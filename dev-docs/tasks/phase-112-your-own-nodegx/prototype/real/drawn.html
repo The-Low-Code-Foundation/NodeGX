@@ -1,0 +1,195 @@
+<!doctype html>
+<!--
+  P112 OWN-012 step 1 — Orbit's screen drawn from the descriptions, beside the real app.
+
+  Left: the real app (NodeGX's own runtime through @nodegx/preview, the frame the size of a phone).
+  Right: the same screen drawn on a 2D canvas from the files, the node specs and the layout model (own-012/draw.ts,
+  bundled as drawn.js by own-012/build.sh), with the values the real app's trace says its wires carry. No CSS is read
+  for the drawing; the real app's elements are read only to grade it (`preview.elementsOf`).
+
+  window.__own012 = { ready, viewport, rows: [{ id, type, drawn, real, dx, dy, dw, dh, within, outside, needs }], needs, values }
+
+  node serve.mjs → /drawn.html?w=390&h=844 (or ?project=<folder beside this file>)
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drawn From Specs</title>
+<style>
+  :root { --bg: #f4f5f7; --fg: #1c2128; --muted: #5b6573; --line: #d5d9df; --ok: #1a7f37; --bad: #c62828; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #14171b; --fg: #e7eaee; --muted: #9aa4b1; --line: #2c323a; --ok: #4ac26b; --bad: #ff6b6b; } }
+  :root[data-theme="dark"] { --bg: #14171b; --fg: #e7eaee; --muted: #9aa4b1; --line: #2c323a; --ok: #4ac26b; --bad: #ff6b6b; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 14px/1.4 system-ui, sans-serif; }
+  main { display: flex; gap: 24px; padding: 16px; flex-wrap: wrap; align-items: flex-start; }
+  figure { margin: 0; }
+  figcaption { color: var(--muted); margin-bottom: 6px; }
+  #app, #drawn { border: 1px solid var(--line); background: #000; display: block; }
+  table { border-collapse: collapse; font: 12px/1.3 ui-monospace, monospace; }
+  td, th { border-bottom: 1px solid var(--line); padding: 3px 8px; text-align: left; vertical-align: top; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); }
+  #needs li { margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <figure><figcaption>The real app</figcaption><div id="app"></div></figure>
+  <figure><figcaption>Drawn from the specs and the layout model</figcaption><canvas id="drawn"></canvas></figure>
+  <section>
+    <table id="grade"><thead><tr><th>node</th><th>drawn</th><th>real</th><th>Δ</th></tr></thead><tbody></tbody></table>
+    <h3>What the drawing needed that no spec gave</h3>
+    <ul id="needs"></ul>
+  </section>
+</main>
+<script src="preview.js"></script>
+<script type="module">
+import { draw, traceValue, isVisualType } from './drawn.js';
+
+const q = new URLSearchParams(location.search);
+const viewport = { width: Number(q.get('w') || 390), height: Number(q.get('h') || 844) };
+const projectName = q.get('project') || 'orbit';
+const TOL = 2;
+window.__own012 = { ready: false, viewport };
+
+const files = await (await fetch(`/project/${projectName}.json`)).json();
+// ?variant=row — the FLD-004 trap, in memory for both sides: the track stacks across, so the bar's wired width is a share
+// of a row, not a percent (OWN-004 §6.2). ?mutant=nogap — the drawer alone loses every gap: the grade must go red.
+const variant = q.get('variant');
+const mutant = q.get('mutant');
+if (variant === 'row') {
+  for (const k of Object.keys(files).filter((k) => k.endsWith('/nodes.json'))) {
+    const doc = JSON.parse(files[k]);
+    for (const n of doc.nodes) if (n.id === 'track') n.parameters = { ...n.parameters, flexDirection: 'row' };
+    files[k] = JSON.stringify(doc);
+  }
+}
+const registry = JSON.parse(files['components/_registry.json']);
+const project = JSON.parse(files['nodegx.project.json']);
+// The root component: the one the project's rootNodeId lives in, else the first.
+const keys = Object.keys(files).filter((k) => k.endsWith('/nodes.json'));
+const comps = keys.map((k) => ({ key: k, nodes: JSON.parse(files[k]).nodes }));
+const comp = comps.find((c) => c.nodes.some((n) => n.id === project.rootNodeId)) || comps[0];
+
+const box = document.getElementById('app');
+box.style.width = viewport.width + 'px';
+box.style.height = viewport.height + 'px';
+const preview = await NodegxPreview.mountPreview(box, { runtimeBase: '/runtime/' });
+const last = {};
+preview.onTrace(({ events }) => {
+  for (const e of events) if (e.kind === 'value') (last[e.toNode] ??= {})[e.toPort] = traceValue(e.value);
+});
+const status = await preview.update(files);
+if (status.status !== 'ok') throw new Error('the app did not run: ' + (status.message || status.status));
+if (preview.frame) { preview.frame.style.width = viewport.width + 'px'; preview.frame.style.height = viewport.height + 'px'; preview.frame.style.border = '0'; }
+await new Promise((r) => setTimeout(r, 1200));
+// A still screen to grade (OWN-012 §6 s1): Orbit's clock ticks and its bar animates, and the trace is read every 150 ms,
+// so a drawing from the last trace value and a box read now can be up to one read apart (±3.3 px on a 1208 px row,
+// the sign flipping run to run). Its own Pause button stops the clock; the bar's 800 ms ease is waited out. Setup, not
+// graded: `?still=0` grades a moving screen.
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+let stilled = false;
+if (q.get('still') !== '0') {
+  const pause = preview.elementsOf('pauseBtn')[0];
+  const btn = pause && (pause.matches('button') ? pause : pause.querySelector('button'));
+  if (btn) {
+    btn.click();
+    await sleep(1500);
+    const frozen = JSON.stringify(last);
+    await sleep(600);
+    stilled = JSON.stringify(last) === frozen;
+  }
+}
+
+// ---- the one thing the model does not do: a leaf's content. Text is measured with a canvas from what the spec's ports
+// say, and every value the ports leave open is named as a need.
+const ctx2 = document.createElement('canvas').getContext('2d');
+const pxOf = (v) => (v && typeof v === 'object' && 'value' in v ? Number(v.value) : typeof v === 'number' ? v : typeof v === 'string' && /^\d/.test(v) ? parseFloat(v) : undefined);
+function measure(node, read) {
+  if (node.type !== 'Text') return undefined;
+  const needs = [];
+  const limits = [];
+  let size = pxOf(read('fontSize'));
+  if (size === undefined) { size = 16; needs.push('Font Size has no default in the spec; 16 px assumed (the browser\'s)'); }
+  let family = read('fontFamily');
+  if (!family) { family = 'system-ui'; needs.push('Font Family has no default in the spec; system-ui assumed'); }
+  const weightRaw = read('fontWeight');
+  const weight = weightRaw === 'Auto' || weightRaw === undefined ? 400 : weightRaw;
+  const spacing = pxOf(read('letterSpacing')) ?? 0;
+  let text = String(read('text') ?? '');
+  const tt = read('textTransform');
+  if (tt === 'uppercase') text = text.toUpperCase();
+  else if (tt === 'lowercase') text = text.toLowerCase();
+  // The spec's Numerals (tabular-nums) changes a digit's advance; a canvas has no font-feature setting, so it measures the
+  // font's proportional digits (OWN-012 §6 s1: 258.69 px against 269.09 for "24:59" at 104 px, the real width exactly).
+  if (read('fontVariantNumeric') === 'tabular-nums') limits.push('Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting)');
+  ctx2.font = `${weight} ${size}px ${family}`;
+  ctx2.letterSpacing = spacing + 'px';
+  const m = ctx2.measureText(text);
+  const lh = read('lineHeight');
+  let height;
+  if (lh === 'Auto' || lh === undefined) {
+    height = m.fontBoundingBoxAscent + m.fontBoundingBoxDescent;
+    needs.push("Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)");
+  } else height = (pxOf(lh) ?? 1.2) * (typeof lh === 'number' ? size : 1);
+  needs.push('the text measured by a canvas in the font the system resolves, not by the model');
+  return { size: { width: m.width, height }, needs, limits };
+}
+
+const values = JSON.parse(JSON.stringify(last));
+const drawNodes = mutant === 'nogap'
+  ? comp.nodes.map((n) => { const p = { ...n.parameters }; delete p.rowGap; delete p.columnGap; return { ...n, parameters: p }; })
+  : comp.nodes;
+const drawing = draw({ nodes: drawNodes, values, viewport, measure });
+
+// ---- the grade: the same instant, the real app's boxes read once
+const rows = drawing.boxes.map((b) => {
+  const el = preview.elementsOf(b.id)[0];
+  const r = el?.getBoundingClientRect();
+  const real = r ? { x: r.x, y: r.y, width: r.width, height: r.height } : null;
+  const d = real ? { dx: b.x - real.x, dy: b.y - real.y, dw: b.width - real.width, dh: b.height - real.height } : {};
+  const within = !!real && Math.max(...Object.values(d).map(Math.abs)) <= TOL;
+  return { id: b.id, type: b.type, drawn: { x: b.x, y: b.y, width: b.width, height: b.height }, real, ...d, within, present: b.present, outside: b.outside, needs: b.needs, limits: b.limits };
+});
+
+// ---- the drawing: boxes and text, in the node's own colours where it names them
+const cv = document.getElementById('drawn');
+cv.width = viewport.width * devicePixelRatio; cv.height = viewport.height * devicePixelRatio;
+cv.style.width = viewport.width + 'px'; cv.style.height = viewport.height + 'px';
+const g = cv.getContext('2d');
+g.scale(devicePixelRatio, devicePixelRatio);
+const byId = new Map(comp.nodes.map((n) => [n.id, n]));
+const read = (n, p) => values[n.id]?.[p] ?? n.parameters?.[p];
+for (const b of drawing.boxes) {
+  if (!b.present) continue;
+  const n = byId.get(b.id);
+  const bg = read(n, 'backgroundColor');
+  if (bg) { g.fillStyle = bg; g.fillRect(b.x, b.y, b.width, b.height); }
+  if (n.type === 'Text' || n.type === 'net.noodl.controls.button') {
+    const t = String(read(n, n.type === 'Text' ? 'text' : 'label') ?? '');
+    const tt = read(n, 'textTransform');
+    g.fillStyle = read(n, 'color') || '#fff';
+    const size = pxOf(read(n, 'fontSize')) ?? 16;
+    g.font = `${read(n, 'fontWeight') ?? 400} ${size}px ${read(n, 'fontFamily') || 'system-ui'}`;
+    g.letterSpacing = (pxOf(read(n, 'letterSpacing')) ?? 0) + 'px';
+    g.textBaseline = 'middle';
+    g.textAlign = n.type === 'Text' ? 'left' : 'center';
+    g.fillText(tt === 'uppercase' ? t.toUpperCase() : t, n.type === 'Text' ? b.x : b.x + b.width / 2, b.y + b.height / 2);
+  }
+  g.strokeStyle = 'rgba(92,169,255,0.55)';
+  g.lineWidth = 1;
+  g.strokeRect(b.x + 0.5, b.y + 0.5, b.width - 1, b.height - 1);
+}
+
+// ---- the table
+const f = (n) => (n === undefined ? '' : Math.round(n * 10) / 10);
+const fr = (r) => (r ? `${f(r.x)},${f(r.y)} ${f(r.width)}×${f(r.height)}` : 'no element');
+document.querySelector('#grade tbody').innerHTML = rows
+  .map((r) => `<tr><td>${r.id}</td><td>${fr(r.drawn)}</td><td>${fr(r.real)}</td><td class="${r.within ? 'ok' : 'bad'}">${r.real ? `${f(r.dx)},${f(r.dy)} ${f(r.dw)}×${f(r.dh)}` : '—'}</td></tr>`)
+  .join('');
+const needs = [...new Set(rows.flatMap((r) => [...r.needs, ...r.limits.map((w) => 'LIMIT ' + w)].map((w) => `${r.id}: ${w}`)))];
+const general = ["the root's parent: the app's root element, the viewport's size, stacked down (no node, no spec says so)", 'the values on the wires: the real app\'s trace (a drawn screen cannot run the graph)'];
+document.getElementById('needs').innerHTML = [...general, ...needs].map((w) => `<li>${w}</li>`).join('');
+Object.assign(window.__own012, { ready: true, variant, mutant, stilled, rows, needs: [...general, ...needs], values, visualCount: comp.nodes.filter((n) => isVisualType(n.type)).length });
+</script>
+</body>
+</html>

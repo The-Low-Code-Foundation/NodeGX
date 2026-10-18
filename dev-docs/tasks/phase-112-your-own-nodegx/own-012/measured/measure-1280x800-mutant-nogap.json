@@ -1,0 +1,327 @@
+{
+ "ready": true,
+ "viewport": {
+  "width": 1280,
+  "height": 800
+ },
+ "variant": null,
+ "mutant": "nogap",
+ "stilled": true,
+ "rows": [
+  {
+   "id": "screen",
+   "type": "Group",
+   "drawn": {
+    "x": 0,
+    "y": 0,
+    "width": 1280,
+    "height": 800
+   },
+   "real": {
+    "x": 0,
+    "y": 0,
+    "width": 1280,
+    "height": 800
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0,
+   "dh": 0,
+   "within": true,
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": []
+  },
+  {
+   "id": "phaseTxt",
+   "type": "Text",
+   "drawn": {
+    "x": 587.6923828125,
+    "y": 272,
+    "width": 104.615234375,
+    "height": 26
+   },
+   "real": {
+    "x": 587.6875,
+    "y": 240,
+    "width": 104.625,
+    "height": 26
+   },
+   "dx": 0.0048828125,
+   "dy": 32,
+   "dw": -0.009765625,
+   "dh": 0,
+   "within": false,
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": []
+  },
+  {
+   "id": "timeTxt",
+   "type": "Text",
+   "drawn": {
+    "x": 510.6610870361328,
+    "y": 298,
+    "width": 258.6778259277344,
+    "height": 123
+   },
+   "real": {
+    "x": 505.453125,
+    "y": 282,
+    "width": 269.09375,
+    "height": 123
+   },
+   "dx": 5.2079620361328125,
+   "dy": 16,
+   "dw": -10.415924072265625,
+   "dh": 0,
+   "within": false,
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": [
+    "Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting)"
+   ]
+  },
+  {
+   "id": "track",
+   "type": "Group",
+   "drawn": {
+    "x": 36,
+    "y": 421,
+    "width": 1208,
+    "height": 8
+   },
+   "real": {
+    "x": 36,
+    "y": 421,
+    "width": 1208,
+    "height": 8
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0,
+   "dh": 0,
+   "within": true,
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": []
+  },
+  {
+   "id": "bar",
+   "type": "Group",
+   "drawn": {
+    "x": 36,
+    "y": 421,
+    "width": 0.8053333333333333,
+    "height": 8
+   },
+   "real": {
+    "x": 36,
+    "y": 421,
+    "width": 0.796875,
+    "height": 8
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0.008458333333333345,
+   "dh": 0,
+   "within": true,
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": []
+  },
+  {
+   "id": "footTxt",
+   "type": "Text",
+   "drawn": {
+    "x": 506.74749755859375,
+    "y": 429,
+    "width": 266.5050048828125,
+    "height": 23
+   },
+   "real": {
+    "x": 506.734375,
+    "y": 445,
+    "width": 266.515625,
+    "height": 23
+   },
+   "dx": 0.01312255859375,
+   "dy": -16,
+   "dw": -0.0106201171875,
+   "dh": 0,
+   "within": false,
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": []
+  },
+  {
+   "id": "btnRow",
+   "type": "Group",
+   "drawn": {
+    "x": 520,
+    "y": 476,
+    "width": 240,
+    "height": 52
+   },
+   "real": {
+    "x": 506,
+    "y": 508,
+    "width": 268,
+    "height": 52
+   },
+   "dx": 14,
+   "dy": -32,
+   "dw": -28,
+   "dh": 0,
+   "within": false,
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": []
+  },
+  {
+   "id": "pauseBtn",
+   "type": "net.noodl.controls.button",
+   "drawn": {
+    "x": 520,
+    "y": 476,
+    "width": 120,
+    "height": 52
+   },
+   "real": {
+    "x": 506,
+    "y": 508,
+    "width": 120,
+    "height": 52
+   },
+   "dx": 14,
+   "dy": -32,
+   "dw": 0,
+   "dh": 0,
+   "within": false,
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": []
+  },
+  {
+   "id": "skipBtn",
+   "type": "net.noodl.controls.button",
+   "drawn": {
+    "x": 640,
+    "y": 476,
+    "width": 120,
+    "height": 52
+   },
+   "real": {
+    "x": 654,
+    "y": 508,
+    "width": 120,
+    "height": 52
+   },
+   "dx": -14,
+   "dy": -32,
+   "dw": 0,
+   "dh": 0,
+   "within": false,
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": []
+  }
+ ],
+ "needs": [
+  "the root's parent: the app's root element, the viewport's size, stacked down (no node, no spec says so)",
+  "the values on the wires: the real app's trace (a drawn screen cannot run the graph)",
+  "phaseTxt: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "phaseTxt: the text measured by a canvas in the font the system resolves, not by the model",
+  "timeTxt: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "timeTxt: the text measured by a canvas in the font the system resolves, not by the model",
+  "timeTxt: LIMIT Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting)",
+  "footTxt: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "footTxt: the text measured by a canvas in the font the system resolves, not by the model"
+ ],
+ "values": {
+  "phase": {
+   "value-Focus-length": 1500,
+   "value-Break-length": 300
+  },
+  "pauseBtn": {
+   "label": "Start"
+  },
+  "btnLabel": {
+   "input": false
+  },
+  "zero": {
+   "value": 1499
+  },
+  "toMs": {
+   "inputValue": 1499
+  },
+  "finished": {
+   "condition": false
+  },
+  "remaining": {
+   "maxInputValue": 1500,
+   "minOutputValue": 1500,
+   "inputValue": 1
+  },
+  "progress": {
+   "maxInputValue": 1500,
+   "inputValue": 1
+  },
+  "phaseTxt": {
+   "color": "#ff5a36",
+   "text": "Focus"
+  },
+  "bar": {
+   "backgroundColor": "#ff5a36",
+   "width": 0.06666666666666667
+  },
+  "hud": {
+   "phase": "Focus",
+   "time": "24:59"
+  },
+  "skyIdx": {
+   "inputValue": 0.0006666666666666666
+  },
+  "smooth": {
+   "targetValue": 0.0006666666666666666
+  },
+  "sky": {
+   "blendValue": 0.0013333333333333333
+  },
+  "screen": {
+   "backgroundColor": "#0b1026"
+  },
+  "clockface": {
+   "input": 1499000
+  },
+  "timeTxt": {
+   "text": "24:59"
+  },
+  "barPct": {
+   "inputValue": 0.0006666666666666666
+  },
+  "footTxt": {
+   "text": "Round 0 · Focus ends in 24:59"
+  }
+ },
+ "visualCount": 9,
+ "pageErrors": []
+}

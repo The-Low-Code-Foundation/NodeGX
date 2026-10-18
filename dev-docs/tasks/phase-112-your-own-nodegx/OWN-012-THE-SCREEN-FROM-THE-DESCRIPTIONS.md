@@ -2,7 +2,7 @@
 
 **Opened 2026-10-10 (s4), from R4's ruling: *teach both equally*** (README §8). **Depends on OWN-004** (the real app
 beside it, `preview.elementsOf`, the trace) **and P107 NSP-016 AC4** (the layout model).
-**Status: 📋 not started.**
+**Status: 🟡 step 1 done (s1, 2026-10-18, Opus 5.5): Orbit drawn from the descriptions alone, 8 of 9 visual nodes at 0 px from the real app at both viewports, the ninth a named limit with its control; the drawer is 2.3 KB. Steps 2–4 next (Fable).**
 **Model:** **Opus** for step 1 (a measurement with a clear finish line); **Fable** for steps 2–3, a drawer graded
 box by box against a browser, where a wrong reading of the layout model becomes every editor's wrong screen. At the
 start of a session on this task, and again if the work changes kind, say which model you are running on and whether
@@ -67,3 +67,70 @@ that plainly, not hiding it.
   drifts silently*); the layout model is the description, and the grade is what keeps it honest.
 - A box that matches is not a screen that matches: colour, text and clipping are look, graded separately if at all.
 - The one visual node with no spec yet (NSP-016's remaining one) is named, not guessed.
+
+## 6. Built
+
+### s1 (2026-10-18 night, Opus 5.5): step 1, the measurement
+
+**What was built.** `own-012/draw.ts` takes files and values in and gives boxes out: a component's nodes as the files
+store them, the values its wires carry, the viewport, and a caller's measurer for a leaf's content. It's the recursion
+over a visual tree that the layout check (`nodegx-node-spec/tests/layout-check.test.ts`) leaves out. That check takes
+each parent's size from the browser and grades one level. Here, only the leaves' text comes from outside, and every
+other size is the model's own (`layoutOf`, `layoutChildren`, `hugSize`). It reads and writes no CSS and copies none of
+the runtime's layout code. `prototype/real/drawn.html` runs Orbit's real app in `@nodegx/preview`, takes the wired
+values from its trace, draws the same screen on a 2D canvas beside it, and grades each visual node against
+`preview.elementsOf(id)` (read to grade only). `own-012/measure.mjs` drives it headless, one Chrome at a time, and
+writes `own-012/measured/`. `own-012/build.sh` bundles the drawer.
+
+**The result, Orbit at 390×844 and 1280×800** (`measured/measure-*.json`, `drawn-*.png`):
+
+| node | Δ from the real app |
+|---|---|
+| screen, phaseTxt, track, bar, footTxt, btnRow, pauseBtn, skipBtn | **0 px** on x, y, width and height, both viewports |
+| timeTxt (the clock) | width −10.4 px (x +5.2 px, the centring of it): **named limit, measured** |
+
+The clock's 10.4 px is the Text spec's *Numerals: tabular-nums*, which a canvas can't apply (it has no font-feature
+setting). **Control:** in the real frame, the clock's own font measures "24:59" at 269.09 px with tabular-nums (the
+real box exactly) and 258.69 px without it, and the canvas gives 258.68. So it's a limit of measuring text on a
+canvas, not of the layout model: the measurer reports it on the node (`limits`), and the grade names it.
+
+**The two arms with teeth:**
+- **The FLD-004 trap (`--variant row`)**: Orbit's track is turned into a row in memory, for both sides. The bar's
+  wired value (about 0.067 at the moment graded) then draws 21.4 px of 318 at 390 wide and 81.3 px of 1208 at 1280
+  wide, the real app's boxes to 0 px: a share of the free space, not a percent. In the column, the same value draws
+  0.2 px, as the real app does. The layout model already gets it right.
+- **A mutant (`--mutant nogap`)**: the drawer alone loses every gap. 6 of 9 nodes go off at both viewports (phaseTxt
+  +32 px, the buttons 14 px across and 32 px up), and `measure.mjs` exits 1.
+
+**A trap found on the way: a moving screen.** Orbit's clock ticks and its bar eases for 800 ms, and the trace is read
+every 150 ms. A drawing from the last trace value can be one read behind the box it's graded against. The row
+variant measured +3.4, −3.3 and −3.3 px on the 1208 px row over three runs: the sign flipped, so it was timing, not
+the model. The page now presses Orbit's own Pause and waits for the ease to finish before it draws (`stilled: true`,
+the trace unchanged across 600 ms). `?still=0` grades the moving screen. A drawer fed by a trace draws what was, not
+what is. Grading it needs a still screen, and an editor drawing a live app will lag by one read.
+
+**What the drawing needed that no spec or model gave it** (the step's question):
+1. **The values on the wires**: the real app's trace. A drawn screen can't run the graph (§2): five of the nine
+   nodes show a wired value (three texts, a label and the bar's width).
+2. **The text's content size**: the model doesn't measure text, as its header says. A canvas measured it, in the
+   font the system resolves `system-ui` to.
+3. **Line Height Auto**: the font's own (ascent + descent, read from the font by the canvas). The spec says "follow
+   the font" and gives no number. It matched to 0 px on all three texts.
+4. **Numerals: tabular-nums**: a canvas can't measure it (above). A DOM measurer could, but that's CSS.
+5. **The root's parent**: the app's root element is the viewport's size and stacks down. No node and no spec says
+   so. It's an assumption in `draw.ts`, and the grade held it (the screen at 0 px).
+6. **Not needed by Orbit, but open in the spec**: the Text spec gives no default Font Size or Font Family (every Orbit
+   text sets both). A text that sets neither would be drawn at a guessed 16 px in `system-ui`, and the measurer says
+   so as a need.
+
+**Step 2's decision: the drawer lives with the layout model, in `@nodegx/node-spec`.** It needs only the specs and
+the layout model, and nothing from the preview. Values come from whoever has them (a trace, or the graph runner),
+and text is measured by the caller (a canvas measurer can ship beside it as a helper). **What it adds to a page:**
+`draw.ts` is 2,285 bytes minified, and the layout model with its mapping is 11,673. The bundle is 1.27 MB (324 KB
+gzipped) because the browser entry brings every node's full spec (1.15 MB, `src/nodes/`): runners, scenarios and
+descriptions a drawer never reads. That's P107-SIZE's row. A drawer-only entry, carrying each visual spec's inputs
+and layout roles, would be small, and step 2 should measure it.
+
+**Not done in step 1:** Orbit's screen on the 3D phone (step 4), the todo template's first page (AC2), and the
+brief (AC4). Look (colour, corner radius, clipping) is drawn roughly and not graded (§5). Rounded corners aren't
+drawn at all.
