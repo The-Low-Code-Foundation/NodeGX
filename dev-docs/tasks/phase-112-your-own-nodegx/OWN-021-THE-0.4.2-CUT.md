@@ -104,7 +104,7 @@ ancestor of `cline-dev` (their merge base is `0728e42f4`); `cline-dev` carries i
 both docs**: `CHANGELOG.md` (the npm 0.2.1 section) and OWN-013 (its shipped status, §12–§13). Both resolve to the
 cut's side, which holds `main`'s lines and later ones; every other file of the merged tree equals the cut's. So
 `release/0.4.2` = the cut with `main` merged in, its tree the cut's (0 files differ), as 0.4.0's was (OWN-013 §6.1).
-Made locally with `commit-tree` (no checkout); **not pushed**.
+Made locally with `commit-tree` (no checkout); **not pushed**. Re-measured on the final cut (after S4's version bump): three conflicts, the third the editor's `"version"` line (`main`'s 0.4.1, the cut's 0.4.2); all three resolve to the cut, and the branch's tree equals the cut's.
 
 **What the cut carries** (a subagent's survey of the 205 commits, spot-checked: 6 cited commits are ancestors):
 66 touch shipped source (35 of them `nodegx-export`, 14 the bundled MCP); no commit, README or task file in range
