@@ -12,7 +12,8 @@
   "main": "src/index.ts",
   "bin": {
     "noodl-preview": "./bin/noodl-preview.js",
-    "nodegx-deploy": "./bin/nodegx-deploy.js"
+    "nodegx-deploy": "./bin/nodegx-deploy.js",
+    "preview": "./bin/noodl-preview.js"
   },
   "files": [
     "bin",
