@@ -280,14 +280,14 @@ Each line cost someone a wrong app or a false claim. The reason is in the senten
 - Write the format version you read, and never change it. Many apps are still format `4`, the todo template among
   them. A NodeGX editor older than 0.4.0 refuses a `5`. That's the editor's age, not your fault.
   (P112-S11-FORMATSKEW.)
-- In a format-4 project, a Run you wire can be switched off later. When the NodeGX editor upgrades a project to
-  5, every value input of a node whose Run is wired, with no `runOnChange-<input>` key, is written `false`. The
-  `nodegx` server writes `true` on those boxes for the nodes it writes (P109 ISL-018), from
-  `planRunOnValueChangeMigration` in `run-on-value-change-migration.js`, run over the whole component. Don't use
-  `pinRunOnValueChangeDefaults`: it says it isn't for user projects. The suite's reference doesn't tick these
-  boxes yet, so an editor that does reads as a difference (P112-OWN008-FORMAT4PIN). Until that's fixed, write no
-  key, and tell the person when your editor wires a Run in a format-4 project. Two of the three OWN-008 strangers
-  wrote no key, and one ticked the boxes.
+- Write the run-on-value-change boxes of your nodes as ticked in a format-4 project. The `nodegx` server does the
+  same. The NodeGX editor upgrades a format-4 project to 5 when it opens it. The upgrade writes `false` on each value
+  input with no `runOnChange-<input>` key, on every node whose Run is wired. The input the person just wired then
+  stops running the node. `format.js` exports the server's own rule (P109 ISL-018). When
+  `projectWillBeCleanedUp(project.version)` is true, pass the store's `writeComponent`
+  `prepare: (stored) => pinAuthoredRunOnChange(key, files, stored ?? null)`. `stored` is the component as it was
+  before your edit. The suite's reference does the same, so an editor that writes no key fails on a format-4
+  project. Don't use `pinRunOnValueChangeDefaults`. It isn't for user projects. (P112-OWN008-FORMAT4PIN.)
 - The server and the preview read differently. The `nodegx` server reads `nodes.json` flat. The preview walks
   `children`. A child listed twice passes the first and breaks the second. Run the preview on your saved files, not
   only the validator. (P112-OWN019-TWOLOADERS.)

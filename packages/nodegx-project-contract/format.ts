@@ -15,6 +15,7 @@ export * from './format/types';
 export * from './format/validator';
 export * from './format/files';
 export * from './format/store';
+export * from './format/run-on-change-pins';
 
 export { default as projectV2Schema } from './schemas/project-v2.schema.json';
 export { default as componentSchema } from './schemas/component.schema.json';

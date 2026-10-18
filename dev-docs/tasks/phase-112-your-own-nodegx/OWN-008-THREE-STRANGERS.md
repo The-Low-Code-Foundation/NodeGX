@@ -232,3 +232,25 @@ they own.
   deck can still be edited.
 - Its round-3 run's teardown killed Richard's play server on :8604, because it had been started inside the lab. It
   was restarted on the same project.
+
+### s4 (2026-10-18 evening, Opus): FORMAT4PIN fixed
+
+The suite's reference now ticks run-on-value-change on a format-4 project, as the `nodegx` server does (P109
+ISL-018). The table stranger was right to pin, and the suite had failed it for doing so. The plan has one copy now,
+`@nodegx/project-contract/format` (`format/run-on-change-pins.ts`). The server imports it from there, and the
+reference runs it in every write's `prepare` when the opened project predates format 5.
+
+- **The regression** (`nodegx-project-contract/tests/own008-format4-pin.test.ts`) uses the table stranger's own
+  script, a Function whose Run is wired in `Commands/Add task`, on the todo template (format `"4"`). It grades two
+  editors written against the store, each saving once as the stranger's does. On format 4 the one that pins PASSes,
+  and the one that writes no key FAILs on `runOnChange-in-value`. On a format-5 copy, the one that writes no key
+  PASSes, and one that pins anyway FAILs. With the reference's pinning switched off, the format-4 arm goes red.
+- **The brief's bullet** now says to pin, and how: `prepare: (stored) => pinAuthoredRunOnChange(key, files, stored ?? null)`
+  when `projectWillBeCleanedUp(project.version)`. Before, it said to write no key until this was fixed.
+- **Gates:** contract jest 359 / 360 (the red is P107-S101-VERBSPECCED, open, not this); contract and MCP typecheck
+  clean; the MCP's `editorSuite` and `isl018DoorPins` 10 / 10; `create-nodegx` 25 / 25.
+- **Found beside it:** ESMADAPTER's `url` import (s2) had turned the package's own import gate red. `url` is now
+  named in that gate. `test:main` is red at 8 suites, none of which reads this change. They're logged as an
+  inventory, P112-OWN008-TESTMAINRED, each with a first reading.
+- **Ships on lane 1's next npm cut**, with NPXPREVIEW, FILESONLY and ESMADAPTER. A stranger on the published kit
+  0.2.x still gets the old reference and the old bullet.

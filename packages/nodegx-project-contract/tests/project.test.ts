@@ -214,7 +214,8 @@ describe('AC4 — nothing in the package reaches an adapter', () => {
     // P112 OWN-006 — the suite's command over a folder on disk; the suite itself (`editor-suite.ts`) is in memory.
     // P112 OWN-003 — the command grades an editor's graph runner with the spec package's scenarios and runner (a
     // sibling package, by source path). The in-memory suite takes the grader as an option and imports nothing of it.
-    'editor-suite-node.ts': ['fs', 'path', '../nodegx-node-spec/src']
+    // P112-OWN008-ESMADAPTER — `url`'s `pathToFileURL`, so the command can `import()` an `.mjs` adapter on Node < 20.19.
+    'editor-suite-node.ts': ['fs', 'path', 'url', '../nodegx-node-spec/src']
   };
 
   /** A relative import that leaves the package root is an outside import too (P112 OWN-003: the first one, named above). */
