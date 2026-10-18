@@ -9,3 +9,7 @@
   `validate.mjs`: AC3's `validate_project`.
 
 Paths point at the s16 session's scratchpad and s15's tarballs. None holds a key.
+- `ac3/` (lane 2 s5, 2026-10-18): AC3's open. `edits.mjs` re-makes s16's four edits through the editor's own save
+  endpoints (the editor on port 4871), `validate.mjs` runs `validate_project` on a folder through the checkout's MCP,
+  and `readout.js` / `edits-read.js` are CDP evals in the dev editor (`__wreq` captured first by the chunk-push
+  trick). `editor-edited.png` is the dev editor with the edited copy open.

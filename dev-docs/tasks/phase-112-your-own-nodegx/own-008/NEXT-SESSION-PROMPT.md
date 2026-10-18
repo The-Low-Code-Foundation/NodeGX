@@ -1,14 +1,14 @@
-# Lane 2 next session: OWN-017 AC3's open, then Richard's looks
+# Lane 2 next session: Richard's looks (OWN-008 AC4, OWN-017 AC4)
 
 Opus. Say so at the start (README §0.2). Read [OWN-008](../OWN-008-THREE-STRANGERS.md) §6 s2–s4 first. AC1–AC3 are
 met, and FORMAT4PIN was fixed in s4. The three strangers' records are in `table/`, `blocks/` and `map/` here.
 
-1. **OWN-017 AC3, the half that's owed** ([OWN-017](../OWN-017-THE-LINGO-APP-IN-OUR-OWN-EDITOR.md) §7 s16): open
-   the lingo app, after s16's edits, in the official editor (the dev build) and read its diagnostics. AC3 passes when
-   there are none that are new, and nothing is rewritten on open but the known OPENWRITES. Drive a copy, never the
-   folder itself (memory: drive a COPY; OPEN WRITES 3). s4 didn't start it: three Electron editors from other
-   sessions were open, and a third launch hangs in AppKit's reopen prompt. Check `ps` for editors first, and launch
-   only on a box with none of yours running beside a peer's.
+1. ✅ **OWN-017 AC3 is met (s5, 2026-10-18)**: [OWN-017](../OWN-017-THE-LINGO-APP-IN-OUR-OWN-EDITOR.md) §7 "Lane 2
+   s5". The edited copy opens in the dev editor with 0 warnings, the same as a pristine control, and opening wrote
+   only `.mcp.json`, `CLAUDE.md` and `AGENTS.md`. s16's edited copy had been lost from its scratchpad, so s5 made
+   the edits again through the stranger's editor (`own-017/ac3/`). 🔴 In s4, the "three Electron editors" that
+   held this item back were probably MCP servers: every `noodl-mcp.cjs` runs from `node_modules/electron/dist`. Read
+   the full command (`ps -o command= -p <pid>`) before you call a process an editor.
 2. **AC4 of OWN-008, and OWN-017's, are Richard's.** OWN-008: his reading of the map's third round, the Star Wars
    battle (`map/round3/`, play server `:8604`), then the table and Big Blocks (`table/table-1-saved.png`,
    `blocks/blocks-0-changed.png`). OWN-017: his edit hit DEEPLINK in s16 (fixed since), so his words on a working

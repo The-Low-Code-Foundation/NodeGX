@@ -4,7 +4,7 @@
 'building our own editor' that we can use to tweak some appropriate parts of the app we've built."*
 **Depends on OWN-015 AC1** (met s15: a stranger's Claude Code built the app from npm alone) **and the published editor
 kit** (`@nodegx/project-contract`, `@nodegx/node-spec`, `@nodegx/canvas-look`, all 0.1.0 on npm).
-**Status: 📋 not started.**
+**Status: 🟡 AC1–AC3 met (AC3's open: lane 2 s5, 2026-10-18); AC4 waits on Richard's words on a working edit.**
 **Model:** **Opus.** At the start of a session on this task, say which model you are running on and whether this line
 says Richard should switch (README §0.2).
 
@@ -130,3 +130,29 @@ checkout's build (port 59502): reloading and a direct load both show the lesson.
 
 **AC3, half:** `validate_project` (packed MCP, read-only) after all edits: 0 errors, 1 warning (FRESHFONT, as
 before). Opening it in the official editor is owed.
+
+### Lane 2 s5 (2026-10-18, Opus 5.5): AC3's open ✅
+
+**s16's edited copy was gone** (its scratchpad had been emptied down to bare folders, and the WAV fix's exact script
+text was never kept). So the edits were made again, the way s16 made them: the stranger's `editor/` installed from the
+registry in an empty folder (kit 0.1.0, as in s16), pointed at a fresh copy of `own-015/s15/french-phrases`, and
+each edit sent to its own save endpoints (`/api/component/save`, `/api/lessons/save`, `/api/voice/save`: the handlers
+its page calls, through `V2ProjectStore` and `applyEdit`). This time they went over HTTP, without presses on the page;
+s16 already drove the page. The edits: the WAV guard (a body that starts with `RIFF`, or a `wav` MIME type, plays as
+it is), *Merci* → *Merci beaucoup / Thank you very much*, Kore → Charon, and Richard's `borderTopStyle: "solid"` on
+*Group Actions*. Against the pristine copy, the files changed were the same five as in s16: the four `nodes.json`
+and the registry's timestamps. Scripts are in `own-017/ac3/`.
+
+| check | edited copy | pristine copy (control) |
+|---|---|---|
+| `validate_project` (the checkout's MCP, read-only) | 0 errors, 1 warning (`font-face-not-shipped /App`) | the same |
+| the dev editor (0.4.1, throwaway `NOODL_USER_DATA_DIR`), opened from its launcher card; folder confirmed from `ProjectModel._retainedProjectDirectory` | 7 components, `WarningsModel` **0**, no error or exception in `dev.log` since the click | the same |
+| the four edits, read from the editor's own graph model | `isWav` guard, *Merci beaucoup*, `Charon`, `solid`: all four | — |
+| written into the folder by opening it | `.mcp.json`, `CLAUDE.md`, `AGENTS.md`, nothing else; `nodegx.project.json` and every component file byte-identical | the same three |
+
+The zero is a reading, not just an absence. `ViewerConnection` logs *"Warnings have been resolved"* only when the
+error-level count *falls*, and it logged that on both opens. So the warnings model counted errors partway through the
+load and settled at 0. The three files written are the known agent config (FIX-008's backfill; `AGENTS.md` is
+PROJECTAGENTS, `4a18723fe`). `.gitignore` gained nothing, because it already lists `.mcp.json`. OPENWRITES (a
+rewrite of `nodegx.project.json` on every open) did not happen. The editor's preview shows the app's Home
+(`own-017/ac3/editor-edited.png`). **AC3 is met.**
