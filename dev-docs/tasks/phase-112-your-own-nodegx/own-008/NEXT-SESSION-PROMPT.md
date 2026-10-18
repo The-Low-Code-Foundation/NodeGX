@@ -12,7 +12,7 @@ and the three strangers' records are in `table/`, `blocks/` and `map/` here.
    (`packages/create-nodegx/profiles/core/skills/nodegx-your-own-editor/SKILL.md`): today it says to write no key
    until this is fixed. Run the MCP's own `editorSuite.test.ts` and `test:main` before you claim it (memory: an
    export edit can turn the editor's typecheck red).
-2. **AC4:** Richard has played with the map (§6, his words, and a second round from them). The table and Big Blocks are still to look at. Screenshots: `table/table-1-saved.png`, `blocks/blocks-0-changed.png`,
+2. **AC4:** Richard has played with the map (§6, his words, and a second round from them). A third round (s3) made it a Star Wars space battle from his words; his reading of it is still to come (`map/round3/`, play server `:8604`). The table and Big Blocks are still to look at. Screenshots: `table/table-1-saved.png`, `blocks/blocks-0-changed.png`,
    `map/map-1-rewired.png` and `map/its-own-shots/`. Quote his words in OWN-008 §6.
 3. **The next npm cut (lane 1, OWN-021 or after) must carry:** `dffbeee00` (NPXPREVIEW: `npx @nodegx/preview` has
    failed since 0.2.0, the command every page gives a person), `12cfc6cf3` (FILESONLY + the brief), `3f62e9643` (ESMADAPTER: the suite command loads an `.mjs` adapter on Node before 20.19), and FORMAT4PIN
