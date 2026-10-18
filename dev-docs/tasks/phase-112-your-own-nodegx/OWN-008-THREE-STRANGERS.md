@@ -316,3 +316,6 @@ round" says what it built:
   bridge. The Mon Calamari cruisers are rounded and organic, and the Nebulon-B has its spar and pod. The weakest are
   the corvettes, which still read as stubby boxes from the overview. The crawl is yellow on black, in perspective.
 - **Not measured:** the sound effects (nobody has listened), and the frame rate on a real graphics card.
+
+**Richard, on round 4 (`:8606`):** *"The new star wars editor is really cool, job done"*. The map is finished. No
+round 5 is owed.
