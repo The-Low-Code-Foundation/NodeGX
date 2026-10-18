@@ -133,9 +133,14 @@ export function triggerParameters(
       scheme:
         trigger.webhook.scheme === 'token'
           ? 'Shared token — X-Webhook-Token, Authorization: Bearer, or ?token='
-          : 'HMAC-SHA256 — X-Hub-Signature-256, GitHub/Stripe style',
+          : trigger.webhook.scheme === 'hmac-sha512'
+            ? 'HMAC-SHA512 — x-paystack-signature, Paystack style'
+            : 'HMAC-SHA256 — X-Hub-Signature-256, GitHub/Stripe style',
       // The spec's trap: a canvas node must not imply the secret is recoverable.
-      secret: 'Shown once when the trigger was created. Not recoverable — create a new trigger to mint another.',
+      secret:
+        trigger.webhook.scheme === 'hmac-sha512'
+          ? 'The Paystack secret key it was saved with. Not shown again — save the hook with the new key to change it.'
+          : 'Shown once when the trigger was created. Not recoverable — create a new trigger to mint another.',
       ...common
     };
   }

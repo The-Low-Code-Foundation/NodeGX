@@ -243,6 +243,12 @@ describe('BMG-008 the drawer’s model', () => {
     expect(draftProblem({ ...d, type: 'webhook', targetName: 'digest' })).toBe('Give the hook a path.');
     expect(draftProblem({ ...d, type: 'webhook', targetName: 'digest', slug: 'Bad Slug' })).toMatch(/lowercase/);
     expect(draftProblem({ ...d, type: 'webhook', targetName: 'digest', slug: 'stripe-payments' })).toBeNull();
+    expect(draftProblem({ ...d, type: 'webhook', targetName: 'digest', slug: 'paystack-ghs', scheme: 'hmac-sha512' })).toBe('Paste the Paystack secret key the hook checks with.');
+    expect(draftProblem({ ...d, type: 'webhook', targetName: 'digest', slug: 'paystack-ghs', scheme: 'hmac-sha512', senderKey: '  ' })).toBe('Paste the Paystack secret key the hook checks with.');
+    expect(draftProblem({ ...d, type: 'webhook', targetName: 'digest', slug: 'paystack-ghs', scheme: 'hmac-sha512', senderKey: 'sk_test_x' })).toBeNull();
+    // An edit of a hook already holding its key may leave the box blank: it keeps the saved one.
+    const saved = draftFrom({ id: 't', type: 'webhook', target: { kind: 'function', name: 'paystackEvent' }, webhook: { slug: 'paystack-ghs', scheme: 'hmac-sha512' } } as never, 'skip');
+    expect([saved.scheme, saved.senderKey, saved.senderKeySaved, draftProblem(saved)]).toEqual(['hmac-sha512', '', true, null]);
     expect(draftProblem({ ...d, type: 'db-change', targetName: 'digest' })).toBe('Pick the collection to watch.');
     expect(draftProblem({ ...d, type: 'db-change', targetName: 'digest', collection: 'Pet' })).toMatch(/created, changed, deleted/);
     expect(draftProblem({ ...d, type: 'db-change', targetName: 'digest', collection: 'Pet', actions: ['create'] })).toBeNull();
@@ -267,6 +273,12 @@ describe('BMG-008 the drawer’s model', () => {
       responseTimeoutMs: 12000,
       dbChange: { collection: 'Pet', actions: ['create', 'delete'] }
     });
+    // A Paystack hook sends the pasted key as `secret` (trimmed); blank sends none, so an edit keeps the saved key.
+    const paystack = { ...d, type: 'webhook' as const, targetName: 'paystackEvent', slug: 'paystack-ghs', scheme: 'hmac-sha512' as const };
+    expect(toInput({ ...paystack, senderKey: ' sk_test_x ' })).toMatchObject({ webhook: { slug: 'paystack-ghs', scheme: 'hmac-sha512' }, secret: 'sk_test_x' });
+    expect('secret' in toInput(paystack)).toBe(false);
+    // Another scheme never sends a key that was typed and then switched away from.
+    expect('secret' in toInput({ ...paystack, scheme: 'hmac-sha256', senderKey: 'sk_test_x' })).toBe(false);
     // An empty payload is omitted, not sent as {}.
     const sched = toInput({ ...d, type: 'schedule', targetName: 'digest', cron: '0 9 * * *' }) as { schedule: Record<string, unknown> };
     expect(sched.schedule).toEqual({ cron: '0 9 * * *', missedFirePolicy: 'skip', overlapPolicy: 'skip' });
@@ -286,6 +298,10 @@ describe('BMG-008 the drawer’s model', () => {
     const signed = webhookExample(url, 'hmac-sha256', 'whsec_x');
     expect(signed).toContain("-hmac 'whsec_x'");
     expect(signed).toContain('X-Hub-Signature-256: sha256=$SIG');
+    const paystack = webhookExample(url, 'hmac-sha512', 'sk_test_x');
+    expect(paystack.split('\n')[0]).toBe("KEY='sk_test_x'");
+    expect(paystack).toContain('openssl dgst -sha512 -hmac "$KEY"');
+    expect(paystack).toContain('x-paystack-signature: $SIG');
     expect(slugify('Stripe payments!')).toBe('stripe-payments');
   });
 

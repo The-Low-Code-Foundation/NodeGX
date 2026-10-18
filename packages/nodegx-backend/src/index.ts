@@ -90,5 +90,5 @@ export { CronScheduler, computeStartPlan } from './triggers/scheduler';
 export { parseCron, validateCron, CronExpression, CronParseError } from './triggers/cron';
 export { DbChangeTriggers } from './triggers/dbchange';
 export { TriggerSubsystem } from './triggers/TriggerSubsystem';
-export { verifyWebhook, signWebhookHmac } from './triggers/webhook';
+export { verifyWebhook, signWebhookHmac, signWebhookHmac512 } from './triggers/webhook';
 export { main as cli } from './cli';

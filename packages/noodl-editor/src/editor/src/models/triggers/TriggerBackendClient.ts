@@ -28,7 +28,7 @@ import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
 
 export type TriggerType = 'schedule' | 'webhook' | 'db-change';
 export type MissedFirePolicy = 'skip' | 'run-once-on-start';
-export type WebhookScheme = 'hmac-sha256' | 'token';
+export type WebhookScheme = 'hmac-sha256' | 'hmac-sha512' | 'token';
 export type ChangeAction = 'create' | 'update' | 'delete';
 
 /**

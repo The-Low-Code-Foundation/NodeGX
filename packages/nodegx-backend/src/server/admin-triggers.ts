@@ -227,6 +227,12 @@ export class AdminTriggerRoutes {
     if (result === 'not-a-webhook') {
       throw new HttpError(400, `Trigger "${ctx.params.id}" is not a webhook — only a webhook has a secret.`);
     }
+    if (result === 'supplied-secret') {
+      throw new HttpError(
+        400,
+        `Trigger "${ctx.params.id}" checks Paystack's signature, made with the business's own secret key — a new secret made here would refuse every call. Save the hook with the new key as \`secret\` instead.`
+      );
+    }
     sendJSON(ctx.res, 200, {
       trigger: decorate(result.trigger),
       secret: result.secret,

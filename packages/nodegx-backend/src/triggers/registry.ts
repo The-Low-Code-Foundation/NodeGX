@@ -68,7 +68,8 @@ export function effectiveOverlapPolicy(trigger: Pick<TriggerDef, 'schedule'>): O
   const authored = trigger.schedule && trigger.schedule.overlapPolicy;
   return authored || DEFAULT_OVERLAP_POLICY;
 }
-export type WebhookScheme = 'hmac-sha256' | 'token';
+export type WebhookScheme = 'hmac-sha256' | 'hmac-sha512' | 'token';
+export const WEBHOOK_SCHEMES: readonly WebhookScheme[] = ['hmac-sha256', 'hmac-sha512', 'token'];
 export type ChangeAction = 'create' | 'update' | 'delete';
 
 /**
@@ -135,7 +136,7 @@ export interface ScheduleConfig {
 export interface WebhookConfig {
   /** URL slug: POST /hooks/<backendId>/<slug>. */
   slug: string;
-  /** Verification scheme. Default hmac-sha256 (what GitHub/Stripe send). */
+  /** Verification scheme. Default hmac-sha256 (what GitHub/Stripe send); hmac-sha512 is Paystack's. */
   scheme: WebhookScheme;
   /** Reject bodies larger than this many bytes (loud 413 + recorded). */
   maxBodyBytes: number;
@@ -425,7 +426,7 @@ export function validateTriggerDef(raw: unknown): string[] {
       if (typeof w.slug !== 'string' || !SLUG_RE.test(w.slug)) {
         errors.push('webhook.slug must match [a-z0-9][a-z0-9-]{0,63} (lowercase, digits, hyphens)');
       }
-      if (w.scheme !== 'hmac-sha256' && w.scheme !== 'token') errors.push('webhook.scheme must be "hmac-sha256" or "token"');
+      if (!WEBHOOK_SCHEMES.includes(w.scheme as WebhookScheme)) errors.push('webhook.scheme must be "hmac-sha256", "hmac-sha512" or "token"');
       if (typeof w.maxBodyBytes !== 'number' || w.maxBodyBytes <= 0 || w.maxBodyBytes > 50 * 1024 * 1024) {
         errors.push('webhook.maxBodyBytes must be a positive number <= 50MB');
       }
@@ -704,7 +705,21 @@ export class TriggerRegistry {
     }
 
     // Secret handling (webhook only): store in secrets.json, mint if needed.
-    if (def.type === 'webhook') {
+    //
+    // P121 TWO-004 step 5: an hmac-sha512 hook is Paystack's, which signs with
+    // the business's own secret key. A minted secret would refuse every call it
+    // sends, so that hook is never minted: its secret is supplied, and not
+    // handed back (the caller is holding it, and it is a payment key).
+    if (def.type === 'webhook' && def.webhook && def.webhook.scheme === 'hmac-sha512') {
+      if (input.secret) {
+        this.secrets.set(WEBHOOK_SECRETS_NAMESPACE, id, input.secret);
+      } else if (!this.secrets.get(WEBHOOK_SECRETS_NAMESPACE, id) || (existing && existing.webhook && existing.webhook.scheme !== 'hmac-sha512')) {
+        throw new TriggerConfigError(
+          'an hmac-sha512 (Paystack) hook checks the signature with the sender’s own key: send it as `secret` ' +
+            '(the Paystack secret key of the business that sends it). A secret made up here would refuse every call.'
+        );
+      }
+    } else if (def.type === 'webhook') {
       if (input.secret) {
         this.secrets.set(WEBHOOK_SECRETS_NAMESPACE, id, input.secret);
         mintedSecret = input.secret;
@@ -736,12 +751,14 @@ export class TriggerRegistry {
    * `null` when there is no such trigger, `'not-a-webhook'` when it is not a
    * webhook: two different answers, because the second is a category error and
    * saying "no such trigger" about a schedule would send the caller looking for
-   * the wrong thing.
+   * the wrong thing. `'supplied-secret'` for an hmac-sha512 (Paystack) hook:
+   * its secret is the sender's key, so a minted one would refuse every call.
    */
-  rotateWebhookSecret(id: string): { trigger: TriggerDef; secret: string } | null | 'not-a-webhook' {
+  rotateWebhookSecret(id: string): { trigger: TriggerDef; secret: string } | null | 'not-a-webhook' | 'supplied-secret' {
     const t = this.triggers.find((x) => x.id === id);
     if (!t) return null;
     if (t.type !== 'webhook') return 'not-a-webhook';
+    if (t.webhook && t.webhook.scheme === 'hmac-sha512') return 'supplied-secret';
 
     const secret = 'whsec_' + crypto.randomBytes(24).toString('base64url');
     this.secrets.set(WEBHOOK_SECRETS_NAMESPACE, id, secret);
