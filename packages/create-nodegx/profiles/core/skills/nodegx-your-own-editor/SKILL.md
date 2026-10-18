@@ -39,7 +39,7 @@ An editor answers six questions. The kit has an answer for each one. You don't i
 | part | the question | answered by |
 |---|---|---|
 | **Format** | What is in the project, and how do I save a change? | `@nodegx/project-contract`: the file types, the schemas, a store that reads and writes with the rules |
-| **Vocabulary** | Which nodes exist, what are their ports, what do they say they do? | `@nodegx/node-spec` for logic nodes; the runtime's own node library (through `@nodegx/preview`) for visual nodes |
+| **Vocabulary** | Which nodes exist, what are their ports, what do they say they do? | `@nodegx/node-spec` for most node types, visual ones included; the runtime's own node library (through `@nodegx/preview`) for the rest |
 | **Logic** | What does the graph do when this changes? | the real engine, in a page, from `@nodegx/preview` |
 | **Screen** | What does the app look like right now? | the real app, rendered by `@nodegx/preview` beside your editor |
 | **Look** | Does it look like NodeGX? | `@nodegx/canvas-look`, if you want it to; your own look, if the person doesn't |
@@ -102,9 +102,19 @@ Some ports depend on a node's parameters, such as a States node's `value-<state>
 function that takes the parameters and returns the ports. A port that isn't in the spec at a given parameter setting
 doesn't exist for that node.
 
-**Visual nodes have no spec.** The NodeGX runtime draws them. Its own node library is where their ports come from,
-and `nodeLibrary` on the preview below lists every type with its ports. Don't draw the screen from what you think a
-Group or a Text looks like. Show the real app. (NodeGX phase 112 README §3, NEEDS.md rows 9 and 10.)
+**Most visual nodes have a spec too.** `specFor('Group')`, `'Text'`, `'Image'`, `'net.noodl.controls.button'` and
+`'net.noodl.controls.textinput'` return full port lists, and `drawnPorts` works on them. For a type node-spec doesn't
+know (`Page`, `CSS Definition`, `Component Inputs`, `Component Outputs`), read the runtime's `nodeLibrary` on the
+preview below. A component instance's ports are the `ports` of its component's Component Inputs and Component
+Outputs nodes, in that component's `nodes.json`. All three OWN-008 strangers worked this out the same way. A spec
+lists a visual node's ports. It doesn't draw the screen. Don't draw the screen from what you think a Group or a Text
+looks like. Show the real app. (OWN-008, NSP-016.)
+
+node-spec 0.1.0's browser entry (`dist/index.mjs`) imports `fast-xml-parser` by bare name, so a page with no bundler or
+import map can't load it. Work out ports on your server, or bundle node-spec. (P112-OWN008-NODESPECBARE.)
+
+A Function's ports come from its script: `functionScriptPortNames(script)` in `@nodegx/project-contract/function-ports.js`
+gives the names, and its wires use them with `in-` and `out-` in front. (OWN-008, the table stranger.)
 
 ### `@nodegx/preview` — the real app beside your editor, and the real engine
 
@@ -126,6 +136,25 @@ preview.onTrace((batch) => { … });           // every value and signal the run
 preview.elementsOf(nodeId);                  // the elements a visual node draws, so a card can point at its screen
 preview.nodeLibrary;                         // the runtime's node types with their ports, visual nodes included
 ```
+
+What comes back, as the package's own types say (`src/inPage/index.ts` in the repository; the published bundle is
+minified):
+
+- `update(files)` resolves `{ status: 'ok', warnings, exportMs, frameMs }`, or a status that says why the app isn't
+  on screen. The last good app stays up.
+- A trace batch is `{ dictionary?, events }`. Each event is `{ seq, t, cause, fromNode, fromPort, toNode, toPort, value,
+  kind }`, with `kind` `'value'` or `'signal'` and `value` a short preview. `dictionary` comes when the live nodes
+  change: `nodes[id]` is `{ name, type, component }`, and `edges` lists the live wires. Node ids aren't scoped. The
+  same id in two instances of one component is one id.
+- `nodeLibrary` is `undefined` until the first `update`. Its `nodetypes` each carry `name`, `category` and `ports` (`{
+  name, plug, type }`). To read it before you show the person's app, update once with a one-Group project.
+  (P112-OWN008-LIBRARYFIRST.)
+- `mountPreview` also takes `traceIntervalMs` (default 150) and `frameTimeoutMs` (default 20 000).
+
+Three things the strangers hit (OWN-008). An outline set on what `elementsOf` returns is wiped when the app
+re-renders. Draw your ring as an overlay positioned from `getBoundingClientRect`. The preview shows the app from its
+start page, and there's no call to open another page or to mount one component. On an app with sign-in, that start
+page is the sign-in page. The frame shares your editor's origin. The app and your editor share one `localStorage`.
 
 The second bundle is `noodl-graph-target.js`. It defines `NodegxGraphTarget`. Each call of
 `NodegxGraphTarget.graphTarget()` returns a fresh copy of the real engine with no screen. You mount a graph, set an
@@ -177,7 +206,13 @@ spell out their fields. `applyEdit` is the reference semantics, if you want to r
 Two optional methods grade the Logic half. `graphTarget()` returns a fresh engine each call, either what
 `NodegxGraphTarget.graphTarget()` returns or a runner of your own. `playGraph(scenario, file)` is for an editor whose
 runner lives in a page: it plays one scenario itself and returns the trace. Offer one or the other. An adapter with no
-runner is graded on files only. The report says so.
+runner is graded on files only. From the next release of `@nodegx/project-contract`, the PASS line says so (`; files
+only: the adapter offers no graph runner`). 0.1.0 prints a bare PASS. Say "files only" in your report yourself.
+(P112-OWN008-FILESONLY.)
+
+Have your adapter call the same code your page's buttons call, and save through the same function your Save button
+uses. All three OWN-008 strangers did. A second control that breaks your editor's own code is worth one run. The
+blocks stranger made its "put inside" ignore the index. The suite named the out-of-order `children`.
 
 ### The command
 
@@ -203,9 +238,17 @@ Before you trust a PASS, break one thing on purpose. Write a number as a string 
 still says PASS, your adapter isn't going through your editor. This control was run on 0.1.0 from the registry and
 read one difference, the sentence quoted above. (OWN-006 AC1, OWN-007 §6.)
 
-### Two more checks
+### More checks
 
-- `validate_project` through the `nodegx` server, on the saved copy, reports 0 errors.
+- `validateStructure(files)` in `editor-suite.js` checks a whole folder of files the way the suite does, schemas and
+  tree. It's the quickest check after a save from your page. (OWN-008, the blocks stranger.)
+- `validate_project` through the `nodegx` server, on the saved copy, reports 0 errors. Its warnings are the
+  editor's own rules, which the kit's validator doesn't run. A raw hex colour where a design token belongs is one.
+  The server's `get_style_vocabulary` lists the tokens that exist. (OWN-008.)
+- Drive your editor's page as a person would, in the Chrome that's already installed, headless, over the DevTools
+  protocol. The `nodegx` server's `drive_page` drives the app, not your editor. Installing `puppeteer` downloads a
+  second browser of about 600 MB into the person's home folder. If you want Puppeteer, use `puppeteer-core` with the
+  installed Chrome. (OWN-008, the blocks stranger.)
 - The official NodeGX editor opens the saved copy with no new diagnostics. If the person has it installed, ask them
   to open it.
 
@@ -228,10 +271,23 @@ Each line cost someone a wrong app or a false claim. The reason is in the senten
 - Return the id you mint. The suite finds the node you added by the id `apply` returned. It names that id in every
   later edit. Without it the next edit names a node your editor doesn't have. The run fails before a single file is
   compared. (P112-S6-SUITEIDS.)
-- A child has no position. Only a node a person placed carries `x` and `y`. If your editor lays out children from the
-  tree, write nothing for them. (OWN-006 §6.2.)
-- The format version is `5`. Write what you read, and never lower it. A NodeGX editor older than 0.4.0 refuses a `5`.
-  That's the editor's age, not your fault. (P112-S11-FORMATSKEW.)
+- Keep a position you find, and write none for a child you add. Files the `nodegx` server wrote carry `x` and `y`
+  on children too (all 389 children in the todo template do). The suite ignores a child's position unless the script
+  moved it. If your editor lays out children from the tree, leave their `x` and `y` alone. (OWN-006 §6.2, OWN-008.)
+- A visual node with no parent that isn't in the component's `visualRoots` is never drawn. `add_node` without a
+  parent makes one. `validate_project` warns about it. Give a new visual node a parent. (OWN-008, the map
+  stranger.)
+- Write the format version you read, and never change it. Many apps are still format `4`, the todo template among
+  them. A NodeGX editor older than 0.4.0 refuses a `5`. That's the editor's age, not your fault.
+  (P112-S11-FORMATSKEW.)
+- In a format-4 project, a Run you wire can be switched off later. When the NodeGX editor upgrades a project to
+  5, every value input of a node whose Run is wired, with no `runOnChange-<input>` key, is written `false`. The
+  `nodegx` server writes `true` on those boxes for the nodes it writes (P109 ISL-018), from
+  `planRunOnValueChangeMigration` in `run-on-value-change-migration.js`, run over the whole component. Don't use
+  `pinRunOnValueChangeDefaults`: it says it isn't for user projects. The suite's reference doesn't tick these
+  boxes yet, so an editor that does reads as a difference (P112-OWN008-FORMAT4PIN). Until that's fixed, write no
+  key, and tell the person when your editor wires a Run in a format-4 project. Two of the three OWN-008 strangers
+  wrote no key, and one ticked the boxes.
 - The server and the preview read differently. The `nodegx` server reads `nodes.json` flat. The preview walks
   `children`. A child listed twice passes the first and breaks the second. Run the preview on your saved files, not
   only the validator. (P112-OWN019-TWOLOADERS.)

@@ -1,7 +1,7 @@
 # OWN-008 — Three strangers
 
 **Opened 2026-10-02.** **Depends on OWN-007** (and therefore on everything before it).
-**Status: 🟡 lab and graders built (s1, 2026-10-16); the three strangers run after Richard's weekly reset (R47).** The phase's thesis test.
+**Status: 🟡 AC1–AC3 ✅ (s2, 2026-10-18): three Opus 5.5 strangers built a table, a children's block editor and a 3D map from the npm kit and the brief alone, each PASS on the repo's todo script, each driven to a saved change with 0 new diagnostics; the brief folded, eight kit rows (NPXPREVIEW and FILESONLY fixed). AC4 waits on Richard's look.** The phase's thesis test.
 **Model:** **Opus, on purpose, for the three strangers**: the test is whether the kit is enough for the model a person has by default. The session that runs them and reads their questions: Opus. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -89,3 +89,78 @@ has its working directory in the lab. Both were proved on a stub `claude` that o
 **Noticed, for the fold-back:** the folder's `CLAUDE.md` says *"Don't write a separate web server or hand-written
 HTML and JavaScript instead"* before it says an editor request goes to the skill. A stranger building a web-page
 editor reads the first sentence first. Whether it slows one down is a reading for the runs.
+
+### s2 (2026-10-18 morning, Opus): the three strangers, graded
+
+**Run** after the weekly reset (R47) at 09:02. The first launch, on Saturday at 23:06, refused all three in their
+first request: Opus 5.5 needs Claude Code ≥ 2.1.280, and the terminal's `claude` was 2.1.251. Richard updated the VS
+Code extension, and the rounds ran on its CLI (2.1.301, `CLAUDE_BIN`). One after another, each on
+`claude-opus-5-5`, with the week at 1–2% throughout. Every stranger's first tool call was `Skill
+nodegx-your-own-editor`. None tripped on the folder's "don't write a separate web server" sentence. All three
+built a server and a page.
+
+| stranger | built | time | turns | cost (API-equivalent) | repo script (never seen) | control | own script | drive through its page | new official-validator diagnostics | `validate_project` |
+|---|---|---|---|---|---|---|---|---|---|---|
+| **table** | one row per node, one column per port, cells typed by port type | 19 min | 116 | $5.83 | `PASS (68 ms)` | `FAIL`, 1 sentence | PASS (22 edits) | header "Todo list" → "My week" in its cell, Save: one value + registry times | 0 | 0 errors |
+| **blocks** | *Big Blocks*: four block kinds, plain words, the real app beside, a ring from `elementsOf`, flashes from `onTrace` | 23 min | 127 | $6.86 | `PASS (74 ms)` | `FAIL`, 1 sentence | PASS (21 edits) | the same title, tapped and typed as a child would: one value, plus its own `modifiedBy` | 0 | 0 errors |
+| **map** | three.js: a plate per component, cards at file x/y in canvas-look colours, arcs, beads from the running app | 24 min | 166 | $8.53 | `PASS (69 ms)` | `FAIL`, 1 sentence | PASS (17 edits) | flown to Header by name, the Log button's press cut from `pickLog` and wired to `pickToday` with clicks on the canvas and its panel: one wire changed | 0 | 0 errors |
+
+"Repo script" is `packages/nodegx-project-contract/tests/fixtures/editor-suite/todo-list.edits.json` (11 edits, all
+eight kinds), run with each stranger's own installed command on a fresh copy of `templates/todo-list`. The control
+is `own-008/control-adapter.cjs`. Each drive (`own-008/drive-{table,blocks,map}.mjs`) is real presses and keys over
+CDP on the stranger's own page. A press lands only where `elementFromPoint` agrees. On the map's canvas, the page's
+own `window.__map` was read only to find where a card is drawn.
+
+**AC1 ✅, with one part graded by the validator rather than a window.** All three pass the suite on the todo
+template, and each saved project has 0 new diagnostics from the official editor's own validator (`npm run
+validate:project`, the editor's `SemanticValidator`, diffed against the untouched template's 0 / 0 / 1 info). None
+of the saved copies was opened in the Electron editor's window. That needs a drive of its own, and it isn't owed by
+any reading so far.
+
+**AC2 ✅ for reads, with writes outside the lab named.** Each stranger's todo copy and the repo's template hash the
+same after its round. No tool call read a file outside its lab except listings of `/Applications` (table, blocks),
+made to find Chrome for their page tests. Each also made one attempt at a cache folder in the home directory,
+refused by the round's `Read(//Users/**)` deny. Writes outside the lab:
+- **table:** an attempted `../_scratch` copy (refused).
+- **blocks:** three helper scripts in `own008/work/`, next to its lab, written with the Write tool and run over its
+  own files (kept in `own-008/blocks/escaped-work/`). And `~/.cache/puppeteer`, 590 MB, from `npm install
+  puppeteer` (removed after the series).
+- **map:** `/tmp/nodegx-map-copies/` (its test copies and screenshots; three kept in `own-008/map/its-own-shots/`,
+  the rest removed) and `/tmp/types.mjs`.
+
+The lab had a hole: the three labs shared one root, so a later stranger could have read an earlier one's editor.
+After the blocks round, the finished labs were moved out of the map stranger's tree, and its log shows no look at
+them. The round now keeps Puppeteer's cache in the lab. A next series should give each lab its own root.
+
+**AC3 ✅.** `own-008/{table,blocks,map}/` hold each report (`REPORT.md`, with time and the stranger's own suite
+output), `grade.json`, the prompt, the screenshots and the editor without `node_modules`. The change log is below.
+
+**AC4 waits on Richard:** the screenshots are `own-008/table/table-1-saved.png`, `own-008/blocks/blocks-0-changed.png`
+and `own-008/map/map-1-rewired.png`, plus the map's own `its-own-shots/`.
+
+**Fold-back (§3.4).** The three reports asked 43 questions. Each was checked against the source or the registry
+before it became a sentence or a row.
+
+| what changed | from | where |
+|---|---|---|
+| "Visual nodes have no spec" was false: node-spec 0.1.0 specs Group, Text, Image, Button, Text Input; the runtime's library covers the rest; an instance's ports are its component's Component Inputs/Outputs `ports` | all three | brief |
+| Write the version you read; format 4 is common; the run-on-value-change hazard, what the server does, and why the brief says to write no key until the suite matches | all three (table ticked, blocks and map didn't) | brief + **P112-OWN008-FORMAT4PIN** (medium, open) |
+| Keep a position you find, write none for a child you add (389 of 389 children in the todo template carry x/y) | blocks, map | brief |
+| A parentless visual node outside `visualRoots` is never drawn | map | brief + **P112-OWN008-EDITGAPS** |
+| The in-page preview's update status, trace batch, dictionary and `nodeLibrary` shapes, from `src/inPage/index.ts`; `elementsOf` styling is wiped, draw an overlay; start page only; shared origin | blocks, map, table | brief + **P112-OWN008-LIBRARYFIRST**, **-PREVIEWPAGE** |
+| `npx @nodegx/preview` fails since 0.2.0 | map | **P112-OWN008-NPXPREVIEW** (high, fixed in `dffbeee00`, ships on the next publish) |
+| A PASS with no runner now says "files only" | blocks, map | **P112-OWN008-FILESONLY** (fixed: `formatReport` + spec, mutant red) + brief |
+| `validateStructure`; `validate_project`'s warnings and `get_style_vocabulary`; drive your page in the installed Chrome, not a downloaded one | blocks | brief |
+| Function ports: `functionScriptPortNames` + `in-`/`out-` | table | brief |
+| node-spec's browser entry imports `fast-xml-parser` by bare name | blocks | **P112-OWN008-NODESPECBARE** |
+| No node type → colour category in canvas-look | map | **P112-OWN008-CATEGORY** |
+| Six `npm audit` advisories through the kit (re-measured: 3 moderate, 3 high) | blocks | **P112-OWN008-AUDIT** |
+
+Left as questions, with no ruling or fix yet: whether a third-party editor signs `modifiedBy` (blocks does);
+how the official editor stores a number typed into a `*` port; which context `drawnPorts` needs for
+`with-project` types (the repo's `port-context.ts` `portContextFor` answers it, but isn't in project-contract 0.1.0);
+evaluating the runtime's `dynamicports`; `prop-*` ports without a backend schema; a binary asset in the suite's
+text-file read.
+
+**No stranger runs again.** §3.4 asks for a re-run where a guess changed the result. None did: the one guess the
+strangers split on (format-4 pinning) gave PASS on the repo script both ways, because that script wires no Run.

@@ -341,7 +341,8 @@ export async function runSuite(
 /** The report as the command prints it: PASS, or the first ten sentences and how many more. */
 export function formatReport(report: SuiteReport, limit = 10): string {
   const head = `${report.adapter} on ${report.fixture} (${Math.round(report.timings.total)} ms)`;
-  if (report.pass) return `PASS — ${head}${report.graph ? `; ${report.graph.summary}` : ''}`;
+  // P112-OWN008-FILESONLY: an adapter with no runner is graded on files only, and the line says so, as the brief does.
+  if (report.pass) return `PASS — ${head}; ${report.graph ? report.graph.summary : 'files only: the adapter offers no graph runner'}`;
   const lines = report.sentences.slice(0, limit).map((s, i) => `${i + 1}. ${s}`);
   const more = report.sentences.length - lines.length;
   return [
