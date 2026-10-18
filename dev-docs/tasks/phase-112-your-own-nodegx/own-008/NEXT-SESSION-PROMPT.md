@@ -9,10 +9,13 @@ met, and FORMAT4PIN was fixed in s4. The three strangers' records are in `table/
    the edits again through the stranger's editor (`own-017/ac3/`). 🔴 In s4, the "three Electron editors" that
    held this item back were probably MCP servers: every `noodl-mcp.cjs` runs from `node_modules/electron/dist`. Read
    the full command (`ps -o command= -p <pid>`) before you call a process an editor.
-2. **AC4 of OWN-008, and OWN-017's, are Richard's.** OWN-008: his reading of the map's third round, the Star Wars
-   battle (`map/round3/`, play server `:8604`), then the table and Big Blocks (`table/table-1-saved.png`,
-   `blocks/blocks-0-changed.png`). OWN-017: his edit hit DEEPLINK in s16 (fixed since), so his words on a working
-   edit are still to be quoted. Quote him in each task's §6 or §7.
+2. ✅ **AC4 of OWN-008 and OWN-017 are met (s6, 2026-10-18).** His words are quoted in OWN-008 §6 s6 and OWN-017 §7
+   "Lane 2 s6". Big Blocks he'd keep; the map is "visually impressive", the ships "a bit silly looking"; the table
+   is "Nope" and isn't carried forward. **Next in the lane: [OWN-012](../OWN-012-THE-SCREEN-FROM-THE-DESCRIPTIONS.md)**,
+   the screen drawn from the node specs (Opus for step 1, Fable for steps 2–3; say which you're on). 🔴 Ports: Le
+   Chonk's game (OWN-022) holds `127.0.0.1:4871–4874`. Express binds `*:P` beside it without an error, and a `curl`
+   to 127.0.0.1 then answers from the game (s6 lost one of Richard's tries that way). Check the one port with
+   `lsof -nP -iTCP:<p> -sTCP:LISTEN`, not a cut-off list.
 3. **The next npm cut (lane 1, OWN-021 or after) must carry:** `dffbeee00` (NPXPREVIEW: `npx @nodegx/preview` has
    failed since 0.2.0, the command every page gives a person), `12cfc6cf3` (FILESONLY and the brief), `3f62e9643`
    (ESMADAPTER: the suite command loads an `.mjs` adapter on Node before 20.19), and FORMAT4PIN (s4: the reference
