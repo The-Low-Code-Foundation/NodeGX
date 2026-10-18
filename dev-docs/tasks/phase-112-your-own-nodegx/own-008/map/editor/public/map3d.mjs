@@ -8,7 +8,7 @@
 
 import * as THREE from 'three';
 import { look, nodeScheme, categoryColors, wireColors } from '/kit/canvas-look/index.mjs';
-import { designShip, shipClass, seeded, SIDES } from '/ships.mjs';
+import { designShip, shipClass, seeded, SIDES, deckMaterial, planarUV } from '/ships.mjs';
 import { Space } from '/space.mjs';
 import { Battle } from '/battle.mjs';
 
@@ -144,6 +144,8 @@ export class MapView {
       const side = fleets.empire.reduce((s, x) => s + x[1].length, 0) <= fleets.rebels.reduce((s, x) => s + x[1].length, 0) ? SIDES.empire : SIDES.rebels;
       fleets[side].push(d);
     }
+    this.fleets = {};
+    for (const side of [SIDES.empire, SIDES.rebels]) this.fleets[side] = { ships: fleets[side].reduce((s, x) => s + x[1].length, 0), folders: fleets[side].map(([f]) => f) };
     // Every ship designed first, to know how much space it takes.
     const ships = new Map();
     for (const key of keys) {
@@ -318,12 +320,14 @@ export class MapView {
       if (this.battle.ships.length) this.updateBattleShips();
     }
     if (plate.shipGroup) plate.group.add(plate.shipGroup);
-    const base = new THREE.Mesh(
-      new THREE.BoxGeometry(w, 0.8, d),
-      new THREE.MeshLambertMaterial({ color: new THREE.Color(isCloud ? '#2a3a5c' : s?.design.deckColor ?? C.cardBgHover) })
-    );
+    // The deck: plated like its hull (a cloud function's deck stays blue, so it stands out).
+    const deckGeo = new THREE.BoxGeometry(w, 0.8, d);
+    deckGeo.translate(plate.origin.x + left + w / 2, -0.4, plate.origin.z + top + d / 2);
+    planarUV(deckGeo);
+    deckGeo.translate(-(plate.origin.x + left + w / 2), 0.4, -(plate.origin.z + top + d / 2));
+    const base = new THREE.Mesh(deckGeo, isCloud || !s ? new THREE.MeshLambertMaterial({ color: new THREE.Color(isCloud ? '#2a3a5c' : C.cardBgHover) }) : deckMaterial(s.side, s.cls));
     base.position.set(plate.origin.x + left + w / 2, -0.4, plate.origin.z + top + d / 2);
-    base.userData = { plate: key };
+    base.userData = { plate: key, sharedMaterial: !isCloud && !!s };
     plate.base = base;
     plate.group.add(base);
     const rim = new THREE.LineSegments(new THREE.EdgesGeometry(base.geometry), new THREE.LineBasicMaterial({ color: C.cardBorder }));

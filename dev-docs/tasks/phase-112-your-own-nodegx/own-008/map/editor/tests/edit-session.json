@@ -17,6 +17,10 @@
   "label": "goto"
  },
  {
+  "waitFor": "!__map.map.flight",
+  "timeout": 20000
+ },
+ {
   "wait": 1500
  },
  {

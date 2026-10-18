@@ -12,7 +12,8 @@ export class Space {
     scene.add(this.sky);
     this.sky.add(nebulaSphere());
     this.sky.add(starfield());
-    this.sky.add(planet());
+    this.sky.add(forestMoon());
+    this.sky.add(deathStar());
     this.dust = dustField();
     scene.add(this.dust);
   }
@@ -57,7 +58,7 @@ function nebulaSphere() {
     const r = 60 + rand() * 260;
     const col = hues[Math.floor(rand() * hues.length)];
     const grad = g.createRadialGradient(x, y, 0, x, y, r);
-    grad.addColorStop(0, `${col}${0.1 + rand() * 0.12})`);
+    grad.addColorStop(0, `${col}${0.03 + rand() * 0.05})`); // faint: Star Wars space is mostly black
     grad.addColorStop(1, `${col}0)`);
     g.fillStyle = grad;
     g.fillRect(x - r, y - r, r * 2, r * 2);
@@ -99,37 +100,92 @@ function starfield() {
   return p;
 }
 
-function planet() {
-  const group = new THREE.Group();
+/** A canvas texture of w × h painted by `paint(g, rand)`. */
+function painted(w, h, seed, paint) {
   const c = document.createElement('canvas');
-  c.width = 512;
-  c.height = 256;
-  const g = c.getContext('2d');
-  const rand = mulberry(3);
-  // A gas giant: bands of ochre and rust.
-  for (let y = 0; y < c.height; y += 4) {
-    const k = 0.55 + 0.45 * Math.sin(y * 0.09 + rand() * 0.6);
-    g.fillStyle = `rgb(${Math.round(150 + 80 * k)},${Math.round(95 + 60 * k)},${Math.round(60 + 40 * k)})`;
-    g.fillRect(0, y, c.width, 4);
-  }
+  c.width = w;
+  c.height = h;
+  paint(c.getContext('2d'), mulberry(seed), w, h);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  const ball = new THREE.Mesh(new THREE.SphereGeometry(520, 48, 32), new THREE.MeshLambertMaterial({ map: tex, fog: false }));
-  group.add(ball);
-  const ring = new THREE.Mesh(
-    new THREE.RingGeometry(700, 1050, 96),
-    new THREE.MeshBasicMaterial({ color: '#d9b98a', transparent: true, opacity: 0.35, side: THREE.DoubleSide, fog: false, depthWrite: false })
+  return tex;
+}
+
+/** A forest moon: deep greens, a few lakes, swirls of white cloud, and a thin blue atmosphere. */
+function forestMoon() {
+  const group = new THREE.Group();
+  const tex = painted(1024, 512, 21, (g, rand, w, h) => {
+    g.fillStyle = '#2c5530';
+    g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 900; i++) {
+      const x = rand() * w, y = rand() * h, r = 4 + rand() * 40;
+      const shade = rand();
+      g.fillStyle = shade < 0.45 ? 'rgba(24,62,30,0.5)' : shade < 0.85 ? 'rgba(70,110,52,0.45)' : 'rgba(40,80,110,0.55)';
+      g.beginPath();
+      g.ellipse(x, y, r * 1.6, r, rand() * Math.PI, 0, Math.PI * 2);
+      g.fill();
+    }
+    for (let i = 0; i < 160; i++) {
+      const x = rand() * w, y = h * 0.1 + rand() * h * 0.8;
+      g.fillStyle = `rgba(255,255,255,${0.12 + rand() * 0.3})`;
+      g.beginPath();
+      g.ellipse(x, y, 20 + rand() * 90, 4 + rand() * 12, (rand() - 0.5) * 0.4, 0, Math.PI * 2);
+      g.fill();
+    }
+  });
+  const moon = new THREE.Mesh(new THREE.SphereGeometry(900, 64, 32), new THREE.MeshLambertMaterial({ map: tex, fog: false }));
+  group.add(moon);
+  const air = new THREE.Mesh(
+    new THREE.SphereGeometry(940, 64, 32),
+    new THREE.MeshBasicMaterial({ color: '#7fb6ff', transparent: true, opacity: 0.12, side: THREE.BackSide, fog: false, depthWrite: false, blending: THREE.AdditiveBlending })
   );
-  ring.rotation.x = Math.PI / 2.4;
-  group.add(ring);
-  group.position.set(-2600, 900, -3400);
-  group.rotation.z = 0.35;
-  // Its own sun, so the far side is in shadow whatever the fleet's lights do.
-  const sun = new THREE.DirectionalLight('#fff2dd', 1.6);
-  sun.position.set(1, 0.4, 0.6);
-  sun.target = ball;
-  group.add(sun);
+  group.add(air);
+  group.position.set(-2300, -700, -3500);
+  group.rotation.set(0.3, 0.5, 0.2);
   return group;
+}
+
+/** The battle station: a grey panelled sphere, its equatorial trench, and the superlaser dish in the northern half. */
+function deathStar() {
+  const tex = painted(1024, 512, 33, (g, rand, w, h) => {
+    g.fillStyle = '#80858c';
+    g.fillRect(0, 0, w, h);
+    for (let i = 0; i < 5000; i++) {
+      const v = 100 + Math.floor(rand() * 60);
+      g.fillStyle = `rgb(${v},${v + 2},${v + 6})`;
+      g.fillRect(rand() * w, rand() * h, 2 + rand() * 10, 1 + rand() * 4);
+    }
+    // Lines of latitude, and the trench round the equator.
+    g.fillStyle = 'rgba(60,62,68,0.5)';
+    for (let y = 16; y < h; y += 24) g.fillRect(0, y, w, 1);
+    g.fillStyle = '#2b2d33';
+    g.fillRect(0, h / 2 - 5, w, 10);
+    g.fillStyle = 'rgba(255,230,170,0.6)';
+    for (let i = 0; i < 400; i++) g.fillRect(rand() * w, rand() * h, 1, 1); // city lights
+    // The superlaser dish: concentric rings round a darker bowl.
+    const dx = w * 0.62, dy = h * 0.3, R = 62;
+    const bowl = g.createRadialGradient(dx - 12, dy - 10, 4, dx, dy, R);
+    bowl.addColorStop(0, '#9a9fa6');
+    bowl.addColorStop(1, '#4d5057');
+    g.fillStyle = bowl;
+    g.beginPath();
+    g.ellipse(dx, dy, R * 1.25, R, 0, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = 'rgba(40,42,48,0.8)';
+    for (let r = 12; r < R; r += 11) {
+      g.beginPath();
+      g.ellipse(dx, dy, r * 1.25, r, 0, 0, Math.PI * 2);
+      g.stroke();
+    }
+    g.fillStyle = '#c9ffc8';
+    g.beginPath();
+    g.arc(dx, dy, 3, 0, Math.PI * 2);
+    g.fill();
+  });
+  const ds = new THREE.Mesh(new THREE.SphereGeometry(330, 64, 32), new THREE.MeshLambertMaterial({ map: tex, fog: false }));
+  ds.position.set(1700, 950, -3900);
+  ds.rotation.y = -2.15; // turns the dish (painted at u = 0.62) to face the fleet, a little off-centre
+  return ds;
 }
 
 function dustField() {

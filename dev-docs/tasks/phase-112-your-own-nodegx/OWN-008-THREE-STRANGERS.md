@@ -281,3 +281,38 @@ it proved the kit can carry one. Richard's reading is that it isn't an editor a 
 not tabulated, and a column of x/y numbers is the canvas's bookkeeping shown as if it were the app. It isn't carried
 forward as a shape to build or polish. Its findings stay (FORMAT4PIN was its). Big Blocks is the one he'd keep. The
 map's next round, if he asks for one, starts from "the ships are a bit silly looking".
+
+### s7 (2026-10-18 night, Opus 5.5): the map's fourth round, "less silly, more Star Warsy"
+
+Richard's words after round 3 went to the map stranger verbatim (`own-008/map/round4/richard-said.txt`): *"The ships
+are a bit silly looking, but I like the space battle and the connector animations … Let's make the ships less silly
+and make everything more Star Warsy please"*, with round 2's closing line. Resumed in its own lab (`round.mjs
+--again`, CLI 2.1.301): 18.8 minutes, 57 turns, $31.54 (API-equivalent), no quota stop. Its REPORT.md "Fourth
+round" says what it built:
+- **Ships:** smooth hulls in panelled plating that keep each class's proportions and grow to fit the deck. The old
+  ones stretched around it, which is what made a long component a long brick. Imperial wedges with a bridge and
+  shield domes; 6 Super Star Destroyers for the longest components; Mon Calamari cruisers, Nebulon-B frigates and
+  Corellian corvettes for the Rebels. Hovering a hull names the ship.
+- **Fighters and effects:** TIE fighters and X-wings that bank and fire their own guns and arrive with a hyperspace
+  streak; layered explosions; synthesised sound effects with an **FX** button.
+- **Space:** near-black, with a battle station and a forest moon.
+- **The opening crawl:** its own words, written from the project's numbers (*"Episode LXXX"* for 80 components).
+  It declined the film's crawl text, as round 3 declined the Imperial March.
+
+**Checked here, on a fresh copy** (`own-008/verify-map-round4.mjs`, headless SwiftShader, the copy served on `:8606`):
+- **Isolation:** 56 tool calls, 0 refused. The only writes outside the lab were to `/tmp/nodegx-map-copies/`, its
+  own test copies, as in rounds 1 and 3. The lab's todo copy and the repo's template hash the same before and after
+  (244 files).
+- **The repo's todo script:** `PASS — NodeGX map editor on todo-list (68 ms)`. The control: `FAIL … "parameters.paddingTop"
+  is "8"`.
+- **The crawl** is up at load and gone after one key.
+- **The fleet:** 80 components, 80 ships, 80 with a hull. The classes split as in round 3 (small 2–6, medium 7–8,
+  large 9–104 nodes).
+- **The battle:** around Sign in, 22–24 fighters (TIEs 11–12, X-wings 10–12), kills 7 → 11 → 23, 80 hulls before
+  and after. **Battle** off: 0 bolts, 0 fighters. Back on over the whole map: 22 fighters. No page errors.
+- **The music** ran before the first press, but the key that skipped the crawl is a gesture. So "nothing before a
+  gesture" wasn't measured this round.
+- **By eye** (`own-008/map/round4/`): the Star Destroyers read as Star Destroyers, wedges with blue engines and a
+  bridge. The Mon Calamari cruisers are rounded and organic, and the Nebulon-B has its spar and pod. The weakest are
+  the corvettes, which still read as stubby boxes from the overview. The crawl is yellow on black, in perspective.
+- **Not measured:** the sound effects (nobody has listened), and the frame rate on a real graphics card.

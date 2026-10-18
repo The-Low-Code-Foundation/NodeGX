@@ -300,3 +300,104 @@ the decks the nodes already sat on.
 
 This round used no kit API beyond what the first two rounds did (`@nodegx/canvas-look` colours and
 fonts for the decks, cards and wires). The questions above still stand.
+
+## Fourth round: less silly, more Star Wars
+
+The person liked the battle and the wire animations but found the block ships silly, and asked for
+everything to be more Star Wars. This round took about 14 minutes (timestamped). Again nothing
+touches the format, the store or saving.
+
+### What changed
+
+- **The ships, rebuilt** (`public/ships.mjs`). Smooth, shaped hulls replace the stair-stepped blocks.
+  - Each ship is a handful of merged meshes in shared materials: a hull plating texture (painted
+    once on a canvas, tinted per material, mapped from position so the panels are one size on every
+    ship), with lit windows, turbolaser turrets with twin barrels, and engine nozzles with glowing
+    faces.
+  - **Each class keeps its proportions.** The hull grows until the deck fits, rather than stretching
+    around it. That was what made the old ships silly: a long component made a long thin brick.
+  - **Empire:** daggers, each with a flat top the deck sits on, a sharp equator with a dark trim
+    line, a narrower keel and a trench ahead of the deck.
+    - Astern of the deck sits a stepped superstructure with rows of lit windows.
+    - The Victory and the Star Destroyer add a bridge tower with its wide bridge; the Star Destroyer
+      adds two shield domes on stalks.
+    - Blue engines: three big ones and smaller side engines.
+    - A component more than about 3 times longer than it is wide becomes a long, thin **Super Star
+      Destroyer**; there are 6 in `todo-list`.
+  - **Rebels:**
+    - The **Mon Calamari cruiser** is a smooth ellipsoid with organic bulges, flank pods, a dorsal
+      ridge, bands of windows and a ring of blue engines. Its top is sliced flat so the deck's
+      corners just meet the edge of the slice.
+    - The **Nebulon-B** has a front hull with a sloping prow and a command tower, red stripes, a
+      thin spar climbing aft to a tall engine block (two big and three small orange engines), and the
+      pod hanging below on its strut.
+    - The **Corellian corvette** has the long body with its red band, the hammerhead cockpit on its
+      neck, and the wide engine block with eleven red engines in two banks.
+  - Hovering a hull names the ship (for example "Todo/Header — Mon Calamari cruiser · 14 nodes").
+- **Fighters.**
+  - The TIE fighter has a ball cockpit with its round framed window, two pylons, and hexagonal wings
+    with a frame and six spokes.
+  - The X-wing has a tapering square nose, a canopy, a blue astromech dome, and four S-foils in
+    attack position, each with its engine, red markings and wingtip cannon.
+  - Both bank into their turns.
+  - They fire twin bolts from their own guns: a TIE from both cannons, an X-wing alternating
+    diagonal pairs.
+  - They arrive with a hyperspace streak along their line of flight. Twelve a side.
+- **Explosions:** a white flash, a fireball going from orange to red, smoke, sparks that streak
+  outward, and tumbling debris. A fighter's death adds the expanding shockwave ring.
+- **Sound effects** (`public/sfx.mjs`, the new **FX** button), synthesised with Web Audio:
+  - an X-wing's blaster "pew", a TIE's warbling cannon, a deeper turbolaser crack, and an explosion's
+    rumble and thump;
+  - fainter with distance, silent out of earshot, and at most two or three of a kind at once.
+- **Space** (`public/space.mjs`):
+  - the nebula is faded to near black, as Star Wars space is;
+  - the ringed gas giant is replaced by a green **forest moon** with clouds and a thin blue
+    atmosphere, and a **battle station** with its equatorial trench, lines of latitude, city lights
+    and its superlaser dish turned towards the fleet.
+- **The opening crawl** (`public/crawl.mjs`).
+  - "A long time ago in a galaxy far, far away...." in blue, then the project's name receding into
+    the stars in outlined yellow, then a yellow crawl in perspective.
+  - **The crawl's words are my own**, written from the project: "Episode LXXX" (the number of
+    components in Roman numerals), the node and wire counts, and which squadrons fly for which side.
+  - I didn't use the film's crawl text, which is copyrighted. Only the famous opening line is
+    quoted.
+  - It plays once a browser session; any key or click skips it; clicking the project's name
+    replays it; `?nocrawl` turns it off.
+- Engine glows are about half the size they were, and the plating is calmer (bigger, lower-contrast
+  panels).
+
+### How it was tested (fresh copies of `todo-list`, headless Chrome)
+
+- `tests/fleet.json`:
+  - 80 ships: 26 Imperial light cruisers, 9 Victory-class, 3 Imperial Star Destroyers, 6 Super Star
+    Destroyers, 17 Corellian corvettes, 2 Nebulon-B frigates and 17 Mon Calamari cruisers.
+  - **Every deck sits on its own hull.** The deck is inside the hull's footprint, and a new check
+    casts a ray straight down from each of the deck's four corners: all 320 rays hit the ship's own
+    hull, so no deck overhangs empty space.
+  - After 30 s: 22 fighters, 9 kills. The music plays after the first click.
+- `tests/rebels.json`: close-ups of a corvette, a Nebulon-B, a Mon Calamari cruiser, an X-wing, a TIE
+  fighter and an explosion with its shockwave ring. The **Battle** toggle clears everything.
+- `tests/crawl.json`: the crawl shows, with its text written from the project (quoted above), any
+  key skips it, and clicking the project's name plays it again.
+- `tests/edit-session.json` on the new ships: wire, cut, rename, set parameter, drag (410 → 550),
+  add, save. The diff against the original shows only those edits: 241 other files byte-identical,
+  0 validator problems.
+- `tests/hover.json`: all 21 wires on their port dots and level; hover glow and balls; the preview
+  highlights the wire's ends; W flies level.
+- `tests/battle.json`: turbolaser bolts and hull bursts in the lane.
+- The editor suite: `PASS — NodeGX map editor on suite (77 ms)`, and the control still FAILs with
+  the one sentence about `fontSize`.
+- `./todo-list`: no file newer than the kit's install.
+
+### One thing my tests got wrong, and fixed
+
+The headless browser renders more slowly with the new ships, and one test clicked a card while the
+camera was still flying to it, so the click landed on the wrong spot and the first rewire was
+skipped. A probe showed that every card picks correctly once the camera has stopped. The tests now
+wait for the flight to end (`waitFor: "!__map.map.flight"`) before clicking.
+
+### Not checked
+
+- **The sound effects were not tested.** No test checks that they play; only the music's audio was
+  checked as running. Nobody listened to either here.
+- As before, speed on a real graphics card wasn't measured.

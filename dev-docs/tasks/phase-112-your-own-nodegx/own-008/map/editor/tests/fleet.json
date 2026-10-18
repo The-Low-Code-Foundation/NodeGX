@@ -7,12 +7,20 @@
   "wait": 1500
  },
  {
+  "label": "ship types",
+  "eval": "(() => { const out = {}; for (const p of __map.map.plates.values()) out[p.ship.design.name] = (out[p.ship.design.name] ?? 0) + 1; return JSON.stringify(out); })()"
+ },
+ {
   "label": "the fleet: ships per side and class",
   "eval": "(() => { const out = {}; for (const p of __map.map.plates.values()) { const s = p.ship; const k = s.side + ' ' + s.cls; out[k] = (out[k] ?? 0) + 1; } return JSON.stringify({ ships: __map.map.plates.size, byKind: out, battleShips: __map.map.battle.ships.length }); })()"
  },
  {
   "label": "every deck sits on its hull: deck inside the hull's footprint, hull top under the deck",
   "eval": "(() => { const bad = []; for (const p of __map.map.plates.values()) { const deck = new __map.map.THREE.Box3().setFromObject(p.base); const hull = new __map.map.THREE.Box3().setFromObject(p.shipGroup); if (!(hull.min.x <= deck.min.x + 0.01 && hull.max.x >= deck.max.x - 0.01 && hull.min.z <= deck.min.z + 0.01 && hull.max.z >= deck.max.z - 0.01)) bad.push(p.key); } return JSON.stringify({ checked: __map.map.plates.size, outside: bad }); })()"
+ },
+ {
+  "label": "every deck corner has its own hull under it (a ray straight down from each corner hits the ship)",
+  "eval": "(() => { const m = __map.map; const T = m.THREE; const ray = new T.Raycaster(); const bad = []; for (const p of m.plates.values()) { const b = new T.Box3().setFromObject(p.base); const meshes = p.shipGroup.children.filter((c) => c.isMesh); for (const [x, z] of [[b.min.x + 0.5, b.min.z + 0.5], [b.max.x - 0.5, b.min.z + 0.5], [b.min.x + 0.5, b.max.z - 0.5], [b.max.x - 0.5, b.max.z - 0.5]]) { ray.set(new T.Vector3(x, -0.1, z), new T.Vector3(0, -1, 0)); if (!ray.intersectObjects(meshes, false).length) { bad.push(p.key + ' ' + p.ship.design.name); break; } } } return JSON.stringify({ checked: m.plates.size, overhanging: bad }); })()"
  },
  {
   "shot": "fleet-overview.png"

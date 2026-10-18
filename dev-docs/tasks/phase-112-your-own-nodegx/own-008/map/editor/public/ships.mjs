@@ -1,21 +1,31 @@
-// The ships of the map, built from blocks (voxels) for a simple, Minecraft-like look.
+// The ships of the map.
 //
 // A component is a capital ship: its deck is the plate its nodes sit on, and the hull is built
-// around and under the deck. The bow points -z (ahead), the engines glow at +z (astern). Two sides,
-// three sizes each, chosen by how many nodes the component has:
-//   Empire: small = light cruiser (plain wedge), medium = Victory-style wedge with a low tower,
-//           large = Star Destroyer (wedge, stepped superstructure, bridge tower, two shield domes).
-//   Rebels: small = Corellian corvette (hammerhead bow, long hull, a wall of red engines),
-//           medium = Nebulon-B frigate (front hull, thin neck, engine block, hanging pod),
-//           large = Mon Calamari cruiser (rounded, lumpy hull, a ring of blue engines).
-// Each design is seeded by the component's key, so the same app always gets the same fleet.
+// around and under the deck. The bow points -z (ahead), the engines glow at +z (astern). Each class
+// keeps its real proportions: the hull grows to fit the deck instead of stretching around it.
+//   Empire: small = Imperial light cruiser, medium = Victory-class Star Destroyer,
+//           large = Imperial Star Destroyer (a long component gets a Super Star Destroyer).
+//           All daggers: a flat upper hull, a sharp equator edge, a narrower keel, a stepped
+//           superstructure astern, a bridge tower with two shield domes, blue engines.
+//   Rebels: small = Corellian corvette (hammerhead cockpit, a cluster of eleven red engines),
+//           medium = Nebulon-B escort frigate (front hull, spar, engine block, hanging pod),
+//           large = Mon Calamari cruiser (smooth, bulging organic hull, a ring of blue engines).
+// Hulls are panelled (one procedural texture, tinted per material), carry lit windows and
+// turbolaser turrets, and are merged into a few meshes per ship. Each design is seeded by the
+// component's key, so the same app always gets the same fleet.
 //
-// Fighters (TIE fighters, X-wings) are small block models with their nose at +z (Object3D.lookAt).
+// Fighters (TIE fighters, X-wings) are built the same way, nose at +z (Object3D.lookAt).
 
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 export const SIDES = { empire: 'empire', rebels: 'rebels' };
+
+export const SHIP_NAMES = {
+  empire: { small: 'Imperial light cruiser', medium: 'Victory-class Star Destroyer', large: 'Imperial Star Destroyer', super: 'Super Star Destroyer' },
+  rebels: { small: 'Corellian corvette', medium: 'Nebulon-B escort frigate', large: 'Mon Calamari cruiser' }
+};
 
 /** A small deterministic random stream (mulberry32) from a string. */
 export function seeded(text) {
@@ -34,39 +44,207 @@ export function seeded(text) {
   };
 }
 
-const BLOCK = 1.5; // the voxel grid: widths snap to it, so slopes come out as stairs
-const snap = (v) => Math.max(BLOCK, Math.round(v / BLOCK) * BLOCK);
+/** The ship's size class from its component's node count and the project's terciles. */
+export function shipClass(count, t1, t2) {
+  return count <= t1 ? 'small' : count <= t2 ? 'medium' : 'large';
+}
 
-const hullMaterial = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
-const glowMaterial = new THREE.MeshBasicMaterial({ vertexColors: true });
+// --- materials ----------------------------------------------------------------------------
 
-/** Collects boxes into two merged meshes: the hull (lit) and the glowing bits (engines, windows). */
-class Voxels {
+/** Hull plating: grey panels of slightly different shades, panel lines and a few vents. Tinted by each material's colour. */
+let panelTexture = null;
+function panels() {
+  if (panelTexture) return panelTexture;
+  const c = document.createElement('canvas');
+  c.width = c.height = 512;
+  const g = c.getContext('2d');
+  const rand = seeded('panels');
+  g.fillStyle = '#c4c4c4';
+  g.fillRect(0, 0, 512, 512);
+  // Panels in a loose grid, wrapping at the edges so the texture tiles.
+  for (let i = 0; i < 260; i++) {
+    const w = 16 * (1 + Math.floor(rand() * 5));
+    const h = 16 * (1 + Math.floor(rand() * 3));
+    const x = Math.floor(rand() * 32) * 16;
+    const y = Math.floor(rand() * 32) * 16;
+    const v = 186 + Math.floor(rand() * 28);
+    g.fillStyle = `rgb(${v},${v},${v})`;
+    for (const [dx, dy] of [[0, 0], [-512, 0], [0, -512], [-512, -512]]) g.fillRect(x + dx, y + dy, w, h);
+  }
+  // Panel lines.
+  g.strokeStyle = 'rgba(60,60,60,0.35)';
+  g.lineWidth = 1.5;
+  for (let i = 0; i <= 512; i += 32) {
+    g.beginPath();
+    g.moveTo(i, 0);
+    g.lineTo(i, 512);
+    g.stroke();
+    g.beginPath();
+    g.moveTo(0, i);
+    g.lineTo(512, i);
+    g.stroke();
+  }
+  for (let i = 0; i < 40; i++) {
+    g.fillStyle = `rgba(40,40,40,${0.15 + rand() * 0.25})`;
+    g.fillRect(Math.floor(rand() * 64) * 8, Math.floor(rand() * 64) * 8, 6 + rand() * 18, 3 + rand() * 6);
+  }
+  panelTexture = new THREE.CanvasTexture(c);
+  panelTexture.wrapS = panelTexture.wrapT = THREE.RepeatWrapping;
+  panelTexture.colorSpace = THREE.SRGBColorSpace;
+  panelTexture.anisotropy = 4;
+  return panelTexture;
+}
+
+const materials = new Map();
+/** The shared materials, by name. Every ship and fighter uses these; none is ever disposed. */
+export function material(name) {
+  if (materials.has(name)) return materials.get(name);
+  const plated = (color, opts = {}) => new THREE.MeshStandardMaterial({ color, map: panels(), roughness: 0.72, metalness: 0.28, flatShading: true, side: THREE.DoubleSide, ...opts });
+  const plain = (color, opts = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.6, metalness: 0.35, flatShading: true, side: THREE.DoubleSide, ...opts });
+  const lit = (color) => new THREE.MeshBasicMaterial({ color });
+  const table = {
+    imperial: () => plated('#c9cdd3'),
+    imperialDark: () => plated('#7c818a'),
+    imperialDeck: () => plated('#8c919a'),
+    gunmetal: () => plain('#4d5259'),
+    rebelHull: () => plated('#e3ddd0'),
+    rebelGrey: () => plated('#aaa69c'),
+    rebelDeck: () => plated('#a39e93'),
+    rebelRed: () => plain('#a5302a'),
+    monCal: () => plated('#8d9cb2', { flatShading: false }),
+    monCalDark: () => plated('#66758a', { flatShading: false }),
+    monCalDeck: () => plated('#7a889c'),
+    window: () => lit('#ffe8b0'),
+    bridge: () => lit('#bfe4ff'),
+    glowBlue: () => lit('#b4e1ff'),
+    glowRed: () => lit('#ffb08f'),
+    glowOrange: () => lit('#ffc890'),
+    tieBody: () => plain('#8b9199'),
+    tieWing: () => plain('#3b4049', { roughness: 0.55 }),
+    tieFrame: () => plain('#9aa0a8'),
+    canopy: () => plain('#16191f', { roughness: 0.2, metalness: 0.6 }),
+    xwBody: () => plated('#dad8d1'),
+    xwRed: () => plain('#a8322a'),
+    xwDark: () => plain('#3b3f46'),
+    astromech: () => plain('#3d6fb6')
+  };
+  const m = table[name]();
+  materials.set(name, m);
+  return m;
+}
+
+/** The deck plating for a ship's side and class. */
+export function deckMaterial(side, cls) {
+  if (side === SIDES.empire) return material('imperialDeck');
+  return material(cls === 'large' ? 'monCalDeck' : 'rebelDeck');
+}
+
+/** UVs from position, by each face's facing (box mapping), so plating keeps one scale on every ship. */
+export function planarUV(geometry, scale = 64) {
+  const pos = geometry.attributes.position;
+  const nor = geometry.attributes.normal;
+  const uv = new Float32Array(pos.count * 2);
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    const ax = Math.abs(nor.getX(i)), ay = Math.abs(nor.getY(i)), az = Math.abs(nor.getZ(i));
+    let u, v;
+    if (ay >= ax && ay >= az) [u, v] = [x, z];
+    else if (ax >= az) [u, v] = [z, y];
+    else [u, v] = [x, y];
+    uv[i * 2] = u / scale;
+    uv[i * 2 + 1] = v / scale;
+  }
+  geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  return geometry;
+}
+
+// --- the builder --------------------------------------------------------------------------
+
+const UP = new THREE.Vector3(0, 1, 0);
+
+/** Collects shaped parts by material and merges each material's parts into one mesh. */
+class Builder {
   constructor(rand) {
     this.rand = rand;
-    this.hull = [];
-    this.glow = [];
+    this.parts = new Map();
   }
 
-  /** A box from corner to corner, in one colour with a little per-block variation (the Minecraft look). */
-  box(x0, y0, z0, x1, y1, z1, color, { glow = false, vary = 0.08 } = {}) {
+  add(geometry, mat, matrix = null, { smooth = false } = {}) {
+    let g = geometry.index ? geometry.toNonIndexed() : geometry;
+    geometry !== g && geometry.dispose();
+    if (matrix) g.applyMatrix4(matrix);
+    if (!smooth || !g.attributes.normal) g.computeVertexNormals();
+    for (const name of Object.keys(g.attributes)) if (!['position', 'normal'].includes(name)) g.deleteAttribute(name);
+    planarUV(g);
+    if (!this.parts.has(mat)) this.parts.set(mat, []);
+    this.parts.get(mat).push(g);
+    return g;
+  }
+
+  /** An axis-aligned box from corner to corner. */
+  box(x0, y0, z0, x1, y1, z1, mat) {
     const w = Math.abs(x1 - x0), h = Math.abs(y1 - y0), d = Math.abs(z1 - z0);
     if (w < 0.01 || h < 0.01 || d < 0.01) return;
-    const g = new THREE.BoxGeometry(w, h, d);
-    g.translate((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2);
-    const c = new THREE.Color(color);
-    if (vary) c.multiplyScalar(1 - vary + this.rand() * vary * 2);
-    const n = g.attributes.position.count;
-    const colors = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) colors.set([c.r, c.g, c.b], i * 3);
-    g.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-    (glow ? this.glow : this.hull).push(g);
+    this.add(new THREE.BoxGeometry(w, h, d), mat, new THREE.Matrix4().makeTranslation((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2));
+  }
+
+  /** A box with rounded edges, centred at (x, y, z). */
+  rounded(w, h, d, x, y, z, mat, radius = Math.min(w, h, d) * 0.18) {
+    this.add(new RoundedBoxGeometry(w, h, d, 2, radius), mat, new THREE.Matrix4().makeTranslation(x, y, z));
+  }
+
+  /** A cylinder from a to b (Vector3s), radius r1 at a and r2 at b. */
+  cylinder(a, b, r1, r2, mat, segments = 12) {
+    const dir = b.clone().sub(a);
+    const len = dir.length();
+    const g = new THREE.CylinderGeometry(r2, r1, len, segments);
+    const m = new THREE.Matrix4().compose(a.clone().add(b).multiplyScalar(0.5), new THREE.Quaternion().setFromUnitVectors(UP, dir.normalize()), new THREE.Vector3(1, 1, 1));
+    this.add(g, mat, m);
+  }
+
+  sphere(at, r, mat, scale = new THREE.Vector3(1, 1, 1), segments = 16) {
+    const g = new THREE.SphereGeometry(r, segments, Math.max(6, segments / 2));
+    this.add(g, mat, new THREE.Matrix4().compose(at, new THREE.Quaternion(), scale), { smooth: true });
+  }
+
+  /** A solid between loops of points (each loop the same count, going round the same way), capped at both ends. */
+  loft(loops, mat) {
+    const pos = [];
+    const tri = (a, b, c) => pos.push(a.x, a.y, a.z, b.x, b.y, b.z, c.x, c.y, c.z);
+    for (let l = 0; l < loops.length - 1; l++) {
+      const A = loops[l], B = loops[l + 1];
+      for (let i = 0; i < A.length; i++) {
+        const j = (i + 1) % A.length;
+        tri(A[i], B[i], B[j]);
+        tri(A[i], B[j], A[j]);
+      }
+    }
+    for (const loop of [loops[0], loops[loops.length - 1]]) for (let i = 1; i < loop.length - 1; i++) tri(loop[0], loop[i], loop[i + 1]);
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    this.add(g, mat);
+  }
+
+  /** A turbolaser turret: a round base and twin barrels pointing `out` (+1 or -1 along x). Returns the muzzle. */
+  turret(at, s, out) {
+    this.cylinder(at, at.clone().add(new THREE.Vector3(0, s * 0.7, 0)), s, s * 0.85, material('gunmetal'), 10);
+    for (const dz of [-0.28, 0.28]) {
+      const a = at.clone().add(new THREE.Vector3(0, s * 0.45, dz * s));
+      this.cylinder(a, a.clone().add(new THREE.Vector3(out * s * 2.4, 0, 0)), s * 0.12, s * 0.1, material('gunmetal'), 6);
+    }
+    return at.clone().add(new THREE.Vector3(out * s * 2.5, s * 0.45, 0));
+  }
+
+  /** An engine nozzle along +z ending at z1: a housing and a glowing disc. Returns its glow position. */
+  engine(x, y, z0, z1, r, glowMat, housing = material('gunmetal')) {
+    this.cylinder(new THREE.Vector3(x, y, z0), new THREE.Vector3(x, y, z1), r * 1.12, r * 1.2, housing, 16);
+    this.cylinder(new THREE.Vector3(x, y, z1), new THREE.Vector3(x, y, z1 + 0.08 + r * 0.04), r, r, glowMat, 16);
+    return new THREE.Vector3(x, y, z1 + r * 0.25);
   }
 
   build() {
     const group = new THREE.Group();
-    for (const [list, mat] of [[this.hull, hullMaterial], [this.glow, glowMaterial]]) {
-      if (!list.length) continue;
+    for (const [mat, list] of this.parts) {
       const merged = mergeGeometries(list);
       for (const g of list) g.dispose();
       const mesh = new THREE.Mesh(merged, mat);
@@ -77,293 +255,329 @@ class Voxels {
   }
 }
 
-/** The ship's size class from its component's node count and the project's terciles. */
-export function shipClass(count, t1, t2) {
-  return count <= t1 ? 'small' : count <= t2 ? 'medium' : 'large';
-}
+const V = (x, y, z) => new THREE.Vector3(x, y, z);
 
 /**
  * Designs one capital ship around a deck W × D (world units; deck-local x ∈ [0, W], z ∈ [0, D],
- * deck top at y = 0). Returns { group, bbox, turrets, engines, hull, deckColor }:
- * group is in deck-local coordinates; turrets are muzzle points; engines are { at, size, color }
- * for glow sprites; hull is the box lasers aim at.
+ * deck top at y = 0). Returns { group, bbox, turrets, engines, hull, name }: group is in
+ * deck-local coordinates; turrets carry their muzzle; engines are { at, size, color } for glow
+ * sprites; hull is the box lasers aim at.
  */
 export function designShip(side, cls, W, D, seed) {
   const rand = seeded(seed);
-  const v = new Voxels(rand);
-  const ship = side === SIDES.empire ? empireShip(v, cls, W, D, rand) : rebelShip(v, cls, W, D, rand);
-  const group = v.build();
-  // Turret blocks: a base and a barrel pointing out over the side.
-  const tv = new Voxels(rand);
-  for (const t of ship.turrets) {
-    const s = t.size;
-    tv.box(t.at.x - s, t.at.y - 0.2, t.at.z - s, t.at.x + s, t.at.y + s * 1.1, t.at.z + s, ship.turretColor);
-    const out = t.out;
-    tv.box(t.at.x + (out > 0 ? s * 0.6 : -s * 2.6), t.at.y + s * 0.4, t.at.z - s * 0.18, t.at.x + (out > 0 ? s * 2.6 : -s * 0.6), t.at.y + s * 0.75, t.at.z + s * 0.18, '#3a3d42');
-    t.muzzle = new THREE.Vector3(t.at.x + out * s * 2.6, t.at.y + s * 0.6, t.at.z);
-  }
-  group.add(...tv.build().children);
-  const bbox = new THREE.Box3().setFromObject(group);
-  return { group, bbox, turrets: ship.turrets, engines: ship.engines, hull: ship.hull, deckColor: ship.deckColor };
+  const b = new Builder(rand);
+  const ship = side === SIDES.empire ? dagger(b, cls, W, D, rand) : cls === 'large' ? monCalamari(b, W, D, rand) : cls === 'medium' ? nebulonB(b, W, D, rand) : corvette(b, W, D, rand);
+  const group = b.build();
+  return { group, bbox: new THREE.Box3().setFromObject(group), turrets: ship.turrets, engines: ship.engines, hull: ship.hull, name: SHIP_NAMES[side][ship.kind ?? cls] };
 }
 
-const MIN_WIDTH = { small: 28, medium: 52, large: 86 };
+// --- the Empire: daggers ------------------------------------------------------------------
 
-function turretsAlong(list, W, D, ledge, y, perSide, size) {
-  for (let i = 0; i < perSide; i++) {
-    const z = D * ((i + 0.5) / perSide);
-    list.push({ at: new THREE.Vector3(-ledge * 0.55, y, z), out: -1, size });
-    list.push({ at: new THREE.Vector3(W + ledge * 0.55, y, z), out: 1, size });
-  }
-}
-
-// --- the Empire ---------------------------------------------------------------------------
-
-function empireShip(v, cls, W, D, rand) {
-  const grey = '#a7abb1';
-  const dark = '#7d8288';
-  const ledge = cls === 'large' ? 7 : 5;
-  const HW = snap(Math.max(W + ledge * 2, MIN_WIDTH[cls]));
+function dagger(b, cls, W, D, rand) {
+  const m = { small: 4, medium: 6, large: 8 }[cls];
+  const isSuper = cls === 'large' && D / Math.max(W, 1) > 3.2;
+  const ratio = isSuper ? 0.2 : { small: 0.5, medium: 0.56, large: 0.62 }[cls]; // width over length
+  const sFrac = isSuper ? 0.07 : { small: 0.09, medium: 0.13, large: 0.17 }[cls]; // superstructure astern of the deck
+  const minL = { small: 70, medium: 120, large: 190 }[cls];
+  // The flat top is a triangle inset from the hull edge; the deck must fit inside it, ahead of the superstructure.
+  const fits = (L) => {
+    const zt = 0.06 * L;
+    const zr = L - sFrac * L - 1;
+    const zf = zr - D;
+    if (zf < zt + 2) return false;
+    return 0.82 * ((ratio * L) / 2) * ((zf - zt) / (L - zt)) >= W / 2 + m;
+  };
+  let L = Math.max(minL, (D + 3) / (0.9 - sFrac));
+  while (!fits(L)) L *= 1.04;
+  const halfW = (ratio * L) / 2;
+  const zf = L - sFrac * L - 1 - D; // the deck's front, measured from the tip
+  const tip = -zf; // so the deck's front is at deck-local z = 0
+  const rear = L - zf;
   const cx = W / 2;
-  const T = snap(4 + HW * (cls === 'large' ? 0.14 : 0.1)); // hull thickness
-  const bowLen = HW * (cls === 'small' ? 0.75 : 0.95);
-  const tip = -bowLen - 2;
-  const rearLen = { small: 9, medium: 15, large: 24 }[cls];
-  const zEnd = D + rearLen;
-  const maxW = HW * (cls === 'large' ? 1.3 : 1.15);
-  const STEP = 3;
-  let widest = HW;
-  for (let z = tip; z < zEnd; z += STEP) {
-    const zm = z + STEP / 2;
-    let w = zm < 0 ? (HW * (zm - tip)) / -tip : Math.min(maxW, HW + (zm * (maxW - HW)) / Math.max(D + rearLen, 1));
-    w = snap(w);
-    widest = Math.max(widest, w);
-    // The upper wedge, its top just under the deck; the lower wedge narrower: the Star Destroyer's double hull.
-    v.box(cx - w / 2, -T * 0.55, z, cx + w / 2, -0.12, z + STEP, grey);
-    v.box(cx - (w * 0.7) / 2, -T, z, cx + (w * 0.7) / 2, -T * 0.55, z + STEP, dark);
-    // The seam between the two wedges.
-    v.box(cx - w / 2 + 0.3, -T * 0.6, z, cx + w / 2 - 0.3, -T * 0.5, z + STEP, '#5d6167', { vary: 0 });
-    // Greebles on the hull top outside the deck: the city-like surface.
-    if (zm < -1 || zm > D + 1 || w > W + 2) {
-      const n = Math.floor(w / 16);
-      for (let i = 0; i < n; i++) {
-        const x = cx - w / 2 + 1 + rand() * (w - 2);
-        if (zm >= 0 && zm <= D && x > -0.5 && x < W + 0.5) continue; // never on the deck
-        const s = 0.6 + rand() * 1.4;
-        v.box(x - s / 2, -0.12, zm - s / 2, x + s / 2, -0.12 + 0.4 + rand() * 0.9, zm + s / 2, rand() < 0.5 ? grey : dark);
-      }
+  const T = L * (isSuper ? 0.045 : { small: 0.1, medium: 0.11, large: 0.115 }[cls]); // hull depth
+  const top = -0.15;
+  const mid = -T * 0.42;
+  const bot = -T;
+  const zAt = (k) => tip + k * L;
+  // The hull: flat top, sharp equator, narrower keel.
+  b.loft(
+    [
+      [V(cx, top, zAt(0.06)), V(cx + halfW * 0.82, top, rear), V(cx - halfW * 0.82, top, rear)],
+      [V(cx, mid, tip), V(cx + halfW, mid, rear), V(cx - halfW, mid, rear)],
+      [V(cx, bot, zAt(0.18)), V(cx + halfW * 0.42, bot, rear), V(cx - halfW * 0.42, bot, rear)]
+    ],
+    material('imperial')
+  );
+  // The equator trim and the centre trench ahead of the deck.
+  b.loft(
+    [
+      [V(cx, mid + 0.25, tip - 0.2), V(cx + halfW + 0.2, mid + 0.25, rear), V(cx - halfW - 0.2, mid + 0.25, rear)],
+      [V(cx, mid - 0.25, tip - 0.2), V(cx + halfW + 0.2, mid - 0.25, rear), V(cx - halfW - 0.2, mid - 0.25, rear)]
+    ],
+    material('imperialDark')
+  );
+  if (zAt(0.06) < -4) b.box(cx - Math.max(0.6, W * 0.04), top - 0.3, zAt(0.1), cx + Math.max(0.6, W * 0.04), top + 0.05, -2, material('imperialDark'));
+  // The superstructure astern: stepped tiers, then the bridge tower, its bridge and two shield domes.
+  const z0 = D + 1;
+  const z1 = rear - 0.5;
+  const hwAt = (z) => 0.82 * halfW * ((z - zAt(0.06)) / (rear - zAt(0.06)));
+  const tiers = { small: 1, medium: 2, large: 3 }[cls] + (isSuper ? 0 : 0);
+  let w = hwAt(z0) * 1.5;
+  let y = top;
+  let tz = z0;
+  const tierH = Math.max(1.2, T * (isSuper ? 0.25 : 0.14));
+  for (let i = 0; i < tiers; i++) {
+    b.box(cx - w / 2, y, tz, cx + w / 2, y + tierH, z1, material(i % 2 ? 'imperialDark' : 'imperial'));
+    // Lit window rows along each tier's sides.
+    for (let k = 0; k < 6; k++) {
+      const wz = tz + ((z1 - tz) * (k + 0.5)) / 6;
+      for (const sx of [-1, 1]) b.box(cx + sx * (w / 2 + 0.02) - 0.05, y + tierH * 0.45, wz - 0.4, cx + sx * (w / 2 + 0.02) + 0.05, y + tierH * 0.6, wz + 0.4, material('window'));
     }
+    y += tierH;
+    w *= 0.62;
+    tz += (z1 - tz) * 0.25;
   }
-  // The superstructure astern of the deck.
   if (cls !== 'small') {
-    const z0 = D + 1;
-    const z1 = zEnd - 2;
-    const w1 = snap(HW * 0.5);
-    v.box(cx - w1 / 2, -0.12, z0, cx + w1 / 2, 3, z1, grey);
-    const w2 = snap(w1 * 0.6);
-    v.box(cx - w2 / 2, 3, z0 + 2, cx + w2 / 2, 6, z1, dark);
-    // The bridge tower and its wide flat bridge.
-    const towerH = cls === 'large' ? 11 : 7;
-    v.box(cx - 1.5, 6, z1 - 6, cx + 1.5, towerH, z1 - 2, grey);
-    const bw = cls === 'large' ? HW * 0.32 : HW * 0.2;
-    v.box(cx - bw / 2, towerH, z1 - 6.5, cx + bw / 2, towerH + 2, z1 - 1.5, grey);
-    v.box(cx - bw / 2 + 0.5, towerH + 0.6, z1 - 6.6, cx + bw / 2 - 0.5, towerH + 1.2, z1 - 6.4, '#cfe8ff', { glow: true, vary: 0 }); // bridge windows
+    const neckW = Math.max(1.4, halfW * 0.08);
+    const neckH = T * (isSuper ? 0.5 : 0.32);
+    const bz0 = z1 - Math.max(4, (z1 - z0) * 0.35);
+    b.box(cx - neckW / 2, y, bz0 + 0.5, cx + neckW / 2, y + neckH, z1 - 0.5, material('imperial'));
+    const bridgeW = Math.max(6, halfW * (isSuper ? 0.5 : 0.42));
+    const bridgeH = Math.max(1, T * 0.09);
+    const by = y + neckH;
+    b.box(cx - bridgeW / 2, by, bz0, cx + bridgeW / 2, by + bridgeH, z1, material('imperial'));
+    b.box(cx - bridgeW / 2 + 0.3, by + bridgeH * 0.35, bz0 - 0.06, cx + bridgeW / 2 - 0.3, by + bridgeH * 0.6, bz0, material('bridge'));
     if (cls === 'large') {
       for (const sx of [-1, 1]) {
-        const dx = cx + sx * (bw / 2 - 1.5);
-        v.box(dx - 1.4, towerH + 2, z1 - 5, dx + 1.4, towerH + 4.6, z1 - 2.4, '#b8bcc2'); // the shield domes, in blocks
-        v.box(dx - 0.9, towerH + 4.6, z1 - 4.5, dx + 0.9, towerH + 5.3, z1 - 2.9, '#b8bcc2');
+        const dr = Math.max(0.9, bridgeH * 0.95);
+        const dx = cx + sx * (bridgeW / 2 - dr * 1.3);
+        b.cylinder(V(dx, by + bridgeH, (bz0 + z1) / 2), V(dx, by + bridgeH + dr * 0.6, (bz0 + z1) / 2), dr * 0.3, dr * 0.3, material('imperial'), 8);
+        b.sphere(V(dx, by + bridgeH + dr * 1.3, (bz0 + z1) / 2), dr, material('imperial'));
       }
     }
   }
-  // Engines on the stern: blocks with glowing faces.
+  // Engines on the stern, glowing blue.
   const engines = [];
   const big = { small: 2, medium: 3, large: 3 }[cls];
-  const es = snap(T * (cls === 'large' ? 0.62 : 0.55));
-  const wEnd = snap(Math.min(maxW, HW + ((D + rearLen) * (maxW - HW)) / Math.max(D + rearLen, 1)));
+  const r = Math.min(halfW * (isSuper ? 0.16 : 0.11), T * 0.28);
   for (let i = 0; i < big; i++) {
-    const x = cx + (i - (big - 1) / 2) * (es * 1.5);
-    const y = -T * 0.42;
-    v.box(x - es / 2, y - es / 2, zEnd, x + es / 2, y + es / 2, zEnd + 2, '#6c7076');
-    v.box(x - es * 0.38, y - es * 0.38, zEnd + 2, x + es * 0.38, y + es * 0.38, zEnd + 2.3, '#bfe6ff', { glow: true, vary: 0 });
-    engines.push({ at: new THREE.Vector3(x, y, zEnd + 2.6), size: es * 2.6, color: '#7cc8ff' });
+    const x = cx + (i - (big - 1) / 2) * r * 2.6;
+    const at = b.engine(x, mid + T * 0.05, rear - r, rear + r * 0.9, r, material('glowBlue'));
+    engines.push({ at, size: r * 2.8, color: '#5fb4ff' });
   }
-  if (cls === 'large') {
+  const small = cls === 'small' ? 0 : 2;
+  for (let s = 1; s <= small; s++) {
     for (const sx of [-1, 1]) {
-      for (const k of [1.4, 2.3]) {
-        const x = cx + sx * es * k * 1.1;
-        const y = -T * 0.78;
-        v.box(x - es * 0.22, y - es * 0.22, zEnd - 1, x + es * 0.22, y + es * 0.22, zEnd + 1.2, '#bfe6ff', { glow: true, vary: 0 });
-        engines.push({ at: new THREE.Vector3(x, y, zEnd + 1.5), size: es * 1.2, color: '#7cc8ff' });
-      }
+      const x = cx + sx * ((big - 1) / 2 * r * 2.6 + r * 1.6 + (s - 1) * r * 1.3);
+      const at = b.engine(x, mid - T * 0.08, rear - r * 0.6, rear + r * 0.5, r * 0.45, material('glowBlue'));
+      engines.push({ at, size: r * 1.4, color: '#5fb4ff' });
     }
   }
+  // Turbolaser turrets along both top edges, beside the deck.
   const turrets = [];
-  turretsAlong(turrets, W, D, Math.max(ledge, (HW - W) / 2), -0.12, { small: 2, medium: 3, large: 4 }[cls], cls === 'large' ? 1.3 : 1);
-  return {
-    turrets,
-    engines,
-    turretColor: '#8d9298',
-    deckColor: '#4a4f57',
-    hull: { x0: cx - widest / 2, x1: cx + widest / 2, y0: -T, y1: -0.5, z0: tip * 0.5, z1: zEnd }
-  };
+  const per = { small: 3, medium: 5, large: 7 }[cls];
+  const ts = Math.max(0.7, Math.min(2.4, T * 0.07));
+  for (let i = 0; i < per; i++) {
+    const z = D * ((i + 0.5) / per);
+    const hw = hwAt(z);
+    for (const sx of [-1, 1]) {
+      const x = cx + sx * Math.max(W / 2 + ts * 1.5, hw - ts * 1.6);
+      turrets.push({ muzzle: b.turret(V(x, top, z), ts, sx) });
+    }
+  }
+  // Rows of lit windows along the equator.
+  const nWin = Math.floor(L / 6);
+  for (let i = 0; i < nWin; i++) {
+    const k = 0.15 + 0.82 * rand();
+    const z = tip + k * L;
+    const hw = halfW * k;
+    for (const sx of [-1, 1]) {
+      if (rand() < 0.4) continue;
+      const x = cx + sx * (hw - 0.1);
+      b.box(x - 0.08, mid + 0.4, z - 0.3, x + 0.08, mid + 0.65, z + 0.3, material('window'));
+    }
+  }
+  return { kind: isSuper ? 'super' : cls, turrets, engines, hull: { x0: cx - halfW, x1: cx + halfW, y0: bot, y1: mid + 0.5, z0: tip + L * 0.3, z1: rear } };
 }
 
 // --- the Rebels ---------------------------------------------------------------------------
 
-function rebelShip(v, cls, W, D, rand) {
-  if (cls === 'large') return monCalamari(v, W, D, rand);
-  if (cls === 'medium') return nebulonB(v, W, D, rand);
-  return corvette(v, W, D, rand);
-}
-
-function monCalamari(v, W, D, rand) {
-  const body = '#8a95a6';
-  const dark = '#6b7586';
-  const ledge = 7;
-  const HW = Math.max(W + ledge * 2, MIN_WIDTH.large);
+function monCalamari(b, W, D, rand) {
+  const m = 6;
+  const Wp = W + 2 * m;
+  const Dp = D + 2 * m;
+  // The hull is an ellipsoid with its top sliced flat for the deck; the deck rectangle's corners touch the slice.
+  const cut = 0.893; // the slice's size against the ellipsoid's, with the centre 0.45 of the height below it
+  // 1.15 more across and 1.1 more along: room for the bulges and the tapered stern.
+  let rx = ((Wp / 2) * Math.SQRT2 / cut) * 1.15;
+  let rz = ((Dp / 2) * Math.SQRT2 / cut) * 1.1;
+  rz = Math.max(rz, rx * 2.1, 55);
+  rx = Math.max(rx, 22);
+  const ry = rx * 0.55;
   const cx = W / 2;
-  const zc = D / 2;
-  const h = D / 2 + 6;
-  const a = h / 0.8; // the hull's half-length: the deck's ends sit where the hull is still HW wide
-  const b = HW / 2 / Math.sqrt(1 - 0.64);
-  const T = snap(8 + HW * 0.12);
-  const STEP = 3;
-  let widest = 0;
-  for (let z = zc - a; z < zc + a; z += STEP) {
-    const zm = z + STEP / 2;
-    const k = Math.max(0, 1 - ((zm - zc) / a) ** 2);
-    const half = b * Math.sqrt(k);
-    if (half < 1) continue;
-    widest = Math.max(widest, half * 2);
-    // Rounded belly: layers narrowing as they go down.
-    const layers = 4;
-    for (let l = 0; l < layers; l++) {
-      const f = Math.sqrt(1 - (l / layers) ** 2);
-      const hw = snap(half * f * 2) / 2;
-      v.box(cx - hw, -((l + 1) * T) / layers, z, cx + hw, l === 0 ? -0.12 : -(l * T) / layers, z + STEP, l % 2 ? dark : body);
-    }
-    // Lumps and bulges along the sides: the organic Mon Calamari hull.
-    if (rand() < 0.55) {
-      const sx = rand() < 0.5 ? -1 : 1;
-      const s = 1.5 + rand() * 3;
-      const x = cx + sx * (half - s * 0.3);
-      v.box(x - s / 2, -T * 0.5 - s / 2, zm - s, x + s / 2, -T * 0.5 + s / 2, zm + s, rand() < 0.5 ? body : dark);
-    }
-    // Lit portholes along the sides.
-    if (rand() < 0.35) {
-      for (const sx of [-1, 1]) v.box(cx + sx * half - 0.2, -T * 0.35, zm - 0.4, cx + sx * half + 0.2, -T * 0.28, zm + 0.4, '#fff2b0', { glow: true, vary: 0 });
+  const cz = D / 2;
+  const cy = -0.15 - ry * 0.45;
+  const top = -0.15;
+  const g = new THREE.SphereGeometry(1, 64, 32);
+  const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
+    // Organic bulges, and a slightly fuller bow and a tapered stern.
+    const bulge = 1 + 0.05 * Math.sin(z * 9 + x * 3) * Math.cos(y * 4) + 0.035 * Math.sin(z * 23);
+    const taper = z > 0 ? 1 - 0.18 * z * z : 1;
+    let X = x * rx * bulge * taper, Y = y * ry * bulge, Z = z * rz;
+    Y = Math.min(Y + cy, top);
+    p.setXYZ(i, X + cx, Y, Z + cz);
+  }
+  g.computeVertexNormals();
+  b.add(g, material('monCal'), null, { smooth: true });
+  // Pods and ridges along the flanks.
+  const pods = 4 + Math.floor(rand() * 4);
+  for (let i = 0; i < pods; i++) {
+    const k = -0.7 + 1.4 * ((i + 0.5) / pods);
+    const z = cz + k * rz;
+    const halfAt = rx * Math.sqrt(Math.max(0.05, 1 - k * k)) * 0.95;
+    for (const sx of [-1, 1]) {
+      if (rand() < 0.3) continue;
+      const s = rx * (0.12 + rand() * 0.1);
+      b.sphere(V(cx + sx * halfAt, cy + ry * 0.1, z), s, material('monCalDark'), V(1, 0.7, 2.2), 14);
     }
   }
-  const zEnd = zc + a;
+  // A dorsal ridge astern of the deck, and lit windows in bands along the sides.
+  b.sphere(V(cx, top, cz + rz * 0.72), rx * 0.18, material('monCalDark'), V(1, 0.9, 2.4), 14);
+  for (let i = 0; i < Math.floor(rz / 2.5); i++) {
+    const k = -0.85 + 1.7 * rand();
+    const z = cz + k * rz;
+    const band = rand() < 0.5 ? 0.15 : -0.25;
+    const halfAt = rx * Math.sqrt(Math.max(0, 1 - k * k)) * Math.sqrt(Math.max(0, 1 - band * band));
+    if (halfAt < 2) continue;
+    for (const sx of [-1, 1]) if (rand() < 0.6) b.box(cx + sx * halfAt - 0.08, cy + band * ry, z - 0.35, cx + sx * halfAt + 0.08, cy + band * ry + 0.3, z + 0.35, material('window'));
+  }
+  // A ring of engines at the stern.
   const engines = [];
   const ring = 7;
-  const r = Math.min(b * 0.35, T * 0.9);
+  const er = Math.min(rx * 0.075, ry * 0.2);
+  const sz = cz + rz * 0.93;
   for (let i = 0; i < ring; i++) {
-    const ang = (i / ring) * Math.PI * 2;
-    const x = cx + Math.cos(ang) * r;
-    const y = -T * 0.5 + Math.sin(ang) * r * 0.5;
-    const s = T * 0.22;
-    v.box(x - s, y - s, zEnd - 6, x + s, y + s, zEnd + 0.5, '#5d6676');
-    v.box(x - s * 0.7, y - s * 0.7, zEnd + 0.5, x + s * 0.7, y + s * 0.7, zEnd + 0.8, '#d6f0ff', { glow: true, vary: 0 });
-    engines.push({ at: new THREE.Vector3(x, y, zEnd + 1.2), size: s * 4.5, color: '#8fd3ff' });
+    const a = (i / ring) * Math.PI * 2;
+    const x = cx + Math.cos(a) * rx * 0.26;
+    const y = cy + Math.sin(a) * ry * 0.35;
+    const at = b.engine(x, y, sz - er * 3, sz + er * 0.8, er, material('glowBlue'), material('monCalDark'));
+    engines.push({ at, size: er * 2.8, color: '#6fc4ff' });
   }
   const turrets = [];
-  turretsAlong(turrets, W, D, Math.max(ledge, (HW - W) / 2) * 0.8, -0.12, 4, 1.3);
-  return { turrets, engines, turretColor: '#9aa4b3', deckColor: '#525a66', hull: { x0: cx - widest / 2, x1: cx + widest / 2, y0: -T, y1: -0.5, z0: zc - a * 0.8, z1: zEnd } };
+  for (let i = 0; i < 6; i++) {
+    const z = D * ((i + 0.5) / 6);
+    const k = (z - cz) / rz;
+    const halfTop = rx * cut * Math.sqrt(Math.max(0, 1 - k * k));
+    for (const sx of [-1, 1]) turrets.push({ muzzle: b.turret(V(cx + sx * Math.max(W / 2 + 2, halfTop - 2), top, z), 1.3, sx) });
+  }
+  return { turrets, engines, hull: { x0: cx - rx, x1: cx + rx, y0: cy - ry * 0.8, y1: cy + ry * 0.2, z0: cz - rz * 0.7, z1: cz + rz * 0.8 } };
 }
 
-function nebulonB(v, W, D, rand) {
-  const white = '#dcd8cf';
-  const grey = '#b9b5ad';
-  const red = '#a8352d';
-  const ledge = 5;
-  const HW = snap(Math.max(W + ledge * 2, MIN_WIDTH.medium));
+function nebulonB(b, W, D, rand) {
+  const m = 4;
+  const Wf = Math.max(W + 2 * m, 24);
+  const Lf = Math.max(D + 2 * m, Wf * 1.45);
+  const Hf = Wf * 0.36;
   const cx = W / 2;
-  const T = snap(5 + HW * 0.09);
-  const bow = HW * 0.4;
-  const STEP = 3;
-  // The front hull, holding the deck, its bow tapering.
-  for (let z = -bow - 2; z < D + 3; z += STEP) {
-    const zm = z + STEP / 2;
-    const w = snap(zm < 0 ? HW * (0.55 + (0.45 * (zm + bow + 2)) / (bow + 2)) : HW);
-    v.box(cx - w / 2, -T * 0.6, z, cx + w / 2, -0.12, z + STEP, white);
-    v.box(cx - w * 0.4, -T, z, cx + w * 0.4, -T * 0.6, z + STEP, grey);
-    v.box(cx - w / 2 - 0.05, -T * 0.42, z, cx - w / 2 + 0.3, -T * 0.3, z + STEP, red, { vary: 0 }); // the red stripe
-    v.box(cx + w / 2 - 0.3, -T * 0.42, z, cx + w / 2 + 0.05, -T * 0.3, z + STEP, red, { vary: 0 });
-  }
-  // The thin neck, stepping down as it goes aft.
-  const neck = Math.max(26, D * 0.45);
-  const zN0 = D + 3;
-  for (let i = 0, z = zN0; z < zN0 + neck; z += STEP, i++) {
-    const drop = Math.min(T * 0.8, i * 0.4);
-    v.box(cx - 1.4, -T * 0.55 - drop, z, cx + 1.4, -T * 0.55 - drop + 2.4, z + STEP, grey);
-  }
-  // The engine block, taller than the hull.
-  const zE0 = zN0 + neck;
-  const zEnd = zE0 + 12;
-  const ew = snap(HW * 0.45);
-  v.box(cx - ew / 2, -T * 2, zE0, cx + ew / 2, T * 0.5, zEnd, white);
-  v.box(cx - ew / 2 - 0.1, -T * 0.9, zE0, cx + ew / 2 + 0.1, -T * 0.7, zEnd, red, { vary: 0 });
+  const zf0 = D / 2 - Lf / 2;
+  const zf1 = zf0 + Lf;
+  const top = -0.15;
+  const cy = top - Hf / 2;
+  // The front hull, its bow sloping down, a command tower ahead of the deck.
+  b.rounded(Wf, Hf, Lf, cx, cy, (zf0 + zf1) / 2, material('rebelHull'), Hf * 0.25);
+  b.loft(
+    [
+      [V(cx - Wf / 2, top, zf0 + 0.5), V(cx + Wf / 2, top, zf0 + 0.5), V(cx + Wf / 2, top - Hf, zf0 + 0.5), V(cx - Wf / 2, top - Hf, zf0 + 0.5)],
+      [V(cx - Wf * 0.3, top - Hf * 0.45, zf0 - Lf * 0.16), V(cx + Wf * 0.3, top - Hf * 0.45, zf0 - Lf * 0.16), V(cx + Wf * 0.3, top - Hf * 0.95, zf0 - Lf * 0.16), V(cx - Wf * 0.3, top - Hf * 0.95, zf0 - Lf * 0.16)]
+    ],
+    material('rebelHull')
+  );
+  if (zf0 < -3) b.rounded(Wf * 0.3, Hf * 0.5, Math.min(-zf0 - 1, Lf * 0.12), cx, top + Hf * 0.2, zf0 + Math.min(-zf0 - 1, Lf * 0.12) / 2 + 0.5, material('rebelGrey'));
+  for (const sx of [-1, 1]) b.box(cx + sx * (Wf / 2) - 0.12, cy - Hf * 0.1, zf0 + 1, cx + sx * (Wf / 2) + 0.12, cy + Hf * 0.12, zf1 - 1, material('rebelRed'));
+  // The spar, climbing astern to the engine block.
+  const spar = Lf * 1.05;
+  const rise = Hf * 1.2;
+  b.cylinder(V(cx, cy, zf1 - 2), V(cx, cy + rise, zf1 + spar), Wf * 0.07, Wf * 0.06, material('rebelGrey'), 6);
+  const ez0 = zf1 + spar - 2;
+  const eL = Lf * 0.4;
+  const eW = Wf * 0.62;
+  const eH = Hf * 2.1;
+  const ey = cy + rise;
+  b.rounded(eW, eH, eL, cx, ey, ez0 + eL / 2, material('rebelHull'), eW * 0.08);
+  b.box(cx - eW / 2 - 0.1, ey - eH * 0.08, ez0 + 0.5, cx + eW / 2 + 0.1, ey + eH * 0.08, ez0 + eL - 0.5, material('rebelRed'));
   const engines = [];
-  for (let r = 0; r < 2; r++) {
-    for (let c = 0; c < 3; c++) {
-      const x = cx + (c - 1) * (ew / 3.2);
-      const y = -T * 1.5 + r * T * 1.2;
-      const s = Math.min(ew / 8, T * 0.4);
-      v.box(x - s, y - s, zEnd, x + s, y + s, zEnd + 0.3, '#ffb27a', { glow: true, vary: 0 });
-      engines.push({ at: new THREE.Vector3(x, y, zEnd + 0.8), size: s * 4.5, color: '#ff8a4a' });
-    }
+  const er = Math.min(eW * 0.16, eH * 0.17);
+  const spots = [[-0.55, 0.45, 1.25], [0.55, 0.45, 1.25], [-0.6, -0.4, 0.8], [0, -0.4, 0.8], [0.6, -0.4, 0.8]];
+  for (const [fx, fy, s] of spots) {
+    const at = b.engine(cx + fx * eW * 0.42, ey + fy * eH * 0.5, ez0 + eL - er, ez0 + eL + er * 0.6, er * s, material('glowOrange'));
+    engines.push({ at, size: er * s * 2.8, color: '#ff7a3a' });
   }
   // The pod hanging below on its strut.
-  const px = cx + HW * 0.32;
-  v.box(px - 1, -T * 1.6, D * 0.45, px + 1, -T * 0.9, D * 0.55 + 1, grey);
-  v.box(px - HW * 0.12, -T * 2.6, D * 0.2, px + HW * 0.12, -T * 1.6, D * 0.8 + 2, white);
+  const px = cx + Wf * 0.3;
+  b.box(px - Wf * 0.04, cy - Hf * 1.4, D * 0.4, px + Wf * 0.04, cy - Hf * 0.4, D * 0.55, material('rebelGrey'));
+  b.rounded(Wf * 0.32, Hf * 0.7, Lf * 0.55, px, cy - Hf * 1.75, D * 0.48, material('rebelHull'));
   const turrets = [];
-  turretsAlong(turrets, W, D, Math.max(ledge, (HW - W) / 2), -0.12, 3, 1);
-  return { turrets, engines, turretColor: '#c9c5bc', deckColor: '#5a5650', hull: { x0: cx - HW / 2, x1: cx + HW / 2, y0: -T, y1: -0.5, z0: -bow * 0.5, z1: D + 3 } };
+  for (let i = 0; i < 4; i++) {
+    const z = D * ((i + 0.5) / 4);
+    for (const sx of [-1, 1]) turrets.push({ muzzle: b.turret(V(cx + sx * (Wf / 2 - 1.4), top, z), 1, sx) });
+  }
+  for (let i = 0; i < Lf / 3; i++) {
+    const z = zf0 + 2 + rand() * (Lf - 4);
+    for (const sx of [-1, 1]) if (rand() < 0.5) b.box(cx + sx * (Wf / 2) - 0.14, cy + Hf * 0.22, z - 0.3, cx + sx * (Wf / 2) + 0.14, cy + Hf * 0.32, z + 0.3, material('window'));
+  }
+  return { turrets, engines, hull: { x0: cx - Wf / 2, x1: cx + Wf / 2, y0: top - Hf, y1: top - 0.5, z0: zf0, z1: zf1 } };
 }
 
-function corvette(v, W, D, rand) {
-  const cream = '#e6e1d4';
-  const red = '#b3342b';
-  const grey = '#bdb8ac';
-  const ledge = 4;
-  const HW = snap(Math.max(W + ledge * 2, MIN_WIDTH.small));
+function corvette(b, W, D, rand) {
+  const m = 3;
+  const Wb = Math.max(W + 2 * m, 16);
+  const Lb = Math.max(D + 2 * m, Wb * 2.1);
+  const Hb = Wb * 0.42;
   const cx = W / 2;
-  const T = snap(4 + HW * 0.1);
-  const STEP = 3;
-  // The long body around the deck, with a red band along each side.
-  for (let z = -2; z < D + 2; z += STEP) {
-    v.box(cx - HW / 2, -T * 0.65, z, cx + HW / 2, -0.12, z + STEP, cream);
-    v.box(cx - HW * 0.38, -T, z, cx + HW * 0.38, -T * 0.65, z + STEP, grey);
-    v.box(cx - HW / 2 - 0.05, -T * 0.5, z, cx + HW / 2 + 0.05, -T * 0.38, z + STEP, red, { vary: 0 });
-  }
-  // The hammerhead bow and its cockpit.
-  const bow = snap(Math.max(8, HW * 0.3));
-  const hw = snap(HW * 1.25);
-  v.box(cx - hw / 2, -T * 0.9, -2 - bow, cx + hw / 2, 0.6, -2, cream);
-  v.box(cx - hw / 2, -T * 0.55, -2.4 - bow, cx + hw / 2, -T * 0.4, -2 - bow + 0.2, red, { vary: 0 });
-  v.box(cx - 2, 0.6, -bow - 1.5, cx + 2, 2.2, -bow + 2.5, grey);
-  v.box(cx - 1.6, 1.3, -bow - 1.6, cx + 1.6, 1.9, -bow - 1.45, '#cfe8ff', { glow: true, vary: 0 });
-  // The engine bank: taller and wider than the hull, a row of red engines across its stern.
-  const zE0 = D + 2;
-  const zEnd = zE0 + 12;
-  const ew = snap(HW * 1.15);
-  v.box(cx - ew / 2, -T * 1.3, zE0, cx + ew / 2, T * 0.45, zEnd, cream);
-  v.box(cx - ew / 2 - 0.05, -T * 0.5, zE0, cx + ew / 2 + 0.05, -T * 0.35, zEnd, red, { vary: 0 });
+  const top = -0.15;
+  const cy = top - Hb / 2;
+  const zb0 = D / 2 - Lb / 2;
+  const zb1 = zb0 + Lb;
+  // The long body, a red band along each side, and a dorsal turret behind the deck.
+  b.rounded(Wb, Hb, Lb, cx, cy, (zb0 + zb1) / 2, material('rebelHull'), Hb * 0.3);
+  for (const sx of [-1, 1]) b.box(cx + sx * Wb / 2 - 0.12, cy - Hb * 0.06, zb0 + 1, cx + sx * Wb / 2 + 0.12, cy + Hb * 0.08, zb1 - 1, material('rebelRed'));
+  // The hammerhead: a neck and the wide cockpit section, its windows looking ahead.
+  const neckL = Lb * 0.14;
+  b.cylinder(V(cx, cy, zb0 + 1), V(cx, cy, zb0 - neckL), Hb * 0.32, Hb * 0.3, material('rebelGrey'), 10);
+  const hL = Lb * 0.16;
+  const hz = zb0 - neckL - hL / 2;
+  b.rounded(Wb * 1.2, Hb * 0.75, hL, cx, cy, hz, material('rebelHull'), Hb * 0.2);
+  b.box(cx - Wb * 0.5, cy + Hb * 0.05, hz - hL / 2 - 0.06, cx + Wb * 0.5, cy + Hb * 0.18, hz - hL / 2 + 0.02, material('bridge'));
+  b.box(cx - Wb * 0.62, cy - Hb * 0.06, hz - hL / 2 + 0.5, cx + Wb * 0.62, cy + Hb * 0.06, hz + hL / 2 - 0.5, material('rebelRed'));
+  // The engine block, wider and taller than the body, eleven red engines in two banks.
+  const eL = Lb * 0.3;
+  const eW = Wb * 1.3;
+  const eH = Hb * 1.55;
+  const ez = zb1 + eL / 2 - 1;
+  b.rounded(eW, eH, eL, cx, cy, ez, material('rebelHull'), eH * 0.15);
+  b.box(cx - eW / 2 - 0.1, cy - eH * 0.05, ez - eL / 2 + 0.5, cx + eW / 2 + 0.1, cy + eH * 0.05, ez + eL / 2 - 0.5, material('rebelRed'));
   const engines = [];
-  const n = Math.max(3, Math.min(11, Math.floor(ew / 2.6)));
-  for (let i = 0; i < n; i++) {
-    const x = cx + (i - (n - 1) / 2) * (ew / n);
-    const y = -T * 0.42;
-    const s = Math.min(ew / n / 2.6, T * 0.45);
-    v.box(x - s, y - s * 1.6, zEnd, x + s, y + s * 1.6, zEnd + 0.3, '#ff9a7a', { glow: true, vary: 0 });
-    engines.push({ at: new THREE.Vector3(x, y, zEnd + 0.8), size: s * 5, color: '#ff5a3a' });
+  const er = Math.min(eW / 15, eH * 0.18);
+  const rows = [[6, 0.24], [5, -0.24]];
+  for (const [n, fy] of rows) {
+    for (let i = 0; i < n; i++) {
+      const x = cx + (i - (n - 1) / 2) * er * 2.35;
+      const at = b.engine(x, cy + fy * eH, ez + eL / 2 - er, ez + eL / 2 + er * 0.9, er, material('glowRed'));
+      engines.push({ at, size: er * 2.8, color: '#ff4a2a' });
+    }
   }
   const turrets = [];
-  turretsAlong(turrets, W, D, Math.max(ledge, (HW - W) / 2), -0.12, 2, 0.9);
-  return { turrets, engines, turretColor: '#d8d2c4', deckColor: '#5a5650', hull: { x0: cx - HW / 2, x1: cx + HW / 2, y0: -T, y1: -0.5, z0: -2, z1: zEnd } };
+  for (let i = 0; i < 3; i++) {
+    const z = D * ((i + 0.5) / 3);
+    for (const sx of [-1, 1]) turrets.push({ muzzle: b.turret(V(cx + sx * (Wb / 2 - 1), top, z), 0.8, sx) });
+  }
+  for (let i = 0; i < Lb / 2.5; i++) {
+    const z = zb0 + 1.5 + rand() * (Lb - 3);
+    for (const sx of [-1, 1]) if (rand() < 0.5) b.box(cx + sx * Wb / 2 - 0.13, cy + Hb * 0.18, z - 0.25, cx + sx * Wb / 2 + 0.13, cy + Hb * 0.27, z + 0.25, material('window'));
+  }
+  return { turrets, engines, hull: { x0: cx - Wb / 2, x1: cx + Wb / 2, y0: top - Hb, y1: top - 0.5, z0: zb0, z1: zb1 } };
 }
 
 // --- fighters -----------------------------------------------------------------------------
@@ -372,50 +586,66 @@ let fighterModels = null;
 
 /** The two fighter models, built once; each fighter is a clone (sharing geometry and material). */
 export function fighterModel(kind) {
-  if (!fighterModels) {
-    fighterModels = { tie: buildTie(), xwing: buildXwing() };
-  }
+  fighterModels ??= { tie: buildTie(), xwing: buildXwing() };
   return fighterModels[kind].clone();
 }
 
 function buildTie() {
-  const v = new Voxels(seeded('tie'));
-  v.box(-0.6, -0.6, -0.6, 0.6, 0.6, 0.6, '#4a4f58'); // the ball cockpit, in blocks
-  v.box(-0.45, -0.45, 0.6, 0.45, 0.45, 0.7, '#14171c', { vary: 0 }); // the window
-  v.box(-1.45, -0.18, -0.18, 1.45, 0.18, 0.18, '#3c4048'); // the wing struts
+  const b = new Builder(seeded('tie'));
+  b.sphere(V(0, 0, 0), 0.85, material('tieBody'), undefined, 18);
+  // The round window: a dark glass disc in a frame, looking ahead.
+  b.cylinder(V(0, 0, 0.7), V(0, 0, 0.86), 0.48, 0.48, material('canopy'), 8);
+  b.add(new THREE.TorusGeometry(0.48, 0.07, 6, 8), material('tieFrame'), new THREE.Matrix4().makeTranslation(0, 0, 0.86));
   for (const sx of [-1, 1]) {
-    v.box(sx * 1.45 - 0.08, -1.7, -1.4, sx * 1.45 + 0.08, 1.7, 1.4, '#2c3038'); // the wing
-    v.box(sx * 1.45 - 0.1, -1.2, -1.0, sx * 1.45 + 0.1, 1.2, 1.0, '#1b1e24', { vary: 0 }); // its dark panel
+    // The pylon to each wing, and the hexagonal wing: a dark panel in a frame, with spokes from its hub.
+    b.cylinder(V(sx * 0.7, 0, 0), V(sx * 2.0, 0, 0), 0.2, 0.16, material('tieBody'), 8);
+    const wing = new THREE.Matrix4().makeRotationZ(Math.PI / 2).premultiply(new THREE.Matrix4().makeTranslation(sx * 2.05, 0, 0));
+    b.add(new THREE.CylinderGeometry(2.5, 2.5, 0.07, 6), material('tieWing'), wing);
+    // The frame: a six-sided torus turned to lie on the wing, its corners on the wing's corners.
+    const rim = new THREE.Matrix4().makeRotationY(Math.PI / 2).premultiply(new THREE.Matrix4().makeTranslation(sx * 2.05, 0, 0));
+    b.add(new THREE.TorusGeometry(2.45, 0.13, 4, 6), material('tieFrame'), rim);
+    b.cylinder(V(sx * 1.95, 0, 0), V(sx * 2.15, 0, 0), 0.45, 0.45, material('tieFrame'), 6);
+    for (let k = 0; k < 6; k++) {
+      const a = (k / 6) * Math.PI * 2;
+      const end = V(sx * 2.1, Math.sin(a) * 2.4, Math.cos(a) * 2.4);
+      b.cylinder(V(sx * 2.1, 0, 0), end, 0.09, 0.09, material('tieFrame'), 4);
+    }
   }
-  v.box(-0.35, -0.2, -0.72, -0.1, 0.2, -0.62, '#ff6a4a', { glow: true, vary: 0 }); // twin ion engines
-  v.box(0.1, -0.2, -0.72, 0.35, 0.2, -0.62, '#ff6a4a', { glow: true, vary: 0 });
-  const g = v.build();
-  g.scale.setScalar(1.3);
+  b.box(-0.3, -0.18, -0.92, -0.08, 0.18, -0.8, material('glowRed'));
+  b.box(0.08, -0.18, -0.92, 0.3, 0.18, -0.8, material('glowRed'));
+  const g = b.build();
+  g.scale.setScalar(1.15);
+  g.userData.guns = [V(-0.35, -0.5, 0.9), V(0.35, -0.5, 0.9)];
   return g;
 }
 
 function buildXwing() {
-  const v = new Voxels(seeded('xwing'));
-  v.box(-0.4, -0.35, -2.1, 0.4, 0.35, 2.1, '#d9d8d2'); // fuselage
-  v.box(-0.25, -0.22, 2.1, 0.25, 0.22, 3.9, '#d9d8d2'); // nose
-  v.box(-0.22, 0.35, 0.3, 0.22, 0.65, 1.3, '#1d2230', { vary: 0 }); // canopy
-  v.box(-0.3, -0.36, 1.4, 0.3, -0.34, 2.6, '#b73a2f', { vary: 0 }); // nose stripe
-  const g = v.build();
-  // Four wings in an X: two above, two below, each tilted away from the fuselage.
+  const body = new Builder(seeded('xwing'));
+  body.rounded(0.95, 0.8, 2.8, 0, 0, -0.6, material('xwBody'), 0.15);
+  // The long nose, square in section and tapering, with a red stripe.
+  const nose = new THREE.CylinderGeometry(0.17, 0.5, 3.6, 4);
+  body.add(nose, material('xwBody'), new THREE.Matrix4().makeRotationY(Math.PI / 4).premultiply(new THREE.Matrix4().makeRotationX(Math.PI / 2)).premultiply(new THREE.Matrix4().makeTranslation(0, 0, 2.6)));
+  body.box(-0.25, 0.25, 1.2, 0.25, 0.3, 2.4, material('xwRed'));
+  body.rounded(0.55, 0.4, 1.1, 0, 0.45, 0.55, material('canopy'), 0.12);
+  body.sphere(V(0, 0.42, -0.45), 0.24, material('astromech'), V(1, 0.8, 1), 12);
+  const g = body.build();
+  // Four S-foils in attack position, each with its engine, cannon and red markings.
   for (const [sx, sy] of [[-1, 1], [1, 1], [-1, -1], [1, -1]]) {
-    const w = new Voxels(seeded(`xw${sx}${sy}`));
-    // Built on its own side (x times sx), not mirrored by a negative scale, which would turn the faces inside out.
-    const bx = (x0, y0, z0, x1, y1, z1, color, opts) => w.box(sx * x0, y0, z0, sx * x1, y1, z1, color, opts);
-    bx(0.3, -0.06, -1.6, 3.3, 0.06, -0.3, '#cfcec7'); // the wing
-    bx(2.2, -0.07, -1.61, 2.9, 0.07, -0.29, '#b73a2f', { vary: 0 }); // the red stripe
-    bx(3.2, -0.08, -1.2, 3.42, 0.08, 1.2, '#8c8c86'); // the laser cannon at the tip
-    bx(0.35, -0.25, -2.3, 0.85, 0.25, -0.9, '#8c8c86'); // the engine
-    bx(0.4, -0.2, -2.42, 0.8, 0.2, -2.3, '#ff7a4a', { glow: true, vary: 0 }); // its glow
+    const w = new Builder(seeded(`xw${sx}${sy}`));
+    const X = (x) => sx * x;
+    w.box(X(0.45), -0.05, -1.8, X(3.4), 0.05, -0.35, material('xwBody'));
+    w.box(X(2.3), -0.06, -1.81, X(2.9), 0.06, -0.34, material('xwRed'));
+    w.box(X(0.9), -0.06, -1.81, X(1.3), 0.06, -0.34, material('xwRed'));
+    w.cylinder(V(X(0.82), sy * 0.08, -2.3), V(X(0.82), sy * 0.08, -0.2), 0.34, 0.3, material('xwBody'), 12);
+    w.cylinder(V(X(0.82), sy * 0.08, -0.2), V(X(0.82), sy * 0.08, 0.05), 0.28, 0.28, material('xwDark'), 12);
+    w.cylinder(V(X(0.82), sy * 0.08, -2.36), V(X(0.82), sy * 0.08, -2.3), 0.26, 0.26, material('glowRed'), 12);
+    w.cylinder(V(X(3.42), 0, -1.4), V(X(3.42), 0, 1.6), 0.07, 0.06, material('xwDark'), 6);
+    w.cylinder(V(X(3.42), 0, 1.6), V(X(3.42), 0, 2.1), 0.11, 0.05, material('xwDark'), 6);
     const wing = w.build();
-    wing.rotation.z = sx * sy * 0.24;
-    wing.position.y = sy * 0.15;
+    wing.rotation.z = sx * sy * 0.22;
+    wing.position.y = sy * 0.12;
     g.add(wing);
   }
-  g.scale.setScalar(1.15);
+  g.userData.guns = [V(-3.35, 0.75, 2.1), V(3.35, 0.75, 2.1), V(-3.35, -0.75, 2.1), V(3.35, -0.75, 2.1)];
   return g;
 }

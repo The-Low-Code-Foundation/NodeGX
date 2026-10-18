@@ -5,6 +5,8 @@
 import { ProjectModel, MapRefusal } from '/core/model.mjs';
 import { MapView, shortType } from '/map3d.mjs';
 import { Music } from '/music.mjs';
+import { Sfx } from '/sfx.mjs';
+import { playCrawl, crawlOncePerSession } from '/crawl.mjs';
 
 const $ = (s) => document.querySelector(s);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -193,6 +195,7 @@ async function loadProject(payload) {
   renderPanel();
   updatePreview(true);
   ui.ready = true; // the map is drawn and can be used (tests wait for this)
+  if (!new URLSearchParams(location.search).has('nocrawl')) crawlOncePerSession(crawlInfo());
 }
 
 async function save() {
@@ -302,7 +305,10 @@ map.on('hover', (hit) => {
     return;
   }
   if (!hit?.card) {
-    el.hidden = true;
+    // Over a ship's hull or deck: which ship it is.
+    const ship = hit?.plate && map.plates.get(hit.plate)?.ship;
+    el.hidden = !ship;
+    if (ship) el.innerHTML = `${esc(hit.plate)} <span class="muted">${esc(ship.design.name)} · ${model.nodes(hit.plate).length} nodes</span>`;
     highlightInPreview();
     return;
   }
@@ -730,9 +736,33 @@ $('#btn-music').addEventListener('click', () => {
   music.toggle();
   showMusic();
 });
-// A browser only lets a page make sound after a click or a key: the first one starts the music.
+// The battle's sound effects: shots and explosions, fainter with distance from the camera.
+const sfx = new Sfx();
+map.battle.onSound = (kind, at, size) => sfx.play(kind, at.distanceTo(map.camera.position), typeof size === 'number' ? size : undefined);
+const showSfx = () => ($('#btn-sfx').textContent = sfx.on ? 'FX on' : 'FX off');
+showSfx();
+$('#btn-sfx').addEventListener('click', () => {
+  sfx.toggle();
+  showSfx();
+});
+
+// The opening crawl: once a session, and again whenever the project's name is clicked.
+const crawlInfo = () => {
+  let nodes = 0;
+  let wires = 0;
+  for (const k of model.keys()) {
+    nodes += model.nodes(k).length;
+    wires += model.wires(k).length;
+  }
+  return { name: ui.project?.name ?? 'Project', components: model.keys().length, nodes, wires, fleets: map.fleets };
+};
+$('#project-name').title = 'Play the opening crawl';
+$('#project-name').addEventListener('click', () => ui.project && playCrawl(crawlInfo()));
+
+// A browser only lets a page make sound after a click or a key: the first one starts the music and the effects.
 const firstGesture = () => {
   music.start();
+  sfx.start();
   window.removeEventListener('pointerdown', firstGesture, true);
   window.removeEventListener('keydown', firstGesture, true);
 };

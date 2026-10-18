@@ -14,7 +14,7 @@
   "wait": 5000
  },
  {
-  "waitFor": "__map.map.battle.blasts.length > 3 && __map.map.battle.bolts.length > 4",
+  "waitFor": "__map.map.battle.effects.length > 3 && __map.map.battle.bolts.length > 4",
   "timeout": 20000
  },
  {
@@ -31,7 +31,7 @@
   "shot": "battle-lane-2.png"
  },
  {
-  "waitFor": "__map.map.battle.blasts.some((x) => x.size > 15)",
+  "waitFor": "__map.map.battle.effects.length > 5",
   "timeout": 20000
  },
  {

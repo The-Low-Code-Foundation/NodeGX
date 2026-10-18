@@ -1,24 +1,31 @@
 # NodeGX map
 
-Your NodeGX app as a 3D map you fly through and rewire, set in space. Every component is a capital
-ship, and its nodes are the blocks on its deck, where the files put them. Each folder is a squadron,
-and the squadrons make up two fleets, the Empire and the Rebels. Both fleets fly ahead at one
-speed, their engines glowing astern and space dust streaming past, with a lane of open space between
-them.
+Your NodeGX app as a 3D map you fly through and rewire, set as a space battle. Every component is
+a capital ship, and its nodes are the blocks on its deck, where the files put them. Each folder is a
+squadron, and the squadrons make up two fleets, the Empire and the Rebels. Both fleets fly ahead at
+one speed with a lane of open space between them, their engines glowing astern and space dust
+streaming past. Behind them hang a battle station and a forest moon.
 
-The ships are built from blocks, Minecraft-style. A component with more nodes gets a bigger class of
-ship, and the hull is built around its deck, so a bigger component is a bigger ship:
+A component with more nodes gets a bigger class of ship. Each class keeps its real proportions, and
+the hull grows until the deck fits on top, so a bigger component is a bigger ship. Hulls are
+panel-plated, with lit windows, turbolaser turrets and engine nozzles:
 
 | | small | medium | large |
 |---|---|---|---|
-| Empire | light cruiser | Victory-style destroyer | Star Destroyer, with bridge tower and shield domes |
-| Rebels | Corellian corvette | Nebulon-B frigate | Mon Calamari cruiser |
+| Empire | Imperial light cruiser | Victory-class Star Destroyer | Imperial Star Destroyer (a long component gets a Super Star Destroyer) |
+| Rebels | Corellian corvette | Nebulon-B escort frigate | Mon Calamari cruiser |
 
-The capital ships trade turret fire across the lane: green bolts from the Empire, red from the
-Rebels. Hits burst on the hulls, but no capital ship is destroyed. TIE fighters and X-wings keep
-arriving out of hyperspace around the map, dogfight, and blow each other up. **Battle** (or B) turns
-the fighting off while you work. **♪** (or M) turns the music off: an original 90s-console-style
-march. Put a music file of your own in `editor/music/` and it plays instead.
+Hover a hull to see which ship it is. The capital ships trade turbolaser fire across the lane:
+green from the Empire, red from the Rebels. Hits burst on the hulls, but no capital ship is
+destroyed. TIE fighters and X-wings keep dropping out of hyperspace around the map. They bank into
+their turns, fire twin bolts, and go up in a fireball with a shockwave ring.
+
+- **Battle** (or B) turns the fighting off while you work.
+- **♪** (or M) turns the music off: an original 90s-console-style march. Put a music file of your
+  own in `editor/music/` and it plays instead.
+- **FX** turns the blaster, turbolaser and explosion sounds off.
+- The opening crawl plays once a browser session. Any key or click skips it, and clicking the
+  project's name replays it. Add `?nocrawl` to the address to skip it altogether.
 
 Each ship's deck works like a NodeGX canvas. As on a NodeGX card, a card has a row for
 each wired port, with a dot on its edge: inputs on the left, outputs on the right. Every wire leaves
@@ -116,9 +123,11 @@ against an editor started on a copy of the app.
 | `core/model.mjs` | the project in memory and the eight changes; the page and the suite both use it |
 | `core/commit.mjs` | validate, then write with each component's revision |
 | `public/map3d.mjs` | the 3D map (three.js) in the NodeGX canvas look (`@nodegx/canvas-look`): the fleet layout, decks, cards, wires |
-| `public/ships.mjs` | the block-built capital ships and fighters |
-| `public/space.mjs` | the nebula, stars, planet and streaming space dust |
-| `public/battle.mjs` | turret fire, hull hits, the fighters' dogfight |
+| `public/ships.mjs` | the capital ships and fighters, and their shared plated materials |
+| `public/space.mjs` | the stars, a faint nebula, the battle station, the forest moon, the streaming space dust |
+| `public/battle.mjs` | turbolaser fire, hull hits, the fighters' dogfight, hyperspace arrivals, explosions |
+| `public/sfx.mjs` | the blaster, turbolaser and explosion sounds (Web Audio) |
+| `public/crawl.mjs` | the opening crawl, written from the project's own numbers |
 | `public/music.mjs` | the chiptune march (Web Audio), or your own track from `music/` |
 | `public/app.mjs` | the panel, the running app (`@nodegx/preview`), save, watching the disk |
 | `suite/` | the editor suite's adapter, its control, and the edit script |

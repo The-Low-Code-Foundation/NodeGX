@@ -81,5 +81,22 @@ main { flex: 1; display: flex; min-height: 0; }
 #toast { position: fixed; right: 410px; bottom: 16px; max-width: 520px; background: #26303b; border: 1px solid var(--line); padding: 8px 12px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,.5); white-space: pre-wrap; }
 #toast.bad { background: #3a1916; border-color: #8f2a22; }
 #toast.good { background: #14301f; border-color: #1e9e63; }
+/* The opening crawl. */
+#crawl { position: fixed; inset: 0; z-index: 50; background: rgba(0, 0, 0, 0.82); overflow: hidden; transition: opacity 0.6s; font-family: 'Franklin Gothic Medium', 'Franklin Gothic', 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif; }
+#crawl.crawl-done { opacity: 0; pointer-events: none; }
+.crawl-intro { position: absolute; top: 40%; left: 18%; color: #4bd5ee; font-size: 2.4vw; line-height: 1.45; letter-spacing: 0.02em; opacity: 0; animation: crawl-intro 5s ease-in-out forwards; }
+@keyframes crawl-intro { 0% { opacity: 0; } 15% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+.crawl-logo { position: absolute; top: 50%; left: 50%; width: 90vw; text-align: center; color: #000; font-weight: 900; font-size: 11vw; line-height: 1; letter-spacing: -0.02em; -webkit-text-stroke: 0.35vw #ffe81f; opacity: 0; transform: translate(-50%, -50%) scale(1.6); animation: crawl-logo 8s linear 5.2s forwards; }
+@keyframes crawl-logo { 0% { opacity: 1; transform: translate(-50%, -50%) scale(1.6); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.03); } }
+.crawl-field { position: absolute; inset: 0; perspective: 340px; perspective-origin: 50% 30%; }
+.crawl-text { position: absolute; left: 50%; bottom: 0; width: 46vw; margin-left: -23vw; color: #ffe81f; font-size: 2.9vw; font-weight: 700; line-height: 1.4; text-align: justify; transform-origin: 50% 100%; transform: rotateX(28deg) translateY(110%); animation: crawl-scroll 62s linear 7s forwards; }
+.crawl-text p { margin: 0 0 1.1em; }
+.crawl-text .crawl-episode { text-align: center; text-transform: uppercase; font-size: 0.9em; margin-bottom: 0.2em; }
+.crawl-text .crawl-title { text-align: center; font-size: 1.9em; margin-bottom: 0.8em; }
+@keyframes crawl-scroll { from { transform: rotateX(28deg) translateY(110%); } to { transform: rotateX(28deg) translateY(-210%); } }
+.crawl-skip { position: absolute; right: 18px; bottom: 14px; color: #6b7280; font: 12px system-ui, sans-serif; }
+#project-name { cursor: pointer; }
+#project-name:hover { color: #ffe81f; }
+
 dialog { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 10px; }
 dialog menu { display: flex; justify-content: flex-end; gap: 8px; padding: 0; }
