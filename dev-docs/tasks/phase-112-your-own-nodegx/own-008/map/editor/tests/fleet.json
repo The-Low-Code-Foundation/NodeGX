@@ -1,0 +1,68 @@
+[
+ {
+  "waitFor": "window.__map?.ui.ready",
+  "timeout": 90000
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "label": "the fleet: ships per side and class",
+  "eval": "(() => { const out = {}; for (const p of __map.map.plates.values()) { const s = p.ship; const k = s.side + ' ' + s.cls; out[k] = (out[k] ?? 0) + 1; } return JSON.stringify({ ships: __map.map.plates.size, byKind: out, battleShips: __map.map.battle.ships.length }); })()"
+ },
+ {
+  "label": "every deck sits on its hull: deck inside the hull's footprint, hull top under the deck",
+  "eval": "(() => { const bad = []; for (const p of __map.map.plates.values()) { const deck = new __map.map.THREE.Box3().setFromObject(p.base); const hull = new __map.map.THREE.Box3().setFromObject(p.shipGroup); if (!(hull.min.x <= deck.min.x + 0.01 && hull.max.x >= deck.max.x - 0.01 && hull.min.z <= deck.min.z + 0.01 && hull.max.z >= deck.max.z - 0.01)) bad.push(p.key); } return JSON.stringify({ checked: __map.map.plates.size, outside: bad }); })()"
+ },
+ {
+  "shot": "fleet-overview.png"
+ },
+ {
+  "wait": 4000
+ },
+ {
+  "label": "the battle after 13 s",
+  "eval": "JSON.stringify(__map.map.battle.stats())"
+ },
+ {
+  "eval": "__map.map.flyToComponent('Pages/Todo'); 'ok'"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "shot": "fleet-ship.png"
+ },
+ {
+  "eval": "(() => { const m = __map.map; const p = m.plates.get('Commands/Add task'); const c = p.shipGroup.position.clone(); m.flyTo(new (m.camera.position.constructor)(c.x + 60, 40, c.z + 140), c); return 'ok'; })()"
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "shot": "fleet-small-ship.png"
+ },
+ {
+  "wait": 8000
+ },
+ {
+  "label": "the battle after 30 s",
+  "eval": "JSON.stringify(__map.map.battle.stats())"
+ },
+ {
+  "click": [
+   600,
+   500
+  ]
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "label": "music after the first click",
+  "eval": "JSON.stringify({ on: __map.music.on, playing: __map.music.playing, ctx: __map.music.ctx?.state, track: __map.music.trackName ?? null })"
+ },
+ {
+  "shot": "fleet-battle.png"
+ }
+]

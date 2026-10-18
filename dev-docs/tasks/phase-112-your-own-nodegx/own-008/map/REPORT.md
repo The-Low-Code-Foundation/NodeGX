@@ -210,3 +210,93 @@ The person played with the map and asked for four fixes. This round took about 1
 18. **The `pulsing` wire colour** is `#ffffff` in the dark theme and `#18212b` in the light one,
     which is the same in both kinds. I tinted it with each kind's `normal` colour, so a ball says
     signal or value. Is `pulsing` meant for something else, such as the wire line itself?
+
+## Third round: the map as a space battle
+
+The person asked for the map as a Star Wars space battle. This round took about 19 minutes
+(timestamped). None of it touches the format, the store or the save path: it is all scenery around
+the decks the nodes already sat on.
+
+### What changed
+
+- **Components are capital ships; nodes are the blocks on their decks.** Every plate is now the deck
+  of a ship built from blocks (Minecraft-style, on a 1.5-unit grid, so slopes come out as stairs).
+  The hull is built around and under the deck, so the cards, port dots, wires and every interaction
+  work exactly as before. Clicking a hull picks its component, like clicking the deck.
+- **Two fleets, three sizes each** (`public/ships.mjs`). Each folder is a squadron; each squadron
+  joins the side with fewer ships, biggest first. A ship's class comes from its component's node
+  count against the project's terciles. Its size also follows its deck, so a bigger component is a
+  bigger ship.
+  - Empire: a light cruiser (plain wedge), a Victory-style destroyer (wedge and low tower), and a
+    Star Destroyer (double wedge, stepped superstructure, bridge tower, two block shield domes,
+    three big and four small engines).
+  - Rebels: a Corellian corvette (hammerhead bow, a wall of red engines), a Nebulon-B frigate (front
+    hull, stepped neck, engine block, hanging pod, red stripe), and a Mon Calamari cruiser (rounded
+    lumpy hull, lit portholes, a ring of blue engines).
+
+  Each design is seeded by the component's key, so the same app always gets the same fleet. In
+  `todo-list` that is 44 Imperial and 36 Rebel ships, with every class on both sides.
+- **One speed, uneven spacing, glowing engines.** Both fleets fly ahead in formation. Each squadron
+  is a few columns of ships, one behind another, with random (seeded) gaps. The ships stay still
+  relative to each other, so editing a deck is unchanged. The motion is shown by space dust
+  streaming astern past the camera, and by flickering engine glows.
+- **Space** (`public/space.mjs`): a painted nebula sky, 5,000 tinted stars, and a ringed gas giant
+  with its own sun. They move with the camera, so they never get nearer. The ground grid is gone.
+- **The battle** (`public/battle.mjs`):
+  - The capital ships near the camera fire turret bolts (green for the Empire, red for the Rebels)
+    at one of the three nearest enemy ships, aimed at the side of its hull facing them. Hits burst
+    into a flash, a fireball and flying blocks. No capital ship is destroyed.
+  - Nine TIE fighters and nine X-wings are kept alive. Half arrive near where you're looking, with
+    a hyperspace flash. Each chases the nearest enemy fighter, fires when it is close and dead
+    ahead, and about one shot in six kills. The target then explodes, and a replacement arrives a
+    few seconds later.
+  - **Battle** (B) clears all of it and pauses it, for when it gets in the way of editing.
+- **Music** (`public/music.mjs`): an original march in G minor, played the way a 90s console would.
+  It has a square-wave lead, a triangle bass, a noise snare and a kick, made with Web Audio. It
+  starts on the first click or key, because browsers wait for one, and **♪** (M) turns it off.
+  - **I did not reproduce John Williams' Imperial March.** Its melody is copyrighted, and a
+    chiptune transcription is still a copy of it. So the built-in march is mine.
+  - Any audio file put in `editor/music/` (the server lists it at `/api/music`) plays on a loop
+    instead, so the person can use a track they own.
+- **Draw calls.** A labelled card is now two draw calls (its face, its sides), down from six, and a
+  far card is one with a shared material. On `todo-list`, draw calls went from 6,619 to 2,146.
+
+### How it was tested (fresh copies of `todo-list`, headless Chrome)
+
+- `tests/fleet.json`:
+  - 80 ships: 9 large, 9 medium and 26 small Imperial; 17 large, 2 medium and 17 small Rebel.
+  - Every deck sits inside its hull's footprint.
+  - The battle builds up: after 30 s, 17 fighters, 6 kills, and bolts and hull bursts in flight.
+  - After the first click, the music is playing (`AudioContext` running).
+- `tests/rebels.json`: close-ups of each Rebel class. **Battle** off cleared every bolt, burst and
+  fighter.
+- `tests/battle.json`: from inside the lane (411 units wide), bolts cross between the fleets, and
+  fighters and a hull hit are on screen.
+- `tests/edit-session.json` on the ships: wire, cut, rename, set parameter, drag (410 → 550, as
+  before), add, save. The diff against the original shows only those edits: 241 other files
+  byte-identical, 0 validator problems.
+- `tests/hover.json`: all 21 wires on their port dots and level; hover glow and balls; the preview
+  highlights both ends once the app is on `/sign-in`; W flies level.
+- The editor suite: `PASS — NodeGX map editor on suite (94 ms)`. The control:
+  `FAIL … 1. node "hdTitle" … "parameters.fontSize" is "28"; the official editor saves 28.`
+- `./todo-list`: no file newer than the kit's install.
+- **Not measured: speed on a real graphics card.** Headless Chrome renders on the CPU (SwiftShader)
+  at about 3 frames a second, with or without the battle. The script per frame (space, battle,
+  engines) is 0.03 ms. Hiding the ships cut a software frame from about 430 to 300 ms; the rest is
+  the map as it was (cards, about 67,000 wire segments, labels) and the running app. The scene is
+  2,146 draw calls and about 840,000 triangles, which a graphics card should handle, but I couldn't
+  check that here.
+
+### Two things I got wrong on the way, and fixed
+
+- **My tests clicked the top bar by coordinates.** The two new buttons moved the bar along, so a
+  click meant for **Fly to a component…** landed on **Whole map**. The camera then stayed far out,
+  and a test drag moved a card 2,300 px. The tests now click by selector, and they wait for a
+  `ready` flag the page sets when the map is drawn, instead of a fixed time.
+- **The X-wing's wings**, first mirrored with a negative scale, would have shown inside out. They
+  are now built at their mirrored coordinates instead.
+
+### Nothing new for the kit
+
+This round used no kit API beyond what the first two rounds did (`@nodegx/canvas-look` colours and
+fonts for the decks, cards and wires). The questions above still stand.

@@ -1,20 +1,64 @@
 [
-  { "wait": 9000 },
-  { "eval": "__map.map.flyToNode('Pages/Sign in', 'siPassword'); 'ok'" },
-  { "wait": 1500 },
-  { "label": "a wire leaves its output dot level and arrives level into its input dot",
-    "eval": "(() => { const p = __map.map.plates.get('Pages/Sign in'); const out = []; for (const e of p.curves) { const a = e.curve.getPoint(0), a2 = e.curve.getPoint(0.01), b2 = e.curve.getPoint(0.99), b = e.curve.getPoint(1); const from = p.info.get(e.wire.fromId).outAt.get(e.wire.fromProperty), to = p.info.get(e.wire.toId).inAt.get(e.wire.toProperty); const lv = (u, v) => Math.abs(v.y - u.y) / Math.max(1e-6, Math.hypot(v.x - u.x, v.z - u.z)); out.push(a.distanceTo(from) < 1e-6 && b.distanceTo(to) < 1e-6 && lv(a, a2) < 0.1 && lv(b2, b) < 0.1); } return JSON.stringify({ wires: out.length, allOnTheirDotsAndLevel: out.every(Boolean) }); })()" },
-  { "hoverCard": ["Pages/Sign in", "siPassword"] },
-  { "wait": 500 },
-  { "label": "hovering a card lights its wires and fires balls",
-    "eval": "JSON.stringify({ glowing: __map.map.hover?.wires.length ?? 0, balls: __map.map.balls.length })" },
-  { "hoverAt": "(() => { const p = __map.map.plates.get('Pages/Sign in'); const e = p.curves.find(c => c.wire.fromId === 'siPassword' && c.wire.toId === 'siLogIn'); return __map.map.screenOfPoint(e.curve.getPoint(0.55)); })()" },
-  { "wait": 26000 },
-  { "label": "hovering a wire lights it; the running app outlines its ends once it shows them",
-    "eval": "JSON.stringify({ glowing: __map.map.hover?.wires.map(e => e.wire.fromId + '.' + e.wire.fromProperty + ' → ' + e.wire.toId + '.' + e.wire.toProperty), tip: document.querySelector('#hover').innerText, app: __map.preview?.frame.contentWindow.location.pathname, boxes: __map.preview?.frame.contentDocument.getElementById('map-highlight')?.children.length ?? 0, note: document.querySelector('#preview-note').textContent })" },
-  { "shot": "hover-wire.png" },
-  { "eval": "JSON.stringify(__map.map.camera.position.toArray().map(n => +n.toFixed(1)))", "label": "camera before W" },
-  { "click": [300, 150] },
-  { "key": "KeyW", "keyName": "w", "ms": 600 },
-  { "label": "W flies level: the height stays", "eval": "JSON.stringify(__map.map.camera.position.toArray().map(n => +n.toFixed(1)))" }
+ {
+  "waitFor": "window.__map?.ui.ready",
+  "timeout": 90000
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "eval": "__map.map.flyToNode('Pages/Sign in', 'siPassword'); 'ok'"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "label": "a wire leaves its output dot level and arrives level into its input dot",
+  "eval": "(() => { const p = __map.map.plates.get('Pages/Sign in'); const out = []; for (const e of p.curves) { const a = e.curve.getPoint(0), a2 = e.curve.getPoint(0.01), b2 = e.curve.getPoint(0.99), b = e.curve.getPoint(1); const from = p.info.get(e.wire.fromId).outAt.get(e.wire.fromProperty), to = p.info.get(e.wire.toId).inAt.get(e.wire.toProperty); const lv = (u, v) => Math.abs(v.y - u.y) / Math.max(1e-6, Math.hypot(v.x - u.x, v.z - u.z)); out.push(a.distanceTo(from) < 1e-6 && b.distanceTo(to) < 1e-6 && lv(a, a2) < 0.1 && lv(b2, b) < 0.1); } return JSON.stringify({ wires: out.length, allOnTheirDotsAndLevel: out.every(Boolean) }); })()"
+ },
+ {
+  "hoverCard": [
+   "Pages/Sign in",
+   "siPassword"
+  ]
+ },
+ {
+  "wait": 500
+ },
+ {
+  "label": "hovering a card lights its wires and fires balls",
+  "eval": "JSON.stringify({ glowing: __map.map.hover?.wires.length ?? 0, balls: __map.map.balls.length })"
+ },
+ {
+  "hoverAt": "(() => { const p = __map.map.plates.get('Pages/Sign in'); const e = p.curves.find(c => c.wire.fromId === 'siPassword' && c.wire.toId === 'siLogIn'); return __map.map.screenOfPoint(e.curve.getPoint(0.55)); })()"
+ },
+ {
+  "wait": 26000
+ },
+ {
+  "label": "hovering a wire lights it; the running app outlines its ends once it shows them",
+  "eval": "JSON.stringify({ glowing: __map.map.hover?.wires.map(e => e.wire.fromId + '.' + e.wire.fromProperty + ' → ' + e.wire.toId + '.' + e.wire.toProperty), tip: document.querySelector('#hover').innerText, app: __map.preview?.frame.contentWindow.location.pathname, boxes: __map.preview?.frame.contentDocument.getElementById('map-highlight')?.children.length ?? 0, note: document.querySelector('#preview-note').textContent })"
+ },
+ {
+  "shot": "hover-wire.png"
+ },
+ {
+  "eval": "JSON.stringify(__map.map.camera.position.toArray().map(n => +n.toFixed(1)))",
+  "label": "camera before W"
+ },
+ {
+  "click": [
+   300,
+   150
+  ]
+ },
+ {
+  "key": "KeyW",
+  "keyName": "w",
+  "ms": 600
+ },
+ {
+  "label": "W flies level: the height stays",
+  "eval": "JSON.stringify(__map.map.camera.position.toArray().map(n => +n.toFixed(1)))"
+ }
 ]

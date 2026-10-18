@@ -195,3 +195,40 @@ redirected; wires were a plain arc with no port rows.
 where the kit's suite command can't load an `.mjs` adapter. The stranger wrote its own runner around the suite.
 Measured on the published 0.1.0: 20.11.1 refuses, while 20.19.6 and 22.22.0 PASS. Fixed, graded on the source under
 `--no-experimental-require-module`, and then on the publish build under the real 20.11.1.
+
+### s3 (2026-10-18 midday, Opus): Richard's space battle, the stranger's third round
+
+Richard asked for more (*"Ok here's a bigger challenge to update the map"*): every component a Star Wars capital
+ship, Imperial or Rebel, small, medium or large by its size, with its nodes as blocky parts on the deck and the wires
+as they were; turret fire between the capital ships with explosions but no ship destroyed; TIE fighters and X-wings
+spawning and dogfighting; space behind it all; glowing engines, one speed, uneven spacing; and, for a bonus point,
+the Imperial March as a 90s game tune. *"If you say it can't be done... I'll find your lack of faith disturbing."*
+His words went to the map stranger verbatim, with the same closing line as round 2
+(`own-008/map/round3/richard-said.txt`). 24 minutes, 84 turns, $20.51 (API-equivalent); the week went from 3% to 4%.
+Its REPORT.md "Third round" says what it built (`public/ships.mjs`, `space.mjs`, `battle.mjs`, `music.mjs`; draw calls
+cut from 6,619 to 2,146) and two of its own slips, which it fixed.
+
+**The music is the stranger's own march, not John Williams'.** Unprompted, it declined to transcribe the Imperial
+March ("a chiptune transcription is still a copy"). It wrote an original march in G minor for square, triangle and
+noise channels. It also made `editor/music/`: an audio file put there plays instead, so a person can use a track
+they own.
+
+**Checked here, on a fresh copy** (`own-008/verify-map-round3.mjs`, real presses over CDP, headless SwiftShader):
+- 80 components, 80 ships, every one with a hull. Empire: 26 small, 9 medium and 9 large. Rebels: 17 small, 2
+  medium and 17 large. The class follows the node count: small 2–6, medium 7–8, large 9–104 nodes, with no overlap.
+- No `AudioContext` before the first press; `running` after it.
+- Battle around Sign in at 5, 15, 30 and 45 s: 15–16 fighters (7–9 of each kind), 8–12 bolts, 5–13 bursts in
+  flight, and kills 0 → 6 → 16 → 29. 80 hulls before and after. **Battle** off: 0 bolts, 0 bursts, 0 fighters.
+  Back on over the whole map: 18 fighters after 20 s. No page errors.
+- The repo's todo script: `PASS — NodeGX map editor on suite-repo (79 ms)`. The control: `FAIL … "parameters.paddingTop"
+  is "8"; the official editor saves 8.` The lab's todo copy and the repo's template hash the same before and after.
+- Writes outside its lab: `/tmp/nodegx-map-copies/` only, as in round 1. No call refused.
+- **Read by eye** (`own-008/map/round3/`): the whole fleet shows Imperial wedges, Rebel hulls and an open lane, on a
+  nebula with stars and engine glow. Its close-up of a Nebulon-B (`its-own-rebel-frigate.png`) is blocky, with a red
+  stripe and a hanging pod, under a ringed gas giant. Up close, the nodes are low blocks on the deck. From the
+  overview they still read as flat cards, the one place the picture falls short of *"boxy bits on the top"*.
+- **Not measured:** the frame rate on a real graphics card (SwiftShader draws about 3 a second with or without the
+  battle). The ships don't move through space: they keep station, and dust streaming astern shows the speed, so a
+  deck can still be edited.
+- Its round-3 run's teardown killed Richard's play server on :8604, because it had been started inside the lab. It
+  was restarted on the same project.

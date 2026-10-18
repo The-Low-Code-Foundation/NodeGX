@@ -61,6 +61,17 @@ await sleep(1500);
 const mouse = (type, x, y, extra = {}) => send('Input.dispatchMouseEvent', { type, x, y, button: 'left', buttons: type === 'mouseReleased' ? 0 : 1, clickCount: 1, ...extra });
 for (const step of steps) {
   if (step.wait) await sleep(step.wait);
+  if (step.waitFor) {
+    // Polls an expression until it is truthy (or the timeout, default 60 s, passes).
+    const until = Date.now() + (step.timeout ?? 60000);
+    let ok = false;
+    while (!ok && Date.now() < until) {
+      const r = await send('Runtime.evaluate', { expression: `!!(${step.waitFor})`, returnByValue: true });
+      ok = r.result?.result?.value === true;
+      if (!ok) await sleep(250);
+    }
+    console.log('[waitFor]', step.waitFor, ok ? 'ok' : 'TIMED OUT');
+  }
   if (step.node) {
     // Another process acting on the files mid-session (a node script with its arguments).
     const { spawnSync } = await import('node:child_process');

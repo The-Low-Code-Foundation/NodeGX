@@ -28,11 +28,13 @@ const shouldOpen = args.includes('--open');
 let projectDir = args.find((a, i) => !a.startsWith('--') && !['--port'].includes(args[i - 1]));
 projectDir = projectDir ? path.resolve(projectDir) : undefined;
 
-const MIME = { '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.txt': 'text/plain' };
+const MIME = { '.mp3': 'audio/mpeg', '.ogg': 'audio/ogg', '.wav': 'audio/wav', '.m4a': 'audio/mp4', '.aac': 'audio/aac', '.flac': 'audio/flac', '.webm': 'audio/webm', '.html': 'text/html', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.txt': 'text/plain' };
 
 /** URL prefix → folder it is served from. */
 const STATIC = [
   ['/vendor/three/', path.join(here, 'node_modules/three/build')],
+  ['/vendor/three-addons/', path.join(here, 'node_modules/three/examples/jsm')],
+  ['/music/', path.join(here, 'music')],
   ['/kit/preview/', path.join(here, 'node_modules/@nodegx/preview/dist/browser')],
   ['/runtime/', path.join(here, 'node_modules/@nodegx/preview/dist/external/deploy')],
   ['/kit/canvas-look/', path.join(here, 'node_modules/@nodegx/canvas-look/dist')],
@@ -139,6 +141,12 @@ const server = http.createServer(async (req, res) => {
     }
     if (url === '/api/revisions' && req.method === 'GET') {
       return send(res, 200, projectDir ? revisions() : {});
+    }
+    if (url === '/api/music' && req.method === 'GET') {
+      // A track of the person's own in editor/music/ plays instead of the built-in chiptune.
+      const dir = path.join(here, 'music');
+      const files = fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => /\.(mp3|ogg|wav|m4a|aac|flac|webm)$/i.test(f)).sort() : [];
+      return send(res, 200, files);
     }
     if (url === '/api/types' && req.method === 'GET') {
       return send(res, 200, Object.keys(specs).sort());

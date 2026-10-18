@@ -5,7 +5,7 @@
     <title>NodeGX map</title>
     <link rel="stylesheet" href="/style.css" />
     <script type="importmap">
-      { "imports": { "three": "/vendor/three/three.module.js" } }
+      { "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/" } }
     </script>
   </head>
   <body>
@@ -16,6 +16,8 @@
       <input id="goto" list="goto-list" placeholder="Fly to a component…" autocomplete="off" />
       <datalist id="goto-list"></datalist>
       <button id="btn-overview" title="See the whole map (Home)">Whole map</button>
+      <button id="btn-battle" title="Fighters, turret fire and explosions around the fleet (B)">Battle: on</button>
+      <button id="btn-music" title="The march (M). Put a track of your own in editor/music/ to hear it instead.">♪ on</button>
       <button id="btn-undo" title="Undo (Ctrl+Z)">Undo</button>
       <button id="btn-save" class="primary" title="Save into the app's files (Ctrl+S)">Save</button>
       <button id="btn-open" title="Open another app's folder">Open…</button>

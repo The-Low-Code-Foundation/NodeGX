@@ -1,0 +1,32 @@
+[
+ {
+  "waitFor": "window.__map?.ui.ready",
+  "timeout": 90000
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "label": "frames per second, battle on",
+  "eval": "new Promise((r) => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 3000) requestAnimationFrame(f); else r((n / 3).toFixed(1)); }; requestAnimationFrame(f); })"
+ },
+ {
+  "eval": "__map.map.setBattle(false); 'off'"
+ },
+ {
+  "label": "frames per second, battle off",
+  "eval": "new Promise((r) => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 3000) requestAnimationFrame(f); else r((n / 3).toFixed(1)); }; requestAnimationFrame(f); })"
+ },
+ {
+  "label": "milliseconds of script per frame: space, battle, engines (battle on)",
+  "eval": "(() => { const m = __map.map; m.setBattle(true); for (let i = 0; i < 60; i++) m.battle.frame(1/60, m.camera); const t0 = performance.now(); for (let i = 0; i < 100; i++) { m.space.frame(m.camera, 1/60); m.battle.frame(1/60, m.camera); } return ((performance.now() - t0) / 100).toFixed(2); })()"
+ },
+ {
+  "label": "milliseconds to render one frame",
+  "eval": "(() => { const m = __map.map; const t0 = performance.now(); for (let i = 0; i < 5; i++) m.renderer.render(m.scene, m.camera); m.renderer.getContext().finish(); return ((performance.now() - t0) / 5).toFixed(1); })()"
+ },
+ {
+  "label": "draw calls and triangles",
+  "eval": "JSON.stringify(__map.map.renderer.info.render)"
+ }
+]

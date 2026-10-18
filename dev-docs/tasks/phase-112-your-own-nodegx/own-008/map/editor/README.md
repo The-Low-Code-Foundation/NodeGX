@@ -1,7 +1,26 @@
 # NodeGX map
 
-Your NodeGX app as a 3D map you fly through and rewire. Every component is a plate in its folder's
-district, and every node is a card where the files put it. As on a NodeGX card, a card has a row for
+Your NodeGX app as a 3D map you fly through and rewire, set in space. Every component is a capital
+ship, and its nodes are the blocks on its deck, where the files put them. Each folder is a squadron,
+and the squadrons make up two fleets, the Empire and the Rebels. Both fleets fly ahead at one
+speed, their engines glowing astern and space dust streaming past, with a lane of open space between
+them.
+
+The ships are built from blocks, Minecraft-style. A component with more nodes gets a bigger class of
+ship, and the hull is built around its deck, so a bigger component is a bigger ship:
+
+| | small | medium | large |
+|---|---|---|---|
+| Empire | light cruiser | Victory-style destroyer | Star Destroyer, with bridge tower and shield domes |
+| Rebels | Corellian corvette | Nebulon-B frigate | Mon Calamari cruiser |
+
+The capital ships trade turret fire across the lane: green bolts from the Empire, red from the
+Rebels. Hits burst on the hulls, but no capital ship is destroyed. TIE fighters and X-wings keep
+arriving out of hyperspace around the map, dogfight, and blow each other up. **Battle** (or B) turns
+the fighting off while you work. **♪** (or M) turns the music off: an original 90s-console-style
+march. Put a music file of your own in `editor/music/` and it plays instead.
+
+Each ship's deck works like a NodeGX canvas. As on a NodeGX card, a card has a row for
 each wired port, with a dot on its edge: inputs on the left, outputs on the right. Every wire leaves
 its output dot level, arcs over, and comes down level into its input dot. Signals are blue and
 values are green.
@@ -37,6 +56,8 @@ Click the map first if you've been typing in the app's preview, so the keys come
 | click | select a card or a plate |
 | double-click, or F | fly to it |
 | Home, or **Whole map** | the whole map |
+| B, or **Battle** | the battle on / off |
+| M, or **♪** | the music on / off (it starts on your first click or key: browsers wait for one) |
 | **Fly to a component…** | jump to one by name |
 
 ## Change the app
@@ -82,7 +103,8 @@ command (same `runSuite`, graph grader and report), except that it loads the ada
 The kit's own `editor-suite-node.js` uses `require()`, which can't load an `.mjs` adapter before
 Node 22.
 
-`tests/edit-session.json` is a session in the page itself (rewire, cut, rename, set, drag, add,
+`tests/fleet.json`, `tests/rebels.json` and `tests/battle.json` check the fleet, the ships and the
+battle. `tests/hover.json` checks wires and hovering. `tests/edit-session.json` is a session in the page itself (rewire, cut, rename, set, drag, add,
 save), run by `node --experimental-websocket tools/drive.mjs <the page's URL> tests/edit-session.json <shots-dir>`
 against an editor started on a copy of the app.
 
@@ -93,7 +115,11 @@ against an editor started on a copy of the app.
 | `server.mjs` | serves the page; reads the project; ports from node-spec; saves through the kit's store |
 | `core/model.mjs` | the project in memory and the eight changes; the page and the suite both use it |
 | `core/commit.mjs` | validate, then write with each component's revision |
-| `public/map3d.mjs` | the 3D map (three.js) in the NodeGX canvas look (`@nodegx/canvas-look`) |
+| `public/map3d.mjs` | the 3D map (three.js) in the NodeGX canvas look (`@nodegx/canvas-look`): the fleet layout, decks, cards, wires |
+| `public/ships.mjs` | the block-built capital ships and fighters |
+| `public/space.mjs` | the nebula, stars, planet and streaming space dust |
+| `public/battle.mjs` | turret fire, hull hits, the fighters' dogfight |
+| `public/music.mjs` | the chiptune march (Web Audio), or your own track from `music/` |
 | `public/app.mjs` | the panel, the running app (`@nodegx/preview`), save, watching the disk |
 | `suite/` | the editor suite's adapter, its control, and the edit script |
 | `tools/` | developer scripts: copy, diff, check, a headless-Chrome driver |

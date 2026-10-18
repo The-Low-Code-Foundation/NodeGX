@@ -8,13 +8,16 @@
 
 import * as THREE from 'three';
 import { look, nodeScheme, categoryColors, wireColors } from '/kit/canvas-look/index.mjs';
+import { designShip, shipClass, seeded, SIDES } from '/ships.mjs';
+import { Space } from '/space.mjs';
+import { Battle } from '/battle.mjs';
 
 const S = 10; // file pixels per world unit
 const CARD_W = look.card.size.width / S;
 const CARD_D = look.card.size.height / S; // the header; port rows add to it
 const ROW_PX = look.card.propertyConnectionHeight;
 const ROW_D = ROW_PX / S;
-const CARD_H = 1.2;
+const CARD_H = 1.6; // the cards are the blocks on the ships' decks
 const PORT_Y = CARD_H; // ports sit on the card's top edge, so the dots and the wire ends show from above
 const PAD = 6;
 const THEME = 'dark';
@@ -65,13 +68,16 @@ export class MapView {
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(C.ground);
-    this.scene.fog = new THREE.Fog(C.ground, 900, 2600);
-    this.camera = new THREE.PerspectiveCamera(60, 1, 0.5, 6000);
-    this.scene.add(new THREE.HemisphereLight(0xffffff, 0x223344, 1.6));
-    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-    sun.position.set(300, 800, 200);
+    this.scene.background = new THREE.Color('#02030a');
+    this.scene.fog = new THREE.Fog('#03040b', 2400, 6000);
+    this.camera = new THREE.PerspectiveCamera(60, 1, 0.5, 7000);
+    this.scene.add(new THREE.HemisphereLight(0xc8d8ff, 0x1a1626, 1.25));
+    const sun = new THREE.DirectionalLight(0xfff4e6, 1.3);
+    sun.position.set(-400, 700, -300);
     this.scene.add(sun);
+    this.THREE = THREE; // for the developer's console and the tests
+    this.space = new Space(this.scene);
+    this.battle = new Battle(this.scene, glowSprite);
     this.world = new THREE.Group();
     this.scene.add(this.world);
     this.overlay = new THREE.Group(); // selection, links
@@ -108,70 +114,111 @@ export class MapView {
 
   // --- building ----------------------------------------------------------------------------
 
-  /** Lays every component out in districts by folder, and draws them all. */
+  /**
+   * Lays the components out as two fleets flying ahead (-z) side by side, the battle lane between
+   * them: every folder is a squadron, its ships in columns, one behind another, with uneven gaps.
+   * Each folder joins the side with fewer ships, biggest folder first. A ship's class (small,
+   * medium, large) comes from its node count against the project's terciles, and its hull is built
+   * around its deck, so a bigger component is a bigger ship.
+   */
   build() {
     for (const p of this.plates.values()) disposeGroup(p.group);
     this.world.clear();
     this.plates.clear();
     this.clearOverlay();
     this.setHover(null);
+    this.battle.clear();
+    const keys = this.model.keys();
+    const counts = keys.map((k) => this.model.nodes(k).length).sort((a, b) => a - b);
+    const t1 = counts[Math.floor((counts.length - 1) / 3)] ?? 0;
+    const t2 = counts[Math.floor((2 * (counts.length - 1)) / 3)] ?? 0;
     const groups = new Map();
-    for (const key of this.model.keys()) {
+    for (const key of keys) {
       const folder = key.includes('/') ? key.split('/')[0] : '(top level)';
       if (!groups.has(folder)) groups.set(folder, []);
       groups.get(folder).push(key);
     }
     const districts = [...groups.entries()].sort((a, b) => b[1].length - a[1].length);
-    let gx = 0;
-    let gz = 0;
-    let rowDepth = 0;
-    const MAX_W = 1300;
-    for (const [folder, keys] of districts) {
-      // Shelf-pack the folder's plates.
-      const measured = keys.map((k) => ({ key: k, ...this.measure(k) }));
-      const shelfW = Math.max(220, Math.min(560, Math.sqrt(measured.reduce((s, m) => s + m.w * m.d, 0)) * 1.3));
-      let x = 0;
-      let z = 0;
-      let shelfD = 0;
-      let width = 0;
-      const placed = [];
-      for (const m of measured) {
-        if (x > 0 && x + m.w > shelfW) {
-          x = 0;
-          z += shelfD + 14;
-          shelfD = 0;
+    const fleets = { [SIDES.empire]: [], [SIDES.rebels]: [] };
+    for (const d of districts) {
+      const side = fleets.empire.reduce((s, x) => s + x[1].length, 0) <= fleets.rebels.reduce((s, x) => s + x[1].length, 0) ? SIDES.empire : SIDES.rebels;
+      fleets[side].push(d);
+    }
+    // Every ship designed first, to know how much space it takes.
+    const ships = new Map();
+    for (const key of keys) {
+      const deck = this.measure(key);
+      const side = fleets.empire.some(([, ks]) => ks.includes(key)) ? SIDES.empire : SIDES.rebels;
+      const cls = shipClass(this.model.nodes(key).length, t1, t2);
+      const design = designShip(side, cls, deck.w, deck.d, key);
+      design.W = deck.w;
+      design.D = deck.d;
+      ships.set(key, { key, deck, side, cls, design, fp: design.bbox });
+    }
+    const LANE = 420;
+    for (const side of [SIDES.empire, SIDES.rebels]) {
+      // The Empire's squadrons spread out to -x from the lane, the Rebels' to +x.
+      let cursor = side === SIDES.empire ? 0 : LANE;
+      for (const [folder, fkeys] of fleets[side]) {
+        const rand = seeded(folder);
+        const list = fkeys.map((k) => ships.get(k)).sort((a, b) => b.fp.max.z - b.fp.min.z - (a.fp.max.z - a.fp.min.z));
+        const ncol = Math.max(1, Math.round(Math.sqrt(list.length / 1.6)));
+        const cols = Array.from({ length: ncol }, () => ({ ships: [], length: 0, width: 0 }));
+        for (const s of list) {
+          const col = cols.reduce((a, b) => (b.length < a.length ? b : a));
+          col.ships.push(s);
+          col.length += s.fp.max.z - s.fp.min.z + 60;
+          col.width = Math.max(col.width, s.fp.max.x - s.fp.min.x);
         }
-        placed.push({ ...m, ox: x, oz: z });
-        x += m.w + 14;
-        width = Math.max(width, x);
-        shelfD = Math.max(shelfD, m.d);
+        const gaps = cols.map(() => 30 + rand() * 50);
+        const width = cols.reduce((s, c, i) => s + c.width + (i ? gaps[i] : 0), 0);
+        let x = side === SIDES.empire ? cursor - width : cursor;
+        const start = rand() * 160;
+        let zMin = Infinity;
+        cols.forEach((col, i) => {
+          if (i) x += gaps[i];
+          let z = start + rand() * 90;
+          for (const s of col.ships) {
+            const jitter = (rand() - 0.5) * 16;
+            const ox = x + col.width / 2 - (s.fp.min.x + s.fp.max.x) / 2 + jitter;
+            const oz = z - s.fp.min.z;
+            zMin = Math.min(zMin, z);
+            this.buildPlate(s.key, { x: ox, z: oz }, { ...s.deck, ship: s });
+            z += s.fp.max.z - s.fp.min.z + 25 + rand() * 75; // uneven spacing, one speed
+          }
+          x += col.width;
+        });
+        const label = textSprite(folder.toUpperCase(), { size: 64, color: C.cardText, bg: null, weight: 800 });
+        const lx = side === SIDES.empire ? cursor - width / 2 : cursor + width / 2;
+        label.position.set(lx, 60, zMin - 60);
+        label.scale.multiplyScalar(3.5);
+        label.userData.district = folder;
+        this.world.add(label);
+        cursor = side === SIDES.empire ? cursor - width - 140 : cursor + width + 140;
       }
-      const depth = z + shelfD;
-      if (gx > 0 && gx + width > MAX_W) {
-        gx = 0;
-        gz += rowDepth + 90;
-        rowDepth = 0;
-      }
-      for (const p of placed) this.buildPlate(p.key, { x: gx + p.ox, z: gz + p.oz }, p);
-      const label = textSprite(folder.toUpperCase(), { size: 64, color: C.cardText, bg: null, weight: 800 });
-      label.position.set(gx + width / 2, 40, gz - 30);
-      label.scale.multiplyScalar(3.5);
-      label.userData.district = folder;
-      this.world.add(label);
-      gx += width + 90;
-      rowDepth = Math.max(rowDepth, depth);
     }
     this.bounds = new THREE.Box3();
-    for (const p of this.plates.values()) this.bounds.expandByObject(p.base);
-    // The canvas's dot grid, as a ground grid under the districts.
-    const size = this.bounds.getSize(new THREE.Vector3());
-    const span = Math.ceil((Math.max(size.x, size.z) + 400) / 40) * 40;
-    const grid = new THREE.GridHelper(span, span / 40, C.gridDotBase, C.gridDotBase);
-    grid.material.transparent = true;
-    grid.material.opacity = 0.07;
-    grid.position.set(this.bounds.getCenter(new THREE.Vector3()).x, -1, this.bounds.getCenter(new THREE.Vector3()).z);
-    this.world.add(grid);
+    for (const p of this.plates.values()) this.bounds.expandByObject(p.base).expandByObject(p.shipGroup);
     this.updateLod(true);
+    this.updateBattleShips();
+  }
+
+  /** Tells the battle where every ship's turrets and hull are now. */
+  updateBattleShips() {
+    const list = [];
+    for (const p of this.plates.values()) {
+      if (!p.shipGroup) continue;
+      const o = p.shipGroup.position;
+      const h = p.ship.design.hull;
+      const hull = new THREE.Box3(new THREE.Vector3(h.x0, h.y0, h.z0).add(o), new THREE.Vector3(h.x1, h.y1, h.z1).add(o));
+      list.push({ key: p.key, side: p.ship.side, turrets: p.ship.design.turrets.map((t) => t.muzzle.clone().add(o)), hull, center: hull.getCenter(new THREE.Vector3()) });
+    }
+    this.battle.setShips(list);
+  }
+
+  /** Turns the battle (fighters, lasers, explosions) on or off; the fleet stays. */
+  setBattle(on) {
+    this.battle.setEnabled(on);
   }
 
   /** Each node's wired ports, as its rows: inputs then outputs, in the order the wires list them. */
@@ -213,7 +260,7 @@ export class MapView {
   }
 
   buildPlate(key, origin, m) {
-    const plate = { key, origin, minX: m.minX, minY: m.minY, w: m.w, d: m.d, group: new THREE.Group(), cards: new Map(), pos: new Map(), info: new Map(), detailed: false };
+    const plate = { key, origin, minX: m.minX, minY: m.minY, w: m.w, d: m.d, ship: m.ship, group: new THREE.Group(), cards: new Map(), pos: new Map(), info: new Map(), detailed: false };
     this.plates.set(key, plate);
     this.world.add(plate.group);
     this.drawPlate(plate);
@@ -221,6 +268,8 @@ export class MapView {
 
   /** (Re)draws one plate's contents at its fixed origin: after a change only this one is redrawn. */
   drawPlate(plate) {
+    // The ship is kept across redraws (it is rebuilt below only if the deck changed size).
+    if (plate.shipGroup) plate.group.remove(plate.shipGroup);
     disposeGroup(plate.group);
     plate.group.clear();
     plate.cards.clear();
@@ -244,9 +293,34 @@ export class MapView {
     const w = Math.max(plate.w, (maxX - plate.minX) / S + CARD_W + PAD * 2) - left;
     const d = Math.max(plate.d, (maxY - plate.minY) / S + CARD_D + PAD * 2 + 4) - top;
     const isCloud = key.includes('#__cloud__');
+    // The ship around the deck. A deck that grew (a card moved past its edge) gets a new hull to fit.
+    const s = plate.ship;
+    if (s && (Math.abs(s.design.W - w) > 0.01 || Math.abs(s.design.D - d) > 0.01)) {
+      if (plate.shipGroup) disposeGroup(plate.shipGroup);
+      plate.shipGroup = null;
+      s.design = designShip(s.side, s.cls, w, d, key);
+      s.design.W = w;
+      s.design.D = d;
+    }
+    if (s && !plate.shipGroup) {
+      plate.shipGroup = s.design.group;
+      plate.shipGroup.position.set(plate.origin.x + left, 0, plate.origin.z + top);
+      plate.engineGlows = [];
+      for (const e of s.design.engines) {
+        const g = glowSprite(e.color, e.size);
+        g.position.copy(e.at);
+        g.userData.base = e.size;
+        g.userData.phase = Math.random() * 10;
+        plate.shipGroup.add(g);
+        plate.engineGlows.push(g);
+      }
+      for (const m of plate.shipGroup.children) if (m.isMesh) m.userData.plate = key;
+      if (this.battle.ships.length) this.updateBattleShips();
+    }
+    if (plate.shipGroup) plate.group.add(plate.shipGroup);
     const base = new THREE.Mesh(
       new THREE.BoxGeometry(w, 0.8, d),
-      new THREE.MeshLambertMaterial({ color: new THREE.Color(isCloud ? '#2a3a5c' : C.cardBgHover) })
+      new THREE.MeshLambertMaterial({ color: new THREE.Color(isCloud ? '#2a3a5c' : s?.design.deckColor ?? C.cardBgHover) })
     );
     base.position.set(plate.origin.x + left + w / 2, -0.4, plate.origin.z + top + d / 2);
     base.userData = { plate: key };
@@ -359,15 +433,17 @@ export class MapView {
     const category = this.categoryOf(key, node);
     const scheme = nodeScheme(category, THEME);
     const accent = categoryColors(category, THEME).accent;
-    const side = new THREE.MeshLambertMaterial({ color: new THREE.Color(scheme.header) });
-    let top;
+    // A labelled card is two draw calls (its face, its sides); a far, plain one is one, with a material shared by its category.
+    let mesh;
     if (detailed) {
-      top = new THREE.MeshBasicMaterial({ map: cardTexture(node, scheme, accent, info.rows, (port, plug) => this.kindOf(key, node.id, port, plug)) });
+      const top = new THREE.MeshBasicMaterial({ map: cardTexture(node, scheme, accent, info.rows, (port, plug) => this.kindOf(key, node.id, port, plug)) });
+      const side = new THREE.MeshLambertMaterial({ color: new THREE.Color(scheme.header) });
+      mesh = new THREE.Mesh(cardGeometry(info.depth), [top, side]);
     } else {
-      top = new THREE.MeshLambertMaterial({ color: new THREE.Color(scheme.base) });
+      mesh = new THREE.Mesh(cardGeometry(info.depth), plainCardMaterial(category, scheme));
+      mesh.userData.sharedMaterial = true;
     }
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(CARD_W, CARD_H, info.depth), [side, side, top, side, side, side]);
-    mesh.userData = { key, id: node.id, category, accent, scheme };
+    Object.assign(mesh.userData, { key, id: node.id, category, accent, scheme });
     return mesh;
   }
 
@@ -686,6 +762,8 @@ export class MapView {
       objs.push(p.base, p.label);
       for (const c of p.cards.values()) objs.push(c);
       if (wires && p.wires) objs.push(p.wires);
+      // Clicking a ship's hull picks its component, like clicking its deck.
+      for (const m of p.shipGroup?.children ?? []) if (m.isMesh) objs.push(m);
     }
     const hits = this.raycaster.intersectObjects(objs, false);
     const card = hits.find((h) => h.object.userData.id);
@@ -803,7 +881,6 @@ export class MapView {
       this.flight = null;
       this.camera.position.addScaledVector(move.normalize(), speed);
     }
-    if (this.camera.position.y < 2) this.camera.position.y = 2;
     const lookAt = this.camera.position.clone().add(new THREE.Vector3(-Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), -Math.cos(this.yaw) * Math.cos(this.pitch)));
     this.camera.lookAt(lookAt);
     for (const o of this.overlay.children) if (o.userData.bob) o.position.y = 4 + Math.sin(t / 250) * 0.6;
@@ -835,6 +912,15 @@ export class MapView {
     if (t - this.lastLod > 500) {
       this.lastLod = t;
       this.updateLod(false);
+    }
+    // Space streams past, the battle goes on, and the engines flicker.
+    this.space.frame(this.camera, dt);
+    this.battle.frame(dt, this.camera);
+    for (const p of this.plates.values()) {
+      for (const g of p.engineGlows ?? []) {
+        const f = 0.88 + 0.08 * Math.sin(t / 70 + g.userData.phase) + Math.random() * 0.06;
+        g.scale.setScalar(g.userData.base * f);
+      }
     }
     this.renderer.render(this.scene, this.camera);
   }
@@ -871,6 +957,23 @@ export function layoutPositions(nodes) {
     if (!at.has(n.id)) at.set(n.id, { x: 0, y: maxY + 120 + 60 * k++ });
   }
   return at;
+}
+
+/** A card's box with its faces in two groups: the top (0) and the five other faces (1). */
+function cardGeometry(depth) {
+  const g = new THREE.BoxGeometry(CARD_W, CARD_H, depth);
+  const idx = Array.from(g.index.array); // six faces of six indices: +x, -x, +y, -y, +z, -z
+  g.setIndex([...idx.slice(12, 18), ...idx.slice(0, 12), ...idx.slice(18)]);
+  g.clearGroups();
+  g.addGroup(0, 6, 0);
+  g.addGroup(6, 30, 1);
+  return g;
+}
+
+const plainMaterials = new Map();
+function plainCardMaterial(category, scheme) {
+  if (!plainMaterials.has(category)) plainMaterials.set(category, new THREE.MeshLambertMaterial({ color: new THREE.Color(scheme.base) }));
+  return plainMaterials.get(category);
 }
 
 /** The card's face: the header as on the canvas, then a row per wired port with its name at its dot's side. */
@@ -988,6 +1091,7 @@ function textSprite(text, { size = 48, color = '#fff', bg = null, weight = 600 }
 
 function disposeMesh(o) {
   o.geometry?.dispose();
+  if (o.userData.sharedMaterial) return; // the ships' hull and glow materials serve every ship
   const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
   for (const m of mats) {
     // The glow texture is shared by every ball and port glow: keep it.

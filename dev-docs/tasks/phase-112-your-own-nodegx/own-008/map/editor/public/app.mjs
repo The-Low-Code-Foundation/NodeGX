@@ -4,6 +4,7 @@
 
 import { ProjectModel, MapRefusal } from '/core/model.mjs';
 import { MapView, shortType } from '/map3d.mjs';
+import { Music } from '/music.mjs';
 
 const $ = (s) => document.querySelector(s);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
@@ -191,6 +192,7 @@ async function loadProject(payload) {
   map.overview();
   renderPanel();
   updatePreview(true);
+  ui.ready = true; // the map is drawn and can be used (tests wait for this)
 }
 
 async function save() {
@@ -706,6 +708,36 @@ $('#btn-undo').addEventListener('click', () => {
   if (u) toast(`Undid: ${u.what}`);
 });
 $('#btn-overview').addEventListener('click', () => map.overview());
+
+// The battle and the music: both on unless you turned them off last time.
+let battleOn = localStorage.getItem('map-battle') !== 'off';
+function setBattle(on) {
+  battleOn = on;
+  localStorage.setItem('map-battle', on ? 'on' : 'off');
+  map.setBattle(on);
+  $('#btn-battle').textContent = `Battle: ${on ? 'on' : 'off'}`;
+}
+setBattle(battleOn);
+$('#btn-battle').addEventListener('click', () => setBattle(!battleOn));
+
+const music = new Music();
+music.findTrack().then(() => {
+  if (music.trackName) $('#btn-music').title = `Playing ${music.trackName} from editor/music/ (M)`;
+});
+const showMusic = () => ($('#btn-music').textContent = music.on ? '♪ on' : '♪ off');
+showMusic();
+$('#btn-music').addEventListener('click', () => {
+  music.toggle();
+  showMusic();
+});
+// A browser only lets a page make sound after a click or a key: the first one starts the music.
+const firstGesture = () => {
+  music.start();
+  window.removeEventListener('pointerdown', firstGesture, true);
+  window.removeEventListener('keydown', firstGesture, true);
+};
+window.addEventListener('pointerdown', firstGesture, true);
+window.addEventListener('keydown', firstGesture, true);
 $('#btn-open').addEventListener('click', () => {
   $('#open-path').value = ui.project?.dir ?? '';
   $('#open-dialog').showModal();
@@ -754,6 +786,11 @@ window.addEventListener('keydown', (e) => {
     $('#panel').querySelector('[data-act="remove"]')?.click();
   }
   if (e.key === 'f' && ui.selection) map.flyToNode(ui.selection.key, ui.selection.id);
+  if (e.key === 'b') setBattle(!battleOn);
+  if (e.key === 'm') {
+    music.toggle();
+    showMusic();
+  }
   if (e.key === 'Home') map.overview();
 });
 
@@ -947,7 +984,7 @@ $('#btn-preview').addEventListener('click', () => {
 
 // --- start ---------------------------------------------------------------------------------
 
-window.__map = { map, model, ui, get preview() { return preview; } }; // for the developer's console and the test driver
+window.__map = { map, model, ui, music, get preview() { return preview; } }; // for the developer's console and the test driver
 
 (async () => {
   try {
