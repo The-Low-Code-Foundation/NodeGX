@@ -592,6 +592,19 @@ declare namespace Noodl {
         onProgress?: (progress: number) => void;
       }
     ): Promise<CloudFile>;
+
+    /**
+     * A link an image can use for a private file, the way the Sign File URL node mints one.
+     * Takes a CloudFile, a record's file (or an item of a list of them), or the stored name.
+     * Rejects for someone who could not read the file itself.
+     *
+     * Example:
+     * ```ts
+     *  const link = await Noodl.Files.sign(post.photos[0])
+     *  console.log(link.url, link.expiresAt)
+     * ```
+     */
+    sign(file: CloudFile | { name: string } | string): Promise<{ url: string; kind: string; expiresAt?: string; ttlSeconds?: number }>;
   }
 
   /**

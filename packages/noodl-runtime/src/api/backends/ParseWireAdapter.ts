@@ -152,6 +152,19 @@ function withStatus(err: WireError | undefined, status: number | undefined): Wir
   return envelope;
 }
 
+/**
+ * The Upload File node's Private and Readers inputs as headers (`files.ts` reads both, case-insensitively).
+ * Readers go as written, trimmed: the backend refuses a malformed list in words, which a client-side check
+ * here would only repeat. A blank one sends nothing, so it never turns an upload private by itself.
+ */
+function uploadHeaders(options: UploadFileOptions): Record<string, string> | undefined {
+  const headers: Record<string, string> = {};
+  if (options.private) headers['X-NodeGX-File-Private'] = 'true';
+  const readers = typeof options.readers === 'string' ? options.readers.trim() : '';
+  if (readers) headers['X-NodeGX-File-Readers'] = readers;
+  return Object.keys(headers).length ? headers : undefined;
+}
+
 export interface ParseWireAdapterOptions {
   /**
    * Turn a record's data into Parse wire JSON — pointers, dates, geopoints and
@@ -688,10 +701,10 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
       content: options.file,
       // Dead — `_makeRequest` never reads `contentType`. See the module note.
       contentType: options.file.type,
-      // BAK-006 follow-up: the Upload File node's Private input. The backend
-      // reads this exact header (files.ts, case-insensitively) to ACL the
-      // upload to its owner instead of leaving it public.
-      headers: options.private ? { 'X-NodeGX-File-Private': 'true' } : undefined,
+      // BAK-006 follow-up: the Upload File node's Private input, and (P121
+      // MEMBERSPHOTO) its Readers. The backend reads these headers to ACL the
+      // upload to its owner, and to those roles, instead of leaving it public.
+      headers: uploadHeaders(options),
       // BCN-007 step 1. This used to be
       // `Object.assign({}, options.data, response)` cast to `{name, url}` —
       // whatever the backend sent, spread over a caller-supplied object no

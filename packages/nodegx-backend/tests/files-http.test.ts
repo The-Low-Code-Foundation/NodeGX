@@ -273,6 +273,99 @@ describe('BAK-006 file storage v2 over HTTP', () => {
   });
 
   // ==========================================================================
+  // P121-TWO001-MEMBERSPHOTO: a private file shared with a role
+  // ==========================================================================
+
+  describe('X-NodeGX-File-Readers', () => {
+    let carl: User; // holds role:crew
+    let dana: User; // holds role:crew too
+
+    async function crewMember(username: string): Promise<User> {
+      const made = await req<ParseRecord>('POST', '/admin/users', { username, password: `pw-${username}`, roles: ['crew'] }, asAdmin());
+      expect(made.status).toBe(201);
+      const login = await req<{ sessionToken: string }>('POST', '/login', { username, password: `pw-${username}` });
+      return { id: made.json.objectId, token: login.json.sessionToken };
+    }
+
+    beforeAll(async () => {
+      expect((await req('POST', '/admin/roles', { name: 'crew' }, asAdmin())).status).toBe(201);
+      carl = await crewMember('carl');
+      dana = await crewMember('dana');
+    });
+
+    it('makes the file private and readable by the role as well as the uploader, never writable by it', async () => {
+      const { url, name } = await uploadFile('crew.png', PNG_BYTES, { 'x-nodegx-file-readers': 'role:crew', ...asUser(carl) });
+
+      expect((await fetch(url, { headers: asUser(carl) })).status).toBe(200);
+      expect((await fetch(url, { headers: asUser(dana) })).status).toBe(200);
+      expect((await req('GET', `/files/${name}/sign`, undefined, asUser(dana))).status).toBe(200);
+      // Not in the role: refused the file and refused a link, as before.
+      expect((await fetch(url, { headers: asUser(bob) })).status).toBe(403);
+      expect((await req('GET', `/files/${name}/sign`, undefined, asUser(bob))).status).toBe(403);
+      expect((await fetch(url)).status).toBe(403);
+      expect((await fetch(url, { headers: asUser(dana) })).headers.get('cache-control')).toBe('private, no-store');
+
+      // The row says who it is shared with, where a cloud function can read it (a record read never carries the ACL).
+      const row = await req<{ results: Array<Record<string, unknown>> }>('GET', `/classes/_Files?where=${encodeURIComponent(JSON.stringify({ storedName: name }))}`, undefined, asAdmin());
+      expect(row.json.results[0]).toMatchObject({ private: true, readers: ['role:crew'] });
+
+      // Reading is shared; deleting stays the uploader's.
+      expect((await req('DELETE', `/files/${name}`, undefined, asUser(dana))).status).toBe(403);
+      expect((await req('DELETE', `/files/${name}`, undefined, asUser(carl))).status).toBe(200);
+    });
+
+    it('🔴 refuses a share with a role the uploader does not hold, before reading the file', async () => {
+      const res = await postFile('notmine.png', PNG_BYTES, { 'x-nodegx-file-readers': 'role:crew', ...asUser(alice) });
+      expect(res.status).toBe(403);
+      expect((res.json as unknown as ErrorBody).error).toBe('You can share a file only with a role you hold, and you hold none of role:crew.');
+
+      // Naming one role you hold beside one you don't is a share with both.
+      const both = await postFile('both.png', PNG_BYTES, { 'x-nodegx-file-readers': 'role:crew, role:captains', ...asUser(carl) });
+      expect(both.status).toBe(201);
+      await req('DELETE', `/files/${both.json.name}`, undefined, asUser(carl));
+
+      // With no account there is no role to hold.
+      expect((await postFile('anon.png', PNG_BYTES, { 'x-nodegx-file-readers': 'role:crew' })).status).toBe(403);
+    });
+
+    it('🔴 refuses anything but role:<name>, in words that say which part', async () => {
+      for (const [header, part] of [
+        ['*', '*'],
+        ['crew', 'crew'],
+        ['role:', 'role:'],
+        [`role:crew, ${carl.id}`, carl.id],
+        ['role:crew;role:x', 'role:crew;role:x']
+      ]) {
+        const res = await postFile('bad.png', PNG_BYTES, { 'x-nodegx-file-readers': header, ...asUser(carl) });
+        expect([header, res.status]).toEqual([header, 400]);
+        expect((res.json as unknown as ErrorBody).error).toContain(`"${part}" is not one.`);
+      }
+      const nine = Array.from({ length: 9 }, (_, i) => `role:r${i}`).join(',');
+      const tooMany = await postFile('many.png', PNG_BYTES, { 'x-nodegx-file-readers': nine, ...asUser(carl) });
+      expect(tooMany.status).toBe(400);
+      expect((tooMany.json as unknown as ErrorBody).error).toBe('X-NodeGX-File-Readers names 9 roles; at most 8.');
+    });
+
+    it('a blank header is no share at all: the file stays as public as it was', async () => {
+      const { url, name } = await uploadFile('blank.png', PNG_BYTES, { 'x-nodegx-file-readers': ' , ', ...asUser(carl) });
+      expect((await fetch(url)).status).toBe(200);
+      const row = await req<{ results: Array<Record<string, unknown>> }>('GET', `/classes/_Files?where=${encodeURIComponent(JSON.stringify({ storedName: name }))}`, undefined, asAdmin());
+      expect(row.json.results[0].readers ?? null).toBeNull();
+      await req('DELETE', `/files/${name}`, undefined, asUser(carl));
+    });
+
+    it('the master key may share with any role; with no owner, the role alone reads it', async () => {
+      const { url, name } = await uploadFile('fromadmin.png', PNG_BYTES, { 'x-nodegx-file-readers': 'role:crew', ...asAdmin() });
+      expect((await fetch(url, { headers: asUser(dana) })).status).toBe(200);
+      // Before this header an ownerless private file had no ACL and read as public
+      // (the `files.private` cell's own note): with a reader it does not.
+      expect((await fetch(url)).status).toBe(403);
+      expect((await fetch(url, { headers: asUser(bob) })).status).toBe(403);
+      await req('DELETE', `/files/${name}`, undefined, asAdmin());
+    });
+  });
+
+  // ==========================================================================
   // Thumbnails: asserted against the REAL sharp availability of this
   // environment (see SHARP_AVAILABLE) — never mocked, either way
   // ==========================================================================

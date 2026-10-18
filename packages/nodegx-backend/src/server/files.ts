@@ -46,6 +46,19 @@
  * a persisted `CloudFile.url` for a private file is not directly usable in an
  * `<img>` without first calling `/sign`; this is documented, not hidden.
  *
+ * ## Shared with a role (P121-TWO001-MEMBERSPHOTO)
+ *
+ * Private alone means the uploader's alone, and public means anyone holding
+ * the URL — neither is "the community's members", which a members-only app
+ * needs for every photo in its feed. `X-NodeGX-File-Readers: role:member,
+ * role:admin` makes the upload private AND lets those roles read it (and
+ * `/sign` it): each becomes a read-only entry in the row's ACL, beside the
+ * owner's read+write, so the one ACL check above decides. Only `role:<name>`
+ * atoms are accepted — `*` would be the public file the header exists to
+ * avoid — and the uploader must hold at least one of the roles they name
+ * (the master key may name any), so nobody shares a file into a group they
+ * are not in.
+ *
  * @module nodegx-backend/server/files
  */
 
@@ -55,7 +68,7 @@ import * as path from 'path';
 
 import type { RequestContext } from './HttpServer';
 import { HttpError, readRawBody, sendJSON } from './http-util';
-import { canAccessRecord } from '../security/model';
+import { canAccessRecord, principalKeys } from '../security/model';
 import type { FileSubsystem } from '../storage/FileSubsystem';
 import type { FileRecord } from '../storage/MetadataStore';
 import { sniff } from '../storage/sniff';
@@ -82,6 +95,36 @@ export interface SignedUrlResult {
   url: string;
   expiresAt: string;
   ttlSeconds: number;
+}
+
+/** At most this many roles in `X-NodeGX-File-Readers`: a file is shared with groups, not a guest list. */
+export const MAX_FILE_READERS = 8;
+
+const READER_ATOM = /^role:[A-Za-z0-9_-]{1,64}$/;
+
+/**
+ * P121-TWO001-MEMBERSPHOTO: `X-NodeGX-File-Readers` as a list of `role:<name>`
+ * keys, or a 400 that says which part is wrong. Absent or blank: no readers.
+ */
+export function parseFileReaders(raw: string | string[] | undefined): string[] {
+  const text = Array.isArray(raw) ? raw.join(',') : raw ?? '';
+  const atoms = text
+    .split(',')
+    .map((a) => a.trim())
+    .filter(Boolean);
+  const readers = [...new Set(atoms)];
+  for (const atom of readers) {
+    if (!READER_ATOM.test(atom)) {
+      throw new HttpError(
+        400,
+        `X-NodeGX-File-Readers takes roles written role:<name>, separated by commas; "${atom}" is not one.`
+      );
+    }
+  }
+  if (readers.length > MAX_FILE_READERS) {
+    throw new HttpError(400, `X-NodeGX-File-Readers names ${readers.length} roles; at most ${MAX_FILE_READERS}.`);
+  }
+  return readers;
 }
 
 function sanitizeName(name: string): string {
@@ -129,6 +172,19 @@ export class FileRoutes {
       throw new HttpError(413, `Upload exceeds this backend's ${config.maxUploadBytes}-byte limit.`);
     }
 
+    // Before the body is read: a refused share costs the uploader no bytes.
+    const readers = parseFileReaders(ctx.req.headers['x-nodegx-file-readers']);
+    if (readers.length && ctx.principal.kind !== 'admin') {
+      const held = new Set(principalKeys(ctx.principal));
+      if (!readers.some((r) => held.has(r))) {
+        throw new HttpError(
+          403,
+          `You can share a file only with a role you hold, and you hold none of ${readers.join(', ')}.`,
+          119
+        );
+      }
+    }
+
     const body = await readRawBody(ctx.req, config.maxUploadBytes);
     if (body.length === 0) throw new HttpError(400, 'Refusing an empty upload.');
 
@@ -144,7 +200,8 @@ export class FileRoutes {
 
     const hash = sha256hex(body);
     const storedName = `${crypto.randomBytes(8).toString('hex')}_${originalName}`;
-    const isPrivate = String(ctx.req.headers['x-nodegx-file-private'] || '').toLowerCase() === 'true';
+    const isPrivate =
+      readers.length > 0 || String(ctx.req.headers['x-nodegx-file-private'] || '').toLowerCase() === 'true';
     const owner = ctx.principal.kind === 'user' ? ctx.principal.userId : null;
 
     const driver = this.subsystem.getDriver();
@@ -159,7 +216,8 @@ export class FileRoutes {
         driver: driver.kind,
         key,
         owner,
-        private: isPrivate
+        private: isPrivate,
+        readers
       });
       sendJSON(ctx.res, 201, {
         url: `${this.baseUrl}/files/${encodeURIComponent(storedName)}`,

@@ -43,6 +43,8 @@ export interface FileRecord {
   key: string;
   owner: string | null;
   private: boolean;
+  /** P121-TWO001-MEMBERSPHOTO: the roles it is shared with (each also a read entry in `ACL`); absent when none. */
+  readers?: string[] | null;
   ACL: Record<string, FileAclEntry> | null | undefined;
   createdAt: string;
   updatedAt: string;
@@ -58,33 +60,52 @@ export interface CreateFileRecordInput {
   key: string;
   owner: string | null;
   private: boolean;
+  /**
+   * P121-TWO001-MEMBERSPHOTO: the `role:<name>` keys that may READ a private
+   * file as well as its owner (`X-NodeGX-File-Readers`). Never write: a file
+   * shared with a role is still deleted only by whoever uploaded it.
+   */
+  readers?: string[];
 }
 
-/** Ensure `_Files` exists with the right shape. Idempotent — call at every startup. */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const FILE_COLUMNS = [
+  { name: 'storedName', type: 'String' },
+  { name: 'originalName', type: 'String' },
+  { name: 'size', type: 'Number' },
+  { name: 'contentType', type: 'String' },
+  { name: 'hash', type: 'String' },
+  { name: 'driver', type: 'String' },
+  { name: 'key', type: 'String' },
+  { name: 'owner', type: 'Pointer', targetClass: '_User' },
+  { name: 'private', type: 'Boolean' },
+  // P121-TWO001-MEMBERSPHOTO: the roles a private file is shared with, the same keys its ACL grants read. Kept as a
+  // column because every record read drops a row's ACL (`cloudstore.js`), and a cloud function must be able to ask
+  // "is this photo the members'?" before it puts it in a post.
+  { name: 'readers', type: 'Array' }
+];
+
+/**
+ * Ensure `_Files` exists with the right shape. Idempotent — call at every startup. A backend made before a column
+ * was added gains it here (`createTable` leaves an existing table alone).
+ */
 export function ensureFilesTable(schemaManager: IStorageSchema | null | undefined): void {
   if (!schemaManager) return;
-  schemaManager.createTable({
-    name: FILES_COLLECTION,
-    columns: [
-      { name: 'storedName', type: 'String' },
-      { name: 'originalName', type: 'String' },
-      { name: 'size', type: 'Number' },
-      { name: 'contentType', type: 'String' },
-      { name: 'hash', type: 'String' },
-      { name: 'driver', type: 'String' },
-      { name: 'key', type: 'String' },
-      { name: 'owner', type: 'Pointer', targetClass: '_User' },
-      { name: 'private', type: 'Boolean' }
-    ]
-  });
+  if (schemaManager.createTable({ name: FILES_COLLECTION, columns: FILE_COLUMNS })) return;
+  const have = new Set((schemaManager.getTableSchema(FILES_COLLECTION)?.columns ?? []).map((c) => c.name));
+  for (const column of FILE_COLUMNS) if (!have.has(column.name)) schemaManager.addColumn(FILES_COLLECTION, column);
 }
 
 export class MetadataStore {
   constructor(private readonly facade: IStorageFacade) {}
 
   async create(input: CreateFileRecordInput): Promise<FileRecord> {
-    const acl = input.private && input.owner ? { [input.owner]: { read: true, write: true } } : undefined;
+    let acl: Record<string, FileAclEntry> | undefined;
+    if (input.private) {
+      const entries: Record<string, FileAclEntry> = {};
+      if (input.owner) entries[input.owner] = { read: true, write: true };
+      for (const reader of input.readers ?? []) entries[reader] = { read: true };
+      if (Object.keys(entries).length) acl = entries;
+    }
     const record = await this.facade.rawCreate(FILES_COLLECTION, {
       storedName: input.storedName,
       originalName: input.originalName,
@@ -95,6 +116,7 @@ export class MetadataStore {
       key: input.key,
       owner: input.owner,
       private: input.private,
+      ...(input.private && input.readers?.length ? { readers: input.readers } : {}),
       ACL: acl
     });
     return record as unknown as FileRecord;

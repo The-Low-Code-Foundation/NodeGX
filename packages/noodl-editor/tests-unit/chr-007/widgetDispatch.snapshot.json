@@ -895,6 +895,7 @@
       "clip": "BooleanType",
       "cssClassName": "BasicType",
       "dataAttributes": "StringListType",
+      "keepPagesWhenUnmounted": "BooleanType",
       "mounted": "BooleanType",
       "name": "IdentifierType",
       "pages": "PropListType",
@@ -1333,8 +1334,11 @@
       "field": "BasicType",
       "file": null,
       "path": "BasicType",
+      "photoQuality": "BasicType",
       "private": "BooleanType",
+      "readers": "BasicType",
       "recordId": "BasicType",
+      "shrinkTo": "BasicType",
       "upload": null
     },
     "Value Changed": {

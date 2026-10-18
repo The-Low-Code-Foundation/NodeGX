@@ -112,8 +112,8 @@ export const nodegxDescriptor: BackendDescriptor = {
     // The header works. What it cannot do is make a file private on behalf of
     // nobody, and an author reading "supported" would not expect that.
     'files.private': degraded(
-      'A private upload is locked to the person who made it, so a file uploaded by anything other than a signed-in user — an admin tool, a cloud function — ends up private with no owner, and stays readable by everyone.',
-      'BCN-007 live, security enforced: uploaded as a signed-in user, the plain URL is 403 for anonymous AND for a second signed-in user. Uploaded with the master key, the identical request with X-NodeGX-File-Private: true serves 200 to anonymous — files.ts::upload sets owner=null for a non-user principal'
+      'A private upload is locked to the person who made it, so a file uploaded by anything other than a signed-in user — an admin tool, a cloud function — ends up private with no owner, and stays readable by everyone. Upload File\'s Readers names roles that may read it too, such as role:member; a file with Readers is never readable by everyone.',
+      'BCN-007 live, security enforced: uploaded as a signed-in user, the plain URL is 403 for anonymous AND for a second signed-in user. Uploaded with the master key, the identical request with X-NodeGX-File-Private: true serves 200 to anonymous — files.ts::upload sets owner=null for a non-user principal. P121-TWO001-MEMBERSPHOTO: X-NodeGX-File-Readers adds read-only role entries to the file\'s ACL; uploaded with the master key and role:crew, anonymous and a user without the role are 403 (files-http.test.ts)'
     ),
     'files.progress': supported('XHR upload path reports progress'),
 

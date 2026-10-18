@@ -195,7 +195,21 @@ const NO_DRAG_WITHOUT_A_TAG: EquivalentMutant[] = ['fileLeave', 'fileDrop'].map(
   why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag from the desktop on a node with no Tag (no files, no target, nothing counted)`)
 }));
 
+/**
+ * P121-TWO008-UPLOADSHRINK — Upload File's Shrink To and Photo Quality are read by the browser's canvas step
+ * (noodl-viewer-react `shrinkphoto.ts`), which this world has not got: with no decoder a photo goes as it was picked, so the
+ * request is the same whatever they hold. Graded where there is a canvas: `noodl-viewer-react/tests/shrinkphoto.test.ts`
+ * (the rules, 13 mutants killed) and the P121 TWO-003 drive (a 4032×3024 JPEG stored at 1600×1200).
+ */
+const SHRINK_UNREAD = (port: string) => `${port} is read only by the browser's canvas step, which this world has not got: a photo goes as picked whatever it holds — graded by shrinkphoto.test.ts and the TWO-003 drive`;
+
 const DECLARED: Readonly<Record<string, EquivalentMutant[]>> = {
+  'Upload File': (['shrinkTo', 'photoQuality'] as const).map((port) => ({
+    reducer: port,
+    kind: 'drop-set' as const,
+    branch: `{"set":["${port}"],"emit":[],"outcome":null,"outcomes":[],"request":false}`,
+    why: SHRINK_UNREAD(port === 'shrinkTo' ? 'Shrink To' : 'Photo Quality')
+  })),
   // NSP-016 s55 — the Drag writes its whole held state on every path (drag.ts `toPatch`); placed off the page, its paint records the
   // props with no component to read them, and the next paint (an act's, or the frame's end) records them again before anything does
   Drag: [{ reducer: 'world.place', kind: 'drop-set', branch: '"emit":[],"outcome":null', why: PLACED_OFF_PAGE }],

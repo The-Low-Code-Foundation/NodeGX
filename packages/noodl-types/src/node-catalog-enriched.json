@@ -37471,6 +37471,18 @@
           "description": "Object path inside the bucket, such as avatars/me.png. Supabase only. Leave blank to use the file's own name"
         },
         {
+          "name": "photoQuality",
+          "displayName": "Photo Quality",
+          "group": "Shrink Photos",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 80,
+          "description": "How much detail a shrunk JPEG or WebP keeps, from 1 to 100; PNG keeps every pixel and its transparency, GIF and SVG are never shrunk"
+        },
+        {
           "name": "private",
           "displayName": "Private",
           "group": "General",
@@ -37483,6 +37495,17 @@
           "description": "Restricts the stored file to whoever uploaded it, so reading it later needs a Sign File URL node"
         },
         {
+          "name": "readers",
+          "displayName": "Readers",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Roles that may read the file as well as whoever uploaded it, such as role:member, separated by commas; setting it makes the file private. NodeGX backends only"
+        },
+        {
           "name": "recordId",
           "displayName": "Record ID (PocketBase)",
           "group": "File Location",
@@ -37492,6 +37515,18 @@
           },
           "isSignal": false,
           "description": "Existing record to attach the file to. PocketBase only. Leave blank to create a new record as part of the upload"
+        },
+        {
+          "name": "shrinkTo",
+          "displayName": "Shrink To",
+          "group": "Shrink Photos",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 0,
+          "description": "Makes a photo smaller in the browser before sending it, so its longer side is at most this many pixels; 0 sends every file as picked"
         },
         {
           "name": "upload",
@@ -37635,6 +37670,15 @@
         "private": [
           "always: held as handed; read when the next Upload goes"
         ],
+        "readers": [
+          "always: held as handed; read when the next Upload goes — set, those roles may read the file as well as whoever uploaded it, and the file is private"
+        ],
+        "shrinkTo": [
+          "always: held as handed; read when the next Upload goes — above 0, a photo (not a GIF or an SVG) is drawn smaller in the browser first, its longer side at most this many pixels, and the smaller file is what goes; it goes as picked when it is already that small, when the smaller one would weigh more, or when the browser cannot read it"
+        ],
+        "photoQuality": [
+          "always: held as handed; read when the next Upload goes, and only when a photo is shrunk — 1 to 100 for a JPEG or WebP, anything else is 80; a PNG keeps every pixel"
+        ],
         "bucket": [
           "always: held as handed; read when the next Upload goes — set, the file goes to this bucket at Path (or under the file's own name)"
         ],
@@ -37651,7 +37695,7 @@
           "always: held as handed; read when the next Upload goes, and only with Collection — a half-filled group is no location at all"
         ],
         "upload": [
-          "always: its own upload at the frame's end — two presses are two uploads — with File, Private and the File Location held then: no File, or a Backend the project does not have, is Error, Error Status Code 0 and Failure at once; otherwise the backend answers with Cloud File then Done, or Error, Error Status Code and Failure"
+          "always: its own upload at the frame's end — two presses are two uploads — with File, Private, Readers and the File Location held then: no File, or a Backend the project does not have, is Error, Error Status Code 0 and Failure at once; otherwise the backend answers with Cloud File then Done, or Error, Error Status Code and Failure"
         ]
       },
       "enrichment": {
