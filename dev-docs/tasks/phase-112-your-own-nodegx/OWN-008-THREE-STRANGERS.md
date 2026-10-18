@@ -1,7 +1,7 @@
 # OWN-008 — Three strangers
 
 **Opened 2026-10-02.** **Depends on OWN-007** (and therefore on everything before it).
-**Status: 🟡 AC1–AC3 ✅ (s2, 2026-10-18): three Opus 5.5 strangers built a table, a children's block editor and a 3D map from the npm kit and the brief alone, each PASS on the repo's todo script, each driven to a saved change with 0 new diagnostics; the brief folded, eight kit rows (NPXPREVIEW and FILESONLY fixed). AC4 waits on Richard's look.** The phase's thesis test.
+**Status: ✅ AC1–AC4 (2026-10-18): three Opus 5.5 strangers built a table, a children's block editor and a 3D map from the npm kit and the brief alone, each PASS on the repo's todo script, each driven to a saved change with 0 new diagnostics; the brief folded, eight kit rows (NPXPREVIEW and FILESONLY fixed). AC4 s6: Richard used all three — Big Blocks "really cool, really well thought out", the map "visually impressive", the table "Nope" (§6 s6).** The phase's thesis test.
 **Model:** **Opus, on purpose, for the three strangers**: the test is whether the kit is enough for the model a person has by default. The session that runs them and reads their questions: Opus. At the start of a session on this task, and again if the work changes kind, say which model you are running on and whether this line says Richard should switch (README §0.2).
 
 ## 1. The person sentence
@@ -254,3 +254,30 @@ reference runs it in every write's `prepare` when the opened project predates fo
   inventory, P112-OWN008-TESTMAINRED, each with a first reading.
 - **Ships on lane 1's next npm cut**, with NPXPREVIEW, FILESONLY and ESMADAPTER. A stranger on the published kit
   0.2.x still gets the old reference and the old bullet.
+
+### s6 (2026-10-18 night, Opus 5.5): Richard uses the three editors (AC4 ✅)
+
+Each editor was installed from its kept `editor/` (`npm ci --omit=dev`, kit as locked) beside its own fresh copy of
+`templates/todo-list` in the session's scratchpad, and opened in Richard's browser: the table on `:8601`, Big Blocks
+on `:8602` (both `--no-open`), the map's round 3 on `:8604`. He was asked, for each, whether it's an editor he'd use
+or a child would get. His words:
+
+> **The table:** "Nope, I don't know how anybody could imagine an app coming from a table and setting the x y
+> positions yourself. It feels like you're making app building purposefully hard to challenge yourself."
+>
+> **Big Blocks:** "Yep I think this one is really cool, really well thought out"
+>
+> **The map:** "Yeah it looks cool. The ships are a bit silly looking, but I like the space battle and the connector
+> animations, it looks really visually impressive"
+
+**What he did, read from the copies afterwards** (each against `templates/todo-list`): in Big Blocks he changed the
+Sign in page's title from *Todo list* to *Help*, raised it from `--text-xl` to `--text-5xl`, and wired its tap to
+the page's existing go-to-the-list navigate (`siTitle.onClick → siToList.navigate`, connections 21 → 22). Three files
+of that page and the registry's timestamps changed; nothing else. The table and map copies are byte-identical to the
+template: he looked, and saved nothing.
+
+**What this rules for the kit.** The table was the wish chosen to share nothing visual with the others (§3.2), and
+it proved the kit can carry one. Richard's reading is that it isn't an editor a person would want: an app is seen,
+not tabulated, and a column of x/y numbers is the canvas's bookkeeping shown as if it were the app. It isn't carried
+forward as a shape to build or polish. Its findings stay (FORMAT4PIN was its). Big Blocks is the one he'd keep. The
+map's next round, if he asks for one, starts from "the ships are a bit silly looking".
