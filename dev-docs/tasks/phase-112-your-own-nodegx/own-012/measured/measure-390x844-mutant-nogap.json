@@ -1,5 +1,6 @@
 {
  "ready": true,
+ "project": "orbit",
  "viewport": {
   "width": 390,
   "height": 844
@@ -7,10 +8,20 @@
  "variant": null,
  "mutant": "nogap",
  "stilled": true,
+ "status": {
+  "status": "ok",
+  "warnings": [],
+  "exportMs": 8.900000095367432,
+  "frameMs": 156
+ },
+ "rootPath": "/App",
+ "pages": {},
  "rows": [
   {
+   "path": "screen",
    "id": "screen",
    "type": "Group",
+   "label": "Screen",
    "drawn": {
     "x": 0,
     "y": 0,
@@ -28,14 +39,21 @@
    "dw": 0,
    "dh": 0,
    "within": true,
+   "sizeOk": true,
+   "posOk": true,
+   "own": [],
    "present": true,
    "outside": [],
    "needs": [],
-   "limits": []
+   "limits": [],
+   "verdict": "within 2 px"
   },
   {
+   "path": "phaseTxt",
    "id": "phaseTxt",
    "type": "Text",
+   "label": "Phase label",
+   "parent": "screen",
    "drawn": {
     "x": 142.6923828125,
     "y": 294,
@@ -53,17 +71,24 @@
    "dw": -0.009765625,
    "dh": 0,
    "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [],
    "present": true,
    "outside": [],
    "needs": [
     "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
     "the text measured by a canvas in the font the system resolves, not by the model"
    ],
-   "limits": []
+   "limits": [],
+   "verdict": "OFF"
   },
   {
+   "path": "timeTxt",
    "id": "timeTxt",
    "type": "Text",
+   "label": "Time",
+   "parent": "screen",
    "drawn": {
     "x": 65.66108703613281,
     "y": 320,
@@ -81,6 +106,11 @@
    "dw": -10.415924072265625,
    "dh": 0,
    "within": false,
+   "sizeOk": false,
+   "posOk": false,
+   "own": [
+    "Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting)"
+   ],
    "present": true,
    "outside": [],
    "needs": [
@@ -89,11 +119,15 @@
    ],
    "limits": [
     "Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting)"
-   ]
+   ],
+   "verdict": "named: Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting); follows phaseTxt"
   },
   {
+   "path": "track",
    "id": "track",
    "type": "Group",
+   "label": "Track",
+   "parent": "screen",
    "drawn": {
     "x": 36,
     "y": 443,
@@ -111,14 +145,21 @@
    "dw": 0,
    "dh": 0,
    "within": true,
+   "sizeOk": true,
+   "posOk": true,
+   "own": [],
    "present": true,
    "outside": [],
    "needs": [],
-   "limits": []
+   "limits": [],
+   "verdict": "within 2 px"
   },
   {
+   "path": "bar",
    "id": "bar",
    "type": "Group",
+   "label": "Progress bar",
+   "parent": "track",
    "drawn": {
     "x": 36,
     "y": 443,
@@ -136,14 +177,21 @@
    "dw": 0.008874999999999994,
    "dh": 0,
    "within": true,
+   "sizeOk": true,
+   "posOk": true,
+   "own": [],
    "present": true,
    "outside": [],
    "needs": [],
-   "limits": []
+   "limits": [],
+   "verdict": "within 2 px"
   },
   {
+   "path": "footTxt",
    "id": "footTxt",
    "type": "Text",
+   "label": "Footer",
+   "parent": "screen",
    "drawn": {
     "x": 61.74749755859375,
     "y": 451,
@@ -161,17 +209,24 @@
    "dw": -0.0106201171875,
    "dh": 0,
    "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [],
    "present": true,
    "outside": [],
    "needs": [
     "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
     "the text measured by a canvas in the font the system resolves, not by the model"
    ],
-   "limits": []
+   "limits": [],
+   "verdict": "named: follows phaseTxt, timeTxt"
   },
   {
+   "path": "btnRow",
    "id": "btnRow",
    "type": "Group",
+   "label": "Buttons",
+   "parent": "screen",
    "drawn": {
     "x": 75,
     "y": 498,
@@ -189,14 +244,21 @@
    "dw": -28,
    "dh": 0,
    "within": false,
+   "sizeOk": false,
+   "posOk": false,
+   "own": [],
    "present": true,
    "outside": [],
    "needs": [],
-   "limits": []
+   "limits": [],
+   "verdict": "named: holds pauseBtn, skipBtn; follows phaseTxt, timeTxt, footTxt"
   },
   {
+   "path": "pauseBtn",
    "id": "pauseBtn",
    "type": "net.noodl.controls.button",
+   "label": "Pause button",
+   "parent": "btnRow",
    "drawn": {
     "x": 75,
     "y": 498,
@@ -214,14 +276,21 @@
    "dw": 0,
    "dh": 0,
    "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [],
    "present": true,
    "outside": [],
    "needs": [],
-   "limits": []
+   "limits": [],
+   "verdict": "named: follows btnRow"
   },
   {
+   "path": "skipBtn",
    "id": "skipBtn",
    "type": "net.noodl.controls.button",
+   "label": "Skip button",
+   "parent": "btnRow",
    "drawn": {
     "x": 195,
     "y": 498,
@@ -239,15 +308,19 @@
    "dw": 0,
    "dh": 0,
    "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [],
    "present": true,
    "outside": [],
    "needs": [],
-   "limits": []
+   "limits": [],
+   "verdict": "named: follows btnRow, pauseBtn"
   }
  ],
  "needs": [
   "the root's parent: the app's root element, the viewport's size, stacked down (no node, no spec says so)",
-  "the values on the wires: the real app's trace (a drawn screen cannot run the graph)",
+  "the values on the wires: a trace or a graph runner (a drawn screen cannot run the graph)",
   "phaseTxt: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
   "phaseTxt: the text measured by a canvas in the font the system resolves, not by the model",
   "timeTxt: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
