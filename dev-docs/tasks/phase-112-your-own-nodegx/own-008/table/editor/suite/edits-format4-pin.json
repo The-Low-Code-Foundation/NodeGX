@@ -1,0 +1,5 @@
+[
+  { "edit": "add_node", "component": "Commands/Add task", "id": "echo", "type": "JavaScriptFunction", "label": "Echo", "x": 10, "y": 10, "parameters": { "functionScript": "Outputs.out = Inputs.value;" } },
+  { "edit": "connect", "component": "Commands/Add task", "from": { "node": "AddtaskIn", "port": "title" }, "to": { "node": "echo", "port": "in-value" } },
+  { "edit": "connect", "component": "Commands/Add task", "from": { "node": "AddtaskIn", "port": "do" }, "to": { "node": "echo", "port": "run" } }
+]
