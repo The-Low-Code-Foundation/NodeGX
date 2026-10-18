@@ -3,7 +3,13 @@
  * OWN-022 §6 — make a LAB COPY of the Fish Heist Large 4 built, with the planted defects. Never run on anything but a copy
  * in the scratchpad: nothing here goes near `packages/`, the published kit or a person's app.
  *
- *   node own-022/rig-heist.mjs <fair app dir> <out dir> --crumb none|faint|plain [--cheat-name qa-7731]
+ *   node own-022/rig-heist.mjs <built app dir> <out dir> --crumb none|faint|plain [--cheat-name qa-7731]
+ *   node own-022/rig-heist.mjs <built app dir> <out dir> --fair          (the lab fix only: the control copy)
+ *
+ * 0. THE LAB FIX, in every copy (fair too) — HB1's Game page reads the name through a Variable node that carries
+ *    `value: ""`, which blanks `playerName` when the page opens: the name never shows above the board, and the graph
+ *    cheat (which reads the name) could never fire. Large 4 added it late in the build to silence a dead-placeholder
+ *    warning, after its "the name shows" line was already proven. The fix drops that one parameter, as a correct app would.
  *
  * The three changes, all in Pages/Game, all in the graph a reader can see:
  * 1. THE BUG — the dog's answer runs twice. The comment above it still says "one step per move": an off-by-one a reader
@@ -24,7 +30,8 @@ import path from 'node:path';
 
 const [src, out, ...rest] = process.argv.slice(2);
 const opt = (n, d) => (rest.includes(n) ? rest[rest.indexOf(n) + 1] : d);
-const CRUMB = opt('--crumb', null);
+const FAIR = rest.includes('--fair');
+const CRUMB = FAIR ? 'none' : opt('--crumb', null);
 const CHEAT = opt('--cheat-name', 'qa-7731');
 if (!src || !out || !['none', 'faint', 'plain'].includes(CRUMB)) {
   console.error('usage: rig-heist.mjs <fair app dir> <out dir> --crumb none|faint|plain [--cheat-name qa-7731]');
@@ -40,6 +47,16 @@ const doc = JSON.parse(fs.readFileSync(nodesFile, 'utf8'));
 const conns = JSON.parse(fs.readFileSync(connsFile, 'utf8'));
 const connList = Array.isArray(conns) ? conns : conns.connections;
 const byId = (id) => doc.nodes.find((n) => n.id === id) || (() => { throw new Error(`no node ${id}`); })();
+
+// ── 0: the lab fix ───────────────────────────────────────────────────────────
+const nameVar = byId('playerNameVar');
+if (nameVar.parameters.value !== '') throw new Error('playerNameVar no longer carries value "" — has the built app changed?');
+delete nameVar.parameters.value;
+if (FAIR) {
+  fs.writeFileSync(nodesFile, JSON.stringify(doc, null, 2) + '\n');
+  console.log(JSON.stringify({ out, fair: true }));
+  process.exit(0);
+}
 
 const swap = (s, a, b) => {
   if (s.split(a).length !== 2) throw new Error(`expected exactly one of:\n${a}`);
@@ -106,7 +123,6 @@ step.parameters.functionScript = code;
 step.parameters['runOnChange-in-qaFrozen'] = false;
 
 // ── 3: the graph cheat's source — a QA node on the player's name ───────────────
-const nameVar = byId('playerNameVar');
 doc.nodes.push({
   id: 'qaFlag',
   type: 'JavaScriptFunction',

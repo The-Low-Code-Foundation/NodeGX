@@ -94,6 +94,8 @@ const START = opt('--path', GAME.path);
 const [VW, VH] = opt('--viewport', '1024x768').split('x').map(Number);
 const MAX_STEPS = Number(opt('--max-steps', 150));
 const EFFORT = opt('--effort', null);
+const API_TIMEOUT_MS = Number(opt('--api-timeout', 600)) * 1000;
+const MAX_MINUTES = Number(opt('--max-minutes', 0)); // 0 = no wall cap
 const MODEL = opt('--model', 'mistral-large-4'); // 🔴 pinned: `mistral-large-latest` answers as a different model (OWN-018 §3)
 const OUT = path.resolve(opt('--out', path.join(process.env.TMPDIR || '/tmp', `own022-${Date.now()}`)));
 const KEEP_SHOTS = Number(opt('--keep-shots', 2)); // how many recent screenshots stay in the conversation
@@ -173,6 +175,7 @@ const SYSTEM =
 // ── Talking to Mistral ───────────────────────────────────────────────────────
 
 async function chat(messages, toolChoice = 'any') {
+  messages = messages.map(({ pruned, ...m }) => m);
   const body = { model: MODEL, messages, tools: TOOLS, tool_choice: toolChoice, parallel_tool_calls: true, temperature: 0.3 };
   if (EFFORT) body.reasoning_effort = EFFORT;
   const first = Date.now();
@@ -180,12 +183,14 @@ async function chat(messages, toolChoice = 'any') {
     const t0 = Date.now();
     let r, j;
     try {
-      // 🔴 without a timeout one request hung 300 s (Node's fetch default) in smoke3; the model's answers take 1–6 s
+      // 🔴 without a timeout one request hung 300 s (Node's fetch default) in smoke3. Monster Gate answers take 1–6 s, but on
+      // the heist board Large 4 plans before it moves: one answer took 29.5 s / 2,738 reasoning tokens on its retry after
+      // a 90 s abort, and fair-smoke4's thinks ran 83–209 s with two over 300 s. --api-timeout (default 600 s) cuts only a dead connection.
       r = await fetch('https://api.mistral.ai/v1/chat/completions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${KEY}` },
         body: JSON.stringify(body),
-        signal: AbortSignal.timeout(90_000)
+        signal: AbortSignal.timeout(API_TIMEOUT_MS)
       });
       j = await r.json().catch(() => ({}));
     } catch (e) {
@@ -201,6 +206,18 @@ async function chat(messages, toolChoice = 'any') {
       continue;
     }
     throw new Error(`Mistral ${r.status}: ${JSON.stringify(j).slice(0, 600)}`);
+  }
+}
+
+/** Old graph reads go too (each is up to 60k chars, paid again on every later call); the newest KEEP_GRAPH stay whole. */
+const KEEP_GRAPH = Number(opt('--keep-graph', 2));
+function pruneGraph(messages) {
+  let seen = 0;
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m.role !== 'tool' || !['list_game_components', 'read_game_component'].includes(m.name) || m.pruned) continue;
+    seen += 1;
+    if (seen > KEEP_GRAPH) { m.content = '(this earlier read was removed to save space — read it again if you need it)'; m.pruned = true; }
   }
 }
 
@@ -313,9 +330,10 @@ const result = await withDeployedSite({ origin: ORIGIN, visible: flag('--visible
     { type: 'image_url', image_url: `data:image/jpeg;base64,${await shoot(page, 0)}` }
   ] });
 
-  while (step < MAX_STEPS && !verdict && finishReason === null) {
+  while (step < MAX_STEPS && !verdict && finishReason === null && !(MAX_MINUTES && Date.now() - started > MAX_MINUTES * 60000)) {
     step += 1;
     pruneImages(messages);
+    pruneGraph(messages);
     const res = await chat(messages);
     const msg = res.choices[0].message;
     const u = res.usage || {};
@@ -356,12 +374,13 @@ const result = await withDeployedSite({ origin: ORIGIN, visible: flag('--visible
     await wait(600);
     const text = await page.evaluate('document.body.innerText');
     const lostNow = GAME.lost.test(text);
+    const pageMoves = Number((text.match(/Moves: (\d+)/) || [])[1] ?? NaN); // heist: the slide reads as +2 in one step
     if (lostNow && !wasLost) cheats.losses += 1; // rising edge: one loss per game
     wasLost = lostNow;
     if (GAME.won.test(text)) verdict = 'won';
     else if (lostNow && !GAME.keepPlaying) verdict = 'lost';
 
-    const line = { step, ...(calls.length ? {} : { raw: JSON.stringify(msg).slice(0, 1500) }), ms: res.ms, totalMs: res.totalMs, attempts: res.attempts, usage: u, said: said.slice(0, 500), actions: done, verdict, at: Date.now() - started };
+    const line = { step, pageMoves, lost: lostNow, ...(calls.length ? {} : { raw: JSON.stringify(msg).slice(0, 1500) }), ms: res.ms, totalMs: res.totalMs, attempts: res.attempts, usage: u, said: said.slice(0, 500), actions: done, verdict, at: Date.now() - started };
     LOG.write(JSON.stringify(line) + '\n');
     console.log(`#${step} ${(res.ms / 1000).toFixed(1)}s ${said.replace(/\s+/g, ' ').slice(0, 140)}` +
       `\n     → ${done.map((d) => `${d.note}${d.hit ? ` [${d.hit}]` : ''}`).join('; ') || '(no action)'}`);
