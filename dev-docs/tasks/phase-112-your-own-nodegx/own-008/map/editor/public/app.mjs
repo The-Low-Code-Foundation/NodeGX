@@ -292,10 +292,22 @@ map.on('move', (card, xy) => {
 
 map.on('hover', (hit) => {
   const el = $('#hover');
-  if (!hit?.card) return (el.hidden = true);
+  if (hit?.wire) {
+    const { key, wire: w } = hit.wire;
+    el.hidden = false;
+    el.innerHTML = `${esc(label(key, w.fromId))}.<code>${esc(w.fromProperty)}</code> <span class="muted">→</span> ${esc(label(key, w.toId))}.<code>${esc(w.toProperty)}</code>`;
+    highlightInPreview([w.fromId, w.toId], `${label(key, w.fromId)} → ${label(key, w.toId)}`);
+    return;
+  }
+  if (!hit?.card) {
+    el.hidden = true;
+    highlightInPreview();
+    return;
+  }
   const n = model.node(hit.card.key, hit.card.id);
   el.hidden = false;
   el.innerHTML = `${esc(n.label || shortType(n.type))} <span class="muted">${esc(shortType(n.type))} · ${esc(hit.card.key)}</span>`;
+  highlightInPreview([hit.card.id], n.label || shortType(n.type));
 });
 $('#map').addEventListener('pointermove', (e) => {
   const el = $('#hover');
@@ -815,7 +827,7 @@ async function runPreview() {
       if (ui.selection) map.select(ui.selection);
       renderPanel();
     }
-    highlightInPreview();
+    drawHighlight();
   } catch (e) {
     status.textContent = 'failed';
     status.title = e.message;
@@ -844,21 +856,72 @@ function loadScript(src) {
   });
 }
 
-let highlighted = [];
-function highlightInPreview() {
-  for (const el of highlighted) el.style.outline = el.dataset.mapOutline ?? '';
-  highlighted = [];
-  if (!preview || !ui.selection) return;
-  try {
-    for (const el of preview.elementsOf(ui.selection.id) ?? []) {
-      el.dataset.mapOutline = el.style.outline;
-      el.style.outline = '2px solid #1570ef';
-      highlighted.push(el);
-    }
-  } catch {
-    /* the app is rebuilding */
+/**
+ * Shows, in the running app, what a node on the map draws: a box over each element it draws, with
+ * its name, laid over the app in its own frame (the app's own styles are not touched). Called with
+ * the hovered node(s); with nothing, it falls back to the selected node. A node that draws nothing
+ * right now (a logic node, or one on another page or hidden) is said in the preview's header.
+ */
+let highlightTarget = { ids: [], name: '' };
+let highlightShown = '';
+function highlightInPreview(ids, name) {
+  if (!ids && ui.selection) {
+    ids = [ui.selection.id];
+    name = label(ui.selection.key, ui.selection.id);
   }
+  highlightTarget = { ids: ids ?? [], name: name ?? '' };
+  drawHighlight();
 }
+
+/**
+ * Draws the boxes for highlightTarget over the app as it is now. Run on every hover and every
+ * 800 ms, so the boxes follow the app when it navigates, scrolls, or rebuilds after an edit.
+ */
+function drawHighlight() {
+  const { ids, name } = highlightTarget;
+  const frame = preview?.frame;
+  const doc = frame?.contentDocument;
+  const note = $('#preview-note');
+  if (!doc?.body) return;
+  doc.getElementById('map-highlight')?.remove();
+  const sig = ids.join('|');
+  const isNew = sig !== highlightShown;
+  highlightShown = sig;
+  if (!ids.length) {
+    note.textContent = '';
+    return;
+  }
+  let els = [];
+  try {
+    for (const id of ids) els.push(...(preview.elementsOf(id) ?? []));
+  } catch {
+    return; /* the app is rebuilding */
+  }
+  els = els.filter((el) => el.isConnected && el.getClientRects().length);
+  if (!els.length) {
+    note.textContent = `${name || 'This node'} draws nothing on this screen right now`;
+    return;
+  }
+  note.textContent = '';
+  const layer = doc.createElement('div');
+  layer.id = 'map-highlight';
+  layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483647;';
+  for (const el of els) {
+    const r = el.getBoundingClientRect();
+    const box = doc.createElement('div');
+    box.style.cssText = `position:fixed;left:${r.left - 2}px;top:${r.top - 2}px;width:${r.width + 4}px;height:${r.height + 4}px;border:2px solid #4da3ff;border-radius:4px;background:rgba(77,163,255,0.18);box-shadow:0 0 0 2px rgba(77,163,255,0.35),0 0 14px rgba(77,163,255,0.6);`;
+    layer.appendChild(box);
+  }
+  const first = els[0].getBoundingClientRect();
+  const chip = doc.createElement('div');
+  chip.textContent = name ?? '';
+  chip.style.cssText = `position:fixed;left:${Math.max(2, first.left - 2)}px;top:${Math.max(2, first.top - 22)}px;background:#4da3ff;color:#fff;font:600 11px system-ui,sans-serif;padding:2px 6px;border-radius:4px;white-space:nowrap;`;
+  if (name) layer.appendChild(chip);
+  doc.body.appendChild(layer);
+  // Newly hovered and off the frame's screen: bring it into view (only once, so you can still scroll the app).
+  if (isNew && (first.bottom < 0 || first.top > frame.clientHeight)) els[0].scrollIntoView({ block: 'center' });
+}
+setInterval(drawHighlight, 800);
 
 /**
  * The running app's trace: each event is one value or signal sent along one wire
@@ -884,7 +947,7 @@ $('#btn-preview').addEventListener('click', () => {
 
 // --- start ---------------------------------------------------------------------------------
 
-window.__map = { map, model, ui }; // for the developer's console and the test driver
+window.__map = { map, model, ui, get preview() { return preview; } }; // for the developer's console and the test driver
 
 (async () => {
   try {

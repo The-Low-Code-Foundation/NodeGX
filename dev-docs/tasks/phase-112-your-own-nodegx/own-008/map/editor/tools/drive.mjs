@@ -3,6 +3,8 @@
 //   node tools/drive.mjs <url> <steps.json> <out-dir>
 // A step is { "wait": ms } | { "eval": "js" } | { "shot": "name.png" } | { "click": [x, y] }
 //   | { "drag": [x1, y1, x2, y2] } | { "key": "KeyW", "ms": 500 } | { "type": "text" }
+//   On Node 20, run it as `node --experimental-websocket tools/drive.mjs …` (WebSocket is built in from Node 22).
+//   The page's preview takes 15–30 s to boot in headless Chrome: wait for it before testing it.
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -88,6 +90,17 @@ for (const step of steps) {
     await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x, y });
     await mouse('mousePressed', x, y);
     await mouse('mouseReleased', x, y);
+  }
+  if (step.hoverCard || step.hoverAt) {
+    // The pointer resting over a card, or over a point an expression names ({ x, y }), with no button down.
+    const expr = step.hoverCard ? `__map.map.screenOf(${JSON.stringify(step.hoverCard[0])}, ${JSON.stringify(step.hoverCard[1])})` : step.hoverAt;
+    const r = await send('Runtime.evaluate', { expression: expr, returnByValue: true });
+    const p = r.result?.result?.value;
+    if (!p) console.log('[hover] not found:', step.hoverCard ?? step.hoverAt);
+    else {
+      for (const [dx, dy] of [[-3, -3], [0, 0]]) await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: p.x + dx, y: p.y + dy });
+      console.log('[hover]', step.hoverCard ? step.hoverCard.join(' ') : 'point', 'at', p.x, p.y);
+    }
   }
   if (step.dragCard) {
     const [key, cid, dx, dy] = step.dragCard;

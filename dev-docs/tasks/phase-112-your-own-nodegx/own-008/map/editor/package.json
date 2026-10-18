@@ -8,8 +8,8 @@
   "scripts": {
     "prestart": "node tools/ensure-installed.mjs",
     "start": "node server.mjs ../todo-list --open",
-    "suite": "node node_modules/@nodegx/project-contract/editor-suite-node.js suite/adapter.mjs",
-    "suite:control": "node node_modules/@nodegx/project-contract/editor-suite-node.js suite/adapter-broken.mjs",
+    "suite": "node tools/run-suite.mjs suite/adapter.mjs",
+    "suite:control": "node tools/run-suite.mjs suite/adapter-broken.mjs",
     "preview": "noodl-preview ../todo-list --open"
   },
   "dependencies": {

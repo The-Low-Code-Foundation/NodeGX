@@ -1,9 +1,15 @@
 # NodeGX map
 
 Your NodeGX app as a 3D map you fly through and rewire. Every component is a plate in its folder's
-district, every node is a card where the files put it, and every wire is an arc: blue for signals,
-green for values. The app itself runs in the corner, and while you use it, beads run along the
-wires that are carrying values right now.
+district, and every node is a card where the files put it. As on a NodeGX card, a card has a row for
+each wired port, with a dot on its edge: inputs on the left, outputs on the right. Every wire leaves
+its output dot level, arcs over, and comes down level into its input dot. Signals are blue and
+values are green.
+
+Hover a wire and it glows, firing glowing balls from its output to its input, so you can see which
+way it runs. Hover a card and all of its wires do the same. Whatever you hover is outlined in the
+running app in the corner, if it draws something on that screen. While you use the app, a ball
+runs along each wire that carries a value.
 
 ## Start
 
@@ -19,12 +25,15 @@ That opens `../todo-list` in your browser. The first start installs the kit. For
 
 | | |
 |---|---|
-| W A S D or the arrow keys | fly |
+| W / S or ↑ / ↓ | fly forward / back, level, the way you're facing |
+| A / D or ← / → | fly left / right |
 | E / Q (or Space / C) | up / down |
 | Shift | faster |
 | drag | look around |
 | right-drag or Shift-drag | pan |
-| wheel | forward / back |
+| wheel | zoom: in and out along your line of sight |
+
+Click the map first if you've been typing in the app's preview, so the keys come back to the map.
 | click | select a card or a plate |
 | double-click, or F | fly to it |
 | Home, or **Whole map** | the whole map |
@@ -68,7 +77,14 @@ npm run suite:control -- <a copy of the app> suite/edits.json  # FAIL on purpose
 ```
 
 `suite/adapter.mjs` drives the same model methods the panel's buttons call (`core/model.mjs`) and
-saves the same way the Save button does (`core/commit.mjs`).
+saves the same way the Save button does (`core/commit.mjs`). `tools/run-suite.mjs` is the kit's
+command (same `runSuite`, graph grader and report), except that it loads the adapter with `import()`.
+The kit's own `editor-suite-node.js` uses `require()`, which can't load an `.mjs` adapter before
+Node 22.
+
+`tests/edit-session.json` is a session in the page itself (rewire, cut, rename, set, drag, add,
+save), run by `node --experimental-websocket tools/drive.mjs <the page's URL> tests/edit-session.json <shots-dir>`
+against an editor started on a copy of the app.
 
 ## Files
 

@@ -1,4 +1,6 @@
-// OWN-008 one stranger: `node round.mjs <table|blocks|map> <labRoot>`.
+// OWN-008 one stranger: `node round.mjs <table|blocks|map> <labRoot> [--again <message.txt>]`.
+// `--again` carries the same stranger on in its own session (`--resume`), in its own lab, with the person's next
+// words, as a person does with their agent: output goes to out/<name>/again-<n>/.
 // The lab is what a person has after `npm create nodegx@0.2.2` (made once as <labRoot>/base) plus a copy of
 // templates/todo-list. The stranger is a fresh `claude -p` on Opus (the task's Model line): no repo, no git, no web,
 // no messaging socket, the project's own settings and skill only, the nodegx server from the folder's .mcp.json with
@@ -16,15 +18,31 @@ const wishes = JSON.parse(fs.readFileSync(path.join(HERE, 'wishes.json'), 'utf8'
 if (!wishes.strangers[name] || !labRoot) throw new Error('usage: round.mjs <table|blocks|map> <labRoot>');
 
 const LAB = path.join(labRoot, 'lab', name);
-const OUT = path.join(labRoot, 'out', name);
-if (fs.existsSync(LAB)) throw new Error(`${LAB} exists: a lab is used once`);
-fs.mkdirSync(OUT, { recursive: true });
-fs.cpSync(path.join(labRoot, 'base'), LAB, { recursive: true });
-fs.cpSync(path.join(REPO, 'templates/todo-list'), path.join(LAB, 'todo-list'), { recursive: true });
-fs.mkdirSync(path.join(LAB, '.home'));
-const mcp = JSON.parse(fs.readFileSync(path.join(LAB, '.mcp.json'), 'utf8'));
-mcp.mcpServers.nodegx.env = { HOME: path.join(LAB, '.home') };
-fs.writeFileSync(path.join(LAB, '.mcp.json'), JSON.stringify(mcp, null, 2) + '\n');
+const FIRST = path.join(labRoot, 'out', name);
+const againFile = process.argv[4] === '--again' ? process.argv[5] : null;
+let OUT = FIRST;
+let resume = [];
+if (againFile) {
+  const init = fs.readFileSync(path.join(FIRST, 'agent.jsonl'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l))
+    .find((e) => e.type === 'system' && e.subtype === 'init');
+  let n = 1;
+  while (fs.existsSync(path.join(FIRST, `again-${n}`))) n++;
+  OUT = path.join(FIRST, `again-${n}`);
+  fs.mkdirSync(OUT, { recursive: true });
+  // The latest session: an again-run carries on the one before it.
+  const prev = n > 1 ? path.join(FIRST, `again-${n - 1}`, 'agent.jsonl') : null;
+  const last = prev ? fs.readFileSync(prev, 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l)).findLast((e) => e.session_id) : init;
+  resume = ['--resume', last.session_id];
+} else {
+  if (fs.existsSync(LAB)) throw new Error(`${LAB} exists: a lab is used once`);
+  fs.mkdirSync(OUT, { recursive: true });
+  fs.cpSync(path.join(labRoot, 'base'), LAB, { recursive: true });
+  fs.cpSync(path.join(REPO, 'templates/todo-list'), path.join(LAB, 'todo-list'), { recursive: true });
+  fs.mkdirSync(path.join(LAB, '.home'));
+  const mcp = JSON.parse(fs.readFileSync(path.join(LAB, '.mcp.json'), 'utf8'));
+  mcp.mcpServers.nodegx.env = { HOME: path.join(LAB, '.home') };
+  fs.writeFileSync(path.join(LAB, '.mcp.json'), JSON.stringify(mcp, null, 2) + '\n');
+}
 
 function manifest(dir) {
   const out = {};
@@ -46,13 +64,13 @@ const snapshot = () => ({
 });
 fs.writeFileSync(path.join(OUT, 'before.json'), JSON.stringify(snapshot(), null, 2));
 
-const prompt = wishes.frame.replace('{wish}', wishes.strangers[name]);
+const prompt = againFile ? fs.readFileSync(againFile, 'utf8').trim() : wishes.frame.replace('{wish}', wishes.strangers[name]);
 fs.writeFileSync(path.join(OUT, 'prompt.txt'), prompt + '\n');
 const bash = ['npm', 'npx', 'node', 'ls', 'mkdir', 'cat', 'cd', 'head', 'tail', 'find', 'grep', 'wc', 'echo', 'sleep',
   'cp', 'diff', 'curl', 'mv', 'touch', 'sort', 'jq'].map((c) => `Bash(${c}:*)`);
 const args = [
   '-e', 'alarm 7200; exec @ARGV', process.env.CLAUDE_BIN || 'claude', // CLAUDE_BIN: claude-opus-5-5 needs CLI ≥ 2.1.280
-  '-p', prompt,
+  '-p', prompt, ...resume,
   '--model', 'claude-opus-5-5',
   '--output-format', 'stream-json', '--verbose',
   '--strict-mcp-config', '--mcp-config', path.join(LAB, '.mcp.json'),

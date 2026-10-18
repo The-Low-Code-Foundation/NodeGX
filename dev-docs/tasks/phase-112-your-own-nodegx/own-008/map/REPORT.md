@@ -119,3 +119,94 @@ question 10).
     `component.json` (or its `modified`) when only `nodes.json` and `connections.json` changed. The
     registry entry's `modified` and `lastUpdated` did change. I treated that as right because the
     reference does the same.
+
+## Second round: fixes after the person used it
+
+The person played with the map and asked for four fixes. This round took about 18 minutes
+(timestamped).
+
+### What changed
+
+1. **Flying forward and back.** W/S (and ↑/↓) used to move along the line of sight. Looking down at
+   the map, that is a dive, which reads as a zoom. They now fly level, the way you're facing, at the
+   same height. E/Q still go up and down, and the wheel stays the zoom. The map also takes the
+   keyboard back when you click it, because keys typed into the app's preview frame never reach the
+   map. Arrows and Space no longer scroll the page.
+2. **Wires into their ports.** Cards now have a row for each wired port, as on a NodeGX card: header,
+   then inputs, then outputs, at the kit's `card.propertyConnectionHeight`. Each port has a dot on
+   the card's edge, inputs west and outputs east. Each wire is a NodeGX-style bezier on the ground
+   plane: it runs straight out of its output and into its input for half the gap, more when it runs
+   backwards. It is lifted into an arc by sin², which has zero slope at both ends, so it leaves its
+   output dot level and comes down level into its input dot. A card's x/y is its top-left corner,
+   as on the canvas. Moving, dropping and placing a new card now allow for its depth.
+3. **The preview highlights what you hover.** Hovering a card outlines what that node draws in the
+   running app, with a labelled box over the app (the app's own styles are not touched). Hovering a
+   wire outlines both of its ends. A node that draws nothing on the current screen is said in the
+   preview's header. The box follows the app every 800 ms, so it is right after a navigation,
+   scroll or rebuild. It also scrolls the app to the element once, when you hover something new.
+   The cause of "doesn't highlight": it only highlighted the *selected* node, not the hovered one.
+   It also never looked again after the app moved on: this app starts on `/` and redirects to
+   `/sign-in`, so a node checked during that moment stayed "nothing drawn".
+4. **Hovered wires glow and show their direction.** Hovering a wire picks it (raycast on the line,
+   with a tolerance that grows with height), and a card in front wins over a wire just above it. The
+   wire is drawn in its kit `highlighted` colour with an additive halo, and both port dots glow. A
+   glowing ball fires from the output to the input every 320 ms at a steady speed, so the direction
+   reads at a glance. A tooltip names both ends. Hovering a card does the same for all of its wires.
+   The live-trace beads from the running app now use the same glowing ball.
+
+### How it was tested (all on fresh copies of `todo-list`)
+
+- `editor/tests/hover.json`, in headless Chrome:
+  - All 21 wires on the Sign in plate start and end exactly on their port dots and are level there
+    (slope < 0.1).
+  - Hovering the Password card lit its 3 wires and fired balls.
+  - Hovering the Password → Sign in wire lit that one wire and named it in the tooltip. Once the app
+    was on `/sign-in`, the preview showed the highlight boxes and no note.
+  - W moved the camera forward with its height unchanged.
+- The case that failed before: I hovered while the app was still on its start screen, and the note
+  said nothing was drawn, which was true then. 26 s later, on `/sign-in`, the box was there and the
+  note had cleared, with no new hover.
+- `editor/tests/edit-session.json` (the first round's session, now kept in the editor), on the
+  taller cards:
+  - Wiring `listLabel → text` gave `hdTitle` a `text` port row.
+  - Cut, rename, set parameter, drag, add and save all went through.
+  - The diff against the original shows only those changes: 241 other files byte-identical, 0
+    validator problems.
+- The editor suite on a fresh copy:
+
+  ```
+  $ node tools/run-suite.mjs suite/adapter.mjs <copy> suite/edits.json
+  PASS — NodeGX map editor on suite (243 ms)
+  $ node tools/run-suite.mjs suite/adapter-broken.mjs <copy> suite/edits.json
+  FAIL — NodeGX map editor (broken on purpose) on suite (296 ms): 1 difference(s)
+  1. node "hdTitle" in components/Todo/Header/nodes.json: "parameters.fontSize" is "28"; the official editor saves 28.
+  ```
+
+- `./todo-list`: no file in it is newer than the kit's install.
+- Not re-run this round: the nodegx server's `validate_project` and `render_report`. The server had
+  disconnected from this session. The structural validator and the suite were run instead.
+
+### More questions for the kit (found this round)
+
+14. **The suite command can't load an `.mjs` adapter before Node 22.** This machine is now on Node
+    20.11.1. `editor-suite-node.js` loads the adapter with `require()`, so `suite/adapter.mjs` (the
+    form the guide shows, `my-adapter.mjs`) fails with "require() of ES Module … not supported".
+    `tools/run-suite.mjs` calls the same `readProjectTree`, `runSuite`, `graphGraderFromNodeSpec`
+    and `formatReport`, but loads the adapter with `import()`. The kit's `loadAdapter` could do the
+    same, since its own source already says `import()`.
+15. **The preview has no "the app moved" signal.** `elementsOf(id)` answers for the screen as it is,
+    and the app navigates by itself (here `/` → `/sign-in`). Nothing tells the editor when the frame
+    navigates or redraws, so a highlight goes stale. I poll every 800 ms. An `onNavigate` or
+    `onDraw` callback beside `onTrace` would remove the guess.
+16. **The preview's boot time** in headless Chrome was 15–30 s before `update()` resolved, and
+    `preview` is null until then. That is fine for a person, but a test has to wait for it. Is that
+    the expected time?
+17. **What the canvas look doesn't say about ports.** `card.propertyConnectionHeight` (20) looks like
+    the port row's height, but nothing says so. Nothing gives the port dot's size or where it sits,
+    the order of the rows (I used inputs, then outputs), or how far a wire's bezier runs straight
+    out of a port (I used half the horizontal gap, at least 25 px). "In the NodeGX canvas, wires are
+    drawn under the cards" is said, but the curve itself isn't. These would make a home-made wire
+    match the editor's.
+18. **The `pulsing` wire colour** is `#ffffff` in the dark theme and `#18212b` in the light one,
+    which is the same in both kinds. I tinted it with each kind's `normal` colour, so a ball says
+    signal or value. Is `pulsing` meant for something else, such as the wire line itself?

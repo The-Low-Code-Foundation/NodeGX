@@ -42,7 +42,8 @@ main { flex: 1; display: flex; min-height: 0; }
 #preview-box { position: absolute; left: 10px; bottom: 10px; width: 400px; height: 300px; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; display: flex; flex-direction: column; overflow: hidden; resize: both; box-shadow: 0 6px 24px rgba(0,0,0,.45); }
 #preview-box > header { display: flex; gap: 8px; align-items: center; padding: 4px 8px; border-bottom: 1px solid var(--line); font-size: 12px; }
 #preview-box > header span:first-child { font-weight: 600; }
-#preview-box > header button { margin-left: auto; }
+#preview-box > header button { margin-left: auto; flex: none; }
+#preview-note { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #preview { flex: 1; position: relative; background: white; }
 #preview-box.collapsed { height: auto !important; resize: none; }
 #preview-box.collapsed #preview { display: none; }

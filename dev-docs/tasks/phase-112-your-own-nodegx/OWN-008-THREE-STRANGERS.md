@@ -164,3 +164,34 @@ text-file read.
 
 **No stranger runs again.** §3.4 asks for a re-run where a guess changed the result. None did: the one guess the
 strangers split on (format-4 pinning) gave PASS on the repo script both ways, because that script wires no Run.
+
+### s2, later: Richard plays with the map (AC4, the map), and the stranger takes his words
+
+Richard opened the map on a fresh copy of the todo app (*"Can I play with the map please?"*) and said:
+
+> "flying forward and back doesn't work it zooms in and out, and the wire connectors need to curve a bit more,
+> they're hard to see where they start and end, they don't curve into the ports they just kind of fall into them at
+> whatever angle. The elements in the preview don't seem to highlight when you hover the nodes on the map. The
+> connector lines don't glow like in the NodeGX editor to show which direction they go when you hover them, would be
+> nice to have a kind of glowing ball firing on the line to show where it goes"
+
+His words went to the map stranger as its next message, verbatim (`own-008/map/round2/richard-said.txt`). The
+stranger was resumed in its own session (`round.mjs --again`), in its own lab, with one closing line: just make the
+changes, test on copies, add them to REPORT.md. 20 minutes, 61 turns, $13.16 (API-equivalent; the resumed context
+is large). The week went from 2% to 3%. Its REPORT.md "Second round" names each cause: W/S moved along the line of
+sight; the preview highlighted the selected node, never the hovered one, and checked only once while the app
+redirected; wires were a plain arc with no port rows.
+
+**Checked here, on a fresh copy** (`own-008/verify-map-round2.mjs`, real keys and mouse moves over CDP):
+- Holding W for 3 s moved the camera 61.8 units with a height change of 0. It now flies level. Headless SwiftShader
+  draws about 3 frames a second, so a 0.6 s hold read 0 and wasn't a verdict.
+- Hovering the Password card drew 2 boxes labelled "Password" in the running app, on `/sign-in`, and they cleared
+  when the mouse left.
+- The wires into their ports and the glowing balls are left to Richard's eye
+  (`own-008/map/round2/round2-hover-card.png`).
+- The repo's todo script still gives PASS and the control still FAILs.
+
+**Found by this round: P112-OWN008-ESMADAPTER** (medium, fixed in `3f62e9643`). This round ran on Node 20.11.1,
+where the kit's suite command can't load an `.mjs` adapter. The stranger wrote its own runner around the suite.
+Measured on the published 0.1.0: 20.11.1 refuses, while 20.19.6 and 22.22.0 PASS. Fixed, graded on the source under
+`--no-experimental-require-module`, and then on the publish build under the real 20.11.1.

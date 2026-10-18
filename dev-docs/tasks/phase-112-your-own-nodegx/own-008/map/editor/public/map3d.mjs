@@ -1,6 +1,9 @@
 // The 3D map: every component a plate in its folder's district, every node a card on its plate at
-// the x, y the files give it, every wire an arc from an output to an input. Drawn with three.js in
-// the NodeGX canvas look (@nodegx/canvas-look): category colours, wire colours, card proportions.
+// the x, y the files give it, every wire an arc from an output port to an input port. Drawn with
+// three.js in the NodeGX canvas look (@nodegx/canvas-look): category colours, wire colours, card
+// metrics. As on a NodeGX card, a card shows a port row only for a port that is wired: inputs, then
+// outputs, each with its dot on the card's edge (inputs west, outputs east), and every wire leaves
+// its output dot level and arrives level into its input dot.
 // The map only draws and picks; every change goes through the model.
 
 import * as THREE from 'three';
@@ -8,12 +11,43 @@ import { look, nodeScheme, categoryColors, wireColors } from '/kit/canvas-look/i
 
 const S = 10; // file pixels per world unit
 const CARD_W = look.card.size.width / S;
-const CARD_D = look.card.size.height / S;
+const CARD_D = look.card.size.height / S; // the header; port rows add to it
+const ROW_PX = look.card.propertyConnectionHeight;
+const ROW_D = ROW_PX / S;
 const CARD_H = 1.2;
+const PORT_Y = CARD_H; // ports sit on the card's top edge, so the dots and the wire ends show from above
 const PAD = 6;
 const THEME = 'dark';
 const C = look.colors[THEME];
 const DETAIL_RANGE = 260; // within this distance of the camera a plate's cards get their labels
+const SEGS = 32; // line segments per wire
+const BALL_EVERY_MS = 320; // how often a hovered wire fires a ball
+const BALL_SPEED = 28; // world units per second
+
+/** A wire's path: a NodeGX bezier on the ground plane (it leaves and arrives horizontally), lifted into an arc between the ports. */
+class WireCurve extends THREE.Curve {
+  constructor(a, b) {
+    super();
+    this.a = a;
+    this.b = b;
+    const dx = b.x - a.x;
+    const dist = Math.hypot(dx, b.z - a.z);
+    // How far the curve runs straight out of the output and into the input: half the gap, more when the wire runs backwards.
+    this.reach = Math.max(2.5, Math.abs(dx) * 0.5, dx < 0 ? 6 + Math.min(-dx * 0.4, 24) : 0);
+    this.lift = Math.min(1 + dist * 0.12, 14);
+  }
+
+  getPoint(t, target = new THREE.Vector3()) {
+    const { a, b, reach, lift } = this;
+    const u = 1 - t;
+    const x = u * u * u * a.x + 3 * u * u * t * (a.x + reach) + 3 * u * t * t * (b.x - reach) + t * t * t * b.x;
+    const z = u * u * u * a.z + 3 * u * u * t * a.z + 3 * u * t * t * b.z + t * t * t * b.z;
+    // sin² rises from 0 with a zero slope, so the ends stay level with their ports.
+    const s = Math.sin(Math.PI * t);
+    const y = a.y + (b.y - a.y) * t + lift * s * s;
+    return target.set(x, y, z);
+  }
+}
 
 export class MapView {
   constructor(canvas, model, { categoryOf, portTypeOf }) {
@@ -21,11 +55,12 @@ export class MapView {
     this.model = model;
     this.categoryOf = categoryOf; // (key, node) → canvas-look category
     this.portTypeOf = portTypeOf; // (key, nodeId, port, 'output'|'input') → 'signal' | other
-    this.plates = new Map(); // key → { group, origin, minX, minY, w, d, cards: Map(id → mesh), pos: Map(id → Vector3), wires, detailed }
+    this.plates = new Map(); // key → { group, origin, minX, minY, w, d, cards, pos, info, curves, wires, detailed }
     this.selection = null; // { key, id }
     this.focusKey = null;
     this.handlers = {};
-    this.pulses = [];
+    this.balls = []; // glowing balls running along wires
+    this.hover = null; // { key, wires: [curve entries], sig }
 
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -39,8 +74,10 @@ export class MapView {
     this.scene.add(sun);
     this.world = new THREE.Group();
     this.scene.add(this.world);
-    this.overlay = new THREE.Group(); // selection wires, links, pulses
+    this.overlay = new THREE.Group(); // selection, links
     this.scene.add(this.overlay);
+    this.hoverGroup = new THREE.Group(); // the hovered wires' glow
+    this.scene.add(this.hoverGroup);
 
     this.raycaster = new THREE.Raycaster();
     this.yaw = 0;
@@ -77,6 +114,7 @@ export class MapView {
     this.world.clear();
     this.plates.clear();
     this.clearOverlay();
+    this.setHover(null);
     const groups = new Map();
     for (const key of this.model.keys()) {
       const folder = key.includes('/') ? key.split('/')[0] : '(top level)';
@@ -136,23 +174,46 @@ export class MapView {
     this.updateLod(true);
   }
 
+  /** Each node's wired ports, as its rows: inputs then outputs, in the order the wires list them. */
+  rowsOf(key) {
+    const rows = new Map();
+    const get = (id) => {
+      if (!rows.has(id)) rows.set(id, { ins: [], outs: [] });
+      return rows.get(id);
+    };
+    for (const w of this.model.wires(key)) {
+      const to = get(w.toId);
+      if (!to.ins.includes(w.toProperty)) to.ins.push(w.toProperty);
+      const from = get(w.fromId);
+      if (!from.outs.includes(w.fromProperty)) from.outs.push(w.fromProperty);
+    }
+    return rows;
+  }
+
+  /** A card's depth on the plate, in file pixels: the header and a row per wired port. */
+  static cardDepthPx(r) {
+    return look.card.size.height + ((r?.ins.length ?? 0) + (r?.outs.length ?? 0)) * ROW_PX;
+  }
+
   /** Where each node of a component sits in file pixels, and the plate size that holds them. */
   measure(key) {
     const nodes = this.model.nodes(key);
     const at = layoutPositions(nodes);
+    const rows = this.rowsOf(key);
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    for (const p of at.values()) {
+    for (const n of nodes) {
+      const p = at.get(n.id);
       minX = Math.min(minX, p.x);
       minY = Math.min(minY, p.y);
       maxX = Math.max(maxX, p.x);
-      maxY = Math.max(maxY, p.y);
+      maxY = Math.max(maxY, p.y + MapView.cardDepthPx(rows.get(n.id)) - look.card.size.height);
     }
     if (!Number.isFinite(minX)) minX = minY = maxX = maxY = 0;
     return { minX, minY, w: (maxX - minX) / S + CARD_W + PAD * 2, d: (maxY - minY) / S + CARD_D + PAD * 2 + 4 };
   }
 
   buildPlate(key, origin, m) {
-    const plate = { key, origin, minX: m.minX, minY: m.minY, w: m.w, d: m.d, group: new THREE.Group(), cards: new Map(), pos: new Map(), detailed: false };
+    const plate = { key, origin, minX: m.minX, minY: m.minY, w: m.w, d: m.d, group: new THREE.Group(), cards: new Map(), pos: new Map(), info: new Map(), detailed: false };
     this.plates.set(key, plate);
     this.world.add(plate.group);
     this.drawPlate(plate);
@@ -164,14 +225,17 @@ export class MapView {
     plate.group.clear();
     plate.cards.clear();
     plate.pos.clear();
+    plate.info.clear();
     const key = plate.key;
     const nodes = this.model.nodes(key);
     const at = layoutPositions(nodes);
+    const rows = this.rowsOf(key);
     // Grow the plate when a node now sits beyond it.
     let maxX = plate.minX, maxY = plate.minY, minX = plate.minX, minY = plate.minY;
-    for (const p of at.values()) {
+    for (const n of nodes) {
+      const p = at.get(n.id);
       maxX = Math.max(maxX, p.x);
-      maxY = Math.max(maxY, p.y);
+      maxY = Math.max(maxY, p.y + MapView.cardDepthPx(rows.get(n.id)) - look.card.size.height);
       minX = Math.min(minX, p.x);
       minY = Math.min(minY, p.y);
     }
@@ -200,26 +264,52 @@ export class MapView {
     plate.label = name;
     plate.group.add(name);
 
+    // Cards: x, y is the card's top-left corner, as on the canvas; the header first, then a row per wired port.
+    const nubs = [];
     for (const n of nodes) {
       const p = at.get(n.id);
-      const world = new THREE.Vector3(
-        plate.origin.x + PAD + (p.x - plate.minX) / S + CARD_W / 2,
-        CARD_H / 2,
-        plate.origin.z + PAD + 4 + (p.y - plate.minY) / S + CARD_D / 2
-      );
-      plate.pos.set(n.id, world);
-      const card = this.makeCard(key, n, plate.detailed);
-      card.position.copy(world);
+      const r = rows.get(n.id) ?? { ins: [], outs: [] };
+      const depth = MapView.cardDepthPx(r) / S;
+      const cx = plate.origin.x + PAD + (p.x - plate.minX) / S + CARD_W / 2;
+      const zTop = plate.origin.z + PAD + 4 + (p.y - plate.minY) / S;
+      const rowZ = (i) => zTop + CARD_D + (i + 0.5) * ROW_D;
+      const info = {
+        center: new THREE.Vector3(cx, CARD_H / 2, zTop + depth / 2),
+        depth,
+        rows: r,
+        inAt: new Map(r.ins.map((name, i) => [name, new THREE.Vector3(cx - CARD_W / 2, PORT_Y, rowZ(i))])),
+        outAt: new Map(r.outs.map((name, j) => [name, new THREE.Vector3(cx + CARD_W / 2, PORT_Y, rowZ(r.ins.length + j))]))
+      };
+      plate.info.set(n.id, info);
+      plate.pos.set(n.id, info.center);
+      const card = this.makeCard(key, n, plate.detailed, info);
+      card.position.copy(info.center);
       plate.cards.set(n.id, card);
       plate.group.add(card);
+      for (const [port, v] of info.inAt) nubs.push({ v, kind: this.kindOf(key, n.id, port, 'input') });
+      for (const [port, v] of info.outAt) nubs.push({ v, kind: this.kindOf(key, n.id, port, 'output') });
     }
-    // Hierarchy: a thin line from a visual parent to each child, on the plate.
+    // The port dots, one instanced mesh per plate.
+    if (nubs.length) {
+      const dots = new THREE.InstancedMesh(new THREE.SphereGeometry(0.3, 10, 8), new THREE.MeshBasicMaterial({ color: 0xffffff }), nubs.length);
+      const m = new THREE.Matrix4();
+      nubs.forEach((nb, i) => {
+        dots.setMatrixAt(i, m.makeTranslation(nb.v.x, nb.v.y, nb.v.z));
+        dots.setColorAt(i, new THREE.Color(wireColors(nb.kind, THEME).normal));
+      });
+      plate.group.add(dots);
+    }
+    // Hierarchy: a thin line from a visual parent's left edge down to each child's header, on the plate.
     const hier = [];
     for (const n of nodes) {
+      const a = plate.info.get(n.id);
       for (const c of n.children ?? []) {
-        const a = plate.pos.get(n.id);
-        const b = plate.pos.get(c);
-        if (a && b) hier.push(a.x - CARD_W / 2 + 1, 0.05, a.z + CARD_D / 2, a.x - CARD_W / 2 + 1, 0.05, b.z, a.x - CARD_W / 2 + 1, 0.05, b.z, b.x - CARD_W / 2, 0.05, b.z);
+        const b = plate.info.get(c);
+        if (!a || !b) continue;
+        const x0 = a.center.x - CARD_W / 2 + 1;
+        const z0 = a.center.z + a.depth / 2;
+        const zc = b.center.z - b.depth / 2 + CARD_D / 2;
+        hier.push(x0, 0.05, z0, x0, 0.05, zc, x0, 0.05, zc, b.center.x - CARD_W / 2, 0.05, zc);
       }
     }
     if (hier.length) {
@@ -227,56 +317,56 @@ export class MapView {
       g.setAttribute('position', new THREE.Float32BufferAttribute(hier, 3));
       plate.group.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: C.hierarchyLine, transparent: true, opacity: 0.7 })));
     }
-    // Wires: arcs from an output (the card's east edge) to an input (the west edge), coloured by kind.
+    // Wires, coloured by kind; one line object per plate, SEGS segments per wire, in plate.curves order.
     const pos = [];
     const col = [];
-    const sig = new THREE.Color(wireColors('signal', THEME).normal);
-    const dat = new THREE.Color(wireColors('data', THEME).normal);
     plate.curves = [];
     for (const w of this.model.wires(key)) {
       const curve = this.wireCurve(plate, w);
       if (!curve) continue;
-      plate.curves.push({ wire: w, curve });
-      const pts = curve.getPoints(18);
-      const c = this.portTypeOf(key, w.fromId, w.fromProperty, 'output') === 'signal' ? sig : dat;
-      for (let i = 0; i < pts.length - 1; i++) {
+      const kind = this.kindOf(key, w.fromId, w.fromProperty, 'output');
+      plate.curves.push({ wire: w, curve, kind });
+      const pts = curve.getPoints(SEGS);
+      const c = new THREE.Color(wireColors(kind, THEME).normal);
+      for (let i = 0; i < SEGS; i++) {
         pos.push(pts[i].x, pts[i].y, pts[i].z, pts[i + 1].x, pts[i + 1].y, pts[i + 1].z);
         col.push(c.r, c.g, c.b, c.r, c.g, c.b);
       }
     }
+    plate.wires = null;
     if (pos.length) {
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
       g.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
-      plate.wires = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.75 }));
+      plate.wires = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.8 }));
+      plate.wires.userData = { wiresOf: key };
       plate.group.add(plate.wires);
     }
   }
 
-  wireCurve(plate, w) {
-    const a = plate.pos.get(w.fromId);
-    const b = plate.pos.get(w.toId);
-    if (!a || !b) return null;
-    const start = new THREE.Vector3(a.x + CARD_W / 2, CARD_H, a.z);
-    const end = new THREE.Vector3(b.x - CARD_W / 2, CARD_H, b.z);
-    const dist = start.distanceTo(end);
-    const mid = start.clone().lerp(end, 0.5);
-    mid.y += 2 + Math.min(dist * 0.25, 30);
-    return new THREE.QuadraticBezierCurve3(start, mid, end);
+  kindOf(key, nodeId, port, plug) {
+    return this.portTypeOf(key, nodeId, port, plug) === 'signal' ? 'signal' : 'data';
   }
 
-  makeCard(key, node, detailed) {
+  wireCurve(plate, w) {
+    const a = plate.info.get(w.fromId)?.outAt.get(w.fromProperty);
+    const b = plate.info.get(w.toId)?.inAt.get(w.toProperty);
+    if (!a || !b) return null;
+    return new WireCurve(a.clone(), b.clone());
+  }
+
+  makeCard(key, node, detailed, info) {
     const category = this.categoryOf(key, node);
     const scheme = nodeScheme(category, THEME);
     const accent = categoryColors(category, THEME).accent;
     const side = new THREE.MeshLambertMaterial({ color: new THREE.Color(scheme.header) });
     let top;
     if (detailed) {
-      top = new THREE.MeshBasicMaterial({ map: cardTexture(node, scheme, accent) });
+      top = new THREE.MeshBasicMaterial({ map: cardTexture(node, scheme, accent, info.rows, (port, plug) => this.kindOf(key, node.id, port, plug)) });
     } else {
       top = new THREE.MeshLambertMaterial({ color: new THREE.Color(scheme.base) });
     }
-    const mesh = new THREE.Mesh(new THREE.BoxGeometry(CARD_W, CARD_H, CARD_D), [side, side, top, side, side, side]);
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(CARD_W, CARD_H, info.depth), [side, side, top, side, side, side]);
     mesh.userData = { key, id: node.id, category, accent, scheme };
     return mesh;
   }
@@ -293,7 +383,7 @@ export class MapView {
         for (const [id, card] of plate.cards) {
           const node = this.model.node(plate.key, id);
           if (!node) continue;
-          const fresh = this.makeCard(plate.key, node, want);
+          const fresh = this.makeCard(plate.key, node, want, plate.info.get(id));
           fresh.position.copy(card.position);
           plate.group.remove(card);
           disposeMesh(card);
@@ -309,6 +399,7 @@ export class MapView {
   redraw(key) {
     const plate = this.plates.get(key);
     if (!plate) return this.build();
+    if (this.hover?.key === key) this.setHover(null);
     this.drawPlate(plate);
     this.refreshSelection();
   }
@@ -341,9 +432,10 @@ export class MapView {
     if (!sel) return;
     const plate = this.plates.get(sel.key);
     const card = plate?.cards.get(sel.id);
-    if (!card) return;
+    const info = plate?.info.get(sel.id);
+    if (!card || !info) return;
     const box = new THREE.LineSegments(
-      new THREE.EdgesGeometry(new THREE.BoxGeometry(CARD_W + 0.6, CARD_H + 0.6, CARD_D + 0.6)),
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(CARD_W + 0.6, CARD_H + 0.6, info.depth + 0.6)),
       new THREE.LineBasicMaterial({ color: C.selection })
     );
     box.position.copy(card.position);
@@ -354,10 +446,9 @@ export class MapView {
     beacon.userData.bob = true;
     this.overlay.add(beacon);
     // The selected node's wires, thick: signal and data in their highlighted colours.
-    for (const { wire, curve } of plate.curves) {
+    for (const { wire, curve, kind } of plate.curves) {
       if (wire.fromId !== sel.id && wire.toId !== sel.id) continue;
-      const kind = this.portTypeOf(sel.key, wire.fromId, wire.fromProperty, 'output') === 'signal' ? 'signal' : 'data';
-      const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 24, 0.18, 6), new THREE.MeshBasicMaterial({ color: wireColors(kind, THEME).highlighted }));
+      const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 48, 0.16, 6), new THREE.MeshBasicMaterial({ color: wireColors(kind, THEME).highlighted }));
       tube.userData.wire = wire;
       this.overlay.add(tube);
     }
@@ -387,18 +478,53 @@ export class MapView {
     }
   }
 
-  /** A bright bead along a wire: the running app sent a value or a signal through it. */
+  /**
+   * The wires under the pointer, lit: each glows in its highlighted colour and fires a glowing ball
+   * from its output to its input every few hundred milliseconds, so you can see which way it runs.
+   * `entries` are plate.curves entries of one plate; null clears.
+   */
+  setHover(h) {
+    const sig = h ? `${h.key}|${h.wires.map((e) => plateWireId(e.wire)).join(',')}` : '';
+    if (sig === (this.hover?.sig ?? '')) return;
+    disposeGroup(this.hoverGroup);
+    this.hoverGroup.clear();
+    this.hover = h && h.wires.length ? { ...h, sig, lastBall: 0 } : null;
+    if (!this.hover) return;
+    for (const e of this.hover.wires) {
+      const colors = wireColors(e.kind, THEME);
+      const core = new THREE.Mesh(new THREE.TubeGeometry(e.curve, 64, 0.13, 6), new THREE.MeshBasicMaterial({ color: colors.highlighted }));
+      const halo = new THREE.Mesh(
+        new THREE.TubeGeometry(e.curve, 64, 0.5, 8),
+        new THREE.MeshBasicMaterial({ color: colors.normal, transparent: true, opacity: 0.28, blending: THREE.AdditiveBlending, depthWrite: false })
+      );
+      this.hoverGroup.add(core, halo);
+      // The two ports it joins, larger and bright.
+      for (const at of [e.curve.a, e.curve.b]) {
+        const dot = glowSprite(colors.normal, 2.2);
+        dot.position.copy(at);
+        this.hoverGroup.add(dot);
+      }
+    }
+  }
+
+  /** A glowing ball along one wire: the running app sent a value or a signal through it. */
   pulse(key, from, to) {
     const plate = this.plates.get(key);
     if (!plate) return;
-    for (const { wire, curve } of plate.curves) {
-      if (wire.fromId !== from.node || wire.fromProperty !== from.port || wire.toId !== to.node || wire.toProperty !== to.port) continue;
-      if (this.pulses.length > 120) return;
-      const kind = this.portTypeOf(key, wire.fromId, wire.fromProperty, 'output') === 'signal' ? 'signal' : 'data';
-      const bead = new THREE.Mesh(new THREE.SphereGeometry(0.45, 10, 8), new THREE.MeshBasicMaterial({ color: wireColors(kind, THEME).pulsing }));
-      this.scene.add(bead);
-      this.pulses.push({ bead, curve, t0: null });
+    for (const e of plate.curves) {
+      const w = e.wire;
+      if (w.fromId !== from.node || w.fromProperty !== from.port || w.toId !== to.node || w.toProperty !== to.port) continue;
+      this.fireBall(e);
     }
+  }
+
+  fireBall(e) {
+    if (this.balls.length > 160) return;
+    const ball = glowSprite(wireColors(e.kind, THEME).normal, 1.8);
+    ball.position.copy(e.curve.a);
+    this.scene.add(ball);
+    const ms = Math.max(450, (e.curve.getLength() / BALL_SPEED) * 1000);
+    this.balls.push({ ball, curve: e.curve, t0: null, ms });
   }
 
   // --- camera ------------------------------------------------------------------------------
@@ -445,9 +571,12 @@ export class MapView {
 
   installControls() {
     const el = this.canvas;
+    // The map takes the keyboard when you click it, even back from the app's preview frame.
+    el.tabIndex = 0;
     let down = null;
     el.addEventListener('contextmenu', (e) => e.preventDefault());
     el.addEventListener('pointerdown', (e) => {
+      el.focus({ preventScroll: true });
       el.setPointerCapture(e.pointerId);
       const hit = this.pick(e);
       const dragCard = hit?.card && this.selection && hit.card.key === this.selection.key && hit.card.id === this.selection.id && e.button === 0 && !e.shiftKey;
@@ -455,9 +584,7 @@ export class MapView {
     });
     el.addEventListener('pointermove', (e) => {
       if (!down) {
-        const hit = this.pick(e);
-        el.style.cursor = hit?.card ? 'pointer' : 'grab';
-        this.emit('hover', hit);
+        this.hoverAt(e);
         return;
       }
       const dx = e.clientX - down.x;
@@ -480,6 +607,11 @@ export class MapView {
         this.yaw -= e.movementX * 0.004;
         this.pitch = Math.max(-1.5, Math.min(1.2, this.pitch - e.movementY * 0.004));
       }
+    });
+    el.addEventListener('pointerleave', () => {
+      if (down) return;
+      this.setHover(null);
+      this.emit('hover', null);
     });
     el.addEventListener('pointerup', (e) => {
       const d = down;
@@ -511,11 +643,29 @@ export class MapView {
     );
     const typing = () => ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
     window.addEventListener('keydown', (e) => {
-      if (typing() || e.metaKey || e.ctrlKey) return;
-      this.keys.add(e.code);
+      if (typing() || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (FLY_KEYS.has(e.code)) {
+        e.preventDefault(); // the arrows and Space would scroll the page
+        this.keys.add(e.code);
+      }
     });
     window.addEventListener('keyup', (e) => this.keys.delete(e.code));
     window.addEventListener('blur', () => this.keys.clear());
+  }
+
+  /** Hovering: a wire lights up with its balls; a card lights up all of its wires. */
+  hoverAt(e) {
+    const hit = this.pick(e, { wires: true });
+    this.canvas.style.cursor = hit?.card || hit?.wire ? 'pointer' : 'grab';
+    if (hit?.wire) {
+      this.setHover({ key: hit.wire.key, wires: [hit.wire.entry] });
+    } else if (hit?.card) {
+      const plate = this.plates.get(hit.card.key);
+      this.setHover({ key: hit.card.key, wires: plate.curves.filter((c) => c.wire.fromId === hit.card.id || c.wire.toId === hit.card.id) });
+    } else {
+      this.setHover(null);
+    }
+    this.emit('hover', hit);
   }
 
   pointerNdc(e) {
@@ -523,21 +673,34 @@ export class MapView {
     return new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
   }
 
-  /** What is under the pointer: a card ({ key, id }) or a plate (its key), and the ground point. */
-  pick(e) {
+  /**
+   * What is under the pointer: a card ({ key, id }), a wire ({ key, wire, entry }) when asked, or a
+   * plate (its key), with the point. A card wins over a wire that passes just above it.
+   */
+  pick(e, { wires = false } = {}) {
     this.raycaster.setFromCamera(this.pointerNdc(e), this.camera);
+    // A wire is a 1-pixel line: catch it within a few pixels' worth of world at this height.
+    this.raycaster.params.Line.threshold = Math.max(0.25, this.camera.position.y * 0.008);
     const objs = [];
     for (const p of this.plates.values()) {
       objs.push(p.base, p.label);
       for (const c of p.cards.values()) objs.push(c);
+      if (wires && p.wires) objs.push(p.wires);
     }
     const hits = this.raycaster.intersectObjects(objs, false);
-    for (const h of hits) {
-      const u = h.object.userData;
-      if (u.id) return { card: { key: u.key, id: u.id }, plate: u.key, point: h.point };
-      if (u.plate) return { plate: u.plate, point: h.point };
+    const card = hits.find((h) => h.object.userData.id);
+    const wire = hits.find((h) => h.object.userData.wiresOf);
+    if (wire && (!card || wire.distance < card.distance - 1.5)) {
+      const key = wire.object.userData.wiresOf;
+      const entry = this.plates.get(key).curves[Math.floor(wire.index / (2 * SEGS))];
+      if (entry) return { wire: { key, wire: entry.wire, entry }, plate: key, point: wire.point };
     }
-    return null;
+    if (card) {
+      const u = card.object.userData;
+      return { card: { key: u.key, id: u.id }, plate: u.key, point: card.point };
+    }
+    const plate = hits.find((h) => h.object.userData.plate);
+    return plate ? { plate: plate.object.userData.plate, point: plate.point } : null;
   }
 
   groundPoint(e) {
@@ -546,12 +709,12 @@ export class MapView {
     return this.raycaster.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), -CARD_H / 2), p) ? p : null;
   }
 
-  /** A world point on a plate, as the x, y the files would hold for a node centred there. */
-  fileXY(key, point) {
+  /** A world point on a plate, as the x, y the files would hold for a card of this depth centred there. */
+  fileXY(key, point, depth = CARD_D) {
     const plate = this.plates.get(key);
     return {
       x: Math.round((point.x - plate.origin.x - PAD - CARD_W / 2) * S + plate.minX),
-      y: Math.round((point.z - plate.origin.z - PAD - 4 - CARD_D / 2) * S + plate.minY)
+      y: Math.round((point.z - plate.origin.z - PAD - 4 - depth / 2) * S + plate.minY)
     };
   }
 
@@ -568,14 +731,16 @@ export class MapView {
       xy = this.fileXY(key, p);
     } else {
       let maxY = plate.minY;
-      for (const v of plate.pos.values()) maxY = Math.max(maxY, (v.z - plate.origin.z - PAD - 4 - CARD_D / 2) * S + plate.minY);
-      xy = { x: Math.round(plate.minX), y: Math.round(maxY + 120) };
+      for (const i of plate.info.values()) maxY = Math.max(maxY, (i.center.z + i.depth / 2 - plate.origin.z - PAD - 4) * S + plate.minY);
+      xy = { x: Math.round(plate.minX), y: Math.round(maxY + 60) };
     }
     // Not on top of another card: step down until the spot is free.
-    const taken = [...layoutPositions(this.model.nodes(key)).values()];
+    const at = layoutPositions(this.model.nodes(key));
+    const rows = this.rowsOf(key);
+    const taken = this.model.nodes(key).map((n) => ({ ...at.get(n.id), h: MapView.cardDepthPx(rows.get(n.id)) }));
     const w = look.card.size.width + 10;
-    const h = look.card.size.height + 14;
-    while (taken.some((t) => Math.abs(t.x - xy.x) < w && Math.abs(t.y - xy.y) < h)) xy.y += h;
+    const h = look.card.size.height;
+    while (taken.some((t) => Math.abs(t.x - xy.x) < w && xy.y < t.y + t.h + 14 && xy.y + h + 14 > t.y)) xy.y += 20;
     return xy;
   }
 
@@ -583,7 +748,12 @@ export class MapView {
   screenOf(key, id) {
     const p = this.plates.get(key)?.pos.get(id);
     if (!p) return null;
-    const v = p.clone().setY(CARD_H).project(this.camera);
+    return this.screenOfPoint(p.clone().setY(CARD_H));
+  }
+
+  /** Where a world point is on the page, in CSS pixels. */
+  screenOfPoint(point) {
+    const v = point.clone().project(this.camera);
     const r = this.canvas.getBoundingClientRect();
     return { x: Math.round(r.left + ((v.x + 1) / 2) * r.width), y: Math.round(r.top + ((1 - v.y) / 2) * r.height), onScreen: Math.abs(v.x) < 1 && Math.abs(v.y) < 1 && v.z < 1 };
   }
@@ -593,12 +763,13 @@ export class MapView {
     if (mesh) {
       mesh.position.set(p.x, CARD_H / 2 + 0.6, p.z);
       this.clearOverlay();
+      this.setHover(null);
     }
   }
 
   endDrag(card, p) {
     if (!p) return this.redraw(card.key);
-    this.emit('move', card, this.fileXY(card.key, p));
+    this.emit('move', card, this.fileXY(card.key, p, this.plates.get(card.key)?.info.get(card.id)?.depth));
   }
 
   frame(t) {
@@ -614,14 +785,16 @@ export class MapView {
       this.pitch = f.pitch0 + (f.pitch1 - f.pitch0) * e;
       if (k >= 1) this.flight = null;
     }
-    // Flying: WASD / arrows, Q and E (or Space and C) for down and up, Shift for faster.
-    const fwd = new THREE.Vector3(-Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), -Math.cos(this.yaw) * Math.cos(this.pitch));
+    // Flying: W/S fly forward and back level with the ground, the way you are facing (looking down
+    // doesn't turn it into a dive); A/D sideways; E/Q (or Space/C) up and down; Shift faster.
+    // The wheel is the zoom: it moves along the line of sight.
+    const ahead = new THREE.Vector3(-Math.sin(this.yaw), 0, -Math.cos(this.yaw));
     const right = new THREE.Vector3(Math.cos(this.yaw), 0, -Math.sin(this.yaw));
     const speed = Math.max(20, Math.abs(this.camera.position.y) * 1.2) * (this.keys.has('ShiftLeft') || this.keys.has('ShiftRight') ? 3 : 1) * dt;
     const k = this.keys;
     const move = new THREE.Vector3();
-    if (k.has('KeyW') || k.has('ArrowUp')) move.add(fwd);
-    if (k.has('KeyS') || k.has('ArrowDown')) move.sub(fwd);
+    if (k.has('KeyW') || k.has('ArrowUp')) move.add(ahead);
+    if (k.has('KeyS') || k.has('ArrowDown')) move.sub(ahead);
     if (k.has('KeyD') || k.has('ArrowRight')) move.add(right);
     if (k.has('KeyA') || k.has('ArrowLeft')) move.sub(right);
     if (k.has('KeyE') || k.has('Space')) move.y += 1;
@@ -631,8 +804,8 @@ export class MapView {
       this.camera.position.addScaledVector(move.normalize(), speed);
     }
     if (this.camera.position.y < 2) this.camera.position.y = 2;
-    const look = this.camera.position.clone().add(new THREE.Vector3(-Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), -Math.cos(this.yaw) * Math.cos(this.pitch)));
-    this.camera.lookAt(look);
+    const lookAt = this.camera.position.clone().add(new THREE.Vector3(-Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), -Math.cos(this.yaw) * Math.cos(this.pitch)));
+    this.camera.lookAt(lookAt);
     for (const o of this.overlay.children) if (o.userData.bob) o.position.y = 4 + Math.sin(t / 250) * 0.6;
     // District names are for the view from above: they fade out as the camera comes down to a plate.
     for (const o of this.world.children) {
@@ -641,16 +814,22 @@ export class MapView {
       o.material.opacity = Math.max(0, Math.min(1, (d - 500) / 400));
       o.visible = o.material.opacity > 0.02;
     }
-    // Pulses travel their wire in 600 ms.
-    this.pulses = this.pulses.filter((p) => {
-      if (p.t0 === null) p.t0 = t;
-      const k2 = (t - p.t0) / 600;
+    // Hovered wires fire a ball from output to input every BALL_EVERY_MS.
+    if (this.hover && t - this.hover.lastBall > BALL_EVERY_MS) {
+      this.hover.lastBall = t;
+      for (const e of this.hover.wires.slice(0, 40)) this.fireBall(e);
+    }
+    // Balls run their wire at BALL_SPEED, easing in and out of the ports.
+    this.balls = this.balls.filter((b) => {
+      if (b.t0 === null) b.t0 = t;
+      const k2 = (t - b.t0) / b.ms;
       if (k2 >= 1) {
-        this.scene.remove(p.bead);
-        disposeMesh(p.bead);
+        this.scene.remove(b.ball);
+        b.ball.material.dispose();
         return false;
       }
-      p.bead.position.copy(p.curve.getPoint(k2));
+      b.ball.position.copy(b.curve.getPoint(k2));
+      b.ball.material.opacity = Math.min(1, k2 * 6, (1 - k2) * 6);
       return true;
     });
     if (t - this.lastLod > 500) {
@@ -660,6 +839,10 @@ export class MapView {
     this.renderer.render(this.scene, this.camera);
   }
 }
+
+const FLY_KEYS = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyQ', 'KeyE', 'KeyC', 'Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ShiftLeft', 'ShiftRight']);
+
+const plateWireId = (w) => `${w.fromId}.${w.fromProperty}>${w.toId}.${w.toProperty}`;
 
 /**
  * Where each node sits, in file pixels. A node with x and y sits there. A visual child without
@@ -690,27 +873,50 @@ export function layoutPositions(nodes) {
   return at;
 }
 
-function cardTexture(node, scheme, accent) {
+/** The card's face: the header as on the canvas, then a row per wired port with its name at its dot's side. */
+function cardTexture(node, scheme, accent, rows, kindOf) {
   const w = 512;
-  const h = Math.round((512 * look.card.size.height) / look.card.size.width);
+  const k = w / look.card.size.width; // texture pixels per file pixel
+  const nRows = rows.ins.length + rows.outs.length;
+  const h = Math.round((look.card.size.height + nRows * ROW_PX) * k);
+  const headH = look.card.size.height * k;
   const c = document.createElement('canvas');
   c.width = w;
   c.height = h;
   const g = c.getContext('2d');
   g.fillStyle = scheme.base;
   g.fillRect(0, 0, w, h);
+  g.fillStyle = scheme.header;
+  g.fillRect(0, 0, w, headH);
   g.fillStyle = accent;
-  g.fillRect(0, 0, 14, h);
+  g.fillRect(0, 0, 14, headH);
   g.fillStyle = scheme.text;
   // The kit's card fonts, scaled from the card's 150 px to this 512 px texture.
-  const scaled = (f) => f.replace(/([\d.]+)px/, (_, px) => `${Math.round(Number(px) * (w / look.card.size.width))}px`);
+  const scaled = (f) => f.replace(/([\d.]+)px/, (_, px) => `${Math.round(Number(px) * k)}px`);
   g.font = scaled(look.fonts.nodeLabel);
   g.textBaseline = 'middle';
   const title = node.label || shortType(node.type);
-  g.fillText(fit(g, title, w - 40), 30, h * 0.36);
+  g.fillText(fit(g, title, w - 40), 30, headH * 0.36);
   g.globalAlpha = 0.7;
   g.font = scaled(look.fonts.nodeSubLabel);
-  g.fillText(fit(g, node.label ? shortType(node.type) : node.id, w - 40), 30, h * 0.76);
+  g.fillText(fit(g, node.label ? shortType(node.type) : node.id, w - 40), 30, headH * 0.76);
+  g.globalAlpha = 1;
+  g.font = scaled(look.fonts.portLabel);
+  const rowY = (i) => headH + (i + 0.5) * ROW_PX * k;
+  rows.ins.forEach((name, i) => {
+    g.fillStyle = wireColors(kindOf(name, 'input'), THEME).normal;
+    g.textAlign = 'left';
+    g.fillText(fit(g, name, w - 60), 26, rowY(i));
+  });
+  rows.outs.forEach((name, j) => {
+    g.fillStyle = wireColors(kindOf(name, 'output'), THEME).normal;
+    g.textAlign = 'right';
+    g.fillText(fit(g, name, w - 60), w - 26, rowY(rows.ins.length + j));
+  });
+  if (nRows) {
+    g.fillStyle = 'rgba(255,255,255,0.08)';
+    g.fillRect(0, headH, w, 2);
+  }
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 4;
@@ -728,6 +934,30 @@ function fit(g, text, max) {
   let t = text;
   while (t.length > 1 && g.measureText(t + '…').width > max) t = t.slice(0, -1);
   return t + '…';
+}
+
+/** A soft glowing ball: a white core fading into the wire's colour, drawn additively so it lights what it passes. */
+let glowTexture = null;
+function glowSprite(color, size) {
+  if (!glowTexture) {
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const g = c.getContext('2d');
+    const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.18, 'rgba(255,255,255,0.95)');
+    grad.addColorStop(0.4, 'rgba(255,255,255,0.35)');
+    grad.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 64, 64);
+    glowTexture = new THREE.CanvasTexture(c);
+  }
+  const s = new THREE.Sprite(
+    new THREE.SpriteMaterial({ map: glowTexture, color: new THREE.Color(color).lerp(new THREE.Color(0xffffff), 0.35), blending: THREE.AdditiveBlending, depthWrite: false, transparent: true })
+  );
+  s.scale.set(size, size, 1);
+  s.userData.shared = true;
+  return s;
 }
 
 function textSprite(text, { size = 48, color = '#fff', bg = null, weight = 600 } = {}) {
@@ -760,7 +990,8 @@ function disposeMesh(o) {
   o.geometry?.dispose();
   const mats = Array.isArray(o.material) ? o.material : o.material ? [o.material] : [];
   for (const m of mats) {
-    m.map?.dispose();
+    // The glow texture is shared by every ball and port glow: keep it.
+    if (m.map && m.map !== glowTexture) m.map.dispose();
     m.dispose();
   }
 }
