@@ -28,3 +28,11 @@ estimate was made from.
 **s80 (2026-10-11, P107 NSP-020 L2):** `npm run size:node-spec` now prints 308.2 KB gzipped without the parser (318.8 KB
 with it). The `when` functions on 448 conditioned ports added about 6.2 KB gzipped (esbuild `--minify` + `gzip -9` over
 `src/browser.ts`: 310.2 KB at HEAD `32745136a`, 316.5 KB after). Still P112's decision; the visual specs remain the bulk.
+
+**s2 of P112 OWN-012 (2026-10-18):** `node scripts/draw-size.mjs` in the package measures what a page that only
+draws a screen from the specs pays: the drawer-only entry `src/draw-only.ts` (the drawer, the canvas measurer, the layout
+model and a generated table of each visual spec's input defaults, layout roles and portability classes) is 82.6 KB
+minified, 12.1 KB gzipped — against 1,210.7 KB / 308.2 KB for the same drawer over the full table (`src/draw-full.ts`)
+and 1,391.4 KB / 361.1 KB for the whole browser entry. The table is derived from `src/nodes` by
+`scripts/gen-draw-specs.mjs` and held equal to it by `tests/draw-specs.test.ts`, so it is a split, not a copy: the
+shape the "split the entry" option in this row would take.

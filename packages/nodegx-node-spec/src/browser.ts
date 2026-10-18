@@ -24,5 +24,9 @@ export * from './nodes';
 export * from './runner';
 export * from './layout';
 export * from './layout-map';
+// OWN-012 — the drawer: a component's screen from the descriptions, over the full table here (`./draw-only` is the small entry)
+export * from './draw';
+export * from './draw-full';
+export * from './draw-canvas';
 export * from './settings-diagnostics';
 export { sha256, sha384, sha512 } from './sha2';
