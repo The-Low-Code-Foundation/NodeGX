@@ -189,10 +189,12 @@ async function chat(messages, toolChoice = 'any') {
       });
       j = await r.json().catch(() => ({}));
     } catch (e) {
+      console.error(`  [api] attempt ${attempt}: ${e.name} ${e.message} after ${Date.now() - t0} ms`);
       if (attempt >= 4) throw e;
       await wait(2000 * attempt);
       continue;
     }
+    if (!r.ok || Date.now() - t0 > 30000) console.error(`  [api] attempt ${attempt}: HTTP ${r.status} after ${Date.now() - t0} ms ${r.ok ? '' : JSON.stringify(j).slice(0, 200)}`);
     if (r.ok) return { ...j, ms: Date.now() - t0, totalMs: Date.now() - first, attempts: attempt };
     if ((r.status === 429 || r.status >= 500) && attempt < 4) {
       await wait(3000 * attempt);
@@ -279,7 +281,7 @@ async function act(page, call) {
       return { ok: true, note: (await GRAPH.call('list_components', {})).slice(0, 20000), graph: 'list' };
     case 'read_game_component':
       if (!GRAPH) break;
-      return { ok: true, note: (await GRAPH.call('get_component', { name: String(a.name || '') })).slice(0, 60000), graph: String(a.name || '') };
+      return { ok: true, note: (await GRAPH.call('get_component', { path: String(a.name || '') })).slice(0, 60000), graph: String(a.name || '') };
   }
   return { ok: false, note: `no tool called ${name}` };
 }
@@ -359,7 +361,7 @@ const result = await withDeployedSite({ origin: ORIGIN, visible: flag('--visible
     if (GAME.won.test(text)) verdict = 'won';
     else if (lostNow && !GAME.keepPlaying) verdict = 'lost';
 
-    const line = { step, ms: res.ms, totalMs: res.totalMs, attempts: res.attempts, usage: u, said: said.slice(0, 500), actions: done, verdict, at: Date.now() - started };
+    const line = { step, ...(calls.length ? {} : { raw: JSON.stringify(msg).slice(0, 1500) }), ms: res.ms, totalMs: res.totalMs, attempts: res.attempts, usage: u, said: said.slice(0, 500), actions: done, verdict, at: Date.now() - started };
     LOG.write(JSON.stringify(line) + '\n');
     console.log(`#${step} ${(res.ms / 1000).toFixed(1)}s ${said.replace(/\s+/g, ' ').slice(0, 140)}` +
       `\n     → ${done.map((d) => `${d.note}${d.hit ? ` [${d.hit}]` : ''}`).join('; ') || '(no action)'}`);
