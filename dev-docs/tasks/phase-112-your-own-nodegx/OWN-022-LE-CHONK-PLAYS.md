@@ -143,6 +143,20 @@ in the scratchpad, never in `packages/` or anything published.
   "Pages/Game"}`, `clickrichter{…}`) instead of calling the tool; the nudge recovers it.
 - **Cost guard:** older graph reads are pruned from the conversation like old screenshots (`--keep-graph 2`).
 
+## 9. The standalone repo (s1, 2026-10-18 late)
+
+`/Users/richardosborne/vscode_projects/le-chonk-plays` — git `main`, first commit `2fd291c`, **no remote** (Richard creates
+the GitHub repo and pushes: that is the publish). MIT for the code. What it holds: `src/` (the harness on Puppeteer +
+`@nodegx/mcp@0.2.2` from npm via `npx -p`), `games/fish-heist` (HB1's app as built, with its own docs), `tools/`
+(rig-heist, solve-heist, verify-rig on Puppeteer, lab = make + serve the four copies with `@nodegx/preview@0.2.2`, arms =
+the lane runner in Node, tally), README (quick start, how it works, the experiment, how it was developed — honest: Richard
++ Claude Code (Opus) for the harness, Large 4 in Vibe for the game). Proven from the repo: the four lab copies are
+**byte-identical** to the experiment's; verify-rig fair/bug/qa/slide all PASS on copies served by the npm preview; the
+player runs Monster Gate; the npm MCP read-only server returns the rigged Game page (qaFlag, qa-7731) and has **no**
+`update_component` — the player can read the game but cannot change it. Still owed: RESULTS.md after the arms; a
+clean-machine run of `npm install` (Puppeteer's Chrome download); Puppeteer counts 1 console error on Monster Gate where
+the old driver counted 0 (it also counts failed resource loads) — check before quoting.
+
 ## 5. Session log
 
 - **s1 (2026-10-18):** task opened; `own-022/play.mjs`; the probes above; smoke1–3; game1–3 **won** (AC2). §6 designed
