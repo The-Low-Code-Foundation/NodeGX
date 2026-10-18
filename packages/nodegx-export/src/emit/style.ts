@@ -1040,7 +1040,7 @@ export function computeRoleCss(
       if (raw !== undefined && raw.kind !== 'literal') {
         result.notes.push(`node ${node.id}'s Placeholder opacity is not a literal; the placeholder is drawn at full opacity`);
       } else {
-        const authored = Number(raw?.value ?? catalogDefault('placeholderOpacity') ?? 0.5);
+        const authored = Number((raw?.kind === 'literal' ? raw.value : undefined) ?? catalogDefault('placeholderOpacity') ?? 0.5);
         const opacity = Number.isFinite(authored) ? Math.min(1, Math.max(0, authored)) : 1;
         if (opacity < 1) {
           const color = cssParam('color') ?? 'FieldText';
