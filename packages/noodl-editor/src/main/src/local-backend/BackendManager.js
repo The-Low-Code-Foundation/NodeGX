@@ -25,6 +25,7 @@ const os = require('os');
 const { ServiceSupervisor } = require('./ServiceSupervisor');
 const { BackendProcessRegistry } = require('./BackendProcessRegistry');
 const workflowProposals = require('./workflow-proposals');
+const { applyProjectSchema } = require('./project-schema');
 
 /**
  * Safe console.log wrapper
@@ -480,7 +481,10 @@ class BackendManager {
    *   its own `security.json`, but only when it has none yet — so passing it on
    *   every start, including a restart, is idempotent, and it is inert for a
    *   project that ships no policy. Every renderer call site sends it through
-   *   `BackendServices/startLocalBackend`; see that module for why.
+   *   `BackendServices/startLocalBackend`; see that module for why. Once the
+   *   service is up, the editor adds the collections the project's
+   *   `backend/schema.json` declares and the backend lacks (P121 R12,
+   *   `project-schema.js`); the result is the status's `projectSchema`.
    */
   async startBackend(id, options = {}) {
     // Already running?
@@ -504,6 +508,8 @@ class BackendManager {
     }
 
     const backendPath = path.join(this.backendsPath, id);
+    const projectDir =
+      typeof options.projectDir === 'string' && options.projectDir.trim() ? options.projectDir : undefined;
     const supervisor = new ServiceSupervisor({
       id: config.id,
       name: config.name,
@@ -512,7 +518,7 @@ class BackendManager {
       port: config.port,
       ephemeral: options.ephemeral === true,
       // SB-015 — the project, not the data dir. See the jsdoc above.
-      projectDir: typeof options.projectDir === 'string' && options.projectDir.trim() ? options.projectDir : undefined,
+      projectDir,
       // A backend that dies on its own is exactly as interesting to a panel as
       // one that is stopped deliberately, and it is the case that used to be
       // invisible: the panel kept showing a running backend that was gone.
@@ -592,9 +598,22 @@ class BackendManager {
     this.startErrors.delete(id);
     this.runningBackends.set(id, supervisor);
 
+    // P121 R12: the project's `backend/schema.json`, every collection the
+    // backend lacks, before the editor pushes functions that could write a row
+    // and make one without its indexes. Never fails the start: a backend
+    // missing a collection still runs, and the report says which.
+    const projectSchema = await applyProjectSchema((method, p, body) => supervisor.request(method, p, body), projectDir);
+    if (projectSchema.status === 'failed') safeLog(`Could not add ${id}'s project collections: ${projectSchema.error}`);
+    else if (projectSchema.status === 'applied') {
+      safeLog(
+        `Project collections on ${id}: ${projectSchema.created.length} added, ${projectSchema.existing.length} already there` +
+          (projectSchema.failed.length ? `, refused: ${projectSchema.failed.map((f) => `${f.table} (${f.error})`).join('; ')}` : '')
+      );
+    }
+
     safeLog(`Started backend: ${id} on ${supervisor.endpoint}`);
     this.broadcastStatusChanged(id, 'started');
-    return this.getStatus(id);
+    return { ...(await this.getStatus(id)), projectSchema };
   }
 
   /**
