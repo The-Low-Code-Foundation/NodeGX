@@ -6815,8 +6815,27 @@ function planComponent(
   // ---- the controlled-state slice (CONTROLLED-STATE-TARGET §3–§4): allocation ------------
 
   const usedStateVarNames = new Set<string>();
+  /**
+   * P18-S128-FIELDSET (EXP-011 §97). The stores this component's own Variable and Set Variable nodes name: the file imports
+   * them under their export names, so a state row may not take one. Found by marketplace's search box, the first field a
+   * Set minted a row for whose label ("The search") is its Variable's name.
+   */
+  let componentStoreNames: Set<string> | undefined;
+  const storeNameTaken = (name: string): boolean => {
+    componentStoreNames ??= new Set(
+      component.nodes
+        .filter((n) => n.type === 'Variable2' || n.type === 'Set Variable')
+        .map((n) => {
+          const variable = literalParam(n, 'name');
+          return typeof variable === 'string' ? registry.variables.get(variable)?.exportName : undefined;
+        })
+        .filter((n): n is string => n !== undefined)
+    );
+    return componentStoreNames.has(name);
+  };
   const stateNameTaken = (name: string): boolean =>
     usedStateVarNames.has(name) ||
+    storeNameTaken(name) ||
     usedJsFnNames.has(name) ||
     plan.props.some((p) => p.name === name) ||
     plan.outputProps.some((o) => o.prop === name) ||
@@ -18283,7 +18302,10 @@ function planComponent(
    * instance keeps what it had before this pass (restored after it).
    */
   const instanceBeforeAttach = new Map<string, Disposition | undefined>();
-  for (const node of component.nodes) if (plan.roleOf[node.id] === 'instance') instanceBeforeAttach.set(node.id, dispositions[node.id]);
+  // P18-S128-FIELDSET. A drawn text field is the same: a Set, Clear, Focus or Blur it cannot take is the wire's, not the field's.
+  for (const node of component.nodes) {
+    if (plan.roleOf[node.id] === 'instance' || plan.roleOf[node.id] === 'input') instanceBeforeAttach.set(node.id, dispositions[node.id]);
+  }
   for (const connection of component.connections) {
     if (consumed.has(connection.key)) continue;
     const toNode = nodeById.get(connection.toId);

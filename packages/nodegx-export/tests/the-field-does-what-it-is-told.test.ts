@@ -148,6 +148,24 @@ const VARIANTS: Array<{ name: string; edit?: (d: Desk) => void; steps: string[] 
       for (const graph of Object.values(d.components)) graph.connections = graph.connections.filter((c) => c.toProperty !== 'set');
     },
     steps: CONTROL_STEPS
+  },
+  {
+    // A typed-in Value under a wire that has delivered nothing: the Set writes the typed-in Value (`_internal.text` holds it).
+    name: 'a typed-in Value under a wire nothing has written',
+    edit: (d) => {
+      const home = d.components['Pages/Home'];
+      home.nodes.push(
+        { id: 'seedField', type: 'net.noodl.controls.textinput', label: 'seed', parent: 'shell', parameters: { placeholder: 'seed', startValue: 'seed text', 'runOnChange-startValue': true }, x: 100, y: 2000 },
+        { id: 'seedBtn', type: 'net.noodl.controls.button', label: 'Seed', parent: 'shell', parameters: { label: 'Seed' }, x: 100, y: 2080 },
+        { id: 'unsetVar', type: 'Variable2', label: 'unset', parameters: { name: 'unset' }, x: 700, y: 2000 }
+      );
+      home.nodes.find((n) => n.id === 'shell')!.children!.push('seedField', 'seedBtn');
+      home.connections.push(
+        { fromId: 'unsetVar', fromProperty: 'value', toId: 'seedField', toProperty: 'startValue' },
+        { fromId: 'seedBtn', fromProperty: 'onClick', toId: 'seedField', toProperty: 'set' }
+      );
+    },
+    steps: ['type:seed:typed over', 'Seed']
   }
 ];
 
@@ -188,8 +206,11 @@ describe('§A the emitted app does what the runtime does, step by step', () => {
     expect([at(exported[0][0], 4)[9], at(exported[0][0], 6)[9]]).toEqual(['focus=[name]', 'focus=none']);
   });
 
+  // On the unticked desk, where a Set into the focused field would write something new (Bob over Eve); on the ticked desk
+  // the focused Set comes after a Clear, so it would write '' over '' and grade nothing (mutant C survived A7 there).
   it('A7 a focused field takes no Set', () => {
-    expect(at(exported[0][0], 5)).toEqual(at(exported[0][0], 4));
+    expect(at(exported[1][0], 7)[5]).toBe('[name]=Eve');
+    expect([at(exported[1][0], 8), at(exported[1][0], 9)]).toEqual([at(exported[1][0], 7), at(exported[1][0], 7)]);
   });
 
   it('A8 a Set after a Clear writes nothing back until the Value is written again, the same value too', () => {
@@ -211,6 +232,12 @@ describe('§A the emitted app does what the runtime does, step by step', () => {
   it('A12 unticked: the runtime reads what EXPECTED.md predicted, and the export reads the same', () => {
     expect(runtime[1][0]).toEqual(UNTICKED);
     expect(exported[1][0]).toEqual(runtime[1][0]);
+  });
+
+  it('A14 a Set under a wire that has delivered nothing writes the typed-in Value back', () => {
+    const seed = (r: string[]): string | undefined => r.find((x) => x.startsWith('[seed]='));
+    expect(runtime[3][0].map(seed)).toEqual(['[seed]=seed text', '[seed]=typed over', '[seed]=seed text']);
+    expect(exported[3][0]).toEqual(runtime[3][0]);
   });
 
   it('A13 the control: with no Set wired, both arms read the control', () => {
@@ -277,9 +304,12 @@ const ruledDesk = (): string =>
       { id: 'numBtn', type: 'net.noodl.controls.button', label: 'Number', parent: 'shell', parameters: { label: 'Number' }, x: 100, y: 2080 },
       { id: 'readBtn', type: 'net.noodl.controls.button', label: 'Read', parent: 'shell', parameters: { label: 'Read' }, x: 100, y: 2160 },
       { id: 'sdRead', type: 'Set Variable', label: 'Read the name', parameters: { name: 'typed' }, x: 700, y: 2000 },
-      { id: 'sdOutcome', type: 'Set Variable', label: 'Focused it', parameters: { name: 'blurred', value: 'focused' }, x: 700, y: 2080 }
+      { id: 'sdOutcome', type: 'Set Variable', label: 'Focused it', parameters: { name: 'blurred', value: 'focused' }, x: 700, y: 2080 },
+      // A field named as the Variable its Value reads: its row may not take the store's name (marketplace's search box).
+      { id: 'draftField', type: 'net.noodl.controls.textinput', label: 'draft', parent: 'shell', parameters: { placeholder: 'draft' }, x: 100, y: 2240 },
+      { id: 'draftBtn', type: 'net.noodl.controls.button', label: 'Draft', parent: 'shell', parameters: { label: 'Draft' }, x: 100, y: 2320 }
     );
-    home.nodes.find((n) => n.id === 'shell')!.children!.push('numField', 'numBtn', 'readBtn');
+    home.nodes.find((n) => n.id === 'shell')!.children!.push('numField', 'numBtn', 'readBtn', 'draftField', 'draftBtn');
     home.connections.push(
       { fromId: 'numBtn', fromProperty: 'onClick', toId: 'numField', toProperty: 'set' },
       // The name's Set, then a read of the name's text in the same chain.
@@ -287,7 +317,9 @@ const ruledDesk = (): string =>
       { fromId: 'readBtn', fromProperty: 'onClick', toId: 'sdRead', toProperty: 'do' },
       { fromId: 'nameField', fromProperty: 'onTextChanged', toId: 'sdRead', toProperty: 'value' },
       // The title's Focus outcome consumed.
-      { fromId: 'titleField', fromProperty: 'done', toId: 'sdOutcome', toProperty: 'do' }
+      { fromId: 'titleField', fromProperty: 'done', toId: 'sdOutcome', toProperty: 'do' },
+      { fromId: 'draftVar', fromProperty: 'value', toId: 'draftField', toProperty: 'startValue' },
+      { fromId: 'draftBtn', fromProperty: 'onClick', toId: 'draftField', toProperty: 'set' }
     );
   }).dir;
 
@@ -329,6 +361,17 @@ describe('§C the plan', () => {
     expect(planOf(ruledDesk(), '/Pages/Home').notes).toContain(
       'wire titleFocusBtn:onClick->titleField:focus dropped: its done outcome is consumed — change-conditional pulses are not translated in this slice'
     );
+  });
+
+  it('C7 a field whose Set is refused is still drawn: the wire is dropped and named, the field keeps its disposition', () => {
+    expect(planOf(ruledDesk(), '/Pages/Home').dispositions['numField']).toEqual(planOf(desks[0].dir, '/Pages/Home').dispositions['nameField']);
+    expect(planOf(ruledDesk(), '/Pages/Home').dispositions['numField']?.kind).not.toBe('deferred');
+  });
+
+  it('C8 a field\'s row does not take the name of a store the component imports', () => {
+    const page = emitDir(ruledDesk()).files['src/pages/Home.tsx'];
+    expect(page).toContain('const [draft2, setDraft2] = useState<string>');
+    expect(page).toContain("import { blurred, changed, draft, noted, typed } from '../stores/variables';");
   });
 
   it('C6 an unticked Value says it reaches the field through its Set', () => {
