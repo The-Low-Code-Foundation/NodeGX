@@ -23,7 +23,7 @@ import sharp from 'sharp';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParseRecord } from './helpers/http';
 import { clickButton, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
 
@@ -38,7 +38,11 @@ const TABLET = { width: 1024, height: 640, mobile: false };
 const MEMBERS = 'role:member, role:admin';
 const BIO = 'Alto in the choir. Sunday school since 2019. Psalm 46:10.';
 
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** A Member row, as far as this drive reads one. */
+interface Member extends ParseRecord {
+  photo?: { name: string };
+}
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const bodyText = async (page: RenderedPage) => String(await page.evaluate('document.body ? document.body.innerText : ""'));
 async function until(page: RenderedPage, what: string, ok: (text: string) => boolean, ms = 15000): Promise<string> {
@@ -141,8 +145,8 @@ describe('TWO-005 slice 3 — profiles, driven in two browsers', () => {
   const memberId: Record<string, string> = {};
   const bobsPosts: string[] = [];
   const ptr = (className: string, objectId: string) => ({ __type: 'Pointer', className, objectId });
-  const rows = async (cls: string, where: Row = {}) =>
-    (await request<{ results: Row[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, { headers: master })).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}) =>
+    (await request<{ results: T[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, { headers: master })).json.results;
 
   beforeAll(async () => {
     const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'two005-profile-drive-data-'));
@@ -272,7 +276,7 @@ describe('TWO-005 slice 3 — profiles, driven in two browsers', () => {
         await until(ann, 'Ann’s profile, saved', (t) => t.includes(BIO) && t.includes('Edit profile'), 20000);
         expect(await where(ann)).toBe(`/member/${ann_}`);
         await untilDrawn(ann, 'Ann’s photo on her profile', 'sig=', 1, 20000);
-        const [annRow] = await rows('Member', { objectId: ann_ });
+        const [annRow] = await rows<Member>('Member', { objectId: ann_ });
         expect([annRow.bio, annRow.photo?.name]).toEqual([BIO, file.storedName]);
         expect((await rows('MemberHistory', { member: ptr('Member', ann_) })).pop()?.changed).toMatchObject({ bio: { from: null, to: BIO }, photo: { from: null, to: file.storedName } });
         await shot(ann, 'phone-4-own');

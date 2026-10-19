@@ -161,6 +161,19 @@ export interface ParseRecord {
   [field: string]: unknown;
 }
 
+/** A pointer column as the Parse wire spells it, read back. */
+export interface ParsePointer {
+  __type: 'Pointer';
+  className: string;
+  objectId: string;
+}
+
+/** A date column as the Parse wire spells it, read back. */
+export interface ParseDate {
+  __type: 'Date';
+  iso: string;
+}
+
 /** `GET /classes/:collection` and the BYOB query routes. */
 export interface ParseQueryResult<T = ParseRecord> {
   results: T[];

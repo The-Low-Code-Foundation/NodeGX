@@ -19,7 +19,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 import { clickButton, clickButtonInRow, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
 
@@ -129,18 +129,25 @@ describe('TWO-003 slice 4 — each seller moves their own part, the buyer sees b
   const overflow: Array<[string, number]> = [];
   const ids: Record<string, string> = {};
 
-  type Row = Record<string, any>;
+  type Row = Record<string, unknown>;
+  /** An OrderPart row and an OrderPartHistory row, as far as this drive reads them. */
+  interface OrderPart extends ParseRecord {
+    seller: ParsePointer;
+  }
+  interface OrderPartHistory extends ParseRecord {
+    changed: { status: { to: string } };
+  }
   const fnCall = async (fn: string, body: Record<string, unknown>, headers: Record<string, string> = admin) => {
     const r = await request<{ result?: Row }>(base, 'POST', `/functions/${fn}`, { body, headers });
     if (r.status !== 200) throw new Error(`${fn}: ${r.status} ${r.text}`);
     return r.json.result ?? {};
   };
-  const rows = async (cls: string, where: Row = {}) =>
-    (await request<{ results: Row[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`, { headers: master })).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}) =>
+    (await request<{ results: T[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`, { headers: master })).json.results;
   const ptr = (className: string, objectId: string) => ({ __type: 'Pointer', className, objectId });
   const partsOf = async (number: string) => {
     const [o] = await rows('Order', { number });
-    return Object.fromEntries((await rows('OrderPart', { order: ptr('Order', o.objectId) })).map((p) => [p.seller.objectId === ids.kofi ? 'kofi' : 'ada', p]));
+    return Object.fromEntries((await rows<OrderPart>('OrderPart', { order: ptr('Order', o.objectId) })).map((p) => [p.seller.objectId === ids.kofi ? 'kofi' : 'ada', p]));
   };
   const placeOrder = async (buyerName: string, lines: Array<[string, number]>, pay: Record<string, string>) =>
     (
@@ -338,7 +345,7 @@ describe('TWO-003 slice 4 — each seller moves their own part, the buyer sees b
         await look('buyer-delivered');
         const parts = await partsOf(order.number);
         expect([parts.kofi.status, parts.ada.status]).toEqual(['delivered', 'delivered']);
-        expect((await rows('OrderPartHistory', { orderPart: ptr('OrderPart', parts.ada.objectId) })).map((h) => h.changed.status.to)).toEqual(
+        expect((await rows<OrderPartHistory>('OrderPartHistory', { orderPart: ptr('OrderPart', parts.ada.objectId) })).map((h) => h.changed.status.to)).toEqual(
           first ? ['new', 'confirmed', 'packed', 'sent', 'delivered'] : ['new', 'confirmed', 'paid', 'packed', 'sent', 'delivered']
         );
 

@@ -87,7 +87,7 @@ describe('TWO-005 slice 1 — joining and being let in, driven', () => {
   const seen: string[] = [];
   const overflow: Array<[string, number]> = [];
   const member = async (email: string) =>
-    (await request<{ results: Array<Record<string, any>> }>(base, 'GET', `/classes/Member?where=${encodeURIComponent(JSON.stringify({ email }))}`, { headers: master })).json.results[0];
+    (await request<{ results: Array<Record<string, unknown>> }>(base, 'GET', `/classes/Member?where=${encodeURIComponent(JSON.stringify({ email }))}`, { headers: master })).json.results[0];
 
   beforeAll(async () => {
     const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'two005-drive-data-'));

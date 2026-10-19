@@ -20,6 +20,7 @@ import * as path from 'path';
 import { promisify } from 'util';
 
 import { PAYSTACK_KEY_PLACEHOLDER } from '../src/admin/app/views/triggers';
+import type { TriggerView } from '../src/server/admin-triggers';
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
 import { FakePaystack, startFakePaystack } from './helpers/fake-paystack';
@@ -243,9 +244,9 @@ describe('TWO-004 — a builder adds Paystack’s webhook in the admin app, as t
         await shot(page, `${vp.name}-4-created`);
 
         // Saved as Paystack's scheme, and the key is in no answer the admin API gives.
-        const list = await request<{ triggers: Array<Record<string, any>> }>(base, 'GET', '/admin/triggers', { headers: master });
+        const list = await request<{ triggers: TriggerView[] }>(base, 'GET', '/admin/triggers', { headers: master });
         const mine = list.json.triggers.find((t) => t.webhook && t.webhook.slug === slug)!;
-        expect(mine.webhook.scheme).toBe('hmac-sha512');
+        expect(mine.webhook!.scheme).toBe('hmac-sha512');
         expect(mine.target).toEqual(expect.objectContaining({ kind: 'function', name: 'paystackEvent' }));
         expect(list.text).not.toContain(key);
 

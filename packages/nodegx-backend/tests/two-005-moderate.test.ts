@@ -23,7 +23,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParseDate, type ParsePointer, type ParseRecord } from './helpers/http';
 
 jest.setTimeout(90000);
 
@@ -32,12 +32,23 @@ const TEMPLATE = process.env.TWO005_TEMPLATE || path.join(__dirname, '../../../t
 const FUNCTIONS = ['whoAmI', 'sharePost', 'commentOn', 'heartPost', 'report', 'hide', 'block', 'writeRules'];
 const TAKEN_DOWN = 'Taken down by the member who wrote it.';
 
-interface Answer {
-  result?: Record<string, any>;
+interface Answer<R = Record<string, unknown>> {
+  result?: R;
   error?: unknown;
   code?: unknown;
 }
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** The rows this spec reads into: a report, a history row, and a Post or Member that may have been ended. */
+interface Report extends ParseRecord {
+  doneBy: ParsePointer;
+  at?: ParseDate;
+}
+interface History extends ParseRecord {
+  who: ParsePointer;
+}
+interface Ended extends ParseRecord {
+  endedAt?: ParseDate;
+}
 
 describe('TWO-005 slice 5 — moderation, through the template’s functions', () => {
   let service: BackendService;
@@ -50,16 +61,16 @@ describe('TWO-005 slice 5 — moderation, through the template’s functions', (
   const who: Record<string, Record<string, string>> = { stranger: {} };
   const userId: Record<string, string> = {};
   const memberId: Record<string, string> = {};
-  const fn = (name: string, body: unknown, as: string) => req<Answer>('POST', `/functions/${name}`, body, who[as]);
+  const fn = <R = Record<string, unknown>>(name: string, body: unknown, as: string) => req<Answer<R>>('POST', `/functions/${name}`, body, who[as]);
   const share = (caption: string, as: string) => fn('sharePost', { post: { caption } }, as);
   const comment = (postId: string, text: string, as: string) => fn('commentOn', { comment: { postId, text } }, as);
   const report = (what: Row, as: string) => fn('report', { report: what }, as);
   const hide = (what: Row, as: string) => fn('hide', { hide: what }, as);
   const block = (what: Row, as: string) => fn('block', { block: what }, as);
   const signIn = (name: string) => req<{ sessionToken?: string }>('POST', '/login', { username: name, password: `pw-${name}-long` }, {});
-  const rows = async (cls: string, where: Row = {}, headers: Record<string, string> = master) =>
-    req<{ results: Row[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
-  const one = async (cls: string, id: string, headers: Record<string, string> = master) => (await rows(cls, { objectId: id }, headers)).json.results?.[0];
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}, headers: Record<string, string> = master) =>
+    req<{ results: T[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
+  const one = async <T extends ParseRecord = ParseRecord>(cls: string, id: string, headers: Record<string, string> = master) => (await rows<T>(cls, { objectId: id }, headers)).json.results?.[0];
   const reason = (a: { json: Answer }) => String(a.json.error ?? '');
 
   beforeAll(async () => {
@@ -129,7 +140,7 @@ describe('TWO-005 slice 5 — moderation, through the template’s functions', (
     expect([r.status, r.json.result?.reported]).toEqual([200, true]);
     // Again, with another reason: the first stands, and nothing more is kept.
     expect((await report({ postId: annsPost, reason: 'spam' }, 'bob')).status).toBe(200);
-    const kept = (await rows('Report', { post: ptr('Post', annsPost) })).json.results;
+    const kept = (await rows<Report>('Report', { post: ptr('Post', annsPost) })).json.results;
     expect(kept.map((k) => [k.doneBy.objectId, k.reason, k.note ?? null, typeof k.at?.iso])).toEqual([[userId.bob, 'child-photo', null, 'string']]);
 
     expect(reason(await report({ postId: annsPost, reason: 'other' }, 'dee'))).toBe('Say in a few words what’s wrong.');
@@ -151,7 +162,7 @@ describe('TWO-005 slice 5 — moderation, through the template’s functions', (
     // A comment: its own reasons (no photo, so no child's), its own table.
     expect(reason(await report({ commentId: bobsComment, reason: 'child-photo' }, 'ann'))).toBe('Say why: unkind, spam or something else.');
     expect((await report({ commentId: bobsComment, reason: 'unkind' }, 'ann')).status).toBe(200);
-    expect((await rows('CommentReport', { comment: ptr('Comment', bobsComment) })).json.results.map((k) => [k.doneBy.objectId, k.reason])).toEqual([[userId.ann, 'unkind']]);
+    expect((await rows<Report>('CommentReport', { comment: ptr('Comment', bobsComment) })).json.results.map((k) => [k.doneBy.objectId, k.reason])).toEqual([[userId.ann, 'unkind']]);
     expect(reason(await report({ commentId: annsComment, reason: 'spam' }, 'ann'))).toBe('This is your own comment. Take it down instead.');
     expect(reason(await report({ commentId: 'nope', reason: 'spam' }, 'ann'))).toBe('This comment isn’t in the feed any more.');
     // An admin may report too.
@@ -182,7 +193,7 @@ describe('TWO-005 slice 5 — moderation, through the template’s functions', (
     expect(reason(await hide({ commentId: annsComment, hidden: true }, 'bob'))).toBe('Only an admin can hide someone else’s comment. Report it instead.');
     const wrote = await req('PUT', `/classes/Post/${annsPost}`, { endedAt: day(new Date().toISOString()), hiddenReason: 'mine now' }, who.bob);
     expect(wrote.status === 200).toBe(false);
-    const p = await one('Post', annsPost);
+    const p = await one<Ended>('Post', annsPost);
     expect([p.endedAt ?? null, p.hiddenReason ?? null, p.ACL ?? null]).toEqual([null, null, null]);
     expect(await one('Post', annsPost, who.dee)).toBeDefined();
     for (const as of ['wes', 'stranger']) expect([as, (await hide({ postId: annsPost, hidden: true }, as)).status]).toEqual([as, 403]);
@@ -192,7 +203,7 @@ describe('TWO-005 slice 5 — moderation, through the template’s functions', (
 
   it('🔴 AC4: a member takes their own post down; it is gone for every member, asked for directly, and stays for admins with why', async () => {
     expect((await hide({ postId: annsPost, hidden: true, reason: 'ignored for your own' }, 'ann')).status).toBe(200);
-    const p = await one('Post', annsPost);
+    const p = await one<Ended>('Post', annsPost);
     expect([typeof p.endedAt?.iso, p.hiddenReason]).toEqual(['string', TAKEN_DOWN]);
     for (const as of ['ann', 'bob', 'dee']) {
       expect([as, await one('Post', annsPost, who[as])]).toEqual([as, undefined]);
@@ -256,9 +267,9 @@ describe('TWO-005 slice 5 — moderation, through the template’s functions', (
     for (const as of ['ann', 'dee', 'wes', 'stranger']) expect([as, (await block({ memberId: memberId.bob, blocked: true, reason: 'x' }, as)).status]).toEqual([as, 403]);
 
     expect((await block({ memberId: memberId.bob, blocked: true, reason: '  Selling in the comments  ' }, 'ama')).status).toBe(200);
-    const m = await one('Member', memberId.bob);
+    const m = await one<Ended>('Member', memberId.bob);
     expect([m.blockedReason, typeof m.endedAt?.iso]).toEqual(['Selling in the comments', 'string']);
-    const history = (await rows('MemberHistory', { member: ptr('Member', memberId.bob) })).json.results;
+    const history = (await rows<History>('MemberHistory', { member: ptr('Member', memberId.bob) })).json.results;
     expect(history.map((h) => [h.who.objectId, h.changed])).toEqual([[userId.ama, { blocked: { from: false, to: true }, blockedReason: { from: null, to: 'Selling in the comments' } }]]);
     // Can't sign in: the old session is refused, and so is the password.
     expect((await fn('whoAmI', {}, 'bob')).status === 200).toBe(false);
@@ -283,14 +294,14 @@ describe('TWO-005 slice 5 — moderation, through the template’s functions', (
 
   it('🔴 let back: signs in again, what he wrote comes back, all but the comment hidden for its own reason', async () => {
     expect((await block({ memberId: memberId.bob, blocked: false }, 'ama')).status).toBe(200);
-    const m = await one('Member', memberId.bob);
+    const m = await one<Ended>('Member', memberId.bob);
     expect([m.blockedReason ?? null, m.endedAt ?? null, m.status]).toEqual([null, null, 'approved']);
-    const history = (await rows('MemberHistory', { member: ptr('Member', memberId.bob) })).json.results;
+    const history = (await rows<History>('MemberHistory', { member: ptr('Member', memberId.bob) })).json.results;
     expect(history[1].changed).toEqual({ blocked: { from: true, to: false }, blockedReason: { from: 'Selling in the comments', to: null } });
     const login = await signIn('bob');
     expect(login.status).toBe(200);
     who.bob = { 'x-parse-session-token': String(login.json.sessionToken) };
-    expect((await fn('whoAmI', {}, 'bob')).json.result?.me?.blocked).toBe(false);
+    expect((await fn<{ me?: { blocked?: boolean } }>('whoAmI', {}, 'bob')).json.result?.me?.blocked).toBe(false);
     expect((await one('Post', bobsPost, who.dee))?.caption).toBe('My new shop is open');
     expect((await one('Comment', bobsOther, who.dee))?.text).toBe('Looks lovely');
     expect(await one('Comment', bobsComment, who.dee)).toBeUndefined();
@@ -314,11 +325,11 @@ describe('TWO-005 slice 5 — moderation, through the template’s functions', (
     expect((await write(`  ${rules}  `, 'ama')).json.result?.saved).toBe(true);
     for (const as of ['ann', 'stranger']) expect([as, (await rows('Community', {}, who[as])).json.results[0]?.rules]).toEqual([as, rules]);
     const c = (await rows('Community')).json.results[0];
-    let h = (await rows('CommunityHistory', { community: ptr('Community', c.objectId) })).json.results;
+    let h = (await rows<History>('CommunityHistory', { community: ptr('Community', c.objectId) })).json.results;
     expect(h.map((x) => [x.who.objectId, x.changed])).toEqual([[userId.ama, { rules: { from: 'Be kind.', to: rules } }]]);
     // The same again: nothing written.
     expect((await write(rules, 'pat')).status).toBe(200);
-    h = (await rows('CommunityHistory', { community: ptr('Community', c.objectId) })).json.results;
+    h = (await rows<History>('CommunityHistory', { community: ptr('Community', c.objectId) })).json.results;
     expect(h).toHaveLength(1);
     expect((await req('PUT', `/classes/Community/${c.objectId}`, { rules: 'Anything goes' }, who.ama)).status === 200).toBe(false);
     expect((await rows('CommunityHistory', {}, who.ann)).json.results?.length ?? 0).toBe(0);

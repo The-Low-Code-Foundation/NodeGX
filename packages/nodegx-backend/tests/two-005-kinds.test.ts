@@ -20,7 +20,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParseDate, type ParseRecord } from './helpers/http';
 
 jest.setTimeout(90000);
 
@@ -36,11 +36,15 @@ const PNG = Buffer.from(
 const DAY = 86400000;
 
 interface Answer {
-  result?: Record<string, any>;
+  result?: Record<string, unknown>;
   error?: unknown;
   code?: unknown;
 }
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** A Post row, as far as this spec reads one. */
+interface Post extends ParseRecord {
+  eventOn?: ParseDate;
+}
 
 describe('TWO-005 slice 4b — testimonies and events, through the template’s functions', () => {
   let service: BackendService;
@@ -54,9 +58,9 @@ describe('TWO-005 slice 4b — testimonies and events, through the template’s 
   const userId: Record<string, string> = {};
   const memberId: Record<string, string> = {};
   const share = (post: unknown, as: string) => req<Answer>('POST', '/functions/sharePost', { post }, who[as]);
-  const rows = async (cls: string, where: Row = {}, headers: Record<string, string> = master) =>
-    req<{ results: Row[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
-  const postRow = async (id: string) => (await rows('Post', { objectId: id })).json.results[0];
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}, headers: Record<string, string> = master) =>
+    req<{ results: T[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
+  const postRow = async (id: string) => (await rows<Post>('Post', { objectId: id })).json.results[0];
   const countOf = async (as: string) => (await rows('Post', { member: ptr('Member', memberId[as]) })).json.results.length;
   const reason = (a: { json: Answer }) => String(a.json.error ?? '');
   /** A photo of the member's own, shared with the members and the admins, as the posting page uploads it. */
@@ -149,7 +153,7 @@ describe('TWO-005 slice 4b — testimonies and events, through the template’s 
     offset.setUTCHours(17, 30, 0, 0);
     const lagos = `${offset.toISOString().slice(0, 10)}T18:30:00+01:00`;
     const r2 = await share({ kind: 'event', caption: 'Choir practice', eventOn: lagos }, 'ann');
-    expect((await postRow(String(r2.json.result?.postId))).eventOn.iso).toBe(offset.toISOString());
+    expect((await postRow(String(r2.json.result?.postId))).eventOn!.iso).toBe(offset.toISOString());
     // Nearly a year away is still allowed; every member and admin reads it.
     const later = await share({ kind: 'event', caption: 'Harvest', eventOn: new Date(Date.now() + 360 * DAY).toISOString() }, 'ama');
     expect(later.status).toBe(200);
