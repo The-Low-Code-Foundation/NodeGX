@@ -17,6 +17,53 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## npm packages 0.2.3 · 2026-10-19
+
+**`npx @nodegx/preview` works again, and the packages for building your own editor can now draw an app's screen
+without running it.**
+
+This release is `@nodegx/mcp`, `@nodegx/preview`, `create-nodegx` and `create-nodegx-vibe` at 0.2.3, and
+`@nodegx/node-spec` and `@nodegx/project-contract` at 0.2.0. `@nodegx/canvas-look` stays at 0.1.0. Nothing in it
+changed.
+
+### New
+
+- **Draw a screen from its files.** `@nodegx/node-spec/draw` is new in node-spec 0.2.0. Give it a component's files and
+  the values on its wires, and it returns a box for each thing on the screen. Each box also lists what the drawer had to
+  assume. A page can load it without a bundler. It's about 12 KB.
+- **The editor guide teaches both ways to show a screen.** `npm create nodegx` adds a guide for building your own
+  editor. It now explains when to show the real app beside your editor and when to draw the screen instead, and what
+  each one costs. It also answers the 43 questions three test builders asked while following it.
+- **The honesty number.** `get_project_info`, `get_component`, every change the agent makes, and `render_report` now
+  say how much of the app is made of nodes whose behaviour is known. The rest is code nobody has checked, such as
+  Function, Script and Expression nodes. It isn't a quality score. It tells you which parts can only be understood by reading
+  their code.
+- **More nodes are described.** node-spec 0.2.0 describes 17 more node types, 125 in all, including the backend's users, roles
+  and calls.
+- **Uploads, webhooks and live updates match the 0.4.2 editor.** The preview and the agent's backend now have Upload
+  File's Readers and Shrink To, Paystack signature checks on webhooks, and live updates for signed-in members.
+
+### Fixed
+
+- **`npx @nodegx/preview <app folder>` runs the preview again.** Since 0.2.0 it stopped with an error, because the
+  package had two commands and npx couldn't choose. It now has a `preview` command, and the old names still work.
+- **The editor test suite loads an adapter written as an ES module on Node versions before 20.19.** Before, it failed
+  to load it.
+- **The editor test suite grades a format-4 project the way the NodeGX server writes it.** An editor that ticks *run
+  when a value changes*, as the server does, now passes. The guide says to tick it.
+- **A PASS on files alone says so.** When your adapter can't run the graph, the suite's PASS line now ends with
+  `files only`.
+- **Code the agent exports matches the running app more often:** filtered and sorted lists, sign-in pages, and forms
+  that say whether they were sent.
+
+### Good to know
+
+- A folder set up with 0.2.2 keeps using 0.2.2. To move it to 0.2.3, change the version in its `.mcp.json` files.
+- `@nodegx/project-contract` 0.2.0 needs `@nodegx/node-spec` 0.2.0. Upgrade the two together.
+- 0.2.2 (2026-10-15) had no notes here. It added `npm create nodegx-vibe`, which sets a folder up for Mistral Vibe.
+  `render_report` also began to name text pressed against the edge of its box, and `drive_page` began to check what a
+  watched step expects.
+
 ## 0.4.2 · 2026-10-19
 
 **Apps can now keep photos for their members only and check Paystack's payment webhooks.**
