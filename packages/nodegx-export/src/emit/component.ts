@@ -6767,11 +6767,22 @@ export function emitComponent(
     internalImports.set(specifier, `import { ${[...usedMediaHelpers].sort().join(', ')} } from '${specifier}';`);
   }
 
-  // P109 ISL-005 AC7. The script-file registry, earned by a printed wrapper that binds `Scripts`.
+  // P109 ISL-005 AC7. The script-file registry, earned by a printed wrapper that binds `Scripts` (only a Function's
+  // does, and a Function's wrapper is in its own file now, which imports it: `functionFileSource`).
   const usesProjectScripts = Object.values(jsFunByNode).some((def) => referencedJsIds.has(def.nodeId) && (def.scripts?.length ?? 0) > 0);
-  if (usesProjectScripts) {
-    const specifier = `${relRoot}/${PROJECT_SCRIPT_FILES_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
-    internalImports.set(specifier, `import { ${PROJECT_SCRIPTS_SYMBOL} } from '${specifier}';`);
+  /*
+   * P18-S122-TPLBUILD, ruled by Richard 2026-10-19: a Function's wrapper moves to its own file, as a Script's code does
+   * (EXP-011 §52), and that one file is not typechecked. The body is the author's JavaScript (`function pick(typed, start)`
+   * is TS7006 under `strict`), and a `// @ts-nocheck` cannot be scoped to one function in a shared file. The signature is
+   * typed, so every call the component makes is still checked here. An Expression's and a Visual Function's stay.
+   */
+  const functionFiles = Object.values(jsFunByNode)
+    .filter((def) => def.kind === 'function' && referencedJsIds.has(def.nodeId))
+    .map((def) => ({ def, file: `src/functions/${plan.file!.dir}/${plan.file!.fileBase}/${def.fnName}.ts` }));
+  const ownFileIds = new Set(functionFiles.map(({ def }) => def.nodeId));
+  for (const { def, file } of functionFiles) {
+    const from = `${relRoot}/${file.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(from, `import { ${def.fnName} } from '${from}';`);
   }
 
   const importLines: string[] = [];
@@ -6788,6 +6799,7 @@ export function emitComponent(
   // definition nothing kept leaves its source behind as a comment instead (EXP-004), so the node
   // the inline marker names can still be read somewhere in the repo.
   for (const def of Object.values(jsFunByNode)) {
+    if (ownFileIds.has(def.nodeId)) continue;
     if (referencedJsIds.has(def.nodeId)) body.push(...jsWrapperLines(def), '');
     else body.push(...refusedSourceLines(def), '');
   }
@@ -7744,6 +7756,8 @@ export function emitComponent(
 
   // EXP-011 §52. One file per Script node: the author's code, verbatim, in the runtime's own wrapper.
   for (const script of plan.scripts) files[script.file] = scriptFileSource(script, plan.path, plan.legacyPath);
+  // P18-S122-TPLBUILD. One file per printed Function wrapper, on the same rule.
+  for (const { def, file } of functionFiles) files[file] = functionFileSource(def, jsWrapperLines(def), plan.path);
 
   return {
     files,
@@ -7876,6 +7890,39 @@ function scriptFileSource(script: ScriptPlan, componentPath: string, legacyPath:
     // EXP-011 §54. Where a load failure is raised from (script/source-failed): the node's graph id and its component.
     `  { nodeId: ${JSON.stringify(script.nodeId)}, componentName: ${JSON.stringify(legacyPath)} }`,
     ');',
+    ''
+  ];
+  return lines.join('\n');
+}
+
+const GENERATED_FUNCTION_TS = '// @nodegx:generated (function node — provenance markers complete in EXP-007)';
+
+/**
+ * The file a Function node's wrapper lives in (P18-S122-TPLBUILD, Richard's ruling of 2026-10-19): the wrapper
+ * `jsWrapperLines` prints, exported, under the header a Script's file has (`scriptFileSource`), for the same reason.
+ *
+ * 🔴 `// @ts-nocheck` on this one file. The body is the author's JavaScript, preserved verbatim (EXP-003 §4), and a
+ * strict check reads it as TypeScript it never was: `function pick(typed, start)` is TS7006, `m[String(id)]` over an
+ * object literal is TS7053, and the app's `build` is `tsc -b && vite build`, so one such line stopped the build. The
+ * directive turns off this file's diagnostics, not its types: the signature is written out, so the component's every call
+ * (its arguments, the outputs it reads, `Parameters<typeof fn>[1]` for a pulsed run) is still checked where it is made.
+ * The path is `src/functions/<dir>/<fileBase>/<fnName>.ts`, three below `src/`, as a Script's is.
+ */
+function functionFileSource(def: JsFunctionPlan, wrapper: string[], componentPath: string): string {
+  const safe = (text: string): string => text.split('*/').join('* /');
+  const signature = `function ${def.fnName}(`;
+  const lines = [
+    '// @ts-nocheck',
+    GENERATED_FUNCTION_TS,
+    '//',
+    `// The Function node "${safe(def.fnName)}" (node ${safe(def.nodeId)}) of ${safe(componentPath)}, in a file of its own.`,
+    "// Type checking is off for this one file, as for a Script node's: the body is the author's JavaScript, not",
+    '// TypeScript. The signature is typed, and every call to it is checked in the component that makes it.',
+    ...((def.scripts?.length ?? 0) > 0
+      ? [`import { ${PROJECT_SCRIPTS_SYMBOL} } from '../../../${PROJECT_SCRIPT_FILES_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}';`]
+      : []),
+    '',
+    ...wrapper.map((line) => (line.startsWith(signature) ? `export ${line}` : line)),
     ''
   ];
   return lines.join('\n');

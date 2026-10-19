@@ -238,6 +238,12 @@
  * lib gains `blendColorKept`, so every project that emits `src/lib/util.ts` moves (gallery-, mood-, photo-, tick- and
  * ticket-desk), and the corpus's one Color Blend, wired from a Variable, prints the kept call: `mood-desk`'s
  * `src/pages/Mood.tsx`. **6 moved, 0 added, 0 removed.**
+ *
+ * ✅ **Regenerated for P18-S122-TPLBUILD (P18 session 125, 2026-10-19), predicted and counted.** A Function's wrapper
+ * moves to `src/functions/<dir>/<fileBase>/<fnName>.ts` (Richard's ruling). Predicted from the corpus emitted at HEAD:
+ * the 6 projects with a printed Function wrapper move their page (7: scripts-desk has two), their `EXPORT-REPORT.md` and
+ * `@report` (the file count and list), and gain one file per wrapper (9). **19 moved, 9 added, 0 removed**, exactly
+ * those. The session's four earlier classes (TS2554, TS2345, TS2786, TS2448) were predicted at 0 keys each and moved 0.
  */
 import * as fs from 'fs';
 import * as path from 'path';

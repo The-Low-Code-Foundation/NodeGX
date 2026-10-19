@@ -186,10 +186,12 @@ describe('§A — a pulse reads what the runtime\'s own Function hands its targe
   });
 
   it("the fixture's emitted wrapper, run by the emitted helper, agrees with the runtime over the fixture's five runs", () => {
-    const page = emit().files[PAGE];
-    const start = page.indexOf('function Hold_the_name_until_Send(');
-    const end = page.indexOf('\n  return Outputs;\n}\n', start) + '\n  return Outputs;\n}'.length;
-    const wrapper = transpile(`export ${page.slice(start, end)}`);
+    // P18-S122-TPLBUILD: the wrapper's own file (Richard's ruling, 2026-10-19), which exports it.
+    const file = emit().files['src/functions/pages/Home/Hold_the_name_until_Send.ts'];
+    const start = file.indexOf('export function Hold_the_name_until_Send(');
+    const end = file.indexOf('\n  return Outputs;\n}\n', start) + '\n  return Outputs;\n}'.length;
+    expect(start).toBeGreaterThan(-1);
+    const wrapper = transpile(file.slice(start, end));
     const i = CASES.findIndex((c) => c.name.startsWith('the fixture body'));
     expect(exportArm(CASES[i], wrapper.Hold_the_name_until_Send as Body)).toEqual(RUNTIME[i]);
   });
@@ -205,11 +207,13 @@ describe('§B — what the fixture emits', () => {
   });
 
   it('the wrapper takes its Outputs record as a parameter, the signals seeded, and declares no record of its own', () => {
-    expect(page).toContain(
-      'function Hold_the_name_until_Send(__inputs: { name: string | undefined }, Outputs: { problem?: any; greeting?: any; sends?: any; refused: () => void; go: () => void } = { refused: () => {}, go: () => {} })'
+    // P18-S122-TPLBUILD (Richard's ruling, 2026-10-19): the wrapper is in a file of its own, which the page imports.
+    const wrapper = app.files['src/functions/pages/Home/Hold_the_name_until_Send.ts'];
+    expect(wrapper).toContain(
+      'export function Hold_the_name_until_Send(__inputs: { name: string | undefined }, Outputs: { problem?: any; greeting?: any; sends?: any; refused: () => void; go: () => void } = { refused: () => {}, go: () => {} })'
     );
-    const wrapper = page.slice(page.indexOf('function Hold_the_name_until_Send('), page.indexOf('/** Home. */'));
     expect(wrapper).not.toContain('const Outputs');
+    expect(page).toContain("import { Hold_the_name_until_Send } from '../functions/pages/Home/Hold_the_name_until_Send';");
   });
 
   it('the node keeps its values across runs in one ref per instance, its signals listed', () => {
