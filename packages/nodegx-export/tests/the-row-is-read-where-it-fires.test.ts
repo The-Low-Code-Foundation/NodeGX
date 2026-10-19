@@ -8,6 +8,7 @@ import { ComponentPlan, planProject } from '../src/analyze/plan';
 import { emitApp, EmittedApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
 import { writeReadDesk } from './helpers/read-desk';
+import { fnNode } from './helpers/success-desk';
 import { Desk, RawWire } from './helpers/root-desk';
 import { typecheckEmittedApp } from './helpers/typecheckApp';
 
@@ -255,6 +256,24 @@ describe('§C the plan', () => {
     expect(list.dispositions['lsSetNamed']).toEqual({ kind: 'deferred', to: 'EXP-003', reason: computed });
     expect(list.notes).toContain(`wire lsSetPicked:done->lsSetNamed:do dropped: ${computed}`);
     expect(list.dispositions['lsSetPicked']).toEqual({ kind: 'collapsed', into: 'lsEach' });
+  });
+
+  it('C8 a Function\'s input is its own, read whenever it runs: a relayed value there is refused by name even when a row\'s signal runs it', () => {
+    const dir = writeReadDesk((d) => {
+      const list = d.components['Components/List'];
+      list.nodes.push({ ...fnNode('lsFn', 'Say which', "Outputs.said = Inputs.which;", { inputs: ['which'], outputs: ['said'] }), x: 700, y: 1600 });
+      list.connections.push(
+        { fromId: 'lsEach', fromProperty: 'itemOutputSignal-pick', toId: 'lsFn', toProperty: 'run' },
+        { fromId: 'lsEach', fromProperty: 'itemOutput-id', toId: 'lsFn', toProperty: 'in-which' }
+      );
+    }).dir;
+    const list = planOf(dir, '/Components/List');
+    expect(list.dispositions['lsFn']).toEqual({
+      kind: 'deferred',
+      to: 'EXP-003',
+      reason: 'input "which" is fed by For Each — it reads the repeater lsEach\'s relayed row value "id" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row\'s relayed signal runs, as the firing row\'s own'
+    });
+    expect(JSON.stringify(list)).not.toContain('"kind":"jsfun-run","nodeId":"lsFn"');
   });
 });
 

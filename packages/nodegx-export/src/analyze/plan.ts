@@ -16391,10 +16391,10 @@ function planComponent(
   /**
    * EXP-011 §100. A sink whose compile read a repeater's relayed row value means one thing inside that repeater's row
    * chain and another outside it, so from then on it is one compile per scope, under `@row:<scope>` (`none` outside). The
-   * plain key keeps a compile that succeeded in any scope over one that was refused, for the readers that look a sink up
-   * by `<id>:<port>` to ask whether it compiles at all (the pre-pass that compiles every sink outside any row's chain
-   * comes first). A compile that read none is one compile, as before. A cached result tells the compile that asked for
-   * it what it read, so the scope-dependence climbs the chain.
+   * plain key keeps the first compile, as it did for every sink before (the readers that look a sink up by `<id>:<port>`
+   * read that one; the pre-pass compiles every sink outside any row's chain first). A compile that read none is one
+   * compile, as before. A cached result tells the compile that asked for it what it read, so the scope-dependence climbs
+   * the chain.
    */
   const compiledOf = (node: NodeIR, port: string): CompiledSink => {
     // EXP-011 §90. A Set with several Value wires compiles per wire it reads, which depends on the chain it is in.
@@ -16410,8 +16410,6 @@ function planComponent(
     if (touched.size > 0) {
       relayTouchedKeys.set(basePlain, new Set([...(scopes ?? []), rowScope]));
       if (key === basePlain) compiledSinks.set(scopedKey, result);
-      const plain = compiledSinks.get(basePlain);
-      if (key !== basePlain && !('defer' in result) && (plain === undefined || 'defer' in plain)) compiledSinks.set(basePlain, result);
     }
     if (touched.size > 0 || relayTouchedKeys.has(basePlain)) relayTouches[relayTouches.length - 1]?.add(rowScope ?? 'none');
     return result;
