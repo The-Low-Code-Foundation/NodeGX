@@ -1,6 +1,6 @@
 # EXP-011 — Close the picker gap, ranked by what apps need
 
-**Status:** 🟡 In progress — **latest: §94 (session 127, 2026-10-19), a signal a parent sends into a placed component runs the chain inside (87 template nodes refused with a Component Inputs trigger → 0), the parent counting its pulses and keeping the count taken; graded against the runtime's own component instances rendered by real React; templates 101 nodes gained, 0 lost**; §93 (session 126, 2026-10-19), a component root's Mounted wire is carried (72 roots in the templates, all refused as "a router concern"), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time; graded against the runtime's own nodes rendered by real React; templates 54 nodes gained, 0 lost**; §92 (session 125), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling); §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
+**Status:** 🟡 In progress — **latest: §95–§96 (session 128, 2026-10-19), a Set Variable's Done runs its chain (54 template nodes refused with a Set's output as their trigger → 20; 55 gained, 0 lost; rocket-school's game and race start), and a placed component's lifted value reaches a sibling's input before the pulse that reads it (8 of 90 sibling wires bind, 82 named by the child that does not lift them); graded against the runtime's own nodes rendered by real React**; §94 (session 127, 2026-10-19), a signal a parent sends into a placed component runs the chain inside (87 template nodes refused with a Component Inputs trigger → 0), the parent counting its pulses and keeping the count taken; graded against the runtime's own component instances rendered by real React; templates 101 nodes gained, 0 lost**; §93 (session 126, 2026-10-19), a component root's Mounted wire is carried (72 roots in the templates, all refused as "a router concern"), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time; graded against the runtime's own nodes rendered by real React; templates 54 nodes gained, 0 lost**; §92 (session 125), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling); §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
 **Depends on:** nothing — but sequenced after EXP-009 and EXP-010, which are worth more per hour
 **Replaces:** every "what to build next" list in this phase from sessions 20–31
 
@@ -13516,3 +13516,220 @@ failed, 3 pending** (session 126's landed tree: 142 suites, 4,939; this session 
    the small ones.
 5. Not graded: a pulse sent while the parent does not draw the child runs when the child next mounts, where the runtime
    runs it at the pulse (the instance exists undrawn); the chain's effect lands, its moment differs.
+
+## §95 The Set runs its Done chain (session 128, 2026-10-19): P18-S127-SETDONE
+
+### §95.0 What was measured first
+
+`s128-setdone/census.ts` on the base `8b5382a17`, over the 19 templates (primary's `templates/` and the two written out by
+`../s119-fnchain-measure/materialize.ts`): **54 nodes refused with a Set Variable's output as their trigger**
+(rocket-school 19, star-class 19, nightbook 12, bot-garden, story-engine, todo-list, todo-list-demo 1 each), as the bug
+said, and **231 wires out of 117 Sets' Done** (no template wires a Set's Completed or Failure). What the 231 drive: another
+Set Variable's Do 79, a Function's Run 35, a placed component's signal input 40 (`loadHistory` 16, `run` 6, `fill`,
+`start`, `load` 4 each, `changed` 3, `ask` 2, `go` 1), a Component Outputs signal 19, a RouterNavigate 9, a kit's action 9
+(nightbook's `addSticker`), a States' To 12, a Delay 5, i18n's Change Language 5, a field's Set 6, a Counter 5, a Condition
+3, a Repeat 2, an Expression's Run 2. 152 of the wires leave a Set that is refused itself (most in logic components). No
+target in a chain reads, through value wires, the variable its Set has just written: the reader claim below is the
+runtime's, graded on the fixture, not a template shape.
+
+### §95.1 What the runtime does (measured on its own nodes, `tests/helpers/runtime-mounted-arm.js`)
+
+The runtime's Set Variable writes in `scheduleAfterInputsHaveUpdated`, notifies every Variable reading the name
+(`forceChange`), then sends Done and Completed (`reportOutcomes`, synchronous). Measured on the Set Desk
+(`tests/helpers/set-desk.ts`) before the export was touched (`s128-setdone/EXPECTED.md`):
+
+- a reader of the variable in the Done chain sees the value just written (Echo reads "ready");
+- Completed runs after the Done chain;
+- a Done into a placed component's signal input runs the chain inside, a Done chain inside a component run from a signal
+  input runs there, and a Done into the component's own signal output reaches the page;
+- 🔴 **the chain runs before the click's next wire.** Predicted the other way from the update loop (the Done's target is
+  pulsed during the first wire's update, so it would update after the second wire), measured "second", not "done after":
+  a node flagged dirty flags its dependees dirty with it (`_performDirtyUpdate` → `flagDependeesDirty`), so the Done's
+  target sits on the dirty list right behind its sender, ahead of the click's second wire, and a node pulls its inputs'
+  nodes first. Depth first, in wire order: what the export prints for a chain already.
+
+### §95.2 What is built
+
+| piece | what it is |
+|---|---|
+| `store-set.then` (`plan.ts`) | the Set's Done chain, then its Completed chain, after the write, present only when something hangs off them (an action with no chain is unchanged, so no golden moves for it) |
+| `withSetDone` | wraps the Set Variable compile: `doneChainOf(node, 'done')`, then `'completed'`. A chain it cannot run does not take the write with it: the Set kept its write when nothing read its Done, and keeps it now; the refusal is kept per port (`setDoneRefusals`) |
+| ownership | `OWN_CHAIN_OUTPUTS['Set Variable'] = ['done', 'completed']`: the attach pass leaves these wires to the Set, so the answer does not depend on wire order (§39.3's hazard) |
+| the sweep after the attach pass | a Done or Completed wire the Set's compile did not take: the sink's own refusal first (as the attach pass rules every trigger wire), else "trigger X.done: the Set Variable's Done chain is not exported — …", "… the Set Variable that sends it is not exported — …" or "… is never run by an exported trigger". A sink another trigger ruled keeps its ruling (s124's rule); the wire is consumed, so it is named once |
+| the walkers | `actionsValidIn`, `snapAction` (the chain carries the click's snapshot onward, as an Object's Set's does), the attach scan, the session and materialize walks; in the emitter `collectActionUse`, `deepActions`, `chainReadsChainLocal`, `actionExprsOf`, and `expandActions`, which prints the chain as following statements |
+| Failure | not a chain: with a literal Name, which the compile requires, it never fires |
+
+### §95.3 The test (`tests/the-set-runs-its-done-chain.test.ts`, 28 rows)
+
+The Set Desk, built in a temporary folder (the corpus golden does not move): a page with Ready (a Set whose Done sets
+`echo` from a Variable reading what it wrote and pulses the Banner's `show`; its Completed writes `told`), Order (the
+click's first wire a Set whose Done and Completed write the same variable, its second wire another Set of it), Play (a
+Set that mounts the Game's box and pulses the Game's `start` from its Done: rocket-school's Monster and Race), and the
+Quiz (its button's Set, whose Done fires the Quiz's own `answered`). §A both arms press by press (the runtime first, A1),
+the claims one by one, the click's wires the other way round (A7), a Condition between the click and the Set (A8), the
+control with every wire out of a Set's Done and Completed removed (A9), a field cleared on the click's first wire and read
+in the Done chain (A10); §B the emitted handlers and effect, a navigation in the chain and its hook; §C the plan (the
+chain collapsed into the click, a refused chain keeps the write, the sink's own refusal, a sink another trigger runs, a
+Set nothing runs, a Now the chain earns, the wire order); §D each variant's app typechecks.
+
+The variants were predicted in `EXPECTED.md` before they ran, and matched. 🔴 **The first draft read three things that
+are not this bug's**, each filed and moved off: the Game's own seeded Variable was stored again on StrictMode's second
+mount over the pulse's write ("game idle" for "game on": P18-S121-SEEDTWICE, and P18-S128-SEEDREMOUNT, the runtime seeds
+once per instance); the Condition variant, its box left ticked, ran its arm at load in the runtime only
+(P18-S128-CONDLOAD); the control's wired Text with no value read "Text" in the runtime only (P18-S122-TEXTDEFAULT).
+
+**Mutant arms** (`s128-setdone/mutants.py`, a copy in `packages/nx-mut-s128`, removed after). Control 28 / 28; every arm
+typechecked and killed rows.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the base: a Set runs no chain | 17 |
+| B | the chain printed before the write | 10 |
+| C | the attach pass does not leave the chain wires to the Set (wire order) | 3 (C3, C5, C6) |
+| D | a chain it cannot run refuses the write too | 1 (C3) |
+| E | the sweep overwrites a sink another trigger ruled | 1 (C4) |
+| F | Completed is not run | 7 |
+| G | no sweep: the wires it could not run are named by nothing | 2 (C3, C5) |
+| H | the sweep does not ask the sink first | 1 (C3) |
+| I | the chain earns no imports | 14 |
+| J | the deep walk skips the chain (the hooks it needs) | 2 (B5, B6) |
+| K | the attach scan skips the chain | 1 (C7) |
+| L | the chain is not snapped | 1 (A10) |
+| M | a wire the sweep names is not consumed (named twice) | 1 (C3) |
+
+🔴 **K and L survived the first spec** (25 rows): nothing in it was earned by the attach scan, and no chain read a value
+the click wrote before it. C7 (a Now read in the Done chain) and A10 (a field cleared on the click's first wire, read in
+the chain: `setNote(''); said.set('wiped'); echo.set('');`) were added for them, A10 predicted on both arms first. G first
+read "0 total" (it broke a narrowing and the suite did not compile) and was reshaped.
+
+### §95.4 What the exported apps do now
+
+`dispdiff.ts`, the base against the tree: **templates (19 projects, 13,432 nodes) 55 gained, 0 lost**: 27 Set Variables,
+18 Expressions (the constants those Sets write: `True()`, `CE2()`, `practice()`), 4 States, 3 RouterNavigates, 2 Component
+Outputs, 1 Function (rocket-school and star-class 24 each, nightbook 4, todo-list-demo 2, bot-garden 1). 22 more stay
+refused with a truer sentence (each from "trigger … is not a rendered element event or a receiver"). **Corpus (229
+projects, 29,482 nodes) 104 gained, 0 lost** (capital-quiz 79, a Rocket School copy 25), 17 re-worded. `census.ts`:
+54 → 20 nodes refused with a Set's output as their trigger. In the templates' notes the trigger-drop sentence 529 → 371,
+the catch-all "no deterministic translation" 8,785 → 8,753.
+
+Read in the emitted diff (every changed code file, `../s126-mounted/emit.ts` both ways, 23 files):
+
+- **Runs now:** rocket-school's and star-class's game and race start (Monster's and Race's `onStart` pulses the Play's
+  `start`); the Countdown bar's `start` chain runs whole (it set the expired flag and stopped; now it fills the bar, glides
+  it and arms the deadline), its `stop` freezes the bar; the Lists page's New opens the editor and pulses its `fill`; the
+  Focus picker, the New player form and the two Setups write their defaults after the first write (`newLevel`, `newLang`,
+  `monsterTimed`, `raceTimed`, `focusDraftTopic`); bot-garden's Island navigates to the Workshop after choosing a garden;
+  nightbook's Tonight recomputes the page background on every pattern, paper and ink pick (a Function the Set's Done runs)
+  and pulses the decorated page's `addSticker` (6 stickers) and `resumeTyping`; its two lock buttons (the Sections' and
+  Tonight's done sheet) navigate to Unlock after locking; todo-list-demo's Reset clears the open action and the slot days.
+- **Still not, named on the wire:** a chain with a field's Set in it (rocket-school's and star-class's Lists Editor `fill`:
+  P18-S128-FIELDSET), a chain into a logic component (the Race's winner into `/Logic/Finish race`), a Function the export
+  refuses (the Race reset's clock, nightbook's network and browser Functions), a Set whose value has no known source.
+
+The templates' typecheck gate 3 / 3, every row 0; all 19 (`../s124-deadrow/tplbuild.ts`) 1 error in 1, nightbook's
+P18-S125-STYLENULL, as at the base. None of this was driven in a browser: the spec renders both arms with real React, and the readings are the runtime's own nodes'.
+
+### §95.5 Readings
+
+The spec 28 / 28; the 13 mutant arms each kill rows (control 28 / 28). Re-pinned: `the-signal-arrives-in-the-component`
+C3 (its refused sender was a Set's Done, which runs now; it is a Set the export refuses, `setWith "object"`, and the
+sentence names it). Neighbours, run together under the lock: `the-signal-arrives-in-the-component` 19, `animation-pair`,
+`browser-utilities`, `cascade`, `chain-wire-order`, `collection-remove`, `component-outputs`, `create-new-array`,
+`date-family`, `drag`, `popups`, `relation-pair`, `record`, `subscribe-to-changes`, `the-pattern-extractor`,
+`the-undrawn-trigger-is-refused`, `websocket` (every spec that pins the old trigger sentence), `parameter-coverage`, the
+templates' typecheck gate 3 / 3. **hls001**: predicted 0 keys by emitting every fixture with the base's `src` and the
+tree's (identical, 63 fixtures); 4 / 4, unchanged. Package `tsc --noEmit` 0. The tsfixme ratchet holds.
+
+**The whole package** (after §96 too; `nice -n 19 --runInBand`, under the lock, JSON written 19:17): **145 / 145 suites,
+5,000 passed, 0 failed, 3 pending** (session 127's landed tree: 143 suites, 4,958; this session adds two suites, 28 + 14).
+
+**Tooling** (`s128-setdone/`, run the `.ts` from `packages/nodegx-export` with `../../node_modules/.bin/ts-node -P
+tsconfig.json --transpile-only`, `ROOTS=` as `../s119-fnchain-measure/dispdiff.ts`): `census.ts <src> <out.json>` (every
+wire out of a Set's Done, Failure or Completed, what it drives and its drop sentence; the nodes refused with a Set's
+output as their trigger, both sentences); `probe.ts <src> [steps…]` (the Set Desk on both arms, press by press);
+`sibling-probe.ts <src> [steps…]` (the Sibling Desk the same); `siblings.ts <src>` (every sibling value wire and what
+became of it); `mutants.py` (both specs' arms); `EXPECTED.md`. The base control copy is `git archive 8b5382a17
+packages/nodegx-export/src` (with the two ledgers and `package.json`, `node_modules` a symlink) unpacked as
+`packages/.nx-ctl-s128` (removed before the whole suite).
+
+### §95.6 What this leaves
+
+1. **P18-S128-FIELDSET** (medium, filed): a text field's Set, Focus or Blur from a chain is not a trigger (35 + 34 template
+   wires); it is what still stops the Lists Editor's `fill`.
+2. **P18-S127-SIBLINGVALUE** (medium): not started this session. 🔴 Read before building: a lifted output reaches the
+   parent one render late (the child pushes it from an effect, CONTROLLED-STATE §4d), and a signal input's chain runs from
+   an effect in the same commit, so a click that sets the output and pulses the sibling would run the sibling's chain on the
+   old value (predicted from the effect order, not measured). The todo-list Dialog flow is exactly that shape.
+3. P18-S128-CONDLOAD, P18-S128-SEEDREMOUNT (low, filed); P18-S127-CLEAROUT; §94.6's list stands.
+
+## §96 The sibling's value arrives (session 128, 2026-10-19): P18-S127-SIBLINGVALUE
+
+### §96.0 What was measured first
+
+`s128-setdone/siblings.ts` over the 19 templates at the SETDONE commit `ffd3d7179`: **90 wires from one placed
+component's value output into another placed component's input, every one dropped** "instance output "x" feeds
+/<component>.<port>, which has no static binding in this slice" (nightbook 26, rocket-school and star-class 24 each,
+todo-list and its demo 8 each), as the bug said. On the Sibling Desk (`tests/helpers/sibling-desk.ts`: the Picker's
+Pick A and Pick B set its output `picked` and then send `chose`; the page wires `picked` into the Shower's `which` and
+`chose` into its `show`, whose chain writes `said` from `which`), the runtime reads "task a", "task b", "task a", and
+"task c" for the page's own Choose C (it sets the Variable the Picker's output reads, then pulses `show`); the export
+"(empty)" at every step.
+
+### §96.1 The first build, and why it was not enough
+
+The parent already lifts a child's output into a row for a rendered sink (CONTROLLED-STATE §4d); an instance's declared
+value input is a sink of the same kind (`siblingValueInputOf`), so the first build passed the row as the prop. Predicted
+from the effect order before it ran, and measured: **the chain read the previous value, one pulse late** ("(empty)",
+"task a", "task b"). The child pushes a lifted value from its effect, in the commit the pulse lands in; the sibling's
+chain runs from its own effect in that same commit, before the parent has re-rendered with the value. A wrong value is
+worse than a dropped wire, so that build was not kept.
+
+### §96.2 What is built
+
+| piece | what it is |
+|---|---|
+| `siblingValueInputOf` (`plan.ts`) | another placed component's declared value input is a bindable sink of a lifted output; `liftInto` binds it to the parent's row |
+| `InstancePulsePlan.delivered` | a placed component that reads a lifted row and is pulsed is handed a second count, `xDelivered`, that follows the count sent from the parent's own effect: `useEffect(() => { setXDelivered(xPulses); }, [xPulses]);`. A parent's effects run after its children's, so the child's push of the value sent with the pulse and the delivered count land in one render, whoever sent the pulse (the sibling or the page's own click). A pulsed component that reads no lifted row is handed the count as before |
+| the marker | a lift into a sibling that fails ("instance output "x" is not lifted by /<child> — its feed defers there") is a dropped wire, so the sibling's marker still names it (it named the old sentence) |
+
+### §96.3 The test (`tests/the-sibling-value-arrives.test.ts`, 14 rows)
+
+§A both arms press by press (the runtime first, A1), the sibling's signal (A3), the page's own click (A4), the two wires
+the other way round (A5), the control with no wire into the signal input (A6); §B the lifted row, the prop, the delivered
+count and its effect; §C the binding, an output its component does not lift (named on the marker, no prop, no delivered
+count), a pulsed component that reads no lifted row (session 127's shape, unchanged); §D each variant's app typechecks.
+The variants were predicted in `s128-setdone/EXPECTED.md` before they ran; 14 / 14 on the first run.
+
+**Mutant arms** (`s128-setdone/mutants.py`, the S arms). Control 14 / 14.
+
+| arm | what it changes | killed |
+|---|---|---|
+| SA | a sibling's value input is not bound (the base) | 8 |
+| SB | the count handed on as it is sent (the first build) | 6 |
+| SC | the delivered count follows nothing: it never moves | 5 |
+| SD | a lift that fails is not named on the sibling's marker | 1 (C2) |
+
+### §96.4 What the exported apps do now
+
+`dispdiff.ts`, the SETDONE commit against the tree: **0 dispositions moved** in the templates (a binding is not a
+disposition). `siblings.ts`: of the 90 wires, **8 bind** (rocket-school's and star-class's Monster and Race: the Setup's
+`style`, `timed` and `players` reach the Play, whose `start` is delivered after them), and **82 are named "not lifted by
+<child>"**, the true blocker now, by the child's own reason: an output fed by a logic component 32 (`/Logic/Resolve focus`
+20, `/Logic/Pick next question` 8, the Hangar shelf and Moon act 2 each), a repeater relaying its rows' outputs 18 (§31's
+"which row fired": todo-list's and its demo's Task list and Today list into the Dialog flow, 16), a kit's output 4
+(`game-kit.AnswerPad`), another placed component's output 2 (the Countdown bar's), and nightbook's 26, whose reason the
+census did not find in the child's notes (not measured further). Read in the emitted diff (24 code files): the 8
+bindings, the 4 delivered counts and their effects, and the marker lines re-worded from "has no static binding" to "is
+not lifted by …".
+
+The templates' typecheck gate 3 / 3, every row 0 (the 8 bindings typecheck); all 19 1 error in 1, as before. hls001:
+predicted 0 keys (every fixture emitted at `ffd3d7179` and on the tree: identical); 4 / 4, unchanged, in the whole
+package run. The spec 14 / 14; the 4 S arms each kill rows (control 14 / 14).
+
+### §96.5 What this leaves
+
+1. todo-list's Dialog flow still runs on inputs it is not given: the Task list's and Today list's outputs are relayed from
+   their rows, which §31 refuses ("which row fired"). That relay is the next blocker for the 16 todo-list wires.
+2. The outputs fed by logic components (32): EXP-003 Tier B, with §93.6's Noodl-API Functions.
+3. Not graded: a lift two levels deep (a child's output fed by its own child's lifted output) would need two commits; the
+   delivered count waits one (the Countdown bar's 2 wires are refused before that matters).

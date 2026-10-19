@@ -1,3 +1,65 @@
+# Next session — session 128 (2026-10-19, BOARD lane 6) fixed **P18-S127-SETDONE** and **P18-S127-SIBLINGVALUE**: a Set Variable's Done runs its chain (the write, then Done, then Completed), and another placed component's lifted value reaches a sibling's input in time for the chain a pulse runs there. Graded against the runtime's own nodes rendered by real React. Templates 55 nodes gained, 0 lost; rocket-school's game and race start, and take the Setup's choices.
+
+## ✅ Session 128: the Set runs its Done chain; the sibling's value arrives
+
+Read EXP-011 §95 and §96. In short:
+
+| what | where |
+|---|---|
+| Measured first: 54 template nodes refused with a Set's output as their trigger; 231 wires out of 117 Sets' Done (a Set 79, a Function 35, a placed component's signal input 40, a Component Outputs signal 19, …) | `s128-setdone/census.ts` |
+| The runtime's order, measured: the Done chain runs **before the click's next wire** (a Done's target is flagged dirty with its sender and pulls it first). Predicted the other way from the update loop alone | `s128-setdone/EXPECTED.md` |
+| `store-set.then` (`withSetDone`): Done, then Completed, after the write, as following statements; a chain it cannot run keeps the write; `OWN_CHAIN_OUTPUTS['Set Variable']` (wire order); a sweep after the attach pass names a wire the compile did not take, the sink's own refusal first, and consumes it | `src/analyze/plan.ts`, `src/emit/component.ts` `expandActions` and five walkers |
+| Spec, 28 rows: the Set Desk (temp folder) against the runtime's own nodes, real React under StrictMode, press by press; the wires reversed, a Condition, a control, a field cleared then read in the chain; the mutant arms | `tests/the-set-runs-its-done-chain.test.ts`, `tests/helpers/set-desk.ts` |
+| SIBLINGVALUE: a placed component's declared value input binds to the parent's lifted row (`siblingValueInputOf`); a pulsed component that reads one is handed its count one commit late, from the parent's own effect (`InstancePulsePlan.delivered`), so the lifted value lands first | `plan.ts` `liftInto`, `component.ts` `instanceAttrs` |
+| Spec, 14 rows: the Sibling Desk; the first build (the row alone) read the value one pulse late, measured | `tests/the-sibling-value-arrives.test.ts`, `tests/helpers/sibling-desk.ts`, `s128-setdone/sibling-probe.ts`, `siblings.ts` |
+
+- 🔴 **The runtime's order was predicted wrong, and the export was right by accident of how it prints.** Reading
+  `updateDirtyNodes` alone says a Done's chain waits for the click's other wires; `flagDependeesDirty` and
+  `_updateDependencies` make it depth first. Measure the order on the runtime's own nodes before deciding one.
+- 🔴 **A sink's own refusal is the truer sentence.** The first sweep wrote "the Set Variable's Done chain is not exported"
+  over 21 nodes whose own compile refuses them for their own reason (the base's attach pass compiled the sink first). The
+  reach read "0 lost" all along; the re-worded rows are what showed it. Read the deferred → deferred rows, not only the
+  gained and lost.
+- 🔴 **The first sweep named a wire and left it unconsumed**, so the catch-all named it again (+78 notes). Count the notes'
+  sentences both ways, not only the dispositions.
+- 🔴 **Binding a sibling's input to the lifted row alone reads one pulse late.** A child pushes a lifted value from its
+  effect; the sibling's pulse effect runs in the same commit. Predicted from the effect order, measured, then fixed by
+  delivering the count from the parent's effect (a parent's effects run after its children's).
+- 🔴 **The first drafts of the desk read three bugs that are not these**, each filed: a Variable seeded inside a component
+  the click mounts and pulses is reseeded over the pulse's write under StrictMode (P18-S121-SEEDTWICE; and
+  P18-S128-SEEDREMOUNT: the runtime seeds once per instance); a ticked Condition with Evaluate wired runs its arm at load in
+  the runtime only (P18-S128-CONDLOAD); a wired Text with no value reads "Text" in the runtime only (P18-S122-TEXTDEFAULT).
+- 🔴 **Two mutant arms survived the first spec**: the attach scan and the snapshot over the chain were ungraded. A Now in
+  the chain (earned by the scan) and a field cleared on the click's first wire, read in the chain (the snapshot), grade them.
+
+Readings: the SETDONE spec 28 / 28 (13 mutant arms, each killing rows), the SIBLINGVALUE spec 14 / 14 (4 arms); re-pinned
+`the-signal-arrives-in-the-component` C3; neighbours green (EXP-011 §95.5); hls001 4 / 4 unchanged (predicted 0, both
+changes); the templates' typecheck gate 3 / 3, every row 0; all 19 (`tplbuild.ts`) 1 error in 1 (nightbook STYLENULL, as
+before); `parameter-coverage` green. Package `tsc --noEmit` 0; the ratchet holds. Whole package (`nice -n 19 --runInBand`,
+JSON 19:17): **145 / 145 suites, 5,000 passed, 0 failed, 3 pending.**
+
+Reach: **SETDONE** (`dispdiff.ts`, `8b5382a17` against `ffd3d7179`): templates 55 gained, 0 lost, 22 re-worded (each from
+"trigger … is not a rendered element event or a receiver"); corpus 104 gained, 0 lost, 17 re-worded. `census.ts` 54 → 20.
+The notes: the trigger-drop sentence 529 → 371, the catch-all 8,785 → 8,753. **SIBLINGVALUE** (`siblings.ts`): of the 90
+wires, 8 bind (rocket-school's and star-class's Monster and Race Setup → Play), 82 are named by their real blocker, the
+child not lifting the output (a logic component 32, a repeater's row relay 18, a kit 4, a nested instance 2, nightbook 26
+not read); 0 dispositions moved.
+
+Filed: **P18-S128-FIELDSET** (medium: a text field's Set, Focus or Blur from a chain; 35 + 34 template wires; the Lists
+Editor's `fill`), **P18-S128-CONDLOAD**, **P18-S128-SEEDREMOUNT** (low). Fixed: P18-S127-SETDONE, P18-S127-SIBLINGVALUE.
+
+**Next (BOARD lane 6):**
+1. **P18-S128-FIELDSET**: a field's Set (and Focus, Blur) from a chain. Small to medium; rocket-school's Lists Editor fills
+   once it is in. Grade with `runtime-mounted-arm.js` (it has the viewer's Text Input).
+2. **The repeater's row relay** (§31, "which row fired is not statically expressible"): the next blocker of todo-list's
+   Dialog flow (16 sibling wires), now that the sibling binding exists.
+3. P18-S127-CLEAROUT; the Mounted feeders (EXP-011 §93.6) and the logic components behind the Feedback banner (Tier B);
+   P18-S128-CONDLOAD, SEEDREMOUNT, P18-S126-PROPUNDEF, PAGEGROUP, UNDEFCOMPUTED, P18-S125-STYLENULL, P18-S124-RUNINPUTS,
+   LATEMARKER (small).
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 127 (2026-10-19, BOARD lane 6) fixed **P18-S126-INSIGNAL**: a signal a parent sends into a placed component runs the chain inside. The parent counts its pulses and keeps the count the child has taken; the child runs the chain when one passes the other. Graded against the runtime's own component instances rendered by real React. Templates 101 nodes gained, 0 lost.
 
 ## ✅ Session 127: the signal arrives in the component

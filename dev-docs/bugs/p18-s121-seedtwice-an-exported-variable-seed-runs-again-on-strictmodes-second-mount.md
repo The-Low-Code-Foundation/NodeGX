@@ -14,3 +14,9 @@ another mount effect wrote in between: a Did Mount chain, a ticked run's signal,
 shows the authored value where the running app shows the later write. Production builds mount once and are right.
 **Reach, measured:** 8 seed effects in 6 corpus files, 0 in the shipped templates; whether any of them meets a later
 write in the same mount is not counted. The fix is the once-guard §53 uses.
+
+**Met again in P18 session 128** (EXP-011 §95.3): a Variable seeded inside a component that the same click mounts and pulses
+(the Set Desk's first draft: Play mounts the Game and pulses its `start`, whose chain writes the seeded Variable). The
+second mount's seed lands after the pulse's write, so the export read the authored value where the runtime reads the
+chain's. The runtime's own seed is once per instance, not per mount: P18-S128-SEEDREMOUNT.
+
