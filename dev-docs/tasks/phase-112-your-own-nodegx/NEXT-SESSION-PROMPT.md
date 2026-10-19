@@ -6,6 +6,17 @@ copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5 (`
 the drive in the dev editor found the copy made twice per open, and measured OPENWRITES' cause; both fixed and driven
 (`1ed87f2ef`, OWN-013 §7). IDREPLACE is driven too. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
 
+## ▶ Lane 1 now (2026-10-19, Opus 5.5, round 2): npm 0.2.3 is packed and tested; Richard publishes it
+
+[OWN-021 §10](OWN-021-THE-0.4.2-CUT.md). `@nodegx/mcp`, `@nodegx/preview`, `create-nodegx`, `create-nodegx-vibe` 0.2.3
+and `@nodegx/node-spec`, `@nodegx/project-contract` 0.2.0 (canvas-look stays 0.1.0), packed from `5c8ae8142` into
+`/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.3-tarballs/`, every check from the tarballs green
+(NPXPREVIEW and ESMADAPTER/FILESONLY each with a red control on the published versions). **Richard:** after `cline-dev`
+holding `5c8ae8142` is pushed, `scripts/own/publish-npm.sh <that folder>` in his own terminal (six OTPs). **Next after
+the publish:** read each registry `dist.shasum` against §10's table; `npm create nodegx@0.2.3` from the registry,
+`HOME` empty; deploy nodegx-web for the changelog; tell lane 2 its drawer is out (its stranger round on the drawer
+waits on this). 🔴 To pack in a worktree, build `packages/noodl-runtime`'s `dist-types` first (§10).
+
 ## ▶ Lane 1 now (2026-10-14, Opus, after s18): SHIPPED — 0.4.1 and npm 0.2.1 are live; next, the language-app stranger round
 
 **Shipped 2026-10-14.** Richard gave the go. PR #51 merged (`73f52de91`), `v0.4.1` tagged on `main`, the Release run

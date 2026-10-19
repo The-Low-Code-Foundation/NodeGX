@@ -4,7 +4,7 @@
 dude to get his templates". Lane 1, after OWN-013 (the 0.4.0 / 0.4.1 cuts). The runbook is OWN-013's (§3–§4,
 UPG-008's shape); this file says what 0.4.2 must carry and how we know it does.
 
-**Status: 🟡 s2 (2026-10-19): S1–S5 ✅, AC1 ✅; PR #52 green on the six required checks (§9). S6 (the Mac staple) and S7 (merge, tag, Publish) are Richard's.** P121's product changes are six commits, one per bug
+**Status: 🟡 s2 (2026-10-19): S1–S5 ✅, AC1 ✅; PR #52 green on the six required checks (§9). S6 (the Mac staple) and S7 (merge, tag, Publish) are Richard's.** **s3 (2026-10-19): the npm 0.2.3 cut is packed and tested (§10); Richard publishes it with one command.** P121's product changes are six commits, one per bug
 (MEMBERSPHOTO and UPLOADSHRINK share one, as both edit `uploadfile.ts` and its spec), each bug `fixed` with its
 commit; the two templates, their generators and specs are `9168a171d`, on Richard's go (R1 re-checked against the
 private brief: none of its names in the 452 files). Next: S3, the cut point (§7).
@@ -154,3 +154,99 @@ filed as P112-OWN021-LISTPORTCENSUS (low: the ERG-003 census pins 54 inputs, the
 both templates driven on the published build. Lane 2's OWN-012 adds to the next **npm** cut (not this editor release):
 `@nodegx/node-spec` with the drawer and its `./draw` export, and `create-nodegx` with the brief that teaches both ways.
 
+## 10. s3 (lane 1, 2026-10-19, Opus 5.5): the npm 0.2.3 cut
+
+The kit on npm was 0.2.2 (published 2026-10-15 18:30 UTC, packed in `own019-s4-pack` at `aab489337`), with node-spec,
+project-contract and canvas-look at 0.1.0. Since then `cline-dev` gained NPXPREVIEW (`dffbeee00`: `npx @nodegx/preview
+<app>` had stopped with "could not determine executable to run" since 0.2.0), FILESONLY and the brief's fold-back
+(`12cfc6cf3`), ESMADAPTER (`3f62e9643`), FORMAT4PIN (`3aba38163`), OWN-012's drawer and its `./draw` export
+(`bdbb88602`), the brief's "show it or draw it" (`cebab5481`), SEE-001's honesty number in the MCP, and P121's runtime
+and backend fixes. This cut carries all of them.
+
+**Versions (`307bb8b38`).** `@nodegx/mcp`, `@nodegx/preview`, `create-nodegx`, `create-nodegx-vibe` 0.2.2 → **0.2.3**.
+`@nodegx/node-spec` 0.1.0 → **0.2.0** (a new public entry, `./draw`). `@nodegx/project-contract` 0.1.0 → **0.2.0**:
+what it publishes changed (ESMADAPTER, FORMAT4PIN's `pinAuthoredRunOnChange`, FILESONLY's PASS line, 2,600 lines of
+`world/`, `hierarchy`, `port-context`), and its published manifest depends on `^<node-spec version>`, so it must move
+with node-spec. `@nodegx/canvas-look` stays **0.1.0**, not re-published: `git diff 6b3910215..HEAD` of its package,
+tests aside, is empty. Pins: create-nodegx → `@nodegx/mcp@0.2.3` (`MCP_VERSION`); create-nodegx-vibe →
+`create-nodegx@0.2.3`; project-contract → `@nodegx/node-spec ^0.2.0` (written by `build-publish.mjs`). The MCP and the
+preview inline node-spec and project-contract, so they pin neither. `publish-npm.sh` now publishes node-spec, then
+project-contract, then canvas-look (skipped: no tarball), then the four (`ee408ba9f`). The brief and node-spec's README
+name 0.2.0 (`459ccc270`). CHANGELOG "npm packages 0.2.3" (`5c8ae8142`), with a line for 0.2.2, which had none.
+
+**Packed from `5c8ae8142`**, in this worktree, clean (`git status` empty before and after), under HEAVY.lock. The
+worktree's `dist` links into primary were removed first (plain `rm`: the MCP's five, the preview's, node-spec's,
+canvas-look's, nodegx-backend's, nodegx-core's, nodegx-export's, the runtime's `dist-types`, the editor's
+`src/external/viewer`). 🔴 **A worktree pack needs the runtime's declarations built first:** the viewer's tsconfig
+resolves `@noodl/runtime`'s types from `packages/noodl-runtime/dist-types` (gitignored; the worktree's was a link), and
+without it both production viewer builds (the preview's `pack-runtime.mjs`, the MCP's `build-render-harness.mjs`)
+fail with 38 TS errors. `npm run build:types` in `packages/noodl-runtime` first (5 s). Every esbuild bundle's
+first-party inputs resolve inside the worktree, read off the module comments: preview 527 + deploy 540, MCP 536,
+cloud bundle 337, kit reader 374, backend 429 (each package's copy), node-spec 192–196, draw 6–7; **0 outside**. node-spec,
+project-contract and create-nodegx packed twice gave the same shasums both times.
+
+| tarball | shasum (sha1, what `publish-npm.sh` compares with the registry) | bytes | unpacked, files |
+|---|---|---|---|
+| `nodegx-node-spec-0.2.0.tgz` | `d10615b4f3a735a64f10ce79cd3b570b8020c363` | 6,429,321 | 42.1 MB, 583 (0.1.0: 38.3 MB, 516) |
+| `nodegx-project-contract-0.2.0.tgz` | `66b3fa7901536b3ec83adf9ab6aec53cf5a0cba2` | 249,636 | 901 KB, 112 (0.1.0: 738 KB, 96) |
+| `nodegx-preview-0.2.3.tgz` | `92489acd733e2b02c24903f874f77638be4d7ae7` | 5,574,432 | 26.1 MB, 25 (0.2.2: 26.0 MB, 25) |
+| `nodegx-mcp-0.2.3.tgz` | `d81d45b36ea5faea8c6a994e88eec2770d0d4ee5` | 11,955,208 | 42.8 MB, 130 (0.2.2: 42.6 MB, 130) |
+| `create-nodegx-0.2.3.tgz` | `f6456f430211c2df83184d22c0b5969af9fcc33f` | 40,467 | 112 KB, 12 |
+| `create-nodegx-vibe-0.2.3.tgz` | `f5783d8d1472e4c31662302b2901bec77ac5ca28` | 13,641 | 38 KB, 4 |
+
+Folder: `/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.3-tarballs/` (outside the repo).
+
+**Tested from the tarballs, never the source**, each in an empty folder under `/private/tmp/claude-501/` (no
+`node_modules` above it), `HOME` an empty folder, npm's cache inside it. Expected results written first.
+
+1. `npx --package=<create-nodegx tgz> create-nodegx my-apps` → exit 0; `.mcp.json` (`npx -y @nodegx/mcp@0.2.3
+   --allow-writes`), `CLAUDE.md`, `AGENTS.md`, `opencode.json`, `.vibe/config.toml` and the editor skill, whose drawer
+   line reads "0.2.0 and later" and which has "The screen: show it or draw it".
+2. The server as `.mcp.json` says (the MCP tarball standing in for `@nodegx/mcp@0.2.3`): connected in 5.2 s, answers
+   `noodl-mcp 0.4.2`, the **seven** bootstrap tools (`list_examples`, `get_example`, `list_projects`, `find_tools`,
+   `call_tool`, `create_project`, `open_project`); `list_projects` empty; `create_project` "Reading List" (Home and
+   Book agreed) → **78 files**, its own `.mcp.json` pinned to `@nodegx/mcp@0.2.3 <project> --allow-writes`.
+3. Day two, a new server in `my-apps`: `list_projects` names Reading List.
+4. The project's own server: 21 tools; `validate_project` **0 errors, 0 warnings**; `get_project_info` carries the
+   honesty number (`100% known (2 known, 0 script, 1 unspecced)`) and its `about` sentence.
+5. `npx --package=<vibe tgz> --package=<create-nodegx tgz> create-nodegx-vibe my-vibe` → exit 0, `.vibe/config.toml`
+   pins `@nodegx/mcp@0.2.3`.
+6. **NPXPREVIEW.** `npx -y file:<preview tgz> <app> --port 48731 --no-watch` (npx picks the bin named after the
+   package, which is what `npx @nodegx/preview <app>` does): up in 4.0 s, "163 node types, rendered in 11ms"; a headless
+   Chrome (390 × 844) drew "Reading List — nothing built yet. Review the plan in docs/ and start when you are ready.",
+   **0 page errors**; `GET /.mcp.json` 404. **Control:** `npx -y @nodegx/preview@0.2.2 <app>` from the registry →
+   exit 1, "npm error could not determine executable to run". Chrome and the preview torn down; port free after.
+7. **The kit.** `npm install <node-spec tgz> <project-contract tgz> @nodegx/canvas-look@0.1.0` → 11 packages,
+   `npm ls`: one node-spec, 0.2.0, project-contract's deduped onto it. `require('@nodegx/node-spec/draw')` → `draw`,
+   `canvasTextMeasurer`, `traceValue`, `createDrawer`, `DRAW_SPECS` and five more; `draw()` of the made project's `/App`
+   (Router → start page Home → Page → Text) → 3 boxes, the Text present and 390 × 20 with a test measurer, `needs` on
+   every box, `drawing.needs` naming Body Scroll and the wire values. The ESM `import { draw, canvasTextMeasurer,
+   traceValue } from '@nodegx/node-spec/draw'` loads too.
+8. **ESMADAPTER and FILESONLY.** The kit's editor suite with an ES-module adapter (`.mjs`, the reference store) on the
+   `reading-list` fixture: Node 22.22 and **Node 22.11** both `PASS … ; files only: the adapter offers no graph
+   runner`, exit 0. **Control**, the registry's project-contract 0.1.0: Node 22.22 a bare `PASS` (no "files only");
+   Node 22.11 "require() of ES Module … not supported".
+9. `scripts/own/stranger-kit.mjs` on node-spec 0.2.0 + project-contract 0.2.0 + canvas-look 0.1.0: 16 CommonJS and 2 ESM
+   entries load, 0 failures; the consumer typechecks under `node`, `bundler` and `node16`.
+
+**Gates.** `node scripts/own/publishable.js`: 6 packages, 0 problems, exit 0 (and `packages/create-nodegx/vibe`: 1, 0).
+`node scripts/bugs.js gate`: **0 blockers** on every kit value; known issues mcp 2, preview 5, node-spec 25,
+project-contract 8, editor-suite 2, canvas-look 1 (P112-S16-CONTRACTREADME, medium, is still true of project-contract
+0.2.0's README). `create.test.js` 26 / 26 with the vibe wrapper resolving this checkout's core (in a worktree,
+`node_modules/create-nodegx` resolves into primary, which says 0.2.2: 25 / 26 there; on `cline-dev` after the merge it
+reads its own). Ratchet: holding the line. **Not run:** `render_report` from the tarball (needs a Chrome under the
+lock; the harness's sources, `scripts/devtools/{measure,render}-from-disk.js`, `drive-steps.js` and
+`@nodegx/render-measure`, have no commit since `aab489337`; the MCP's report gained the honesty section), a backend from the tarball,
+`test:main` / `test:ci` (no editor code changed).
+
+**The command Richard runs**, after `cline-dev` with `5c8ae8142` in it is pushed (R12: the GPL bundles must point at
+public source), in his own terminal (npm asks for his one-time password once per package, six times):
+
+```
+scripts/own/publish-npm.sh /Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.3-tarballs
+```
+
+It publishes node-spec, project-contract, preview, mcp, create-nodegx, create-nodegx-vibe in that order, skips
+canvas-look (no tarball) and anything already up, and waits for each to be live with the tested shasum before the next.
+Then: `npm view create-nodegx@0.2.3 dist.shasum` etc. against the table; nodegx.io's changelog follows a nodegx-web
+deploy; change the CHANGELOG's date if the publish lands on another day.
