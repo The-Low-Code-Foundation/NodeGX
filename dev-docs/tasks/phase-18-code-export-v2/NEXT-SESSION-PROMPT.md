@@ -1,3 +1,61 @@
+# Next session — session 130 (2026-10-19, BOARD lane 6) fixed **P18-S129-FNSUCCESS** and built **the repeater's row relay**: a Function's Success runs its chain (after the body's own signals and before Done on a Run, alone on a ticked input's run), and a repeater's relayed row value reaches its component's value output (each row's relayed signal writes what that row passes through, before the signal's chain). Graded against the runtime's own nodes, the viewer's own For Each among them, rendered by real React. Templates 10 + 23 nodes gained, 0 lost; the Lists Editor's New fills, todo-list's Dialog flow is handed the task a person picks.
+
+## ✅ Session 130: the Function succeeds; the row relays its values
+
+Read EXP-011 §98 and §99. In short:
+
+| what | where |
+|---|---|
+| Measured first: 189 wires out of a Function's Success, 11 in visual components, 4 refused for the Success itself (the two Lists Editors' `leFill`, pixel-game's `plTakeCoin`) | `s130-fnsuccess/census.ts` |
+| The runtime, read then measured: after the body's await, Success then Done (Done only on a Run); a ticked run sends Success alone; a throw sends neither; the run finishes after the click's later wires | `s130-fnsuccess/EXPECTED.md`, `probe.ts` |
+| `compileJsRun` compiles the Success chain (pulses, Success, Done); the ticked half carries it; the attach pass leaves Success wires to the Function and a sweep names those it did not take; a Run of a Function a ticked input also runs records its read even unpulsed | `src/analyze/plan.ts`, `src/emit/component.ts` |
+| Spec, 26 rows: the Success Desk (a pulsed run, a ticked run counted by a Counter, the Lists Editor's shape in a placed Editor), the wires reversed, the control, the box unticked; 12 mutant arms each killing rows | `tests/the-function-succeeds.test.ts`, `tests/helpers/success-desk.ts`, `s130-fnsuccess/mutants.py` |
+| Measured first: 263 relayed row value wires, 150 into a value output, 144 refused "which row fired"; 167 of the 263 pass a row input straight through | `s130-relay/census.ts` |
+| `rowRelayOf`: a state row per relayed value, lifted as any §4d value; refused by name where the row computes it, nothing or two wires feed it, or the repeater draws no rows (taken back after the list passes); `rowSignalAttrs` writes every relayed value in every relayed row callback before the chain | `plan.ts`, `component.ts` |
+| Spec, 20 rows: the Relay Desk (two signals, an output named apart from its input) against the viewer's own For Each, which the runtime arm now draws; 8 mutant arms each killing rows | `tests/the-row-relays-its-values.test.ts`, `tests/helpers/relay-desk.ts`, `tests/helpers/runtime-mounted-arm.js`, `s130-relay/mutants.py` |
+
+- 🔴 **The bug's ticked-run claim was measured false**: `leFill`'s two boxes are written `false` in both templates; it runs on
+  `fill` alone. The ticked path is built and graded on the desk anyway (the runtime sends Success on a ticked run).
+- 🔴 **The run count came from reading the emitted code, not from the first desk.** A Run of a Function neither pulsed nor
+  materialized printed no statement, so it never recorded its ticked read: a click that writes the value and sends Run
+  ran it twice. No such run had a ticked half before; a Success chain gives it one. A Counter on Success made it visible.
+- 🔴 **The first relay build lifted rows nothing ever writes**: five holders whose repeater the export does not draw. The
+  reach read "27 gained, 0 lost"; reading the emitted holders (state rows with no write) found it. Taken back: 23 gained.
+- 🔴 **The runtime arm was run on the Relay Desk before its EXPECTED.md** (it had to be made to draw a For Each first). Said
+  so in the file; the variants were predicted before they ran.
+- 🔴 **Two divergences found that are not these bugs**, filed or recorded: a throwing Function runs its Done and Success
+  chains in the export (P18-S130-THROWCHAIN, medium); a Text whose value becomes `undefined` prints nothing where the
+  runtime keeps its text (P18-S130-UNDEFTEXT, low); a Run's chains finish after the click's later wires in the runtime
+  (P18-S121-ONEUPDATE's fourth shape).
+- The viewer's For Each reads `NoodlRuntime.instance.getProjectSettings()`; the arm lends `{}` when nothing set it.
+
+Readings: the FNSUCCESS spec 26 / 26 (12 arms), the relay spec 20 / 20 (8 arms; RH survived the first 19 rows, C5 added);
+neighbours green (EXP-011 §98.5, 20 suites, 518 rows; §99.5, 15 suites, 266 rows); hls001 unchanged (predicted 0 for both:
+all 63 fixtures identical, base against tree); the templates' typecheck gate 3 / 3, every row 0; all 19 (`tplbuild.ts`)
+1 error in 1 (nightbook STYLENULL, as before). Package `tsc --noEmit` 0; the ratchet holds. Whole package
+(`nice -n 19 --runInBand`): JSON 21:32, after both changes: **148 / 148 suites, 5,080 passed, 0 failed, 3 pending** (session 129: 146, 5,034; this session adds two suites of 26 and 20).
+
+Reach (`dispdiff.ts`): **FNSUCCESS** (`72f013fec` against `391ba0370`): templates **10 gained, 0 lost**, 2 re-worded;
+corpus 0 / 0, 20 re-worded. **Relay** (`391ba0370` against the tree): templates **23 gained, 0 lost**, 14 re-worded;
+corpus **7 gained, 0 lost**, 1 re-worded; sibling wires bound 8 → 24. In the emitted apps: rocket-school's and
+star-class's Lists page New empties the drafts and both fields; todo-list's (and its demo's) Dialog flow is handed the
+task, today's row and the next action a person picked.
+
+Filed: **P18-S130-THROWCHAIN** (medium), **P18-S130-UNDEFTEXT** (low); ONEUPDATE's fourth shape recorded. Fixed:
+P18-S129-FNSUCCESS.
+
+**Next (BOARD lane 6):**
+1. **A relayed value read inside the holder** (§99.6.1): in a row signal's chain the value is that row's (a Set Variable's
+   Value 20, a Function's input 12 in the templates). The Lists Editor's edit path (`lsSetEditId`) is one.
+2. **A lifted instance output read by a logic sink in the parent** (§99.6.2: `tdSelectFromList` reads the Task list's
+   `taskId` on its `open`): todo-list's selection from the list. Measure the timing first (the value lands one render
+   after the click's handler).
+3. P18-S130-THROWCHAIN; P18-S129-VALUEARRIVAL (medium); then the low ones (P18-S130-UNDEFTEXT, P18-S129-SEEDANNOUNCE,
+   RUNONCHANGEMARK, and session 128's list).
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 129 (2026-10-19, BOARD lane 6) fixed **P18-S128-FIELDSET** and **P18-S127-CLEAROUT**: a text field's Set, Clear, Focus and Blur run from a chain, as the runtime runs them: the Set writes the Value as the field holds it and nothing into a focused field, a Clear sends the empty text on, Focus and Blur reach the element, and a field's Enter is its Enter key. Graded against the runtime's own Text Input and the viewer's own focus tracker, rendered by real React. Templates 78 nodes gained, 0 lost; the Lists Editor still does not fill, for a reason measured this session (P18-S129-FNSUCCESS).
 
 ## ✅ Session 129: the field does what it is told

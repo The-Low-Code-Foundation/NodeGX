@@ -1,6 +1,6 @@
 # EXP-011 — Close the picker gap, ranked by what apps need
 
-**Status:** 🟡 In progress — **latest: §95–§96 (session 128, 2026-10-19), a Set Variable's Done runs its chain (54 template nodes refused with a Set's output as their trigger → 20; 55 gained, 0 lost; rocket-school's game and race start), and a placed component's lifted value reaches a sibling's input before the pulse that reads it (8 of 90 sibling wires bind, 82 named by the child that does not lift them); graded against the runtime's own nodes rendered by real React**; §94 (session 127, 2026-10-19), a signal a parent sends into a placed component runs the chain inside (87 template nodes refused with a Component Inputs trigger → 0), the parent counting its pulses and keeping the count taken; graded against the runtime's own component instances rendered by real React; templates 101 nodes gained, 0 lost**; §93 (session 126, 2026-10-19), a component root's Mounted wire is carried (72 roots in the templates, all refused as "a router concern"), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time; graded against the runtime's own nodes rendered by real React; templates 54 nodes gained, 0 lost**; §92 (session 125), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling); §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
+**Status:** 🟡 In progress — **latest: §98–§99 (session 130, 2026-10-19), a Function's Success runs its chain (after its own signals and before Done on a Run, alone on a ticked run; templates 10 gained, 0 lost; the Lists Editor's New fills), and a repeater's relayed row value reaches its component's value output (144 refused → 0 "which row fired"; 74 lift; templates 23 gained, 0 lost; 16 more sibling wires bind, todo-list's Dialog flow among them); graded against the runtime's own nodes, the viewer's own For Each among them, rendered by real React**; §97 (session 129), a text field's Set, Clear, Focus and Blur run from a chain; §95–§96 (session 128, 2026-10-19), a Set Variable's Done runs its chain (54 template nodes refused with a Set's output as their trigger → 20; 55 gained, 0 lost; rocket-school's game and race start), and a placed component's lifted value reaches a sibling's input before the pulse that reads it (8 of 90 sibling wires bind, 82 named by the child that does not lift them); graded against the runtime's own nodes rendered by real React**; §94 (session 127, 2026-10-19), a signal a parent sends into a placed component runs the chain inside (87 template nodes refused with a Component Inputs trigger → 0), the parent counting its pulses and keeping the count taken; graded against the runtime's own component instances rendered by real React; templates 101 nodes gained, 0 lost**; §93 (session 126, 2026-10-19), a component root's Mounted wire is carried (72 roots in the templates, all refused as "a router concern"), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time; graded against the runtime's own nodes rendered by real React; templates 54 nodes gained, 0 lost**; §92 (session 125), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling); §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
 **Depends on:** nothing — but sequenced after EXP-009 and EXP-010, which are worth more per hour
 **Replaces:** every "what to build next" list in this phase from sessions 20–31
 
@@ -13996,6 +13996,9 @@ The spec 26 / 26; the 12 mutant arms each kill rows. Neighbours, run together un
 `hls001-corpus-identity`. **hls001**: predicted 0 keys by emitting all 63 fixtures with the base's `src` and the tree's
 (identical, notes too). Package `tsc --noEmit` 0. The tsfixme ratchet holds.
 
+**The whole package** (after §99 too; `nice -n 19 --runInBand`, under the lock, JSON written 21:32): **148 / 148 suites,
+5,080 passed, 0 failed, 3 pending** (session 129's landed tree: 146 suites, 5,034; this session adds two suites, 26 + 20).
+
 **Tooling** (`s130-fnsuccess/`, run the `.ts` from `packages/nodegx-export` with `../../node_modules/.bin/ts-node -P
 tsconfig.json --transpile-only`, `ROOTS=` as `../s119-fnchain-measure/dispdiff.ts`): `census.ts <src> <out.json>` (every
 wire out of a Function's Success: the component, Run, the ticked boxes, both dispositions, the drop sentence);
@@ -14005,7 +14008,114 @@ scratch folder, with the root `node_modules` and the sibling packages linked bes
 
 ### §98.6 What this leaves
 
-1. **The repeater's row relay** (§96.5.1): the Lists Editor's edit path, and todo-list's Dialog flow.
+1. **The repeater's row relay** (§96.5.1): the Lists Editor's edit path, and todo-list's Dialog flow. Built for the value output in §99.
 2. **P18-S130-THROWCHAIN** (medium, filed): a throwing body still runs its Done and Success chains in the export.
 3. P18-S121-ONEUPDATE's fourth shape (a Run's chains against the click's later wires), recorded there.
 4. The 3 reactive Functions' Success wires (Run unwired, §89.6 #4) and the 178 in logic components (Tier B).
+
+## §99 The row relays its values (session 130, 2026-10-19): the repeater's row relay
+
+### §99.0 What was measured first
+
+`s130-relay/census.ts` on the base (`391ba0370`, §98 landed), over the 19 templates: **263 wires out of a repeater's
+relayed row value** (`itemOutput-<name>`): into a Component Outputs value port 150, a Set Variable's Value 20, a placed
+component's input 76 (most of them logic components), a Function's input 12, an Expression 6, a Condition 1, a Cloud
+Function 1. **144 of the 150 into a value output were refused**, "a repeater relays its rows' outputs into … — which row
+fired is not statically expressible" (the other 6 share a port with another wire). What feeds the row template's output,
+over all 263: one of the row's own inputs passed straight through 167; a nested repeater's relay 42; a Function in the
+row 49; a field's text 5. Every repeater relays a row signal. This is what stood in front of todo-list's Dialog flow: the
+Task list's `taskId` and `taskTitle` and the Today list's `targetId`, `title` and `rowId` (18 of §96's sibling wires).
+
+### §99.1 What the runtime does (read, then measured on its own nodes)
+
+`foreach.tsx`: `itemOutput-<name>` is registered when wired and read from `_internal.itemOutputs`, which only
+`itemOutputSignalTriggered` writes. When a row's relayed signal fires, the call is queued; after the update, for each
+heard call in order, the repeater sets Item Id, copies **every** relayed output of that row, then sends the signal. So the
+value is the firing row's, written before the signal, `undefined` until one fires.
+
+The runtime arm draws the viewer's own For Each now (`runtime-mounted-arm.js`: the viewer's `foreach.tsx`, the runtime's
+Static Data, and `NoodlRuntime.instance` lent an empty project settings, as `f50-repeater-plain-array.test.ts` lends it).
+On the Relay Desk (`tests/helpers/relay-desk.ts`) it read t1 · Milk, t2 · Bread, t2 · Bread, t1 · Milk, as the code says.
+🔴 **Order of work, stated**: the runtime arm was run on the desk as soon as it could draw a For Each, before
+`s130-relay/EXPECTED.md` was written; the variants were predicted there before they ran, and held.
+
+### §99.2 What is built
+
+| piece | what it is |
+|---|---|
+| `rowRelayOf` (`plan.ts`) | a Component Outputs value port fed by `itemOutput-<name>`: where the row template's output `<name>` is one of its Component Inputs ports passed straight through, a state row (`relayed<Name>`, origin `relay`, `T \| undefined`) and a `RowRelayPlan`; the value port lifts it as any §4d value (`state-get`). One state row per relayed value, shared by every port it feeds |
+| refused by name | a row output computed inside the row ("… is computed inside the row (by X.port) — only a row input passed straight through is relayed in this slice"), fed by nothing, fed by two wires, a mapping script that is not a static map, a mapping that maps nothing into the input |
+| the take-back | after the list passes (the feed is known only then), a relay whose repeater draws no rows in the export (no query, named array, statically-known list) is taken back: no state row, no push, no lifted prop; the value output defers with "the repeater relaying … draws no rows in the export …, so no row ever relays it". The first build kept them: five holders (nightbook's Section, the Shelves, the Choice rows, bot-garden's Pad) lifted a row nothing ever wrote |
+| `rowSignalAttrs` (`component.ts`) | every relayed row signal's callback writes every relayed value from its own row (`setRelayedId(item.id)`, the field the row is handed for that input; `undefined` where the mapping drops it), then runs the signal's chain (`prependStatements`) |
+| the sibling | nothing new: a sibling the signal pulses reads the lifted row on time through §96's delivered count |
+
+### §99.3 The test (`tests/the-row-relays-its-values.test.ts`, 20 rows)
+
+The Relay Desk, in a temporary folder: a List of two Static Data tasks into a For Each of Rows; each Row has a button
+labelled by its title (sends `open`) and one by its id (sends `pick`), and passes its `id` and its `title` (as the output
+`label`) straight through; the List relays both signals and both values; the page wires the List's values and signals into
+a Shower whose `show` sets two Variables. §A both arms press by press (the runtime first, A1): a row's open, the other
+signal, the wires reversed (A5), the control with no value wire (A6, pinned: the export writes `undefined`,
+P18-S130-UNDEFTEXT), a label computed in the row (A7, refused by name, the id still relayed). §B the state rows, the
+callbacks, the push effects, the page's binding and delivered count. §C the plan: the relays, a computed output, one
+state row for two ports, nothing and two wires feeding, a repeater that draws no rows. §D each variant typechecks.
+
+**Mutant arms** (`s130-relay/mutants.py`, a copy in `packages/nx-mut-s130r`, removed after). Control 20 / 20; every arm
+typechecked and killed rows.
+
+| arm | what it changes | killed |
+|---|---|---|
+| RA | the base: a relayed row value is refused | 13 |
+| RB | the relay written after the signal's chain | 1 (B2: inside one React handler the two orders render the same) |
+| RC | only the first relayed signal writes | 5 |
+| RD | the relay reads the output's name as the field | 5 |
+| RE | a row output computed in the row is relayed anyway | 1 (C2) |
+| RF | two relays of one value are two state rows | 1 (C3) |
+| RG | a row output fed twice is relayed | 1 (C4) |
+| RH | a relay whose repeater draws no rows is kept | 1 (C5; it survived the first spec of 19 rows, and C5 was added for it) |
+
+### §99.4 What the exported apps do now
+
+`dispdiff.ts`, `391ba0370` against the tree: **templates 23 Component Outputs gained (deferred → static), 0 lost**, 14
+re-worded (each now names the row output computed inside the row, or the repeater that draws no rows); **corpus 7 gained,
+0 lost**, 1 re-worded. `census.ts` on the tree: of the 150 relayed values into a value output, **74 lift**, 10 are taken
+back (their repeater draws no rows), 60 are named by the row that computes them (a nested repeater's relay 32, a
+Function 24, a field's text 4; todo-list and its demo 27 each, planning and its demo 3 each), and the 6 that share a port
+with another wire are refused as before; "which row fired" 144 → 0. `../s128-setdone/siblings.ts`: **16 more sibling wires bind**,
+8 → 24 (todo-list's and its demo's Task list and Today list into the Dialog flow, 8 each).
+
+Read in the emitted diff (`../s126-mounted/emit.ts` both ways; 47 code files in 8 templates): the state rows, the writes in
+every relayed row callback, and the push effects in the 39 holders that draw their rows; on todo-list's Todo page the
+Dialog flow is handed `listTaskId`, `listTaskTitle`, `todayTaskId`, `todayTaskTitle`, `occurrenceId` and
+`occurrenceTitle` (and `actionId`, `actionTitle` from Next actions), and its three pulses are delivered one commit late,
+§96's way. **Still not:** the page's own Set Variables that read the Task list's `taskId` on `open` (`tdSelectFromList`:
+"instance output feeds an unrendered sink", the family §96.5 left), so selecting a task from the list does not yet set
+the page's selection; the Lists Editor's edit path (`lsEach.itemOutputSignal-edit` into a Set whose value is
+`itemOutput-id`, a relayed value read by a logic sink inside the holder, not this slice's).
+
+The templates' typecheck gate 3 / 3, every row 0; all 19 (`../s124-deadrow/tplbuild.ts`) 1 error in 1, nightbook's
+P18-S125-STYLENULL, as at the base. Not driven in a browser.
+
+### §99.5 Readings
+
+The spec 20 / 20; the 8 mutant arms each kill rows. Neighbours, run together under the lock (15 suites, 266 rows):
+`component-outputs`, `foreach-relay-ports`, `repeater-row-signals`, `static-data`, `the-sibling-value-arrives`,
+`controlled-state`, every spec on the runtime arm (it gained a module), `the-templates-typecheck`, `parameter-coverage`,
+`hls001-corpus-identity`, both new specs. **hls001**: predicted 0 keys (all 63 fixtures emitted with the session base's
+`src` and the tree's: identical). Package `tsc --noEmit` 0. The tsfixme ratchet holds. The whole package: §98.5.
+
+**Tooling** (`s130-relay/`): `census.ts <src> <out.json>` (every relayed row value wire: the holder, the target, what
+feeds the row's output, the dispositions, the drop sentence); `probe.ts <src> [steps…]` (the Relay Desk on both arms,
+`EDIT=`, `RUNTIME=0`, `EXPORT=0`); `mutants.py`; `EXPECTED.md`.
+
+### §99.6 What this leaves
+
+1. **A relayed value read inside the holder** (a Set Variable's Value 20, a Function's input 12, an Expression 6, a
+   Condition 1 in the templates): in a row signal's chain the value is that row's, outside it the state row. The Lists
+   Editor's edit path is one (`lsSetEditId`).
+2. **A lifted instance output read by a logic sink in the parent** (`tdSelectFromList`, 651 wires named "feeds an
+   unrendered sink" by `siblings.ts`): the click's handler reads the child's value, which in the export lands one render
+   later.
+3. A row output computed inside the row (60 value-output wires: nested relays 34, Functions 26), and the 10 holders whose
+   repeater draws no rows.
+4. P18-S130-UNDEFTEXT (low, filed).
