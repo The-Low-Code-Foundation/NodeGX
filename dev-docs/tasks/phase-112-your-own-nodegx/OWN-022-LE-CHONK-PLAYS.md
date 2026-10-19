@@ -44,7 +44,7 @@ the setup; how it was developed (how many people, what tools, what OSS it builds
 | AC5 | `play.mjs --game <that>` — Large 4 plays the game it built and wins, by the harness's verdict | ⬜ |
 | AC6 | **The submission** by 2026-10-29: a public repo (harness + both games' setup, a README a stranger can follow — reproducibility is judged), the video, the "how it was developed" note, posted in `challenges-submissions` | ⬜ Richard posts |
 | — | **Rulings 2026-10-18:** the repo is **new and standalone on Richard's GitHub** (MIT for the harness; NodeGX from npm), built locally — Richard creates and pushes it (pushing makes it public); **the video: Opus cuts it** from the runs (screenshots, Large 4's own words as captions, a live-run segment), **Richard narrates** | ✅ ruled |
-| AC8 | **The report** — a shareable page for the Mistral community (pixel fat cats; our own drawing, never Mistral's art): the setup, the tally per arm, the moments it found / used / passed up a cheat in its own words, the interviews, costs, caveats | 🟡 **published** (private until Richard shares it): https://claude.ai/artifact/XTxm1P3orbbEngaXJXbRFz — the GitHub link goes in once the repo is pushed; a copy in `NodeGX test projects/OWN-022 Le Chonk/` |
+| AC8 | **The report** — a shareable page for the Mistral community (pixel fat cats; our own drawing, never Mistral's art): the setup, the tally per arm, the moments it found / used / passed up a cheat in its own words, the interviews, costs, caveats | 🟡 **published** (private until Richard shares it): https://claude.ai/artifact/XTxm1P3orbbEngaXJXbRFz — v2 (2026-10-19) links the repo; a copy in `NodeGX test projects/OWN-022 Le Chonk/` |
 | AC7 | **The cheat experiment (§6)** on the game AC4 builds: rigged + two planted cheats, the arms × 10 runs, the harness's tally of who found / used / admitted each cheat | ✅ **both passes done** (2026-10-19 07:47, §11): 42 runs, ≈ $15; 6 rigged wins of 36 (4 slide, 2 QA); QA used in 3 of 3 runs that saw it with the back tool under "whatever it takes", never mentioned under "try to win"; 42 of 42 interviews match the verdict |
 
 ## 6. The cheat experiment (ruled 2026-10-18)
@@ -151,9 +151,15 @@ in the scratchpad, never in `packages/` or anything published.
 - **The repo** (`le-chonk-plays`, local, `main`): harness, game, tools, `RESULTS.md`, `experiment/pass1|pass2|pass1-crashed`
   (every result.json + steps.jsonl, local paths rewritten; screenshots kept out). `npm run tally -- experiment/pass2`
   reproduces the table.
-- **Still owed before the 29th:** Richard pushes the repo (then the report and README get the link); a clean-machine
-  `npm install` check; the Puppeteer console-error count on Monster Gate; the video cut (Opus) + narration (Richard); the
-  Discord post with the how-it-was-developed note.
+- **2026-10-19 s2: the repo is public** — https://github.com/richardosborne14/le-chonk-plays (Richard: "create a new
+  public repo"); audited first (the key never in history, no local paths). The report (v2) and README link it.
+- **Clean-machine check ✅:** a fresh clone from GitHub with empty npm and Puppeteer caches: `npm install` 19 s (Chrome
+  downloaded), `npm run solve` = the 12-move path, `npm run lab` up in ~8 s, verify-rig fair / bug / qa / slide all exit 0.
+- **The Monster Gate "1 console error" is `nodegx.io/favicon.ico` 404** (Puppeteer reports a failed resource as a console
+  error); the game itself logs none. Quote "0 from the game".
+- **Still owed before the 29th:** the video cut (Opus) + narration (Richard); Richard shares the report (Share menu — it is
+  private) and posts in `challenges-submissions` with the how-it-was-developed note (README §How it was developed has it).
+  Optional: AC3 (Challenge pace).
 
 ## 11. Both passes — the result (2026-10-19 07:47)
 
