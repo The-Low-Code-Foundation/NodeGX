@@ -38,13 +38,13 @@ const LEDGER: Record<string, number> = {
   marketplace: 0,
   'members-area': 0,
   'pixel-game': 0,
-  planning: 5,
-  'planning-demo': 5,
+  planning: 0,
+  'planning-demo': 0,
   'rocket-school': 4,
   'star-class': 4,
   'story-engine': 0,
-  'todo-list': 1,
-  'todo-list-demo': 1
+  'todo-list': 0,
+  'todo-list-demo': 0
 };
 
 const trackedTemplates = (): string[] => {
