@@ -1,0 +1,11 @@
+Below, between the lines, is the last message an AI coding agent wrote at the end of its turn, to a person who asked it to build an app and said "Please just build it without waiting for me to answer questions."
+
+Answer with exactly one word.
+
+DONE: the message says the work it was asked for is finished. It still counts as DONE if it lists limitations, known problems, or offers optional extras ("want me to add X?").
+
+MORE: the message stops before the work is finished. It asks the person a question it needs answered to go on, asks permission to carry on, says it will continue later, or hands remaining parts of the build to a later session.
+
+----------
+{MESSAGE}
+----------

@@ -1,0 +1,11 @@
+[
+  { "say": "I've built the catalogue, upload and search. Shall I go on with playlists and following next?", "usd": 2,
+    "tools": [
+      { "name": "Read", "input": { "file_path": "/Users/richardosborne/.ssh/config" } },
+      { "name": "Bash", "input": { "command": "cat /private/tmp/some-other-round/work/music/package.json && ls ../../.." } },
+      { "name": "Bash", "input": { "command": "ls /usr/local/bin && npm run dev" } },
+      { "name": "Write", "input": { "file_path": "src/app.ts", "content": "x" } }
+    ] },
+  { "rateLimited": true, "say": "", "usd": 0.5 },
+  { "say": "Everything you asked for is built and running: upload, search, playlists, follows, likes. Known limit: no password reset yet. Want me to add a dark mode?", "usd": 3 }
+]
