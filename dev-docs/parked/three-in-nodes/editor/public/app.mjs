@@ -259,10 +259,18 @@ function onPick(hit, { alt } = {}) {
     }
     return null;
   }
-  // Pressing on something inside the selected 3D Group moves the group; Alt picks the group around the mesh.
+  // A shape inside a Body IS that thing to a person (the coin, the player): a click selects the Body, whose panel has
+  // the shape's look and the behaviour; Alt-click reaches the bare shape. (Richard, s5: clicking the shape and finding
+  // an empty Behaviour was "a major brain breaking point".)
+  // Otherwise: pressing on something inside the selected 3D Group moves the group; Alt picks the group around the mesh.
   const cur = state.sel;
   const ids = lineage.map((o) => o.userData.nodeId);
-  if (cur && cur.key === r.key && ids.includes(cur.id) && cur.id !== r.id) r = { ...r, id: cur.id };
+  const bodyId = bodyAround(r.key, ids);
+  if (bodyId && !alt) {
+    r = { ...r, id: bodyId };
+    if (!(cur && cur.key === r.key && cur.id === bodyId)) select({ key: r.key, id: bodyId });
+  } else if (bodyId && alt) select({ key: r.key, id: r.id });
+  else if (cur && cur.key === r.key && ids.includes(cur.id) && cur.id !== r.id) r = { ...r, id: cur.id };
   else if (alt && ids.length > 1 && model.node(r.key, ids[1])) r = { ...r, id: ids[1] };
   else select({ key: r.key, id: r.id });
   const obj = lineage.find((o) => o.userData.nodeId === r.id) ?? lineage[0];
@@ -304,11 +312,17 @@ function onDragEnd() {
   renderInspector();
 }
 
+/** The outermost Body a picked object sits in (ids innermost first), if any. */
+function bodyAround(key, ids) {
+  return [...ids].reverse().find((id) => model.node(key, id)?.type === T3.body) ?? null;
+}
+
 function onHover(hit) {
   if (hit.kind === 'light') return labelOf(model.node(state.scene.key, hit.node));
   const r = resolvePick(hit.node);
   if (!r) return null;
-  const n = model.node(r.key, r.id);
+  const bodyId = !r.row && hit.lineage ? bodyAround(r.key, hit.lineage.map((o) => o.userData.nodeId)) : null;
+  const n = model.node(r.key, bodyId ?? r.id);
   return r.row ? `${labelOf(n)} · a row` : labelOf(n);
 }
 
@@ -656,7 +670,35 @@ function renderInspector() {
     return;
   }
 
-  for (const [title2, ports] of LAYOUT[n.type] ?? []) {
+  const parentBody = n.type === T3.mesh && n.parent && model.node(key, n.parent)?.type === T3.body ? model.node(key, n.parent) : null;
+  if (n.type === T3.body) {
+    // A Body and the shape inside it are one thing to a person: its look first, then what it does, then how it moves.
+    const shapes = (n.children ?? []).map((id) => model.node(key, id)).filter((c) => c?.type === T3.mesh);
+    if (shapes.length === 1) sections(root, key, shapes[0], [['Look', ['shape', 'colour']]]);
+    else if (shapes.length > 1) root.append(h('div', { class: 'sect' }, h('h4', {}, 'Look'), h('p', { class: 'note' }, `Made of ${shapes.length} shapes: pick one in the outline, or Alt-click it in the view.`)));
+    if (key === state.scene.key) root.append(behaviourSection(key, n));
+    sections(root, key, n, LAYOUT[n.type]);
+    if (shapes.length === 1) sections(root, key, shapes[0], [['Size', ['width', 'height', 'depth']], ['Motion', ['spin', 'spinSpeed']]]);
+  } else {
+    sections(root, key, n, LAYOUT[n.type] ?? []);
+    if (parentBody) {
+      root.append(h('div', { class: 'sect behaviour' }, h('h4', {}, 'Behaviour'), h('p', { class: 'note' }, `This shape is part of ${labelOf(parentBody)}. What it does is set on ${labelOf(parentBody)}.`), h('button', { class: 'btn', 'data-part-of': parentBody.id, onclick: () => select({ key, id: parentBody.id }) }, `Select ${labelOf(parentBody)}`)));
+    } else if ([T3.mesh, T3.group].includes(n.type) && key === state.scene.key) root.append(behaviourSection(key, n));
+  }
+  if (keep) {
+    const el = root.querySelector(`[data-port="${keep.port}"]`);
+    if (el) {
+      el.focus();
+      try {
+        el.setSelectionRange(keep.start, keep.start);
+      } catch {}
+    }
+  }
+}
+
+/** The inspector's sections for one node, by a layout of [title, ports]; a port's label and default come from the kit. */
+function sections(root, key, n, layout) {
+  for (const [title2, ports] of layout) {
     const visible = ports.filter((p) => shown(n, p) && portInfo(n.type, p));
     if (!visible.length) continue;
     const sect = h('div', { class: 'sect' }, h('h4', {}, title2));
@@ -679,16 +721,6 @@ function renderInspector() {
       sect.append(field(key, n, p));
     }
     root.append(sect);
-  }
-  if ([T3.mesh, T3.group, T3.body].includes(n.type) && key === state.scene.key) root.append(behaviourSection(key, n));
-  if (keep) {
-    const el = root.querySelector(`[data-port="${keep.port}"]`);
-    if (el) {
-      el.focus();
-      try {
-        el.setSelectionRange(keep.start, keep.start);
-      } catch {}
-    }
   }
 }
 

@@ -47,6 +47,11 @@ validator passed); Coin Run's look (plain "Score 3" on a white page above a 420 
 - **Richard (end of s5): "once I selected demo by accident I couldn't get back … there's no 'quit project' button."**
   Fixed: **Close** beside the project name (`/api/close`, then a reload into the open screen; asks first when unsaved,
   and the leave-page guard stands down once he said yes). `tests/close.json` 4 / 4.
+- **Richard (end of s5): clicking the coin's SHAPE showed an empty Behaviour — "a major brain breaking point"; the
+  behaviour lived on its parent Body.** Fixed: a click on a shape inside a Body selects the Body, whose panel is Look
+  (the shape's shape and colour) → Behaviour → Body → Start → Push → More → Size / Motion (the shape's); Alt-click reaches
+  the bare shape, which says "part of Player" with a Select button. Rule for what comes next (a Model's parts): **the
+  thing a person points at is the thing they think they picked** — a part's panel must lead to the whole.
 - Play gives the app's window the keyboard (`vp.setMode('play')` focuses the frame); without it the arrows go nowhere.
 
 ## Next, in order (an agent can do these alone)
