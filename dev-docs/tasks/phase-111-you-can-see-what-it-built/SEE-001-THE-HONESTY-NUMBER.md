@@ -118,6 +118,18 @@ and after** (0 tokens). Measured per call on the training template, each with a 
 `get_project_info`'s `honesty.about` carries it. The briefing (`instructions`) has 6 tokens free, so it is not there:
 the doctrines already ride `get_project_info`'s result for the same reason.
 
+**Gates, session 1 (worktree `l7-honesty`, under HEAVY.lock, `nice -n 19 … --runInBand`).**
+- `nodegx-node-spec` package suite: **40 of 40 suites passed, 2,082 tests passed, 18 skipped, exit 0** (3,088 s;
+  `stranger.test.ts` alone 2,424 s). 40 suites = the 37 test files committed at `e7e3e77db` + this session's 3, so
+  none vanished. `tsc -p tsconfig.json --noEmit`: exit 0, no output.
+- `noodl-mcp` package suite: **232 of 232 suites ran; 226 passed, 6 failed (10 tests), 4,482 passed, 3 skipped, exit 1**
+  (651 s). 232 = 231 committed + `see001Honesty.test.ts`. The six are not this change: `cmp004Parts`,
+  `cmp004RoundTrip` and `fld013ExportReach` fail the same 7 tests with this session's MCP source reverted to
+  `e7e3e77db` (measured); `backendTools` (the backend now ships an `emailCode` template the spec does not list),
+  `sbr009ThemeEditorDrive` and `def018-def020-layout-drive` (browser drives) were not re-run on the base and touch no
+  result field this change adds. `tsc -p tsconfig.json --noEmit`: exit 0, 0 errors. Primary's `noodl-mcp/tests` has 236
+  test files (5 untracked, `tpl011*`), so its total will differ.
+
 **R-SEE-001-a (instance- or line-weighted).** Built instance-weighted. The line-weighted figure differs a lot, so it is
 reported beside the headline everywhere (`percentByLines`): training 67.0% by instance, **6.9% by lines**; todo 87.9%
 against **9.8%**; planning 89.7% against 8.3%. One Function of 611 lines weighs as much as 611 known nodes.
