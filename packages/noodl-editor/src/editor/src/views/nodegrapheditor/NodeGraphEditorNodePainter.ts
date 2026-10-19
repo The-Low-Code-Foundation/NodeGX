@@ -5,6 +5,7 @@ import { CanvasFonts, CanvasTheme } from './canvas/CanvasTheme';
 import { currentEyebrowPlacement } from './canvas/eyebrowPlacement';
 import { instanceCountOf } from './canvas/instanceCounts';
 import { eyebrowPlan, eyebrowText, InstanceEyebrow, titleAllowanceFor } from './canvas/instanceEyebrow';
+import { isScriptNodeType } from './canvas/scriptMark';
 import { fillRoundRect, roundRect, strokeRoundRect, truncateText } from './canvasHelpers';
 import { NodeGraphEditorNode } from './NodeGraphEditorNode';
 import { arrowheadPolygon, diamondPolygon, glyphForPlugIcon, glyphScaleFor, WIRE_ENDPOINT } from './wireEndpoints';
@@ -486,6 +487,19 @@ export function paintNode(node: NodeGraphEditorNode, ctx: CanvasRenderingContext
       ctx.save();
       ctx.fillStyle = theme.commentIndicator;
       ctx.fillRect(x, y, commentStripeWidth(ctx), titlebarHeight);
+      ctx.restore();
+    }
+
+    // P111 SEE-001 — the script mark: the right-hand twin of the comment stripe, for a node the honesty number counts
+    // as script (a Function, Script, Expression or Visual Function node, or a kit node with no spec). The components
+    // panel draws the same bar, in the same token (`SCRIPT_MARK_TOKEN`, the function category's ink), on the number of
+    // every component that holds one, and lists these nodes by name. Inside the clip and keyed off `titlebarHeight`, so
+    // it takes no width from the title and moves no port anchor.
+    if (isScriptNodeType(node.model.typename)) {
+      ctx.save();
+      ctx.fillStyle = theme.categoryJavascript;
+      const markWidth = commentStripeWidth(ctx);
+      ctx.fillRect(x + node.nodeSize.width - markWidth, y, markWidth, titlebarHeight);
       ctx.restore();
     }
 

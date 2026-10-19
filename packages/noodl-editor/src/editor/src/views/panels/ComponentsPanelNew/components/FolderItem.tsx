@@ -17,6 +17,7 @@ import { buildCreateMenuItems, createMenuTitle } from '../createMenu';
 import { FolderItemData, TreeNode } from '../types';
 import { RenameInput } from './RenameInput';
 import { showUsedInPopover } from '../showUsedInPopover';
+import { RowHonestyLabel } from './HonestyLabels';
 import { RowMetaLabel } from './RowMetaLabel';
 import { WarningDot } from './WarningDot';
 
@@ -327,6 +328,8 @@ export function FolderItem({
           <div className={css['Label']}>{folder.name}</div>
           {/* TVW-001 (c): a folder that is also a component answers the same question. */}
           <RowMetaLabel meta={folder.meta} onUsedIn={(anchor) => showUsedInPopover(folder.instances, anchor)} />
+          {/* P111 SEE-001: a component-folder's honesty number, when its component holds script. */}
+          <RowHonestyLabel componentName={folder.isComponentFolder ? folder.component?.name : undefined} />
           <WarningDot count={folder.warningCount} />
         </div>
       </div>
