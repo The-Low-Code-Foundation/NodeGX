@@ -40,6 +40,7 @@ import { guarded, jsonResult } from './util';
 import { projectVisualPredicate } from './author';
 import { readVisualRoots } from '../visualRoots';
 import { drawnPortsFor } from '../specPorts';
+import { componentHonestyOf, componentHonestyPayload, projectHonestyOf, projectHonestyPayload } from '../honesty';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { kitDiagnostics } = require('@nodegx/kit-catalog');
@@ -289,7 +290,9 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
                 preferences: userPreferences
               }
             }
-          : {})
+          : {}),
+        // P111 SEE-001 — the honesty number, always (R2). A result field: no resident-surface cost.
+        honesty: projectHonestyPayload(projectHonestyOf(store))
       };
       return jsonResult(payload);
     })
@@ -388,6 +391,8 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
       // NSP-020 R19 — the ports the specs draw now, beside the saved lists (a result field: no tool-surface cost)
       const drawn = drawnPortsFor(store, stored.files.component.path ?? '/' + stored.key, stored.files.nodes.nodes);
       if (Object.keys(drawn).length) payload.drawnPorts = drawn;
+      // P111 SEE-001 — this component's number and its script nodes by id (a result field)
+      payload.honesty = componentHonestyPayload(componentHonestyOf(stored.legacyName, stored.files.nodes.nodes));
       return jsonResult(payload);
     })
   );

@@ -217,14 +217,14 @@ export function scriptPartName(part: ScriptPart): string {
 
 /**
  * One line a person reads: "61% known (22 known, 14 script, 3 unspecced); script: `Compute pace`, `Format dossier` +3 more".
- * The parts are the largest first (by lines), at most `maxNames`.
+ * The parts are the largest first (by lines), at most `maxNames`; with `maxNames` 0, the head alone.
  */
 export function honestyLine(h: Honesty, maxNames = 5): string {
   const head =
     h.percent === null
       ? `no known or script nodes (${h.unspecced} unspecced)`
       : `${h.percent}% known (${h.known} known, ${h.script} script${h.unspecced ? `, ${h.unspecced} unspecced` : ''})`;
-  if (!h.scriptParts.length) return head;
+  if (!h.scriptParts.length || maxNames <= 0) return head;
   const parts = [...h.scriptParts].sort((a, b) => b.lines - a.lines);
   const names = parts.slice(0, maxNames).map((p) => '`' + scriptPartName(p) + '`');
   const more = parts.length > maxNames ? ` +${parts.length - maxNames} more` : '';

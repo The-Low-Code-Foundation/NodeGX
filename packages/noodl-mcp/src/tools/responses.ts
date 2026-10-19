@@ -12,6 +12,7 @@
  * than silently at the consumer.
  */
 
+import type { ComponentHonestyPayload, ProjectHonestyPayload } from '../honesty';
 import type { CloudDeployNote } from './cloudDeployNote';
 import type { RunOnChangeTickedSummary } from '../project/runOnChangePins';
 import type {
@@ -181,6 +182,12 @@ export interface ProjectInfoResponse {
    * reads as priority if nobody says otherwise.
    */
   userPreferences?: { note: string; preferences: string };
+  /**
+   * P111 SEE-001 — the honesty number: the share of the project's nodes whose behaviour is specced and graded, against
+   * the script nodes, with the components that hold the most script. Always sent (R2: a number you can hide is a
+   * promise). The rule is `@nodegx/node-spec`'s `honesty.ts`.
+   */
+  honesty?: ProjectHonestyPayload;
 }
 
 export interface ProjectKitsReport {
@@ -250,6 +257,8 @@ export interface GetComponentResponse {
    * the last list a running editor saved and can be out of date; where the two differ, this one is the node's ports.
    */
   drawnPorts?: Record<string, DrawnPort[]>;
+  /** P111 SEE-001 — this component's honesty number and its script nodes by id. */
+  honesty?: ComponentHonestyPayload;
 }
 
 export interface SearchMatch {
@@ -511,8 +520,14 @@ export interface BackendDisclosureSummary {
   backendToolsRevealed?: string;
 }
 
+/** P111 SEE-001 — a write's honesty: the written component's number with its script parts named, and the project's after the write. */
+export interface WriteHonestySummary {
+  honesty?: { component: string; project: string };
+}
+
 export interface CreateComponentResponse
-  extends WriteValidationSummary,
+  extends WriteHonestySummary,
+    WriteValidationSummary,
     PageRegistrationSummary,
     NodeIdRemapSummary,
     BackendDisclosureSummary,
@@ -533,7 +548,8 @@ export interface CreateComponentResponse
 }
 
 export interface UpdateComponentResponse
-  extends WriteValidationSummary,
+  extends WriteHonestySummary,
+    WriteValidationSummary,
     PageRegistrationSummary,
     NodeIdRemapSummary,
     BackendDisclosureSummary,

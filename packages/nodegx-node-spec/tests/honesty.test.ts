@@ -133,6 +133,7 @@ describe('the rule, node by node', () => {
     ];
     const h = componentHonesty({ name: '/C', nodes }, options);
     expect(honestyLine(h, 2)).toBe('25% known (1 known, 3 script); script: `Big`, `Small` +1 more');
+    expect(honestyLine(h, 0)).toBe('25% known (1 known, 3 script)');
     expect(h.scriptLines).toBe(5);
     expect(h.percentByLines).toBe(16.7); // 1 ÷ (1 + 3 + 1 + 1)
   });
