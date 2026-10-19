@@ -4429,39 +4429,50 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
   };
   for (const component of ir.components) visit(`/${component.path}`, []);
   const plannedByLegacy = new Map<string, ComponentPlan>();
-  for (const legacy of order) {
+  /**
+   * P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. What a component's second plan refuses up front, and the names its first
+   * plan took from the project-wide sets: a re-plan gives them back first, so it allocates the same names again.
+   */
+  const exclusionsOf = new Map<string, PlanExclusions>();
+  const namesTakenBy = new Map<string, Array<{ set: Set<string>; names: string[] }>>();
+  const nameSets = [usedPageNames, usedComponentNames, usedHttpNames];
+  const planOne = (legacy: string): ComponentPlan => {
+    for (const taken of namesTakenBy.get(legacy) ?? []) for (const name of taken.names) taken.set.delete(name);
+    const before = nameSets.map((set) => new Set(set));
     const component = ir.components.find((c) => `/${c.path}` === legacy)!;
-    plannedByLegacy.set(
-      legacy,
-      planComponent(
-        component,
-        ir,
-        catalog,
-        registry,
-        pageByLegacy,
-        pageFileByPath,
-        usedPageNames,
-        usedComponentNames,
-        kits,
-        usedHttpNames,
-        plannedByLegacy,
-        templateCycle
-      )
+    const planned = planComponent(
+      component,
+      ir,
+      catalog,
+      registry,
+      pageByLegacy,
+      pageFileByPath,
+      usedPageNames,
+      usedComponentNames,
+      kits,
+      usedHttpNames,
+      plannedByLegacy,
+      templateCycle,
+      exclusionsOf.get(legacy)
     );
-  }
-  // The plans keep the project's own component order, whatever order they were computed in.
-  const plans = ir.components.map((component) => plannedByLegacy.get(`/${component.path}`)!);
-
-  const byLegacyPath = new Map(plans.map((p) => [p.legacyPath, p]));
+    namesTakenBy.set(
+      legacy,
+      nameSets.map((set, i) => ({ set, names: [...set].filter((name) => !before[i].has(name)) }))
+    );
+    plannedByLegacy.set(legacy, planned);
+    return planned;
+  };
+  for (const legacy of order) planOne(legacy);
 
   // Second phase (CONTROLLED-STATE-TARGET §4d, parent side): a consumed instance value output
   // binds only after the child's plan exists — the child lifts the port (prop + push effect)
   // or it does not, and a parent passing `onXChanged` to a child whose emitted interface lacks
   // it would fail the emitted app's own typecheck (the popups closable lesson).
-  for (const plan of plans) {
+  const byLegacyNow = (legacy: string) => plannedByLegacy.get(legacy);
+  const liftInto = (plan: ComponentPlan) => {
     const liftedVarByKey = new Map<string, string>();
     for (const pending of plan.pendingLifted) {
-      const child = byLegacyPath.get(pending.targetLegacy);
+      const child = byLegacyNow(pending.targetLegacy);
       const lifted = child?.liftedOutputProps.find((l) => l.port === pending.port);
       if (!lifted) {
         plan.notes.push(
@@ -4498,7 +4509,72 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
       };
     }
     plan.pendingLifted = [];
+  };
+  for (const legacy of order) liftInto(plannedByLegacy.get(legacy)!);
+
+  /**
+   * P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. Decided after the render, attach and lift passes, because only then is it
+   * known which elements the export draws (a Mounted bound by the parent's lift is decided in the phase above) and
+   * which chains it prints. A component with a chain on an element it never draws, a Did Mount it does not run, or a
+   * Function row nothing it prints writes, is planned again with those refused by name up front — so every pass that
+   * earns by attachment (api stubs, rows, the readers' bindings) decides with them gone, as the first plan would have.
+   * Refusing can only reach further (a Mounted bound to a refused row is no longer bound), so the loop goes until a
+   * round finds nothing new.
+   */
+  for (let round = 0; round < 8; round++) {
+    const again: string[] = [];
+    for (const legacy of order) {
+      const planned = plannedByLegacy.get(legacy)!;
+      const component = ir.components.find((c) => `/${c.path}` === legacy)!;
+      const found = unreachedTriggersOf(planned, component);
+      const known = exclusionsOf.get(legacy) ?? { owners: new Map(), mounts: new Map(), rows: new Map() };
+      let fresh = false;
+      for (const key of ['owners', 'mounts', 'rows'] as const) {
+        for (const [id, reason] of found[key]) {
+          if (known[key].has(id)) continue;
+          known[key].set(id, reason);
+          fresh = true;
+        }
+      }
+      if (!fresh) continue;
+      exclusionsOf.set(legacy, known);
+      again.push(legacy);
+    }
+    if (again.length === 0) break;
+    // A Run Tasks host reads facts off its template's plan, so a template planned again takes its hosts with it.
+    for (const legacy of [...again]) {
+      for (const [host, templates] of templatesOf) if (templates.includes(legacy) && !again.includes(host)) again.push(host);
+    }
+    const liftedBefore = new Map(again.map((legacy) => [legacy, JSON.stringify(plannedByLegacy.get(legacy)!.liftedOutputProps)]));
+    for (const legacy of order) if (again.includes(legacy)) planOne(legacy);
+    // A child whose lifted outputs changed would leave its parents passing a prop it no longer declares.
+    for (const [legacy, before] of liftedBefore) {
+      if (JSON.stringify(plannedByLegacy.get(legacy)!.liftedOutputProps) === before) continue;
+      for (const component of ir.components) {
+        const parent = `/${component.path}`;
+        if (again.includes(parent) || !component.nodes.some((n) => n.type === legacy)) continue;
+        again.push(parent);
+        planOne(parent);
+      }
+    }
+    for (const legacy of again) liftInto(plannedByLegacy.get(legacy)!);
   }
+
+  // P18-S122-DEADROW. A dead row's readers that are not drawn elements keep reading it (see PlanExclusions); each is said.
+  for (const [legacy, known] of exclusionsOf) {
+    const planned = plannedByLegacy.get(legacy)!;
+    for (const [fnId, reason] of known.rows) {
+      const row = planned.stateVars.find((v) => v.origin === 'jsfun' && v.originNodeId === fnId);
+      if (row === undefined) continue;
+      const text = JSON.stringify({ ...planned, stateVars: undefined, dispositions: undefined, notes: undefined });
+      if (!text.includes(`"viaState":"${row.name}"`)) continue;
+      planned.notes.push(`node ${fnId}: a handler or a node that is not drawn still reads its outputs, and reads nothing — ${reason.replace(/^it reads /, '')}`);
+    }
+  }
+
+  // The plans keep the project's own component order, whatever order they were computed in.
+  const plans = ir.components.map((component) => plannedByLegacy.get(`/${component.path}`)!);
+  const byLegacyPath = new Map(plans.map((p) => [p.legacyPath, p]));
 
   const stubCollections: string[] = [];
   for (const plan of plans) {
@@ -4518,6 +4594,151 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
     reachability: componentReachability(ir),
     kitDuplicates
   };
+}
+
+/**
+ * P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. What a component's next plan refuses before it attaches anything: chains on
+ * an element the export never draws (`owners`), Did Mount chains on an element a value mounts (`mounts`, which the
+ * emitter does not run), and the render reads of a Function's row that nothing the export runs ever writes (`rows`, by
+ * the Function's id). Each maps a node id to the sentence the refusal says.
+ *
+ * 🔴 **A row's other readers are kept, and said.** A Function input or a Set Variable that reads a dead row reads what
+ * HEAD's export read (nothing yet); refusing the reader would take a chain that works for every other input with it
+ * (the older Site Builder copies' "The slug to show" reads the URL's slug, and the never-written home slug only as a
+ * fallback). They are named in a note instead.
+ */
+export interface PlanExclusions {
+  owners: Map<string, string>;
+  mounts: Map<string, string>;
+  rows: Map<string, string>;
+}
+
+/**
+ * Why an element of a planned component is never drawn, or `null` when it may be. The emitter's own rule (`render` in
+ * `component.ts`): an element, or an element above it, whose Mounted is bound to a statically false value, or not bound
+ * and authored false, is removed from the tree. A Mounted bound to anything else draws it when that value says.
+ */
+export function undrawnReasonOf(plan: ComponentPlan, component: ComponentIR, id: string): string | null {
+  const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
+  const labelOf = (nodeId: string) => {
+    const node = nodeById.get(nodeId);
+    return node?.authoredLabel ? `"${node.authoredLabel}" (${nodeId})` : `${node?.type ?? 'a node'} ${nodeId}`;
+  };
+  for (let at: string | undefined = id; at !== undefined; at = nodeById.get(at)?.parent) {
+    const whose = at === id ? 'it is' : `an element above it, ${labelOf(at)}, is`;
+    const bound = plan.bindings[at]?.['mounted'];
+    if (bound !== undefined) {
+      if (bound.kind === 'computed' && (bound.expr.kind === 'undefined' || (bound.expr.kind === 'literal' && !bound.expr.value))) {
+        return `${whose} mounted from a statically false source`;
+      }
+    } else if (nodeById.get(at)?.parameters.find((p) => p.name === 'mounted')?.value.kind === 'literal' &&
+      (nodeById.get(at)!.parameters.find((p) => p.name === 'mounted')!.value as { value: unknown }).value === false) {
+      const wire = component.connections.find((c) => c.toId === at && c.toProperty === 'mounted');
+      if (wire === undefined) return `${whose} authored Mounted false, and nothing mounts it`;
+      const prefix = `wire ${wire.key} dropped: `;
+      const dropped = plan.droppedWires.find((w) => w.key === wire.key)?.reason ?? plan.notes.find((n) => n.startsWith(prefix))?.slice(prefix.length);
+      const from = nodeById.get(wire.fromId);
+      const fromRefused = plan.dispositions[wire.fromId];
+      const because =
+        dropped !== undefined
+          ? ` (${dropped})`
+          : fromRefused?.kind === 'deferred'
+            ? ` (the node it comes from is not exported: ${fromRefused.reason})`
+            : '';
+      return `${whose} authored Mounted false, and the wire into its Mounted from ${from?.authoredLabel ? `"${from.authoredLabel}"` : (from?.type ?? wire.fromId)}.${wire.fromProperty} is not exported${because}`;
+    }
+    if (at === plan.rootId) break;
+  }
+  return null;
+}
+
+/**
+ * The triggers of one planned component that the emitted app never runs (see {@link PlanExclusions}). Read off the
+ * finished plan: its handlers, its bindings after the lift phase, and every action list it carries.
+ */
+export function unreachedTriggersOf(plan: ComponentPlan, component: ComponentIR): PlanExclusions {
+  const found: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map() };
+  if (plan.file === null) return found;
+  const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
+  const labelOf = (nodeId: string) => {
+    const node = nodeById.get(nodeId);
+    return node?.authoredLabel ? `"${node.authoredLabel}" (${nodeId})` : `${node?.type ?? 'a node'} ${nodeId}`;
+  };
+  // The owners: an element with an attached chain that is never drawn.
+  const whyUndrawn = new Map<string, string>();
+  const owners = new Set([...Object.keys(plan.handlers), ...Object.keys(plan.changeHandlers), ...plan.drags.map((d) => d.nodeId)]);
+  for (const owner of owners) {
+    if (plan.roleOf[owner] === undefined) continue;
+    const why = undrawnReasonOf(plan, component, owner);
+    if (why === null) continue;
+    whyUndrawn.set(owner, why);
+    found.owners.set(owner, `its trigger, ${labelOf(owner)}, is not drawn: ${why}`);
+  }
+  // The Did Mounts the emitter does not run: an element a value mounts (`mountChains` in component.ts).
+  const whyUnmounted = new Map<string, string>();
+  for (const [owner, byPort] of Object.entries(plan.handlers)) {
+    if (byPort['didMount'] === undefined || whyUndrawn.has(owner)) continue;
+    for (let at: string | undefined = owner; at !== undefined; at = nodeById.get(at)?.parent) {
+      const bound = plan.bindings[at]?.['mounted'];
+      if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal')) {
+        const whose = at === owner ? 'it is' : `an element above it, ${labelOf(at)}, is`;
+        const why = `${whose} mounted by a value, so its Did Mount fires when that value says, and a mount effect runs when the component mounts`;
+        whyUnmounted.set(owner, why);
+        found.mounts.set(owner, `its trigger, the Did Mount of ${labelOf(owner)}, is not run: ${why}`);
+        break;
+      }
+      if (at === plan.rootId) break;
+    }
+  }
+  // The rows: every list the plan carries writes a row, except the lists of the owners above.
+  const writers = new Map<string, string[]>();
+  const walk = (value: unknown, owner: string | undefined): void => {
+    if (Array.isArray(value)) {
+      for (const item of value) walk(item, owner);
+      return;
+    }
+    if (value === null || typeof value !== 'object') return;
+    const record = value as Record<string, unknown>;
+    if (record.kind === 'jsfun-run' && typeof record.materialize === 'string') {
+      const list = writers.get(record.materialize) ?? [];
+      list.push(owner ?? '');
+      writers.set(record.materialize, list);
+    }
+    for (const child of Object.values(record)) walk(child, owner);
+  };
+  for (const [key, value] of Object.entries(plan)) {
+    if (key === 'handlers') {
+      for (const [owner, byPort] of Object.entries(plan.handlers)) {
+        for (const [port, actions] of Object.entries(byPort)) {
+          walk(actions, whyUndrawn.has(owner) || (port === 'didMount' && whyUnmounted.has(owner)) ? owner : undefined);
+        }
+      }
+    } else if (key === 'changeHandlers') {
+      for (const [owner, actions] of Object.entries(plan.changeHandlers)) walk(actions, whyUndrawn.has(owner) ? owner : undefined);
+    } else if (key !== 'stateVars' && key !== 'dispositions' && key !== 'notes') {
+      walk(value, undefined);
+    }
+  }
+  const planText = JSON.stringify({ ...plan, stateVars: undefined, dispositions: undefined, notes: undefined });
+  for (const row of plan.stateVars) {
+    if (row.origin !== 'jsfun') continue;
+    const fnId = row.originNodeId;
+    const written = writers.get(row.name) ?? [];
+    if (written.some((owner) => owner === '')) continue;
+    if (!planText.includes(`"viaState":"${row.name}"`)) continue;
+    const disposition = plan.dispositions[fnId];
+    const owner = written[0];
+    const why =
+      owner === undefined
+        ? disposition?.kind === 'deferred'
+          ? disposition.reason
+          : 'nothing the export runs sends its Run'
+        : whyUndrawn.has(owner)
+          ? `its Run is sent only from ${labelOf(owner)}, which is not drawn: ${whyUndrawn.get(owner)}`
+          : `its Run is sent only from the Did Mount of ${labelOf(owner)}, which is not run: ${whyUnmounted.get(owner)}`;
+    found.rows.set(fnId, `it reads ${labelOf(fnId)}, which the export never runs, so its outputs are never written: ${why}`);
+  }
+  return found;
 }
 
 function planComponent(
@@ -4540,7 +4761,9 @@ function planComponent(
   /** EXP-011 §53. The plans computed so far — every template this component names is already here. */
   plannedByLegacy: ReadonlyMap<string, ComponentPlan>,
   /** EXP-011 §53. The components on a template cycle (a task that runs itself). */
-  templateCycle: ReadonlySet<string>
+  templateCycle: ReadonlySet<string>,
+  /** P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. The triggers a first plan of this component found never run. */
+  excluded: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map() }
 ): ComponentPlan {
   const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
   const dispositions: Record<string, Disposition> = {};
@@ -17720,6 +17943,23 @@ function planComponent(
   }
 
   const receiverActions = new Map<string, HandlerAction[]>();
+  /**
+   * P18-S123-UNDRAWNTRIGGER. A chain on an element the export never draws, or a Did Mount it does not run (a first plan
+   * found them: `unreachedTriggersOf`), is refused by name, its nodes with it — unless another trigger runs them, which
+   * collapses them as before (a later attach overwrites; an earlier one is kept). A Component Outputs port keeps its
+   * interface: the callback is never called, which is the absent behaviour a refused port has.
+   */
+  const unreachedOwnerOf = (connection: ConnectionIR): string | undefined =>
+    excluded.owners.get(connection.fromId) ?? (connection.fromProperty === 'didMount' ? excluded.mounts.get(connection.fromId) : undefined);
+  const refuseUnreached = (connection: ConnectionIR, toNode: NodeIR, compiled: Exclude<CompiledSink, { defer: string }>, reason: string, outputsSink: boolean) => {
+    notes.push(wireNote(connection, reason));
+    for (const key of compiled.consumes) consumed.add(key);
+    if (outputsSink) return;
+    if (dispositions[toNode.id] === undefined) dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason };
+    for (const id of compiled.collapses ?? []) {
+      if (dispositions[id] === undefined) dispositions[id] = { kind: 'deferred', to: 'EXP-003', reason };
+    }
+  };
   for (const connection of component.connections) {
     if (consumed.has(connection.key)) continue;
     const toNode = nodeById.get(connection.toId);
@@ -17830,6 +18070,11 @@ function planComponent(
       isTextInputType(fromNode.type) &&
       connection.fromProperty === 'textChanged'
     ) {
+      const unreached = unreachedOwnerOf(connection);
+      if (unreached !== undefined) {
+        refuseUnreached(connection, toNode, compiled, unreached, outputsSink);
+        continue;
+      }
       if (!actionsValidIn([compiled.action], { kind: 'dom', nodeId: fromNode.id, port: 'textChanged' })) {
         const reason = 'the action reads values that only exist in another handler';
         if (outputsSink) {
@@ -17898,6 +18143,11 @@ function planComponent(
       rendered.has(fromNode.id) &&
       (connection.kind === 'signal' || instanceSignal || customSignal || repeaterRowSignal)
     ) {
+      const unreached = unreachedOwnerOf(connection);
+      if (unreached !== undefined) {
+        refuseUnreached(connection, toNode, compiled, unreached, outputsSink);
+        continue;
+      }
       if (!actionsValidIn([compiled.action], { kind: 'dom', nodeId: fromNode.id, port: connection.fromProperty })) {
         const reason = 'the action reads values that only exist in another handler';
         if (outputsSink) {
@@ -18906,6 +19156,13 @@ function planComponent(
       styleSinkOf(toNode, connection.toProperty) !== undefined;
     if (!bindable) continue; // the sweep names the reason
     if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) continue; // the sweep names the reason
+    // P18-S122-DEADROW. A drawn element reading a row nothing the export runs writes would show nothing, forever, unsaid.
+    const deadRow = excluded.rows.get(fromNode.id);
+    if (deadRow !== undefined) {
+      consumed.add(connection.key);
+      notes.push(wireNote(connection, deadRow));
+      continue;
+    }
     const ctx = newCtx();
     const expr = resolveExpr(fromNode, connection.fromProperty, ctx);
     if (expr === null) continue; // the sweep defers the node with this reason

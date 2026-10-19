@@ -412,8 +412,9 @@ describe('§C refused by name, or nothing to print', () => {
       g.connections.push({ fromId: 'itemRead', fromProperty: 'value', toId: 'box', toProperty: 'mounted' });
     });
     const app = emitDir(dir);
+    // P18-S123-UNDRAWNTRIGGER (s124): refused in the plan, after the lift phase, so its chain's nodes are refused with it.
     expect(app.notes).toContain(
-      'Pages/Home: signal box.didMount dropped: it is mounted by a value, so its Did Mount fires when that value says, and a mount effect runs when the component mounts — reported'
+      'Pages/Home: wire box:didMount->hold:run dropped: its trigger, the Did Mount of "Box" (box), is not run: it is mounted by a value, so its Did Mount fires when that value says, and a mount effect runs when the component mounts'
     );
     expect(app.files[PAGE]).not.toContain('Did Mount: once');
   });

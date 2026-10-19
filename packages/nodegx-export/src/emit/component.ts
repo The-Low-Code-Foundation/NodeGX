@@ -42,7 +42,8 @@ import {
   PARENT_COMPONENT_OBJECT_TYPE,
   PAGE_STACK_ENTRY_PROP,
   variableSeedAction,
-  objectSeedAction
+  objectSeedAction,
+  undrawnReasonOf
 } from '../analyze/plan';
 import { ExportIR, ITEM_OUTPUT_SIGNAL, NodeIR } from '../ir/types';
 import { KitBinding, tsTypeOf as kitPortTsType } from './kits';
@@ -1528,7 +1529,14 @@ export function emitComponent(
     flushed.add(nodeId);
     // "asked of it" rather than "wired to it": an authored parameter with no mapping is one of
     // these and is not a wire, and a header that named only wires would misdescribe it.
-    const out = [`TODO(export): node ${commentSafe(nodeId)} renders, and part of what the graph`, 'asked of it did not survive:'];
+    // P18-S123-UNDRAWNTRIGGER. An element removed from the tree is not said to render; the marker says why it is not drawn.
+    const undrawn = plan.roleOf[nodeId] !== undefined ? undrawnReasonOf(plan, component, nodeId) : null;
+    const out = [
+      undrawn === null
+        ? `TODO(export): node ${commentSafe(nodeId)} renders, and part of what the graph`
+        : `TODO(export): node ${commentSafe(nodeId)} is not drawn (${commentSafe(undrawn)}), and part of what the graph`,
+      'asked of it did not survive:'
+    ];
     for (const d of deferrals) {
       out.push(`  - ${commentSafe(d.subject)} ${commentSafe(d.reason)}.`);
       if (d.origin !== null) out.push(`    In the graph it is fed by ${commentSafe(d.origin)}.`);
