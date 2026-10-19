@@ -255,6 +255,10 @@ named costs and letters — lab-notes; he had not read them.)
 > bit more basic 'use the browser default' style. The play bar has childish icons and isn't well spaced on the mobile
 > view though.
 
+Correction by Richard the same evening, asked about R's "better than M but not as good as M": *"Yeah not as good as K,
+K had the most refined and true to Spotify play bar, not just a few icons and a slider."* (So R's play bar: better
+than M's, not as good as K's.)
+
 ## 10. What this task is not
 
 - Not a benchmark of models (OWN-020 is). One model, three arms.
