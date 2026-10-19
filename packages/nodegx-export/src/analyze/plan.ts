@@ -2542,7 +2542,13 @@ export type HandlerAction =
    * (`setX(v => !v)`) — immune to closure staleness, which is why Switch's `flip` and
    * Counter's arithmetic use it, never `expr`.
    */
-  | { kind: 'state-set'; name: string; expr?: ValueExpr; op?: 'toggle' | 'inc' | 'dec' }
+  | { kind: 'state-set'; name: string; expr?: ValueExpr; op?: 'toggle' | 'inc' | 'dec'; field?: FieldWrite }
+  /**
+   * P18-S128-FIELDSET (EXP-011 §97). A text field's Focus or Blur: `focus()` / `blur()` on the exported `<input>` through a
+   * ref, as the runtime's focus tracker calls them on the viewer's own (`_focus`, `_blur`). A field that is not on the page
+   * takes nothing, and the Focus is not held (GAM-012 R13): the ref is `null` then.
+   */
+  | { kind: 'field-focus'; inputId: string; focus: boolean }
   /**
    * An awaited call into an api stub (RECORD-VERBS-TARGET §4, USER-FAMILY-TARGET §4e): the
    * vocabulary's asynchronous action. The emitted handler becomes `async`, the call is awaited,
@@ -4025,6 +4031,26 @@ export interface FieldMountPlan {
    */
   gates?: string[];
   comment: string;
+}
+
+/**
+ * P18-S128-FIELDSET and P18-S127-CLEAROUT (EXP-011 §97). A text field's Set or Clear, carried on the `state-set` of the
+ * field's own row, so every walker that reads a state write reads this one; the emitter prints the rest.
+ *
+ * The runtime (`text-input.ts`, `TextInput.tsx`): **Set** writes `_internal.text`, the Value as last delivered (`undefined`
+ * is never delivered, `null` is `''`) or `''` once a Clear has run, and **nothing while the field has focus**; **Clear**
+ * writes `''`, focused or not. Both then call the field's own `setText`, which sends the text to every sink of the Value and
+ * fires Value Changed, changed or not. So the exported write is followed by the field's own change chain, with the text
+ * written where the chain reads the field, as the mount announcement prints it (P18-S116-FIELDMOUNT).
+ *
+ * On a Set, `expr` is the Value's source as a handler reads it (a literal where nothing is wired), and `start` the text a
+ * Value never delivered leaves (the typed-in Value, or `''`); the emitter writes `start` for `undefined`, `''` for `null`,
+ * else `String(value)`. On a Clear, `expr` is the literal `''`.
+ */
+export interface FieldWrite {
+  inputId: string;
+  port: 'set' | 'clear';
+  start?: string;
 }
 
 /** The seed as the action it prints — one patch, read off the plan so the import sweep and the emitter cannot disagree. */
@@ -8418,7 +8444,8 @@ function planComponent(
   /** Action ports whose translation needs local control state (§4c: check/uncheck, clear). */
   const CONTROL_ACTION_PORTS: Partial<Record<RenderRole, string[]>> = {
     checkbox: ['check', 'uncheck'],
-    input: ['clear']
+    // P18-S128-FIELDSET. A Set writes the field's text as a Clear does, so it earns the row too.
+    input: ['clear', 'set']
   };
 
   /**
@@ -10979,7 +11006,8 @@ function planComponent(
     (jsNodeKindOf(type) !== null && toProperty === 'run') ||
     (isLatchType(type) && (LATCH_TRIGGERS[type] ?? []).includes(toProperty)) ||
     ((type === 'net.noodl.controls.checkbox' || type === 'Checkbox') && (toProperty === 'check' || toProperty === 'uncheck')) ||
-    (isTextInputType(type) && toProperty === 'clear') ||
+    // P18-S128-FIELDSET. A text field's four actions: Clear, Set, Focus, Blur.
+    (isTextInputType(type) && (toProperty === 'clear' || toProperty === 'set' || toProperty === 'focus' || toProperty === 'blur')) ||
     // EXP-011 §39. A Delay's Start/Restart/Stop — one node, three action ports.
     (type === TIMER_TYPE && isTimerTrigger(toProperty)) ||
     // EXP-011 §49. A States' Toggle and its `to-<state>` family.
@@ -11656,14 +11684,61 @@ function planComponent(
     if (stateVar === undefined) {
       return { defer: `its ${port} action writes control state nothing else observes — no state row is minted` };
     }
+    if (port === 'set') return compileFieldSet(node, stateVar);
     const action: HandlerAction =
       port === 'check'
         ? { kind: 'state-set', name: stateVar.name, expr: { kind: 'literal', value: true } }
         : port === 'uncheck'
           ? { kind: 'state-set', name: stateVar.name, expr: { kind: 'literal', value: false } }
-          : // clear → the field type's empty value, projected onto the DOM string (FB-026).
-            { kind: 'state-set', name: stateVar.name, expr: { kind: 'literal', value: '' } };
+          : // clear → the field type's empty value, projected onto the DOM string (FB-026); P18-S127-CLEAROUT: then the
+            // field's change chain, with the empty text (the runtime's `clear()` calls `setText('')`).
+            { kind: 'state-set', name: stateVar.name, expr: { kind: 'literal', value: '' }, field: { inputId: node.id, port: 'clear' } };
     return { action, consumes: [] };
+  };
+
+  /**
+   * P18-S128-FIELDSET (EXP-011 §97). A text field's Set: the Value as the runtime's `_internal.text` holds it, read where the
+   * handler is (a wire's source, or the typed-in Value), written into the field's row, and the field's change chain after it
+   * (the emitter prints both, behind the focus test: a focused field takes no Set).
+   */
+  const compileFieldSet = (node: NodeIR, stateVar: StateVarPlan): CompiledSink => {
+    const type = literalParam(node, 'type');
+    if (wiredPorts.has(`${node.id}:type`) || (type !== undefined && typeof type !== 'string')) {
+      return { defer: 'its Type is wired, so whether its Set writes text or a number is not known here' };
+    }
+    if (type === 'number') {
+      return { defer: 'a Number field\'s Set sends a number or null, and the exported field carries text (P18-S118-NUMBERFIELD)' };
+    }
+    const authored = literalParam(node, 'startValue');
+    const start = authored === undefined || authored === null ? '' : typeof authored === 'object' ? undefined : String(authored);
+    if (start === undefined) return { defer: 'its typed-in Value is not text, a number or a boolean' };
+    const field: FieldWrite = { inputId: node.id, port: 'set', start };
+    const wires = component.connections.filter((c) => c.toId === node.id && c.toProperty === 'startValue');
+    if (wires.length > 1) return { defer: 'two wires feed its Value — which one its Set writes is not statically ordered' };
+    if (wires.length === 0) {
+      return { action: { kind: 'state-set', name: stateVar.name, expr: { kind: 'literal', value: start }, field }, consumes: [] };
+    }
+    const ctx = newCtx();
+    const expr = resolveExpr(nodeById.get(wires[0].fromId), wires[0].fromProperty, ctx);
+    if (expr === null) return { defer: ctx.defer ?? 'its Value wire has no statically known source, and its Set writes that Value' };
+    if (isBooleanExpr(expr)) return { defer: 'its Value wire carries a logic truth value, and its Set writes it as text' };
+    return {
+      action: { kind: 'state-set', name: stateVar.name, expr, field },
+      consumes: [...ctx.consumes],
+      collapses: ctx.logicNodeIds,
+      subscribes: ctx.subscriberIds
+    };
+  };
+
+  /** P18-S128-FIELDSET. A drawn field's Focus or Blur: a call on its element. Its outcomes are not translated. */
+  const compileFieldFocus = (node: NodeIR, port: 'focus' | 'blur'): CompiledSink => {
+    const consumedOutcome = component.connections.find(
+      (c) => c.fromId === node.id && (c.fromProperty === 'done' || c.fromProperty === 'unchanged')
+    );
+    if (consumedOutcome) {
+      return { defer: `its ${consumedOutcome.fromProperty} outcome is consumed — change-conditional pulses are not translated in this slice` };
+    }
+    return { action: { kind: 'field-focus', inputId: node.id, focus: port === 'focus' }, consumes: [] };
   };
 
   /**
@@ -15530,6 +15605,8 @@ function planComponent(
     if ((plan.roleOf[node.id] === 'checkbox' || plan.roleOf[node.id] === 'input') && (CONTROL_ACTION_PORTS[plan.roleOf[node.id]] ?? []).includes(port)) {
       return compileControlAction(node, port);
     }
+    // P18-S128-FIELDSET. A drawn text field's Focus and Blur.
+    if (plan.roleOf[node.id] === 'input' && (port === 'focus' || port === 'blur')) return compileFieldFocus(node, port);
     if (node.type === EXTERNAL_LINK_TYPE) return compileExternalLink(node);
     if (node.type === LOG_TYPE) return compileLog(node);
     if (node.type === TIMER_TYPE && isTimerTrigger(port)) return compileDelay(node, port);
@@ -16610,6 +16687,9 @@ function planComponent(
         // EXP-011 §63. A call on the handle; the Done listener is validated where it compiles (the render context).
         case 'drag-snap':
           return true;
+        // P18-S128-FIELDSET. A call on the field's element, reading nothing.
+        case 'field-focus':
+          return true;
         // EXP-011 §52. A call on the handle; the node's listeners are validated where they compile.
         case 'script-signal':
           return true;
@@ -16874,10 +16954,17 @@ function planComponent(
     const wires = component.connections.filter((c) => c.toId === node.id && c.toProperty === spec.statePort);
     if (wires.length === 0) continue;
     if (spec.coerce === 'textinput' && literalParam(node, 'runOnChange-startValue') === false) {
+      // P18-S128-FIELDSET. A wired Set reads this wire where it runs (`compileFieldSet`); the note says so either way.
+      const viaSet = wiredPorts.has(`${node.id}:set`);
       for (const w of wires) {
         consumed.add(w.key);
         notes.push(
-          wireNote(w, `Value is unticked under Run On Value Change — arrivals wait for a Set pulse, which is not translated in this slice`)
+          wireNote(
+            w,
+            viaSet
+              ? 'Value is unticked under Run On Value Change — it reaches the field only when its Set is sent (P18-S128-FIELDSET)'
+              : 'Value is unticked under Run On Value Change — arrivals wait for a Set pulse, and nothing sends this field one'
+          )
         );
       }
       continue;
@@ -17411,7 +17498,9 @@ function planComponent(
         if (action.expr !== undefined) {
           const e = snapExpr(action.expr, snap);
           if ('defer' in e) return e;
-          snap.set(action.name, e);
+          // P18-S128-FIELDSET. A Set is not written into a focused field, and writes the Value as text: what a later read of
+          // the field sees is not one expression, so a read after it is refused by name (a Clear always writes '').
+          snap.set(action.name, action.field?.port === 'set' ? 'op' : e);
           return { ...action, expr: e };
         }
         snap.set(action.name, 'op');
@@ -20606,6 +20695,9 @@ function planComponent(
           // EXP-011 §63. Nothing to read; the options and listeners are walked off the plan below.
           case 'drag-snap':
             break;
+          // P18-S128-FIELDSET. Nothing to read.
+          case 'field-focus':
+            break;
           // EXP-011 §52. The same: the inputs and listeners are walked off the plan below.
           case 'script-signal':
             break;
@@ -21187,6 +21279,8 @@ function planComponent(
             break;
           // EXP-011 §63. Nothing nested; the listeners are filled off the plan below.
           case 'drag-snap':
+            break;
+          case 'field-focus':
             break;
           case 'script-signal':
             break;

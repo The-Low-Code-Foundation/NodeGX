@@ -24,6 +24,7 @@ import {
   IdNewAction,
   CryptoCallAction,
   CryptoNodeKind,
+  FieldWrite,
   MintedTarget,
   JsFunctionPlan,
   RefusedScriptPlan,
@@ -48,7 +49,7 @@ import {
 } from '../analyze/plan';
 import { ExportIR, ITEM_OUTPUT_SIGNAL, NodeIR } from '../ir/types';
 import { KitBinding, tsTypeOf as kitPortTsType } from './kits';
-import { assignClassNames, ClassCandidate, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
+import { assignClassNames, ClassCandidate, lowerFirst, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
 import { WiredWhere, wiredWhereCode } from '../analyze/querySettings';
 import { tsLiteral } from './state';
 import { UTIL_LIB_PATH, utilCallMayBeUndefined } from './utilLib';
@@ -3463,6 +3464,7 @@ export function emitComponent(
       // The functional updates are §3.3's closure-staleness-immune forms.
       case 'state-set': {
         const setter = stateSetterOf(action.name);
+        if (action.field !== undefined && fieldWriteIsRun(action)) return fieldWriteCode(action, action.field, indent);
         if (action.op === 'toggle') return `${setter}((v) => !v)`;
         if (action.op === 'inc') return `${setter}((v) => v + 1)`;
         if (action.op === 'dec') return `${setter}((v) => v - 1)`;
@@ -4024,6 +4026,9 @@ export function emitComponent(
       // EXP-011 §63. One call on the handle; Done is the node's listener, passed once to the hook.
       case 'drag-snap':
         return `${action.local}.snapTo(${tsLiteral(action.axis)})`;
+      // P18-S128-FIELDSET. A call on the field's element; nothing when it is not on the page.
+      case 'field-focus':
+        return `${fieldRefs.get(action.inputId)}.current?.${action.focus ? 'focus' : 'blur'}()`;
       /**
        * EXP-011 §61. A push, printed as the runtime's own call (`navigate.ts` `navigate()`): the target, the
        * parameters by the target's own prop identifiers, the back callback (the results row written FIRST, then
@@ -4344,8 +4349,77 @@ export function emitComponent(
     // EXP-011 §61. A push is a multi-line call; a pop is always the block form; a Reset with a chain is a run of statements.
     a.kind === 'stack-push' ||
     a.kind === 'stack-pop' ||
-    (a.kind === 'stack-reset' && a.then.length > 0)
+    (a.kind === 'stack-reset' && a.then.length > 0) ||
+    // P18-S128-FIELDSET. A field's Set is an `if`; a Clear with a chain to run after it is a run of statements.
+    (a.kind === 'state-set' && fieldWriteIsRun(a))
     );
+  }
+
+  /** P18-S128-FIELDSET. The field's own change chain, as its onChange runs it (`changeAttrs`). */
+  const fieldChainOf = (inputId: string): HandlerAction[] => [
+    ...(plan.changeHandlers[inputId] ?? []),
+    ...((plan.handlers[inputId] ?? {})['onChange'] ?? [])
+  ];
+  /** The fields whose chain is being printed: a chain that Sets or Clears its own field is not run again inside itself. */
+  const printingFieldChains = new Set<string>();
+  /** Whether a field write prints more than its setter: a Set always (the focus test), a Clear with a chain or a mark. */
+  function fieldWriteIsRun(a: HandlerAction): boolean {
+    if (a.kind !== 'state-set' || a.field === undefined) return false;
+    if (a.field.port === 'set') return true;
+    return fieldClearedLocals.has(a.field.inputId) || (!printingFieldChains.has(a.field.inputId) && fieldChainOf(a.field.inputId).length > 0);
+  }
+  /**
+   * P18-S128-FIELDSET and P18-S127-CLEAROUT (EXP-011 §97). The write, then the field's change chain with the text written
+   * where the chain reads the field (`announcedCode`, as the mount announcement prints it). A Set is not written into a
+   * focused field (`setText`'s `hasFocus()`), and writes the Value as text: `undefined` leaves the start value, `null` is
+   * `''`, a Clear since the last delivery is `''`. Every line ends its own statement; the first carries no indent.
+   */
+  function fieldWriteCode(action: Extract<HandlerAction, { kind: 'state-set' }>, field: FieldWrite, indent: number): string {
+    const setter = stateSetterOf(action.name);
+    const at = pad(indent);
+    const cleared = fieldClearedLocals.get(field.inputId);
+    const chainLines = (code: string, depth: number): string[] => {
+      if (printingFieldChains.has(field.inputId)) return [];
+      const chain = fieldChainOf(field.inputId);
+      if (chain.length === 0) return [];
+      const outer = announcedCode;
+      announcedCode = { inputId: field.inputId, code };
+      printingFieldChains.add(field.inputId);
+      const lines = effectBody(chain, depth);
+      printingFieldChains.delete(field.inputId);
+      announcedCode = outer;
+      return lines;
+    };
+    if (field.port === 'clear') {
+      const lines = [`${at}${setter}('');`, ...(cleared !== undefined ? [`${at}${cleared}.current = true;`] : []), ...chainLines("''", indent)];
+      return lines.join('\n').slice(at.length);
+    }
+    const ref = fieldRefs.get(field.inputId)!;
+    const inner = pad(indent + 2);
+    const start = tsLiteral(field.start ?? '');
+    const body: string[] = [];
+    let code: string;
+    if (action.expr === undefined || action.expr.kind === 'literal') {
+      const literal = tsLiteral(action.expr?.kind === 'literal' ? String(action.expr.value) : (field.start ?? ''));
+      code = cleared !== undefined ? `(${cleared}.current ? '' : ${literal})` : literal;
+    } else {
+      // Block-scoped, so a name another write's block uses is free here; one the component's scope holds is not.
+      const blockLocal = (base: string): string => {
+        let candidate = base;
+        for (let n = 2; reserved.has(candidate); n++) candidate = `${base}${n}`;
+        return candidate;
+      };
+      const value = blockLocal(`${action.name}Value`);
+      code = blockLocal(`${action.name}Text`);
+      const asText = `String(${value} ?? '')`;
+      const coerced = field.start === undefined || field.start === '' ? asText : `${value} === undefined ? ${start} : ${asText}`;
+      body.push(
+        `${inner}const ${value} = ${exprCode(action.expr, 'handler')};`,
+        `${inner}const ${code} = ${cleared !== undefined ? `${cleared}.current ? '' : ${coerced}` : coerced};`
+      );
+    }
+    body.push(`${inner}${setter}(${code});`, ...chainLines(code, indent + 2));
+    return [`if (${ref}.current !== document.activeElement) {`, ...body, `${at}}`].join('\n');
   }
 
   /**
@@ -4382,7 +4456,9 @@ export function emitComponent(
       // EXP-011 §60. The parent write's `if` ends in `}` and takes no terminator.
       (a.kind === 'component-object-set' && a.parent) ||
       // EXP-011 §61. The pop's block form ends in `}`; the push ends in `)` and takes its `;`, as does a Reset.
-      a.kind === 'stack-pop'
+      a.kind === 'stack-pop' ||
+      // P18-S128-FIELDSET. Each line of a field write ends its own statement.
+      (a.kind === 'state-set' && fieldWriteIsRun(a))
     );
   }
   /** Whether anything in these actions, at any depth, is awaited — the arrow around it is `async`. */
@@ -4409,6 +4485,7 @@ export function emitComponent(
    */
   function blockBody(expanded: HandlerAction[], indent: number): string[] {
     return expanded.map((a) =>
+      // P18-S128-FIELDSET. A field write's lines take the column (`actionTakesNoTerminator` holds for it).
       actionTakesNoTerminator(a)
         ? `${pad(indent)}${actionCode(a, indent)}`
         : `${pad(indent)}${actionCode(a, ('detached' in a && a.detached === true) || a.kind === 'date-now-read' || a.kind === 'id-new' || a.kind === 'crypto-call' || a.kind === 'branch' || a.kind === 'array-new' || a.kind === 'component-object-set' || a.kind === 'stack-push' || a.kind === 'stack-reset' || a.kind === 'jsfun-run' ? indent : 0)};`
@@ -4455,6 +4532,29 @@ export function emitComponent(
   const delayRefs = new Map<string, string>();
   for (const a of deepActions(allActions)) {
     if (a.kind === 'delay') delayRefs.set(a.nodeId, a.ref);
+  }
+  /*
+   * P18-S128-FIELDSET (EXP-011 §97). A field a Focus, a Blur or a Set acts on holds its element in a ref (a Set asks whether
+   * the field has focus, as the runtime's does). A field that is both Set and Cleared keeps, in a second ref, whether a Clear
+   * has run since its Value was last delivered: the runtime's Set writes `_internal.text`, which the Clear empties and the
+   * next delivery fills. Read off the actions, as the Delay's refs are.
+   */
+  const fieldRefs = new Map<string, string>();
+  const fieldSetSources = new Map<string, ValueExpr>();
+  const fieldCleared = new Set<string>();
+  for (const a of deepActions(allActions)) {
+    const inputId = a.kind === 'field-focus' ? a.inputId : a.kind === 'state-set' && a.field?.port === 'set' ? a.field.inputId : undefined;
+    if (inputId !== undefined && !fieldRefs.has(inputId)) {
+      const named = lowerFirst(pascalCase(nodeById.get(inputId)?.authoredLabel ?? '')) || 'field';
+      fieldRefs.set(inputId, dedupeLocal(/^[A-Za-z_$]/.test(named) ? `${named}Field` : 'field'));
+    }
+    if (a.kind === 'state-set' && a.field?.port === 'set' && a.expr !== undefined) fieldSetSources.set(a.field.inputId, a.expr);
+    if (a.kind === 'state-set' && a.field?.port === 'clear') fieldCleared.add(a.field.inputId);
+  }
+  const fieldClearedLocals = new Map<string, string>();
+  for (const inputId of fieldCleared) {
+    if (!fieldSetSources.has(inputId)) continue;
+    fieldClearedLocals.set(inputId, dedupeLocal(`${fieldRefs.get(inputId)!.replace(/Field$/, '')}Cleared`));
   }
 
   // ---- imports ---------------------------------------------------------------------------
@@ -4514,7 +4614,9 @@ export function emitComponent(
   }
   if (radioNameLocals.size > 0) reactImports.push('useId');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
-  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0 || plan.instancePulses.length > 0) reactImports.push('useRef');
+  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0 || plan.instancePulses.length > 0 || fieldRefs.size > 0) reactImports.push('useRef');
+  // P18-S128-FIELDSET. A Cleared mark's reset is an effect.
+  if ([...fieldClearedLocals.keys()].some((id) => fieldSetSources.get(id)?.kind !== 'literal') && !reactImports.includes('useEffect')) reactImports.push('useEffect');
   // EXP-011 §53. A task template's mount effect and its once-guard (StrictMode mounts twice; startTask pulses once).
   // EXP-011 §57. A Repeater Item's Added effect takes the same pair, for the same reason.
   // P18-S116-FIELDMOUNT. A field's mount announcement takes the same pair: its chain may reach a parent or a backend.
@@ -5271,6 +5373,14 @@ export function emitComponent(
         defer(node.id, 'the "didMount" signal', mountRefusals.get(node.id)!);
         continue;
       }
+      // P18-S128-FIELDSET. A text field's On Enter is its Enter key (TextInput.tsx `onKeyDown`).
+      if (port === 'onEnter' && plan.roleOf[node.id] === 'input') {
+        const expanded = expandActions(actions);
+        attrs.push(
+          `onKeyDown={${actionsAwait(expanded) ? 'async ' : ''}(event) => {\n${pad(attrIndent + 2)}if (event.key !== 'Enter') return;\n${blockBody(expanded, attrIndent + 2).join('\n')}\n${pad(attrIndent)}}}`
+        );
+        continue;
+      }
       const eventAttr = roleEvents[port] ?? EVENT_ATTRS[port];
       if (!eventAttr) {
         notes.push(`${plan.path}: signal ${node.id}.${port} has no DOM event equivalent — dropped, reported`);
@@ -5678,6 +5788,8 @@ export function emitComponent(
     if (controlVar !== undefined) {
       attrs.push(`${role === 'checkbox' ? 'checked' : 'value'}={${controlVar.name}}`);
     }
+    // P18-S128-FIELDSET. The element a Focus, a Blur or a Set acts on.
+    if (role === 'input' && fieldRefs.has(id)) attrs.push(`ref={${fieldRefs.get(id)}}`);
     if (role === 'input' || isControl) attrs.push(...changeAttrs(node, indent + 2));
     attrs.push(...handlerAttrs(node, indent + 2));
 
@@ -7090,6 +7202,21 @@ export function emitComponent(
   }
   // EXP-011 §39. The refs: a Delay's timer handle, and a Value Changed's last value seen.
   for (const [, ref] of delayRefs) body.push(`  const ${ref} = useRef<DelayHandle | null>(null);`);
+  // P18-S128-FIELDSET. A field's element, and whether it has been Cleared since its Value was last delivered.
+  for (const [, ref] of fieldRefs) body.push(`  const ${ref} = useRef<HTMLInputElement>(null);`);
+  for (const [inputId, local] of fieldClearedLocals) {
+    const source = fieldSetSources.get(inputId)!;
+    body.push(`  const ${local} = useRef(false);`);
+    if (source.kind === 'literal') continue;
+    const read = exprCode(source, 'handler');
+    const store = /^([A-Za-z_$][A-Za-z0-9_$]*)\.get\(\)$/.exec(read);
+    // A Variable delivers on every write, the same value too (the Set Variable's forceChange); anything else, on a change.
+    body.push(
+      ...(store !== null
+        ? [`  useEffect(() => ${store[1]}.subscribe(() => { ${local}.current = false; }), []);`]
+        : ['  useEffect(() => {', `    ${local}.current = false;`, `  }, [${exprCode(source, 'render')}]);`])
+    );
+  }
   for (const effect of plan.valueChangedEffects) body.push(`  const ${effect.lastLocal} = useRef<unknown>(undefined);`);
   // P18-S126-INSIGNAL. The count each placed component has acted on, kept here so it outlives the child's unmount.
   for (const pulse of plan.instancePulses) body.push(`  const ${pulse.takenLocal} = useRef(0);`);
@@ -7789,6 +7916,9 @@ export function emitComponent(
         return [];
       // EXP-011 §63. The same.
       case 'drag-snap':
+        return [];
+      // P18-S128-FIELDSET. The same.
+      case 'field-focus':
         return [];
       // EXP-011 Tier 2.5. The link, the wired Open In New Tab, and both chains — `usesPayload`
       // walks this list, so a link built from a received event's payload is found here or the

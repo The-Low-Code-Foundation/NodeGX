@@ -9,9 +9,16 @@
  * A press is a DOM click on the `<button>` whose text is the label. A child process because ts-jest typechecks every file
  * it transforms against this package's strict config, and the runtime and viewer are not written for it.
  *
- * stdin: `[{ dir, scenarios }]`: per project, its folder (v2 format), and lists of button labels to press. stdout: per
+ * stdin: `[{ dir, scenarios, fields? }]`: per project, its folder (v2 format), and lists of button labels to press. stdout: per
  * project, per scenario, one reading after load and one after each press: the text of every Text node in the document,
  * in document order (the export's `<p>`s, read the same way by `export-react-arm.js`).
+ *
+ * P18 session 129 (EXP-011 §97, P18-S128-FIELDSET). `fields: true` puts the viewer's own focus tracker behind a Focus and a
+ * Blur (`focus-tracker.ts`, as `viewer.jsx` does; without it they reach a stub that focuses nothing), and appends to every
+ * reading each field's text, `[placeholder]=value` in document order, then `focus=[placeholder]` (or `focus=none`) for the
+ * element that holds focus. Two steps that are not button labels: `type:<placeholder>:<text>` focuses that field, writes
+ * the text as a keystroke does (the value setter, then an `input` event, which React's onChange reads) and blurs it, as a
+ * person types and leaves; `enter:<placeholder>` presses Enter in it (a `keydown`).
  */
 
 const fs = require('fs');
@@ -116,7 +123,30 @@ async function frames(graph) {
   await graph.settle();
 }
 
-async function run({ dir, scenarios }) {
+/** P18 session 129. Each field's text by its placeholder, in document order, then which one holds focus. */
+function fieldReading(container) {
+  const els = [...container.querySelectorAll('input, textarea')];
+  const name = (el) => `[${el.getAttribute('placeholder') ?? ''}]`;
+  const active = els.find((el) => el === document.activeElement);
+  return [...els.map((el) => `${name(el)}=${el.value}`), `focus=${active ? name(active) : 'none'}`];
+}
+
+/** P18 session 129. `type`: focus, write as a keystroke does, blur; `enter`: an Enter keydown. */
+function stepInField(container, verb, placeholder, text) {
+  const el = [...container.querySelectorAll('input, textarea')].find((e) => (e.getAttribute('placeholder') ?? '') === placeholder);
+  if (!el) throw new Error(`no field "${placeholder}"`);
+  if (verb === 'enter') {
+    el.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    return;
+  }
+  el.focus();
+  const proto = el.tagName === 'TEXTAREA' ? dom.window.HTMLTextAreaElement.prototype : dom.window.HTMLInputElement.prototype;
+  Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, text);
+  el.dispatchEvent(new dom.window.Event('input', { bubbles: true }));
+  el.blur();
+}
+
+async function run({ dir, scenarios, fields }) {
   const components = componentsOf(dir);
   const home = components.find((c) => c.name === '/Pages/Home');
   // The Home page's Page node is the router's; the arm draws the Page's one child, the page's Group.
@@ -128,7 +158,11 @@ async function run({ dir, scenarios }) {
     delete Model._models['--ndl--global-variables'];
     const graph = await createCorpusGraph({ modules: MODULES, data: { components }, rootComponent: '/Pages/Home' });
     graph.context.styles = { getTextStyle: () => ({}), resolveColor: (c) => c };
-    graph.context.setNodeFocused = () => undefined;
+    if (fields) {
+      const { FocusTracker } = require(path.join(VIEWER, 'focus-tracker'));
+      const tracker = new FocusTracker();
+      graph.context.setNodeFocused = (node, focused) => tracker.setNodeFocused(node, focused);
+    } else graph.context.setNodeFocused = () => undefined;
     await graph.settle();
     const container = document.getElementById('root');
     const root = createRoot(container);
@@ -144,7 +178,7 @@ async function run({ dir, scenarios }) {
         if (el && container.contains(el)) texts.push({ el, text: (el.textContent ?? '').trim() });
       }
       texts.sort((a, b) => (a.el.compareDocumentPosition(b.el) & 4 ? -1 : 1));
-      return texts.map((t) => t.text);
+      return [...texts.map((t) => t.text), ...(fields ? fieldReading(container) : [])];
     };
     /**
      * React commits (and the viewer sends Did Mount from `componentDidMount`) as an `act` scope closes, after the frames
@@ -165,6 +199,15 @@ async function run({ dir, scenarios }) {
     await settled();
     const readings = [read()];
     for (const label of presses) {
+      const typed = /^(type|enter):([^:]*)(?::(.*))?$/.exec(label);
+      if (typed) {
+        await act(async () => {
+          stepInField(container, typed[1], typed[2], typed[3] ?? '');
+        });
+        await settled();
+        readings.push(read());
+        continue;
+      }
       const button = [...container.querySelectorAll('button')].find((b) => (b.textContent ?? '').trim() === label);
       if (!button) throw new Error(`no button "${label}"`);
       await act(async () => {
