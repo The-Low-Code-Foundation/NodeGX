@@ -49,7 +49,7 @@ async function appWithBackend(withConfig = true) {
     fs.writeFileSync(path.join(root, ID, 'schema.json'), JSON.stringify({ tables: [] }));
   }
   const dir = scratchCopy('hello-world');
-  writeJson<TSFixme>(path.join(dir, 'nodegx.project.json'), (p) => {
+  writeJson<{ metadata?: unknown }>(path.join(dir, 'nodegx.project.json'), (p) => {
     p.metadata = { cloudservices: { instanceId: ID, endpoint: `http://127.0.0.1:${port}`, appId: ID, type: 'nodegx' } };
   });
   return { port, root, dir, env: { ...process.env, NODEGX_BACKENDS_DIR: root } };
