@@ -6886,7 +6886,9 @@ export function emitComponent(
     }
     for (const output of plan.outputProps) body.push(`  ${output.prop}?: () => void;`);
     // Lifted value outputs (CONTROLLED-STATE §4d): optional callbacks carrying the value.
-    for (const lifted of plan.liftedOutputProps) body.push(`  ${lifted.prop}?: (value: ${lifted.tsType}) => void;`);
+    // P18-S122-TPLBUILD. The push sends whatever the output holds, `undefined` before its source has a value (a prop
+    // not passed, a row not yet written), and the parent's row is `T | undefined` already: the callback says so too.
+    for (const lifted of plan.liftedOutputProps) body.push(`  ${lifted.prop}?: (value: ${lifted.tsType} | undefined) => void;`);
     // The popup boundary's reserved prop (POPUPS-TARGET §4), after the declared interface.
     if (plan.closesPopup) body.push('  onClose?: (action?: string) => void;');
     // EXP-011 §61. The stack's reserved prop, after the declared interface (Close Popup's placement).

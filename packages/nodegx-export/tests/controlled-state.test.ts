@@ -90,7 +90,7 @@ function joinClasses(...classes: Array<string | false | undefined>) {
 }
 
 export interface CheerMeterProps {
-  onDraftChanged?: (value: string) => void;
+  onDraftChanged?: (value: string | undefined) => void;
 }
 
 /** Cheer meter. */

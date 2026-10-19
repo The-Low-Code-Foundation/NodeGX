@@ -24,9 +24,12 @@ import { typecheckEmittedApp } from './helpers/typecheckApp';
 
 const REPO = path.join(__dirname, '..', '..', '..');
 
-/** Errors per template, session 124's tree (311 in 11 of 16). Lower a row when a fix lowers it. */
+/**
+ * Errors per template. Session 124: 311 in 11 of 16 at first; 189 in 9 of 16 once a lifted output's callback took
+ * `T | undefined` (the 122 TS2345 rows of `onXChanged?.(x)`). Lower a row when a fix lowers it.
+ */
 const LEDGER: Record<string, number> = {
-  'bot-garden': 16,
+  'bot-garden': 6,
   'digital-bricks-training': 2,
   'digital-bricks-training-demo': 0,
   gram: 4,
@@ -35,13 +38,13 @@ const LEDGER: Record<string, number> = {
   marketplace: 1,
   'members-area': 0,
   'pixel-game': 0,
-  planning: 21,
-  'planning-demo': 21,
-  'rocket-school': 78,
-  'star-class': 78,
-  'story-engine': 2,
-  'todo-list': 44,
-  'todo-list-demo': 44
+  planning: 5,
+  'planning-demo': 5,
+  'rocket-school': 65,
+  'star-class': 65,
+  'story-engine': 0,
+  'todo-list': 18,
+  'todo-list-demo': 18
 };
 
 const trackedTemplates = (): string[] => {
