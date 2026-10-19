@@ -1933,6 +1933,9 @@ export function emitComponent(
   };
   /** The wrapper call's argument record; shorthand where the arg code is the field name. */
   const jsArgsObject = (def: JsFunctionPlan, mode: 'handler' | 'render'): string => {
+    // P18-S122-TPLBUILD (TS2554). An Expression with no inputs prints `function True()`: a call with `{}` passes an
+    // argument it does not take. A Function's and a Visual Function's wrapper always takes its record.
+    if (def.kind === 'expression' && def.inputs.length === 0) return '';
     const entries = def.inputs
       .filter((i) => i.expr !== undefined)
       .map((i) => {

@@ -40,8 +40,8 @@ const LEDGER: Record<string, number> = {
   'pixel-game': 0,
   planning: 5,
   'planning-demo': 5,
-  'rocket-school': 65,
-  'star-class': 65,
+  'rocket-school': 44,
+  'star-class': 44,
   'story-engine': 0,
   'todo-list': 18,
   'todo-list-demo': 18
