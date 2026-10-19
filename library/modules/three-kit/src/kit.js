@@ -568,12 +568,38 @@
    * the prototype's first drive: Mesh Count 2 for 9). A ref made once per mounted component is one per row.
    */
   var nextId = 1;
+
+  /**
+   * PARKED-THREE-S2-MESHOUTSIDE, the kit's half: a child with no Scene above it has no one to speak to and draws nothing,
+   * and nothing in the format can say "only inside a Scene" (the bridge registers every kit node as Visual). So the child
+   * says it, as a console ERROR: `render_report` collects errors and exceptions only (render-capture.js, `type ===
+   * 'error'`), so a warning would never reach the agent. Once per node and name, not once per For Each row.
+   */
+  var KIND_LABEL = { mesh: 'Mesh', group: '3D Group', light: 'Light' };
+  var saidOutside = {};
+  function sayOutsideScene(spec) {
+    var what = KIND_LABEL[spec.kind] || spec.kind;
+    var who = what + (spec.name ? ' "' + spec.name + '"' : '');
+    if (saidOutside[who]) return;
+    saidOutside[who] = true;
+    console.error(
+      'three-kit: ' + who + ' is not inside a Scene, so it draws nothing. Move it under a three-kit Scene ' +
+        '(or under a 3D Group or a For Each that is inside one).'
+    );
+  }
+
   function useSceneObject(props, spec) {
     var ctx = React.useContext(SceneContext);
     var idRef = React.useRef(null);
     if (idRef.current === null) idRef.current = 'tk' + nextId++;
     var id = idRef.current;
     var key = JSON.stringify(spec);
+    React.useEffect(
+      function () {
+        if (!ctx) sayOutsideScene(spec);
+      },
+      [ctx]
+    );
     React.useEffect(
       function () {
         if (ctx) ctx.upsert(id, spec);

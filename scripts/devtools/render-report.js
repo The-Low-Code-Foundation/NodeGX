@@ -1731,6 +1731,11 @@ async function withRenderedPage(options, fn) {
       '--no-default-browser-check',
       '--hide-scrollbars',
       '--disable-gpu',
+      // PARKED-THREE-S3-NOWEBGL: `--disable-gpu` alone leaves no WebGL, so a three.js scene (three-kit, garden-3d-kit)
+      // drew its "No WebGL here" fallback to the agent. Software GL brings WebGL back with no GPU (measured 2026-10-19 in
+      // this harness: gl false → true, the three-kit fixture's 12 meshes drawn); a page with no WebGL never touches it.
+      '--use-angle=swiftshader',
+      '--enable-unsafe-swiftshader',
       // P112-S14-KEYCHAIN: on macOS a page that touches storage makes Chrome open the login keychain. With no
       // keychain where `HOME` points (an empty HOME, a CI user) the OS shows "Keychain Not Found" on the person's
       // screen and Chrome waits for the answer, so the render hangs until its 240 s kill. A throwaway profile

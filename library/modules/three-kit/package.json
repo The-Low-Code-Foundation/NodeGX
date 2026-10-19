@@ -1,0 +1,31 @@
+{
+  "name": "@nodegx/three-kit",
+  "version": "0.1.0",
+  "description": "three.js as NodeGX nodes: Scene, Mesh, Light and 3D Group. `npx @nodegx/three-kit add` puts the kit in your project's noodl_modules/.",
+  "license": "GPL-3.0-only",
+  "homepage": "https://nodegx.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "library/modules/three-kit"
+  },
+  "keywords": ["nodegx", "three.js", "3d", "kit"],
+  "bin": {
+    "three-kit": "bin/three-kit.js"
+  },
+  "files": [
+    "bin",
+    "project/noodl_modules/three-kit",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "prepack": "node build.mjs",
+    "test": "node --test test/*.test.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

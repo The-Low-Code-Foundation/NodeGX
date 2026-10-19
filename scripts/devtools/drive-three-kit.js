@@ -10,6 +10,9 @@
  *   node node_modules/.bin/nodegx deploy <project-dir> <deploy-dir> --allow-development-engine
  *   node scripts/devtools/drive-three-kit.js <deploy-dir> [--shots <dir>] [--json <file>]
  *
+ *   node scripts/devtools/drive-three-kit.js assemble <project-dir> --outside   (the ball moved out of the Scene)
+ *   node scripts/devtools/drive-three-kit.js <deploy-dir> --outside              (one clause, OUTSIDE)
+ *
  * 🔴 Gate on the deploy's EXIT CODE: 0 wrote the site; 11 refused a development engine (the flag above).
  * 🔴 Chrome runs with `--use-angle=swiftshader`: frame counts are a software renderer's and say nothing about a GPU.
  *
@@ -23,6 +26,10 @@
  *   SPIN    the ball spins: the renderer's frame count rises over 600 ms with nothing else changing
  *   WIRE    a Variable write (ballY = 4) moves the ball to y 4 in the scene graph — the graph owns the position
  *   TAP     a CDP mouse press and release on the tallest bar's projected centre fires Tapped and Tapped Name = "sat"
+ *
+ * --outside (PARKED-THREE-S2-MESHOUTSIDE's repro: the ball moved from the Scene to the page's Layout Group):
+ *   OUTSIDE exactly one console error, naming Mesh "ball" and the Scene it needs; Mesh Count 11 (the ball is not drawn).
+ *           Its control is the main run's BOOT: the same page with the ball inside logs no error.
  */
 const fs = require('fs');
 const path = require('path');
@@ -51,6 +58,15 @@ if (process.argv[2] === 'assemble') {
   fs.rmSync(out, { recursive: true, force: true });
   fs.cpSync(FIXTURE, out, { recursive: true });
   fs.cpSync(KIT, path.join(out, 'noodl_modules', 'three-kit'), { recursive: true });
+  if (process.argv.includes('--outside')) {
+    const file = path.join(out, 'components', 'Pages', 'Home', 'nodes.json');
+    const doc = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const byId = Object.fromEntries(doc.nodes.map((n) => [n.id, n]));
+    byId.scene.children = byId.scene.children.filter((c) => c !== 'ball');
+    byId.layout.children.push('ball');
+    byId.ball.parent = 'layout';
+    fs.writeFileSync(file, JSON.stringify(doc, null, 2));
+  }
   const three = path.join(out, 'noodl_modules', 'three-kit', 'three.min.js');
   console.log(JSON.stringify({ assembled: out, threeBytes: fs.existsSync(three) ? fs.statSync(three).size : null, kitBytes: fs.statSync(path.join(KIT, 'index.js')).size }));
   process.exit(fs.existsSync(three) ? 0 : 1);
@@ -59,6 +75,7 @@ if (process.argv[2] === 'assemble') {
 const DIR = process.argv[2];
 const SHOTS = arg('--shots');
 const JSON_OUT = arg('--json');
+const OUTSIDE = process.argv.includes('--outside');
 if (!DIR || !fs.existsSync(path.join(DIR, 'index.html'))) {
   console.error('usage: drive-three-kit.js <deploy-dir> [--shots <dir>] [--json <file>]  |  assemble <project-dir>');
   process.exit(2);
@@ -149,6 +166,16 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
   };
   await page.setViewport({ width: 1024, height: 640 });
   await wait(1500);
+
+  if (OUTSIDE) {
+    const meshes = await vars('meshes');
+    const ball = (await census()).objects.find((o) => o.name === 'ball');
+    const said = page.consoleErrors.filter((e) => /three-kit: Mesh "ball" is not inside a Scene/.test(e));
+    readings.outside = { meshes, ball: ball || null, consoleErrors: page.consoleErrors };
+    check('OUTSIDE the ball outside the Scene: exactly one console error, naming Mesh "ball"; Mesh Count 11; no ball in the scene', page.consoleErrors.length === 1 && said.length === 1 && meshes === 11 && !ball, readings.outside);
+    await shot('outside');
+    return;
+  }
 
   // BOOT
   const html = fs.readFileSync(path.join(DIR, 'index.html'), 'utf8');
