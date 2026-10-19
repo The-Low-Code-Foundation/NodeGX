@@ -1,5 +1,54 @@
 # Phase 111 — next session
 
+**Rewritten 2026-10-19 by lane 7, session 1 (branch `l7-honesty`, from `e7e3e77db`).** Earlier text (scoping, 2026-10-01)
+is kept below the line.
+
+## Where lane 7 stands
+
+| task | state |
+|---|---|
+| SEE-000 the census | 🟡 built in part: script, gate, honesty by hand ✅; the cost table (AC3) and the code app's row (§3.4) deferred |
+| SEE-001 the honesty number | 🟡 built but for the editor: `honesty.ts`, the MCP surfaces, the ratchet, the sentence ✅; editor ⬜; AC6 ⬜ (Richard) |
+| SEE-002 … SEE-012 | ⬜ never built |
+
+The numbers (2026-10-19): training template **67.0%** known (578 known, 285 script, 148 of them kit nodes) and **6.9%**
+by script lines; todo **87.9%** / 9.8%. All sixteen templates are in `CENSUS.md` and `honesty-ledger.json`.
+
+## The next task to build in lane 7
+
+1. **SEE-001's editor surface** (§4 item 3): the project number in the components panel header
+   (`packages/noodl-editor/src/editor/src/views/panels/ComponentsPanelNew`), each component's number on its row, the
+   script nodes marked on the canvas. Read `projectHonesty` from `@nodegx/node-spec`; never restate the rule. It needs a
+   drive from primary (open a COPY of `templates/digital-bricks-training`, read the header and two rows against
+   `honesty-ledger.json`). Then AC6: Richard reads it.
+2. Or the board's next lane-7 task (SEE-011, SEE-012), if Richard rules the editor surface can wait.
+3. Owed small: the MCP's `apply_plan` result carries no honesty line yet (create/update do).
+
+## Gates this lane added (they run in the node-spec package suite, so in the PR workflow)
+
+- `packages/nodegx-node-spec/tests/see-census.test.ts` — `census.js --check`: a template whose counts move without a
+  regenerated `census.json` is red. **A template commit now regenerates the census in the same commit**
+  (`node scripts/see/census.js`).
+- `packages/nodegx-node-spec/tests/honesty-ledger.test.ts` — `honesty-ledger.js --check`: a template's number that
+  falls is red; one that rises is red until `node scripts/see/honesty-ledger.js --write`.
+- `packages/nodegx-node-spec/tests/honesty.test.ts` — the rule held to phase 107's files and to the census.
+- `packages/noodl-mcp/tests/see001Honesty.test.ts` — the MCP surfaces on the real training template, with ceilings.
+
+## Rulings owed
+
+- **R-SEE-001-a:** the number counts nodes; counted by script lines it is about a tenth as high on the training
+  template (6.9% against 67.0%). Both are shown; Richard says which one leads.
+- R1–R5, R7 as below.
+
+## Bugs found
+
+- `P111-SEE001-DBTCLOUDUNREGISTERED` — the training template's 33 cloud functions are not in its registry, so the MCP
+  reads 49 of 82 components (66.0% there against the census's 67.0%).
+
+---
+
+# Phase 111 — next session
+
 **Written 2026-10-01 at scoping, HEAD `22303a534`.** Nothing is built. This file is the board until a session builds.
 
 ## The board (re-derived from the task files, 2026-10-01)

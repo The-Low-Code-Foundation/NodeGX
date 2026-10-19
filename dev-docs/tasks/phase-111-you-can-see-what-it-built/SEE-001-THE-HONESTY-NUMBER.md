@@ -1,7 +1,9 @@
 # SEE-001 — The honesty number: how much of this app is made of parts whose behaviour is known
 
 **Opened 2026-10-01.** **Depends on SEE-000.** NSP-017 moves the line later; it does not block the number.
-**Status: 📋 not started.**
+**Status: 🟡 built but for the editor (s1, 2026-10-19, branch `l7-honesty`).** §4 items 1, 2, 4, 5 built; item 3 (the
+editor) not started. AC1–AC5 ✅ (AC1 on the MCP with one named gap, a template defect); AC6 ⬜ (Richard, and it needs
+the editor surface).
 
 ## 1. The person sentence
 
@@ -63,3 +65,68 @@ primitives.
   not on a toy.
 - The number is the one thing in this phase a competitor can quote back. Define it once, in one file, and let every
   surface import it (memory: *a second copy of a palette drifts silently*).
+
+## 7. Session 1 — 2026-10-19 (lane 7, worktree `l7-honesty`, from `e7e3e77db`)
+
+**The definition, `packages/nodegx-node-spec/src/honesty.ts`** (exported from the browser entry). Pure: it takes the
+components as plain data and `coreTypes` (the shipped catalog's names). Every node instance is one of:
+
+- **known**: a registry spec that is not a `contract`, or a type an N graph scenario's claims grade (`GRAPH_GRADED_TYPES`,
+  20 types). This is "conforms on the ledger": phase 107's `spec-ledger.js` counts exactly these two ways (142 / 147
+  today), and a registry spec that does not conform is a red PR.
+- **script**: `SCRIPT_TYPES`, phase 107's T6 (Expression, JavaScriptFunction, Javascript2, Logic Builder; CSS Definition
+  is exempt there), or a kit type with no spec (not in the shipped catalog, not a component).
+- **unspecced**, **instance** (a component instance: counted inside its component), **exempt** (Component Children,
+  CSS Definition): reported, never in the number.
+
+The number is known ÷ (known + script) × 100, one decimal, `null` for a component with neither. `percentByLines` is
+beside it. `tests/honesty.test.ts` holds `SCRIPT_TYPES` to `tiers.json`, `EXEMPT_TYPES` to `exemptions.json` and
+`GRAPH_GRADED_TYPES` to the graph scenarios, both ways, so the rule cannot drift from the ledger. Six mutants (the kit
+branch, the contract check, the exempt branch, unspecced in the denominator, a graph type dropped, the line weight), six
+killed; the contract mutant needed its own test (a planted contract spec on a kit type stays script), because every
+contract spec today is also T6.
+
+**AC1 ✅.** `honesty.ts` over all 16 templates equals SEE-000's census, which computes the rule separately (16 rows,
+`honesty.test.ts`). On the MCP: the todo template's `get_project_info` equals the census exactly (87.9%, 690 known, 95
+script, 2 unspecced, 9.8% by lines). The training template's reads **66.0% (475 known, 245 script, 20 unspecced)** against
+the census's **67.0% (578, 285, 20)**: its registry lists 49 of its 82 components, and the MCP reads through the
+registry. The 33 left out are all `#__cloud__` functions; the spec asserts the gap is exactly those 33, so it cannot
+widen silently. Bug `P111-SEE001-DBTCLOUDUNREGISTERED` (fix: register them; then the assertion becomes equality).
+
+**AC2 ✅ (MCP and render report; the editor is not built).** On a copy of the training template, one Function added to
+`Logic/Standing` through `update_component`: the write says ``this component: 50% known (2 known, 2 script); script:
+`Count, pace, trajectory`, `Planted by SEE-001` `` and `the project: 65.9% known (475 known, 246 script, 20
+unspecced)`; `get_project_info`, `get_component` and `render_report`'s `HONESTY —` line then say the same numbers.
+`create_component` reports the new component's and the project's number too. Not covered: `apply_plan`'s result.
+
+**AC3 ✅.** A kit node with no spec is script; a planted spec (`specs: { 'game-kit.Sound': {} }`) flips it to known, in
+the component's number (50% → 100%).
+
+**AC4 ✅ — the ratchet.** `scripts/see/honesty-ledger.js` (`--check`, `--write`) over the census's reader, and
+`honesty-ledger.json` beside this file with all 16 templates. `tests/honesty-ledger.test.ts`: a planted Function in a
+copy of the todo template reads `todo-list: the honesty number FELL to 87.8% (690 known, 96 script); the ledger holds
+87.9% (690 known, 95 script)`; removing `Logic/Projects`' Functions reads `ROSE … the ledger still says 87.9%` until
+`--write`; a missing and a stray entry fail. Two mutants (fall branch, rise branch), two killed.
+
+**AC5 ✅.** Every field is a result field. The resident surface (`toolDisclosure.test.ts`) reads **8,274 / 8,280 before
+and after** (0 tokens). Measured per call on the training template, each with a ceiling in `see001Honesty.test.ts`
+(printed on a passing run): `get_project_info`'s `honesty` **1,318** chars (ceiling 1,600), `get_component`'s on
+`Pages/Settings`, the component with the most script nodes (34), **1,490** (1,800), a write's **193** (600),
+`render_report`'s section **985** (1,200).
+
+**The sentence (§4 item 5).** `HONESTY_SENTENCE` in `honesty.ts`; the MCP README quotes it word for word (graded);
+`get_project_info`'s `honesty.about` carries it. The briefing (`instructions`) has 6 tokens free, so it is not there:
+the doctrines already ride `get_project_info`'s result for the same reason.
+
+**R-SEE-001-a (instance- or line-weighted).** Built instance-weighted. The line-weighted figure differs a lot, so it is
+reported beside the headline everywhere (`percentByLines`): training 67.0% by instance, **6.9% by lines**; todo 87.9%
+against **9.8%**; planning 89.7% against 8.3%. One Function of 611 lines weighs as much as 611 known nodes.
+
+**The editor (§4 item 3): not started.** The components panel header, the per-row number and the canvas mark are
+editor work in `views/panels/ComponentsPanelNew` and need a drive from primary. They read the same `projectHonesty`.
+
+**AC6 ⬜** — Richard's read, and it needs the editor surface. Until then the same list is in `get_project_info`
+(`mostScript`, `scriptByType`) and `get_component` (`scriptNodes`). What to look at: on the training template, whether
+"148 of 285 script nodes are kit nodes, 131 of them `Translation`" and the five components with the most script tell
+him anything he did not know.
+

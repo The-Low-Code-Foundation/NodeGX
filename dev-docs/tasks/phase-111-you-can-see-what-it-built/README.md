@@ -4,7 +4,9 @@
 which he had built once in code and then again in NodeGX, and found slower, heavier on his Claude usage and fiddlier to
 style the second time. The conversation read [RISE](#3-what-rise-was-and-why-it-is-not-the-answer), the P78 register,
 P18, P107, P110 and the MCP's briefing module before it reached the conclusion below.
-**Status: ⬜ OPEN — 0 of 13 built. Six rulings to ask first (§8); R6 ruled 2026-10-06 with DIRECTION.md D2.** **Prefix: `SEE`.**
+**Status: ⬜ OPEN — 0 of 13 done; SEE-000 and SEE-001 built in part (2026-10-19: the census, the honesty number on MCP
+and its ratchet; the editor surface and the cost table owed). Six rulings to ask first (§8); R6 ruled 2026-10-06 with
+DIRECTION.md D2.** **Prefix: `SEE`.**
 Task files: [SEE-000](SEE-000-THE-CENSUS.md) … [SEE-012](SEE-012-THE-SECURITY-REPORT.md). The board is §6.
 
 > "NodeGX did move in a direction of 'stop letting AI code for you without any way of knowing what's under the hood and
