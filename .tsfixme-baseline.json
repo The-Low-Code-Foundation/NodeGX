@@ -6,7 +6,7 @@
   "exclude": [
     "packages/noodl-runtime/dist-types"
   ],
-  "commit": "8763a64c6",
+  "commit": "de337f61b",
   "max": {
     "src": {
       "TSFixme": 583,
@@ -17,7 +17,7 @@
     },
     "tests": {
       "TSFixme": 307,
-      "any": 1913,
+      "any": 1892,
       "@ts-ignore": 1,
       "@ts-nocheck": 2,
       "@ts-expect-error": 8
@@ -82,7 +82,7 @@
     },
     "noodl-mcp": {
       "TSFixme": 0,
-      "any": 1366,
+      "any": 1345,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
@@ -3185,7 +3185,7 @@
     },
     "packages/noodl-mcp/tests/tpl007Engine.test.ts": {
       "TSFixme": 0,
-      "any": 93,
+      "any": 65,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
@@ -3207,6 +3207,20 @@
     "packages/noodl-mcp/tests/tpl007Template.test.ts": {
       "TSFixme": 0,
       "any": 6,
+      "@ts-ignore": 0,
+      "@ts-nocheck": 0,
+      "@ts-expect-error": 0
+    },
+    "packages/noodl-mcp/tests/tpl013Edition.test.ts": {
+      "TSFixme": 0,
+      "any": 4,
+      "@ts-ignore": 0,
+      "@ts-nocheck": 0,
+      "@ts-expect-error": 0
+    },
+    "packages/noodl-mcp/tests/two003Run.ts": {
+      "TSFixme": 0,
+      "any": 3,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
