@@ -12,12 +12,20 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+import type { HonestyNode } from '../src/honesty';
+
 const ROOT = path.join(__dirname, '..', '..', '..');
 const SCRIPT = path.join(ROOT, 'scripts', 'see', 'census.js');
 const CENSUS = path.join(ROOT, 'dev-docs', 'tasks', 'phase-111-you-can-see-what-it-built', 'census.json');
 
-type Json = Record<string, any>;
-const read = (p: string): Json => JSON.parse(fs.readFileSync(p, 'utf8'));
+/** The census rows this spec reads. */
+interface CensusFile {
+  projects: Array<{ name: string; nodes: number; handObjects: number; components: number; componentRecords: number }>;
+}
+interface NodesFile {
+  nodes: HonestyNode[];
+}
+const read = <T>(p: string): T => JSON.parse(fs.readFileSync(p, 'utf8')) as T;
 
 function census(flags: string[]): { status: number | null; out: string; err: string } {
   const r = spawnSync(process.execPath, [SCRIPT, ...flags], { encoding: 'utf8', timeout: 60_000 });
@@ -41,7 +49,7 @@ describe('SEE-000 — the census gate', () => {
   });
 
   it('AC1: a node is what the runtime instantiates, and the scoping over-count is exactly one component record per component', () => {
-    for (const p of read(CENSUS).projects) {
+    for (const p of read<CensusFile>(CENSUS).projects) {
       expect({ name: p.name, over: p.handObjects - p.nodes }).toEqual({ name: p.name, over: p.components });
       expect(p.componentRecords).toBe(p.components);
     }
@@ -52,7 +60,7 @@ describe('SEE-000 — the census gate', () => {
     expect(census(['--check', ...copyFlags()]).status).toBe(0); // and it holds
 
     const file = path.join(dir, 'templates', 'todo-list', 'components', 'App', 'nodes.json');
-    const nodes = read(file);
+    const nodes = read<NodesFile>(file);
     nodes.nodes.push({ id: 'planted_fn', type: 'JavaScriptFunction', label: 'Planted', parameters: { functionScript: 'Script.Outputs.x = 1;\n' } });
     fs.writeFileSync(file, JSON.stringify(nodes, null, 2));
 

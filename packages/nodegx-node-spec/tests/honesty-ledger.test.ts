@@ -12,11 +12,18 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+import type { HonestyNode } from '../src/honesty';
+
 const ROOT = path.join(__dirname, '..', '..', '..');
 const SCRIPT = path.join(ROOT, 'scripts', 'see', 'honesty-ledger.js');
 
-type Json = Record<string, any>;
-const read = (p: string): Json => JSON.parse(fs.readFileSync(p, 'utf8'));
+interface NodesFile {
+  nodes: HonestyNode[];
+}
+interface LedgerFile {
+  templates: Record<string, { percent: number | null }>;
+}
+const read = <T>(p: string): T => JSON.parse(fs.readFileSync(p, 'utf8')) as T;
 
 function ledger(flags: string[]): { status: number | null; out: string; err: string } {
   const r = spawnSync(process.execPath, [SCRIPT, ...flags], { encoding: 'utf8', timeout: 60_000 });
@@ -44,7 +51,7 @@ it('control: the committed honesty-ledger.json holds against the templates in th
 });
 
 it('a Function planted in the todo template makes the number fall, and the ratchet names it', () => {
-  const nodes = read(appNodes());
+  const nodes = read<NodesFile>(appNodes());
   nodes.nodes.push({ id: 'planted_fn', type: 'JavaScriptFunction', label: 'Planted', parameters: { functionScript: 'x' } });
   fs.writeFileSync(appNodes(), JSON.stringify(nodes));
   const r = ledger(['--check', ...copy()]);
@@ -54,9 +61,9 @@ it('a Function planted in the todo template makes the number fall, and the ratch
 
 it('a rise fails until the ledger is raised in the same commit', () => {
   const file = path.join(templates(), 'todo-list', 'components', 'Logic', 'Projects', 'nodes.json');
-  const nodes = read(file);
+  const nodes = read<NodesFile>(file);
   const before = nodes.nodes.length;
-  nodes.nodes = nodes.nodes.filter((n: Json) => n.type !== 'JavaScriptFunction');
+  nodes.nodes = nodes.nodes.filter((n) => n.type !== 'JavaScriptFunction');
   expect(nodes.nodes.length).toBeLessThan(before);
   fs.writeFileSync(file, JSON.stringify(nodes));
   const red = ledger(['--check', ...copy()]);
@@ -64,7 +71,7 @@ it('a rise fails until the ledger is raised in the same commit', () => {
   expect(red.err).toMatch(/todo-list: the honesty number ROSE to [\d.]+%; the ledger still says 87\.9%/);
   expect(ledger(['--write', ...copy()]).status).toBe(0);
   expect(ledger(['--check', ...copy()]).status).toBe(0);
-  expect(read(ledgerFile()).templates['todo-list'].percent).toBeGreaterThan(87.9);
+  expect(read<LedgerFile>(ledgerFile()).templates['todo-list'].percent).toBeGreaterThan(87.9);
 });
 
 it('a template with no entry, and an entry with no template, each fail', () => {

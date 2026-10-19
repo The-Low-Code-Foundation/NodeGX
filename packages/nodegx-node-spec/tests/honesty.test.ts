@@ -23,6 +23,7 @@ import {
   honestyLine,
   projectHonesty,
   type HonestyComponent,
+  type HonestyNode,
   type HonestyOptions
 } from '../src/honesty';
 import { specs } from '../src/nodes';
@@ -32,11 +33,35 @@ const P107 = path.join(ROOT, 'dev-docs', 'tasks', 'phase-107-the-node-says-what-
 const CENSUS = path.join(ROOT, 'dev-docs', 'tasks', 'phase-111-you-can-see-what-it-built', 'census.json');
 const GRAPH = path.join(__dirname, '..', 'scenarios', 'graph');
 
-type Json = Record<string, any>;
-const read = (p: string): Json => JSON.parse(fs.readFileSync(p, 'utf8'));
+const read = <T>(p: string): T => JSON.parse(fs.readFileSync(p, 'utf8')) as T;
+
+/** The shapes this spec reads from disk. */
+interface CatalogFile {
+  nodes: Array<{ typeName: string }>;
+}
+interface TiersFile {
+  nodes: Record<string, { tier: string }>;
+}
+interface GraphScenario {
+  clauses?: string[];
+  claims?: Array<{ subject: string }>;
+  nodes: Record<string, { type: string; in?: string }>;
+  components?: Record<string, unknown>;
+}
+interface CensusRow {
+  name: string;
+  known: number;
+  script: number;
+  unspecced: number;
+  instance: number;
+  exempt: number;
+  percent: number | null;
+  percentByLines: number | null;
+  scriptLines: number;
+}
 const sorted = (xs: Iterable<string>) => [...xs].sort();
 
-const coreTypes = read(path.join(ROOT, 'packages', 'noodl-types', 'src', 'node-catalog.json')).nodes.map((n: Json) => n.typeName as string);
+const coreTypes = read<CatalogFile>(path.join(ROOT, 'packages', 'noodl-types', 'src', 'node-catalog.json')).nodes.map((n) => n.typeName);
 const options: HonestyOptions = { coreTypes };
 
 /** A v2 template's components, read from the files (component.json's `path` is the legacy name). */
@@ -49,8 +74,8 @@ function templateComponents(dir: string): HonestyComponent[] {
     }
     const nodesFile = path.join(d, 'nodes.json');
     if (fs.existsSync(nodesFile)) {
-      const meta = fs.existsSync(path.join(d, 'component.json')) ? read(path.join(d, 'component.json')) : {};
-      out.push({ name: meta.path ?? '/' + path.relative(path.join(dir, 'components'), d), nodes: read(nodesFile).nodes ?? [] });
+      const meta: { path?: string } = fs.existsSync(path.join(d, 'component.json')) ? read<{ path?: string }>(path.join(d, 'component.json')) : {};
+      out.push({ name: meta.path ?? '/' + path.relative(path.join(dir, 'components'), d), nodes: read<{ nodes?: HonestyNode[] }>(nodesFile).nodes ?? [] });
     }
   };
   walk(path.join(dir, 'components'));
@@ -59,28 +84,28 @@ function templateComponents(dir: string): HonestyComponent[] {
 
 describe('the constants are the ledger\'s, both ways', () => {
   it('SCRIPT_TYPES is tiers.json T6 minus the exempt, and holds every contract spec', () => {
-    const tiers = read(path.join(P107, 'tiers.json')).nodes as Record<string, { tier: string }>;
-    const exempt = Object.keys(read(path.join(P107, 'exemptions.json'))).filter((k) => !k.startsWith('$'));
+    const tiers = read<TiersFile>(path.join(P107, 'tiers.json')).nodes;
+    const exempt = Object.keys(read<Record<string, unknown>>(path.join(P107, 'exemptions.json'))).filter((k) => !k.startsWith('$'));
     expect(sorted(SCRIPT_TYPES)).toEqual(sorted(Object.keys(tiers).filter((t) => tiers[t].tier === 'T6' && !exempt.includes(t))));
-    const contracts = Object.keys(specs).filter((t) => typeof (specs[t] as Json).contract === 'string');
+    const contracts = Object.keys(specs).filter((t) => typeof (specs[t] as { contract?: unknown }).contract === 'string');
     expect(contracts.length).toBeGreaterThan(0);
     for (const t of contracts) expect(SCRIPT_TYPES).toContain(t);
   });
 
   it('EXEMPT_TYPES is exemptions.json', () => {
-    expect(sorted(EXEMPT_TYPES)).toEqual(sorted(Object.keys(read(path.join(P107, 'exemptions.json'))).filter((k) => !k.startsWith('$'))));
+    expect(sorted(EXEMPT_TYPES)).toEqual(sorted(Object.keys(read<Record<string, unknown>>(path.join(P107, 'exemptions.json'))).filter((k) => !k.startsWith('$'))));
   });
 
   it('GRAPH_GRADED_TYPES is what the N graph scenarios claim, minus the registry\'s own specs', () => {
     const graded = new Set<string>();
     for (const f of fs.readdirSync(GRAPH).filter((x) => x.endsWith('.json'))) {
-      for (const sc of read(path.join(GRAPH, f)) as unknown as Json[]) {
+      for (const sc of read<GraphScenario[]>(path.join(GRAPH, f))) {
         if (!Array.isArray(sc.clauses) || !sc.clauses.includes('N')) continue;
         for (const c of sc.claims ?? []) {
           const node = sc.nodes[c.subject];
           if (node) graded.add(node.type);
           else if (sc.components && sc.components[c.subject]) {
-            for (const n of Object.values(sc.nodes) as Json[]) if (n.type === 'Component Outputs' && n.in === c.subject) graded.add(n.type);
+            for (const n of Object.values(sc.nodes)) if (n.type === 'Component Outputs' && n.in === c.subject) graded.add(n.type);
           }
         }
       }
@@ -140,10 +165,9 @@ describe('the rule, node by node', () => {
 });
 
 describe('AC1 — the number equals SEE-000\'s hand computation on every template', () => {
-  const census = read(CENSUS);
-  it.each((census.projects as Json[]).map((p) => [p.name, p]))('%s', (name, row) => {
-    const h = projectHonesty(templateComponents(path.join(ROOT, 'templates', name as string)), options);
-    const r = row as Json;
+  const census = read<{ projects: CensusRow[] }>(CENSUS);
+  it.each(census.projects.map((p): [string, CensusRow] => [p.name, p]))('%s', (name, r) => {
+    const h = projectHonesty(templateComponents(path.join(ROOT, 'templates', name)), options);
     expect({ known: h.known, script: h.script, unspecced: h.unspecced, instances: h.instances, exempt: h.exempt, percent: h.percent, byLines: h.percentByLines, lines: h.scriptLines }).toEqual({
       known: r.known,
       script: r.script,
