@@ -1,0 +1,1 @@
+I want to change some things myself without asking you each time: the app's name, its colours, how many songs show per page, and which sort is the default. Make me a settings screen or a panel where I can change those and see the app change. Please just build it without waiting for me to answer questions.

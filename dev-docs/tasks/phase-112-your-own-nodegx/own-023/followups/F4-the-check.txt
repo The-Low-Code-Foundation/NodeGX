@@ -1,0 +1,5 @@
+Someone built my music app for me and it is already in this folder. Before I show it to anyone I need to know whether it really does what I asked for. This is exactly what I asked for:
+
+<BRIEF>
+
+Please check every part of that on the running app, the way I would use it on my phone, and then tell me line by line what works and what does not. Do not change or fix anything yet: I only want the report, and I will decide what to fix afterwards. Please just do it without waiting for me to answer questions.

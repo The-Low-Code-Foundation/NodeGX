@@ -1,0 +1,1 @@
+Add a "More like this" button on a song. It asks Mistral (model mistral-large-4) for three songs from our own catalogue that are closest in genre and mood and shows them. I'll add my key myself afterwards under the name MISTRAL_API_KEY; it must stay on the server, never in the browser. Please just build it without waiting for me to answer questions.
