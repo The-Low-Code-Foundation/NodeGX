@@ -35,6 +35,10 @@ run(Counter, { startValue: 5 }, ['settle', { signal: 'increase' }, 'settle']);
   citations (R3 (a): the runtime wins by default; a disagreement is a row and a ruling). 18 so far: the pilot five
   (NSP-004) and the first batch (NSP-011: the four Variables, Boolean To String, Color Blend, Inverter, Log, Number
   Remapper, Or, String Mapper, Substring, Value Changed).
+- `src/honesty.ts` — the honesty number (phase 111, SEE-001): `projectHonesty(components, { coreTypes })` sorts every
+  node instance into known / script / unspecced (and instance, exempt) and returns known ÷ (known + script) per
+  component and per project, with the script parts by name. The one definition: the MCP server and the templates'
+  ratchet (`scripts/see/honesty-ledger.js`) import it. `HONESTY_SENTENCE` says what the number is and is not.
 
 ## In a page, and as a package (phase 112, OWN-002)
 

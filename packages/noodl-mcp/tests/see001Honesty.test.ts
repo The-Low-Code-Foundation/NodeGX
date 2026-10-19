@@ -19,6 +19,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+import { HONESTY_SENTENCE } from '@nodegx/node-spec';
+
 import { call, connect, type TestSession } from './helpers';
 
 const ROOT = path.join(__dirname, '..', '..', '..');
@@ -175,5 +177,12 @@ describe('SEE-001 — AC1 over MCP on the todo template, whose registry lists ev
       await session.close();
       fs.rmSync(dir, { recursive: true, force: true });
     }
+  });
+});
+
+describe('SEE-001 §4 item 5 — the sentence', () => {
+  it('the README quotes HONESTY_SENTENCE word for word (get_project_info\'s `about` is the constant itself)', () => {
+    const readme = fs.readFileSync(path.join(__dirname, '..', 'README.md'), 'utf8').replace(/\s+/g, ' ');
+    expect(readme).toContain(HONESTY_SENTENCE);
   });
 });
