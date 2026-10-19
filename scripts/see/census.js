@@ -42,7 +42,7 @@
 const fs = require('fs');
 const path = require('path');
 const { loadSpecs } = require('../node-spec/load-specs');
-const { readProject } = require('./read-project');
+const { readProject, trackedTemplateNames } = require('./read-project');
 
 const args = process.argv.slice(2);
 function argValue(flag, fallback) {
@@ -180,9 +180,10 @@ function sortObj(o) {
   return Object.fromEntries(Object.entries(o).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])));
 }
 
+const tracked = trackedTemplateNames(root, templatesDir);
 const projects = fs
   .readdirSync(templatesDir)
-  .filter((d) => fs.statSync(path.join(templatesDir, d)).isDirectory())
+  .filter((d) => fs.statSync(path.join(templatesDir, d)).isDirectory() && (!tracked || tracked.has(d)))
   .sort()
   .map((d) => censusOf(d, path.join(templatesDir, d)))
   .filter(Boolean);

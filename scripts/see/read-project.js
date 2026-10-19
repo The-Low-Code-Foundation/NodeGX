@@ -79,4 +79,20 @@ function readProject(dir) {
   return null;
 }
 
-module.exports = { readProject, handCount };
+/**
+ * The template folders git tracks, by name, or null when `dir` is not the repo's own `templates/`
+ * (the specs read copies) or git cannot answer. A shared checkout holds other sessions' untracked
+ * templates (nightbook, for months); counting them made both gates red in the tree and green in CI.
+ * Modified tracked files are still counted: they are real edits a commit must carry its numbers for.
+ */
+function trackedTemplateNames(root, dir) {
+  if (path.resolve(dir) !== path.resolve(root, 'templates')) return null;
+  try {
+    const out = require('child_process').execSync('git ls-files -z -- templates', { cwd: root, encoding: 'utf8' });
+    return new Set(out.split('\0').filter(Boolean).map((f) => f.split('/')[1]));
+  } catch {
+    return null;
+  }
+}
+
+module.exports = { readProject, handCount, trackedTemplateNames };

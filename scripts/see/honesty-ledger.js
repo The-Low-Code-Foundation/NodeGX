@@ -24,7 +24,7 @@
 const fs = require('fs');
 const path = require('path');
 const { requireSource } = require('../node-spec/load-specs');
-const { readProject } = require('./read-project');
+const { readProject, trackedTemplateNames } = require('./read-project');
 
 const args = process.argv.slice(2);
 function argValue(flag, fallback) {
@@ -40,10 +40,11 @@ const ledgerPath = argValue('--ledger', path.join(root, 'dev-docs', 'tasks', 'ph
 const { projectHonesty } = requireSource(path.join(root, 'packages', 'nodegx-node-spec', 'src', 'honesty.ts'));
 const coreTypes = JSON.parse(fs.readFileSync(path.join(root, 'packages', 'noodl-types', 'src', 'node-catalog.json'), 'utf8')).nodes.map((n) => n.typeName);
 
+const tracked = trackedTemplateNames(root, templatesDir);
 const now = {};
 for (const name of fs.readdirSync(templatesDir).sort()) {
   const dir = path.join(templatesDir, name);
-  if (!fs.statSync(dir).isDirectory()) continue;
+  if (!fs.statSync(dir).isDirectory() || (tracked && !tracked.has(name))) continue;
   const p = readProject(dir);
   if (!p) continue;
   const h = projectHonesty(p.components, { coreTypes });
