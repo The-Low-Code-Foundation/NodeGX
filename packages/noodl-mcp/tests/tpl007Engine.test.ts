@@ -104,6 +104,39 @@ function helper<T>(name: string, ...args: unknown[]): T {
   return fn(args) as T;
 }
 
+/** A drawn board as the draw scripts hand it to the repeaters: rows of cells, each with an id (read as these specs read it). */
+interface GridCell {
+  id: string;
+  kind: string;
+  fx: string;
+  [field: string]: unknown;
+}
+interface GridRow {
+  id: string;
+  cells: GridCell[];
+  [field: string]: unknown;
+}
+interface Drawn {
+  rows: GridRow[];
+  [field: string]: unknown;
+}
+/** One row a view script hands a repeater: a shelf item, a set, a food, a dome, an alien in the book. */
+interface ViewRow {
+  id: string;
+  name?: string;
+  label?: string;
+  colour?: string;
+  selected?: boolean;
+  use?: boolean;
+  [field: string]: unknown;
+}
+/** A player profile in the app state, as far as these specs read one. */
+interface Profile {
+  id: string;
+  name: string;
+  [field: string]: unknown;
+}
+
 const freshModel = () => ({ rating: 0, skills: {} as Record<string, any>, lastSkill: '', answered: 0 });
 
 function pick(overrides: Record<string, unknown> = {}) {
@@ -577,16 +610,16 @@ describe('TPL-007 — the engine', () => {
     it('the drawn board is four rows of four, each square coloured by its kind, and the pop classes swap every move', () => {
       const game = { board: [0, 7, 10, 30, 120, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1234], joined: [2], landed: [1], moves: 3, score: 40, made: 2, biggest: 1234, over: false };
       const en = runScript(DRAW_MERGE_SCRIPT, { game, lang: 'en' });
-      expect(en.rows.map((r: any) => r.cells.length)).toEqual([4, 4, 4, 4]);
-      expect(en.rows[0].cells.map((c: any) => c.kind)).toEqual(['empty', 'unit', 'ten', 'tens']);
+      expect(en.rows.map((r: GridRow) => r.cells.length)).toEqual([4, 4, 4, 4]);
+      expect(en.rows[0].cells.map((c: GridCell) => c.kind)).toEqual(['empty', 'unit', 'ten', 'tens']);
       expect([en.rows[1].cells[0].kind, en.rows[1].cells[1].kind]).toEqual(['big', 'unit']);
-      expect(en.rows[0].cells.map((c: any) => c.fx)).toEqual(['rkt-merge-tile', 'rkt-merge-tile rkt-land-b', 'rkt-merge-tile rkt-join-b', 'rkt-merge-tile']);
+      expect(en.rows[0].cells.map((c: GridCell) => c.fx)).toEqual(['rkt-merge-tile', 'rkt-merge-tile rkt-land-b', 'rkt-merge-tile rkt-join-b', 'rkt-merge-tile']);
       expect(runScript(DRAW_MERGE_SCRIPT, { game: { ...game, moves: 4 }, lang: 'en' }).rows[0].cells[2].fx).toBe('rkt-merge-tile rkt-join-a');
       expect([en.rows[3].cells[3].word, runScript(DRAW_MERGE_SCRIPT, { game, lang: 'fr' }).rows[3].cells[3].word]).toEqual(['1,234', '1 234']);
       // A repeater row needs an id, or a re-run piles rows up.
-      expect(new Set(en.rows.flatMap((r: any) => [r.id, ...r.cells.map((c: any) => c.id)])).size).toBe(20);
+      expect(new Set(en.rows.flatMap((r: GridRow) => [r.id, ...r.cells.map((c) => c.id)])).size).toBe(20);
       expect([en.phase, en.over, runScript(DRAW_MERGE_SCRIPT, { game: { ...game, over: true }, lang: 'en' }).phase]).toEqual(['playing', false, 'over']);
-      expect(runScript(DRAW_MERGE_SCRIPT, {}).rows.flatMap((r: any) => r.cells.map((c: any) => c.kind))).toEqual(Array(16).fill('empty'));
+      expect(runScript(DRAW_MERGE_SCRIPT, {}).rows.flatMap((r: GridRow) => r.cells.map((c) => c.kind))).toEqual(Array(16).fill('empty'));
     });
 
     it('🔴 Easy: a helper tile is the partner of a single number on the board; Hard draws from the pool alone (the modes are one constant)', () => {
@@ -653,7 +686,7 @@ describe('TPL-007 — the engine', () => {
       // Known-firing: the name that bit the hangar is on the list.
       expect([reserved.has('on'), reserved.has('get')]).toEqual([true, true]);
       const rows = runScript(DRAW_MERGE_SCRIPT, { game: { board: [7, 3], moves: 1, joined: [0], landed: [1] }, lang: 'en' }).rows;
-      const keys = [...new Set([...rows.flatMap((r: any) => Object.keys(r)), ...rows.flatMap((r: any) => r.cells.flatMap((c: any) => Object.keys(c)))])].sort();
+      const keys = [...new Set([...rows.flatMap((r: GridRow) => Object.keys(r)), ...rows.flatMap((r: GridRow) => r.cells.flatMap((c) => Object.keys(c)))])].sort();
       expect(keys).toEqual(['cells', 'fx', 'id', 'kind', 'word']);
       expect(keys.filter((k) => reserved.has(k))).toEqual([]);
     });
@@ -762,9 +795,9 @@ describe('TPL-007 — the engine', () => {
     const hunt = (over: Record<string, unknown> = {}): any => ({ id: 'h1', level: 'CE2', round: 1, rounds: HUNT_ROUNDS, kind: 'add2', count: 2, cells: CELLS, target: 20, ways: [[0, 1], [2, 3]], found: [], shown: [], picked: [], missed: [], lately: [], said: [], note: 'start', made: 0, helped: 0, misses: 0, gridMisses: 0, taps: 0, over: false, ...over });
     const move = (game: any, action: string, index?: number) => runScript(HUNT_MOVE_SCRIPT, { game, action, index });
     const taps = (game: any, ...indexes: number[]): any => indexes.reduce((g, i) => move(g, 'tap', i).game, game);
-    const draw = (game: any, lang = 'en') => runScript(DRAW_HUNT_SCRIPT, { game, lang });
-    const kinds = (d: any): string[] => d.rows.flatMap((r: any) => r.cells.map((c: any) => c.kind));
-    const fxRow = (d: any, r = 0): string[] => d.rows[r].cells.map((c: any) => c.fx);
+    const draw = (game: any, lang = 'en') => runScript(DRAW_HUNT_SCRIPT, { game, lang }) as Drawn;
+    const kinds = (d: Drawn): string[] => d.rows.flatMap((r) => r.cells.map((c) => c.kind));
+    const fxRow = (d: Drawn, r = 0): string[] => d.rows[r].cells.map((c) => c.fx);
     const waysIn = (cells: number[], kind: string, count: number, target: number) => {
       const out: number[][] = [];
       const rec = (start: number, chosen: number[]) => {
@@ -861,7 +894,7 @@ describe('TPL-007 — the engine', () => {
 
     it('the drawn hunt is four rows of four: each number shows where it stands, a way just found pops, a wrong pick shakes, and the next tap stills both', () => {
       const d = draw(taps(hunt(), 0, 1, 2));
-      expect(d.rows.map((r: any) => r.cells.length)).toEqual([4, 4, 4, 4]);
+      expect(d.rows.map((r: GridRow) => r.cells.length)).toEqual([4, 4, 4, 4]);
       expect(kinds(d).slice(0, 4)).toEqual(['found', 'found', 'picked', 'idle']);
       const justFound = taps(hunt(), 0, 1);
       expect(fxRow(draw(justFound))).toEqual(['rkt-hunt-tile rkt-hunt-found rkt-join-a', 'rkt-hunt-tile rkt-hunt-found rkt-join-a', 'rkt-hunt-tile rkt-hunt-idle', 'rkt-hunt-tile rkt-hunt-idle']);
@@ -872,8 +905,8 @@ describe('TPL-007 — the engine', () => {
       expect(fxRow(draw({ ...justFound, taps: 3 }))[0]).toBe('rkt-hunt-tile rkt-hunt-found rkt-join-b');
       expect([d.rows[3].cells[3].word, d.rows[3].cells[3].at, d.rows[0].cells[1].word]).toEqual(['90', 15, '17']);
       // A repeater row needs an id, or a re-run piles rows up.
-      expect(new Set(d.rows.flatMap((r: any) => [r.id, ...r.cells.map((c: any) => c.id)])).size).toBe(20);
-      const empty = runScript(DRAW_HUNT_SCRIPT, {});
+      expect(new Set(d.rows.flatMap((r: GridRow) => [r.id, ...r.cells.map((c) => c.id)])).size).toBe(20);
+      const empty = runScript(DRAW_HUNT_SCRIPT, {}) as Drawn;
       expect([kinds(empty), empty.phase, empty.note, empty.instruction]).toEqual([Array(16).fill('idle'), 'playing', '', '']);
     });
 
@@ -893,7 +926,7 @@ describe('TPL-007 — the engine', () => {
       for (let p = RuntimeModel.prototype; p && p !== Object.prototype; p = Object.getPrototypeOf(p)) for (const n of Object.getOwnPropertyNames(p)) reserved.add(n);
       expect([reserved.has('on'), reserved.has('get')]).toEqual([true, true]);
       const rows = draw(taps(hunt(), 0, 1)).rows;
-      const keys = [...new Set([...rows.flatMap((r: any) => Object.keys(r)), ...rows.flatMap((r: any) => r.cells.flatMap((c: any) => Object.keys(c)))])].sort();
+      const keys = [...new Set([...rows.flatMap((r: GridRow) => Object.keys(r)), ...rows.flatMap((r: GridRow) => r.cells.flatMap((c) => Object.keys(c)))])].sort();
       expect(keys).toEqual(['at', 'cells', 'fx', 'id', 'kind', 'word']);
       expect(keys.filter((k) => reserved.has(k))).toEqual([]);
     });
@@ -925,7 +958,7 @@ describe('TPL-007 — the engine', () => {
     const game = (over: Record<string, unknown> = {}): any => ({ id: 'm1', style: 'gate', timed: false, hearts: MONSTER.hearts, beaten: 0, hp: MONSTER.hp, start: 1, pos: 1, streak: 0, right: 0, answered: 0, event: 'start', fresh: false, healed: false, over: false, won: false, moves: 0, ...over });
     const move = (g: any, outcome: string, extra: Record<string, unknown> = {}) => runScript(MONSTER_MOVE_SCRIPT, { game: g, action: 'answer', outcome, ...extra });
     const answers = (g: any, ...outcomes: string[]): any => outcomes.reduce((acc, o) => move(acc, o).game, g);
-    const next = (g: any) => runScript(MONSTER_MOVE_SCRIPT, { game: g, action: 'next' });
+    const next = (g: Record<string, unknown>) => runScript(MONSTER_MOVE_SCRIPT, { game: g, action: 'next' });
     const draw = (g: any, lang = 'en') => runScript(DRAW_MONSTER_SCRIPT, { game: g, lang });
 
     it('the rule table is the ruling: three monsters, three hearts, four hits, a heart back after three quick answers', () => {
@@ -1203,7 +1236,7 @@ describe('TPL-007 — the engine', () => {
 
       app = runScript(DELETE_PROFILE_SCRIPT, { app, profileId: app.profiles[0].id }).app;
       expect(app.profiles).toHaveLength(MAX_PROFILES - 1);
-      expect(app.profiles.some((p: any) => p.name === 'Léa')).toBe(false);
+      expect(app.profiles.some((p: Profile) => p.name === 'Léa')).toBe(false);
     });
 
     it('🔴 RKT-008 AC1: Update settings renames under Create’s rules (trimmed, 24 characters), and an empty name is refused', () => {
@@ -1935,7 +1968,7 @@ describe('TPL-007 — the engine', () => {
 
   describe('PLY-001 / PLY-002 — the hangar is a shop, it fits the face you chose, and nothing owned is ever taken away', () => {
     const shelf = HANGAR_SHELF;
-    const me = (app: any) => app.profiles.find((p: any) => p.id === app.activeId);
+    const me = (app: any) => app.profiles.find((p: Profile) => p.id === app.activeId);
     const newPlayer = (look: string) => runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Léa', lang: 'fr', look }).app;
     const withTotal = (app: any, stars: number) => runScript(SAVE_MODEL_SCRIPT, { app, model: { ...(me(app).model || {}), stars } }).app;
     const spent = (app: any) => Number(me(app).model?.spent) || 0;
@@ -1978,12 +2011,12 @@ describe('TPL-007 — the engine', () => {
       expect(me(app).owned).toEqual(['crown']);
       app = runScript(UPDATE_SETTINGS_SCRIPT, { app, look: 'adventurer' }).app;
       const shown = runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'face' });
-      expect(shown.rows.map((r: any) => r.id)).not.toContain('crown');
+      expect(shown.rows.map((r: ViewRow) => r.id)).not.toContain('crown');
       expect([shown.elsewhere, shown.elsewhereText]).toEqual([1, expect.stringMatching(/1 objet t’appartient/)]);
       // Still owned, and worn again the moment the face comes back (wear is keyed by look).
       expect(me(app).owned).toEqual(['crown']);
       app = runScript(UPDATE_SETTINGS_SCRIPT, { app, look: 'big-smile' }).app;
-      expect(runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'face' }).rows.find((r: any) => r.id === 'crown').worn).toBe(true);
+      expect(runScript(HANGAR_SHELF_SCRIPT, { app, shelf, tab: 'face' }).rows.find((r: ViewRow) => r.id === 'crown').worn).toBe(true);
     });
 
     /** 60 seeded races at about 20 ⭐ each. After each one the child changes face now and then, and taps every item on the shelf. */
@@ -2555,7 +2588,7 @@ describe('TPL-007 — the engine', () => {
       // A computer that has an older copy of one list and a list of its own: the code's copy wins, the other list stays.
       const busy = { profiles: [], activeId: '', sets: [{ id: 'sHist', name: 'History (old)', items: [], both: false }, { id: 'sMine', name: 'Mine', items: [{ q: 'a', a: 'b' }], both: false }] };
       const merged = runScript(DECODE_SAVE_SCRIPT, { app: busy, code });
-      expect(merged.app.sets.map((x: any) => `${x.id}:${x.name}`)).toEqual(['sHist:History Monday', 'sMine:Mine', 'sVoc:English words']);
+      expect(merged.app.sets.map((x: ViewRow) => `${x.id}:${x.name}`)).toEqual(['sHist:History Monday', 'sMine:Mine', 'sVoc:English words']);
 
       // A full store refuses the code, and its lists do not slip in.
       let full: any = { profiles: [], activeId: '', sets: [] };
@@ -2578,7 +2611,7 @@ describe('TPL-007 — the engine', () => {
     };
     const act = (app: any, action: string, over: Record<string, unknown> = {}) => runScript(MOON_ACT_SCRIPT, { app, action, ...over });
     const view = (app: any, over: Record<string, unknown> = {}) => runScript(MOON_VIEW_SCRIPT, { app, ...over });
-    const me = (app: any) => app.profiles.find((p: any) => p.id === app.activeId);
+    const me = (app: any) => app.profiles.find((p: Profile) => p.id === app.activeId);
 
     it('🔴 the first alien is free, the next costs 60 ⭐ from the hangar’s purse, and a short purse changes nothing', () => {
       let app = withPurse(50);
@@ -2636,20 +2669,20 @@ describe('TPL-007 — the engine', () => {
       expect([view(app).selGrown, view(app).selLine, view(app).aliens[0].line]).toEqual([2, 'Grown up! · 19 meals', 'Grown up']);
       // Spent is every meal's price; stars (earned) never moved.
       expect(me(app).model.stars).toBe(500);
-      expect(view(app).foods.every((f: any) => f.use === true)).toBe(true);
+      expect(view(app).foods.every((f: ViewRow) => f.use === true)).toBe(true);
     });
 
     it('🔴 something to wear is bought once, put on the chosen alien at once, and then goes on or off any alien for free', () => {
       let app = withPurse(160);
       app = act(app, 'adopt', { species: 'squid', name: 'Tako' }).app;
       app = act(app, 'adopt', { species: 'trio', name: 'Oko' }).app; // 60
-      const crown = view(app).wear.find((w: any) => w.id === 'crown');
+      const crown = view(app).wear.find((w: ViewRow) => w.id === 'crown');
       expect(crown).toEqual(expect.objectContaining({ line: '80 ⭐', use: false, ask: true, dim: false, showAlien: true, species: 'trio', hat: 'crown' }));
       const bought = act(app, 'buy', { wearId: 'crown' });
       expect([bought.ok, bought.said]).toEqual([true, 'Oko is wearing the crown!']);
       app = bought.app;
       expect([me(app).moon.owned, me(app).moon.aliens[1].wear.hat, me(app).model.spent]).toEqual([['crown'], 'crown', 140]);
-      expect(view(app).wear.find((w: any) => w.id === 'crown')).toEqual(expect.objectContaining({ line: 'On ✓', use: true, ask: false, worn: true }));
+      expect(view(app).wear.find((w: ViewRow) => w.id === 'crown')).toEqual(expect.objectContaining({ line: 'On ✓', use: true, ask: false, worn: true }));
       // Bought twice: refused. Off again: free. On the other alien: free.
       expect(act(app, 'buy', { wearId: 'crown' }).why).toBe('owned');
       const off = act(app, 'wear', { wearId: 'crown' });
@@ -2660,15 +2693,15 @@ describe('TPL-007 — the engine', () => {
       // Not owned cannot be worn; too dear cannot be bought, and is greyed.
       expect(act(app, 'wear', { wearId: 'tophat' }).why).toBe('notOwned');
       expect(act(app, 'buy', { wearId: 'starglasses' }).why).toBe('tooDear');
-      expect(view(app).wear.find((w: any) => w.id === 'starglasses')).toEqual(expect.objectContaining({ dim: true, ask: false }));
+      expect(view(app).wear.find((w: ViewRow) => w.id === 'starglasses')).toEqual(expect.objectContaining({ dim: true, ask: false }));
     });
 
     it('the moon speaks French to a French player, and the adopt card draws every species in the colour being chosen', () => {
       let app = withPurse(100, 'fr');
       const v0 = view(app, { draftSpecies: 'star', draftColour: 'sky' });
       expect(v0.adoptSpecies).toHaveLength(6);
-      expect(v0.adoptSpecies.every((r: any) => r.colour === 'var(--alien-sky)')).toBe(true);
-      expect(v0.adoptSpecies.filter((r: any) => r.selected).map((r: any) => r.id)).toEqual(['star']);
+      expect(v0.adoptSpecies.every((r: ViewRow) => r.colour === 'var(--alien-sky)')).toBe(true);
+      expect(v0.adoptSpecies.filter((r: ViewRow) => r.selected).map((r: ViewRow) => r.id)).toEqual(['star']);
       expect([v0.suggestedName, v0.adoptButton, v0.purseLine, v0.adoptColours[0].label]).toEqual(['Stella', 'Adopter · gratuit !', 'Tu as 100 ⭐', 'Citron vert']);
       const r = act(app, 'adopt', { species: 'star', colour: 'sky', name: 'Nova' });
       expect(r.said).toBe('Bienvenue sur la Lune, Nova !');
@@ -2703,7 +2736,7 @@ describe('TPL-007 — the engine', () => {
     };
     const act = (app: any, action: string, over: Record<string, unknown> = {}) => runScript(MOON_ACT_SCRIPT, { app, action, ...over });
     const view = (app: any, over: Record<string, unknown> = {}) => runScript(MOON_VIEW_SCRIPT, { app, ...over });
-    const me = (app: any) => app.profiles.find((p: any) => p.id === app.activeId);
+    const me = (app: any) => app.profiles.find((p: Profile) => p.id === app.activeId);
     const fill = (app: any, n: number) => { for (let i = 0; i < n; i++) app = act(app, 'adopt', { species: 'star', colour: 'sunny' }).app; return app; };
 
     it('🔴 the book has every species in every colour; an alien had is drawn and named, one never had is a grey shape with no name', () => {
@@ -2711,9 +2744,9 @@ describe('TPL-007 — the engine', () => {
       const v = view(app);
       expect(v.book).toHaveLength(36);
       expect([v.bookCount, v.bookLine]).toEqual([1, 'Alien Book · 1 of 36']);
-      expect(v.book.find((r: any) => r.id === 'bean-pink')).toEqual(expect.objectContaining({ name: 'Bean', line: 'Pink', colour: 'var(--alien-pink)', species: 'bean' }));
-      expect(v.book.find((r: any) => r.id === 'bean-lime')).toEqual(expect.objectContaining({ name: '?', line: '', colour: 'var(--muted)', species: 'bean' }));
-      expect(view(app, {}).book.filter((r: any) => r.name !== '?')).toHaveLength(1);
+      expect(v.book.find((r: ViewRow) => r.id === 'bean-pink')).toEqual(expect.objectContaining({ name: 'Bean', line: 'Pink', colour: 'var(--alien-pink)', species: 'bean' }));
+      expect(v.book.find((r: ViewRow) => r.id === 'bean-lime')).toEqual(expect.objectContaining({ name: '?', line: '', colour: 'var(--muted)', species: 'bean' }));
+      expect(view(app, {}).book.filter((r: ViewRow) => r.name !== '?')).toHaveLength(1);
       expect(runScript(MOON_VIEW_SCRIPT, { app: withPurse(0, 'fr') }).bookLine).toBe('Le livre des aliens · 0 sur 36');
     });
 
@@ -2731,7 +2764,7 @@ describe('TPL-007 — the engine', () => {
     it('🔴 a dome makes room for two more aliens; built once; too dear refused with the store as it was', () => {
       let app = fill(withPurse(3200), 6); // 3200 − 630 (six) − 1000 (dome) − 520 (two more) = 1050, short of 1500
       expect(view(app)).toEqual(expect.objectContaining({ full: true, canAdopt: false }));
-      const crater = view(app).bigs.find((b: any) => b.id === 'crater');
+      const crater = view(app).bigs.find((b: ViewRow) => b.id === 'crater');
       expect(crater).toEqual(expect.objectContaining({ label: 'Crater Dome', line: '1000 ⭐ · room for 2 more', ask: true, dim: false, worn: false }));
       const spentBefore = me(app).model.spent;
       const built = act(app, 'build', { thingId: 'crater' });
@@ -2739,7 +2772,7 @@ describe('TPL-007 — the engine', () => {
       app = built.app;
       expect(me(app).model.spent).toBe(spentBefore + 1000);
       expect(view(app)).toEqual(expect.objectContaining({ full: false, canAdopt: true, anotherLine: '＋ Adopt another alien · 240 ⭐' }));
-      expect(view(app).bigs.find((b: any) => b.id === 'crater')).toEqual(expect.objectContaining({ line: 'Built ✓ · room for 2 more', ask: false, worn: true }));
+      expect(view(app).bigs.find((b: ViewRow) => b.id === 'crater')).toEqual(expect.objectContaining({ line: 'Built ✓ · room for 2 more', ask: false, worn: true }));
       expect(act(app, 'build', { thingId: 'crater' }).why).toBe('owned');
       app = fill(app, 2);
       expect([me(app).moon.aliens.length, view(app).full]).toEqual([8, true]);
@@ -2747,7 +2780,7 @@ describe('TPL-007 — the engine', () => {
       // The ridge dome is 1500; with less left, it is greyed and refused, and nothing changes.
       const purse = view(app).purse;
       expect(purse).toBeLessThan(1500);
-      expect(view(app).bigs.find((b: any) => b.id === 'ridge')).toEqual(expect.objectContaining({ ask: false, dim: true }));
+      expect(view(app).bigs.find((b: ViewRow) => b.id === 'ridge')).toEqual(expect.objectContaining({ ask: false, dim: true }));
       const short = act(app, 'build', { thingId: 'ridge' });
       expect([short.ok, short.why]).toEqual([false, 'tooDear']);
       expect(short.app).toEqual(app);
@@ -2769,7 +2802,7 @@ describe('TPL-007 — the engine', () => {
         expect(me(app).moon.sel).toBe(born.id);
       }
       expect(view(app).full).toBe(true);
-      expect(view(app).bigs.find((b: any) => b.id === 'egg')).toEqual(expect.objectContaining({ ask: false, dim: true, line: 'The moon is full: build a dome first' }));
+      expect(view(app).bigs.find((b: ViewRow) => b.id === 'egg')).toEqual(expect.objectContaining({ ask: false, dim: true, line: 'The moon is full: build a dome first' }));
       expect(act(app, 'egg').why).toBe('full');
       expect(me(app).model.spent).toBe(6 * 300);
       // Every page met, the book is full, and an egg still hatches (any alien).
@@ -2777,7 +2810,7 @@ describe('TPL-007 — the engine', () => {
       p.moon.met = [];
       for (const sp of ['blob', 'bean', 'trio', 'squid', 'fuzz', 'star']) for (const c of ['lime', 'mint', 'sky', 'lilac', 'pink', 'sunny']) p.moon.met.push(`${sp}-${c}`);
       app = act(app, 'build', { thingId: 'crater' }).app;
-      expect(view(app).bigs.find((b: any) => b.id === 'egg').line).toBe('300 ⭐ · a surprise alien');
+      expect(view(app).bigs.find((b: ViewRow) => b.id === 'egg').line).toBe('300 ⭐ · a surprise alien');
       expect(act(app, 'egg').ok).toBe(true);
     });
 
@@ -2788,7 +2821,7 @@ describe('TPL-007 — the engine', () => {
       app = act(app, 'build', { thingId: 'crater' }).app;
       app = act(app, 'build', { thingId: 'ridge' }).app;
       for (let i = 0; i < 4; i++) app = act(app, 'egg').app;
-      const names = me(app).moon.aliens.map((a: any) => a.name.toLowerCase());
+      const names = me(app).moon.aliens.map((a: { name: string }) => a.name.toLowerCase());
       expect(new Set(names).size).toBe(names.length);
       expect(names.slice(0, 6)).toEqual(['zorp', 'tilly', 'nok', 'beep', 'zorp 2', 'tilly 2']);
       expect(names.includes(view(app, { draftSpecies: 'bean' }).suggestedName.toLowerCase())).toBe(false);
@@ -2796,9 +2829,9 @@ describe('TPL-007 — the engine', () => {
 
     it('the egg says how many it could be, in both languages', () => {
       const app = act(withPurse(400), 'adopt', { species: 'blob', colour: 'lime' }).app;
-      expect(view(app).bigs.find((b: any) => b.id === 'egg')).toEqual(expect.objectContaining({ line: '300 ⭐ · an alien you have never had (35 it could be)', ask: true }));
+      expect(view(app).bigs.find((b: ViewRow) => b.id === 'egg')).toEqual(expect.objectContaining({ line: '300 ⭐ · an alien you have never had (35 it could be)', ask: true }));
       const fr = act(withPurse(400, 'fr'), 'adopt', { species: 'blob', colour: 'lime' }).app;
-      expect(view(fr).bigs.map((b: any) => b.label)).toEqual(['Dôme du cratère', 'Dôme de la crête', 'Œuf surprise']);
+      expect(view(fr).bigs.map((b: ViewRow) => b.label)).toEqual(['Dôme du cratère', 'Dôme de la crête', 'Œuf surprise']);
       expect(act(fr, 'egg').said).toMatch(/^L’œuf éclot : voici \S+, un /);
     });
 
@@ -2816,7 +2849,7 @@ describe('TPL-007 — the engine', () => {
 
   // ── TPL-013 SC-5 — skin tones, for both games (Richard, 2026-10-15) ──
   describe('TPL-013 SC-5 — a skin a child picks, kept with what they wear', () => {
-    const me = (app: any) => app.profiles.find((p: any) => p.id === app.activeId);
+    const me = (app: any) => app.profiles.find((p: Profile) => p.id === app.activeId);
     const make = (skin?: string, look = 'big-smile') => runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Ada', look, seed: 'Ada', lang: 'en', skin }).app;
 
     it('five tones, each its own colour and its own ✋, light to dark', () => {
