@@ -6133,7 +6133,10 @@ export function emitComponent(
     const specifier = `../kits/${binding.modulePath.split('/').pop()}`;
     const existing = internalImports.get(specifier);
     const symbols = new Set(existing ? existing.replace(/^import \{ | \} from .*$/g, '').split(', ') : []);
-    symbols.add(binding.symbol);
+    // P18-S122-TPLBUILD (TS2440). A component named as the kit node it draws (rocket-school's RaceTrack draws the
+    // GameKit's RaceTrack) imports the kit's under another local name: one name for both is a conflict tsc refuses.
+    const kitLocal = binding.symbol === plan.file!.symbol ? `${binding.symbol}Kit` : binding.symbol;
+    symbols.add(kitLocal === binding.symbol ? binding.symbol : `${binding.symbol} as ${kitLocal}`);
     internalImports.set(specifier, `import { ${[...symbols].sort().join(', ')} } from '${specifier}';`);
 
     const attrs: string[] = [];
@@ -6210,7 +6213,7 @@ export function emitComponent(
       );
     }
     const blocks = renderChildBlocks(node.id, childIds, indent + 2).flat();
-    return element(binding.symbol, attrs, blocks.length > 0 ? blocks : null, indent, blocks.length > 0);
+    return element(kitLocal, attrs, blocks.length > 0 ? blocks : null, indent, blocks.length > 0);
   };
 
   const instanceAttrs = (node: NodeIR): string[] => {
@@ -7037,7 +7040,12 @@ export function emitComponent(
   // may read (an Expression into State is the corpus's own shape), before the effects that read
   // the handles. The listeners are printed inline so each closes over this render.
   for (const animation of plan.animations) {
-    const options = `{ duration: ${exprCode(animation.duration, 'render')}, delay: ${exprCode(animation.delay, 'render')}, ease: ${tsLiteral(animation.ease)} }`;
+    // P18-S122-TPLBUILD. A value that is not statically a number is handed on as it is, as the runtime's setter stores it.
+    const optionCode = (input: 'duration' | 'delay', expr: ValueExpr): string => {
+      const code = exprCode(expr, 'render');
+      return animation.castToNumber?.includes(input) ? `${SIMPLE_REF.test(code) ? code : `(${code})`} as number` : code;
+    };
+    const options = `{ duration: ${optionCode('duration', animation.duration)}, delay: ${optionCode('delay', animation.delay)}, ease: ${tsLiteral(animation.ease)} }`;
     const arrive = animation.arrive !== undefined ? `, ${handlerArrow(animation.arrive, '()', 2)}` : '';
     body.push(`  // ${animation.comment}`, `  const ${animation.local} = useAnimatedValue(${exprCode(animation.target, 'render')}, ${options}${arrive});`);
   }

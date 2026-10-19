@@ -26,11 +26,16 @@ const REPO = path.join(__dirname, '..', '..', '..');
 
 /**
  * Errors per template. Session 124: 311 in 11 of 16 at first; 189 in 9 of 16 once a lifted output's callback took
- * `T | undefined` (the 122 TS2345 rows of `onXChanged?.(x)`). Lower a row when a fix lowers it.
+ * `T | undefined` (the 122 TS2345 rows of `onXChanged?.(x)`). Session 125 (EXP-011 §92), class by class: an Expression
+ * with no inputs called with none (TS2554, 42), a lifted push of an untyped value cast to the port's type (TS2345, 35),
+ * a removed root returning null (TS2786, 39), a render local after the hook it reads (TS2448/TS2454, 44), a Function's
+ * wrapper in its own file (TS7006/TS7053, 7, Richard's ruling), a "key" input bound as keyProp (TS17001, 12), a kit
+ * import aliased off its component's name (TS2440, 4, and the 4 TS2322 behind it), an object kit prop that takes an
+ * array and an animation option cast to a number (TS2322, 3): **0 in 0 of 16.** Every row is 0: a rise is a new error.
  */
 const LEDGER: Record<string, number> = {
   'bot-garden': 0,
-  'digital-bricks-training': 2,
+  'digital-bricks-training': 0,
   'digital-bricks-training-demo': 0,
   gram: 0,
   'landing-pages': 0,
@@ -40,8 +45,8 @@ const LEDGER: Record<string, number> = {
   'pixel-game': 0,
   planning: 0,
   'planning-demo': 0,
-  'rocket-school': 4,
-  'star-class': 4,
+  'rocket-school': 0,
+  'star-class': 0,
   'story-engine': 0,
   'todo-list': 0,
   'todo-list-demo': 0

@@ -3683,6 +3683,11 @@ export interface AnimationPlan {
   target: ValueExpr;
   duration: ValueExpr;
   delay: ValueExpr;
+  /**
+   * P18-S122-TPLBUILD (TS2322). The inputs whose wired value is not statically a number (an untyped Variable is `unknown`):
+   * the runtime's Duration setter stores the value as it is, and the hook's option says `number`, so the option is a cast.
+   */
+  castToNumber?: Array<'duration' | 'delay'>;
   ease: AnimateEaseName;
   /** The At Target Value chain, when wired. */
   arrive?: HandlerAction[];
@@ -15037,12 +15042,14 @@ function planComponent(
       if (!Array.isArray(snapped)) return refuse(snapped.defer);
       arrive = snapped;
     }
+    const castToNumber = (['duration', 'delay'] as const).filter((input) => exprTsType(input === 'duration' ? duration : delay) !== 'number');
     const registered: AnimationPlan = {
       nodeId: node.id,
       local: mintLocal(animateLocals, node, 'Animated', ''),
       target,
       duration,
       delay,
+      ...(castToNumber.length > 0 ? { castToNumber: [...castToNumber] } : {}),
       ease: easeParam as AnimateEaseName,
       ...(arrive !== undefined ? { arrive } : {}),
       comment: `${node.authoredLabel ?? 'Animate To Value'} — moves towards its Target Value over Duration after Delay (animate-to-value.ts); the first target is adopted outright.`
