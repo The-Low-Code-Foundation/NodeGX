@@ -1375,6 +1375,8 @@ export function emitComponent(
       if (stateVar) referencedStateNames.add(stateVar.name);
     }
   }
+  // P18-S127-SIBLINGVALUE. A delivered count is read by the instance's prop and written by its effect.
+  for (const pulse of plan.instancePulses) if (pulse.delivered !== undefined) referencedStateNames.add(pulse.delivered.name);
   const referencedStateVars = plan.stateVars.filter((v) => referencedStateNames.has(v.name));
   /** P18-S111-RECORDLIVE. Each live Record whose row this component holds, with that row's state var. */
   const liveRecordRows = plan.recordReads.flatMap((read) => {
@@ -4489,6 +4491,8 @@ export function emitComponent(
       plan.tickedRuns.length > 0 ||
       // P18-S126-INSIGNAL. A signal input's chain is an effect on its count.
       plan.inputPulses.length > 0 ||
+      // P18-S127-SIBLINGVALUE. A delivered count follows the count sent from an effect.
+      plan.instancePulses.some((p) => p.delivered !== undefined) ||
       // EXP-011 §43, P18-S113-IDBINDREAD. A Record with Fetch unwired is a bind keyed on its Id.
       recordBinds.length > 0 ||
       // P18-S111-RECORDLIVE. A live Record's row subscribes to the client's copy of its record.
@@ -6327,7 +6331,8 @@ export function emitComponent(
       if (pulse !== undefined) {
         const pulseAttr = targetPropName(node.type, toProperty);
         if (pulseAttr !== null) {
-          attrs.push(`${pulseAttr}={{ sent: ${pulse.stateName}, taken: ${pulse.takenLocal} }}`);
+          // P18-S127-SIBLINGVALUE. A placed component that reads a lifted value is handed the count one commit late.
+          attrs.push(`${pulseAttr}={{ sent: ${pulse.delivered?.name ?? pulse.stateName}, taken: ${pulse.takenLocal} }}`);
           continue;
         }
       }
@@ -7088,6 +7093,20 @@ export function emitComponent(
   for (const effect of plan.valueChangedEffects) body.push(`  const ${effect.lastLocal} = useRef<unknown>(undefined);`);
   // P18-S126-INSIGNAL. The count each placed component has acted on, kept here so it outlives the child's unmount.
   for (const pulse of plan.instancePulses) body.push(`  const ${pulse.takenLocal} = useRef(0);`);
+  /*
+   * P18-S127-SIBLINGVALUE (EXP-011 §96). The count handed to a placed component that reads a lifted value follows the count
+   * sent from this component's own effect: a parent's effects run after its children's, so the push of the value lifted
+   * with the pulse (a child's effect in the same commit) and the delivered count land in one render.
+   */
+  for (const pulse of plan.instancePulses) {
+    if (pulse.delivered === undefined) continue;
+    body.push(
+      `  // "${pulse.port}" is handed on one commit after it is sent: the values lifted with it arrive first, as the running app delivers them.`,
+      '  useEffect(() => {',
+      `    ${pulse.delivered.setterName}(${pulse.stateName});`,
+      `  }, [${pulse.stateName}]);`
+    );
+  }
   // EXP-011 §86. The Function node's values across runs, one per instance, as the running app's node keeps them.
   for (const id of pulsedRunIds) {
     const def = jsFunByNode[id]!;

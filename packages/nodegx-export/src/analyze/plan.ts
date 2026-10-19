@@ -3227,6 +3227,14 @@ export interface InstancePulsePlan {
   port: string;
   stateName: string;
   takenLocal: string;
+  /**
+   * P18-S127-SIBLINGVALUE (EXP-011 §96). Set when the placed component also reads an input the parent lifts from another
+   * placed component: the count it is handed (`sent`) is a second row that follows the count from the parent's own
+   * effect, one commit later. A lifted value reaches the parent from the child's push effect, which runs in the commit the
+   * pulse lands in; the parent's effects run after its children's, so the delivered count and the lifted value arrive in
+   * the same render, and the chain inside reads the value sent with the pulse, as the runtime's does.
+   */
+  delivered?: { name: string; setterName: string };
 }
 
 /** P18-S126-INSIGNAL. The TypeScript type of a signal input's prop, the pair the parent passes. */
@@ -4387,6 +4395,8 @@ export interface ComponentPlan {
     port: string;
     toNodeId: string;
     toProperty: string;
+    /** P18-S127-SIBLINGVALUE. The sink is another placed component's input: a lift that fails is named on its marker. */
+    intoInstance?: true;
   }>;
   dispositions: Record<string, Disposition>;
   /** Dropped wires, unhandled constructs — EXP-004's report feed. Nothing silently dropped. */
@@ -4533,9 +4543,12 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
       const child = byLegacyNow(pending.targetLegacy);
       const lifted = child?.liftedOutputProps.find((l) => l.port === pending.port);
       if (!lifted) {
-        plan.notes.push(
-          `wire ${pending.connectionKey} dropped: instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`
-        );
+        const reason = `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`;
+        plan.notes.push(`wire ${pending.connectionKey} dropped: ${reason}`);
+        // P18-S127-SIBLINGVALUE. Into another placed component, the wire was named on its marker before; it still is.
+        if (pending.intoInstance === true) {
+          plan.droppedWires.push({ key: pending.connectionKey, fromId: pending.instanceId, fromProperty: pending.port, toId: pending.toNodeId, toProperty: pending.toProperty, reason });
+        }
         continue;
       }
       const varKey = `${pending.instanceId}:${pending.port}`;
@@ -4565,6 +4578,25 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
         kind: 'computed',
         expr: { kind: 'state-get', name, maybeUndefined: true }
       };
+      // P18-S127-SIBLINGVALUE (EXP-011 §96). A placed component that reads a lifted value and is pulsed: its pulses are
+      // delivered after the lifted values that go with them.
+      for (const pulse of plan.instancePulses) {
+        if (pulse.nodeId !== pending.toNodeId || pulse.delivered !== undefined) continue;
+        const taken = takenNamesOf(plan);
+        const base = `${pulse.stateName.replace(/Pulses$/, '')}Delivered`;
+        let delivered = base;
+        for (let n = 2; taken.has(delivered) || taken.has(setterNameOf(delivered)); n++) delivered = `${base}${n}`;
+        plan.stateVars.push({
+          name: delivered,
+          setterName: setterNameOf(delivered),
+          tsType: 'number',
+          boot: 0,
+          originNodeId: pulse.nodeId,
+          origin: 'counter',
+          comment: `"${pulse.port}" as the placed component is handed it: the count, one commit after it is sent, so the values lifted with it have landed (P18-S127-SIBLINGVALUE).`
+        });
+        pulse.delivered = { name: delivered, setterName: setterNameOf(delivered) };
+      }
     }
     plan.pendingLifted = [];
   };
@@ -17012,6 +17044,18 @@ function planComponent(
     }
   }
 
+  /**
+   * P18-S127-SIBLINGVALUE (EXP-011 §96). Another placed component's declared value input: the parent's lifted row, passed
+   * as that prop (`liftInto`), as a rendered sink reads it.
+   */
+  const siblingValueInputOf = (toNode: NodeIR, port: string): boolean => {
+    if (plan.roleOf[toNode.id] !== 'instance') return false;
+    const target = ir.components.find((tc) => `/${tc.path}` === toNode.type);
+    return (
+      target !== undefined &&
+      target.nodes.some((n) => n.type === 'Component Inputs' && n.declaredPorts.some((p) => p.plug === 'output' && p.name === port && p.kind !== 'signal'))
+    );
+  };
   // §4d parent side: consumed instance value outputs are recorded pending and resolved after
   // every plan exists (planProject's second phase) — binding requires the child to have
   // actually lifted the port, or the parent would pass a prop the child does not declare.
@@ -17039,7 +17083,8 @@ function planComponent(
       contentRole === 'attr-not:disabled' ||
       (contentRole !== undefined && contentRole.startsWith('attr:')) ||
       // EXP-011 §49. A wired style parameter the emitter prints inline.
-      styleSinkOf(toNode, c.toProperty) !== undefined;
+      styleSinkOf(toNode, c.toProperty) !== undefined ||
+      siblingValueInputOf(toNode, c.toProperty);
     if (!bindable) {
       consumed.add(c.key);
       notes.push(
@@ -17059,7 +17104,8 @@ function planComponent(
       targetLegacy: fromNode.type,
       port: c.fromProperty,
       toNodeId: toNode.id,
-      toProperty: c.toProperty
+      toProperty: c.toProperty,
+      ...(siblingValueInputOf(toNode, c.toProperty) ? { intoInstance: true as const } : {})
     });
   }
 
