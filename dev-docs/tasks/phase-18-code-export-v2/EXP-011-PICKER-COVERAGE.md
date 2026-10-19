@@ -1,6 +1,6 @@
 # EXP-011 — Close the picker gap, ranked by what apps need
 
-**Status:** 🟡 In progress — **latest: §98–§99 (session 130, 2026-10-19), a Function's Success runs its chain (after its own signals and before Done on a Run, alone on a ticked run; templates 10 gained, 0 lost; the Lists Editor's New fills), and a repeater's relayed row value reaches its component's value output (144 refused → 0 "which row fired"; 74 lift; templates 23 gained, 0 lost; 16 more sibling wires bind, todo-list's Dialog flow among them); graded against the runtime's own nodes, the viewer's own For Each among them, rendered by real React**; §97 (session 129), a text field's Set, Clear, Focus and Blur run from a chain; §95–§96 (session 128, 2026-10-19), a Set Variable's Done runs its chain (54 template nodes refused with a Set's output as their trigger → 20; 55 gained, 0 lost; rocket-school's game and race start), and a placed component's lifted value reaches a sibling's input before the pulse that reads it (8 of 90 sibling wires bind, 82 named by the child that does not lift them); graded against the runtime's own nodes rendered by real React**; §94 (session 127, 2026-10-19), a signal a parent sends into a placed component runs the chain inside (87 template nodes refused with a Component Inputs trigger → 0), the parent counting its pulses and keeping the count taken; graded against the runtime's own component instances rendered by real React; templates 101 nodes gained, 0 lost**; §93 (session 126, 2026-10-19), a component root's Mounted wire is carried (72 roots in the templates, all refused as "a router concern"), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time; graded against the runtime's own nodes rendered by real React; templates 54 nodes gained, 0 lost**; §92 (session 125), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling); §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
+**Status:** 🟡 In progress — **latest: §100 (session 131, 2026-10-19), a relayed row value read inside its holder is the firing row's (in a chain a row's relayed signal runs: directly, down a Done chain, in a Condition's arm; "the value wire has no statically known source" 19 → 0 on such wires), and a repeater that draws no rows runs none of its rows' chains (P18-S131-ROWLESSTRIGGER: 13 template nodes counted collapsed into rows nobody draws → 0); templates 4 gained, 11 that never ran taken back; corpus 1 gained, 0 lost; rocket-school's Question box answers; §101 measured the parent's read of a lifted output (not built)**; §98–§99 (session 130, 2026-10-19), a Function's Success runs its chain (after its own signals and before Done on a Run, alone on a ticked run; templates 10 gained, 0 lost; the Lists Editor's New fills), and a repeater's relayed row value reaches its component's value output (144 refused → 0 "which row fired"; 74 lift; templates 23 gained, 0 lost; 16 more sibling wires bind, todo-list's Dialog flow among them); graded against the runtime's own nodes, the viewer's own For Each among them, rendered by real React**; §97 (session 129), a text field's Set, Clear, Focus and Blur run from a chain; §95–§96 (session 128, 2026-10-19), a Set Variable's Done runs its chain (54 template nodes refused with a Set's output as their trigger → 20; 55 gained, 0 lost; rocket-school's game and race start), and a placed component's lifted value reaches a sibling's input before the pulse that reads it (8 of 90 sibling wires bind, 82 named by the child that does not lift them); graded against the runtime's own nodes rendered by real React**; §94 (session 127, 2026-10-19), a signal a parent sends into a placed component runs the chain inside (87 template nodes refused with a Component Inputs trigger → 0), the parent counting its pulses and keeping the count taken; graded against the runtime's own component instances rendered by real React; templates 101 nodes gained, 0 lost**; §93 (session 126, 2026-10-19), a component root's Mounted wire is carried (72 roots in the templates, all refused as "a router concern"), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time; graded against the runtime's own nodes rendered by real React; templates 54 nodes gained, 0 lost**; §92 (session 125), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling); §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
 **Depends on:** nothing — but sequenced after EXP-009 and EXP-010, which are worth more per hour
 **Replaces:** every "what to build next" list in this phase from sessions 20–31
 
@@ -14119,3 +14119,168 @@ feeds the row's output, the dispositions, the drop sentence); `probe.ts <src> [s
 3. A row output computed inside the row (60 value-output wires: nested relays 34, Functions 26), and the 10 holders whose
    repeater draws no rows.
 4. P18-S130-UNDEFTEXT (low, filed).
+
+## §100 The row is read where it fires (session 131, 2026-10-19): a relayed row value read inside its holder
+
+### §100.0 What was measured first
+
+`s131-rowread/census.ts` on the base (`7e49bc805`, §99 landed), over the 19 templates: **40 wires out of a repeater's
+relayed row value into a logic node in the component that holds the repeater** (§99.6.1): a Set Variable's Value 20, a
+Function's input 12, an Expression 6, a Condition 1, a Cloud Function 1. **30 of the 40 sinks are run directly by a row
+signal of the same repeater**; the row's output is one of its inputs passed straight through for 35 (a nested repeater's
+relay 4, a Function 1). Every one was refused: the Sets "the value wire has no statically known source" (19), the
+Condition "the condition wire has no statically known source", the Functions and Expressions "input … is fed by For Each
+— no statically known source". rocket-school's and star-class's `lsSetEditId` (the Lists page's edit path) are two.
+
+Predicted before building, from the census and not written to a file: the 14 Sets a row signal runs directly over a
+pass-through and bot-garden's Condition would gain. Measured: 12 Sets the first build, 4 after the fix below; the Condition
+is now refused for its arm's two Value wires, two Sets for a trigger under a Mounted-false parent, and 8 for rows the
+export never draws (§100.2).
+
+### §100.1 What the runtime does (read, then measured on its own nodes)
+
+`foreach.tsx`: when a row's relayed signal fires, after the update the repeater sets Item Id, copies **every** relayed
+output of that row onto `_internal.itemOutputs`, flags them, then sends `itemOutputSignal-<name>`. So every node the signal
+runs, directly or down its chain, reads the firing row's values; anything else reads whatever the last row to fire left,
+`undefined` before any.
+
+Measured on the Read Desk (`tests/helpers/read-desk.ts`) by `runtime-mounted-arm.js` (the viewer's own For Each),
+predicted cell by cell in `s131-rowread/EXPECTED.md` before either arm ran, every cell held: a row's pick writes its id
+and, down the Set's Done chain, its label; a row's open evaluates an unticked Condition on its `done`, the false arm
+writes its label; a row's edit sets the id to edit, and the placed Editor's `fill` (the Set's Done) reads it through the
+Variable (the Lists Editor's shape). An Again button that also runs the pick's Set writes the last row's id.
+
+### §100.2 What is built
+
+| piece | what it is |
+|---|---|
+| `row-relay` (`plan.ts` `ValueExpr`) | a repeater's relayed value read inside a chain one of its rows' signals runs: `{ repeaterId, output, input, tsType }`, the input the output passes through (`relayedInputOf`, factored out of §99's `rowRelayOf`, so both refuse a computed output, two feeds, a script mapping, an unmapped input in the same words) |
+| the scope (`rowChainScopes`) | the attach pass pushes the repeater around the compile of a wire out of `itemOutputSignal-<name>`; inside, `resolveExpr` mints `row-relay`; outside, it refuses by name: "as a standing input" (a Function's or an Expression's own input, resolved once for every run, `jsResolving`), else "in a chain no row's relayed signal of that repeater starts in the export" |
+| the cache (`compiledOf`) | a compile that read (or refused) a relayed value is cached per scope (`relayTouchedKeys`, `@row:<scope>`); the plain key keeps the first compile, as for every sink; a cached result tells the compile that asked what it read, so the dependence climbs the chain. The pre-pass compiles every sink outside any scope first: without the per-scope key the row's chains reuse that refusal (mutant C, 19 rows) |
+| the sweeps | the Set Done and Function Success sweeps compile a sink again to ask its own refusal; they ask in the scope the sender was compiled in (`inSenderRowScope`), so a read down a row's chain gives the row's reason |
+| `exprValidIn` | `row-relay` only in that repeater's `itemOutputSignal-*` handlers |
+| the emitter (`component.ts`) | `rowSignalAttrs` holds `rowRelayCode` while it prints a row's callback: a `row-relay` prints as what the row is handed for the input (`item.id`), `undefined` where the mapping drops it |
+| **P18-S131-ROWLESSTRIGGER** | `rowlessReasonOf`: a repeater that draws no rows (no feed the export reads, a script mapping, no template) is an owner the export never draws (`unreachedTriggersOf`), so its rows' chains are refused by name on the next plan round, as P18-S123-UNDRAWNTRIGGER refuses a chain on an undrawn element; a node another trigger runs is collapsed into that trigger |
+
+🔴 **The reach first read "12 gained, 0 lost", and 8 of the 12 never ran.** Reading the emitted diff found no handler for
+bot-garden's `shSetTab`, nightbook's `bkDaySet`, rocket-school's `lsSetEditId`: their repeaters are drawn as a
+`TODO(export)` marker (items fed by a logic component), so no row callback exists. `s131-rowread/undrawn.ts` then counted
+**13 nodes with the same lie at the base**. Fixed with the undrawn-owner mechanism; the reach below is after it.
+
+🔴 **The sweep named a row's read with the outside sentence** (C5, found by reading the plan of a variant): fixed, mutant G.
+
+🔴 **A promotion graded nothing**: a first build let a row's successful compile replace a refused one under the plain key.
+Mutant F survived the whole spec; taken out (the plain key keeps the first compile, as at the base).
+
+### §100.3 The test (`tests/the-row-is-read-where-it-fires.test.ts`, 27 rows)
+
+The Read Desk, in a temporary folder (§100.1). §A both arms press by press (the runtime first, A1): the pick and its Done
+chain (A3), the Condition and its arm (A4), the edit path (A5), the List's wires reversed (A6), a §99 relay lifted beside
+the reads (A7), the Again button with its wire first and last (A8, A9: pinned, the export refuses the wire, P18-S131-
+RELAYOUTSIDE). §B the emitted callbacks (`onPick={() => { picked.set(item.id); named.set(item.title); }}`, the
+Condition's `if (item.done)`, the edit's write then the Editor's pulse, the state row first beside a lifted relay, no
+handler on Again). §C the plan: every sink collapsed into the repeater, the `row-relay` expression, the Again wire's
+sentence both orders, a Set that reads nothing relayed whose Done chain does reached first from a button (C4), a computed
+row output refused in the row's words down the chain (C5), a Function's input as a standing input (C8). §C' a repeater
+with no feed: its chains refused by name (C6), the control, a Set a drawn button also runs, collapsed into the button
+(C7). §D each variant's app typechecks.
+
+**Mutant arms** (`s131-rowread/mutants.py`, a copy in `packages/nx-mut-s131`, removed after; each arm typechecked with
+`tsc --noEmit -p` before its spec ran, all did). Control 27 / 27.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the base: a read in a row's chain is refused | 19 |
+| B | the read prints the output's name as the field | 11 |
+| C | the cache is not kept per scope | 19 |
+| D | a row's read is valid in any handler | **0** (survives: no path mints `row-relay` outside its row's callback, the scope and the per-scope cache see to it; kept as a guard, said so) |
+| E | a read does not climb to the compile that asked | 1 (C4) |
+| G | the sweep asks outside the sender's scope | 1 (C5) |
+| H | a standing input takes the chain's rule | 1 (C8) |
+| I | a repeater that draws no rows keeps its chains collapsed | 1 (C6) |
+| K | the row callback does not hold the row while it prints | 18 |
+
+### §100.4 What the exported apps do now
+
+`dispdiff.ts`, `7e49bc805` against the tree: **templates (19 projects, 13,432 nodes) 4 gained** (rocket-school's and
+star-class's Question box `qbSetPicked` and Moon Adopt `maSetSp`), **11 taken back** that never ran (collapsed into a
+repeater that draws no rows: bot-garden's Shop 4, nightbook's `meCopyNoteRestoring`, planning's and its demo's
+`twModeTick` and `twModeWords`, todo-list's and its demo's `prMode`, now named by its own refusal; each read under its
+`TODO(export): For Each … deferred` marker), 2 collapsed into their other trigger (`shClearItem` into `shOpen`,
+`tnMineShut` into `tnMineClose`), 30 re-worded (each now names the row output computed in the row, the repeater that
+draws no rows, a trigger under a Mounted-false parent, two Value wires, a standing input, or a chain no row starts).
+**Corpus (229 projects, 29,482 nodes) 1 gained, 0 lost**, 17 re-worded (the capital-quiz copies). `census.ts` on the
+tree: "the value wire has no statically known source" 19 → 0 and "the condition wire …" 1 → 0 on these wires; 4 collapsed.
+
+Read in the emitted diff (`../s126-mounted/emit.ts` both ways, 27 code files): rocket-school's and star-class's Question
+box now answers: a picked option writes `questionAnswer` from its own row and calls `onAnswered` (the round's answer
+path was dropped whole before); Moon Adopt's species chips write `moonDraftSpecies`. The other files gain only named
+markers (the rows' chains of undrawn repeaters, each wire named: bot-garden's Pad and Shop, nightbook's Section and Me,
+rocket-school's ChoiceRow and Shelf, todo-list's MoneySheet, NextMovePrompt and ProjectRow) and lose dead imports
+(bot-garden's Shop imported four stores for handlers it never printed).
+
+**rocket-school's Lists Editor, edit path: still blocked, by reading the emitted `Lists.tsx`.** The row's `edit` now
+compiles (`editId.set(item.id)` then the Editor's `fill`), but the list of lists (`lsEach`) is fed by `lsSets.sets`, a
+logic component (`/Logic/List question sets`, Tier B): the repeater is drawn as a `TODO(export)` marker, so there is no
+row and no Edit button, and `lsSetEditId` is refused by name for it. Behind that, the Editor's `sets` comes from
+`/Logic/Active profile` and its Save goes to `/Logic/Save question set` (both Tier B). Editing an existing list waits on
+the logic components, not on the relay.
+
+The templates' typecheck gate 3 / 3, every row 0; all 19 (`../s124-deadrow/tplbuild.ts`) 1 error in 1, nightbook's
+P18-S125-STYLENULL, as at the base. Not driven in a browser: the spec renders both arms with real React.
+
+### §100.5 Readings
+
+The spec 27 / 27; the mutant arms as above. Neighbours, run together under the lock (34 suites, 855 rows, exit 0): every
+spec on the runtime arm, the repeater and relay specs (`foreach-relay-ports`, `repeater-row-signals`, `repeater-item`,
+`static-data`, `component-outputs`, `the-row-relays-its-values`), `the-undrawn-trigger-is-refused`, `controlled-state`,
+`chain-wire-order`, `the-templates-typecheck`, `parameter-coverage`, `hls001-corpus-identity`, and the rest of the 34 that touch a
+For Each. **hls001**: predicted 0 keys by emitting all 63 fixtures with the base's `src` and the tree's
+(`../s125-tplbuild/emitfx.ts`: identical); it passed. Package `tsc --noEmit` 0. The tsfixme ratchet holds.
+
+**The whole package** (`nice -n 19 --runInBand`, under the lock, 22:30): **149 / 149 suites, 5,107 passed, 0 failed, 3
+skipped** (session 130: 148 suites, 5,080; this session adds one suite of 27).
+
+**Tooling** (`s131-rowread/`, the `.ts` from `packages/nodegx-export` with `../../node_modules/.bin/ts-node -P
+tsconfig.json --transpile-only`, `ROOTS=` as `../s119-fnchain-measure/dispdiff.ts`): `census.ts <src> <out.json>` (every
+relayed value wire into a logic node in its holder: the sink, its triggers, the row output's feed, the disposition);
+`undrawn.ts <src>` (every node collapsed into a repeater that draws no rows); `probe.ts <src> [steps…]` (the Read Desk
+on both arms); `census-parent.ts` (§101); `mutants.py`; `EXPECTED.md`. The base copy was `git archive 7e49bc805
+packages/nodegx-export` unpacked in the session's scratch folder, the root `node_modules` and the sibling packages linked
+beside it.
+
+### §100.6 What this leaves
+
+1. **P18-S131-RELAYOUTSIDE** (low, filed): a relayed value read outside a row's chain (6 Expression wires, `tnUse`,
+   `rdCarry`, `rdSetAt`; the Again shape).
+2. A row output computed inside the row (planning's Week `twSetLog`, `twCardFromBlock`: a nested repeater's relay), as §99.6.3.
+3. The repeaters that draw no rows because a logic component feeds them (rocket-school's list of lists, bot-garden's Shop,
+   nightbook's Book and Coming): EXP-003 Tier B.
+4. §101.
+
+## §101 The parent reads a lifted output (session 131, 2026-10-19): measured, not built
+
+`s131-rowread/census-parent.ts` on the tree, over the 19 templates: **733 wires from a placed component's value output
+into a logic node in a visual parent**; the child lifts the output for **80** (541 come from a logic component, 112 from a
+visual child that does not lift it). Of the 80: **32 run by a signal of the same instance** (todo-list's and its demo's
+`tdSelectFromList`, `tdSelectFromDone`, `tdSelectFromLog`, `tdSelectFromToday`, `tdSelectFromRoutines`, `tdOpenDesc`,
+`tdPickDay`; planning's and its demo's Week `twSetPhoneDay`, `twCardFromMight`, `twChip`, `twPickToggle`, `twStripRoute`;
+nightbook's Strengths `fsSet0..2`; story-engine's `rxParse`), 32 by another trigger, 16 reactive. By sink: Set Variable
+263, Function 227, Expression 122, Condition 91 (all 733). Every one is refused; the wire itself reads "instance output …
+feeds an unrendered sink — lifted values land only in rendered sinks in this slice", and a Set its "the value wire has no
+statically known source".
+
+What stands in the way, read in the code, not built:
+
+- **The order of the plans.** The parent's lift of an instance output is decided in `planProject`'s second phase
+  (`liftInto`), after every component is planned, because whether the child lifts the port is a fact about the child's
+  plan; the parent's Set compiles in its own attach pass, before that. A read needs the lifted row's name at compile time:
+  a replan round, as the undrawn-trigger loop already runs.
+- **The timing.** In the runtime the child's Component Outputs value is flagged before its signal, so the parent's Set reads
+  the new id in the same update. In the export the child pushes the value from an effect (`on<Port>Changed`), one commit
+  after the click; the parent's `onOpen` handler runs inside the click and would read the previous value. The chain has to
+  run from an effect fed by a count delivered one commit late, §96's `InstancePulsePlan.delivered`, which already orders a
+  pulse after the lifted value for a sibling's input; here it is the parent's own chain, so in render context.
+
+Reach if built: up to 32 wires (14 Set Variables, 2 Conditions; the Functions behind their own refusals). Selecting a
+task from todo-list's lists sets the page's selection only once it is.

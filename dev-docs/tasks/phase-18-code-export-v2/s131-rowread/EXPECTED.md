@@ -51,3 +51,21 @@ Variants:
 ## What the arms read
 
 (filled in after running, below this line)
+
+Every predicted cell held. `probe.ts` on the desk before the emitter was touched: the runtime read the table's runtime
+column exactly, and the base export stayed at the load reading on every step, as predicted. After the change the export
+read the runtime's column on every step. The four variants were then read by the spec
+(`tests/the-row-is-read-where-it-fires.test.ts` A6 to A9): the wires reversed and the lifted relay read the desk's
+readings on both arms; the Again variants read, on the runtime, L0, L0, t2 · Bread, t2 · Bread · Milk, t1 · Milk · Milk,
+and on the export the same but the last, t2 · Bread · Milk, both wire orders (the disposition the shared Set keeps:
+collapsed into the repeater, the Again wire named; the uncertain cell came out the safe way).
+
+🔴 **Not predicted, found by reading the plan of a variant (C5):** the Set down the pick's Done chain was named, by the
+sweep that names the Done wires a compile did not take, with the sentence for a read **outside** a row's chain, when the
+row's own reason (the label computed inside the row) was the true one. The sweep compiles the sink again to ask its own
+refusal, and asked outside any scope. It asks in the sender's scope now (mutant G).
+
+🔴 **Not predicted, found by reading the emitted diff of the templates:** 8 of the first 12 "gained" Sets were collapsed into
+a repeater that draws no rows in the export (its items fed by a logic component or a Function), so no row callback was
+printed for them; rocket-school's `lsSetEditId` among them. 13 nodes had the same lie at the base. P18-S131-ROWLESSTRIGGER,
+fixed: a repeater that draws no rows is an owner the export never draws (`unreachedTriggersOf`).

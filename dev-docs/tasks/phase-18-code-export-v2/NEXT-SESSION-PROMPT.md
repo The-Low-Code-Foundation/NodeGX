@@ -1,3 +1,55 @@
+# Next session — session 131 (2026-10-19, BOARD lane 6) built **a relayed row value read inside its holder**: in a chain a row's relayed signal runs (directly, down a Done chain, in a Condition's arm) a read of that repeater's relayed value is the firing row's own item field; anywhere else it is refused by name. On the way it fixed **P18-S131-ROWLESSTRIGGER**: a repeater that draws no rows runs none of its rows' chains (13 template nodes were counted collapsed into rows nobody draws). Graded against the runtime's own nodes, the viewer's own For Each among them, rendered by real React. Templates 4 gained, 11 that never ran taken back; rocket-school's Question box answers. The parent's read of a lifted output (§101) was measured, not built.
+
+## ✅ Session 131: the row is read where it fires
+
+Read EXP-011 §100 and §101. In short:
+
+| what | where |
+|---|---|
+| Measured first: 40 relayed value wires into a logic node in their holder (Set Value 20, Function input 12, Expression 6, Condition 1, Cloud Function 1); 30 sinks run directly by the same repeater's row signal; all refused | `s131-rowread/census.ts` |
+| The runtime, read then measured on the Read Desk (`EXPECTED.md` first, every cell held): every node a row's signal runs reads that row's values; anything else the last row's | `s131-rowread/EXPECTED.md`, `probe.ts` |
+| `row-relay`: minted only while a row's chain compiles (`rowChainScopes`), printed as the row's item field (`rowRelayCode`); outside, refused "as a standing input" or "in a chain no row's relayed signal … starts"; a compile that read one cached per scope; the sweeps ask in the sender's scope | `src/analyze/plan.ts`, `src/emit/component.ts` |
+| P18-S131-ROWLESSTRIGGER: `rowlessReasonOf` makes a repeater with no feed the export reads an owner the export never draws (`unreachedTriggersOf`) | `plan.ts` |
+| Spec, 27 rows: the Read Desk (pick and its Done chain, a Condition's arm, the Lists Editor's edit path), wires reversed, a lifted relay beside, an Again button both orders (pinned), plan rows; 9 mutant arms, 8 kill rows, D survives (a guard no path reaches, said so) | `tests/the-row-is-read-where-it-fires.test.ts`, `tests/helpers/read-desk.ts`, `s131-rowread/mutants.py` |
+| Measured, not built: 733 wires from a placed component's value output into a parent's logic node, 80 lifted, 32 run by the same instance's signal (todo-list's `tdSelectFromList` and six siblings, planning's Week) | `s131-rowread/census-parent.ts`, EXP-011 §101 |
+
+- 🔴 **The reach first read "12 gained, 0 lost", and 8 of the 12 never ran.** Reading the emitted diff found no handler:
+  their repeaters are `TODO(export)` markers (fed by a logic component). `undrawn.ts` then found 13 such nodes at the base.
+  Read the emitted code of every gained node, every session: the count cannot see a callback that is never printed.
+- 🔴 **rocket-school's edit path is still blocked, by the list, not the relay**: `lsEach` is fed by `/Logic/List question
+  sets` (Tier B), so no row and no Edit button exist; then `sets` (`/Logic/Active profile`) and Save (`/Logic/Save
+  question set`), Tier B too.
+- 🔴 **A sweep re-compiles a sink to ask its refusal**, and asked outside the row's scope: the row's reason came out as the
+  outside sentence (C5). The compile pre-pass compiles every sink outside any scope first: a cache not kept per scope
+  reuses that refusal for every row (mutant C, 19 rows).
+- 🔴 **One sentence, two populations** (§31's lesson): the first outside sentence said "outside a chain its rows' relayed
+  signals run" for a Function a row's signal runs. A Function's input is resolved once for every run; it has its own
+  sentence now ("as a standing input").
+- 🔴 **A mutant survived and the code went**: a promotion of a row's compile over the plain key's refusal graded nothing
+  (F); taken out.
+
+Readings: the spec 27 / 27 (9 arms, each typechecked; 8 kill rows); neighbours 34 suites, 855 rows, green; hls001
+unchanged (predicted 0: all 63 fixtures identical, base against tree); the templates' typecheck gate 3 / 3, every row 0;
+all 19 (`tplbuild.ts`) 1 error in 1 (nightbook STYLENULL, as before). Package `tsc --noEmit` 0; the ratchet holds. Whole
+package (`nice -n 19 --runInBand`, 22:30): **149 / 149 suites, 5,107 passed, 0 failed, 3 skipped.**
+
+Reach (`dispdiff.ts`, `7e49bc805` against the tree): **templates 4 gained** (Question box `qbSetPicked`, Moon Adopt
+`maSetSp`, rocket-school and star-class), **11 taken back that never ran** (each under a `TODO(export)` marker), 2 moved
+to their other trigger, 30 re-worded; **corpus 1 gained, 0 lost**, 17 re-worded.
+
+Filed: **P18-S131-ROWLESSTRIGGER** (fixed), **P18-S131-RELAYOUTSIDE** (low).
+
+**Next (BOARD lane 6):**
+1. **A lifted instance output read by a logic sink in the parent** (§101: 32 wires run by the same instance's signal;
+   todo-list's selection from its lists). Two pieces: a replan round so the parent's compile knows the lifted row, and the
+   chain run from an effect on a count delivered one commit late (§96's `InstancePulsePlan.delivered`).
+2. P18-S130-THROWCHAIN; P18-S129-VALUEARRIVAL (medium); P18-S131-RELAYOUTSIDE and the low ones (P18-S130-UNDEFTEXT,
+   P18-S129-SEEDANNOUNCE, RUNONCHANGEMARK, and session 128's list).
+3. The repeaters a logic component feeds (rocket-school's list of lists, bot-garden's Shop, nightbook's Book): EXP-003 Tier B.
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 130 (2026-10-19, BOARD lane 6) fixed **P18-S129-FNSUCCESS** and built **the repeater's row relay**: a Function's Success runs its chain (after the body's own signals and before Done on a Run, alone on a ticked input's run), and a repeater's relayed row value reaches its component's value output (each row's relayed signal writes what that row passes through, before the signal's chain). Graded against the runtime's own nodes, the viewer's own For Each among them, rendered by real React. Templates 10 + 23 nodes gained, 0 lost; the Lists Editor's New fills, todo-list's Dialog flow is handed the task a person picks.
 
 ## ✅ Session 130: the Function succeeds; the row relays its values
