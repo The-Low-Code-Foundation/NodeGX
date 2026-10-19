@@ -231,6 +231,7 @@
         o.spec = spec;
         attach(o);
       }
+      if (objects[id]) objects[id].obj.userData.nodeId = spec.node || '';
       needs = true;
       schedule();
       if (listeners.onCount) listeners.onCount(count());
@@ -325,7 +326,7 @@
       for (var id in objects) {
         var o = objects[id];
         var w = o.obj.getWorldPosition(new T.Vector3());
-        out.push({ id: id, kind: o.kind, name: o.spec.name || null, shape: o.shape || o.lightKind || null, parent: o.spec.parent || null, x: o.obj.position.x, y: o.obj.position.y, z: o.obj.position.z, wx: w.x, wy: w.y, wz: w.z, h: o.obj.scale.y });
+        out.push({ id: id, node: o.spec.node || null, kind: o.kind, name: o.spec.name || null, shape: o.shape || o.lightKind || null, parent: o.spec.parent || null, x: o.obj.position.x, y: o.obj.position.y, z: o.obj.position.z, wx: w.x, wy: w.y, wz: w.z, h: o.obj.scale.y });
       }
       return { meshes: count(), objects: out, frames: frames, camera: { distance: cam.distance, height: cam.height, angle: cam.angle } };
     }
@@ -572,6 +573,14 @@
   var nextId = 1;
 
   /**
+   * The id of the node in the project's files that made this object (shared by every row of a For Each). Not the
+   * object's identity (that is per mount, above): a label an editor reads to point from a picked object to its node.
+   */
+  function nodeIdOf(props) {
+    return props.noodlNode && props.noodlNode.id !== undefined ? String(props.noodlNode.id) : '';
+  }
+
+  /**
    * PARKED-THREE-S2-MESHOUTSIDE, the kit's half: a child with no Scene above it has no one to speak to and draws nothing,
    * and nothing in the format can say "only inside a Scene" (the bridge registers every kit node as Visual). So the child
    * says it, as a console ERROR: `render_report` collects errors and exceptions only (render-capture.js, `type ===
@@ -638,6 +647,7 @@
       return function MeshComponent(props) {
         var spec = {
           kind: 'mesh',
+          node: nodeIdOf(props),
           name: props.name ? String(props.name) : '',
           shape: props.shape || 'box',
           x: num(props.x, 0),
@@ -711,6 +721,7 @@
       return function GroupComponent(props) {
         var spec = {
           kind: 'group',
+          node: nodeIdOf(props),
           name: props.name ? String(props.name) : '',
           x: num(props.x, 0),
           y: num(props.y, 0),
@@ -780,6 +791,7 @@
       return function LightComponent(props) {
         useSceneObject(props, {
           kind: 'light',
+          node: nodeIdOf(props),
           light: props.kind || 'sun',
           colour: colourOf(props.colour, null, '#ffffff'),
           ground: colourOf(props.ground, null, '#444444'),

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NodeGX Scene</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffb547' d='M12 3l8 4.5-8 4.5-8-4.5z'/%3E%3Cpath fill='%23b07a2a' d='M4 7.5l8 4.5v9l-8-4.5z'/%3E%3Cpath fill='%23704c18' d='M20 7.5l-8 4.5v9l8-4.5z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><span class="brand-mark" id="brand-mark"></span><b>NodeGX</b><span class="brand-sub">Scene</span></div>
+    <div class="where">
+      <span class="proj" id="proj-name">…</span>
+      <span class="sep">/</span>
+      <select id="scene-pick" title="Which 3D scene to edit"></select>
+    </div>
+    <div class="spacer"></div>
+    <div class="seg" role="group" aria-label="Mode">
+      <button id="mode-edit" class="on" title="Edit: click to select, drag to move (E)"></button>
+      <button id="mode-play" title="Play: the app as it runs (P)"></button>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="undo" title="Undo (⌘Z)"></button>
+    <button class="icon-btn" id="redo" title="Redo (⇧⌘Z)"></button>
+    <button class="save" id="save" disabled>Saved</button>
+  </header>
+  <main>
+    <aside class="left">
+      <section>
+        <h3>Add</h3>
+        <div class="tiles" id="tiles"></div>
+      </section>
+      <section class="outline-wrap">
+        <h3>In the scene</h3>
+        <div class="outline" id="outline" role="tree"></div>
+      </section>
+    </aside>
+    <section class="stage" id="stage" data-mode="edit">
+      <div class="vp-tools">
+        <button class="chip on" id="tool-focus" title="Fill the view with the scene while editing (F)"></button>
+        <button class="chip on" id="tool-snap" title="Moves snap to a quarter (Alt while dragging: free)"></button>
+      </div>
+      <div class="vp-hint" id="hint"></div>
+      <div class="vp-busy" id="busy" hidden><span class="spin"></span>Updating the app…</div>
+      <div class="empty" id="empty" hidden></div>
+    </section>
+    <aside class="right"><div id="inspector"></div></aside>
+  </main>
+  <footer class="status"><span id="status-msg">Starting the app…</span><span id="status-sel"></span></footer>
+  <div class="toast" id="toast" hidden></div>
+  <script type="module" src="/app.mjs"></script>
+</body>
+</html>
