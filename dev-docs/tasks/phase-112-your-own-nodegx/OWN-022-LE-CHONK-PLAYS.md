@@ -165,6 +165,8 @@ in the scratchpad, never in `packages/` or anything published.
   Monster Gate game1–3 copied out of s1's scratchpad into `runs/monster-game*`.
 - **Published on YouTube (2026-10-19):** https://youtu.be/T7SyhaccN2A — linked from the README, the repo's homepage field and
   the report (v3).
+- **The report is public** at https://le-chonk-challenge.netlify.app/ (Richard, Netlify; README links it). The live page
+  is v2 (no video link); v3 ready to upload: `OWN-022 Le Chonk/netlify/index.html`.
 - **Still owed before the 29th:** Richard shares the report (Share menu — it is
   private) and posts in `challenges-submissions` with the how-it-was-developed note (README §How it was developed has it).
   Optional: AC3 (Challenge pace).
