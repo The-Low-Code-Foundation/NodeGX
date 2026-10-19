@@ -12,6 +12,13 @@ the [board](../BOARD.md); which slot it takes is Richard's to name.
 add`); a Mesh outside a Scene now says so to the agent; and the agent's own render harness, which had **no WebGL**, draws
 the scene (§3.2).
 
+**s4 (same day): the separate editor, first.** Richard: *"Maybe we should already make the separate editor? I'm a bit
+worried about how it'll look in the existing NodeGX editor. I'd like to be able to start testing it before we do more"*,
+so R1's order changed (§6). [`three-in-nodes/editor/`](three-in-nodes/editor/README.md) is **NodeGX Scene**: an outline,
+a palette of ten things to add, an inspector from the kit's own port definitions, and the real app in the middle, where
+a click selects, a drag moves, and a setting reaches the running app as it changes. It puts a 3D scene on any page of an
+app that has none, installing the kit first (§3.3).
+
 > "I've had several community members asking me to show them 'how NodeGX works with three.js in nodes' which I know at
 > the moment we don't … is there a world where we can create for example a custom editor designed specifically for
 > generating the three.js windows in the apps we've made? … if we can create a 'spec' like we did with the 130 NodeGX
@@ -145,6 +152,52 @@ fixture's 12 meshes drawn. [`three-kit-render.test.ts`](../../packages/noodl-mcp
 flags removed, the first test reads `gl: false`. Nine render and drive specs **96 / 96** after the change. npm users get
 it with the next `@nodegx/mcp` cut (`dist/render-harness` is rebuilt from these files).
 
+### 3.3 s4 — NodeGX Scene, the separate editor (2026-10-19)
+
+**What it is.** A page and a small server in [`three-in-nodes/editor/`](three-in-nodes/editor/README.md), built from the
+npm kit the way the P112 editors are: `@nodegx/preview` 0.2.2 renders the app in the page (it already loads a project's
+`noodl_modules` kits in memory, `inPage/kits.ts`), `@nodegx/project-contract` reads and saves (the map editor's
+`core/commit.mjs`: validate first, write only on the revision read). Left: Add (Box, Ball, Cylinder, Cone, Ring, Tile,
+Group, Sun, Lamp, Sky) and the scene's tree, where a row dragged onto a Group goes inside it and a For Each shows its row
+template in italics. Middle: the app. Right: the selected thing's settings, laid out per kind (Shape, Colour, Place,
+Size, Motion), each port's label, default and choices read from the running app's node library, so the editor cannot
+drift from the kit. Edit / Play at the top.
+
+**Three mechanisms, all existing ones.** (1) A setting goes to the running app through the runtime's own
+`graphModel.getComponentWithName(…).getNodeWithId(…).setParameter` (what the editor's live preview calls,
+`editormodeleventshandler.ts`), every instance at once, no rebuild; only a tree edit re-renders, keeping the orbit.
+(2) Picking, orbit and zoom are three-kit's own (`pick`, `orbit`, `zoom` on the engine at `root.__threeKit`); a drag is
+the pointer's travel over a plane through the object, turned into its parent's own space, so a mesh inside a turned,
+scaled 3D Group follows the pointer. (3) **The stage:** in Edit the preview gets the same files with the scene's page as
+`rootNodeId` (the page's root renamed for the stage alone, since the root is found by id across components), so a scene
+behind a sign-in is on screen. Play renders the real root. Measured on the todo app: without the stage, the new scene
+sat behind the sign-in page and could not be edited; with it, it is the page.
+
+**The kit's seam.** Each three.js object carries `userData.nodeId`, the id of the node that made it (`nodeIdOf`,
+`props.noodlNode.id`), and the census reports it: every row of a For Each shares its template's id, which is how a
+picked bar selects its For Each. Additive: the catalog and render specs **8 / 8**, the add test **5 / 5** after it.
+
+**Graded** (headless Chrome on software GL, fresh copies every run; `tests/*.json`):
+- `editor.json` on the fixture: opens on the stage, 12 meshes, the outline as the files say; a click on the robot's body
+  selects it and boxes it; a swatch recolours it live in the same frame; a 160 px drag moves it x 0 → 3.25 inside its
+  group; with the robot selected, a drag on its head moves the robot z 4 → 7.5 and leaves its X to the wire from
+  `robotGlide` (Animate To Value) and the head's own settings unchanged; one undo takes the drag back; add, group,
+  reparent, undo; an empty click selects the Scene; an orbit then **Use this view** writes the camera; Save: "the
+  project validates"; Play: the layer off, the app as built.
+- `add-scene.json` on `templates/todo-list` (no kit, no scene): the card lists Pages/Todo and Pages/Sign in; **Add a 3D
+  scene** on Todo installs the kit, adds Sky, Sun and Box and draws them on the stage; a ball and a ring; Save validates;
+  Play shows the sign-in page, as the app runs.
+- `demo.json`: the open screen, **Try the demo** (a temp copy), hovering names the head, a Lamp's marker dragged moves
+  the lamp x 0 → -2.5.
+
+**Found while building, fixed there:** the no-scene card's `display: grid` beat its `hidden` attribute, so a black panel
+covered the view and ate every click (the first drive's "clicks do nothing"); a drag on an object with a wired axis was
+refused outright, now the other axes drag.
+
+**Not checked:** the feel on a real screen and a real GPU (Richard's), the main editor opening a project this editor
+saved (its files pass the kit's `validateStructure`), rotation by dragging (a slider today), light markers above the
+view (off screen, so selected from the outline).
+
 ## 4. The vocabulary, ranked by the two surfaces Richard named
 
 Games, and 3D representations of data. Not by what three.js offers.
@@ -178,7 +231,7 @@ app (P112 R4).
 - **Specs** (layer 2): a headless face that reads the Scene's graph (the drive's `census()` is its first draft), the
   format's `act` for a tap and a drag, scenarios for Tween and Tap. NSP-016's layout model has nothing to say here:
   a transform is three numbers, easier than flexbox.
-- **The sub-editor** (layer 3): the P112 kit applied to one component. Not before the vocabulary exists.
+- **The sub-editor** (layer 3): ✅ s4, first version: NodeGX Scene (§3.3), before the vocabulary, by R1's change. Owed: what Richard finds trying it.
 - **A demo designed before it is built.** P117's post-mortem: engineered before designed, no gate graded fun. A kit
   is infrastructure, so fun is the user's problem; the first demo still needs a mockup and a grade.
 
@@ -186,6 +239,8 @@ app (P112 R4).
 
 - R1 **Which layer first.** ✅ **Ruled 2026-10-19: nodes first** (the picker and the MCP, then Group and Tween; the
   sub-editor follows once there are enough nodes for it to edit).
+  **Changed the same day (s4):** the separate editor now, so Richard can test the look before more nodes: *"I'm a bit
+  worried about how it'll look in the existing NodeGX editor. I'd like to be able to start testing it before we do more."*
 - R2 **Where the kit ships.** ✅ **Ruled 2026-10-19: on npm too** (`library/modules/` and `@nodegx/three-kit`, so a
   person using only the npm tools can install it; with lane 1's next npm cut).
 - R3 **The Godot sentence.** Say "the spec admits other targets" and build none, or scope one batch (Mesh, Tween, Tap)
@@ -200,4 +255,5 @@ app (P112 R4).
 - `library/modules/three-kit/package.json`, `bin/three-kit.js`, `test/add.test.js` — the npm package and its add (s3)
 - `packages/noodl-mcp/tests/three-kit-render.test.ts` — what the agent's render harness sees (3 tests, s3)
 - `packages/noodl-mcp/tests/three-kit-catalog.test.ts` — the catalog spec (5 tests)
+- `dev-docs/parked/three-in-nodes/editor/` — NodeGX Scene, the separate editor (s4), its README, its drives in `tests/`
 - `dev-docs/bugs/parked-three-s1-instanceid-….md`, `parked-three-s2-meshoutside-….md`, `parked-three-s3-nowebgl-….md` — the findings

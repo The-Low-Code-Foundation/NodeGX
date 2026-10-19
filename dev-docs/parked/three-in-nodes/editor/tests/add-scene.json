@@ -1,0 +1,19 @@
+[
+ { "waitFor": "window.__scene?.state.ready", "timeout": 90000 },
+ { "wait": 800 },
+ { "label": "an app with no scene: the empty card, its pages, the kit not installed", "eval": "JSON.stringify({ scene: __scene.state.scene, empty: !document.getElementById('empty').hidden, pages: [...document.querySelectorAll('#page-pick option')].map(o => o.value), kit: __scene.state.project.kit })" },
+ { "shot": "a1-empty.png" },
+ { "label": "pick the Today page and add a scene", "eval": "(() => { const sel = document.getElementById('page-pick'); const want = [...sel.options].find(o => /Today/i.test(o.value)) ?? sel.options[0]; sel.value = want.value; return want.value; })()" },
+ { "clickSel": "#add-scene" },
+ { "waitFor": "__scene.state.scene && __scene.vp.engine()", "timeout": 60000 },
+ { "wait": 1500 },
+ { "label": "the kit is in, a scene with a sky, a sun and a box, drawing on its page", "eval": "JSON.stringify({ kit: __scene.state.project.kit, scene: __scene.state.scene, rows: [...document.querySelectorAll('#outline .row')].map(r => r.textContent.trim()), meshes: __scene.vp.engine().census().meshes, dirty: __scene.model.dirtyKeys() })" },
+ { "shot": "a2-added.png" },
+ { "label": "add a ball and a ring", "eval": "__scene.addTile('sphere'); __scene.select(null); __scene.addTile('torus'); 'ok'" },
+ { "waitFor": "__scene.vp.engine() && __scene.vp.engine().census().meshes === 3", "timeout": 30000 },
+ { "label": "save", "eval": "(async () => { await __scene.save(); return JSON.stringify({ dirty: __scene.model.dirtyKeys(), status: document.getElementById('status-msg').textContent }); })()" },
+ { "shot": "a3-saved.png" },
+ { "label": "play: the todo page itself, with the scene on it", "eval": "__scene.setMode('play'); 'ok'" },
+ { "wait": 1000 },
+ { "shot": "a4-play.png" }
+]

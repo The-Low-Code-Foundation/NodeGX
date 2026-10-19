@@ -1,0 +1,16 @@
+{
+  "name": "nodegx-scene-editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "An editor for the 3D scenes in a NodeGX app: three-kit's Scene, Mesh, Light and 3D Group, with the real app running beside it.",
+  "type": "module",
+  "license": "GPL-3.0",
+  "scripts": {
+    "prestart": "node tools/ensure-installed.mjs",
+    "start": "node server.mjs --open"
+  },
+  "dependencies": {
+    "@nodegx/preview": "^0.2.2",
+    "@nodegx/project-contract": "^0.1.0"
+  }
+}
