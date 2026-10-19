@@ -1,0 +1,1052 @@
+{
+  "summary": {
+    "K": {
+      "part1": {
+        "g1": 19,
+        "g2": 19,
+        "of": 19,
+        "bothPass": 19
+      },
+      "part2": {
+        "g1": 19,
+        "g2": 20,
+        "of": 22,
+        "bothPass": 19
+      },
+      "disagree": [
+        "O22"
+      ],
+      "missing": []
+    },
+    "M": {
+      "part1": {
+        "g1": 19,
+        "g2": 19,
+        "of": 19,
+        "bothPass": 19
+      },
+      "part2": {
+        "g1": 20,
+        "g2": 21,
+        "of": 22,
+        "bothPass": 20
+      },
+      "disagree": [
+        "O12"
+      ],
+      "missing": []
+    },
+    "R": {
+      "part1": {
+        "g1": 19,
+        "g2": 19,
+        "of": 19,
+        "bothPass": 19
+      },
+      "part2": {
+        "g1": 16,
+        "g2": 19,
+        "of": 22,
+        "bothPass": 16
+      },
+      "disagree": [
+        "O12",
+        "O19",
+        "O21"
+      ],
+      "missing": []
+    }
+  },
+  "table": {
+    "K": [
+      {
+        "line": "G1",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Sign up created the account and signed me in. Log out followed by log in worked. A wrong password showed \"Wrong username or password\".",
+        "saw2": "I created accounts graderA1019, graderB1019, graderC1019 and graderD1019 through the \"Sign up\" form, and later logged in as graderA1019 from person B's browser with \"Log in\".",
+        "agree": true
+      },
+      {
+        "line": "G2",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Tapping the upload area opened a real file picker. I chose my-song.mp3 and the page showed \"my-song.mp3 · 0.3 MB · 0:20\". After Publish, the song page /track/32 opened.",
+        "saw2": "Tapping the drop zone on Upload opened a real file picker; I chose my-song.mp3 (\"my-song.mp3 · 0.3 MB · 0:20\"), published, and got the song page /track/32.",
+        "agree": true
+      },
+      {
+        "line": "G3",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I chose the genre Folk on upload. The song page shows \"Genre: Folk\".",
+        "saw2": "I picked \"Folk\" on the upload form, and the song page shows \"Genre: Folk\".",
+        "agree": true
+      },
+      {
+        "line": "G4",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "cover.png, chosen on upload, shows as the large picture on the song page and as the picture in the Fresh uploads list.",
+        "saw2": "I added cover.png on the upload form; it shows as a large image on the song page and as the thumbnail in Home's \"Fresh uploads\".",
+        "agree": true
+      },
+      {
+        "line": "G5",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The \"About this song\" text I entered shows on the song page, and person B could read it too.",
+        "saw2": "The \"About this song\" text I typed shows under the heading \"About this song\" on the song page, and person B could open that page too.",
+        "agree": true
+      },
+      {
+        "line": "G6",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Tapping \"Remix on Suno\" opened a new tab at https://suno.com/song/abc123, titled \"Suno \\",
+        "saw2": "The song page shows \"Remix on Suno\"; tapping it opened a new tab at my suno.com/song/… address, titled \"Suno \\",
+        "agree": true
+      },
+      {
+        "line": "G7",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I created the artist \"Quillon Vasquez\" in the upload form. The artist page lists the song under Popular and Latest releases.",
+        "saw2": "I created artist \"Zephyr Marmalade\" while uploading; /artist/11 lists \"Quokka Lantern Ride\" under Popular and Latest releases.",
+        "agree": true
+      },
+      {
+        "line": "G8",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I created the album \"Tangerine Orbit\" in the upload form. The album page shows \"1 song\" and lists Zephyr Marmalade.",
+        "saw2": "I created album \"Tangerine Orbit\" while uploading; /album/10 shows \"1 song\" and lists Quokka Lantern Ride.",
+        "agree": true
+      },
+      {
+        "line": "G9",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Searching \"Zeph\" (from the title) and \"Quil\" (from the artist) each returned only Zephyr Marmalade.",
+        "saw2": "Searching \"Quok\" showed Quokka Lantern Ride as the top result, and \"Zephyr\" showed the artist, the song and the album.",
+        "agree": true
+      },
+      {
+        "line": "G10",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Choosing Genre = Folk showed 4 songs, matching the \"Folk 4 songs\" tile. One of them I opened was tagged Folk.",
+        "saw2": "With Genre set to Folk, only 4 songs were listed; I opened them and all four are Folk.",
+        "agree": true
+      },
+      {
+        "line": "G11",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Sorting by \"Most liked\" put Lantern Road (3 likes, the most) first. The \"Top 50\" chart, ranked by listens and likes, had Umbrella Hours (1 like) first and Lantern Road 6th.",
+        "saw2": "After A, B and C each liked \"Wombat Velvet Echo\" (3 likes; no other song has more than 2), it went to #1 on the weekly chart, the Today chart and the \"Most liked\" sort. The \"All time\" chart had it at #23.",
+        "agree": true
+      },
+      {
+        "line": "G12",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Tapping Play made the progress bar move. Pause held it at 924/1000 for 2 s, and Play resumed from 938.",
+        "saw2": "Tapping Play started the bottom player and its progress bar moved; Pause stopped it at 560/1000, and Play carried on from there.",
+        "agree": true
+      },
+      {
+        "line": "G13",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The like stayed on after leaving and coming back, and after a reload. The song is in Liked Songs.",
+        "saw2": "After a like, the button still showed as liked when I went Home, came back and reloaded, and the page read \"1 like\".",
+        "agree": true
+      },
+      {
+        "line": "G14",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "\"Not for me\" stayed on after going to Charts and back, and after a reload. A toast said \"Got it — we'll play less like this\".",
+        "saw2": "\"Not for me\" on Static Shock showed \"Got it — we'll play less like this\" and was still on after leaving, coming back and reloading.",
+        "agree": true
+      },
+      {
+        "line": "G15",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Person B followed person A; the button changed to \"Following\" and A's follower count went to 1. Unfollowing set it back to \"Follow\" and 0 followers, also after a reload.",
+        "saw2": "On uploader Mira Vos's profile, Follow changed to \"Following\" with 3 followers; tapping it again showed \"Follow\" with 2 followers, and both states held after a reload.",
+        "agree": true
+      },
+      {
+        "line": "G16",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "While following person A, person B's Home had a \"New from creators you follow\" section listing Zephyr Marmalade.",
+        "saw2": "After I followed Mira, Home showed a \"New from creators you follow\" section listing all 8 of her uploads.",
+        "agree": true
+      },
+      {
+        "line": "G17",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I made the playlist \"Grader Mix Kumquat\" from the song and added a second song. The playlist page lists both, and Play started the first song.",
+        "saw2": "I made playlist \"Grader Mix 1019\" from \"Add to playlist\" and added a second song; the playlist page lists both, and Play started the first one in the player.",
+        "agree": true
+      },
+      {
+        "line": "G18",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Share said \"Link copied to clipboard\". Person B, signed out, opened /playlist/7 and saw both songs.",
+        "saw2": "Share showed \"Link copied to clipboard\"; person B opened /playlist/7 while signed out and saw \"Grader Mix 1019\" with both songs.",
+        "agree": true
+      },
+      {
+        "line": "G19",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Every flow above worked at 390 px using the bottom nav bar and the player bar at the foot of the screen.",
+        "saw2": "Every page I used works at 390 px with a bottom tab bar (Home, Search, Charts, Library, Upload). See O12 for a 2 px overflow.",
+        "agree": true
+      },
+      {
+        "line": "O1",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The upload form has Title, Artist (with \"create new\") and Album (with \"+ New album…\") in one form, saved with one Publish.",
+        "saw2": "One upload form had Title, Artist (with \"Create a new artist\") and Album (with \"New album\"), and all three were saved together.",
+        "agree": true
+      },
+      {
+        "line": "O2",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The artist has a name and a Bio, which shows under \"About\". The album has a title, and the cover I added through Edit shows on its page.",
+        "saw2": "\"Edit artist\" has a name field and a Bio field, and the bio shows under \"About\". \"Edit album\" has a title and cover art, and the cover I added shows on the album page after a reload.",
+        "agree": true
+      },
+      {
+        "line": "O3",
+        "g1": "fail",
+        "g2": "fail",
+        "saw1": "Home \"Fresh uploads\" and the search list show the cover, title and artist, but no genre.",
+        "saw2": "In \"Fresh uploads\", on Home and at /search?sort=new, the new song shows its cover, title and artist, but not its genre.",
+        "agree": true
+      },
+      {
+        "line": "O4",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The results updated with each letter typed. \"Q\", \"Qu\" and \"Qui\" each showed 20 songs; \"Quil\" showed 1.",
+        "saw2": "Typing \"Quok\" one letter at a time updated the results without pressing Enter.",
+        "agree": true
+      },
+      {
+        "line": "O5",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "\"Clear filters\" reset the genre to \"All genres\" and showed the full browse view again.",
+        "saw2": "\"Clear filters\" set Genre back to \"All genres\" and the full browse view came back.",
+        "agree": true
+      },
+      {
+        "line": "O6",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The player bar shows \"Zephyr Marmalade\" and \"Quillon Vasquez\".",
+        "saw2": "The player bar shows \"Quokka Lantern Ride\" and \"Zephyr Marmalade\".",
+        "agree": true
+      },
+      {
+        "line": "O7",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "During playback I went to Library and then Home; the progress kept moving (500 → 566) and the button still read Pause.",
+        "saw2": "The song kept playing after I tapped Search; it was only 20 seconds long, so by then the player had moved on to the next song, still playing.",
+        "agree": true
+      },
+      {
+        "line": "O8",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Unlike worked. The count changed (0 → 1 → 0 likes), but only after a reload, not right after tapping.",
+        "saw2": "Unlike turned the button off. The count went 0→1 on like and 1→0 on unlike, but only showed after a reload; straight after tapping, it still showed the old number.",
+        "agree": true
+      },
+      {
+        "line": "O9",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Tapping \"Not for me\" again cleared it, and it stayed cleared after a reload.",
+        "saw2": "Tapping \"Not for me\" again turned it off, and it stayed off after a reload.",
+        "agree": true
+      },
+      {
+        "line": "O10",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "In profile B, I logged in as person A and saw the upload, artist, playlist and liked song on A's profile.",
+        "saw2": "After logging in as graderA1019 in person B's browser, Studio listed both uploads, the artist and the album, and Library listed the playlist.",
+        "agree": true
+      },
+      {
+        "line": "O11",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "After a reload, the button still read \"Following\" and A still had 1 follower.",
+        "saw2": "After a reload, Mira's profile still showed \"Following\" and 3 followers.",
+        "agree": true
+      },
+      {
+        "line": "O12",
+        "g1": "fail",
+        "g2": "fail",
+        "saw1": "Once the player bar is showing, every page I checked (18) can be scrolled sideways by 2 px, because the player's progress bar sticks out past the right edge. No controls were cut off.",
+        "saw2": "With the player bar showing, every page I checked (19 of them) scrolls sideways by 2 px: the player's progress row ends at 392 px. Before the player appeared, the page was exactly 390 px wide.",
+        "agree": true
+      },
+      {
+        "line": "O13",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The only console error in either profile was a 401 from /api/auth/login, caused by my deliberate wrong-password try.",
+        "saw2": "The console had 0 errors and 0 warnings for the whole session in both browser profiles.",
+        "agree": true
+      },
+      {
+        "line": "O14",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The cover art and \"About this song\" are on the song itself, set in the upload form, not only on the artist or album.",
+        "saw2": "Cover art and \"About this song\" were added to the song itself on the upload form and show on the song page.",
+        "agree": true
+      },
+      {
+        "line": "O15",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Resume carried on from the same point (924 → 938). The MP3 loaded and was not muted; I cannot actually hear audio in this browser.",
+        "saw2": "Resume carried on from 560/1000 rather than starting over. The MP3 loaded as audio/mpeg and the player wasn't muted, but I could only see it play, not hear it, in this browser.",
+        "agree": true
+      },
+      {
+        "line": "O16",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "With Platform = Udio, the song published (\"is live!\"), and its page shows \"Made with: Udio\".",
+        "saw2": "I picked Platform \"Udio\" and published with no complaint; the page shows \"Made with Udio\".",
+        "agree": true
+      },
+      {
+        "line": "O17",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Saved with no link: the page shows no Remix or original-link button and no empty links.",
+        "saw2": "The Udio song, saved with the link left empty, shows no Remix or original link on its page.",
+        "agree": true
+      },
+      {
+        "line": "O18",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Person B played Departure Gate through 3 times with no likes, and it moved from 30th to 28th on the weekly chart. The play count rose by only 1 (1 → 2), and 6-second plays added nothing.",
+        "saw2": "B played \"Departure Gate\" 4 times but only the first counted (1→2 plays). That moved it from #30 to #28 on the weekly chart; on the Today chart it stayed at #14.",
+        "agree": true
+      },
+      {
+        "line": "O19",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "People search for \"Grader Ann\" found person A. After following, A appeared in person B's Library → People.",
+        "saw2": "Search → People for \"mira\" found Mira Vos; after I followed her she appeared under Library → People, and disappeared after I unfollowed.",
+        "agree": true
+      },
+      {
+        "line": "O20",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "After I liked 3 Synthwave songs and disliked 2 Lo-fi and 1 Jazz, \"Made for you\" put the other Synthwave songs first and second. The remaining Jazz and Lo-fi songs dropped to 15th and 16th (they were 11th and 10th before).",
+        "saw2": "New account D liked 3 Synthwave songs and disliked 3 Folk songs. In \"Made for you\", the 2 other Synthwave songs moved to #1 and #2 and the disliked songs were gone. The only Folk song left (Quokka) dropped from #22 to last place (#20).",
+        "agree": true
+      },
+      {
+        "line": "O21",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "\"Made for you\" says \"Songs you haven't heard yet…\" and lists songs I had not uploaded, liked or played.",
+        "saw2": "\"Made for you\" says \"Songs you haven't heard yet…\" and lists songs the account hadn't uploaded, liked or played.",
+        "agree": true
+      },
+      {
+        "line": "O22",
+        "g1": "fail",
+        "g2": "pass",
+        "saw1": "I could play, search, make a playlist and follow without getting stuck. The screens are not plain: the upload form has about 15 inputs, including voice profile, mood, track #, tags, style/prompt, lyrics and a remix toggle, and the signed-in Home has 7 sections.",
+        "saw2": "I played a song, searched, made a playlist and followed a creator without help or getting stuck. For the \"plain\" part: Home has 8 sections, the upload form has about 15 fields, and search has 6 filter controls.",
+        "agree": false
+      }
+    ],
+    "M": [
+      {
+        "line": "G1",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I created `gradera1` with username, email and password and landed on Home signed in; later I logged in again as `gradera1` on the second profile.",
+        "saw2": "Create account (username, email, password) signed me straight in; later I logged in as the same user in person B's browser.",
+        "agree": true
+      },
+      {
+        "line": "G2",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "\"Choose audio file\" opened a real file picker; after picking my-song.mp3 and publishing, the song \"Zephyr Marmalade\" opened on its own page and appeared under Fresh uploads.",
+        "saw2": "\"Choose audio file\" opened a real file picker; I picked my-song.mp3, published, and landed on the new song's page. It also appeared in Search and Fresh uploads.",
+        "agree": true
+      },
+      {
+        "line": "G3",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I picked Jazz in the Genre field, and the song page reads \"Jazz · Made with Suno\".",
+        "saw2": "I picked Jazz from the Genre dropdown and the song page reads \"Jazz · Made with Suno\".",
+        "agree": true
+      },
+      {
+        "line": "G4",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "cover.png (a purple square) shows on the song page, on the home card, in search results and in the playlist.",
+        "saw2": "\"Choose image\" took cover.png; it shows as the big picture on the song page and as the song's tile picture in the lists.",
+        "agree": true
+      },
+      {
+        "line": "G5",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The story text shows under \"The story\" on the song page, including for person B when signed out.",
+        "saw2": "The text I typed into \"The story\" shows under a \"The story\" heading on the song page, and person B could open that page too.",
+        "agree": true
+      },
+      {
+        "line": "G6",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Tapping \"Remix on Suno\" opened a new tab at https://suno.com/song/3f2a9b1c-test (title \"Suno \\",
+        "saw2": "Tapping \"Remix on Suno\" opened a new tab at https://suno.com/song/abc123 (Suno's site loaded).",
+        "agree": true
+      },
+      {
+        "line": "G7",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The new artist \"Quillfeather Moon\" was created during upload; tapping the artist name opened the artist page, which lists Zephyr Marmalade under Songs.",
+        "saw2": "I made the new artist \"Quillfeather Moss\" during upload; tapping the name opened an artist page listing the song under \"Songs\".",
+        "agree": true
+      },
+      {
+        "line": "G8",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The album \"Toast Chronicles\" was created during upload; its page shows the cover and lists Zephyr Marmalade.",
+        "saw2": "Typing \"Orchard Tapes\" in Album made the album; its page lists Zephyr Marmalade, \"1 song\".",
+        "agree": true
+      },
+      {
+        "line": "G9",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "\"Zeph\" showed 1 song (Zephyr Marmalade); \"Neon\" showed the Neon Harbor artist and only its 3 songs.",
+        "saw2": "Search for \"Marma\" (from the title) showed only Zephyr Marmalade. \"Qui\" (from the artist name) showed the artist plus that song.",
+        "agree": true
+      },
+      {
+        "line": "G10",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Choosing Electronic on Search listed 3 songs, all Electronic; choosing Jazz listed only Zephyr Marmalade.",
+        "saw2": "Genre \"Rock\" showed 2 songs, both Rock; \"Jazz\" showed 1 song (mine). The Rock chip on the home page opened the same filtered list.",
+        "agree": true
+      },
+      {
+        "line": "G11",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The \"Most liked\" sort put Station Platform (4 likes) first. The default \"Most popular\" sort and the home \"Trending\" list put Low Pressure (2 likes, 336 plays) first.",
+        "saw2": "Search's \"Most liked\" sort puts Station Platform (4 likes, the highest) first. But home \"Trending\" and the default \"Most popular\" sort put Low Pressure (2 likes) first.",
+        "agree": true
+      },
+      {
+        "line": "G12",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Tapping Play started the song and the progress bar moved. Pause held the slider at 67.5 for 2 seconds; resume carried on to 68.8.",
+        "saw2": "Play started it: the bottom bar showed the title and the progress moved. Pause held at 55.8% for 3 s, and resume continued from 55.8% onward.",
+        "agree": true
+      },
+      {
+        "line": "G13",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The thumb-up turned green and the count went 0→1; after leaving to Home, coming back and reloading, it was still green with 1.",
+        "saw2": "Like turned the count 0→1 in green, and it was still 1 and green after a full reload.",
+        "agree": true
+      },
+      {
+        "line": "G14",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The thumb-down turned green, and it was still green after going to Library and coming back.",
+        "saw2": "Dislike turned green and stayed green after going to Home and coming back by reloading the page.",
+        "agree": true
+      },
+      {
+        "line": "G15",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "On @gradera1's profile, person B tapped Follow (\"Following\", 1 follower), then tapped again (\"Follow\", 0 followers); the library list emptied.",
+        "saw2": "Person B tapped Follow on @gradera1019's page: it became \"Following, 1 follower\". Tapping again went back to \"Follow, 0 followers\", and that stayed after a reload.",
+        "agree": true
+      },
+      {
+        "line": "G16",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "After following, B's Home showed a \"From creators you follow\" section containing Zephyr Marmalade.",
+        "saw2": "Person B's home showed a \"From creators you follow\" section with Zephyr Marmalade in it.",
+        "agree": true
+      },
+      {
+        "line": "G17",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I made \"Breakfast Mix\" and added 2 songs through \"Add to playlist\"; the playlist page lists both, and its Play button started the first one.",
+        "saw2": "\"Add to playlist… → New playlist → Add\" made a playlist; I added a second song the same way. The playlist page listed both, Play started song 1, and Next went to song 2.",
+        "agree": true
+      },
+      {
+        "line": "G18",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Share copied the playlist link; person B, signed out in the other profile, opened it and saw \"Breakfast Mix\" with both songs.",
+        "saw2": "Share said \"Link copied\" (the playlist URL). Person B, signed out in the other profile, opened it and saw \"New playlist, 2 songs\" with both songs.",
+        "agree": true
+      },
+      {
+        "line": "G19",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Every flow above was completed at 390 px with tap targets reachable.",
+        "saw2": "Every flow above was done at 390 px with taps and typing.",
+        "agree": true
+      },
+      {
+        "line": "O1",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The single upload form has Title, Artist (with new-artist name and bio) and Album fields together.",
+        "saw2": "The upload form has Title, Artist (new or existing) and Album in the same form, saved by one Publish tap.",
+        "agree": true
+      },
+      {
+        "line": "O2",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The artist page shows the name and an \"About\" text; the album page shows its title and cover art.",
+        "saw2": "The artist page shows the name and an \"About\" with the text I entered. The album page shows the title and a cover picture, which was the song's cover; the form has no separate album-cover input.",
+        "agree": true
+      },
+      {
+        "line": "O3",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The Fresh uploads card shows the cover, \"Zephyr Marmalade\" (cut short at the card edge), \"Quillfeather Moon\" and \"Jazz · 0 likes\".",
+        "saw2": "Fresh uploads shows my song's tile with the cover, \"Zephyr Marmalade\", \"Quillfeather Moss\" and \"Jazz · 0 likes\".",
+        "agree": true
+      },
+      {
+        "line": "O4",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Typing \"Neon\" one letter at a time changed the count from 15 to 6 to 3 to 3 songs.",
+        "saw2": "The count went from \"15 songs\" to \"1 song\" after the first typed letter, with no submit.",
+        "agree": true
+      },
+      {
+        "line": "O5",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Setting the genre back to \"Any genre\" brought the list back to 15 songs.",
+        "saw2": "Setting the genre back to \"Any genre\" restored \"15 songs\".",
+        "agree": true
+      },
+      {
+        "line": "O6",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The player bar shows the song title, cut short to \"Zephyr Mar\", with the artist underneath.",
+        "saw2": "The bottom player shows \"Zephyr Marmalade / Quillfeather Moss\" while playing.",
+        "agree": true
+      },
+      {
+        "line": "O7",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Station Platform kept playing, with the bar advancing, after moving from Home to Library.",
+        "saw2": "I moved from the song page to Search while it played; the title stayed in the bar and progress kept going (83.8 → 91.8).",
+        "agree": true
+      },
+      {
+        "line": "O8",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Unliking turned the count from 1 back to 0 and the thumb went grey.",
+        "saw2": "Like 0→1, and tapping again un-liked it back to 0 with the green gone.",
+        "agree": true
+      },
+      {
+        "line": "O9",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Tapping the green thumb-down again turned it grey, and it stayed grey after a reload.",
+        "saw2": "Tapping dislike again took the green off, and it stayed off after a reload.",
+        "agree": true
+      },
+      {
+        "line": "O10",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "After A signed out, logging in as `gradera1` in B's profile showed both uploads and the playlist on \"This is you\".",
+        "saw2": "In person B's browser I signed out and logged in as person A: the profile showed 1 song, the artist and the playlist. The song played and its cover loaded.",
+        "agree": true
+      },
+      {
+        "line": "O11",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "After a reload, B's profile view still showed \"Following\" and the library listed @gradera1.",
+        "saw2": "Person B was still \"Following, 1 follower\" after a reload, and the Library listed @gradera1019 under \"Creators you follow\".",
+        "agree": true
+      },
+      {
+        "line": "O12",
+        "g1": "fail",
+        "g2": "pass",
+        "saw1": "No page scrolls sideways (page width stayed 390 on all 11 pages checked), but the player bar cuts text short: \"Nothing play…\" and \"Zephyr Mar…\".",
+        "saw2": "No page was wider than 390 px, and no button or field sat off-screen. I checked 10 pages: home, search, library, upload, two songs, artist, album, playlist and creator.",
+        "agree": false
+      },
+      {
+        "line": "O13",
+        "g1": "fail",
+        "g2": "fail",
+        "saw1": "The console logged \"Failed to load resource: 404 … /favicon.ico\" as an error on every page load; there were no other errors.",
+        "saw2": "Both profiles log a console error on every page load: \"Failed to load resource: 404 … /favicon.ico\". There were no other errors.",
+        "agree": true
+      },
+      {
+        "line": "O14",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The story and the cover art were added in the song's own upload form and show on the song page.",
+        "saw2": "Cover art and \"The story\" are fields on the song's own upload form and show on the song page.",
+        "agree": true
+      },
+      {
+        "line": "O15",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Resume carried on from the same point (67.5 → 68.8). I could not hear audio in this browser; I only saw the progress bar move.",
+        "saw2": "Resume carried on from the same point (55.8% before, 55.8% then 62.6% after). I could only see progress moving and could not hear the audio in this browser.",
+        "agree": true
+      },
+      {
+        "line": "O16",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "\"Udio Pancake Waltz\" with \"Made with: Udio\" published without any block.",
+        "saw2": "I picked \"Udio\" in \"Made with\" and published without a problem; the song reads \"Pop · Made with Udio\".",
+        "agree": true
+      },
+      {
+        "line": "O17",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "That song was saved with an empty link field; its page has no Remix button and no links at all.",
+        "saw2": "With the link field left empty, the song saved, and its page has no Remix/link button, only Play, like, playlist and Share.",
+        "agree": true
+      },
+      {
+        "line": "O18",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "B played Fog Index all the way through 7 times (27→34 plays); it moved above Reply All in the \"Most played\" sort. The \"Most popular\" sort did not change.",
+        "saw2": "Person B played Station Platform 6 times (a play only counted after about 30 s), taking it from 22 to 28 plays. It then moved from 13th to 11th in \"Most popular\", passed Fog Index in \"Most played\", and entered home \"Trending\".",
+        "agree": true
+      },
+      {
+        "line": "O19",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Searching \"gradera1\" showed only their song and no people; I reached the person through \"Shared by @gradera1\" on the song page, followed them, and they appeared under \"Creators you follow\".",
+        "saw2": "Person B reached @gradera1019 through \"Shared by @gradera1019\" on a song, followed them, and the Library listed them under \"Creators you follow\". Search for \"gradera\" listed the song but not the person.",
+        "agree": true
+      },
+      {
+        "line": "O20",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "After 3 Electronic likes and 2 Folk dislikes, \"For you\" stayed empty (\"Give a few songs a thumbs up…\"). After one more like on an Ambient song, it showed Fog Index (Ambient) and no Folk songs.",
+        "saw2": "After person B liked the Electronic songs and disliked two Folk ones, \"For you\" stayed empty, since all three Electronic songs were liked. After un-liking one Electronic song, \"For you\" showed only that song (Chrome Hearts, Electronic) and no Folk.",
+        "agree": true
+      },
+      {
+        "line": "O21",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Home has Trending, Fresh uploads, Artists to discover and For you, showing songs B had not uploaded, liked or played (e.g. Rivers Remember). Those sections also include songs B had liked or played.",
+        "saw2": "Home has \"Trending\", \"Fresh uploads\" and \"Artists to discover\" (plus \"For you\") with songs I hadn't uploaded, liked or played.",
+        "agree": true
+      },
+      {
+        "line": "O22",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Playing, searching, making a playlist and following a creator were each done without getting stuck; the screens are plain lists and buttons.",
+        "saw2": "I played, searched, made a playlist and followed a creator without getting stuck, on plain list-style screens. The top bar's buttons are icons with no text labels, so I tapped each one to learn where it goes, and the sign-out icon signs out on one tap with no confirmation.",
+        "agree": true
+      }
+    ],
+    "R": [
+      {
+        "line": "G1",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I signed up with name, email and password, landed on Home signed in, and later logged in with the same account from the second profile.",
+        "saw2": "Sign-up with name, email and password signed person A in, and later person A logged in with that email and password on the second profile.",
+        "agree": true
+      },
+      {
+        "line": "G2",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The Upload page has a real \"Audio file\" picker; I chose my-song.mp3 and the song opened on its own page and played (20 s long).",
+        "saw2": "The \"Audio file\" button opened a real file picker; I chose my-song.mp3 and it became a song page, \"Zebra Lighthouse\", that plays a 20-second track.",
+        "agree": true
+      },
+      {
+        "line": "G3",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I picked \"Jazz\" in the Genre dropdown and the song page shows a \"Jazz\" tag.",
+        "saw2": "I picked Reggae from the Genre list when uploading, and the song page shows a \"Reggae\" tag.",
+        "agree": true
+      },
+      {
+        "line": "G4",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I chose cover.png as the cover picture and it shows as a 320 px image on the song page.",
+        "saw2": "cover.png, added in the upload form, shows as a large picture on the song page and as a small picture in the lists.",
+        "agree": true
+      },
+      {
+        "line": "G5",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I typed text into \"About this song\"; it shows under that heading, and person B opening the song reads the same text.",
+        "saw2": "The \"About this song\" text I typed shows on the song page, and person B could read it there.",
+        "agree": true
+      },
+      {
+        "line": "G6",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I entered a suno.com link; the song page has a \"Remix on Suno\" link, and tapping it opened that suno.com page in a new tab.",
+        "saw2": "The song page shows \"Remix on Suno\"; tapping it opened suno.com/song/3f9b2c1e-zebra in a new tab.",
+        "agree": true
+      },
+      {
+        "line": "G7",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I created the artist \"Quillon Vey\" in the upload form; the artist's page lists \"Zebrafish Sunrise\" under Songs.",
+        "saw2": "I created the made-up artist \"Quillfeather Nova\" while uploading; the artist page lists Zebra Lighthouse.",
+        "agree": true
+      },
+      {
+        "line": "G8",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I created the album \"Harbor Lights LP\" in the upload form; the album page lists the song as track 1.",
+        "saw2": "I created the album \"Harbor Echoes\" while uploading; the album page lists Zebra Lighthouse as track 1.",
+        "agree": true
+      },
+      {
+        "line": "G9",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Searching \"Zebra\" (title) and \"Quillon\" (artist) both showed \"Zebrafish Sunrise\".",
+        "saw2": "After tapping Go, searching \"Zebra\" (title) and \"Quillfeather\" (artist) both showed Zebra Lighthouse.",
+        "agree": true
+      },
+      {
+        "line": "G10",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Genre = Jazz showed only 3 songs, and each one's page shows Jazz.",
+        "saw2": "The Reggae filter showed only Zebra Lighthouse; the Electronic filter showed only Midnight Arcade and Chrome Horizon.",
+        "agree": true
+      },
+      {
+        "line": "G11",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Top → All time puts Midnight Arcade first, which has the most likes among the songs I checked (4, against 3, 2, 2 and 0); the default \"This week\" view had Moon Rent (3 likes) first.",
+        "saw2": "The Top page ranks by \"plays, plus 5 points for each like, minus 3 for each dislike\"; under All time the first song is Midnight Arcade, which has the most likes (4).",
+        "agree": true
+      },
+      {
+        "line": "G12",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Tapping Play started the song; Pause stopped it at 0:11, and Play carried on from 0:11.",
+        "saw2": "Tapping Play started the song; Pause stopped it at 0:13 and Play carried on from 0:13.",
+        "agree": true
+      },
+      {
+        "line": "G13",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I liked the song (1 like, button pressed); after a reload it was still pressed with 1 like.",
+        "saw2": "Like showed as pressed with \"1 like\", and it was still pressed with \"1 like\" after a reload.",
+        "agree": true
+      },
+      {
+        "line": "G14",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I disliked the song, went to Home and came back; Dislike was still pressed.",
+        "saw2": "Dislike showed as pressed; after going to Home and back to the song it was still pressed.",
+        "agree": true
+      },
+      {
+        "line": "G15",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Person B followed Maya Lin (button turned \"Following\", 4 followers), then unfollowed (back to \"Follow\", 3 followers after reload).",
+        "saw2": "On Grader Alpha's profile, person B tapped Follow (changed to \"Following\", 1 follower), then tapped Following to unfollow (back to \"Follow\", 0 followers).",
+        "agree": true
+      },
+      {
+        "line": "G16",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "After B followed Grader A, B's Home showed a \"From creators you follow\" section with Grader A's song.",
+        "saw2": "Person B's Home has a \"From creators you follow\" section showing Zebra Lighthouse.",
+        "agree": true
+      },
+      {
+        "line": "G17",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I created the playlist \"Foggy Mornings\" from \"Add to playlist\", added two songs, opened it from Library, and \"Play all\" started the first song.",
+        "saw2": "I made the playlist \"Foggy Mornings\" from \"Add to playlist\" and added two songs; opening it listed both, and tapping Midnight Arcade played it.",
+        "agree": true
+      },
+      {
+        "line": "G18",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Person B opened the playlist's address and saw \"Foggy Mornings by Grader A · 2 songs\" with both songs; tapping Share gave no visible feedback, so I passed B the address directly.",
+        "saw2": "Person B opened the playlist address and saw both songs, under \"by Grader Alpha\".",
+        "agree": true
+      },
+      {
+        "line": "G19",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "All the flows above worked at 390 px with a bottom tab bar and a mini-player.",
+        "saw2": "All 22 pages I checked fit the 390 px width with no page-level sideways scroll, and the last buttons sit above the fixed player and menu bars.",
+        "agree": true
+      },
+      {
+        "line": "O1",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The one upload form has Title, Artist (+ New artist), Album (+ New album) and Track number fields.",
+        "saw2": "One upload form has Title, Artist (with \"+ New artist…\") and Album (with \"+ New album…\").",
+        "agree": true
+      },
+      {
+        "line": "O2",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The artist has a name, and the Bio I saved shows on its page; the album has a title, and the cover I added shows on its page.",
+        "saw2": "Editing the artist has Name and Bio, and the bio I saved shows on the artist page; editing the album has Title and Cover picture, and the cover I added shows on the album page.",
+        "agree": true
+      },
+      {
+        "line": "O3",
+        "g1": "fail",
+        "g2": "fail",
+        "saw1": "The new song appears in \"New releases\" on Home with its cover, title and artist, but no genre; the search list doesn't show the genre either.",
+        "saw2": "Home \"New releases\" and the full New list show the song's cover, title and artist, but no genre.",
+        "agree": true
+      },
+      {
+        "line": "O4",
+        "g1": "fail",
+        "g2": "fail",
+        "saw1": "I typed \"Zebra\" into Search one letter at a time and nothing changed; results only appeared after I tapped \"Go\".",
+        "saw2": "Typing \"Zebra\" into the search box changed nothing; results came only after tapping Go.",
+        "agree": true
+      },
+      {
+        "line": "O5",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Setting Genre back to \"Any genre\" removed the filter and the unfiltered search page came back.",
+        "saw2": "Setting Genre back to \"Any genre\" removed the filter and brought back the normal search page.",
+        "agree": true
+      },
+      {
+        "line": "O6",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The player bar shows \"Zebrafish Sunrise\" and \"Quillon Vey\".",
+        "saw2": "The player bar shows \"Zebra Lighthouse\" and \"Quillfeather Nova\".",
+        "agree": true
+      },
+      {
+        "line": "O7",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I started the song on the artist page, tapped through to the album page, and it was still playing at 0:07.",
+        "saw2": "Midnight Arcade, started from the playlist, kept playing (0:10 → 0:11) after I tapped Top in the menu.",
+        "agree": true
+      },
+      {
+        "line": "O8",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Like changed the count from 0 to 1 like, and unliking changed it back to 0 likes.",
+        "saw2": "Tapping Like again un-pressed it, and the count went from \"1 like\" to \"0 likes\".",
+        "agree": true
+      },
+      {
+        "line": "O9",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Tapping Dislike again un-pressed it, and it stayed off after a reload.",
+        "saw2": "Tapping Dislike again un-pressed it, and it stayed un-pressed after a reload.",
+        "agree": true
+      },
+      {
+        "line": "O10",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "In the second profile, signed in as Grader A, the profile showed artist Quillon Vey and song Zebrafish Sunrise; I didn't sign out of the first profile.",
+        "saw2": "Logged in as person A on profile B, the Library showed both uploads, the artist and the playlist.",
+        "agree": true
+      },
+      {
+        "line": "O11",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "After a reload, Grader A's page still showed \"Following\" and \"1 follower\".",
+        "saw2": "After a reload, Grader Alpha's profile still showed \"Following\" and 1 follower for person B.",
+        "agree": true
+      },
+      {
+        "line": "O12",
+        "g1": "fail",
+        "g2": "pass",
+        "saw1": "No page scrolled sideways (page width 390 on all 14 pages), but the middle of the Home tab is covered by the \"Open Next.js Dev Tools\" button, so a tap there didn't go through; only its edges could be tapped.",
+        "saw2": "No page scrolled sideways at 390 px; only the Home song rows slide sideways, inside their own row. The last controls are reachable above the fixed bars.",
+        "agree": false
+      },
+      {
+        "line": "O13",
+        "g1": "fail",
+        "g2": "fail",
+        "saw1": "Every page logs \"Failed to load resource: 404 … /favicon.ico\" as an error, and the search page also logged three \"preloaded but not used\" CSS warnings.",
+        "saw2": "Every full page load put one error in the console: \"Failed to load resource: 404\" for /favicon.ico. There were no other errors or warnings.",
+        "agree": true
+      },
+      {
+        "line": "O14",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "The cover picture and the \"About this song\" text were added to the song itself, and both show on the song page.",
+        "saw2": "The cover picture and \"About this song\" text were added on the song's own upload form and show on the song page.",
+        "agree": true
+      },
+      {
+        "line": "O15",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "Paused at 11.51 s and resumed from 11.51 s, not muted, volume full; I can't hear audio through these tools, but the playback position kept moving.",
+        "saw2": "Play carried on from the paused point (13.2 s), unmuted at full volume; the MP3 decodes to real sound (not silence). I could not listen by ear.",
+        "agree": true
+      },
+      {
+        "line": "O16",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I uploaded \"Udio Pebble Dance\" with AI tool = Udio; it saved and shows \"Made with Udio\".",
+        "saw2": "I uploaded \"Udio Tidepool\" with Udio as the AI tool; it saved and shows \"Made with Udio\".",
+        "agree": true
+      },
+      {
+        "line": "O17",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "That song has no link back, and its page shows no remix link and no broken link.",
+        "saw2": "That song was saved with no link, and its page shows no Remix link, empty or broken.",
+        "agree": true
+      },
+      {
+        "line": "O18",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "With no likes, B played Zebrafish Sunrise all the way through 9 times, and it moved from #3 to #2 in Top \"This week\".",
+        "saw2": "Person B played Zebra Lighthouse to the end 5 times (only full plays counted; 6-second plays did not). Plays went from 1 to 6 and it moved from #22 to #20 in the All-time ranking with 0 likes.",
+        "agree": true
+      },
+      {
+        "line": "O19",
+        "g1": "fail",
+        "g2": "pass",
+        "saw1": "Searching \"Grader\" listed people under \"Creators\", and B followed Grader A; Grader A then appeared under \"People you follow\" in B's Library.",
+        "saw2": "Searching \"Grader\" showed a \"Creators\" section with people; person B followed Grader Alpha, who then appeared under \"People you follow\".",
+        "agree": false
+      },
+      {
+        "line": "O20",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "After B liked 2 Rock songs and disliked 3 Hip-Hop songs, \"Made for you\" put the third Rock song first and dropped all the Hip-Hop songs.",
+        "saw2": "Person B liked 2 Lo-fi songs and disliked 2 Rock songs. Before, \"Made for you\" was the general popular list; after, the remaining Lo-fi song (Sleepy Tram) came first and no Rock songs appeared.",
+        "agree": true
+      },
+      {
+        "line": "O21",
+        "g1": "fail",
+        "g2": "pass",
+        "saw1": "\"Made for you\" left out the songs B had liked, but still included Zebrafish Sunrise, which B had played many times; I found no place that shows only unplayed songs.",
+        "saw2": "\"Made for you\" left out person B's liked songs and included songs B had never played, such as Sleepy Tram. It still included Zebra Lighthouse, which B had played 6 times.",
+        "agree": false
+      },
+      {
+        "line": "O22",
+        "g1": "pass",
+        "g2": "pass",
+        "saw1": "I played a song, searched, made a playlist and followed a creator from plain list-style screens without getting stuck; the one snag was the Home tab tap being blocked (O12).",
+        "saw2": "Playing, searching, making a playlist and following all worked from visible buttons, and nothing got stuck (search just needs a tap on Go). The screens are simple lists and forms.",
+        "agree": true
+      }
+    ]
+  }
+}

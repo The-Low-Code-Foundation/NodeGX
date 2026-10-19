@@ -156,5 +156,6 @@ fs.writeFileSync(path.join(OUT, 'grade-url.json'), JSON.stringify(report, null, 
 console.log(JSON.stringify({ routes: report.routesReached, consoleErrors: report.console.errors.length, notFavicon: report.console.notFavicon, sideways: report.overflow390.routesScrollingSideways, like: like.result }));
 ws.close();
 chrome.kill();
-fs.rmSync(profile, { recursive: true, force: true });
+await sleep(1500); // Chrome is still writing its profile as it exits
+try { fs.rmSync(profile, { recursive: true, force: true }); } catch {}
 process.exit(0);

@@ -1,0 +1,372 @@
+{
+  "url": "http://localhost:5103/",
+  "at": "2026-10-19T20:18:17.023Z",
+  "routesReached": 25,
+  "console": {
+    "routesWithErrors": 1,
+    "notFavicon": 0,
+    "errors": [
+      {
+        "route": 0,
+        "kind": "log.network",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found) http://localhost:5103/favicon.ico"
+      }
+    ]
+  },
+  "overflow390": {
+    "routesScrollingSideways": []
+  },
+  "like": {
+    "result": "not reached",
+    "why": "the press changed nothing a script can read on that control",
+    "found": {
+      "name": "Play Pixel Heartbreak P",
+      "x": 712,
+      "y": 333
+    },
+    "before": {
+      "pressed": null,
+      "name": "Play Pixel Heartbreak P",
+      "html": "<div data-testid=\"cover-fallback\" aria-hidden=\"true\" style=\"background:linear-gradient(135deg, hsl(232 70% 45%), hsl(304 75% 30%))\" class=\"flex select-none items-center justify-center font-bold text-w",
+      "around": "P\nPixel Heartbreak\nVelvet Static"
+    },
+    "after": {
+      "pressed": null,
+      "name": "Play Pixel Heartbreak P",
+      "html": "<div data-testid=\"cover-fallback\" aria-hidden=\"true\" style=\"background:linear-gradient(135deg, hsl(232 70% 45%), hsl(304 75% 30%))\" class=\"flex select-none items-center justify-center font-bold text-w",
+      "around": "P\nPixel Heartbreak\nVelvet Static"
+    }
+  },
+  "routes": [
+    {
+      "n": 0,
+      "url": "http://localhost:5103/",
+      "finalUrl": "http://localhost:5103/",
+      "title": "OpenSound",
+      "errors": [
+        {
+          "kind": "log.network",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found) http://localhost:5103/favicon.ico"
+        }
+      ],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 1,
+      "url": "http://localhost:5103/login",
+      "finalUrl": "http://localhost:5103/login",
+      "title": "Log in · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 2,
+      "url": "http://localhost:5103/signup",
+      "finalUrl": "http://localhost:5103/signup",
+      "title": "Sign up · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 3,
+      "url": "http://localhost:5103/more/for-you",
+      "finalUrl": "http://localhost:5103/more/for-you",
+      "title": "Made for you · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 4,
+      "url": "http://localhost:5103/song/cmvfkiqn6000bx5d10iv1q6ho",
+      "finalUrl": "http://localhost:5103/song/cmvfkiqn6000bx5d10iv1q6ho",
+      "title": "Midnight Arcade by Velvet Static · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 5,
+      "url": "http://localhost:5103/artist/cmvfkiqm70007x5d170gknhv9",
+      "finalUrl": "http://localhost:5103/artist/cmvfkiqm70007x5d170gknhv9",
+      "title": "Velvet Static · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 6,
+      "url": "http://localhost:5103/song/cmvfkir4t001zx5d1185560fx",
+      "finalUrl": "http://localhost:5103/song/cmvfkir4t001zx5d1185560fx",
+      "title": "Moon Rent by Kid Comet · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 7,
+      "url": "http://localhost:5103/artist/cmvfkir2f001rx5d1jy32o8m2",
+      "finalUrl": "http://localhost:5103/artist/cmvfkir2f001rx5d1jy32o8m2",
+      "title": "Kid Comet · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 8,
+      "url": "http://localhost:5103/song/cmvfkir2e001px5d14wpyaz70",
+      "finalUrl": "http://localhost:5103/song/cmvfkir2e001px5d14wpyaz70",
+      "title": "Golden Hour Groove by Sunday Theory · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 9,
+      "url": "http://localhost:5103/artist/cmvfkir0j001lx5d1k7oyenzt",
+      "finalUrl": "http://localhost:5103/artist/cmvfkir0j001lx5d1k7oyenzt",
+      "title": "Sunday Theory · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 10,
+      "url": "http://localhost:5103/song/cmvfkiqzl001hx5d1n69trstn",
+      "finalUrl": "http://localhost:5103/song/cmvfkiqzl001hx5d1n69trstn",
+      "title": "Cathedral of Fog by Lumen Choir · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 11,
+      "url": "http://localhost:5103/artist/cmvfkiqyp001fx5d1pa8g1ww0",
+      "finalUrl": "http://localhost:5103/artist/cmvfkiqyp001fx5d1pa8g1ww0",
+      "title": "Lumen Choir · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 12,
+      "url": "http://localhost:5103/song/cmvfkiqp3000fx5d1svbzijia",
+      "finalUrl": "http://localhost:5103/song/cmvfkiqp3000fx5d1svbzijia",
+      "title": "Pixel Heartbreak by Velvet Static · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 13,
+      "url": "http://localhost:5103/song/cmvfkiqq3000jx5d1l493tvvw",
+      "finalUrl": "http://localhost:5103/song/cmvfkiqq3000jx5d1l493tvvw",
+      "title": "Lanterns on the River by Juniper Hollow · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 14,
+      "url": "http://localhost:5103/artist/cmvfkiqp4000hx5d1wimuyliu",
+      "finalUrl": "http://localhost:5103/artist/cmvfkiqp4000hx5d1wimuyliu",
+      "title": "Juniper Hollow · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 15,
+      "url": "http://localhost:5103/song/cmvfkir42001xx5d1l2en79a3",
+      "finalUrl": "http://localhost:5103/song/cmvfkir42001xx5d1l2en79a3",
+      "title": "Space Cadet by Kid Comet · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 16,
+      "url": "http://localhost:5103/song/cmvfkiqtv000vx5d10dnqcc51",
+      "finalUrl": "http://localhost:5103/song/cmvfkiqtv000vx5d10dnqcc51",
+      "title": "Paper Lanterns by Neon Koi · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 17,
+      "url": "http://localhost:5103/artist/cmvfkiqr3000nx5d1tjp7ztru",
+      "finalUrl": "http://localhost:5103/artist/cmvfkiqr3000nx5d1tjp7ztru",
+      "title": "Neon Koi · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 18,
+      "url": "http://localhost:5103/song/cmvfkiqwi0017x5d1g516qgiy",
+      "finalUrl": "http://localhost:5103/song/cmvfkiqwi0017x5d1g516qgiy",
+      "title": "Highway of Ghosts by Thunder Mesa · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 19,
+      "url": "http://localhost:5103/artist/cmvfkiqvr0013x5d1l6mgjhna",
+      "finalUrl": "http://localhost:5103/artist/cmvfkiqvr0013x5d1l6mgjhna",
+      "title": "Thunder Mesa · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 20,
+      "url": "http://localhost:5103/song/cmvfkiqs1000rx5d1imtb6pet",
+      "finalUrl": "http://localhost:5103/song/cmvfkiqs1000rx5d1imtb6pet",
+      "title": "Rain on the Tin Roof by Neon Koi · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 21,
+      "url": "http://localhost:5103/top",
+      "finalUrl": "http://localhost:5103/top",
+      "title": "Top songs · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 22,
+      "url": "http://localhost:5103/more/new",
+      "finalUrl": "http://localhost:5103/more/new",
+      "title": "New releases · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 23,
+      "url": "http://localhost:5103/song/cmvfkir3a001vx5d1n6dksh6g",
+      "finalUrl": "http://localhost:5103/song/cmvfkir3a001vx5d1n6dksh6g",
+      "title": "Orbit Freestyle by Kid Comet · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 24,
+      "url": "http://localhost:5103/song/cmvfkir0i001jx5d1x99w3j2f",
+      "finalUrl": "http://localhost:5103/song/cmvfkir0i001jx5d1x99w3j2f",
+      "title": "Northern Static by Lumen Choir · OpenSound",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    }
+  ]
+}
