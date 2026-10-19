@@ -1,6 +1,6 @@
 # EXP-011 — Close the picker gap, ranked by what apps need
 
-**Status:** 🟡 In progress — **latest: §93 (session 126, 2026-10-19), a component root's Mounted wire is carried (72 roots in the templates, all refused as "a router concern"), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time; graded against the runtime's own nodes rendered by real React; templates 54 nodes gained, 0 lost**; §92 (session 125), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling); §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
+**Status:** 🟡 In progress — **latest: §94 (session 127, 2026-10-19), a signal a parent sends into a placed component runs the chain inside (87 template nodes refused with a Component Inputs trigger → 0), the parent counting its pulses and keeping the count taken; graded against the runtime's own component instances rendered by real React; templates 101 nodes gained, 0 lost**; §93 (session 126, 2026-10-19), a component root's Mounted wire is carried (72 roots in the templates, all refused as "a router concern"), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time; graded against the runtime's own nodes rendered by real React; templates 54 nodes gained, 0 lost**; §92 (session 125), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling); §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
 **Depends on:** nothing — but sequenced after EXP-009 and EXP-010, which are worth more per hour
 **Replaces:** every "what to build next" list in this phase from sessions 20–31
 
@@ -13360,3 +13360,159 @@ skipped. The three were rows pinning the base's print for a Mounted authored tru
    the Feedback banners never open.
 3. P18-S126-PROPUNDEF, P18-S126-PAGEGROUP, P18-S126-UNDEFCOMPUTED (low, filed).
 4. §92.5's list stands: the §87 Conditions, P18-S125-STYLENULL, P18-S124-RUNINPUTS, P18-S124-LATEMARKER and the small ones.
+
+## §94 The signal arrives in the component (session 127, 2026-10-19): P18-S126-INSIGNAL
+
+### §94.0 What was measured first
+
+`s127-insignal/census.ts` on the base `a59d3e4d5`, over the 19 templates (primary's `templates/` and the two written out by
+`../s119-fnchain-measure/materialize.ts`): **87 nodes refused "trigger … is not a rendered element event or a receiver"
+with a Component Inputs port as the trigger, 115 wires dropped with that sentence**, as the bug said. What the 115 drive
+inside: a Set Variable's Do 48 nodes (todo-list's and its demo's Dialog flow 32, the New player form 10), a Function's Run
+20 (todo-list's Commands), a Text Input's Clear, Set or Focus 18, a States' To <state> 6, a Delay 4, a kit Race Track 4, a
+Counter 4, a Condition 2. And outside, **859 wires into a placed component's signal input, every one with no sentence of
+its own** (the catch-all "no deterministic translation"); the parent's prop was typed `() => void`, a callback the child
+never called, and a signal input passed straight on (rocket-school's Round, `ask` into the banner's `hide`) was forwarded
+as that function. Most of the 859 go into logic components, which draw nothing.
+
+The family with the most reach that a test can grade is the mechanism itself: one pulse idiom serves every sink inside
+(the house's sinks already compile), so the fixture takes the largest sinks (Set Variable, States, Clear, Counter) and the
+sender kinds the templates use (a click, an instance's own signal output, a signal input passed on, a Condition's arm).
+
+### §94.1 What the runtime does (measured on its own nodes, `tests/helpers/runtime-mounted-arm.js`)
+
+The runtime sets the instance's input and its Component Inputs flags the port (componentinstance.ts
+`registerComponentInputPort`), and the trigger inside fires. Measured on the Signal Desk (`tests/helpers/signal-desk.ts`)
+with the runtime's own component instances, Component Inputs and Outputs, States, Counter, Condition, Set Variable and the
+viewer's Group, Text, Button and Text Input, before the export was touched (`s127-insignal/EXPECTED.md`):
+
+- a pulse runs the chain inside once: two Asks count 1, 2;
+- nothing runs at load;
+- a value the click set on its first wire (`msg`) has arrived when the chain its second wire sent in reads it ("hello
+  two", not "hello one");
+- a signal input passed straight on into a child's signal input runs there (the Lamp);
+- a Clear sent in empties the field;
+- a pulse sent to a component the page draws only from that same click still runs the chain inside: the runtime's
+  instance exists while it is not drawn (the Picker, added after the first build, §94.3).
+
+### §94.2 What is built
+
+| piece | what it is |
+|---|---|
+| `instanceSignalInputOf` (`plan.ts`) | a placed component's input its Component Inputs declares a signal, on a target with a visual root, is a trigger port (`isTriggerInto`): every chain path reaches it (a click, an instance's own signal and a Condition's arm are graded; a Function's signal is in the templates' diff). A logic component's input is not: it draws nothing and has no file to run a chain in |
+| `compileInstanceSignal` | the parent keeps a count per wired port (`state-set` with `op: 'inc'`, GAM-017's kit idiom: two pulses in one handler are two) and a ref of the count the child has acted on (`InstancePulsePlan`); the prop is `{ sent, taken }` (`INPUT_PULSE_TS_TYPE`), printed by `instanceAttrs` |
+| the child's chain (`plan.inputPulses`) | in the attach pass a Component Inputs signal port is a trigger: its wires compile in render context and snap as an effect's chain; one effect per port: `if (x === undefined \|\| x.taken.current === x.sent) return; x.taken.current = x.sent; …`, keyed on `x?.sent` |
+| a pass-through | a signal input wired straight into a placed component's signal input is that child's pulse, added from the effect (the base forwarded the prop as a function) |
+| earned by attachment | a count whose every sender was refused (a logic component's Done, a Set Variable's Done) is pruned with its prop; the wires keep their refusal, now named on the placed component's marker |
+| a placed component stays drawn | a refused sender writes its sentence on the wire, not on the instance: the instance's disposition before the attach pass is restored |
+| the export arm's settled mode | `export-react-arm.js` `settled: true` mounts and presses in an async act (the States library drains its queue in a microtask), lending jsdom a `MessageChannel`; the earlier specs keep the synchronous acts |
+
+### §94.3 The test (`tests/the-signal-arrives-in-the-component.test.ts`, 19 rows)
+
+The Signal Desk, built in a temporary folder (the corpus golden does not move): a page with Show, Hide, Change, Wipe and
+Pick, and four placed components: the Banner (rocket-school's Feedback banner: `show`, `hide` into a States whose `isOpen`
+mounts the root authored false, a Set Variable writing `said` from the value input `message`, `wipe` into a field's
+Clear), the Asker (its button's click a Component Outputs signal, into the Relay's `ping`: todo-list's Dialog flow shape),
+the Relay (`ping` straight on into its Lamp's `light`, and into a Counter), and the Picker in a Group mounted from a
+Variable that Pick sets on the same click that pulses `fill` (rocket-school's "open the chooser and fill it"). §A both arms
+press by press (the runtime first, A1), the claims one by one, a Condition between a click and its pulse (A7), the control
+with every wire into a signal input removed (A8); §B the emitted pair, the effect, the parent's count and ref, the
+pass-through; §C the plan (inside collapsed into the Component Inputs, one count per port, a refused sender, a logic
+component); §D each variant's app typechecks.
+
+🔴 **The first build lost the Picker's pulse.** It booted the child's ref with the count at mount, so a pulse sent with the
+click that draws the component was taken as already seen. Counted over the templates' exports (`condpulse.py`): **14 of
+the 29 pulsed placements are drawn under a condition in their parent** (rocket-school's and star-class's chooser, player
+form, Round inside the race and the game). The count taken lives in the parent now, beside the count sent, so it outlives
+the child's unmount. Mutant D is that first build, and kills A2 and A6.
+
+🔴 **The first reach read 127 gained and 56 lost** (`dispdiff.ts`): the attach pass writes a refused sender's sentence on
+its sink, and the sink is now a placed component, which is drawn whatever a sender does. The instance's disposition is
+restored after the pass (mutant G): 127 gained, 0 lost. 26 of those were in chains that pulse a logic component, which
+draws nothing and has no file to run a chain in: a target must have a visual root (mutant I): 101. And the emitted diff
+showed counts nothing adds to, because a sink is compiled before its sender is ruled on: pruned (mutant H).
+
+🔴 **Two shapes of the first draft were not this bug's**, found by the runtime probe and filed rather than built: a Set
+Variable's Done is not carried at all (P18-S127-SETDONE, 54 template nodes), and a Clear does not send the empty text on
+to a Variable fed by the field (P18-S127-CLEAROUT). The desk sends both pulses off the click and shows the field's text on
+a Text beside it.
+
+**Mutant arms** (`s127-insignal/mutants.py`, a copy in `packages/nx-mut-s127`, removed after). Control 19 / 19.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the base's rule: a placed component's signal input is no trigger | 10 (A2, A4–A7, B3, B4, C2–C4) |
+| B | a signal input runs no chain inside | 8 (A2, A4–A7, B2, B4, C1) |
+| C | no count taken: the chain runs on every effect run | 6 (A2, A3, A5–A7, B2) |
+| D | the count taken is the child's, booted at its mount (the first build) | 4 (A2, A6, A7, B2) |
+| E | one count per placed component, not per port | 5 (A2, A4, A6, A7, C2) |
+| F | the effect keyed on nothing: it runs at mount only | 6 (A2, A4–A7, B2) |
+| G | a refused sender defers the placed component | 1 (C3) |
+| H | a count nothing adds to is kept | 1 (C3) |
+| I | a logic component's input is pulsed too | 1 (C4) |
+
+### §94.4 What the exported apps do now
+
+`dispdiff.ts`, the base against the tree: **templates (19 projects, 13,432 nodes) 101 gained, 0 lost**: 40 Set Variables,
+20 Functions, 14 Text Inputs (deferred → static: their Clear now runs), 8 Expressions, 4 Conditions, 4 Delays, 4 Counters,
+3 States, 2 kit Race Tracks, 2 Value Changed. **Corpus (229 projects, 29,482 nodes) 69 gained, 0 lost**: copies of the same shapes (two Rocket School and three todo-list copies), driftwood's FormField Clear (read in its diff) and capital-quiz's AnswerButton Switch reset (a latch, read off its disposition). `census.ts`: 87 → 0 nodes refused with a Component
+Inputs trigger, 115 → 0 wires; what is left inside is refused for its own reason (44 wires: a States value with no
+authored value 16, a Function reading the clock 14, keeping state on `this` 5, and 9 more). The trigger-drop sentence in
+the templates' notes 612 → 529; the catch-all "no deterministic translation" 8,915 → 8,785.
+
+Read in the emitted diff (every changed code file, `../s126-mounted/emit.ts` both ways, 4,563 diff lines):
+
+- **Runs now:** bot-garden's Form resets (its band, its language, its name field) on New; its Runner plays and stops
+  (three States, the world reset); rocket-school's and star-class's Countdown bar starts and stops, their New player form
+  resets and fills, the Focus picker fills from the subject, the Preview counts changes, the Race track bursts (the kit's
+  pulse count), the Round counts its questions and hides the banner on `ask`, stops the clock on `abandon` and on an
+  answer; todo-list's and its demo's Dialog flow takes its eight signals, the History, Next actions, Task list, Routine
+  list and Routine summary clear their fields, ten Commands run their guard Function (what its `go` starts, a record write whose Done goes into a logic component, is
+  still refused); nightbook's Field clears.
+- **Still not, and named on the placed component's marker:** a pulse whose sender is not exported, mostly a logic
+  component's Done (rocket-school's Feedback banner `show` from `/Logic/Grade answer`: the banner still never opens; the
+  Countdown bar's `start` from `/Logic/Pick next question`; the Preview's from `/Logic/Pick item`), a Set Variable's Done
+  (P18-S127-SETDONE: the game's and the race's `start`, the Lists editor's `fill`), a Function the export refuses (the
+  clock).
+- **Runs on a value it is not given:** todo-list's Dialog flow chains write `todoDialogTask` from `listTaskId` and its
+  siblings, which the page does not pass (another placed component's output into its input is dropped, P18-S127-SIBLINGVALUE,
+  90 such wires in the templates). The dialog's States are refused for their own reason, so nothing draws from it yet.
+- The interfaces: 79 component files in the 19 templates' exports declare a signal input, typed `{ sent: number; taken:
+  { current: number } }` now (they were `() => void`). In the corpus, batch-desk's Run Tasks template `Do` too, the one
+  hls001 key that moved (its host passes none: its chain runs on the template's mount, as before).
+
+The templates' typecheck gate 3 / 3, every row 0; all 19 (`../s124-deadrow/tplbuild.ts`) 1 error in 1, nightbook's P18-S125-STYLENULL, as at the base. None of this was
+driven in a browser: the spec renders both arms with real React, and the readings are the runtime's own nodes'.
+
+**Tooling** (`s127-insignal/`, run the `.ts` from `packages/nodegx-export` with `../../node_modules/.bin/ts-node -P
+tsconfig.json --transpile-only`, `ROOTS=` as `../s119-fnchain-measure/dispdiff.ts`): `census.ts <src> <out.json>` (every
+wire out of a signal Component Input and what it drives, every wire into a placed component's signal input and its drop
+sentence, the trigger-sentence refusals by trigger type); `condpulse.py <emitted dir>` (each pulsed placement, drawn
+always or under a condition in its parent); `mutants.py` (the arms above); `EXPECTED.md`. The base control copy is
+`git archive a59d3e4d5 packages/nodegx-export/src` unpacked as `packages/.nx-ctl-s127` (removed before the whole suite).
+
+### §94.5 Readings
+
+The spec 19 / 19; the 9 mutant arms each kill rows (control 19 / 19). Neighbours: `the-root-is-mounted-when-it-says` 19 (its arm gained three modules),
+`the-id-is-held` 22 and `the-ticked-input-runs-it-again` 30 (the export arm's synchronous mode, unchanged), `component-outputs`
+17, `component-stack-pair` 11, `controlled-state` 26, `hls005-nothing-left-over` 17, `popups` 25, `node-spec-graph` 7,
+`custom-nodes` 34, `typecheck-emitted` 67, `the-undrawn-trigger-is-refused` 16, `the-function-sends-its-signals` 38,
+`export-report` 30, `in-code-markers` 87, `run-tasks` 67 (re-pinned: Notify's `Do` type), `parameter-coverage` 9,
+`the-templates-typecheck` 3 (every row 0). **hls001**: predicted by emitting every fixture with the base's `src` and the
+tree's (one file, batch-desk's `Notify.tsx`); the red run named exactly that key; regenerated, one hash moved; 4 / 4.
+Package `tsc --noEmit` 0. The tsfixme ratchet holds.
+
+**The whole package** (`nice -n 19 --runInBand`, under the lock, JSON written 17:08): **143 / 143 suites, 4,958 passed, 0
+failed, 3 pending** (session 126's landed tree: 142 suites, 4,939; this session adds one suite of 19).
+
+### §94.6 What this leaves
+
+1. **P18-S127-SETDONE** (medium, filed): a Set Variable's Done runs nothing, 54 template nodes; rocket-school's game and
+   race start from one.
+2. The senders that are logic components' Done (rocket-school's Feedback banner): EXP-011 §93.6's Noodl-API Functions and
+   the logic components that wrap them (Tier B).
+3. **P18-S127-SIBLINGVALUE** (medium, filed), **P18-S127-CLEAROUT** (low, filed).
+4. §93.6's list stands: the Mounted feeders (132), P18-S126-PROPUNDEF, PAGEGROUP, UNDEFCOMPUTED, the §87 Conditions and
+   the small ones.
+5. Not graded: a pulse sent while the parent does not draw the child runs when the child next mounts, where the runtime
+   runs it at the pulse (the instance exists undrawn); the chain's effect lands, its moment differs.

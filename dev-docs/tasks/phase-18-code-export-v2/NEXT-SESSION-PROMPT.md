@@ -1,3 +1,58 @@
+# Next session — session 127 (2026-10-19, BOARD lane 6) fixed **P18-S126-INSIGNAL**: a signal a parent sends into a placed component runs the chain inside. The parent counts its pulses and keeps the count the child has taken; the child runs the chain when one passes the other. Graded against the runtime's own component instances rendered by real React. Templates 101 nodes gained, 0 lost.
+
+## ✅ Session 127: the signal arrives in the component
+
+Read EXP-011 §94. In short:
+
+| what | where |
+|---|---|
+| Measured first: 87 template nodes refused with a Component Inputs trigger, 115 wires (a Set Variable 48, a Function's Run 20, a field's Clear/Set/Focus 18, States 6, Delay, kit, Counter 4 each); 859 wires into a placed component's signal input with no sentence of their own; the prop typed `() => void` | `s127-insignal/census.ts` |
+| `instanceSignalInputOf`: a placed component's signal input (target with a visual root) is a trigger port; `compileInstanceSignal`: a count per wired port (`op: 'inc'`) and a ref of the count taken, passed as `{ sent, taken }` (`INPUT_PULSE_TS_TYPE`) | `src/analyze/plan.ts`, `src/emit/component.ts` `instanceAttrs` |
+| Inside: a Component Inputs signal port is a trigger in the attach pass; one effect per port, `if (x === undefined \|\| x.taken.current === x.sent) return; x.taken.current = x.sent; …`, keyed on `x?.sent` (`plan.inputPulses`) | `plan.ts`, `component.ts` |
+| A pass-through is the child's own pulse to its child; a count with no attached sender is pruned; a refused sender does not defer the placed component (restored after the attach pass) | `plan.ts` |
+| Spec, 19 rows: the Signal Desk (temp folder) against the runtime's component instances, States, Counter, Condition, real React under StrictMode, press by press; a Condition variant; a control; 9 mutant arms each killing rows. The export arm gained `settled: true` (async act; the States library drains in a microtask) | `tests/the-signal-arrives-in-the-component.test.ts`, `tests/helpers/signal-desk.ts`, `s127-insignal/mutants.py` |
+
+- 🔴 **The first build lost a pulse sent with the click that draws the component.** It booted the child's ref with the count
+  at mount. 14 of the 29 pulsed placements in the templates sit under a condition in their parent (`condpulse.py`): the
+  choosers, the player form, the Round. The count taken lives in the parent now. Mutant D is the first build (A6, A7).
+- 🔴 **The probe found two other bugs in the fixture's first draft**, filed instead of built: a Set Variable's Done is not
+  carried at all (P18-S127-SETDONE, 54 template nodes; rocket-school's game and race `start`), a Clear does not send the
+  empty text on (P18-S127-CLEAROUT).
+- 🔴 **The first reach read 127 gained and 56 lost.** The 56 were placed components (and one Expression reading one)
+  deferred because a sender into them was refused: the attach pass writes its sentence on the sink, and a placed
+  component is drawn whatever a sender does. Restored after the pass: 127 gained, 0 lost. Then 26 of the 127 were in chains
+  that pulse a logic component, which draws nothing and has no file: a target must have a visual root, 101 gained.
+  Then the emitted diff showed counts nothing adds to (every sender refused, the compile runs before the sender is ruled
+  on): pruned. Each is a mutant (G, I, H).
+- 🔴 **Reading the diff found a chain that runs on inputs it is not given**: todo-list's Dialog flow writes from
+  `listTaskId` and its siblings, which the page drops (another placed component's output into an input, 90 template
+  wires): P18-S127-SIBLINGVALUE.
+- The States library schedules in a microtask: the synchronous export arm read the Banner closed. `settled: true` presses in
+  an async act (and lends jsdom a `MessageChannel`, and exits explicitly, or the process hangs).
+
+Readings: the spec 19 / 19 (9 mutant arms, each killing rows); neighbours green (EXP-011 §94.5); `run-tasks` re-pinned
+(a Run Tasks template's `Do` is typed as the pulse pair); hls001 one key, predicted (batch-desk's `Notify.tsx`), regenerated;
+the templates' typecheck gate 3 / 3, every row 0; all 19 (`tplbuild.ts`) 1 error in 1 (nightbook STYLENULL, as before);
+`parameter-coverage` 9. Package `tsc --noEmit` 0; the ratchet holds. Whole package (`nice -n 19 --runInBand`, JSON 17:08):
+**143 / 143 suites, 4,958 passed, 0 failed, 3 pending.**
+
+Reach (`dispdiff.ts`, base `a59d3e4d5` against the tree): **templates 101 gained, 0 lost; corpus 69 gained, 0 lost.**
+`census.ts` 87 → 0 (115 → 0 wires). rocket-school's Feedback banner still never opens: its `show` comes from `/Logic/Grade
+answer`'s Done, a logic component (named on its marker now).
+
+Filed: **P18-S127-SETDONE** (medium), **P18-S127-SIBLINGVALUE** (medium), **P18-S127-CLEAROUT** (low). Fixed: P18-S126-INSIGNAL.
+
+**Next (BOARD lane 6):**
+1. **P18-S127-SETDONE**: a Set Variable's Done (54 template nodes; rocket-school's game and race start). Small, and the
+   Signal Desk's first draft is its fixture.
+2. **P18-S127-SIBLINGVALUE**: another placed component's value output into an input (90 template wires).
+3. The Mounted feeders left (EXP-011 §93.6), and the logic components behind the Feedback banner (Tier B).
+4. P18-S127-CLEAROUT, P18-S126-PROPUNDEF, PAGEGROUP, UNDEFCOMPUTED, P18-S125-STYLENULL, P18-S124-RUNINPUTS, LATEMARKER
+   (small); the §87 Conditions; the low ones as listed in session 126.
+5. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 126 (2026-10-19, BOARD lane 6) carried **the Mounted wires of component roots**: a root's Mounted binds as any element's (only a Page's is the router's), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time. Graded against the runtime's own nodes rendered by real React. Templates 54 nodes gained, 0 lost.
 
 ## ✅ Session 126: the root is mounted when it says
