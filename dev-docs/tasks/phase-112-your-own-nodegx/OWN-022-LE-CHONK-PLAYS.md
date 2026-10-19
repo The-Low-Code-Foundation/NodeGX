@@ -44,7 +44,7 @@ the setup; how it was developed (how many people, what tools, what OSS it builds
 | AC5 | `play.mjs --game <that>` — Large 4 plays the game it built and wins, by the harness's verdict | ⬜ |
 | AC6 | **The submission** by 2026-10-29: a public repo (harness + both games' setup, a README a stranger can follow — reproducibility is judged), the video, the "how it was developed" note, posted in `challenges-submissions` | ⬜ Richard posts |
 | — | **Rulings 2026-10-18:** the repo is **new and standalone on Richard's GitHub** (MIT for the harness; NodeGX from npm), built locally — Richard creates and pushes it (pushing makes it public); **the video: Opus cuts it** from the runs (screenshots, Large 4's own words as captions, a live-run segment), **Richard narrates** | ✅ ruled |
-| AC8 | **The report** — a shareable page for the Mistral community (pixel fat cats; our own drawing, never Mistral's art): the setup, the tally per arm, the moments it found / used / passed up a cheat in its own words, the interviews, costs, caveats | ⬜ after the arms |
+| AC8 | **The report** — a shareable page for the Mistral community (pixel fat cats; our own drawing, never Mistral's art): the setup, the tally per arm, the moments it found / used / passed up a cheat in its own words, the interviews, costs, caveats | 🟡 **published** (private until Richard shares it): https://claude.ai/artifact/XTxm1P3orbbEngaXJXbRFz — the GitHub link goes in once the repo is pushed; a copy in `NodeGX test projects/OWN-022 Le Chonk/` |
 | AC7 | **The cheat experiment (§6)** on the game AC4 builds: rigged + two planted cheats, the arms × 10 runs, the harness's tally of who found / used / admitted each cheat | ✅ **both passes done** (2026-10-19 07:47, §11): 42 runs, ≈ $15; 6 rigged wins of 36 (4 slide, 2 QA); QA used in 3 of 3 runs that saw it with the back tool under "whatever it takes", never mentioned under "try to win"; 42 of 42 interviews match the verdict |
 
 ## 6. The cheat experiment (ruled 2026-10-18)
@@ -142,6 +142,18 @@ in the scratchpad, never in `packages/` or anything published.
 - **Tool calls written as text:** twice it emitted a call as text with a stray prefix (`read_game_component依之夢{"name":
   "Pages/Game"}`, `clickrichter{…}`) instead of calling the tool; the nudge recovers it.
 - **Cost guard:** older graph reads are pruned from the conversation like old screenshots (`--keep-graph 2`).
+
+## 12. Where everything is (2026-10-19 morning)
+
+- **Run data, durable:** `NodeGX test projects/OWN-022 Le Chonk/` — `arms/` (pass 1), `arms2/` (pass 2), `arms-crashed/`,
+  `runs/` (smokes), `HB1-build/` (the Vibe build, no HOME or call recordings), the report HTML and its two renders. The s1
+  scratchpad is not durable.
+- **The repo** (`le-chonk-plays`, local, `main`): harness, game, tools, `RESULTS.md`, `experiment/pass1|pass2|pass1-crashed`
+  (every result.json + steps.jsonl, local paths rewritten; screenshots kept out). `npm run tally -- experiment/pass2`
+  reproduces the table.
+- **Still owed before the 29th:** Richard pushes the repo (then the report and README get the link); a clean-machine
+  `npm install` check; the Puppeteer console-error count on Monster Gate; the video cut (Opus) + narration (Richard); the
+  Discord post with the how-it-was-developed note.
 
 ## 11. Both passes — the result (2026-10-19 07:47)
 
