@@ -1,0 +1,281 @@
+{
+ "results": [
+  {
+   "name": "BOOT  the page drew, three.min.js before three-kit/index.js, no console error",
+   "ok": true,
+   "saw": {
+    "marker": true,
+    "iThree": 8107,
+    "iKit": 9353,
+    "consoleErrors": [],
+    "networkErrors": []
+   }
+  },
+  {
+   "name": "SUPP  Supported true out of the port; root data-ready",
+   "ok": true,
+   "saw": {
+    "supported": true,
+    "ready": "true"
+   }
+  },
+  {
+   "name": "READY Ready fired once",
+   "ok": true,
+   "saw": {
+    "readyCount": 1
+   }
+  },
+  {
+   "name": "ROWS  Mesh Count 9 out of the port; one box per Static Data row with its name, x order and height",
+   "ok": true,
+   "saw": {
+    "meshes": 9,
+    "attr": "9",
+    "bars": [
+     [
+      "mon",
+      -4.9,
+      3,
+      1.5
+     ],
+     [
+      "tue",
+      -3.5000000000000004,
+      5,
+      2.5
+     ],
+     [
+      "wed",
+      -2.1000000000000005,
+      2,
+      1
+     ],
+     [
+      "thu",
+      -0.7000000000000011,
+      6,
+      3
+     ],
+     [
+      "fri",
+      0.6999999999999993,
+      4,
+      2
+     ],
+     [
+      "sat",
+      2.0999999999999996,
+      7,
+      3.5
+     ],
+     [
+      "sun",
+      3.4999999999999982,
+      1,
+      0.5
+     ],
+     [
+      "avg",
+      4.899999999999999,
+      4,
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "name": "PIXELS the canvas region of the screenshot has ≥ 100 distinct colours (flat shading: 9 solids + a grid read 165 on 2026-10-19)",
+   "ok": true,
+   "saw": {
+    "colours": 171,
+    "rect": {
+     "x": 0,
+     "y": 18,
+     "width": 1024,
+     "height": 360,
+     "top": 18,
+     "right": 1024,
+     "bottom": 378,
+     "left": 0
+    }
+   }
+  },
+  {
+   "name": "SPIN  the ball spins: frames rise over 600 ms",
+   "ok": true,
+   "saw": {
+    "framesA": 97,
+    "framesB": 123
+   }
+  },
+  {
+   "name": "WIRE  ballY = 4 through a Variable moves the ball to y 4",
+   "ok": true,
+   "saw": {
+    "id": "tk3",
+    "kind": "mesh",
+    "name": "ball",
+    "shape": "sphere",
+    "x": -5,
+    "y": 4,
+    "z": -3,
+    "h": 2
+   }
+  },
+  {
+   "name": "TAP   a press and release on the tallest bar fires Tapped once with Tapped Name \"sat\"",
+   "ok": true,
+   "saw": {
+    "at": {
+     "x": 531.9887469233745,
+     "y": 150.0072289347006
+    },
+    "tappedName": "sat",
+    "taps": 1
+   }
+  }
+ ],
+ "readings": {
+  "scriptOrder": {
+   "three": 8107,
+   "kit": 9353
+  },
+  "census": {
+   "meshes": 9,
+   "objects": [
+    {
+     "id": "tk1",
+     "kind": "light",
+     "name": null,
+     "shape": "sky",
+     "x": 5,
+     "y": 10,
+     "z": 5,
+     "h": 1
+    },
+    {
+     "id": "tk2",
+     "kind": "light",
+     "name": null,
+     "shape": "sun",
+     "x": 6,
+     "y": 12,
+     "z": 4,
+     "h": 1
+    },
+    {
+     "id": "tk3",
+     "kind": "mesh",
+     "name": "ball",
+     "shape": "sphere",
+     "x": -5,
+     "y": 0,
+     "z": -3,
+     "h": 2
+    },
+    {
+     "id": "tk4",
+     "kind": "mesh",
+     "name": "mon",
+     "shape": "box",
+     "x": -4.9,
+     "y": 1.5,
+     "z": 2,
+     "h": 3
+    },
+    {
+     "id": "tk5",
+     "kind": "mesh",
+     "name": "tue",
+     "shape": "box",
+     "x": -3.5000000000000004,
+     "y": 2.5,
+     "z": 2,
+     "h": 5
+    },
+    {
+     "id": "tk6",
+     "kind": "mesh",
+     "name": "wed",
+     "shape": "box",
+     "x": -2.1000000000000005,
+     "y": 1,
+     "z": 2,
+     "h": 2
+    },
+    {
+     "id": "tk7",
+     "kind": "mesh",
+     "name": "thu",
+     "shape": "box",
+     "x": -0.7000000000000011,
+     "y": 3,
+     "z": 2,
+     "h": 6
+    },
+    {
+     "id": "tk8",
+     "kind": "mesh",
+     "name": "fri",
+     "shape": "box",
+     "x": 0.6999999999999993,
+     "y": 2,
+     "z": 2,
+     "h": 4
+    },
+    {
+     "id": "tk9",
+     "kind": "mesh",
+     "name": "sat",
+     "shape": "box",
+     "x": 2.0999999999999996,
+     "y": 3.5,
+     "z": 2,
+     "h": 7
+    },
+    {
+     "id": "tk10",
+     "kind": "mesh",
+     "name": "sun",
+     "shape": "box",
+     "x": 3.4999999999999982,
+     "y": 0.5,
+     "z": 2,
+     "h": 1
+    },
+    {
+     "id": "tk11",
+     "kind": "mesh",
+     "name": "avg",
+     "shape": "box",
+     "x": 4.899999999999999,
+     "y": 2,
+     "z": 2,
+     "h": 4
+    }
+   ],
+   "frames": 86,
+   "camera": {
+    "distance": 22,
+    "height": 9,
+    "angle": 28
+   }
+  },
+  "colours": 171,
+  "frames": {
+   "a": 97,
+   "b": 123
+  },
+  "tap": {
+   "at": {
+    "x": 531.9887469233745,
+    "y": 150.0072289347006
+   },
+   "tappedName": "sat",
+   "taps": 1
+  },
+  "consoleErrors": [],
+  "networkErrors": []
+ }
+}

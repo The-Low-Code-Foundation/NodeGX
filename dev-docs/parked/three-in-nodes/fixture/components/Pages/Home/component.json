@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c_home",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "description": "The page: one Scene, two Lights, a spinning ball, and a For Each that makes one box per row of a Static Data."
+}

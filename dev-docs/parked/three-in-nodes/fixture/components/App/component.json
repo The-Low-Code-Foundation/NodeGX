@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c_app",
+  "name": "App",
+  "path": "/App",
+  "type": "root",
+  "description": "Three-in-nodes prototype: a Scene with a For Each of bars under it. dev-docs/parked/THREE-IN-NODES.md"
+}

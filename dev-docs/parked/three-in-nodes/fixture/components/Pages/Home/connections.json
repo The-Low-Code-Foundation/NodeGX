@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "data",
+      "fromProperty": "items",
+      "toId": "bars",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "vBallY",
+      "fromProperty": "value",
+      "toId": "ball",
+      "toProperty": "y"
+    },
+    {
+      "fromId": "scene",
+      "fromProperty": "onTappedName",
+      "toId": "vTapped",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "scene",
+      "fromProperty": "onMeshCount",
+      "toId": "vMeshes",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "scene",
+      "fromProperty": "onSupported",
+      "toId": "vSupported",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "scene",
+      "fromProperty": "onTapped",
+      "toId": "tapCounter",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "tapCounter",
+      "fromProperty": "currentCount",
+      "toId": "vTaps",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "scene",
+      "fromProperty": "onReady",
+      "toId": "readyCounter",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "readyCounter",
+      "fromProperty": "currentCount",
+      "toId": "vReady",
+      "toProperty": "value"
+    }
+  ]
+}
