@@ -7,10 +7,13 @@
 # exactly as tested (the session packed them in a worktree at a pushed commit), never re-packed here.
 set -euo pipefail
 dir="${1:?usage: publish-npm.sh <folder of .tgz files>}"
-# @nodegx/mcp before create-nodegx: create-nodegx sets folders up with the mcp version it pins; create-nodegx-vibe
-# (OWN-019, `npm create nodegx-vibe`) last, because it pins create-nodegx. `<name>-[0-9]*` so that create-nodegx
-# never picks up create-nodegx-vibe-<v>.tgz.
-for name in nodegx-preview nodegx-mcp create-nodegx create-nodegx-vibe; do
+# Dependencies first. @nodegx/node-spec before @nodegx/project-contract, whose published manifest depends on it
+# (`^<node-spec version>`, written by build-publish.mjs); @nodegx/canvas-look depends on nothing (a folder without its
+# tarball is skipped, so a cut that leaves it at its published version just omits it). @nodegx/mcp before
+# create-nodegx: create-nodegx sets folders up with the mcp version it pins; create-nodegx-vibe (OWN-019,
+# `npm create nodegx-vibe`) last, because it pins create-nodegx. `<name>-[0-9]*` so that create-nodegx never picks up
+# create-nodegx-vibe-<v>.tgz.
+for name in nodegx-node-spec nodegx-project-contract nodegx-canvas-look nodegx-preview nodegx-mcp create-nodegx create-nodegx-vibe; do
   tgz=$(ls "$dir"/"$name"-[0-9]*.tgz 2>/dev/null | head -1 || true)
   [ -n "$tgz" ] || { echo "skip $name: no tarball in $dir"; continue; }
   pkg=$(tar -xzOf "$tgz" package/package.json | node -pe 'const p=JSON.parse(require("fs").readFileSync(0,"utf8")); p.name+"@"+p.version')
