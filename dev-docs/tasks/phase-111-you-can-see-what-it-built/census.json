@@ -1729,7 +1729,7 @@
     {
       "name": "digital-bricks-training",
       "format": "v2",
-      "bytes": 1588149,
+      "bytes": 1588121,
       "files": 247,
       "components": 82,
       "handObjects": 1026,
@@ -2798,7 +2798,7 @@
     {
       "name": "digital-bricks-training-demo",
       "format": "v2",
-      "bytes": 1008170,
+      "bytes": 1008142,
       "files": 112,
       "components": 37,
       "handObjects": 486,
