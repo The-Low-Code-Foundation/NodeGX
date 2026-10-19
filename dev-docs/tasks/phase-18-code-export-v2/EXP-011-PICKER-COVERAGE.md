@@ -13887,3 +13887,125 @@ the same name"): run jest from `../../node_modules/.bin/jest` while a mutant cop
    as a pulse count (P18-S126-INSIGNAL), whose chain runs once the form is drawn, so its field is on the page by then (read,
    not run).
 5. The repeater's row relay (§96.5.1) was not started this session.
+
+## §98 The Function succeeds (session 130, 2026-10-19): P18-S129-FNSUCCESS
+
+### §98.0 What was measured first
+
+`s130-fnsuccess/census.ts` on the base `72f013fec`, over the 19 templates: **189 wires out of a Function's Success** (187
+Functions), **11 in visual components** (the bug said 12: its Component Outputs one sits in a logic component), 178 in
+logic components (no file; Tier B). Of the 11: 8 leave a Run-wired Function (rocket-school's and star-class's Lists
+Editor `leFill`, pixel-game's `plTakeCoin` 2 and `plStepEnemies` 2, story-engine's `rdCarry` and `rxParse`), 3 a reactive
+one (Run unwired: pixel-game's `plPickLevel`, story-engine's `rdFind` and `rdScreen`). 4 were refused for the Success
+itself ("only done continues a Run chain": the two `leFill`s and `plTakeCoin`'s two), the rest for their inputs. Targets:
+a Condition's Evaluate 7, a Set Variable's Do 4.
+
+🔴 **The bug's ticked-run claim was measured false.** It said `leFill`'s `sets` and `setId` are ticked, so the running
+editor refills whenever they change. Both boxes are written `false` in both templates: it runs on `fill` alone. No
+Run-wired Function with a Success wire in a visual component has a ticked input. The ticked path is built anyway, because
+the runtime sends Success on a ticked run, and it is graded on the desk.
+
+### §98.1 What the runtime does (read, then measured on its own nodes)
+
+`simplejavascript.ts` `runScript`, measured on the Success Desk (`tests/helpers/success-desk.ts`) by
+`runtime-mounted-arm.js` before the export was touched (`s130-fnsuccess/EXPECTED.md`, every cell predicted, every cell held):
+
+- A run is reached from Run (with a token), from a ticked input's new value (no token) and, Run unwired, from the script
+  setter at load; it is scheduled after the update's inputs, and the body is awaited (a sync body finishes a microtask
+  later). Then **Success, then Done**; Done only with a token. So on a Run both fire, Success first; on a ticked arrival
+  Success alone (at load too: the seed arrives at creation).
+- The body's own signals' chains run before Success (they pulse during the body).
+- **A throw sends Failure and neither Success nor Done**, and the click's later wires still run (measured with the arms'
+  error check lifted in a copy).
+- The run finishes after the click's later wires: a second wire that writes what the Success chain writes is overwritten
+  by the chain in the runtime. The base's Done chain is printed where the Run is, so the export's second wire writes last;
+  measured the same with every Success wire made a Done wire. P18-S121-ONEUPDATE's family, recorded there as its fourth
+  shape; not this bug's.
+
+### §98.2 What is built
+
+| piece | what it is |
+|---|---|
+| `compileJsRun` (`plan.ts`) | a Function's Success is no longer refused: `doneChainOf(node, 'success')`, run after the pulses and before Done (`[...pulses, ...success, ...done]`). A chain it cannot run refuses the run with the sink's sentence, as Done's does (the base refused any Success wire, so nothing the base exported is lost) |
+| the ticked half | carries the Success chain (`tickedThen`), never Done's; a ticked run that only sends Success is now observable, so it gets its effect |
+| the attach pass | leaves a Run-wired Function's Success wires to the Function (`isRunSuccessWire`), as it leaves Done's, so the answer does not depend on wire order. A reactive Function's Success keeps the pass's sentence |
+| the sweep after it | a Success wire the compile did not take: the sink's own refusal first, else "trigger X.success: the Function that sends it is not exported — …", else "… is never run by an exported trigger"; named once |
+| the Run's record (`component.ts`) | a Run of a Function a ticked input also runs records what it read (`tickedArrival`) even when it is neither pulsed nor materialized: such a run had no ticked half before (it needed an own signal or a row), and without the record a click that writes the value and sends Run ran it twice (measured: 5 runs for the runtime's 4) |
+
+### §98.3 The test (`tests/the-function-succeeds.test.ts`, 26 rows)
+
+The Success Desk, built in a temporary folder: Say runs "The greeting" (its own `ping`, Success and Done each writing the
+order cells, a Set's Done chain on the Success chain); Show runs "The pick to show" (ticked, Success counted by a
+Counter, Done writing `doneAt`); Pick b and Pick c and show write its input; Edit pulses the placed Editor's `fill`,
+whose Function's Success sets the draft, whose Done sends the field's Set, and fires the Editor's own output (the Lists
+Editor's shape, and story-engine's). §A both arms step by step (the runtime first, A1): the reads, the order, the ticked
+run at load and on arrival, one run for a write and a Run, the Editor; the Success wires listed first (A8); the click's
+second wire, pinned as the known difference (A9); the control with no Success wire (A10); the box unticked (A11). §B the
+emitted Run, the ticked effect, the record, the Editor's pulse effect. §C the plan (dispositions, the ticked action, wire
+order, a refused sink and its sibling wire, a reactive Function). §D each variant's app typechecks.
+
+🔴 **The first desk read two things that are not this bug's**: `shown` seeded on the page was stored again on StrictMode's
+second mount over the ticked run's write (P18-S121-SEEDTWICE; the desk leaves it unseeded), and the click's second wire
+(ONEUPDATE, moved to a variant). 🔴 **The run count came from reading the emitted Show handler**, not from the first desk:
+the readings agreed while the export ran the pick twice; the Counter on Success made it visible, and the record fixes it.
+
+**Mutant arms** (`s130-fnsuccess/mutants.py`, a copy in `packages/nx-mut-s130`, removed after). Control 26 / 26; every
+arm typechecked and killed rows.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the base: a Success wire refuses the run | 18 |
+| B | Success after Done | 7 |
+| C | Success before the own signals | 6 |
+| D | a ticked run sends no Success | 8 |
+| E | a ticked run sends Done too | 7 |
+| F | a plain Run is not a statement, so it records nothing | 5 |
+| G | a plain Run prints no record | 5 |
+| H | the attach pass rules Success wires as triggers (wire order) | 2 (C3, C4) |
+| I | no sweep | 1 (C4) |
+| J | the sweep does not ask the sink first | 1 (C4) |
+| K | a reactive Function's Success taken as a Run chain | 1 (C5) |
+| L | a Success chain it cannot run does not refuse the run | 1 (C4) |
+
+### §98.4 What the exported apps do now
+
+`dispdiff.ts`, the base against the tree: **templates (19 projects, 13,432 nodes) 10 gained, 0 lost**: the two Lists
+Editors' Function and four Sets each; 2 re-worded (pixel-game's `plTakeCoin` now named by its real blocker, a Function
+input fed by another Function, and its Condition by the Function that sends it). **Corpus (229 projects, 29,482 nodes)
+0 gained, 0 lost**, 20 re-worded (the pixel-game copies, the same two sentences and the readers of `plStepEnemies`).
+`census.ts` on the tree: "only done continues a Run chain" 4 → 0.
+
+Read in the emitted diff (`../s126-mounted/emit.ts` both ways; 2 code files and 2 new wrapper files, the rest notes and
+reports): rocket-school's and star-class's `Lists/Editor.tsx` gain the wrapper `The_list_to_edit_or_an_empty_one` and,
+in the `fill` pulse effect, the four drafts (`listDraftName`, `listDraftText`, `listDraftBoth`, `listDraftId`) and then the
+text field's Set and the name field's Set, depth first in wire order as the runtime runs them; the two field rows' dropped
+Set notes are gone. On the Lists page the New button's chain (`lsClearId.done → fill`) runs it, so a new list opens with
+empty drafts and empty fields. **Not yet:** editing an existing list, whose `fill` is sent from a row's `edit`
+(`lsEach.itemOutputSignal-edit` into a Set whose value is `itemOutput-id`: the row relay), and whose `sets` comes from a
+logic component (`/Logic/Active profile`, Tier B); the Editor's Save goes to a logic component too.
+
+The templates' typecheck gate 3 / 3, every row 0; all 19 (`../s124-deadrow/tplbuild.ts`) 1 error in 1, nightbook's
+P18-S125-STYLENULL, as at the base. Not driven in a browser: the spec renders both arms with real React.
+
+### §98.5 Readings
+
+The spec 26 / 26; the 12 mutant arms each kill rows. Neighbours, run together under the lock (20 suites, 518 rows):
+`jsfun`, `visual-function`, `http-request`, `streaming-trio`, `cloud-function`, `controlled-state`, the Function specs
+(`the-function-sends-its-signals`, `the-ticked-input-runs-it-again`, `the-id-is-held`), the specs on the two arms,
+`chain-wire-order`, `the-undrawn-trigger-is-refused`, `the-templates-typecheck`, `parameter-coverage`,
+`hls001-corpus-identity`. **hls001**: predicted 0 keys by emitting all 63 fixtures with the base's `src` and the tree's
+(identical, notes too). Package `tsc --noEmit` 0. The tsfixme ratchet holds.
+
+**Tooling** (`s130-fnsuccess/`, run the `.ts` from `packages/nodegx-export` with `../../node_modules/.bin/ts-node -P
+tsconfig.json --transpile-only`, `ROOTS=` as `../s119-fnchain-measure/dispdiff.ts`): `census.ts <src> <out.json>` (every
+wire out of a Function's Success: the component, Run, the ticked boxes, both dispositions, the drop sentence);
+`probe.ts <src> [steps…]` (the Success Desk on both arms, `EDIT=<module>` a variant, `RUNTIME=0`, `EXPORT=0`);
+`mutants.py`; `EXPECTED.md`. The base copy was `git archive 72f013fec packages/nodegx-export` unpacked in the session's
+scratch folder, with the root `node_modules` and the sibling packages linked beside it.
+
+### §98.6 What this leaves
+
+1. **The repeater's row relay** (§96.5.1): the Lists Editor's edit path, and todo-list's Dialog flow.
+2. **P18-S130-THROWCHAIN** (medium, filed): a throwing body still runs its Done and Success chains in the export.
+3. P18-S121-ONEUPDATE's fourth shape (a Run's chains against the click's later wires), recorded there.
+4. The 3 reactive Functions' Success wires (Run unwired, §89.6 #4) and the 178 in logic components (Tier B).
