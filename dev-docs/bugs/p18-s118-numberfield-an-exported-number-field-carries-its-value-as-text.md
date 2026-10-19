@@ -21,3 +21,10 @@ wired Value in 21 projects, every one read from a handler (state row), 19 of the
 FIELDMOUNT refuses a Number field's mount announcement by name and points here, because the announcement would be the
 same text. The fix is the runtime's own rule at each read: `outwardValueForFieldType('number', text)` on the field's
 value (its `onChange`, the state row's reads), and the Variable it writes typed `number | null`.
+
+## P18 session 129 (EXP-011 §97)
+
+A Number field's **Set** is refused by this bug's name too now that a Set is a trigger: "a Number field's Set sends a
+number or null, and the exported field carries text (P18-S118-NUMBERFIELD)". 14 template wires (planning and its demo,
+the Money editor's, Money repeat's and Project detail's amount fields); their senders are Functions the export refuses
+anyway (`out-reset`).

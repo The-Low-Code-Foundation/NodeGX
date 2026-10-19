@@ -1,10 +1,12 @@
 ---
 id: P18-S127-CLEAROUT
 title: A field's Clear empties the exported field and does not send the empty text on to what its text feeds
-status: open
+status: fixed
 severity: low
 area: export / a Text Input's Clear on a field whose text is written through (`src/analyze/plan.ts` `compileControlAction`)
 found: P18 session 127, 2026-10-19, the Signal Desk's first draft (the Banner's field written to a page Variable)
+fixed: P18 session 129, 2026-10-19, branch l6-fieldset; EXP-011 §97
+commit: 8307dc26d
 evidence: dev-docs/tasks/phase-18-code-export-v2/s127-insignal/EXPECTED.md
 ---
 
@@ -21,3 +23,14 @@ Reach: every field whose Clear is wired and whose text is written to a Variable 
 history note, bot-garden's Form name and rocket-school's New player form name are cleared this way; whether each writes a
 Variable was not counted). Fix, small: the Clear action also writes the empty value to each write-through Variable of that
 field (the `store-set`s its `changeHandlers` hold with `input-text`), after the state write.
+
+## Fixed (P18 session 129, EXP-011 §97)
+
+The Clear writes `''` into the field's row and then runs the field's own change chain with `''`, as the runtime's
+`clear()` calls `setText('')` (focused or not), so every write-through, lifted value and Value Changed chain sees the
+empty text. Graded on the Field Desk (`tests/the-field-does-what-it-is-told.test.ts` A5 and A9: Wipe, and a field's own
+Did Mount Clear, both against the runtime's own Text Input); mutant F (no chain) kills 9 rows. `controlled-state`'s Clear
+row, which pinned the divergence (`onClick={() => setDraft('')}`), now pins `setDraft(''); draftCopy.set('');`.
+
+Reach, counted: of the 19 Clear wires the templates' export carries, none has a chain to run (their fields' text is
+read from the row, or lifted from it); the change is in shapes like the Signal Desk's and the corpus's `cheer`.

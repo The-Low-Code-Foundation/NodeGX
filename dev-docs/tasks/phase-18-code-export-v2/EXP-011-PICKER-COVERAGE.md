@@ -13733,3 +13733,157 @@ package run. The spec 14 / 14; the 4 S arms each kill rows (control 14 / 14).
 2. The outputs fed by logic components (32): EXP-003 Tier B, with §93.6's Noodl-API Functions.
 3. Not graded: a lift two levels deep (a child's output fed by its own child's lifted output) would need two commits; the
    delivered count waits one (the Countdown bar's 2 wires are refused before that matters).
+
+## §97 The field does what it is told (session 129, 2026-10-19): P18-S128-FIELDSET and P18-S127-CLEAROUT
+
+### §97.0 What was measured first
+
+`s129-fieldset/census.ts` on the base `1d4adc615`, over the 19 templates: **165 wires into a text field's action input**:
+Clear 97, **Set 35**, **Blur 26, Focus 7** (the bug said Focus and Blur 34; counted, 33). Only Clear was a trigger
+(`isTriggerWire`), so every Set, Focus and Blur wire fell to the catch-all "no deterministic translation", and a chain
+holding one was refused from there. By sender: a Function's own signal 45 of the 68 (planning's `out-reset`, `out-blur`,
+the Site Builder's `out-picked`), a Set Variable's Done 6 (the Lists Editors 4, Moon Adopt 2), a field's own Did Mount or
+Enter 12 (todo-list and its demo), a signal input 4 (the New player forms' `fill`, nightbook's Field `set` and `focus`),
+a Group's Did Mount 1 (the marketplace's search box).
+
+### §97.1 What the runtime does (read, then measured on its own nodes)
+
+`text-input.ts` and `TextInput.tsx`, measured on the Field Desk (`tests/helpers/field-desk.ts`) by
+`runtime-mounted-arm.js` with the viewer's own focus tracker before the export was touched (`s129-fieldset/EXPECTED.md`):
+
+- **Set** writes `_internal.text`: the Value as last delivered (`undefined` is never delivered, `null` is `''`), the
+  typed-in Value if nothing has been, `''` after a Clear until the next delivery. Not what a person typed. Mounted and
+  not focused, the component's `setText` writes its state and calls `onTextChanged`, so the Value's sinks get the text and
+  Value Changed fires, changed or not (`addPrimitiveOutputPropHandler`). **A focused field takes nothing.**
+- **Clear** writes `''`, focused or not, and the same `setText` sends it on (CLEAROUT).
+- **Focus / Blur** call the `<input>`'s `focus()` / `blur()` through the tracker; a Focus off the page does nothing.
+- 🔴 **Predicted wrong:** a Set after a Clear, with the Variable its Value reads written again with the same value, was
+  predicted to write `''` (no change, no delivery) and measured to write the value: the Set Variable notifies every
+  Variable of the name (`forceChange`), which sends its output again, and the field takes it over the cleared `''`.
+
+### §97.2 What is built
+
+| piece | what it is |
+|---|---|
+| `isTriggerWire`, `CONTROL_ACTION_PORTS.input` | a text field's Set, Focus and Blur are triggers; a Set earns the field its row, as a Clear does |
+| `compileFieldSet` (`plan.ts`) | the `state-set` of the field's row with `field: { inputId, port: 'set', start }` and the Value's source read where the handler is (a literal where nothing is wired). Refused by name: a Number field (P18-S118-NUMBERFIELD), a wired Type, two wires into Value |
+| the Clear | the same `state-set`, `field.port: 'clear'`: every walker reads it as the state write it is |
+| `field-focus`, `compileFieldFocus` | Focus and Blur, a call on the field's element; refused when its Done or Unchanged is consumed |
+| the snapshot | a read of the field's text after its Set in the same chain is refused by name (a focused field keeps its own) |
+| `fieldWriteCode` (`component.ts`) | the Set: `if (xField.current !== document.activeElement) { const xValue = <source>; const xText = …; setX(xText); <the field's change chain with xText> }`; the Clear: `setX(''); <chain with ''>`. The chain is the field's own onChange chain, printed with `announcedCode` as the mount announcement prints it; a chain that Sets its own field is not run inside itself |
+| the Cleared mark | a field both Set and Cleared keeps `xCleared`; the Clear sets it, the Set writes `''` while it holds, and every write of the Variable the Value reads lifts it (`draft.subscribe`: `Value.set` calls every listener, the same value too); a prop or another source lifts it on a change |
+| On Enter | a field's On Enter is `onKeyDown` with `event.key === 'Enter'` (it was "no DOM event equivalent") |
+| the element | `ref={xField}` on the `<input>`; `const xField = useRef<HTMLInputElement>(null)`, named from the field's label |
+| a drawn field keeps its disposition | a Set, Clear, Focus or Blur it cannot take is the wire's: restored after the attach pass, as a placed component is (P18-S126-INSIGNAL) |
+| a row may not take a store's name | `stateNameTaken` asks the component's Variable and Set Variable stores (the marketplace's search box minted `search`, its own Variable's store) |
+| the unticked note | "Value is unticked … — it reaches the field only when its Set is sent (P18-S128-FIELDSET)" where a Set is wired |
+
+### §97.3 The test (`tests/the-field-does-what-it-is-told.test.ts`, 34 rows)
+
+The Field Desk, built in a temporary folder: the name field (Value from `draft`, text to `typed`, Value Changed to
+`changed`; Fill sets `draft` and its Done sends the Set, as the Lists Editor does; Reset, Wipe, Focus, Blur), the note
+(its own Did Mount Clears and Focuses it, todo-list's Note dialog), the title (its Enter Blurs it, its Blurred writes
+`blurred`), and the Form (a placed component whose signal inputs send its field's Set and Focus, the New player form and
+nightbook's Field). Both arms read each field's text by placeholder and the focused one (`fields: true`), and both take
+`type:<placeholder>:<text>` and `enter:<placeholder>` steps. §A both arms step by step (the runtime first), the ticked desk
+(A1–A11), the name field unticked, where only its Set puts the Value in (A12, and A7 the focused Sets), the control with
+no wire into any Set (A13), a typed-in Value under a wire nothing has written (A14); §B the emitted handlers, refs, mark,
+Did Mount effect and Enter key; §C the plan (the actions, a Number field, a read after the Set, a consumed Focus outcome,
+the unticked note, a refused Set leaves the field drawn, the row's name); §D each variant's app typechecks.
+
+🔴 **The first drafts read three things that are not this bug's**, each moved off and two filed: the editor's load
+migration reads a format-4 field with a wired Set and an unstated box as unticked, the runtime arm (reading the file)
+as ticked, so the desk states the box; a Variable seeded on the field's own page is announced before its seed lands
+(**P18-S129-SEEDANNOUNCE**); and a ticked Value arriving is sent on in the runtime and not in the export, and written over
+a focused field (**P18-S129-VALUEARRIVAL**), so the Set alone is graded on the unticked desk.
+
+**Mutant arms** (`s129-fieldset/mutants.py`, a copy in `packages/nx-mut-s129`, removed after). Control 34 / 34; every
+arm typechecked and killed rows.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the base: a Set is not a trigger | 13 |
+| B | Focus and Blur are refused | 13 |
+| C | no focus test: a focused field takes the Set | 4 (A7, A12, B1, B7) |
+| D | no Cleared mark | 6 |
+| E | the mark lifted only by a change of value (the prediction) | 4 |
+| F | CLEAROUT: a Clear runs no chain | 9 |
+| G | a Set runs no chain | 5 |
+| H | the Set reads the Value as the render last saw it | 4 |
+| I | On Enter is not the Enter key | 3 |
+| J | a refused Set defers the drawn field | 1 (C7) |
+| K | a row may take its store's name | 2 (C8, D) |
+| L | a read after the Set is snapped to the Value | 1 (C4) |
+| M | a Focus with its outcome consumed is not refused | 1 (C5) |
+| N | the Set ignores the typed-in Value under an undelivered wire | 1 (A14) |
+
+🔴 **C and N survived the first spec** (32 rows): the ticked desk's focused Set came after a Clear, so it would have
+written `''` over `''`; no field had a typed-in Value under a wire. A7 was moved to the unticked desk's focused Sets (Bob
+over Eve), A14 added, both predicted and then run.
+
+### §97.4 What the exported apps do now
+
+`census.ts` on the tree: of the **35 Set** wires, **3 carried** (the marketplace's search box at its Group's Did Mount,
+rocket-school's and star-class's New player form `fill`), 20 refused by the field's own reason (a Number field 14,
+two Value wires 5, a wired Type 1: their senders are refused Functions but for nightbook's), 12 whose sender is not run
+(6 Functions; the Lists Editors 4, from `leFill.success`; Moon Adopt 2, from a logic component); **Focus 7 of 7
+carried, Blur 6 of 26** (todo-list's three Enter fields; the 20 others are planning's refused `out-blur`), Clear 19
+carried as before, now with their chains (none of the 19 has one to run in the templates).
+
+`dispdiff.ts`, the base against the tree: **templates 78 nodes gained, 0 lost** (every one a text field a refused Clear
+had marked deferred though it was drawn: planning and its demo 70, todo-list and its demo 8), 6 re-worded (the Lists
+Editors' Sets, now named from `leFill.success`); **corpus 49 gained, 0 lost**, 22 re-worded (the Text Search filter's
+Component Object, "feeds a text input, which is itself deferred" → "has no static binding"). The notes: the catch-all
+8,753 → 8,689, the trigger-drop sentence 395 → 433 (the Function-sent Set, Blur and Clear wires, named now), "no DOM event
+equivalent" 7 → 1.
+
+Read in the emitted diff (30 code files in 10 templates, `../s126-mounted/emit.ts` both ways):
+
+- **Runs now:** todo-list's (and its demo's) Note dialog, Money editor and Move form put the cursor in their field as they
+  open; the Action row's, Routine summary's and Task summary's title lets go of it on Enter, which runs their Blurred
+  (`rename`, `describe`); the Routine summary's time field adds a time on Enter; planning's and todo-list's Sign in log in
+  on Enter in the password field; bot-garden's shop card names on Enter; nightbook's Field takes the parent's Focus and
+  sends `enter`; rocket-school's and star-class's New player form `fill` puts the profile's name back; the marketplace's
+  search box shows the saved search when the page opens (unticked, so only its Set puts it there; the field is
+  controlled now).
+- **Still not, named on the wire:** rocket-school's and star-class's Lists Editor (**P18-S129-FNSUCCESS**: its `fill` runs a
+  Function whose Success, not Done, starts the chain; the bug's claim that the field's Set was the blocker was measured
+  false), Moon Adopt (a logic component's Done), planning's Function-sent Sets, Blurs and Clears (Tier B), nightbook's
+  Field Set (its Type is wired).
+
+The templates' typecheck gate 3 / 3, every row 0; all 19 (`../s124-deadrow/tplbuild.ts`) 1 error in 1, nightbook's
+P18-S125-STYLENULL, as at the base. Not driven in a browser: the spec renders both arms with real React, focus included.
+
+### §97.5 Readings
+
+The spec 34 / 34; the 14 mutant arms each kill rows (control 34 / 34). Re-pinned: `controlled-state` "clear is a
+state-set": it pinned `onClick={() => setDraft('')}`, CLEAROUT's divergence; the Clear now writes `draftCopy` too.
+Neighbours, run together under the lock (15 suites, 358 rows): `controlled-state`, `global-store`, `streaming-trio`,
+`the-state-history` (the specs that wire a field's action), the six that use the two arms, `the-field-announces-at-mount`,
+`the-undrawn-trigger-is-refused`, `chain-wire-order`, `parameter-coverage`, `hls001-corpus-identity`. **hls001**:
+predicted 0 keys by emitting all 63 fixtures with the base's `src` and the tree's (identical, notes too); unchanged.
+Package `tsc --noEmit` 0. The tsfixme ratchet holds.
+
+**The whole package** (`nice -n 19 --runInBand`, under the lock, JSON written 20:15): **146 / 146 suites, 5,034 passed,
+0 failed, 3 pending** (session 128's landed tree: 145 suites, 5,000; this session adds one suite of 34).
+
+**Tooling** (`s129-fieldset/`, run the `.ts` from `packages/nodegx-export` with `../../node_modules/.bin/ts-node -P
+tsconfig.json --transpile-only`, `ROOTS=` as `../s119-fnchain-measure/dispdiff.ts`): `census.ts <src> <out.json>` (every
+wire into a field's Set, Focus, Blur, Clear, Insert Text, Backspace: its sender, both dispositions, its drop sentence);
+`probe.ts <src> [steps…]` (the Field Desk on both arms, `EDIT=<module>` a variant, `RUNTIME=0`); `mutants.py`;
+`EXPECTED.md`. The base copy was `git archive 1d4adc615 packages/nodegx-export` unpacked in the session's scratch folder
+with `node_modules` and the sibling packages linked beside it (outside `packages/`, so `hls006` and npm's workspaces never
+see it). 🔴 A package copy inside `packages/` with the same name stops `npx` resolving at all ("multiple workspaces with
+the same name"): run jest from `../../node_modules/.bin/jest` while a mutant copy exists.
+
+### §97.6 What this leaves
+
+1. **P18-S129-FNSUCCESS** (medium, filed): a Function's Success continues no chain; the Lists Editor's real blocker.
+2. **P18-S129-VALUEARRIVAL** (medium, filed): a ticked Value arriving is not sent on, and is written over a focused field.
+3. P18-S129-SEEDANNOUNCE, P18-S129-RUNONCHANGEMARK (low, filed); P18-S118-NUMBERFIELD now also names 14 Set wires.
+4. Not graded: a Set while the field is not on the page (a value-mounted field): the runtime writes the start value and
+   sends the text to the Value's sinks only if it changed, with no Value Changed; the export writes the row and runs the
+   whole chain. Not counted on the templates. The New player form's root is mounted from a value; its `fill` is handed in
+   as a pulse count (P18-S126-INSIGNAL), whose chain runs once the form is drawn, so its field is on the page by then (read,
+   not run).
+5. The repeater's row relay (§96.5.1) was not started this session.

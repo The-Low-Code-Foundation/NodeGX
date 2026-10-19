@@ -1,3 +1,68 @@
+# Next session — session 129 (2026-10-19, BOARD lane 6) fixed **P18-S128-FIELDSET** and **P18-S127-CLEAROUT**: a text field's Set, Clear, Focus and Blur run from a chain, as the runtime runs them: the Set writes the Value as the field holds it and nothing into a focused field, a Clear sends the empty text on, Focus and Blur reach the element, and a field's Enter is its Enter key. Graded against the runtime's own Text Input and the viewer's own focus tracker, rendered by real React. Templates 78 nodes gained, 0 lost; the Lists Editor still does not fill, for a reason measured this session (P18-S129-FNSUCCESS).
+
+## ✅ Session 129: the field does what it is told
+
+Read EXP-011 §97. In short:
+
+| what | where |
+|---|---|
+| Measured first: 165 wires into a field's action input (Clear 97, Set 35, Blur 26, Focus 7; the bug said 34 Focus and Blur, counted 33); only Clear was a trigger | `s129-fieldset/census.ts` |
+| The runtime, read then measured on its own nodes: a Set writes `_internal.text` (the Value as last delivered, `''` after a Clear), nothing while focused; a Clear writes `''` focused or not; both send the text on and fire Value Changed | `s129-fieldset/EXPECTED.md`, `probe.ts` |
+| A Set and a Clear are the `state-set` of the field's row with `field: { port }`, so every walker reads them; the emitter prints the focus test, the write, and the field's own change chain with the text (`fieldWriteCode`); a Cleared mark lifted by every write of the Variable the Value reads (`draft.subscribe`) | `src/analyze/plan.ts` `compileFieldSet`, `src/emit/component.ts` |
+| Focus and Blur are `field-focus`, a call on the `<input>`'s ref; a field's On Enter is `onKeyDown` Enter; a drawn field keeps its disposition when such a wire is refused; a row does not take its component's store names | `plan.ts`, `component.ts` |
+| Spec, 34 rows: the Field Desk against the runtime's own Text Input and focus tracker, real React under StrictMode, step by step; the unticked desk, the control, a typed-in Value under an unwritten wire; 14 mutant arms each killing rows | `tests/the-field-does-what-it-is-told.test.ts`, `tests/helpers/field-desk.ts`, `s129-fieldset/mutants.py` |
+| Both arms gained `fields: true` (each field's text by placeholder, then the focused one) and the steps `type:<placeholder>:<text>` and `enter:<placeholder>`; the runtime arm puts the viewer's own `FocusTracker` behind Focus and Blur | `tests/helpers/runtime-mounted-arm.js`, `tests/helpers/export-react-arm.js` |
+
+- 🔴 **The bug's blocker was measured false.** The Lists Editor's `fill` runs a Function whose **Success** starts the
+  chain, and the export refuses a Run whose Success is wired ("only done continues a Run chain"): P18-S129-FNSUCCESS,
+  filed, medium. The field's Set is carried behind it now. Moon Adopt's Set is sent from a logic component's Done.
+- 🔴 **A prediction was wrong, and the mark's design came from it.** A Set after a Clear, with the Variable written again
+  with the same value, writes the value in the runtime (the Set Variable's `forceChange` delivers it again), not `''`. An
+  effect keyed on the value would be the predicted rule; the store's `subscribe` (every `set` calls every listener) is
+  the measured one. Mutant E is the prediction.
+- 🔴 **The first reach read 7 fields lost** (static → deferred): a refused Set wrote its sentence on a field that is drawn
+  whatever a sender does. Restored after the attach pass, as a placed component is; then 78 fields that refused Clears had
+  always marked deferred came back too (planning 70, todo-list 8).
+- 🔴 **Reading the emitted diff found a name clash**: the marketplace's search box, the first field a Set minted a row
+  for, named its row `search`, the store its own Variable imports. `stateNameTaken` asks the component's stores now
+  (C8, mutant K). Found by reading, before the gate ran.
+- 🔴 **Two mutant arms survived the first spec**: the ticked desk's focused Set came after a Clear (`''` over `''`), and no
+  field had a typed-in Value under a wire. A7 moved to the unticked desk, A14 added.
+- 🔴 **The first drafts read three things that are not this bug's**: a format-4 field with a wired Set and an unstated box
+  is unticked to the export's settle and ticked to the runtime arm (the desk states the box); a page-seeded Variable is
+  announced before its seed lands (P18-S129-SEEDANNOUNCE); a ticked Value arriving is not sent on and is written over a
+  focused field (P18-S129-VALUEARRIVAL, medium). So the Set alone is graded on the unticked desk.
+- 🔴 A package copy inside `packages/` with the same name stops `npx` resolving ("multiple workspaces with the same name"):
+  use `../../node_modules/.bin/jest` while a mutant copy exists, and remove it before the whole suite.
+
+Readings: the spec 34 / 34 (14 mutant arms, each killing rows); re-pinned `controlled-state`'s Clear row (it pinned
+CLEAROUT's divergence); neighbours green (EXP-011 §97.5, 15 suites, 358 rows); hls001 unchanged (predicted 0: all 63
+fixtures identical, base against tree); the templates' typecheck gate 3 / 3, every row 0; all 19 (`tplbuild.ts`) 1 error
+in 1 (nightbook STYLENULL, as before). Package `tsc --noEmit` 0; the ratchet holds. Whole package (`nice -n 19
+--runInBand`, JSON 20:15): **146 / 146 suites, 5,034 passed, 0 failed, 3 pending.**
+
+Reach (`dispdiff.ts`, `1d4adc615` against the tree): **templates 78 gained, 0 lost**, 6 re-worded (the Lists Editors'
+Sets, now named from `leFill.success`); **corpus 49 gained, 0 lost**, 22 re-worded. The catch-all 8,753 → 8,689, "no DOM
+event equivalent" 7 → 1. Carried: Set 3 of 35, Focus 7 of 7, Blur 6 of 26. In the emitted apps: todo-list's dialogs
+put the cursor in their field, its rows' titles let go on Enter and run their Blurred, both Sign ins log in on Enter,
+nightbook's Field takes Focus, the New player form's `fill` puts the name back, the marketplace's search box shows the
+saved search.
+
+Filed: **P18-S129-FNSUCCESS** (medium: a Function's Success continues no chain; the Lists Editor), **P18-S129-VALUEARRIVAL**
+(medium), **P18-S129-SEEDANNOUNCE**, **P18-S129-RUNONCHANGEMARK** (low). Fixed: P18-S128-FIELDSET, P18-S127-CLEAROUT.
+
+**Next (BOARD lane 6):**
+1. **P18-S129-FNSUCCESS**: a Function's Success as a chain, on the Run path and on the ticked-run path (the Lists Editor
+   refills when its sets or id change, in the runtime). Small to medium; the Lists Editor fills once it is in (its
+   field's Set is carried behind it).
+2. **The repeater's row relay** (§96.5.1, not started this session): the next blocker of todo-list's Dialog flow (16
+   sibling wires). The runtime arm has no For Each yet (`MODULES` in `runtime-mounted-arm.js`).
+3. P18-S129-VALUEARRIVAL (the sync effect sends the text on and leaves a focused field alone; the printer is
+   `fieldWriteCode`); then the low ones as listed in session 128.
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 128 (2026-10-19, BOARD lane 6) fixed **P18-S127-SETDONE** and **P18-S127-SIBLINGVALUE**: a Set Variable's Done runs its chain (the write, then Done, then Completed), and another placed component's lifted value reaches a sibling's input in time for the chain a pulse runs there. Graded against the runtime's own nodes rendered by real React. Templates 55 nodes gained, 0 lost; rocket-school's game and race start, and take the Setup's choices.
 
 ## ✅ Session 128: the Set runs its Done chain; the sibling's value arrives
