@@ -4526,6 +4526,15 @@ export function emitComponent(
     }
     return statements.length === 1 ? `${head} => ${statements[0]}` : `${head} => { ${statements.join('; ')}; }`;
   };
+  /** EXP-011 §99. Statements put in front of a handler arrow's body, in the form `handlerArrow` printed it. */
+  const prependStatements = (arrow: string, statements: string[], indent: number): string => {
+    if (statements.length === 0) return arrow;
+    const head = arrow.slice(0, arrow.indexOf('=> ') + 3);
+    const body = arrow.slice(head.length);
+    if (body.startsWith('{\n')) return `${head}{\n${statements.map((st) => `${pad(indent + 2)}${st};`).join('\n')}\n${body.slice(2)}`;
+    if (body.startsWith('{ ')) return `${head}{ ${statements.join('; ')}; ${body.slice(2)}`;
+    return `${head}{ ${statements.join('; ')}; ${body}; }`;
+  };
 
   /**
    * EXP-011 §39. One `useRef` per Delay node that attached, whichever of its verbs did — read
@@ -6006,10 +6015,21 @@ export function emitComponent(
      * signal. Per-row callbacks run both. Two rows cannot be clicked in one frame, so the
      * divergence needs a programmatic fire to reach.
      */
-    const rowSignalAttrs = (attrIndent: number): string[] => {
+    const rowSignalAttrs = (attrIndent: number, itemRef: string, entries: ReadonlyArray<RowEntry>): string[] => {
       const handlers = plan.handlers[node.id];
       if (handlers === undefined) return [];
       const propByPort = new Map((templatePlan?.outputProps ?? []).map((o) => [o.port, o.prop]));
+      /**
+       * EXP-011 §99. The relayed row values, written first: the runtime copies the firing row's relayed outputs, then sends
+       * its signal. A row output that passes its input through holds what this row is handed for it (`undefined` where the
+       * mapping drops the field, as the runtime's row never gets the input).
+       */
+      const relayWrites = plan.rowRelays
+        .filter((r) => r.repeaterId === node.id)
+        .map((r) => {
+          const entry = entries.find((e) => e.input === r.input);
+          return `${stateSetterOf(r.stateName)}(${entry === undefined ? 'undefined' : memberExpr(itemRef, entry.field)})`;
+        });
       const out: string[] = [];
       for (const [port, actions] of Object.entries(handlers)) {
         if (!port.startsWith(ITEM_OUTPUT_SIGNAL)) {
@@ -6035,7 +6055,7 @@ export function emitComponent(
           defer(node.id, `the relayed row signal "${templatePort}"`, `has no callback prop on ${templateLegacy}`);
           continue;
         }
-        out.push(`${prop}={${handlerArrow(actions, '()', attrIndent)}}`);
+        out.push(`${prop}={${prependStatements(handlerArrow(actions, '()', attrIndent), relayWrites, attrIndent)}}`);
       }
       return out;
     };
@@ -6098,7 +6118,7 @@ export function emitComponent(
       // §3.2: `id` keys only when every row has a unique one, mirroring the runtime's own
       // record identity; otherwise index, which is the same information the runtime has.
       const keyAttr = staticData.keyField ? `key={${itemLocal}.${staticData.keyField}}` : `key={${indexLocal}}`;
-      const attrs = [keyAttr, ...rowAttrs(keptStatic, itemLocal), ...rowSignalAttrs(indent + 2)];
+      const attrs = [keyAttr, ...rowAttrs(keptStatic, itemLocal), ...rowSignalAttrs(indent + 2, itemLocal, keptStatic)];
       const lines = element(target.symbol, attrs, null, indent + 2, false);
       const params = staticData.keyField ? itemLocal : `${itemLocal}, ${indexLocal}`;
       return [`${pad(indent)}{${staticData.constName}.map((${params}) => (`, ...lines, `${pad(indent)}))}`];
@@ -6130,7 +6150,7 @@ export function emitComponent(
           );
         }
       }
-      const attrs = [`key={${indexLocal}}`, ...rowAttrs(keptExpr, itemLocal), ...rowSignalAttrs(indent + 2)];
+      const attrs = [`key={${indexLocal}}`, ...rowAttrs(keptExpr, itemLocal), ...rowSignalAttrs(indent + 2, itemLocal, keptExpr)];
       const lines = element(target.symbol, attrs, null, indent + 2, false);
       const srcCode = exprCode(itemsExpr, 'render');
       // `?? []` is foreach.tsx's own "empty arrival clears the list". EXP-011 §55: a minted read is the hook
@@ -6169,13 +6189,13 @@ export function emitComponent(
       );
     }
     if (collection) {
-      const attrs = [`key={${indexLocal}}`, ...rowAttrs(kept, itemLocal), ...rowSignalAttrs(indent + 2)];
+      const attrs = [`key={${indexLocal}}`, ...rowAttrs(kept, itemLocal), ...rowSignalAttrs(indent + 2, itemLocal, kept)];
       const lines = element(target.symbol, attrs, null, indent + 2, false);
       const local = collectionLocals.get(collection.name)!;
       return [`${pad(indent)}{${local}.map((${itemLocal}, ${indexLocal}) => (`, ...lines, `${pad(indent)}))}`];
     }
     const item = query!.itemName;
-    const attrs = [`key={${item}.id}`, ...rowAttrs(kept, item), ...rowSignalAttrs(indent + 2)];
+    const attrs = [`key={${item}.id}`, ...rowAttrs(kept, item), ...rowSignalAttrs(indent + 2, item, kept)];
     const lines = element(target.symbol, attrs, null, indent + 2, false);
     return [`${pad(indent)}{${query!.stateName}.map((${item}) => (`, ...lines, `${pad(indent)}))}`];
   };

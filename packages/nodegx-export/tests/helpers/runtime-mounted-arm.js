@@ -74,8 +74,19 @@ const MODULES = [
   def(require(path.join(VIEWER, 'nodes', 'visual', 'group'))),
   def(require(path.join(VIEWER, 'nodes', 'visual', 'text'))),
   def(require(path.join(VIEWER, 'nodes', 'controls', 'button'))),
-  def(require(path.join(VIEWER, 'nodes', 'controls', 'text-input')))
+  def(require(path.join(VIEWER, 'nodes', 'controls', 'text-input'))),
+  // P18 session 130 (EXP-011 §99): the Relay Desk's list, the viewer's own For Each over the runtime's own Static Data.
+  def(require(path.join(LIB, 'nodes', 'std-library', 'data', 'staticdata'))),
+  def(require(path.join(VIEWER, 'nodes', 'std-library', 'data', 'foreach')))
 ];
+
+// P18 session 130. The viewer's For Each reads the project's settings off the running runtime, which the harness does not
+// start: an empty set is the default project's (as `noodl-viewer-react/tests/corpus/f50-repeater-plain-array.test.ts` lends it).
+{
+  const runtimeModule = require(require.resolve('@noodl/runtime', { paths: [path.join(ROOT, 'packages', 'noodl-viewer-react')] }));
+  const NoodlRuntime = runtimeModule && runtimeModule.default ? runtimeModule.default : runtimeModule;
+  if (NoodlRuntime.instance === undefined) NoodlRuntime.instance = { getProjectSettings: () => ({}) };
+}
 
 /** A v2 component's nodes as the editor exports them: each visual node with its children nested. */
 function componentData(dir, rel) {

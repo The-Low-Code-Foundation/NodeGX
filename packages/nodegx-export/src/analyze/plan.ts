@@ -3319,7 +3319,9 @@ export interface StateVarPlan {
     /** EXP-011 §61 — a pusher's back-results row (`Record<string, unknown>`, boots `{}`). */
     | 'stack-back'
     /** EXP-011 §87 — a Mounted or Visible written by the Evaluate of the unticked Conditions wired into it. */
-    | 'condition';
+    | 'condition'
+    /** EXP-011 §99 — a repeater's relayed row value, written in the rows' relayed-signal callbacks. */
+    | 'relay';
   /** The provenance comment above the row. */
   comment: string;
 }
@@ -4115,6 +4117,14 @@ export interface RepeaterPlan {
   itemsStaticId?: string;
 }
 
+/** EXP-011 §99. One relayed row value: the repeater, the row's output, the row's input it passes through, its state row. */
+export interface RowRelayPlan {
+  repeaterId: string;
+  output: string;
+  input: string;
+  stateName: string;
+}
+
 /**
  * One Static Data node hoisted to a frozen module constant (STATIC-DATA-TARGET §3).
  *
@@ -4345,6 +4355,12 @@ export interface ComponentPlan {
   syncEffects: SyncEffectPlan[];
   /** Push effects (§3.5), registration order — the lifted value outputs' child side. */
   pushEffects: PushEffectPlan[];
+  /**
+   * EXP-011 §99. A repeater's relayed row values (`itemOutput-<output>`) this component lifts: a state row per value,
+   * written in every row's relayed-signal callback from what the parent hands that row for its input `input`, before
+   * the signal's chain, as the runtime's `itemOutputSignalTriggered` copies the row's outputs and then sends the signal.
+   */
+  rowRelays: RowRelayPlan[];
   /** Reactive Conditions (LOGIC-TARGET §10), compile order — one useEffect each. */
   branchEffects: BranchEffectPlan[];
   /** Value Changed effects (EXP-011 §39), compile order — one useEffect + one useRef each. */
@@ -4951,6 +4967,7 @@ function planComponent(
     stateVars: [],
     syncEffects: [],
     pushEffects: [],
+    rowRelays: [],
     branchEffects: [],
     recordEffects: [],
     variableSeeds: [],
@@ -17071,6 +17088,71 @@ function planComponent(
     }
   }
 
+  /**
+   * EXP-011 §99, the repeater's row relay. `itemOutput-<name>` is the value the row whose relayed signal fired last held on
+   * its output `<name>`: the runtime's `itemOutputSignalTriggered` (`foreach.tsx`) copies every relayed output of that row,
+   * then sends the signal, and nothing else ever writes it (so it is `undefined` until a row signal fires). Here each row
+   * is its own element, and its signal callback closes over its own item: the callback writes the value into a state row,
+   * then runs the signal's chain. Statically known where the row's output is one of its inputs passed straight through
+   * (its Component Inputs port wired into its Component Outputs port), which the parent hands each row from its item.
+   */
+  const rowRelays = new Map<string, StateVarPlan>();
+  /** The relayed signals of a repeater, for the comment: "open" or "open, close". */
+  const relayedSignalsOf = (forEach: NodeIR): string =>
+    [
+      ...new Set(
+        component.connections.filter((c) => c.fromId === forEach.id && c.fromProperty.startsWith(ITEM_OUTPUT_SIGNAL)).map((c) => c.fromProperty.slice(ITEM_OUTPUT_SIGNAL.length))
+      )
+    ].join(', ') || 'relayed signal';
+  const rowRelayOf = (forEach: NodeIR, fromProperty: string): { stateName: string } | { defer: string } => {
+    if (!fromProperty.startsWith(ITEM_OUTPUT_VALUE)) {
+      return { defer: `a repeater's "${fromProperty}" is not a row's relayed value — those register as "${ITEM_OUTPUT_VALUE}<name>"` };
+    }
+    const output = fromProperty.slice(ITEM_OUTPUT_VALUE.length);
+    const key = `${forEach.id}\u0000${output}`;
+    const known = rowRelays.get(key);
+    if (known !== undefined) return { stateName: known.name };
+    const repeater = plan.repeaters[forEach.id];
+    const templatePath = repeater?.templatePath ?? null;
+    const template = templatePath === null ? undefined : ir.components.find((tc) => `/${tc.path}` === templatePath);
+    if (repeater === undefined || template === undefined) return { defer: `the repeater relaying "${output}" has no template component` };
+    if (repeater.mapping === null) return { defer: `the repeater relaying "${output}" maps its rows with a script, which is not a static map` };
+    const tById = new Map(template.nodes.map((n) => [n.id, n]));
+    const feeds = template.connections.filter((c) => c.toProperty === output && tById.get(c.toId)?.type === 'Component Outputs');
+    if (feeds.length !== 1) {
+      return {
+        defer:
+          feeds.length === 0
+            ? `nothing in ${templatePath} feeds the row output "${output}" that the repeater relays`
+            : `${feeds.length} wires feed ${templatePath}'s row output "${output}" — last-writer-wins is not statically ordered`
+      };
+    }
+    const feeder = tById.get(feeds[0].fromId);
+    if (feeder?.type !== 'Component Inputs') {
+      return {
+        defer: `${templatePath}'s row output "${output}" is computed inside the row (by ${feeder?.type ?? 'a missing node'}.${feeds[0].fromProperty}) — only a row input passed straight through is relayed in this slice`
+      };
+    }
+    const input = feeds[0].fromProperty;
+    if (repeater.mapping !== 'template-inputs' && !repeater.mapping.some((m) => m.input === input)) {
+      return { defer: `the repeater maps nothing into ${templatePath}'s input "${input}", which its row output "${output}" passes through` };
+    }
+    const declared = componentOutputInterface(template).valueProps.find((v) => v.port === output)?.tsType ?? 'unknown';
+    const tsType = declared === 'unknown' || declared === 'any' ? declared : `${declared} | undefined`;
+    const stateVar = allocStateVar(
+      `relayed ${output}`,
+      'relayed',
+      tsType,
+      null,
+      forEach.id,
+      'relay',
+      `What the row whose "${relayedSignalsOf(forEach)}" fired last holds on its "${output}" — undefined until one fires (foreach.tsx itemOutputSignalTriggered, EXP-011 §99).`
+    );
+    rowRelays.set(key, stateVar);
+    plan.rowRelays.push({ repeaterId: forEach.id, output, input, stateName: stateVar.name });
+    return { stateName: stateVar.name };
+  };
+
   // §4d child side: a Component Outputs value port fed by the vocabulary lifts — an optional
   // callback prop plus a push effect. A port whose feed does not resolve fails alone (the
   // mixed-outputs rule); the node's verdict names the first failure while good ports keep
@@ -17115,15 +17197,17 @@ function planComponent(
        * the case §32.4 declined on its own census. If a real project ever lands here, split it
        * the way §31.2 split its sibling, and do not inherit the sentence.
        */
+      let relayExpr: ValueExpr | undefined;
       if (from?.type === 'For Each') {
-        fail(
-          wire.key,
-          `a repeater relays its rows' outputs into "${port}" — which row fired is not statically expressible in this slice`
-        );
-        continue;
+        const relay = rowRelayOf(from, wire.fromProperty);
+        if ('defer' in relay) {
+          fail(wire.key, relay.defer);
+          continue;
+        }
+        relayExpr = { kind: 'state-get', name: relay.stateName };
       }
       const ctx = newCtx();
-      const expr = from === undefined ? null : resolveExpr(from, wire.fromProperty, ctx);
+      const expr = relayExpr ?? (from === undefined ? null : resolveExpr(from, wire.fromProperty, ctx));
       if (expr === null) {
         fail(
           wire.key,
@@ -20910,6 +20994,34 @@ function planComponent(
     for (const key of wiring.consumes) consumed.add(key);
     for (const id of wiring.collapses) dispositions[id] = { kind: 'collapsed', into };
     for (const id of wiring.subscribes) boundSubscribers.add(id);
+  }
+
+  /**
+   * EXP-011 §99. A relay whose repeater draws no rows in the export (its items have no feed the export reads) is never
+   * written: no row callback exists to write it. Its lift is taken back, so the parent binds nothing, and the value output
+   * says why (the feed is known only now, after the list passes).
+   */
+  for (const relay of [...plan.rowRelays]) {
+    const repeater = plan.repeaters[relay.repeaterId];
+    const fed =
+      repeater !== undefined &&
+      (plan.queries.some((q) => q.nodeId === repeater.itemsQueryId) ||
+        repeater.itemsCollectionName != null ||
+        repeater.itemsExpr !== undefined ||
+        plan.staticData.some((sd) => sd.nodeId === repeater.itemsStaticId));
+    if (fed) continue;
+    const reason = `the repeater relaying "${relay.output}" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it`;
+    plan.rowRelays.splice(plan.rowRelays.indexOf(relay), 1);
+    plan.stateVars = plan.stateVars.filter((v) => v.name !== relay.stateName);
+    plan.pushEffects = plan.pushEffects.filter((e) => !(e.expr.kind === 'state-get' && e.expr.name === relay.stateName));
+    for (const wire of component.connections) {
+      if (wire.fromId !== relay.repeaterId || wire.fromProperty !== `${ITEM_OUTPUT_VALUE}${relay.output}`) continue;
+      const outputs = nodeById.get(wire.toId);
+      if (outputs?.type !== 'Component Outputs') continue;
+      plan.liftedOutputProps = plan.liftedOutputProps.filter((l) => l.port !== wire.toProperty);
+      notes.push(wireNote(wire, reason));
+      if (dispositions[outputs.id]?.kind !== 'deferred') dispositions[outputs.id] = { kind: 'deferred', to: 'EXP-003', reason };
+    }
   }
 
   // Pass 6: report every wire nothing translated.
