@@ -1,10 +1,9 @@
 # SEE-001 — The honesty number: how much of this app is made of parts whose behaviour is known
 
 **Opened 2026-10-01.** **Depends on SEE-000.** NSP-017 moves the line later; it does not block the number.
-**Status: 🟡 built, the editor drive and Richard's read owed (s2, 2026-10-19, branch `l7-editor`).** §4 items 1–5 built;
-item 3 (the editor) built in s2 and graded in plain Node and in pixels, not yet driven. AC1–AC5 ✅ (AC1 on the MCP and in
-the editor with one named gap, a template defect; AC2's editor arm graded, not driven); AC6 ⬜ (Richard reads it, once the
-drive from primary passes).
+**Status: 🟡 built and driven; Richard's read owed (s2, 2026-10-19).** §4 items 1–5 built; the editor surface driven
+from primary after landing (§9). AC1–AC5 ✅; AC6 ⬜ (Richard reads the header and the script list on the training
+template).
 
 ## 1. The person sentence
 
@@ -208,4 +207,24 @@ recipe is in the phase's `NEXT-SESSION-PROMPT.md`.
 
 **AC2 in the editor:** graded on the walk (the planted Function moves the row and the header by the rule's amounts), not
 driven. **AC6 ⬜**: Richard reads the header and the rows on the training template once the drive passes.
+
+## 9. The drive (orchestrator, 2026-10-19, primary at `4ef1888fa`)
+
+`test:ci` from primary: **3020 specs, 0 failures** (seed 74347, fresh `test-results.json`; CI's last was 3017), the new
+pixel spec `NodeScriptMark` among them. Then the dev editor on a throwaway profile (`NOODL_USER_DATA_DIR`, CDP 9333) on a
+copy of `templates/digital-bricks-training`:
+
+| what | expected (recipe) | read in the editor |
+|---|---|---|
+| header | `66% known` | `66% known`, title `Honesty: 66% known (475 known, 245 script, 20 unspecced). 11.8% weighed by script lines (3393 lines).` + the sentence |
+| Settings / App rows | 56.4% / 40% | 56.4% / 40% |
+| Logic/Standing row | 66.7% | 66.7% |
+| canvas mark | a 3px pink bar on a Function's and a spec-less kit node's titlebar | seen on App: the Function "THE GATE" and the Language Bundle "common → i18next" |
+| a Function planted in Standing | header 65.9%, row 50% | `65.9% known (475 known, 246 script, 20 unspecced)`, Standing 50% |
+| the Function removed | back | `66% known`, Standing 66.7% |
+
+**AC2 in the editor ✅, driven.** Found on the way: the training template opened on "No HOME component selected", its
+`rootNodeId` naming no node (P111-S2-DBTNOHOME, fixed `46fb2bf4c` with a check over every template). And the census and
+honesty-ledger gates counted the untracked `nightbook` in a shared checkout, red in the tree and green in CI: they now
+count only tracked templates (`12081e5b4`). The 66% against the ledger's 67% is still P111-SEE001-DBTCLOUDUNREGISTERED.
 
