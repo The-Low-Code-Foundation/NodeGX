@@ -1,6 +1,8 @@
 # Usage: python3 -I mutants.py <package copy> <tree src> <out.json> — each arm below applied alone to a fresh copy of the
 # tree's src, the spec run against it (tests/the-root-is-mounted-when-it-says.test.ts); a control arm first. Every arm's
 # emitted apps still typecheck (each changes a decision, not the shape of the code), so a red row is the behaviour's.
+# G was first `!literal && id.length < 0`, which broke the narrowing of `bound` below it and read "0 total": reshaped.
+# ONLY=<arm name prefix>[,…] runs those arms (and the control) alone.
 import json, os, re, shutil, subprocess, sys
 copy, tree_src, out = sys.argv[1:4]
 PLAN, EMIT = 'src/analyze/plan.ts', 'src/emit/component.ts'
@@ -12,13 +14,16 @@ ARMS = {
   'D a gated Did Mount runs once, at the component mount': [(EMIT, "    if (gate.length > 0) {\n      const when", "    if (gate.length > 0 && gate.length < 0) {\n      const when")],
   'E the Did Mount ref is not reset by an unmount': [(EMIT, "        `      ${mounted}.current = false;`,\n", "")],
   'F the field announces at the component mount': [(EMIT, "      ...(when !== null ? [`    if (${negatedCode(when)}) return;`] : []),", "      ...(when !== null && when.length < 0 ? [`    if (${negatedCode(when)}) return;`] : []),")],
-  'G the plan gives the field no gates': [(PLAN, "          if (!literal && id !== plan.collapsedGroupId) gates.push(id);", "          if (!literal && id !== plan.collapsedGroupId && id.length < 0) gates.push(id);")],
-  'H an Expression answer takes the undefined arm': [(EMIT, "    const isExpressionAnswer =\n      source.kind === 'computed'", "    const isExpressionAnswer =\n      false && source.kind === 'computed'")],
+  'G the plan gives the field no gates': [(PLAN, "          else if (!literal) gates.push(id);", "          else if (!literal) gates.push(...[id].filter((x) => x.length < 0));")],
+  'H an Expression answer takes the undefined arm': [(EMIT, "nodeById.get(source.expr.nodeId)?.type === 'Expression';", "nodeById.get(source.expr.nodeId)?.type === 'Expression' && id.length < 0;")],
   "I a Page's Mounted binds too": [(PLAN, "    toProperty === 'mounted' && toNode.id === plan.rootId && toNode.type === 'Page';", "    toProperty === 'mounted' && toNode.id === plan.rootId && toNode.type === '\\u0000';")],
-  'J a Did Mount gated by its own element only': [(EMIT, "&& at !== plan.collapsedGroupId) gates.push(at);", "&& at !== plan.collapsedGroupId && at === id) gates.push(at);")],
+  'J a Did Mount gated by its own element only': [(EMIT, "        if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal')) gates.push(at);", "        if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal') && at === id) gates.push(at);")],
+  "K a Did Mount in a page's own wired Group is not refused": [(PLAN, "    if (!inside) continue;", "    if (!inside || inside) continue;")],
 }
 results = {}
+only = [x for x in os.environ.get('ONLY', '').split(',') if x]
 for name, edits in ARMS.items():
+    if only and name != 'control' and not any(name.startswith(o) for o in only): continue
     shutil.rmtree(os.path.join(copy, 'src'), ignore_errors=True)
     shutil.copytree(tree_src, os.path.join(copy, 'src'))
     ok = True

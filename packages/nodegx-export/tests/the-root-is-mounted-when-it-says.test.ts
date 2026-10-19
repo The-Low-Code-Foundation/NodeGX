@@ -37,15 +37,25 @@ import { typecheckEmittedApp } from './helpers/typecheckApp';
 const catalog: Catalog = loadCatalog();
 type Readings = string[][];
 
-const childArm = (helper: string, input: unknown): Readings[][] =>
-  JSON.parse(
-    execFileSync(process.execPath, [path.join(__dirname, 'helpers', helper)], {
-      input: JSON.stringify(input),
-      encoding: 'utf-8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-      maxBuffer: 16 * 1024 * 1024
-    })
-  );
+/**
+ * One arm in a child process. An arm that throws (a press on a button the page does not draw) reads as one reading per
+ * project holding the error, so the rows fail by name instead of the file failing to load.
+ */
+const childArm = (helper: string, input: Array<{ scenarios: string[][] }>): Readings[][] => {
+  try {
+    return JSON.parse(
+      execFileSync(process.execPath, [path.join(__dirname, 'helpers', helper)], {
+        input: JSON.stringify(input),
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+        maxBuffer: 16 * 1024 * 1024
+      })
+    );
+  } catch (e) {
+    const said = String((e as { stderr?: unknown }).stderr ?? e).split('\n')[0];
+    return input.map((project) => project.scenarios.map(() => [[`the ${helper} arm threw: ${said}`]]));
+  }
+};
 const writeApp = (app: EmittedApp): string => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'root-desk-app-'));
   for (const [file, text] of Object.entries(app.files)) {
