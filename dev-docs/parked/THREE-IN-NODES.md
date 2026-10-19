@@ -243,6 +243,11 @@ app (P112 R4).
   worried about how it'll look in the existing NodeGX editor. I'd like to be able to start testing it before we do more."*
 - R2 **Where the kit ships.** ✅ **Ruled 2026-10-19: on npm too** (`library/modules/` and `@nodegx/three-kit`, so a
   person using only the npm tools can install it; with lane 1's next npm cut).
+- R4 **Which crowd first, after the editor.** ✅ **Ruled 2026-10-19 (end of s4): games.** *"We have much more of a game
+  crowd I'm afraid. I'd go with 2 next, and yeah 3 for putting in models would be amazing, I think making your own models
+  is pretty much dead thanks to AI, but tweaking the models would obviously be a good thing for mistakes an AI has made in
+  design."* Next: behaviour (sentences on an object that write real nodes and wires; Camera Follow; Body), then models
+  (glTF in, and tweaking an AI-made model's parts). The data view waits. Plan: [`three-in-nodes/NEXT-SESSION-PROMPT.md`](three-in-nodes/NEXT-SESSION-PROMPT.md).
 - R3 **The Godot sentence.** Say "the spec admits other targets" and build none, or scope one batch (Mesh, Tween, Tap)
   as a NSP-006 stranger round in GDScript to prove it.
 
