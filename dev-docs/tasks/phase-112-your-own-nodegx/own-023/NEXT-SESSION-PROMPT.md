@@ -1,5 +1,15 @@
 # OWN-023 — the session that runs it (Opus 5.5)
 
+> **s1 state (2026-10-19 ~18:35, Opus 5.5).** Rulings R1–R10 in (task §9.1: 3 arms, Bash on, **5** continues, $60,
+> testers+scripts+Richard, each arm picks storage, judges outside, **builds tonight**, B's server warmed first (R9,
+> P112-OWN023-COLDSERVER filed), wait for Richard's ffmpeg encodes (R10)). Step 0 ✅ (`checklist-outside.md`,
+> `checklist-graded.md`), step 1 ✅ (`round-arm.mjs`, `audit-arm.mjs`, `judge.txt`, mock + 5 Haiku smokes, see
+> `lab-notes.md`), step 2 ✅ (`harness/CLAUDE.md`, 8,805 B). `grade-url.mjs` built. **Step 3 running:**
+> `run-arms.mjs` (background) in s1's scratchpad `98514a87-…/scratchpad/own023/rounds/{A,Aplus,B}`; progress in
+> `rounds/chain.json`, `rounds/<arm>.log`, each arm's `arm.json`. The scratchpad is /private/tmp: copy each arm out
+> (gallery) before a reboot. Next: gallery rows (A/A+ need their own dev server, by PORT), then Richard's three lines
+> per app (C11) before any number, then graders.
+
 **Written 2026-10-19 by Fable, who scoped it and ran nothing.** Say "Opus" in your first message. Read, in order: this
 file; `../OWN-023-ONE-BRIEF-THREE-STRANGERS.md` (all of it; §2.1 the controls, §7 and §9 twice); `../own-018/round-claude.mjs`
 and `peek-claude.mjs` (the Claude Code arm, the seal, the cost reading); `../own-019/gallery.mjs` (how an app is shown).
