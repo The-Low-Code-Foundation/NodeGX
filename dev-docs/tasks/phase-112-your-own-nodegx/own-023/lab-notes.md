@@ -31,3 +31,32 @@ that down." Those lines are marked **pull**.
 - **pull:** my first thought on seeing the server fail was "pre-warm the cache, it's only the lab". That is the
   handoff's named temptation (fixing B's way so B looks like itself). It goes to Richard as a ruling with both costs,
   not into the script on my say.
+
+## 2026-10-19 s1, the builds (step 3)
+
+- Waited 32 min for Richard's encodes (R10). A started 19:00 CEST (CPU 76% idle), A+ 19:36 (80%), B 20:10 (65%).
+  Back to back, one evening window, Claude Code 2.1.301, Opus 5.5, kit 0.2.2 (B's server warmed in 5.7 s — the
+  cache already held the package from the smokes; R9's cost is the cold 25.8–27.8 s measured before).
+- **Each arm ended in ONE sitting, judge DONE, 0 continues, 0 rate-limit waits.** R3's N never came into play.
+
+  | arm | API-eq $ | wall | turns | stack the arm chose |
+  |---|---|---|---|---|
+  | A bare | 9.25 | 33.9 min | 17 | Express + multer + `node:sqlite`, plain HTML/JS in `public/` ("Hum") |
+  | A+ harness | 8.56 | 33.7 min | 150 | Next.js + Prisma/SQLite + Vitest + Playwright, SPEC/REPORT/DECISIONS/verification ("OpenSound") |
+  | B NodeGX | 16.48 | 31.0 min | 210 | NodeGX project `openwave` + its local backend ("OpenWave") |
+
+  (A's 17 turns beside 2,033 s: to read in its transcript — likely long tool calls or subagents; not interpreted here.)
+- Audit, read by hand (the regex lists URL paths from curl as "leaks"): **no arm touched another arm's root or read
+  Richard's files.** A: wrote /tmp/a.txt, b.txt, /tmp/humc; looked for Chrome under /Applications twice (refused).
+  A+: Claude Code's own task-output dir + 4 logs in /tmp; `ls ~/Library/Caches/ms-playwright` refused ×3 (the `~`
+  misfire, s1 notes above). B: screenshots and a seed script in /tmp/ow-*; **tried to write a Claude Code auto-memory
+  file under Richard's ~/.claude (refused)** — A and A+ didn't. No re-run owed (§4.1: only if it touched another arm).
+- Gallery: `~/vscode_projects/NodeGX test projects/OWN-023 apps/` — `rounds/<arm>` (copied out of /tmp, minus npm and
+  Playwright caches), `arms.json` (the letter map, random), `apps/<L>` served by `serve-apps.mjs` on 5101–5103, each
+  the way its own folder says (A `npm start`; A+ README: setup then `npm run dev`, it left no production build so
+  `next start` refuses; B `noodl-preview`).
+- **Serving facts that are rows, not lab fixes:** the two code arms open on a phone over Wi-Fi as they are (A+'s
+  README even says how); B's preview binds 127.0.0.1, and with `--host 0.0.0.0` its page still calls its backend at
+  127.0.0.1:8584 → filed P112-OWN023-PHONEPREVIEW. A+ in `next dev` shows Next's "N" badge over its Home tab.
+- **pull:** none felt while the numbers came in. Noted the urge to explain B's $16.48 (2× A) by the server's
+  instruction overhead before reading the transcript; not written anywhere but here, not interpreted.
