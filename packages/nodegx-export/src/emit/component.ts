@@ -6984,10 +6984,43 @@ export function emitComponent(
   }
   // P18-S119-TICKEDRUN. What each ticked input of a Run-wired Function holds, one per instance, as the node's inputs do.
   for (const ticked of plan.tickedRuns) body.push(`  const ${pulseNamesOf(jsFunByNode[ticked.nodeId]!).held} = useRef<unknown[]>([]).current;`);
-  for (const [id, local] of jsLocals) {
+  /*
+   * P18-S122-TPLBUILD (TS2448, TS2454). A render local that reads a hook printed below it (a States value, an animated
+   * number, a Drag's, a Script's or a stream's output) was printed above that hook's `const`: a read in its temporal
+   * dead zone, which throws at the first render ("Cannot access 'foldedOrOpen' before initialization"), and which the
+   * app's `tsc -b` refuses. Such a local, and any local that reads one, prints after the hooks; the rest print here, where
+   * a hook's arguments may read them (an Expression into an animation's target is the corpus's own shape).
+   */
+  const hookLocalNames = [
+    ...plan.animations.map((a) => a.local),
+    ...plan.drags.map((d) => d.local),
+    ...plan.statesMachines.map((m) => m.local),
+    ...plan.scripts.map((s) => s.local),
+    ...plan.runTasks.map((r) => r.local),
+    ...plan.pageStacks.map((s) => s.local),
+    ...screenHooks.map((s) => s.local),
+    ...plan.appErrors.map((b) => b.local),
+    ...plan.streams.map((s) => s.local)
+  ];
+  const codeReads = (code: string, name: string): boolean =>
+    new RegExp(`(^|[^A-Za-z0-9_$.])${name.replace(/\$/g, '\\$')}(?![A-Za-z0-9_$])`).test(code);
+  const renderLocalLines = [...jsLocals].map(([id, local]) => {
     const def = jsFunByNode[id]!;
-    body.push(`  const ${local} = ${def.fnName}(${jsArgsObject(def, 'render')});`);
+    return { local, line: `  const ${local} = ${def.fnName}(${jsArgsObject(def, 'render')});` };
+  });
+  const afterHooks = new Set<string>();
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const { local, line } of renderLocalLines) {
+      if (afterHooks.has(local)) continue;
+      const rhs = line.slice(line.indexOf('='));
+      if (hookLocalNames.some((name) => codeReads(rhs, name)) || [...afterHooks].some((name) => codeReads(rhs, name))) {
+        afterHooks.add(local);
+        grew = true;
+      }
+    }
   }
+  for (const { local, line } of renderLocalLines) if (!afterHooks.has(local)) body.push(line);
   // EXP-011 §49. The animation pair's hooks — after the render locals a target or a wired State
   // may read (an Expression into State is the corpus's own shape), before the effects that read
   // the handles. The listeners are printed inline so each closes over this render.
@@ -7087,6 +7120,8 @@ export function emitComponent(
     if (listenerLines.length === 0) body.push(`  const ${stream.local} = ${spec.hook}(${source}, ${options});`);
     else body.push(`  const ${stream.local} = ${spec.hook}(${source}, ${options}, {`, listenerLines.join(',\n'), '  });');
   }
+  // P18-S122-TPLBUILD. The render locals that read a hook above, in their own order (each after any it reads).
+  for (const { local, line } of renderLocalLines) if (afterHooks.has(local)) body.push(line);
   // EXP-011 §53. A task template's start chain: once, on mount — startTask pulses the start input right after
   // createNode, and never again for that task. The ref guards StrictMode's second mount in development.
   if (plan.task !== undefined) {

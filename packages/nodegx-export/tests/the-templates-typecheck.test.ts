@@ -40,11 +40,11 @@ const LEDGER: Record<string, number> = {
   'pixel-game': 0,
   planning: 5,
   'planning-demo': 5,
-  'rocket-school': 20,
-  'star-class': 20,
+  'rocket-school': 4,
+  'star-class': 4,
   'story-engine': 0,
-  'todo-list': 10,
-  'todo-list-demo': 10
+  'todo-list': 4,
+  'todo-list-demo': 4
 };
 
 const trackedTemplates = (): string[] => {
