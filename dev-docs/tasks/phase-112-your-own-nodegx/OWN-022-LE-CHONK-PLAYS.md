@@ -157,7 +157,13 @@ in the scratchpad, never in `packages/` or anything published.
   downloaded), `npm run solve` = the 12-move path, `npm run lab` up in ~8 s, verify-rig fair / bug / qa / slide all exit 0.
 - **The Monster Gate "1 console error" is `nodegx.io/favicon.ico` 404** (Puppeteer reports a failed resource as a console
   error); the game itself logs none. Quote "0 from the game".
-- **Still owed before the 29th:** the video cut (Opus) + narration (Richard); Richard shares the report (Share menu — it is
+- **The video cut ✅ (2026-10-19 s2):** `NodeGX test projects/OWN-022 Le Chonk/video/le-chonk-plays.mp4` — 2:31, 1080p30,
+  silent track for the narration; `narration-script.md` has a timecode and suggested words per scene. Built, not edited:
+  `storyboard.mjs` (scenes, durations, narration; Large 4's words read from the runs' logs) → `render.mjs` (Puppeteer,
+  1920×1080 frames) → `build.mjs` (ffmpeg). Re-time = change `dur`, rerun both. Hero = pass 2 rig-none-high-3 (QA win);
+  its 12 batched taps are a labelled replay (`replay.mjs`, logged pixels on the same rigged copy — it wins identically).
+  Monster Gate game1–3 copied out of s1's scratchpad into `runs/monster-game*`.
+- **Still owed before the 29th:** Richard's narration (then mux it in); Richard shares the report (Share menu — it is
   private) and posts in `challenges-submissions` with the how-it-was-developed note (README §How it was developed has it).
   Optional: AC3 (Challenge pace).
 
