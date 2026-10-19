@@ -7323,9 +7323,12 @@ export function emitComponent(
   // is the boot delivery a parent wire gets from the interpreter.
   for (const push of plan.pushEffects) {
     const deps = [...effectDeps(push.expr), push.prop].join(', ');
+    // P18-S122-TPLBUILD. A value whose static type is not the port's is handed on as it is, as the runtime does.
+    const code = exprCode(push.expr, 'render');
+    const pushed = push.castTo === undefined ? code : `${SIMPLE_REF.test(code) ? code : `(${code})`} as ${push.castTo} | undefined`;
     body.push(
       '  useEffect(() => {',
-      `    ${push.prop}?.(${exprCode(push.expr, 'render')});`,
+      `    ${push.prop}?.(${pushed});`,
       `  }, [${deps}]);`,
       ''
     );

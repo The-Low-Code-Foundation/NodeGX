@@ -3305,6 +3305,12 @@ export interface SyncEffectPlan {
 export interface PushEffectPlan {
   prop: string;
   expr: ValueExpr;
+  /**
+   * P18-S122-TPLBUILD (TS2345). The port's declared type, when the pushed value's static type is not it (an untyped
+   * Variable is `unknown`, an Expression's answer keeps `null` for a NaN at load): the push says the port's type, as a
+   * cast. The runtime's Component Outputs hands the value on as it is, and so does the cast; it changes no value.
+   */
+  castTo?: string;
 }
 
 /**
@@ -16823,7 +16829,8 @@ function planComponent(
       }
       consumed.add(wire.key);
       stateLandedKeys.add(wire.key);
-      plan.pushEffects.push({ prop: vp.prop, expr });
+      const pushedType = exprTsType(expr);
+      plan.pushEffects.push({ prop: vp.prop, expr, ...(vp.tsType !== 'any' && pushedType !== vp.tsType ? { castTo: vp.tsType } : {}) });
       plan.liftedOutputProps.push({ port, prop: vp.prop, tsType: vp.tsType });
       for (const k of ctx.consumes) consumed.add(k);
       for (const s of ctx.subscriberIds) boundSubscribers.add(s);
