@@ -5,6 +5,16 @@ and the readings are in [`dev-docs/parked/THREE-IN-NODES.md`](../../../dev-docs/
 that has it in `noodl_modules/` gets its nodes in the MCP's catalog through the project overlay, the way every kit does
 (`packages/noodl-mcp/tests/three-kit-catalog.test.ts`). No node-spec entries yet.
 
+## Install it from npm
+
+```
+npx @nodegx/three-kit add            # inside a NodeGX project, or pass its folder
+```
+
+It copies the kit into the project's `noodl_modules/three-kit/`, where the editor, the preview, `nodegx deploy` and the
+MCP read every kit, and records where it came from in `noodl_modules/kit-provenance.json`. Run it again after an
+upgrade; a copy with edits in it is kept unless you pass `--force`. (Published with NodeGX's next npm release.)
+
 ## The nodes
 
 | node | what | under |
@@ -27,7 +37,8 @@ rendered many times; keying by `noodlNode.id` collapsed eight rows into one obje
 🔴 **A child speaks before its parent.** React runs a child's effects before its parent's, so a Mesh inside a 3D Group
 reaches the engine before the group does. The engine parks it in the scene and the group adopts it when it arrives.
 
-🔴 **Nothing says when a Mesh is outside a Scene** (PARKED-THREE-S2-MESHOUTSIDE): it validates clean and draws nothing.
+🔴 **A Mesh outside a Scene draws nothing, and says so in the console** (PARKED-THREE-S2-MESHOUTSIDE): one error naming
+it, which `render_report` hands an agent as a `console-error` finding. Validation still says nothing.
 
 ## Build, assemble, deploy, drive
 

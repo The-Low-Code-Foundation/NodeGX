@@ -8,6 +8,10 @@ first** and **R2 on npm too** (§6). s2 added the 3D Group node, Width and Heigh
 and measured the catalog route: **12 / 12** on the drive, **5 / 5** on the catalog spec (§3.1). It still has no lane on
 the [board](../BOARD.md); which slot it takes is Richard's to name.
 
+**s3 (same day):** the kit is the npm package `@nodegx/three-kit`, ready for lane 1's next cut (`npx @nodegx/three-kit
+add`); a Mesh outside a Scene now says so to the agent; and the agent's own render harness, which had **no WebGL**, draws
+the scene (§3.2).
+
 > "I've had several community members asking me to show them 'how NodeGX works with three.js in nodes' which I know at
 > the moment we don't … is there a world where we can create for example a custom editor designed specifically for
 > generating the three.js windows in the apps we've made? … if we can create a 'spec' like we did with the 130 NodeGX
@@ -107,6 +111,40 @@ Group's X glides it. The fixture's robot does exactly that.
 **12 / 12.** Readings [`drive-2026-10-19-s2.json`](three-in-nodes/drive-2026-10-19-s2.json); the scene at 520 px
 [before](three-in-nodes/shots/s2-01-scene.png) and [after the robot glided](three-in-nodes/shots/s2-03-robot-glided.png).
 
+### 3.2 s3 — on npm, a Mesh that says where it is, and an agent that can see it (2026-10-19)
+
+**The package.** `library/modules/three-kit/` is `@nodegx/three-kit` 0.1.0: `package.json` at the entry's root, so it
+is no workspace and `package-lock.json` does not move; `files` ships the bin, the built kit folder and the README
+(8 files, 189 kB packed). `npx @nodegx/three-kit add [projectDir] [--force]` finds the project at or above the folder,
+copies the kit into `noodl_modules/three-kit/` and records the editor's `imported` provenance arm
+(`fromProject: "@nodegx/three-kit@0.1.0 from npm"`, `entry`, `entryVersion`), keeping other kits' records. A second add
+is a no-op; a different copy (someone's edits) is refused without `--force`. **Why a copy and not "the loader reads
+`node_modules`"** (GRV-002 §4.2 asks for the pick): every loader (editor, preview, `nodegx deploy`, the MCP overlay)
+already reads `noodl_modules/`, so one writer here beats four readers changed there. GRV-002's other half, the project
+naming the kits it needs, is not built. **Not published:** the publish is Richard's, with lane 1's next cut.
+
+**Graded.** `node --test library/modules/three-kit/test/*.test.js` **5 / 5**. The published-artefact route: `npm pack`,
+the tarball installed in a scratch folder, its bin run in a fresh copy of the fixture, `nodegx deploy`, the drive:
+**12 / 12** ([`drive-2026-10-19-s3-npm.json`](three-in-nodes/drive-2026-10-19-s3-npm.json)). Not measured: the editor's
+picker with the kit installed (still owed), and whether a running MCP picks the kit up without a reopen (the overlay is
+keyed on kit file mtimes, so it probably does; the bin's message says "reopen" until that is measured).
+
+**PARKED-THREE-S2-MESHOUTSIDE, the kit's half.** A Mesh, Light or 3D Group with no Scene above it logs one
+`console.error` naming itself, once per node and name. An error and not a warning because `render_report` collects
+errors only (measured in `render-capture.js` and `render-report.js`). The drive's `--outside` variant is the bug's
+repro (the ball moved to the Layout Group): **OUTSIDE 1 / 1** ([`drive-2026-10-19-s3-outside.json`](three-in-nodes/drive-2026-10-19-s3-outside.json));
+the same site with the HEAD kit **0 / 1**, `consoleErrors: []`. The main run's BOOT (no console error) is its control.
+`validate_project` and the editor's drop still say nothing: that half is option (a), a format change.
+
+**PARKED-THREE-S3-NOWEBGL (high, fixed).** Opening the outside variant through the MCP and calling `render_report`
+returned the finding, and a white page reading **"No WebGL here"**: the agent's harness ran Chrome with `--disable-gpu`
+alone, so every three.js scene (this kit, garden-3d-kit) was blank to an agent. Software GL beside it
+(`--use-angle=swiftshader --enable-unsafe-swiftshader`) in `render-report.js` and `drive-page.js`: gl false → true, the
+fixture's 12 meshes drawn. [`three-kit-render.test.ts`](../../packages/noodl-mcp/tests/three-kit-render.test.ts) **3 / 3**
+(WebGL with default flags; the outside page's `console-error` finding; the in-Scene control without one); with the two
+flags removed, the first test reads `gl: false`. Nine render and drive specs **96 / 96** after the change. npm users get
+it with the next `@nodegx/mcp` cut (`dist/render-harness` is rebuilt from these files).
+
 ## 4. The vocabulary, ranked by the two surfaces Richard named
 
 Games, and 3D representations of data. Not by what three.js offers.
@@ -130,10 +168,12 @@ app (P112 R4).
 ## 5. What it would need to become a phase
 
 - **The catalog, the picker and the MCP.** ✅ measured s2 (§3.1): the project overlay carries the kit to the MCP; it
-  validates. Owed: the editor's picker driven once with the kit installed, and PARKED-THREE-S2-MESHOUTSIDE.
+  validates. ✅ s3: `render_report` draws the scene (NOWEBGL fixed), and a Mesh outside a Scene reaches the agent as a
+  finding. Owed: the editor's picker driven once with the kit installed; MESHOUTSIDE's format half.
 - **Layout inputs on the Scene.** ✅ s2: Width and Height.
-- **On npm (R2).** `@nodegx/three-kit`, so a person with only `npm create nodegx` can add it; rides lane 1's next npm
-  cut. Not started: what the package carries and how a kit-only project installs it is the next session's first read.
+- **On npm (R2).** ✅ s3 built and graded from the packed tarball (§3.2): `npx @nodegx/three-kit add`. Owed: the
+  publish (Richard, lane 1's next cut), and a sentence somewhere an agent reads (the MCP's instructions or
+  `create-nodegx`'s brief) so an agent asked for 3D knows the kit exists: today nothing in the npm kit names it.
 - **The ten nodes** (§4), each with the four or five inputs a person wants, not the forty three.js has.
 - **Specs** (layer 2): a headless face that reads the Scene's graph (the drive's `census()` is its first draft), the
   format's `act` for a tap and a drag, scenarios for Tween and Tap. NSP-016's layout model has nothing to say here:
@@ -156,6 +196,8 @@ app (P112 R4).
 - `library/modules/three-kit/` — the kit (`src/kit.js`, `build.mjs`, `library.json`, `project/noodl_modules/three-kit/`
   with `index.js`, `manifest.json`, `three.min.js`, `LICENSE.txt`)
 - `dev-docs/parked/three-in-nodes/fixture/` — the project; `shots/`, `drive-2026-10-19.json` — the readings
-- `scripts/devtools/drive-three-kit.js` — the drive (12 clauses)
+- `scripts/devtools/drive-three-kit.js` — the drive (12 clauses; `--outside`, 1 clause)
+- `library/modules/three-kit/package.json`, `bin/three-kit.js`, `test/add.test.js` — the npm package and its add (s3)
+- `packages/noodl-mcp/tests/three-kit-render.test.ts` — what the agent's render harness sees (3 tests, s3)
 - `packages/noodl-mcp/tests/three-kit-catalog.test.ts` — the catalog spec (5 tests)
-- `dev-docs/bugs/parked-three-s1-instanceid-….md`, `parked-three-s2-meshoutside-….md` — the findings
+- `dev-docs/bugs/parked-three-s1-instanceid-….md`, `parked-three-s2-meshoutside-….md`, `parked-three-s3-nowebgl-….md` — the findings
