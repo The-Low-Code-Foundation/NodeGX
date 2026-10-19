@@ -1,6 +1,6 @@
 # EXP-011 — Close the picker gap, ranked by what apps need
 
-**Status:** 🟡 In progress — **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
+**Status:** 🟡 In progress — **latest: §91 (session 124, 2026-10-19), a trigger the export never runs is refused by name, and the tracked templates' exports are gated by type-error count (311 → 189)**; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
 **Depends on:** nothing — but sequenced after EXP-009 and EXP-010, which are worth more per hour
 **Replaces:** every "what to build next" list in this phase from sessions 20–31
 
@@ -12931,3 +12931,173 @@ now started without waiting, as the runtime's two requests go out together).
    ticked Condition).
 4. P18-S122-DEADROW, P18-S122-TPLBUILD (high); P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE,
    P18-S113-LISTLIVE, P18-S115-DYNPROBE; TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).
+
+## §91 A trigger the export never runs is refused (session 124, 2026-10-19): P18-S123-UNDRAWNTRIGGER and P18-S122-DEADROW
+
+### §91.0 What was measured first
+
+`s124-deadrow/census.ts` on HEAD `e7e3e77db` over the 19 template projects (primary's `templates/`, nightbook included,
+and the two materialized `*.content.json`): **186 elements own an attached chain and are never drawn; 151 nodes are
+collapsed into one of them; 5 Did Mounts sit on an element a value mounts** (the emitter refused those, the plan counted
+their nodes). `deadrow.py` over the emitted templates: **19 printed §4f rows, 11 never written**, 6 of them read by drawn
+elements (members-area's Landing 8 times). The bug files named 10 nodes, the ones session 123 gained; the rest had been
+counted exported all along.
+
+No undrawn element in the templates is authored Mounted false with nothing to mount it. Each has a wire into its Mounted
+the export does not carry: a refused Function (gram's and the marketplace's refusal pages, the Site Builder copies), an
+Inverter of a maybe-undefined operand (driftwood), an instance output its component does not lift (members-area's
+isModerator, the Chrome's menu, nightbook's Tonight panels). So the running app draws them and the export never does.
+
+### §91.1 Where it is decided
+
+After the render pass, the attach pass **and** `planProject`'s lift phase: a Mounted bound by the parent's lift
+(CONTROLLED-STATE §4d) is only known there, so a decision inside `planComponent` would refuse a chain the lift then
+draws (mutant H). `planProject` now plans every component, lifts, then asks each plan `unreachedTriggersOf(plan,
+component)`; a component with anything new is planned again with those triggers refused up front (`PlanExclusions`),
+until a round finds nothing new (a refusal can only reach further: a Mounted bound to a refused row is no longer bound).
+A re-plan first gives back the names its first plan took from the project-wide sets (page, component and http names),
+so it allocates the same ones; a re-planned template takes its Run Tasks hosts with it, and a child whose lifted outputs
+change takes its parents.
+
+### §91.2 What is built
+
+| piece | what it is |
+|---|---|
+| `undrawnReasonOf` | the emitter's rule (`render` in `component.ts`), as a sentence: the element or one above it has a Mounted bound to a statically false value, or not bound and authored false — then "and nothing mounts it", or "and the wire into its Mounted from X.port is not exported (<the drop reason, or the source node's refusal>)" |
+| `unreachedTriggersOf` | `owners`: every element in `handlers`, `changeHandlers` or `drags` that is not drawn; `mounts`: every Did Mount on an element a value mounts (the sentence is the emitter's own); `rows`: every jsfun row a binding reads and no printed list writes (a generic walk of the plan, the dead owners' lists excepted) |
+| Pass 2 | a wire from an excluded owner (or its `didMount`) is refused by name: the sink and the chain's collapses take the sentence only if no other trigger has claimed them (a later attach still overwrites, an earlier collapse is kept); a Component Outputs port keeps its interface, its callback never called |
+| Pass 4e | a drawn element reading an excluded row drops its wire with the row's sentence ("it reads "Word" (rowFn), which the export never runs, so its outputs are never written: …"), so it carries a TODO marker |
+| the other readers | a handler's or a Function input's read of a dead row is kept, and the report says it reads nothing (`node <id>: a handler or a node that is not drawn still reads its outputs, and reads nothing — …`) |
+| the marker | an undrawn element's marker (printed above the return) says "node X is not drawn (<why>)", not "renders" |
+
+🔴 **The first rule refused the dead row's Function, and with it a chain that worked.** The older Site Builder copies'
+"The slug to show" runs on the Site's Did Mount and reads the URL's slug, the never-written home slug only as a fallback.
+Refusing "Read the settings row" refused it, and its two Queries, in 5 corpus copies (15 nodes). Only the drawn reads
+are refused now; the measurement of the losses is what found it.
+
+### §91.3 The test (`tests/the-undrawn-trigger-is-refused.test.ts`, 16 rows)
+
+The fixture is built by the spec in a temporary folder (the corpus golden does not move): a page with one drawn button
+and four triggers the export never runs, each beside a node a drawn trigger shares — a panel authored Mounted false
+with nothing to mount it, a box mounted by a refused Function, a group a Variable mounts (its child's Did Mount), and
+moderator tools mounted by an instance output its component does not lift; a Function only the undrawn button runs, read
+by a drawn Text; a Function a refused Query runs, read by a drawn Text and by a handler's Function. §A the chains (A6: the
+same graph with the instance output lifted keeps the chain, which only a decision after the lift gets right; A7 the
+control, every trigger drawn); §B the Did Mount; §C the rows; §D the emitted page (no handler, no wrapper, the markers,
+both apps typecheck). The expected rows were written before the first run; 14 of 15 matched, and the fifteenth (C1) had
+predicted the row would not be allocated: the run's compile still allocates it, nothing binds it, and the emitter prints
+none. Re-pinned to the new claim: `the-ticked-input-runs-it-again` "Did Mount on an element mounted by a value" (the note
+is the plan's wire drop now, not the emitter's).
+
+**Mutant arms** (`s124-deadrow/mutants.py`, a copy in `packages/nx-mut-s124`, removed after). Control 16 / 16; every arm
+typechecked (each failed named rows, none read "0 total").
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | no owners | 8 |
+| B | no Did Mounts | 1 |
+| C | no dead rows | 5 |
+| D | a refusal overwrites a node another trigger collapsed | 1 |
+| E | only the element itself, never one above it | 9 |
+| F | no second plan | 12 |
+| G | the marker still says "renders" | 1 |
+| H | the findings before the lift phase | 2 |
+| I | an unexported Mounted wire named without why | 1 |
+| J | a dead row still read by the drawn Text | 4 |
+| K | no note for the kept readers | 1 |
+
+**Neighbours.** `hls001-corpus-identity` 4 / 4 unchanged (no fixture has an undrawn trigger or a dead row);
+`the-failure-runs-its-chain` 23, `the-id-is-held` 22, `the-function-sends-its-signals` 38, `jsfun` 47,
+`the-condition-remembers-its-answer` 40, `export-report` 30, `the-ticked-input-runs-it-again` 30 (one re-pinned).
+`parameter-coverage`: the same 2 failures as on HEAD, measured on both (a copy of the package at HEAD): the committed
+catalog's three Upload File ports (`photoQuality`, `readers`, `shrinkTo`) are not in the ledger; reaching **1,236 = the
+floor**, total 1,399 against the ledger's 1,396. **The whole
+package** (`nice -n 19 --runInBand`, JSON written 10:48): 138 / 140 suites, 4,912 passed, 3 failed, 3 skipped: the two
+`parameter-coverage` rows above, and `hls006-every-listener` naming this session's two scratch copies of the package
+(`packages/.nx-ctl-s124`, `packages/nx-mut-s124`), each with a `serve.ts`; it passes once they are removed (run again
+alone after: 4 / 4). Package `tsc --noEmit` 0. Commit `f342b3df2`.
+
+### §91.4 No drive
+
+The change removes code that never ran (handlers on elements removed from the tree, wrappers and rows no printed list
+writes) and adds markers; nothing new runs in the browser, so this session prepared no drive. The spec's control rows
+and the typecheck grade the emitted page.
+
+### §91.5 What this moves, measured
+
+`dispdiff.ts`, HEAD against the tree:
+
+- **Templates: 166 nodes leave the exported count, none join, 8 are re-pointed to a drawn trigger.** By sentence: 123
+  under an element authored Mounted false whose Mounted wire is not exported, 18 under one an unlifted instance output
+  mounts (members-area's Chrome, Announcement and Meeting Remove), 16 in a Did Mount on a value-mounted page (nightbook's
+  Tonight, Coming, Envelope, Me, Warmup), and 9 whose sentence is another wire's refusal or a consequence: 5 refused by
+  a second wire that never fires (bot-garden's "Band 10–12", the two Feedback banners' "Open or closed", todo-list's and
+  the demo's "Close the description"; each collapsed at HEAD into an undrawn element), 3 Query Records fetched only for
+  a dead row's Function (members-area's Chrome and Landing "The association", the Site Builder's Site settings), and
+  gram's Member "Whose profile" (read only by the dead row's Function). Per template: nightbook 44, gram 36,
+  marketplace 33, members-area 32, digital-bricks-training 5, bot-garden 4, todo-list 4, todo-list-demo 3,
+  landing-pages 2, rocket-school, star-class and the Site Builder 1 each. Every one was checked against HEAD: its
+  disposition collapsed into the element the new sentence names (151), or into another element HEAD never drew (5, and
+  the 5 second-wire ones), or the Query or Page Inputs a dead row alone read (5).
+- **Corpus (220 projects): 73 leave, none join, 5 re-pointed.** The same shapes: 44 named triggers, 22 Site settings /
+  association Queries, and **5 Page Inputs that the emitted code still reads** ("The slug from the URL" in the Did Mount
+  of 5 older Site Builder copies): their disposition says "nothing reads any of its parameters" because a Function's
+  run never collapses its input sources, which the dead row's render read used to hide. Filed, P18-S124-RUNINPUTS.
+- **Rows:** `deadrow.py` on the emitted templates: **8 printed, 0 never written** (HEAD 19 and 11). Members-area's
+  Landing now shows its authored state, the "not connected yet" card, where HEAD showed nothing at all (every section
+  was mounted from the never-written row); each Text that read a dead row is empty as before and carries a marker.
+
+Read in the emitted diff of all 117 changed files: every removed line is a handler on an element never drawn, a wrapper,
+a row or an api stub only such a handler or row used (members-area's `deleteAnnouncement`, `deleteMeeting`, `logOut`'s
+Chrome source, `associations.ts`; the Site Builder's `sitesettingses.ts`; the marketplace's `giveLogin` and
+`nameMarketplace`), or a read of a never-written row; every added line is a marker.
+
+### §91.6 What this leaves
+
+1. **The wires into Mounted that the export does not carry are now the named blockers of 166 template nodes**: the
+   Inverter of a maybe-undefined operand, the Functions that read the Noodl API on gram's and the marketplace's pages, an
+   instance output its component does not lift (members-area's `/Members/Standing`, the Chrome's menu). Each is an
+   export defect the running app does not have; the next sessions can rank them by these counts.
+2. P18-S124-RUNINPUTS (low, filed): a node read only by a Function's run is reported as read by nothing.
+3. P18-S124-LATEMARKER (low, filed): a refusal filed after its element's marker printed is left out of the file.
+4. P18-S122-TPLBUILD (high): the gate and the first class are built (§91.7); the next classes are listed there.
+5. The §87 Conditions still waiting; P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE, P18-S113-LISTLIVE,
+   P18-S115-DYNPROBE; STUBORDER, TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).
+
+### §91.7 P18-S122-TPLBUILD: the gate, by count, and the first class
+
+`s124-deadrow/tplbuild.ts` (every template emitted and typechecked as its own `tsc -b` would, `tests/helpers/typecheckApp`)
+re-measured the bug's reading on HEAD `e7e3e77db`: **337 errors in 13 of 19**, as filed. The tree after §91: 335 (the
+Site Builder's Messages and Admin lose two TS7006 with the never-run "row-count sentence" wrappers).
+
+**The gate** (`tests/the-templates-typecheck.test.ts`, 3 rows, 27 s): every template git tracks (16; nightbook is not
+tracked, and the two `*.content.json` need the editor's writer, so they are measured by the script and not the gate) is
+emitted and typechecked, and each count is held to a ledger row inside the spec. A ratchet both ways: a rise names the
+template and its first three errors, a fall asks for the row to be lowered. A control counts one error put into a clean
+template's page. Mutants: a row lowered by one (the rise sentence, row 2 red), a row dropped (rows 1 and 2 red). It
+gates template edits too: a template lane whose change moves a count meets this row.
+
+**The first class: a lifted output's push** (CONTROLLED-STATE §4d). Every TS2345 in the tracked templates (157) is one
+line shape, `onXChanged?.(x)` in a push effect: the child declared the callback `(value: T) => void`, and pushes whatever
+its output holds, `undefined` (a prop not passed, a row not yet written) included. The parent's row is already
+`T | undefined`, and the parent passes its setter. The callback now takes `T | undefined`: **122 of the 157 leave, none
+added** (311 → 189 in the tracked templates; 337 → 203 over all 19). Predicted before regenerating hls001: CheerMeter
+and BenchEmitter; regenerated, exactly those two keys. `controlled-state`'s CheerMeter golden re-pinned. The gate's rows
+were lowered from its own failure ("fewer: lower its row to 6", …), which is the ratchet working.
+
+**What is left in the tracked templates (188), by class:**
+
+| class | count | the shape | where |
+|---|---|---|---|
+| TS2554 | 42 | a Function Expression called with an argument it does not take: `monsterWalking.set(False({}))` | rocket-school, star-class |
+| TS2448 + TS2454 | 22 + 22 | a render local read before the hook that declares it: `The_fold_button({ open: foldedOrOpen.values.open })` above `const foldedOrOpen = useStates(…)` | rocket-school, star-class (Adopt), todo-list ×2 |
+| TS2786 | 39 | a component whose body returns `{}` used as JSX: all 39 are components whose root is authored Mounted false, so the export removes it and returns a comment (`Pad`, `WinCard`; a Mounted wire into a root is "a router concern" the export does not carry) | bot-garden, gram, rocket-school, star-class, todo-list ×2 |
+| TS2345 | 35 | a lifted push of `unknown` or `null` (a row field or a nullable state into `T \| undefined`) | rocket-school, star-class, bot-garden |
+| TS17001 | 12 | a repeater row's `key` printed twice | planning ×2, todo-list ×2 |
+| TS2322 | 6 | `unknown` into an animated number; a number into a kit's signal prop | rocket-school, star-class |
+| TS7006 | 6 | an author's untyped parameter in a Function body re-hosted verbatim (`function pick(typed, start)`) — **the body class, Richard's ruling** | todo-list ×2 (and the Site Builder 6) |
+| TS2440 | 4 | a kit wrapper and a component with one name imported into the same file | digital-bricks-training, rocket-school, star-class |
+| TS7053 | 1 | an untyped object indexed by a string in a Function body (`m[String(Inputs.countryId)]`) | marketplace (and the Site Builder) |
+
+Commits `9bb16f905` (the gate), `c31409e27` (the class). Whole package after both (JSON written 11:16): 140 / 141 suites,
+4,916 passed, 2 failed (`parameter-coverage`, as on HEAD), 3 skipped; `tsc --noEmit` 0.

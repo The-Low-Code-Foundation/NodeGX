@@ -1,3 +1,68 @@
+# Next session — session 124 (2026-10-19, BOARD lane 6) fixed **P18-S123-UNDRAWNTRIGGER and P18-S122-DEADROW**: a trigger the export never runs (an element it never draws, a Did Mount it does not run, a Function row nothing it runs writes) is refused by name instead of counted exported. Then **P18-S122-TPLBUILD's gate**: the tracked templates' exports typecheck, by count, and the largest class is fixed (311 → 189 errors).
+
+## ✅ Session 124: a trigger the export never runs is refused
+
+Read EXP-011 §91. In short:
+
+| what | where |
+|---|---|
+| Measured first: **151** template nodes collapsed into an element never drawn (the bugs named 10), 186 such elements, 5 value-mounted Did Mounts; 19 printed rows, 11 never written. Every undrawn element has a Mounted wire the export does not carry | `s124-deadrow/census.ts`, `../s122-holdtheid/deadrow.py` |
+| Decided after render, attach **and the lift phase** (a Mounted the parent's lift binds is known only there): `planProject` plans, lifts, asks `unreachedTriggersOf`, and plans a component again with its unreached triggers refused up front (names given back first), until nothing new | `src/analyze/plan.ts` |
+| `undrawnReasonOf` (the emitter's own rule, as a sentence); Pass 2 refuses a wire from an undrawn owner or a gated Did Mount, keeping any node another trigger claims; Pass 4e drops a drawn read of a dead row with the Function's sentence; a handler's read is kept and noted | `plan.ts` |
+| An undrawn element's marker says "is not drawn (why)", not "renders" | `src/emit/component.ts` |
+| Spec, 16 rows: a built fixture (temp folder, the corpus golden does not move), four unreached triggers each beside a shared node, the lifted variant, a control; 11 mutant arms each killing rows | `tests/the-undrawn-trigger-is-refused.test.ts`, `s124-deadrow/mutants.py` |
+| TPLBUILD gate: every tracked template emitted and typechecked, count per template, a ratchet both ways (rise names the errors, fall asks for the row) | `tests/the-templates-typecheck.test.ts`, `s124-deadrow/tplbuild.ts` |
+| TPLBUILD class 1: a lifted output's callback is `(value: T \| undefined) => void` (the push sends undefined before its source has a value): 122 TS2345 gone, none added | `component.ts`; hls001 regenerated (CheerMeter, BenchEmitter: predicted, exactly those) |
+
+- 🔴 **The bug files said 10; the census said 151, and 166 once the readers' consequences counted.** The rest had been
+  counted exported for as long as their pages existed. Measure the artefact, not the bug's own number.
+- 🔴 **The first rule refused the dead row's Function, and with it a chain that worked** (5 older Site Builder copies,
+  "The slug to show", reads the URL's slug and the dead home slug only as a fallback: 15 corpus nodes). Only drawn reads
+  are refused now. Found by classifying every corpus loss, not the templates' (the templates had none of it).
+- 🔴 **A decision inside `planComponent` would have been wrong**: members-area's moderator tools are mounted by an
+  instance output the lift phase decides. Mutant H (findings before the lift) kills A5/A6.
+- 🔴 **Two pre-existing holes surfaced once the dead-row reads were gone**, both filed, not fixed: a Page Inputs read
+  only in a Function's run says "nothing reads" (P18-S124-RUNINPUTS), and a refusal filed after an element's marker
+  printed never reaches the file (P18-S124-LATEMARKER).
+- 🔴 **Scratch copies of the package inside `packages/` turn `hls006-every-listener` red** (each copy's `serve.ts` is a
+  socket nobody enrolled). Remove `packages/.nx-ctl-*` and `packages/nx-mut-*` before the whole suite, or read that
+  failure as yours.
+
+Readings: the spec 16 / 16; the gate 3 / 3; re-pinned `the-ticked-input-runs-it-again` (the Did Mount note is the plan's
+now), `controlled-state` (CheerMeter's callback type). Neighbours green (`the-failure-runs-its-chain` 23, `the-id-is-held`
+22, `the-function-sends-its-signals` 38, `jsfun` 47, `the-condition-remembers-its-answer` 40, `export-report` 30,
+`custom-nodes` 34, `typecheck-emitted` 67, `hls001` 4). `parameter-coverage`: the same 2 failures as on HEAD (measured on
+a HEAD copy): the committed catalog's three Upload File ports are not in the ledger; reaching 1,236 = the floor.
+Whole package (`nice -n 19 --runInBand`, JSON written 11:16, after the
+TPLBUILD commit): **140 / 141 suites, 4,916 passed, 2 failed (those two), 3 skipped**; package `tsc --noEmit` 0. (The run
+after the first commit read 138 / 140 with `hls006-every-listener` red for this session's scratch copies; alone after
+removing them, 4 / 4.) Commits `f342b3df2`, `9bb16f905`, `c31409e27`.
+
+Reach (`dispdiff.ts`, HEAD `e7e3e77db` against the tree): **templates 166 nodes leave the exported count, none join,
+8 re-pointed to a drawn trigger; corpus 73 leave, none join, 5 re-pointed.** Printed rows never written: 11 → 0.
+Template exports' type errors (`tplbuild.ts`, tracked templates): 311 in 11 of 16 → 189 in 9 of 16. All 19 (nightbook and the two materialized): 337 in 13 → 203 in 12.
+
+Filed: **P18-S124-RUNINPUTS** (low), **P18-S124-LATEMARKER** (low). Fixed: P18-S123-UNDRAWNTRIGGER, P18-S122-DEADROW.
+P18-S122-TPLBUILD stays open (the gate and class 1 done).
+
+**Next (BOARD lane 6):**
+1. **P18-S122-TPLBUILD, the next classes** (tracked templates, 188 errors): a Function Expression called with an
+   argument it does not take (`monsterWalking.set(False({}))`, TS2554, 42, rocket-school and star-class), a component
+   whose body returns `{}` used as JSX (TS2786, 39), a render local used before the States hook that declares it
+   (TS2448/TS2454, 44: rocket-school's Adopt `foldedOrOpen`), the last lifted pushes of `unknown` or `null` (TS2345, 35),
+   a repeater's `key` printed twice (TS17001, 12), a kit wrapper and a component with one name (TS2440, 4). Lower the
+   gate's rows as each lands. The body class (TS7006, an author's untyped parameter, 6) waits for Richard's ruling.
+2. **The Mounted wires the export does not carry**, now the named blockers of 166 template nodes: a Function reading the
+   Noodl API (gram's and the marketplace's refusal pages), an instance output its component does not lift
+   (members-area's `/Members/Standing`, the Chrome's menu, nightbook's Tonight panels), an Inverter of a maybe-undefined
+   operand. Rank by the counts in EXP-011 §91.5.
+3. The §87 Conditions still waiting (members-area's Post, Unsubscribe; landing-pages' contact; the Site Builder's Setup).
+4. P18-S124-RUNINPUTS, P18-S124-LATEMARKER (small); P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE,
+   P18-S113-LISTLIVE, P18-S115-DYNPROBE; STUBORDER, TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).
+5. Not this lane's, for Richard: P18-S119-TOKENCLAIM, the ruling P18-S119-FIRSTWRITE asks, and the TPLBUILD body class.
+
+---
+
 # Next session — session 123 (2026-10-17, BOARD lane 6) built **the Failure chain**: a record or user verb's Failure runs its chain in the export, and a click's later wires run before the request answers. The Sign-in pages of members-area, todo-list, the Site Builder and the planner show their refusal now; nightbook's Me toggles work.
 
 ## ✅ Session 123: the failure runs its chain

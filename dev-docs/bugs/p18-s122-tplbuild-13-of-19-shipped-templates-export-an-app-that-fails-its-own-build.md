@@ -31,3 +31,10 @@ first (the templates' exports typecheck, by count, ratcheting down), then each c
 type bugs; the fourth needs a ruling (the body is the author's JavaScript: a per-wrapper `// @ts-nocheck` cannot be
 scoped to one function, so either the wrapper moves to its own file, as a Script's does, or the build stops at
 `vite build`).
+
+**Session 124 (EXP-011 §91.7): the gate and the first class.** Re-measured on HEAD `e7e3e77db`: 337 in 13 of 19, as
+above. `tests/the-templates-typecheck.test.ts` now typechecks every tracked template's export (16) and holds each count
+to a row, a ratchet both ways. The largest class, a lifted output's push `onXChanged?.(x)` against a callback typed
+`(value: T)`, is fixed by typing the callback `T | undefined` (commit `c31409e27`): **311 → 189 in the tracked
+templates (11 → 9 of 16), 337 → 203 over all 19, none added.** Left: TS2554 42, TS2448/TS2454 44, TS2786 39, TS2345 35
+(`unknown`/`null` pushes), TS17001 12, TS2322 6, TS7006 6 (the body class, the ruling), TS2440 4, TS7053 1.
