@@ -1186,7 +1186,14 @@ export const RUN_TASKS_CONTRACT = {
   error: { parameter: 'taskErrorOutput', default: 'Error' }
 } as const;
 
+/**
+ * P18-S127-SETDONE (EXP-011 §95). A Set Variable's chains: its compile runs them after the write (`withSetDone`); a wire it
+ * could not run is named by the sweep after the attach pass. Not Failure: with a literal Name it never fires.
+ */
+const SET_VARIABLE_CHAIN_OUTPUTS = ['done', 'completed'] as const;
 const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
+  // P18-S127-SETDONE (EXP-011 §95).
+  'Set Variable': SET_VARIABLE_CHAIN_OUTPUTS,
   [RUN_TASKS_TYPE]: RUN_TASKS_OUTPUTS,
   // EXP-011 §54. The boundary's Error is its listener, compiled by its own registration.
   [ON_APP_ERROR_TYPE]: ['error'],
@@ -2432,8 +2439,13 @@ export type HandlerAction =
    * (measured: `exp-011-s96-a-literal-under-a-wire.test.ts`), so the handler prints `expr ?? fallback`. Absent when
    * nothing is typed in, or when the wire's source always carries a value (the typed-in value is then never written,
    * in the runtime or here — a note says so).
+   *
+   * P18-S127-SETDONE (EXP-011 §95). `then`: the Set's Done chain, then its Completed chain, as following statements
+   * (`expandActions`), present only when something hangs off them. The runtime writes, notifies every Variable reading
+   * the name, then sends Done and Completed (`setvariablenode.ts` `scheduleStore`), and a Done's target is updated before
+   * the click's next wire (it is flagged dirty with its sender and pulls it first): depth first, as printed.
    */
-  | { kind: 'store-set'; variableName: string; expr: ValueExpr; fallback?: string | number | boolean }
+  | { kind: 'store-set'; variableName: string; expr: ValueExpr; fallback?: string | number | boolean; then?: HandlerAction[] }
   | { kind: 'globalstore-set'; storeName: string; key: string; expr: ValueExpr; fallback?: string | number | boolean }
   /**
    * `Set Object Properties` on a named Object (EXP-011 §47): one patch over every wired property
@@ -15666,6 +15678,42 @@ function planComponent(
      * a switch that stops compiling, a fall-through that answers plausibly.
      */
     // Set Variable
+    return withSetDone(node, compileSetVariableWrite(node));
+  };
+
+  /**
+   * P18-S127-SETDONE (EXP-011 §95). A Set Variable's Done and Completed chains, after its write. The runtime writes, every
+   * Variable reading the name is notified, then Done and Completed are sent (`setvariablenode.ts` `scheduleStore`); a
+   * Done's target is flagged dirty with its sender and pulls it first, so the chain runs before the click's next wire
+   * (measured, `s128-setdone/EXPECTED.md`): the chain is following statements, as an Object's Set prints its Done.
+   *
+   * A chain the export cannot run does not take the write with it: the Set kept its write when nothing read its Done, and
+   * keeps it now. The port's wires stay unconsumed and are named by the sweep after the attach pass, with this refusal
+   * (`setDoneRefusals`). Failure is not this chain's: with a literal Name it never fires.
+   */
+  const withSetDone = (node: NodeIR, write: CompiledSink): CompiledSink => {
+    if ('defer' in write || write.action.kind !== 'store-set') return write;
+    const then: HandlerAction[] = [];
+    const consumes = [...write.consumes];
+    const collapses = [...(write.collapses ?? [])];
+    const subscribes = [...(write.subscribes ?? [])];
+    for (const port of SET_VARIABLE_CHAIN_OUTPUTS) {
+      if (!component.connections.some((c) => c.fromId === node.id && c.fromProperty === port)) continue;
+      const chain = doneChainOf(node, port);
+      if ('defer' in chain) {
+        setDoneRefusals.set(`${node.id}:${port}`, chain.defer);
+        continue;
+      }
+      then.push(...chain.then);
+      consumes.push(...chain.consumes);
+      collapses.push(...chain.collapses);
+      subscribes.push(...chain.subscribes);
+    }
+    if (then.length === 0) return { ...write, consumes, collapses, subscribes };
+    return { action: { ...write.action, then }, consumes, collapses, subscribes };
+  };
+
+  const compileSetVariableWrite = (node: NodeIR): CompiledSink => {
     const variableName = variableNameOf(node);
     if (variableName === undefined) return { defer: 'variable name is not a literal' };
     /**
@@ -16068,6 +16116,8 @@ function planComponent(
 
   /** Keyed `${nodeId}:${port}` — the popup nodes compile per trigger port (`closeAction-*`). */
   const compiledSinks = new Map<string, CompiledSink>();
+  /** P18-S127-SETDONE. A Set Variable's chain the export could not run, by `<id>:<port>`: the sweep names its wires with it. */
+  const setDoneRefusals = new Map<string, string>();
   /**
    * Why a reactive Condition (LOGIC-TARGET §10) did not become an effect, by node id. The Condition sweep
    * prefers this over the `:eval` sink's reason: for a ticked node that sink only ever says
@@ -16315,7 +16365,9 @@ function planComponent(
             context.port.startsWith(ITEM_OUTPUT_SIGNAL) &&
             actionsValidIn(action.then, context, invokedScope)
           );
+        // P18-S127-SETDONE. The value, then the Done chain.
         case 'store-set':
+          return exprValidIn(action.expr, context, invokedScope) && actionsValidIn(action.then ?? [], context, invokedScope);
         case 'globalstore-set':
           return exprValidIn(action.expr, context, invokedScope);
         // EXP-011 §47. Every value in the patch, then the chain.
@@ -17319,7 +17371,16 @@ function planComponent(
         snap.set(action.name, 'op');
         return action;
       }
-      case 'store-set':
+      // P18-S127-SETDONE. The value is read where the handler is; the Done chain follows, one arm always taken, so it
+      // carries the map onward (an Object's Set's treatment).
+      case 'store-set': {
+        const e = snapExpr(action.expr, snap);
+        if ('defer' in e) return e;
+        if (action.then === undefined) return { ...action, expr: e };
+        const then = snapActionList(action.then, snap);
+        if (!Array.isArray(then)) return then;
+        return { ...action, expr: e, then };
+      }
       case 'globalstore-set': {
         const e = snapExpr(action.expr, snap);
         if ('defer' in e) return e;
@@ -18420,6 +18481,57 @@ function planComponent(
     notes.push(wireNote(connection, pulseRefusal ?? `the trigger is not a rendered element event or a receiver`));
   }
 
+  /**
+   * P18-S127-SETDONE (EXP-011 §95). A Set Variable's Done or Completed wire its compile did not take: the chain it could
+   * not run (`setDoneRefusals`), the Set itself refused, or a Set no exported trigger runs. Named by that, after every
+   * wire has spoken (the attach pass skips these wires, `ownsChainOutput`, so the answer does not depend on wire order).
+   * A sink another trigger has ruled keeps its ruling (s124's rule); a placed component is restored below, as any.
+   */
+  for (const connection of component.connections) {
+    if (consumed.has(connection.key)) continue;
+    const fromNode = nodeById.get(connection.fromId);
+    if (fromNode?.type !== 'Set Variable' || !(SET_VARIABLE_CHAIN_OUTPUTS as readonly string[]).includes(connection.fromProperty)) continue;
+    const toNode = nodeById.get(connection.toId);
+    if (!toNode) continue;
+    const outputsSink = toNode.type === 'Component Outputs';
+    if (!outputsSink && !isTriggerInto(toNode, connection.toProperty)) continue;
+    // Named here, so not again by the sweep of wires nothing translated (the attach pass consumed it at the base).
+    consumed.add(connection.key);
+    // The sink's own refusal first, as the attach pass rules every trigger wire: a sink that cannot compile says why.
+    const sink = outputsSink ? outputSinkOf(connection.toProperty, fromNode, connection.fromProperty) : compiledOf(toNode, connection.toProperty);
+    if ('drop' in sink) {
+      notes.push(wireNote(connection, sink.drop));
+      continue;
+    }
+    if ('defer' in sink) {
+      if (outputsSink) {
+        if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, sink.defer);
+      } else if (dispositions[toNode.id]?.kind !== 'collapsed' && dispositions[toNode.id]?.kind !== 'static') {
+        dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason: sink.defer };
+      }
+      notes.push(wireNote(connection, sink.defer));
+      continue;
+    }
+    const trigger = `trigger ${connection.fromId}.${connection.fromProperty}`;
+    const chainRefusal = setDoneRefusals.get(`${connection.fromId}:${connection.fromProperty}`);
+    const own = dispositions[fromNode.id];
+    const compiled = [...compiledSinks].find(([key]) => key === `${fromNode.id}:do` || key.startsWith(`${fromNode.id}:do@`))?.[1];
+    const reason =
+      chainRefusal !== undefined
+        ? `${trigger}: the Set Variable's ${connection.fromProperty === 'done' ? 'Done' : 'Completed'} chain is not exported — ${chainRefusal}`
+        : own?.kind === 'deferred'
+          ? `${trigger}: the Set Variable that sends it is not exported — ${own.reason}`
+          : compiled !== undefined && 'defer' in compiled
+            ? `${trigger}: the Set Variable that sends it is not exported — ${compiled.defer}`
+            : `${trigger}: the Set Variable that sends it is never run by an exported trigger`;
+    if (outputsSink) {
+      if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, reason);
+    } else if (dispositions[toNode.id] === undefined) {
+      dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason };
+    }
+    notes.push(wireNote(connection, reason));
+  }
+
   for (const [id, before] of instanceBeforeAttach) {
     if (dispositions[id]?.kind !== 'deferred' || before?.kind === 'deferred') continue;
     if (before === undefined) delete dispositions[id];
@@ -18567,6 +18679,9 @@ function planComponent(
           // EXP-011 §39. The chain is walked, which is what earns the popups, mutations and
           // channels inside it.
           scanActions(action.then);
+        } else if (action.kind === 'store-set') {
+          // P18-S127-SETDONE. A Set Variable's Done chain, the same.
+          scanActions(action.then ?? []);
         } else if (action.kind === 'delay') {
           // EXP-011 §39. All four chains — a popup opened from a Delay's Finished is the shape
           // this node exists for.
@@ -20485,6 +20600,10 @@ function planComponent(
           case 'state-set':
             if (action.expr !== undefined) walkExpr(action.expr);
             break;
+          // P18-S127-SETDONE. A Set Variable's Done chain (its own value is not walked here, as before).
+          case 'store-set':
+            walkActions(action.then ?? []);
+            break;
           default:
             break;
         }
@@ -21161,6 +21280,10 @@ function planComponent(
           case 'api-call':
             fillMaterialize(action.then);
             fillMaterialize(action.failThen);
+            break;
+          // P18-S127-SETDONE. A Set Variable's Done chain.
+          case 'store-set':
+            fillMaterialize(action.then ?? []);
             break;
           default:
             break;

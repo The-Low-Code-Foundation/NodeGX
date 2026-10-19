@@ -826,6 +826,8 @@ export function emitComponent(
     if (action.kind === 'store-set') {
       usedVariableNames.add(action.variableName);
       collectExprUse(action.expr);
+      // P18-S127-SETDONE. The Done chain earns what it uses.
+      (action.then ?? []).forEach(collectActionUse);
     }
     if (action.kind === 'globalstore-set') {
       usedStoreNames.add(action.storeName);
@@ -1142,6 +1144,9 @@ export function emitComponent(
                 a.kind === 'array-new' ||
                 // EXP-011 §61. A Reset's one chain.
                 a.kind === 'stack-reset'
+              ? [a, ...deepActions(a.then)]
+            : // P18-S127-SETDONE. A Set Variable's Done chain.
+              a.kind === 'store-set' && a.then !== undefined
               ? [a, ...deepActions(a.then)]
               : [a]
     );
@@ -2604,6 +2609,10 @@ export function emitComponent(
       (a.kind === 'popup-show' || a.kind === 'collection-remove' || a.kind === 'log' || a.kind === 'object-set' || (a.kind === 'delay' && a.verb === 'restart')) &&
       a.then.length > 0
         ? [{ ...a, then: [] }, ...expandActions(a.then)]
+        : // P18-S127-SETDONE. A Set Variable with a literal Name cannot fail and its write is synchronous: Done, then
+          // Completed, are following statements (`withSetDone` put them in `then` in that order).
+          a.kind === 'store-set' && a.then !== undefined
+          ? [{ ...a, then: undefined }, ...expandActions(a.then)]
         : // EXP-011 §60. The self variant cannot miss and `set` is synchronous: Done then Completed are following
           // statements, in the order reportOutcome sends them. The parent form prints its own two arms.
           a.kind === 'component-object-set' && !a.parent && (a.then.length > 0 || a.completedThen.length > 0)
@@ -2687,7 +2696,9 @@ export function emitComponent(
     };
     const inAction = (a: HandlerAction): boolean => {
       switch (a.kind) {
+        // P18-S127-SETDONE. The value, or anything in the Done chain.
         case 'store-set':
+          return reads(a.expr) || (a.then ?? []).some(inAction);
         case 'globalstore-set':
           return reads(a.expr);
         // EXP-011 §47. Any of the patch's values, or anything in the chain after it.
@@ -7644,7 +7655,9 @@ export function emitComponent(
     switch (a.kind) {
       case 'emit':
         return a.payload.map((p) => p.expr);
+      // P18-S127-SETDONE. The value, then the Done chain.
       case 'store-set':
+        return [a.expr, ...(a.then ?? []).flatMap(actionExprsOf)];
       case 'globalstore-set':
         return [a.expr];
       // EXP-011 §47. The patch's values, then the chain.

@@ -228,13 +228,16 @@ describe('§C the plan', () => {
   it('C3 a sender the export does not run: the wire dropped and named, the instance still drawn, no count left behind', () => {
     const dir = writeSignalDesk((d) => {
       const home = d.components['Pages/Home'];
-      home.nodes.push({ id: 'pickDone', type: 'Set Variable', label: 'Picked again', parameters: { name: 'picked', value: 'picked again' } });
+      // P18 session 128: a Set Variable's Done runs its chain now (P18-S127-SETDONE); a Set the export refuses still does not.
+      home.nodes.push({ id: 'pickDone', type: 'Set Variable', label: 'Picked again', parameters: { name: 'picked', setWith: 'object', value: 'picked again' } });
       home.connections = home.connections.filter((c) => !(c.toId === 'picker' && c.toProperty === 'fill'));
       home.connections.push({ fromId: 'pickBtn', fromProperty: 'onClick', toId: 'pickDone', toProperty: 'do' });
       home.connections.push({ fromId: 'pickDone', fromProperty: 'done', toId: 'picker', toProperty: 'fill' });
     }).dir;
     const plan = planOf(dir, '/Pages/Home');
-    expect(plan.notes).toContain('wire pickDone:done->picker:fill dropped: the trigger is not a rendered element event or a receiver');
+    expect(plan.notes).toContain(
+      'wire pickDone:done->picker:fill dropped: trigger pickDone.done: the Set Variable that sends it is not exported — setWith "object" conversion is not translated in step 5'
+    );
     expect(plan.dispositions['picker']).toEqual({ kind: 'static' });
     expect(plan.instancePulses.map((p) => p.nodeId)).not.toContain('picker');
     expect(plan.stateVars.map((v) => v.name)).not.toContain('pickerFillPulses');
