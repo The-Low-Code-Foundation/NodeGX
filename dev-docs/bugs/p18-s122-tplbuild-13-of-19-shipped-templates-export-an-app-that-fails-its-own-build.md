@@ -1,10 +1,11 @@
 ---
 id: P18-S122-TPLBUILD
 title: 13 of the 19 shipped templates export an app whose own `npm run build` fails at `tsc -b`
-status: open
+status: fixed
 severity: high
 area: export / the emitted app's types (all templates)
 found: P18 session 122, 2026-10-17, typechecking the templates' exports before and after "Hold the id"
+fixed: P18 session 125, 2026-10-19, branch l6-tplbuild (commits b3dd0dc87 … 0f133f30b, 55eae56a1); EXP-011 §92
 evidence: dev-docs/tasks/phase-18-code-export-v2/s122-holdtheid/tc.ts (tests/helpers/typecheckApp, the scaffold's strict options) over templates/ and the two materialized `*.content.json`; EXP-011 §89.6
 ---
 
@@ -41,3 +42,15 @@ to a row, a ratchet both ways. The largest class, a lifted output's push `onXCha
 `(value: T)`, is fixed by typing the callback `T | undefined` (commit `c31409e27`): **311 → 189 in the tracked
 templates (11 → 9 of 16), 337 → 203 over all 19, none added.** Left: TS2554 42, TS2448/TS2454 44, TS2786 39, TS2345 35
 (`unknown`/`null` pushes), TS17001 12, TS2322 6, TS7006 6 (the body class, the ruling), TS2440 4, TS7053 1.
+
+**Session 125 (EXP-011 §92): every class, and the ruling built.** On the base `a2c4fc09c`, 189 in 9 of 16, as session 124
+left it. One commit per class, each lowering the gate's rows and armed by a mutant: an Expression with no inputs called
+with none (TS2554, 42); a lifted push of an untyped value cast to the port's type (TS2345, 35); a removed root returning
+`null` (TS2786, 39, a render React threw on); a render local printed after the hook it reads (TS2448/TS2454, 44, a
+ReferenceError at the first render); **each Function wrapper in its own file, `src/functions/<dir>/<fileBase>/<fnName>.ts`,
+one-file `// @ts-nocheck`, the signature typed** (TS7006/TS7053, 7: Richard's ruling; with the directive off the files hold
+exactly those 7 and no name from the component's scope); an input called `key` bound as `keyProp` (TS17001, 12); a kit
+import aliased off its component's name, a kit `object` input that takes an array, an untyped animation option cast to a
+number (TS2440 4, TS2322 6). **The gate: 0 in 0 of 16, every tracked template's export passes `tsc -b`.** All 19: 1 in 1,
+nightbook's Expression `null` into a style colour, filed P18-S125-STYLENULL (nightbook is not tracked). `dispdiff.ts`: 0
+dispositions changed in the templates (13,432 nodes) or the corpus (27,789). Whole package 141 / 141 suites.

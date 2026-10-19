@@ -1,6 +1,6 @@
 # EXP-011 — Close the picker gap, ranked by what apps need
 
-**Status:** 🟡 In progress — **latest: §91 (session 124, 2026-10-19), a trigger the export never runs is refused by name, and the tracked templates' exports are gated by type-error count (311 → 189)**; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
+**Status:** 🟡 In progress — **latest: §92 (session 125, 2026-10-19), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling)**; §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
 **Depends on:** nothing — but sequenced after EXP-009 and EXP-010, which are worth more per hour
 **Replaces:** every "what to build next" list in this phase from sessions 20–31
 
@@ -13101,3 +13101,105 @@ were lowered from its own failure ("fewer: lower its row to 6", …), which is t
 
 Commits `9bb16f905` (the gate), `c31409e27` (the class). Whole package after both (JSON written 11:16): 140 / 141 suites,
 4,916 passed, 2 failed (`parameter-coverage`, as on HEAD), 3 skipped; `tsc --noEmit` 0.
+
+## §92 The templates' exports build (session 125, 2026-10-19): P18-S122-TPLBUILD, every class
+
+### §92.0 What was measured first
+
+The gate (`tests/the-templates-typecheck.test.ts`) and a dump of every diagnostic over the 16 tracked templates, on the
+branch's base `a2c4fc09c`: **189 errors in 9 of 16**, as §91.7 left them. All 19 shipped templates (`tplbuild.ts`, primary's
+`templates/` with nightbook, and the Site Builder and landing-pages `*.content.json` written out by `materialize.ts`):
+**203 in 12 of 19**. Read line by line, §91.7's table held, with one correction: the TS2345 rows are all one shape, a lifted
+push, and none is the `string | undefined` argument class (that one was gone with §91.7's fix).
+
+### §92.1 The classes, in the order worked
+
+Each class: the expected count written first, the fix in the emitter, the gate's rows lowered in the same commit, and a
+mutant that brings the class back reds the gate's row 2. The tracked count after each, and what the emitted diff showed:
+
+| class | count | the shape | the fix | after |
+|---|---|---|---|---|
+| TS2554 | 42 | `monsterWalking.set(False({}))`: an Expression with no inputs prints `function False()`, every call passed `{}` | `jsArgsObject` prints no argument for an Expression with no inputs | 147 |
+| TS2345 | 35 | a lifted push of a value whose static type is not the port's: an untyped Variable (`unknown`), an Expression's answer that keeps `null` at load | the plan decides `castTo` (when `exprTsType` is not the port's type); the push hands the value on as it is, under a cast, as Component Outputs does | 112 |
+| TS2786 | 39 | a root authored Mounted false (or an unresolved instance) printed its comment alone: `return ( {/* … */} )`, an empty object literal | the component returns `null`, the comment kept above it | 73 |
+| TS2448 + TS2454 | 44 | an Expression's render local reading a States value or an animated number, printed above the hook's `const` | such a local, and any local that reads one, prints after the hooks; the rest stay where a hook's arguments may read them | 29 |
+| TS7006 + TS7053 | 7 | the author's untyped JavaScript in a Function body (`function pick(typed, start)`, `m[String(id)]`) | **Richard's ruling**: the wrapper moves to its own file (§92.2) | 22 |
+| TS17001 | 12 | a row component's input called `key`: `<Row key={index} key={item.key} />` | `propIdentifier('key')` is `keyProp`, as `do` is `doProp` | 10 |
+| TS2440 (+ TS2322) | 4 (+ 4) | a component named as the kit node it draws imported the kit's wrapper under its own name (rocket-school's RaceTrack, digital-bricks-training's DossierSegment and TimelineRow) | the kit import is aliased (`RaceTrack as RaceTrackKit`). The RaceTrack's four TS2322 had been checking `burstA` against the wrong component and leave with it; one dbt row surfaced | 3 |
+| TS2322 | 3 | a Component Inputs list into a kit's `object` input (dbt's TimelineRow Notes); an untyped Variable into an animation's `duration` | a kit's `object` input is `Record<string, unknown> \| readonly unknown[]` at the prop position (FLD-015's reasoning); `castToNumber` on an animation option not statically a number | **0** |
+
+**The gate reads 0 in 0 of 16.** All 19: **1 in 1** (nightbook's Day2: an Expression's `null`/`0` into a style colour,
+filed P18-S125-STYLENULL; nightbook is not tracked, so the gate does not hold it).
+
+### §92.2 The Function's own file (the ruling)
+
+`functionFileSource` (`src/emit/component.ts`): each printed Function wrapper is
+`src/functions/<dir>/<fileBase>/<fnName>.ts`, the lines `jsWrapperLines` prints with `export` added, under a Script file's
+header and its one-file `// @ts-nocheck`; a `Uses` registry import moves with it (`../../../lib/projectScriptFiles`). The
+component imports it. An Expression's and a Visual Function's wrapper stay in the component (the ruling names the
+Function's body; an Expression's text and a Visual Function's generated code are not the class).
+
+What the directive does and does not hide, measured: **55 wrappers moved in the templates, 9 in the corpus**, byte-identical
+but for `export` (`s125-tplbuild/movecheck.py` and `rmcheck.py`: every removed line is a moved wrapper's, every added line an import). With the directive
+taken off (`s125-tplbuild/nocheck.ts`), the 55 template files have **exactly the 7 body errors** and no name read from the component's
+scope (no TS2304: no body leaned on a module name it would lose); the corpus's 9 have none. The signature stays typed, so
+every call, the outputs read, and `Parameters<typeof fn>[1]` for a pulsed run are still checked in the component.
+
+### §92.3 What the exported apps do now
+
+`dispdiff.ts`, the base against the tree: **templates (19 projects, 13,432 nodes) 0 changed; corpus (226 projects, 27,789
+nodes) 0 changed.** No disposition moved: every change is in the emitted text. Read in the emitted diff, by class:
+
+- **Type only, nothing runs differently:** TS2554 (`False()` for `False({})`: an Expression ignored the argument), TS2345 (37
+  casts; 2 on values already assignable), the Function move, TS2440's alias, the kit prop type, the animation cast.
+- **A render that threw now renders.** A component returning `{}` throws in React ("Objects are not valid as a React
+  child", measured with `react-dom/server` 19.0.0): the 39 TS2786 sites (gram's Nav on Feed, Member, Post and Prayer;
+  bot-garden's Pad, WinCard, Form, OliveLine and OliveLessons; rocket-school's Result, TeachCard and FeedbackBanner;
+  todo-list's KindGroup, MoneySheet, ProblemBanner, NextMovePrompt and NoteDialog) were each a page that could not render
+  while that component was on it; they draw nothing now, as the element is not drawn. The 39 unresolved-instance roots
+  (todo-list's and the demo's history writers, 19 each, and one in bot-garden) are placed as JSX nowhere (no TS2786 named
+  them) and only change text. The TS2448 rows were reads in a
+  `const`'s temporal dead zone, a ReferenceError at the first render by the language's rule (not driven): rocket-school's
+  and star-class's Adopt, CountdownBar, QuestionBox and Round, todo-list's MoneyEditor and ProjectEditor render now.
+- **An input that never arrived arrives.** React withholds `key`: 22 components' "key" input was `undefined` in the export
+  and is delivered now, as the runtime delivers it. The 4 repeaters keep `key={index}` as the element key, as every other
+  repeater does (HEAD's duplicate let `item.key` win); planning's MoneySheet no longer remounts its MoneyRepeat and
+  MoneyEditor when their key input changes (the runtime does not remount an instance on an input).
+
+None of this was driven in a browser; the gate typechecks, and the React and TDZ readings are the two above.
+
+### §92.4 Readings
+
+- The gate 3 / 3, every row 0. hls001: predicted 0 keys for each of the six emitter classes and 0 moved; for the Function
+  move, predicted from the corpus emitted at the base (6 projects with a printed Function wrapper: their page, 7 in all,
+  `EXPORT-REPORT.md` and `@report`; one new file per wrapper), **19 moved, 9 added, 0 removed**, exactly those; regenerated.
+- Re-pinned to the Function's own file: `stores-events` (the Home target, and `formatShout`'s file as a new target),
+  `jsfun` (3 rows), `the-function-sends-its-signals` (2), `isl-005-script-files` (7), and two the whole package found:
+  `in-code-markers` (2; its "no wrapper in the page" absence had become true of every tree, so the cut row now asserts the
+  file is gone) and `on-app-error` §J (1). 🔴 **The signals spec's §A row passed
+  with the wrapper gone**: it cut the wrapper out of the page with `indexOf`, got an empty slice, and still agreed with
+  the runtime. It now fails if the wrapper is not found.
+- `prop-names` gains a row (`key` → `keyProp`; `ref`, which a React 19 function component does receive, stays).
+- Mutants, one per class, each red on the gate's row 2 (E reshaped after reading "0 total": a comparison with a kind the
+  union does not have does not typecheck): A no-argument guard off; B `castTo` never set; C the removed-root match never
+  taken; D nothing moved after the hooks; E no Function moved; F the Function file without its directive; G the `key`
+  mapping off (also `prop-names`); H the kit alias off; I the kit widening off; J the animation cast off.
+- Neighbours: `the-failure-runs-its-chain` 23, `the-id-is-held` 22, `the-function-sends-its-signals` 38, `jsfun` 47,
+  `the-condition-remembers-its-answer` 40, `export-report` 30, `custom-nodes` 34, `typecheck-emitted` 67,
+  `the-undrawn-trigger-is-refused` 16, `the-ticked-input-runs-it-again` 30, `controlled-state`, `animation-pair`,
+  `the-evaluate-at-load` 117, `stores-events` 23, `isl-005-script-files` 29.
+- `parameter-coverage`: its two failures since P112 OWN-021 were the committed catalog's three new Upload File ports. Read,
+  they are not their neighbour's `refused-with`: the runtime acts on all three and the export drops them with no note, which
+  P121-TWO001-EXPORTREADERS and P121-TWO003-EXPORTSHRINK already say. Classified `gap` with those rows; total 1,396 → 1,399,
+  the floor 1,236 unchanged; 9 / 9.
+- **The whole package** (`nice -n 19 --runInBand`, JSON written 13:35): **141 / 141 suites, 4,920 passed, 0 failed, 3
+  skipped** (the first attempt was killed at exit 137 after 30 suites, on a box at load 20 to 30; its two failures were the
+  two re-pins above). Package `tsc --noEmit` 0. The tsfixme ratchet is red on the base for 19 files of other lanes; none of
+  this session's.
+
+### §92.5 What this leaves
+
+1. P18-S125-STYLENULL (low, filed): nightbook's one row, an Expression's `null`/`0` into a style colour.
+2. The gate holds 16 templates; nightbook and the two `*.content.json` are measured by `tplbuild.ts` only (19: 1 error).
+3. §91.6's list stands: the Mounted wires the export does not carry (the named blockers of 166 template nodes), the §87
+   Conditions, P18-S124-RUNINPUTS, P18-S124-LATEMARKER and the small ones.

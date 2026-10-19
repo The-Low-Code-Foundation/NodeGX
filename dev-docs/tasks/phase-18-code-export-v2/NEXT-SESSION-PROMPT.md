@@ -1,3 +1,55 @@
+# Next session — session 125 (2026-10-19, BOARD lane 6) fixed **P18-S122-TPLBUILD**: every tracked template's export passes its own `tsc -b` (189 → 0 type errors in the 16; all 19 shipped templates 203 → 1). A Function's wrapper is in its own file, as Richard ruled.
+
+## ✅ Session 125: the templates' exports build
+
+Read EXP-011 §92. In short:
+
+| class | count | fix | where |
+|---|---|---|---|
+| TS2554 | 42 | an Expression with no inputs is called with none (`False()`) | `component.ts` `jsArgsObject` |
+| TS2345 | 35 | a lifted push of an untyped value is cast to the port's type (`castTo`, decided by `exprTsType`) | `plan.ts` `PushEffectPlan`, `component.ts` |
+| TS2786 | 39 | a component whose root is removed returns `null` (it returned `{}`, which React throws on) | `component.ts`, the return |
+| TS2448 + TS2454 | 44 | a render local that reads a hook prints after it (it was read in the hook's dead zone, a ReferenceError) | `component.ts`, the render locals |
+| TS7006 + TS7053 | 7 | **the ruling**: each Function wrapper is `src/functions/<dir>/<fileBase>/<fnName>.ts`, one-file `// @ts-nocheck`, the signature typed | `component.ts` `functionFileSource` |
+| TS17001 | 12 | an input called `key` binds as `keyProp` (React withholds `key`) | `naming.ts` `propIdentifier` |
+| TS2440, TS2322 | 4 + 7 | a kit import named as its component is aliased; a kit `object` input takes an array; an untyped animation option is cast to number | `component.ts`, `kits.ts`, `plan.ts` `castToNumber` |
+
+- 🔴 **Two classes were crashes, not types.** A component returning `{}` throws at render ("Objects are not valid as a
+  React child"): gram's Nav on four pages, bot-garden's Pad and WinCard, rocket-school's Result. A render local read above
+  its hook's `const` is a ReferenceError: rocket-school's Round and Adopt, todo-list's ProjectEditor. Those pages render now.
+- 🔴 **The `key` fix changes what arrives**: 22 components' "key" input was `undefined` in the export and arrives now, as in
+  the runtime; planning's MoneySheet no longer remounts its editors when their key changes.
+- 🔴 **A type error can hide another.** The RaceTrack's four TS2322 were checking `burstA` against the wrong `RaceTrack`
+  (the name conflict); with the alias they left and one dbt row behind its own conflict surfaced (10 → 3, not 10 → 6).
+- 🔴 **A spec row passed with its subject gone.** `the-function-sends-its-signals` §A cut the wrapper out of the page with
+  `indexOf`, got an empty slice once the wrapper moved, and still passed. It fails now if the wrapper is not found.
+- The move hides exactly the 7 body errors, measured with the directive taken off: no body reads a name from the
+  component's scope (no TS2304).
+
+Readings: the gate 3 / 3, every row 0; hls001 0 keys for six classes, the Function move 19 moved, 9 added, 0 removed
+(predicted, exactly those); `dispdiff.ts` templates 19 projects 13,432 nodes **0 changed**, corpus 226 projects 27,789 nodes
+**0 changed**; 10 mutant arms, each red on the gate. Neighbours green (EXP-011 §92.4). `parameter-coverage` fixed: the
+three Upload File ports are `gap`s named by P121-TWO001-EXPORTREADERS and P121-TWO003-EXPORTSHRINK (9 / 9).
+Re-pinned to the Function's own file: `stores-events`, `jsfun`, `the-function-sends-its-signals`, `isl-005-script-files`,
+`in-code-markers`, `on-app-error`. Whole package (`nice -n 19 --runInBand`, JSON written 13:35): **141 / 141 suites, 4,920
+passed, 0 failed, 3 skipped**; package `tsc --noEmit` 0. Tooling: `s125-tplbuild/`. Commits on `l6-tplbuild` from
+`a2c4fc09c`, one per class.
+
+Filed: **P18-S125-STYLENULL** (low: nightbook's last row, an Expression's `null` into a style colour). Fixed:
+P18-S122-TPLBUILD.
+
+**Next (BOARD lane 6):**
+1. **The Mounted wires the export does not carry**, the named blockers of 166 template nodes (EXP-011 §91.5): a Function
+   reading the Noodl API (gram's and the marketplace's refusal pages), an instance output its component does not lift
+   (members-area's `/Members/Standing`, the Chrome's menu, nightbook's Tonight panels), an Inverter of a maybe-undefined
+   operand. Rank by those counts. The gate now also holds every template edit to 0.
+2. The §87 Conditions still waiting (members-area's Post, Unsubscribe; landing-pages' contact; the Site Builder's Setup).
+3. P18-S125-STYLENULL, P18-S124-RUNINPUTS, P18-S124-LATEMARKER (small); P18-S120-TEXTAREA, P18-S118-NUMBERFIELD,
+   P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE; STUBORDER, TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 124 (2026-10-19, BOARD lane 6) fixed **P18-S123-UNDRAWNTRIGGER and P18-S122-DEADROW**: a trigger the export never runs (an element it never draws, a Did Mount it does not run, a Function row nothing it runs writes) is refused by name instead of counted exported. Then **P18-S122-TPLBUILD's gate**: the tracked templates' exports typecheck, by count, and the largest class is fixed (311 → 189 errors).
 
 ## ✅ Session 124: a trigger the export never runs is refused
