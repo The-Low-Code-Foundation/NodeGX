@@ -29,10 +29,10 @@ const REPO = path.join(__dirname, '..', '..', '..');
  * `T | undefined` (the 122 TS2345 rows of `onXChanged?.(x)`). Lower a row when a fix lowers it.
  */
 const LEDGER: Record<string, number> = {
-  'bot-garden': 5,
+  'bot-garden': 0,
   'digital-bricks-training': 2,
   'digital-bricks-training-demo': 0,
-  gram: 4,
+  gram: 0,
   'landing-pages': 0,
   'learn-with-simple-rick': 0,
   marketplace: 1,
@@ -40,11 +40,11 @@ const LEDGER: Record<string, number> = {
   'pixel-game': 0,
   planning: 5,
   'planning-demo': 5,
-  'rocket-school': 27,
-  'star-class': 27,
+  'rocket-school': 20,
+  'star-class': 20,
   'story-engine': 0,
-  'todo-list': 18,
-  'todo-list-demo': 18
+  'todo-list': 10,
+  'todo-list-demo': 10
 };
 
 const trackedTemplates = (): string[] => {

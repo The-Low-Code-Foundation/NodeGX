@@ -7632,8 +7632,14 @@ export function emitComponent(
   }
   // EXP-011 §60. A component that owns a Component Object provides its record to everything below — the
   // transcription of the parent walk's predicate (componentwalk.ts findAncestorWithComponentObject).
+  /*
+   * P18-S122-TPLBUILD (TS2786). A root removed from the tree prints its comment alone, and `return ( {/* … *\/} )` is an
+   * empty object literal: a component React refuses to render ("Objects are not valid as a React child"), and the app's
+   * own `tsc -b` refuses to use as JSX. The element is not drawn, so the component draws nothing: `null`, the comment kept.
+   */
+  const removedRoot = jsxLines.length === 1 ? /^\s*\{\/\* (.*) \*\/\}$/.exec(jsxLines[0]) : null;
   const providedJsx =
-    printsRecord && !(jsxLines.length === 1 && jsxLines[0] === '    null')
+    printsRecord && removedRoot === null && !(jsxLines.length === 1 && jsxLines[0] === '    null')
       ? [
           `    <ParentComponentObjectContext.Provider value={${plan.componentObject!.local}}>`,
           ...jsxLines.map((line) => (line.trim().length === 0 ? line : `  ${line}`)),
@@ -7641,6 +7647,7 @@ export function emitComponent(
         ]
       : jsxLines;
   if (jsxLines.length === 1 && jsxLines[0] === '    null') body.push(...preReturnComment, '  return null;', '}');
+  else if (removedRoot !== null) body.push(...preReturnComment, `  // ${removedRoot[1]}`, '  return null;', '}');
   else body.push(...preReturnComment, '  return (', ...providedJsx, '  );', '}');
 
   if (usesRowField) {
