@@ -111,7 +111,7 @@ spec also says which part of the layout each layout port sets. Don't draw the sc
 Text looks like. Show the real app, or draw it with the kit's drawer, which reads those layout roles (see "The screen:
 show it or draw it"). (OWN-008, NSP-016, OWN-012.)
 
-node-spec 0.1.0's browser entry (`dist/index.mjs`) imports `fast-xml-parser` by bare name, so a page with no bundler or
+node-spec's browser entry (`dist/index.mjs`, in 0.1.0 and 0.2.0) imports `fast-xml-parser` by bare name, so a page with no bundler or
 import map can't load it. Work out ports on your server, or bundle node-spec. (P112-OWN008-NODESPECBARE.)
 
 A Function's ports come from its script: `functionScriptPortNames(script)` in `@nodegx/project-contract/function-ports.js`
@@ -180,7 +180,7 @@ can't, or when the person wants the screen in their own look. For live values, k
 and draw from its trace. Orbit, the 3D editor the kit was built with, does both. Its phone is drawn from the
 descriptions. The real app is one press away. (OWN-012.)
 
-The drawer is `@nodegx/node-spec/draw`, in releases of `@nodegx/node-spec` after 0.1.0. 0.1.0 has no drawer. Run
+The drawer is `@nodegx/node-spec/draw`, in `@nodegx/node-spec` 0.2.0 and later. 0.1.0 has no drawer. Run
 `npm view @nodegx/node-spec version` first. Files and values go in. Boxes come out. It reads no CSS. Unlike the
 package's main entry, it imports nothing by bare name, so a page with no bundler can load it:
 
@@ -278,7 +278,7 @@ spell out their fields. `applyEdit` is the reference semantics, if you want to r
 Two optional methods grade the Logic half. `graphTarget()` returns a fresh engine each call, either what
 `NodegxGraphTarget.graphTarget()` returns or a runner of your own. `playGraph(scenario, file)` is for an editor whose
 runner lives in a page: it plays one scenario itself and returns the trace. Offer one or the other. An adapter with no
-runner is graded on files only. From the next release of `@nodegx/project-contract`, the PASS line says so (`; files
+runner is graded on files only. From `@nodegx/project-contract` 0.2.0, the PASS line says so (`; files
 only: the adapter offers no graph runner`). 0.1.0 prints a bare PASS. Say "files only" in your report yourself.
 (P112-OWN008-FILESONLY.)
 

@@ -42,7 +42,7 @@ run(Counter, { startValue: 5 }, ['settle', { signal: 'increase' }, 'settle']);
 
 ## In a page, and as a package (phase 112, OWN-002)
 
-Two entries, split by one rule: what touches the file system is on `/node`, nothing else is.
+Three entries. What touches the file system is on `/node`, nothing else is; `/draw` is the drawer alone.
 
 - **`@nodegx/node-spec`** (`src/browser.ts`) runs in a browser as it is: the format, the interpreter, the world, the
   registry, every spec, the canonical form, the schema and the whole runner (generate, compare, shrink, mutants,
@@ -54,6 +54,11 @@ Two entries, split by one rule: what touches the file system is on `/node`, noth
   `SCENARIOS_DIR`, `loadGraphScenarios`, `GRAPH_SCENARIOS_DIR`. Importing it fills `scenarioIO`, so `runConformance`
   without `options.scenarios` reads the package's files, as every test in this repo expects. Inside the repo, tests and
   scripts import `src/index.ts` by path, as they always did.
+- **`@nodegx/node-spec/draw`** (`src/draw-only.ts`, from 0.2.0; phase 112, OWN-012) draws a component's screen from
+  its files and the values you give it: `draw({ nodes, components, values, viewport, measure, token })` returns one
+  box per visual node, each with its `needs` (what the drawer assumed) and `limits` (what it could not honour), and
+  `canvasTextMeasurer` measures text on a canvas. It imports nothing by bare name, so a page with no bundler loads it,
+  and it is about 12 KB gzipped. It reads no CSS and cannot run the graph.
 
 ```
 npm run build          # dist/index.mjs + index.cjs (browser-safe), dist/node.cjs, dist/types/ (gitignored)
@@ -68,8 +73,8 @@ interpreter 4%, the trace schema 2%. The budget is 240 KB gzipped without the pa
 
 Two things the package carries that an outsider should know: it bundles a slice of `@noodl/backend-contract` (the
 query translators and backend descriptors, about 30 KB minified) because the record specs are written against the
-contract's neutral filter; and its `scenarios/` and `schema/` directories ship with it. Not published yet: README §8 R2
-of phase 112 decides when, at 0.x.
+contract's neutral filter; and its `scenarios/` and `schema/` directories ship with it. Published on npm at 0.x (phase 112 R2): a minor
+version may change how it is used.
 
 No dependency on the runtime, the editor or React. Strict TypeScript, `noImplicitReturns`.
 Tests type-check (ts-jest without `isolatedModules`) because `tests/types.test.ts` is graded by
