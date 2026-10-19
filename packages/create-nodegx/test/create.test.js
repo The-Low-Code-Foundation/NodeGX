@@ -77,6 +77,21 @@ test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, na
   assert.match(run.stdout, /Wrote \.claude\/skills\/nodegx-your-own-editor\/SKILL\.md/);
 });
 
+test('P112 OWN-012 AC4 (R4, teach both equally): the brief teaches the real app and the drawn screen side by side, each with its cost', () => {
+  const text = fs.readFileSync(path.join(__dirname, '..', 'profiles', 'core', 'skills', 'nodegx-your-own-editor', 'SKILL.md'), 'utf8');
+  const section = text.split('\n### The screen: show it or draw it\n')[1]?.split('\n### ')[0];
+  assert.ok(section, 'the brief has a section "The screen: show it or draw it"');
+  // both ways, each with what it costs, in one table
+  assert.match(section, /\| \| show the real app \| draw it from the descriptions \|/);
+  assert.match(section, /\| what it loads \| about 3\.6 MB of scripts .* \| 12\.5 KB gzipped \|/);
+  // the drawer's import, the version that has it, and the limits it names
+  assert.match(section, /from '@nodegx\/node-spec\/draw'/);
+  assert.match(section, /0\.1\.0 has no drawer/);
+  for (const limit of ['wraps', 'cssClassName', 'tabular numerals', 'automatic minimum', 'For Each']) assert.ok(section.includes(limit), limit);
+  // the old one-way instruction is gone
+  assert.doesNotMatch(text, /It doesn't draw the screen\./);
+});
+
 test("P112 OWN-007: a person's own skill file is never replaced", () => {
   const dir = tmp();
   const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md');
