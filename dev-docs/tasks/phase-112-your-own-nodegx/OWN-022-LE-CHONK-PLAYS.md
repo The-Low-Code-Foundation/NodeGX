@@ -163,7 +163,9 @@ in the scratchpad, never in `packages/` or anything published.
   1920×1080 frames) → `build.mjs` (ffmpeg). Re-time = change `dur`, rerun both. Hero = pass 2 rig-none-high-3 (QA win);
   its 12 batched taps are a labelled replay (`replay.mjs`, logged pixels on the same rigged copy — it wins identically).
   Monster Gate game1–3 copied out of s1's scratchpad into `runs/monster-game*`.
-- **Still owed before the 29th:** Richard's narration (then mux it in); Richard shares the report (Share menu — it is
+- **Published on YouTube (2026-10-19):** https://youtu.be/T7SyhaccN2A — linked from the README, the repo's homepage field and
+  the report (v3).
+- **Still owed before the 29th:** Richard shares the report (Share menu — it is
   private) and posts in `challenges-submissions` with the how-it-was-developed note (README §How it was developed has it).
   Optional: AC3 (Challenge pace).
 
