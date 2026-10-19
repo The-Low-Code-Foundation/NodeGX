@@ -1,0 +1,29 @@
+{
+  "name": "create-nodegx-cline",
+  "version": "0.2.3",
+  "description": "npm create nodegx-cline — sets a folder up so Cline can build NodeGX apps in it.",
+  "license": "GPL-3.0-only",
+  "homepage": "https://nodegx.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "packages/create-nodegx/cline"
+  },
+  "bin": {
+    "create-nodegx-cline": "bin/create-nodegx-cline.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "create-nodegx": "0.2.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

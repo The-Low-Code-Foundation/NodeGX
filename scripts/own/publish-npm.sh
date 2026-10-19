@@ -11,9 +11,10 @@ dir="${1:?usage: publish-npm.sh <folder of .tgz files>}"
 # (`^<node-spec version>`, written by build-publish.mjs); @nodegx/canvas-look depends on nothing (a folder without its
 # tarball is skipped, so a cut that leaves it at its published version just omits it). @nodegx/mcp before
 # create-nodegx: create-nodegx sets folders up with the mcp version it pins; create-nodegx-vibe (OWN-019,
-# `npm create nodegx-vibe`) last, because it pins create-nodegx. `<name>-[0-9]*` so that create-nodegx never picks up
-# create-nodegx-vibe-<v>.tgz.
-for name in nodegx-node-spec nodegx-project-contract nodegx-canvas-look nodegx-preview nodegx-mcp create-nodegx create-nodegx-vibe; do
+# `npm create nodegx-vibe`) and create-nodegx-cline (OWN-020) last, because each pins create-nodegx. `<name>-[0-9]*` so
+# that create-nodegx never picks up create-nodegx-vibe-<v>.tgz. create-nodegx-cline needs a create-nodegx with
+# `--cline` (0.2.4 and later), so its first tarball comes with the 0.2.4 cut.
+for name in nodegx-node-spec nodegx-project-contract nodegx-canvas-look nodegx-preview nodegx-mcp create-nodegx create-nodegx-vibe create-nodegx-cline; do
   tgz=$(ls "$dir"/"$name"-[0-9]*.tgz 2>/dev/null | head -1 || true)
   [ -n "$tgz" ] || { echo "skip $name: no tarball in $dir"; continue; }
   pkg=$(tar -xzOf "$tgz" package/package.json | node -pe 'const p=JSON.parse(require("fs").readFileSync(0,"utf8")); p.name+"@"+p.version')
