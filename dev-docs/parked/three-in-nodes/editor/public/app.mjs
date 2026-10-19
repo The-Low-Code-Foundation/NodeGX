@@ -966,6 +966,7 @@ function renderScenePick() {
 
 function bindChrome() {
   $('#brand-mark').innerHTML = ICONS.box.replace(/width="24" height="24"/, 'width="20" height="20"');
+  $('#close-proj').addEventListener('click', closeProject);
   $('#undo').innerHTML = ICONS.undo;
   $('#redo').innerHTML = ICONS.redo;
   $('#mode-edit').innerHTML = `${ICONS.edit}<span>Edit</span>`;
@@ -1018,7 +1019,7 @@ function bindChrome() {
     else if (!mod && e.key.toLowerCase() === 'f') $('#tool-focus').click();
   });
   window.addEventListener('beforeunload', (e) => {
-    if (model.dirtyKeys().length) e.preventDefault();
+    if (model.dirtyKeys().length && !state.closing) e.preventDefault();
   });
 }
 
@@ -1062,8 +1063,18 @@ function renderOpen() {
   );
 }
 
+/** Back to the open screen: another project, the demo, or Coin Run. Unsaved edits are asked about first. */
+async function closeProject() {
+  const dirty = model.dirtyKeys().length;
+  if (dirty && !confirm(`${dirty} component${dirty === 1 ? ' has' : 's have'} changes that are not saved. Close without saving them?`)) return;
+  await post('/api/close', {});
+  state.closing = true; // the person already said yes: the leave-page guard must not ask a second time
+  location.reload();
+}
+
 async function openPayload(project) {
   state.project = project;
+  $('#close-proj').hidden = false;
   $('#proj-name').textContent = project.name;
   document.title = `${project.name} · NodeGX Scene`;
   model.load(project.components);

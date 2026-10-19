@@ -116,6 +116,11 @@ function serveStatic(req, res) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x').pathname;
   try {
+    if (url === '/api/close' && req.method === 'POST') {
+      // Back to the open screen. The files stay as they are on disk: closing never saves and never deletes.
+      projectDir = undefined;
+      return send(res, 200, { dir: null });
+    }
     if (url === '/api/project' && req.method === 'GET') {
       return send(res, 200, projectDir ? projectPayload() : { dir: null });
     }

@@ -36,6 +36,7 @@ select, input { font: inherit; color: inherit; }
 .brand-mark { color: var(--accent); display: inline-flex; }
 .brand-sub { color: var(--accent); font-weight: 600; }
 .where { display: flex; align-items: center; gap: 8px; margin-left: 14px; min-width: 0; }
+.close-proj { margin-left: 6px; }
 .proj { color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
 .sep { color: var(--faint); }
 #scene-pick { background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 6px; padding: 4px 8px; max-width: 260px; }

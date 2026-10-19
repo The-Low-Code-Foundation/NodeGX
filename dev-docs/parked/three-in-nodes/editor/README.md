@@ -16,7 +16,8 @@ node server.mjs <project-dir>  # straight into a project (add --open to open the
 
 The demo is a fresh copy of `../fixture` (a bar chart, a ball, a robot) in a temp folder, so trying it never edits the
 repo. **Try Coin Run** opens a fresh copy of `../coin-run`, the little game this editor built (s5): press Play, click the
-game once, then the arrow keys. A project with no 3D scene gets a card: pick a page and **Add a 3D scene** puts a Scene with a sky, a sun and a box
+game once, then the arrow keys. **Close** (beside the project's name) goes back to this screen; with unsaved changes it
+asks first, and closing never saves or deletes anything. A project with no 3D scene gets a card: pick a page and **Add a 3D scene** puts a Scene with a sky, a sun and a box
 on it, installing three-kit into its `noodl_modules/` first if it has none (the same copy `npx @nodegx/three-kit add`
 makes).
 
@@ -52,7 +53,7 @@ file on disk is still the one read (a file another editor or an agent changed si
 | `public/behaviour.mjs` | the Behaviour sentences: write, read back, take off (pure functions over the model; `tests/behaviour.test.mjs`) |
 | `public/icons.mjs`, `style.css`, `index.html` | the look |
 | `tools/drive.mjs` | headless Chrome over CDP (copied from the map editor; adds `dragAt` / `clickAt`, `keyDown` / `keyUp`); a step's `expect` is a check, exit 1 on any FAIL |
-| `tests/*.json` | the drives: `editor.json` (the fixture), `add-scene.json` (the todo app, no scene), `demo.json` (the open screen), `coin-run.json` (builds Coin Run from `../fixture-blank` and plays it), `coin-run-deployed.json` (the deployed game, real key presses) |
+| `tests/*.json` | the drives: `editor.json` (the fixture), `add-scene.json` (the todo app, no scene), `demo.json` (the open screen), `coin-run.json` (builds Coin Run from `../fixture-blank` and plays it), `coin-run-deployed.json` (the deployed game, real key presses), `close.json` (demo → Close, asked first when unsaved → Try Coin Run; a server started with no project) |
 
 One seam in the kit made it possible: every three.js object three-kit makes carries `userData.nodeId`, the id of the node
 in the project's files that made it (`nodeIdOf`, `src/kit.js`), and the census reports it. Every row of a For Each

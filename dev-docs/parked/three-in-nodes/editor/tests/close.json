@@ -1,0 +1,20 @@
+[
+ { "waitFor": "document.getElementById('open-demo')", "timeout": 30000, "label": "the open screen" },
+ { "clickSel": "#open-demo" },
+ { "waitFor": "window.__scene?.state.ready && __scene.vp.engine()", "timeout": 90000, "label": "the demo is open" },
+ { "label": "the demo is open, with a Close button", "eval": "JSON.stringify({ name: document.getElementById('proj-name').textContent, close: !document.getElementById('close-proj').hidden })", "expect": "r => r.name === 'Three In Nodes' && r.close === true" },
+ { "clickSel": "[data-tile=\"box\"]" },
+ { "wait": 500 },
+ { "eval": "(() => { window.__asked = 0; window.confirm = () => (window.__asked++, false); return 'ok'; })()" },
+ { "clickSel": "#close-proj" },
+ { "wait": 800 },
+ { "label": "with an unsaved box, Close asks first, and No keeps the project open", "eval": "JSON.stringify({ asked: window.__asked, name: document.getElementById('proj-name').textContent, dirty: __scene.model.dirtyKeys().length })", "expect": "r => r.asked === 1 && r.name === 'Three In Nodes' && r.dirty === 1" },
+ { "eval": "(() => { window.confirm = () => true; return 'ok'; })()" },
+ { "clickSel": "#close-proj" },
+ { "waitFor": "document.getElementById('open-coin-run')", "timeout": 30000, "label": "back on the open screen" },
+ { "label": "the open screen again: no project, Close hidden", "eval": "fetch('/api/project').then(r => r.json()).then(p => JSON.stringify({ dir: p.dir, close: document.getElementById('close-proj').hidden }))", "expect": "r => r.dir === null && r.close === true" },
+ { "clickSel": "#open-coin-run" },
+ { "waitFor": "window.__scene?.state.ready && __scene.vp.engine()", "timeout": 90000, "label": "Coin Run is open" },
+ { "label": "Coin Run opened after the demo: its name, five coins and a player", "eval": "JSON.stringify({ name: document.getElementById('proj-name').textContent, meshes: __scene.vp.engine().census().meshes, bodies: __scene.vp.engine().census().objects.filter(o => o.kind === 'body').length })", "expect": "r => r.name === 'Coin Run' && r.meshes === 7 && r.bodies === 7" },
+ { "shot": "x1-coin-run.png" }
+]

@@ -24,7 +24,7 @@ Say "Opus" in your first message. Verify a claim here by measuring it, not by tr
 | catalog + render specs | `cd packages/noodl-mcp && nice -n 19 npx jest --runInBand tests/three-kit-catalog.test.ts tests/three-kit-render.test.ts` | **10 / 10** |
 | kit add | `node --test library/modules/three-kit/test/add.test.js` (pass the FILE) | **5 / 5** |
 | sentences | `cd editor && node --test tests/behaviour.test.mjs` | **6 / 6** |
-| NodeGX Scene drives | `node server.mjs <copy> --port P` then `node tools/drive.mjs http://127.0.0.1:P/ tests/<t>.json <shots>` | editor **13 / 13**, add-scene **3 / 3**, demo **4 / 4**, coin-run **8 / 8** |
+| NodeGX Scene drives | `node server.mjs <copy> --port P` then `node tools/drive.mjs http://127.0.0.1:P/ tests/<t>.json <shots>` | editor **13 / 13**, add-scene **3 / 3**, demo **4 / 4**, coin-run **8 / 8**, close **4 / 4** |
 | Coin Run deployed | deploy `coin-run/` with the kit added; serve; `tools/drive.mjs <url> tests/coin-run-deployed.json` | **2 / 2** (real CDP ArrowUp → z −5.1) |
 
 The drive tool now FAILS (exit 1) on a missed `expect` or a timed-out `waitFor`; a control proved it. **Gate on exit codes.**
@@ -44,6 +44,9 @@ validator passed); Coin Run's look (plain "Score 3" on a white page above a 420 
   coin's X/Z put all five under the player; the first play read Score 5, and two of the drive's checks passed on top of
   it. Body's Jump To X/Z is the fix. When a sentence must move a placed thing, wire a port that is not its placement.
 - P117's wall has no body-to-body physics to reuse (ballistic shards on one floor); Body's contacts are new code.
+- **Richard (end of s5): "once I selected demo by accident I couldn't get back … there's no 'quit project' button."**
+  Fixed: **Close** beside the project name (`/api/close`, then a reload into the open screen; asks first when unsaved,
+  and the leave-page guard stands down once he said yes). `tests/close.json` 4 / 4.
 - Play gives the app's window the keyboard (`vp.setMode('play')` focuses the frame); without it the arrows go nowhere.
 
 ## Next, in order (an agent can do these alone)
