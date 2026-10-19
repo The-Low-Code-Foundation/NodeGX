@@ -26,12 +26,20 @@
       "types": "./dist/types/nodegx-node-spec/src/index.d.ts",
       "default": "./dist/node.cjs"
     },
+    "./draw": {
+      "types": "./dist/types/nodegx-node-spec/src/draw-only.d.ts",
+      "import": "./dist/draw.mjs",
+      "require": "./dist/draw.cjs"
+    },
     "./package.json": "./package.json"
   },
   "typesVersions": {
     "*": {
       "node": [
         "./dist/types/nodegx-node-spec/src/index.d.ts"
+      ],
+      "draw": [
+        "./dist/types/nodegx-node-spec/src/draw-only.d.ts"
       ]
     }
   },
