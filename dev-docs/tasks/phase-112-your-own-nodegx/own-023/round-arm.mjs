@@ -25,6 +25,7 @@
 //
 // Writes into <root>: command.txt, sittings/<k>.jsonl (+ .stderr), sittings.json, audit.json, teardown.json, arm.json.
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawn, spawnSync, execFileSync } from 'node:child_process';
 
@@ -90,6 +91,20 @@ if (mode === 'nodegx') {
   fs.writeFileSync(mcpFile, JSON.stringify(mcp, null, 2) + '\n');
   mcpArgs = ['--mcp-config', mcpFile];
   setup.kit = { version, files: Object.fromEntries(walk(APP).map((f) => [f, fs.statSync(path.join(APP, f)).size])) };
+  // R9 (Richard, 2026-10-19): the server is started once before the build, as a person who retried would have —
+  // cold it misses Claude Code's 30 s limit (P112-OWN023-COLDSERVER). The cost stays in B's row; this is its measure.
+  if (rest.includes('--warm-server') && !process.env.MOCK_CREATE) setup.warm = await warmServer(server, version);
+}
+
+function warmServer(server, version) {
+  return new Promise((resolve) => {
+    const t0 = Date.now();
+    const p = spawn(server.command, server.args, { cwd: APP, env: { ...env, ...roundEnv }, stdio: ['pipe', 'pipe', 'pipe'] });
+    p.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'own023-warm', version: '0' } } }) + '\n');
+    const done = (answered) => { try { p.kill(); } catch {} resolve({ answered, seconds: Number(((Date.now() - t0) / 1000).toFixed(1)), package: `@nodegx/mcp@${version}` }); };
+    p.stdout.on('data', (d) => { if (String(d).includes('"id":1')) done(true); });
+    setTimeout(() => done(false), 300000).unref();
+  });
 }
 
 const fence = ['//Users/**', '//Applications/**', ...deny.map((d) => `/${d}/**`)];
@@ -122,13 +137,14 @@ function sitting(k, prompt, resume, budget) {
   return new Promise((resolve) => {
     const out = path.join(SITS, `${k}.jsonl`);
     const t0 = Date.now();
+    const loadBefore = os.loadavg().map((x) => Number(x.toFixed(1)));
     const child = spawn('perl', ['-e', `alarm ${SITTING_SECONDS}; exec @ARGV`, BIN, ...baseArgs(prompt, resume, budget)], { cwd: APP, env, stdio: ['ignore', 'pipe', 'pipe'] });
     const log = fs.createWriteStream(out);
     child.stdout.pipe(log);
     child.stderr.pipe(fs.createWriteStream(path.join(SITS, `${k}.stderr`)));
     fs.writeFileSync(path.join(root, 'agent.pid'), String(child.pid));
     // 'exit', not 'close': a server the agent left running can hold the pipe open (OWN-008).
-    child.on('exit', (code, signal) => log.end(() => resolve({ k, prompt: prompt === brief ? 'brief' : prompt, code, signal, seconds: Math.round((Date.now() - t0) / 1000), ...read(out) })));
+    child.on('exit', (code, signal) => log.end(() => resolve({ k, prompt: prompt === brief ? 'brief' : prompt, code, signal, seconds: Math.round((Date.now() - t0) / 1000), load: { before: loadBefore, after: os.loadavg().map((x) => Number(x.toFixed(1))) }, ...read(out) })));
   });
 }
 

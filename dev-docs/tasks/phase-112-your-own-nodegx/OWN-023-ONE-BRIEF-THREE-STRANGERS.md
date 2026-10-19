@@ -226,6 +226,9 @@ that matches a prediction here is not more true for matching it.
 | R7 | "Who draws the conclusions … each one is a fresh Claude in an empty folder outside this repo, with no access to our notes, memory or nodegx.io, and not told that NodeGX's authors are asking …" | **All outside the repo** |
 | R8 | (new) "When should the three builds run? They need one daytime window, back to back … because speed and caching vary by hour. It's 17:50 now …" | **"Start now, I'll keep the laptop on all night."** The builds run the evening of 2026-10-19, back to back, A → A+ → B, once the plumbing is proven on a mock; §4.1's "daytime" is replaced by "one evening window" and the write-up says so. |
 
+| R9 | (new, ~18:15) "In a test run, the NodeGX build lost its NodeGX tools before it started. When Claude Code opens a fresh NodeGX folder it gives the NodeGX helper 30 seconds to start. On a first-ever run the helper downloads itself first (43 MB), which took 27.8 s here, and Claude Code gave up … A second start takes 7.8 s. I've filed it as a bug either way. For the real NodeGX build:" | **"Download it first."** `round-arm.mjs --warm-server` starts the server once before sitting 1 (its seconds in `arm.json` → `setup.warm`). The failed cold start is a cost in B's row (C3): P112-OWN023-COLDSERVER. |
+| R10 | (new) "Your three video encodes in LX-elearning are using about 5 of 8 cores right now (load average 222) … Start the plain build now or wait?" | **Wait until they finish.** `run-arms.mjs` waits before each arm for no ffmpeg and ≥ 60% CPU idle twice a minute apart, and records the idle reading and every sitting's load averages. |
+
 The kit on the day: **0.2.2 from the registry** (`create-nodegx`, `@nodegx/mcp`, `@nodegx/preview` all 0.2.2, published
 2026-10-15). Agents run on Claude Code **2.1.301** (the VS Code extension's binary; the terminal's 2.1.251 can't run
 Opus 5.5).
