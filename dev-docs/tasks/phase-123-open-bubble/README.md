@@ -1,5 +1,12 @@
 # Phase 123 — Open Bubble
 
+> 🔴 **MOVED 2026-10-19 → [The-Low-Code-Foundation/nodegx-studio](https://github.com/The-Low-Code-Foundation/nodegx-studio)**
+> (local: `~/vscode_projects/nodegx-studio`), renamed **NodeGX Studio**: Bubble's brand guidelines forbid BUBBLE in
+> another product's name. The editor, the importer, the gates and these papers live there now, plus an Electron
+> shell and `docs/SCOPE.md` (M1 desktop app, M2 page data, M3 workflows on their element, M4 the run timeline, M5 the
+> importer as a product). **Edit there, not here**; this folder is the phase's record. Not copied (on purpose): the
+> TrybeUP report and screenshots, `import/database-export/` (incl. the `.pem`), `probe-heights.mjs`.
+
 **Scoped and built:** 2026-10-16 (s1, Fable), from one message of Richard's: *"What if we made an 'Open Bubble' clone of
 Bubble, the nocode builder … Let's just take a run at it."* **This is a prototype phase in the shape Phase 118 set:
 four files and a handoff, no task files, no gate suite beyond its own `check.mjs`, no defect rows until it takes a
