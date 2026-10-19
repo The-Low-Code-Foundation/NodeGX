@@ -87,16 +87,15 @@ describe('SEE-001 — the honesty number over MCP, on the training template', ()
   }
 
   it('AC1: get_project_info says the census\'s number over the components the project registers', async () => {
-    // 🔴 The training template's registry lists 49 of its 82 components: its 33 `__cloud__/…` functions are on disk and
-    // deployed by its own tools, but no registry entry names them, so this server (and the editor's importer) cannot read
-    // them (dev-docs/bugs/p111-see001-dbtcloudunregistered-…). The census counts the files; this server counts what it
-    // can open. The difference is exactly those 33 components, asserted here, so it cannot widen silently.
+    // The training template's registry once listed 49 of its 82 components: its 33 `__cloud__/…` functions were on disk
+    // but unregistered, so this server read 66% where the census read 67% (P111-SEE001-DBTCLOUDUNREGISTERED, fixed
+    // 2026-10-19). Every component the census counts is registered now, so the two surfaces must agree exactly.
     const registered = new Set(Object.keys(JSON.parse(fs.readFileSync(path.join(dir, 'components', '_registry.json'), 'utf8')).components).map((k) => (k.startsWith('__cloud__/') ? '/#' + k : '/' + k)));
     const rows = census.byComponent;
     const sum = (rs: CensusCounts[], k: 'known' | 'script' | 'unspecced') => rs.reduce((t, r) => t + r[k], 0);
     const inRegistry = rows.filter((r) => registered.has(r.name));
     const missing = rows.filter((r) => !registered.has(r.name));
-    expect({ registered: inRegistry.length, missing: missing.length, missingAreCloud: missing.every((r) => r.name.startsWith('/#__cloud__/')) }).toEqual({ registered: 49, missing: 33, missingAreCloud: true });
+    expect({ registered: inRegistry.length, missing: missing.map((r) => r.name) }).toEqual({ registered: 82, missing: [] });
     const known = sum(inRegistry, 'known');
     const script = sum(inRegistry, 'script');
     const h = await projectInfo();

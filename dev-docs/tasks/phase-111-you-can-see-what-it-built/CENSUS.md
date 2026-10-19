@@ -8,7 +8,7 @@ The gate (`packages/nodegx-node-spec/tests/see-census.test.ts`) fails when a tem
 | template | graph JSON bytes | component files | components | nodes (runtime rule) | hand count (type+id) | connections | Functions | Function lines | known | script (of it kit) | unspecced | instances | honesty | by lines |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
 | `bot-garden` | 2,123,528 | 406 | 135 | 1,112 | 1,247 | 3,586 | 91 | 5,898 | 804 | 104 (13) | 6 | 197 | **88.5%** | 12% |
-| `digital-bricks-training` | 1,588,121 | 247 | 82 | 944 | 1,026 | 1,390 | 136 | 7,672 | 578 | 285 (148) | 20 | 60 | **67%** | 6.9% |
+| `digital-bricks-training` | 1,596,166 | 247 | 82 | 944 | 1,026 | 1,390 | 136 | 7,672 | 578 | 285 (148) | 20 | 60 | **67%** | 6.9% |
 | `digital-bricks-training-demo` | 1,008,142 | 112 | 37 | 449 | 486 | 719 | 70 | 3,402 | 275 | 131 (60) | 13 | 29 | **67.7%** | 7.4% |
 | `gram` | 765,068 | 136 | 45 | 720 | 765 | 835 | 83 | 3,839 | 599 | 83 (0) | 16 | 21 | **87.8%** | 13.5% |
 | `landing-pages` | 300,515 | 85 | 28 | 494 | 522 | 213 | 5 | 43 | 397 | 18 (0) | 3 | 75 | **95.7%** | 87.6% |
