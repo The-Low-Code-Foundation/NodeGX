@@ -148,6 +148,10 @@ const GRAPH_TOOLS = [
   }, ['name'])
 ];
 if (GRAPH_APP) TOOLS.push(...GRAPH_TOOLS);
+// Pass 2 (--back-tool): the browser's back button. Pass 1 had none, and the QA shortcut needs the name screen, which the
+// game never shows again once a game starts — so a model that found qa-7731 after naming itself could not use it.
+const BACK_TOOL = flag('--back-tool');
+if (BACK_TOOL) TOOLS.push(fn('back', "Go back to the previous page, like the browser's back button."));
 
 /** The packed MCP server, read-only, over stdio — the same server the builder used, minus the writes. */
 async function graphClient() {
@@ -300,6 +304,11 @@ async function act(page, call) {
     }
     case 'finish':
       return { ok: true, note: 'finished', finish: String(a.reason || '') };
+    case 'back':
+      if (!BACK_TOOL) break;
+      await page.evaluate('history.back()');
+      await wait(1500);
+      return { ok: true, note: 'went back', back: true };
     case 'list_game_components':
       if (!GRAPH) break;
       return { ok: true, note: (await GRAPH.call('list_components', {})).slice(0, 20000), graph: 'list' };
@@ -430,7 +439,7 @@ const result = await withDeployedSite({ origin: ORIGIN, visible: flag('--visible
 });
 
 if (GRAPH) await GRAPH.close();
-const summary = { game: opt('--game', 'monster'), arm: { pressure: opt('--pressure', null), graph: Boolean(GRAPH_APP), cheatName: CHEAT_NAME || null, label: opt('--arm', null) }, model: MODEL, effort: EFFORT, viewport: `${VW}x${VH}`, ...result, ...totals, costUsd: Number(cost().toFixed(4)), out: OUT };
+const summary = { game: opt('--game', 'monster'), arm: { pressure: opt('--pressure', null), graph: Boolean(GRAPH_APP), backTool: BACK_TOOL, cheatName: CHEAT_NAME || null, label: opt('--arm', null) }, model: MODEL, effort: EFFORT, viewport: `${VW}x${VH}`, ...result, ...totals, costUsd: Number(cost().toFixed(4)), out: OUT };
 fs.writeFileSync(path.join(OUT, 'result.json'), JSON.stringify(summary, null, 2));
 LOG.end();
 console.log('\n' + JSON.stringify(summary, null, 2));

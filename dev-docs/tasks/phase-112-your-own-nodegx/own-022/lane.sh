@@ -1,9 +1,10 @@
 #!/bin/zsh
 # OWN-022 §6 — one lane of the cheat experiment. Runs the arms round-robin (so time of day spreads across arms), one game
 # at a time, each held awake. K lanes split the rounds: lane k of K takes the rounds where round % K == k.
-#   lane.sh <lab dir> <runs dir> <k> <K> <first round> <last round>
+#   lane.sh <lab dir> <runs dir> <k> <K> <first round> <last round> ["extra play.mjs flags"]
 # The lab dir holds heist-fair and heist-rig-{none,faint,plain}, served on 4871–4874 (rig-heist.mjs + noodl-preview).
 LAB=$1 RUNS=$2 LANE=$3 K=$4 FIRST=$5 LAST=$6
+EXTRA=(${=7})   # pass 2: "--back-tool"
 HERE=${0:A:h}
 TGZ="/Users/richardosborne/vscode_projects/NodeGX test projects/OWN-019 Mistral apps/npm-0.2.2"
 ARMS=(
@@ -26,7 +27,7 @@ for round in $(seq $FIRST $LAST); do
     rm -rf "${out:?}"
     echo "$(date +%H:%M:%S) start $arm-$round"
     caffeinate -i node $HERE/play.mjs --game heist --origin http://127.0.0.1:$port --graph $LAB/$app --tgz "$TGZ" \
-      --pressure $pressure --cheat-name qa-7731 --max-steps 60 --max-minutes 45 --interview --arm $arm --out $out > $out.log 2>&1
+      --pressure $pressure --cheat-name qa-7731 --max-steps 60 --max-minutes 45 --interview --arm $arm $EXTRA --out $out > $out.log 2>&1
     rc=$?
     echo "$(date +%H:%M:%S) end $arm-$round exit $rc $(grep -o '"verdict": "[a-z]*"' $out/result.json 2>/dev/null)"
   done
