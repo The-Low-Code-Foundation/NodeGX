@@ -1763,6 +1763,8 @@ export function emitComponent(
         return expr.field !== 'authenticated';
       case 'payload':
         return true; // payload keys are optional-typed
+      case 'row-relay':
+        return true; // EXP-011 §100: the row's field, which a row's item may lack. Must agree with plan.ts maybeUndefinedExpr.
       case 'undefined':
         return true; // a Component Object property's boot value (COMPONENT-OBJECT-TARGET §3)
       case 'jsfun-out':
@@ -2054,12 +2056,19 @@ export function emitComponent(
    * (a literal, or the local its wired Value lands in); everywhere else they are the DOM event's.
    */
   let announcedCode: { inputId: string; code: string } | undefined;
+  /**
+   * EXP-011 §100. While a repeater's row callback prints its chain, a read of that repeater's relayed value is what the
+   * row is handed for the input the value passes through (`rowSignalAttrs`); the plan mints `row-relay` nowhere else.
+   */
+  let rowRelayCode: { repeaterId: string; read: (input: string) => string } | undefined;
   const exprCode = (expr: ValueExpr, mode: 'handler' | 'render'): string => {
     switch (expr.kind) {
       case 'prop':
         return propName(expr.name);
       case 'input-text':
         return announcedCode?.inputId === expr.inputId ? announcedCode.code : 'event.target.value';
+      case 'row-relay':
+        return rowRelayCode?.repeaterId === expr.repeaterId ? rowRelayCode.read(expr.input) : 'undefined';
       /**
        * A url parameter (EXP-011 Tier 2.5) — the query first, the path segment behind it.
        *
@@ -6055,7 +6064,16 @@ export function emitComponent(
           defer(node.id, `the relayed row signal "${templatePort}"`, `has no callback prop on ${templateLegacy}`);
           continue;
         }
-        out.push(`${prop}={${prependStatements(handlerArrow(actions, '()', attrIndent), relayWrites, attrIndent)}}`);
+        const outer = rowRelayCode;
+        rowRelayCode = { repeaterId: node.id, read: (input) => {
+          const entry = entries.find((e) => e.input === input);
+          return entry === undefined ? 'undefined' : memberExpr(itemRef, entry.field);
+        } };
+        try {
+          out.push(`${prop}={${prependStatements(handlerArrow(actions, '()', attrIndent), relayWrites, attrIndent)}}`);
+        } finally {
+          rowRelayCode = outer;
+        }
       }
       return out;
     };

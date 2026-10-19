@@ -1857,6 +1857,14 @@ export type ValueExpr =
    */
   | { kind: 'state-get'; name: string; maybeUndefined?: boolean }
   /**
+   * EXP-011 §100. A repeater's relayed row value (`itemOutput-<output>`) read inside a chain one of its rows' relayed
+   * signals runs: the firing row's own value, which the runtime copies onto the repeater before it sends the signal
+   * (`foreach.tsx` `itemOutputSignalTriggered`). Minted only while such a chain is compiled (`rowChainScopes`), valid only
+   * in that repeater's row callbacks, and printed there as what the row is handed for `input` (the row's input the output
+   * passes straight through). `tsType` is the row template's declared output type.
+   */
+  | { kind: 'row-relay'; repeaterId: string; output: string; input: string; tsType: string }
+  /**
    * The user-path value inside a control's own onChange (CONTROLLED-STATE-TARGET §4c) — the
    * `input-text` context rule generalized per control role: `event.target.checked` for a
    * checkbox, `Number(event.target.value)` for a range, `event.target.value` for a dropdown.
@@ -4788,6 +4796,24 @@ export function undrawnReasonOf(plan: ComponentPlan, component: ComponentIR, id:
 }
 
 /**
+ * EXP-011 §99, P18-S131-ROWLESSTRIGGER. Why a repeater draws no rows in the export, or null when it draws them: its items
+ * have no feed the export reads (a query, a named array, an expression, Static Data), or its rows are mapped by a script
+ * (the emitter's `renderRepeater` draws a TODO marker for both). Decided after the list passes.
+ */
+export function rowlessReasonOf(plan: ComponentPlan, repeaterId: string): string | null {
+  const repeater = plan.repeaters[repeaterId];
+  if (repeater === undefined || repeater.templatePath === null) return 'it draws no rows in the export (it has no template component)';
+  const fed =
+    plan.queries.some((q) => q.nodeId === repeater.itemsQueryId) ||
+    repeater.itemsCollectionName != null ||
+    repeater.itemsExpr !== undefined ||
+    plan.staticData.some((sd) => sd.nodeId === repeater.itemsStaticId);
+  if (!fed) return 'it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)';
+  if (repeater.mapping === null) return 'it draws no rows in the export (its rows are mapped by a script, which is not a static map)';
+  return null;
+}
+
+/**
  * The triggers of one planned component that the emitted app never runs (see {@link PlanExclusions}). Read off the
  * finished plan: its handlers, its bindings after the lift phase, and every action list it carries.
  */
@@ -4804,7 +4830,8 @@ export function unreachedTriggersOf(plan: ComponentPlan, component: ComponentIR)
   const owners = new Set([...Object.keys(plan.handlers), ...Object.keys(plan.changeHandlers), ...plan.drags.map((d) => d.nodeId)]);
   for (const owner of owners) {
     if (plan.roleOf[owner] === undefined) continue;
-    const why = undrawnReasonOf(plan, component, owner);
+    // P18-S131-ROWLESSTRIGGER. A repeater that draws no rows prints no row callback, so none of its chains runs.
+    const why = undrawnReasonOf(plan, component, owner) ?? (nodeById.get(owner)?.type === 'For Each' ? rowlessReasonOf(plan, owner) : null);
     if (why === null) continue;
     whyUndrawn.set(owner, why);
     found.owners.set(owner, `its trigger, ${labelOf(owner)}, is not drawn: ${why}`);
@@ -6998,7 +7025,17 @@ function planComponent(
    * arm runs where no answer arrived.
    */
   const httpChainScope = new Map<string, 'done' | 'failure'>();
-  const httpNames = new Map<string, { fnName: string; typeName: string; answerLocal: string; messageLocal: string }>();
+  /**
+   * EXP-011 §100. The repeaters whose row signal's chain is being compiled, innermost last (the attach pass pushes one
+   * around the compile of a wire out of `itemOutputSignal-<name>`). Inside, a read of that repeater's relayed value is the
+   * firing row's (`row-relay`); outside, it is refused by name. `relayTouches` is one set per open `compiledOf`: the
+   * repeaters whose relayed value the compile read (or refused), so a compile whose meaning depends on the scope is
+   * cached per scope (`relayTouchedKeys`: the plain key, and every scope it was compiled under; `null` is outside).
+   */
+  const rowChainScopes: string[] = [];
+  const relayTouches: Array<Set<string>> = [];
+  const relayTouchedKeys = new Map<string, Set<string | null>>();
+  const httpNames =new Map<string, { fnName: string; typeName: string; answerLocal: string; messageLocal: string }>();
   /**
    * The four names one HTTP node contributes, minted together so the module, the component and
    * the chain locals cannot disagree. `fnName`/`typeName` are project-unique (one `api/http.ts`);
@@ -9259,8 +9296,69 @@ function planComponent(
     return cases;
   };
 
+  /**
+   * EXP-011 §99 and §100. What a repeater's relayed row value `itemOutput-<output>` is statically: the row template's input
+   * passed straight through to that output (its Component Inputs port wired into its Component Outputs port), which the
+   * parent hands each row from its item; or why it is not.
+   */
+  const relayedInputOf = (forEach: NodeIR, output: string): { input: string; templatePath: string; declared: string } | { defer: string } => {
+    const repeater = plan.repeaters[forEach.id];
+    const templatePath = repeater?.templatePath ?? null;
+    const template = templatePath === null ? undefined : ir.components.find((tc) => `/${tc.path}` === templatePath);
+    if (repeater === undefined || templatePath === null || template === undefined) return { defer: `the repeater relaying "${output}" has no template component` };
+    if (repeater.mapping === null) return { defer: `the repeater relaying "${output}" maps its rows with a script, which is not a static map` };
+    const tById = new Map(template.nodes.map((n) => [n.id, n]));
+    const feeds = template.connections.filter((c) => c.toProperty === output && tById.get(c.toId)?.type === 'Component Outputs');
+    if (feeds.length !== 1) {
+      return {
+        defer:
+          feeds.length === 0
+            ? `nothing in ${templatePath} feeds the row output "${output}" that the repeater relays`
+            : `${feeds.length} wires feed ${templatePath}'s row output "${output}" — last-writer-wins is not statically ordered`
+      };
+    }
+    const feeder = tById.get(feeds[0].fromId);
+    if (feeder?.type !== 'Component Inputs') {
+      return {
+        defer: `${templatePath}'s row output "${output}" is computed inside the row (by ${feeder?.type ?? 'a missing node'}.${feeds[0].fromProperty}) — only a row input passed straight through is relayed in this slice`
+      };
+    }
+    const input = feeds[0].fromProperty;
+    if (repeater.mapping !== 'template-inputs' && !repeater.mapping.some((m) => m.input === input)) {
+      return { defer: `the repeater maps nothing into ${templatePath}'s input "${input}", which its row output "${output}" passes through` };
+    }
+    const declared = componentOutputInterface(template).valueProps.find((v) => v.port === output)?.tsType ?? 'unknown';
+    return { input, templatePath, declared };
+  };
+
   const resolveExpr = (fromNode: NodeIR | undefined, fromProperty: string, ctx: ResolveCtx): ValueExpr | null => {
     if (!fromNode) return null;
+    /**
+     * EXP-011 §100. A repeater's relayed row value. Inside a chain one of its rows' relayed signals runs (the attach pass
+     * holds the scope while it compiles one), the firing row's own value: the runtime copies that row's relayed outputs
+     * onto the repeater, then sends the signal, so every node down the chain reads them. Anywhere else it is the value of
+     * whichever row fired last, `undefined` before any, which no row's closure holds: refused by name. Either way the
+     * open compile is told it read one, so its result is cached per scope.
+     */
+    if (fromNode.type === 'For Each' && fromProperty.startsWith(ITEM_OUTPUT_VALUE)) {
+      const output = fromProperty.slice(ITEM_OUTPUT_VALUE.length);
+      relayTouches[relayTouches.length - 1]?.add(fromNode.id);
+      // A Function's or an Expression's inputs are its own, resolved once for every run (`jsResolving`), not per chain.
+      if (jsResolving.size > 0) {
+        ctx.defer = `it reads the repeater ${fromNode.id}'s relayed row value "${output}" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own`;
+        return null;
+      }
+      if (rowChainScopes[rowChainScopes.length - 1] !== fromNode.id) {
+        ctx.defer = `it reads the repeater ${fromNode.id}'s relayed row value "${output}" in a chain no row's relayed signal of that repeater starts in the export — there it is the value of whichever row fired last, which the export does not hold (in a row's chain it is the firing row's own)`;
+        return null;
+      }
+      const relayed = relayedInputOf(fromNode, output);
+      if ('defer' in relayed) {
+        ctx.defer = relayed.defer;
+        return null;
+      }
+      return { kind: 'row-relay', repeaterId: fromNode.id, output, input: relayed.input, tsType: relayed.declared };
+    }
     if (LIST_PRODUCERS.has(fromNode.type) && fromProperty === 'items') return listReadOf(fromNode, ctx);
     // EXP-011 §56. A transform's Count is its derived list's length — current whenever the list is.
     if (LIST_PRODUCERS.has(fromNode.type) && fromProperty === 'count') {
@@ -10500,6 +10598,9 @@ function planComponent(
         return expr.viaState !== undefined && expr.seeded !== true;
       case 'state-get':
         return expr.maybeUndefined === true;
+      // EXP-011 §100. The row's field: a row whose item lacks it is handed nothing. Must agree with component.ts maybeUndefined.
+      case 'row-relay':
+        return true;
       // FLD-015. A hoisted Static Data constant is a frozen module-scope literal: it exists from
       // module load and nothing writes it, so it is never undefined for a stronger reason than
       // the named arrays below — there is no boot value to be before.
@@ -10928,6 +11029,9 @@ function planComponent(
         return 'unknown';
       case 'state-get':
         return plan.stateVars.find((v) => v.name === expr.name)?.tsType.replace(' | undefined', '') ?? 'unknown';
+      // EXP-011 §100. The row template's declared output type.
+      case 'row-relay':
+        return expr.tsType;
       case 'control-event':
         return expr.form === 'checked' ? 'boolean' : expr.form === 'number' ? 'number' : 'string';
       case 'logical':
@@ -16284,10 +16388,35 @@ function planComponent(
   /** EXP-011 §43. Why a Record with `Fetch` unwired could not become an Id effect. */
   const recordEffectDefers = new Map<string, string>();
   const compiling = new Set<string>();
+  /**
+   * EXP-011 §100. A sink whose compile read a repeater's relayed row value means one thing inside that repeater's row
+   * chain and another outside it, so from then on it is one compile per scope, under `@row:<scope>` (`none` outside). The
+   * plain key keeps a compile that succeeded in any scope over one that was refused, for the readers that look a sink up
+   * by `<id>:<port>` to ask whether it compiles at all (the pre-pass that compiles every sink outside any row's chain
+   * comes first). A compile that read none is one compile, as before. A cached result tells the compile that asked for
+   * it what it read, so the scope-dependence climbs the chain.
+   */
   const compiledOf = (node: NodeIR, port: string): CompiledSink => {
     // EXP-011 §90. A Set with several Value wires compiles per wire it reads, which depends on the chain it is in.
     const valueWires = (node.type === 'Set Variable' || node.type === GLOBAL_STORE_SET) && valueWiresInto(node).length > 1;
-    const plainKey = `${node.id}:${port}${valueWires ? `@value:${lastValueWireOf(node)?.key ?? 'none'}` : ''}`;
+    const basePlain = `${node.id}:${port}${valueWires ? `@value:${lastValueWireOf(node)?.key ?? 'none'}` : ''}`;
+    const rowScope = rowChainScopes[rowChainScopes.length - 1] ?? null;
+    const scopedKey = `${basePlain}@row:${rowScope ?? 'none'}`;
+    const scopes = relayTouchedKeys.get(basePlain);
+    const key = scopes !== undefined ? scopedKey : basePlain;
+    relayTouches.push(new Set());
+    const result = compiledOfKeyed(node, port, key);
+    const touched = relayTouches.pop()!;
+    if (touched.size > 0) {
+      relayTouchedKeys.set(basePlain, new Set([...(scopes ?? []), rowScope]));
+      if (key === basePlain) compiledSinks.set(scopedKey, result);
+      const plain = compiledSinks.get(basePlain);
+      if (key !== basePlain && !('defer' in result) && (plain === undefined || 'defer' in plain)) compiledSinks.set(basePlain, result);
+    }
+    if (touched.size > 0 || relayTouchedKeys.has(basePlain)) relayTouches[relayTouches.length - 1]?.add(rowScope ?? 'none');
+    return result;
+  };
+  const compiledOfKeyed = (node: NodeIR, port: string, plainKey: string): CompiledSink => {
     /**
      * EXP-011 §90. Inside a verb's Failure chain a read of its Error is the catch's local, outside it the row; one sink
      * that two chains run would carry whichever was compiled first into the other (planning's Sign in: Sign Up's catch
@@ -16391,6 +16520,9 @@ function planComponent(
         );
       case 'input-text':
         return context.kind === 'dom' && context.nodeId === expr.inputId;
+      // EXP-011 §100. Only in that repeater's row callbacks, which close over the firing row's item.
+      case 'row-relay':
+        return context.kind === 'dom' && context.nodeId === expr.repeaterId && (context.port?.startsWith(ITEM_OUTPUT_SIGNAL) ?? false);
       case 'control-event':
         return context.kind === 'dom' && context.nodeId === expr.controlId;
       case 'payload':
@@ -17112,32 +17244,9 @@ function planComponent(
     const key = `${forEach.id}\u0000${output}`;
     const known = rowRelays.get(key);
     if (known !== undefined) return { stateName: known.name };
-    const repeater = plan.repeaters[forEach.id];
-    const templatePath = repeater?.templatePath ?? null;
-    const template = templatePath === null ? undefined : ir.components.find((tc) => `/${tc.path}` === templatePath);
-    if (repeater === undefined || template === undefined) return { defer: `the repeater relaying "${output}" has no template component` };
-    if (repeater.mapping === null) return { defer: `the repeater relaying "${output}" maps its rows with a script, which is not a static map` };
-    const tById = new Map(template.nodes.map((n) => [n.id, n]));
-    const feeds = template.connections.filter((c) => c.toProperty === output && tById.get(c.toId)?.type === 'Component Outputs');
-    if (feeds.length !== 1) {
-      return {
-        defer:
-          feeds.length === 0
-            ? `nothing in ${templatePath} feeds the row output "${output}" that the repeater relays`
-            : `${feeds.length} wires feed ${templatePath}'s row output "${output}" — last-writer-wins is not statically ordered`
-      };
-    }
-    const feeder = tById.get(feeds[0].fromId);
-    if (feeder?.type !== 'Component Inputs') {
-      return {
-        defer: `${templatePath}'s row output "${output}" is computed inside the row (by ${feeder?.type ?? 'a missing node'}.${feeds[0].fromProperty}) — only a row input passed straight through is relayed in this slice`
-      };
-    }
-    const input = feeds[0].fromProperty;
-    if (repeater.mapping !== 'template-inputs' && !repeater.mapping.some((m) => m.input === input)) {
-      return { defer: `the repeater maps nothing into ${templatePath}'s input "${input}", which its row output "${output}" passes through` };
-    }
-    const declared = componentOutputInterface(template).valueProps.find((v) => v.port === output)?.tsType ?? 'unknown';
+    const relayed = relayedInputOf(forEach, output);
+    if ('defer' in relayed) return relayed;
+    const { input, declared } = relayed;
     const tsType = declared === 'unknown' || declared === 'any' ? declared : `${declared} | undefined`;
     const stateVar = allocStateVar(
       `relayed ${output}`,
@@ -18498,7 +18607,14 @@ function planComponent(
       }
       compiled = sink;
     } else {
-      compiled = compiledOf(toNode, connection.toProperty);
+      // EXP-011 §100. A row's relayed signal: the chain it runs reads that row's relayed values.
+      const rowScope = fromNode?.type === 'For Each' && connection.fromProperty.startsWith(ITEM_OUTPUT_SIGNAL) ? fromNode.id : undefined;
+      if (rowScope !== undefined) rowChainScopes.push(rowScope);
+      try {
+        compiled = compiledOf(toNode, connection.toProperty);
+      } finally {
+        if (rowScope !== undefined) rowChainScopes.pop();
+      }
     }
     if ('defer' in compiled) {
       if (outputsSink) {
@@ -18741,6 +18857,22 @@ function planComponent(
   }
 
   /**
+   * EXP-011 §100. A sweep that names a chain wire the compile did not take compiles its sink again to ask for the sink's
+   * own refusal; it asks in the row scope the sender's own compile was made in (`relayTouchedKeys`), so a read of a row's
+   * relayed value down that chain gives the reason it gave there, not the sentence a read outside a row's chain gets.
+   */
+  const inSenderRowScope = <T>(senderId: string, port: string, fn: () => T): T => {
+    const scopes = [...relayTouchedKeys].find(([key]) => key === `${senderId}:${port}` || key.startsWith(`${senderId}:${port}@`))?.[1];
+    const scope = [...(scopes ?? [])].find((s): s is string => s !== null) ?? null;
+    if (scope !== null) rowChainScopes.push(scope);
+    try {
+      return fn();
+    } finally {
+      if (scope !== null) rowChainScopes.pop();
+    }
+  };
+
+  /**
    * P18-S127-SETDONE (EXP-011 §95). A Set Variable's Done or Completed wire its compile did not take: the chain it could
    * not run (`setDoneRefusals`), the Set itself refused, or a Set no exported trigger runs. Named by that, after every
    * wire has spoken (the attach pass skips these wires, `ownsChainOutput`, so the answer does not depend on wire order).
@@ -18757,7 +18889,10 @@ function planComponent(
     // Named here, so not again by the sweep of wires nothing translated (the attach pass consumed it at the base).
     consumed.add(connection.key);
     // The sink's own refusal first, as the attach pass rules every trigger wire: a sink that cannot compile says why.
-    const sink = outputsSink ? outputSinkOf(connection.toProperty, fromNode, connection.fromProperty) : compiledOf(toNode, connection.toProperty);
+    // EXP-011 §100: compiled in the row scope the Set itself was compiled in, so a row's read says its own reason.
+    const sink = outputsSink
+      ? outputSinkOf(connection.toProperty, fromNode, connection.fromProperty)
+      : inSenderRowScope(fromNode.id, 'do', () => compiledOf(toNode, connection.toProperty));
     if ('drop' in sink) {
       notes.push(wireNote(connection, sink.drop));
       continue;
@@ -18804,7 +18939,9 @@ function planComponent(
     const outputsSink = toNode.type === 'Component Outputs';
     if (!outputsSink && !isTriggerInto(toNode, connection.toProperty)) continue;
     consumed.add(connection.key);
-    const sink = outputsSink ? outputSinkOf(connection.toProperty, fromNode, connection.fromProperty) : compiledOf(toNode, connection.toProperty);
+    const sink = outputsSink
+      ? outputSinkOf(connection.toProperty, fromNode, connection.fromProperty)
+      : inSenderRowScope(fromNode.id, 'run', () => compiledOf(toNode, connection.toProperty));
     if ('drop' in sink) {
       notes.push(wireNote(connection, sink.drop));
       continue;
