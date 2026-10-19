@@ -1,6 +1,6 @@
 # EXP-011 — Close the picker gap, ranked by what apps need
 
-**Status:** 🟡 In progress — **latest: §92 (session 125, 2026-10-19), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling)**; §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
+**Status:** 🟡 In progress — **latest: §93 (session 126, 2026-10-19), a component root's Mounted wire is carried (72 roots in the templates, all refused as "a router concern"), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time; graded against the runtime's own nodes rendered by real React; templates 54 nodes gained, 0 lost**; §92 (session 125), every tracked template's export passes its own `tsc -b` (189 → 0 type errors; all 19 shipped templates 203 → 1), P18-S122-TPLBUILD fixed; a Function's wrapper is in its own file (Richard's ruling); §91 (session 124), a trigger the export never runs is refused by name; **Tier 1 COMPLETE; Tier 2.7 COMPLETE** (the three pure utilities, session 65; the id pair, session 66); §38–§39 the small non-pure nodes; **§40 (session 69) fixed the chain-wire / earn-scan / branch-arm defect class behind every translated node with a chain; §41 (session 69) built `Cloud Function`, the first of the nine Cloud Services; §42 (session 70) DROVE it against a live `nodegx-backend` — the session token measured on the receiving end — and fixed the two cells that disagreed (a boolean result rendered as nothing; an empty answer replaced the row); §43 (session 70) BUILT `Record` in both forms — 🔴 gates NOT run, NOT committed (the box ran out of memory; see §43.4)**. **82 of 127 (64.6%) on disk, 81 committed.** Tier 2's remainder is Cloud Services (9) and the component stack pair
 **Depends on:** nothing — but sequenced after EXP-009 and EXP-010, which are worth more per hour
 **Replaces:** every "what to build next" list in this phase from sessions 20–31
 
@@ -13203,3 +13203,160 @@ None of this was driven in a browser; the gate typechecks, and the React and TDZ
 2. The gate holds 16 templates; nightbook and the two `*.content.json` are measured by `tplbuild.ts` only (19: 1 error).
 3. §91.6's list stands: the Mounted wires the export does not carry (the named blockers of 166 template nodes), the §87
    Conditions, P18-S124-RUNINPUTS, P18-S124-LATEMARKER and the small ones.
+
+## §93 The root is mounted when it says (session 126, 2026-10-19): the Mounted wires the export did not carry
+
+### §93.0 What was measured first
+
+§91.5 named the wires into Mounted the export does not carry as the blockers of 166 template nodes, and named their
+feeders. `s126-mounted/census.ts` measured them by feeder on the base `3476642d6`, over the 19 templates: **157 nodes
+refused for an unreached trigger** (§91.5's 166 less the 9 whose sentence is another wire's refusal). By what feeds the
+Mounted that hides them:
+
+| feeder | nodes | where |
+|---|---|---|
+| a Function reading the Noodl API | 64 | gram's and the marketplace's refusal pages and admin forms, the gram bar |
+| an Expression or Function fed by a source the export cannot read (a kit node, an instance, a Filter) | 33 | nightbook's Tonight (`nightbook-kit.Page`), Day, Profile |
+| an instance output its component does not lift, or an output of a logic component | 18 + 8 | members-area's `/Members/Standing` (a logic component) through the Chrome |
+| a Did Mount under an element a value mounts | 16 | nightbook's Tonight, Coming, Envelope, Me, Warmup |
+| a component root mounted from a Component Input ("a router concern") | 7 | gram's Nav, bot-garden's Form |
+| a Function fed by User's roles; a dead row's Function; an Expression fed by a refused Function; a Function into a Mounted with no binding | 4; 3; 2; 2 | |
+
+The largest family needs `Noodl.Records`, `Noodl.CloudFunctions`, `Noodl.Users` and `Component.Object` translated (EXP-003
+Tier B): no test can grade that against the runtime in one session. The fourth and fifth are one mechanism, and
+`s126-mounted/roots.ts` measured its reach beyond the refused triggers: **72 wires into a component root's Mounted in the
+templates, every one refused as "a router concern"** (from a Component Input 38, an Expression 24, a States value 4, a
+Function 4, an instance output 2). The 24 roots authored Mounted false were never drawn in the export (todo-list's Note
+dialog and Money sheet, gram's Nav on four pages, bot-garden's Form, Pad and Win card, rocket-school's Result and Teach
+card, nightbook's Check-in); the 48 authored true were always drawn (planning's ten sheets and editors, rocket-school's
+Choice row placed 19 times, its Countdown bar, Confirm, Setup and Play screens), whatever the input said. That family was
+built.
+
+### §93.1 What the runtime does (measured on its own nodes, `tests/helpers/runtime-mounted-arm.js`)
+
+The viewer's own Group, Text, Button and Text Input, the runtime's own component instances, Component Inputs, Expression,
+Variable and Set Variable, on the corpus harness, rendered by real React into jsdom, pressed through DOM clicks:
+
+- A root's Mounted is the element's own (`wantsToBeMounted`): false, the instance draws nothing (`componentinstance.ts`
+  `render` is its root's `render`), and the root tells the instance's visual parent to draw again.
+- A wire never delivers `undefined` (`Node.sendValue`), so a root, or any element, wired from a source that has no value
+  yet keeps its authored Mounted: the Card (authored true, nothing passed) is drawn, the Ghost (authored false) is not.
+- Did Mount comes from the element's `componentDidMount`, so it fires on every mount: the Sheet's inner Group says
+  "seen the sheet" on each Open, after a Reset too.
+- A Text Input announces its start value as it mounts (s116's FIELDMOUNT): "named Ann" the first time the Sheet opens.
+
+### §93.2 What is built
+
+| piece | what it is |
+|---|---|
+| `routerMounted` (`plan.ts`) | a wire into the root's Mounted is the router's only when the root is a Page; it was every root, from every source (12 sites) |
+| the root guard (`component.ts`) | a root whose Mounted a value decides prints `if (!cond) return null;` after every hook, before the return: the component's state is kept across, as the runtime keeps its nodes |
+| `mountedCondOf` | the Mounted condition, as the runtime decides it: authored false, `!!x`; authored true and the source a read that is undefined until written (a prop, a store, a store key, a row's field), `(x === undefined \|\| x)`. Not for an Expression's answer (computed in render, a value from the first render) or a computed call (it would print and run twice): P18-S126-UNDEFCOMPUTED |
+| the gated Did Mount | `mountChains` carries the gates (the element and every element above it a value mounts); the effect runs when they all say mounted, resets its ref when they do not, keyed on the conditions. `unreachedTriggersOf` no longer refuses these (s124's `mounts`), but for the one case the export cannot gate (below) |
+| the gated field | `FieldMountPlan.gates`: the field announces the first time its gates hold (a later mount announces only a real change, GAM-009 R10); it was refused by name |
+| the one left | a page's sole Group renders as the page div, whose Mounted the emitter drops: a Did Mount or a field under it is refused by name in the plan and the emitter alike (`UNCARRIED_PAGE_GROUP`, P18-S126-PAGEGROUP; 0 templates) |
+
+### §93.3 The test (`tests/the-root-is-mounted-when-it-says.test.ts`, 19 rows)
+
+The Root Desk (`tests/helpers/root-desk.ts`, built in a temporary folder, so the corpus golden does not move): a page with
+Open, Close and Reset, and four placed components, each a root's Mounted wired: the Sheet (authored false, from its input,
+with a button, a Did Mount and a field inside), the Card (authored true, nothing passed), the Ghost (authored false,
+nothing passed), the Gate (an Expression over a Variable); and a Group on the page mounted from a Variable nothing sets.
+§A both arms press by press (`export-react-arm.js`, StrictMode; `runtime-mounted-arm.js`): A1 the runtime reads what
+`s126-mounted/EXPECTED.md` says, A2 the export reads exactly that, A3–A5 the claims one by one, A6 the wire moved to an
+element inside the root, A7 the control (no Mounted wire anywhere). §B the emitted guard, the undefined arm, the gated
+effects; §C the plan (the root bound, its triggers' chains kept, the Expression collapsed, a Page's root still the
+router's, the page's own Group refusal); §D every variant's app typechecks.
+
+The main fixture's readings were measured on the runtime first (the probe that built the arm), then written; the
+variants were predicted in `EXPECTED.md` before they ran, and all three matched. A fourth variant, the Sheet's root
+authored true and wired from a Variable not yet set, was predicted to diverge at load and does: the parent passes
+`shown={!!openValue}`, `false`, where the runtime delivers nothing (P18-S126-PROPUNDEF, filed; 1 reading of 24 on the
+tree, 18 of 24 on the base, `s126-mounted/arms.ts`).
+
+**Mutant arms** (`s126-mounted/mutants.py`, a copy in `packages/nx-mut-s126`, removed after). Control 19 / 19.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the base's rule: every root's Mounted is the router's | 13 |
+| B | the root drawn whatever it says | 6 |
+| C | no undefined arm | 4 |
+| D | a gated Did Mount runs once, at the component mount | 4 |
+| E | the Did Mount's ref is not reset by an unmount | 4 |
+| F | the field announces at the component mount | 4 |
+| G | the plan gives the field no gates | 5 |
+| H | an Expression's answer takes the undefined arm | 1 |
+| I | a Page's Mounted binds too | 1 |
+| J | a Did Mount gated by its own element only | 4 |
+| K | a Did Mount in a page's own wired Group is not refused | 1 |
+
+🔴 Two arms first read "0 total". A's export arm threw on a button the base never draws, at the file's load: the arms
+now return the error as a reading, so the rows fail by name. G (`!literal && id.length < 0`) broke the narrowing of the
+line below it, and the suite did not compile: reshaped to filter the pushed id.
+
+**Re-pinned to the new claim:** `drag` C13, `untyped-store-key`, `untyped-variable` (the undefined arm; found by the
+whole package, §93.5), `the-ticked-input-runs-it-again` (a Did Mount on a value-mounted element runs, keyed),
+`controlled-state` (a root's Mounted binds; a Variable-fed Mounted authored true takes the undefined arm),
+`the-undrawn-trigger-is-refused` B1 (the Did Mount kept, gated), `the-field-announces-at-mount` (a value-mounted field
+announces the first time; the page's own Group refused by name). **hls001**: predicted 0 keys by `predict.ts` over the
+base's plans; the first run moved one (deadline-desk's Home: the undefined arm around a Date Compare's call, printed
+twice), which the predictor did not model and which was wrong: the arm is for a read only now, and the golden is
+unchanged (4 / 4).
+
+### §93.4 What the exported apps do now
+
+`dispdiff.ts`, the base against the tree: **templates (19 projects, 13,432 nodes) 54 gained, 0 lost; corpus (228 projects,
+29,217 nodes) 14 gained, 0 lost.** In the templates: 24 Expressions into a root (rocket-school and star-class 11 each,
+nightbook's Section and Check-in), 16 Set Variables and 1 Function under nightbook's value-mounted pages (their Did
+Mounts), gram's Nav's 4 navigations, bot-garden's Form's 4 Set Variables, todo-list's and its demo's Problem banner (its
+Function and its Dismiss), rocket-school's and star-class's Feedback banner States. The corpus's 14 are copies of the
+same shapes. `census.ts`: 157 → 132 refused for an unreached trigger.
+
+Read in the emitted diff of every changed file (169 files, `s126-mounted/emit.ts` both ways):
+
+- **Drawn when it says, where it was never drawn:** 22 roots authored Mounted false (gram's Nav on Feed, Member, Post and
+  Prayer, with its four tabs; bot-garden's Form, Pad, Win card; rocket-school's and star-class's Result, Teach card and
+  Feedback banner; todo-list's and the demo's Kind group, Money sheet, Next move prompt, Note dialog, Problem banner;
+  nightbook's Section and Check-in). Their buttons and inner wires bind (14 of the Win card's 15 "no rendered sink"
+  wires among them), the Note dialog clears its field on every open (its Did Mount), the Problem banner's Dismiss writes.
+- **Hidden when it says, where it was always drawn:** 46 roots authored true (planning's and the demo's ten sheets and
+  editors, rocket-school's and star-class's Choice row, Countdown bar, Focus picker, Confirm, Editor, New player form,
+  Monster and Race Play and Setup, Moon Care, the Header). Their Did Mounts (the Setup's, the Play's) run each time the
+  root mounts; the Editor's two fields announce the first time it opens (they announced at the component's mount), the
+  Race Setup's second name field the first time it appears (it was refused).
+- **Kept drawn while the value has none:** 208 elements authored Mounted true whose source is a prop, a store or a row's
+  field print `(x === undefined || x)` (dbt's row components, planning's money rows, todo-list's rows, gram's cards):
+  the runtime keeps them drawn until a value arrives, as it does not deliver `undefined`.
+- **Counted, not yet reachable:** the Feedback banner's States is bound (its root's Mounted), but the banner opens on
+  `show`, a signal sent into the component, which the export still drops (P18-S126-INSIGNAL: 87 template nodes refused
+  for that trigger). bot-garden's Form's "Band 10–12" is set by its button now, its `reset` signal dropped the same way.
+- nightbook's Did Mount pages (Tonight, Coming, Envelope, Me, Warmup) reset their sheets each time the page's bar and
+  page are mounted.
+
+The templates' typecheck gate 3 / 3, every row 0; all 19 (`tplbuild.ts`): 1 error in 1, nightbook's P18-S125-STYLENULL,
+as at the base. None of this was driven in a browser: the spec renders both arms with real React, and the readings are
+the runtime's own nodes'.
+
+### §93.5 Readings
+
+The spec 19 / 19. Neighbours: `the-undrawn-trigger-is-refused` 16, `the-failure-runs-its-chain` 23, `the-id-is-held` 22,
+`the-function-sends-its-signals` 38, `jsfun` 47, `the-condition-remembers-its-answer` 40, `export-report` 30,
+`typecheck-emitted` 67, `parameter-coverage` 9, `the-ticked-input-runs-it-again` 30, `controlled-state`,
+`the-field-announces-at-mount`, `in-code-markers`, `popups`, `hls001-corpus-identity` 4, `the-templates-typecheck` 3.
+Package `tsc --noEmit` 0. The tsfixme ratchet holds.
+
+**The whole package** (`nice -n 19 --runInBand`, JSON written 14:55): 139 / 142 suites, 4,936 passed, 3 failed, 3
+skipped. The three were rows pinning the base's print for a Mounted authored true fed by an untyped Variable or store key
+(`{!!x && (`), each built by mutating a fixture in memory, so the corpus golden had not seen them: `drag` C13,
+`untyped-store-key` and `untyped-variable` ("mounted reads the value as it is"). Re-pinned to `(x === undefined || !!x)`
+(still no `String()`), and the three files run again alone: 84 / 84. The whole package was not run a second time.
+
+### §93.6 What this leaves
+
+1. The Mounted feeders still blocking 132 template nodes: a Function reading the Noodl API (64), an Expression or
+   Function fed by a source the export cannot read (33, nightbook's kit), members-area's `/Members/Standing` logic
+   component (26 through the Chrome), User's roles (4), a dead row (3), a refused Function (2).
+2. **P18-S126-INSIGNAL** (medium, filed): a signal sent into a component runs nothing in the export, 87 template nodes;
+   the Feedback banners never open.
+3. P18-S126-PROPUNDEF, P18-S126-PAGEGROUP, P18-S126-UNDEFCOMPUTED (low, filed).
+4. §92.5's list stands: the §87 Conditions, P18-S125-STYLENULL, P18-S124-RUNINPUTS, P18-S124-LATEMARKER and the small ones.

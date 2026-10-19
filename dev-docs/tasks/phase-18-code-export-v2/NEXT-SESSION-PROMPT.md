@@ -1,3 +1,63 @@
+# Next session — session 126 (2026-10-19, BOARD lane 6) carried **the Mounted wires of component roots**: a root's Mounted binds as any element's (only a Page's is the router's), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time. Graded against the runtime's own nodes rendered by real React. Templates 54 nodes gained, 0 lost.
+
+## ✅ Session 126: the root is mounted when it says
+
+Read EXP-011 §93. In short:
+
+| what | where |
+|---|---|
+| Measured first, by feeder: 157 template nodes refused for an unreached trigger; a Function reading the Noodl API 64 (needs EXP-003 Tier B), a source the export cannot read 33, members-area's Standing 26, a value-mounted Did Mount 16, a root mounted from an input 7. And **72 wires into a component root's Mounted, all refused as "a router concern"**: 24 roots never drawn, 48 always drawn | `s126-mounted/census.ts`, `roots.ts` |
+| `routerMounted`: only a Page's root is the router's (12 sites) | `src/analyze/plan.ts` |
+| The root guard `if (!cond) return null;` after every hook | `src/emit/component.ts` |
+| `mountedCondOf`: an element authored Mounted true keeps it while a read source (prop, store, row field) is undefined, `(x === undefined \|\| x)`; the runtime never delivers `undefined` | `component.ts` |
+| A Did Mount under a value-mounted element: an effect keyed on the gates, its ref reset when they say unmounted (s124 refused it); a field there announces the first time (`FieldMountPlan.gates`; it was refused) | `component.ts`, `plan.ts` |
+| A page's sole Group's Mounted is still dropped: a Did Mount or field under it is refused by name in plan and emitter alike | `UNCARRIED_PAGE_GROUP` |
+| Spec, 19 rows: the Root Desk built in a temp folder; real React under StrictMode against the viewer's own Group, Text, Button, Text Input and the runtime's component instances (a new arm), press by press; a control; 11 mutant arms each killing rows | `tests/the-root-is-mounted-when-it-says.test.ts`, `tests/helpers/root-desk.ts`, `tests/helpers/runtime-mounted-arm.js`, `s126-mounted/mutants.py` |
+
+- 🔴 **The viewer's own nodes render in jsdom.** `runtime-mounted-arm.js` renders the corpus graph's root with real React:
+  a visual node re-renders on the frame's END (`forceUpdate` waits for `frameEnd`, so `graph.frame()`, not `settle()`),
+  and React commits, and the viewer sends Did Mount, as an `act` scope closes: the frames run again in a new scope until a
+  reading repeats. The next mount-shaped question can use it instead of stand-ins.
+- 🔴 **Reading the emitted diff found a field lost.** The first build gated the Did Mount and not the field: rocket-school's
+  Editor lost its two fields' mount announcements (HEAD announced them; the value-mounted rule refused them). The count
+  said 54 gained, 0 lost all along: the field mount is not a disposition. Read the code, every session.
+- 🔴 **The undefined arm is for a read only.** Around a Date Compare's call it printed (and ran) the call twice
+  (deadline-desk, the one hls001 key the predictor did not foresee); around an Expression's answer it is noise. A read
+  only now; the golden did not move.
+- 🔴 **A mutant arm can crash the file instead of failing rows**: A's export arm threw at load on a button the base never
+  draws ("0 total"). The arms now return the error as a reading. G broke a narrowing and did not compile: reshaped.
+- The parent still coerces a boolean input with `!!` (P18-S126-PROPUNDEF): the one divergence left in the arms' 24
+  readings (base 18).
+
+Readings: the spec 19 / 19; re-pinned `the-ticked-input-runs-it-again`, `controlled-state` (2), `the-undrawn-trigger-is-refused`
+B1, `the-field-announces-at-mount` (2), `drag` C13, `untyped-store-key`, `untyped-variable`; neighbours green (EXP-011 §93.5); hls001 4 / 4, unchanged (predicted 0); the
+templates' typecheck gate 3 / 3, every row 0, all 19 1 error in 1 (nightbook STYLENULL, as before). Package `tsc --noEmit`
+0; the ratchet holds. Whole package (`nice -n 19 --runInBand`, JSON 14:55): **139 / 142 suites, 4,936 passed, 3 failed, 3
+skipped**: `drag` C13, `untyped-store-key`, `untyped-variable` pinned the base's `{!!x && (` for an authored-true Mounted
+fed by an untyped store (fixtures mutated in memory, so hls001 never saw them); re-pinned, 84 / 84 alone. 🔴 The
+neighbour list missed them: a print change reaches every spec that mutates a fixture, so grep the specs for the old
+print before the whole run.
+
+Reach (`dispdiff.ts`, base `3476642d6` against the tree): **templates 54 gained, 0 lost; corpus 14 gained, 0 lost.**
+`census.ts` 157 → 132. In the emitted apps: 22 roots authored false now drawn when their input says (gram's Nav, todo-list's
+Note dialog and Money sheet, bot-garden's Form, rocket-school's Result), 46 authored true now hidden when it says
+(planning's sheets, rocket-school's screens), 208 elements kept drawn while their source has no value.
+
+Filed: **P18-S126-INSIGNAL** (medium: a signal sent into a component runs nothing, 87 template nodes; the Feedback banners
+never open), **P18-S126-PROPUNDEF**, **P18-S126-PAGEGROUP**, **P18-S126-UNDEFCOMPUTED** (low).
+
+**Next (BOARD lane 6):**
+1. **P18-S126-INSIGNAL**: a signal into a component (87 template nodes, 115 wires; todo-list 26, rocket-school and
+   star-class 14 each). Grade it with `runtime-mounted-arm.js`'s real component instances.
+2. The Mounted feeders left (EXP-011 §93.6): members-area's `/Members/Standing` logic component (26 through the Chrome),
+   nightbook's kit-fed Expressions (33), and, largest and Tier B, the Functions reading the Noodl API (64).
+3. The §87 Conditions still waiting; P18-S126-PROPUNDEF, P18-S126-PAGEGROUP, P18-S126-UNDEFCOMPUTED, P18-S125-STYLENULL,
+   P18-S124-RUNINPUTS, P18-S124-LATEMARKER (small); P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE,
+   P18-S113-LISTLIVE, P18-S115-DYNPROBE; STUBORDER, TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
 # Next session — session 125 (2026-10-19, BOARD lane 6) fixed **P18-S122-TPLBUILD**: every tracked template's export passes its own `tsc -b` (189 → 0 type errors in the 16; all 19 shipped templates 203 → 1). A Function's wrapper is in its own file, as Richard ruled.
 
 ## ✅ Session 125: the templates' exports build
