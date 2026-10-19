@@ -4,7 +4,7 @@
 dude to get his templates". Lane 1, after OWN-013 (the 0.4.0 / 0.4.1 cuts). The runbook is OWN-013's (§3–§4,
 UPG-008's shape); this file says what 0.4.2 must carry and how we know it does.
 
-**Status: 🟡 s1 (2026-10-19): S1–S4 ✅, AC1 ✅; S5 waits on Richard's go to push (§8).** P121's product changes are six commits, one per bug
+**Status: 🟡 s2 (2026-10-19): S1–S5 ✅, AC1 ✅; PR #52 green on the six required checks (§9). S6 (the Mac staple) and S7 (merge, tag, Publish) are Richard's.** P121's product changes are six commits, one per bug
 (MEMBERSPHOTO and UPLOADSHRINK share one, as both edit `uploadfile.ts` and its spec), each bug `fixed` with its
 commit; the two templates, their generators and specs are `9168a171d`, on Richard's go (R1 re-checked against the
 private brief: none of its names in the 452 files). Next: S3, the cut point (§7).
@@ -42,7 +42,7 @@ Each bug file names its files and specs; P121's [NEXT-SESSION-PROMPT](../phase-1
 | S2 | **Commit the two templates** (`templates/marketplace/`, `templates/gram/`, untracked) and their generators and specs, so the release tree and the zip agree. Richard's go: they enter the public repo (R1: no names in them, grepped 2026-10-16) | agent + Richard | ✅ s1, `9168a171d` (§7) |
 | S3 | **G1, the cut point.** `cline-dev` is 125 commits past `v0.4.1` (2026-10-16), most of them P18's export work: read each live phase's rows for half-done work (OWN-013 §6.1); `git merge-tree --write-tree origin/main <cut>` exit 0; `release/0.4.2` | agent | ✅ s1 (§8): `release/0.4.2` made locally, not pushed |
 | S4 | **G2–G3:** CHANGELOG `## 0.4.2`, the release body, the what's-new post (pushed only after Publish). Content-authoring skill. Our words only: no builder's name, no ministry, no app name (R1) | agent | ✅ s1 (§8): CHANGELOG `08cd2e259`; `GITHUB-RELEASE-0.4.2.md`, `whats-new-0.4.2.READY-TO-PUSH.json` drafted |
-| S5 | **G4–G6:** the PR `release/0.4.2` → `main`, the six required checks green; `npm run ci:build:editor` on the cut tree; the editor test floor by name | CI + agent | ⬜ |
+| S5 | **G4–G6:** the PR `release/0.4.2` → `main`, the six required checks green; `npm run ci:build:editor` on the cut tree; the editor test floor by name | CI + agent | ✅ s2 (§9): PR #52, six required checks green on `a9b9af9ad`; Test (editor) 3017 / 0 at seed 61524 |
 | S6 | **The Mac staple.** OWN-013 §12: electron-builder notarises by itself and its staple has no retry; the one-line fix `"notarize": false` under `build.mac` was refused in auto mode ("Security Weaken"). Richard allows it, or the release session re-runs the failed leg as 0.4.0's did | Richard | ⬜ |
 | S7 | **Tag, Release run, Publish** (OWN-013 §4) | Richard publishes | ⬜ |
 | S8 | **Drive both templates on the released 0.4.2** (not dev, not source): install, open each zip's copy, Backend Services → Built-in → Run one on this computer → Start; R12's line in the log; the marketplace: set up, a seller, a product with a photo (shrunk), checkout on delivery; the community app: join, let in (email set up), a post with a members-only photo seen by a second member, live count. Shots looked at | agent | ⬜ |
@@ -131,3 +131,26 @@ an exported Upload File sends a members-only photo as a full-size public file.
 
 **Next: S5** — push `release/0.4.2` and open its PR to `main` (Richard's go: it is outward-facing), the six
 required checks, the editor floor by name. Then S6 (the Mac staple, Richard's), S7, S8.
+
+## 9. s2: S5, the PR
+
+Richard's go on 2026-10-19. `release/0.4.2` pushed (`b1b701ed3`, its tree the cut's) and **PR #52** opened to `main`.
+First CI (run 39214479584): five of the six required checks green; **Lint red on the type-escape ratchet alone**
+(ESLint itself is 3,037 under its baseline). Tests only: TSFixme 307 → 312, `any` 1913 → 1997, `src` unchanged
+(583 / 603), from 20 test files of P121, P18 and the TPL-007/013 specs. Counted in a clean worktree of the release
+branch, equal to CI's table. The auto-mode classifier refused the raise as a CI bypass. Richard chose R19's route
+(raise it visibly, owed back down), and it is `a9b9af9ad` on `release/0.4.2`, with a note on the PR.
+**Owed: those test markers typed back down on `cline-dev`** (the list is in the commit).
+
+Second CI on `a9b9af9ad`: **all six required checks green**. Test (editor) ran 3017 specs with 0 failures (seed 61524,
+read in the job log, not from the badge).
+
+Not required, red on #51 as well: Docs site builds (HLT-013), Lesson bundles (FIX-027), Renderer errors (HLT-010), and
+Test (runtime, backend, viewer, mcp, preview). The package job's 13 failing tests: 10 are filed rows (P107-S101-VERBSPECCED,
+P18-S104-KITTYPESDRIFT, P78-TPL011-INSTANCEROOT and GAM-014's kit root, P112-OWN019-BACKENDSESSION); 3 were new and are
+filed as P112-OWN021-LISTPORTCENSUS (low: the ERG-003 census pins 54 inputs, the catalog has 83).
+
+**Not merged.** Next: S6, the Mac staple (Richard's), then S7: merge #52, tag `v0.4.2`, Release run, Publish. Then S8,
+both templates driven on the published build. Lane 2's OWN-012 adds to the next **npm** cut (not this editor release):
+`@nodegx/node-spec` with the drawer and its `./draw` export, and `create-nodegx` with the brief that teaches both ways.
+
