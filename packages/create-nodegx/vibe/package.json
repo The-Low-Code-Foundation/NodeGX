@@ -1,6 +1,6 @@
 {
   "name": "create-nodegx-vibe",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "npm create nodegx-vibe — sets a folder up so Mistral Vibe (Large 4) can build NodeGX apps in it.",
   "license": "GPL-3.0-only",
   "homepage": "https://nodegx.io",
@@ -18,7 +18,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "create-nodegx": "0.2.2"
+    "create-nodegx": "0.2.3"
   },
   "engines": {
     "node": ">=18"
