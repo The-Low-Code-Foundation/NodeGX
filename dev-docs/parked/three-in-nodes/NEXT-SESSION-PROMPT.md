@@ -1,106 +1,92 @@
-# Three in nodes — s5: scenes that BEHAVE (the game crowd), then MODELS
+# Three in nodes — s6: MODELS (load an AI-made model, then fix its parts), after Richard plays Coin Run
 
-**Written 2026-10-19 ~14:40 CEST by Opus 5.5, end of s4** (the conversation that built NodeGX Scene). Read, in order:
-this file; [`../THREE-IN-NODES.md`](../THREE-IN-NODES.md) §3.3 (s4) and §6 (rulings); [`editor/README.md`](editor/README.md).
+**Written 2026-10-19 ~16:00 CEST by Opus 5.5, end of s5** (the conversation that built the game half). Read, in order:
+this file; [`../THREE-IN-NODES.md`](../THREE-IN-NODES.md) §3.5 (s5) and §6 (rulings); [`editor/README.md`](editor/README.md).
 Say "Opus" in your first message. Verify a claim here by measuring it, not by trusting it.
 
-## Where it stands (HEAD `7f491eed6` on `cline-dev`)
+## Where it stands (HEAD `55eadcf31` on `cline-dev`, plus this docs commit)
 
-**Done and observed working** (headless Chrome on software GL, fresh copies, 2026-10-19):
-- **three-kit** (`library/modules/three-kit`, `@nodegx/three-kit` 0.1.0, packed, NOT published): Scene, Mesh, Light,
-  3D Group. s4 added one seam: each three.js object carries `userData.nodeId` (the node that made it) and the census
-  reports it. After it: `packages/noodl-mcp/tests/three-kit-catalog.test.ts` + `three-kit-render.test.ts` **8 / 8**,
-  `node --test library/modules/three-kit/test/add.test.js` **5 / 5** (pass the FILE; `node --test test/` fails on the folder).
-- **NodeGX Scene** (`dev-docs/parked/three-in-nodes/editor/`), the separate editor. Drives all green at `7f491eed6`:
-  `tests/editor.json` (fixture: select by click, live colour in the same frame, drag x 0 → 3.25 inside a group, group
-  drag z 4 → 7.5 with its wired X left alone, undo, add, reparent, Use this view, Save "the project validates", Play),
-  `tests/add-scene.json` (todo app, no kit: Add a 3D scene on Pages/Todo installs the kit, draws past the sign-in, saves),
-  `tests/demo.json` (open screen, Try the demo, hover tooltip, lamp marker drag).
+**Done and observed working** (2026-10-19, headless Chrome on software GL, fresh copies every run):
+- **three-kit** has the game half: **Body** (Moves / Fixed / Ghost; Push X/Z, Jump To X/Z, Reset; out Hit + Hit Name,
+  Fell, Now X Y Z, Tapped), **Camera** (Follow a Name), **Keys** (a logic node, arrows / WASD → −1…1). The engine draws
+  every frame while a Body moves or a Camera follows; `pause(true)` holds Bodies at their start.
+- **NodeGX Scene** has a **Game** shelf (Player, Floor, Wall, Coin, Camera) and **Behaviour** sentences that write real
+  nodes and wires (`editor/public/behaviour.mjs`), and **Try Coin Run** on its open screen.
+- **Coin Run** was built inside NodeGX Scene from a blank page by `editor/tests/coin-run.json` and played by it; the save
+  is `three-in-nodes/coin-run/`.
 
-**Written but not observed:** how a drag feels on a real screen and GPU (Richard's); the main NodeGX editor opening a
-project NodeGX Scene saved (only the kit's `validateStructure` passed); lights above the view have no marker (outline only);
-rotation is a slider, not a drag in the view.
+**Readings taken (all 2026-10-19, at `55eadcf31`'s content):**
 
-**Running when s4 ended** (this session's servers; they may have died with it): `:8650` the demo copy, `:8651` a todo
-copy, both under s4's scratchpad. Check `lsof -nP -iTCP:<p> -sTCP:LISTEN` before you reuse a port.
+| what | how to re-run | reading |
+|---|---|---|
+| kit game drive | `drive-three-kit.js assemble <d> --game` → `nodegx deploy … --allow-development-engine` → `drive-three-kit.js <site> --game` | **7 / 7** |
+| kit original / outside | the same without `--game` / with `--outside` | **12 / 12**, **1 / 1** |
+| catalog + render specs | `cd packages/noodl-mcp && nice -n 19 npx jest --runInBand tests/three-kit-catalog.test.ts tests/three-kit-render.test.ts` | **10 / 10** |
+| kit add | `node --test library/modules/three-kit/test/add.test.js` (pass the FILE) | **5 / 5** |
+| sentences | `cd editor && node --test tests/behaviour.test.mjs` | **6 / 6** |
+| NodeGX Scene drives | `node server.mjs <copy> --port P` then `node tools/drive.mjs http://127.0.0.1:P/ tests/<t>.json <shots>` | editor **13 / 13**, add-scene **3 / 3**, demo **4 / 4**, coin-run **8 / 8** |
+| Coin Run deployed | deploy `coin-run/` with the kit added; serve; `tools/drive.mjs <url> tests/coin-run-deployed.json` | **2 / 2** (real CDP ArrowUp → z −5.1) |
 
-## What s4 settled (and where the plan of record was wrong)
+The drive tool now FAILS (exit 1) on a missed `expect` or a timed-out `waitFor`; a control proved it. **Gate on exit codes.**
 
-- **R1 changed** (Richard, s4): the separate editor BEFORE more nodes. *"I'm a bit worried about how it'll look in the
-  existing NodeGX editor. I'd like to be able to start testing it before we do more."* The "drive the main editor's picker"
-  item is moot for now.
-- **R4 ruled (end of s4): the game crowd first.** *"We have much more of a game crowd I'm afraid. I'd go with 2 next, and
-  yeah 3 for putting in models would be amazing, I think making your own models is pretty much dead thanks to AI, but
-  tweaking the models would obviously be a good thing for mistakes an AI has made in design."* So: **(2) behaviour**, then
-  **(3) models** (load them, and TWEAK them — not model them). The data view (labelled 3D chart from app data) is behind both.
-- The plan assumed the editor previews the app as it runs. **Wrong for real apps:** the todo app's page is behind
-  sign-in, so the scene could not be reached. Fixed with **the stage**: in Edit, the preview gets the files with the
-  scene's page as `rootNodeId` (that root renamed `__scene_stage__`, because the root is found by id across every
-  component); Play renders the real root. Nothing of the stage is saved.
-- `preview.update()` builds a **new frame** per call (~1 s on software GL): never per keystroke. A setting goes live
-  through the runtime's own `runtime.context.graphModel.getComponentWithName(legacyName).getNodeWithId(id).setParameter`
-  (what the main editor's live preview calls). Only tree edits rebuild.
-- 🔴 `.x { display: grid }` beats the `hidden` attribute: a "hidden" overlay covered the view and ate every click.
-  `style.css` has `[hidden] { display: none !important; }`; keep it.
-- A drag on an object with a wired axis moves the other axes; the wired one stays with its wire (the fixture's robot X
-  is wired from `robotGlide`, an Animate To Value).
+**Written but not observed:** how Coin Run feels on a real screen and GPU (Richard's); a phone (Keys has no on-screen
+arrows); sound (no sentence plays one, see below); the main NodeGX editor opening `coin-run/` (only the agent's
+validator passed); Coin Run's look (plain "Score 3" on a white page above a 420 px scene).
+
+## What s5 settled (and where the handoff it started from was wrong)
+
+- **R5 ruled: Coin Run** (from two playable sketches on an Artifact page; Mole Bop was the cheap one).
+- 🔴 **s4's "drives all green" could not have been red.** `tools/drive.mjs` ended in `process.exit(0)`; green meant read
+  by eye. Fixed (PARKED-THREE-S5-DRIVEEXIT0); the s4 drives got 20 expectations from their own readings, all PASS.
+- 🔴 **game-kit's KeyboardMap is not key input.** The s4 handoff listed it as a mechanism to reuse; it draws a keyboard
+  for typing lessons. No node read a held key anywhere (§3.4), hence Keys.
+- 🔴 **A wired input never reads the value typed into it** (PARKED-THREE-S5-WIREDSTART): "somewhere new" wired into a
+  coin's X/Z put all five under the player; the first play read Score 5, and two of the drive's checks passed on top of
+  it. Body's Jump To X/Z is the fix. When a sentence must move a placed thing, wire a port that is not its placement.
+- P117's wall has no body-to-body physics to reuse (ballistic shards on one floor); Body's contacts are new code.
+- Play gives the app's window the keyboard (`vp.setMode('play')` focuses the frame); without it the arrows go nowhere.
 
 ## Next, in order (an agent can do these alone)
 
-0. **Ask Richard in one line what he found trying NodeGX Scene** (`npm start` in `editor/`, or `node server.mjs <copy>`).
-   Fix what he names first. If he has nothing, go on.
+0. **Ask Richard, in one line, what he found playing Coin Run** (`cd dev-docs/parked/three-in-nodes/editor && npm start`,
+   **Try Coin Run**, Play, click the game once, arrow keys). Fix what he names first. If he has nothing, go on.
 
-1. **Measure the mechanisms before designing** (P112's rule: use the existing mechanism). From the running app's node
-   library (`vp.preview.nodeLibrary`, or the MCP's `get_node_type`), confirm the ports of: Animate To Value (the s2 ANIM
-   clause: it IS the tween), Variable / Set Variable, Counter, the Router navigate node (target = a component legacyName),
-   game-kit's **KeyboardMap** and **Sound** (`library/modules/game-kit`), States. Write the table into THREE-IN-NODES §3.4.
-   Look at P117's wall physics prototype (`dev-docs/tasks/phase-117-tchac-boum/prototype/`) before writing any physics.
+1. **Models (R4's "3"): measure before building.** A **Model** node (glTF / GLB from the project's assets). Two likely
+   blockers, both to MEASURE, not assume: (a) the vendored `three.min.js` 0.158 is the UMD build with **no GLTFLoader**
+   (the `examples/js` loaders went in r148+), so the kit's build would bundle `GLTFLoader` from `three/examples/jsm`;
+   (b) NodeGX Scene's `projectTree` sends the preview **text files only** (`json|md|css|js|txt|svg`) and the in-page
+   preview's kits use `blob:` URLs: find how `@nodegx/preview` serves a binary asset before choosing. Test with a real
+   AI-made GLB (Meshy, Tripo and the like export GLB).
 
-2. **Design the demo game BEFORE building** (P117's post-mortem: engineered before designed, nothing graded fun).
-   Two candidates on one page for Richard, each a mockup plus the node list it needs, e.g. *Coin run* (a ball the arrow
-   keys roll, the camera follows, spinning coins, touch one = +1 and it moves, fall off = restart) and a second of your
-   own. **His pick is the only human gate in this list** (see below); keep building the parts both need while he decides.
+2. **Tweaking is the point** (Richard: *"tweaking the models would obviously be a good thing for mistakes an AI has made
+   in design"*): the model's parts listed under it in the outline; per part hide / colour / move / turn / scale, kept as
+   ONE overrides parameter on the Model node; whole-model scale, turn, and Sit On Floor from its bounding box. A Model
+   inside a Body should get its shape from its bounding box (today `shapeOf` reads Meshes only).
 
-3. **Behaviour in the editor**: a "Behaviour" section in the inspector that reads as sentences on the selected object:
-   *When tapped → move to / turn / change colour / go to page / play sound / add to score*, *On start → spin / bob /
-   patrol*. **It writes real nodes and wires** (the kit draws, the graph decides), so the main editor, the MCP and
-   `nodegx deploy` run it. The model needs `connect` / `disconnect` / non-visual `addNode` (the map editor's
-   `core/model.mjs` has them: `own-008/map/editor/core`). Reading back: recognise the editor's own patterns by structure
-   (Tapped → Animate To Value → x); show anything else as a read-only "wired: A → B" line, never hide it.
-
-4. **The kit's game nodes** (ranks 7–8 in THREE-IN-NODES §4), each with the 4–5 inputs a person wants:
-   **Camera** (position, look at, **Follow** a named mesh, smoothing), **Body** (gravity, bounce, a box or sphere,
-   **Hit** signal + the other's Name). Add the palette tiles and inspector layouts for them. Grade each with a clause in
-   `scripts/devtools/drive-three-kit.js` (re-run the drive; never rebuild the measurement) and the catalog spec.
-
-5. **Build the chosen demo inside NodeGX Scene** (not by hand-writing JSON) and grade it with a drive that PLAYS it:
-   keys held → the player moves, the camera follows, a coin touched → the score goes up. Gate on game state, not wall
-   clock (software GL runs at a fraction of real time).
-
-6. **Then models** (the next session, probably): a **Model** node (glTF / GLB from the project's assets). Measure first,
-   two likely blockers: (a) the vendored `three.min.js` 0.158 is the UMD build, which has **no GLTFLoader** (the
-   `examples/js` loaders were removed in r148+), so the kit's build must bundle `GLTFLoader` from `three/examples/jsm`;
-   (b) the editor's `projectTree` sends the preview **text files only** (`json|md|css|js|txt|svg`), and the in-page
-   preview's kits use `blob:` URLs: find how `@nodegx/preview` serves binary assets before choosing. **Tweaking** is the
-   point (Richard: fix an AI's design mistakes): the model's parts listed under it in the outline; per part hide / colour
-   / move / turn / scale, kept as one overrides parameter on the Model node; whole-model scale, turn, and Sit On Floor
-   from its bounding box. AI generators (Meshy, Tripo and the like) export GLB; test with one.
+3. **Coin Run owed, smaller:** on-screen arrows for a phone (Keys could draw them, or a Scene option); the look (Scene
+   height to fill the page in a game, a styled score); a Wall or two in the demo; the main editor opening `coin-run/`
+   once (drive it with the `run-editor` skill on a COPY).
 
 ## Needs a human (Richard), not an agent
 
-- **Which demo game** (step 2). Ask with a page and pictures in plain words, not a wall of text.
-- **The publish** of `@nodegx/three-kit` (rides lane 1's npm cut; lane 1 packed 0.2.3 at `98dfc5249`, the kit isn't in it).
-- **R3, the Godot sentence**, and **a BOARD lane** for this work: both still his.
-- **An agent-facing sentence** naming the kit (the MCP's instructions or `create-nodegx`'s brief): lanes 1/2 own those
-  surfaces; ask before editing.
+- **Sound in a sentence.** game-kit's Sound is the existing mechanism, but game-kit is not on npm and NodeGX Scene cannot
+  install it. Either game-kit gets the npm treatment three-kit got, or three-kit carries a Sound of its own (a second copy
+  of the synth, which drifts). Ask with the cost of each in plain words.
+- **The publish** of `@nodegx/three-kit` (still 0.1.0, never published; it now carries the game half). Rides lane 1's npm cut.
+- **R3, the Godot sentence**, and **a BOARD lane** for this work.
+- **An agent-facing sentence** naming the kit (the MCP's instructions or `create-nodegx`'s brief): lanes 1/2 own those.
 
 ## Working notes
 
-- Test on COPIES: `node scripts/devtools/drive-three-kit.js assemble <dir>` (fixture + kit), `cp -R templates/todo-list <dir>`.
-- Drive: `node editor/tools/drive.mjs <url> <steps.json> <shots>`; steps `dragAt`/`clickAt`/`hoverAt` take an expression
-  returning `{x, y}`; `__scene.vp.screenOf(nodeId)` is an object's page position. A step with no answer in 45 s prints
-  `[stuck]`. The page exposes `window.__scene` (state, model, vp, select, addTile, save, undo, setMode, showTree…).
-- One heavy job at a time on this box; `nice -n 19 … --runInBand` for jest.
-- Commit only your paths through a temporary index (shared checkout): see s4's commit `7f491eed6`.
-- At the end: update this file for the session after, THREE-IN-NODES §3.x, and the memory
-  `three-in-nodes-parked-prototype.md`.
+- Copies, never the repo: `drive-three-kit.js assemble <dir> [--game]`; `cp -R ../fixture-blank <dir>` for coin-run.json;
+  `cp -R templates/todo-list <dir>` for add-scene.json.
+- Servers left from s4 on `:8650` / `:8651` run s4's code (another session's scratchpad); s5 used `:8660–8664`. Check
+  `lsof -nP -iTCP:<p> -sTCP:LISTEN` and the process's command before reusing or killing a port.
+- `tools/drive.mjs`: one Chrome per run, a 45 s guard per CDP call (an in-page autopilot must finish inside it). To drive
+  a deployed site, serve it with `drive-deployed.js`'s `serveFolder` and spawn the drive ASYNC: a `spawnSync` blocks the
+  server it is meant to talk to (s5 lost a run to it).
+- The `nodegx` CLI warns its dist is older than `src/analyze/plan.ts` (a peer's change); deploy still exited 0 and its
+  output drove green. Not ours to rebuild.
+- One heavy job at a time; `nice -n 19 … --runInBand` for jest. Commit only your paths through a temporary index with a
+  compare-and-swap `update-ref` (see `55eadcf31`), then `git reset -q HEAD -- <your paths>`.
+- At the end: update this file, THREE-IN-NODES §3.x, and the memory `three-in-nodes-parked-prototype.md`.
