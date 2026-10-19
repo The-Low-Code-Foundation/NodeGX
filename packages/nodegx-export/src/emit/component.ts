@@ -2623,8 +2623,9 @@ export function emitComponent(
         : // A jsfun-run is only its done-chain (EXP-003 §4 A2h): output reads inline the call
           // at their sinks, so the run itself needs no statement — unless it materializes its
           // output record (CONTROLLED-STATE §4f), which is one setter statement before the chain.
+          // P18-S129-FNSUCCESS: or a Run of a Function a ticked input also runs, which records what it read first.
           a.kind === 'jsfun-run'
-          ? a.materialize !== undefined || runIsPulsed(a)
+          ? a.materialize !== undefined || runIsPulsed(a) || (a.ticked !== true && tickedRunIds.has(a.nodeId))
             ? [{ ...a, then: [] }, ...expandActions(a.then)]
             : expandActions(a.then)
           : // P18-S116-QUERYFETCH. A Fetch into a query the export does not keep (nothing it renders reads the rows) asks
@@ -3436,6 +3437,9 @@ export function emitComponent(
         if (action.materialize !== undefined) {
           return `${record}${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler')}))`;
         }
+        // P18-S129-FNSUCCESS. A Run of a run that is neither pulsed nor materialized is only its record: the chain after
+        // it reads the outputs where they land, as before. (A Success chain gives such a run a ticked half.)
+        if (record !== '' && action.then.length === 0) return `tickedArrival(${tickedRecordArgs(action.nodeId)})`;
         return expandActions(action.then).map(actionCode).join('; ');
       }
       /**

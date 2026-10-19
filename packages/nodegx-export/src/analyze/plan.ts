@@ -11430,10 +11430,11 @@ function planComponent(
     if ('defer' in record) return { defer: record.defer };
     const ticked = tickedWatchOf(node, record.def);
     if ('defer' in ticked) return { defer: ticked.defer };
-    // §3.6 over the run path: success co-fires with done, failure/unchanged/error report the
-    // run itself, isTrueEv/isFalseEv pulse per evaluation — any of them consumed defers.
+    // §3.6 over the run path: failure/unchanged/error report the run itself, isTrueEv/isFalseEv pulse per evaluation —
+    // any of them consumed defers. A Function's Success is a chain of its own since P18-S129-FNSUCCESS (below).
     for (const c of component.connections) {
       if (c.fromId !== node.id || c.fromProperty === 'done' || isJsValueOutput(node, c.fromProperty)) continue;
+      if (node.type === JS_FUNCTION && c.fromProperty === 'success') continue;
       if (node.type === JS_FUNCTION && !c.fromProperty.startsWith('out-')) {
         const builtIn = ['success', 'failure', 'unchanged', 'completed', 'error'].includes(c.fromProperty);
         if (!builtIn) continue; // a dead bare-name wire — the pre-pass noted and consumed it
@@ -11453,21 +11454,31 @@ function planComponent(
     }
     const done = doneChainOf(node);
     if ('defer' in done) return done;
+    /**
+     * P18-S129-FNSUCCESS (EXP-011 §98). A Function's Success as a chain. The runtime sends it after the body's await, on
+     * every run that finishes (`simplejavascript.ts` `runScript`: `sendSignalOnOutput('success')`, then
+     * `reportOutcomes(tokens, 'done')`): on a Run before Done, and on a ticked input's run, which has no Done. A throw sends
+     * Failure and neither. A chain it cannot run refuses the run, as Done's does (the base refused any Success wire).
+     */
+    const success = node.type === JS_FUNCTION ? doneChainOf(node, 'success') : { then: [], consumes: [], collapses: [], subscribes: [] };
+    if ('defer' in success) return success;
     const pulsed = pulseChainsOf(node, record.def);
     if ('defer' in pulsed) pulseRefusals.set(node.id, pulsed.defer);
     const pulses: DoneChain = 'defer' in pulsed ? { then: [], consumes: [], collapses: [], subscribes: [] } : pulsed;
-    // P18-S119-TICKEDRUN. A ticked arrival runs the signals' chains from an effect, where no handler's values exist.
-    if (ticked.watch.length > 0 && !actionsValidIn([{ kind: 'jsfun-run', nodeId: node.id, then: pulses.then }], { kind: 'render' })) {
+    // P18-S119-TICKEDRUN. A ticked arrival runs the signals' chains and Success's from an effect, where no handler's values exist.
+    const tickedThen = [...pulses.then, ...success.then];
+    if (ticked.watch.length > 0 && !actionsValidIn([{ kind: 'jsfun-run', nodeId: node.id, then: tickedThen }], { kind: 'render' })) {
       return {
         defer: 'a ticked input runs it again from no handler, and its signals\' chains read values that exist only inside a handler'
       };
     }
-    // The pulses run before Done, as the runtime's targets act in the drain and Done is sent after the run's await.
+    // The pulses run before Success and Done, as the runtime's targets act in the drain and both are sent after the run's
+    // await, Success first.
     const chain = {
-      then: [...pulses.then, ...done.then],
-      consumes: [...pulses.consumes, ...done.consumes],
-      collapses: [...pulses.collapses, ...done.collapses],
-      subscribes: [...pulses.subscribes, ...done.subscribes]
+      then: [...pulses.then, ...success.then, ...done.then],
+      consumes: [...pulses.consumes, ...success.consumes, ...done.consumes],
+      collapses: [...pulses.collapses, ...success.collapses, ...done.collapses],
+      subscribes: [...pulses.subscribes, ...success.subscribes, ...done.subscribes]
     };
     const strays = component.connections.filter(
       (c) => c.fromId === node.id && isJsValueOutput(node, c.fromProperty) && !chain.consumes.includes(c.key)
@@ -11580,10 +11591,11 @@ function planComponent(
     // keeps its outputs across them (a run that returns early writes nothing). So it keeps a node, as a pulsed run does.
     if (pulses.then.length > 0 || (materialize !== undefined && record.def.kind === 'function')) record.def.pulsed = true;
     // P18-S119-TICKEDRUN. Done is the Run's alone; a ticked run that sends nothing and writes nothing is unobservable.
-    if (ticked.watch.length > 0 && (pulses.then.length > 0 || materialize !== undefined)) {
+    // P18-S129-FNSUCCESS: it sends Success.
+    if (ticked.watch.length > 0 && (tickedThen.length > 0 || materialize !== undefined)) {
       tickedRunPieces.set(node.id, {
         watch: ticked.watch,
-        action: { kind: 'jsfun-run', nodeId: node.id, then: pulses.then, ...(materialize !== undefined ? { materialize } : {}), ticked: true }
+        action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true }
       });
     }
     return {
@@ -18302,6 +18314,9 @@ function planComponent(
    * instance keeps what it had before this pass (restored after it).
    */
   const instanceBeforeAttach = new Map<string, Disposition | undefined>();
+  /** P18-S129-FNSUCCESS. A wire out of a Run-wired Function's Success: its Run chain's, not a trigger of its own. */
+  const isRunSuccessWire = (connection: ConnectionIR): boolean =>
+    connection.fromProperty === 'success' && nodeById.get(connection.fromId)?.type === JS_FUNCTION && wiredPorts.has(`${connection.fromId}:run`);
   // P18-S128-FIELDSET. A drawn text field is the same: a Set, Clear, Focus or Blur it cannot take is the wire's, not the field's.
   for (const node of component.nodes) {
     if (plan.roleOf[node.id] === 'instance' || plan.roleOf[node.id] === 'input') instanceBeforeAttach.set(node.id, dispositions[node.id]);
@@ -18338,6 +18353,9 @@ function planComponent(
     if (fromNode !== undefined && jsNodeKindOf(fromNode.type) !== null && connection.fromProperty === 'done') {
       continue;
     }
+    // P18-S129-FNSUCCESS. A Run-wired Function's Success wires are its Run chain too; the sweep below names those its
+    // compile did not take. Unwired, Success is a reactive run's pulse and keeps this pass's sentence.
+    if (isRunSuccessWire(connection)) continue;
     consumed.add(connection.key);
     /**
      * 🔴 **The prefix was taken as a fact, and it is a claim about the template.**
@@ -18684,6 +18702,40 @@ function planComponent(
     if (outputsSink) {
       if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, reason);
     } else if (dispositions[toNode.id] === undefined) {
+      dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason };
+    }
+    notes.push(wireNote(connection, reason));
+  }
+
+  /**
+   * P18-S129-FNSUCCESS (EXP-011 §98). A Run-wired Function's Success wire its compile did not take (the attach pass skips
+   * them, as it skips Done, so the answer does not depend on wire order): the sink's own refusal first, as the attach
+   * pass rules every trigger wire; else the Function's own refusal; else a Function no exported trigger runs.
+   */
+  for (const connection of component.connections) {
+    if (consumed.has(connection.key) || !isRunSuccessWire(connection)) continue;
+    const fromNode = nodeById.get(connection.fromId)!;
+    const toNode = nodeById.get(connection.toId);
+    if (!toNode) continue;
+    const outputsSink = toNode.type === 'Component Outputs';
+    if (!outputsSink && !isTriggerInto(toNode, connection.toProperty)) continue;
+    consumed.add(connection.key);
+    const sink = outputsSink ? outputSinkOf(connection.toProperty, fromNode, connection.fromProperty) : compiledOf(toNode, connection.toProperty);
+    if ('drop' in sink) {
+      notes.push(wireNote(connection, sink.drop));
+      continue;
+    }
+    const run = compiledSinks.get(`${fromNode.id}:run`);
+    const trigger = `trigger ${connection.fromId}.success`;
+    const reason =
+      'defer' in sink
+        ? sink.defer
+        : run !== undefined && 'defer' in run
+          ? `${trigger}: the Function that sends it is not exported — ${run.defer}`
+          : `${trigger}: the Function that sends it is never run by an exported trigger`;
+    if (outputsSink) {
+      if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, reason);
+    } else if (dispositions[toNode.id] === undefined || ('defer' in sink && dispositions[toNode.id]?.kind !== 'collapsed' && dispositions[toNode.id]?.kind !== 'static')) {
       dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason };
     }
     notes.push(wireNote(connection, reason));
