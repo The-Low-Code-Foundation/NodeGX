@@ -21,14 +21,19 @@ const out = path.dirname(folder);
 const BIN = process.env.CLAUDE_BIN || path.join(process.env.HOME, '.vscode/extensions/anthropic.claude-code-2.1.301-darwin-arm64/resources/native-binary/claude');
 const prompt = fs.readFileSync(promptFile, 'utf8').trim();
 const tools = opt('--tools', 'Read,Write,Glob,Grep');
+// --mcp <config.json>: the only MCP servers this stranger gets (the blind graders' two browsers); their tools are
+// allowed by server name. --tools "" leaves no built-in tool at all (no files, no shell).
+const mcpFile = opt('--mcp', null);
+const mcpNames = mcpFile ? Object.keys(JSON.parse(fs.readFileSync(mcpFile, 'utf8')).mcpServers).map((n) => `mcp__${n}`) : [];
+const allowed = [...tools.split(',').filter(Boolean), ...mcpNames];
 const args = [
   '-p', prompt,
   '--model', opt('--model', 'claude-opus-5-5'),
   '--output-format', 'stream-json', '--verbose',
   '--setting-sources', '',
-  '--strict-mcp-config',
+  '--strict-mcp-config', ...(mcpFile ? ['--mcp-config', mcpFile] : []),
   '--tools', tools,
-  '--allowedTools', ...tools.split(','),
+  ...(allowed.length ? ['--allowedTools', ...allowed] : []),
   '--disallowedTools', 'WebFetch', 'WebSearch', 'Read(//Users/**)', 'Glob(//Users/**)', 'Grep(//Users/**)', 'Read(//Applications/**)',
   '--max-budget-usd', opt('--cap', '20'),
   '--no-session-persistence'

@@ -19,6 +19,12 @@ if (cmd === 'stop') { fs.writeFileSync(PIDS, '[]\n'); console.log('stopped'); pr
 if (cmd === 'list') { for (const l of Object.keys(PORTS)) console.log(`${l}  http://localhost:${PORTS[l]}`); process.exit(0); }
 if (cmd !== 'serve') throw new Error('usage: serve-apps.mjs serve|stop|list');
 
+// `serve --fresh`: every app back to its build's state (Richard's play, a grader's uploads and likes gone) before the
+// next grader; the as-built folder under rounds/ is never served or touched.
+if (process.argv.includes('--fresh')) {
+  await new Promise((r) => setTimeout(r, 3000)); // the old servers let go of their files
+  for (const L of Object.keys(map)) for (const d of ['apps', 'homes']) fs.rmSync(path.join(G, d, L), { recursive: true, force: true });
+}
 fs.mkdirSync(path.join(G, 'logs'), { recursive: true });
 const pids = [];
 const nodeDir = path.dirname(process.execPath); // Node 22 (A's README asks ≥ 22.13; the agents' shell had 20.11)

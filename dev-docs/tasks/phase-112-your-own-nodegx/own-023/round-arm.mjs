@@ -69,8 +69,17 @@ env.PWD = APP;
 // The folder the person opens.
 const setup = { mode };
 let mcpArgs = [];
-if (mode === 'bare') fs.mkdirSync(APP);
-if (mode === 'harness') {
+// §4.3 follow-ups: `--from <arm-root>` starts from a COPY of that build's folder and HOME (its local backend's data
+// lives there), as the person's machine was left; the build itself stays as built. Same seal, relay and cap.
+const from = opt('--from', null);
+if (from) {
+  fs.cpSync(path.join(path.resolve(from), 'work', 'music'), APP, { recursive: true, verbatimSymlinks: true });
+  const noodl = path.join(path.resolve(from), 'home', '.noodl');
+  if (fs.existsSync(noodl)) fs.cpSync(noodl, path.join(HOME, '.noodl'), { recursive: true });
+  setup.from = path.resolve(from);
+}
+if (mode === 'bare' && !from) fs.mkdirSync(APP);
+if (mode === 'harness' && !from) {
   fs.mkdirSync(APP);
   const h = path.resolve(opt('--harness'));
   fs.copyFileSync(h, path.join(APP, 'CLAUDE.md'));
@@ -78,7 +87,7 @@ if (mode === 'harness') {
 }
 if (mode === 'nodegx') {
   const version = opt('--nodegx');
-  const created = process.env.MOCK_CREATE
+  const created = from ? { status: 0, stdout: `copied from ${from}`, stderr: '' } : process.env.MOCK_CREATE
     ? (fs.mkdirSync(APP), fs.writeFileSync(path.join(APP, '.mcp.json'), JSON.stringify({ mcpServers: { nodegx: { type: 'stdio', command: 'npx', args: ['-y', `@nodegx/mcp@${version}`, '--allow-writes'] } } })), { status: 0, stdout: 'mock', stderr: '' })
     : spawnSync('npm', ['create', '-y', `nodegx@${version}`, 'music'], { cwd: WORK, env: { ...env, ...roundEnv }, encoding: 'utf8' });
   fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
