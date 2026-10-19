@@ -19,6 +19,11 @@ a palette of ten things to add, an inspector from the kit's own port definitions
 a click selects, a drag moves, and a setting reaches the running app as it changes. It puts a 3D scene on any page of an
 app that has none, installing the kit first (§3.3).
 
+**s5 (same day): the game half.** Richard tried NodeGX Scene (*"It worked really well, no notes"*) and picked **Coin Run**
+from two playable sketches (R5, §6). The kit has **Body**, **Camera** and **Keys**; NodeGX Scene has a Game shelf and
+**Behaviour** sentences that write real nodes and wires; Coin Run was built inside NodeGX Scene from a blank app by a drive
+and played by another, and runs from `nodegx deploy` on real key presses (§3.5).
+
 > "I've had several community members asking me to show them 'how NodeGX works with three.js in nodes' which I know at
 > the moment we don't … is there a world where we can create for example a custom editor designed specifically for
 > generating the three.js windows in the apps we've made? … if we can create a 'spec' like we did with the 130 NodeGX
@@ -198,6 +203,107 @@ refused outright, now the other axes drag.
 saved (its files pass the kit's `validateStructure`), rotation by dragging (a slider today), light markers above the
 view (off screen, so selected from the outline).
 
+### 3.4 s5 — the mechanisms a game would be built from, measured before designing (2026-10-19)
+
+Richard tried NodeGX Scene (the robot and the bar chart) at the start of s5: *"It worked really well, no notes."*
+
+The ports below are what the MCP's `get_node_type` reports (the runtime's own library), and the kit sources. P112's rule:
+use the existing mechanism, and say plainly where there is none.
+
+| what a game needs | the existing mechanism | ports that matter | verdict |
+|---|---|---|---|
+| a tween ("move to", "turn") | **States** with `useTransitions` (`states.ts` :270, a timer per value) | `states`, `values`, `to-<S>` (signal in), `value-<S>-<V>`, output `<V>`, `reached-<S>` | ✅ one node per sentence: Tapped → `to-Moved`; its `x` `y` `z` outputs → the Mesh. A sentence the editor wrote is recognisable by structure |
+| a tween that chases a number | **Animate To Value** | `targetValue`, `duration`, `easingCurve`, `delay`, `jumpTo`; out `currentValue`, `atTargetValue` | ✅ s2's ANIM: no start signal, it follows `targetValue`. Right for "follow a value", wrong for "on tap, go there" |
+| a score | **Counter** | `increase` `decrease` `reset` (signals), `startValue`, limits; out `currentCount`, `countChanged` | ✅ |
+| a value shared across the app | **Variable** (`Variable2`) / **Set Variable** | `name`, `value` / `name`, `do`, `setWith` | ✅ (high score, lives) |
+| a clock | **Repeat** | `interval` (ms), `start`, `stop`; out `tick`, `count` | ✅ ("every 2 s a mole pops up") |
+| a one-off wait | **Delay** (`Timer`) | `duration`, `start`, `restart`; out `timerFinished` | ✅ |
+| on / off | **Switch** | `on` `off` `flip`; out `state`, `switchedToOn` | ✅ |
+| a test | **Condition**, **Expression** | `condition` / `expression` (free names become inputs); out `ontrue`, `isTrueEv` | ✅ ("fell below 0 → restart") |
+| go to a page | **Navigate** (`RouterNavigate`) | `navigate` (signal); `target` = a page's legacyName (dynamic) | ✅ |
+| a sound | **game-kit Sound** | `sound` ∈ correct, wrong, tick, win, lose, pop, type, heart; `volume`, `enabled`, `play`; out `ended` | ✅ synthesised, no files |
+| a tap on a thing | **three-kit Mesh / 3D Group `Tapped`**, Scene `Tapped Name` | — | ✅ (s1) |
+| **a key held down** | **none.** game-kit **KeyboardMap draws a keyboard** for typing lessons (`nextKey`, `pressedKey`); the only `keydown` listener in the kits is AnswerPad's typing box (`game-kit/src/kit.js` :1717). No core node reads keys | — | ❌ **owed: a Keys node** (arrows / WASD held → Left Right Up Down, and two numbers −1…1) |
+| **a frame loop** | three-kit's engine draws **only while something spins** (`kit.js` :148 `if (spinning) raf = …`) | — | ❌ owed: the engine runs every frame while a Body or a Follow camera is in the scene. A game cannot be a graph signal per frame (Repeat at 16 ms through the runtime is the wrong tool) |
+| **physics** | P117's wall: shards fly ballistically and bounce on one floor (`mur3d.js` :234); marbles are beads on rails. **No body-to-body contact anywhere** | — | ❌ owed: **Body** in the kit (gravity, floor, bounce, push, Hit + the other's Name) |
+| **a camera that follows** | the Scene's camera orbits the middle (`cameraDistance/Height/Angle`) | — | ❌ owed: **Camera** (Follow a Name, smoothing) |
+
+**So the line between the two kinds of game is measured, not guessed:** a game of taps, timers and scores (the moles
+below) is buildable from nodes that exist today plus three-kit's Tapped; a game you steer (the coin run) needs the four
+✗ rows, all inside the kit.
+
+### 3.5 s5 — the game half: Body, Camera, Keys, and sentences that write the graph (2026-10-19)
+
+**The pick.** Two playable sketches on one page (an Artifact, three.js in the kit's look): *Coin Run* (roll a ball with
+the arrow keys, the camera follows, grab coins, roll off and you drop back in) and *Mole Bop* (tap moles; nothing new in
+the kit). Richard: **Coin Run** (R5, §6).
+
+**The kit** (`library/modules/three-kit/src/kit.js`, still ES5, still one file):
+- **Body** — a 3D Group the Scene moves, the one place "the kit draws, the graph decides" bends (a game cannot be a graph
+  signal per frame). Kind **Moves** (falls, rolls, bounces), **Fixed** (a floor, a wall), **Ghost** (a coin: solid to
+  nothing, says it was touched). Its shape comes from the meshes inside it: a ball when all are spheres, a box otherwise.
+  X Y Z are its start (a change teleports it); **Jump To X / Z** move it and leave the start alone; **Push X / Z** roll
+  it; **Reset**; out: **Hit** + **Hit Name** (when a touch STARTS, once, for both), **Fell** (10 below the floor),
+  **Now X Y Z**, **Tapped**. Gravity 20, a contact slower than 2 rests instead of bouncing; ball–ball, ball–box and
+  box–box overlaps pushed out along the shallowest way.
+- **Camera** — a Scene child: **Follow** (a Name), Distance, Height, Angle, Smoothing, Field Of View. While it is there
+  the Scene's own camera inputs and orbit are not used.
+- **Keys** — a logic node: Left Right Up Down Space (arrows or W A S D), **X** and **Z** (−1…1, straight into Push X / Z),
+  Last Key, Pressed. Ignores keys typed into a text field.
+- **The engine** draws every frame while a Body moves or a Camera follows; `pause(true)` holds every Body at its start
+  (NodeGX Scene's Edit mode), `pause(false)` lets the game run.
+
+**NodeGX Scene** (`three-in-nodes/editor/`): a **Game** shelf (Player, Floor, Wall, Coin, Camera); Body and Camera
+inspectors; and **Behaviour**, sentences on the selected object, each one real nodes and wires
+(`public/behaviour.mjs`, pure functions over the model):
+
+| sentence | what it writes |
+|---|---|
+| The arrow keys push it | one Keys node for the scene; Keys X → Push X, Keys Z → Push Z |
+| The camera follows it | the scene's Camera (made if there is none), Follow = its Name |
+| When tapped / something touches it / it falls off → **add 1 to the score** | Tapped / Hit / Fell → one shared Counter "Score"; the first one also makes an Expression `'Score ' + score` and a Text above the Scene |
+| … → **move somewhere new** | two Expressions that belong to the object (`round((random() * 2 - 1) * 9) / 2`, Run on the trigger) → its **Jump To X / Z** |
+| … → **go back to the start** | the trigger → its own Reset |
+
+Nodes a sentence made carry `metadata.scene = { role, for }`: reading back is by that structure, a wire no sentence made
+shows as a plain *wired:* line, never hidden. A duplicate brings its own helpers and wires again to the shared score; a
+delete takes its helpers; a sentence is one undo step (`model.batch`). Edit holds the game still; Play gives the app's
+window the keyboard.
+
+**Graded** (all 2026-10-19, headless Chrome on software GL):
+- `scripts/devtools/drive-three-kit.js --game` on `three-in-nodes/fixture-game/` **7 / 7**: GBOOT, LAND (dropped from y 2,
+  rests at y 0.45, Hit Name "Floor"), FOLLOW (8 in front, 6 above), KEYS (a held CDP ArrowRight: Keys X 1, it rolls),
+  RING (Ghost: Hit once, the graph jumps it to x −3), FELL (Fell → Reset brings it back), PAUSE. The original drive
+  **12 / 12** and `--outside` **1 / 1** unchanged.
+- `packages/noodl-mcp/tests/three-kit-catalog.test.ts` + `three-kit-render.test.ts` **10 / 10**: the seven types with
+  their ports, Body holds Visual like a 3D Group, Keys is a logic node; the game fixture and the saved Coin Run both
+  validate with no error. `library/modules/three-kit/test/add.test.js` **5 / 5**.
+- `editor/tests/behaviour.test.mjs` (node:test) **6 / 6**: write, read back, duplicate, delete, undo, numbering.
+- NodeGX Scene's drives, **now real gates** (below): `editor.json` **13 / 13**, `add-scene.json` **3 / 3**, `demo.json`
+  **4 / 4**, and **`coin-run.json` 8 / 8**: from `three-in-nodes/fixture-blank/` (one empty page) it adds a scene,
+  deletes the starter box, adds Floor, Player (arrow keys, camera follows, falls off → back to the start) and a Coin
+  (touches → score, → somewhere new), duplicates it to five, places them, saves ("the project validates"), plays: Score
+  0 with every coin where it was put, an autopilot pressing arrow keys in the game's window takes the score from **0 to
+  3 in 2.6 s**, a coin taken is somewhere new, rolling off the edge drops it to y −10 and back to the middle with the
+  score kept. Its save is kept as **`three-in-nodes/coin-run/`** (**Try Coin Run** on NodeGX Scene's open screen).
+- `editor/tests/coin-run-deployed.json` on `nodegx deploy` of `coin-run/` **2 / 2**: the game running, the coins where
+  NodeGX Scene put them, and a real CDP **ArrowUp held 1.2 s rolls the player to z −5.1**.
+
+**Found while building, fixed there:**
+- **The drive tool could not fail** (PARKED-THREE-S5-DRIVEEXIT0). s4's "drives all green" was read by eye:
+  `tools/drive.mjs` ended in `process.exit(0)`. Steps now take `expect`, a timed-out `waitFor` is a FAIL, exit 1 on any;
+  a control with a false expectation exits 1.
+- **"Move somewhere new" put every coin on the player** (PARKED-THREE-S5-WIREDSTART). The first Coin Run play read
+  **Score 5** before a key was pressed: the sentence wired the coin's X and Z, a wired input never reads the value
+  typed into it, so all five started at 0, 0 under the player. The autopilot's "score 3" passed on top of it, a check
+  with nothing under it; only the start-state check failed. Fixed with Jump To X / Z; the drive now asserts Score 0
+  and the placed coins at the start, and the autopilot that its first reading was 0.
+
+**Not checked:** the feel on a real screen and GPU (Richard's); a phone (Keys has no on-screen arrows yet); sound (the
+sentences have no "play a sound": game-kit's Sound is not on npm and NodeGX Scene cannot install it); the main NodeGX
+editor opening Coin Run (only the agent's validator); Coin Run's look (the score is plain text on a white page under a
+420 px scene).
+
 ## 4. The vocabulary, ranked by the two surfaces Richard named
 
 Games, and 3D representations of data. Not by what three.js offers.
@@ -210,8 +316,9 @@ Games, and 3D representations of data. Not by what three.js offers.
 | 4 | Group (a transform with children) | a robot is a group of meshes; a For Each of groups is a row of robots | ✅ s2, as `3D Group` |
 | 5 | Tween (Animate To Value in 3D: X Y Z, rotation, scale, over ms) | movement is what makes it a game and a chart that updates | ✅ s2: **no node**, the built-in Animate To Value wired into X (ANIM) |
 | 6 | Text (a label projected from a point: a DOM overlay, the Garden's bubble) | a chart with no labels is a sculpture | |
-| 7 | Camera as its own node (position, target, Follow) | a game follows a player; a data view frames a selection | |
-| 8 | Body (a box or sphere with gravity and bounces, the wall's physics) | the kids' phases asked for it twice | |
+| 7 | Camera as its own node (position, target, Follow) | a game follows a player; a data view frames a selection | ✅ s5 (Follow a Name) |
+| 8 | Body (a box or sphere with gravity and bounces, the wall's physics) | the kids' phases asked for it twice | ✅ s5 (Moves / Fixed / Ghost, Hit, Fell) |
+| 8½ | Keys (arrows / W A S D held → −1…1) | nothing read a held key anywhere (§3.4) | ✅ s5 (desktop only) |
 | 9 | Model (a glTF file from assets) | the vibe coder's first question after the primitives | |
 | 10 | Material (textures, shine) | last: flat shading is the look that worked every time (IG-000, TBM-008) | |
 
@@ -231,9 +338,11 @@ app (P112 R4).
 - **Specs** (layer 2): a headless face that reads the Scene's graph (the drive's `census()` is its first draft), the
   format's `act` for a tap and a drag, scenarios for Tween and Tap. NSP-016's layout model has nothing to say here:
   a transform is three numbers, easier than flexbox.
-- **The sub-editor** (layer 3): ✅ s4, first version: NodeGX Scene (§3.3), before the vocabulary, by R1's change. Owed: what Richard finds trying it.
-- **A demo designed before it is built.** P117's post-mortem: engineered before designed, no gate graded fun. A kit
-  is infrastructure, so fun is the user's problem; the first demo still needs a mockup and a grade.
+- **The sub-editor** (layer 3): ✅ s4, first version: NodeGX Scene (§3.3), before the vocabulary, by R1's change. ✅ s5:
+  Richard tried it, *"It worked really well, no notes"*; Behaviour sentences and the Game shelf (§3.5).
+- **A demo designed before it is built.** P117's post-mortem: engineered before designed, no gate graded fun. ✅ s5:
+  two playable sketches first, Richard picked Coin Run, then it was built in NodeGX Scene and graded by playing it
+  (§3.5). Fun is still graded by a person: his hands on it are the check no drive makes.
 
 ## 6. Rulings to ask Richard, when it is unparked
 
@@ -248,6 +357,8 @@ app (P112 R4).
   is pretty much dead thanks to AI, but tweaking the models would obviously be a good thing for mistakes an AI has made in
   design."* Next: behaviour (sentences on an object that write real nodes and wires; Camera Follow; Body), then models
   (glTF in, and tweaking an AI-made model's parts). The data view waits. Plan: [`three-in-nodes/NEXT-SESSION-PROMPT.md`](three-in-nodes/NEXT-SESSION-PROMPT.md).
+- R5 **Which demo game.** ✅ **Ruled 2026-10-19 (s5): Coin Run**, from two playable sketches (Coin Run, Mole Bop) with
+  what each needs. Built and graded in §3.5.
 - R3 **The Godot sentence.** Say "the spec admits other targets" and build none, or scope one batch (Mesh, Tween, Tap)
   as a NSP-006 stranger round in GDScript to prove it.
 
@@ -261,4 +372,8 @@ app (P112 R4).
 - `packages/noodl-mcp/tests/three-kit-render.test.ts` — what the agent's render harness sees (3 tests, s3)
 - `packages/noodl-mcp/tests/three-kit-catalog.test.ts` — the catalog spec (5 tests)
 - `dev-docs/parked/three-in-nodes/editor/` — NodeGX Scene, the separate editor (s4), its README, its drives in `tests/`
-- `dev-docs/bugs/parked-three-s1-instanceid-….md`, `parked-three-s2-meshoutside-….md`, `parked-three-s3-nowebgl-….md` — the findings
+- `dev-docs/parked/three-in-nodes/editor/public/behaviour.mjs`, `tests/behaviour.test.mjs` — the sentences (s5)
+- `dev-docs/parked/three-in-nodes/fixture-game/` — Body, Camera, Keys for the drive's `--game`; `fixture-blank/` — one
+  empty page, where `tests/coin-run.json` builds the game; `coin-run/` — Coin Run as NodeGX Scene saved it (s5)
+- `dev-docs/bugs/parked-three-s1-instanceid-….md`, `parked-three-s2-meshoutside-….md`, `parked-three-s3-nowebgl-….md`,
+  `parked-three-s5-driveexit0-….md`, `parked-three-s5-wiredstart-….md` — the findings

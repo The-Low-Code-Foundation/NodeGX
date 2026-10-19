@@ -100,9 +100,15 @@ export class Viewport {
     this.helperIds = '';
     this.helperSig = '';
     await this.whenSceneReady(4000);
+    this.applyPause();
     this.restoreCamera();
     this.applyFocus();
     return r;
+  }
+
+  /** In Edit every Body stands at its start and a Camera node lets go of the view; in Play the game runs. */
+  applyPause() {
+    this.engine()?.pause?.(this.mode === 'edit');
   }
 
   async whenSceneReady(ms) {
@@ -132,6 +138,8 @@ export class Viewport {
     this.host.dataset.mode = mode;
     this.applyFocus();
     this.helperIds = null;
+    // A game hears its keys in the app's own window: in Play, give that window the keyboard.
+    if (mode === 'play') this.frame?.contentWindow?.focus();
   }
 
   setFocus(on) {

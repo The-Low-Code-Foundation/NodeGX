@@ -7,6 +7,7 @@
 import { SceneModel, onlyParameters, parameterDiff } from '/core/model.mjs';
 import { Viewport } from '/viewport.mjs';
 import { ICONS, TINTS } from '/icons.mjs';
+import { T3, TRIGGERS, ACTIONS, readBehaviour, addSentence, removeSentence, setKeys, setFollow, kindOfBody } from '/behaviour.mjs';
 
 const $ = (s) => document.querySelector(s);
 const h = (tag, attrs = {}, ...kids) => {
@@ -22,7 +23,8 @@ const h = (tag, attrs = {}, ...kids) => {
   return el;
 };
 
-const T3 = { scene: 'three-kit.Scene', mesh: 'three-kit.Mesh', group: 'three-kit.Group', light: 'three-kit.Light' };
+/** What other things go inside: a 3D Group, and a Body (a group the scene moves). */
+const HOLDS = (type) => type === T3.group || type === T3.body;
 const IS3D = (type) => typeof type === 'string' && type.startsWith('three-kit.');
 const COLOURS = ['#4f8cff', '#ff4757', '#2ed573', '#ffb547', '#a55eea', '#1ec8c8', '#ff7eb6', '#f1f2f6', '#57606f', '#ff9f43'];
 const SHAPE_WORD = { box: 'Box', sphere: 'Ball', cylinder: 'Cylinder', cone: 'Cone', torus: 'Ring', plane: 'Tile' };
@@ -38,7 +40,13 @@ const TILES = [
   { key: 'group', label: 'Group', type: T3.group, params: {} },
   { key: 'sun', label: 'Sun', type: T3.light, params: { kind: 'sun', intensity: 1.2, x: 5, y: 10, z: 5 } },
   { key: 'lamp', label: 'Lamp', type: T3.light, params: { kind: 'lamp', intensity: 2, x: 0, y: 3, z: 2, colour: '#ffd9a0' } },
-  { key: 'sky', label: 'Sky', type: T3.light, params: { kind: 'sky', intensity: 0.7 } }
+  { key: 'sky', label: 'Sky', type: T3.light, params: { kind: 'sky', intensity: 0.7 } },
+  { gap: true, label: 'Game' },
+  { key: 'player', label: 'Player', type: T3.body, params: { body: 'moves', y: 1 }, child: { shape: 'sphere', width: 0.9, height: 0.9, depth: 0.9, colour: '#e5484d' } },
+  { key: 'floor', label: 'Floor', type: T3.body, params: { body: 'fixed', y: -0.25 }, child: { shape: 'box', width: 12, height: 0.5, depth: 12, colour: '#3a4a5c' }, at: { x: 0, z: 0 } },
+  { key: 'wall', label: 'Wall', type: T3.body, params: { body: 'fixed', y: 0 }, child: { shape: 'box', width: 1, height: 1, depth: 1, sitOnFloor: true, colour: '#4f8cff' } },
+  { key: 'coin', label: 'Coin', type: T3.body, params: { body: 'ghost', y: 0.6 }, child: { shape: 'torus', width: 0.8, height: 0.8, depth: 0.8, spin: true, spinSpeed: 120, colour: '#e8a317' } },
+  { key: 'camera3d', label: 'Camera', type: T3.camera, params: { distance: 8, height: 6, smoothing: 0.3 } }
 ];
 
 /** What the inspector shows for each kind, in order; a port's label, default and choices come from the kit. */
@@ -46,11 +54,13 @@ const LAYOUT = {
   [T3.mesh]: [['Shape', ['shape']], ['Colour', ['colour']], ['Place', ['x', 'y', 'z', 'rotationY', 'sitOnFloor']], ['Size', ['width', 'height', 'depth']], ['Motion', ['spin', 'spinSpeed']], ['More', ['wireframe', 'name']]],
   [T3.group]: [['Place', ['x', 'y', 'z', 'rotationY', 'scale']], ['Motion', ['spin', 'spinSpeed']], ['More', ['name']]],
   [T3.light]: [['Light', ['kind', 'colour', 'ground', 'intensity']], ['Place', ['x', 'y', 'z']]],
-  [T3.scene]: [['Look', ['background', 'floor']], ['Camera', ['cameraDistance', 'cameraHeight', 'cameraAngle', 'fieldOfView', 'orbit']], ['Size', ['height']]]
+  [T3.scene]: [['Look', ['background', 'floor']], ['Camera', ['cameraDistance', 'cameraHeight', 'cameraAngle', 'fieldOfView', 'orbit']], ['Size', ['height']]],
+  [T3.body]: [['Body', ['body', 'bounce']], ['Start', ['x', 'y', 'z']], ['Push', ['speed']], ['More', ['name']]],
+  [T3.camera]: [['Follow', ['follow', 'distance', 'height', 'angle', 'smoothing', 'fieldOfView']]]
 };
 const TRIPLES = [['x', 'y', 'z'], ['width', 'height', 'depth']];
-const STEP = { x: 0.1, y: 0.1, z: 0.1, width: 0.1, height: 0.1, depth: 0.1, scale: 0.05, rotationY: 1, spinSpeed: 5, intensity: 0.05, cameraDistance: 0.5, cameraHeight: 0.25, cameraAngle: 1, fieldOfView: 1 };
-const RANGE = { rotationY: [-180, 180], cameraAngle: [-180, 180], fieldOfView: [15, 110], intensity: [0, 5], spinSpeed: [-360, 360] };
+const STEP = { x: 0.1, y: 0.1, z: 0.1, width: 0.1, height: 0.1, depth: 0.1, scale: 0.05, rotationY: 1, spinSpeed: 5, intensity: 0.05, cameraDistance: 0.5, cameraHeight: 0.25, cameraAngle: 1, fieldOfView: 1, distance: 0.5, angle: 1, smoothing: 0.05, bounce: 0.05, speed: 0.5 };
+const RANGE = { rotationY: [-180, 180], cameraAngle: [-180, 180], fieldOfView: [15, 110], intensity: [0, 5], spinSpeed: [-360, 360], angle: [-180, 180], smoothing: [0, 1], bounce: [0, 1], speed: [0, 20] };
 
 const model = new SceneModel();
 const state = { project: null, library: null, scenes: [], scene: null, sel: null, mode: 'edit', toldRows: false };
@@ -80,6 +90,8 @@ function kindOf(node) {
   if (!node) return 'other';
   if (node.type === T3.scene) return 'scene';
   if (node.type === T3.group) return 'group';
+  if (node.type === T3.body) return 'body';
+  if (node.type === T3.camera) return 'camera3d';
   if (node.type === 'For Each') return 'foreach';
   if (node.type === T3.mesh) return node.parameters?.shape || value(node, 'shape') || 'box';
   if (node.type === T3.light) return node.parameters?.kind || 'sun';
@@ -91,6 +103,7 @@ function labelOf(node) {
   if (node.parameters?.name) return node.parameters.name;
   if (node.type === T3.mesh) return SHAPE_WORD[kindOf(node)] ?? 'Mesh';
   if (node.type === T3.light) return { sun: 'Sun', lamp: 'Lamp', sky: 'Sky' }[kindOf(node)] ?? 'Light';
+  if (node.type === T3.camera) return 'Camera';
   return displayType(node.type);
 }
 function icon(kind, size) {
@@ -184,6 +197,7 @@ async function ensureVisible() {
       vp.win?.Noodl?.Navigation?.navigate(r, comp.legacyName);
     } catch {}
     if (await vp.whenSceneReady(2500)) {
+      vp.applyPause();
       vp.restoreCamera();
       return;
     }
@@ -338,17 +352,29 @@ function addTile(tileKey) {
   const key = state.scene.key;
   const sel = state.sel && state.sel.key === key ? model.node(key, state.sel.id) : null;
   let parent = state.scene.id;
-  if (sel && (sel.type === T3.group || sel.type === T3.scene)) parent = sel.id;
-  else if (sel?.parent && model.node(key, sel.parent)?.type === T3.group) parent = sel.parent;
+  // A Body or a Camera goes straight under the Scene (a Body moves in the Scene's own space); a shape goes inside the
+  // selected Group or Body.
+  if (tile.type === T3.body || tile.type === T3.camera) parent = state.scene.id;
+  else if (sel && (HOLDS(sel.type) || sel.type === T3.scene)) parent = sel.id;
+  else if (sel?.parent && HOLDS(model.node(key, sel.parent)?.type)) parent = sel.parent;
   const params = { ...tile.params };
   if (tile.type === T3.mesh) {
     const used = model.nodes(key).filter((n) => n.type === T3.mesh).length;
     params.colour = COLOURS[used % COLOURS.length];
     if (tile.key !== 'plane') Object.assign(params, freeSpot(key, parent));
   }
-  if (tile.type === T3.group) Object.assign(params, freeSpot(key, parent));
-  const id = model.addNode(key, { type: tile.type, parent, label: tile.label, parameters: params });
-  if (tile.type !== T3.light) model.node(key, id).parameters.name = id;
+  if (tile.type === T3.group || tile.type === T3.body) Object.assign(params, tile.at ?? freeSpot(key, parent));
+  if (tile.type === T3.camera) {
+    if (model.nodes(key).some((n) => n.type === T3.camera)) return toast('This scene has a Camera already: select it in the outline.');
+    const player = model.nodes(key).find((n) => n.type === T3.body && kindOfBody(n) === 'moves' && n.parameters?.name);
+    if (player) params.follow = player.parameters.name;
+  }
+  let id;
+  model.batch(key, () => {
+    id = model.addNode(key, { type: tile.type, parent, label: tile.label, parameters: params });
+    if (tile.type !== T3.light && tile.type !== T3.camera) model.node(key, id).parameters.name = id;
+    if (tile.child) model.addNode(key, { type: T3.mesh, parent: id, label: SHAPE_WORD[tile.child.shape], parameters: { ...tile.child } });
+  });
   rebuild();
   select({ key, id });
   renderChrome();
@@ -361,7 +387,7 @@ function removeSelected() {
   const parent = n.parent;
   model.removeNode(sel.key, sel.id);
   rebuild();
-  select(parent && model.node(sel.key, parent)?.type === T3.group ? { key: sel.key, id: parent } : null);
+  select(parent && HOLDS(model.node(sel.key, parent)?.type) ? { key: sel.key, id: parent } : null);
   renderChrome();
 }
 
@@ -473,7 +499,7 @@ function renderPalette() {
   root.innerHTML = '';
   for (const t of TILES) {
     if (t.gap) {
-      root.append(h('div', { class: 'tile-gap' }));
+      root.append(h('div', { class: 'tile-gap' }, t.label ? h('span', {}, t.label) : null));
       continue;
     }
     root.append(h('button', { class: 'tile', title: `Add a ${t.label.toLowerCase()} to the scene`, 'data-tile': t.key, onclick: () => addTile(t.key) }, icon(t.key), h('span', {}, t.label)));
@@ -510,7 +536,7 @@ function outlineRow(key, n, depth, tpl) {
   );
   row.style.paddingLeft = `${8 + depth * 14}px`;
   if (tpl) return row;
-  const container = n.type === T3.group || n.type === T3.scene;
+  const container = HOLDS(n.type) || n.type === T3.scene;
   row.addEventListener('dragstart', (e) => {
     dragRow = { key, id: n.id };
     row.classList.add('dragging');
@@ -654,6 +680,7 @@ function renderInspector() {
     }
     root.append(sect);
   }
+  if ([T3.mesh, T3.group, T3.body].includes(n.type) && key === state.scene.key) root.append(behaviourSection(key, n));
   if (keep) {
     const el = root.querySelector(`[data-port="${keep.port}"]`);
     if (el) {
@@ -672,7 +699,47 @@ function shown(n, p) {
     if ('xyz'.includes(p)) return kind !== 'sky';
   }
   if (p === 'spinSpeed') return !!value(n, 'spin');
+  if (n.type === T3.body && (p === 'speed' || p === 'bounce')) return kindOfBody(n) === 'moves';
   return true;
+}
+
+/**
+ * Behaviour, as sentences on the selected object. Each one writes real nodes and wires (behaviour.mjs), so what the
+ * person reads here is what the graph does; a wire no sentence made is listed as it is.
+ */
+function behaviourSection(key, n) {
+  const sceneId = state.scene.id;
+  const b = readBehaviour(model, key, n, labelOf);
+  const after = () => {
+    rebuild();
+    renderInspector();
+    renderOutline();
+    renderChrome();
+  };
+  const sect = h('div', { class: 'sect behaviour' }, h('h4', {}, 'Behaviour'));
+  const toggleRow = (text, on, flip, title) =>
+    h('div', { class: 'say-toggle', title }, h('button', { class: `toggle${on ? ' on' : ''}`, role: 'switch', 'aria-checked': String(on), 'aria-label': text, onclick: flip }), h('span', {}, text));
+  if (n.type === T3.body && kindOfBody(n) === 'moves') {
+    sect.append(toggleRow('The arrow keys push it', b.keys, () => (setKeys(model, key, n.id, !b.keys), after()), 'Arrows or W A S D roll it; on a phone this needs on-screen arrows (not built yet)'));
+  }
+  sect.append(toggleRow('The camera follows it', b.followed, () => (setFollow(model, key, sceneId, n.id, !b.followed), after()), 'The scene’s Camera stays with it while the app plays'));
+  for (const sn of b.sentences) {
+    sect.append(h('div', { class: 'sentence', 'data-sentence': `${sn.when}:${sn.do}` }, h('span', {}, sn.words), h('button', { class: 'x', title: 'Take this off', 'aria-label': `Take off: ${sn.words}`, onclick: () => (removeSentence(model, key, n.id, sn.when, sn.do), after()) }, '×')));
+  }
+  const whens = TRIGGERS.filter((t) => t.on(n));
+  const dos = ACTIONS.filter((a) => a.on(n));
+  if (whens.length && dos.length) {
+    const w = h('select', { 'aria-label': 'When', 'data-say': 'when' }, whens.map((t) => h('option', { value: t.key }, t.words)));
+    const d = h('select', { 'aria-label': 'Do', 'data-say': 'do' }, dos.map((a) => h('option', { value: a.key }, a.words)));
+    const add = h('button', { class: 'btn', 'data-say': 'add', onclick: () => {
+      if (b.sentences.some((sn) => sn.when === w.value && sn.do === d.value)) return toast('It already does that.');
+      addSentence(model, key, sceneId, n.id, w.value, d.value);
+      after();
+    } }, 'Add');
+    sect.append(h('div', { class: 'say-add' }, w, h('span', { class: 'arrow' }, '→'), d, add));
+  }
+  for (const o of b.others) sect.append(h('div', { class: 'wire-note' }, `wired: ${o}`));
+  return sect;
 }
 
 function wireNote(key, n, p) {
@@ -730,7 +797,10 @@ function field(key, n, p) {
     control = h('div', { class: 'shapes' }, enums.map((e) => h('button', { class: v === e.value ? 'on' : '', title: e.label, html: ICONS[e.value] ?? e.label, onclick: () => (setParam(key, n.id, p, e.value), renderInspector()) })));
     return h('div', { class: 'shape-field' }, control, wireNote(key, n, p));
   }
-  if (t === 'enum') {
+  if (p === 'follow') {
+    const names = model.nodes(key).filter((x) => [T3.mesh, T3.group, T3.body].includes(x.type) && x.parameters?.name).map((x) => x.parameters.name);
+    control = h('select', { class: 'text', 'data-port': p, disabled: !!wired, onchange: (e) => (setParam(key, n.id, p, e.target.value), renderInspector()) }, h('option', { value: '' }, 'Nothing: look at the middle'), [...new Set(names)].map((nm) => h('option', { value: nm, selected: nm === v ? true : null }, nm)));
+  } else if (t === 'enum') {
     control = h('div', { class: 'segs' }, (info.type.enums ?? []).map((e) => h('button', { class: v === e.value ? 'on' : '', onclick: () => (setParam(key, n.id, p, e.value), renderInspector(), renderOutline()), html: `${ICONS[e.value] ? `<span style="color:${TINTS[e.value] ?? 'inherit'};display:inline-flex">${ICONS[e.value].replace(/width="24" height="24"/, 'width="16" height="16"')}</span>` : ''}${e.label}` })));
   } else if (t === 'boolean') {
     const on = v === true || v === 'true';
@@ -772,7 +842,7 @@ function field(key, n, p) {
   const out = h('div', { class: 'field' }, lab, control);
   const wn = wireNote(key, n, p);
   if (wn) out.append(wn);
-  if (p === 'name') out.append(h('div', { class: 'help' }, 'Tapped Name on the Scene says this when it is tapped.'));
+  if (p === 'name') out.append(h('div', { class: 'help' }, n.type === T3.body ? 'Another Body hears this in Hit Name, and a Camera follows it by this.' : 'Tapped Name on the Scene says this when it is tapped.'));
   return out;
 }
 
@@ -986,7 +1056,8 @@ function renderOpen() {
       h('h2', {}, 'The 3D scenes in your app'),
       h('p', {}, 'Open a NodeGX project folder. If it has no 3D scene yet, you can put one on any page.'),
       h('div', { class: 'row-pick' }, path, h('button', { class: 'btn primary', id: 'open-go', onclick: () => go('/api/open', { dir: path.value.trim() }) }, 'Open')),
-      h('p', { style: 'margin:18px 0 0' }, h('button', { class: 'btn accent', id: 'open-demo', onclick: () => go('/api/demo', {}) }, 'Try the demo'), ' a bar chart, a ball and a robot, in a fresh copy')
+      h('p', { style: 'margin:18px 0 0' }, h('button', { class: 'btn accent', id: 'open-demo', onclick: () => go('/api/demo', {}) }, 'Try the demo'), ' a bar chart, a ball and a robot, in a fresh copy'),
+      h('p', { style: 'margin:8px 0 0' }, h('button', { class: 'btn accent', id: 'open-coin-run', onclick: () => go('/api/demo', { which: 'coin-run' }) }, 'Try Coin Run'), ' a little game: press Play, then the arrow keys')
     )
   );
 }

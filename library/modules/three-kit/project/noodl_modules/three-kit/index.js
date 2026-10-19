@@ -17,6 +17,12 @@
  *
  * The rule: the kit draws, the graph decides. A mesh is where the graph puts it; the Scene never moves one by itself
  * except to spin it when asked. Rendering is ON DEMAND: a still scene draws nothing, a spinning one draws every frame.
+ *
+ * s5 (2026-10-19), the game half, and the one place the rule bends: a **Body** is a 3D Group that the Scene moves —
+ * gravity, bouncing off Fixed bodies, a push from the graph — because a game cannot be a graph signal per frame. The
+ * graph still starts it (X Y Z, a teleport when they change), pushes it (Push X / Z) and hears what it hits (Hit, Hit
+ * Name, Fell). A **Camera** child follows a thing by Name. **Keys** says which arrow keys are held. While anything moves
+ * the Scene draws every frame; `pause(true)` on the engine (an editor's Edit mode) holds every Body at its start.
  */
 (function () {
   // ✅ React is a global the runtime installs before this file runs. Read it bare; never window.React.
@@ -99,6 +105,8 @@
     var last = 0;
     var frames = 0;
     var listeners = opts.listeners;
+    var paused = false;
+    var view = { pos: new T.Vector3(), look: new T.Vector3(), live: false }; // a Camera node's smoothed view
 
     function geometry(shape) {
       var make = SHAPES[shape] || SHAPES.box;
@@ -108,6 +116,7 @@
     }
 
     function placeCamera() {
+      if (view.live) return; // a Camera node has the view
       var a = cam.angle * DEG;
       camera.fov = cam.fov;
       camera.position.set(cam.target.x + Math.sin(a) * cam.distance, cam.target.y + cam.height, cam.target.z + Math.cos(a) * cam.distance);
@@ -142,6 +151,10 @@
           spinning = true;
         }
       }
+      if (!paused) {
+        if (stepBodies(dt)) spinning = true;
+        if (stepCamera(dt)) spinning = true;
+      }
       if (needs || spinning) {
         renderer.render(scene, camera);
         frames++;
@@ -153,6 +166,248 @@
 
     function schedule() {
       if (!raf) raf = requestAnimationFrame(tick);
+    }
+
+    // ── Bodies ────────────────────────────────────────────────────────────────
+    var GRAVITY = 20;
+    var REST = 2; // below this speed into a surface, a body stops instead of bouncing
+
+    /**
+     * A body's shape, from the meshes straight inside it (rotation ignored, so a spinning coin keeps one box): a ball
+     * when every one of them is a sphere, a box otherwise. In the body's own space: the middle and the half sizes.
+     */
+    function shapeOf(o) {
+      var lo = [Infinity, Infinity, Infinity];
+      var hi = [-Infinity, -Infinity, -Infinity];
+      var balls = true;
+      var any = false;
+      for (var id in objects) {
+        var c = objects[id];
+        if (c.kind !== 'mesh' || c.spec.parent !== o.obj.userData.id) continue;
+        any = true;
+        var s = c.spec;
+        if (s.shape !== 'sphere') balls = false;
+        var lift = s.sit ? s.h / 2 : 0;
+        var half = [s.w / 2, s.h / 2, s.d / 2];
+        var mid = [s.x, s.y + lift, s.z];
+        for (var k = 0; k < 3; k++) {
+          lo[k] = Math.min(lo[k], mid[k] - half[k]);
+          hi[k] = Math.max(hi[k], mid[k] + half[k]);
+        }
+      }
+      if (!any) return { ball: true, mid: new T.Vector3(0, 0.5, 0), half: new T.Vector3(0.5, 0.5, 0.5), r: 0.5 };
+      var halfV = new T.Vector3((hi[0] - lo[0]) / 2, (hi[1] - lo[1]) / 2, (hi[2] - lo[2]) / 2);
+      return { ball: balls, mid: new T.Vector3((hi[0] + lo[0]) / 2, (hi[1] + lo[1]) / 2, (hi[2] + lo[2]) / 2), half: halfV, r: Math.max(halfV.x, halfV.y, halfV.z) };
+    }
+
+    /** How far `a` sits inside `b`, and the way out for `a`: { n, depth } or null when apart. */
+    function overlap(a, b) {
+      var ca = a.obj.position.clone().add(a.shape.mid);
+      var cb = b.obj.position.clone().add(b.shape.mid);
+      var d, dist;
+      if (a.shape.ball && b.shape.ball) {
+        d = ca.clone().sub(cb);
+        dist = d.length();
+        var depth = a.shape.r + b.shape.r - dist;
+        if (depth <= 0) return null;
+        return { n: dist > 1e-6 ? d.divideScalar(dist) : new T.Vector3(0, 1, 0), depth: depth };
+      }
+      if (a.shape.ball || b.shape.ball) {
+        var ball = a.shape.ball ? a : b;
+        var box = a.shape.ball ? b : a;
+        var cBall = a.shape.ball ? ca : cb;
+        var cBox = a.shape.ball ? cb : ca;
+        var h = box.shape.half;
+        var q = new T.Vector3(
+          Math.max(cBox.x - h.x, Math.min(cBox.x + h.x, cBall.x)),
+          Math.max(cBox.y - h.y, Math.min(cBox.y + h.y, cBall.y)),
+          Math.max(cBox.z - h.z, Math.min(cBox.z + h.z, cBall.z))
+        );
+        d = cBall.clone().sub(q);
+        dist = d.length();
+        var n, dep;
+        if (dist > 1e-6) {
+          if (dist >= ball.shape.r) return null;
+          n = d.divideScalar(dist);
+          dep = ball.shape.r - dist;
+        } else {
+          var inside = boxPush(cBall.clone().sub(cBox), h, new T.Vector3(ball.shape.r, ball.shape.r, ball.shape.r));
+          n = inside.n;
+          dep = inside.depth;
+        }
+        // n points from the box to the ball; `a` wants its own way out.
+        return { n: a === ball ? n : n.negate(), depth: dep };
+      }
+      var rel = ca.clone().sub(cb);
+      var o2 = boxPush(rel, b.shape.half, a.shape.half);
+      return o2.depth > 0 ? o2 : null;
+    }
+
+    /** Two boxes, `rel` from b's middle to a's: the shallowest way out along one axis. */
+    function boxPush(rel, hb, ha) {
+      var ox = ha.x + hb.x - Math.abs(rel.x);
+      var oy = ha.y + hb.y - Math.abs(rel.y);
+      var oz = ha.z + hb.z - Math.abs(rel.z);
+      if (ox <= 0 || oy <= 0 || oz <= 0) return { n: new T.Vector3(0, 1, 0), depth: 0 };
+      if (oy <= ox && oy <= oz) return { n: new T.Vector3(0, rel.y >= 0 ? 1 : -1, 0), depth: oy };
+      if (ox <= oz) return { n: new T.Vector3(rel.x >= 0 ? 1 : -1, 0, 0), depth: ox };
+      return { n: new T.Vector3(0, 0, rel.z >= 0 ? 1 : -1), depth: oz };
+    }
+
+    function teleport(o) {
+      o.obj.position.set(o.spec.x, o.spec.y, o.spec.z);
+      o.vel.set(0, 0, 0);
+      o.obj.quaternion.identity();
+      o.fell = false;
+      o.touching = {};
+    }
+
+    function jump(o, axis, v) {
+      o.obj.position[axis] = v;
+      o.vel.set(0, 0, 0);
+      needs = true;
+    }
+
+    function emit(o, name) {
+      var fn = o.spec[name];
+      if (typeof fn !== 'function') return;
+      fn.apply(null, Array.prototype.slice.call(arguments, 2));
+    }
+
+    /** One step of every Body. True while any of them can still move (the loop keeps running). */
+    function stepBodies(dt) {
+      var all = [];
+      var moving = false;
+      for (var id in objects) if (objects[id].kind === 'body') all.push(objects[id]);
+      if (!all.length || dt <= 0) return all.some(function (b) { return b.spec.body === 'moves'; });
+      for (var i = 0; i < all.length; i++) all[i].shape = shapeOf(all[i]);
+      var now = {};
+      for (i = 0; i < all.length; i++) {
+        var a = all[i];
+        if (a.spec.body !== 'moves') continue;
+        moving = true;
+        var v = a.vel;
+        var accel = a.spec.speed * 2;
+        v.x += a.spec.pushX * accel * dt;
+        v.z += a.spec.pushZ * accel * dt;
+        v.y -= GRAVITY * dt;
+        var drag = Math.exp(-(a.grounded ? 2 : 0.3) * dt);
+        v.x *= drag;
+        v.z *= drag;
+        a.obj.position.addScaledVector(v, dt);
+        a.grounded = false;
+        for (var j = 0; j < all.length; j++) {
+          var b = all[j];
+          if (b === a) continue;
+          var hit = overlap(a, b);
+          if (!hit) continue;
+          var pairKey = a.obj.userData.id < b.obj.userData.id ? a.obj.userData.id + '|' + b.obj.userData.id : b.obj.userData.id + '|' + a.obj.userData.id;
+          now[pairKey] = [a, b];
+          if (b.spec.body === 'ghost') continue;
+          var share = b.spec.body === 'moves' ? 0.5 : 1;
+          a.obj.position.addScaledVector(hit.n, hit.depth * share);
+          if (share < 1) b.obj.position.addScaledVector(hit.n, -hit.depth * share);
+          var vn = v.dot(hit.n);
+          if (vn < 0) {
+            var bounce = vn < -REST ? a.spec.bounce : 0;
+            v.addScaledVector(hit.n, -(1 + bounce) * vn);
+          }
+          if (hit.n.y > 0.7) a.grounded = true;
+        }
+        // A ball rolls the way it moves, when its sphere is at the body's middle (anywhere else it would swing round).
+        if (a.shape.ball && a.shape.r > 0 && a.shape.mid.lengthSq() < 1e-4) {
+          var vh = Math.sqrt(v.x * v.x + v.z * v.z);
+          if (vh > 1e-4) {
+            var axis = new T.Vector3(v.z / vh, 0, -v.x / vh);
+            a.obj.quaternion.premultiply(new T.Quaternion().setFromAxisAngle(axis, (vh * dt) / a.shape.r));
+          }
+        }
+        if (!a.fell && a.obj.position.y < -10) {
+          a.fell = true;
+          emit(a, 'onFell');
+        }
+        var p = a.obj.position;
+        var key = Math.round(p.x * 100) + ',' + Math.round(p.y * 100) + ',' + Math.round(p.z * 100);
+        if (key !== a.said) {
+          a.said = key;
+          emit(a, 'onPlace', Math.round(p.x * 100) / 100, Math.round(p.y * 100) / 100, Math.round(p.z * 100) / 100);
+        }
+      }
+      // Hit fires when two bodies START touching, once, for both of them.
+      for (var k in now) {
+        var pair = now[k];
+        if (contacts[k]) continue;
+        emit(pair[0], 'onHit', pair[1].spec.name || '');
+        emit(pair[1], 'onHit', pair[0].spec.name || '');
+      }
+      contacts = now;
+      needs = needs || moving;
+      return moving;
+    }
+    var contacts = {};
+    var saidNested = {};
+
+    // ── The Camera node ──────────────────────────────────────────────────────
+    function cameraNode() {
+      var found = null;
+      for (var id in objects) if (objects[id].kind === 'camera') found = objects[id];
+      return found;
+    }
+
+    function byName(name) {
+      if (!name) return null;
+      var best = null;
+      for (var id in objects) {
+        var o = objects[id];
+        if (o.kind === 'light' || o.kind === 'camera' || o.spec.name !== name) continue;
+        if (!best || o.kind === 'body') best = o;
+      }
+      return best;
+    }
+
+    /** A Camera node's view, eased towards where it wants to be. True while it is following something. */
+    function stepCamera(dt) {
+      var c = cameraNode();
+      if (!c) {
+        if (view.live) {
+          view.live = false;
+          placeCamera();
+        }
+        return false;
+      }
+      var s = c.spec;
+      var target = new T.Vector3();
+      var followed = byName(s.follow);
+      if (followed) {
+        scene.updateMatrixWorld();
+        followed.obj.getWorldPosition(target);
+        if (followed.kind === 'body' && followed.shape) target.add(followed.shape.mid);
+      }
+      var a = s.angle * DEG;
+      var want = new T.Vector3(target.x + Math.sin(a) * s.distance, target.y + s.height, target.z + Math.cos(a) * s.distance);
+      var t = !view.live || !followed || s.smoothing <= 0 ? 1 : 1 - Math.exp(-dt * (3 / Math.min(1, s.smoothing)));
+      view.pos.lerp(want, t);
+      view.look.lerp(target, t);
+      view.live = true;
+      camera.fov = s.fov;
+      camera.position.copy(view.pos);
+      camera.lookAt(view.look);
+      camera.updateProjectionMatrix();
+      needs = true;
+      return !!followed;
+    }
+
+    /** Hold every Body at its start and give the view back to the Scene's own camera (an editor's Edit mode). */
+    function pause(on) {
+      paused = !!on;
+      for (var id in objects) if (objects[id].kind === 'body') teleport(objects[id]);
+      contacts = {};
+      if (paused && view.live) {
+        view.live = false;
+        placeCamera();
+      }
+      needs = true;
+      schedule();
     }
 
     /**
@@ -213,6 +468,31 @@
         m.rotation.x = spec.shape === 'plane' ? -Math.PI / 2 : 0;
         o.spec = spec;
         attach(o);
+      } else if (spec.kind === 'body') {
+        var born = !o;
+        if (born) {
+          var bg = new T.Group();
+          bg.userData.id = id;
+          o = objects[id] = { kind: 'body', obj: bg, spec: spec, vel: new T.Vector3(), touching: {}, fell: false, grounded: false };
+        }
+        var was = born ? null : o.spec;
+        o.spec = spec;
+        // X Y Z are where it starts: a change is a teleport, and so is Reset. A push, a bounce, a name are not.
+        if (born || was.x !== spec.x || was.y !== spec.y || was.z !== spec.z || was.reset !== spec.reset || was.body !== spec.body) teleport(o);
+        // Jump To X / Z: a move that leaves the start alone (a coin to somewhere new; Reset still brings it home).
+        // Nothing until a value arrives: a wired input reads nothing before its source has run.
+        if (!born && spec.jumpX !== null && spec.jumpX !== was.jumpX) jump(o, 'x', spec.jumpX);
+        if (!born && spec.jumpZ !== null && spec.jumpZ !== was.jumpZ) jump(o, 'z', spec.jumpZ);
+        if (spec.parent && !saidNested[spec.name || id]) {
+          saidNested[spec.name || id] = true;
+          console.error('three-kit: Body' + (spec.name ? ' "' + spec.name + '"' : '') + ' is inside a 3D Group or another Body. A Body moves in the Scene\u2019s own space, so put it straight under the Scene.');
+        }
+        attach(o);
+        if (born) adopt(id);
+      } else if (spec.kind === 'camera') {
+        if (!o) o = objects[id] = { kind: 'camera', obj: new T.Object3D(), spec: spec };
+        o.spec = spec;
+        attach(o);
       } else if (spec.kind === 'light') {
         if (!o || o.lightKind !== spec.light) {
           if (o) remove(id);
@@ -240,7 +520,7 @@
     function remove(id) {
       var o = objects[id];
       if (!o) return;
-      if (o.kind === 'group') for (var c in objects) if (objects[c].spec.parent === id) scene.add(objects[c].obj);
+      if (o.kind === 'group' || o.kind === 'body') for (var c in objects) if (objects[c].spec.parent === id) scene.add(objects[c].obj);
       if (o.obj.parent) o.obj.parent.remove(o.obj);
       if (o.kind === 'mesh') o.obj.material.dispose();
       delete objects[id];
@@ -326,12 +606,22 @@
       for (var id in objects) {
         var o = objects[id];
         var w = o.obj.getWorldPosition(new T.Vector3());
-        out.push({ id: id, node: o.spec.node || null, kind: o.kind, name: o.spec.name || null, shape: o.shape || o.lightKind || null, parent: o.spec.parent || null, x: o.obj.position.x, y: o.obj.position.y, z: o.obj.position.z, wx: w.x, wy: w.y, wz: w.z, h: o.obj.scale.y });
+        var row = { id: id, node: o.spec.node || null, kind: o.kind, name: o.spec.name || null, shape: o.kind === 'mesh' ? o.shape : o.lightKind || null, parent: o.spec.parent || null, x: o.obj.position.x, y: o.obj.position.y, z: o.obj.position.z, wx: w.x, wy: w.y, wz: w.z, h: o.obj.scale.y };
+        if (o.kind === 'body') {
+          row.body = o.spec.body;
+          row.ball = o.shape ? o.shape.ball : null;
+          row.vx = o.vel.x;
+          row.vy = o.vel.y;
+          row.vz = o.vel.z;
+          row.grounded = !!o.grounded;
+        }
+        if (o.kind === 'camera') row.follow = o.spec.follow || null;
+        out.push(row);
       }
-      return { meshes: count(), objects: out, frames: frames, camera: { distance: cam.distance, height: cam.height, angle: cam.angle } };
+      return { meshes: count(), objects: out, frames: frames, paused: paused, camera: { distance: cam.distance, height: cam.height, angle: cam.angle, x: camera.position.x, y: camera.position.y, z: camera.position.z } };
     }
 
-    return { upsert: upsert, remove: remove, resize: resize, setLook: setLook, pick: pick, lineage: lineage, orbit: orbit, zoom: zoom, dispose: dispose, census: census, count: count, anySpin: anySpin, schedule: schedule, camera: camera, scene: scene, renderer: renderer, projectOf: function (id) {
+    return { upsert: upsert, remove: remove, resize: resize, setLook: setLook, pick: pick, lineage: lineage, orbit: orbit, zoom: zoom, dispose: dispose, census: census, count: count, anySpin: anySpin, schedule: schedule, pause: pause, isPaused: function () { return paused; }, camera: camera, scene: scene, renderer: renderer, projectOf: function (id) {
       var o = objects[id];
       if (!o) return null;
       scene.updateMatrixWorld();
@@ -586,7 +876,7 @@
    * says it, as a console ERROR: `render_report` collects errors and exceptions only (render-capture.js, `type ===
    * 'error'`), so a warning would never reach the agent. Once per node and name, not once per For Each row.
    */
-  var KIND_LABEL = { mesh: 'Mesh', group: '3D Group', light: 'Light' };
+  var KIND_LABEL = { mesh: 'Mesh', group: '3D Group', light: 'Light', body: 'Body', camera: 'Camera' };
   var saidOutside = {};
   function sayOutsideScene(spec) {
     var what = KIND_LABEL[spec.kind] || spec.kind;
@@ -823,10 +1113,261 @@
     outputProps: {}
   };
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Body, Camera — the game half (s5). Keys — a logic node: which arrow keys are held.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /** What is under a Body or a 3D Group speaks through a context naming it as the parent, unless a nearer one did. */
+  function useParentContext(parentCtx, gid) {
+    return React.useMemo(
+      function () {
+        if (!parentCtx) return null;
+        return {
+          upsert: function (id, childSpec) {
+            parentCtx.upsert(id, childSpec.parent ? childSpec : Object.assign({}, childSpec, { parent: gid }));
+          },
+          remove: function (id) {
+            parentCtx.remove(id);
+          }
+        };
+      },
+      [parentCtx, gid]
+    );
+  }
+
+  var Body = {
+    name: 'three-kit.Body',
+    displayName: 'Body',
+    category: '3D',
+    usePortAsLabel: 'name',
+    description:
+      'A 3D Group that the Scene moves: put Meshes under it and it falls, rolls and bounces off other Bodies. Kind Moves is a ' +
+      'player or a ball; Fixed is a floor or a wall that others land on and bump into; Ghost is solid to nothing and only says it ' +
+      'was touched (a coin, a goal). Its shape comes from the meshes inside it: a ball when they are all spheres, a box ' +
+      'otherwise. X Y Z are where it starts, and changing them moves it there; Jump To X and Z move it and leave the start alone. Push X and Push Z (−1 to 1, from a Keys node) ' +
+      'roll it. Hit fires when it starts touching another Body, with that Body’s Name in Hit Name. Fell fires when it ' +
+      'drops 10 below the floor. Tapped fires when a mesh inside it is tapped. Put it straight under the Scene.',
+    ssr: { compat: 'safe' },
+    noodlNodeAsProp: true,
+    allowChildren: true,
+    defaultCss: { display: 'none' },
+
+    getReactComponent: function () {
+      return function BodyComponent(props) {
+        var spec = {
+          kind: 'body',
+          node: nodeIdOf(props),
+          name: props.name ? String(props.name) : '',
+          body: props.body === 'fixed' || props.body === 'ghost' ? props.body : 'moves',
+          x: num(props.x, 0),
+          y: num(props.y, 0),
+          z: num(props.z, 0),
+          pushX: Math.max(-1, Math.min(1, num(props.pushX, 0))),
+          pushZ: Math.max(-1, Math.min(1, num(props.pushZ, 0))),
+          speed: Math.max(0, num(props.speed, 6)),
+          bounce: Math.max(0, Math.min(1, num(props.bounce, 0.3))),
+          reset: num(props.reset, 0),
+          jumpX: props.jumpX === undefined || props.jumpX === null || props.jumpX === '' ? null : num(props.jumpX, null),
+          jumpZ: props.jumpZ === undefined || props.jumpZ === null || props.jumpZ === '' ? null : num(props.jumpZ, null)
+        };
+        var so = useSceneObject(props, spec);
+        React.useEffect(function () {
+          if (so.ctx) so.ctx.upsert(so.id, Object.assign({}, spec, {
+            onHit: function (other) {
+              if (typeof props.onHitName === 'function') props.onHitName(other);
+              if (typeof props.onHit === 'function') props.onHit();
+            },
+            onFell: function () {
+              if (typeof props.onFell === 'function') props.onFell();
+            },
+            onTap: function () {
+              if (typeof props.onTapped === 'function') props.onTapped();
+            },
+            onPlace: function (x, y, z) {
+              if (typeof props.onNowX === 'function') props.onNowX(x);
+              if (typeof props.onNowY === 'function') props.onNowY(y);
+              if (typeof props.onNowZ === 'function') props.onNowZ(z);
+            }
+          }));
+        });
+        var api = useParentContext(so.ctx, so.id);
+        return h(SceneContext.Provider, { value: api }, props.children);
+      };
+    },
+
+    inputProps: {
+      body: {
+        type: { name: 'enum', enums: [{ value: 'moves', label: 'Moves' }, { value: 'fixed', label: 'Fixed' }, { value: 'ghost', label: 'Ghost' }] },
+        displayName: 'Kind',
+        group: 'Body',
+        default: 'moves',
+        description: 'Moves: falls, rolls, bounces (a player, a ball). Fixed: never moves, others land on it (a floor, a wall). Ghost: passes through, only says it was touched (a coin).'
+      },
+      name: { type: 'string', displayName: 'Name', group: 'Body', default: '', description: 'What another Body hears in Hit Name, and what a Camera follows.' },
+      x: { type: 'number', displayName: 'X', group: 'Start', default: 0, description: 'Where it starts, left and right. Changing it moves it there.' },
+      y: { type: 'number', displayName: 'Y', group: 'Start', default: 0, description: 'Where it starts, up and down.' },
+      z: { type: 'number', displayName: 'Z', group: 'Start', default: 0, description: 'Where it starts, towards and away.' },
+      pushX: { type: 'number', displayName: 'Push X', group: 'Push', default: 0, description: '−1 pushes it left, 1 right. Wire a Keys node’s X here.' },
+      pushZ: { type: 'number', displayName: 'Push Z', group: 'Push', default: 0, description: '−1 pushes it away, 1 towards you. Wire a Keys node’s Z here.' },
+      speed: { type: 'number', displayName: 'Speed', group: 'Push', default: 6, description: 'How fast a full push gets it going, in steps a second.' },
+      bounce: { type: 'number', displayName: 'Bounce', group: 'Body', default: 0.3, description: '0 lands dead, 1 bounces back as high as it fell.' },
+      reset: { type: 'signal', displayName: 'Reset', group: 'Start', description: 'Back to X Y Z, standing still.' },
+      jumpX: { type: 'number', displayName: 'Jump To X', group: 'Jump', description: 'When this changes it jumps there, left and right. Its start (X Y Z) stays where it is: Reset still brings it back.' },
+      jumpZ: { type: 'number', displayName: 'Jump To Z', group: 'Jump', description: 'When this changes it jumps there, towards and away.' }
+    },
+
+    outputProps: {
+      onTapped: { type: 'signal', displayName: 'Tapped', group: 'Events', description: 'A finger or a mouse landed on a mesh inside it.' },
+      onHit: { type: 'signal', displayName: 'Hit', group: 'Events', description: 'It started touching another Body. Hit Name already holds which.' },
+      onHitName: { type: 'string', displayName: 'Hit Name', group: 'Events', description: 'The Name of the Body it last started touching.' },
+      onFell: { type: 'signal', displayName: 'Fell', group: 'Events', description: 'It dropped 10 below the floor. Wire it to Reset to start again.' },
+      onNowX: { type: 'number', displayName: 'Now X', group: 'Where', description: 'Where it is now.' },
+      onNowY: { type: 'number', displayName: 'Now Y', group: 'Where', description: 'Where it is now.' },
+      onNowZ: { type: 'number', displayName: 'Now Z', group: 'Where', description: 'Where it is now.' }
+    }
+  };
+
+  var Camera = {
+    name: 'three-kit.Camera',
+    displayName: 'Camera',
+    category: '3D',
+    description:
+      'The Scene’s camera, as a node. Follow names a Mesh, a 3D Group or a Body and the camera stays with it, Distance ' +
+      'behind and Height above, at Angle round it (0 is from the front). Smoothing 0 is stuck to it, 1 drifts after it. With no ' +
+      'Follow it looks at the middle. Put it straight under the Scene; while it is there, the Scene’s own camera inputs ' +
+      'and its orbit are not used.',
+    ssr: { compat: 'safe' },
+    noodlNodeAsProp: true,
+    allowChildren: false,
+    defaultCss: { display: 'none' },
+
+    getReactComponent: function () {
+      return function CameraComponent(props) {
+        useSceneObject(props, {
+          kind: 'camera',
+          node: nodeIdOf(props),
+          follow: props.follow ? String(props.follow) : '',
+          distance: num(props.distance, 10),
+          height: num(props.height, 5),
+          angle: num(props.angle, 0),
+          smoothing: Math.max(0, Math.min(1, num(props.smoothing, 0.5))),
+          fov: num(props.fieldOfView, 50)
+        });
+        return null;
+      };
+    },
+
+    inputProps: {
+      follow: { type: 'string', displayName: 'Follow', group: 'Camera', default: '', description: 'The Name of what it follows. Empty: it looks at the middle.' },
+      distance: { type: 'number', displayName: 'Distance', group: 'Camera', default: 10, description: 'How far behind.' },
+      height: { type: 'number', displayName: 'Height', group: 'Camera', default: 5, description: 'How far above.' },
+      angle: { type: 'number', displayName: 'Angle', group: 'Camera', default: 0, description: 'Where round it the camera stands, in degrees. 0 is from the front.' },
+      smoothing: { type: 'number', displayName: 'Smoothing', group: 'Camera', default: 0.5, description: '0 sticks to it, 1 drifts after it.' },
+      fieldOfView: { type: 'number', displayName: 'Field Of View', group: 'Camera', default: 50, description: 'The lens, in degrees.' }
+    },
+
+    outputProps: {}
+  };
+
+  /**
+   * Which keys are held, for a game. Arrows and W A S D both steer; Space is its own. X and Z are the arrows as two
+   * numbers, the way a Body’s Push X and Push Z want them. A key typed into a text box is not a game key.
+   */
+  var KEY_OF = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', Space: 'space' };
+  var KEY_OUTPUTS = ['left', 'right', 'up', 'down', 'space', 'x', 'z'];
+
+  var Keys = {
+    name: 'three-kit.Keys',
+    displayNodeName: 'Keys',
+    category: '3D',
+    color: 'logic',
+    docs:
+      'Which keys are held right now, for steering a game: Left, Right, Up, Down (the arrows or W A S D) and Space. X is −1 ' +
+      'while left is held and 1 while right is; Z is −1 for up and 1 for down, so wire X and Z straight into a Body’s ' +
+      'Push X and Push Z. Keys typed into a text field are left alone. Pressed fires on each new key.',
+    searchTags: ['keyboard', 'arrows', 'wasd', 'game', 'controls', 'input'],
+    ssr: { compat: 'client-only', note: 'No keyboard on the server.' },
+
+    initialize: function () {
+      var node = this;
+      var held = (node._internal.held = { left: false, right: false, up: false, down: false, space: false });
+      node._internal.enabled = true;
+      if (typeof window === 'undefined') return;
+      function typing(e) {
+        var t = e.target;
+        if (!t || !t.tagName) return false;
+        return t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable;
+      }
+      function publish() {
+        for (var i = 0; i < KEY_OUTPUTS.length; i++) node.flagOutputDirty(KEY_OUTPUTS[i]);
+      }
+      function down(e) {
+        var k = KEY_OF[e.code];
+        if (!k || !node._internal.enabled || typing(e)) return;
+        if (k === 'space' || /^Arrow/.test(e.code)) e.preventDefault(); // the page must not scroll under a game
+        if (held[k]) return;
+        held[k] = true;
+        node._internal.last = k;
+        publish();
+        node.flagOutputDirty('key');
+        node.sendSignalOnOutput('pressed');
+      }
+      function up(e) {
+        var k = KEY_OF[e.code];
+        if (!k || !held[k]) return;
+        held[k] = false;
+        publish();
+      }
+      function clear() {
+        for (var k in held) held[k] = false;
+        publish();
+      }
+      window.addEventListener('keydown', down);
+      window.addEventListener('keyup', up);
+      window.addEventListener('blur', clear);
+      if (typeof node.addDeleteListener === 'function') {
+        node.addDeleteListener(function () {
+          window.removeEventListener('keydown', down);
+          window.removeEventListener('keyup', up);
+          window.removeEventListener('blur', clear);
+        });
+      }
+    },
+
+    inputs: {
+      enabled: {
+        type: 'boolean',
+        displayName: 'Enabled',
+        group: 'Keys',
+        default: true,
+        description: 'False ignores the keyboard (a paused game, a menu open).',
+        set: function (value) {
+          this._internal.enabled = value !== false && value !== 'false';
+          if (!this._internal.enabled) {
+            for (var k in this._internal.held) this._internal.held[k] = false;
+            for (var i = 0; i < KEY_OUTPUTS.length; i++) this.flagOutputDirty(KEY_OUTPUTS[i]);
+          }
+        }
+      }
+    },
+
+    outputs: {
+      left: { type: 'boolean', displayName: 'Left', group: 'Held', description: 'Left arrow or A is held.', get: function () { return !!this._internal.held.left; } },
+      right: { type: 'boolean', displayName: 'Right', group: 'Held', description: 'Right arrow or D is held.', get: function () { return !!this._internal.held.right; } },
+      up: { type: 'boolean', displayName: 'Up', group: 'Held', description: 'Up arrow or W is held.', get: function () { return !!this._internal.held.up; } },
+      down: { type: 'boolean', displayName: 'Down', group: 'Held', description: 'Down arrow or S is held.', get: function () { return !!this._internal.held.down; } },
+      space: { type: 'boolean', displayName: 'Space', group: 'Held', description: 'Space is held.', get: function () { return !!this._internal.held.space; } },
+      x: { type: 'number', displayName: 'X', group: 'Steer', description: '−1 left, 1 right, 0 neither or both.', get: function () { var k = this._internal.held; return (k.right ? 1 : 0) - (k.left ? 1 : 0); } },
+      z: { type: 'number', displayName: 'Z', group: 'Steer', description: '−1 up (away), 1 down (towards you), 0 neither or both.', get: function () { var k = this._internal.held; return (k.down ? 1 : 0) - (k.up ? 1 : 0); } },
+      key: { type: 'string', displayName: 'Last Key', group: 'Steer', description: 'left, right, up, down or space: the last one pressed.', get: function () { return this._internal.last || ''; } },
+      pressed: { type: 'signal', displayName: 'Pressed', group: 'Steer', description: 'A key was pressed. Last Key says which.' }
+    }
+  };
+
   /** @type {import('./types/node-kit').NodeKitModule} */
   var kit = {
-    nodes: [],
-    reactNodes: h ? [Scene, Mesh, Light, Group3D] : []
+    nodes: [Keys],
+    reactNodes: h ? [Scene, Mesh, Light, Group3D, Body, Camera] : []
   };
 
   Noodl.defineModule(kit);

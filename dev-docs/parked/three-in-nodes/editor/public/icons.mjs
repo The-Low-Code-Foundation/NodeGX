@@ -20,6 +20,12 @@ export const ICONS = {
   scene: svg(`<rect x="2.5" y="4" width="19" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path ${top} d="M12 8l4 2.2-4 2.2-4-2.2z"/><path ${left} d="M8 10.2l4 2.2v4l-4-2.2z"/><path ${right} d="M16 10.2l-4 2.2v4l4-2.2z"/>`),
   foreach: svg(`<path ${line} d="M4 7h11M4 12h11M4 17h11"/><path ${line} d="M18 6.5a3.5 3.5 0 1 1 0 7"/><path fill="currentColor" d="M17 11.5l2.6 2-2.6 2z"/>`),
   other: svg(`<circle cx="12" cy="12" r="3" fill="currentColor"/>`),
+  body: svg(`<circle cx="14" cy="13" r="6" fill="currentColor" fill-opacity=".9"/><path ${line} d="M2.5 9.5h4M2 13h3.5M2.5 16.5h4"/><path fill="currentColor" fill-opacity=".45" d="M6 20.5h16v1.5H6z"/>`),
+  camera3d: svg(`<path fill="currentColor" fill-opacity=".9" d="M3 7.5A1.5 1.5 0 0 1 4.5 6h9A1.5 1.5 0 0 1 15 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 3 16.5z"/><path fill="currentColor" fill-opacity=".55" d="M15 10.5l6-3.5v10l-6-3.5z"/>`),
+  player: svg(`<circle cx="14" cy="13" r="6" fill="currentColor" fill-opacity=".9"/><path ${line} d="M2.5 9.5h4M2 13h3.5M2.5 16.5h4"/>`),
+  floor: svg(`<path ${top} d="M12 8l10 5-10 5-10-5z"/><path ${left} d="M2 13v1.5l10 5V18z"/><path ${right} d="M22 13v1.5l-10 5V18z"/>`),
+  wall: svg(`<path ${top} d="M12 3l6 3-6 3-6-3z"/><path ${left} d="M6 6l6 3v12l-6-3z"/><path ${right} d="M18 6l-6 3v12l6-3z"/>`),
+  coin: svg(`<ellipse cx="12" cy="12" rx="5.5" ry="8" fill="none" stroke="currentColor" stroke-width="3.2"/>`),
   undo: svg(`<path ${line} d="M9 7L4.5 11.5 9 16"/><path ${line} d="M5 11.5h9a5 5 0 0 1 0 10h-2"/>`, 18),
   redo: svg(`<path ${line} d="M15 7l4.5 4.5L15 16"/><path ${line} d="M19 11.5h-9a5 5 0 0 0 0 10h2"/>`, 18),
   copy: svg(`<rect x="8" y="8" width="12" height="12" rx="2" ${line}/><path ${line} d="M16 5V4a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h1"/>`, 16),
@@ -35,5 +41,6 @@ export const ICONS = {
 /** The colour each kind of thing wears in the palette and the outline. */
 export const TINTS = {
   box: '#6aa8ff', sphere: '#ff6b81', cylinder: '#7bed9f', cone: '#ffc048', torus: '#c39bff', plane: '#70e1e1',
-  group: '#c8d0dc', sun: '#ffd166', lamp: '#ffe29a', sky: '#8ecbff', scene: '#ffb547', foreach: '#7ee0a8', other: '#8b95a5'
+  group: '#c8d0dc', sun: '#ffd166', lamp: '#ffe29a', sky: '#8ecbff', scene: '#ffb547', foreach: '#7ee0a8', other: '#8b95a5',
+  body: '#ff8a65', camera3d: '#b0bec5', player: '#ff6b6b', floor: '#90a4ae', wall: '#6aa8ff', coin: '#f2b630'
 };

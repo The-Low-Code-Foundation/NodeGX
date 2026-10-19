@@ -77,6 +77,7 @@ export class SceneModel {
    * object dragged) are one step, so undo takes the whole drag back, not its last pixel.
    */
   step(key, merge) {
+    if (this.batching === key) return;
     const now = Date.now();
     if (merge && this.lastStep && this.lastStep.merge === merge && this.lastStep.key === key && now - this.lastStep.at < 1500) {
       this.lastStep.at = now;
@@ -86,6 +87,18 @@ export class SceneModel {
     if (this.past.length > 200) this.past.shift();
     this.future = [];
     this.lastStep = { key, merge, at: now };
+  }
+
+  /** Several edits to one component as ONE undo step (a behaviour sentence adds nodes and wires together). */
+  batch(key, fn) {
+    this.step(key);
+    this.lastStep = null;
+    this.batching = key;
+    try {
+      return fn();
+    } finally {
+      this.batching = null;
+    }
   }
 
   /** Ends a merged run, so the next drag is its own step. */
@@ -137,13 +150,20 @@ export class SceneModel {
     for (let i = 2; ; i++) if (!taken.has(`${stem}-${i}`)) return `${stem}-${i}`;
   }
 
-  /** A new node under `parent` (a node id; none puts it at the component's top), at `index` among its children. */
-  addNode(key, { type, parent, index, label, parameters }) {
+  /**
+   * A new node under `parent` (a node id; none puts it at the component's top, where logic nodes live), at `index`
+   * among its children. `metadata.scene` marks a node a behaviour sentence made: `{ role, for }`, `for` being the
+   * object it belongs to (deleted and duplicated with it), or no `for` for one the scene shares (the score, the keys).
+   */
+  addNode(key, { type, parent, index, label, parameters, metadata, x, y }) {
     const c = this.comps.get(key);
     this.step(key);
     const id = this.newId(key, label || type.split('.').pop());
     const node = { id, type, label: label || undefined, parameters: clone(parameters ?? {}) };
     if (!node.label) delete node.label;
+    if (metadata) node.metadata = clone(metadata);
+    if (x !== undefined) node.x = x;
+    if (y !== undefined) node.y = y;
     if (parent) {
       node.parent = parent;
       const p = this.node(key, parent);
@@ -154,11 +174,12 @@ export class SceneModel {
     return id;
   }
 
-  /** The node and everything under it, with every wire that touches one of them. */
+  /** The node and everything under it, the behaviour nodes that belong to them, and every wire that touches one. */
   removeNode(key, id) {
     const c = this.comps.get(key);
     const gone = new Set(this.subtree(key, id));
     if (!gone.size) return;
+    for (const n of c.files.nodes.nodes) if (n.metadata?.scene?.for && gone.has(n.metadata.scene.for)) gone.add(n.id);
     this.step(key);
     const n = this.node(key, id);
     if (n.parent) {
@@ -209,7 +230,8 @@ export class SceneModel {
     this.step(key);
     const ids = this.subtree(key, id);
     const map = new Map();
-    for (const old of ids) map.set(old, this.newIdAvoiding(key, old, map));
+    // A copy of a copy is "Coin 3", id coin-3: numbered from the original, never "Coin copy copy".
+    for (const old of ids) map.set(old, this.newIdAvoiding(key, old === id ? old.replace(/-\d+$/, '') : old, map));
     const copies = ids.map((old) => {
       const src = clone(this.node(key, old));
       src.id = map.get(old);
@@ -220,11 +242,65 @@ export class SceneModel {
     const top = copies[0];
     top.parameters = top.parameters ?? {};
     top.parameters.x = Math.round(((Number(top.parameters.x) || 0) + 1.5) * 100) / 100;
-    if (top.label) top.label = `${top.label} copy`;
+    if (top.label) {
+      const base = top.label.replace(/(?: copy)+$/, '').replace(/ \d+$/, '');
+      const labels = new Set(this.nodes(key).map((x) => x.label));
+      let k = 2;
+      while (labels.has(`${base} ${k}`)) k++;
+      top.label = `${base} ${k}`;
+    }
+    // A Name another node reads (Hit Name, a Camera's Follow) must not be shared by the copy.
+    if (typeof top.parameters.name === 'string' && top.parameters.name) top.parameters.name = top.id;
     const p = this.node(key, n.parent);
     p.children.splice(p.children.indexOf(id) + 1, 0, top.id);
+    // Its behaviour comes with it: the nodes that belong to it are copied, a shared one (the score) is wired again.
+    const helpers = c.files.nodes.nodes.filter((x) => x.metadata?.scene?.for && map.has(x.metadata.scene.for));
+    for (const hn of helpers) map.set(hn.id, this.newIdAvoiding(key, hn.id, map));
+    for (const hn of helpers) {
+      const cp = clone(hn);
+      cp.id = map.get(hn.id);
+      cp.metadata.scene.for = map.get(hn.metadata.scene.for);
+      if (cp.y !== undefined) cp.y += 40;
+      copies.push(cp);
+    }
+    const wires = c.files.connections.connections.filter((w) => map.has(w.fromId) || map.has(w.toId));
     c.files.nodes.nodes.push(...copies);
+    for (const w of wires) c.files.connections.connections.push({ ...w, fromId: map.get(w.fromId) ?? w.fromId, toId: map.get(w.toId) ?? w.toId });
     return top.id;
+  }
+
+  // ── wires ───────────────────────────────────────────────────────────────────────────────────────────────────
+
+  /**
+   * A wire from one node's output to another's input. `replace` (a value input: X, Push X) drops whatever drove that
+   * input first; a signal input (Reset, the score's Increase) takes any number of wires.
+   */
+  connect(key, fromId, fromProperty, toId, toProperty, { replace } = {}) {
+    const c = this.comps.get(key);
+    const ws = c.files.connections.connections;
+    if (ws.some((w) => w.fromId === fromId && w.fromProperty === fromProperty && w.toId === toId && w.toProperty === toProperty)) return;
+    this.step(key);
+    if (replace) c.files.connections.connections = ws.filter((w) => !(w.toId === toId && w.toProperty === toProperty));
+    c.files.connections.connections.push({ fromId, fromProperty, toId, toProperty });
+  }
+
+  /** Removes the wires that match every field given. */
+  disconnect(key, match) {
+    const c = this.comps.get(key);
+    const ws = c.files.connections.connections;
+    const hit = (w) => Object.entries(match).every(([k, v]) => w[k] === v);
+    if (!ws.some(hit)) return;
+    this.step(key);
+    c.files.connections.connections = ws.filter((w) => !hit(w));
+  }
+
+  /** Removes a node with no parent (a logic node) and its wires, without touching anything else. */
+  removeLogic(key, id) {
+    const c = this.comps.get(key);
+    if (!this.node(key, id)) return;
+    this.step(key);
+    c.files.nodes.nodes = c.files.nodes.nodes.filter((x) => x.id !== id);
+    c.files.connections.connections = c.files.connections.connections.filter((w) => w.fromId !== id && w.toId !== id);
   }
 
   newIdAvoiding(key, base, pending) {

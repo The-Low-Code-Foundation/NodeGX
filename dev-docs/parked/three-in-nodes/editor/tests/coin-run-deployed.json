@@ -1,0 +1,12 @@
+[
+ { "waitFor": "document.querySelector('[data-three-scene]')?.__threeKit && /Score 0/.test(document.body.innerText)", "timeout": 60000, "label": "the deployed game is up, Score 0" },
+ { "waitFor": "(() => { const p = document.querySelector('[data-three-scene]').__threeKit.census().objects.find(o => o.name === 'player'); return p && p.grounded; })()", "timeout": 20000, "label": "the player lands" },
+ { "label": "running, not paused: five coins where NodeGX Scene put them", "eval": "(() => { const c = document.querySelector('[data-three-scene]').__threeKit.census(); return JSON.stringify({ paused: c.paused, coins: c.objects.filter(o => o.kind === 'body' && o.body === 'ghost').map(o => [o.x, o.z]) }); })()", "expect": "r => r.paused === false && JSON.stringify(r.coins) === JSON.stringify([[3,-3],[-3,-3],[-3,3],[3,3],[0,-4.5]])" },
+ { "eval": "(() => { document.body.click(); window.focus(); return 'ok'; })()" },
+ { "keyDown": "ArrowUp", "vk": 38 },
+ { "wait": 1200 },
+ { "keyUp": "ArrowUp", "vk": 38 },
+ { "wait": 300 },
+ { "label": "a real ArrowUp held (CDP key events) rolled the player away from the camera", "eval": "(() => { const p = document.querySelector('[data-three-scene]').__threeKit.census().objects.find(o => o.name === 'player'); return JSON.stringify({ x: p.x, z: p.z }); })()", "expect": "r => r.z < -1 && Math.abs(r.x) < 0.5" },
+ { "shot": "d1-deployed.png" }
+]

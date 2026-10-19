@@ -27,11 +27,14 @@ const REPO = path.join(__dirname, '..', '..', '..');
 const KIT = path.join(REPO, 'library', 'modules', 'three-kit', 'project', 'noodl_modules', 'three-kit');
 const FIXTURE = path.join(REPO, 'dev-docs', 'parked', 'three-in-nodes', 'fixture');
 
-const TYPES = ['three-kit.Group', 'three-kit.Light', 'three-kit.Mesh', 'three-kit.Scene'];
+// s5 (2026-10-19) added the game half: Body and Camera (React children of the Scene) and Keys (a logic node).
+const TYPES = ['three-kit.Body', 'three-kit.Camera', 'three-kit.Group', 'three-kit.Keys', 'three-kit.Light', 'three-kit.Mesh', 'three-kit.Scene'];
 
 let tempDir: string;
 let withKit: string;
 let withoutKit: string;
+let game: string;
+let coinRun: string;
 
 beforeAll(async () => {
   tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'three-kit-catalog-'));
@@ -41,6 +44,12 @@ beforeAll(async () => {
   fs.cpSync(FIXTURE, withKit, { recursive: true });
   fs.cpSync(FIXTURE, withoutKit, { recursive: true });
   fs.cpSync(KIT, path.join(withKit, 'noodl_modules', 'three-kit'), { recursive: true });
+  game = path.join(tempDir, 'game');
+  fs.cpSync(path.join(FIXTURE, '..', 'fixture-game'), game, { recursive: true });
+  fs.cpSync(KIT, path.join(game, 'noodl_modules', 'three-kit'), { recursive: true });
+  coinRun = path.join(tempDir, 'coin-run');
+  fs.cpSync(path.join(FIXTURE, '..', 'coin-run'), coinRun, { recursive: true });
+  fs.cpSync(KIT, path.join(coinRun, 'noodl_modules', 'three-kit'), { recursive: true });
 }, 120_000);
 
 afterAll(() => {
@@ -59,7 +68,7 @@ describe('the three-kit in the catalog', () => {
     overlay = extractProjectOverlay(withKit);
   }, 60_000);
 
-  it('🔴 the overlay holds Scene, Mesh, Light and 3D Group, each in the node picker', () => {
+  it('🔴 the overlay holds Scene, Mesh, Light, 3D Group, Body, Camera and Keys, each in the node picker', () => {
     expect(overlay.unavailable).toBeUndefined();
     expect(overlay.failures).toEqual([]);
     expect(overlay.nodes.map((n) => n.typeName).sort()).toEqual(TYPES);
@@ -78,7 +87,13 @@ describe('the three-kit in the catalog', () => {
         outputs: ['onTapped']
       },
       'three-kit.Light': { inputs: ['kind', 'colour', 'ground', 'intensity', 'x', 'y', 'z'], outputs: [] },
-      'three-kit.Group': { inputs: ['name', 'x', 'y', 'z', 'rotationY', 'scale', 'spin', 'spinSpeed'], outputs: ['onTapped'] }
+      'three-kit.Group': { inputs: ['name', 'x', 'y', 'z', 'rotationY', 'scale', 'spin', 'spinSpeed'], outputs: ['onTapped'] },
+      'three-kit.Body': {
+        inputs: ['body', 'name', 'x', 'y', 'z', 'pushX', 'pushZ', 'speed', 'bounce', 'reset', 'jumpX', 'jumpZ'],
+        outputs: ['onTapped', 'onHit', 'onHitName', 'onFell', 'onNowX', 'onNowY', 'onNowZ']
+      },
+      'three-kit.Camera': { inputs: ['follow', 'distance', 'height', 'angle', 'smoothing', 'fieldOfView'], outputs: [] },
+      'three-kit.Keys': { inputs: ['enabled'], outputs: ['left', 'right', 'up', 'down', 'space', 'x', 'z', 'key', 'pressed'] }
     };
     for (const [type, ports] of Object.entries(want)) {
       const ins = byType[type].inputs.map((p) => p.name);
@@ -90,7 +105,7 @@ describe('the three-kit in the catalog', () => {
 
   it('🔴 a Mesh and a 3D Group are titled on the canvas by their Name', () => {
     const label = Object.fromEntries(overlay.nodes.map((n) => [n.typeName, n.usePortAsLabel ?? null]));
-    expect(label).toEqual({ 'three-kit.Group': 'name', 'three-kit.Light': null, 'three-kit.Mesh': 'name', 'three-kit.Scene': null });
+    expect(label).toEqual({ 'three-kit.Body': 'name', 'three-kit.Camera': null, 'three-kit.Group': 'name', 'three-kit.Keys': null, 'three-kit.Light': null, 'three-kit.Mesh': 'name', 'three-kit.Scene': null });
   });
 
   it('🔴 a Scene and a 3D Group take children; a Mesh and a Light do not — and the catalog cannot say "only inside a Scene"', () => {
@@ -98,7 +113,11 @@ describe('the three-kit in the catalog', () => {
     // visual node and a Mesh may sit under a plain Group, where it draws nothing. The hierarchy rule is category-only;
     // filed as PARKED-THREE-S2-MESHOUTSIDE. This pins the reading so a change to it is seen.
     const rules = Object.fromEntries(overlay.nodes.map((n) => [n.typeName, { asChild: !!n.allowAsChild, holds: n.allowChildrenWithCategory ?? null }]));
+    // s5: a Body holds meshes the way a 3D Group does; a Camera holds nothing; Keys is a logic node, on the canvas, not in the tree.
     expect(rules).toEqual({
+      'three-kit.Body': { asChild: true, holds: ['Visual'] },
+      'three-kit.Camera': { asChild: true, holds: null },
+      'three-kit.Keys': { asChild: false, holds: null },
       'three-kit.Group': { asChild: true, holds: ['Visual'] },
       'three-kit.Light': { asChild: true, holds: null },
       'three-kit.Mesh': { asChild: true, holds: null },
@@ -116,4 +135,18 @@ describe('the three-kit in the catalog', () => {
     const control = validateOnDisk(new ProjectStore(withoutKit), { strict: false }).report;
     expect(kitDiagnostics(control).filter((d) => d.code === 'unknown-node-type').length).toBeGreaterThan(0);
   });
+
+  it('🔴 s5: the game fixture (a Fixed floor, a Body that Moves, a Ghost ring, a Camera, Keys wired into Push X / Z) validates with no error', () => {
+    setCatalogOverlay(extractProjectOverlay(game).nodes);
+    const report = validateOnDisk(new ProjectStore(game), { strict: false }).report;
+    expect(report.diagnostics.filter((d) => d.severity === 'error')).toEqual([]);
+    expect(kitDiagnostics(report)).toEqual([]);
+  }, 60_000);
+
+  it('🔴 s5: Coin Run, as NodeGX Scene saved it (its sentences are Counters, Expressions, Keys and wires), validates with no error', () => {
+    setCatalogOverlay(extractProjectOverlay(coinRun).nodes);
+    const report = validateOnDisk(new ProjectStore(coinRun), { strict: false }).report;
+    expect(report.diagnostics.filter((d) => d.severity === 'error')).toEqual([]);
+    expect(kitDiagnostics(report)).toEqual([]);
+  }, 60_000);
 });

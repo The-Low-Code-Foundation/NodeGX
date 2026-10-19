@@ -1,0 +1,311 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "visualRoots": [
+    "page"
+  ],
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Home"
+      },
+      "children": [
+        "layout"
+      ]
+    },
+    {
+      "id": "layout",
+      "type": "Group",
+      "label": "Layout",
+      "parent": "page",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "children": [
+        "marker",
+        "scene"
+      ]
+    },
+    {
+      "id": "marker",
+      "type": "Text",
+      "label": "Marker",
+      "parent": "layout",
+      "parameters": {
+        "text": "three-kit game drew"
+      }
+    },
+    {
+      "id": "scene",
+      "type": "three-kit.Scene",
+      "label": "Scene",
+      "parent": "layout",
+      "parameters": {
+        "orbit": false,
+        "height": {
+          "value": 520,
+          "unit": "px"
+        }
+      },
+      "children": [
+        "sky",
+        "sun",
+        "camera",
+        "floor",
+        "ball",
+        "ring"
+      ]
+    },
+    {
+      "id": "sky",
+      "type": "three-kit.Light",
+      "label": "Sky",
+      "parent": "scene",
+      "parameters": {
+        "kind": "sky",
+        "intensity": 0.8
+      }
+    },
+    {
+      "id": "sun",
+      "type": "three-kit.Light",
+      "label": "Sun",
+      "parent": "scene",
+      "parameters": {
+        "kind": "sun",
+        "intensity": 1.2,
+        "x": 6,
+        "y": 12,
+        "z": 4
+      }
+    },
+    {
+      "id": "camera",
+      "type": "three-kit.Camera",
+      "label": "Camera",
+      "parent": "scene",
+      "parameters": {
+        "follow": "Ball",
+        "distance": 8,
+        "height": 6,
+        "smoothing": 0.3
+      }
+    },
+    {
+      "id": "floor",
+      "type": "three-kit.Body",
+      "label": "Floor",
+      "parent": "scene",
+      "parameters": {
+        "body": "fixed",
+        "name": "Floor",
+        "y": -0.25
+      },
+      "children": [
+        "floorTile"
+      ]
+    },
+    {
+      "id": "floorTile",
+      "type": "three-kit.Mesh",
+      "label": "floorTile",
+      "parent": "floor",
+      "parameters": {
+        "shape": "box",
+        "name": "Floor",
+        "colour": "#3a4a5c",
+        "width": 12,
+        "height": 0.5,
+        "depth": 12
+      }
+    },
+    {
+      "id": "ball",
+      "type": "three-kit.Body",
+      "label": "Ball",
+      "parent": "scene",
+      "parameters": {
+        "body": "moves",
+        "name": "Ball",
+        "y": 2,
+        "speed": 6,
+        "bounce": 0.3
+      },
+      "children": [
+        "ballShape"
+      ]
+    },
+    {
+      "id": "ballShape",
+      "type": "three-kit.Mesh",
+      "label": "ballShape",
+      "parent": "ball",
+      "parameters": {
+        "shape": "sphere",
+        "colour": "#e5484d",
+        "width": 0.9,
+        "height": 0.9,
+        "depth": 0.9
+      }
+    },
+    {
+      "id": "ring",
+      "type": "three-kit.Body",
+      "label": "Ring",
+      "parent": "scene",
+      "parameters": {
+        "body": "ghost",
+        "name": "Ring",
+        "x": 3,
+        "y": 0.6
+      },
+      "children": [
+        "ringShape"
+      ]
+    },
+    {
+      "id": "ringShape",
+      "type": "three-kit.Mesh",
+      "label": "ringShape",
+      "parent": "ring",
+      "parameters": {
+        "shape": "torus",
+        "colour": "#e8a317",
+        "width": 1,
+        "height": 1,
+        "depth": 1,
+        "spin": true,
+        "spinSpeed": 120
+      }
+    },
+    {
+      "id": "keys",
+      "type": "three-kit.Keys",
+      "label": "Keys",
+      "x": 600,
+      "y": 100
+    },
+    {
+      "id": "vKeysX",
+      "type": "Variable2",
+      "label": "keysX",
+      "parameters": {
+        "name": "keysX"
+      },
+      "x": 800,
+      "y": 100
+    },
+    {
+      "id": "vBallX",
+      "type": "Variable2",
+      "label": "ballX",
+      "parameters": {
+        "name": "ballX"
+      },
+      "x": 800,
+      "y": 160
+    },
+    {
+      "id": "vBallY",
+      "type": "Variable2",
+      "label": "ballY",
+      "parameters": {
+        "name": "ballY"
+      },
+      "x": 800,
+      "y": 220
+    },
+    {
+      "id": "vBallZ",
+      "type": "Variable2",
+      "label": "ballZ",
+      "parameters": {
+        "name": "ballZ"
+      },
+      "x": 800,
+      "y": 280
+    },
+    {
+      "id": "vBallHit",
+      "type": "Variable2",
+      "label": "ballHit",
+      "parameters": {
+        "name": "ballHit"
+      },
+      "x": 800,
+      "y": 340
+    },
+    {
+      "id": "vRings",
+      "type": "Variable2",
+      "label": "rings",
+      "parameters": {
+        "name": "rings"
+      },
+      "x": 800,
+      "y": 400
+    },
+    {
+      "id": "vFalls",
+      "type": "Variable2",
+      "label": "falls",
+      "parameters": {
+        "name": "falls"
+      },
+      "x": 800,
+      "y": 460
+    },
+    {
+      "id": "vRingHit",
+      "type": "Variable2",
+      "label": "ringHit",
+      "parameters": {
+        "name": "ringHit"
+      },
+      "x": 800,
+      "y": 520
+    },
+    {
+      "id": "ringCount",
+      "type": "Counter",
+      "label": "rings",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 600,
+      "y": 400
+    },
+    {
+      "id": "fallCount",
+      "type": "Counter",
+      "label": "falls",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 600,
+      "y": 460
+    },
+    {
+      "id": "ringNext",
+      "type": "Expression",
+      "label": "next ring x",
+      "parameters": {
+        "expression": "n % 2 === 1 ? -3 : 3"
+      },
+      "x": 600,
+      "y": 560
+    }
+  ]
+}

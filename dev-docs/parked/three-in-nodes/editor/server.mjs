@@ -20,8 +20,9 @@ import { V2ProjectStore, commit, readProject } from './core/commit.mjs';
 const here = path.dirname(fileURLToPath(import.meta.url));
 // The kit's own installer: in this repo, the package's bin; for an outsider it would be `npx @nodegx/three-kit add`.
 const KIT_BIN = path.resolve(here, '../../../../library/modules/three-kit/bin/three-kit.js');
-// The demo: the prototype's fixture (a bar chart, a ball, a robot), copied fresh so trying it never edits the repo.
-const DEMO = path.resolve(here, '../fixture');
+// The demos, copied fresh so trying one never edits the repo: the prototype's fixture (a bar chart, a ball, a robot),
+// and Coin Run, the game NodeGX Scene built itself (s5: tests/coin-run.json builds it from a blank app).
+const DEMOS = { scene: path.resolve(here, '../fixture'), 'coin-run': path.resolve(here, '../coin-run') };
 const args = process.argv.slice(2);
 const flag = (name) => {
   const i = args.indexOf(name);
@@ -123,8 +124,10 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, projectPayload());
     }
     if (url === '/api/demo' && req.method === 'POST') {
-      const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'nodegx-scene-demo-'));
-      fs.cpSync(DEMO, dir, { recursive: true });
+      const which = (await readBody(req)).which;
+      const from = DEMOS[which] ?? DEMOS.scene;
+      const dir = fs.mkdtempSync(path.join(os.tmpdir(), `nodegx-scene-${DEMOS[which] ? which : 'demo'}-`));
+      fs.cpSync(from, dir, { recursive: true });
       const r = spawnSync(process.execPath, [KIT_BIN, 'add', dir], { encoding: 'utf8' });
       if (r.status !== 0) return send(res, 500, { error: (r.stderr || r.stdout).trim() });
       openProject(dir);

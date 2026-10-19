@@ -11,6 +11,8 @@
  *   node scripts/devtools/drive-three-kit.js <deploy-dir> [--shots <dir>] [--json <file>]
  *
  *   node scripts/devtools/drive-three-kit.js assemble <project-dir> --outside   (the ball moved out of the Scene)
+ *   node scripts/devtools/drive-three-kit.js assemble <project-dir> --game      (fixture-game: Body, Camera, Keys)
+ *   node scripts/devtools/drive-three-kit.js <deploy-dir> --game
  *   node scripts/devtools/drive-three-kit.js <deploy-dir> --outside              (one clause, OUTSIDE)
  *
  * 🔴 Gate on the deploy's EXIT CODE: 0 wrote the site; 11 refused a development engine (the flag above).
@@ -27,6 +29,18 @@
  *   WIRE    a Variable write (ballY = 4) moves the ball to y 4 in the scene graph — the graph owns the position
  *   TAP     a CDP mouse press and release on the tallest bar's projected centre fires Tapped and Tapped Name = "sat"
  *
+ * --game (s5, `fixture-game/`: a Fixed floor, a ball that Moves, a Ghost ring, a Camera following the ball, Keys):
+ *   GBOOT  the page drew, no console error; the census holds 3 Bodies (fixed, moves, ghost) and a Camera following "Ball"
+ *   LAND   the ball dropped from y 2 comes to rest ON the floor (y = its radius 0.45, grounded); Now Y reached the
+ *          graph; its Hit Name is "Floor"
+ *   FOLLOW the camera stands where the Camera node says: Distance 8 in front of and Height 6 above the ball
+ *   KEYS   a held ArrowRight (CDP key events) makes Keys X 1 and rolls the ball right; released, Keys X is 0 again
+ *   RING   rolled into the Ghost ring at x 3: Hit fires once (rings 1, Hit Name "Ball"), the ring jumps to x −3
+ *          through the graph (Counter → Expression → Jump To X), and the ball passed through it (a Ghost is solid to nothing)
+ *   FELL   rolled off the edge: Fell fires once (falls 1) and its wire to Reset puts the ball back at x 0
+ *   PAUSE  the engine's pause(true) (an editor's Edit mode) holds the ball at its start, y 2, and nothing falls;
+ *          pause(false) and it lands again
+ *
  * --outside (PARKED-THREE-S2-MESHOUTSIDE's repro: the ball moved from the Scene to the page's Layout Group):
  *   OUTSIDE exactly one console error, naming Mesh "ball" and the Scene it needs; Mesh Count 11 (the ball is not drawn).
  *           Its control is the main run's BOOT: the same page with the ball inside logs no error.
@@ -37,7 +51,7 @@ const zlib = require('zlib');
 const { withDeployedSite } = require('./drive-deployed.js');
 
 const REPO = path.resolve(__dirname, '..', '..');
-const FIXTURE = path.join(REPO, 'dev-docs', 'parked', 'three-in-nodes', 'fixture');
+const FIXTURE = path.join(REPO, 'dev-docs', 'parked', 'three-in-nodes', process.argv.includes('--game') ? 'fixture-game' : 'fixture');
 const KIT = path.join(REPO, 'library', 'modules', 'three-kit', 'project', 'noodl_modules', 'three-kit');
 
 const arg = (flag) => {
@@ -76,6 +90,7 @@ const DIR = process.argv[2];
 const SHOTS = arg('--shots');
 const JSON_OUT = arg('--json');
 const OUTSIDE = process.argv.includes('--outside');
+const GAME = process.argv.includes('--game');
 if (!DIR || !fs.existsSync(path.join(DIR, 'index.html'))) {
   console.error('usage: drive-three-kit.js <deploy-dir> [--shots <dir>] [--json <file>]  |  assemble <project-dir>');
   process.exit(2);
@@ -166,6 +181,105 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
   };
   await page.setViewport({ width: 1024, height: 640 });
   await wait(1500);
+
+
+  if (GAME) {
+    await page.client.send('Emulation.setFocusEmulationEnabled', { enabled: true });
+    const KEY = { ArrowRight: 39, ArrowLeft: 37, ArrowUp: 38, ArrowDown: 40 };
+    const key = (type, code) => page.client.send('Input.dispatchKeyEvent', { type, code, key: code, windowsVirtualKeyCode: KEY[code], nativeVirtualKeyCode: KEY[code] });
+    const until = async (what, ms) => {
+      const t0 = Date.now();
+      let last;
+      while (Date.now() - t0 < ms) {
+        last = await what();
+        if (last && last.ok) return last;
+        await wait(100);
+      }
+      return last || { ok: false };
+    };
+    const bodies = (c) => c.objects.filter((o) => o.kind === 'body');
+    const ballOf = (c) => c.objects.find((o) => o.kind === 'body' && o.name === 'Ball');
+    const ringOf = (c) => c.objects.find((o) => o.kind === 'body' && o.name === 'Ring');
+
+    // GBOOT
+    const marker = await evaluate(`document.body.innerText.includes('three-kit game drew')`);
+    const c0 = await census();
+    const kinds = bodies(c0).map((b) => b.body).sort().join(',');
+    const camNode = c0.objects.find((o) => o.kind === 'camera');
+    check('GBOOT the page drew, no console error; 3 Bodies (fixed, ghost, moves) and a Camera following "Ball"', marker && page.consoleErrors.length === 0 && kinds === 'fixed,ghost,moves' && camNode && camNode.follow === 'Ball', { marker, kinds, camNode, consoleErrors: page.consoleErrors });
+
+    // LAND — gate on the state, not the clock: software GL runs at a fraction of real time.
+    const land = await until(async () => {
+      const b = ballOf(await census());
+      return { ok: !!b && b.grounded && Math.abs(b.y - 0.45) < 0.02 && Math.abs(b.vy) < 0.5, b };
+    }, 8000);
+    const yVar = await vars('ballY');
+    const hitVar = await vars('ballHit');
+    readings.land = { ball: land.b, ballY: yVar, ballHit: hitVar };
+    check('LAND  the ball dropped from y 2 rests on the floor (y 0.45, its radius; grounded); Now Y reached the graph; Hit Name "Floor"', land.ok && typeof yVar === 'number' && Math.abs(yVar - 0.45) < 0.03 && hitVar === 'Floor', readings.land);
+
+    // FOLLOW — Distance 8 in front (angle 0 is +z), Height 6 above the ball's middle, once the smoothing settles.
+    const follow = await until(async () => {
+      const c = await census();
+      const b = ballOf(c);
+      const cam = c.camera;
+      return { ok: !!b && Math.abs(cam.x - b.x) < 0.05 && Math.abs(cam.y - (b.y + 6)) < 0.05 && Math.abs(cam.z - (b.z + 8)) < 0.05, cam, b: b && { x: b.x, y: b.y, z: b.z } };
+    }, 6000);
+    readings.follow = follow;
+    check('FOLLOW the camera stands 8 in front of and 6 above the ball (the Camera node, Follow "Ball")', follow.ok, follow);
+    await shot('g1-landed');
+
+    // KEYS + RING — hold ArrowRight: Keys X is 1, the ball rolls right into the ring at x 3.
+    const x0 = ballOf(await census()).x;
+    await key('rawKeyDown', 'ArrowRight');
+    await wait(200);
+    const keysHeld = await vars('keysX');
+    const ring = await until(async () => {
+      const rings = await vars('rings');
+      const r = ringOf(await census());
+      return { ok: rings >= 1 && !!r && Math.abs(r.x + 3) < 1e-6, rings };
+    }, 10000);
+    const cRing = await census();
+    const ringVar = await vars('ringHit');
+    readings.keys = { x0, keysHeld, ballAfter: ballOf(cRing) };
+    check('KEYS  ArrowRight held: Keys X is 1 and the ball rolls right', keysHeld === 1 && ballOf(cRing).x > x0 + 1, readings.keys);
+    const ringBody = ringOf(cRing);
+    readings.ring = { rings: ring.rings, ringHit: ringVar, ring: ringBody, ball: ballOf(cRing) };
+    await shot('g2-ring');
+
+    // FELL — keep holding: past x 6 the ball leaves the floor, falls, Fell → Reset puts it back at x 0.
+    const fell = await until(async () => {
+      const falls = await vars('falls');
+      return { ok: falls >= 1, falls };
+    }, 15000);
+    await key('keyUp', 'ArrowRight');
+    await wait(300);
+    const keysUp = await vars('keysX');
+    const rings2 = await vars('rings');
+    check('RING  into the Ghost ring: Hit once (rings 1, Hit Name "Ball"); the graph moved the ring to x −3 (Jump To X); the ball went on through it to the edge', ring.ok && rings2 === 1 && ringVar === 'Ball' && ringBody && Math.abs(ringBody.x + 3) < 1e-6 && fell.ok, Object.assign(readings.ring, { ringsAfterFall: rings2 }));
+    const cFell = await census();
+    const bFell = ballOf(cFell);
+    readings.fell = { falls: fell.falls, ball: bFell, keysUp };
+    check('FELL  off the edge: Fell once (falls 1); its wire to Reset brings the ball back to x 0; Keys X 0 once released', fell.ok && fell.falls === 1 && Math.abs(bFell.x) < 1 && keysUp === 0, readings.fell);
+    await shot('g3-reset');
+
+    // PAUSE — what an editor's Edit mode does: every Body at its start, nothing falls; then it plays again.
+    await evaluate(`(${ROOT}).__threeKit.pause(true)`);
+    await wait(600);
+    const p1 = ballOf(await census());
+    await wait(600);
+    const p2 = ballOf(await census());
+    await evaluate(`(${ROOT}).__threeKit.pause(false)`);
+    const relanded = await until(async () => {
+      const b = ballOf(await census());
+      return { ok: !!b && b.grounded && Math.abs(b.y - 0.45) < 0.02, b };
+    }, 8000);
+    readings.pause = { p1, p2, relanded: relanded.b };
+    check('PAUSE pause(true) holds the ball at its start (y 2) and it does not fall; pause(false) and it lands again', Math.abs(p1.y - 2) < 1e-6 && Math.abs(p2.y - 2) < 1e-6 && Math.abs(p1.x) < 1e-6 && relanded.ok, readings.pause);
+
+    readings.consoleErrors = page.consoleErrors;
+    return;
+  }
 
   if (OUTSIDE) {
     const meshes = await vars('meshes');

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c_app",
+  "name": "App",
+  "path": "/App",
+  "type": "root",
+  "description": "A blank app with one empty page: where NodeGX Scene builds Coin Run (dev-docs/parked/THREE-IN-NODES.md §3.5)."
+}

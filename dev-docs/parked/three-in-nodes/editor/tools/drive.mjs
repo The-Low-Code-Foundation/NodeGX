@@ -3,6 +3,10 @@
 //   node tools/drive.mjs <url> <steps.json> <out-dir>
 // A step is { "wait": ms } | { "eval": "js" } | { "shot": "name.png" } | { "click": [x, y] }
 //   | { "drag": [x1, y1, x2, y2] } | { "key": "KeyW", "ms": 500 } | { "type": "text" }
+//   | { "keyDown": "ArrowRight", "vk": 39 } | { "keyUp": "ArrowRight" }   (a key HELD across steps, for a game)
+// An eval step with "expect" is a check: "r => r.meshes === 12" runs on its value (JSON-parsed when it parses) and
+// prints PASS or FAIL with the label. A waitFor that times out is a FAIL too. Exit 1 when anything failed, 0 when
+// every check passed (s5, 2026-10-19: before this the drive always exited 0 and "green" meant read by eye).
 //   On Node 20, run it as `node --experimental-websocket tools/drive.mjs …` (WebSocket is built in from Node 22).
 //   The page's preview takes 15–30 s to boot in headless Chrome: wait for it before testing it.
 import { spawn } from 'node:child_process';
@@ -65,6 +69,13 @@ await send('Emulation.setDeviceMetricsOverride', { width: 1600, height: 1000, de
 await send('Page.navigate', { url });
 await sleep(1500);
 
+let checks = 0;
+let failed = 0;
+const verdict = (ok, label, saw) => {
+  checks++;
+  if (!ok) failed++;
+  console.log(`${ok ? 'PASS' : 'FAIL'}  ${label}${ok ? '' : `\n        saw: ${String(saw).slice(0, 1500)}`}`);
+};
 const mouse = (type, x, y, extra = {}) => send('Input.dispatchMouseEvent', { type, x, y, button: 'left', buttons: type === 'mouseReleased' ? 0 : 1, clickCount: 1, ...extra });
 for (const step of steps) {
   if (step.wait) await sleep(step.wait);
@@ -78,6 +89,7 @@ for (const step of steps) {
       if (!ok) await sleep(250);
     }
     console.log('[waitFor]', step.waitFor, ok ? 'ok' : 'TIMED OUT');
+    if (!ok) verdict(false, `waitFor ${step.label ?? step.waitFor}`, 'timed out');
   }
   if (step.node) {
     // Another process acting on the files mid-session (a node script with its arguments).
@@ -89,6 +101,19 @@ for (const step of steps) {
     const r = await send('Runtime.evaluate', { expression: step.eval, awaitPromise: true, returnByValue: true });
     const v = r.result?.result;
     console.log('[eval]', step.label ?? step.eval.slice(0, 60), '→', String(JSON.stringify(v?.value ?? v?.description ?? r.result?.exceptionDetails?.exception?.description ?? r.error)).slice(0, 3000));
+    if (step.expect) {
+      let got = v?.value;
+      try {
+        if (typeof got === 'string') got = JSON.parse(got);
+      } catch {}
+      let ok = false;
+      try {
+        ok = !!new Function(`return (${step.expect})`)()(got);
+      } catch (e) {
+        ok = false;
+      }
+      verdict(ok, step.label ?? step.eval.slice(0, 60), JSON.stringify(got));
+    }
   }
   if (step.clickSel || step.clickCard) {
     // Where a person would click: the element's centre, or the card's place on the map.
@@ -158,6 +183,8 @@ for (const step of steps) {
     await sleep(step.ms ?? 50);
     await send('Input.dispatchKeyEvent', { type: 'keyUp', code: step.key, key: step.keyName ?? step.key, modifiers: step.modifiers ?? 0 });
   }
+  if (step.keyDown) await send('Input.dispatchKeyEvent', { type: 'rawKeyDown', code: step.keyDown, key: step.keyName ?? step.keyDown, windowsVirtualKeyCode: step.vk ?? 0 });
+  if (step.keyUp) await send('Input.dispatchKeyEvent', { type: 'keyUp', code: step.keyUp, key: step.keyName ?? step.keyUp, windowsVirtualKeyCode: step.vk ?? 0 });
   if (step.type) await send('Input.insertText', { text: step.type });
   if (step.shot) {
     const r = await send('Page.captureScreenshot', { format: 'png' });
@@ -167,4 +194,5 @@ for (const step of steps) {
 }
 ws.close();
 chrome.kill();
-process.exit(0);
+console.log(`\n${checks - failed} / ${checks} checks PASS`);
+process.exit(failed ? 1 : 0);

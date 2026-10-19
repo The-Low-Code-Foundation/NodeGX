@@ -1,6 +1,6 @@
 {
   "label": "Three Kit",
-  "description": "three.js as NodeGX nodes — a PROTOTYPE (dev-docs/parked/THREE-IN-NODES.md). Scene is a WebGL canvas and a parent, sized by Width and Height; Mesh (box, sphere, cylinder, cone, torus, plane at X Y Z, sized, coloured, Sit On Floor, Spin, Tapped), Light (sun, lamp, sky) and 3D Group (a parent that moves, turns and scales what is under it) go under it in the structure lane and draw nothing of their own: they tell the Scene above them what they are. A For Each under a Scene makes one mesh per row; Animate To Value wired into X glides one. three.js 0.158.0 is vendored beside the kit (MIT).",
+  "description": "three.js as NodeGX nodes — a PROTOTYPE (dev-docs/parked/THREE-IN-NODES.md). Scene is a WebGL canvas and a parent, sized by Width and Height; Mesh (box, sphere, cylinder, cone, torus, plane at X Y Z, sized, coloured, Sit On Floor, Spin, Tapped), Light (sun, lamp, sky) and 3D Group (a parent that moves, turns and scales what is under it) go under it in the structure lane and draw nothing of their own: they tell the Scene above them what they are. A For Each under a Scene makes one mesh per row; Animate To Value wired into X glides one. For games: Body (a 3D Group the Scene moves: falls, rolls, bounces, Hit, Fell; Moves, Fixed or Ghost), Camera (follows a thing by Name) and Keys (the arrow keys held, as numbers for a Body's Push). three.js 0.158.0 is vendored beside the kit (MIT).",
   "type": "module",
   "tags": ["UI", "3D"],
   "version": "0.1.0",
