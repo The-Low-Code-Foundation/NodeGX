@@ -21,6 +21,9 @@
  *  - The ruling (2026-10-10, both poses with a switch): a REAL press — Input.dispatchMouseEvent at the screen point the
  *    page projects the button to — reaches the app in the scene (posed in 3D) and in the window, and changes it.
  *
+ * OWN-012 step 4, in Orbit, the drawn pose: the phone is drawn (one box per visual node), a press on it is not a press
+ * on the app (it is a picture), and one press on "App in the scene" brings the real app back, which a press reaches.
+ *
  *   node check.mjs [--shot <dir>]        exits 0 PASS, 1 FAIL, 2 when the runtime, the bundle or Chrome is missing
  *   node check.mjs --site <url>          grades the page at <url> instead (a folder from `serve.mjs --out`, e.g. https://nodegx.io/orbit/)
  *
@@ -220,6 +223,30 @@ try {
     ok(problems.length === 0, `no exception or console error${problems.length ? ': ' + [...new Set(problems)].slice(0, 3).join(' / ') : ''}`);
     problems.length = 0;
     void before;
+  }
+
+  {
+    // OWN-012 step 4: the third pose. The phone is a picture the page drew from the descriptions (its grade, box by box
+    // against the real app, is own-012/measure.mjs --page orbit); here: it is drawn, it is not the app, and the real app
+    // is one press away.
+    console.log('check: drawn');
+    await client.send('Page.navigate', { url: `${page}?stage=orbit&speed=1&pose=drawn` });
+    let title = 'pending';
+    for (let i = 0; i < 200 && (title === 'pending' || title === ''); i++) { await wait(200); title = await evaluate(client, 'document.title').catch(() => 'pending'); }
+    ok(title.startsWith('ready nodes=28 wires=37 visual=9'), `page ready (${title})`);
+    if (!title.startsWith('ready')) throw new Error('the page did not start');
+    const drawn = await until(`__orbit.drawn.on && __orbit.drawn.drawing && __orbit.drawn.drawing.boxes.filter((b) => b.present).length`, 8000);
+    ok(drawn === 9, `the phone is drawn from the descriptions: ${drawn} boxes, one per visual node, the real app unseen behind it (${await evaluate(client, `document.getElementById('app').className`)})`);
+    const pic = await press('pauseBtn', (now, was) => now !== was);
+    ok(pic.hit !== 'IFRAME' && pic.got.length === 0, `a real press on the drawn Pause lands on the picture, not the app (hit ${pic.hit}; the app received ${JSON.stringify(pic.got)})`);
+    await clickSel('[data-mode="scene"]');
+    ok(await until(`__orbit.mode === 'scene' && !__orbit.drawn.on && !document.getElementById('app').classList.contains('drawn')`, 3000), 'one press on App in the scene puts the real app back on the phone');
+    await wait(1200);   // the pose settles
+    const real = await press('pauseBtn', (now, was) => now !== was);
+    ok(real.hit === 'IFRAME' && real.after !== real.before, `and a real press on Pause reaches it again (hit ${real.hit}; ${real.before} → ${real.after})`);
+    if (shotDir) { const { data } = await client.send('Page.captureScreenshot', { format: 'png' }); writeFileSync(join(shotDir, 'orbit-drawn-then-real.png'), Buffer.from(data, 'base64')); }
+    ok(problems.length === 0, `no exception or console error${problems.length ? ': ' + [...new Set(problems)].slice(0, 3).join(' / ') : ''}`);
+    problems.length = 0;
   }
 } catch (err) {
   fails.push(String(err && err.message));

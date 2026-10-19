@@ -17,7 +17,14 @@
   Orbit (rings around the app). In Graph and Lift the app sits in a window; in Orbit one switch puts it inside the
   scene or keeps it in its window (Richard's R7, s4). Both are the same element, so the app keeps running.
 
-    node serve.mjs → /orbit.html   ?stage=graph|lift|orbit  ?pose=scene|window  ?speed=1|60  ?set=node.param=value (repeatable)
+  OWN-012 step 4 — the third pose, Drawn: the phone in the scene is a picture the page paints itself, on a WebGL texture,
+  from the descriptions alone: the files, the node specs and the layout model (`@nodegx/node-spec`'s drawer, drawn.js),
+  with the values the running app's trace sends. The real app keeps running, unseen, behind it; it gives the values,
+  the page a Router shows and, for the grade only, its boxes. "App in the scene" is the real app again, one press away.
+  `window.__orbit.drawn.grade()` grades the picture against the real app box by box (own-012/measure.mjs --page orbit).
+
+    node serve.mjs → /orbit.html   ?stage=graph|lift|orbit  ?pose=scene|window|drawn  ?speed=1|60  ?set=node.param=value (repeatable)
+                                   ?mutant=nogap (the drawn phone loses every gap: its grade must go red)
 -->
 <style>
 :root {
@@ -35,6 +42,7 @@ body { margin: 0; background: var(--ground); color: var(--fg); font: 13px/1.45 v
 #css.dragging { cursor: grabbing; }
 #css.connecting { cursor: crosshair; }
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+#app.drawn { opacity: 0; pointer-events: none !important; }   /* OWN-012: drawn on the phone instead; still running, so still traced. !important: CSS3DObject sets pointer-events:auto inline */
 #app { width: 380px; height: 680px; border-radius: 36px; overflow: hidden; background: #0b1026; box-shadow: 0 0 0 8px #0d0e12, 0 30px 80px rgba(0,0,0,.55); }
 
 .bar { position: fixed; left: 0; right: 0; top: 0; z-index: 4; padding: 8px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--bar); border-bottom: 1px solid var(--rule); }
@@ -178,6 +186,7 @@ input[type="text"], input[type="number"], select { width: 100%; box-sizing: bord
   <div class="seg" id="poses" role="group" aria-label="Where the app sits" hidden>
     <button type="button" data-mode="scene" aria-pressed="true">App in the scene</button>
     <button type="button" data-mode="window" aria-pressed="false">App in a window</button>
+    <button type="button" data-mode="drawn" aria-pressed="false" title="The screen drawn by this page from what each node says it draws">Drawn from the descriptions</button>
   </div>
   <div class="spacer"></div>
   <span class="mono" style="color:var(--faint)">clock</span>
@@ -262,6 +271,7 @@ import * as THREE from 'three';
 import { CSS3DRenderer, CSS3DObject } from 'three/addons/renderers/CSS3DRenderer.js';
 import { look, nodeScheme, wireColors } from './look.js';
 import { portsFor, hasSpec } from './specs.js';
+import { projectParts, drawProject, measurerFor, realElements, gradeDrawing, paintDrawing, traceValue } from './draw-page.mjs';
 
 const $ = (id) => document.getElementById(id);
 const say = (t) => { document.title = t; };
@@ -322,6 +332,7 @@ const UI = css.getPropertyValue('--ui'), MONO = css.getPropertyValue('--mono');
 
 const APP = { w: 380, h: 680 };
 const appObj = new CSS3DObject($('app'));
+let appHole;
 appObj.scale.setScalar(0.01);
 scene.add(appObj);
 // the hole: transparent pixels with depth where the app is, so a card behind the app is hidden and one in front is not
@@ -332,6 +343,7 @@ scene.add(appObj);
   const hole = new THREE.Mesh(new THREE.ShapeGeometry(s, 8), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0, blending: THREE.NoBlending, side: THREE.DoubleSide }));
   hole.renderOrder = 10;
   appObj.add(hole);
+  appHole = hole;
 }
 function resize() {
   renderer.setSize(innerWidth, innerHeight, false);
@@ -527,9 +539,11 @@ const fmt = (v) => {
 const raw = (k) => { const v = last[k]; return v === undefined ? undefined : /^".*"$/.test(v) ? v.slice(1, -1) : v; };
 const recent = [], wiresSeen = new Set();
 let eventCount = 0;
+const drawnValues = {};   // OWN-012: `${toNode}` → port → value, coerced as the drawer takes it
 preview.onTrace(({ events }) => {
   for (const e of events) {
     eventCount++;
+    if (e.kind === 'value') (drawnValues[e.toNode] ??= {})[e.toPort] = traceValue(e.value);
     const shown = e.kind === 'signal' ? '' : e.value;
     last[`${e.fromNode}.out.${e.fromPort}`] = shown;
     last[`${e.toNode}.in.${e.toPort}`] = shown;
@@ -1323,10 +1337,14 @@ const CAPTIONS = [
   ['Each step up is one more wire along the data flow.', 'A tick from the clock climbs the staircase to the screen nodes at the top. The values on the cards and the pulses on the wires come from the running app.'],
   ['The same nodes, arranged around the app they make.', 'The screen\'s nodes line up beside the app, each pointing at what it draws. Each ring out is one more wire away from the screen.']
 ];
-const POSES = { scene: ' The app is an object in the scene: it turns with the graph, and you can still press its buttons.', window: ' The app stays flat in its window while the graph turns behind it.' };
+const POSES = {
+  scene: ' The app is an object in the scene: it turns with the graph, and you can still press its buttons.',
+  window: ' The app stays flat in its window while the graph turns behind it.',
+  drawn: ' This phone is a picture: the page drew it from what each node says it draws (the node specs and the layout model), with the values the running app sends. App in the scene puts the real app back.'
+};
 const STAGES = ['graph', 'lift', 'orbit'];
 let stage = Math.max(0, STAGES.indexOf(query.get('stage') || 'graph')), stageT = stage;
-let mode = query.get('pose') === 'window' ? 'window' : 'scene';
+let mode = ['window', 'drawn'].includes(query.get('pose')) ? query.get('pose') : 'scene';
 let pan = new THREE.Vector3(), zoom = 1, turnYaw = 0, turnPitch = 0, autoYaw = 0, userTurned = false;
 const stageBtns = [...document.querySelectorAll('[data-stage]')];
 function caption() {
@@ -1361,7 +1379,7 @@ for (const b of document.querySelectorAll('[data-speed]')) {
 }
 setMode(mode);
 setStage(stage);
-let mix = stage === 2 && mode === 'scene' ? 0 : 1;   // 0 = the app in the scene, 1 = in its window
+let mix = stage === 2 && mode !== 'window' ? 0 : 1;   // 0 = the app in the scene (real or drawn), 1 = in its window
 
 /* ================= hover: a card lights what it draws, and what you point at in the app lights its card ================= */
 let lit = [];
@@ -1419,7 +1437,7 @@ host.addEventListener('pointermove', (e) => {
   const p = ptrs.get(e.pointerId);
   if (!p || !gesture) {
     const hc = hitAt(e.clientX, e.clientY, tops());
-    light(hc ? hc.object.userData.id : null);
+    light(hc ? hc.object.userData.id : drawnIdAt(e.clientX, e.clientY));
     return;
   }
   const dx = e.clientX - p.x, dy = e.clientY - p.y;
@@ -1458,6 +1476,78 @@ const up = (e) => {
 host.addEventListener('pointerup', up);
 host.addEventListener('pointercancel', (e) => { ptrs.delete(e.pointerId); gesture = null; host.classList.remove('dragging', 'connecting'); ghostWire.visible = false; });
 host.addEventListener('wheel', (e) => { e.preventDefault(); zoom = clampZoom(zoom * (1 - Math.sign(e.deltaY) * 0.08)); }, { passive: false });
+
+/* ================= OWN-012 step 4: the screen drawn from the descriptions, on the phone ================= */
+// The drawer (`@nodegx/node-spec`, drawn.js) turns the files and the wires' values into boxes; draw-page.mjs paints them on
+// a canvas; the canvas is the phone's texture. Nothing here reads the real app's CSS or its boxes to draw: the real app
+// gives the values (its trace) and the page a Router shows. Its boxes are read only by drawn.grade().
+const BEZEL = 8, SCREEN_R = 36;
+const drawnCanvas = document.createElement('canvas');
+const DPR = 2;
+drawnCanvas.width = (APP.w + BEZEL * 2) * DPR; drawnCanvas.height = (APP.h + BEZEL * 2) * DPR;
+const drawnTex = new THREE.CanvasTexture(drawnCanvas); drawnTex.colorSpace = THREE.SRGBColorSpace; drawnTex.anisotropy = 8;
+const drawnMesh = new THREE.Mesh(new THREE.PlaneGeometry(APP.w + BEZEL * 2, APP.h + BEZEL * 2), new THREE.MeshBasicMaterial({ map: drawnTex, transparent: true, fog: false }));
+drawnMesh.position.z = 1; drawnMesh.renderOrder = 11; drawnMesh.visible = false;
+appObj.add(drawnMesh);
+const drawnMeasure = measurerFor({ tokenValue: (n) => drawnParts()?.tokenValue(n) });
+const MUTANT = query.get('mutant') || undefined;
+let partsAt = -1, parts = null, drawing = null, drawnKey = '', drawnPages = new Map(), drawnWasOn = false;
+const drawnOn = () => mode === 'drawn' && stage === 2;
+/** The files as the drawer takes them, re-read when the app was rebuilt from them (every edit goes through show()). */
+function drawnParts() {
+  if (partsAt !== shows) { parts = projectParts(files.entries()); partsAt = shows; }
+  return parts;
+}
+/** One drawing from what the trace has sent so far: the root component the app shows, at the app's size. */
+function drawNow() {
+  const p = drawnParts();
+  drawnPages = realElements(preview, p).pages;   // which page each Router shows: the real app's, followed, not drawn from
+  drawing = drawProject(p, { values: drawnValues, viewport: { width: APP.w, height: APP.h }, measure: drawnMeasure, pages: drawnPages, mutant: MUTANT });
+  return drawing;
+}
+const drawnBoxOf = (id) => drawing?.boxes.find((b) => b.id === id && b.present);
+function paintPhone() {
+  const g = drawnCanvas.getContext('2d');
+  g.setTransform(DPR, 0, 0, DPR, 0, 0);
+  g.clearRect(0, 0, APP.w + BEZEL * 2, APP.h + BEZEL * 2);
+  g.fillStyle = '#0d0e12'; g.beginPath(); g.roundRect(0, 0, APP.w + BEZEL * 2, APP.h + BEZEL * 2, SCREEN_R + BEZEL); g.fill();
+  g.save();
+  g.translate(BEZEL, BEZEL);
+  g.beginPath(); g.roundRect(0, 0, APP.w, APP.h, SCREEN_R); g.clip();
+  g.fillStyle = '#ffffff'; g.fillRect(0, 0, APP.w, APP.h);   // the frame's own background, under the app
+  const hi = hoverId ?? selected;
+  paintDrawing(g, drawing, { parts: drawnParts(), values: drawnValues, pages: drawnPages, outlines: false, highlight: hi ? drawnBoxOf(hi)?.path : undefined });
+  g.restore();
+  drawnTex.needsUpdate = true;
+}
+function syncDrawn() {
+  const on = drawnOn();
+  if (on !== drawnWasOn) { drawnWasOn = on; drawnMesh.visible = on; if (appHole) appHole.visible = !on; $('app').classList.toggle('drawn', on); drawnKey = ''; }
+  if (!on || frameN % 3 !== 0) return;
+  const key = JSON.stringify([drawnValues, shows, hoverId, selected]);
+  if (key === drawnKey) return;
+  drawnKey = key;
+  drawNow();
+  paintPhone();
+}
+/** The screen node under a point of this page, read from the drawing (the deepest box there), for the card to light. */
+function drawnIdAt(x, y) {
+  if (!drawnOn() || !drawing) return null;
+  const hit = hitAt(x, y, [drawnMesh]);
+  if (!hit?.uv) return null;
+  const px = hit.uv.x * (APP.w + BEZEL * 2) - BEZEL, py = (1 - hit.uv.y) * (APP.h + BEZEL * 2) - BEZEL;
+  let best = null;
+  for (const b of drawing.boxes) if (b.present && visual.has(b.id) && px >= b.x && px <= b.x + b.width && py >= b.y && py <= b.y + b.height) best = b;
+  return best ? best.id : null;
+}
+/** The grade (own-012/measure.mjs --page orbit): a fresh drawing and the real app's boxes, read at the same instant. */
+function gradeDrawn() {
+  const d = drawNow();
+  const p = drawnParts();
+  const real = realElements(preview, p);
+  const { rows, needs } = gradeDrawing(d, { real, preview });
+  return { project: query.get('project') || 'orbit', viewport: { width: APP.w, height: APP.h }, mutant: MUTANT, rootPath: p.rootPath, pages: Object.fromEntries(real.pages), rows, needs, values: JSON.parse(JSON.stringify(drawnValues)), visualCount: p.visualCount, status: lastShow };
+}
 
 /* ================= frame ================= */
 const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
@@ -1516,7 +1606,7 @@ function tick(now) {
   phonePos.set(ORBIT_C.x, PHONE_Y, ORBIT_C.z);
 
   // the app: in the scene at the centre of the rings, facing the camera's turn; or in its window, 10 units in front of the camera
-  mix += ((stage === 2 && mode === 'scene' ? 1 - orb : 1) - mix) * Math.min(1, dt * 3.2);
+  mix += ((stage === 2 && mode !== 'window' ? 1 - orb : 1) - mix) * Math.min(1, dt * 3.2);
   const m = eased(clamp01(mix));
   poseScene.p.copy(phonePos); poseScene.q.setFromEuler(new THREE.Euler(0, yaw, 0, 'YXZ'));
   const D = 10, wpp = (2 * D * half) / innerHeight;
@@ -1561,11 +1651,13 @@ function tick(now) {
   for (const [mat, a] of laneParts) mat.opacity = a * (1 - orb);
   // leaders: in Orbit always; elsewhere for the card you point at
   for (const id of visual) {
-    const L = leaders[id], cd = cards[id], el = preview.elementsOf(id)[0];
+    // the part of the screen a card points at: the real element, or in the drawn pose the box the drawer gave it
+    const db = drawnOn() ? drawnBoxOf(id) : null, el = db ? null : preview.elementsOf(id)[0];
+    const L = leaders[id], cd = cards[id];
     const on = hoverId === id || selected === id;
-    L.line.visible = !!el && !!cd && (orb > 0.01 || on);
+    L.line.visible = (!!el || !!db) && !!cd && (orb > 0.01 || on);
     if (!L.line.visible) continue;
-    const r = el.getBoundingClientRect(), s = orb > 0.5 ? slot[id].side : 1;
+    const r = db ? { left: db.x, right: db.x + db.width, top: db.y, height: db.height } : el.getBoundingClientRect(), s = orb > 0.5 ? slot[id].side : 1;
     const pos = L.line.geometry.attributes.position;
     v.set((s < 0 ? -1 : 1) * CARD_W / 2, cd.thick + 0.003, -cardH(id) / 2 + 0.22);
     cd.grp.localToWorld(v);
@@ -1621,6 +1713,7 @@ function tick(now) {
     }
   }
   if (frameN % 6 === 0 && !bodyNode.hidden) drawNode(false);
+  syncDrawn();
   renderer.render(scene, camera);
   cssRenderer.render(scene, camera);
   frameN++;
@@ -1678,6 +1771,7 @@ window.__orbit = {
   graph: graphBridge,
   recent, wiresSeen, project, screenOf, preview, store, files, cards, rows, last, MISSIONS, mstate,
   get conns() { return conns; }, get nodes() { return nodes; }, get mode() { return mode; }, get mix() { return mix; }, get stage() { return stage; }, get stageT() { return stageT; },
+  drawn: { get on() { return drawnOn(); }, get drawing() { return drawing; }, grade: gradeDrawn, values: drawnValues },
   get events() { return eventCount; }, get lastShow() { return lastShow; }, get shows() { return shows; }, get checker() { return checker; }, get selected() { return selected; },
   setMode, setStage, select, check: runCheck, showMe, get visual() { return [...visual]; }, portsOf, apply: applyEdit, openComponent, get component() { return KEY; }
 };
