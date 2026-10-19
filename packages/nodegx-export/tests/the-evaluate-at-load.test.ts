@@ -25,7 +25,22 @@ import { emitApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
 import { ExportIR, NodeIR, ParamValue } from '../src/ir/types';
 
-type AnyModule = Record<string, any>;
+/** The runtime's node and its context, as nodecontext.ts makes them — the part read here. */
+interface RuntimeNode {
+  raiseRuntimeError(...args: unknown[]): void;
+  setInputValue(port: string, value: unknown): void;
+  getOutput(port: string): { value: unknown };
+  update(): void;
+}
+interface RuntimeContext {
+  updateIteration: number;
+  nodeRegister: { register(definition: unknown): void; createNode(type: string, id: string): RuntimeNode };
+}
+/** A runtime node file's exports: the definition, possibly wrapped under `default` or `node`. */
+interface NodeModule {
+  default?: NodeModule;
+  node?: NodeModule;
+}
 
 const REPO = path.resolve(__dirname, '..', '..', '..');
 const RUNTIME_SRC = path.join(REPO, 'packages', 'noodl-runtime', 'src');
@@ -40,11 +55,11 @@ const transpile = (source: string): string =>
 
 /** One module graph: each runtime file evaluated once, a relative import resolved to its `.ts` file. */
 const loaderOf = () => {
-  const cache = new Map<string, { exports: AnyModule }>();
-  const load = (file: string): AnyModule => {
+  const cache = new Map<string, { exports: unknown }>();
+  const load = (file: string): unknown => {
     const hit = cache.get(file);
     if (hit) return hit.exports;
-    const module = { exports: {} as AnyModule };
+    const module: { exports: unknown } = { exports: {} };
     cache.set(file, module);
     const req = (id: string): unknown => {
       if (id.startsWith('.')) {
@@ -63,9 +78,9 @@ const loaderOf = () => {
 };
 
 const load = loaderOf();
-const NodeContext = load(path.join(RUNTIME_SRC, 'nodecontext.ts')) as unknown as new () => any;
-const NodeDefinition = load(path.join(RUNTIME_SRC, 'nodedefinition.ts'));
-const expressionModule = load(path.join(RUNTIME_SRC, 'nodes', 'std-library', 'expression.ts'));
+const NodeContext = load(path.join(RUNTIME_SRC, 'nodecontext.ts')) as new () => RuntimeContext;
+const NodeDefinition = load(path.join(RUNTIME_SRC, 'nodedefinition.ts')) as { defineNode(definition: unknown): unknown };
+const expressionModule = load(path.join(RUNTIME_SRC, 'nodes', 'std-library', 'expression.ts')) as NodeModule;
 const expressionNode = expressionModule.default ?? expressionModule.node ?? expressionModule;
 
 type Box = 'ticked' | 'unticked';
@@ -114,14 +129,14 @@ const wrapperOf = (home: string): ((inputs: Record<string, unknown>) => unknown)
   expect(start).toBeGreaterThanOrEqual(0);
   const end = home.indexOf('\n}\n', start);
   const source = `${home.slice(start, end + 2)}\nmodule.exports = hasLongName;`;
-  const module = { exports: {} as any };
+  const module: { exports: unknown } = { exports: {} };
   const quiet = console.error;
   // eslint-disable-next-line no-new-func
   new Function('module', 'exports', transpile(source))(module, module.exports);
   return (inputs) => {
     console.error = () => {};
     try {
-      return module.exports(inputs);
+      return (module.exports as (inputs: Record<string, unknown>) => unknown)(inputs);
     } finally {
       console.error = quiet;
     }

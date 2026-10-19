@@ -115,7 +115,6 @@ describe('§A the fixture whole', () => {
 
 // ---- §B ------------------------------------------------------------------------------------------------------------
 
-type AnyModule = Record<string, any>;
 const compiled = new Map<string, string>();
 const transpiled = (key: string, source: () => string): string => {
   if (!compiled.has(key)) {
@@ -125,11 +124,11 @@ const transpiled = (key: string, source: () => string): string => {
 };
 /** A fresh module graph per call: each file evaluated once, a relative import resolved to its `.ts` file. */
 const loaderOf = () => {
-  const cache = new Map<string, { exports: AnyModule }>();
-  const load = (file: string): AnyModule => {
+  const cache = new Map<string, { exports: unknown }>();
+  const load = (file: string): unknown => {
     const hit = cache.get(file);
     if (hit) return hit.exports;
-    const module = { exports: {} as AnyModule };
+    const module: { exports: unknown } = { exports: {} };
     cache.set(file, module);
     const req = (id: string): unknown => {
       if (id.startsWith('.')) {
@@ -148,6 +147,45 @@ const loaderOf = () => {
 const OUTPUTS = ['value', 'previousValue', 'isPending', 'pendingCount', 'isCommitted', 'isRolledBack', 'transactionId', 'error'] as const;
 const SIGNALS = ['applied', 'committed', 'rolledBack', 'timedOut', 'done', 'unchanged', 'failure', 'completed'] as const;
 type InputPort = 'key' | 'optimisticValue' | 'errorMessage' | 'transactionId' | 'timeout' | 'onDispose';
+type Patch = { id: string; keys: string[] };
+
+/** The runtime's node and its context, as nodecontext.ts and optimisticupdatenode.ts make them — the part read here. */
+interface RuntimeNode {
+  sendSignalOnOutput(name: string): void;
+  raiseRuntimeError(code: string, message: string): void;
+  setInputValue(port: string, value: unknown): void;
+  getOutput(port: string): { value: unknown };
+  update(): void;
+  _onNodeDeleted(): void;
+}
+interface RuntimeContext {
+  updateIteration: number;
+  nodeRegister: { register(definition: unknown): void; createNode(type: string, id: string): RuntimeNode };
+}
+interface RuntimeGlobalStore {
+  setKey(store: string, key: string, value: unknown): void;
+  deleteKey(store: string, key: string): void;
+  getState(store: string): Record<string, unknown>;
+  getOpenPatches(store: string): Patch[];
+}
+/** @nodegx/core's store and the emitted lib's node, as far as the export side drives them. */
+interface CoreStore {
+  set(patch: Record<string, unknown>): void;
+  peek(): Record<string, unknown>;
+}
+type LibNode = {
+  setListeners(on: Record<string, () => void>): void;
+  setInput(port: InputPort, value: unknown): void;
+  setupSubscription(): void;
+  dispose(): void;
+  apply(): void;
+  commit(): void;
+  rollback(): void;
+} & { readonly [K in (typeof OUTPUTS)[number]]: unknown };
+interface HistoryLib {
+  createOptimisticUpdateNode(meta: { label: string; nodeId: string; componentName: string }, store: CoreStore): LibNode;
+  getOpenPatches(store: CoreStore): Patch[];
+}
 
 /** One side of the differential: two Optimistic Update nodes on the "app" store, and the plain writes beside them. */
 interface Side {
@@ -166,10 +204,10 @@ interface Side {
 /** The runtime's own node, in a NodeContext, over its own globalstore.ts; each frame is a tick (a pulse is deferred to it). */
 const runtimeSide = (): Side => {
   const load = loaderOf();
-  const NodeContext = load(path.join(RUNTIME_SRC, 'nodecontext.ts')) as unknown as new () => any;
-  const NodeDefinition = load(path.join(RUNTIME_SRC, 'nodedefinition.ts'));
-  const gsm = load(path.join(RUNTIME_AGENT, 'globalstore.ts')).globalStoreManager;
-  const module = load(path.join(RUNTIME_AGENT, 'optimisticupdatenode.ts'));
+  const NodeContext = load(path.join(RUNTIME_SRC, 'nodecontext.ts')) as new () => RuntimeContext;
+  const NodeDefinition = load(path.join(RUNTIME_SRC, 'nodedefinition.ts')) as { defineNode(definition: unknown): unknown };
+  const gsm = (load(path.join(RUNTIME_AGENT, 'globalstore.ts')) as { globalStoreManager: RuntimeGlobalStore }).globalStoreManager;
+  const module = load(path.join(RUNTIME_AGENT, 'optimisticupdatenode.ts')) as { node: unknown };
   const context = new NodeContext();
   context.nodeRegister.register(NodeDefinition.defineNode(module.node));
   const log: string[] = [];
@@ -187,7 +225,7 @@ const runtimeSide = (): Side => {
     return node;
   };
   const nodes = [create(0), create(1)];
-  const tick = (node: any) => {
+  const tick = (node: RuntimeNode) => {
     context.updateIteration++;
     node.update();
   };
@@ -221,22 +259,22 @@ const runtimeSide = (): Side => {
       return out;
     },
     state: () => gsm.getState('app'),
-    openPatches: () => gsm.getOpenPatches('app').map((p: { id: string; keys: string[] }) => ({ id: p.id, keys: p.keys })),
+    openPatches: () => gsm.getOpenPatches('app').map((p: Patch) => ({ id: p.id, keys: p.keys })),
     drain: () => log.splice(0)
   };
 };
 
 /** The lib over @nodegx/core's own store, both fresh. `source` defaults to the emitted lib (a mutant can be handed in). */
 const exportSide = (source = historyLibSource()): Side => {
-  const core = loaderOf()(path.join(CORE_SRC, 'index.ts'));
+  const core = loaderOf()(path.join(CORE_SRC, 'index.ts')) as { store(name: string, initial: Record<string, unknown>): CoreStore };
   const log: string[] = [];
   let raisingSlot = 0;
-  const module = { exports: {} as AnyModule };
+  const module: { exports: unknown } = { exports: {} };
   const errors = { raiseAppError: (e: { code: string; message: string }) => log.push(`${raisingSlot}:raise ${e.code}: ${e.message}`) };
   const req = (id: string): unknown => (id === '@nodegx/core' ? core : id === './errors' ? errors : id === 'react' ? {} : {});
   // eslint-disable-next-line no-new-func
   new Function('require', 'module', 'exports', transpiled(`lib:${source.length}:${source.slice(-64)}`, () => source))(req, module, module.exports);
-  const lib = module.exports;
+  const lib = module.exports as HistoryLib;
   const store = core.store('app', {});
   const create = (slot: number) => {
     const node = lib.createOptimisticUpdateNode({ label: 'Update', nodeId: `ou-${slot}`, componentName: '/Pages/Home' }, store);
@@ -276,7 +314,7 @@ const exportSide = (source = historyLibSource()): Side => {
       return out;
     },
     state: () => store.peek(),
-    openPatches: () => lib.getOpenPatches(store).map((p: { id: string; keys: string[] }) => ({ id: p.id, keys: p.keys })),
+    openPatches: () => lib.getOpenPatches(store).map((p: Patch) => ({ id: p.id, keys: p.keys })),
     drain: () => log.splice(0)
   };
 };

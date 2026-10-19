@@ -126,7 +126,57 @@ describe('§A the fixture whole', () => {
 
 // ---- the two sides' world ------------------------------------------------------------------------------------------
 
-type AnyModule = Record<string, any>;
+/** The globals the world installs and removes, read as a plain bag of properties. */
+const globals = () => globalThis as unknown as Record<string, unknown>;
+
+interface AuthReturnState {
+  inProgress: boolean;
+  succeeded?: boolean;
+  notice?: string;
+  error?: string;
+}
+interface BackendHandle {
+  type: string;
+  name: string;
+  url: string;
+  publicToken: string;
+}
+/** The runtime's ParseAuthAdapter, as far as the return leg and Sign In With reach it. */
+interface AuthAdapter {
+  on(event: string, cb: (state: unknown) => void): void;
+  readonly oauthReturn: AuthReturnState;
+  consumeAuthReturn(handle: BackendHandle): boolean;
+  signInWithProvider(handle: BackendHandle, options: Record<string, unknown>): void;
+}
+/** The emitted client's return leg; a mutant client may have neither. */
+interface ClientModule {
+  readAuthReturn?(): AuthReturnState;
+  subscribeAuthReturn?(listener: (state: unknown) => void): () => void;
+}
+/** The runtime's node, in a NodeContext, as signinwith.ts makes it — the part read here. */
+interface ContextNode {
+  _internal: { signingIn: unknown; error: unknown; notice: unknown };
+  sendSignalOnOutput(name: string): void;
+  raiseRuntimeError(code: string, message: string): void;
+  setInputValue(port: string, value: unknown): void;
+  getOutput(port: string): { value: unknown };
+  update(): void;
+  _onNodeDeleted(): void;
+}
+interface RuntimeContext {
+  updateIteration: number;
+  nodeRegister: { register(definition: unknown): void; createNode(type: string, id: string): ContextNode };
+}
+/** What the emitted `useSignInWith` hands back to a component. */
+interface SignInHandle {
+  signingIn: unknown;
+  error: unknown;
+  notice: unknown;
+  signIn(): void;
+}
+interface SignInLib {
+  useSignInWith(meta: { label: string; nodeId: string; componentName: string }, options: Record<string, unknown>, on: Record<string, () => void>): SignInHandle;
+}
 const compiled = new Map<string, string>();
 const transpiled = (key: string, source: () => string): string => {
   if (!compiled.has(key)) {
@@ -136,11 +186,11 @@ const transpiled = (key: string, source: () => string): string => {
 };
 /** A fresh module graph per call; `overrides` answers a specifier (or a resolved file) first. */
 const loaderOf = (overrides: Record<string, unknown> = {}) => {
-  const cache = new Map<string, { exports: AnyModule }>();
-  const load = (file: string): AnyModule => {
+  const cache = new Map<string, { exports: unknown }>();
+  const load = (file: string): unknown => {
     const hit = cache.get(file);
     if (hit) return hit.exports;
-    const module = { exports: {} as AnyModule };
+    const module: { exports: unknown } = { exports: {} };
     cache.set(file, module);
     const req = (id: string): unknown => {
       if (id in overrides) return overrides[id];
@@ -219,7 +269,7 @@ class World {
         world.href = new URL(next, world.href).toString();
       }
     };
-    const g = globalThis as AnyModule;
+    const g = globals();
     g.window = { location, history, addEventListener() {}, removeEventListener() {} };
     g.localStorage = this.storage;
     g.fetch = (url: string, init: { method?: string; body?: string }) => {
@@ -278,7 +328,7 @@ class World {
 }
 
 const uninstall = () => {
-  const g = globalThis as AnyModule;
+  const g = globals();
   delete g.window;
   delete g.localStorage;
   delete g.fetch;
@@ -293,17 +343,17 @@ const EXCHANGED_NOTICE = { ...EXCHANGED, authOutcome: 'linked-credentials-revoke
 const EXPIRED = { code: 101, error: 'This sign-in code is not valid. It may have expired or already been used.' };
 
 /** The emitted client, evaluated in the installed world. `import.meta.env` is Vite's; here every variable is unset. */
-const loadClient = (clientSource = app.files['src/api/client.ts']): AnyModule => {
+const loadClient = (clientSource = app.files['src/api/client.ts']): ClientModule => {
   const source = clientSource.replace(/import\.meta\.env\.VITE_NODEGX_\w+/g, 'undefined');
-  const module = { exports: {} as AnyModule };
+  const module: { exports: unknown } = { exports: {} };
   // eslint-disable-next-line no-new-func
   new Function('require', 'module', 'exports', transpiled(`client:${source.length}:${source.slice(-200)}`, () => source))(() => ({}), module, module.exports);
-  return module.exports;
+  return module.exports as ClientModule;
 };
 
-const runtimeAdapter = (): { adapter: AnyModule; handle: AnyModule } => {
+const runtimeAdapter = (): { adapter: AuthAdapter; handle: BackendHandle } => {
   const load = loaderOf();
-  const { ParseAuthAdapter } = load(path.join(RUNTIME_BACKENDS, 'ParseAuthAdapter.ts'));
+  const { ParseAuthAdapter } = load(path.join(RUNTIME_BACKENDS, 'ParseAuthAdapter.ts')) as { ParseAuthAdapter: new (options: { serializeObject(data: unknown): unknown }) => AuthAdapter };
   const adapter = new ParseAuthAdapter({ serializeObject: (data: unknown) => data });
   return { adapter, handle: { type: 'nodegx', name: 'Sign In Desk', url: ENDPOINT, publicToken: APP_ID } };
 };
@@ -457,7 +507,7 @@ const runtimeNodes = async (url: string, answer: (r: Req) => Answer, ops: Op[]):
       get oauthReturn() {
         return adapter.oauthReturn;
       },
-      signInWithProvider: (options: AnyModule) => adapter.signInWithProvider(handle, options)
+      signInWithProvider: (options: Record<string, unknown>) => adapter.signInWithProvider(handle, options)
     };
     const UserService = {
       get instance() {
@@ -469,14 +519,14 @@ const runtimeNodes = async (url: string, answer: (r: Req) => Answer, ops: Op[]):
       }
     };
     const load = loaderOf({ [path.join(VIEWER_USER, 'userservice')]: { __esModule: true, default: UserService } });
-    const NodeContext = load(path.join(RUNTIME_SRC, 'nodecontext.ts')) as unknown as new () => any;
-    const NodeDefinition = load(path.join(RUNTIME_SRC, 'nodedefinition.ts'));
-    const RuntimeNode = load(path.join(RUNTIME_SRC, 'node.ts')) as unknown as { prototype: AnyModule };
-    const module = load(path.join(VIEWER_USER, 'signinwith.ts')).default;
+    const NodeContext = load(path.join(RUNTIME_SRC, 'nodecontext.ts')) as new () => RuntimeContext;
+    const NodeDefinition = load(path.join(RUNTIME_SRC, 'nodedefinition.ts')) as { defineNode(definition: unknown): unknown };
+    const RuntimeNode = load(path.join(RUNTIME_SRC, 'node.ts')) as { prototype: Pick<ContextNode, 'raiseRuntimeError'> };
+    const module = (load(path.join(VIEWER_USER, 'signinwith.ts')) as { default: { node: unknown } }).default;
     const context = new NodeContext();
     context.nodeRegister.register(NodeDefinition.defineNode(module.node));
     const log: string[] = [];
-    const nodes: any[] = [];
+    const nodes: Array<ContextNode | undefined> = [];
     let next = 0;
     const frame = () => {
       for (const node of nodes) {
@@ -520,13 +570,13 @@ const runtimeNodes = async (url: string, answer: (r: Req) => Answer, ops: Op[]):
         };
         nodes[slot] = node;
       } else if (step.op === 'unmount') {
-        nodes[step.slot]._onNodeDeleted();
+        nodes[step.slot]!._onNodeDeleted();
         nodes[step.slot] = undefined;
       } else if (step.op === 'set') {
-        nodes[step.slot].setInputValue(step.port, step.value);
+        nodes[step.slot]!.setInputValue(step.port, step.value);
       } else if (step.op === 'press') {
-        nodes[step.slot].setInputValue('signIn', false);
-        nodes[step.slot].setInputValue('signIn', true);
+        nodes[step.slot]!.setInputValue('signIn', false);
+        nodes[step.slot]!.setInputValue('signIn', true);
       } else if (step.op === 'answer') {
         world.answerAll();
         await settle();
@@ -599,15 +649,16 @@ const exportNodes = async (url: string, answer: (r: Req) => Answer, ops: Op[], l
     const log: string[] = [];
     let raisingSlot = 0;
     const errors = { raiseAppError: (e: { code: string; message: string }) => log.push(`${raisingSlot}:raise ${e.code}: ${e.message}`) };
-    const module = { exports: {} as AnyModule };
+    const module: { exports: unknown } = { exports: {} };
     const req = (id: string): unknown => (id === '../api/client' ? client : id === './errors' ? errors : id === 'react' ? react : {});
     // eslint-disable-next-line no-new-func
     new Function('require', 'module', 'exports', transpiled(`lib:${libSource.length}:${libSource.slice(-64)}`, () => libSource))(req, module, module.exports);
-    const lib = module.exports;
+    const lib = module.exports as SignInLib;
     interface Mounted {
       instance: ReturnType<typeof instance>;
       options: Record<string, unknown>;
-      handle: AnyModule;
+      /** Empty until the first render assigns what the hook hands back. */
+      handle: SignInHandle;
     }
     const mounted: Array<Mounted | undefined> = [];
     const listenersOf = (slot: number) => {
@@ -641,7 +692,7 @@ const exportNodes = async (url: string, answer: (r: Req) => Answer, ops: Op[], l
         const options: Record<string, unknown> = {};
         if (step.provider !== undefined) options.provider = step.provider;
         if (step.redirect !== undefined) options.redirect = step.redirect;
-        mounted[step.slot] = { instance: instance(), options, handle: {} };
+        mounted[step.slot] = { instance: instance(), options, handle: {} as SignInHandle };
         renderSlot(step.slot);
       } else if (step.op === 'unmount') {
         unmount(mounted[step.slot]!.instance);

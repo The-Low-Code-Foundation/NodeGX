@@ -29,7 +29,12 @@ const QUERY = 'puppyQuery';
 const catalog: Catalog = loadCatalog();
 const baseIr = parseProject(PUPPY, catalog);
 
-type AnyModule = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+/** What the runtime node asked its adapter, and the body the adapter put on the wire, both as JSON. */
+type Asked = Record<string, unknown>;
+/** The emitted client's `filterValue`, the one export this file reads. */
+interface FilterClient {
+  filterValue(value: unknown, dateColumn?: boolean): unknown;
+}
 
 const componentOf = (ir: ExportIR, p: string): ComponentIR => ir.components.find((c) => c.path === p)!;
 const queryNode = (ir: ExportIR): NodeIR => componentOf(ir, LANDING).nodes.find((n) => n.id === QUERY)!;
@@ -103,7 +108,7 @@ const valuesFor = (wired: string[]): Wire[][] => (wired.length === 1 ? ONE_VALUE
 
 // ---- the runtime arm -------------------------------------------------------------------------------------------
 
-type RuntimeReading = { failed: string } | { asked: AnyModule; body: AnyModule };
+type RuntimeReading = { failed: string } | { asked: Asked; body: Asked };
 
 const runtimeReadings = (cases: Array<{ ir: ExportIR; values: Record<string, Wire> }>): RuntimeReading[] =>
   JSON.parse(
@@ -116,13 +121,13 @@ const runtimeReadings = (cases: Array<{ ir: ExportIR; values: Record<string, Wir
 
 // ---- the export arm: the emitted page's own text ---------------------------------------------------------------
 
-const loadClient = (source: string): AnyModule => {
+const loadClient = (source: string): FilterClient => {
   const plain = source.replace(/import\.meta\.env\.VITE_NODEGX_\w+/g, 'undefined');
   const js = ts.transpileModule(plain, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
-  const module = { exports: {} as AnyModule };
+  const module: { exports: unknown } = { exports: {} };
   // eslint-disable-next-line no-new-func
   new Function('require', 'module', 'exports', 'fetch', js)(() => ({}), module, module.exports, undefined);
-  return module.exports;
+  return module.exports as FilterClient;
 };
 
 /** The query's effect in the emitted page: its `where` line, its call and its dependency list. */

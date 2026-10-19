@@ -80,16 +80,21 @@ const runtimeArm = (cases: Case[]): RunReading[][] =>
     })
   );
 
-type AnyModule = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+type Body = (inputs: Values, outputs: Values) => unknown;
+/** The emitted `functionRun.ts`'s two helpers, as `functionRunLibSource()` declares them, read with `O` as `Values`. */
+interface FunctionRunLib {
+  functionNode(signals: readonly string[]): unknown;
+  runFunction(body: Body, inputs: Values, node: unknown): { outputs: Values; pulses: Array<{ signal: string; values: Values }> };
+}
 
 /** The emitted `src/lib/functionRun.ts`, compiled as the app compiles it. */
-const transpile = (source: string): AnyModule => {
+const transpile = (source: string): Record<string, unknown> => {
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
-  const exports: AnyModule = {};
+  const exports: Record<string, unknown> = {};
   new Function('exports', js)(exports);
   return exports;
 };
-const lib = transpile(functionRunLibSource());
+const lib = transpile(functionRunLibSource()) as unknown as FunctionRunLib;
 
 /** A body the way the emitted wrapper hosts it: verbatim, inside an arrow, a throw caught. */
 const wrapperOf = (body: string) => new Function('Inputs', 'Outputs', `try {\n(() => {\n${body}\n})();\n} catch (e) {}\nreturn Outputs;`);
@@ -186,7 +191,7 @@ describe('§A — a pulse reads what the runtime\'s own Function hands its targe
     const end = page.indexOf('\n  return Outputs;\n}\n', start) + '\n  return Outputs;\n}'.length;
     const wrapper = transpile(`export ${page.slice(start, end)}`);
     const i = CASES.findIndex((c) => c.name.startsWith('the fixture body'));
-    expect(exportArm(CASES[i], wrapper.Hold_the_name_until_Send)).toEqual(RUNTIME[i]);
+    expect(exportArm(CASES[i], wrapper.Hold_the_name_until_Send as Body)).toEqual(RUNTIME[i]);
   });
 });
 

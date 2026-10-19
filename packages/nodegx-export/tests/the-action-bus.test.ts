@@ -104,16 +104,41 @@ describe('§A the fixture whole', () => {
 
 // ---- §B ------------------------------------------------------------------------------------------------------------
 
-type AnyModule = Record<string, any>;
-const loadModule = (source: string, stubs: Record<string, unknown>): AnyModule => {
+/** What a handler is handed, as the runtime's `action-dispatcher.ts` shapes it — the part this file reads. */
+interface HandlerContext {
+  actionId: unknown;
+  payload?: unknown;
+  complete(result?: unknown): void;
+  fail(message: string): void;
+}
+interface BusRegistry {
+  register(channel: string, actionType: string, handler: { invoke(ctx: HandlerContext): void }): () => void;
+  registeredTypes(channel: string): string[];
+}
+interface BusDispatcher {
+  readonly queueSize: number;
+  readonly isExecuting: boolean;
+  readonly waitingFor: string;
+  dispatch(raw: unknown): boolean;
+  cancelAll(): number;
+}
+/** The exports both buses share — the runtime's module and the exported library — as far as this file uses them. */
+interface BusModule {
+  ActionRegistry: new () => BusRegistry;
+  ActionDispatcher: new (options: Record<string, unknown>, hooks: Record<string, (info?: Record<string, unknown>) => void>, deps: Record<string, unknown>) => BusDispatcher;
+  payloadOf(action: unknown): unknown;
+  builtInFieldOf(action: unknown, field: string): unknown;
+  parseList(value: string | undefined | null): string[];
+}
+const loadModule = (source: string, stubs: Record<string, unknown>): unknown => {
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
-  const module = { exports: {} as AnyModule };
+  const module: { exports: unknown } = { exports: {} };
   // eslint-disable-next-line no-new-func
   new Function('require', 'module', 'exports', js)((id: string) => stubs[id] ?? {}, module, module.exports);
   return module.exports;
 };
-const runtimeBus = () => loadModule(fs.readFileSync(path.join(RUNTIME_SRC, 'nodes', 'std-library', 'agent', 'action-dispatcher.ts'), 'utf8'), { './globalstore': { globalStoreManager: {} } });
-const exportBus = () => loadModule(actionsLibSource(), { react: {}, './errors': { raiseAppError: () => undefined } });
+const runtimeBus = () => loadModule(fs.readFileSync(path.join(RUNTIME_SRC, 'nodes', 'std-library', 'agent', 'action-dispatcher.ts'), 'utf8'), { './globalstore': { globalStoreManager: {} } }) as BusModule;
+const exportBus = () => loadModule(actionsLibSource(), { react: {}, './errors': { raiseAppError: () => undefined } }) as BusModule;
 
 /** A seeded generator (mulberry32), so a failing script is reproducible by its seed. */
 const rng = (seed: number) => () => {
@@ -180,7 +205,7 @@ const scriptOf = (seed: number, length: number): Op[] => {
 };
 
 /** Plays one script against one module and returns everything observable, in order. */
-const play = (bus: AnyModule, options: Record<string, unknown>, ops: Op[]): unknown[] => {
+const play = (bus: BusModule, options: Record<string, unknown>, ops: Op[]): unknown[] => {
   const log: unknown[] = [];
   let now = 0;
   let nextTimer = 1;
@@ -193,7 +218,7 @@ const play = (bus: AnyModule, options: Record<string, unknown>, ops: Op[]): unkn
   };
   const registry = new bus.ActionRegistry();
   const held: Array<{ complete(r?: unknown): void; fail(m: string): void }> = [];
-  let dispatcher: any;
+  let dispatcher: BusDispatcher;
   const snap = () => [dispatcher.queueSize, dispatcher.isExecuting, dispatcher.waitingFor];
   const hook = (name: string) => (info?: Record<string, unknown>) => {
     log.push([name, info === undefined ? null : JSON.stringify(info, (_k, v) => (v === undefined ? '<undefined>' : v)), ...snap()]);
@@ -220,7 +245,7 @@ const play = (bus: AnyModule, options: Record<string, unknown>, ops: Op[]): unkn
         case 'register':
           unregisters.push(
             registry.register(o.channel, o.type, {
-              invoke(ctx: any) {
+              invoke(ctx: HandlerContext) {
                 log.push(['invoke', o.type, ctx.actionId, JSON.stringify(ctx.payload ?? '<undefined>')]);
                 if (o.behaviour === 'complete') ctx.complete(o.result);
                 else if (o.behaviour === 'complete-undefined') ctx.complete();
