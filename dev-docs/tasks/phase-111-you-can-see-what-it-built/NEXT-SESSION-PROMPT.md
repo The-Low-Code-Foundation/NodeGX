@@ -1,5 +1,67 @@
 # Phase 111 — next session
 
+**Rewritten 2026-10-19 by lane 7, session 2 (branch `l7-editor`, from `a2c4fc09c`).** Session 1's text is kept below
+the first line, the scoping text below the second.
+
+## Where lane 7 stands
+
+| task | state |
+|---|---|
+| SEE-000 the census | 🟡 built in part: script, gate, honesty by hand ✅; the cost table (AC3) and the code app's row (§3.4) deferred |
+| SEE-001 the honesty number | 🟡 built in every surface: `honesty.ts`, the MCP, the ratchet, the sentence, **the editor (s2)** ✅; the editor drive ⬜ (primary); AC6 ⬜ (Richard) |
+| SEE-002 … SEE-012 | ⬜ never built |
+
+## The next step: drive the editor surface from primary, then AC6
+
+Session 2 built SEE-001 §4 item 3 (see SEE-001 §8) and graded it in plain Node (12 tests, 8 mutants killed) and in
+pixels (a jasmine spec that runs only in `test:ci`). Nobody has looked at it in the running editor yet.
+
+**The drive** (primary, after the branch lands, after `test:ci`):
+
+1. Copy the template, never the original (opening a project writes files into it):
+   `cp -R templates/digital-bricks-training <scratch>/dbt-honesty` and open the copy.
+2. **The header** of the Project panel, left of the `+`, reads **`66% known`**. Hover: `Honesty: 66% known (475 known, 245
+   script, 20 unspecced). 11.8% weighed by script lines (3393 lines).` then the sentence. It is 66, not the ledger's 67
+   (`honesty-ledger.json`: 67, 578/285/20), because the editor loads through the registry and 33 cloud functions are not
+   in it (bug `P111-SEE001-DBTCLOUDUNREGISTERED`); the MCP's `get_project_info` on the same copy says the same 66%.
+   Click: the five components with the most script, the first `Pages/Settings  34 script · 56.4%`, then `People/Their
+   path 21 script · 50%`, `Pages/Home 17 script · 59.5%`, `Pages/Course 15 script · 68.8%`, `People/Add a learner
+   14 script · 54.8%`.
+3. **Two rows** on the Components tab: `Settings` (Pages) reads **`56.4%`** behind a pink bar; click it: 12 script parts,
+   the first `Forget the session here, then Home, saying it is done`, then a disabled `+22 more script nodes`. `App` reads
+   **`40%`**. A row with no script carries no number, e.g. `Step chip` (Lesson) or `Roster row` (People): blank, and its
+   `×N` lines up with the rows that have one.
+4. **The canvas mark.** Open `Logic/Standing` (row reads `66.7%`): the Function `Count, pace, trajectory` has a 3px pink bar
+   down the right edge of its titlebar; its two other nodes do not. A kit node carries it too: `Course/Trajectory row`'s
+   `dbt-lesson.RatingGauge` (`Where they are against the goal`). A component instance never does. Clicking a script part
+   in a row's popover opens its component with that node selected, and that node carries the bar.
+5. AC2's live arm: add a Function node to `Logic/Standing`; its row reads `50%` and the header `65.9% known`
+   (hover: 246 script). Delete it: back to `66.7%` and `66%`.
+
+Then **AC6**: Richard reads the header and the rows on the training template and says whether the script list tells him
+anything he did not know. His words go into SEE-001.
+
+## Then
+
+- The board's next lane-7 task (SEE-011, SEE-012).
+- Owed small: the MCP's `apply_plan` result carries no honesty line yet (create/update do).
+
+## Gates this lane added
+
+- `packages/nodegx-node-spec/tests/see-census.test.ts`, `honesty-ledger.test.ts`, `honesty.test.ts` and
+  `packages/noodl-mcp/tests/see001Honesty.test.ts` (session 1; see below).
+- `packages/noodl-editor/tests-unit/see-001/honestyView.test.ts` (session 2, the `test:main` runner): the editor's walk
+  reads the ledger's and the MCP's numbers, the panel's words, the canvas marks exactly the script parts.
+- `packages/noodl-editor/tests/canvas/NodeScriptMark.test.ts` (session 2, jasmine, `test:ci`): the bar's pixels.
+
+## Bugs found
+
+- `P111-SEE001-DBTCLOUDUNREGISTERED` (session 1): it is why the editor and the MCP read 66% and the ledger 67%.
+
+---
+
+# Phase 111 — session 1 (kept)
+
 **Rewritten 2026-10-19 by lane 7, session 1 (branch `l7-honesty`, from `e7e3e77db`).** Earlier text (scoping, 2026-10-01)
 is kept below the line.
 

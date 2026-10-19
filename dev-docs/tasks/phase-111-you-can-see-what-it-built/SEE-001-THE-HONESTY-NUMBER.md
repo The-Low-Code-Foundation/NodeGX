@@ -1,9 +1,10 @@
 # SEE-001 — The honesty number: how much of this app is made of parts whose behaviour is known
 
 **Opened 2026-10-01.** **Depends on SEE-000.** NSP-017 moves the line later; it does not block the number.
-**Status: 🟡 built but for the editor (s1, 2026-10-19, branch `l7-honesty`).** §4 items 1, 2, 4, 5 built; item 3 (the
-editor) not started. AC1–AC5 ✅ (AC1 on the MCP with one named gap, a template defect); AC6 ⬜ (Richard, and it needs
-the editor surface).
+**Status: 🟡 built, the editor drive and Richard's read owed (s2, 2026-10-19, branch `l7-editor`).** §4 items 1–5 built;
+item 3 (the editor) built in s2 and graded in plain Node and in pixels, not yet driven. AC1–AC5 ✅ (AC1 on the MCP and in
+the editor with one named gap, a template defect; AC2's editor arm graded, not driven); AC6 ⬜ (Richard reads it, once the
+drive from primary passes).
 
 ## 1. The person sentence
 
@@ -143,4 +144,68 @@ editor work in `views/panels/ComponentsPanelNew` and need a drive from primary. 
 (`mostScript`, `scriptByType`) and `get_component` (`scriptNodes`). What to look at: on the training template, whether
 "148 of 285 script nodes are kit nodes, 131 of them `Translation`" and the five components with the most script tell
 him anything he did not know.
+
+## 8. Session 2 — 2026-10-19 (lane 7, worktree `l7-editor`, from `a2c4fc09c`): the editor surface
+
+**Which panel.** `router.setup.ts` mounts `views/panels/componentspanel`, which re-exports
+`ComponentsPanelNew/ComponentsPanelReact`. That is the one edited.
+
+**One definition, one catalog.** The editor imports `@nodegx/node-spec` by source (webpack alias and tsconfig path to
+`src/browser.ts`, which exports `honesty.ts`), so it reads the same rule and the same spec registry as the MCP and the
+ledger. The kit test's "shipped" list is the editor's bundled catalog (`validation/catalog`'s `defaultCatalog`, built-ins
+only): 180 type names, the same set as the MCP's `node-catalog-enriched.json` and the ledger's `node-catalog.json`
+(measured: no type in one and not the other).
+
+**What was built.**
+- `ComponentsPanelNew/honestyView.ts` (pure): walks each `ComponentModel` with `forEachNode` (the callback returns nothing:
+  the walk stops on a truthy return) into `projectHonesty`, and words the result: the header (`66% known`; hover: the three
+  counts, the line-weighted figure and `HONESTY_SENTENCE`; click: the five components with the most script, each opening
+  that component), a row (`56.4%`, only on a component that holds script; hover: the MCP's write line with five parts
+  named; click: up to 12 script parts by name, the most lines first, `kit node, no spec` for a kit node; a part opens the
+  component with that node selected, through `navigateToInstance`, the `×N` popover's door).
+- `components/HonestyLabels.tsx` (thin): the header button, before the `+`, and the row's number after its meta, through a
+  context so the tree builder is untouched. Rows without script get an empty fixed-width slot when any row has a number,
+  so the numbers and the `×N` column line up. Tokens only (`--font-size-xs`, `--spacing-*`, `--radius-*`, the meta's
+  colours).
+- `nodegrapheditor/canvas/scriptMark.ts` + the painter: a node whose type the rule classes as `script` gets **the script
+  mark, a 3px bar down the right edge of its titlebar** (the comment stripe's right-hand twin: no width taken from the
+  title, no port anchor moved), in `--theme-color-node-category-function` (CanvasTheme's `categoryJavascript`). The
+  panel draws the same bar, in the same token, before every row's number and in the header popover's legend. Not amber:
+  amber is warning, and the number is not a quality score.
+- Recomputed on the panel's own change counter: a node added or removed anywhere, a component added, removed or renamed,
+  a kit arriving. A Function's script edited does not move the number (it counts nodes), only a row's line counts.
+
+**What the editor reads on the training template.** The editor loads a v2 project through its registry
+(`services/ProjectStructure/index.ts`), as the MCP does, so it reads **66% known (475 known, 245 script, 20 unspecced)**, the
+MCP's number, not the ledger's **67% (578, 285, 20)**: the 33 unregistered cloud functions
+(`P111-SEE001-DBTCLOUDUNREGISTERED`). The spec asserts both: over every component folder the walk gives the ledger's
+numbers exactly; over the registry's 49 it gives 66% exactly. Fix the bug and the editor reads 67% with no code change.
+38 of the 49 components hold script and carry a number.
+
+**Gates, session 2 (worktree `l7-editor`).**
+- `packages/noodl-editor/tests-unit/see-001/honestyView.test.ts` (the editor's plain-Node jest, `test:main`'s runner, which
+  runs from the worktree): **12 of 12 passed, exit 0.** It rebuilds the training template as nested graphs (roots and
+  `children`, as the editor holds them) and grades: the 180-type catalog; the ledger's number over every folder; the MCP's
+  66% over the registry; per component, the walk equals the rule over the flat file (counts, script lines and every
+  part's id, label and lines); the header's and a row's words; a row only where there is script; a planted Function
+  (`Logic/Standing`) reads `65.9% known (475 known, 246 script, 20 unspecced)`, s1's MCP number; a card marked exactly
+  when its node is a listed script part (every node of the template); the panel's bar and the canvas's bar in one token.
+- **Eight mutants, eight killed** (under HEAVY.lock): the walk stopping on a truthy return (7 red), dropping parameters (1),
+  dropping labels (2), a number on a 100% row (1), the header's wording (3), the canvas marking unspecced nodes too (1),
+  the canvas bar in amber (1), the panel bar in amber (1).
+- Neighbours that reach the edited files: `tests-unit/tvw-006/canvasRendererLane.test.ts` and
+  `tests-unit/tvw-001/folderDisplay.test.ts`, **33 of 33 passed, exit 0.**
+- `packages/noodl-editor/tests/canvas/NodeScriptMark.test.ts` (jasmine, exported from `tests/canvas/index.ts`): the bar's
+  pixel in the function ink on a Function and on a kit node, card body on a `Group` and on a component instance. It runs in
+  the Electron renderer, so **not run here: it runs in `test:ci` from primary.**
+- `tsc -p packages/noodl-editor --noEmit`: **exit 0, 0 lines** (3,264 files, the four new ones among them).
+  `tsc -p packages/noodl-editor/tsconfig.tests.json --noEmit`: **exit 0, 0 lines.**
+- `node scripts/tsfixme-ratchet.js`: exit 1 on files this session did not touch (27 lines, other packages, already at the
+  base); none of this session's files listed.
+
+**Not measured: the drive.** The panel, the popovers and the canvas bar have not been seen in the running editor. The
+recipe is in the phase's `NEXT-SESSION-PROMPT.md`.
+
+**AC2 in the editor:** graded on the walk (the planted Function moves the row and the header by the rule's amounts), not
+driven. **AC6 ⬜**: Richard reads the header and the rows on the training template once the drive passes.
 
