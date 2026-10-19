@@ -32,6 +32,9 @@ type bugs; the fourth needs a ruling (the body is the author's JavaScript: a per
 scoped to one function, so either the wrapper moves to its own file, as a Script's does, or the build stops at
 `vite build`).
 
+**Ruled by Richard, 2026-10-19: the wrapper moves to its own file, as a Script's does** ("probably their own files
+would be cleaner"). The build keeps running `tsc -b`.
+
 **Session 124 (EXP-011 §91.7): the gate and the first class.** Re-measured on HEAD `e7e3e77db`: 337 in 13 of 19, as
 above. `tests/the-templates-typecheck.test.ts` now typechecks every tracked template's export (16) and holds each count
 to a row, a ratchet both ways. The largest class, a lifted output's push `onXChanged?.(x)` against a callback typed

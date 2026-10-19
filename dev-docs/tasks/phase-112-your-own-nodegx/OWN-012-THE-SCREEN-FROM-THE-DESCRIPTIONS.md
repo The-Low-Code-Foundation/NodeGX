@@ -303,6 +303,8 @@ its source, five rows named as its consequences, and exits 1 (`measure-orbit-pos
 `own-012/measured/orbit-real-orbit.png` (the same moment, one press later, the real app on the phone). They are hard to
 tell apart; the clock's digits are the tell.
 
+**Richard's read, 2026-10-19:** asked whether the drawn phone reads as the app, he said *"Yep"*.
+
 **Orbit's own gate** (`prototype/real/check.mjs`) gained a drawn block: the phone is drawn (9 boxes), a real mouse press
 on the drawn Pause lands on the picture and not the app, one press on *App in the scene* brings the real app back, and a
 press on Pause reaches it. **It found a defect in the new pose on its first run:** the press on the drawn Pause reached

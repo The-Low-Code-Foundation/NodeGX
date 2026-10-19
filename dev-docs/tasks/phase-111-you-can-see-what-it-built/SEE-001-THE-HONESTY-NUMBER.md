@@ -133,6 +133,8 @@ the doctrines already ride `get_project_info`'s result for the same reason.
 **R-SEE-001-a (instance- or line-weighted).** Built instance-weighted. The line-weighted figure differs a lot, so it is
 reported beside the headline everywhere (`percentByLines`): training 67.0% by instance, **6.9% by lines**; todo 87.9%
 against **9.8%**; planning 89.7% against 8.3%. One Function of 611 lines weighs as much as 611 known nodes.
+**Ruled by Richard, 2026-10-19: the headline is the instance-weighted number ("67%").** The line-weighted figure stays
+beside it as the second number, as built.
 
 **The editor (§4 item 3): not started.** The components panel header, the per-row number and the canvas mark are
 editor work in `views/panels/ComponentsPanelNew` and need a drive from primary. They read the same `projectHonesty`.
