@@ -1045,6 +1045,8 @@ export function emitComponent(
     ...Object.values(plan.handlers).flatMap((byPort) => Object.values(byPort).flat()),
     ...Object.values(plan.changeHandlers).flat(),
     ...plan.receivers.flatMap((r) => r.actions),
+    // P18-S126-INSIGNAL. A signal input's chain earns imports and references exactly as a handler's does.
+    ...plan.inputPulses.flatMap((p) => p.actions),
     // A reactive Condition's branch earns imports, `navigate` and state references exactly as a
     // handler's does — it just runs from an effect instead of an event (LOGIC-TARGET §10).
     ...plan.branchEffects.map((e) => e.action),
@@ -4474,6 +4476,8 @@ export function emitComponent(
       plan.valueChangedEffects.length > 0 ||
       // P18-S119-TICKEDRUN. A ticked input's run is an effect.
       plan.tickedRuns.length > 0 ||
+      // P18-S126-INSIGNAL. A signal input's chain is an effect on its count.
+      plan.inputPulses.length > 0 ||
       // EXP-011 §43, P18-S113-IDBINDREAD. A Record with Fetch unwired is a bind keyed on its Id.
       recordBinds.length > 0 ||
       // P18-S111-RECORDLIVE. A live Record's row subscribes to the client's copy of its record.
@@ -4495,7 +4499,7 @@ export function emitComponent(
   }
   if (radioNameLocals.size > 0) reactImports.push('useId');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
-  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0) reactImports.push('useRef');
+  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0 || plan.instancePulses.length > 0) reactImports.push('useRef');
   // EXP-011 §53. A task template's mount effect and its once-guard (StrictMode mounts twice; startTask pulses once).
   // EXP-011 §57. A Repeater Item's Added effect takes the same pair, for the same reason.
   // P18-S116-FIELDMOUNT. A field's mount announcement takes the same pair: its chain may reach a parent or a backend.
@@ -6307,6 +6311,15 @@ export function emitComponent(
       claimBinding(node.id, toProperty);
       // mounted rides the render wrapper; visible has no class to toggle on an instance.
       if (toProperty === 'mounted') continue;
+      // P18-S126-INSIGNAL. A signal input the parent pulses: the count and the count taken, one prop.
+      const pulse = plan.instancePulses.find((p) => p.nodeId === node.id && p.port === toProperty);
+      if (pulse !== undefined) {
+        const pulseAttr = targetPropName(node.type, toProperty);
+        if (pulseAttr !== null) {
+          attrs.push(`${pulseAttr}={{ sent: ${pulse.stateName}, taken: ${pulse.takenLocal} }}`);
+          continue;
+        }
+      }
       if (toProperty === 'visible') {
         notes.push(
           `${plan.path}: wire into instance ${node.id}.visible dropped — an instance has no element class to toggle in this slice`
@@ -7062,6 +7075,8 @@ export function emitComponent(
   // EXP-011 §39. The refs: a Delay's timer handle, and a Value Changed's last value seen.
   for (const [, ref] of delayRefs) body.push(`  const ${ref} = useRef<DelayHandle | null>(null);`);
   for (const effect of plan.valueChangedEffects) body.push(`  const ${effect.lastLocal} = useRef<unknown>(undefined);`);
+  // P18-S126-INSIGNAL. The count each placed component has acted on, kept here so it outlives the child's unmount.
+  for (const pulse of plan.instancePulses) body.push(`  const ${pulse.takenLocal} = useRef(0);`);
   // EXP-011 §86. The Function node's values across runs, one per instance, as the running app's node keeps them.
   for (const id of pulsedRunIds) {
     const def = jsFunByNode[id]!;
@@ -7552,6 +7567,25 @@ export function emitComponent(
       `    ${effect.lastLocal}.current = arrival;`,
       ...effectBody(effect.actions, 4),
       `  }, [${deps}]);`,
+      ''
+    );
+  }
+  /*
+   * P18-S126-INSIGNAL (EXP-011 §94). A signal the parent sends in: the parent passes `{ sent, taken }`, the count of its
+   * pulses and a ref it keeps of the count acted on. The chain runs when `sent` passes `taken`, once per move: never at a
+   * mount with nothing sent (StrictMode's second mount sees the first's `taken`), and at a mount after a pulse sent with the
+   * click that draws this component (the runtime's instance exists while it is not drawn). After the values the parent
+   * set before the pulse have arrived, as a render's props have.
+   */
+  for (const pulse of plan.inputPulses) {
+    const pair = exprCode({ kind: 'prop', name: pulse.port }, 'render');
+    body.push(
+      `  // "${commentSafe(pulse.port)}", a signal the parent sends in: its chain runs once for each pulse sent, never twice.`,
+      '  useEffect(() => {',
+      `    if (${pair} === undefined || ${pair}.taken.current === ${pair}.sent) return;`,
+      `    ${pair}.taken.current = ${pair}.sent;`,
+      ...effectBody(pulse.actions, 4),
+      `  }, [${pair}?.sent]);`,
       ''
     );
   }

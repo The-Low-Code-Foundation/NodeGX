@@ -58,6 +58,10 @@ const MODULES = [
   def(require(path.join(LIB, 'nodes', 'std-library', 'data', 'setvariablenode'))),
   def(require(path.join(LIB, 'nodes', 'std-library', 'expression'))),
   def(require(path.join(LIB, 'nodes', 'std-library', 'simplejavascript'))),
+  // P18 session 127 (EXP-011 §94): the Pulse Desk's Counter, Condition and States.
+  def(require(path.join(LIB, 'nodes', 'std-library', 'counter'))),
+  def(require(path.join(LIB, 'nodes', 'std-library', 'condition'))),
+  def(require(path.join(VIEWER, 'nodes', 'std-library', 'states'))),
   def(require(path.join(LIB, 'nodes', 'componentinputs'))),
   def(require(path.join(LIB, 'nodes', 'componentoutputs'))),
   def(require(path.join(VIEWER, 'nodes', 'visual', 'group'))),

@@ -227,7 +227,9 @@ describe('§D the emitted template — renders null, runs its start chain once o
     expect(template).toContain("import { useEffect, useRef, useState } from 'react';");
     expect(template).toContain("import { callNotifyGuest } from '../api/functions';");
     expect(template).toContain("import { lastSent } from '../stores/variables';");
-    expect(template).toContain('export interface NotifyProps {\n  Do?: () => void;\n  name?: string;\n  onSuccess?: () => void;\n  onFailure?: () => void;\n}');
+    // P18-S126-INSIGNAL (session 127): a signal input is the pulse pair a parent passes; the Run Tasks host passes none (the
+    // template's Do chain runs on its mount, as startTask pulses it).
+    expect(template).toContain('export interface NotifyProps {\n  Do?: { sent: number; taken: { current: number } };\n  name?: string;\n  onSuccess?: () => void;\n  onFailure?: () => void;\n}');
     expect(template).toContain('export function Notify({ Do, name, onSuccess, onFailure }: NotifyProps) {');
   });
 

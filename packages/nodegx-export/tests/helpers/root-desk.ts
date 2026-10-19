@@ -50,7 +50,7 @@ export interface Desk {
 
 const T = '2026-10-19T12:00:00.000Z';
 
-const placeAll = (nodes: RawNode[]) => {
+export const placeAll = (nodes: RawNode[]): RawNode[] => {
   let y = 40;
   for (const n of nodes) {
     n.x = n.x ?? (n.parent !== undefined || n.children !== undefined ? 100 : 700);
@@ -169,11 +169,19 @@ const write = (root: string, rel: string, data: unknown) => {
 export const writeDesk = (edit?: (d: Desk) => void, dir?: string): { dir: string; desk: Desk } => {
   const desk = rootDesk();
   edit?.(desk);
-  const at = dir ?? fs.mkdtempSync(path.join(os.tmpdir(), 'root-desk-'));
+  return { dir: writeDeskProject(desk, { name: 'Root Desk', idBase: 'b8d20e00-0000-4000-8000-0000000009', prefix: 'root-desk-' }, dir), desk };
+};
+
+/**
+ * Any desk written as a v2 project (P18 session 127 reuses it for the Pulse Desk): its App router lists `/Pages/Home`, a
+ * component under `Pages/` is a page and every other one visual. `idBase` is a uuid less its last two digits.
+ */
+export const writeDeskProject = (desk: Desk, named: { name: string; idBase: string; prefix: string }, dir?: string): string => {
+  const at = dir ?? fs.mkdtempSync(path.join(os.tmpdir(), named.prefix));
   write(at, 'nodegx.project.json', {
-    $schema: 'https://opennoodl.dev/schemas/project-v2.json', name: 'Root Desk', id: 'b8d20e00-0000-4000-8000-000000000901',
+    $schema: 'https://opennoodl.dev/schemas/project-v2.json', name: named.name, id: `${named.idBase}01`,
     version: '4', nodegxVersion: '0.2.0', runtimeVersion: 'react19', created: T, modified: T,
-    settings: { htmlTitle: 'Root Desk', navigationPathType: 'path' }, structure: { componentsDir: 'components' }
+    settings: { htmlTitle: named.name, navigationPathType: 'path' }, structure: { componentsDir: 'components' }
   });
   const all: Record<string, { type: string; graph: Graph }> = {
     App: {
@@ -191,11 +199,11 @@ export const writeDesk = (edit?: (d: Desk) => void, dir?: string): { dir: string
     components: Object.fromEntries(Object.entries(all).map(([p, c]) => [p, { path: p, type: c.type, nodeCount: c.graph.nodes.length, connectionCount: c.graph.connections.length, created: T, modified: T }]))
   });
   for (const [p, c] of Object.entries(all)) {
-    const id = `b8d20e00-0000-4000-8000-0000000009${String(10 + ids.indexOf(p)).padStart(2, '0')}`;
+    const id = `${named.idBase}${String(10 + ids.indexOf(p)).padStart(2, '0')}`;
     const roots = c.graph.nodes.filter((n) => n.parent === undefined && (n.children !== undefined || n.type === 'Router')).map((n) => n.id);
     write(at, `components/${p}/component.json`, { $schema: 'https://opennoodl.dev/schemas/component-v2.json', id, name: p.split('/').pop(), path: `/${p}`, type: c.type, modified: T });
     write(at, `components/${p}/nodes.json`, { $schema: 'https://opennoodl.dev/schemas/nodes-v2.json', componentId: id, version: 1, nodes: c.graph.nodes, visualRoots: roots });
     write(at, `components/${p}/connections.json`, { $schema: 'https://opennoodl.dev/schemas/connections-v2.json', componentId: id, version: 1, connections: c.graph.connections });
   }
-  return { dir: at, desk };
+  return at;
 };

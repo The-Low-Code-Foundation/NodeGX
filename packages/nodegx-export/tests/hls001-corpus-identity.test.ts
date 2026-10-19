@@ -400,6 +400,9 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // Failure runs a chain. Predicted before regenerating (`s123-failchain/after-await.ts` over the fixtures): fail-desk in,
     // and record-desk's Home.tsx changed (its Load sends two Record Fetches; the first is started, not waited for, as the
     // runtime's two requests go out together). Regenerated, key by key: exactly those two, nothing else.
+    // Still 63 on 2026-10-19 (P18-S126-INSIGNAL, session 127): a signal input's prop is the pulse pair the parent passes.
+    // Predicted by emitting every fixture with the base's `src` and the tree's: batch-desk's Notify.tsx alone (its `Do`
+    // type). The red run named exactly that key; regenerated, that one hash moved.
     expect(corpusProjects().length).toBe(63);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });

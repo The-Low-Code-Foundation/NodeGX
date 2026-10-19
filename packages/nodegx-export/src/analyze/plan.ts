@@ -3195,6 +3195,31 @@ export interface JsFunctionPlan {
   loadGate?: { unset: string[]; atLoad: 'evaluate' | 'wait' };
 }
 
+/**
+ * P18-S126-INSIGNAL (EXP-011 §94). A signal input's chain: the actions the Component Inputs port's wires describe, in wire
+ * order, run from an effect keyed on the pulse count the parent passes (`InstancePulsePlan`).
+ */
+export interface InputPulsePlan {
+  port: string;
+  actions: HandlerAction[];
+}
+
+/**
+ * P18-S126-INSIGNAL. A placed component's signal input the parent pulses: the count (`stateName`, a state row) and the
+ * count the child has acted on (`takenLocal`, a ref the parent keeps, so it outlives the child's unmount). Passed as one
+ * prop, `{ sent, taken }`: the child runs its chain when `sent` passes `taken`, at a mount too (the runtime's instance exists
+ * while it is not drawn and takes the pulse then), and never twice for one pulse (StrictMode's second mount included).
+ */
+export interface InstancePulsePlan {
+  nodeId: string;
+  port: string;
+  stateName: string;
+  takenLocal: string;
+}
+
+/** P18-S126-INSIGNAL. The TypeScript type of a signal input's prop, the pair the parent passes. */
+export const INPUT_PULSE_TS_TYPE = '{ sent: number; taken: { current: number } }';
+
 export interface ReceiverPlan {
   nodeId: string;
   channelName: string;
@@ -4217,6 +4242,10 @@ export interface ComponentPlan {
   changeHandlers: Record<string, HandlerAction[]>;
   /** Event Receivers this component hosts as useSignal subscriptions. */
   receivers: ReceiverPlan[];
+  /** P18-S126-INSIGNAL. One effect per signal input whose wires run a chain. */
+  inputPulses: InputPulsePlan[];
+  /** P18-S126-INSIGNAL. One count per placed component's signal input a sender here attached to. */
+  instancePulses: InstancePulsePlan[];
   /** Popup slots this component renders, registration order — earned by attachment (§2). */
   popups: PopupSlotPlan[];
   /** True when a translated Close Popup attached — the component declares `onClose` (§4). */
@@ -4833,6 +4862,8 @@ function planComponent(
     handlers: {},
     changeHandlers: {},
     receivers: [],
+    inputPulses: [],
+    instancePulses: [],
     popups: [],
     closesPopup: false,
     queries: [],
@@ -10926,13 +10957,30 @@ function planComponent(
   const isTriggerInto = (node: NodeIR, toProperty: string): boolean =>
     isTriggerWire(node.type, toProperty) ||
     (node.type === SCRIPT_TYPE && scriptPortsOf(node).signalInputs.includes(toProperty)) ||
-    kitSignalInputOf(node, toProperty) !== undefined;
+    kitSignalInputOf(node, toProperty) !== undefined ||
+    instanceSignalInputOf(node, toProperty);
 
   /** P88 GAM-017 — a kit node's declared signal input (`inputProps` or `inputs`), or undefined. */
   const kitSignalInputOf = (node: NodeIR, port: string) =>
     plan.roleOf[node.id] === 'custom'
       ? plan.customNodes[node.id]?.def.inputs.find((input) => input.name === port && input.type === 'signal')
       : undefined;
+
+  /**
+   * P18-S126-INSIGNAL. A placed component's input its Component Inputs declares a signal (the target's own interface), on a
+   * target that exports a component (a visual root, as a popup's target must have). A logic component's instance draws
+   * nothing and has no file to run the chain in: its inputs stay what they were.
+   */
+  const instanceSignalInputOf = (node: NodeIR, port: string): boolean => {
+    if (plan.roleOf[node.id] !== 'instance') return false;
+    const target = ir.components.find((c) => `/${c.path}` === node.type);
+    if (target === undefined || !signalInputPortsOf(target).has(port)) return false;
+    return target.nodes.some((n) => {
+      if (n.parent !== undefined) return false;
+      const role = renderRole(n, catalog, kits);
+      return role !== null && role !== 'unsupported' && role !== 'radio';
+    });
+  };
 
   // Which components open as popups anywhere in the project — the close side translates only
   // inside one; elsewhere the runtime resolves an enclosing popup by ancestor walk, which a
@@ -11509,6 +11557,41 @@ function planComponent(
         `How many times "${port}" on the kit node ${node.id} has been signalled — the count the node reads (GAM-017).`
       );
       kitPulseVars.set(key, stateVar);
+      plan.bindings[node.id] = plan.bindings[node.id] ?? {};
+      plan.bindings[node.id][port] = { kind: 'computed', expr: { kind: 'state-get', name: stateVar.name } };
+    }
+    return { action: { kind: 'state-set', name: stateVar.name, op: 'inc' }, consumes: [] };
+  };
+
+  /**
+   * P18-S126-INSIGNAL (EXP-011 §94). A signal into a placed component's signal input, as a pulse count: GAM-017's idiom one
+   * node type over. The runtime sets the instance's input and its Component Inputs sends the pulse on (componentinstance.ts
+   * `registerComponentInputPort`), so the chain inside runs once per pulse. Here the parent keeps one count per wired port of
+   * the instance, every sender adds one (a functional update: two pulses in one handler are two), and a ref beside it holds
+   * the count the child has acted on; the two are the prop (`InstancePulsePlan`). The child runs its chain from an effect
+   * when the count sent passes the count taken (`plan.inputPulses`): once per move, at a mount too (a pulse sent with the
+   * click that draws the child, or while the parent does not draw it), never again for a pulse already taken.
+   */
+  const instancePulseVars = new Map<string, StateVarPlan>();
+  const compileInstanceSignal = (node: NodeIR, port: string): CompiledSink => {
+    const key = `${node.id}\u0000${port}`;
+    let stateVar = instancePulseVars.get(key);
+    if (stateVar === undefined) {
+      stateVar = allocStateVar(
+        `${node.authoredLabel ?? 'instance'} ${port} pulses`,
+        `${port}Pulses`,
+        'number',
+        0,
+        node.id,
+        'counter',
+        `How many times "${port}" on the placed ${node.type} ${node.id} has been signalled — the count it reads (P18-S126-INSIGNAL).`
+      );
+      instancePulseVars.set(key, stateVar);
+      const base = `${stateVar.name.replace(/Pulses$/, '')}Taken`;
+      let takenLocal = base;
+      for (let n = 2; stateNameTaken(takenLocal); n++) takenLocal = `${base}${n}`;
+      usedStateVarNames.add(takenLocal);
+      plan.instancePulses.push({ nodeId: node.id, port, stateName: stateVar.name, takenLocal });
       plan.bindings[node.id] = plan.bindings[node.id] ?? {};
       plan.bindings[node.id][port] = { kind: 'computed', expr: { kind: 'state-get', name: stateVar.name } };
     }
@@ -15399,6 +15482,7 @@ function planComponent(
     if (jsNodeKindOf(node.type) !== null && port === 'run') return compileJsRun(node);
     if (isLatchType(node.type)) return compileLatch(node, port);
     if (kitSignalInputOf(node, port) !== undefined) return compileKitSignal(node, port);
+    if (instanceSignalInputOf(node, port)) return compileInstanceSignal(node, port);
     if ((plan.roleOf[node.id] === 'checkbox' || plan.roleOf[node.id] === 'input') && (CONTROL_ACTION_PORTS[plan.roleOf[node.id]] ?? []).includes(port)) {
       return compileControlAction(node, port);
     }
@@ -17978,6 +18062,8 @@ function planComponent(
   }
 
   const receiverActions = new Map<string, HandlerAction[]>();
+  /** P18-S126-INSIGNAL. Each signal input's chain, in wire order: one effect per port (`plan.inputPulses`). */
+  const inputPulseActions = new Map<string, HandlerAction[]>();
   /**
    * P18-S123-UNDRAWNTRIGGER. A chain on an element the export never draws, or a Did Mount it does not run (a first plan
    * found them: `unreachedTriggersOf`), is refused by name, its nodes with it — unless another trigger runs them, which
@@ -17995,6 +18081,13 @@ function planComponent(
       if (dispositions[id] === undefined) dispositions[id] = { kind: 'deferred', to: 'EXP-003', reason };
     }
   };
+  /*
+   * P18-S126-INSIGNAL. A placed component's signal input is a trigger port now, and the refusals below write their
+   * sentence on the sink. A placed component is drawn whatever one of its senders does: the wire is dropped and named, the
+   * instance keeps what it had before this pass (restored after it).
+   */
+  const instanceBeforeAttach = new Map<string, Disposition | undefined>();
+  for (const node of component.nodes) if (plan.roleOf[node.id] === 'instance') instanceBeforeAttach.set(node.id, dispositions[node.id]);
   for (const connection of component.connections) {
     if (consumed.has(connection.key)) continue;
     const toNode = nodeById.get(connection.toId);
@@ -18226,6 +18319,46 @@ function planComponent(
       for (const id of compiled.subscribes ?? []) boundSubscribers.add(id);
       continue;
     }
+    /**
+     * P18-S126-INSIGNAL (EXP-011 §94). A signal the parent sends in: the chain runs from an effect on the pulse count, so in
+     * render context, snapped as an effect's chain is. A signal input passed straight on into a placed component's signal
+     * input is a chain like any other here (its action adds one to that instance's own count), so one port can both run a
+     * chain and pass the pulse on, and a port fed from inside and from outside needs no sum.
+     */
+    if (fromNode?.type === 'Component Inputs' && signalInputPortsOf(component).has(connection.fromProperty)) {
+      const refuse = (reason: string) => {
+        if (outputsSink) {
+          if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, reason);
+        } else {
+          dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason };
+        }
+        notes.push(wireNote(connection, reason));
+      };
+      if (!plan.file) {
+        refuse('the component emits no file to host the effect a signal input runs');
+        continue;
+      }
+      if (!actionsValidIn([compiled.action], { kind: 'render' })) {
+        refuse('the action reads values that only exist inside a handler');
+        continue;
+      }
+      const snappedIn = snapAction(compiled.action, chainSnapshotFor(`input:${connection.fromProperty}`));
+      const lateInWrite = 'defer' in snappedIn ? undefined : lateQueryFetchWrite([...(inputPulseActions.get(connection.fromProperty) ?? []), snappedIn]);
+      if (lateInWrite !== undefined) {
+        refuse(lateInWrite);
+        continue;
+      }
+      if ('defer' in snappedIn) {
+        refuse(snappedIn.defer);
+        continue;
+      }
+      inputPulseActions.set(connection.fromProperty, [...(inputPulseActions.get(connection.fromProperty) ?? []), snappedIn]);
+      if (!outputsSink) dispositions[toNode.id] = { kind: 'collapsed', into: fromNode.id };
+      for (const id of compiled.collapses ?? []) dispositions[id] = { kind: 'collapsed', into: fromNode.id };
+      for (const key of compiled.consumes) consumed.add(key);
+      for (const id of compiled.subscribes ?? []) boundSubscribers.add(id);
+      continue;
+    }
     if (fromNode?.type === 'Event Receiver' && connection.fromProperty === 'eventReceived') {
       const eligible = receiverEligible(fromNode);
       if ('defer' in eligible) {
@@ -18287,6 +18420,12 @@ function planComponent(
     notes.push(wireNote(connection, pulseRefusal ?? `the trigger is not a rendered element event or a receiver`));
   }
 
+  for (const [id, before] of instanceBeforeAttach) {
+    if (dispositions[id]?.kind !== 'deferred' || before?.kind === 'deferred') continue;
+    if (before === undefined) delete dispositions[id];
+    else dispositions[id] = before;
+  }
+
   // Component Outputs nodes rule once, after every wire has spoken: the interface declaration
   // is static (Component Inputs' own disposition) unless some fed port failed — then the node
   // defers with that first failure, while the ports that did translate keep their behaviour
@@ -18327,6 +18466,9 @@ function planComponent(
     plan.receivers.push({ nodeId: node.id, channelName: channelNameOf(node)!, actions });
     dispositions[node.id] = { kind: 'collapsed', into: `src/${plan.file.dir}/${plan.file.fileBase}.tsx` };
   }
+
+  // P18-S126-INSIGNAL. Each signal input that runs a chain: an effect on its count, in wire order.
+  for (const [port, actions] of inputPulseActions) plan.inputPulses.push({ port, actions });
 
   // Popup slots and the close prop are earned by attachment (POPUPS-TARGET §2, §4): a compiled
   // popup action whose trigger never attached must leave no state, render, or prop behind.
@@ -18470,6 +18612,7 @@ function planComponent(
     for (const byPort of Object.values(plan.handlers)) for (const actions of Object.values(byPort)) scanActions(actions);
     for (const actions of Object.values(plan.changeHandlers)) scanActions(actions);
     for (const receiver of plan.receivers) scanActions(receiver.actions);
+    for (const pulse of plan.inputPulses) scanActions(pulse.actions);
     // EXP-011 §53. A Run Tasks' listener chains and a template's start chain attach exactly as a handler's
     // chains do — a Cloud Function called only from a task's start chain earns its export and its rows here.
     for (const run of plan.runTasks) for (const chain of Object.values(run.listeners)) if (chain !== undefined) scanActions(chain);
@@ -20353,6 +20496,7 @@ function planComponent(
     for (const byPort of Object.values(plan.handlers)) for (const actions of Object.values(byPort)) walkActions(actions);
     for (const actions of Object.values(plan.changeHandlers)) walkActions(actions);
     for (const receiver of plan.receivers) walkActions(receiver.actions);
+    for (const pulse of plan.inputPulses) walkActions(pulse.actions);
     // A reactive Condition's own test is the commonest session read there is (the auth-gate
     // idiom), and it lives in neither a binding nor a handler. Without this the `User` node
     // reads as unread: no `useSession` in `src/api/session.ts`, and the page imports a symbol
@@ -21026,6 +21170,7 @@ function planComponent(
     for (const byPort of Object.values(plan.handlers)) for (const actions of Object.values(byPort)) fillMaterialize(actions);
     for (const actions of Object.values(plan.changeHandlers)) fillMaterialize(actions);
     for (const receiver of plan.receivers) fillMaterialize(receiver.actions);
+    for (const pulse of plan.inputPulses) fillMaterialize(pulse.actions);
     for (const effect of plan.branchEffects) fillMaterialize([effect.action]);
     for (const effect of plan.valueChangedEffects) fillMaterialize(effect.actions);
     for (const ticked of plan.tickedRuns) fillMaterialize([ticked.action]);
@@ -21167,6 +21312,31 @@ function planComponent(
     if (node === undefined || !component.connections.some((c) => c.toId === id && isTriggerInto(node, c.toProperty))) continue;
     dispositions[id] = { kind: 'static' };
   }
+  /*
+   * P18-S126-INSIGNAL. A pulse count is earned by attachment, as a popup's slot is: the sink is compiled before its sender
+   * is ruled on, so a placed component whose every sender was refused (a logic component's Done, a Set Variable's Done)
+   * would keep a count nothing adds to. Its row and its prop go; the wires keep their refusals.
+   */
+  if (instancePulseVars.size > 0) {
+    const pulsed = new Set<string>();
+    const seen = new Set<unknown>();
+    const visit = (value: unknown): void => {
+      if (value === null || typeof value !== 'object' || seen.has(value)) return;
+      seen.add(value);
+      if (Array.isArray(value)) return value.forEach(visit);
+      const v = value as { kind?: unknown; name?: unknown; op?: unknown };
+      if (v.kind === 'state-set' && v.op === 'inc' && typeof v.name === 'string') pulsed.add(v.name);
+      for (const child of Object.values(value)) visit(child);
+    };
+    for (const [key, value] of Object.entries(plan)) if (key !== 'stateVars' && key !== 'bindings') visit(value);
+    for (const [key, stateVar] of instancePulseVars) {
+      if (pulsed.has(stateVar.name)) continue;
+      const [nodeId, port] = key.split('\u0000');
+      plan.stateVars = plan.stateVars.filter((v) => v !== stateVar);
+      plan.instancePulses = plan.instancePulses.filter((p) => p.stateName !== stateVar.name);
+      if (plan.bindings[nodeId] !== undefined) delete plan.bindings[nodeId][port];
+    }
+  }
   sweepRefusedScripts();
   sweepUnreportedDeferrals();
   collectRefusals();
@@ -21195,6 +21365,22 @@ export interface OutputInterface {
    * off the ComponentIR alone, so the child's plan and every parent's plan agree.
    */
   valueProps: Array<{ port: string; prop: string; tsType: string }>;
+}
+
+/** P18-S126-INSIGNAL. The ports a component's Component Inputs declare signals: the inputs a parent pulses. */
+const signalInputPortsCache = new WeakMap<ComponentIR, Set<string>>();
+export function signalInputPortsOf(component: ComponentIR | undefined): Set<string> {
+  if (component === undefined) return new Set();
+  let ports = signalInputPortsCache.get(component);
+  if (ports === undefined) {
+    ports = new Set();
+    for (const node of component.nodes) {
+      if (node.type !== 'Component Inputs') continue;
+      for (const port of node.declaredPorts) if (port.plug === 'output' && port.kind === 'signal') ports.add(port.name);
+    }
+    signalInputPortsCache.set(component, ports);
+  }
+  return ports;
 }
 
 export function componentOutputInterface(component: ComponentIR): OutputInterface {
@@ -21964,7 +22150,9 @@ export function indexPageStacks(ir: ExportIR, catalog: CatalogIndex, kits: KitIn
 }
 
 function tsTypeOf(portType: string | undefined, kind: 'value' | 'signal'): string {
-  if (kind === 'signal') return '() => void';
+  // P18-S126-INSIGNAL. A signal input is the pair the parent passes (`compileInstanceSignal`, `InstancePulsePlan`): the child
+  // runs its chain when the count sent passes the count taken. It was typed as a callback the child never called.
+  if (kind === 'signal') return INPUT_PULSE_TS_TYPE;
   switch (portType) {
     case 'boolean':
       return 'boolean';
