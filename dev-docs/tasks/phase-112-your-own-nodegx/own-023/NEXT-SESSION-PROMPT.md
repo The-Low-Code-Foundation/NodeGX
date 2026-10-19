@@ -10,6 +10,14 @@
 > (gallery) before a reboot. Next: gallery rows (A/A+ need their own dev server, by PORT), then Richard's three lines
 > per app (C11) before any number, then graders.
 
+> **s1 later (2026-10-19 ~22:55):** builds done (one sitting each; numbers in `lab-notes.md`, rounds copied to the
+> gallery `~/vscode_projects/NodeGX test projects/OWN-023 apps/rounds`). Richard's lines per app in task §9.2 (blind,
+> before any number). Blind grade done: `grades/` (6 reports, scripted checks, Richard's 5 rulings, final table).
+> **Follow-ups F1–F4 running** (`run-followups.mjs`, background, scratchpad `…/own023/followups/<arm>-F<n>`,
+> `followups.json`); the gallery is STOPPED while they run (B's backend port 8584). Next: copy follow-ups to the
+> gallery, re-grade F1/F2 (serve their folders, `grade-agents.mjs`), F1 key search (OWN-015 method + control), then
+> the hats (step 6), table, write-up.
+
 **Written 2026-10-19 by Fable, who scoped it and ran nothing.** Say "Opus" in your first message. Read, in order: this
 file; `../OWN-023-ONE-BRIEF-THREE-STRANGERS.md` (all of it; §2.1 the controls, §7 and §9 twice); `../own-018/round-claude.mjs`
 and `peek-claude.mjs` (the Claude Code arm, the seal, the cost reading); `../own-019/gallery.mjs` (how an app is shown).
