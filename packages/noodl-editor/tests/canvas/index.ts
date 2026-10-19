@@ -13,6 +13,9 @@ export * from './WireLabels.test';
 // from its own root node) and the stacked-card edge bottom-right.
 export * from './NodeComponentMark.test';
 
+// P111 SEE-001: the script mark, a bar down the right edge of a card the honesty number counts as script.
+export * from './NodeScriptMark.test';
+
 // BEN-004: the *preview* canvas, not the node graph — which components the
 // bench may be pointed at, and what the frame width control does with the
 // strings a text input hands back.
