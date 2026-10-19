@@ -12,8 +12,8 @@
     "Pages/Home": {
       "path": "Pages/Home",
       "type": "page",
-      "nodeCount": 17,
-      "connectionCount": 9
+      "nodeCount": 25,
+      "connectionCount": 13
     },
     "Parts/Bar": {
       "path": "Parts/Bar",
@@ -24,7 +24,7 @@
   },
   "stats": {
     "totalComponents": 3,
-    "totalNodes": 21,
-    "totalConnections": 13
+    "totalNodes": 29,
+    "totalConnections": 17
   }
 }

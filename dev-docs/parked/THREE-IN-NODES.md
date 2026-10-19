@@ -1,8 +1,12 @@
 # Three in nodes — three.js as NodeGX nodes, and an editor for them
 
-**Parked:** 2026-10-19, from a conversation with Richard. This isn't a phase. It becomes one only when it takes a lane
-on the [board](../BOARD.md) and Richard says so. Unlike most parked pages it carries a **measured prototype**: a kit of
-three nodes, a fixture, a drive, 8 / 8 clauses green on the day it was written (§3).
+**Parked:** 2026-10-19, from a conversation with Richard. Unlike most parked pages it carries a **measured prototype**:
+a kit of three nodes, a fixture, a drive, 8 / 8 clauses green on the day it was written (§3).
+
+**Picked up the same day (s2):** Richard, *"Let's continue the custom three.js editor work"*, then ruled **R1 nodes
+first** and **R2 on npm too** (§6). s2 added the 3D Group node, Width and Height on the Scene, Name as the card title,
+and measured the catalog route: **12 / 12** on the drive, **5 / 5** on the catalog spec (§3.1). It still has no lane on
+the [board](../BOARD.md); which slot it takes is Richard's to name.
 
 > "I've had several community members asking me to show them 'how NodeGX works with three.js in nodes' which I know at
 > the moment we don't … is there a world where we can create for example a custom editor designed specifically for
@@ -69,8 +73,39 @@ fix is a ref made once per mounted component. Filed as `PARKED-THREE-S1-INSTANCE
 about it, and the next kit author will key by node id too.
 
 **What it did not measure.** A GPU (software GL only); a touch tap (the mouse path only); more than nine meshes; the
-editor (the deploy and the viewer only — the picker does not list these nodes, §5); the look beside a mockup (there is
-no mockup: the screenshot is a readout, not a grade).
+editor (the deploy and the viewer only); the look beside a mockup (there is no mockup: the screenshot is a readout, not
+a grade).
+
+### 3.1 s2 — the catalog, a 3D Group, a size (2026-10-19)
+
+**The catalog was never the gap.** §5 said the kit "would not validate through the MCP" and the picker "does not list
+these nodes". Neither had been measured. A kit in a project's `noodl_modules/` reaches the MCP through the project
+overlay (CN-003), the route garden-3d-kit takes. [`three-kit-catalog.test.ts`](../../packages/noodl-mcp/tests/three-kit-catalog.test.ts)
+runs it on this fixture: the overlay holds all four nodes, each `inNodePicker: true` with every declared port; the
+fixture validates through `validateOnDisk` (what `validate_project` runs) with 0 errors; the control, the same project
+without the kit, says `unknown-node-type`. What the overlay can't hold: "a Mesh belongs under a Scene". The bridge
+registers every kit React node as `Visual` and the hierarchy rule is category-only, so a Mesh under a plain Group
+validates clean and draws nothing (**PARKED-THREE-S2-MESHOUTSIDE**, low). The editor's picker itself was not driven.
+
+**Built:** `3D Group` (`three-kit.Group`): Name, X Y Z, Rotation Y, Scale, Spin; Tapped when any mesh inside it is
+tapped; a mesh with no Name is reported by the nearest group's. React runs a child's effects before its parent's, so
+the engine parks a child in the scene and the group adopts it when it arrives. **Width and Height on the Scene**
+(`inputCss`, the built-in controls' way; defaults 100 % × 360 px). **Name as the canvas card title** on Mesh and Group
+(`usePortAsLabel`).
+
+**Not built: Tween.** The built-in **Animate To Value** is the tween: its Current Value wired into a Mesh's or a 3D
+Group's X glides it. The fixture's robot does exactly that.
+
+| clause (new or changed) | reading, s2 |
+|---|---|
+| ROWS | Mesh Count **12** out of the port: the eight bars, the ball, the robot's three parts (a group is not a mesh) |
+| GROUP | the robot is a 3D Group of 3 meshes; its body's world position is the group's (x −6, z 4, centre y 0.8), and the eye sits where a 30° turn puts it (x + 0.21, z + 0.36) |
+| SIZE | the canvas is 1024 × **520**: Height set in the graph (the old fixed height was 360, so 520 can only come from the port) |
+| ANIM | robotX −6 → 6: 2.76 at 300 ms, 6 after 1.5 s, body with it |
+| GTAP | a tap on the robot's unnamed body: Tapped Name `"robot"`, the group's Tapped once, the Scene's twice in all |
+
+**12 / 12.** Readings [`drive-2026-10-19-s2.json`](three-in-nodes/drive-2026-10-19-s2.json); the scene at 520 px
+[before](three-in-nodes/shots/s2-01-scene.png) and [after the robot glided](three-in-nodes/shots/s2-03-robot-glided.png).
 
 ## 4. The vocabulary, ranked by the two surfaces Richard named
 
@@ -81,8 +116,8 @@ Games, and 3D representations of data. Not by what three.js offers.
 | 1 | Scene (camera and orbit inside it) | nothing without it | ✅ |
 | 2 | Mesh (six primitives, Sit On Floor, Spin, Tapped) | a bar, a ball, a tile, a wall, a player | ✅ |
 | 3 | Light (sun, lamp, sky) | a scene with none is black | ✅ |
-| 4 | Group (a transform with children) | a robot is a group of meshes; a For Each of groups is a row of robots | |
-| 5 | Tween (Animate To Value in 3D: X Y Z, rotation, scale, over ms) | movement is what makes it a game and a chart that updates | |
+| 4 | Group (a transform with children) | a robot is a group of meshes; a For Each of groups is a row of robots | ✅ s2, as `3D Group` |
+| 5 | Tween (Animate To Value in 3D: X Y Z, rotation, scale, over ms) | movement is what makes it a game and a chart that updates | ✅ s2: **no node**, the built-in Animate To Value wired into X (ANIM) |
 | 6 | Text (a label projected from a point: a DOM overlay, the Garden's bubble) | a chart with no labels is a sculpture | |
 | 7 | Camera as its own node (position, target, Follow) | a game follows a player; a data view frames a selection | |
 | 8 | Body (a box or sphere with gravity and bounces, the wall's physics) | the kids' phases asked for it twice | |
@@ -94,11 +129,11 @@ app (P112 R4).
 
 ## 5. What it would need to become a phase
 
-- **The catalog, the picker and the MCP.** Nodes a module registers at runtime are not in the build-time catalog
-  (`library/modules/README.md` :144); the editor's picker and `noodl-mcp`'s validator learn a kit through the kit
-  catalog (`nodegx-kit-catalog`, `kitOverlay.ts`). A new node type owes both (harness pointers). Today the fixture
-  deploys and runs; it would not validate through the MCP.
-- **Layout inputs on the Scene.** It has `defaultCss` and no Width / Height ports; a page sizes it by its parent.
+- **The catalog, the picker and the MCP.** ✅ measured s2 (§3.1): the project overlay carries the kit to the MCP; it
+  validates. Owed: the editor's picker driven once with the kit installed, and PARKED-THREE-S2-MESHOUTSIDE.
+- **Layout inputs on the Scene.** ✅ s2: Width and Height.
+- **On npm (R2).** `@nodegx/three-kit`, so a person with only `npm create nodegx` can add it; rides lane 1's next npm
+  cut. Not started: what the package carries and how a kit-only project installs it is the next session's first read.
 - **The ten nodes** (§4), each with the four or five inputs a person wants, not the forty three.js has.
 - **Specs** (layer 2): a headless face that reads the Scene's graph (the drive's `census()` is its first draft), the
   format's `act` for a tap and a drag, scenarios for Tween and Tap. NSP-016's layout model has nothing to say here:
@@ -109,10 +144,10 @@ app (P112 R4).
 
 ## 6. Rulings to ask Richard, when it is unparked
 
-- R1 **Which layer first.** The recommendation is layer 1 as a published kit in the picker, the data demo (Static Data →
-  For Each → Mesh) its first example; the sub-editor waits.
-- R2 **Where the kit ships.** `library/modules/` like the others, or `@nodegx/three-kit` on npm beside the P112
-  packages (the vibe coder installs with no editor).
+- R1 **Which layer first.** ✅ **Ruled 2026-10-19: nodes first** (the picker and the MCP, then Group and Tween; the
+  sub-editor follows once there are enough nodes for it to edit).
+- R2 **Where the kit ships.** ✅ **Ruled 2026-10-19: on npm too** (`library/modules/` and `@nodegx/three-kit`, so a
+  person using only the npm tools can install it; with lane 1's next npm cut).
 - R3 **The Godot sentence.** Say "the spec admits other targets" and build none, or scope one batch (Mesh, Tween, Tap)
   as a NSP-006 stranger round in GDScript to prove it.
 
@@ -121,5 +156,6 @@ app (P112 R4).
 - `library/modules/three-kit/` — the kit (`src/kit.js`, `build.mjs`, `library.json`, `project/noodl_modules/three-kit/`
   with `index.js`, `manifest.json`, `three.min.js`, `LICENSE.txt`)
 - `dev-docs/parked/three-in-nodes/fixture/` — the project; `shots/`, `drive-2026-10-19.json` — the readings
-- `scripts/devtools/drive-three-kit.js` — the drive
-- `dev-docs/bugs/parked-three-s1-instanceid-….md` — the finding
+- `scripts/devtools/drive-three-kit.js` — the drive (12 clauses)
+- `packages/noodl-mcp/tests/three-kit-catalog.test.ts` — the catalog spec (5 tests)
+- `dev-docs/bugs/parked-three-s1-instanceid-….md`, `parked-three-s2-meshoutside-….md` — the findings

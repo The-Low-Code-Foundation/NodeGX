@@ -55,13 +55,18 @@
       "parameters": {
         "cameraDistance": 22,
         "cameraHeight": 9,
-        "cameraAngle": 28
+        "cameraAngle": 28,
+        "height": {
+          "value": 520,
+          "unit": "px"
+        }
       },
       "children": [
         "sky",
         "sun",
         "ball",
-        "bars"
+        "bars",
+        "robot"
       ]
     },
     {
@@ -205,6 +210,107 @@
       },
       "x": 600,
       "y": 560
+    },
+    {
+      "id": "robot",
+      "type": "three-kit.Group",
+      "label": "Robot",
+      "parent": "scene",
+      "parameters": {
+        "name": "robot",
+        "z": 4,
+        "rotationY": 30
+      },
+      "children": [
+        "robotBody",
+        "robotHead",
+        "robotEye"
+      ]
+    },
+    {
+      "id": "robotBody",
+      "type": "three-kit.Mesh",
+      "label": "Body",
+      "parent": "robot",
+      "parameters": {
+        "shape": "box",
+        "colour": "#ffa502",
+        "width": 1.2,
+        "height": 1.6,
+        "depth": 0.8,
+        "sitOnFloor": true
+      }
+    },
+    {
+      "id": "robotHead",
+      "type": "three-kit.Mesh",
+      "label": "Head",
+      "parent": "robot",
+      "parameters": {
+        "shape": "box",
+        "colour": "#eccc68",
+        "width": 0.9,
+        "height": 0.8,
+        "depth": 0.8,
+        "y": 1.7,
+        "sitOnFloor": true
+      }
+    },
+    {
+      "id": "robotEye",
+      "type": "three-kit.Mesh",
+      "label": "Eye",
+      "parent": "robot",
+      "parameters": {
+        "shape": "sphere",
+        "colour": "#2f3542",
+        "width": 0.3,
+        "height": 0.3,
+        "depth": 0.3,
+        "y": 2.1,
+        "z": 0.42
+      }
+    },
+    {
+      "id": "vRobotX",
+      "type": "Variable2",
+      "label": "robotX",
+      "parameters": {
+        "name": "robotX",
+        "value": -6
+      },
+      "x": 420,
+      "y": 740
+    },
+    {
+      "id": "robotGlide",
+      "type": "net.noodl.animatetovalue",
+      "label": "Robot glides",
+      "parameters": {
+        "duration": 800
+      },
+      "x": 640,
+      "y": 740
+    },
+    {
+      "id": "robotTapCounter",
+      "type": "Counter",
+      "label": "robot taps",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 420,
+      "y": 860
+    },
+    {
+      "id": "vRobotTaps",
+      "type": "Variable2",
+      "label": "robotTaps",
+      "parameters": {
+        "name": "robotTaps"
+      },
+      "x": 640,
+      "y": 860
     }
   ]
 }

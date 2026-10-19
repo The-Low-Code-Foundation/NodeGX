@@ -4,5 +4,5 @@
   "name": "Home",
   "path": "/Pages/Home",
   "type": "page",
-  "description": "The page: one Scene, two Lights, a spinning ball, and a For Each that makes one box per row of a Static Data."
+  "description": "The page: one Scene, two Lights, a spinning ball, a For Each that makes one box per row of a Static Data, and a robot (a 3D Group of three meshes) whose X glides through Animate To Value."
 }

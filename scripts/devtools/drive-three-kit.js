@@ -170,14 +170,26 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
   const meshes = await vars('meshes');
   const attr = await evaluate(`(${ROOT}).getAttribute('data-meshes')`);
   const c1 = await census();
-  const bars = c1.objects.filter((o) => o.kind === 'mesh' && o.name !== 'ball').sort((a, b) => a.x - b.x);
+  const bars = c1.objects.filter((o) => o.kind === 'mesh' && !o.parent && o.name !== 'ball').sort((a, b) => a.x - b.x);
   const expect = [['mon', 3], ['tue', 5], ['wed', 2], ['thu', 6], ['fri', 4], ['sat', 7], ['sun', 1], ['avg', 4]];
   const rowsOk = bars.length === 8 && expect.every(([n, v], i) => bars[i] && bars[i].name === n && Math.abs(bars[i].h - v) < 1e-6 && Math.abs(bars[i].y - v / 2) < 1e-6);
   readings.census = c1;
-  check('ROWS  Mesh Count 9 out of the port; one box per Static Data row with its name, x order and height', meshes === 9 && attr === '9' && rowsOk, { meshes, attr, bars: bars.map((b) => [b.name, b.x, b.h, b.y]) });
+  // 12 = the eight boxes the For Each made, the ball, and the robot's three parts (a 3D Group is not a mesh).
+  check('ROWS  Mesh Count 12 out of the port; one box per Static Data row with its name, x order and height', meshes === 12 && attr === '12' && rowsOk, { meshes, attr, bars: bars.map((b) => [b.name, b.x, b.h, b.y]) });
+
+  // GROUP — the robot's parts sit in its 3D Group: their parent is the group, and a part at the group's middle stands
+  // where the group stands in the world (x −6 from Animate To Value's first target, z 4 from the group's own Z).
+  const robot = c1.objects.find((o) => o.kind === 'group' && o.name === 'robot');
+  const parts = robot ? c1.objects.filter((o) => o.parent === robot.id) : [];
+  const body = parts.find((o) => o.shape === 'box' && Math.abs(o.h - 1.6) < 1e-6);
+  const groupOk = !!robot && parts.length === 3 && Math.abs(robot.x + 6) < 1e-6 && Math.abs(robot.z - 4) < 1e-6 && !!body && Math.abs(body.wx + 6) < 1e-6 && Math.abs(body.wz - 4) < 1e-6 && Math.abs(body.wy - 0.8) < 1e-6;
+  check('GROUP the robot is a 3D Group of 3 meshes; its body stands where the group stands (world x −6, z 4, centre y 0.8)', groupOk, { robot, parts });
+
+  // SIZE — the page sizes the Scene: Height 520 px from the graph, Width 100 % of a 1024 px page by default.
+  const rect = JSON.parse(await evaluate(`JSON.stringify((${ROOT}).querySelector('canvas').getBoundingClientRect())`));
+  check('SIZE  the canvas is the Scene\'s Height (520 px, set in the graph) by its default Width (100 % = 1024 px)', Math.round(rect.height) === 520 && Math.round(rect.width) === 1024, rect);
 
   // PIXELS
-  const rect = JSON.parse(await evaluate(`JSON.stringify((${ROOT}).querySelector('canvas').getBoundingClientRect())`));
   const f1 = await shot('01-scene');
   let colours = null;
   if (f1) {
@@ -216,6 +228,33 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
   readings.tap = { at, tappedName, taps };
   check('TAP   a press and release on the tallest bar fires Tapped once with Tapped Name "sat"', tappedName === 'sat' && taps === 1, { at, tappedName, taps });
   await shot('02-after-tap');
+
+  // ANIM — the built-in Animate To Value is the tween: robotX −6 → 6 over 800 ms, read mid-way and after.
+  const groupX = async () => (await census()).objects.find((o) => o.kind === 'group' && o.name === 'robot');
+  await evaluate(`Noodl.Variables.set('robotX', 6)`);
+  await wait(300);
+  const mid = await groupX();
+  await wait(1200);
+  const end = await groupX();
+  const endBody = (await census()).objects.find((o) => body && o.id === body.id);
+  readings.anim = { mid: mid && mid.x, end: end && end.x, endBodyWx: endBody && endBody.wx };
+  check('ANIM  Animate To Value glides the robot: mid-way strictly between −6 and 6, then at 6 with its body', !!mid && mid.x > -6 && mid.x < 6 && !!end && Math.abs(end.x - 6) < 1e-6 && !!endBody && Math.abs(endBody.wx - 6) < 1e-6, readings.anim);
+
+  // GTAP — a tap on the robot's body (no Name of its own): the Scene says "robot" and the group's Tapped fires once.
+  const bodyAt = body ? JSON.parse(await evaluate(`JSON.stringify((${ROOT}).__threeKit.projectOf(${JSON.stringify(body.id)}))`)) : null;
+  if (bodyAt) {
+    const mouse = (type, x, y) => page.client.send('Input.dispatchMouseEvent', { type, x: Math.round(x), y: Math.round(y), button: 'left', clickCount: 1 });
+    await mouse('mouseMoved', bodyAt.x, bodyAt.y);
+    await mouse('mousePressed', bodyAt.x, bodyAt.y);
+    await mouse('mouseReleased', bodyAt.x, bodyAt.y);
+    await wait(400);
+  }
+  const gName = await vars('tappedName');
+  const gTaps = await vars('robotTaps');
+  const allTaps = await vars('taps');
+  readings.groupTap = { at: bodyAt, tappedName: gName, robotTaps: gTaps, taps: allTaps };
+  check('GTAP  a tap on the robot\'s unnamed body: Tapped Name "robot", the group\'s Tapped once, the Scene\'s twice in all', gName === 'robot' && gTaps === 1 && allTaps === 2, readings.groupTap);
+  await shot('03-robot-glided');
 
   readings.consoleErrors = page.consoleErrors;
   readings.networkErrors = page.networkErrors;

@@ -56,6 +56,30 @@
       "fromProperty": "currentCount",
       "toId": "vReady",
       "toProperty": "value"
+    },
+    {
+      "fromId": "vRobotX",
+      "fromProperty": "value",
+      "toId": "robotGlide",
+      "toProperty": "targetValue"
+    },
+    {
+      "fromId": "robotGlide",
+      "fromProperty": "currentValue",
+      "toId": "robot",
+      "toProperty": "x"
+    },
+    {
+      "fromId": "robot",
+      "fromProperty": "onTapped",
+      "toId": "robotTapCounter",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "robotTapCounter",
+      "fromProperty": "currentCount",
+      "toId": "vRobotTaps",
+      "toProperty": "value"
     }
   ]
 }

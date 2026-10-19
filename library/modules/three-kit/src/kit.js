@@ -2,9 +2,10 @@
 /**
  * three-kit — three.js as NodeGX nodes. A PROTOTYPE (dev-docs/parked/THREE-IN-NODES.md), 2026-10-19.
  *
- * Three visual nodes. `Scene` draws a WebGL canvas and is a parent; `Mesh` and `Light` are its children in the
- * structure lane and draw nothing of their own: each one tells the Scene above it what it is, through a React
- * context, and the Scene keeps a three.js object per child. A `For Each` under a Scene therefore makes one mesh per
+ * Four visual nodes. `Scene` draws a WebGL canvas and is a parent; `Mesh`, `Light` and `3D Group` are its children in
+ * the structure lane and draw nothing of their own: each one tells the Scene above it what it is, through a React
+ * context, and the Scene keeps a three.js object per child. A `3D Group` is a parent too: what is under it moves,
+ * turns and scales with it, so a robot is a group of meshes and a For Each of groups is a row of robots. A `For Each` under a Scene therefore makes one mesh per
  * row, the same way it makes one Group per row in the DOM — that is the claim this prototype exists to measure.
  *
  * Hand-written in the shape of `garden-3d-kit`: ES5, no SDK, no bundler for THIS file. `build.mjs` copies it under a
@@ -134,7 +135,7 @@
       var spinning = false;
       for (var id in objects) {
         var o = objects[id];
-        if (o.spec.spin && o.obj.isMesh) {
+        if (o.spec.spin && (o.kind === 'mesh' || o.kind === 'group')) {
           o.obj.rotation.y += o.spec.spinSpeed * DEG * dt;
           spinning = true;
         }
@@ -152,18 +153,45 @@
       if (!raf) raf = requestAnimationFrame(tick);
     }
 
+    /**
+     * Put an object under the parent it asked for. React runs a child's effects BEFORE its parent's, so a Mesh inside a
+     * 3D Group speaks first: until the group exists the mesh waits in the scene, and the group adopts it when it arrives.
+     */
+    function attach(o) {
+      var want = o.spec.parent && objects[o.spec.parent] ? objects[o.spec.parent].obj : scene;
+      if (o.obj.parent !== want) want.add(o.obj);
+    }
+
+    function adopt(groupId) {
+      for (var id in objects) if (objects[id].spec.parent === groupId) attach(objects[id]);
+    }
+
     function upsert(id, spec) {
       var o = objects[id];
       if (o && o.kind !== spec.kind) {
         remove(id);
         o = null;
       }
-      if (spec.kind === 'mesh') {
+      if (spec.kind === 'group') {
+        var made = !o;
+        if (made) {
+          var g = new T.Group();
+          g.userData.id = id;
+          o = objects[id] = { kind: 'group', obj: g, spec: spec };
+        }
+        var gr = o.obj;
+        var sc = Math.max(0.0001, spec.scale);
+        gr.scale.set(sc, sc, sc);
+        gr.position.set(spec.x, spec.y, spec.z);
+        if (!spec.spin || o.spec.spin !== spec.spin) gr.rotation.y = spec.yaw * DEG;
+        o.spec = spec;
+        attach(o);
+        if (made) adopt(id);
+      } else if (spec.kind === 'mesh') {
         if (!o) {
           var mat = new T.MeshLambertMaterial({ color: 0xffffff, flatShading: true, side: spec.shape === 'plane' ? T.DoubleSide : T.FrontSide });
           var mesh = new T.Mesh(geometry(spec.shape), mat);
           mesh.userData.id = id;
-          scene.add(mesh);
           o = objects[id] = { kind: 'mesh', obj: mesh, spec: spec, shape: spec.shape };
         }
         var m = o.obj;
@@ -182,6 +210,7 @@
         if (!spec.spin || o.spec.spin !== spec.spin) m.rotation.y = spec.yaw * DEG;
         m.rotation.x = spec.shape === 'plane' ? -Math.PI / 2 : 0;
         o.spec = spec;
+        attach(o);
       } else if (spec.kind === 'light') {
         if (!o || o.lightKind !== spec.light) {
           if (o) remove(id);
@@ -190,7 +219,6 @@
           else if (spec.light === 'lamp') light = new T.PointLight(0xffffff, 1, 0, 1);
           else light = new T.DirectionalLight(0xffffff, 1);
           light.userData.id = id;
-          scene.add(light);
           o = objects[id] = { kind: 'light', obj: light, spec: spec, lightKind: spec.light };
         }
         var l = o.obj;
@@ -199,6 +227,7 @@
         l.position.set(spec.x, spec.y, spec.z);
         if (spec.light === 'sky' && l.groundColor) l.groundColor.set(spec.ground);
         o.spec = spec;
+        attach(o);
       }
       needs = true;
       schedule();
@@ -208,7 +237,8 @@
     function remove(id) {
       var o = objects[id];
       if (!o) return;
-      scene.remove(o.obj);
+      if (o.kind === 'group') for (var c in objects) if (objects[c].spec.parent === id) scene.add(objects[c].obj);
+      if (o.obj.parent) o.obj.parent.remove(o.obj);
       if (o.kind === 'mesh') o.obj.material.dispose();
       delete objects[id];
       needs = true;
@@ -248,9 +278,22 @@
       ray.setFromCamera(ndc, camera);
       var meshes = [];
       for (var id in objects) if (objects[id].kind === 'mesh') meshes.push(objects[id].obj);
+      scene.updateMatrixWorld();
       var hits = ray.intersectObjects(meshes, false);
       if (!hits.length) return null;
       return objects[hits[0].object.userData.id] || null;
+    }
+
+    /** The mesh and every 3D Group it sits in, innermost first: a tap belongs to all of them. */
+    function lineage(o) {
+      var out = [];
+      var seen = {};
+      while (o && !seen[o.obj.userData.id]) {
+        seen[o.obj.userData.id] = true;
+        out.push(o);
+        o = o.spec.parent ? objects[o.spec.parent] : null;
+      }
+      return out;
     }
 
     function orbit(dAngle, dHeight) {
@@ -275,18 +318,21 @@
 
     /** What a drive reads: the scene graph, no pixels needed. */
     function census() {
+      scene.updateMatrixWorld();
       var out = [];
       for (var id in objects) {
         var o = objects[id];
-        out.push({ id: id, kind: o.kind, name: o.spec.name || null, shape: o.shape || o.lightKind || null, x: o.obj.position.x, y: o.obj.position.y, z: o.obj.position.z, h: o.obj.scale.y });
+        var w = o.obj.getWorldPosition(new T.Vector3());
+        out.push({ id: id, kind: o.kind, name: o.spec.name || null, shape: o.shape || o.lightKind || null, parent: o.spec.parent || null, x: o.obj.position.x, y: o.obj.position.y, z: o.obj.position.z, wx: w.x, wy: w.y, wz: w.z, h: o.obj.scale.y });
       }
       return { meshes: count(), objects: out, frames: frames, camera: { distance: cam.distance, height: cam.height, angle: cam.angle } };
     }
 
-    return { upsert: upsert, remove: remove, resize: resize, setLook: setLook, pick: pick, orbit: orbit, zoom: zoom, dispose: dispose, census: census, count: count, anySpin: anySpin, schedule: schedule, camera: camera, scene: scene, renderer: renderer, projectOf: function (id) {
+    return { upsert: upsert, remove: remove, resize: resize, setLook: setLook, pick: pick, lineage: lineage, orbit: orbit, zoom: zoom, dispose: dispose, census: census, count: count, anySpin: anySpin, schedule: schedule, camera: camera, scene: scene, renderer: renderer, projectOf: function (id) {
       var o = objects[id];
       if (!o) return null;
-      var v = o.obj.position.clone().project(camera);
+      scene.updateMatrixWorld();
+      var v = o.obj.getWorldPosition(new T.Vector3()).project(camera);
       var r = canvas.getBoundingClientRect();
       return { x: r.left + ((v.x + 1) / 2) * r.width, y: r.top + ((1 - v.y) / 2) * r.height };
     } };
@@ -303,13 +349,13 @@
     displayName: 'Scene',
     category: '3D',
     description:
-      'A three.js scene on a canvas. Put Mesh and Light nodes under it (or a For Each that makes them) and it draws them; ' +
+      'A three.js scene on a canvas. Put Mesh, Light and 3D Group nodes under it (or a For Each that makes them) and it draws them; ' +
       'the graph says where everything is. A drag orbits the camera and a wheel zooms when Orbit is on. A tap on a mesh fires ' +
       'Tapped with its Name. Supported is false when there is no WebGL: nothing is drawn, nothing throws, Ready never fires.',
     ssr: { compat: 'safe' },
     noodlNodeAsProp: true,
     allowChildren: true,
-    defaultCss: { display: 'block', width: '100%', height: '360px' },
+    defaultCss: { display: 'block' },
 
     getReactComponent: function () {
       return function SceneComponent(props) {
@@ -434,10 +480,13 @@
           if (!p || p.moved || !engRef.current) return;
           var hit = engRef.current.pick(e.clientX, e.clientY);
           if (!hit) return;
-          var name = hit.spec.name || '';
+          // The name is the mesh's own, or the nearest 3D Group's it sits in: tap a robot's arm, the Scene says the robot.
+          var line = engRef.current.lineage(hit);
+          var name = '';
+          for (var i = 0; i < line.length && !name; i++) name = line[i].spec.name || '';
           if (typeof props.onTappedName === 'function') props.onTappedName(name);
           if (typeof props.onTapped === 'function') props.onTapped();
-          if (typeof hit.spec.onTap === 'function') hit.spec.onTap();
+          for (var j = 0; j < line.length; j++) if (typeof line[j].spec.onTap === 'function') line[j].spec.onTap();
         }
         function onWheel(e) {
           if (!orbitOn || !engRef.current) return;
@@ -480,6 +529,26 @@
       label: { type: 'string', displayName: 'Label', group: 'Look', default: '3D scene', description: 'What a screen reader calls the scene.' }
     },
 
+    // The Scene's size is the page's to decide, the way a Group's is: the canvas fills whatever these make.
+    inputCss: {
+      width: {
+        index: 1,
+        group: 'Dimensions',
+        displayName: 'Width',
+        description: 'How wide the scene is on the page.',
+        type: { name: 'number', units: ['%', 'px', 'vw'], defaultUnit: '%' },
+        default: 100
+      },
+      height: {
+        index: 2,
+        group: 'Dimensions',
+        displayName: 'Height',
+        description: 'How tall the scene is on the page. The camera keeps its framing at any size.',
+        type: { name: 'number', units: ['px', '%', 'vh'], defaultUnit: 'px' },
+        default: 360
+      }
+    },
+
     outputProps: {
       onReady: { type: 'signal', displayName: 'Ready', group: 'Events', description: 'The scene is on the page and drawing.' },
       onSupported: { type: 'boolean', displayName: 'Supported', group: 'Events', description: 'True when WebGL and three.js are both here. False draws nothing and never fires Ready.' },
@@ -490,7 +559,7 @@
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // Mesh and Light — children. They render nothing; they tell the Scene what they are.
+  // Mesh, Light and 3D Group — children. They render nothing; they tell the Scene what they are.
   // ═══════════════════════════════════════════════════════════════════════════
 
   /**
@@ -526,9 +595,10 @@
     name: 'three-kit.Mesh',
     displayName: 'Mesh',
     category: '3D',
+    usePortAsLabel: 'name',
     description:
       'One shape in the Scene above it: a box, sphere, cylinder, cone, torus or plane, at X Y Z, sized by Width, Height and ' +
-      'Depth, in one Colour. Draws nothing outside a Scene. Sit On Floor makes Y the base instead of the middle, so a bar ' +
+      'Depth, in one Colour. Draws nothing outside a Scene. Inside a 3D Group, X Y Z are from the group’s middle. Sit On Floor makes Y the base instead of the middle, so a bar ' +
       'chart is a For Each of boxes with Height wired to the number. Spin turns it on its own axis. Tapped fires when a finger ' +
       'or a mouse lands on it.',
     ssr: { compat: 'safe' },
@@ -594,6 +664,77 @@
     }
   };
 
+  var Group3D = {
+    name: 'three-kit.Group',
+    displayName: '3D Group',
+    category: '3D',
+    usePortAsLabel: 'name',
+    description:
+      'Meshes, Lights and other 3D Groups under it move, turn and scale with it, so a robot is a 3D Group of meshes and a ' +
+      'For Each of 3D Groups is a row of robots. What is under it is placed from its middle, not from the Scene’s. A tap ' +
+      'on any mesh inside it fires its Tapped, and the Scene’s Tapped Name is its Name when the mesh has none. Draws ' +
+      'nothing outside a Scene.',
+    ssr: { compat: 'safe' },
+    noodlNodeAsProp: true,
+    allowChildren: true,
+    defaultCss: { display: 'none' },
+
+    getReactComponent: function () {
+      return function GroupComponent(props) {
+        var spec = {
+          kind: 'group',
+          name: props.name ? String(props.name) : '',
+          x: num(props.x, 0),
+          y: num(props.y, 0),
+          z: num(props.z, 0),
+          yaw: num(props.rotationY, 0),
+          scale: num(props.scale, 1),
+          spin: bool(props.spin),
+          spinSpeed: num(props.spinSpeed, 60)
+        };
+        var so = useSceneObject(props, spec);
+        React.useEffect(function () {
+          if (so.ctx) so.ctx.upsert(so.id, Object.assign({}, spec, { onTap: function () {
+            if (typeof props.onTapped === 'function') props.onTapped();
+          } }));
+        });
+        // What is under it speaks through a context that names this group as its parent, unless a nearer one already did.
+        var parentCtx = so.ctx;
+        var gid = so.id;
+        var api = React.useMemo(
+          function () {
+            if (!parentCtx) return null;
+            return {
+              upsert: function (id, childSpec) {
+                parentCtx.upsert(id, childSpec.parent ? childSpec : Object.assign({}, childSpec, { parent: gid }));
+              },
+              remove: function (id) {
+                parentCtx.remove(id);
+              }
+            };
+          },
+          [parentCtx, gid]
+        );
+        return h(SceneContext.Provider, { value: api }, props.children);
+      };
+    },
+
+    inputProps: {
+      name: { type: 'string', displayName: 'Name', group: 'Group', default: '', description: 'What the Scene reports in Tapped Name when a mesh inside it with no Name of its own is tapped.' },
+      x: { type: 'number', displayName: 'X', group: 'Place', default: 0, description: 'Left and right. 0 is the middle of whatever it is in.' },
+      y: { type: 'number', displayName: 'Y', group: 'Place', default: 0, description: 'Up and down. 0 is the floor of whatever it is in.' },
+      z: { type: 'number', displayName: 'Z', group: 'Place', default: 0, description: 'Towards and away. 0 is the middle of whatever it is in.' },
+      rotationY: { type: 'number', displayName: 'Rotation Y', group: 'Place', default: 0, description: 'Turned about its vertical axis, in degrees, and everything in it with it.' },
+      scale: { type: 'number', displayName: 'Scale', group: 'Place', default: 1, description: 'Everything in it, bigger or smaller. 2 is twice the size.' },
+      spin: { type: 'boolean', displayName: 'Spin', group: 'Motion', default: false, description: 'Turn on its own axis, forever, with everything in it.' },
+      spinSpeed: { type: 'number', displayName: 'Spin Speed', group: 'Motion', default: 60, description: 'Degrees per second when spinning.' }
+    },
+
+    outputProps: {
+      onTapped: { type: 'signal', displayName: 'Tapped', group: 'Events', description: 'A finger or a mouse landed on a mesh inside it.' }
+    }
+  };
+
   var Light = {
     name: 'three-kit.Light',
     displayName: 'Light',
@@ -645,7 +786,7 @@
   /** @type {import('./types/node-kit').NodeKitModule} */
   var kit = {
     nodes: [],
-    reactNodes: h ? [Scene, Mesh, Light] : []
+    reactNodes: h ? [Scene, Mesh, Light, Group3D] : []
   };
 
   Noodl.defineModule(kit);
