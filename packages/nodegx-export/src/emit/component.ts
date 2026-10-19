@@ -6776,7 +6776,7 @@ export function emitComponent(
   /*
    * P18-S122-TPLBUILD, ruled by Richard 2026-10-19: a Function's wrapper moves to its own file, as a Script's code does
    * (EXP-011 §52), and that one file is not typechecked. The body is the author's JavaScript (`function pick(typed, start)`
-   * is TS7006 under `strict`), and a `// @ts-nocheck` cannot be scoped to one function in a shared file. The signature is
+   * is TS7006 under `strict`), and a file-wide no-check directive cannot be scoped to one function in a shared file. The signature is
    * typed, so every call the component makes is still checked here. An Expression's and a Visual Function's stay.
    */
   const functionFiles = Object.values(jsFunByNode)
@@ -7909,7 +7909,7 @@ const GENERATED_FUNCTION_TS = '// @nodegx:generated (function node — provenanc
  * The file a Function node's wrapper lives in (P18-S122-TPLBUILD, Richard's ruling of 2026-10-19): the wrapper
  * `jsWrapperLines` prints, exported, under the header a Script's file has (`scriptFileSource`), for the same reason.
  *
- * 🔴 `// @ts-nocheck` on this one file. The body is the author's JavaScript, preserved verbatim (EXP-003 §4), and a
+ * 🔴 The no-check directive on this one file. The body is the author's JavaScript, preserved verbatim (EXP-003 §4), and a
  * strict check reads it as TypeScript it never was: `function pick(typed, start)` is TS7006, `m[String(id)]` over an
  * object literal is TS7053, and the app's `build` is `tsc -b && vite build`, so one such line stopped the build. The
  * directive turns off this file's diagnostics, not its types: the signature is written out, so the component's every call
