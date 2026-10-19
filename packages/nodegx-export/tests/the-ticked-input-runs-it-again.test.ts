@@ -405,17 +405,18 @@ describe('§C refused by name, or nothing to print', () => {
     expect(planOf(dir).tickedRuns).toEqual([]);
   });
 
-  test('Did Mount on an element mounted by a value is refused, and says why', () => {
+  test('Did Mount on an element mounted by a value runs each time that value mounts it', () => {
     const { dir } = fixtureWith((g) => {
       addNode(g, { id: 'box', type: 'Group', label: 'Box', parent: 'shell', children: [], parameters: {} }, { parent: 'shell', after: 'saidText' });
       for (const c of g.connections) if (c.fromProperty === 'didMount') c.fromId = 'box';
       g.connections.push({ fromId: 'itemRead', fromProperty: 'value', toId: 'box', toProperty: 'mounted' });
     });
     const app = emitDir(dir);
-    // P18-S123-UNDRAWNTRIGGER (s124): refused in the plan, after the lift phase, so its chain's nodes are refused with it.
-    expect(app.notes).toContain(
-      'Pages/Home: wire box:didMount->hold:run dropped: its trigger, the Did Mount of "Box" (box), is not run: it is mounted by a value, so its Did Mount fires when that value says, and a mount effect runs when the component mounts'
-    );
+    // P18 session 126 (EXP-011 §93): s124 refused it by name; it runs now, keyed on the element's own render condition
+    // (the viewer sends Did Mount from componentDidMount, again after every unmount). Graded against the runtime's own
+    // nodes in `the-root-is-mounted-when-it-says`.
+    expect(app.notes.some((n) => n.includes('box:didMount') && n.includes('dropped'))).toBe(false);
+    expect(app.files[PAGE]).toContain('Box — Did Mount: each time it mounts, as the running app sends it: when (itemValue === undefined || !!itemValue).');
     expect(app.files[PAGE]).not.toContain('Did Mount: once');
   });
 

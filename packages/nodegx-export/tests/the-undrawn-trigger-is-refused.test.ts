@@ -247,10 +247,13 @@ describe('§A A chain on an element the export never draws is refused by name', 
   });
 });
 
-describe('§B A Did Mount on an element a value mounts is refused in the plan, not only in the emitter', () => {
-  it('B1 its chain is refused by name', () => {
-    expect(reasonOf(plan, 'mountSet')).toBe(NOT_RUN_MOUNT);
-    expect(plan.handlers['mountMe']).toBeUndefined();
+describe('§B A Did Mount on an element a value mounts runs when that value mounts it (P18 session 126, EXP-011 §93)', () => {
+  it('B1 its chain is kept, and the page runs it keyed on the element\'s render condition (s124 refused it by name)', () => {
+    expect(reasonOf(plan, 'mountSet')).toBeUndefined();
+    expect(plan.dispositions['mountSet']).toEqual({ kind: 'collapsed', into: 'mountMe' });
+    expect(plan.handlers['mountMe']?.['didMount']?.length).toBeGreaterThan(0);
+    expect(page).not.toContain(NOT_RUN_MOUNT);
+    expect(page).toContain('Mount me — Did Mount: each time it mounts, as the running app sends it: when');
   });
 });
 

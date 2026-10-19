@@ -3973,6 +3973,12 @@ export interface FieldMountPlan {
    * mount, so the field announces it: `undefined` is never delivered (the start value stands), `null` clears.
    */
   source?: ValueExpr;
+  /**
+   * P18 session 126 (EXP-011 §93). The field and the elements above it whose Mounted a value decides: the field is not there
+   * as the component mounts, so it announces the first time those values all say mounted (its later mounts announce only a
+   * real change, GAM-009 R10, and the field keeps what it holds). Absent or empty, it announces as the component mounts.
+   */
+  gates?: string[];
   comment: string;
 }
 
@@ -4618,6 +4624,9 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
  * (the older Site Builder copies' "The slug to show" reads the URL's slug, and the never-written home slug only as a
  * fallback). They are named in a note instead.
  */
+/** P18 session 126 (EXP-011 §93). The words a refusal under a page's own wired Group starts with; the emitter says the same. */
+export const UNCARRIED_PAGE_GROUP = "the page's own Group,";
+
 export interface PlanExclusions {
   owners: Map<string, string>;
   mounts: Map<string, string>;
@@ -4685,21 +4694,23 @@ export function unreachedTriggersOf(plan: ComponentPlan, component: ComponentIR)
     whyUndrawn.set(owner, why);
     found.owners.set(owner, `its trigger, ${labelOf(owner)}, is not drawn: ${why}`);
   }
-  // The Did Mounts the emitter does not run: an element a value mounts (`mountChains` in component.ts).
+  /*
+   * The Did Mounts the emitter does not run. Since session 126 (EXP-011 §93) there are none to find here: a Did Mount on an
+   * element a value mounts runs when that value mounts it (`mountChains` in component.ts, keyed on the gate), once per
+   * mount, as the viewer sends it from `componentDidMount`. An element never drawn is an owner above.
+   */
   const whyUnmounted = new Map<string, string>();
+  // The one exception: a Did Mount in a page's own Group whose Mounted is wired, which the emitter does not carry.
   for (const [owner, byPort] of Object.entries(plan.handlers)) {
-    if (byPort['didMount'] === undefined || whyUndrawn.has(owner)) continue;
-    for (let at: string | undefined = owner; at !== undefined; at = nodeById.get(at)?.parent) {
-      const bound = plan.bindings[at]?.['mounted'];
-      if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal')) {
-        const whose = at === owner ? 'it is' : `an element above it, ${labelOf(at)}, is`;
-        const why = `${whose} mounted by a value, so its Did Mount fires when that value says, and a mount effect runs when the component mounts`;
-        whyUnmounted.set(owner, why);
-        found.mounts.set(owner, `its trigger, the Did Mount of ${labelOf(owner)}, is not run: ${why}`);
-        break;
-      }
-      if (at === plan.rootId) break;
-    }
+    if (byPort['didMount'] === undefined || whyUndrawn.has(owner) || plan.collapsedGroupId === undefined) continue;
+    const bound = plan.bindings[plan.collapsedGroupId]?.['mounted'];
+    if (bound === undefined || (bound.kind === 'computed' && bound.expr.kind === 'literal')) continue;
+    let inside = false;
+    for (let at: string | undefined = owner; at !== undefined; at = nodeById.get(at)?.parent) if (at === plan.collapsedGroupId) inside = true;
+    if (!inside) continue;
+    const why = `${UNCARRIED_PAGE_GROUP} ${labelOf(plan.collapsedGroupId)} is mounted by a value the export does not carry (it draws the page), so when it mounts is not known here`;
+    whyUnmounted.set(owner, why);
+    found.mounts.set(owner, `its trigger, the Did Mount of ${labelOf(owner)}, is not run: ${why}`);
   }
   // The rows: every list the plan carries writes a row, except the lists of the owners above.
   const writers = new Map<string, string[]>();
@@ -5199,6 +5210,16 @@ function planComponent(
   if (roots.length > 1) {
     notes.push(`component has ${roots.length} visual roots; only the first renders in step 4`);
   }
+  /**
+   * P18 session 126 (EXP-011 §93). A wire into the root's Mounted is the router's concern only when the root is a Page: the
+   * Router mounts a page. Any other component's root mounts as every element does in the runtime (`wantsToBeMounted`, and a
+   * root tells the instance's visual parent to draw again), so the wire binds as it would on any element, and the
+   * component returns `null` while it says not to (`component.ts`). It was refused from every source, so a root authored
+   * Mounted false was never drawn (todo-list's Note dialog, gram's Nav, bot-garden's Form) and one authored true always was
+   * (planning's sheets, rocket-school's Choice row), whatever the input said.
+   */
+  const routerMounted = (toNode: NodeIR, toProperty: string): boolean =>
+    toProperty === 'mounted' && toNode.id === plan.rootId && toNode.type === 'Page';
   const root: NodeIR | undefined = roots[0];
   if (root !== undefined) {
     plan.rootId = root.id;
@@ -10519,7 +10540,7 @@ function planComponent(
           reason = `its ${w.fromProperty} feeds ${sink?.type ?? 'a missing node'}.${w.toProperty} — a snapshot of the last Evaluate lands only in a Mounted or a Visible in this slice`;
         } else if (!sink || !rendered.has(sink.id)) {
           reason = `its ${w.fromProperty} feeds an element that is not drawn — a snapshot lands only in a drawn element's Mounted or Visible in this slice`;
-        } else if (w.toProperty === 'mounted' && sink.id === plan.rootId) {
+        } else if (routerMounted(sink, w.toProperty)) {
           reason = 'a mounted wire into the component root is a router concern — not translated in this slice';
         }
         if (reason !== null) break;
@@ -16890,7 +16911,7 @@ function planComponent(
       );
       continue;
     }
-    if (c.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, c.toProperty)) {
       consumed.add(c.key);
       notes.push(wireNote(c, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
@@ -16946,7 +16967,7 @@ function planComponent(
       notes.push(wireNote(c, `custom node output "${c.fromProperty}" ${bindable}`));
       continue;
     }
-    if (c.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, c.toProperty)) {
       consumed.add(c.key);
       notes.push(wireNote(c, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
@@ -18962,7 +18983,7 @@ function planComponent(
       notes.push(wireNote(connection, VARIABLE_FROZEN));
       continue;
     }
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, connection.toProperty)) {
       notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
     }
@@ -18999,7 +19020,7 @@ function planComponent(
       notes.push(wireNote(connection, `${read.defer}`));
       continue;
     }
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, connection.toProperty)) {
       notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
     }
@@ -19084,7 +19105,7 @@ function planComponent(
       );
       continue;
     }
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, connection.toProperty)) {
       notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
     }
@@ -19121,7 +19142,7 @@ function planComponent(
       // EXP-011 §49. A wired style parameter the emitter prints inline.
       styleSinkOf(toNode, connection.toProperty) !== undefined;
     if (!bindable) continue; // the sweep names the reason
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) continue; // the sweep names the reason
+    if (routerMounted(toNode, connection.toProperty)) continue; // the sweep names the reason
     const ctx = newCtx();
     const expr = resolveExpr(fromNode, connection.fromProperty, ctx);
     if (expr === null) continue; // the sweep defers the node with this reason
@@ -19169,7 +19190,7 @@ function planComponent(
       // EXP-011 §49. A wired style parameter the emitter prints inline.
       styleSinkOf(toNode, connection.toProperty) !== undefined;
     if (!bindable) continue; // the sweep names the reason
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) continue; // the sweep names the reason
+    if (routerMounted(toNode, connection.toProperty)) continue; // the sweep names the reason
     // P18-S122-DEADROW. A drawn element reading a row nothing the export runs writes would show nothing, forever, unsaid.
     const deadRow = excluded.rows.get(fromNode.id);
     if (deadRow !== undefined) {
@@ -19479,7 +19500,7 @@ function planComponent(
       );
       continue;
     }
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, connection.toProperty)) {
       consumed.add(connection.key);
       notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
@@ -19557,7 +19578,7 @@ function planComponent(
       // EXP-011 §49. A wired style parameter the emitter prints inline.
       styleSinkOf(toNode, connection.toProperty) !== undefined;
     if (!bindable) continue;
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) continue;
+    if (routerMounted(toNode, connection.toProperty)) continue;
     // EXP-011 §47. A named Object's read is a store-key binding — Pass 4b's shape in the widened
     // (binding) mode, so an `unknown` key binds and is coerced at the sink rather than dropped.
     const objectStore = objectStoreNodes.get(fromNode.id);
@@ -19616,7 +19637,7 @@ function planComponent(
       // EXP-011 §49. A wired style parameter the emitter prints inline.
       styleSinkOf(toNode, connection.toProperty) !== undefined;
     if (!bindable) continue;
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) continue;
+    if (routerMounted(toNode, connection.toProperty)) continue;
     const ctx = newCtx();
     const expr = resolveExpr(fromNode, connection.fromProperty, ctx);
     if (expr === null) {
@@ -19684,7 +19705,7 @@ function planComponent(
       continue;
     }
     if (fromNode?.type === 'Component Inputs' && toNode && rendered.has(toNode.id)) {
-      if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
+      if (routerMounted(toNode, connection.toProperty)) {
         consumed.add(connection.key);
         notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
         continue;
@@ -20475,19 +20496,23 @@ function planComponent(
       const label = node.authoredLabel ? `"${node.authoredLabel}"` : 'The text input';
       const refuse = (why: string) =>
         notes.push(`node ${node.id} (${node.type}): its Value at mount is not announced — ${why}; typing still runs its chain (P18-S116-FIELDMOUNT)`);
-      // The field and every ancestor up to the root: a Mounted that is false or wired means the field is not there at mount.
-      let away: 'never' | 'later' | undefined;
+      // The field and every ancestor up to the root: a Mounted that is false means the field is never there; one a value
+      // decides (P18 session 126) means it is there, and announces, the first time that value says true.
+      let away: 'never' | 'uncarried' | undefined;
+      const gates: string[] = [];
       for (let id: string | undefined = node.id; id !== undefined; id = parentOf.get(id)) {
         const bound = plan.bindings[id]?.['mounted'];
         if (bound !== undefined) {
           const literal = bound.kind === 'computed' && (bound.expr.kind === 'literal' || bound.expr.kind === 'undefined');
-          if (!literal) away = away ?? 'later';
+          // A page's sole Group renders as the page div, whose Mounted the emitter does not carry (it draws the page).
+          if (!literal && id === plan.collapsedGroupId) away = 'uncarried';
+          else if (!literal) gates.push(id);
           else if (bound.expr.kind === 'undefined' || !(bound.expr as { value: unknown }).value) away = 'never';
         } else if (literalParam(nodeById.get(id)!, 'mounted') === false) away = 'never';
       }
       if (away === 'never') continue;
-      if (away === 'later') {
-        refuse('it or a group it sits in mounts from a wire, so it announces when that wire first says true, not as the component mounts');
+      if (away === 'uncarried') {
+        refuse("it sits in the page's own Group, whose Mounted is wired and not carried (the page is drawn), so when it appears is not known here");
         continue;
       }
       const type = literalParam(node, 'type');
@@ -20516,7 +20541,11 @@ function planComponent(
         inputId: node.id,
         start: raw === undefined ? '' : String(raw),
         ...(sync !== undefined ? { source: sync.source } : {}),
-        comment: `${label} announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).`
+        ...(gates.length > 0 ? { gates } : {}),
+        comment:
+          gates.length > 0
+            ? `${label} announces its Value the first time it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)); it mounts when a value says.`
+            : `${label} announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).`
       });
     }
   }

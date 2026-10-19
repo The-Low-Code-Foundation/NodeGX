@@ -43,7 +43,8 @@ import {
   PAGE_STACK_ENTRY_PROP,
   variableSeedAction,
   objectSeedAction,
-  undrawnReasonOf
+  undrawnReasonOf,
+  UNCARRIED_PAGE_GROUP
 } from '../analyze/plan';
 import { ExportIR, ITEM_OUTPUT_SIGNAL, NodeIR } from '../ir/types';
 import { KitBinding, tsTypeOf as kitPortTsType } from './kits';
@@ -130,6 +131,28 @@ const PRINT_WIDTH = 100;
 
 /** A bare reference (`name`, `visitorName.get()`) that negates without parentheses. */
 const SIMPLE_REF = /^[A-Za-z_$][A-Za-z0-9_$.]*(\(\))?$/;
+/**
+ * P18 session 126 (EXP-011 §93). `!(cond)` for a printed condition, without the noise: `!!x` negates to `!x`, a bare
+ * reference or a condition already in its own parentheses takes the `!` as it is.
+ */
+function negatedCode(cond: string): string {
+  if (cond.startsWith('!!')) {
+    const rest = cond.slice(2);
+    if (SIMPLE_REF.test(rest)) return `!${rest}`;
+    if (rest.startsWith('(') && closingParenOf(rest) === rest.length - 1) return `!${rest}`;
+  }
+  if (SIMPLE_REF.test(cond) || (cond.startsWith('(') && closingParenOf(cond) === cond.length - 1)) return `!${cond}`;
+  return `!(${cond})`;
+}
+/** The index of the `)` that closes the `(` at index 0 of `code` (strings and comments are not expected there), or -1. */
+function closingParenOf(code: string): number {
+  let depth = 0;
+  for (let i = 0; i < code.length; i++) {
+    if (code[i] === '(') depth++;
+    else if (code[i] === ')' && --depth === 0) return i;
+  }
+  return -1;
+}
 /** EXP-011 §45. The fields of a files answer that are optional even in the chain-local form — must agree with plan.ts. */
 const FILE_OUT_OPTIONAL_FIELDS = new Set(['upload.contentType', 'upload.size', 'sign.expiresAt', 'sign.ttlSeconds']);
 /**
@@ -624,10 +647,16 @@ export function emitComponent(
    * element or an element above it has a Mounted that a value decides, and dropped where one is authored Mounted false
    * (it never mounts, so its Did Mount never fires). Post-order over the tree, the runtime's order.
    */
-  const mountChains: Array<{ nodeId: string; actions: HandlerAction[] }> = [];
+  /**
+   * P18 session 126 (EXP-011 §93). `gates`: the element and every element above it, up to the root, whose Mounted a value
+   * decides. Empty, the chain is a mount effect; otherwise it runs each time those values all say mounted, which is each
+   * time the viewer mounts the element and sends its Did Mount (`componentDidMount`, again after every unmount).
+   */
+  const mountChains: Array<{ nodeId: string; actions: HandlerAction[]; gates: string[] }> = [];
   const mountRefusals = new Map<string, string>();
   {
-    const mountGateOf = (id: string): string | null => {
+    const mountGateOf = (id: string): { never: string } | { gates: string[] } => {
+      const gates: string[] = [];
       for (let at: string | undefined = id; at !== undefined; at = nodeById.get(at)?.parent) {
         const bound = plan.bindings[at]?.['mounted'];
         const literal = nodeById.get(at)?.parameters.find((p) => p.name === 'mounted')?.value;
@@ -635,20 +664,23 @@ export function emitComponent(
           (bound !== undefined && bound.kind === 'computed' && (bound.expr.kind === 'undefined' || (bound.expr.kind === 'literal' && !bound.expr.value))) ||
           (bound === undefined && literal?.kind === 'literal' && literal.value === false);
         const whose = at === id ? 'it is' : `an element above it (${at}) is`;
-        if (never) return `${whose} never mounted, so its Did Mount never fires`;
-        if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal')) {
-          return `${whose} mounted by a value, so its Did Mount fires when that value says, and a mount effect runs when the component mounts`;
+        if (never) return { never: `${whose} never mounted, so its Did Mount never fires` };
+        // A page's sole Group renders as the page div, whose Mounted is not carried: the page is drawn, so when it mounts is
+        // not known here (the plan refuses the chain with the same words).
+        if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal') && at === plan.collapsedGroupId) {
+          return { never: `${UNCARRIED_PAGE_GROUP} ${at}, is mounted by a value the export does not carry (it draws the page), so when it mounts is not known here` };
         }
+        if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal')) gates.push(at);
         if (at === plan.rootId) break;
       }
-      return null;
+      return { gates };
     };
     const consider = (id: string) => {
       const actions = plan.handlers[id]?.['didMount'];
       if (actions === undefined) return;
-      const why = mountGateOf(id);
-      if (why === null) mountChains.push({ nodeId: id, actions });
-      else mountRefusals.set(id, why);
+      const gate = mountGateOf(id);
+      if ('gates' in gate) mountChains.push({ nodeId: id, actions, gates: gate.gates });
+      else mountRefusals.set(id, gate.never);
     };
     const visit = (id: string) => {
       for (const child of plan.childrenOf[id] ?? []) visit(child);
@@ -5278,6 +5310,36 @@ export function emitComponent(
     if (boolTypedSource(source)) return base;
     return SIMPLE_REF.test(base) ? `!!${base}` : `!!(${base})`;
   };
+  /**
+   * P18 session 126 (EXP-011 §93). The condition an element's Mounted wire draws it under, as the runtime decides it: the
+   * viewer's `mounted` setter coerces `!!value`, and a wire never delivers `undefined` (`Node.sendValue`), so while the
+   * source has no value the element keeps its own authored Mounted. Authored false, `!!x` already says that; authored true
+   * (the default), an undefined source must draw it: `x === undefined || x` (planning's sheets, a component placed without
+   * the input). Not `x ?? true`: a `null` IS delivered (an Expression's load answer for a throw), and unmounts it.
+   */
+  const mountedCondOf = (id: string, source: BindingSource): string | null => {
+    const cond = truthinessCode(source);
+    if (cond === null) return null;
+    const node = nodeById.get(id);
+    const authored = node?.parameters.find((p) => p.name === 'mounted')?.value;
+    if (authored?.kind === 'literal' && authored.value === false) return cond;
+    // An Expression's answer is computed in render from its inputs, a value from the first render (`null` for a throw):
+    // undefined only when its text says so, which this does not read. The rows a run writes, the props a parent passes,
+    // the stores and the records are undefined until something writes them.
+    const isExpressionAnswer =
+      source.kind === 'computed' && source.expr.kind === 'jsfun-out' && source.expr.viaState === undefined && nodeById.get(source.expr.nodeId)?.type === 'Expression';
+    const undefinedAtFirst =
+      source.kind === 'prop' ||
+      source.kind === 'store' ||
+      source.kind === 'store-key' ||
+      (source.kind === 'computed' && !isExpressionAnswer && maybeUndefined(source.expr));
+    if (!undefinedAtFirst) return cond;
+    // A read only (a prop, a store's local, a row's field): a computed value (a Date Compare's call) would print, and run,
+    // twice; it keeps `!!x`, which differs only while that value is undefined.
+    const base = rawBindingExpr(source);
+    if (base === null || !SIMPLE_REF.test(base) || base.endsWith('()')) return cond;
+    return boolTypedSource(source) ? `(${base} === undefined || ${base})` : `(${base} === undefined || !!${base})`;
+  };
   const negatedVisibleCode = (source: BindingSource): string | null => {
     const base = bindingExpr(source, 'truthy');
     if (base === null) return null;
@@ -5456,6 +5518,8 @@ export function emitComponent(
    * the element prints. A statically-false source removes it with a comment: authored
    * invisibility is authored state, not dead code.
    */
+  /** P18 session 126 (EXP-011 §93). The root's Mounted condition, when a value decides it; printed as the return's guard. */
+  let rootMountedCond: string | null = null;
   const render = (id: string, indent: number, radioCtx?: RadioCtx): string[] => {
     const node = nodeById.get(id)!;
     const mountedBound = plan.bindings[id]?.['mounted'];
@@ -5473,8 +5537,14 @@ export function emitComponent(
       }
       const staticallyTrue = mountedBound.kind === 'computed' && mountedBound.expr.kind === 'literal';
       if (!staticallyTrue) {
-        const cond = truthinessCode(mountedBound);
+        const cond = mountedCondOf(id, mountedBound);
         if (cond !== null) {
+          // P18 session 126 (EXP-011 §93). The root: the component draws nothing while it says not to, after its hooks
+          // (so its state is kept across, as the runtime keeps its nodes), the instance's visual parent drawing again.
+          if (id === plan.rootId) {
+            rootMountedCond = cond;
+            return renderCore(id, indent, radioCtx);
+          }
           const inner = renderCore(id, indent + 2, radioCtx);
           return [`${pad(indent)}{${cond} && (`, ...inner, `${pad(indent)})}`];
         }
@@ -7361,16 +7431,24 @@ export function emitComponent(
     announcedCode = { inputId: mount.inputId, code };
     const chainLines = effectBody(chain, 4);
     announcedCode = undefined;
+    // P18 session 126 (EXP-011 §93). Under a Mounted a value decides: the first time the field's own render condition holds.
+    const gate = (mount.gates ?? [])
+      .map((id) => mountedCondOf(id, plan.bindings[id]['mounted']))
+      .filter((c): c is string => c !== null);
+    const when = gate.length === 0 ? null : gate.length === 1 ? gate[0] : gate.map((c) => (SIMPLE_REF.test(c) ? c : `(${c})`)).join(' && ');
     body.push(
       `  // ${mount.comment}`,
       `  const ${once} = useRef(false);`,
       '  useEffect(() => {',
       `    if (${once}.current) return;`,
+      ...(when !== null ? [`    if (${negatedCode(when)}) return;`] : []),
       `    ${once}.current = true;`,
       ...lines,
       ...chainLines,
-      "    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts",
-      '  }, []);',
+      when !== null
+        ? '    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, the first time the field mounts'
+        : '    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts',
+      `  }, [${gate.join(', ')}]);`,
       ''
     );
   }
@@ -7495,6 +7573,27 @@ export function emitComponent(
   for (const mount of mountChains) {
     const node = nodeById.get(mount.nodeId)!;
     const mounted = dedupeLocal('mounted');
+    // P18 session 126 (EXP-011 §93). Under a Mounted a value decides: the element's own render condition, element by element.
+    const gate = mount.gates.map((id) => mountedCondOf(id, plan.bindings[id]['mounted'])).filter((c): c is string => c !== null);
+    if (gate.length > 0) {
+      const when = gate.length === 1 ? gate[0] : gate.map((c) => (SIMPLE_REF.test(c) ? c : `(${c})`)).join(' && ');
+      body.push(
+        `  // ${node.authoredLabel ?? node.type} — Did Mount: each time it mounts, as the running app sends it: when ${commentSafe(when)}.`,
+        `  const ${mounted} = useRef(false);`,
+        '  useEffect(() => {',
+        `    if (${negatedCode(when)}) {`,
+        `      ${mounted}.current = false;`,
+        '      return;',
+        '    }',
+        `    if (${mounted}.current) return;`,
+        `    ${mounted}.current = true;`,
+        ...effectBody(mount.actions, 4),
+        "    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per mount, like the element's own Did Mount",
+        `  }, [${gate.join(', ')}]);`,
+        ''
+      );
+      continue;
+    }
     body.push(
       `  // ${node.authoredLabel ?? node.type} — Did Mount: once, when it mounts, as the running app sends it.`,
       `  const ${mounted} = useRef(false);`,
@@ -7703,7 +7802,18 @@ export function emitComponent(
       : jsxLines;
   if (jsxLines.length === 1 && jsxLines[0] === '    null') body.push(...preReturnComment, '  return null;', '}');
   else if (removedRoot !== null) body.push(...preReturnComment, `  // ${removedRoot[1]}`, '  return null;', '}');
-  else body.push(...preReturnComment, '  return (', ...providedJsx, '  );', '}');
+  else if (rootMountedCond !== null) {
+    const guard = negatedCode(rootMountedCond);
+    body.push(
+      ...preReturnComment,
+      `  // Its root is mounted when ${commentSafe(rootMountedCond)}; while it is not, the running app draws nothing for this instance.`,
+      `  if (${guard}) return null;`,
+      '  return (',
+      ...providedJsx,
+      '  );',
+      '}'
+    );
+  } else body.push(...preReturnComment, '  return (', ...providedJsx, '  );', '}');
 
   if (usesRowField) {
     body.push(
