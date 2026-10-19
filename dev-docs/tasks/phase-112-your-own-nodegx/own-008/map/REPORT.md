@@ -401,3 +401,71 @@ wait for the flight to end (`waitFor: "!__map.map.flight"`) before clicking.
 - **The sound effects were not tested.** No test checks that they play; only the music's audio was
   checked as running. Nobody listened to either here.
 - As before, speed on a real graphics card wasn't measured.
+
+## Fifth round: fly an X-wing
+
+*This round was not built by the stranger. Richard asked (2026-10-19): "Any chance for the 'todo list'
+Star Wars editor that we can make an 'Xwing' from 1993 game style view where you can fly one of the Xwings
+and dog fight with the tie fighters? To give builders a fun break when they get bored." The OpenNoodl
+session (Claude Fable 5.1) built it directly in this folder, the same way the stranger worked: on copies,
+checked over CDP, written up here. The kit is not touched by it; the cockpit is scenery over the battle.*
+
+### What changed
+
+- **`public/pilot.mjs`, the cockpit.** The **Fly an X-wing** button (or X) saves the map's camera and
+  puts you in a fighter: on the first sortie where the camera was, if that is over the fleet, otherwise
+  behind the fleet flying its way, with a hyperspace streak. The camera becomes the cockpit (72° view,
+  the eye above the hull, a lean into each turn). Esc, the button, or the browser giving the pointer back
+  leaves it, and the map's camera flies back to exactly where it was.
+- **Flying.** A click takes the pointer (pointer lock); the mouse is then a self-centring stick. The
+  arrows do the same; A / D roll; W / S or the wheel set the throttle (28–115 m/s; the fighters fly
+  55–80). The ship cannot leave the battle: the edge of the fleet's box, plus 350 m, holds it and
+  the HUD says to turn back. A key tapped between two frames still counts on the next one.
+- **Cannons.** Space or the button held fires the four cannons in diagonal pairs, 0.14 s apart,
+  converging 320 m ahead, at 430 m/s to 700 m; each shot costs laser energy that recharges. Every bolt
+  is the battle's own `fire()` with a new `hits(at, from)` step test: the segment a bolt moved this
+  frame is checked against every TIE (4.5 m) and every capital hull. A TIE hit is `battle.kill` (the
+  same fireball and ring, the same respawn); a hull hit bursts on the plating.
+- **The TIEs fight back.** The battle has a `setPlayer` seat: when a TIE picks a target, it takes you
+  instead with a chance that grows as you come closer (40 % inside 250 m, 20 % inside 700 m). Their
+  shots and hits are the rules the fighters already play by (dead ahead, inside 170 m, 18 % a volley);
+  a hit on you is 20 shield points, a red wash, a burst on the canopy and a thud. At zero the ship
+  explodes, "SHIP LOST", and a new one arrives 2.8 s later; kills and losses are kept. All fighters'
+  aimed shots now lead their target by its speed over the bolt's flight (they used to aim at where it was).
+- **The HUD** (a 2D canvas over the map, `#cockpit`): the canopy struts, the reticle, the target's
+  bracket with its distance (amber in range), the diamond where to lead it, an edge arrow when it is
+  off the view or behind, the FORE and AFT scopes with every fighter as a dot (TIEs red, X-wings green),
+  the targeting computer with the TIE's wireframe, SHIELDS, LASERS, THROTTLE, SPEED, KILLS and LOST,
+  and the key help. The running app's box hides while you fly, since the console sits where it does.
+- A `hit` sound in `sfx.mjs`. `map3d.mjs` hands the camera and the controls to the pilot while it is
+  active (`frame` is now `steer` + `render`); `__map.pilot` is on the page for the console and tests.
+
+### How it was tested (fresh copies of `todo-list`, headless Chrome on software GL)
+
+`tests/pilot.json`, four drives while building, the last one clean:
+
+- The button: active, the HUD up, the camera 1 m from the ship, 72°, the running app's box hidden,
+  the button reads "Back to the map", the battle on.
+- ArrowLeft held: the heading turned (7–20°, by how many frames the hold caught). W: the throttle rose.
+  Space: shots counted, bolts in the battle.
+- **The aimed shot:** a TIE held 60 m dead ahead, Space: `kills` 0 → 1, the battle's effects up (the
+  fireball). This is the gate for the cannons' hit test.
+- The assist (R2 steering) for 20 s: the TIEs hit back (shields 100 → 82 → 88, `hitsTaken` 1). In an
+  earlier drive it was shot down and came back (`deaths` 1, shields 0 → 100). In two earlier drives
+  it scored 1–2 kills by itself.
+- `dirtyCount` 0 and 80 plates throughout: nothing reached the model. The copy of the app is
+  byte-identical to the template after every drive.
+- Esc: out, the HUD down, 60°, the map's camera back **0 m** from where it was, the app's box back;
+  X in and out again.
+- The earlier tests still pass: `hover.json` (21 wires level, balls, W flies level) and `battle.json`.
+
+**Why the kill is not gated on the assist:** on software GL this page draws about one frame a second,
+and the frame step is capped at 0.1 s, so 20 s of wall clock is 4 s of game (`pilot.time`); whether
+the assist scores in that time is luck. The aimed shot is the deterministic check.
+
+### Not checked
+
+- **The mouse stick.** Headless Chrome does not grant pointer lock, so no drive flew with the mouse; the
+  arrows flew every drive. Richard's hand on it is the check.
+- Speed on a real graphics card, as before; the sounds, as before (nobody listened).
+- The balance (how hard the TIEs are) was set by reasoning, not play: 20 a hit, 5 a second back.

@@ -64,6 +64,7 @@ export class MapView {
     this.handlers = {};
     this.balls = []; // glowing balls running along wires
     this.hover = null; // { key, wires: [curve entries], sig }
+    this.pilot = null; // the cockpit (pilot.mjs), set by the page; while it is active it owns the camera and the controls
 
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -656,6 +657,7 @@ export class MapView {
     let down = null;
     el.addEventListener('contextmenu', (e) => e.preventDefault());
     el.addEventListener('pointerdown', (e) => {
+      if (this.pilot?.active) return;
       el.focus({ preventScroll: true });
       el.setPointerCapture(e.pointerId);
       const hit = this.pick(e);
@@ -663,6 +665,7 @@ export class MapView {
       down = { x: e.clientX, y: e.clientY, button: e.button, shift: e.shiftKey, moved: false, dragCard: dragCard ? hit.card : null };
     });
     el.addEventListener('pointermove', (e) => {
+      if (this.pilot?.active) return;
       if (!down) {
         this.hoverAt(e);
         return;
@@ -696,7 +699,7 @@ export class MapView {
     el.addEventListener('pointerup', (e) => {
       const d = down;
       down = null;
-      if (!d) return;
+      if (!d || this.pilot?.active) return;
       if (d.dragCard && d.moved) {
         const p = this.groundPoint(e);
         this.endDrag(d.dragCard, p);
@@ -705,6 +708,7 @@ export class MapView {
       if (!d.moved) this.emit('click', this.pick(e), e);
     });
     el.addEventListener('dblclick', (e) => {
+      if (this.pilot?.active) return;
       const hit = this.pick(e);
       if (hit?.card) this.flyToNode(hit.card.key, hit.card.id);
       else if (hit?.plate) this.flyToComponent(hit.plate);
@@ -712,6 +716,7 @@ export class MapView {
     el.addEventListener(
       'wheel',
       (e) => {
+        if (this.pilot?.active) return;
         e.preventDefault();
         this.flight = null;
         const dir = new THREE.Vector3();
@@ -723,7 +728,7 @@ export class MapView {
     );
     const typing = () => ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
     window.addEventListener('keydown', (e) => {
-      if (typing() || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (typing() || e.metaKey || e.ctrlKey || e.altKey || this.pilot?.active) return;
       if (FLY_KEYS.has(e.code)) {
         e.preventDefault(); // the arrows and Space would scroll the page
         this.keys.add(e.code);
@@ -857,6 +862,13 @@ export class MapView {
   frame(t) {
     const dt = this.lastT ? Math.min(0.1, (t - this.lastT) / 1000) : 0;
     this.lastT = t;
+    if (this.pilot?.active) this.pilot.frame(dt);
+    else this.steer(t, dt);
+    this.render(t, dt);
+  }
+
+  /** The map's own camera: a flight in progress, then the keys and the look direction. */
+  steer(t, dt) {
     if (this.flight) {
       const f = this.flight;
       if (f.t0 === null) f.t0 = t;
@@ -887,6 +899,10 @@ export class MapView {
     }
     const lookAt = this.camera.position.clone().add(new THREE.Vector3(-Math.sin(this.yaw) * Math.cos(this.pitch), Math.sin(this.pitch), -Math.cos(this.yaw) * Math.cos(this.pitch)));
     this.camera.lookAt(lookAt);
+  }
+
+  /** The rest of the frame, after the camera is placed: names, balls, the battle, the render. */
+  render(t, dt) {
     for (const o of this.overlay.children) if (o.userData.bob) o.position.y = 4 + Math.sin(t / 250) * 0.6;
     // District names are for the view from above: they fade out as the camera comes down to a plate.
     for (const o of this.world.children) {

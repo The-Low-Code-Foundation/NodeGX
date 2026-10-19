@@ -55,3 +55,11 @@ root this time: in s2 the three shared one, and the finished labs had to be move
 Start an editor with `--no-open` where it has one. Big Blocks opens the default browser on Richard's screen
 otherwise. The terminal's `claude` is 2.1.251, too old for Opus 5.5: set `CLAUDE_BIN` to the VS Code extension's
 `resources/native-binary/claude`.
+
+## s9 (2026-10-19): the cockpit is in the map editor
+
+OWN-008 §6 s9: `map/editor/public/pilot.mjs` — fly an X-wing over the battle. **Waiting on Richard:** a hand on the
+mouse stick (pointer lock is untested headless) and the balance (TIE hits 20, 5/s back). If he wants it harder or
+softer, the numbers are the constants at the top of `pilot.mjs` and the pick chance in `battle.mjs` (`setPlayer`
+seat). Re-drive: `node server.mjs <a copy> --port 8641` then `node tools/drive.mjs http://127.0.0.1:8641/?nocrawl
+tests/pilot.json <shots>`; on software GL the game runs at ~1/5 real time, so gate on game time (`pilot.time`), never wall clock.

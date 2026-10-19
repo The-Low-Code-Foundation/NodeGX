@@ -344,3 +344,19 @@ against 108 in the npm 0.1.0 the stranger built with).
 - 🔴 **`ops/deploy.sh` re-renders `/changelog/` from `CHANGELOG.md`**, which already held the unpublished 0.4.2
   section. Deployed with `NODEGX_CHANGELOG=<a copy without 0.4.2>`; the built changelog was byte-identical to the
   live one before the push. Lane 1's S7 publishes 0.4.2's section with a plain deploy.
+
+### s9 (2026-10-19, Fable 5.1): the map's fifth round — fly an X-wing
+
+Richard: *"Any chance for the 'todo list' Star Wars editor that we can make an 'Xwing' from 1993 game style view
+where you can fly one of the Xwings and dog fight with the tie fighters? To give builders a fun break when they get
+bored."* Built directly by this session in `own-008/map/editor/` (not relayed to the stranger: it is scenery over the
+battle, and exercises nothing of the kit). `public/pilot.mjs` is the cockpit: the **Fly an X-wing** button (or X)
+saves the map's camera and seats you in a Rebel fighter over the same battle; the mouse (pointer lock) or the arrows
+fly, A/D roll, W/S throttle, Space fires the four cannons as the battle's own bolts with a per-step hit test against
+every TIE and hull; the TIEs take you as a target by distance and their hits drain your shields; "SHIP LOST" and a
+new ship 2.8 s later; a HUD with the reticle, the target bracket and lead diamond, fore/aft scopes, gauges and
+score; Esc flies the map's camera back to exactly where it was. The record is `map/REPORT.md` "Fifth round" and
+`editor/README.md` "Fly an X-wing"; `tests/pilot.json` is the drive (gated on an aimed shot at a TIE held 60 m
+ahead: `kills` 0 → 1; Esc back 0 m off; the app copy byte-identical), run on the editor's server and on the static
+build. The mouse stick is **unchecked**: headless Chrome grants no pointer lock, so only the arrows flew. The static
+folder was rebuilt with `static/build.mjs --kit ../editor` and pushed to nodegx.io/map/ (see the commit).

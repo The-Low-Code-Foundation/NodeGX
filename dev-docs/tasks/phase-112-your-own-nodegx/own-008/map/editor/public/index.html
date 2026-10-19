@@ -17,6 +17,7 @@
       <datalist id="goto-list"></datalist>
       <button id="btn-overview" title="See the whole map (Home)">Whole map</button>
       <button id="btn-battle" title="Fighters, turret fire and explosions around the fleet (B)">Battle: on</button>
+      <button id="btn-pilot" title="Fly one of the X-wings and dogfight the TIEs (X). Esc brings you back to the map.">Fly an X-wing</button>
       <button id="btn-music" title="The march (M). Put a track of your own in editor/music/ to hear it instead.">♪ on</button>
       <button id="btn-sfx" title="Blasters, turbolasers and explosions near you">FX on</button>
       <button id="btn-undo" title="Undo (Ctrl+Z)">Undo</button>
@@ -26,10 +27,11 @@
     <main>
       <div id="stage">
         <canvas id="map"></canvas>
+        <canvas id="cockpit" hidden></canvas>
         <div id="banner" hidden></div>
         <div id="help">
           <b>Fly</b> W A S D · <b>up/down</b> E / Q · <b>faster</b> Shift · <b>look</b> drag · <b>pan</b> right-drag ·
-          <b>zoom</b> wheel · <b>select</b> click · <b>fly to</b> double-click · <b>move a card</b> drag the selected one
+          <b>zoom</b> wheel · <b>select</b> click · <b>fly to</b> double-click · <b>move a card</b> drag the selected one · <b>fly an X-wing</b> X
         </div>
         <div id="hover" hidden></div>
         <section id="preview-box">

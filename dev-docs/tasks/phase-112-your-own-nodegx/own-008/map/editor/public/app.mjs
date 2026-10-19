@@ -6,6 +6,7 @@ import { ProjectModel, MapRefusal } from '/core/model.mjs';
 import { MapView, shortType } from '/map3d.mjs';
 import { Music } from '/music.mjs';
 import { Sfx } from '/sfx.mjs';
+import { Pilot } from '/pilot.mjs';
 import { playCrawl, crawlOncePerSession } from '/crawl.mjs';
 
 const $ = (s) => document.querySelector(s);
@@ -746,6 +747,23 @@ $('#btn-sfx').addEventListener('click', () => {
   showSfx();
 });
 
+// The cockpit: fly one of the X-wings yourself, over the same battle (pilot.mjs). X, or the button; Esc brings you back.
+const pilot = new Pilot(map, {
+  toast,
+  ensureBattle: () => {
+    if (!battleOn) setBattle(true);
+  },
+  onSound: (kind) => sfx.play(kind, 0),
+  onChange: (on) => {
+    $('#btn-pilot').textContent = on ? 'Back to the map' : 'Fly an X-wing';
+    $('#help').hidden = on;
+    $('#hover').hidden = true;
+    $('#preview-box').hidden = on; // the console sits where the running app does; the app keeps running behind it
+  }
+});
+map.pilot = pilot;
+$('#btn-pilot').addEventListener('click', () => (pilot.active ? pilot.exit() : pilot.enter()));
+
 // The opening crawl: once a session, and again whenever the project's name is clicked.
 const crawlInfo = () => {
   let nodes = 0;
@@ -817,6 +835,7 @@ window.addEventListener('keydown', (e) => {
   }
   if (e.key === 'f' && ui.selection) map.flyToNode(ui.selection.key, ui.selection.id);
   if (e.key === 'b') setBattle(!battleOn);
+  if (e.key === 'x') pilot.active ? pilot.exit() : pilot.enter();
   if (e.key === 'm') {
     music.toggle();
     showMusic();
@@ -1014,7 +1033,7 @@ $('#btn-preview').addEventListener('click', () => {
 
 // --- start ---------------------------------------------------------------------------------
 
-window.__map = { map, model, ui, music, get preview() { return preview; } }; // for the developer's console and the test driver
+window.__map = { map, model, ui, music, pilot, get preview() { return preview; } }; // for the developer's console and the test driver
 
 (async () => {
   try {

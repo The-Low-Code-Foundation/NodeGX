@@ -34,6 +34,7 @@ code { font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12px; 
 main { flex: 1; display: flex; min-height: 0; }
 #stage { flex: 1; position: relative; min-width: 0; }
 #map { width: 100%; height: 100%; display: block; outline: none; }
+#cockpit { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 #help { position: absolute; left: 10px; top: 8px; font-size: 11.5px; color: var(--muted); background: rgba(10, 14, 18, 0.65); padding: 4px 8px; border-radius: 6px; pointer-events: none; }
 #hover { position: absolute; pointer-events: none; background: rgba(10, 14, 18, 0.85); border: 1px solid var(--line); padding: 3px 7px; border-radius: 5px; font-size: 12px; white-space: nowrap; }
 #banner { position: absolute; left: 50%; top: 40px; transform: translateX(-50%); background: #1d4f91; border: 1px solid #5ca9ff; padding: 6px 12px; border-radius: 8px; display: flex; gap: 10px; align-items: center; box-shadow: 0 4px 20px rgba(0,0,0,.5); }
