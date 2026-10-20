@@ -2,7 +2,8 @@
 > darwin-x64 (signed, notarised), win32-x64 and linux-x64, each passing the new thumbnail smoke; **darwin-arm64 never got
 > a GitHub runner** (three times; a background loop re-queued it). Not published. S8 re-driven on the Intel artefact:
 > every check ✅ (OWN-024 §6). **The zips are made and in `nodegx-private/builder-briefs/`.** What's left, in order:
-> (1) the arm64 leg — `gh run rerun 39466894582 --failed` until it gets a runner; read its log for the two
+> (1) the arm64 leg — seven attempts 17:3x–20:2x UTC got no runner ("not acquired … capacity constraints"); a
+> background loop retries every 30 min overnight; if it's still red, `gh run rerun 39466894582 --failed` (0.4.2's arm64 built at 07:40 UTC); read its log for the two
 > `[check-packaged-backend]` lines; (2) the draft: 16 assets, `latest-mac.yml` with both arches (re-run *merge mac update
 > feed* after arm64), the body from `GITHUB-RELEASE-0.4.3.md`; (3) **Publish** (Richard gave his go for it); (4) the
 > feed post, the CHANGELOG date, nodegx.io (OWN-021 §11's way). The library job stays red on the parked Three Kit:
