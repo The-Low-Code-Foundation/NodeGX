@@ -51,10 +51,9 @@ Done 2026-10-20 evening (§12's last entry): **UNWIREDSIGNAL fixed in `3026899d4
 disk the throw happened wired too, so the bug's first workaround was wrong) and **CDQ4's double tap read**: the model's
 design (`lock_gate` is a literal-`true` fan-out, by its own comment), not the kit's; no kit note.
 
-1. ~~The 0.2.4 cut~~ **packed and tested 2026-10-20 17:10** (`dce0e876a`; §12's last entry: tarballs, shasums, the
-   seven tests, UNWIREDSIGNAL proven in the product against a 0.2.3 control). **Waits on Richard to publish:**
-   `scripts/own/publish-npm.sh /Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.4-tarballs`. After:
-   confirm each `dist.shasum` on the registry = §12's table, then the CHANGELOG line (content-authoring skill).
+1. ~~The 0.2.4 cut~~ **PUBLISHED 2026-10-20 19:50, all six verified** (§12's last entry; AC7 met). Next for an
+   agent: the CHANGELOG "npm packages 0.2.4" line and the site's npm section, through the content-authoring skill
+   (public copy: Richard sees the words before they go anywhere).
 2. Nothing else is an agent's alone until Richard rules (below).
 
 ## Waits on Richard

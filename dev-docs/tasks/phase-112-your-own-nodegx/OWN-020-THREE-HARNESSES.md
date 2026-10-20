@@ -8,7 +8,7 @@ because the board says a lane uses the phase it already has.
 on mutants); OWN-018 (the OpenCode arm, `round-opencode.mjs`, and the zero-cost mock method); **Richard's ClinePass**
 ($9.99 a month) and its API key in the repo `.env` as `CLINE_PASS_API_KEY`. Richard adds that line himself; the key is
 never pasted into a chat.
-**Status (2026-10-19 night): AC2 built, not yet released: `create-nodegx --cline` + `create-nodegx-cline` (§12, "the Cline kit"), 34/34 tests, a zero-cost mock round on the packed kit; it ships with the 0.2.4 cut. Not done for "works with Cline": AC6, AC7 (the 0.2.4 cut, published), AC8. AC5 for Cline met 2026-10-20 (R48: DeepSeek V4.1 Flash, quiz and Launch twice each); OpenCode's AC5 still open. Earlier: 🟡 s1 done 2026-10-15: AC1 ✅. Both harnesses × all three models pass the smoke (6/6, finished by themselves, 55–153 s); the Cline seal (a plugin + disabledTools) proven on a scripted mock; `own-020/round-cline.mjs`, `round-opencode.mjs --provider clinepass`. R41–R43 ruled (§10). First quota reading: 3 smokes = 10% of the 5-hour window. Next: the first real round (calibrates quota per round), then the kits (R41: `--cline`, `--opencode`). Details: §12.**
+**Status (2026-10-19 night): AC2 built, not yet released: `create-nodegx --cline` + `create-nodegx-cline` (§12, "the Cline kit"), 34/34 tests, a zero-cost mock round on the packed kit; it ships with the 0.2.4 cut. Not done for "works with Cline": AC6, AC8. AC7 met 2026-10-20 (npm 0.2.4 published, the Cline kit included). AC5 for Cline met 2026-10-20 (R48: DeepSeek V4.1 Flash, quiz and Launch twice each); OpenCode's AC5 still open. Earlier: 🟡 s1 done 2026-10-15: AC1 ✅. Both harnesses × all three models pass the smoke (6/6, finished by themselves, 55–153 s); the Cline seal (a plugin + disabledTools) proven on a scripted mock; `own-020/round-cline.mjs`, `round-opencode.mjs --provider clinepass`. R41–R43 ruled (§10). First quota reading: 3 smokes = 10% of the 5-hour window. Next: the first real round (calibrates quota per round), then the kits (R41: `--cline`, `--opencode`). Details: §12.**
 **Model:** Opus for the sessions that build the kit and read the rounds. The agents under test: **MiMo-V2.6 Pro (R46, replacing Kimi K3), GLM-5.3 and
 DeepSeek V4.1 Flash on ClinePass** (V4.1 Flash replaced V4 Pro, R44), in **OpenCode** and in **Cline CLI**, each pinned per round.
 
@@ -812,4 +812,21 @@ Large 4 (OWN-018 runs 9 and 10, quiz only).
   - **Owed:** Richard publishes (`scripts/own/publish-npm.sh <that folder>`: it skips node-spec and canvas-look, which
     have no tarball there, and publishes project-contract, preview, mcp, create-nodegx, -vibe, -cline in that order).
     Then a CHANGELOG "npm packages 0.2.4" line (through the content-authoring skill) and the site's npm section.
+- **npm 0.2.4 PUBLISHED (Richard, 2026-10-20 17:13–19:50 CEST), every package verified against its tarball.**
+  - **On the registry** (read from the full document, `versions[v].dist.shasum` = §12's table, `latest` = this version):
+    project-contract 0.2.1 (17:13), preview 0.2.4 (17:22), mcp 0.2.4 (19:01), create-nodegx-vibe 0.2.4 (19:41),
+    create-nodegx-cline 0.2.4 (19:42, its first version), create-nodegx 0.2.4 (19:50). The two wrappers went live nine
+    minutes before the core they pin, so for those minutes they couldn't install; no harm after 19:50.
+  - **Why it took four runs:** the script stopped at mcp three times. The last stop was E403 "cannot publish over the
+    previously published versions: 0.2.4": mcp 0.2.4 had been live since 19:01, but `npm view` (and the registry's
+    abbreviated document) still said it wasn't, so the re-run's "already published?" check tried it again. The full
+    document had it all along. **Fixed in `publish-npm.sh`:** both checks (already published, and live before the next)
+    read the full document with no npm cache (`registry_shasum`); re-run on the 0.2.4 folder it skips all six, and an
+    unpublished version reads as absent. Earlier stops: one unknown (log overwritten), one a browser sign-in left
+    unapproved.
+  - **Live from the registry, empty HOME:** `npm create nodegx-cline@0.2.4 my-cline` → exit 0, Cline's entry `npx -y
+    @nodegx/mcp@0.2.4 --allow-writes --screenshots-to-files`; that server from npm connected cold in 3.7 s, 7 tools.
+  - **So AC7 (the Cline kit and the core fixes on npm) is met.** Left for "works with Cline": AC6 (Richard's own Cline
+    run, in a folder `npm create nodegx-cline` makes) and AC8 (the words). Also owed: a CHANGELOG "npm packages 0.2.4"
+    line and the site's npm section, through the content-authoring skill.
 
