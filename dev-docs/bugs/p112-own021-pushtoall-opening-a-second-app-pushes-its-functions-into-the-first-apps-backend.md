@@ -1,11 +1,13 @@
 ---
 id: P112-OWN021-PUSHTOALL
 title: Opening a second app while the first app's backend runs pushes the second app's functions into the first app's backend
-status: open
+status: fixed
+commit: (this session, OWN-024 s1)
 severity: high
 area: editor / Backend Services (CloudFunctionDeployer)
 found: P112 OWN-021 S8, 2026-10-20, on the released 0.4.2 (arm64 DMG)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-021-THE-0.4.2-CUT.md §12
+regression: packages/noodl-editor/tests-unit/own-021/pushtoall.test.ts "a save in the community app pushes to the community app's backend, and not the marketplace's"
 ---
 
 A builder who has both P121 templates opens the marketplace, starts its backend, goes back to the projects and opens
@@ -37,3 +39,14 @@ in 0.4.3 at the earliest.
 
 **Until then (the builder's words, in the marketplace's setup page):** stop one app's backend before opening the other
 app.
+
+**Fixed (2026-10-20, OWN-024 s1), not released.** The save push (and the trail's Deploy with no backend named) goes
+through `services/cloudDeployTarget.ts` `pushToProjectBackend`: the local backend the project's endpoint points at
+(`matchEndpointToManaged(getCloudServices(project), backend:list)`, the rule the panel's attached card and
+`ProjectBackendLifecycle` already use), if it is running, and nothing otherwise. `onBackendStarted` is unchanged.
+`CloudFunctionDeployer.pushToAllRunning` is gone (its two callers moved). Spec: 6 cases, two projects and two running
+backends; the 0.4.2 loop put back into the module as a mutant reddens all 6. The trail's Deploy with no running backend
+now says so ("This project's backend isn't running. Start it in Backend Services, then deploy.") instead of reporting a
+deploy to "every running backend".
+
+Still owed: the S8 path re-driven on the 0.4.3 build (both apps' backends running, a save in each).
