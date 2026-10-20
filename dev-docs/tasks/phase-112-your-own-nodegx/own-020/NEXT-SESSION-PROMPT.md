@@ -1,6 +1,7 @@
 # OWN-020 — the session after the 0.2.4 candidate's rounds (Opus)
 
-**Written 2026-10-20 ~14:40 CEST by the Opus session that packed the 0.2.4 candidate and ran DeepSeek on the Cline kit.**
+**Written 2026-10-20 ~14:40 CEST by the Opus session that packed the 0.2.4 candidate and ran DeepSeek on the Cline kit;
+"Next" updated ~14:50 CEST by the session that fixed UNWIREDSIGNAL.**
 Read, in order: this file; `../OWN-020-THREE-HARNESSES.md` §7 (acceptance), §10 (R41–R47), and §12's last three
 entries ("The 0.2.4 candidate, packed and mock-rounded", "AC5's DeepSeek rounds on the 0.2.4 candidate's Cline kit",
 and the option 4 entry above them); `round-cline.mjs`, `stream-tap.mjs`. Then the memory index, lane 5.
@@ -46,15 +47,17 @@ Richard's question: can the Cline / DeepSeek V4.1 Flash version be declared done
 
 ## Next, in order (an agent alone)
 
-1. **UNWIREDSIGNAL's minimal repro**: one Function `Outputs.best = 1; Outputs.done();`, `out-best` wired, `out-done` not,
-   in the packed preview (expect the throw) and in the editor (expect none). Then the fix (the runtime registers
-   `functionScriptPortNames` signals at load, as the spec's target does, or the door saves them), the repro as the
-   regression, and the bug file updated. Run the Function spec first (memory: RUN THE SPEC 1st).
-2. **The double tap in CDQ4**: read its graph (gallery `CDQ4/capital-quiz`) for why a second tap was taken: the model's
-   design or something the kit teaches. If kit-shaped, a note in the core note / skill.
-3. **When Richard has re-run `publish-npm.sh` for 0.2.3** (check: `npm view @nodegx/mcp version` → 0.2.3): the real 0.2.4
-   cut on `cline-dev` (versions as `a6544370c`, plus project-contract 0.2.1, the lockfile, `MCP_VERSION`), packed again
-   from a clean worktree at the pushed commit (the candidate's tarballs are not the cut's).
+Done 2026-10-20 evening (§12's last entry): **UNWIREDSIGNAL fixed in `3026899d4`** (runtime `placingSignalPorts`; from
+disk the throw happened wired too, so the bug's first workaround was wrong) and **CDQ4's double tap read**: the model's
+design (`lock_gate` is a literal-`true` fan-out, by its own comment), not the kit's; no kit note.
+
+1. **When Richard has re-run `publish-npm.sh` for 0.2.3** (check: `npm view @nodegx/mcp version` → 0.2.3; at 14:30 CEST
+   it still read 0.2.2): the real 0.2.4 cut on `cline-dev` (versions as `a6544370c`, plus project-contract 0.2.1, the
+   lockfile, `MCP_VERSION`), packed again from a clean worktree at the pushed commit (the candidate's tarballs are not
+   the cut's, and they predate `3026899d4`). **Its smoke owes one render** through the packed MCP of a Function that
+   calls an unwired signal (`Outputs.best = 1; Outputs.done();`, only `out-best` wired): `consoleErrors` empty. That's
+   the product-level half of the UNWIREDSIGNAL fix, not driven yet (the render engines are built bundles).
+2. Nothing else is an agent's alone until Richard rules (below).
 
 ## Waits on Richard
 

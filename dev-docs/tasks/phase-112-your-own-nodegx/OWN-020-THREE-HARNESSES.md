@@ -739,3 +739,19 @@ Large 4 (OWN-018 runs 9 and 10, quiz only).
     editor side not yet measured.
   - **Quota:** no before / after reading of Richard's bars reached the session (CDQ2 + CDQ3 + CDL2 + CDQ4 ≈ 18.4M input, 90%
     cached in all, ~94k output).
+- **UNWIREDSIGNAL fixed, CDQ4's double tap read (2026-10-20 evening, Opus; next-session steps 1 and 2).**
+  - **UNWIREDSIGNAL, fixed in `3026899d4`** (runtime, `placingSignalPorts` in simplejavascript.ts; regression
+    `noodl-runtime/test/p112-own020-an-unwired-signal-a-function-calls.test.ts`). Measured first, from disk (no module
+    `setup`, the component as the file holds it): the CDQ2 shape threw with `out-done` unwired **and with it wired**. A
+    wire registers the node's output, not a model port, so the bug file's first workaround was wrong. Only a saved
+    `ports` entry (what an editor deploy writes) ran clean. The run now prepares the placing's signals too (written list
+    typed Signal, then the code's `Outputs.x()`, read from `model.parameters`). The spec's two Function rows are
+    unchanged; the sabotage turns exactly the three fixed cases red. **Not driven in the product:** the MCP render and the
+    deploy engine are built bundles, so the 0.2.4 cut's smoke owes one render of an unwired-signal Function with
+    `consoleErrors` empty.
+  - **CDQ4's double tap is the model's design, not the kit's.** `Pages/Quiz` has a Condition `lock_gate`, labelled "The
+    question is locked", with `condition: true` as a literal and no wire. Its own comment says "Its condition is a
+    constant, so it is a fan-out, not a test". Every tap fires `picked` → `write_tapped_N` and `pickedRight` →
+    `score_counter.increase`, and nothing reads `quizRevealed` before counting, so a second tap is coloured and scored.
+    The sentence never asks for a lock, and the double tap is observed, not scored. A kit note would be teaching to an
+    unscored check, so none was written. CDQ1, CGQ1 and CMQ1 were clean on the same kit family.
