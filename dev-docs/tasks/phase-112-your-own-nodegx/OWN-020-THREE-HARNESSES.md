@@ -744,8 +744,11 @@ Large 4 (OWN-018 runs 9 and 10, quiz only).
     spec's "a signal the code calls with no wire on it sends nothing; the run still succeeds" passes, because the
     spec's target registers code-derived ports at mount and the from-disk runtime doesn't. Minimal repro and the
     editor side not yet measured.
-  - **Quota:** no before / after reading of Richard's bars reached the session (CDQ2 + CDQ3 + CDL2 + CDQ4 ≈ 18.4M input, 90%
-    cached in all, ~94k output).
+  - **Quota (Richard's bars, read 15:22 CEST): 5-hour 10%, weekly 61%, monthly 30%.** The 5-hour window resets at
+    17:24, so it opened at 12:24, one minute after CDQ2 began: **the four rounds (CDQ2 + CDQ3 + CDL2 + CDQ4, ≈ 18.4M
+    input, 90% cached, ~94k output) cost 10% of a 5-hour window**, about $1 on the market-value estimate above. Weekly
+    48 → 61 and monthly 24 → 30 since the CGQ1 + CMQ1 reading also hold CDL1, the CDS1 chain, CDS2-01 (72M input) and
+    UI-1 / UI-2, so they don't split per round.
 - **UNWIREDSIGNAL fixed, CDQ4's double tap read (2026-10-20 evening, Opus; next-session steps 1 and 2).**
   - **UNWIREDSIGNAL, fixed in `3026899d4`** (runtime, `placingSignalPorts` in simplejavascript.ts; regression
     `noodl-runtime/test/p112-own020-an-unwired-signal-a-function-calls.test.ts`). Measured first, from disk (no module
@@ -762,3 +765,8 @@ Large 4 (OWN-018 runs 9 and 10, quiz only).
     `score_counter.increase`, and nothing reads `quizRevealed` before counting, so a second tap is coloured and scored.
     The sentence never asks for a lock, and the double tap is observed, not scored. A kit note would be teaching to an
     unscored check, so none was written. CDQ1, CGQ1 and CMQ1 were clean on the same kit family.
+  - **Reported to Cline (Richard: "You can send the report to Cline"):** https://github.com/cline/cline/issues/15214.
+    The in-band `AI_InvalidResponseDataError` chunk verbatim (generation `gen_01M5CESD7DAFQQW8223ZRZ12QX`, CDQ3), the
+    six deaths of 10-19 / 10-20, the 5 m 43 s silence, and three asks: the gateway retries upstream, the CLI treats an
+    in-band error and a stall as retryable, and a shorter stall timeout. The recorded response is offered privately,
+    not attached. Filed on `cline` 3.0.71 (3.0.73 is current, not retested).

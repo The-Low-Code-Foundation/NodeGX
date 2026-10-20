@@ -63,10 +63,9 @@ design (`lock_gate` is a literal-`true` fan-out, by its own comment), not the ki
 
 - ~~AC5 ruling~~ **ruled R48 (2026-10-20): yes to both.** AC5 for Cline is met by DeepSeek V4.1 Flash; AC8's words
   must say what the retry tap hides. OpenCode's half of AC5 is still open (no Launch round yet).
-- **His bars**: no before / after reading reached this session for CDQ2–CDQ4 + CDL2 (≈ 18.4M input, 90% cached).
-- **Raise it with Cline?** The in-band gateway error (bytes in `scratchpad/rounds/CDQ3-tap/resp-020.sse`) and Cline not
-  retrying it are reportable; whether and how is his call.
-- **npm 0.2.3 is still half out** (12:04 CEST: mcp, preview, create-nodegx, create-nodegx-vibe still 0.2.2). He re-runs
+- ~~His bars~~ read 15:22: the four rounds = 10% of a 5-hour window (§12). ~~Raise it with Cline?~~ Filed:
+  https://github.com/cline/cline/issues/15214. Watch it for a reply.
+- **npm 0.2.3: Richard re-ran the publish at ~15:20 CEST** (in flight then). Was half out (12:04 CEST: mcp, preview, create-nodegx, create-nodegx-vibe still 0.2.2). He re-runs
   `scripts/own/publish-npm.sh /Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.3-tarballs`.
 - **Option 4 step 2** ("adopt, keeping what's there") is its own task when he wants it; step 3 is his by-eye call.
 - AC6 (his own Cline run) and AC8 (the claim's words, through the content-authoring skill) come last.
