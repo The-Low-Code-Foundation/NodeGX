@@ -6,7 +6,7 @@ Lane 1, after [OWN-021](OWN-021-THE-0.4.2-CUT.md) (0.4.2). The runbook is [OWN-0
 OWN-021 §7–§11 last ran it. **This file owns the editor half of the board's 0.4.3 row. The npm half (0.2.4 with the
 Cline kit) is OWN-020's** ([OWN-020](OWN-020-THREE-HARNESSES.md) AC2).
 
-**Status: 🟡 s1 (2026-10-20): S1–S6 ✅, S8 ✅ driven on the 0.4.3 Intel artefact, zips made (§6); S7: merged, tagged,
+**Status: ✅ s1 (2026-10-20): 0.4.3 PUBLISHED 21:16:16 UTC, every AC met (§7); the zips are made. Before: S1–S6 ✅, S8 ✅ driven on the 0.4.3 Intel artefact, zips made (§6); S7: merged, tagged,
 three of four legs built; arm64 waits on a GitHub runner, then Publish. Before: S6 under way — `release/0.4.3` pushed (`4efbce226`, cut `65f936bcb`) on
 Richard's go and PR #53 open to `main`, its required checks green at `e55a37f86` (Test (editor) 3021 / 0, seed
 74287). Merge, tag and Publish wait on his go.**
@@ -191,3 +191,22 @@ in 0.4.2; no local path, no `.mcp.json`/`CLAUDE.md`/`.DS_Store`. In `nodegx-priv
 
 **Left:** the arm64 leg (a runner), then the draft checked (16 assets, `latest-mac.yml` both arches, body from
 `GITHUB-RELEASE-0.4.3.md`), **Publish** (Richard's go given), the feed post, the CHANGELOG date, nodegx.io.
+
+## 7. s1, end: 0.4.3 published (2026-10-20 21:16:16 UTC)
+
+- **arm64:** the overnight loop's first attempt (20:42 UTC) got a runner: built in 19m10s; `[build] sharp for
+  darwin-arm64: 11 packages`; afterPack 200, notarised, **afterSign 200 under the signed binary**, ticket stapled.
+  *merge mac update feed* ✅, *verify draft release is complete* ✅ (16 assets; `latest-mac.yml` 0.4.3 with arm64 and
+  x64). Only *every authored library entry is installable* stays red (the parked Three Kit: Richard's call).
+- **The arm64 DMG, measured here natively:** 0.4.3, `codesign --verify --deep --strict` ok, stapler validates,
+  Gatekeeper "accepted, Notarized Developer ID", `@img/sharp-darwin-arm64` + libvips packed,
+  `check-packaged-backend.js` with the app's binary → `?thumb=md` 200, 256 px. **AC2 ✅.**
+- **Published** as Latest on Richard's go ("Go please"), the body from `GITHUB-RELEASE-0.4.3.md`. All six downloads
+  answer 206 on a range request. **AC1 ✅ AC3 ✅ AC4 ✅** (S8 on the Intel artefact, §6; the zips, §6).
+- **The feed post** pushed (nodegx-content `a52caae42`, `date_modified` 2026-10-20T21:16:16Z, plain `<p>` leads); the
+  served feed's one item is `nodegx-0.4.3`.
+- **nodegx.io** deployed (nodegx-web `e455136`, local commit): eyebrow, button, release block (a new note through the
+  offline copy checks), the six downloads, changelog `#v0-4-3`. Built with `NODEGX_CHANGELOG` = CHANGELOG without the
+  npm 0.2.3 section, as deployed this morning. Neighbours 200 before and after. **npm 0.2.4 is on the registry**
+  (mcp, preview, create-nodegx, -vibe, -cline 0.2.4; project-contract 0.2.1): its CHANGELOG section and the site's npm
+  section are OWN-020's.

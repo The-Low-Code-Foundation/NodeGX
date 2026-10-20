@@ -1,3 +1,7 @@
+> ✅ **DONE, 2026-10-20 21:16 UTC: 0.4.3 published, feed post and nodegx.io on it, zips made (OWN-024 §7).** What's
+> left is Richard's: sending the zips and the email; the parked Three Kit's library publish (its job is red). For
+> agents: P112-OWN024-SCHEMAFIRSTSTART and -DEPLOYNOSHARP are open; npm 0.2.4's changelog/site section is OWN-020's.
+>
 > **Update, end of s1 (2026-10-20 ~21:00 CEST):** #53 merged (`e0bd5309e`), `v0.4.3` tagged; the Release run built
 > darwin-x64 (signed, notarised), win32-x64 and linux-x64, each passing the new thumbnail smoke; **darwin-arm64 never got
 > a GitHub runner** (three times; a background loop re-queued it). Not published. S8 re-driven on the Intel artefact:
