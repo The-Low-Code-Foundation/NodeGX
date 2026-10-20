@@ -1,0 +1,16 @@
+---
+id: P112-OWN021-ADDKEEPS
+title: Adding a country or a shelf leaves what you typed in the field, inviting a second press
+status: open
+severity: low
+area: template / templates/marketplace `/Pages/Admin/WaysToPay`, `/Pages/Admin/Shelves`
+found: P112 OWN-021 S8, 2026-10-20, on the released 0.4.2
+evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-021-THE-0.4.2-CUT.md §12
+---
+
+On Ways to pay, after **Add the country** the new country is listed ("Ghana · GHS"), but the Country and Currency code
+fields still say "Ghana" and "GHS". On Shelves, after **Add the shelf** the field still says the shelf's name. A builder
+can't tell whether it worked and may press again. Not measured: what a second press does (a second Ghana? refused?).
+
+Fix in the generator (`two003Admin.ts`): clear the fields when the add succeeds, and check the duplicate case in the
+spec.

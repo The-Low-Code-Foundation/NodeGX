@@ -1,7 +1,22 @@
 # Setting up the community app
 
 The app is for a church community. People ask to join. An admin lets them in. Members sign in with a link sent to their
-email. This page is the setup. Each step is done once, in the backend's admin app, before anyone joins.
+email. This page is the setup. Each step is done once, before anyone joins.
+
+## Before you start
+
+Open the community app in NodeGX. The first time, NodeGX updates the project and keeps the original in a folder beside
+it called `community-app.before-0.4`. You can delete that folder once the app opens.
+
+Open **Backend Services** in the left-hand bar and press **+**. Choose **Built-in**, then **Run one on this computer**.
+Give the backend the community's name: members see it in the email that signs them in. Press **Create**, then **Start
+backend**.
+
+Run one app's backend at a time. If another NodeGX app's backend is running, stop it before you open the community app.
+
+On the backend's card, press **Manage data & settings**. The backend's admin app opens in your browser. The first time,
+it asks you to create your admin account for the backend. Use a different email for the community's first admin in
+step 4. The app refuses an email that already has an account.
 
 ## 1. Choose a setup token
 
@@ -15,6 +30,13 @@ you keep to yourself.
 Members sign in with a link sent to their email. They get a message when an admin lets them in. Both need the backend
 to send email. Open **Email** in the admin app and set up the mail service.
 
+1. Pick who sends the mail: Gmail, Resend, Postmark, Amazon SES, Mailgun, Brevo, or **Other** for any other mail
+   server. Each one shows what goes in Username and Password, with a link to where the provider gives it to you.
+2. Fill in **From address** and **From name**. Members see them on every message.
+3. In **Base URL (links in emails)**, type the backend's address, shown on its card in Backend Services (such as
+   `http://localhost:8607`).
+4. Switch on **Sending is on**, press **Save**, then **Send test email** to yourself.
+
 Without email, people can still ask to join and be let in. Nobody can sign in until it's set up. The admin who lets
 someone in is told the message didn't go.
 
@@ -25,7 +47,9 @@ instead.
 
 1. Switch on **People may sign in with a link sent to their email**.
 2. Under **Where your app lives**, add the app's web address, such as `https://community.example.org`. A link only
-   brings someone back to an address on this list.
+   brings someone back to an address on this list. While you try the app on your own computer, add
+   `http://localhost:8574`, the address of NodeGX's preview.
+3. Press **Save policy**.
 
 ## 4. Set the community up
 
@@ -33,6 +57,9 @@ Open the app. It says the community isn't set up yet. Press **Set up the communi
 community's name, your name, your email and a password of 8 characters or more.
 
 You're now the first admin. You sign in with that password.
+
+The bar at the top of every page says "gram". To change it, open the `UI/Bar` component in NodeGX and change the text
+of its wordmark.
 
 ## 5. Letting people in
 
@@ -56,7 +83,7 @@ app checks this when a post is shared, and refuses a photo that anyone could see
 
 A heart or a comment shows on everyone's feed as it happens, without reloading.
 
-Photos and live updates need a NodeGX build from 15 October 2026 or later.
+Photos and live updates need NodeGX 0.4.2 or later.
 
 ## 7. Profiles
 

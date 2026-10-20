@@ -23,3 +23,11 @@ which session token `whoAmI` carried on the red run.
 
 A person would meet it on a shared phone: a seller's staff hands the phone to the admin, who signs in and finds
 themselves on the seller's orders.
+
+**Measured on the released 0.4.2 (P112 OWN-021 S8, 2026-10-20).** A tablet-size Chrome on the editor's preview, the
+marketplace on its built-in backend: 20 sign-ins over the other person's session, alternating staff → admin and
+admin → staff, never signing out. **The route was right all 20 times** (admin on `/admin/sellers` with the six tabs,
+staff on `/orders`). Once (the 6th, admin → staff) the bar still read **ADMIN** 3 s after the staff's Orders page drew;
+the next 12, read at 3 s and again at 7 s, were all clean. So the routing race s19 saw did not reproduce; a bar that
+names the previous person for a moment may be the same race in a smaller form. Still open: log which session token
+`whoAmI` carries, and when the bar's name is read.

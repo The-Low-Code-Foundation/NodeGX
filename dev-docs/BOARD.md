@@ -33,16 +33,17 @@ not counts of open acceptance criteria; lanes 3 and 7 are the least certain. Ric
 block no release except where a task waits on his read. **Lane 6 runs in a second session the whole way**, as it
 depends on no other lane, so 0.4.6 lands close behind 0.4.5. A release is cut when its row is done, not on a date.
 
-**🔴 First, before any row below (Richard, 2026-10-20: "testing those two templates so I can send them"):** OWN-021 S8
-and AC4. Drive P121's marketplace and community app on the *released* 0.4.2 (a separate install, never his 0.3.0 in
-`/Applications`), make the two zips from `v0.4.2`, write the marketplace's setup page, then hand Richard what to
-send. The steps: [own-021/NEXT-SESSION-PROMPT](tasks/phase-112-your-own-nodegx/own-021/NEXT-SESSION-PROMPT.md).
-P121 stays parked otherwise; this is the 0.4.2 row's leftover, not a new lane.
+**🔴 First, before any row below: P112-OWN021-NOSHARP, then the two zips.** S8 was driven on the released 0.4.2
+on 2026-10-20 (OWN-021 §12): both apps open on their home page, start their backend and walk their main path. One
+blocker: **every marketplace photo shows broken**, because the backend the editor runs ships without `sharp` and the
+shop asks for thumbnails. Richard's ruling, the same day: fix it product-side in 0.4.3 and hold the zips until then.
+So 0.4.3 carries NOSHARP first, then both zips are made from the fixing commit and the marketplace re-driven on the
+0.4.3 build. The steps: [own-021/NEXT-SESSION-PROMPT](tasks/phase-112-your-own-nodegx/own-021/NEXT-SESSION-PROMPT.md).
 
 | release | what is in it | sessions | running |
 |---|---|---|---|
-| **0.4.2** | ✅ **Published 2026-10-20 08:18 UTC** (OWN-021 §11): PR #52 merged, `v0.4.2` tagged, nodegx.io and the feed post on it. Left: npm 0.2.3's four (preview, mcp, create-nodegx, create-nodegx-vibe) not on the registry at 08:50 UTC, then the site's npm section; S8, both templates driven on the release | 0 | 0 |
-| **0.4.3** a stranger starts from npm | npm 0.2.4 with the Cline kit (OWN-020 AC2); ✅ P112-OWN023-COLDSERVER fixed 2026-10-20 (`b09ed2b7f`: the server declared the SDK and zod it already bundles, so npx installed 91 unused packages; cold install 12.6 / 11.6 s → 3.8 / 5.5 s on 0.2.2's tarball, boot ~1 s; a real first run on the 0.2.4 kit still owed) and ✅ P112-OWN020-CALLTOOLSTRIP fixed 2026-10-20 (`ea0d1d7b0`: `call_tool` refuses an unknown argument by name, as a direct call does); lane 1: the stranger's app from the registry, OWN-014 AC4; lane 2: the stranger round on the drawer; the tests-only `any` raise paid back | 7–10 | ~10 |
+| **0.4.2** | ✅ **Published 2026-10-20 08:18 UTC** (OWN-021 §11): PR #52 merged, `v0.4.2` tagged, nodegx.io and the feed post on it. Left: npm 0.2.3's four (preview, mcp, create-nodegx, create-nodegx-vibe) not on the registry at 08:50 UTC, then the site's npm section. ✅ S8 driven on the release (OWN-021 §12); the zips wait on NOSHARP in 0.4.3 | 0 | 0 |
+| **0.4.3** a stranger starts from npm | 🔴 **first: P112-OWN021-NOSHARP** (`sharp` with its per-platform prebuild beside the packaged `nodegx-backend/cli.js`; gate on the artefact), then P121's two zips and the marketplace re-driven on 0.4.3 (OWN-021 §12); P112-OWN021-PUSHTOALL (a second app's functions pushed into the first app's backend); npm 0.2.4 with the Cline kit (OWN-020 AC2); ✅ P112-OWN023-COLDSERVER fixed 2026-10-20 (`b09ed2b7f`: the server declared the SDK and zod it already bundles, so npx installed 91 unused packages; cold install 12.6 / 11.6 s → 3.8 / 5.5 s on 0.2.2's tarball, boot ~1 s; a real first run on the 0.2.4 kit still owed) and ✅ P112-OWN020-CALLTOOLSTRIP fixed 2026-10-20 (`ea0d1d7b0`: `call_tool` refuses an unknown argument by name, as a direct call does); lane 1: the stranger's app from the registry, OWN-014 AC4; lane 2: the stranger round on the drawer; the tests-only `any` raise paid back | 7–10 | ~10 |
 | **0.4.4** full stack on your own VM | lane 3: OWN-015's rest (AC4, R11, AC1 from the registry), P116 ONT-004 onward, P104's rows as kit pieces; lane 4: OWN-016 AC2 and AC5, the deploy as a tool the agent calls, a second VM provider, the runbook | 12–18 | ~28 |
 | **0.4.5** cheaper models, measured | lane 5: OWN-020 AC5 (DeepSeek on the Cline kit, direct vs tapped), OWN-023's three arms, LOC-002, the price table with verified prices, ISL-010; P109's six (ISL-008, 022, 024, 025, 037, 046) | 12–16 | ~44 |
 | **0.4.6** code export you can claim | lane 6 short of Tier B: EXP-011 §101 and the named P18 rows in its "now" and "then" | 18–27 | ~71 |

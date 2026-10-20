@@ -4,7 +4,7 @@
 dude to get his templates". Lane 1, after OWN-013 (the 0.4.0 / 0.4.1 cuts). The runbook is OWN-013's (§3–§4,
 UPG-008's shape); this file says what 0.4.2 must carry and how we know it does.
 
-**Status: 🟢 s4 (2026-10-20): 0.4.2 PUBLISHED 08:18:31 UTC, nodegx.io on 0.4.2, feed post live (§11); npm 0.2.3 half out; S8 and AC4 left.** Before: 🟡 s2 (2026-10-19): S1–S5 ✅, AC1 ✅; PR #52 green on the six required checks (§9). S6 (the Mac staple) and S7 (merge, tag, Publish) are Richard's.** **s3 (2026-10-19): the npm 0.2.3 cut is packed and tested (§10); Richard publishes it with one command.** P121's product changes are six commits, one per bug
+**Status: 🟡 s5 (2026-10-20): S8 ✅ and AC4 ✅ driven on the released 0.4.2 (§12); the marketplace's photos are broken on it (P112-OWN021-NOSHARP, blocker), so the zips wait for 0.4.3 (Richard). s4: 0.4.2 PUBLISHED 08:18:31 UTC, nodegx.io on 0.4.2, feed post live (§11); npm 0.2.3 half out.** Before: 🟡 s2 (2026-10-19): S1–S5 ✅, AC1 ✅; PR #52 green on the six required checks (§9). S6 (the Mac staple) and S7 (merge, tag, Publish) are Richard's.** **s3 (2026-10-19): the npm 0.2.3 cut is packed and tested (§10); Richard publishes it with one command.** P121's product changes are six commits, one per bug
 (MEMBERSPHOTO and UPLOADSHRINK share one, as both edit `uploadfile.ts` and its spec), each bug `fixed` with its
 commit; the two templates, their generators and specs are `9168a171d`, on Richard's go (R1 re-checked against the
 private brief: none of its names in the 452 files). Next: S3, the cut point (§7).
@@ -45,7 +45,7 @@ Each bug file names its files and specs; P121's [NEXT-SESSION-PROMPT](../phase-1
 | S5 | **G4–G6:** the PR `release/0.4.2` → `main`, the six required checks green; `npm run ci:build:editor` on the cut tree; the editor test floor by name | CI + agent | ✅ s2 (§9): PR #52, six required checks green on `a9b9af9ad`; Test (editor) 3017 / 0 at seed 61524 |
 | S6 | **The Mac staple.** OWN-013 §12: electron-builder notarises by itself and its staple has no retry; the one-line fix `"notarize": false` under `build.mac` was refused in auto mode ("Security Weaken"). Richard allows it, or the release session re-runs the failed leg as 0.4.0's did | Richard | ⬜ |
 | S7 | **Tag, Release run, Publish** (OWN-013 §4) | Richard publishes | ⬜ |
-| S8 | **Drive both templates on the released 0.4.2** (not dev, not source): install, open each zip's copy, Backend Services → Built-in → Run one on this computer → Start; R12's line in the log; the marketplace: set up, a seller, a product with a photo (shrunk), checkout on delivery; the community app: join, let in (email set up), a post with a members-only photo seen by a second member, live count. Shots looked at | agent | ⬜ |
+| S8 | **Drive both templates on the released 0.4.2** (not dev, not source): install, open each zip's copy, Backend Services → Built-in → Run one on this computer → Start; R12's line in the log; the marketplace: set up, a seller, a product with a photo (shrunk), checkout on delivery; the community app: join, let in (email set up), a post with a members-only photo seen by a second member, live count. Shots looked at | agent | ✅ s5 (§12); the marketplace's photos broken (NOSHARP) |
 
 ## 4. Acceptance criteria
 
@@ -272,3 +272,78 @@ deploy; change the CHANGELOG's date if the publish lands on another day.
   `ops/deploy.sh 49.12.102.195` with no `NODEGX_CHANGELOG` (it reads this repo's CHANGELOG, which has the section) and commit.
 - **Left:** the four npm packages (Richard's terminal), the site's npm section after them, S8 (both templates driven on
   the released build), AC4.
+
+## 12. s5 (2026-10-20, Opus 5.5, session opennoodl-8a): S8 driven on the released 0.4.2
+
+**Verdict: S8 ✅ driven, both apps, on the published arm64 DMG. AC4 ✅ (both open on their home page). AC3 ✅ for the
+community app; the marketplace's path works end to end but every product photo shows broken
+(P112-OWN021-NOSHARP, blocker). Richard's ruling, the same day: fix it product-side in 0.4.3 and hold the zips until
+then.** No zip has been sent or kept: the ones made from `v0.4.2` were for the drive only.
+
+**Set-up.** The release asset `NodeGX-0.4.2-mac-arm64.dmg` (171,725,191 bytes) curled from the GitHub release, its
+`.app` copied into the scratchpad: `CFBundleShortVersionString` 0.4.2, `codesign --verify --deep --strict` ok. Launched
+with `--user-data-dir=<scratch>/profile --use-mock-keychain -ApplePersistenceIgnoreState YES`, `NOODLPORT=8674`,
+`NOODL_REMOTE_DEBUG_PORT=9333`, `ELECTRON_RUN_AS_NODE` unset; profile seeded with `firstRunLegal.json` and
+`recently_opened_project.json`. Richard's `/Applications/NodeGX.app` (0.3.0) was not touched; Connect was never
+pressed. Zips: `git archive --format=zip --prefix=marketplace/ v0.4.2:templates/marketplace` (313 entries) and
+`--prefix=community-app/ v0.4.2:templates/gram` (201). R1: every capitalised word, address and number in the private
+brief grepped against both unzipped trees; the hits are ordinary words, product names, countries and "Richard"
+(two ruling attributions in `docs/WORLD.md`). The app's users were three headless Chromes on the editor's preview
+(desktop, 390 × 844, 820 × 1180, each its own profile, `--use-mock-keychain`); mail went to a 60-line local SMTP
+catcher under the Email page's **Other**. The admin app was opened at `/_admin#token=…`, the address the editor's
+button opens, in that Chrome (the button calls `shell.openExternal`, Richard's own browser), with the token of the
+two backends this drive made, read on Richard's go. Everything torn down by its own pid; both backends deleted through
+`backend:delete`; `~/.noodl/backends` the same 29 folders before and after.
+
+| | marketplace | community app |
+|---|---|---|
+| AC4: opens on | the shop's Home ("Showing Home") ✅ | Welcome ✅ |
+| on open | "This project was updated for NodeGX 0.4", a `….before-0.4` copy beside it (designed, P100 R10) | the same |
+| backend start (R12) | `Project collections …: 21 added, 0 already there`; 20 functions pushed; reopened later: `0 added, 21 already there` | `13 added, 0 already there`; 15 functions pushed |
+| set up | Secrets `MARKETPLACE_SETUP_TOKEN`; Sign in → Set up this marketplace → "Market Square"; lands on Sign in, then the admin on Sellers ✅ | Secrets `GRAM_SETUP_TOKEN`; Email → Other (SMTP) → "Test email sent."; Sign-in → magic links on, the preview's address listed, "Sign-in policy saved."; Set up the community → Waiting for you ✅ |
+| main path | Ways to pay: Ghana · GHS, pay on delivery on; Rates GHS 1; a shelf; a seller with a login; the seller (tablet) adds a product with a 4000 × 3000, 955 KB photo → stored **1600 × 1200, 116,701 bytes** ✅; a buyer (phone) adds it to the basket, checks out paid on delivery → MK-2026-00001; the seller confirms (delivery GH₵30), Packed, Sent, Delivered and paid; the buyer's page reads Delivered, "Paid: GH₵880" ✅ | Ann (phone) asks to join; the admin lets her in (mail 002: "An admin has let you in to …"); she signs in by the emailed link (the backend's "Sign in to <backend>" page) ✅; a post with a photo, stored 1600 × 1200; the bare file URL **403**, the signed one 200 ✅; Bob (tablet) joins, is let in, signs in, sees the photo ✅; Bob hearts it and Ann's feed reads "1 heart · Bob" **within 1 s with no reload** (a marker on her page survived) ✅ |
+| photos | 🔴 **every one broken**: `?thumb=md` → 501 "Image transforms are unavailable on this backend … Cannot find module 'sharp' … Resources/nodegx-backend/cli.js"; the bare file 200 | shown through `Noodl.Files.sign`, no transform: fine |
+
+**Shots looked at** (scratchpad `shots/`, 43): the launcher, both editors on open, the backend card, the admin app's
+first run, Email, the welcome on a phone, both feeds (phone, tablet), the live heart, the shop's card with its broken
+photo, the product form, the order page delivered. 
+
+**Found and filed** (one file each in `dev-docs/bugs/`):
+
+- **P112-OWN021-NOSHARP** (blocker): above. Every earlier P121 drive ran a backend from source or jest, where
+  `node_modules/sharp` exists, so none could see it. Product-side fix in 0.4.3, its gate on the packaged artefact.
+- **P112-OWN021-PUSHTOALL** (high): with the marketplace's backend running, opening the community app pushed the
+  community app's functions into the marketplace's backend on its first save (`CloudFunctionDeployer.pushToAllRunning`
+  pushes to every running local backend). It failed only because both have a `whoAmI`: "Duplicate component name
+  /#__cloud__/whoAmI". Both setup pages now say to run one app's backend at a time.
+- **P112-OWN021-SAMEEMAIL** (medium): the admin app's first run asks the builder to create an admin account; setting
+  up either template with that same email is refused ("This marketplace could not be set up with that." / "This
+  community couldn't be set up with that."), a different email is set up at once. Both setup pages now say so.
+- **P112-OWN021-GRAMWORDMARK** (medium): the community app's bar says "gram" on every page, not the community's name.
+- **P112-OWN021-WELCOMEDEVOTIONAL** (low): the Welcome page promises a devotional the app doesn't have (§5).
+- **P112-OWN021-EMAILNOTE** (low): "…before this can send mail.. Sends fail loudly…", on the page it tells you to open.
+- **P112-OWN021-ADDKEEPS** (low): adding a country or a shelf leaves its words in the field.
+
+**§6's other owed items.**
+- The marketplace's setup page: written, `templates/marketplace/docs/SETTING-UP.md` (hand-written, survives
+  regeneration), from what this drive needed: start the backend, the admin app and its first-run account, the setup
+  token's secret name, the order countries → rates → shelves → sellers, what sellers and buyers do. The community
+  app's `SETTING-UP.md` gained a "Before you start" section, the Email page's fields (Base URL is the backend's
+  address), the preview's address for Where your app lives, Save policy, the bar's word, "0.4.2 or later" for photos.
+  Both through the content-authoring skill's offline checks (`written`, `closer`, `contract`, `opener`, `figures`):
+  what's left flagged is imperatives opening "On…"/"In…", section numbers, and one pre-existing ", but" line in the
+  gram's §8.
+- The editor badge's 26 warnings: **there is no warnings badge on 0.4.2.** No element in the editor carries a warning
+  count; the 26 s19 saw came from the dev build (NSP-019's Problems work, held back from 0.4.2's changelog). Not news
+  for the builder.
+- P121-S19-SIGNINRACE, measured: 20 sign-ins over the other person's session on a tablet, all routed right; once the
+  bar read ADMIN for 3 s on the staff's page. Written into the bug.
+
+**What the email to the builder will need to say** (for when the zips go, after 0.4.3): install NodeGX 0.4.3 or later;
+a mail service for the community app (any SMTP provider the Email page lists: Gmail, Resend, Postmark, Amazon SES,
+Mailgun, Brevo, or Other); a Paystack business and its secret key per country for cards (`PAYING-BY-CARD.md`); and
+that putting either app on the internet isn't covered yet (TWO-011).
+
+**Not driven:** the marketplace's enquiry, card payment (stand-in only, §5), the admin's other tabs beyond setup;
+the community app's comments, prayer, profiles, moderation, events (all driven from source in P121 s12–s16); Windows,
+Linux and Intel Mac builds.
