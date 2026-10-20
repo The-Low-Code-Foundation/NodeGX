@@ -695,3 +695,47 @@ Large 4 (OWN-018 runs 9 and 10, quiz only).
     `format/types.ts`, `format/store.ts`, `schemas/styles.schema.json`), so a 0.2.1 belongs in it (the MCP and preview
     inline it either way); node-spec's change since 0.2.0 is README only. The cut also needs npm 0.2.3 finished first
     (at 12:04 CEST mcp, preview, create-nodegx, create-nodegx-vibe still answered 0.2.2 on the registry).
+- **AC5's DeepSeek rounds on the 0.2.4 candidate's Cline kit (2026-10-20 afternoon, Opus; Richard: "Yes, run both",
+  then "Both through the tap", then "Yes, retry mode").** Runner `scratchpad/run-cd2.sh` (CDL1's script on `tgz024`
+  with `--kit cline`, Cline 3.0.71; `TAP=<port>` puts `stream-tap.mjs` in front, `TAPMODE` record|retry). Gallery
+  `OWN-020 ClinePass apps`, index :4900.
+  - **CDQ2 (quiz, DIRECT, 12:23 CEST): ended `error` at 14.5 min, "Stream error occurred"** (34 iterations, 78 tools,
+    3.05M input, 94% cached, seal clean). Unfinished, ungraded. Its last render had caught its own fault (below).
+    Gallery :4922.
+  - **CDQ3 (quiz, tap in RECORD mode, 12:42): ended `error` at 6 min, "Stream error occurred"** (20 iterations, 0.83M
+    input). **The first failure with its bytes saved, and it answers where the stream deaths come from:** response 020
+    (`resp-020.sse`, 10,222 lines, 1.9 MB, 51 s) is ~10k well-formed reasoning chunks from
+    `vmc/deepseek-v4p1-flash-contributor-fallbacks`, then ONE chunk carrying `"error":{"code":"error","message":"Stream
+    error occurred","name":"AI_InvalidResponseDataError"}` with `finish_reason: "error"`, then `[DONE]`. **The error
+    is in-band from ClinePass's gateway**: the gateway's own AI SDK parser rejected what its upstream sent and relayed
+    the error; Cline only reports it and, as measured before, never retries it. Not the client, not the tap (record is
+    pass-through), not context size (376k characters of request). So CDS1c / CDS1e / CDS1f / CDQ2's identical message is
+    explained; CDS1d's 5 m 43 s silence is the other shape (next item). A line for the write-up and for Cline. Gallery
+    :4923.
+  - **CDL2 (Launch, tap in RECORD mode, 12:48): 18/19, every behaviour check ✓, finished by itself in 33 min.** 64
+    iterations, 101 tools, seal clean, tap 64 responses all ok. Tokens 10.58M input, **58% cached** (CDL1: 95%; the
+    cause is unread), 40k output. ✗ **font** only: the headline names "Iowan Old Style", which nothing ships; the
+    validator said so (`font-face-not-shipped`, 1 warning) and the model left it. Contrast min 5.01. Audit: 9
+    components, 115 nodes, FaqItem / FeatureSection / PricingSection / SiteFooter / WaitlistSection with Component
+    Inputs, localStorage for the kept state. **With CDL1 (17/19, core kit tgz35) that is two Launch passes in a row
+    for DeepSeek on Cline**, on two kit versions (see the AC5 note below). Gallery :4924.
+  - **CDQ4 (quiz, tap in RETRY mode, 14:02): 12/12, carryover clean, double tap NOT clean, finished by itself in 19
+    min.** 39 iterations, 72 tools, 3.92M input (95% cached), 20.8k output, seal clean, validate 0/0. **The tap
+    re-asked one reply:** request 017 went silent for 90 s (`try 1: silent 90s`), was asked again, and the run went
+    on; in record mode or direct that is CDS1d's silence, then Cline's own timeout and the end of the run. So the
+    quiz pass is **with the lab's retry**, not what a person on ClinePass gets today. Double tap: Q1's second tap
+    coloured too, and Q2's second tap was scored (CDQ1 was clean on both; CGQ1 and CMQ1 too). Audit: 5 components, 65
+    nodes, AnswerOption with Component Inputs, Static Data for the questions, Timer ×2 + Repeat, localStorage best.
+    Gallery :4925.
+  - **AC5 bookkeeping, for Richard.** AC5 says "twice in a row **on one kit version**". DeepSeek on Cline now has quiz
+    12/12 on tgz35 (CDQ1, direct) and 12/12 on 0.2.4c (CDQ4, retry tap), Launch 17/19 on tgz35 (CDL1) and 18/19 on
+    0.2.4c (CDL2, record tap). Read strictly, 0.2.4c has one pass of each, and the 0.2.4c quiz needed the retry. The
+    ruling owed: whether tgz35 → 0.2.4c (the same core note and server, plus the Cline kit and element styles) counts
+    as one version for AC5, and whether a pass through the retry tap counts.
+  - **P112-OWN020-UNWIREDSIGNAL, filed (open, medium, kit preview).** CDQ2's Functions end `Outputs.done();` with no
+    `out-done` wire and no saved port; rendered from disk, each throws "Outputs.done is not a function". The Function
+    spec's "a signal the code calls with no wire on it sends nothing; the run still succeeds" passes, because the
+    spec's target registers code-derived ports at mount and the from-disk runtime doesn't. Minimal repro and the
+    editor side not yet measured.
+  - **Quota:** no before / after reading of Richard's bars reached the session (CDQ2 + CDQ3 + CDL2 + CDQ4 ≈ 18.4M input, 90%
+    cached in all, ~94k output).
