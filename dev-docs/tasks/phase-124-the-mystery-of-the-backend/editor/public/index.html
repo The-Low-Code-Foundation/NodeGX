@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Backend map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="map" aria-label="The map of the backend"></canvas>
+
+  <header id="top">
+    <div class="brand">
+      <div class="title" id="appName">Backend map</div>
+      <div class="sub" id="backendLine">Opening the backend…</div>
+    </div>
+    <div class="lens" role="group" aria-label="Look at it as">
+      <span class="lens-label">Look at it as</span>
+      <button data-lens="all" class="on">Everyone</button>
+      <button data-lens="anon">Someone not signed in</button>
+      <button data-lens="learner">A signed-in learner</button>
+      <button data-lens="staff">Staff</button>
+    </div>
+    <input id="search" type="search" placeholder="Find a table, function or screen" title="Drag the map to move it, scroll to zoom, click anything to see its story" autocomplete="off">
+  </header>
+
+  <aside id="secure" class="card small"></aside>
+  <div id="lensNote" class="card hidden"></div>
+
+  <aside id="panel" class="card hidden"><button class="close" id="closePanel" aria-label="Close">×</button><div id="panelBody"></div></aside>
+
+  <footer id="ticker">
+    <div class="ticker-head"><span class="pulse" id="livePulse"></span><b>What just ran</b> <span id="tickerNote">listening to the backend…</span>
+      <span id="legend">
+        <span class="legend-row"><span class="ln calls"></span>asks it to run</span>
+        <span class="legend-row"><span class="ln reads"></span>reads</span>
+        <span class="legend-row"><span class="ln writes"></span>adds, changes, deletes</span>
+        <span class="legend-row"><span class="ln mentions"></span>names it in its code</span>
+        <span class="legend-row"><span class="ln links"></span>rows point at rows</span>
+        <span class="legend-row"><span class="lk" style="color:#4da3ff">■</span>signed in</span>
+        <span class="legend-row"><span class="lk" style="color:#a78bfa">■</span>staff only</span>
+        <span class="legend-row"><span class="lk" style="color:#f97066">■</span>anyone at all</span>
+      </span>
+    </div>
+    <div id="runs"></div>
+  </footer>
+
+  <div id="tip" class="hidden"></div>
+  <div id="toast" class="hidden"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,5 +1,9 @@
 # The next session: the big think — turning the backend, the database and the workflows into visual coding
 
+> **Taken 2026-10-20 by Phase 124** (`dev-docs/tasks/phase-124-the-mystery-of-the-backend/`, Fable 5.1, s1): the think
+> is its README §3, the brief is BRIEF.md, the first stranger ran from `stranger/`. The §6 rulings are its README §7.
+> This page is the record of where it came from.
+
 **Written 2026-10-20 by the positioning session (Fable 5.1), at the end of a four-round interview with Richard.** Say
 which model you are in your first message. This is a **think-and-prototype session**, not a lab round and not a
 positioning session. Read first: `dev-docs/reviews/THE-PLACE-NODEGX-BESIDE-REPLIT.md` §9.4 and §10 (where this comes

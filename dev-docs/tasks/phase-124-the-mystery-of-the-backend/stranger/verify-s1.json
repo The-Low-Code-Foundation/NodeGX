@@ -1,0 +1,90 @@
+{
+  "model": "claude-opus-5-5",
+  "exit": {
+    "code": 0,
+    "signal": null,
+    "quotaStop": null,
+    "minutes": 22.1077
+  },
+  "result": {
+    "subtype": "success",
+    "costUsd": 7.116565399999997,
+    "turns": 160,
+    "durationMs": 1314904,
+    "usage": {
+      "input_tokens": 190,
+      "cache_creation_input_tokens": 234740,
+      "cache_read_input_tokens": 13912427,
+      "output_tokens": 122770,
+      "output_tokens_details": {
+        "thinking_tokens": 24111
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 234740,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1204,
+          "cache_read_input_tokens": 246500,
+          "cache_creation_input_tokens": 636,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 636
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "turns": 252,
+  "tools": {
+    "Skill": 1,
+    "Read": 11,
+    "Bash": 59,
+    "Write": 24,
+    "Grep": 8,
+    "Glob": 2,
+    "Edit": 49,
+    "ToolSearch": 1,
+    "TaskStop": 3
+  },
+  "writesOutsideLab": [
+    "/tmp/probe/p.sh",
+    "/tmp/probe/probe.mjs",
+    "/tmp/probe/schema.mjs"
+  ],
+  "projectCopyInLabChanged": [],
+  "projectCopyAtRootChanged": [],
+  "leftRunning": [],
+  "report": {
+    "chars": 10874,
+    "head": "# Report: a backend map for a NodeGX app, built from the kit\n\nFor the people who made the NodeGX kit. This is the report the skill `nodegx-your-own-editor` asks for. As\nasked, it's written here instead of being opened as an issue on `The-Low-Code-Foundation/NodeGX`.\n\n## What was built\n\n`./editor` is a backend editor for `./training` (Digital Bricks Training). You start it with `cd editor &&\nnpm st"
+  },
+  "screenshots": [
+    "editor-0.png",
+    "editor-1.png"
+  ],
+  "editor": {
+    "name": "backend-map",
+    "scripts": {
+      "start": "node server.mjs ../training",
+      "test": "node test/run-all.mjs"
+    },
+    "dependencies": {
+      "@nodegx/canvas-look": "^0.1.0",
+      "@nodegx/node-spec": "^0.2.0",
+      "@nodegx/preview": "^0.2.4",
+      "@nodegx/project-contract": "^0.2.1"
+    }
+  }
+}
