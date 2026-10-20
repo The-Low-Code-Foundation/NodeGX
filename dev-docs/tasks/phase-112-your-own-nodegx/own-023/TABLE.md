@@ -61,6 +61,10 @@ Spotify … play bar has childish icons".
 | the key in `openwave/.env` doesn't reach the backend without an agent | F1 | P112-OWN023-KEYNEEDSAGENT |
 | a `[noodl]` runtime error in the console after F2 (`ParentComponentObject (/Shared/Track Row): No ancestor component has a Component Object node`) | after-F2 grader 1, O13 | P112-OWN023-NOANCESTOR |
 
+| the local backend answers an anonymous `/classes/_User` with all 7 users' emails (and every reaction): "devOpen" on by default, CORS `*` | reported by B's F4 agent and hats A, D, X; verified by the lab on the served copy. By code (not measured) the backend refuses to start devOpen beyond loopback, so the measured scope is the person's machine | P112-OWN023-DEVOPENREAD |
+| the file server ignores Range (200 + the whole file for bytes 0–99): seeking, Safari/iOS playback | hat X, B's F4 agent; verified | P112-OWN023-NORANGE |
+| every song's audio and cover stored as `http://127.0.0.1:8584/files/…` (14 of 14) | hat X, B's F4 agent; verified; whose choice (agent or kit) not yet read | P112-OWN023-FILEURLHOST |
+
 Not the kit: B's build agent alone tried to write a Claude Code auto-memory file under the person's `~/.claude` (refused by the
 lab's fence).
 
@@ -76,7 +80,20 @@ lab's fence).
   copy; next round should set a neutral USER.
 - Not measured: the honesty number (B), the NodeGX editor's inspector (no hat can open an Electron app), a real phone.
 
-## 6. Owed
+## 6. The hats (verdicts/, unedited; each read ~40 files and, bar C, used the running apps)
+
+| hat | what it chose (its own words, first line or verdict line) | file |
+|---|---|---|
+| A — non-techie who already ships | "I'd choose R" | verdicts/A.md |
+| B — beginner | "I'd start my next app with **R**" | verdicts/B.md |
+| C — freelance dev | "I'd take over R, and K is a close second. I wouldn't take over M as a code job." | verdicts/C.md |
+| D — founder / tech lead | "I'd let the team start with **R**. **K** is close behind. I would not use **M** with real users as it stands" | verdicts/D.md |
+| X — null hypothesis | "What the framework gave that a prompt could not: **nothing**." | verdicts/X.md |
+
+Two hats' cost figures for B-F2 ($12.69) are the as-run total including the lab's fault sittings (§5); the agent's own
+work cost $5.47. Hats were not told; the transcript they read contains the extra sittings.
+
+## 7. Owed
 
 Hats' verdicts (`verdicts/`), F3 scored twice (agent / alone) and F4 against the graders by the hats, the write-up by a
 stranger, Richard's verdict beside his lines.
