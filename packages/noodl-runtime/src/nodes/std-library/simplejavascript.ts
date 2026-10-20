@@ -83,6 +83,8 @@ interface SimpleJavascriptNodeInstance extends NodeInstance {
     uses?: ScriptPath[];
     /** ISL-005 — listening for `scriptsChanged` on the graph model, so an edited file re-runs its users. */
     listeningForScripts?: boolean;
+    /** P112-OWN020 — the signals the placing's script calls, parsed once per script text (`placingSignalPorts`). */
+    codeSignals?: { script: string; names: string[] };
     /** The receiver user code sees as `this`; persists across runs. */
     _this: Record<string, unknown>;
     func?: (...args: unknown[]) => Promise<unknown>;
@@ -232,6 +234,45 @@ function usersOf(node: SimpleJavascriptNodeInstance, path: ScriptPath): string[]
     }
   }
   return users;
+}
+
+/**
+ * P112-OWN020-UNWIREDSIGNAL — the signal ports a run prepares a callable for: the saved ones (`model.outputPorts`), plus the
+ * ones the placing's own parameters declare, which is what `_managePortsForNode` pushes into `model.outputPorts` in the
+ * editor ("it's needed by the initial run of the script function") and nothing pushes from disk. A project an agent wrote,
+ * rendered by the preview or the MCP, has no saved ports, so `Outputs.done()` was "not a function" there and fine in the
+ * editor. The same precedence as the editor's list: a saved port keeps its type, then `scriptOutputs` (a name listed there is
+ * a signal only if typed Signal), then the code's `Outputs.x()`. Read from `model.parameters`, the placing's: a Script set
+ * while the app runs is not, so the spec's "a new signal is not a function" still holds.
+ */
+function placingSignalPorts(node: SimpleJavascriptNodeInstance): string[] {
+  const saved = node.model.outputPorts;
+  const params = (node.model.parameters || {}) as Record<string, unknown>;
+  const names: string[] = [];
+  for (const key in saved) {
+    if (saved[key] && saved[key].type === 'signal') names.push(key);
+  }
+  const declare = (key: string) => {
+    if (!(key in saved) && names.indexOf(key) === -1) names.push(key);
+  };
+  const listed: string[] = [];
+  const scriptOutputs = params['scriptOutputs'] as ScriptPortSpec[] | undefined;
+  if (Array.isArray(scriptOutputs)) {
+    scriptOutputs.forEach((p) => {
+      listed.push('out-' + p.label);
+      if (params['outtype-' + p.label] === 'signal') declare('out-' + p.label);
+    });
+  }
+  const script = params['functionScript'];
+  if (typeof script === 'string') {
+    const cached = node._internal.codeSignals;
+    const signals = cached && cached.script === script ? cached.names : functionScriptPortNames(script).signals;
+    node._internal.codeSignals = { script, names: signals };
+    signals.forEach((n) => {
+      if (listed.indexOf('out-' + n) === -1) declare('out-' + n);
+    });
+  }
+  return names;
 }
 
 function publishHeldWrites(node: SimpleJavascriptNodeInstance): void {
@@ -598,24 +639,24 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
       const outputs = this._internal.outputValuesProxy;
 
       // Prepare send signal functions
-      for (const key in this.model.outputPorts) {
-        if (this._isSignalType(key)) {
-          const _sendSignal = () => {
-            // FUN-007 §1. `Outputs.Done()` is a *call*, so it never reaches
-            // `outputValuesProxy`'s `set` trap — a Function whose only output is a signal
-            // would otherwise be told it produced nothing on the very run in which it fired.
-            this._internal.outputWrites.add(key.substring('out-'.length));
-            publishHeldWrites(this);
-            if (this.hasOutput(key)) this.sendSignalOnOutput(key);
-          };
-          // The value is both callable and carries `.send`, so user code may write either
-          // `Outputs.done()` or `Outputs.done.send()`. Typed at the point the second shape
-          // is attached rather than by widening the whole record to `any`.
-          const signalValue = _sendSignal as typeof _sendSignal & { send: typeof _sendSignal };
-          signalValue.send = _sendSignal;
-          this._internal.outputValues[key.substring('out-'.length)] = signalValue;
-        }
-      }
+      // P112-OWN020-UNWIREDSIGNAL: the placing's signals, not only the saved ports — see `placingSignalPorts`.
+      // forEach, not for…of: the viewer's ES5 test build compiles this file.
+      placingSignalPorts(this).forEach((key) => {
+        const _sendSignal = () => {
+          // FUN-007 §1. `Outputs.Done()` is a *call*, so it never reaches
+          // `outputValuesProxy`'s `set` trap — a Function whose only output is a signal
+          // would otherwise be told it produced nothing on the very run in which it fired.
+          this._internal.outputWrites.add(key.substring('out-'.length));
+          publishHeldWrites(this);
+          if (this.hasOutput(key)) this.sendSignalOnOutput(key);
+        };
+        // The value is both callable and carries `.send`, so user code may write either
+        // `Outputs.done()` or `Outputs.done.send()`. Typed at the point the second shape
+        // is attached rather than by widening the whole record to `any`.
+        const signalValue = _sendSignal as typeof _sendSignal & { send: typeof _sendSignal };
+        signalValue.send = _sendSignal;
+        this._internal.outputValues[key.substring('out-'.length)] = signalValue;
+      });
 
       // Create Noodl API and augment with Inputs/Outputs for backward compatibility
       // Legacy code used: Noodl.Outputs.foo = 'bar'
