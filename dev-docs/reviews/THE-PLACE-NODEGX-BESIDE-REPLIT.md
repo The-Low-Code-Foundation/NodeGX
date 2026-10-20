@@ -30,6 +30,9 @@ comfort and ships infrastructure mechanisms. Claude Code has shipped the buildin
 third thing nobody asked for. Its owner asks for it every time he starts an app, and §2.4's builders ask for the same
 thing in other words. What is true is that NodeGX has not yet built the thing they ask for.
 
+*Later the same evening, after §9's four rounds, the place got its name: the workbench of the person who vouches, and
+the missing half of it is the backend (§9.4, §10).*
+
 ## 1. Richard's interview, verbatim, before any research
 
 Asked 2026-10-20 by this session with AskUserQuestion, two rounds of four. The option labels he ticked are given,
@@ -608,6 +611,29 @@ Ticked: *the person who understands and vouches for the system; the teacher.* Th
    non-coder can see the decisions, catch what the client did not ask for, answer where the data is and why it does X,
    and keep an exit to the stack the investor wants. Whether anyone but him is that person is §8's play test, with
    the recruiting pool now named: people who sell "a human checked this".
+
+## 10. Where it ends (2026-10-20, late): the reading confirmed, and the next big think
+
+Richard, on §9.4's reading ("the workbench of the person who vouches"): *"Yep."* Then, verbatim:
+
+> And I think the only thing that's missing today, and the thing I'd like to prototype in a new session, is a way to
+> make backend workflows and cloud functions and the database itself interactive in a custom way, the same as Noodl
+> did by turning visual and logic elements into nodes with connectors, I want the mystery of the backend / cloud
+> functions and the database schema and management, privacy etc., to become as cool as the star wars editor or the
+> kids block editor we made in a recent session. The big think question, for the next session, is how do you turn
+> backend functions and database managers into 'visual coding' standard? We already did a lot of work on this in the
+> backend phase of the 'your own editor' pushes, but we never tried to rethink how a user sees and interacts with a
+> database. We had ideas, like nodes for tables and connectors for relations, something like a graph DB, but I've not
+> seen a prototype yet. Having that DB view FUSED with the backend workflows and functions that make it work would be
+> a very interesting thing, and a way to complete the 'I can explain all of this and you can take control' argument.
+> no BaaS today really gives the user who's non technical a visual editor to manage their full backend, DB and
+> workflows. Things like n8n come close, and our node editor for backend functions and workflows is good, but it's
+> not enough. This is the big think for the next session
+
+So the session's answer, in the end: the place is the workbench of the person who vouches; the half of the workbench
+that exists is the front end's; the half that is missing is the backend's, and that is where the client's unanswerable
+questions live (§9.1). The handoff for that think is `own-023/NEXT-SESSION-PROMPT.md`. §5's items and §8's play test
+are parked behind it, waiting on Richard. Nothing changes on nodegx.io.
 
 ## 7. Sources
 

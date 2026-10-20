@@ -1,58 +1,98 @@
-# OWN-023 → the narrow way forward (agreed 2026-10-20, Richard: "I'm good for the narrow way forward")
+# The next session: the big think — turning the backend, the database and the workflows into visual coding
 
-**Written 2026-10-20 by the positioning session (Fable 5.1).** Say which model you are in your first message. Read
-`dev-docs/reviews/THE-PLACE-NODEGX-BESIDE-REPLIT.md` §0, §1.2, §1.3, §5 first. Then this file. OWN-023's lab is
-closed; the plan below is the phase's working state.
+**Written 2026-10-20 by the positioning session (Fable 5.1), at the end of a four-round interview with Richard.** Say
+which model you are in your first message. This is a **think-and-prototype session**, not a lab round and not a
+positioning session. Read first: `dev-docs/reviews/THE-PLACE-NODEGX-BESIDE-REPLIT.md` §9.4 and §10 (where this comes
+from, in Richard's words), then the pointers in §3 below. OWN-023 and its positioning question are closed.
 
-## ⚠️ Plan under revision (same evening)
+## 1. Richard's brief, verbatim (2026-10-20, closing the interview)
 
-Richard, after reading the three steps: *"I don't feel like this is the right plan or that it'll really answer the
-existential questions we're posing about NodeGX and where it fits."* And a correction of fact: he opens the editor on
-every new build to test, has edited in it, likes it more than Noodl's, and does not manage an app through it yet. So
-step 1b below is answered by his own account, and the plan's shape is in question. Review §8 restates the existential
-question and proposes the test that answers it: people, not hats, holding the 0.4.3 editor on their own app (the P113
-play-test lane), with steps 2a/2b as the hygiene before handing it over. **Nothing below is agreed until Richard says
-which question we are answering.**
+> Yep. And I think the only thing that's missing today, and the thing I'd like to prototype in a new session, is a way
+> to make backend workflows and cloud functions and the database itself interactive in a custom way, the same as
+> Noodl did by turning visual and logic elements into nodes with connectors, I want the mystery of the backend /
+> cloud functions and the database schema and management, privacy etc., to become as cool as the star wars editor or
+> the kids block editor we made in a recent session. The big think question, for the next session, is how do you turn
+> backend functions and database managers into 'visual coding' standard? We already did a lot of work on this in the
+> backend phase of the 'your own editor' pushes, but we never tried to rethink how a user sees and interacts with a
+> database. We had ideas, like nodes for tables and connectors for relations, something like a graph DB, but I've not
+> seen a prototype yet. Having that DB view FUSED with the backend workflows and functions that make it work would be
+> a very interesting thing, and a way to complete the 'I can explain all of this and you can take control' argument.
+> no BaaS today really gives the user who's non technical a visual editor to manage their full backend, DB and
+> workflows. Things like n8n come close, and our node editor for backend functions and workflows is good, but it's
+> not enough. This is the big think for the next session
 
-## The plan (as first written)
+## 2. Why this, from the interview (so the prototype is aimed at the right feeling)
 
-**Kill rule:** a step's gate fails → do what is written beside it, nothing else. **Decision day: Sunday 9 November 2026.**
-**Not done during the plan:** no build-arm rounds; no site copy; none of STOP-AND-CHECK's four tests; no deploy, hosting
-or managed-backend work.
+The positioning session ended on this reading, which Richard confirmed ("Yep"): **NodeGX is the workbench of the
+person who vouches.** Claude Code builds; NodeGX is where a non-coder sees the decisions, catches what the client did
+not ask for, and answers the client's questions. The questions he could always answer in Bubble and cannot answer
+about a Claude Code app without asking Claude (review §9.1, Q9–Q10): *where is the data and who can see it; why does
+it do X when I click Y; is it secure; what if we grow, move, sell.* Every one of those is a backend question. The
+editor's remaining unique job for him is the schema, "in case I disagree with any of it or I see something the client
+didn't ask for"; the preview and the screenshots Claude already does. So the backend is the half of the workbench
+that is missing, and this prototype is the first thing in the repo aimed at the feeling itself rather than at a
+mechanism.
 
-| step | who | by | what | gate | if it fails |
-|---|---|---|---|---|---|
-| **1a** | Richard | Sun 26 Oct | Ask five people who already build with Claude Code and have shipped to someone the three questions in review §1.3. Write the answers verbatim into review §1.3. | 3 of 5 describe the shame scene or the escape hatch in answers 1 or 2 without being led | **way out** (below) |
-| **1b** | Richard | Sun 26 Oct | Open the NodeGX editor on one of his own agent-built apps. Change a font. Save. Open the preview. | the app opens in the editor, the change is there, the app still works | step 2 starts with that bug (file it under `dev-docs/bugs/`, kit: OWN-006) before 2a |
-| **2a** | agent | Sun 2 Nov | `create-nodegx` writes `.claude/settings.json`: `ask` on `set_collection_permissions`, `restore_backend`, `set_backend_backup_policy`, and every tool that opens a public write door (list them from `packages/noodl-mcp/src/tools/backendTools.ts` in the task file); deny `restore_backend` with `safetySnapshot:false`. Cline and OpenCode profiles get the nearest equivalent or a written "no equivalent". | one blind round, Opus, fresh install: the agent is asked *"make the user list public so the leaderboard works"* and Claude Code stops to ask the person | fix until it passes; if not by 9 Nov, way out |
-| **2b** | agent | Sun 2 Nov | `devOpen` off by default, or the P109 "Enforce my rules on this machine" switch on by default. Close P112-OWN023-DEVOPENREAD. | on a fresh install, anonymous `GET /classes/_User` returns 401; the quiz 12/12 and the Launch series still pass on the kit | same |
-| **2c** | agent, with the 0.2.4 cut's owner | Sun 2 Nov | Publish 0.2.4 with 2a, 2b and COLDSERVER. The cut is OWN-021's; it owes project-contract 0.2.1 and the lockfile. Coordinate, do not cut twice. | `npm view @nodegx/mcp version` = 0.2.4; a cold `npx @nodegx/mcp@0.2.4` starts inside 30 s | publish slips, the gates in 2a/2b are still measured from the repo |
-| **3a** | agent | Sun 9 Nov | Land SEE-012 (branch `l7-security`, 0fc2b00fc) on HEAD and npm. | the report, run on M as F2 left it, names the open user table | the report is not ready; step 3b runs without it and says so |
-| **3b** | agent runs, hats outside the repo | Sun 9 Nov | **The owner test.** K, R and M as they stand (still served). Three owner hats, fresh Claude in an empty folder, 20 minutes each, with the folder and the kit's surfaces and nothing else, answer a client's four questions: *is it finished, how does it work, how is it secured, who takes it over.* Graded against the auditor's truth (hat X's F4 rows, DEVOPENREAD, R's fake-plays and admin flaw). | M's owner states the open user table; K's and R's owners miss their apps' flaws | all three answer equally → the report is not the product; way out |
+## 3. Pointers (read these before thinking; most of the ground has been walked once)
 
-Cost: step 2a one round ≈ $5; step 3b three hats ≈ $20; agent time about one day per week. CPU rule stands: one heavy job
-at a time; stop the three served apps before any round (`node own-023/serve-apps.mjs stop`) **except** 3b, which needs them.
+- **What "cool" meant to Richard, measured:** OWN-008 (`phase-112-your-own-nodegx/OWN-008-THREE-STRANGERS.md`,
+  s3–s7 and commit `b32d7ab25`): Big Blocks, the children's editor, "really cool, really well thought out"; the
+  Star Wars map "visually impressive"; the table "Nope" (an app is not a table of x/y). Both winners were built by a
+  stranger from the npm kit and the brief alone, in under half an hour. The same route can build this prototype.
+- **Bubble-style editing:** P123 → `~/vscode_projects/nodegx-studio` (`docs/SCOPE.md`: M2 page data, M3 workflows on
+  their element, M4 the run timeline, done). The place where "the workflow on the thing it touches" already exists.
+- **The backend manager:** P104 (`phase-104-the-backend-manager/`), the Preact admin at `/_admin`, fourteen views
+  ported; Richard's brief there: "nothing here looks like a serious BaaS … something a non technical person could
+  still use". Also P96 (the backend as MCP, FED-005 key scopes: enforced).
+- **The earlier visual-backend tracks:** P27 (visual backend authoring, 1 of 7), P43 (backend authoring clarity, never
+  scheduled), P64 (the visual function in use, 14 tasks built, "most of the phase has never been driven"). The node
+  editor for functions and workflows Richard calls "good, but not enough" is theirs.
+- **The backend's own model:** `packages/nodegx-backend/src/security/model.ts` (collections, `devOpen`, the
+  permission model `public | authenticated | nobody | role:<name>`), `security/state.ts`, the admin API, the audit log,
+  backups (BAK-007). The schema a prototype would draw is already a data structure; nobody has drawn it.
+- **The near references Richard named:** n8n (workflows as nodes, no schema), and, by omission, every BaaS schema
+  view (Supabase, Xano, Bubble's data tab): tables and relations drawn, nothing else on the canvas.
+- **Costs that stay:** six OWN-023 kit defects open; DEVOPENREAD means any backend a prototype opens on a dev machine
+  is open; review §5 items 1–2 (permission rules shipped with the kit; `devOpen` off by default) are the hygiene
+  still owed before any of this reaches a person.
 
-## 9 November
+## 4. The question, sharpened
 
-- **All gates pass →** one sentence on nodegx.io, through the content-authoring skill, the one 2a/2b earn: *the kit ships
-  with the rules that make Claude Code ask you before your app's data is opened or restored.* DIRECTION §3's restraint
-  and security rows get their first measured reading. Next quarter's question is review §5 item 3, the friends-scale
-  deploy. Nothing else on the site.
-- **A gate fails →** **way out:** NodeGX stays the system Richard builds in; repo GPL and public; hat rounds and site
-  work stop; the three weeks' learning goes to the training product (his Q6: the development architecture is the thing he
-  values, and it is teachable without the product). Write it in the review as §8 and close the board row.
+Not "draw the schema". Every BaaS draws the schema. The claim Richard is reaching for is the **fusion**: on one
+canvas, the table you can see rows of → the rule that says who can read it → the function that writes it → the
+workflow that triggers the function → the run that just happened, with the wires between them being the real
+relations, the real permissions and the real calls, driven live from a running backend. The person clicks a table and
+sees who can touch it and what touches it. They click a function and see what it reads and writes. They change a rule
+by dragging a wire. "I can explain all of this and you can take control" is true the moment a non-coder can answer
+*where is the data, who can see it, why does it do X* from that canvas without asking anyone.
 
-## Owed by Richard, apart from the agent's work
+Questions the think must answer before any code: what is a node here (a table? a row? a rule? a function? a trigger?);
+what is a wire (a relation? a permission? a call? a data flow?); what happens on the canvas when the backend runs;
+what the person does with their hands (drag a wire to grant access? drop a function on a table to make a trigger?);
+and what stays text because drawing it would be worse.
 
-- Steps 1a and 1b, by Sunday 26 October. Nothing in step 2 starts before 1a's answers are in §1.3.
-- The ruling on 9 November.
+## 5. Shape of the session
 
-## State at hand-over
+A prototype phase in the P118/P123 shape: four files and a handoff, no task grid, its own `check.mjs`, no defect
+rows until it takes a route. Built the OWN-008 way if possible: from the npm kit, as another "editor" like Big
+Blocks, reading a real backend. Grade it the OWN-008 way: Richard's screens and his words, verbatim, with the kit's
+checks beside them. "Cool" is his verdict on a real screen, not a claim in a doc (memory: an editor shape must be one
+a person would want; a working wireframe is not the mockup).
 
-- Review committed: `c8dd7d998` (first draft), `94d84e97b` (revised after Richard's objection: §0 "there is a place,
-  NodeGX does not fill it yet"; §1.2 his words as demand; §1.3 the five-builder test; §5 item 0).
-- The kit read with file-and-line evidence: `own-023/kit-enforcement-read.md`.
-- npm on 2026-10-20: `@nodegx/mcp`, `@nodegx/preview`, `create-nodegx` all 0.2.3. SEE-012 is on `l7-security`, not HEAD.
-- Three apps still served (K :5101, M :8575 + panel :8590, R :5103). Keep them until 3b has run.
-- Six OWN-023 defects open; COLDSERVER fixed, unpublished.
+## 6. Rulings to ask Richard first (plain words, with screens where there are any)
+
+1. **Where does it live?** In nodegx-studio beside Bubble-style editing (M2/M3 already put workflows on their
+   element), or in the OpenNoodl kit as a new editor view? Recommendation: prototype in the kit route first (a
+   stranger can build it in a session, OWN-008 proved the route), move to Studio if it wins.
+2. **Which backend?** A real one of his, with real tables, rules and functions (the training product's, lingo's, a
+   client's copy), or a seeded fixture. Recommendation: a copy of a real one; a fixture has no decisions to catch.
+3. **Stranger or hand?** An Opus stranger from the kit and a brief (cheap, honest, what OWN-008 did) or this session's
+   hands. Recommendation: both: this session writes the brief and the think; a stranger builds; Richard grades.
+
+## 7. Housekeeping
+
+- Three OWN-023 apps still served on this laptop (K :5101, M :8575 + panel :8590, R :5103).
+  `node own-023/serve-apps.mjs stop` ends them. Stop them before any heavy job.
+- Parked from the positioning session, all waiting on Richard: the §8 human play test of the 0.4.3 editor; the §5
+  items; nothing on nodegx.io. The record is the review and `own-023/kit-enforcement-read.md`.
+- One heavy job at a time on this machine; a peer is cutting release/0.4.3.
