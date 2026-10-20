@@ -17,7 +17,7 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
-## npm packages 0.2.3 · 2026-10-19
+## npm packages 0.2.3 · 2026-10-20
 
 **`npx @nodegx/preview` works again, and the packages for building your own editor can now draw an app's screen
 without running it.**
@@ -64,7 +64,7 @@ changed.
   `render_report` also began to name text pressed against the edge of its box, and `drive_page` began to check what a
   watched step expects.
 
-## 0.4.2 · 2026-10-19
+## 0.4.2 · 2026-10-20
 
 **Apps can now keep photos for their members only and check Paystack's payment webhooks.**
 
