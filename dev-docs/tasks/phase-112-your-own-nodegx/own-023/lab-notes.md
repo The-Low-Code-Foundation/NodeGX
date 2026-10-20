@@ -66,3 +66,20 @@ that down." Those lines are marked **pull**.
   plainly with the URLs; whether he had read them is his to say, and it goes beside his three lines. Graders and hats
   are unaffected (they never see this conversation). Next time: report a build's numbers only into files until C11
   is done, and never name a letter's arm in a message.
+
+## 2026-10-20 s1 (morning), two lab faults found in the follow-ups — fixed for F3/F4, reported for F1/F2
+
+- **Cost double-counted on resume.** `total_cost_usd` in a resumed `claude -p` is the SESSION's running total; the lab
+  summed it per sitting. B-F1 read $18.74; it cost **$3.43**. Builds (one sitting each) were not affected. Fixed:
+  sitting cost = running total − the previous sitting's (`round-arm.mjs`), and a resumed session gets the whole cap.
+- **A sitting outlived the agent's answer.** B-F2's agent finished in 16 min ($5.47: "I've built a settings panel …
+  it's running now"), but its servers ran as Claude Code background tasks, so `claude -p` stayed open ~2 h a sitting,
+  answered each server's exit notice, and the judge read THOSE ("the panel has stopped again") → MORE → 4 more
+  sittings, 9.5 h, $12.69. Stopped by hand 08:55. Sittings 2–5 ran only Bash (restart servers), no file written.
+  Fixed: a sitting ends 5 s after the agent's first `result` event; the judge reads that answer.
+- **B-F1's 5 continues are the judge, not a fault:** the first answer said the button was built but couldn't be tried
+  without the key (which the sentence says the person adds later); judge.txt calls that MORE. Sittings 2–6 wrote no
+  app file. A's and A+'s F1 answers were judged DONE. Reported as is (C10: the judge is not changed between arms).
+- Neither B round's ARTEFACT was changed by the extra sittings, so neither is re-run; both are reported at the first
+  answer with the extra sittings as the lab's cost beside them. A and A+ rounds had one answer each: unaffected.
+- **pull:** wanted to re-run B-F2 "to be fair to B". Not needed: its folder is as at its first answer.

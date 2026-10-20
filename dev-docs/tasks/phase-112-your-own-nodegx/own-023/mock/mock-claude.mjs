@@ -19,8 +19,16 @@ out({ type: 'rate_limit_event', rate_limit_info: { status: step.rateLimited ? 'r
 const content = (step.tools || []).map((t, i) => ({ type: 'tool_use', id: `t${k}-${i}`, name: t.name, input: t.input }));
 content.push({ type: 'text', text: step.say });
 out({ type: 'assistant', message: { content }, session_id: session });
+// Like the real thing: total_cost_usd is the session's running total (s1 found that the hard way).
+const before = fs.readFileSync(log, 'utf8').split('\n').filter(Boolean).slice(0, -1).map((l) => plan[Math.min(JSON.parse(l).k - 1, plan.length - 1)].usd ?? 1);
+const cum = (argv.includes('--resume') ? before.reduce((a, b) => a + b, 0) : 0) + (step.usd ?? 1);
 out({
   type: 'result', subtype: step.rateLimited ? 'error_during_execution' : (step.subtype || 'success'), is_error: !!step.rateLimited,
-  num_turns: content.length, total_cost_usd: step.usd ?? 1, result: step.rateLimited ? 'Claude usage limit reached.' : step.say,
+  num_turns: content.length, duration_ms: 1000, total_cost_usd: cum, result: step.rateLimited ? 'Claude usage limit reached.' : step.say,
   permission_denials: step.denials || [], session_id: session
 });
+// `lateSay`: a background task's notice answered 8 s later, as B-F2's servers did; the lab must end the sitting first.
+if (step.lateSay) {
+  await new Promise((r) => setTimeout(r, 8000));
+  out({ type: 'result', subtype: 'success', is_error: false, num_turns: 1, duration_ms: 500, total_cost_usd: cum + 0.5, result: step.lateSay, session_id: session });
+}

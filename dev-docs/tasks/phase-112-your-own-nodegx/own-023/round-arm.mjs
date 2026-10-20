@@ -152,13 +152,29 @@ function sitting(k, prompt, resume, budget) {
     child.stdout.pipe(log);
     child.stderr.pipe(fs.createWriteStream(path.join(SITS, `${k}.stderr`)));
     fs.writeFileSync(path.join(root, 'agent.pid'), String(child.pid));
+    // A sitting ends at the agent's FIRST answer (s1, B-F2: an agent that left servers running in Claude Code's
+    // background kept `claude -p` open two hours a sitting, its later turns answered the servers' exit notices, and
+    // the judge read those). An interactive person reads the first answer; their servers stay up, and so do these
+    // (teardown at the end of the arm). 5 s after the first `result` event the process is ended.
+    let tail = '', ended = false;
+    child.stdout.on('data', (chunk) => {
+      const lines = (tail + chunk).split('\n');
+      tail = lines.pop();
+      if (!ended && lines.some((l) => l.startsWith('{"type":"result"') || /"type":"result"/.test(l))) {
+        ended = true;
+        setTimeout(() => { try { child.kill('SIGTERM'); } catch {} }, 5000).unref();
+      }
+    });
     // 'exit', not 'close': a server the agent left running can hold the pipe open (OWN-008).
-    child.on('exit', (code, signal) => log.end(() => resolve({ k, prompt: prompt === brief ? 'brief' : prompt, code, signal, seconds: Math.round((Date.now() - t0) / 1000), load: { before: loadBefore, after: os.loadavg().map((x) => Number(x.toFixed(1))) }, ...read(out) })));
+    child.on('exit', (code, signal) => log.end(() => resolve({ k, prompt: prompt === brief ? 'brief' : prompt, code, signal, endedAtFirstAnswer: ended, seconds: Math.round((Date.now() - t0) / 1000), load: { before: loadBefore, after: os.loadavg().map((x) => Number(x.toFixed(1))) }, ...read(out) })));
   });
 }
 
+// `total_cost_usd` is the SESSION's running total, so a resumed sitting reports what came before it too (s1: B-F1's
+// six sittings summed to $18.74 for a session that cost $3.43). `cum` is that total at this sitting's end; the
+// sitting's own cost (`usd`) is set in the loop as cum minus the previous sitting's cum in the same session.
 function read(file) {
-  let session = null, result = null, limit = null, week = null;
+  let session = null, result = null, first = null, limit = null, week = null;
   for (const line of fs.readFileSync(file, 'utf8').split('\n')) {
     let m;
     try { m = JSON.parse(line); } catch { continue; }
@@ -167,12 +183,13 @@ function read(file) {
       limit = m.rate_limit_info;
       week = m.rate_limit_info?.unifiedWindows?.seven_day?.utilization ?? week;
     }
-    if (m.type === 'result') result = m;
+    if (m.type === 'result') { result = m; first ??= m; }
   }
   return {
     session, week,
-    subtype: result?.subtype ?? null, isError: result?.is_error ?? null, turns: result?.num_turns ?? null,
-    usd: result?.total_cost_usd ?? 0, last: result?.result ?? '',
+    subtype: first?.subtype ?? null, isError: first?.is_error ?? null, turns: first?.num_turns ?? null,
+    activeSeconds: first ? Math.round(first.duration_ms / 1000) : null,
+    cum: result?.total_cost_usd ?? 0, results: result ? (first === result ? 1 : 2) : 0, last: first?.result ?? '',
     rateLimited: limit?.status === 'rejected' || (!!result?.is_error && /limit|rate/i.test(result?.result || '')),
     resetsAt: limit?.resetsAt ?? null
   };
@@ -194,7 +211,11 @@ let continues = 0, rateLimitResumes = 0, session = null, stop = null;
 const spent = () => sittings.reduce((n, s) => n + (s.usd || 0), 0);
 for (let k = 1; ; k++) {
   const prompt = k === 1 ? brief : 'Continue.';
-  const s = await sitting(k, prompt, session, Math.max(0.01, CAP - spent()));
+  // A resumed session may measure --max-budget-usd against its running total, so it gets the whole cap; the lab's own
+  // sum (spent) stops the arm at the cap either way.
+  const s = await sitting(k, prompt, session, session ? CAP : Math.max(0.01, CAP - spent()));
+  const prevCum = sittings.filter((x) => x.session === s.session).reduce((n, x) => Math.max(n, x.cum || 0), 0);
+  s.usd = Math.max(0, (s.cum || 0) - prevCum);
   session = s.session ?? session;
   if (s.rateLimited) {
     s.judge = null;
