@@ -1,3 +1,6 @@
+> ✅ **Done to the PR by OWN-024 s1 (2026-10-20).** The next session starts from
+> [own-024/NEXT-SESSION-PROMPT](../own-024/NEXT-SESSION-PROMPT.md).
+
 # The 0.4.3 cut: ship `sharp` in the editor's backend, cut 0.4.3, then make the two zips Richard sends
 
 **Written 2026-10-20 by Opus 5.5 (session opennoodl-8a), at HEAD `1bc0b8a65` on `cline-dev`.** Richard, the same day:
