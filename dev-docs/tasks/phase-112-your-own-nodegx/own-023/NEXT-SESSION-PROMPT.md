@@ -4,7 +4,17 @@
 `dev-docs/reviews/THE-PLACE-NODEGX-BESIDE-REPLIT.md` §0, §1.2, §1.3, §5 first. Then this file. OWN-023's lab is
 closed; the plan below is the phase's working state.
 
-## The plan
+## ⚠️ Plan under revision (same evening)
+
+Richard, after reading the three steps: *"I don't feel like this is the right plan or that it'll really answer the
+existential questions we're posing about NodeGX and where it fits."* And a correction of fact: he opens the editor on
+every new build to test, has edited in it, likes it more than Noodl's, and does not manage an app through it yet. So
+step 1b below is answered by his own account, and the plan's shape is in question. Review §8 restates the existential
+question and proposes the test that answers it: people, not hats, holding the 0.4.3 editor on their own app (the P113
+play-test lane), with steps 2a/2b as the hygiene before handing it over. **Nothing below is agreed until Richard says
+which question we are answering.**
+
+## The plan (as first written)
 
 **Kill rule:** a step's gate fails → do what is written beside it, nothing else. **Decision day: Sunday 9 November 2026.**
 **Not done during the plan:** no build-arm rounds; no site copy; none of STOP-AND-CHECK's four tests; no deploy, hosting

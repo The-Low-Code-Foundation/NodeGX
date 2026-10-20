@@ -138,6 +138,16 @@ Ticked: *Full research, null answer first.* Then:
 
 > Full research but I think my answers here will likely change your direction
 
+**Correction by Richard, same evening, after reading the plan built on Q6's "I've never opened the editor":**
+
+> I've opened the editor to do testing on every new build, and I've made changes and I still like the editor, even
+> more than I liked the Noodl editor. But I wouldn't use it yet to manage an app, I'd still ask Claude Code to make
+> the changes to the NodeGX project and not use the editor
+
+This supersedes Q6 on that point wherever the review repeats it: he opens the editor on every build, to test and to
+look, and has edited in it; he does not manage an app through it. The editor is a window he uses, not an escape hatch
+he keeps shut.
+
 ### 1.1 What the interview does to the question (written before the research, so the research can be checked against it)
 
 - **The audience the handoff asked for does not exist in Richard's world.** "A person like Richard was: an experienced
@@ -154,8 +164,8 @@ Ticked: *Full research, null answer first.* Then:
   is it secured", and not being able to answer without asking Claude. That is OWN-023's F2/F4 persistent failures
   (STOP-AND-CHECK §3) in a person's words, and it is the fear the message review's §2 ("a check a person who can't
   read code can read") was aimed at, and which a prompt matched.
-- **The live finding is Richard's own behaviour (Q6):** he builds every new app in NodeGX, has never opened the editor
-  for any of them, and names three reasons that are all about the future, not the build: (A) ownership, (B) being able
+- **The live finding is Richard's own behaviour (Q6, corrected above):** he builds every new app in NodeGX, opens the
+  editor on each to test and look but manages them through Claude Code, and names three reasons that are all about the future, not the build: (A) ownership, (B) being able
   to take the development over if Anthropic disappears, (C) a system underneath that Claude cannot override without
   permission, so saying yes without reading does not come back to bite him. Each is a want (§1.2) with a mechanism
   behind it that can be checked against what the kit does (§4). OWN-023 already measured against (C): the agent moved
@@ -174,7 +184,7 @@ Row by row:
 
 | his words (Q6) | what it asks for | strangers saying the same (§2.4) | what answers it in the kit today |
 |---|---|---|---|
-| *"JUST IN CASE I need to do something with it like change something, check something, show some moving part to a client, I know I can"* | an escape hatch, kept and not used; insurance | "the only real advantage Bubble has for me is that it still has a visual editor" (Apr 2026); "I'm now around 80% AI / 20% Bubble editor" (May 2026); a freelancer keeping Bubble because "the client is non-technical and wants to own the editor" | the editor and preview exist and open the agent's files. Whether they open and survive an edit on *his* apps is OWN-006's promise, ungraded on any app he built |
+| *"JUST IN CASE I need to do something with it like change something, check something, show some moving part to a client, I know I can"* | an escape hatch, kept and not used; insurance | "the only real advantage Bubble has for me is that it still has a visual editor" (Apr 2026); "I'm now around 80% AI / 20% Bubble editor" (May 2026); a freelancer keeping Bubble because "the client is non-technical and wants to own the editor" | the editor and preview exist and open the agent's files. Richard's correction: he opens the editor on every build to test, and has edited in it. That is the P111 use ("the canvas becomes the reason you can trust what was built"), by its owner, on his own apps. No hat in OWN-023 could open it |
 | *"'is this finished' or 'how does this actually work' or 'how is this secured' … 'wtf am I actually necessary for in this process??'"* | standing behind the app as its maker | agencies: clients ask who takes this over; security "found too late"; 20i: a third of non-developers name trust or understanding the code as their biggest problem | `render_report` on npm; the security report on a branch; the honesty number in the repo only |
 | *"A. More like I own them"* | the app in a form that is mine, not a vendor's | the August agency thread: a client's IT rebuilt off Bubble behind the agency; handover guides: "client owns repo, hosting and DB accounts" | plain files, GPL; the data outside the folder today |
 | *"B. Like I in theory could take over the development if Anthropic explodes"* | a tool a person who cannot read code can drive without an agent | "who still understands version 127"; enterprise staying on Bubble for compliance | the editor; the specs strangers built nodes from; a partial export |
@@ -361,7 +371,7 @@ other six (DEVOPENREAD, FILEURLHOST, KEYNEEDSAGENT, NOANCESTOR, NORANGE, PHONEPR
 | his reason (Q6) | what it would need to be true | as shipped | what OWN-023 measured |
 |---|---|---|---|
 | **A. "More like I own them"** | the app and its data in files the person holds, in a format that outlives any vendor | plain JSON, GPL. But a code app in a folder is owned in the same way, and more portably. NodeGX's data lives outside the project folder; the code arms' data lived inside it. | K and R: data in the app folder. M: data in `~/.noodl`, file URLs tied to `127.0.0.1`. |
-| **B. "I could take over if Anthropic explodes"** | a person who cannot read code can change the app without an agent | the editor exists and opens the same files. Richard has never opened it on any app he built. No hat could run it. | not tested: the inspector and editor were never opened by anyone in the study. The harness arm's code is Next.js and Prisma, which any developer or any other agent can take over; that is the most portable format there is. |
+| **B. "I could take over if Anthropic explodes"** | a person who cannot read code can change the app without an agent | the editor exists and opens the same files. Richard opens it on every build to test and has edited in it (his correction, §1); he does not manage an app through it yet. No hat could run it. | not tested: the inspector and editor were never opened by anyone in the study. The harness arm's code is Next.js and Prisma, which any developer or any other agent can take over; that is the most portable format there is. |
 | **C. "A system Claude can't override without permission"** | a step where a person approves a rule change, a restore, a destructive deploy or free script; secure defaults on the dev machine | **absent.** No approval step in the MCP; free JS unbounded; `devOpen` on by default; Bash on and asked for; no permission rules shipped. | **worse than plain Claude Code:** the backend served seven users' emails to an anonymous request and the agent knew and shipped; the agent moved the backend's files into a backup folder unasked; validated writes let through a graph that throws at runtime; 489 lines of free JS inside nodes. |
 
 Richard said this feeling was Replit's too (Q2): "you knew there wasn't going to be a security concern and your concept
@@ -369,10 +379,10 @@ was safe in Replit's harness." Lemkin had that feeling on the day the agent dele
 feeling is the demand (§1.2), and the mechanism is what a harness has to ship before it sells the feeling. Today
 NodeGX gives Richard the feeling ahead of the mechanism. That is the order to fix, and §5's first two items fix it.
 
-On the editor, the table above is too harsh in one place. Its value to Richard is that it is there, not that he opens
-it. Insurance is not graded on claims made. It is graded on whether it pays when claimed, which is OWN-006's promise,
-"every project an agent writes opens in the editor and survives an edit", and that has not been tested on any app he
-built. §5 item 5 is that test, and he can run it himself in an afternoon.
+On the editor, the first draft was wrong on the fact. Richard opens it on every build, to test and to see what the
+agent built, and has edited in it; he manages the app through Claude Code. So the editor is not insurance he never
+claims. It is the window he looks through before he ships, which is P111's thesis in use, and the one surface of the
+product that no OWN-023 hat could open. The study measured NodeGX minus the part its owner uses.
 
 ### 4.3 Fear → mechanism → who closes it
 
@@ -422,8 +432,8 @@ skill's rule 0 asks for the fact before the copy, and the fact a stranger can ch
 builds the app as a graph of parts whose behaviour is written down and tested, saved as plain files, and you can open
 it in an editor on the day you want to change something yourself.* That sentence is §1.2's first row, the escape
 hatch, and it is the one want the kit answers today. OWN-023 measured that no reviewer chose it at the size they
-built, and Richard keeps it without opening it. It can go on the site the day OWN-006 shows it holds on agent-built
-apps (§5 item 5). The wants in §1.2's other rows wait on items 1, 2 and 4.
+built, with no reviewer able to open it; Richard opens it on every build. It can go on the site the day someone other
+than Richard is measured doing the same (§8). The wants in §1.2's other rows wait on items 1, 2 and 4.
 
 What the site can say without a gate: what exists (the npm install, the editor, the gallery, the GPL repo) and what
 it does not do (no hosting, no managed database, no production deploy today). §8.4 of the message review ("already
@@ -432,6 +442,48 @@ enforced and nothing measured against it. Every sentence in DIRECTION §3's four
 SEE-009, and none of the four has passed one: restraint not built, testing half, security report not on HEAD, do it
 yourself in progress. The first sentence the site could add is the one item 1 or 2 of §5 would earn: *the kit ships
 with the rules that make Claude Code ask you before your app's data is opened or restored.*
+
+## 8. The existential question, restated (proposed, not agreed; written after Richard rejected the three-step plan)
+
+Richard on the three-step plan: *"I don't feel like this is the right plan or that it'll really answer the existential
+questions we're posing about NodeGX and where it fits."* He is right that §5's items are features with gates, and a
+feature passing a gate does not say where the product fits.
+
+**The question, in one sentence:** once the agent writes a codebase and a node graph equally well, what does the graph,
+with an editor that shows it, give a person that the codebase does not?
+
+**What is known.** At build time, nothing (OWN-023). After the build, for the one owner anyone has watched: he opens
+the editor on every build to test and to see what the agent built, edits in it, and ships from it, while managing the
+app through Claude Code. No OWN-023 hat could open the editor, so the study measured the product minus the part its
+owner uses, and the hats chose on READMEs. The wrappers' edge is infrastructure (§2.2). The raw agents' new browser
+panes show the running app (§2.3); they do not show how it works, because a codebase has no picture of itself that is
+also the app. A graph does. That is the one architectural property in this review that a vendor's window on code
+cannot copy, and it is P111's thesis: *"the canvas stops being where you build and becomes the reason you can trust
+what was built."*
+
+**The fit that follows, as a sentence to test, not a claim:** *NodeGX is for the person who ships what Claude Code
+builds to other people and has to answer for it. Claude Code builds the app. NodeGX is how that person sees what was
+built and how it works, tests it, and shows it, without reading code.* Richard is that person. §2.4's agencies, whose
+clients ask "how does this work" and "who takes it over", may be.
+
+**The only test that answers it** is people, not Claude hats, holding the real editor, on their own app, with their own
+name on it. The 0.4.3 editor release is being cut today, which makes it possible for the first time since the kit
+shipped, and P113 (the third play test) is the lane that already exists for it.
+
+| | |
+|---|---|
+| who | three to five people from Richard's network who already build with Claude Code and ship to someone else |
+| what they get | the 0.4.3 editor and the kit on their own machine, after §5 items 1 and 2 are done (the kit must not hand them an open user table) |
+| what they build | their own next small app, not a brief of ours, with Claude Code inside NodeGX, over two weeks |
+| what is recorded | a three-line log per session: did you open the editor, what for (test, look, change), what you would answer if your client asked "how does it work"; and at the end, one question: do you start your next app in it, and why |
+| control | each person's own Claude Code habit; they say what they did differently from their last app |
+| gate | three of five open the editor on their own app unprompted, for testing or looking; two of five start the next app in it |
+| if it fails | NodeGX is Richard's tool, and the site says what it is without a claim about anyone else; the kit stays public |
+| cost | their time; the six open defects, which will bite them and are filed as costs; §5 items 1–2 first |
+
+What §5 becomes under this reading: items 1 and 2 are the hygiene that makes the editor safe to hand to a person;
+item 0 (the five interviews) is the recruiting conversation for the play test, not a gate of its own; items 3, 4 and
+6 wait until the play test says whether anyone but Richard looks through the window.
 
 ## 7. Sources
 
