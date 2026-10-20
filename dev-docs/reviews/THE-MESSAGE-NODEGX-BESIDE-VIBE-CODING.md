@@ -323,3 +323,38 @@ D72 and D75. Some were opened by the port and some only met by it, so the copy c
   NODEGX-FULL-STACK-PORT-EVALUATION.md` and sprints 44, 49, 50; `comcoi-v2/README.md` and its git log;
   `node scripts/bugs.js` (150, 143 open); the pasted conversation with Mats and the Reddit screenshot, 2026-10-19.
 - Not done: no round was run, no page was published, and §8 has not been read by Richard.
+
+---
+
+## 11. What OWN-023 changed (2026-10-20, written by the session that ran it, after the hats and Richard's verdict)
+
+The control named in §0 and §3 has now run, with a third arm, and §2 as written **does not survive it.** The record is
+`dev-docs/tasks/phase-112-your-own-nodegx/own-023/` (TABLE.md, grades/, verdicts/, WRITEUP.md, STOP-AND-CHECK.md).
+
+- **The fact in §2 was matched by a prompt.** An 8.8 KB CLAUDE.md written by a stranger in 53 s gave Claude Code
+  written behaviour per requirement, tests, a phone-width browser check, a line-by-line report with screenshots, a
+  leak check and a settings screen — every clause of the §2 sentence except "parts whose behaviour is written down and
+  tested". All five outside hats chose that arm; none chose NodeGX; hat X: *"what the framework gave that a prompt could
+  not: nothing."* The stranger's write-up, first line: *"For none of the people the reviewers stood in for did the
+  framework setup give anything they needed more than Claude Code alone."*
+- **Richard's verdict**, verbatim (task §9.3): *"in theory as it stands for just somebody deciding how to get into vibe
+  coding, we're cooked. Nobody cares about being able to manage security settings and tweak parts of their app
+  manually when they just want to play with Claude or make some small scale app for friends or colleagues."*
+- **So §2's frame ("keep vibe coding, add one check you can read") is not ours to claim**: Claude Code with a good
+  CLAUDE.md gives the check. §8's heroes A–C and the declaration rest on it and are withdrawn until there is a measured
+  row a prompt did not match. §8.4 ("already have a project? leave it") stands; it was true before and the study
+  made it truer.
+- **Rows the study measured against NodeGX, which any new message must carry:** 1.8–1.9× the cost; seven kit defects
+  met in two days (a cold server missing Claude Code's 30 s start; no phone access; a failing published command; a
+  key that needs the agent; every user's email readable anonymously on the dev machine; no Range; file URLs tied to
+  127.0.0.1); no README and no deploy line in the folder it left.
+- **What the study did not test**, and where the only remaining architectural theory lives (STOP-AND-CHECK §4–6):
+  decay over many changes to the same app, irreversible actions on live data, the deploy gate, a weaker model. Richard
+  (R11): those are production concerns, *"a long shot for us to target"*, not run.
+- **§1 row 7 and §6 (Mats's backend/MCP use case) are untouched** by the study and remain the one place this review
+  pointed that nothing has yet contradicted.
+- **What Richard asked for next** is not another round but the question this review skipped: whether there is a
+  *real-world* reason for NodeGX in the decision to vibe code at all, the way Replit argues for itself against plain
+  Claude Code (he used Replit early *"because I was scared of doing pure Claude Coding and getting stuff wrong"*).
+  That session's handoff is `own-023/NEXT-SESSION-PROMPT.md`. Until it reports, the §7 plan is on hold and nothing on
+  nodegx.io changes on the strength of §2.

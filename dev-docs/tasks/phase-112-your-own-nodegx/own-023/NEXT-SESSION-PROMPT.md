@@ -1,97 +1,104 @@
-# OWN-023 — the session that runs it (Opus 5.5)
+# The next session: does NodeGX have a real-world place in the decision to vibe code?
 
-> **s1 state (2026-10-19 ~18:35, Opus 5.5).** Rulings R1–R10 in (task §9.1: 3 arms, Bash on, **5** continues, $60,
-> testers+scripts+Richard, each arm picks storage, judges outside, **builds tonight**, B's server warmed first (R9,
-> P112-OWN023-COLDSERVER filed), wait for Richard's ffmpeg encodes (R10)). Step 0 ✅ (`checklist-outside.md`,
-> `checklist-graded.md`), step 1 ✅ (`round-arm.mjs`, `audit-arm.mjs`, `judge.txt`, mock + 5 Haiku smokes, see
-> `lab-notes.md`), step 2 ✅ (`harness/CLAUDE.md`, 8,805 B). `grade-url.mjs` built. **Step 3 running:**
-> `run-arms.mjs` (background) in s1's scratchpad `98514a87-…/scratchpad/own023/rounds/{A,Aplus,B}`; progress in
-> `rounds/chain.json`, `rounds/<arm>.log`, each arm's `arm.json`. The scratchpad is /private/tmp: copy each arm out
-> (gallery) before a reboot. Next: gallery rows (A/A+ need their own dev server, by PORT), then Richard's three lines
-> per app (C11) before any number, then graders.
+**Written 2026-10-20 by the session that ran OWN-023 (Opus 5.5, then Fable 5.1 for the stop-and-check).** Say which
+model you are in your first message. This is a **research and positioning session, not a lab session**: no rounds
+unless Richard asks. Read, in order: this file; `WRITEUP.md` (a stranger's page, the answer in its first line);
+`STOP-AND-CHECK.md` (what persists past a follow-up prompt, and what OWN-023 never tested); the task file §9.1–9.3
+(the rulings and Richard's verdict); `dev-docs/reviews/THE-MESSAGE-NODEGX-BESIDE-VIBE-CODING.md` §0, §2, §6, §11.
+Then the memory index, lane 5. Skip `TABLE.md`, `grades/`, `verdicts/` unless a number is needed; they are the record.
 
-> **s1 later (2026-10-19 ~22:55):** builds done (one sitting each; numbers in `lab-notes.md`, rounds copied to the
-> gallery `~/vscode_projects/NodeGX test projects/OWN-023 apps/rounds`). Richard's lines per app in task §9.2 (blind,
-> before any number). Blind grade done: `grades/` (6 reports, scripted checks, Richard's 5 rulings, final table).
-> **Follow-ups F1–F4 running** (`run-followups.mjs`, background, scratchpad `…/own023/followups/<arm>-F<n>`,
-> `followups.json`); the gallery is STOPPED while they run (B's backend port 8584). Next: copy follow-ups to the
-> gallery, re-grade F1/F2 (serve their folders, `grade-agents.mjs`), F1 key search (OWN-015 method + control), then
-> the hats (step 6), table, write-up.
+## Where OWN-023 ended
 
-**Written 2026-10-19 by Fable, who scoped it and ran nothing.** Say "Opus" in your first message. Read, in order: this
-file; `../OWN-023-ONE-BRIEF-THREE-STRANGERS.md` (all of it; §2.1 the controls, §7 and §9 twice); `../own-018/round-claude.mjs`
-and `peek-claude.mjs` (the Claude Code arm, the seal, the cost reading); `../own-019/gallery.mjs` (how an app is shown).
-Then the memory index, lane 5. **Do not read `dev-docs/reviews/THE-MESSAGE-NODEGX-BESIDE-VIBE-CODING.md` until the
-hats have written** (control C8): it argues for NodeGX, and your job is to measure.
+One paragraph (Richard's music app) built three ways by Opus 5.5 on one evening: bare Claude Code, Claude Code with a
+stranger-written 8.8 KB CLAUDE.md, Claude Code with NodeGX 0.2.2. All three passed every shared checklist line. Five
+outside hats all chose the harness arm; none chose NodeGX; the null-hypothesis hat: *"what the framework gave that a
+prompt could not: nothing."* NodeGX cost 1.9×, met seven kit defects (filed), and its backend served every user's
+email to an anonymous request on the dev machine. Richard, blind, liked NodeGX's app's look best — and ruled:
 
-## The stance
+> *"in theory as it stands for just somebody deciding how to get into vibe coding, we're cooked. Nobody cares about
+> being able to manage security settings and tweak parts of their app manually when they just want to play with
+> Claude or make some small scale app for friends or colleagues."*
 
-Richard: *"We must not be trying to PROVE that NodeGX is a good idea … approach this strange newbie repo we've
-discovered called NodeGX and really evaluate if this might contain something we need more than just Claude Coding."*
-Null hypothesis: Claude Code alone is enough. You run arms and assemble numbers. You don't conclude; hats, a stranger
-writer and Richard do (C6, C7). Re-read §2.1 before each step. If you notice yourself wanting a round to come out a
-particular way, write that down in `own-023/lab-notes.md` and carry on exactly as scripted.
+The stop-and-check found that the study sat in Claude Code's strongest quadrant (greenfield, one change, own machine)
+and proposed tests for the persistent failures (decay over ten changes, irreversible data loss, deploy and audit, a
+weaker model). Richard (R11): *"a bit of a stretch and only applicable for production apps which would be a long shot
+for us to target."* Not run. So the task's question has its answer, and it is "nothing, for this person, at this size".
 
-## Before any round: the rulings
+## The question for this session
 
-Ask Richard R1–R6 from the task file §9, in plain words, with the recommendations. Don't start a round on a guess.
-If he's not there, build the plumbing (below) and the mock run, which need no ruling.
+Richard: *"I feel like I need a new session to dig deeper into the real world reasons NodeGX might have a place in
+the decision to vibe code, the way Replit tries to argue to use them instead of just Claude Coding. I used Replit a
+lot at the beginning of my AI coding journey because I was scared of doing pure Claude Coding and getting stuff wrong,
+even though I'm an experienced low code builder."*
 
-## The order of work
+That is a different question from OWN-023's. OWN-023 asked *what does the artefact give you*. This asks *why does a
+person choose a wrapped environment over the raw agent at all*, when Replit, Lovable, Bolt, Base44 and the rest
+plainly win that choice for many people, and whether anything NodeGX is or could be sits in that reason. The null
+hypothesis stands: the honest answer may be "Claude Code (now with auto mode, sandboxing, hooks, checkpoints, the
+desktop app and Claude Code on the web) plus any hosted Postgres covers it, and there is no place." Richard said so
+himself for the friends-and-colleagues builder. Find out whether that is the whole audience.
 
-0. **The outside checklist** (C4): a fresh Opus 5.5 in a clean folder outside the repo, `hats/checklist-brief.md` and
-   `brief.txt` only, no settings, no MCP. Save as `own-023/checklist-outside.md` unedited. Then write
-   `own-023/checklist-graded.md`: the lines both lists have (reworded only to merge wording, never to add), and under a
-   rule the lines only one list has, each marked `repo` or `outside`. Both sets are graded; they're reported apart.
-1. **Plumbing, proven on a mock first** (OWN-020's zero-cost method): `round-arm.mjs` from `round-claude.mjs` with
-   three modes (`--bare`, `--harness <file>`, `--nodegx <tgz-dir|registry>`), Bash on, the seal of task §4.1 (a round
-   root, HOME inside it, reads and shells denied outside by rule, the path audit after), the relay (`Continue.` up to N,
-   never reading output), `--model opus`, the cap. Prove with a scripted mock that: a run that ends with a question gets
-   a `Continue.`; the Nth continue ends it; a path outside the root shows in the audit.
-2. **The harness for A+**: a fresh Opus 5.5 (`claude -p`, no MCP, Bash off) given `hats/harness-brief.md`. Save its
-   CLAUDE.md unedited as `own-023/harness/CLAUDE.md`, with its byte count beside the kit's files.
-3. **The three builds, one day, daytime**, A then A+ then B. Each from an empty round root. Record per arm:
-   `command.txt`, `agent.jsonl`, exit, API-equivalent $, wall time, turns, continues, the audit. Add each to the gallery
-   under a letter (K, M, R, shuffled, the map kept in `own-023/arms.json` and shown to nobody until the hats).
-4. **Grading**: `grade-url.mjs` (the scripted checks of task §5 over a URL: console errors, 390-px overflow on every
-   route, reload persistence) on each; then two blind grader agents per app, outside the repo (`hats/README.md`'s
-   setup), with `hats/grader.md` and `checklist-graded.md`. Disagreements to Richard. **Before Richard sees any
-   number or hat**, give him the three URLs and nothing else, and ask for three lines per app in his words (C11);
-   save them in the task file before anything else is shown to him.
-5. **Follow-ups** F1–F4 (`followups/`), each a fresh stranger on a COPY of the arm's folder (the build stays as built),
-   F3 with a real title and count from that app. F1's key search with OWN-015's method and its control. Re-grade after
-   F1 and F2.
-6. **The hats**: five fresh Opus 5.5 agents **outside the repo**, set up exactly as `hats/README.md` says, with the
-   commissioning line from that file and nothing else from us. Save each verdict unedited in `own-023/verdicts/`.
-7. **The table**: task §8 AC5's rows, every arm, each with its §7 prediction beside it, each kit defect B met as a
-   cost in its row (C3) and filed `kit:` (memory: *every bug into the ledger*; file, don't fix mid-round). The C9
-   asymmetry stated on every prompt-shaped row. Numbers only; no verdict sentence from you.
-8. **The prose**: a fresh Opus 5.5 outside the repo with `hats/writeup-brief.md`, the table, the verdicts and
-   Richard's before-and-after lines. Save unedited as `own-023/WRITEUP.md`.
-9. **Richard's verdict**, his words, beside his three lines per app, in the task file. Only now read the message
-   review, and write in it what the result changes.
+## What to do, in order
 
-## Traps already known
+1. **Interview Richard first (AskUserQuestion, plain words).** He is the primary source no search gives: what exactly he
+   was scared of in his Replit months (losing work? breaking it? deploying? the database? not knowing if it worked?
+   looking stupid?); which Replit things calmed each fear (checkpoints, the dev/prod split after the Lemkin incident,
+   one-click deploy, the managed DB, the secrets panel, the mobile app, the preview pane, seeing files?); when and why
+   he left for Claude Code; what he would have paid for then; whether any of those fears came back later. Write the
+   answers verbatim into the review before researching, so the research can't bend them.
+2. **Read how the wrappers argue against the raw agent**, from their own pages and from their users: Replit (Agent 3,
+   the "safe by default" story since July 2025: dev/prod databases, rollbacks, deploy), Lovable (2.0's security scan
+   after CVE-2025-48757), Bolt, v0, Base44, Databutton, Softr/Glide for the no-code end. For each: the fear it sells
+   against, the mechanism that answers it, the price, and the public failure (Lemkin's DB, Lovable's 170 apps,
+   Moltbook). Separate *mechanisms* (a dev/prod split is a mechanism) from *comfort* (a preview pane beside the chat).
+3. **Read what Claude Code itself now ships for the same fears** — primary docs only (`code.claude.com/docs`): auto mode
+   and its classifier, sandboxing, hooks, checkpoints/rewind, `/verify`, the Chrome integration, the desktop app,
+   Claude Code on the web, Cowork, managed settings. For each wrapper mechanism in step 2, say whether plain Claude
+   Code has closed it, half-closed it, or not. The 2026 baseline is not "Claude Code in a terminal in 2025".
+4. **Only then map NodeGX.** For each fear that survives steps 2–3 (a fear Claude Code has not closed and a hosted DB
+   does not close), ask whether NodeGX *as shipped* answers it, whether NodeGX *as designed* could (DIRECTION.md, P111,
+   P96, OWN-016's deploy route, the backend as MCP), or whether it does not touch it. Carry OWN-023's evidence against
+   every claim: the seven defects, the open backend, the missing README. Richard's own verdict names one audience
+   (small apps for friends) for whom nothing matters; test the others named in OWN-023's hats (someone with users,
+   a tech lead, a freelancer) and the one OWN-023 never had: **a person like Richard was — an experienced low-code
+   builder, new to agents, scared of getting it wrong.** Hat B was a beginner; this person is not.
+5. **Write `dev-docs/reviews/THE-PLACE-NODEGX-BESIDE-REPLIT.md`**: the answer in one paragraph first (which may be
+   "none"); Richard's interview verbatim; the fear → mechanism → who-closes-it table; what NodeGX would have to be or
+   do to earn a place, with the gate for each; what it changes on nodegx.io (§2 of the message review is withdrawn;
+   say what, if anything, replaces it). Through the content-authoring skill for any copy. No rounds.
+6. **Hand back to Richard** with the paragraph and the table. He rules on whether any of it becomes a task, a page, or
+   nothing.
 
-- `--allowedTools` pre-approves, it doesn't restrict; use `--disallowedTools` for what a clause depends on (memory).
-- Opus has never run on the kit in this lab. A kit failure in B is a `kit:` bug and a row, not a reason to re-run B
-  with a fix (that would be OWN-019's loop, and it would make B a different arm).
-- `drive_page` has no file-input step (SP1 PLAN "Learned"); the checklist's line 1 allows a demo-file button beside a
-  real picker for that reason. A/A+ with a real picker: the grader uses CDP's file chooser.
-- The gallery copies an app with its backend's DB (SP1: ports rewritten so copies never collide with a live build).
-  A and A+ may need a dev server per app; `gallery.mjs` only knows the NodeGX preview — add a `--serve <cmd>` or run
-  them beside it, by PORT, never by name (memory: `pkill -f` kills a peer).
-- The temptation that will come: B meets a kit defect, you know the fix, it's one line. Don't. File it, let B pay
-  it, write it in the row. A re-run of B with a fix is a different arm and the comparison is gone (C3, C10).
-- The other temptation: a brief or follow-up reads badly once an arm has run. Don't reword it for the next arm. Either
-  re-run every arm with the fix or report the flaw (C10).
-- Three Opus builds plus twelve follow-ups plus six graders plus five hats is a lot of subscription in one day. Watch
-  the 5-hour window; the builds come first, the hats can wait a day.
-- One heavy job at a time on this box (memory). The three builds run in sequence, not in parallel.
+## Traps for this session
 
-## What done looks like
+- **This is the confirmation-bias session.** Everything in it is about finding a reason for NodeGX; the reason may not
+  exist. Write the null answer first and make the evidence move you off it. "Replit sells comfort, Claude Code now
+  ships the mechanisms, NodeGX is a third thing nobody asked for" is a complete, publishable result.
+- **Richard's own story is one person's.** It is the most valuable data here and the easiest to over-generalise.
+- **"Could in theory" is not "does."** OWN-023 measured several NodeGX theories as worse in practice (security on the
+  dev machine, deploy, phone). A claim about a mechanism names the gate that would prove it, or it is a hope.
+- **Don't re-litigate OWN-023.** Its answer stands for its question. Don't re-run arms, don't reword briefs (C10).
+- **The seven kit defects are real costs** for anyone who tries NodeGX this month. P112-OWN023-COLDSERVER is fixed in
+  the repo (`b09ed2b7f`, unpublished); the other six are open. Any positioning that depends on a fix must say so.
 
-AC1–AC6 of the task file: the table, the three apps in the gallery, the verdicts in `own-023/verdicts/`, `WRITEUP.md`
-by a stranger with the answer in its first line (which may be "nothing"), Richard's verdict beside his first three
-lines, and a NEXT-SESSION-PROMPT here saying what the message review and nodegx.io now have to change, in either
-direction.
+## Housekeeping (state at hand-over)
+
+- **Three apps still served** on this laptop (K :5101, M :8575 + its panel :8590, R :5103), as F2 left them.
+  `node own-023/serve-apps.mjs stop` ends them by the pids it recorded. Richard may still want to look; stop them
+  before any heavy job.
+- **Durable copies:** `~/vscode_projects/NodeGX test projects/OWN-023 apps/` — `rounds/` (the three builds with their
+  transcripts and homes), `followups/` (12 rounds, 4.8 GB), `graders/` (18 reports + screenshots), `arms.json` (the
+  letter map). The scratchpad (`/private/tmp/claude-501/…/98514a87-…/scratchpad/own023/`) also holds the hats' scrubbed
+  material and runs; it does not outlive a reboot.
+- **In the repo** (`own-023/`): TABLE.md, WRITEUP.md, STOP-AND-CHECK.md, grades/, verdicts/, checklist-graded.md,
+  harness/CLAUDE.md, followups/runs.json, lab-notes.md (every lab fault and pull, dated), runs/ (the outside
+  strangers' transcripts), and the scripts (round-arm, run-arms, run-followups, grade-agents, grade-url, key-search,
+  serve-apps, prepare-hats, run-hats, stranger, judge.txt, mock/).
+- **Owed and parked:** AC6's page on nodegx.io (Richard rules; nothing changes on the site until this session
+  reports); the §2 rewrite of the message review (same); the STOP-AND-CHECK tests (R11: not now); a neutral `USER`
+  in `round-arm.mjs`'s env (the agents saw Richard's login name; B named a test user after it).
+- **Lab lessons that will bite any future `claude -p` lab** (also in lab-notes and memory): a resumed session's
+  `total_cost_usd` is the running total, not the sitting's; a sitting outlives the agent's first answer when it left
+  background servers, and a judge then reads the servers' exit notices; a moved HOME logs Claude Code out (use
+  `CLAUDE_CODE_SHELL_PREFIX` for the agent's shell); permission rules expand `$HOME` and `~` with Claude Code's own HOME;
+  a cold `npx @nodegx/mcp` misses the 30 s MCP limit.
