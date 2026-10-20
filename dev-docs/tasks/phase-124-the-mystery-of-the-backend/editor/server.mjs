@@ -16,6 +16,8 @@ import { look, wireColors } from '@nodegx/canvas-look';
 import { openProject, analyseProject, tableLinks } from './lib/project.mjs';
 import { backend, BackendError } from './lib/backend.mjs';
 import { setTableRule, entryFor, readSecurityFile, dryRuns, Refusal, SECURITY_FILE } from './lib/rules.mjs';
+import { makeViews } from './lib/views.mjs';
+import { KEY_SUFFIX } from './lib/asperson.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -47,6 +49,9 @@ export function createEditor(opts) {
   const project = openProject(opts.project);
   const be = backend(opts.backend, opts.token);
   const ctx = { be, files: project.files };
+  const mine = new Map(); // request id → { person, fn, key }: the runs this map made, as whom
+  const views = makeViews({ be, project, mine });
+  const keyActors = new Map(); // request id → the key that made a run, from the audit
 
   async function buildMap() {
     const health = await be.health();
@@ -115,18 +120,47 @@ export function createEditor(opts) {
     const q = new URLSearchParams({ limit: '60', offset: '0' });
     if (since) q.set('since', String(since));
     const { json, headers } = await be.getWithHeaders(`/executions?${q}`);
+    // A run through the MCP door was made with a key: the audit names the key, by the run's request id.
+    const viaKey = json.filter((r) => /\/mcp/.test(r.metadata?.triggerSource ?? '') && !keyActors.has(r.metadata?.requestId));
+    if (viaKey.length) {
+      const audit = await be.get('/admin/audit?action=mcp.tool.call&limit=200').catch(() => ({ entries: [] }));
+      for (const e of audit.entries ?? []) if (e.requestId) keyActors.set(e.requestId, e.actor);
+    }
     return {
       total: Number(headers.get('x-total-count') ?? json.length),
-      runs: json.map((r) => ({
-        id: r.id,
-        name: r.workflowId,
-        kind: r.kind,
-        status: r.status,
-        startedAt: r.startedAt,
-        durationMs: r.durationMs,
-        errorMessage: r.errorMessage ?? null
-      }))
+      runs: json.map((r) => {
+        const rid = r.metadata?.requestId;
+        const ours = rid && mine.get(rid);
+        const actor = rid && keyActors.get(rid);
+        return {
+          id: r.id,
+          name: r.workflowId,
+          kind: r.kind,
+          status: r.status,
+          startedAt: r.startedAt,
+          durationMs: r.durationMs,
+          errorMessage: r.errorMessage ?? null,
+          byMap: ours ? { person: ours.person, key: ours.key } : actor && actor.endsWith(KEY_SUFFIX) ? { person: null, key: actor } : null,
+          byKey: actor && !actor.endsWith(KEY_SUFFIX) ? actor : null
+        };
+      })
     };
+  }
+
+  /** A table's rows, each with a short label in words, for choosing one. */
+  async function rows(table) {
+    const schema = await be.get('/admin/schema');
+    const t = schema.tables.find((x) => x.name === table);
+    if (!t) throw new Refusal('No such table.');
+    const { results } = await be.get(`/api/${encodeURIComponent(table)}?limit=50`);
+    const keys = (t.indexes ?? []).filter((i) => i.unique && i.fields.length === 1).map((i) => i.fields[0]);
+    const words = ['subject', 'title', 'name', 'projectName', 'label', 'email', 'username', 'body', 'content'];
+    return results.map((r) => {
+      const w = words.map((k) => r[k]).find((v) => typeof v === 'string' && v.trim());
+      const key = keys.map((k) => r[k]).find((v) => typeof v === 'string');
+      const owner = ['learnerId', 'userId', 'authorUserId'].map((k) => r[k]).find(Boolean);
+      return { objectId: r.objectId, label: w ? w.slice(0, 80) : key ?? r.objectId, key: key ?? null, owner: owner ?? null };
+    });
   }
 
   async function changeRule(body) {
@@ -136,7 +170,7 @@ export function createEditor(opts) {
     return setTableRule(ctx, table, entry, { etag, fileStamp });
   }
 
-  return { buildMap, runs, changeRule, check: (table) => dryRuns(be, table), project, be };
+  return { buildMap, runs, rows, changeRule, check: (table) => dryRuns(be, table), views, project, be };
 }
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png' };
@@ -157,10 +191,24 @@ export function serve(editor, port) {
       if (url.pathname === '/api/map' && req.method === 'GET') return send(res, 200, await editor.buildMap());
       if (url.pathname === '/api/runs' && req.method === 'GET') return send(res, 200, await editor.runs(url.searchParams.get('since')));
       if (url.pathname === '/api/check' && req.method === 'GET') return send(res, 200, { checks: await editor.check(url.searchParams.get('table')) });
-      if (url.pathname === '/api/table-rule' && req.method === 'POST') {
+      const body = async () => {
         let raw = '';
         for await (const chunk of req) raw += chunk;
-        return send(res, 200, await editor.changeRule(JSON.parse(raw || '{}')));
+        return JSON.parse(raw || '{}');
+      };
+      if (url.pathname === '/api/table-rule' && req.method === 'POST') return send(res, 200, await editor.changeRule(await body()));
+      if (url.pathname === '/api/people' && req.method === 'GET') return send(res, 200, { people: await editor.views.people() });
+      if (url.pathname === '/api/rows' && req.method === 'GET') return send(res, 200, { rows: await editor.rows(url.searchParams.get('table')) });
+      // The three that act as a real person. POST, because each one makes a key, and the screen and
+      // record ones make real (read-only) runs.
+      if (url.pathname === '/api/as/reach' && req.method === 'POST') return send(res, 200, await editor.views.reach((await body()).person));
+      if (url.pathname === '/api/as/screen' && req.method === 'POST') {
+        const b = await body();
+        return send(res, 200, await editor.views.screen(b.person, b.screen));
+      }
+      if (url.pathname === '/api/record-reach' && req.method === 'POST') {
+        const b = await body();
+        return send(res, 200, await editor.views.recordReach(b.table, b.objectId));
       }
       if (req.method !== 'GET') return send(res, 405, { error: 'Not here.' });
       const rel = url.pathname === '/' ? 'index.html' : decodeURIComponent(url.pathname).replace(/^\/+/, '');
@@ -201,6 +249,14 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     process.exit(1);
   }
   const editor = createEditor(opts);
+  // Keys this map makes live for one question each. Any left over (a crash) go now, and on the way out.
+  await editor.views.sweep();
+  for (const sig of ['SIGINT', 'SIGTERM']) {
+    process.on(sig, async () => {
+      await editor.views.sweep();
+      process.exit(0);
+    });
+  }
   const server = await serve(editor, opts.port);
   const url = `http://127.0.0.1:${server.address().port}/`;
   console.log(`Backend map for ${opts.project}`);

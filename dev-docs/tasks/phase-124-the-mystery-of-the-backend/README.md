@@ -10,9 +10,11 @@ editor from the kit, OWN-008's route). The board lists it in §4 until Richard s
 **Status: 🟡 s1 — the think written (§3), a copy of a real backend running and measured (§2), the first Opus stranger
 built the §3 shape from the kit in 22 minutes for $7.12 ("backend map", `editor/`, LOOK.md: 27 tables, 27 functions,
 9 screens, the lens per person, the *Is it secure?* card, live runs, a grant that writes the backend and the file and
-held through a restart here); two bugs filed (`P124-S1-WRITESRECORDSJS`, `P124-S1-DOORREFUSALUNSEEN`); the stranger
-corrected s1's cheat-sheet on when the policy file is read. Waits on Richard: §7's three rulings and the sitting
-(PLAYTEST.md).**
+held through a restart here). s2 (the same evening): Richard's verdict *"It looks so cool … psychadelic, in a good
+way"* and three asks; the same stranger built them in 19 minutes for $13.40: the 12 real people as a column, a
+pathway followed as one of them with the functions RUN as them, and one row's reach measured across all 12 (LOOK.md
+§s2: *"2 of 12 people can reach this row"*). Three bugs filed (`P124-S1-WRITESRECORDSJS`, `P124-S1-DOORREFUSALUNSEEN`,
+`P124-S2-ACTSASHTTP`). Waits on Richard: §7's three rulings and the live sitting (PLAYTEST.md).**
 
 > "I want the mystery of the backend / cloud functions and the database schema and management, privacy etc., to become
 > as cool as the star wars editor or the kids block editor we made in a recent session. … Having that DB view FUSED with
@@ -134,6 +136,13 @@ static touches (§3.2) at the run's time, not from the run. That is the first th
    limit, listed in words), *what if we move* (the export routes that exist, named; this is P18's offramp and is text).
 5. **Try it as.** Pick a person and a table or function; the backend's own dry run answers in a sentence
    (`/admin/permissions/check`). No request is made, nothing changes.
+6. **See it as a real person (s2, Richard's ask).** Pick one of the people in the database: the pathways they can
+   use light up (the rules, computed by the backend: the functions their key is offered, the tables the dry run
+   admits). Follow a pathway to a screen: the functions that screen asks for are RUN as them (a short-lived key
+   bound to them, on the MCP door) and what came back is shown as the screen would show it. That is "what EXACTLY
+   does Frank see", not a reading of the code. Pick one row: who can reach it is measured the same way, directly
+   (the dry run with the row) and through every function that touches its table, run as each person. Every such
+   call is a real run and shows on the map as the map's own.
 
 ### 3.5 What stays text, because drawing it would be worse
 
@@ -213,6 +222,17 @@ project folder is otherwise byte-identical. Every assertion reads the backend or
    or a hand-built cut from §3 in `editor/`. Recommendation: whichever screen you like more after the first round.
 
 ## 8. Sessions
+
+- **s2 (2026-10-20, late, Fable 5.1, the same evening):** Richard's verdict on the first screens, verbatim in
+  PLAYTEST.md and BRIEF.md §s2: *"It looks so cool … very psychadelic, in a good way"*, and three asks: view as a
+  real person from the database with their pathways lit; follow a pathway to a page and see EXACTLY what they get;
+  one record's reach (who can reach this row, through which pathways). **The mechanism, measured before briefing:**
+  a key bound to a person (`POST /admin/keys` with `actsAsUserId`) on the backend's MCP door (`POST /mcp`) runs a
+  function AS them; the plain `/functions/<name>` door passes the gate as them but the function sees nobody (filed
+  `P124-S2-ACTSASHTTP`). Run for all 12 people: `course` as Marie contains her conversation; as the other eleven it
+  does not; staff is offered 27 tools, a learner 12. So *"if I let Frank log in, will he see Sally's
+  conversations?"* is answerable by running, not by reading code (`stranger/BACKEND-2.md`). Round 2 launched on
+  the same stranger with his words (`stranger/richard-said-2.txt`).
 
 - **s1 (2026-10-20, Fable 5.1):** read the ground (review §9–10, OWN-008, P104, P43, P27, P64, Studio's scope, the
   security model, the workflow and trigger types, the admin routes); rebuilt the backend's dist; ran a copy of the

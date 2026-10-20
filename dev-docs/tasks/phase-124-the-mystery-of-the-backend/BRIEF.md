@@ -41,6 +41,24 @@ it in `./editor`, one npm command, test on copies, write the report. The wish is
 > it, why does it do that when I click this, is it secure" without asking anyone. And let me take control from the
 > canvas: change who can see a table, and have the backend obey. Plain words, no jargon, no JSON on screen.
 
+## s2 — Richard's verdict on the first screen, and the three asks (2026-10-20, late)
+
+> It looks so cool. Now what would make it extra cool is if you take that 'I'm signed in this is what I can see'
+> concept, and apply it to 'view as user X' so you can pick a user from the database and literally see the lit up
+> pathways they can access, and follow a pathway to say 'if this specific user is on the 'course' page, what EXACTLY
+> do they see?' So you'd be able to answer the question 'If I let Frank log in, will he see Sally's conversations?'
+> But otherwise the view is very psychadelic, in a good way. Furthermore the ability to for example extrapolate this
+> view to 'show me this one conversation record Frank made, who would be able to reach it and through which
+> pathways?' and the map shows a view of that one record and who would in theory be able to access it and from
+> where, now that's reassurance. Being able to visually explore the 'preview' of the results of your privacy rules
+> and relationships, functions and workflows, amazing
+
+Three asks, in his order: **view as a real person** from the database, their reachable pathways lit; **follow a
+pathway** to a page and see exactly what that person gets there; **one record's reach**: pick a row and see who can
+reach it and from where. The honest mechanism for "exactly" is to run the functions AS that person, not to read the
+code: the backend's keys that act as a person (FED-005 `actsAsUserId`) make that real. These go to the same stranger
+as round 2, verbatim, with the mechanism measured first (README §s2).
+
 ## What the session assumed, for Richard to overturn
 
 - **The audience is the vouching person, not the operator.** The canvas draws what a client asks about; keys, email,

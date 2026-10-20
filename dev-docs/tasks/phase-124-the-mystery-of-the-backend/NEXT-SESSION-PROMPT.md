@@ -14,7 +14,13 @@
 - Two bugs filed from this round: `P124-S1-WRITESRECORDSJS` (the backend says no function writes; eight do, from
   JavaScript, one of them public) and `P124-S1-DOORREFUSALUNSEEN` (a 403 at the rule gate is no run and no audit
   row). Neither is fixed; neither blocks the next round.
-- **Richard has not seen it.** That is the whole of what is next.
+- **Round 2 is done too** (the same evening). Richard saw the first screens: *"It looks so cool … psychadelic, in a
+  good way"* and asked for three things (BRIEF.md §s2). The same stranger built them in 19 minutes for $13.40
+  (LOOK.md §s2): the 12 real people as a column; a pathway followed as one of them, the screen's functions RUN as
+  them through a key bound to them on the backend's MCP door (`stranger/BACKEND-2.md`); and one row's reach measured
+  across all 12 (*"2 of 12 people can reach this row"*). A third bug, `P124-S2-ACTSASHTTP` (the plain functions door
+  passes a bound key as the person but the function sees nobody).
+- **Richard has not sat with it live.** That is the whole of what is next.
 
 ## What to do first: put the screen in front of Richard
 

@@ -38,7 +38,7 @@ try {
   await page.waitForFunction(() => window.__map?.map && window.__map.nodes.length > 0, { timeout: 20000 });
   const counts = await page.evaluate(() => ({ tables: window.__map.nodes.filter((n) => n.kind === 'table').length, fns: window.__map.nodes.filter((n) => n.kind === 'fn').length }));
   ok(counts.tables > 20 && counts.fns === 27, `the map draws ${counts.tables} tables and ${counts.fns} functions`);
-  ok(/No table can be opened directly/.test(await page.$eval('#secure', (e) => e.innerText)), 'the safety card says no table can be opened directly');
+  ok(/No table can be opened directly/.test(await page.$eval('#secure', (e) => e.textContent)), 'the safety card (folded to its headline until clicked) says no table can be opened directly');
 
   const clickBlock = async (id) => {
     const pos = await page.evaluate((id) => {

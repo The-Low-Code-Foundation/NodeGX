@@ -92,4 +92,58 @@ standard rule*: live entry gone, file **byte-identical to the template again**. 
 6. `/admin/roles` lists only groups that exist; the rules name `role:staff` whether or not the group does.
 7. No push channel for runs; `since` not said to be inclusive.
 
-**Richard, on it:** *(PLAYTEST.md; not yet)*
+**Richard, on it** (PLAYTEST.md, from the screens): *"It looks so cool … very psychadelic, in a good way"*, and three
+asks. Round 2 below.
+
+## s2 (2026-10-20, late): the same stranger, with Richard's words — real people, one pathway, one row's reach
+
+**The round:** `round.mjs canvas <labRoot> --again stranger/richard-said-2.txt` (his words verbatim, plus
+`stranger/BACKEND-2.md`: a key bound to a person on the MCP door runs a function AS them, measured first on all 12
+people). Same session resumed, same lab. **19.0 minutes, 118 turns, $13.40**, exit 0; 67 Edit, 19 Bash, 19 Read,
+9 Write. Project copies unchanged (lab and root). It left nothing running (the teardown's five Chrome processes were
+this session's own headless Chrome from the s1 screenshots, cwd in the lab). On the real backend afterwards: 42 keys,
+**0 usable** (every map key revoked; the backend keeps revoked records), 72 runs, 0 tables with a rule of their own.
+
+**What it built** (`editor/`, now 2,680 lines + `public/render.js`; REPORT.md "Round 2"):
+
+- **People**, a fourth column on the far left: the 12 real accounts, and *A real person…* in the top bar. Picked,
+  the map asks the backend two things under a short-lived key bound to them: which functions it offers them
+  (`tools/list`, runs nothing) and whether it would let them open each table (`permissions/check`). Their pathways
+  go pink, the rest dims, and the note says it: *"As Marie Dubois: the backend lets them run 12 of 27 functions and
+  open 0 tables directly."*
+- **Follow a pathway:** with Marie picked, click Course: every function the screen asks for is run as her or shown
+  with the reason it was not (*not allowed* by the backend: `learnerProgramme`, `openThreadAsCoach`, `replyAsCoach`;
+  *not run* because it changes data: `openThread`, `sendMessage`). The real answer is laid out the way the screen
+  lists it: her project *Parent evening booking*, 13 entries, her conversation *A question for my coach*. The panel
+  says these are real runs, by a key named `view-as-marie-dubois-by-backend-map`, deleted straight after.
+- **One row's reach:** click a table, pick a row, *Find who can reach it*. For each of the 12 and for someone not
+  signed in: directly (the dry run with the row, `get` and `find`) and through every read-only function that touches
+  the table, run as them, the row's ids looked for in the answer; required arguments taken from the row when the
+  names match and said so. For `conv-l-marie`: **"2 of 12 people can reach this row: Marie Dubois, Richard Osborne.
+  Someone not signed in can't. Nobody can open it directly: every pathway goes through a function."** Marie through
+  `course` and `exportMine`; the staff member through `learnerProgramme` *(asked with learnerId = l-marie, this
+  row's learnerId)*; the other ten *can't reach it: course and exportMine answered without it; the backend's rule
+  check says no to opening it directly*. What it did not check is listed (the writing functions). On the map, two
+  people tagged REACHES IT with pink wires through the function that hands the row over, ten tagged CAN'T REACH IT.
+- **Its runs are its own:** each shows in *What just ran* as *"course worked · run by this map, as Marie Dubois"*
+  with a pink border; runs made with other keys are named by their key through the audit's `mcp.tool.call` row
+  (the same request id), so this session's `who-probe-…` measurement runs are labelled too. The page is checked
+  for `ngxk_` (no secret reaches it); leftover map keys are swept at start and stop.
+
+**The screens:** `look/stranger-2-as-marie-course.png`, `look/stranger-3-one-conversation-reach.png`, both the
+stranger's own on the real backend.
+
+**Checked here, against this session's own measurement** (README §s2: `course` run as each of the 12 through the
+MCP door, before the round): Marie's answer contains `conv-l-marie`, the other eleven's do not, staff is offered 27
+tools and a learner 12. The map's sentences say the same. Read back through the editor's own API on the real
+backend (`POST /api/as/screen` Marie + Pages/Course; `POST /api/record-reach` Conversation `conv-l-marie`): Course as
+Marie = `course` **ran**, `learnerProgramme` / `openThreadAsCoach` / `replyAsCoach` **not allowed** (the backend's
+answer), `openThread` / `sendMessage` **not run** (they create rows); the row's reach = 12 people answered, Marie
+`true` through `course` and `exportMine`, the staff member `true` through `learnerProgramme`, the other ten `false`,
+the same two names this session's own 12-key probe found.
+
+**What it found** (REPORT.md "What I had to decide"): deleting a key revokes it and the backend keeps the record,
+so "no key left" has to mean "no usable key"; the run record does not name the key, the audit does; which arguments
+a function needs is read from the tool's description and the row; the staff member reaches every learner's
+conversation through `learnerProgramme` because that function takes the learner id from its caller: by design for
+a coach, and now on screen.

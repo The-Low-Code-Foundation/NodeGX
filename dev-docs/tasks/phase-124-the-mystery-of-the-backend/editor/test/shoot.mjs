@@ -41,12 +41,30 @@ try {
       const token = fs.readFileSync(new URL('../../ADMIN-TOKEN', import.meta.url), 'utf8').split('\n')[0].trim();
       await fetch(v, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` }, body: '{}' });
     }
+    // person:<name> — pick a real person in the top bar, and wait for the backend's answer
+    if (k === 'person') {
+      const id = await page.evaluate((n) => window.__map.people.find((p) => p.name === n)?.id, v);
+      await page.select('#personPick', id);
+      await page.waitForFunction(() => window.__map.person?.reach, { timeout: 60000 });
+    }
+    if (k === 'pathway') await page.waitForFunction(() => window.__map.pathway?.data, { timeout: 60000 });
+    // row:<key> — in an open table panel, pick the row whose key is <key>, and ask who can reach it
+    if (k === 'row') {
+      await page.waitForSelector('[data-row]', { timeout: 20000 });
+      const id = await page.evaluate((key) => Object.values(window.__map.rows).flat().find((r) => r.key === key)?.objectId, v);
+      await page.click(`[data-row="${id}"]`);
+      await page.click('#findReach');
+      await page.waitForFunction(() => window.__map.record?.data, { timeout: 180000 });
+    }
+    if (k === 'scrollpanel') await page.evaluate((y) => (document.getElementById('panel').scrollTop = Number(y)), v);
     if (k === 'waitrun') {
       await page.waitForFunction((n) => window.__map.runs[0]?.name === n, { timeout: 15000 }, v);
       await new Promise((r) => setTimeout(r, 350));
     }
     if (k === 'text') console.log(await page.$eval(v, (el) => el.innerText));
   }
+  await page.mouse.move(2, 70); // off the map, so no tooltip covers it
+  await new Promise((r) => setTimeout(r, 150));
   await page.screenshot({ path: out });
   if (errors.length) console.log('PAGE ERRORS:\n' + errors.join('\n'));
   else console.log('no page errors');

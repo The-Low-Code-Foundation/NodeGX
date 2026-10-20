@@ -23,10 +23,26 @@ The stranger's own `npm start` and its README say the rest; LOOK.md §s1 has the
 
 ## The sitting
 
-*(not yet — Richard has not sat with it)*
+**2026-10-20, late, from the screens in LOOK.md (the first stranger's "backend map"), before sitting with it live.**
+His words, verbatim:
+
+> It looks so cool. Now what would make it extra cool is if you take that 'I'm signed in this is what I can see'
+> concept, and apply it to 'view as user X' so you can pick a user from the database and literally see the lit up
+> pathways they can access, and follow a pathway to say 'if this specific user is on the 'course' page, what EXACTLY
+> do they see?' So you'd be able to answer the question 'If I let Frank log in, will he see Sally's conversations?'
+> But otherwise the view is very psychadelic, in a good way. Furthermore the ability to for example extrapolate this
+> view to 'show me this one conversation record Frank made, who would be able to reach it and through which
+> pathways?' and the map shows a view of that one record and who would in theory be able to access it and from
+> where, now that's reassurance. Being able to visually explore the 'preview' of the results of your privacy rules
+> and relationships, functions and workflows, amazing
+
+Read as the verdict OWN-008's register asks for: **cool** ("psychadelic, in a good way"). The three asks go to the
+stranger as round 2, verbatim (BRIEF.md §s2). The live sitting (the four questions, the grant, the restart) is still
+owed.
 
 | he asked / tried | what happened | his words | time |
 |---|---|---|---|
+| looked at the two screens | | "It looks so cool … very psychadelic, in a good way" | — |
 | where is the data | | | |
 | who can see Lesson | | | |
 | why does it do X when I click Y | | | |

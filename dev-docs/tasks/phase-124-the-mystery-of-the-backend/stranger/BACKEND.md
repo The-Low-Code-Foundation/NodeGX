@@ -75,8 +75,8 @@ guess.
 - **To call a function:** `POST /functions/<name>` with a JSON body. Every function here but one requires a signed-in
   person (`authenticated`, 11) or a staff member (`role:staff`, 15); `unsubscribe` is `public`. The admin credential is not a person and is refused with
   *"Unauthenticated requests not accepted."* (that refusal is itself recorded as a run, see below). The app signs
-  people in by magic link, which needs a mailbox, so you cannot make a successful run from a script here; you can
-  make refused runs, and you can read every run.
+  people in by magic link, which needs a mailbox. **To run a function as a real person, see BACKEND-2.md:** a key
+  bound to that person, on the backend's MCP door.
 
 ## What ran: runs and the audit
 

@@ -90,6 +90,7 @@ export function ago(ms) {
 /** A run's error, without stack or code, in words. */
 export function runWords(run) {
   if (run.status === 'success') return 'worked';
+  if (run.status === 'running' || run.status === 'pending' || run.status === 'queued') return 'is running';
   const msg = String(run.errorMessage || '');
   if (/Unauthenticated/i.test(msg)) return 'was turned away: nobody was signed in';
   if (/permission|not allowed|forbidden|role/i.test(msg)) return 'was turned away: not allowed';

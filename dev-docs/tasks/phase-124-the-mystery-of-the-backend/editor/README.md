@@ -36,6 +36,24 @@ Another app or backend: `node server.mjs <app folder> --backend <url> --token-fi
 If someone else changed the rules since you opened the map, the change is refused and nothing is
 written; the map reloads so you can choose again.
 
+## Looking as a real person
+
+- **Pick a person**: click them in the People column, or choose them in "A real person…" at the top.
+  The backend itself says what they may run and which tables they could open directly. Pink wires
+  are theirs. Nothing runs to show this.
+- **Follow a pathway**: with a person picked, click a screen. Each function that screen asks for is
+  run **as that person, for real**, and the real answer is shown the way the screen lists it: the
+  things, their words, their counts. A function that changes anything is never run; the panel says
+  which and why.
+- **One row's reach**: click a table, pick a row, press **Find who can reach it**. For each of the
+  people the map asks the backend whether they could open that row directly, and runs, as them, every
+  read-only function that touches the table, looking for the row in what comes back. The map shows who
+  reaches it and through which function. It also lists who can't, and what it couldn't check.
+
+How: a key bound to the person (BACKEND-2.md), used through the backend's MCP door. It is made for one
+question and deleted straight after, and its secret is never shown or saved. Every run it makes shows in
+"What just ran" as **run by this map, as <name>**.
+
 ## What it can't tell you
 
 - Which **rows** a function hands back: that is decided in the function's own code. The map shows which
@@ -53,4 +71,6 @@ written; the map reloads so you can choose again.
 
 `npm test` runs everything on copies (a copy of the app's folder under `test/.work`, with a backend of its
 own from the kit): the NodeGX kit's editor suite and its control, the rule change end to end with
-restarts, and the page driven in Chrome.
+restarts, the page driven in Chrome, and the real-person views on a copy holding the app's whole world.
+The app's own `tools/setup-backend.mjs` and `tools/deploy-functions.mjs`, run from the copy, set up its
+people, rows and functions.

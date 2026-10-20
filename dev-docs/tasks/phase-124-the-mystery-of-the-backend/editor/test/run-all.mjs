@@ -22,5 +22,7 @@ console.log('\n— changing who may see a table, on a copy and its own backend �
 if (run([path.join(here, 'rule-change.test.mjs')]) !== 0) bad++;
 console.log('\n— the page, driven in Chrome, on a copy and its own backend —');
 if (run([path.join(here, 'ui.test.mjs')]) !== 0) bad++;
+console.log('\n— round 2: real people, a pathway, one row’s reach (Chrome, a copy with the app’s whole world) —');
+if (run([path.join(here, 'people.test.mjs')]) !== 0) bad++;
 console.log(bad ? `\n${bad} part(s) FAILED` : '\nEverything passed.');
 process.exit(bad ? 1 : 0);

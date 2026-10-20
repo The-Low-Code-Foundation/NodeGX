@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import net from 'node:net';
 import crypto from 'node:crypto';
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -63,6 +63,17 @@ export async function startBackend({ copy, dataDir, token }, port) {
 export function adminClient(base, token) {
   return (p, init = {}) =>
     fetch(base + p, { ...init, headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json', ...(init.headers ?? {}) } }).then((r) => r.json());
+}
+
+/**
+ * The app's whole world on the copy backend: its tables, policy, people and rows (the copy's own
+ * tools/setup-backend.mjs) and its functions (tools/deploy-functions.mjs), run from the COPY's folder.
+ */
+export function seedWorld({ copy, token }, base) {
+  for (const tool of ['setup-backend.mjs', 'deploy-functions.mjs']) {
+    const r = spawnSync(process.execPath, [path.join(copy, 'tools', tool), '--backend', base, '--token', token], { encoding: 'utf8' });
+    if (r.status !== 0) throw new Error(`${tool} failed on the copy:\n${(r.stdout + r.stderr).slice(-1500)}`);
+  }
 }
 
 /** The app's own tables on the copy backend, as the app's setup applies them. */

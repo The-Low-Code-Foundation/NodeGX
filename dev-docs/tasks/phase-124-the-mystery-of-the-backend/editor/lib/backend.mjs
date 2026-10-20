@@ -13,16 +13,23 @@ export function backend(baseUrl, token) {
   const base = baseUrl.replace(/\/$/, '');
   async function call(method, path, body, headers = {}) {
     let res;
-    try {
-      res = await fetch(base + path, {
-        method,
-        headers: { Authorization: `Bearer ${token}`, ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}), ...headers },
-        body: body !== undefined ? JSON.stringify(body) : undefined
-      });
-    } catch (e) {
-      throw new BackendError(0, `The backend at ${base} isn’t answering. Is it running?`);
+    let text;
+    // The backend limits admin requests (300 a minute, bursts of 100): when it says "retry in N s", wait and retry.
+    for (let attempt = 0; ; attempt++) {
+      try {
+        res = await fetch(base + path, {
+          method,
+          headers: { Authorization: `Bearer ${token}`, ...(body !== undefined ? { 'Content-Type': 'application/json' } : {}), ...headers },
+          body: body !== undefined ? JSON.stringify(body) : undefined
+        });
+      } catch (e) {
+        throw new BackendError(0, `The backend at ${base} isn’t answering. Is it running?`);
+      }
+      text = await res.text();
+      if (res.status !== 429 || attempt >= 8) break;
+      const after = Number(res.headers.get('retry-after')) || Number(text.match(/Retry in (\d+)s/)?.[1]) || 1;
+      await new Promise((r) => setTimeout(r, after * 1000 + 50));
     }
-    const text = await res.text();
     let json = null;
     try {
       json = text ? JSON.parse(text) : null;

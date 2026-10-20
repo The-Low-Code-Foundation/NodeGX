@@ -167,3 +167,185 @@ backend from `@nodegx/preview`'s `dist/backend/cli.js`. Every one passes:
   didn't want the editor starting a second backend for the real app. The README says how to watch the map
   while using the app in another window.
 - **No deleting the test copies** under `editor/test/.work`. That needed approval, so they're still there.
+
+---
+
+# Round 2: real people, one pathway, one row's reach
+
+You asked for three things in `./editor`, keeping everything that was already there. All three are built,
+tested on copies, and photographed on the real backend. They use BACKEND-2.md's mechanism: a key bound to
+one person, plus the backend's MCP door. Nothing is simulated.
+
+## What was built
+
+1. **Look at it as a real person.**
+   - There is a new **People** column on the far left with the 12 people from the database, and a
+     "A real person…" picker in the top bar.
+   - When you pick someone, the map asks the backend two things:
+     - which functions it offers them (`tools/list` under their key, which runs nothing);
+     - whether it would let them open each table (`/admin/permissions/check` with them as the person).
+   - Their pathways light up pink. The note at the top says it in words, for example: "As Marie Dubois:
+     the backend lets them run 12 of 27 functions and open 0 tables directly."
+2. **Follow a pathway.** With a person picked, click a screen. Every function that screen asks for is
+   either run **as them** or shown with the reason it wasn't. The real answer is shown the way the screen
+   lists it: things, counts and words (`public/render.js`, never JSON). On the map, the screen and its
+   functions are coloured by what happened (ran, refused, not allowed, not run), and wires go on to the
+   tables the functions that ran touch.
+
+   Measured on the real backend:
+   - **Marie's Course:** `course` ran as her and answered her project ("Parent evening booking") and 13
+     entries (1 message, 12 lessons), including **her conversation "A question for my coach"**.
+   - `learnerProgramme`, `openThreadAsCoach` and `replyAsCoach` are *not allowed* for her, by the backend.
+   - `openThread` and `sendMessage` are *not run* because they change data. The panel says so.
+   - On a copy, **Jo Whitfield's Course doesn't contain Marie's conversation.**
+3. **One row's reach.** Click a table, pick a row, and press "Find who can reach it". For each person:
+   - **Directly:** `permissions/check` with that row, for `get` and `find`. Someone not signed in is
+     checked too.
+   - **Through functions:** every function that touches the table and only reads is run as them, and
+     the map looks for the row's ids (its `objectId` and its unique key) in the answer. Required
+     arguments come from the row itself when the names match, and the panel says so, for example
+     "learnerProgramme asked with learnerId = l-marie, this row's learnerId".
+
+   The answer for Marie's conversation (`conv-l-marie`) on the real backend:
+   - **2 of 12 people can reach it:**
+     - Marie, through `course` and `exportMine`;
+     - Richard Osborne (staff), through `learnerProgramme`.
+   - The other ten can't: `course` and `exportMine` answered them without it.
+   - Nobody can open it directly, including someone not signed in.
+   - On the map, the people who reach it are tagged REACHES IT, with pink wires through the function
+     that hands it over to the row. Everyone else is tagged CAN'T REACH IT.
+
+   The panel also lists **what it didn't check**: functions it wouldn't run, and why.
+
+   This answers your example. Would Frank see Sally's conversations? Pick one of Sally's conversations
+   and read Frank's line. Note that the staff member reaches any learner's conversations through
+   `learnerProgramme`, because that function takes a learner id from its caller. That is by design for a
+   coach, and now it's visible.
+
+**Keys and runs, made visibly mine.**
+- Each question makes one key per person, named `view-as-<name>-by-backend-map`, and deletes it in a
+  `finally`.
+- Any leftover map key is swept when the editor starts and when it stops.
+- The secret lives in one local variable on the editor's server. It is never sent to the page, logged
+  or written. The test checks the whole page for `ngxk_`.
+- **Deleting a key revokes it and the backend keeps the record:** 28 revoked map keys are listed on the
+  real backend now, and **0 working keys of any kind**.
+- Every run made this way shows in "What just ran" as **"run by this map, as Marie Dubois"**, with a pink
+  border, and the person's block flashes with the function. The run record doesn't name the key, but the
+  audit's `mcp.tool.call` entry does, under the same request id. The map joins the two, so runs made with
+  other people's keys are labelled too (for example the `who-probe-…` keys used to measure BACKEND-2.md).
+
+**Real runs I made on the real backend in round 2:** 1 probe of `course` as Marie (a key named
+`view-as-probe-marie`, revoked), 2 × Marie's Course pathway (1 run each), and 2 × the reach of
+`conv-l-marie` (26 runs each). All of them were read-only functions. `./training` is unchanged: no file
+in it is newer than the start of round 1.
+
+**Screenshots**, both on the real backend:
+- `./editor-2.png`: the map seen as Marie, with the Course pathway followed and her real answer in the
+  panel.
+- `./editor-3.png`: the reach of her conversation: 2 of 12, with the pathways drawn.
+
+## Tests (all on copies), pasted
+
+The copy backend now carries the app's whole world: 12 people, the rows and 27 functions. These come from
+the app's own `tools/setup-backend.mjs` and `tools/deploy-functions.mjs`, run from the copied folder
+against the copy's own backend. It reproduces BACKEND-2.md's measurement exactly.
+
+```
+— the kit's editor suite, on a copy —
+PASS — backend map on training (675 ms); files only: the adapter offers no graph runner
+— its control: broken on purpose, must FAIL —
+FAIL — … 1. node "cs_title" in components/Pages/Course/nodes.json: "parameters.fontWeight" is "800"; the official editor saves 800.
+— changing who may see a table — all passed
+— the page, driven in Chrome — all passed
+— round 2: real people, a pathway, one row's reach —
+ok    the People column has the 12 people from the database
+ok    the lens says, from the backend: "As Marie Dubois: the backend lets them run 12 of 27 functions and open 0 tables directly…"
+ok    12 pink pathways light up, one to each function the backend offers her (12)
+ok    no working key is left behind after looking (deleted keys are revoked)
+ok    clicking Course opens "Course, as Marie Dubois"
+ok    course ran as her
+ok    her real answer shows: her project "Parent evening booking" and her conversation "A question for my coach"
+ok    openThread was not run, and the page says why (it changes data)
+ok    learnerProgramme is not allowed for her, as the backend says
+ok    the panel says these were real runs, with the key's name (never its secret)
+ok    no key secret anywhere in the page
+ok    the run shows in "What just ran", marked "run by this map, as Marie Dubois"
+ok    as Jo Whitfield, Course does not contain Marie's conversation
+ok    "2 of 12 people can reach this row: Marie Dubois, Richard Osborne"
+ok    Marie gets it through course and exportMine
+ok    the staff member gets it through learnerProgramme, asked with this row's learnerId
+ok    Jo Whitfield can't reach it
+ok    nobody can open it directly, someone not signed in included
+ok    what wasn't checked is listed (openThread, …)
+ok    on the map: 2 people tagged REACHES IT, 6 pink pathways
+ok    no JSON anywhere on screen
+ok    every key the map made no longer works
+ok    no page errors
+ok    the copy's folder is unchanged: looking writes nothing
+ok    the real app folder is unchanged
+Everything passed.
+```
+
+The kit's suite still grades only the folder, which round 2 never writes, so its PASS says no more
+than in round 1.
+
+## How long it took
+
+About 20 minutes, from 20:25 to 20:45.
+
+## What I had to decide, or couldn't know
+
+1. **Which functions may the map run as someone? Only the ones that read.** Running a function as a
+   real person is a real run, and some functions that sound like reads write. `openThread` "marks their
+   coach's turns read", and `acceptPrivacy` "records" an acceptance.
+   - The rule in `lib/asperson.mjs` `runnable()` skips a function when **either** the map saw a write
+     in its graph or code, **or** its own description uses a changing verb (save, record, delete, mark,
+     send, set, add, publish, copy, stop, accept, …).
+   - It's deliberately cautious and it's still a reading of words.
+
+   **Wanted from the backend:** a read-only flag on each function (or a dry-run door). Then this guess
+   goes away.
+2. **Arguments.** A function's required arguments come from `tools/list`'s `inputSchema`. The map only
+   fills ones it can name honestly:
+   - the person's own learner id, from their LearnerProfile;
+   - the step they're on now, taken from their own `course` answer, for a screen whose functions take a
+     `conceptId` (Lesson);
+   - for one row, the row's own `…Id` columns.
+
+   Anything else is "not run: it needs X, which this screen gets from somewhere the map can't know (the
+   address, or what was clicked)". So a staff member's `learnerProgramme` on the Course screen isn't run,
+   because the screen gets the learner from which learner the coach opened.
+3. **"Reaches the row" means its ids appear in the answer.** The map looks for the row's `objectId` and
+   its unique key. A function that hands over the row's *content* without any of its ids would be
+   missed, and the panel's "what this didn't check" says what wasn't run. Functions the map doesn't see
+   touching the table aren't run at all.
+4. **The plain HTTP door doesn't carry the person**, as BACKEND-2.md says (filed as a backend defect),
+   so all person runs go through `/mcp`.
+5. **Keys can't expire.** `POST /admin/keys` takes no expiry (I read the backend's `createKey`).
+   "Short-lived" is therefore delete-in-`finally`, plus a sweep at start and stop. A crash of the whole
+   machine mid-question would leave one working key until the next start. A `ttlSeconds` on keys would
+   close that gap.
+6. **Deleting a key keeps a revoked record.** After a few questions the API-keys list fills with revoked
+   `view-as-…` keys: 28 so far on the real backend. They are harmless, but if that list matters to you,
+   a way to purge revoked keys would help.
+7. **Admin requests are rate-limited** (300 a minute, bursts of 100). One row's reach makes about 60
+   admin requests (keys and rule checks) on top of the map's own polling, and it hit the limit once on a
+   copy. The editor's backend client now waits and retries when the backend says "retry in N s", and the
+   map reloads every 60 s instead of 30 s.
+8. **A run caught while still running** used to read "went wrong" in the ticker. The ticker now asks
+   again for the last ten seconds and takes the run's end. That fix came from looking at the first
+   screenshot.
+9. **Names.** The people's names come from their email (`marie.dubois@…` → Marie Dubois) unless the
+   account has a first and last name, as the trainer's does. One account has no email: it's shown as
+   "l-invoice (no email)".
+
+## Also changed in round 2
+
+- **The People column** is new on the far left.
+- **The safety card starts folded** to its headline, to make room for the people. Click the headline to
+  open it.
+- **The legend** has a pink "a real person's pathway" entry.
+- **Leftover files:** two probes I used while building, `test/probe-copy.mjs` and `test/probe-views.mjs`.
+  They are safe to delete; I left them because deleting files needs your approval.
+- **Unchanged:** the round-1 features are all still there, and their tests still pass.
