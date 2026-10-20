@@ -45,6 +45,7 @@ import {
   SCHEMA_IDS,
   SchemaValidator,
   SemanticValidator,
+  settingsDiagnosticLookup,
   sortDiagnostics,
   buildEffectiveTokens,
   checkFontFaces,
@@ -57,6 +58,9 @@ import {
 } from './editor-deps';
 import type { ComponentFiles } from './graph';
 import type { ProjectStore } from './project/ProjectStore';
+// P112-OWN019-TWOLOADERS — the preview's own read and gate, so the two cannot disagree.
+import { readLegacyProject, resolveTarget as resolvePreviewTarget } from '../../noodl-preview/src/readProject';
+import { validateLegacyProject, type PreviewReport } from '../../noodl-preview/src/validate';
 import { drawnPortCheck } from './specPorts';
 import { makeProjectVisualPredicate, type VisualTypePredicate } from './visualRoots';
 import { listScriptPaths } from './tools/scriptTools';
@@ -357,7 +361,7 @@ export function validateCandidate(
   const name = candidate.component.path ?? key;
   const candidateProject = store.buildNormProject({ replace: { key, files: candidate } });
   // NSP-020 R19 — a wire to a port the node's spec does not draw is refused, judged on the project this write leaves
-  const report = validator().validateComponent(candidateProject, name, { strict, drawnPorts: drawnPortCheck(store, new Map([[legacyNameOf(key, candidate), candidate]])) });
+  const report = validator().validateComponent(candidateProject, name, { strict, drawnPorts: drawnPortCheck(store, new Map([[legacyNameOf(key, candidate), candidate]])), settingsDiagnostics: settingsDiagnosticLookup });
 
   const views = authoredProjectViews(store, new Map([[name, candidate]]));
   const diagnostics = dedupeDiagnostics([
@@ -369,7 +373,7 @@ export function validateCandidate(
   if (baseline) {
     const baselineName = baseline.component.path ?? key;
     const baselineProject = store.buildNormProject({ replace: { key, files: baseline } });
-    const baselineReport = validator().validateComponent(baselineProject, baselineName, { strict, drawnPorts: drawnPortCheck(store, new Map([[legacyNameOf(key, baseline), baseline]])) });
+    const baselineReport = validator().validateComponent(baselineProject, baselineName, { strict, drawnPorts: drawnPortCheck(store, new Map([[legacyNameOf(key, baseline), baseline]])), settingsDiagnostics: settingsDiagnosticLookup });
     // Exempted on **blocking** identity, not on `severity === 'error'`, and
     // over the same four preconditions the candidate is judged by — the editor's
     // rule, and the correction AAQ-005 made to it after this package's own
@@ -528,7 +532,8 @@ export function validateOnDisk(
 ): { report: ValidationReport; target?: string } {
   const project = store.buildNormProject();
   // NSP-020 R19 — the same wire check a write meets, so a check before a write says what the write will
-  const validatorOptions = { strict: options.strict ?? false, drawnPorts: drawnPortCheck(store) };
+  // P107 R40 — a node's settings-only warnings, from its spec (settingsDiagnosticLookup.ts)
+  const validatorOptions = { strict: options.strict ?? false, drawnPorts: drawnPortCheck(store), settingsDiagnostics: settingsDiagnosticLookup };
   const views = authoredProjectViews(store, new Map());
   const emitSkipNotes = options.emitSkipNotes === true;
 
@@ -550,9 +555,49 @@ export function validateOnDisk(
     report: withPreconditions(report, [
       ...onDiskPreconditions(store, views, targets, emitSkipNotes),
       ...fontFaceDiagnostics(store, root ? root.legacyName : ''),
-      ...tokenComposableDiagnostics(store, root ? root.legacyName : '')
+      ...tokenComposableDiagnostics(store, root ? root.legacyName : ''),
+      ...previewGateDiagnostics(store, report.diagnostics)
     ])
   };
+}
+
+/**
+ * P112-OWN019-TWOLOADERS — what the preview and `nodegx deploy` would refuse, read the way they read it.
+ *
+ * This validator reads each `nodes.json` flat. The preview and the deploy rebuild the project through the editor's
+ * io engine, which walks `children`, and gate on the result (`@nodegx/preview`'s `readLegacyProject` +
+ * `validateLegacyProject`, imported here rather than restated). A graph one reader tolerates and the other refuses
+ * read as "done" to the agent and as a blank page to the person (a child listed twice: 0 errors here, 38
+ * `duplicate-node-id` there). So the gate runs here too, and every ERROR it raises that this pass did not is
+ * reported, worded as what it is. Warnings are not gates there, so they are not repeated. A project the io engine
+ * cannot read at all is left to this pass's own read diagnostics.
+ */
+function previewGateDiagnostics(store: ProjectStore, flat: readonly Diagnostic[]): Diagnostic[] {
+  let gate: PreviewReport;
+  try {
+    const { format } = resolvePreviewTarget(store.projectDir);
+    const { legacy } = readLegacyProject(store.projectDir, format);
+    gate = validateLegacyProject(legacy as unknown as Parameters<typeof validateLegacyProject>[0]);
+  } catch {
+    return [];
+  }
+  const key = (code: string, component: string, nodeId?: string) => `${code}|${component}|${nodeId ?? ''}`;
+  const seen = new Set(flat.filter((d) => d.severity === 'error').map((d) => key(d.code, d.location.component, d.location.nodeId)));
+  return gate.diagnostics
+    .filter((d) => d.severity === 'error' && !seen.has(key(d.code, d.component, d.nodeId)))
+    .map((d) => ({
+      code: d.code as DiagnosticCode,
+      severity: 'error' as const,
+      message: `The preview and \`nodegx deploy\` refuse this (they read the component as a tree, through children): ${d.message}`,
+      location: {
+        component: d.component,
+        ...(d.nodeId ? { nodeId: d.nodeId } : {}),
+        ...(d.nodeType ? { nodeType: d.nodeType } : {}),
+        ...(d.nodeLabel ? { nodeLabel: d.nodeLabel } : {}),
+        ...(d.port ? { port: d.port } : {})
+      },
+      ...(d.suggestion ? { suggestion: d.suggestion } : {})
+    }));
 }
 
 /**

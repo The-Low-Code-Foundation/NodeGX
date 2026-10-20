@@ -21,6 +21,7 @@ import { bootstrapNodeLibrary } from './headless';
 import { describeAccess, lanAddress, resolveAccess, shareUrl } from '../../nodegx-export/src/serve/access';
 
 import { assertDeployAssets, loadPreview, resolveTarget, type ProjectFormat } from './loader';
+import { keepOwnBackend, type OwnBackend } from './ownBackend';
 import { PreviewServer } from './server';
 import { startWatching } from './watcher';
 
@@ -37,6 +38,8 @@ Options:
   --debounce <ms>   Quiet period before rebuilding after a change (default 120).
   --no-watch        Render once and serve; do not watch for changes.
   --open            Open the preview in the default browser.
+  --no-backend      Do not start the app's own local backend (by default, an app whose backend lives
+                    on this machine gets it started, and stopped again with the preview).
   --version         Print version and exit.
   --help            Show this help.
 
@@ -52,10 +55,11 @@ interface Args {
   debounce: number;
   watch: boolean;
   open: boolean;
+  backend: boolean;
 }
 
 function parseArgs(argv: string[]): Args | null {
-  const args: Args = { target: '', port: 8575, host: '127.0.0.1', token: null, debounce: 120, watch: true, open: false };
+  const args: Args = { target: '', port: 8575, host: '127.0.0.1', token: null, debounce: 120, watch: true, open: false, backend: true };
   const positional: string[] = [];
 
   for (let i = 0; i < argv.length; i++) {
@@ -78,6 +82,9 @@ function parseArgs(argv: string[]): Args | null {
         break;
       case '--open':
         args.open = true;
+        break;
+      case '--no-backend':
+        args.backend = false;
         break;
       default:
         if (a.startsWith('--')) {
@@ -177,6 +184,9 @@ async function main(): Promise<void> {
     return;
   }
 
+  // P112-OWN019-BACKENDSESSION (R38): the app's own local backend, started when it is not running.
+  const backend: OwnBackend | null = args.backend && format === 'v2' ? await keepOwnBackend(dir, log) : null;
+
   await rebuild(server, dir, format);
 
   const url = shared ? shareUrl(lanAddress() ?? args.host, port, access.token) : `http://${args.host}:${port}`;
@@ -208,6 +218,7 @@ async function main(): Promise<void> {
 
   const shutdown = () => {
     log('\nstopping…');
+    backend?.stop();
     void (watcher?.close() ?? Promise.resolve()).then(() => server.close()).then(() => process.exit(0));
   };
   process.on('SIGINT', shutdown);

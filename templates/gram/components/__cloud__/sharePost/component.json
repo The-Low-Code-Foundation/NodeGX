@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "dbb77b5a-0fe9-5a5f-85d6-3f515d209be7",
+  "name": "sharePost",
+  "path": "/#__cloud__/sharePost",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Share a post with the members: a caption, photos shared with members only, or both"
+}

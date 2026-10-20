@@ -119,6 +119,12 @@
     },
     {
       "fromId": "rcMe",
+      "fromProperty": "skin",
+      "toId": "rcHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "rcMe",
       "fromProperty": "faceOptions",
       "toId": "rcHeader",
       "toProperty": "options"

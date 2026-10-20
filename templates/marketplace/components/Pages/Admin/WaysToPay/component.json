@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "65ac28f6-c9bc-5b07-8c8e-8efb5b21c94d",
+  "name": "WaysToPay",
+  "path": "/Pages/Admin/WaysToPay",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The admin’s ways to pay: the countries, and each way turned on per country"
+}

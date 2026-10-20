@@ -1,0 +1,299 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000000603",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Held Desk",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "headline",
+        "pickB",
+        "pickNothing",
+        "removeBtn",
+        "loadedLabel",
+        "loadedText",
+        "sayingLabel",
+        "sayingText",
+        "removedLabel",
+        "removedText"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 240
+    },
+    {
+      "id": "headline",
+      "type": "Text",
+      "label": "Headline",
+      "parent": "shell",
+      "parameters": {
+        "text": "Held Desk",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 320
+    },
+    {
+      "id": "pickB",
+      "type": "net.noodl.controls.button",
+      "label": "Pick b",
+      "parent": "shell",
+      "parameters": {
+        "label": "Pick b"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "pickNothing",
+      "type": "net.noodl.controls.button",
+      "label": "Pick nothing",
+      "parent": "shell",
+      "parameters": {
+        "label": "Pick nothing"
+      },
+      "x": 100,
+      "y": 480
+    },
+    {
+      "id": "removeBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Remove",
+      "parent": "shell",
+      "parameters": {
+        "label": "Remove"
+      },
+      "x": 100,
+      "y": 560
+    },
+    {
+      "id": "loadedLabel",
+      "type": "Text",
+      "label": "Loaded",
+      "parent": "shell",
+      "parameters": {
+        "text": "Loaded",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "loadedText",
+      "type": "Text",
+      "label": "Loaded \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 720
+    },
+    {
+      "id": "sayingLabel",
+      "type": "Text",
+      "label": "Saying",
+      "parent": "shell",
+      "parameters": {
+        "text": "Saying",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 800
+    },
+    {
+      "id": "sayingText",
+      "type": "Text",
+      "label": "Saying \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "removedLabel",
+      "type": "Text",
+      "label": "Removed",
+      "parent": "shell",
+      "parameters": {
+        "text": "Removed",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 960
+    },
+    {
+      "id": "removedText",
+      "type": "Text",
+      "label": "Removed \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1040
+    },
+    {
+      "id": "idRead",
+      "type": "Variable2",
+      "label": "Which id",
+      "parameters": {
+        "name": "id",
+        "value": "a"
+      },
+      "x": 700,
+      "y": 1120
+    },
+    {
+      "id": "pickBSet",
+      "type": "Set Variable",
+      "label": "Pick b",
+      "parameters": {
+        "name": "id",
+        "value": "b"
+      },
+      "x": 700,
+      "y": 1200
+    },
+    {
+      "id": "pickNothingSet",
+      "type": "Set Variable",
+      "label": "Pick nothing",
+      "parameters": {
+        "name": "id",
+        "value": ""
+      },
+      "x": 700,
+      "y": 1280
+    },
+    {
+      "id": "hold",
+      "type": "JavaScriptFunction",
+      "label": "Hold the id",
+      "parameters": {
+        "functionScript": "if (Inputs.id === undefined || Inputs.id === '') return;\nOutputs.id = Inputs.id;\nOutputs.ready();",
+        "runOnChange-in-id": true
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-ready",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 700,
+      "y": 1360
+    },
+    {
+      "id": "loadedSet",
+      "type": "Set Variable",
+      "label": "Load the one it holds",
+      "parameters": {
+        "name": "loaded"
+      },
+      "x": 700,
+      "y": 1440
+    },
+    {
+      "id": "loadedRead",
+      "type": "Variable2",
+      "label": "Loaded",
+      "parameters": {
+        "name": "loaded"
+      },
+      "x": 700,
+      "y": 1520
+    },
+    {
+      "id": "confirmed",
+      "type": "JavaScriptFunction",
+      "label": "The id, and the go-ahead",
+      "parameters": {
+        "functionScript": "Outputs.saying = 'removing ' + (Inputs.id === undefined || Inputs.id === '' ? 'nothing' : Inputs.id);\nif (Inputs.id === undefined || Inputs.id === '') return;\nOutputs.id = Inputs.id;\nOutputs.go();",
+        "runOnChange-in-id": false
+      },
+      "ports": [
+        {
+          "name": "in-id",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-id",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-saying",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 700,
+      "y": 1600
+    },
+    {
+      "id": "removedSet",
+      "type": "Set Variable",
+      "label": "Remove it",
+      "parameters": {
+        "name": "removed"
+      },
+      "x": 700,
+      "y": 1680
+    },
+    {
+      "id": "removedRead",
+      "type": "Variable2",
+      "label": "Removed",
+      "parameters": {
+        "name": "removed"
+      },
+      "x": 700,
+      "y": 1760
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

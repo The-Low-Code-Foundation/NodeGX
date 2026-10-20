@@ -1,0 +1,964 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fdd213a6-9c19-57b8-8621-03affc036013",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pfPage",
+      "type": "Page",
+      "label": "Product",
+      "parameters": {
+        "title": "Product",
+        "urlPath": "product/{sellerId}/{productId}"
+      },
+      "children": [
+        "pfRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pfRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "pfPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "pfBar",
+        "pfBand",
+        "pfBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pfBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "pfRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "pfBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pfBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "pfBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "pfBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "pfRoot",
+      "parameters": {
+        "words": ""
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "pfBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "pfRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "pfContent",
+        "pfRefused"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pfUrl",
+      "type": "PageInputs",
+      "label": "Which product",
+      "parameters": {
+        "pathParams": "sellerId,productId"
+      },
+      "x": 650,
+      "y": 3160
+    },
+    {
+      "id": "pfContent",
+      "type": "Group",
+      "label": "The form",
+      "parent": "pfBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "pfBack",
+        "pfTitle",
+        "pfPhotos",
+        "pfName",
+        "pfDescription",
+        "pfPrice",
+        "pfCategory",
+        "pfMode",
+        "pfSave",
+        "pfError"
+      ],
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "pfBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "pfContent",
+      "parameters": {
+        "label": "← Products",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "pfTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "pfContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "pfPhotos",
+      "type": "Group",
+      "label": "The photos",
+      "parent": "pfContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "pfGrid",
+        "pfUploading",
+        "pfPhotoError",
+        "pfPhotoNote"
+      ],
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "pfGrid",
+      "type": "Group",
+      "label": "One tile per photo, then Add",
+      "parent": "pfPhotos",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "pfEach",
+        "pfAddPhoto"
+      ],
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "pfEach",
+      "type": "For Each",
+      "label": "One tile per photo",
+      "parent": "pfGrid",
+      "parameters": {
+        "template": "/Seller/PhotoTile"
+      },
+      "x": 400,
+      "y": 1360
+    },
+    {
+      "id": "pfAddPhoto",
+      "type": "net.noodl.controls.button",
+      "label": "Add a photo",
+      "parent": "pfGrid",
+      "parameters": {
+        "label": "+ Add a photo",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "width": {
+          "value": 96,
+          "unit": "px"
+        },
+        "height": {
+          "value": 96,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "dashed",
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--border)"
+      },
+      "x": 400,
+      "y": 1480
+    },
+    {
+      "id": "pfUploading",
+      "type": "Text",
+      "label": "Sending the photo",
+      "parent": "pfPhotos",
+      "parameters": {
+        "text": "Making the photo smaller and sending it…",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "pfPhotoError",
+      "type": "Text",
+      "label": "Why the photo did not go",
+      "parent": "pfPhotos",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "pfPick",
+      "type": "Open File Picker",
+      "label": "Choose a photo",
+      "parameters": {
+        "acceptedFileTypes": "image/*"
+      },
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "pfUpload",
+      "type": "Upload File",
+      "label": "Send it, shrunk to 1600 px",
+      "parameters": {
+        "shrinkTo": 1600,
+        "photoQuality": 80
+      },
+      "x": 650,
+      "y": 1720
+    },
+    {
+      "id": "pfBusy",
+      "type": "Switch",
+      "label": "Sending a photo",
+      "x": 650,
+      "y": 1600
+    },
+    {
+      "id": "pfPhotoNote",
+      "type": "Text",
+      "label": "Photos are made smaller",
+      "parent": "pfPhotos",
+      "parameters": {
+        "text": "Photos are made smaller on your phone before they upload, so they’re quick on mobile data. Up to 8.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "pfPhotoList",
+      "type": "JavaScriptFunction",
+      "label": "The photos, while the form is open",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nvar keep = Component.Object;\nvar photos = keep.get('photos') || [];\nif (Inputs.loaded !== keep.get('loadedFrom')) {\n  keep.set('loadedFrom', Inputs.loaded);\n  keep.set('addedFrom', Inputs.added);\n  keep.set('removedFrom', Inputs.removed);\n  photos = Array.isArray(Inputs.loaded) ? Inputs.loaded.slice() : [];\n}\nvar up = Inputs.added;\nif (up && up !== keep.get('addedFrom')) {\n  keep.set('addedFrom', up);\n  if (typeof up.getUrl === 'function' && up.getUrl()) photos = photos.concat([{ name: up.getName() || 'photo', url: up.getUrl() }]).slice(0, 8);\n}\nif (Inputs.removed && Inputs.removed !== keep.get('removedFrom')) {\n  keep.set('removedFrom', Inputs.removed);\n  var gone = String(Inputs.removed).split('|')[0];\n  photos = photos.filter(function (f) { return f.url !== gone; });\n}\nkeep.set('photos', photos);\nOutputs.photos = photos;\nOutputs.tiles = photos.map(function (f) { return { id: f.url, url: f.url, thumb: thumb(f, 'md') }; });\nOutputs.room = photos.length < 8;"
+      },
+      "ports": [
+        {
+          "name": "in-loaded",
+          "displayName": "loaded",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-added",
+          "displayName": "added",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-removed",
+          "displayName": "removed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-photos",
+          "displayName": "photos",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tiles",
+          "displayName": "tiles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-room",
+          "displayName": "room",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1360
+    },
+    {
+      "id": "pfRemoved",
+      "type": "Variable2",
+      "label": "A photo was taken off",
+      "parameters": {
+        "name": "photoRemoved"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: which photo was taken off: the form keeps one list, whichever tile said so."
+      },
+      "x": 650,
+      "y": 3280
+    },
+    {
+      "id": "pfName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name",
+      "parent": "pfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Name"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "pfDescription",
+      "type": "net.noodl.controls.textinput",
+      "label": "Description",
+      "parent": "pfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Description",
+        "type": "textArea"
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "pfPrice",
+      "type": "net.noodl.controls.textinput",
+      "label": "Price",
+      "parent": "pfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Price",
+        "inputMode": "decimal"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "pfCategory",
+      "type": "net.noodl.controls.options",
+      "label": "Shelf",
+      "parent": "pfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Shelf",
+        "placeholder": "Choose a shelf"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "pfMode",
+      "type": "net.noodl.controls.options",
+      "label": "How buyers get it",
+      "parent": "pfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "How buyers get it"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "pfSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "pfContent",
+      "parameters": {
+        "label": "Save and put on sale",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 2560
+    },
+    {
+      "id": "pfError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "pfContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "pfRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "pfBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "pfRefusedWhy",
+        "pfRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 2800
+    },
+    {
+      "id": "pfRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "pfRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "pfRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "pfRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "pfToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 650,
+      "y": 3040
+    },
+    {
+      "id": "pfLoad",
+      "type": "JavaScriptFunction",
+      "label": "The product, the shelves, the seller’s currency",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nif (Inputs.sellerId === undefined || Inputs.productId === undefined) return;\nvar isNew = !Inputs.productId || Inputs.productId === 'new';\ntry {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  var sellerId = Inputs.sellerId === 'mine' ? (me.seller && me.seller.id) : String(Inputs.sellerId);\n  var s = sellerId ? (await all('Seller', { objectId: { equalTo: sellerId } }))[0] : null;\n  var country = s ? (await all('Country', { objectId: { equalTo: idOf(s.country) } }))[0] : null;\n  var shelves = await all('Category');\n  var p = isNew ? null : (await all('Product', { objectId: { equalTo: String(Inputs.productId) } }))[0];\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nif (!s || (!isNew && !p)) { Outputs.problem = 'There is no such product.'; Outputs.refused = true; Outputs.ok = false; return; }\nshelves.sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });\nOutputs.shelves = shelves.map(function (c) { return { Label: c.name, Value: c.objectId }; });\nOutputs.modes = [{ Label: 'Buy through the basket', Value: 'buy' }, { Label: 'Enquire (they message you; you settle it yourselves)', Value: 'enquire' }];\nOutputs.heading = isNew ? 'Add a product' : 'Edit ' + (p.name || 'the product');\nOutputs.band = me.role === 'admin' ? 'Admin · ' + s.name : 'Signed in as ' + s.name;\nOutputs.priceLabel = 'Price (' + (country ? country.currency : '') + ')';\nOutputs.sellerId = sellerId;\nOutputs.name = p ? p.name || '' : '';\nOutputs.description = p ? p.description || '' : '';\nOutputs.price = p ? String(p.price) : '';\nOutputs.category = p ? idOf(p.category) : ''; // no shelf chosen for a new product: the seller picks one\nOutputs.mode = p ? p.mode || 'buy' : 'buy';\nOutputs.photos = (p && Array.isArray(p.photos) ? p.photos : []).filter(function (f) { return f && f.url; }).map(function (f) { return { name: f.name || 'photo', url: f.url }; });\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-productId",
+          "displayName": "productId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shelves",
+          "displayName": "shelves",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-modes",
+          "displayName": "modes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-heading",
+          "displayName": "heading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-priceLabel",
+          "displayName": "priceLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sellerId",
+          "displayName": "sellerId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-description",
+          "displayName": "description",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-price",
+          "displayName": "price",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-category",
+          "displayName": "category",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mode",
+          "displayName": "mode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-photos",
+          "displayName": "photos",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 760
+    },
+    {
+      "id": "pfGather",
+      "type": "JavaScriptFunction",
+      "label": "The form, as one product",
+      "parameters": {
+        "functionScript": "function v(typed, loaded) { return typed === undefined ? (loaded || '') : String(typed); }\nvar isNew = !Inputs.productId || Inputs.productId === 'new';\nvar product = {\n  seller: String(Inputs.sellerId || ''),\n  name: v(Inputs.name, Inputs.name0),\n  description: v(Inputs.description, Inputs.description0),\n  price: Number(v(Inputs.price, Inputs.price0).replace(/[^0-9.]/g, '')),\n  category: v(Inputs.category, Inputs.category0),\n  mode: v(Inputs.mode, Inputs.mode0) || 'buy'\n};\nif (Array.isArray(Inputs.photos)) product.photos = Inputs.photos;\nif (!isNew) product.id = String(Inputs.productId);\nOutputs.product = product;\nOutputs.go();",
+        "runOnChange-in-sellerId": false,
+        "runOnChange-in-productId": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-name0": false,
+        "runOnChange-in-description": false,
+        "runOnChange-in-description0": false,
+        "runOnChange-in-price": false,
+        "runOnChange-in-price0": false,
+        "runOnChange-in-category": false,
+        "runOnChange-in-category0": false,
+        "runOnChange-in-mode": false,
+        "runOnChange-in-mode0": false,
+        "runOnChange-in-photos": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-productId",
+          "displayName": "productId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name0",
+          "displayName": "name0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-description",
+          "displayName": "description",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-description0",
+          "displayName": "description0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-price",
+          "displayName": "price",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-price0",
+          "displayName": "price0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-category",
+          "displayName": "category",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-category0",
+          "displayName": "category0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-mode0",
+          "displayName": "mode0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-photos",
+          "displayName": "photos",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-product",
+          "displayName": "product",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1960
+    },
+    {
+      "id": "pfCall",
+      "type": "CloudFunction2",
+      "label": "saveProduct(product)",
+      "parameters": {
+        "function": "saveProduct"
+      },
+      "x": 650,
+      "y": 2680
+    },
+    {
+      "id": "pfToProducts",
+      "type": "RouterNavigate",
+      "label": "Back to the products",
+      "parameters": {
+        "target": "/Pages/Seller/Products"
+      },
+      "x": 650,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "pfPage"
+  ]
+}

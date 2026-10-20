@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000000303",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nameInput",
+      "fromProperty": "onTextChanged",
+      "toId": "hold",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "sendBtn",
+      "fromProperty": "onClick",
+      "toId": "hold",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-greeting",
+      "toId": "greetingSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-go",
+      "toId": "greetingSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-sends",
+      "toId": "sendsSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-go",
+      "toId": "sendsSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-problem",
+      "toId": "problemSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-refused",
+      "toId": "problemSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "greetingRead",
+      "fromProperty": "value",
+      "toId": "greetingText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sendsRead",
+      "fromProperty": "value",
+      "toId": "sendsText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "problemRead",
+      "fromProperty": "value",
+      "toId": "problemText",
+      "toProperty": "text"
+    }
+  ]
+}

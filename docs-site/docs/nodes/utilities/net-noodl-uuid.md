@@ -18,6 +18,7 @@ A record id, an idempotency key, a correlation id across services, a filename th
 | Available in | browser, cloud |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
+| Behaviour spec | version 1 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -73,7 +74,97 @@ Two nodes that look interchangeable and are not. UUID gives a version-4 identifi
 
 [Unique Id](../string-manipulation/unique-id.md), [Random Bytes](./net-noodl-random-bytes.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
+## Under the hood
+
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 1. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+
+### What it depends on outside the node
+
+- random numbers (`random`)
+
+### Starting state
+
+```json
+{}
+```
+
+### How actions report back
+
+Each time New is triggered, the node reports exactly one of **Done** or **Failure**.
+
+## The full spec {#spec-source}
+
+The spec's source, as the docs were generated. Helpers it imports live beside it in `packages/nodegx-node-spec/src`.
+
+```ts title="packages/nodegx-node-spec/src/nodes/uuid.ts"
+/**
+ * UUID (`net.noodl.UUID`) — read from `packages/noodl-runtime/src/nodes/std-library/crypto/uuid.ts`
+ * and `crypto/encoding.ts` on 2026-09-30 (NSP-007).
+ *
+ * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
+ *
+ * THE RULE: the node holds one version-4 UUID, drawn from the platform's random source ONCE AT
+ * CREATION (uuid.ts :48-54) so `Id` is never empty, and again on every `New` (:96-110), which
+ * reports `done`. The draws come from the WORLD (spec.ts `WorldView.uuid`; world.ts): a target's
+ * `crypto.randomUUID` is the world's seeded source, so the first id a node shows is the world's
+ * first draw and the n-th `New` shows its (n+1)-th — a target that draws lazily, or twice, shows
+ * a different id in the same place.
+ *
+ * The failure path (:99-104: no cryptographic source at all → `Error` set, `failure`
+ * `uuid/failed`, `Id` kept) cannot happen under a world, which always has one; it is declared in
+ * `outcomes` (the catalog draws the port) and has no reducer branch — a §6 note in NSP-007, not
+ * a row: nothing a wire can carry distinguishes it from a world with entropy.
+ */
+
+import { defineNode } from '../spec';
+
+export const Uuid = defineNode({
+  type: 'net.noodl.UUID',
+  version: 1,
+  source: 'packages/noodl-runtime/src/nodes/std-library/crypto/uuid.ts',
+  needs: ['random'],
+
+  // :29-33 `_internal.uuid`, `_internal.error`
+  state: { uuid: undefined as string | undefined, error: undefined as string | undefined },
+  // :48-54 initialize → randomUuid() (encoding.ts :151-162: `crypto.randomUUID` where it exists)
+  init: (w) => ({ uuid: w.uuid() }),
+  // :55-57
+  inspect: (s) => s.uuid ?? '',
+  // :81-84 outcomeOutputs({ done, failure })
+  outcomes: ['done', 'failure'],
+
+  inputs: {
+    // :59-67
+    generate: { type: 'signal', outcome: true, displayName: 'New', group: 'Actions', description: 'Generates a fresh UUID, replacing the one on Id' }
+  },
+
+  outputs: {
+    // :70-80
+    uuid: {
+      type: 'string',
+      from: (s) => s.uuid,
+      displayName: 'Id',
+      group: 'Values',
+      description:
+        'A random version-4 UUID, generated once when the node is created and again on every New. ' +
+        'Use this rather than Unique Id wherever the id has to be globally unique or unguessable'
+    },
+    // :85-93 — never defined under a world (the failure path is unreachable), so never sent (C3)
+    error: { type: 'string', from: (s) => s.error, displayName: 'Error', group: 'Error', description: 'Why no UUID could be generated' }
+  }
+}).on({
+  // :96-110 _generate: a fresh draw, `error` cleared, both flagged, `done`
+  generate: (_s, _i, w) => ({ says: 'always: a fresh UUID goes on Id, and Error is cleared', set: { uuid: w.uuid(), error: undefined }, outcome: 'done' })
+});
+```
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

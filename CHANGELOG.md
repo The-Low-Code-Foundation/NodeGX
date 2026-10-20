@@ -17,6 +17,39 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## 0.4.2 · 2026-10-19
+
+**Apps can now keep photos for their members only and check Paystack's payment webhooks.**
+
+### New
+
+- **Upload File can keep a photo for members only.** Its new Readers input names the roles, such as `role:member`,
+  that can open a private file. The person who uploaded it can still open it.
+- **Upload File can make a photo smaller before sending it.** Its new Shrink To input sets the longest side in pixels.
+  Photo Quality sets how much detail a JPEG or WebP keeps.
+- **A webhook trigger can check Paystack's signature.** Choose *Paystack signature* for the hook in the backend's
+  admin app, then paste the Paystack secret key.
+- **A project's collections come with it.** Some projects list their collections in `backend/schema.json`. When you
+  start that project's backend on this computer, NodeGX now adds any of those collections it lacks. Each one keeps its
+  unique fields and links.
+- **Exported apps do more of what the running app does.** Filtered and sorted lists, sign-in pages and forms that
+  say whether they were sent now work the same in exported code.
+- **Your agent sees more of what it built.** `render_report` now shows the app on a desktop, a tablet and a phone. It
+  also names a row with a hole in it, or text pressed against the edge of its box.
+
+### Fixed
+
+- **Live updates reach signed-in members.** On the built-in backend, Subscribe To Changes asked for updates as a
+  stranger, even when someone was signed in. A collection that only members can read refused every update. It now
+  asks as the person who's signed in.
+- **A refused webhook call says why.** In the admin app's Runs, a call refused before its first step said "This run
+  recorded no steps". It now shows the reason, such as a signature that doesn't match.
+
+### Good to know
+
+- **Exported code doesn't keep Readers or Shrink To yet.** If your app shares photos with members only, don't export
+  it as code for now. An exported Upload File sends the photo as a full-size public file.
+
 ## 0.4.1 · 2026-10-14
 
 **A small release that fixes three things in 0.4.0: opening a project no longer changes its files, the update window
@@ -34,6 +67,39 @@ shows when a project is open, and the What's new window is readable.**
 
 - **To update from 0.4.0, go back to your projects first.** 0.4.0 still has the hidden update window, so it shows the
   update to 0.4.1 on the projects list, not inside a project.
+
+## npm packages 0.2.1 · 2026-10-14
+
+**New apps start with a typeface, icons and pictures. Your agent's checks now agree with the preview, and the preview
+starts your app's backend for you.**
+
+### New
+
+- **New apps start with a typeface, icons and pictures.** `create_project` now adds Inter, the Lucide icons and the
+  starter pictures, the same set the editor gives a new project. Before, an app made from npm had none of them.
+- **The preview starts your app's backend.** `npx @nodegx/preview <app folder>` starts the app's backend on your
+  machine if it isn't running, and stops it when the preview stops. Add `--no-backend` to leave it alone.
+- **An example of an app that speaks.** `fn-play-audio-a-cloud-function-returns` calls a text-to-speech service from
+  a cloud function, so the key stays on the server, and plays the audio in the page as it came. Your agent finds it
+  when it searches the examples for text to speech.
+- **`render_report` looks at three sizes:** desktop, a portrait tablet (768 × 1024) and a phone. On desktop it also
+  names a row with a big gap in it, and a part of a section that sits off the line of its heading.
+- **`drive_page` can watch several things at once,** for example every answer on a quiz screen.
+
+### Fixed
+
+- `validate_project` passed some pages that the preview then refused to show. It now also runs the preview's own
+  check, and says what the preview would refuse.
+- A new project's first check warned that its typeface wasn't there. It is now.
+- The agent was offered library tools (`list_library`, `install_prefab`) that only work inside the NodeGX source code,
+  and every call failed. They're no longer offered.
+- Two examples called a cloud function by a name that no function had. Now each call names its function.
+- On a page that scrolls smoothly, a tap read the page before the scrolling stopped. It now waits.
+
+### Good to know
+
+- The backend needs Node 22.13 or later.
+- A folder set up with 0.2.0 keeps using 0.2.0. To move it to 0.2.1, change the version in its `.mcp.json` files.
 
 ## 0.4.0 · 2026-10-14
 
@@ -132,32 +198,55 @@ explains each node, new kinds of backend rule and many fixes to how nodes behave
 - Windows installers aren't signed, so SmartScreen will warn you. Choose More info, then Run anyway.
 - If you use the MCP server with an assistant, restart the assistant's session after updating.
 
-## npm packages 0.2.0 · 2026-10-12
+## npm packages 0.2.0 · 2026-10-14
 
-**Your agent can now look at the pages it builds. It can also keep an API key on a server and put your app in a
-folder you can host.**
+**Your agent can now look at the pages it builds and press through them like a person. It can also keep an API key on
+a server and put your app in a folder you can host.**
 
 ### New
 
 - **Your agent sees what it built.** `render_report` now works from npm. The agent renders each page and reads what it
   measured before it says the work is done. It needs Chrome, Edge or Chromium on your machine.
+- **Your agent tries the app the way you would.** `drive_page` taps, types and waits like a person. Then it reads what a
+  person would see, such as a colour named in words or whether something is visible. It can watch the moment a new
+  screen appears, and reload the page it's on.
 - **Your agent can start a backend.** `provision_backend` runs a NodeGX backend on your machine. Nothing else needs
   installing.
 - **A cloud function can keep a key secret.** `set_function_secret` stores the key on the backend. A cloud function
-  reads it with a Secret node. The page never sees it.
+  reads it with a Secret node. The page never sees it. You paste the key into the project's `.env` file yourself. It
+  never goes through the chat.
 - **`nodegx-deploy`** writes your app to a folder you can host:
   `npx --package @nodegx/preview nodegx-deploy <app folder> <output folder>`.
-- **`npm create nodegx`** now sets a folder up with `@nodegx/mcp` 0.2.0.
+- **Your agent can build you an editor of your own.** `npm create nodegx` now adds a skill, `nodegx-your-own-editor`.
+  It tells your agent how to build its own editor for these apps from the published packages, and how to check it's
+  right.
+- **Mistral Vibe and OpenCode.** `npm create nodegx` also sets the folder up for Mistral Vibe (with Mistral Large 4)
+  and for OpenCode. Start Vibe with `vibe --legacy-harness`.
+- **`npm create nodegx`** now sets a folder up with `@nodegx/mcp` 0.2.0, and writes a short `CLAUDE.md` and `AGENTS.md`
+  saying that apps in the folder are NodeGX apps.
 
 ### Fixed
 
+- The preview served every file in the project folder, including `.env` and `.mcp.json`. It now serves only the app.
+- A render could hang on Mac behind a "Keychain Not Found" dialog. It no longer opens the keychain.
+- Reloading the preview on any page but the first showed "Not found". It now shows that page.
+- A child could be listed twice under its parent. The preview then refused the page while `validate_project` passed.
+  Now it's listed once.
+- A style preset named a typeface that never loaded. The preset fonts now come with `@nodegx/mcp`.
+- A cloud function call wired without its `in-` and `out-` port names sent nothing. The server now refuses that wiring
+  and says how to fix it.
+- When the agent changed a cloud function, nothing told it to deploy it. It's now told, and offered the deploy tool.
+- An agent whose tool list never refreshes couldn't build after creating the project. It now reaches every tool
+  through `call_tool`.
 - Deploying cloud functions failed unless the agent was started inside an npm package.
-- A deploy copied `.mcp.json` and `CLAUDE.md` into the output folder. They are now left out.
+- A deploy copied `.mcp.json` and `CLAUDE.md` into the output folder. They're now left out.
 - A page with warnings was reported as clean. The report's first line now names the warnings.
 
 ### Good to know
 
 - The backend needs Node 22.13 or later.
+- The backend on your machine stops when your agent's session ends. To use the app's data again, ask your agent to
+  start the backend.
 - A folder set up with 0.1.0 keeps using 0.1.0. To move it to 0.2.0, change the version in its `.mcp.json` files.
 
 ## npm packages 0.1.0 · 2026-10-11

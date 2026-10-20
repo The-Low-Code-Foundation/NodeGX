@@ -1,0 +1,128 @@
+{
+ "runtime": [
+  {
+   "text": "\"Line one\\nLine two\"",
+   "whiteSpace": "pre-wrap",
+   "overflowWrap": "anywhere",
+   "textOverflow": "clip",
+   "overflow": "visible",
+   "width": 240,
+   "lines": 2,
+   "overflowsBox": false
+  },
+  {
+   "text": "\"Supercalifragilisticexpialidocious\"",
+   "whiteSpace": "pre-wrap",
+   "overflowWrap": "anywhere",
+   "textOverflow": "clip",
+   "overflow": "visible",
+   "width": 80,
+   "lines": 4,
+   "overflowsBox": false
+  },
+  {
+   "text": "\"a content-size line that is longer than its two hundred pixel parent\"",
+   "whiteSpace": "pre",
+   "overflowWrap": "normal",
+   "textOverflow": "clip",
+   "overflow": "visible",
+   "width": 474,
+   "lines": 1,
+   "overflowsBox": false
+  },
+  {
+   "text": "\"an ellipsis line that is longer than its box\"",
+   "whiteSpace": "nowrap",
+   "overflowWrap": "normal",
+   "textOverflow": "ellipsis",
+   "overflow": "hidden",
+   "width": 120,
+   "lines": 1,
+   "overflowsBox": true
+  }
+ ],
+ "export-HEAD": [
+  {
+   "text": "\"Line one Line two\"",
+   "whiteSpace": "normal",
+   "overflowWrap": "normal",
+   "textOverflow": "clip",
+   "overflow": "visible",
+   "width": 240,
+   "lines": 1,
+   "overflowsBox": false
+  },
+  {
+   "text": "\"Supercalifragilisticexpialidocious\"",
+   "whiteSpace": "normal",
+   "overflowWrap": "normal",
+   "textOverflow": "clip",
+   "overflow": "visible",
+   "width": 80,
+   "lines": 1,
+   "overflowsBox": true
+  },
+  {
+   "text": "\"a content-size line that is longer than its two hundred pixel parent\"",
+   "whiteSpace": "normal",
+   "overflowWrap": "normal",
+   "textOverflow": "clip",
+   "overflow": "visible",
+   "width": 176,
+   "lines": 3,
+   "overflowsBox": false
+  },
+  {
+   "text": "\"an ellipsis line that is longer than its box\"",
+   "whiteSpace": "normal",
+   "overflowWrap": "normal",
+   "textOverflow": "clip",
+   "overflow": "visible",
+   "width": 120,
+   "lines": 3,
+   "overflowsBox": false
+  }
+ ],
+ "export-patched": [
+  {
+   "text": "\"Line one\\nLine two\"",
+   "whiteSpace": "pre-wrap",
+   "overflowWrap": "anywhere",
+   "textOverflow": "clip",
+   "overflow": "visible",
+   "width": 240,
+   "lines": 2,
+   "overflowsBox": false
+  },
+  {
+   "text": "\"Supercalifragilisticexpialidocious\"",
+   "whiteSpace": "pre-wrap",
+   "overflowWrap": "anywhere",
+   "textOverflow": "clip",
+   "overflow": "visible",
+   "width": 80,
+   "lines": 4,
+   "overflowsBox": false
+  },
+  {
+   "text": "\"a content-size line that is longer than its two hundred pixel parent\"",
+   "whiteSpace": "pre",
+   "overflowWrap": "normal",
+   "textOverflow": "clip",
+   "overflow": "visible",
+   "width": 474,
+   "lines": 1,
+   "overflowsBox": false
+  },
+  {
+   "text": "\"an ellipsis line that is longer than its box\"",
+   "whiteSpace": "nowrap",
+   "overflowWrap": "normal",
+   "textOverflow": "ellipsis",
+   "overflow": "hidden",
+   "width": 120,
+   "lines": 1,
+   "overflowsBox": true
+  }
+ ]
+}

@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a7c10d00-0000-4000-8000-000000000178",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-15T12:00:00.000Z",
+  "description": "EXP-011 §77 fixture: a text input feeds a Variable that feeds an Action Dispatcher's Action (channel desk, Wait For Handler 500 ms); Dispatch and Cancel All are two buttons; Result, Refusal Reason, Waiting For, Completed Count and Is Executing are five Texts; Action Completed writes the completed Action Type into a Variable shown in a sixth. The Greeter placed below holds the two handlers, so a Dispatcher and its Handlers sit in two components."
+}

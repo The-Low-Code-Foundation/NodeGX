@@ -1,0 +1,397 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "edabdb79-c394-5a60-81cb-a26cf566d34b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "npRoot",
+      "fromProperty": "didMount",
+      "toId": "npLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npRoot",
+      "fromProperty": "didMount",
+      "toId": "npKind",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npUrl",
+      "fromProperty": "pm-kind",
+      "toId": "npKind",
+      "toProperty": "in-start"
+    },
+    {
+      "fromId": "npKindPost",
+      "fromProperty": "onClick",
+      "toId": "npPickPost",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npKindPrayer",
+      "fromProperty": "onClick",
+      "toId": "npPickPrayer",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npKindTestimony",
+      "fromProperty": "onClick",
+      "toId": "npPickTestimony",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npKindEvent",
+      "fromProperty": "onClick",
+      "toId": "npPickEvent",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npPickPost",
+      "fromProperty": "out-picked",
+      "toId": "npKind",
+      "toProperty": "in-picked"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-postInk",
+      "toId": "npKindPost",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-postFill",
+      "toId": "npKindPost",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "npPickPrayer",
+      "fromProperty": "out-picked",
+      "toId": "npKind",
+      "toProperty": "in-picked"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-prayerInk",
+      "toId": "npKindPrayer",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-prayerFill",
+      "toId": "npKindPrayer",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "npPickTestimony",
+      "fromProperty": "out-picked",
+      "toId": "npKind",
+      "toProperty": "in-picked"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-testimonyInk",
+      "toId": "npKindTestimony",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-testimonyFill",
+      "toId": "npKindTestimony",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "npPickEvent",
+      "fromProperty": "out-picked",
+      "toId": "npKind",
+      "toProperty": "in-picked"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-eventInk",
+      "toId": "npKindEvent",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-eventFill",
+      "toId": "npKindEvent",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-title",
+      "toId": "npTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-field",
+      "toId": "npCaption",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-hint",
+      "toId": "npCaption",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-share",
+      "toId": "npShare",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-back",
+      "toId": "npBack",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-takesPhotos",
+      "toId": "npPhotoBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-isPrayer",
+      "toId": "npPrayerFine",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-isEvent",
+      "toId": "npWhen",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-today",
+      "toId": "npDay",
+      "toProperty": "Min"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-latest",
+      "toId": "npDay",
+      "toProperty": "Max"
+    },
+    {
+      "fromId": "npDay",
+      "fromProperty": "Value",
+      "toId": "npGather",
+      "toProperty": "in-day"
+    },
+    {
+      "fromId": "npTime",
+      "fromProperty": "value",
+      "toId": "npGather",
+      "toProperty": "in-time"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-kind",
+      "toId": "npGather",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "npKind",
+      "fromProperty": "out-kind",
+      "toId": "npWhere",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "npLoad",
+      "fromProperty": "out-ok",
+      "toId": "npContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npLoad",
+      "fromProperty": "out-band",
+      "toId": "npBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "npLoad",
+      "fromProperty": "out-waiting",
+      "toId": "npToWaiting",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "npLoad",
+      "fromProperty": "out-problem",
+      "toId": "npRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "npLoad",
+      "fromProperty": "out-refused",
+      "toId": "npRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "npToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "npBack",
+      "fromProperty": "onClick",
+      "toId": "npWhere",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npWhere",
+      "fromProperty": "out-feed",
+      "toId": "npToFeed",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "npWhere",
+      "fromProperty": "out-prayer",
+      "toId": "npToPrayer",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "npAddPhoto",
+      "fromProperty": "onClick",
+      "toId": "npPick",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "npPick",
+      "fromProperty": "file",
+      "toId": "npUpload",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "npPick",
+      "fromProperty": "done",
+      "toId": "npUpload",
+      "toProperty": "upload"
+    },
+    {
+      "fromId": "npPick",
+      "fromProperty": "done",
+      "toId": "npBusy",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "npUpload",
+      "fromProperty": "completed",
+      "toId": "npBusy",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "npBusy",
+      "fromProperty": "state",
+      "toId": "npUploading",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npUpload",
+      "fromProperty": "error",
+      "toId": "npPhotoError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "npUpload",
+      "fromProperty": "cloudFile",
+      "toId": "npPhotos",
+      "toProperty": "in-added"
+    },
+    {
+      "fromId": "npRemoved",
+      "fromProperty": "value",
+      "toId": "npPhotos",
+      "toProperty": "in-removed"
+    },
+    {
+      "fromId": "npPhotos",
+      "fromProperty": "out-tiles",
+      "toId": "npEachTile",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "npPhotos",
+      "fromProperty": "out-many",
+      "toId": "npTiles",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npPhotos",
+      "fromProperty": "out-room",
+      "toId": "npAddPhoto",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npPhotos",
+      "fromProperty": "out-photos",
+      "toId": "npGather",
+      "toProperty": "in-photos"
+    },
+    {
+      "fromId": "npCaption",
+      "fromProperty": "onTextChanged",
+      "toId": "npGather",
+      "toProperty": "in-caption"
+    },
+    {
+      "fromId": "npShare",
+      "fromProperty": "onClick",
+      "toId": "npGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npGather",
+      "fromProperty": "out-problem",
+      "toId": "npError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "npGather",
+      "fromProperty": "out-post",
+      "toId": "npCall",
+      "toProperty": "in-post"
+    },
+    {
+      "fromId": "npGather",
+      "fromProperty": "out-go",
+      "toId": "npCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "npCall",
+      "fromProperty": "error",
+      "toId": "npError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "npCall",
+      "fromProperty": "done",
+      "toId": "npStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npStamp",
+      "fromProperty": "out-at",
+      "toId": "npChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "npStamp",
+      "fromProperty": "out-go",
+      "toId": "npChanged",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "npCall",
+      "fromProperty": "done",
+      "toId": "npWhere",
+      "toProperty": "run"
+    }
+  ]
+}

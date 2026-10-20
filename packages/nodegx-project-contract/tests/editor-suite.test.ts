@@ -58,6 +58,16 @@ describe('AC1 — the reference passes, a broken adapter fails naming the field'
     expect(formatReport(report)).toMatch(/^PASS — reference/);
   });
 
+  // P112-OWN008-FILESONLY: two OWN-008 strangers read a bare PASS and could not tell it from one with a graph half.
+  test('a PASS with no runner says it graded files only; one with a graph half names that instead', async () => {
+    const report = await runSuite(referenceAdapter(), small());
+    expect(report.graph).toBeUndefined();
+    expect(formatReport(report)).toMatch(/; files only: the adapter offers no graph runner$/);
+    const graded = { ...report, graph: { summary: 'graph scenarios on the runner: 85 passed', sentences: [] } };
+    expect(formatReport(graded)).toMatch(/; graph scenarios on the runner: 85 passed$/);
+    expect(formatReport(graded)).not.toMatch(/files only/);
+  });
+
   test('the broken adapter fails, and the sentences name toProperty and the parameter', async () => {
     const report = await runSuite(brokenAdapter(), small());
     expect(report.pass).toBe(false);

@@ -22,6 +22,8 @@ const ROOT = path.join(__dirname, '..');
 const CATALOG_PATH = path.join(ROOT, 'packages/noodl-types/src/node-catalog-enriched.json');
 const STRUCTURAL_CATALOG_PATH = path.join(ROOT, 'packages/noodl-types/src/node-catalog.json');
 const OUT_DIR = path.join(ROOT, 'docs-site/docs/nodes');
+const SPEC_NODES_DIR = path.join(ROOT, 'packages/nodegx-node-spec/src/nodes');
+const EXPORT_LEDGER_PATH = path.join(ROOT, 'packages/nodegx-export/coverage-ledger.json');
 
 /**
  * 🔴 FB-025 lane, 2026-08-27 — **this script grades an input it does not produce, and nothing
@@ -253,9 +255,232 @@ function renderDynamicPorts(dynamicPorts) {
   return parts.join('\n');
 }
 
+/**
+ * The low half of each page: what the node's executable spec (`@nodegx/node-spec`) and the export ledger
+ * (`nodegx-export/coverage-ledger.json`) say about it, for a reader who wants more than the ports.
+ *
+ * The specs are read from source with the loader `catalog:generate` already uses (scripts/node-spec/load-specs.js),
+ * so no build of the package is needed and a stale `dist/` cannot answer. Each spec's file is found by identity in
+ * `require.cache` after the load — the module whose exports hold that very spec object — rather than by guessing a
+ * file name from the type name (`Group` lives in group.ts, `net.noodl.controls.textinput` in text-input.ts).
+ */
+function loadSpecSources() {
+  const { loadSpecs, registryPath } = require('./node-spec/load-specs');
+  const specs = loadSpecs();
+  // The registry is skipped because it exports every spec it collects. Any other module exporting a spec it did not
+  // define would make two candidates, and that is refused below rather than settled by load order.
+  const filesBySpec = new Map();
+  for (const [file, mod] of Object.entries(require.cache)) {
+    if (!file.startsWith(SPEC_NODES_DIR + path.sep) || file === registryPath || !mod || !mod.exports) continue;
+    for (const value of Object.values(mod.exports)) {
+      if (!value || typeof value !== 'object') continue;
+      if (!filesBySpec.has(value)) filesBySpec.set(value, []);
+      filesBySpec.get(value).push(file);
+    }
+  }
+  const byType = new Map();
+  for (const [typeName, spec] of Object.entries(specs)) {
+    const candidates = filesBySpec.get(spec) || [];
+    if (candidates.length !== 1) {
+      throw new Error(
+        `generate-node-docs: the spec of ${typeName} is exported by ${candidates.length} files (${candidates
+          .map((f) => path.basename(f))
+          .join(', ')}); expected exactly one`
+      );
+    }
+    const file = candidates[0];
+    const source = fs.readFileSync(file, 'utf8');
+    // The page fences the source with ``` and the HLT-013 scan pairs fences the same way, so a triple backtick inside
+    // the source would end the block early and turn the rest of the file into prose. Refuse rather than mis-render.
+    if (source.includes('```')) throw new Error(`generate-node-docs: ${file} contains a triple backtick`);
+    byType.set(typeName, { spec, source, rel: path.relative(ROOT, file).split(path.sep).join('/') });
+  }
+  return byType;
+}
+
+/** What a spec's `needs` mean, in words (spec.ts `WorldNeed`). */
+const WORLD_NEEDS = {
+  clock: 'time: timers, delays and the frame clock',
+  random: 'random numbers',
+  network: 'the network',
+  registry: 'the shared store of Objects and Arrays, looked up by id',
+  timezone: 'the local time zone',
+  digest: "the browser's SHA-2 hashing",
+  viewport: "the browser window's size",
+  location: 'the page URL, and whether a person caused the action',
+  project: "the project's settings",
+  stack: 'a Component Stack',
+  router: 'the page Router',
+  popup: 'popups',
+  backend: 'a backend: records, users and cloud functions',
+  picker: "the browser's file picker",
+  socket: 'WebSockets',
+  person: "a person's pointer and keyboard",
+  group: 'the Radio Button Group it sits in',
+  host: 'services of the backend process a cloud function runs in'
+};
+
+/** What each input conversion does, in words (coerce.ts `COERCIONS`). `none` is not listed: the value arrives as sent. */
+const COERCION_WORDS = {
+  'js-number': 'converted with `Number(value)`, so text that is not a number becomes `NaN`',
+  'js-string': 'converted with `String(value)`, so no value becomes the text `"undefined"`',
+  'js-boolean': 'any truthy value is `true`, anything else `false`',
+  'typed-number': 'a number; no value, or one that is not a number, keeps the default',
+  'typed-string': 'converted to text; no value keeps the default',
+  'typed-boolean': 'converted with `!!value`; no value keeps the default',
+  'typed-color': 'kept when it is `#RGB`, `#RRGGBB`, `rgb(…)` or `rgba(…)`; anything else keeps the default',
+  'not-false': 'only an explicit `false` turns it off; no value, `0` and `""` leave it on',
+  'array-literal': 'text is evaluated as a JavaScript array literal; text that does not evaluate becomes `[]`',
+  'object-literal': 'text is evaluated as a JavaScript object literal; text that does not evaluate becomes `{}`'
+};
+
+/** What the export ledger's statuses mean (scripts/export-ledger/check.js). */
+const EXPORT_STATUS_WORDS = {
+  translated: 'Exports to React. A project that uses it exports this node as React code.',
+  stubbed: 'Exports to React as a typed stub by design: the generated code has the shape, and you connect it to your own backend.',
+  deferred: 'Does not export to React yet. A project that uses it exports with this node named in the export report.',
+  'backend-only': 'Runs only on the backend, inside cloud functions, so it has no React form.'
+};
+
+function inlineCode(text) {
+  const s = String(text);
+  const longest = Math.max(0, ...(s.match(/`+/g) || []).map((run) => run.length));
+  const fence = '`'.repeat(longest + 1);
+  return longest ? `${fence} ${s} ${fence}` : `${fence}${s}${fence}`;
+}
+
+/** Lower-cases a sentence's first letter to follow a colon (not an acronym's), and ends it with a full stop. */
+function sentence(text) {
+  const s = String(text).trim();
+  const lowered = /^[A-Z][a-z]/.test(s) ? s.charAt(0).toLowerCase() + s.slice(1) : s;
+  return /[.!?]$/.test(lowered) ? lowered : lowered + '.';
+}
+
+/** `a`, `a or b`, `a, b or c`. */
+function orList(items) {
+  return items.length < 2 ? items.join('') : `${items.slice(0, -1).join(', ')} or ${items[items.length - 1]}`;
+}
+
+function migrationWords(migration) {
+  if (!migration) return '';
+  if (migration.none) return `Existing projects are not migrated: ${escapeAngles(sentence(migration.none))}`;
+  if (migration.project) return `Existing projects are migrated by \`${migration.project}\` when they are opened.`;
+  if (migration.parameter) return `A project that sets \`${migration.parameter}\` keeps the old behaviour.`;
+  return '';
+}
+
+/** The node types in the export page's worked example (scripts/export-doc/example.js). */
+const EXAMPLE_TYPES = new Set(require('./export-doc/example').BECAME.map(([typeName]) => typeName));
+
+function renderExportSection(entry) {
+  if (!entry) return '';
+  const words = EXPORT_STATUS_WORDS[entry.status];
+  if (!words) throw new Error(`generate-node-docs: unknown export status "${entry.status}" for ${entry.typeName}`);
+  const why = entry.status !== 'translated' && entry.exemption ? `\n\nWhy: ${escapeAngles(entry.exemption)}.` : '';
+  // Pages sit at nodes/<category>/<slug>.md, two levels below the export page.
+  const more = EXAMPLE_TYPES.has(entry.typeName)
+    ? 'This node is in the worked example on [How export works](../../how-export-works.md): see [what it became](../../how-export-works.md#what-each-node-became) in the generated React.'
+    : '[How export works](../../how-export-works.md) shows what an export writes, with a worked example.';
+  return `## Code export\n\n${words}${why}\n\n${more}\n`;
+}
+
+function renderSpecSection(node, specEntry) {
+  if (!specEntry) return '';
+  const { spec, source, rel } = specEntry;
+  const parts = [
+    '## Under the hood\n',
+    `This node's behaviour is written down as an executable spec in \`@nodegx/node-spec\`, version ${spec.version}. ` +
+      'The spec is the reference the conformance tests grade the runtime against. ' +
+      'Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.\n'
+  ];
+
+  const needs = (spec.needs || []).filter((n) => WORLD_NEEDS[n]);
+  if (needs.length) {
+    parts.push(
+      `### What it depends on outside the node\n\n${needs.map((n) => `- ${WORLD_NEEDS[n]} (\`${n}\`)`).join('\n')}\n`
+    );
+  } else {
+    parts.push('### What it depends on outside the node\n\nNothing. Its outputs depend only on its inputs and its own state.\n');
+  }
+
+  if (spec.state && typeof spec.state === 'object' && Object.keys(spec.state).length) {
+    parts.push(`### Starting state\n\n\`\`\`json\n${JSON.stringify(spec.state, null, 2)}\n\`\`\`\n`);
+  }
+
+  const inputsByName = new Map((node.inputs || []).map((p) => [p.name, p]));
+  const converted = Object.entries(spec.inputs || {}).filter(([, decl]) => decl && COERCION_WORDS[decl.coerce]);
+  if (converted.length) {
+    const rows = converted.map(([name, decl]) => {
+      const label = (inputsByName.get(name) && inputsByName.get(name).displayName) || decl.displayName || name;
+      return `| ${escapeMd(label)} (\`${escapeMd(name)}\`) | \`${decl.coerce}\` | ${escapeMd(COERCION_WORDS[decl.coerce])} |`;
+    });
+    parts.push(
+      `### How inputs are converted\n\nInputs not listed arrive as sent.\n\n| Input | Conversion | What it does |\n|---|---|---|\n${rows.join('\n')}\n`
+    );
+  }
+
+  // spec.ts `Outcome`: exactly one per invocation of an `outcome: true` input.
+  const outcomes = Array.isArray(spec.outcomes) ? spec.outcomes : [];
+  const actions = Object.entries(spec.inputs || {}).filter(([, decl]) => decl && decl.outcome);
+  if (outcomes.length && actions.length) {
+    const label = ([name, decl]) =>
+      `${escapeAngles((inputsByName.get(name) && inputsByName.get(name).displayName) || decl.displayName || name)}`;
+    const named = outcomes.map((o) => `**${o.charAt(0).toUpperCase() + o.slice(1)}**`);
+    parts.push(
+      `### How actions report back\n\nEach time ${orList(actions.map(label))} is triggered, the node reports exactly one of ${orList(named)}.\n`
+    );
+  }
+
+  const diagnostics = Object.entries(spec.diagnostics || {});
+  if (diagnostics.length) {
+    const rows = diagnostics.map(
+      ([id, d]) =>
+        `| ${escapeMd(d.says || id)} | ${(d.settings || []).map((s) => `\`${escapeMd(s)}\``).join(', ') || '—'} | \`${escapeMd(id)}\` |`
+    );
+    parts.push(
+      `### Warnings it shows in the editor\n\n| Warning | Settings it points at | Id |\n|---|---|---|\n${rows.join('\n')}\n`
+    );
+  }
+
+  const acts = Object.entries(spec.acts || {});
+  if (acts.length) {
+    parts.push(
+      `### What a person can do to it\n\nThe conformance tests play these acts against it:\n\n${acts
+        .map(([name, a]) => `- \`${name}\`: ${escapeAngles((a && a.description) || '')}`)
+        .join('\n')}\n`
+    );
+  }
+
+  const changes = Array.isArray(spec.changes) ? spec.changes : [];
+  if (changes.length) {
+    const lines = changes.map((c) => {
+      const commit = c.commit ? ` (runtime commit \`${c.commit}\`)` : '';
+      return `- **Version ${c.version}**${commit}: ${escapeAngles(c.says)}. ${migrationWords(c.migration)}`;
+    });
+    parts.push(`### Version history\n\n${lines.join('\n')}\n`);
+  }
+
+  const idioms = Array.isArray(spec.idioms) ? spec.idioms : [];
+  if (idioms.length) {
+    parts.push(
+      `### The code it replaces\n\nWhat you would write by hand instead:\n\n${idioms
+        .map((i) => `- ${escapeAngles(i.says)}: ${inlineCode(i.example)}`)
+        .join('\n')}\n`
+    );
+  }
+
+  parts.push(
+    `## The full spec {#spec-source}\n\nThe spec's source, as the docs were generated. Helpers it imports live beside it in \`packages/nodegx-node-spec/src\`.\n\n\`\`\`ts title="${rel}"\n${source.replace(/\n$/, '')}\n\`\`\`\n`
+  );
+  return parts.join('\n');
+}
+
 function main() {
   const check = process.argv.includes('--check');
   const catalog = JSON.parse(fs.readFileSync(CATALOG_PATH, 'utf8'));
+  const specSources = loadSpecSources();
+  const exportLedger = JSON.parse(fs.readFileSync(EXPORT_LEDGER_PATH, 'utf8')).entries || {};
+  const exportByType = new Map(Object.values(exportLedger).map((e) => [e.typeName, e]));
 
   // Both modes, deliberately: writing pages from a stale enriched catalog is the worse half of
   // the defect, because it bakes the staleness into the committed pages and `--check` then
@@ -289,7 +514,7 @@ function main() {
   const files = new Map();
 
   const GENERATED_NOTE =
-    '\n:::info Generated\nThis page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.\n:::\n';
+    '\n:::info Generated\nThis page is generated from `node-catalog-enriched.json`, the node\'s spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.\n:::\n';
 
   files.set('_category_.json', JSON.stringify({ label: 'Node reference', position: 3, link: { type: 'doc', id: 'index' } }, null, 2) + '\n');
 
@@ -300,6 +525,11 @@ function main() {
     '',
     `Every node in the catalog — ${catalog.nodes.length} in total — generated from the same`,
     'enriched catalog the editor reads for its own in-editor help. Grouped by picker category.',
+    '',
+    `${catalog.nodes.filter((n) => specSources.has(n.typeName)).length} of them also have an executable behaviour spec,`,
+    'shown on the node\'s page under **Under the hood**: what it depends on, its starting state, how it',
+    'converts its inputs, its version history and the full spec source. Every page also says whether the node',
+    'exports to React.',
     GENERATED_NOTE,
     ''
   ];
@@ -350,7 +580,12 @@ function main() {
         `| Type name | \`${node.typeName}\` |`,
         `| Available in | ${(node.availableIn || []).join(', ') || '—'} |`,
         `| SSR compatibility | ${node.ssr ? node.ssr.compat + (node.ssr.note ? ` — ${escapeMd(node.ssr.note)}` : '') : '—'} |`,
-        `| Provided by | \`${node.providedBy || '—'}\` |`
+        `| Provided by | \`${node.providedBy || '—'}\` |`,
+        `| Behaviour spec | ${
+          specSources.has(node.typeName)
+            ? `version ${specSources.get(node.typeName).spec.version} ([under the hood](#under-the-hood))`
+            : 'not written yet'
+        } |`
       ];
       parts.push(`## At a glance\n\n${meta.join('\n')}\n`);
 
@@ -386,6 +621,9 @@ function main() {
           .filter(Boolean);
         if (links.length) parts.push(`## Related nodes\n\n${links.join(', ')}\n`);
       }
+
+      parts.push(renderExportSection(exportByType.get(node.typeName)));
+      parts.push(renderSpecSection(node, specSources.get(node.typeName)));
 
       parts.push(GENERATED_NOTE);
 
@@ -444,7 +682,7 @@ if (require.main === module) {
   runCli();
 }
 
-module.exports = { assertEnrichedCatalogIsFresh, StaleCatalogError, renderRulesSection };
+module.exports = { assertEnrichedCatalogIsFresh, StaleCatalogError, renderRulesSection, slugify, escapeAngles };
 
 function runCli() {
   try {

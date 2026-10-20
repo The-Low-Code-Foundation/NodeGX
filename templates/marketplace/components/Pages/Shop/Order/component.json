@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "37a01595-c56c-5712-8124-59dd20631369",
+  "name": "Order",
+  "path": "/Pages/Shop/Order",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "An order, opened by its private link: its number, and each seller’s part as it moves"
+}

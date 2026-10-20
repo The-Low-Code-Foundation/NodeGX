@@ -1,0 +1,382 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "02fcc340-9ee1-5d3c-8a42-4fbd98078d49",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "qbIn",
+      "type": "Component Inputs",
+      "label": "The question",
+      "ports": [
+        {
+          "name": "prompt",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "choices",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "enabled",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "placeholder",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "checkWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "skillName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "padKeys",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "numeric",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "expected",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "qbWrap",
+      "type": "Group",
+      "label": "The box",
+      "children": [
+        "qbSkill",
+        "qbPrompt",
+        "qbTyped",
+        "qbOptions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "qbSkill",
+      "type": "Text",
+      "label": "Which skill",
+      "parent": "qbWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--foreground)",
+        "as": "span",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "qbPrompt",
+      "type": "Text",
+      "label": "The question",
+      "parent": "qbWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-4xl)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-tight)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "qbTyped",
+      "type": "Group",
+      "label": "Answer it",
+      "parent": "qbWrap",
+      "children": [
+        "qbPad"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "cssClassName": "rkt-answer"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "qbPad",
+      "type": "game-kit.AnswerPad",
+      "label": "The answer pad",
+      "parent": "qbTyped",
+      "parameters": {
+        "keySize": 48,
+        "fieldWidth": 220,
+        "fieldFontSize": "var(--text-2xl)",
+        "fontFamily": "Grandstander",
+        "radius": "var(--radius-lg)",
+        "placeholder": "…"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "qbOptions",
+      "type": "Group",
+      "label": "Pick one",
+      "parent": "qbWrap",
+      "children": [
+        "qbEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "justifyContent": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "qbEach",
+      "type": "For Each",
+      "label": "One button per option",
+      "parameters": {
+        "template": "/Game/Option button",
+        "templateType": "explicit"
+      },
+      "parent": "qbOptions",
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "qbStates",
+      "type": "States",
+      "label": "Typed or options",
+      "parameters": {
+        "states": "typed,options",
+        "values": "showTyped,showOptions",
+        "useTransitions": false,
+        "type-showTyped": "boolean",
+        "value-typed-showTyped": true,
+        "value-options-showTyped": false,
+        "type-showOptions": "boolean",
+        "value-typed-showOptions": false,
+        "value-options-showOptions": true
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "qbShowTyped",
+      "type": "Expression",
+      "label": "Type it, while answering",
+      "parameters": {
+        "expression": "show === true && enabled !== false"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "qbShowOptions",
+      "type": "Expression",
+      "label": "Pick one, while answering",
+      "parameters": {
+        "expression": "show === true && enabled !== false"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "qbSkillShown",
+      "type": "Expression",
+      "label": "Name the skill while answering",
+      "parameters": {
+        "expression": "enabled !== false"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "qbFocusBox",
+      "type": "JavaScriptFunction",
+      "label": "Put the cursor back in the box",
+      "parameters": {
+        "functionScript": "if (typeof document !== 'undefined') {\n  requestAnimationFrame(() => {\n    const field = document.querySelector('.rkt-answer input');\n    if (field && !field.disabled) field.focus();\n  });\n}"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "qbLength",
+      "type": "Expression",
+      "label": "A sum, a sentence, or a long sentence?",
+      "parameters": {
+        "expression": "((prompt || '') + '').length <= 24 ? 'sum' : ((prompt || '') + '').length <= 60 ? 'sentence' : 'long'"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "qbSize",
+      "type": "States",
+      "label": "Big for a sum, smaller for a sentence",
+      "parameters": {
+        "states": "sum,sentence,long",
+        "values": "size",
+        "useTransitions": false,
+        "type-size": "string",
+        "value-sum-size": "var(--text-4xl)",
+        "value-sentence-size": "var(--text-3xl)",
+        "value-long-size": "var(--text-xl)"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "qbSetTyped",
+      "type": "Set Variable",
+      "label": "The typed answer",
+      "parameters": {
+        "name": "questionAnswer"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "qbSetPicked",
+      "type": "Set Variable",
+      "label": "The picked answer",
+      "parameters": {
+        "name": "questionAnswer"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "qbAnswer",
+      "type": "Variable2",
+      "label": "The answer",
+      "parameters": {
+        "name": "questionAnswer"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: only one round is ever on screen (the race page's or Monster Gate's), and each question writes this before it is read."
+      },
+      "x": 410,
+      "y": 1480
+    },
+    {
+      "id": "qbOut",
+      "type": "Component Outputs",
+      "label": "The answer",
+      "ports": [
+        {
+          "name": "answered",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "answer",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "text",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "layoutSeen",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "layoutSeenNow",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "mistakes",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "wrongKey",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "qbWrap"
+  ]
+}

@@ -79,14 +79,17 @@
  *                                        reload of THIS screen shows (P112-OWN019-RELOADHERE: o2 proved "the best
  *                                        survives a reload" by navigating to its start page, and a reload of its
  *                                        results page showed "You scored  out of 5")
- *   { "watch": { "look": T }, "for_ms": 1500?, "expect"?: { "never": {…} } }
+ *   { "watch": { "look": T | [T, …] }, "for_ms": 1500?, "expect"?: { "never": {…} } }
  *                                        read T's look about every 25 ms for for_ms (≤ 10000) and answer every
  *                                        DISTINCT state in order, each with the ms it began and ended — what a
  *                                        person sees DURING a change, where a read's look waits for it to settle
  *                                        (P112-OWN019-WATCHMOMENT: the quiz's new answers wore the last question's
  *                                        green and red for a moment, and every settled look read them idle).
  *                                        T absent reads as null. `expect: { never: { backgroundName: "green" } }`
- *                                        fails the step when any state had those fields
+ *                                        fails the step when any state had those fields. A LIST of targets (≤ 8) is
+ *                                        read on every tick and answers per target; `never` fails on any of them
+ *                                        (P112-OWN019-WATCHONE: R3 watched Canberra while the carried green landed,
+ *                                        by position, on Sydney)
  *   { "viewport": "phone" | "390x844" }  resize
  *   { "screenshot": "name" }             a PNG of the viewport into --out-dir
  *   { "seed_storage": { "key": "value" } } write localStorage, and navigate afterwards to load it
@@ -213,10 +216,12 @@ function locateExpression(target) {
     if (all.length === 0) return { found: false, matched: 0 };
     let last;
     for (const el of all) {
-      el.scrollIntoView({ block: 'center', inline: 'center' });
+      // 'instant': under \`html { scroll-behavior: smooth }\` a plain scrollIntoView glides, the rect below is read
+      // before it arrives, and every target off screen was refused as off screen (P112-OWN019-TAPHOLD, L1's page).
+      el.scrollIntoView({ block: 'center', inline: 'center', behavior: 'instant' });
       const r = el.getBoundingClientRect();
       const x = r.left + r.width / 2, y = r.top + r.height / 2;
-      if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) { last = { x, y, offscreen: true, wouldHit: 'nothing (off screen)' }; continue; }
+      if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) { last = { x, y, offscreen: true, wouldHit: 'nothing (off screen)', target: describe(el) }; continue; }
       // Lent pointer-events for the one measurement: elementFromPoint skips an element that has none.
       const before = el.style.pointerEvents;
       el.style.pointerEvents = 'auto';
@@ -485,6 +490,24 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
     const value = JSON.parse(last);
     return value && typeof value === 'object' ? { ...value, settledMs: Date.now() - t0 } : value;
   };
+  // A tap can start a glide (`scrollIntoView({ behavior: 'smooth' })`, `html { scroll-behavior: smooth }`): on L1's
+  // landing page (OWN-019 s4) it took ~1 s to reach the form, the step answered after two frames, and a read then
+  // said 101 px of 3788 — a working "scroll to the form" button read as broken (P112-OWN019-TAPHOLD). So a tap
+  // answers once no scroll position has moved for two frame pairs, for at most 2 s (`watch` is for during).
+  const SCROLLS = `(() => { const a = [scrollX, scrollY]; for (const e of document.querySelectorAll('*')) if (e.scrollTop || e.scrollLeft) a.push(e.scrollTop, e.scrollLeft); return a.join(','); })()`;
+  const scrollSettled = async () => {
+    const t0 = Date.now();
+    let last = await evaluate(SCROLLS);
+    let moved = false;
+    for (let same = 0; same < 2 && Date.now() - t0 < 2000; ) {
+      await frames();
+      const next = await evaluate(SCROLLS);
+      if (next === last) same++;
+      else (same = 0), (moved = true);
+      last = next;
+    }
+    return moved ? { scrolledMs: Date.now() - t0, still: Date.now() - t0 >= 2000 } : null;
+  };
   const press = async (target) => {
     let p = await evaluate(locateExpression(target));
     // A target that is not there YET (an animation, a route still mounting) gets a short grace, as the
@@ -529,6 +552,11 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
         row.pressed = p.target;
         if (p.matched > 1) row.matched = p.matched;
         await frames();
+        const glide = await scrollSettled();
+        if (glide) {
+          row.scrolledMs = glide.scrolledMs;
+          if (glide.still) row.stillScrolling = true;
+        }
       } else if (verb === 'type') {
         if (typeof step.type !== 'string') throw new UsageError(`Step ${i + 1}: type takes a string.`);
         if (step.into !== undefined) await press(step.into);
@@ -596,28 +624,47 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
         row.url = await evaluate('location.pathname + location.hash');
       } else if (verb === 'watch') {
         const w = step.watch && typeof step.watch === 'object' ? step.watch : {};
-        if (w.look === undefined) throw new UsageError(`Step ${i + 1}: watch takes { look: T }.`);
-        const forMs = Math.min(10000, Math.max(100, Number(step.for_ms ?? 1500)));
-        const expr = lookExpression(w.look);
+        if (w.look === undefined) throw new UsageError(`Step ${i + 1}: watch takes { look: T } or { look: [T, T, …] }.`);
+        // P112-OWN019-WATCHINSIDE — Large 4 wrote `{ watch: { look: [...], for_ms: 3000, expect: { never: … } } }` and
+        // both were dropped without a word: six "never green" watches passed with green in their own states (s8, AC3).
+        // Either place is read; a key the watch does not know is refused, never ignored.
+        const unknown = Object.keys(w).filter((k) => !['look', 'for_ms', 'expect'].includes(k));
+        if (unknown.length) throw new UsageError(`Step ${i + 1}: watch does not take ${unknown.map((k) => JSON.stringify(k)).join(', ')} — it takes look, for_ms and expect.`);
+        if (step.expect !== undefined && w.expect !== undefined) throw new UsageError(`Step ${i + 1}: give watch one expect, beside it or inside it, not both.`);
+        const forMs = Math.min(10000, Math.max(100, Number(step.for_ms ?? w.for_ms ?? 1500)));
+        const expect = step.expect !== undefined ? step.expect : w.expect;
+        // P112-OWN019-WATCHONE — a list watches every target on every tick. R3 (s5) proved "nothing left over" on
+        // Canberra while the last question's green landed, by position, on Sydney: one target proves nothing about
+        // the rest. One target keeps the answer it always had (a list of states); a list answers per target.
+        const many = Array.isArray(w.look);
+        const targets = many ? w.look : [w.look];
+        if (targets.length === 0 || targets.length > 8) throw new UsageError(`Step ${i + 1}: watch looks at 1 to 8 targets.`);
+        const expr = `Promise.all([${targets.map((t) => lookExpression(t)).join(', ')}])`;
         // The fields a person tells apart; a look's box geometry moves with layout and is not a different state.
         const keyOf = (v) => (v && typeof v === 'object' ? JSON.stringify({ text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity === undefined ? undefined : Math.round(v.opacity * 10) / 10 }) : 'null');
-        const states = [];
+        const states = targets.map(() => []);
         const t0 = Date.now();
         while (Date.now() - t0 <= forMs) {
-          const v = await evaluate(expr);
+          const vs = await evaluate(expr);
           const at = Date.now() - t0;
-          const last = states[states.length - 1];
-          if (last && last.key === keyOf(v)) last.until = at;
-          else states.push({ key: keyOf(v), from: at, until: at, look: v && typeof v === 'object' ? { text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity } : null });
+          vs.forEach((v, k) => {
+            const list = states[k];
+            const last = list[list.length - 1];
+            if (last && last.key === keyOf(v)) last.until = at;
+            else list.push({ key: keyOf(v), from: at, until: at, look: v && typeof v === 'object' ? { text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity } : null });
+          });
           await wait(25);
         }
-        row.value = states.map(({ from, until, look }) => ({ from, until, look }));
-        const never = step.expect && typeof step.expect === 'object' ? step.expect.never : undefined;
+        const shown = (list) => list.map(({ from, until, look }) => ({ from, until, look }));
+        row.value = many ? targets.map((t, k) => ({ target: t, states: shown(states[k]) })) : shown(states[0]);
+        const never = expect && typeof expect === 'object' ? expect.never : undefined;
         if (never && typeof never === 'object') {
-          const hit = states.find((st) => st.look && Object.keys(never).every((k) => matches(st.look[k], never[k])));
-          if (hit) {
-            row.ok = false;
-            row.error = `${JSON.stringify(never)} was seen from ${hit.from} to ${hit.until} ms: ${JSON.stringify(hit.look)}`;
+          for (let k = 0; k < targets.length && row.ok; k++) {
+            const hit = states[k].find((st) => st.look && Object.keys(never).every((key) => matches(st.look[key], never[key])));
+            if (hit) {
+              row.ok = false;
+              row.error = `${many ? `${JSON.stringify(targets[k])}: ` : ''}${JSON.stringify(never)} was seen from ${hit.from} to ${hit.until} ms: ${JSON.stringify(hit.look)}`;
+            }
           }
         }
       } else if (verb === 'viewport') {

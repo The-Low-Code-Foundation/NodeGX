@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1a0d65f7-8546-5c0d-8893-039cb4ba6a21",
+  "name": "SetUp",
+  "path": "/Pages/SetUp",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Set up: the community and its first admin, with the setup token"
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1ec0d2ec-3e7a-5441-8301-701cb3d1e8af",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "deletequestiIn",
+      "fromProperty": "app",
+      "toId": "deletequestiFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "deletequestiIn",
+      "fromProperty": "setId",
+      "toId": "deletequestiFn",
+      "toProperty": "in-setId"
+    },
+    {
+      "fromId": "deletequestiIn",
+      "fromProperty": "run",
+      "toId": "deletequestiFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "deletequestiFn",
+      "fromProperty": "out-app",
+      "toId": "deletequestiOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "deletequestiFn",
+      "fromProperty": "success",
+      "toId": "deletequestiOut",
+      "toProperty": "done"
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e7a1c4d2-5b3f-4e8d-9c1a-000000000091",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Alarm Desk",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "breakText",
+        "wordText",
+        "contentText",
+        "ellipsisText"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 200,
+          "unit": "px"
+        },
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "breakText",
+      "type": "Text",
+      "label": "breakText",
+      "parent": "shell",
+      "parameters": {
+        "text": "Line one\nLine two",
+        "width": {
+          "value": 240,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "wordText",
+      "type": "Text",
+      "label": "wordText",
+      "parent": "shell",
+      "parameters": {
+        "text": "Supercalifragilisticexpialidocious",
+        "width": {
+          "value": 80,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "contentText",
+      "type": "Text",
+      "label": "contentText",
+      "parent": "shell",
+      "parameters": {
+        "text": "a content-size line that is longer than its two hundred pixel parent",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "ellipsisText",
+      "type": "Text",
+      "label": "ellipsisText",
+      "parent": "shell",
+      "parameters": {
+        "text": "an ellipsis line that is longer than its box",
+        "width": {
+          "value": 120,
+          "unit": "px"
+        },
+        "textOverflow": "ellipsis"
+      },
+      "x": 100,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

@@ -9,7 +9,7 @@ package that only work well with Claude and Claude Code, we need to be able to o
 vibe version."*
 **Depends on** OWN-018 (the lab: `round-kit.mjs`, `grade-quiz.mjs`, kit tgz12, everything Mistral taught the kit) and
 Richard's Vibe subscription key (`MISTRAL_VIBE_API_KEY` in the repo `.env`, made under Code › Vibe CLI).
-**Status: 🟡 s4 scoped (2026-10-14, Fable, with Richard): R33 no fork, R34 no Fable audit, R35 the series then Richard's own run last. AC5 met (s2); AC4 open; a third brief "Launch" (`own-019/sentence-launch.txt`: look, forms, a faked call, logic, storage) written, its grader owed. The sprint guide is `own-019/NEXT-SESSION-PROMPT.md` (Opus runs it). Earlier: s3 built the process kit (R31) then R32 (one session, taught, tgz27); q6 was the first process-kit 12/12; the field guide `own-019/VIBE-AND-LARGE4.md`.**
+**Status: 🟡 s5 ran (2026-10-14, Opus): every s4 lever in tgz30 (NOTELOOP, TAPHOLD — misread in s4 —, DESCRIBEINSIDE, RECORDERTAIL, the editor grader's mutants) + BACKENDSESSION (R38: the preview starts the backend); the series on tgz30 by day — quiz 12/12 ×3 (carryover clean ×2, R3 ✗ = WATCHONE, fixed), Launch RL1 17/19, RL2b 18/19, RL3 18/19 (behaviour all ✓; LAPTOPGAPS, R39: row gaps and eyebrow drift, now measured), one lab failure (Mistral's stream); money ≈ €0.42 per list $. Next: tgz31 (s5's fixes + peers' starter assets, 0.2.1) and the series again — sprint guide `own-019/NEXT-SESSION-PROMPT.md`. Earlier: s4 (daytime; Q1 12/12, L1 17/17, R36 Large 4 only, R37 levers first).**
 **Model:** Opus for the sessions that build and read the rounds. The agent under test: **Mistral Large 4
 (`mistral-large-4`, never `-latest`) in Mistral Vibe**, pinned to a version per round (2.26.1 at opening).
 
@@ -432,3 +432,105 @@ post-tool, post-agent) — and the kit uses none of them yet.
   (`own-019/NEXT-SESSION-PROMPT.md`: the four proofs, the series rules, the round columns including the console's
   allowance Δ that Richard reads, the Launch grader's checks and mutants, the lever list). The kit stays tgz27 (a copy
   survives in the s3 scratchpad; matches HEAD). Opus runs the sprint.
+- **s4 (2026-10-14, Opus, 09:10–14:00 CEST): the first daytime day.** Console €30.90 → €34.49 by 10:47.
+  - **o2 (tgz27, quiz, 09:10): 11/12, carryover not clean, finished by itself** in 52 min, $3.64 list, 86% cached;
+    one 103 KB design think in 5.6 min (o1's 171 KB took 30 min at evening speed) — R32 holds by day. Both misses had
+    the right checklist line; the tool could not play it: `read: { look }` settles (a 55 ms flash of the last
+    question's green read idle) and there was no reload (it navigated to `/start`; reloading its results page shows
+    "You scored  out of 5"). **WATCHMOMENT + RELOADHERE fixed (`5f8dee6d7`): `drive_page` `watch` (every state a
+    target shows during a change, `expect: { never }`) and `reload`**, taught in the Vibe AGENTS.md.
+  - **o2's first minutes found three more:** NODETYPEWORDS (a multi-word `list_node_types` query matched nothing;
+    15 calls walking categories), NESTEDCALLTOOL (`call_tool` called through `call_tool`, refused ~10×, so no tool
+    schemas), and the Launch yardstick PRESETFONTS (npm shipped no preset typefaces). Fixed `cda7ea056` (tgz28).
+  - **The Launch grader** (`own-019/grade-launch.mjs`, 17 checks incl. measured look: painted font via
+    `CSS.getPlatformFontsForNode`, chosen palette vs the template's own tokens, scale, contrast from pixels, phone,
+    laptop): Sonnet's l0 16/17 (font = PRESETFONTS, real); its control (look replayed through tgz28) 17/17; 12
+    mutants exact. Four grader faults read before believed and fixed (a `\S` in a template; default slate/blue
+    counted as chosen; an instant press; the grader's own scrolls gliding under `scroll-behavior: smooth`).
+  - **Q1 (tgz29, quiz, 10:14): 12/12, carryover clean, by itself** — 56 min, $3.49, 91% cached; `watch` ×3,
+    `reload` ×3, a reset-first component. Its proof and the grader agree.
+  - **L1 (tgz28, Launch, 09:50): 17/17, by itself** — 90 min, $5.12; Fraunces + DM Sans painted, its own palette and
+    drawn product vignettes. Richard: *"Fuck it actually looks good, blow me over with a feather."*
+  - **Richard's bonus — "your own editor" (`own-019/sentence-editor.txt`, `grade-editor.mjs`, 13 checks: edit in
+    browser A, a fresh browser plays it, everything restarted, a third plays it):** a second session on q6 (`--seed`).
+    **E1 (Large 4): 13/13** — chose the local backend, proved the record contract on a scratch page and exported the
+    collection before building; then **NOTELOOP: 67 min failing to edit its own NEXT.md** (18 of 23 edits refused,
+    probe files to calibrate the tool) — **lab stop**. SE1 (Sonnet) 13/13. Found: **BACKENDSESSION** (high) — a local
+    backend lives only while the agent's MCP session does; the grader and the gallery restart it, a person can't.
+    The editor grader first saved its edit into the rounds' own backends (a regrade found no Portugal): now grades a
+    copy; the rounds' data restored from SQLite.
+  - **Comparisons (Richard: "a GLM 5.3 round … and Sonnet using Claude Code"):** `round-kit --model zai-glm-5-3`.
+    GLM quiz 12/12 (47 min); GLM Launch **12/17** (the error line before any press; `ada@nowhere` saved; no font);
+    Sonnet quiz 12/12 (15 min). **R36: dropped — Large 4 only.**
+  - **Money (proof 3, first reading):** €3.59 of allowance over $7.10 list (recorder) — the console tracks Vibe's list
+    $ halved (the sale). A quiz ≈ €1.8 → ~140/month in the sale, ~70 after.
+  - **The gallery (Richard's ask):** every app copied out of the scratchpad and served from its own packed preview,
+    `own-019/gallery.mjs`, http://localhost:4800 (9 apps; backends kept alive for E1/SE1).
+  - **TAPHOLD (open):** `drive_page`'s tap stops L1's smooth scroll 2–201 px down where a person's tap reaches the
+    form; holding the press inside drive-steps didn't fix it.
+  - **R37: the levers first** (NOTELOOP, TAPHOLD, BACKENDSESSION, Q1's empty sitting, recorder-vs-Vibe $, the editor
+    grader's mutants) **into tgz30, then the series on it** — nothing so far counts as "three in a row on one kit"
+    (o2 tgz27, L1 tgz28, Q1/E1 tgz29). Q2 and SL1 started and stopped by that ruling.
+- **s5 (2026-10-14, Opus, from 14:00 CEST): the levers into tgz30, then the Large 4 series on it.**
+  - **NOTELOOP fixed (`3153bb4fc`):** the Vibe AGENTS.md says write NEXT.md whole with `write_file`; the hand-over hook
+    refuses a fourth note write after this session's NEXT.md (replayed on E1: stopped at call 92, ~1 h earlier).
+  - **TAPHOLD was misread, then fixed (`d256c1ab1`):** the tap never stopped the glide — any wait reads 3788 / 3352 /
+    3020; s4's 101 px was a read taken straight after the tap. Worse, found re-measuring: the runner's own
+    `scrollIntoView` glided under `scroll-behavior: smooth`, so **every target off screen was refused**. Now a tap
+    answers once scrolling stops (≤2 s) and locate centres instantly.
+  - **Q1's empty sitting = DESCRIBEINSIDE (`620e6723e`):** `describe: true` sent inside `arguments` (as the first-frame
+    note read) was stripped, a dummy drive ran, the agent grepped outside its folder and headless Vibe's "Allow grep?"
+    ended the sitting, recorded "finished". call_tool honours it now; round-kit records outcome `approval`.
+  - **Recorder vs Vibe $ = RECORDERTAIL (`bd149ba2c`):** the proxy searched only the last 8 KB of each stream; a final
+    line carrying a big tool call plus `usage` is longer, so L1 sitting 1 lost 8 of 43 calls' usage. 🔴 **s4's "console
+    € = list $ ÷ 2, number for number" compared the console with the recorder's low sum — unproven; re-measure from
+    Vibe's own export (`vibeUsd`).**
+  - **The editor grader proven (`b090c30ec`):** 4 mutants of SE1 (seconds, colours, marker, browser-only), each failing
+    exactly its checks; control 13/13. 🔴 Its first control graded the WRONG backend: the copy kept the round's port,
+    the gallery held it, provision failed, the grade went on and saved "Europe Quiz" into the gallery's SE1. Now the
+    copy gets its own port and a backend that doesn't start stops the grade; the gallery row restored (Richard's OK).
+  - **BACKENDSESSION fixed to R38 (`c04c1cc63`):** the preview starts the app's own backend (parent-pid, a `preview`
+    runtime record an agent adopts — same pid and port, measured — a look every 10 s); not in tgz30.
+  - **tgz30 = `b090c30ec`** (mcp + create-nodegx packed in the s4 pack worktree; preview = tgz29's). File list as tgz29
+    (+ the core-only OWN-007 skill, absent from a Vibe kit). Proven from the tarballs: the read straight after the
+    tap 99 (tgz29) → 3788 (tgz30); an off-screen "Yearly" pressed; describe-inside returns the schema; a kit made by
+    tgz30 refuses the 4th note write.
+  - **The series on tgz30, by day (all Large 4, every round finished by itself, cached 82–92%):** R1 12/12 carryover ✓
+    (39 min, $2.45), R2 12/12 ✓ (59 min, $3.94), R3 12/12 **carryover ✗** (66 min, $4.39) — it watched Canberra while
+    the carried green landed, by position, on Sydney: **WATCHONE, fixed `7f6bee6d9`** (watch takes a list). RL1 17/19
+    (100 min, $7.27), RL2b 18/19 (87 min, $6.82), RL3 18/19 (132 min, $9.55, ran past 18:00; its first ✗gaps was
+    its hero drawing — `row-gap` now needs words on one side); RL2 a lab failure (Mistral's stream died 27 s in; round-kit now
+    reruns the brief when no note exists). Every Launch behaviour check passed; the reds are the look.
+  - **Richard on RL1's laptop rows** ("funny justification choices and spacing"): **LAPTOPGAPS, R39 — all of it plus
+    three screenshot sizes.** render_report's `row-gap` / `alignment-drift` (graded on the gallery: Launch apps fire,
+    the nine quizzes and s4's control don't), three sizes by default, the vocabulary's layout rules, the grader's
+    `gaps`/`align`. The first default ("tablet") was refused by the real CLI — caught by a real run, fixed before
+    packing (`ed121860d`).
+  - **Three of four Launch reds were the grader's** (hero, laptop, font) — each fixed, each re-proven on the control
+    and the 12 mutants; one widening let `nofont` through and the mutant caught it.
+  - **Money:** €51.54 → €57.16 over ≈ $13.5 list ⇒ ≈ €0.42 per list $ (s4's "÷ 2" was against the recorder's low sum).
+  - **tgz31 packed (`09ae8b14c`, 0.2.1 — a peer's version bump):** s5's fixes plus peers' starter assets, TWOLOADERS,
+    CLOUDCALLNAME. The lab hardcodes 0.2.0 tarball names — s6's first job.
+- **s6 (2026-10-14, 19:42–20:00, Opus — evening, so no rounds):**
+  - **The lab is version-agnostic (`ac3effdd5`):** `own-018/kit-tarball.mjs` finds a kit's tarballs by package name;
+    the round scripts require create-nodegx's pin to equal the packed server's version (a mixed kit is refused,
+    measured); round-kit `--dry`. Dry creates on tgz30 (0.2.0) and tgz31 (0.2.1).
+  - **tgz32 = `ac3effdd5`** = tgz31 + the drawing-blind `row-gap` (the only content diff). Proven from the tarballs:
+    three sizes by default; RL1's feature rows fire on both kits, RL3's hero drawing fires on tgz31 only; a list
+    `watch` is clean on R1 and catches o2's 58 ms green on Sydney (the known-firing control); the preview starts SE1's
+    backend (a copy on its own port), stops it on SIGINT, starts it again, and `--no-backend` leaves it off.
+  - **Richard's look verdict on RL1, RL2b, RL3 (20:05):** "a nice looking landing page", all three, except RL1's
+    "Why Driftwood" rows: "the numbers on each row on the left, then a big space, then the text block further right,
+    weird spacing" — the LAPTOPGAPS row, built on tgz30 before render_report reported `row-gap`. He did not raise the
+    eyebrow drift the grader's `align` fails all three on. The tgz32 question: does a Launch round still leave the gap
+    now that the tool reports it?
+  - **R40 (Richard, ~20:10): the eyebrow drift IS a look failure** ("I can imagine my ex clients pulling me up on it").
+    He saw RL1's WAITLIST eyebrow off its centred "Join the waitlist" block, which render_report did not name: RL1's
+    group holds a 290 px form card and the drift rule skipped any group with a part > 240 px. **DRIFTTALLPART fixed
+    `c52e01e4f`** (skip only with two or more tall parts); gallery corpus moved by exactly that one finding (302 px).
+  - **The Launch control drifted under the fix** — Sonnet's Driftwood hero: "DRIFTWOOD" wordmark 528 px left of a centred
+    3-line headline (the headline was the tall part that hid it). **Richard (~20:15): yes, that is a drift too.** The
+    control's `hero_wordmark` gets `textAlignX: center` (validates clean, drift gone); the 12 mutants regenerated from
+    it (s6 scratchpad `lchk/c/driftwood`, `lchk/lmut2`, control as `ctl`). **Graded on tgz33: control 19/19, 12/12
+    mutants fail exactly their declared checks (13/13).**
+

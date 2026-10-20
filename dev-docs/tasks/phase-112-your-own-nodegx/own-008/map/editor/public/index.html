@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>NodeGX map</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/" } }
+    </script>
+  </head>
+  <body>
+    <header id="bar">
+      <strong id="project-name">NodeGX map</strong>
+      <span id="project-dir" class="muted"></span>
+      <span class="spacer"></span>
+      <input id="goto" list="goto-list" placeholder="Fly to a component…" autocomplete="off" />
+      <datalist id="goto-list"></datalist>
+      <button id="btn-overview" title="See the whole map (Home)">Whole map</button>
+      <button id="btn-battle" title="Fighters, turret fire and explosions around the fleet (B)">Battle: on</button>
+      <button id="btn-music" title="The march (M). Put a track of your own in editor/music/ to hear it instead.">♪ on</button>
+      <button id="btn-sfx" title="Blasters, turbolasers and explosions near you">FX on</button>
+      <button id="btn-undo" title="Undo (Ctrl+Z)">Undo</button>
+      <button id="btn-save" class="primary" title="Save into the app's files (Ctrl+S)">Save</button>
+      <button id="btn-open" title="Open another app's folder">Open…</button>
+    </header>
+    <main>
+      <div id="stage">
+        <canvas id="map"></canvas>
+        <div id="banner" hidden></div>
+        <div id="help">
+          <b>Fly</b> W A S D · <b>up/down</b> E / Q · <b>faster</b> Shift · <b>look</b> drag · <b>pan</b> right-drag ·
+          <b>zoom</b> wheel · <b>select</b> click · <b>fly to</b> double-click · <b>move a card</b> drag the selected one
+        </div>
+        <div id="hover" hidden></div>
+        <section id="preview-box">
+          <header><span>The app, running</span><span id="preview-status" class="muted"></span><span id="preview-note" class="muted"></span><button id="btn-preview">Hide</button></header>
+          <div id="preview"></div>
+        </section>
+      </div>
+      <aside id="panel"></aside>
+    </main>
+    <div id="toast" hidden></div>
+    <dialog id="open-dialog">
+      <form method="dialog">
+        <h3>Open a NodeGX app</h3>
+        <p class="muted">The folder that holds <code>nodegx.project.json</code>.</p>
+        <input id="open-path" size="60" />
+        <menu><button value="cancel">Cancel</button><button id="open-go" value="ok" class="primary">Open</button></menu>
+      </form>
+    </dialog>
+    <script type="module" src="/app.mjs"></script>
+  </body>
+</html>

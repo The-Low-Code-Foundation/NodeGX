@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "43f75914-6c8b-5b73-8cea-406f4642bfdc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mrIn",
+      "fromProperty": "name",
+      "toId": "mrName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "initials",
+      "toId": "mrInitials",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "shade",
+      "toId": "mrAv",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "sub",
+      "toId": "mrSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "canMake",
+      "toId": "mrMake",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mrIn",
+      "fromProperty": "id",
+      "toId": "mrGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "mrMake",
+      "fromProperty": "onClick",
+      "toId": "mrGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mrGather",
+      "fromProperty": "out-admin",
+      "toId": "mrCall",
+      "toProperty": "in-admin"
+    },
+    {
+      "fromId": "mrGather",
+      "fromProperty": "out-go",
+      "toId": "mrCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "mrCall",
+      "fromProperty": "error",
+      "toId": "mrError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mrCall",
+      "fromProperty": "failure",
+      "toId": "mrFailed",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "mrCall",
+      "fromProperty": "done",
+      "toId": "mrFailed",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "mrFailed",
+      "fromProperty": "state",
+      "toId": "mrError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mrCall",
+      "fromProperty": "done",
+      "toId": "mrStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mrStamp",
+      "fromProperty": "out-at",
+      "toId": "mrChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "mrStamp",
+      "fromProperty": "out-go",
+      "toId": "mrChanged",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "da66c3dd-3435-59b0-8b9b-943f2d1cf044",
+  "name": "OrderCard",
+  "path": "/Seller/OrderCard",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One seller’s part of an order, as the seller (or the admin) moves it: confirm with the delivery cost, the next step, or cancel with why"
+}

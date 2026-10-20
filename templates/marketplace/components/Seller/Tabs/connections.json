@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0596343b-b6f6-5250-8056-1c18db0d11bc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "stbIn",
+      "fromProperty": "on",
+      "toId": "stbLook",
+      "toProperty": "in-on"
+    },
+    {
+      "fromId": "stbLook",
+      "fromProperty": "out-orders",
+      "toId": "stb_orders",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "stb_orders",
+      "fromProperty": "onClick",
+      "toId": "stbTo_orders",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "stbLook",
+      "fromProperty": "out-products",
+      "toId": "stb_products",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "stb_products",
+      "fromProperty": "onClick",
+      "toId": "stbTo_products",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "stbLook",
+      "fromProperty": "out-enquiries",
+      "toId": "stb_enquiries",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "stb_enquiries",
+      "fromProperty": "onClick",
+      "toId": "stbTo_enquiries",
+      "toProperty": "navigate"
+    }
+  ]
+}

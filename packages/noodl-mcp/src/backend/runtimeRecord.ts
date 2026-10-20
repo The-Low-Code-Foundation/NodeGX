@@ -71,7 +71,7 @@ export const HEARTBEAT_INTERVAL_MS = 10_000;
 
 export interface BackendRuntimeOwner {
   /** Which spawner is responsible for stopping this backend. */
-  kind: 'noodl-mcp' | 'editor';
+  kind: 'noodl-mcp' | 'editor' | 'preview';
   pid: number;
   startedAt: string;
   /** The project the owner was serving, for the report a human reads. */

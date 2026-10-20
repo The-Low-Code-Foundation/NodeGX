@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000000503",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pickB",
+      "fromProperty": "onClick",
+      "toId": "pickBSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pickCRun",
+      "fromProperty": "onClick",
+      "toId": "pickCSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pickCRun",
+      "fromProperty": "onClick",
+      "toId": "hold",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "runBtn",
+      "fromProperty": "onClick",
+      "toId": "hold",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "page",
+      "fromProperty": "didMount",
+      "toId": "hold",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "itemRead",
+      "fromProperty": "value",
+      "toId": "hold",
+      "toProperty": "in-item"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-runs",
+      "toId": "readySet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-ready",
+      "toId": "readySet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-runs",
+      "toId": "doneSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "done",
+      "toId": "doneSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-item",
+      "toId": "holdingText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-runs",
+      "toId": "runsText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "readyRead",
+      "fromProperty": "value",
+      "toId": "readyText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "doneRead",
+      "fromProperty": "value",
+      "toId": "doneText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "againBtn",
+      "fromProperty": "onClick",
+      "toId": "say",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "say",
+      "fromProperty": "out-said",
+      "toId": "saidSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "say",
+      "fromProperty": "out-spoke",
+      "toId": "saidSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "saidRead",
+      "fromProperty": "value",
+      "toId": "saidText",
+      "toProperty": "text"
+    }
+  ]
+}

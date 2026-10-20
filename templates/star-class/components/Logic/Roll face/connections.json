@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d0ced17a-7463-528f-86f9-ce3efabd0445",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rollfaceIn",
+      "fromProperty": "history",
+      "toId": "rollfaceFn",
+      "toProperty": "in-history"
+    },
+    {
+      "fromId": "rollfaceIn",
+      "fromProperty": "at",
+      "toId": "rollfaceFn",
+      "toProperty": "in-at"
+    },
+    {
+      "fromId": "rollfaceIn",
+      "fromProperty": "action",
+      "toId": "rollfaceFn",
+      "toProperty": "in-action"
+    },
+    {
+      "fromId": "rollfaceIn",
+      "fromProperty": "seed",
+      "toId": "rollfaceFn",
+      "toProperty": "in-seed"
+    },
+    {
+      "fromId": "rollfaceIn",
+      "fromProperty": "run",
+      "toId": "rollfaceFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rollfaceFn",
+      "fromProperty": "out-history",
+      "toId": "rollfaceOut",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "rollfaceFn",
+      "fromProperty": "out-at",
+      "toId": "rollfaceOut",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "rollfaceFn",
+      "fromProperty": "out-seed",
+      "toId": "rollfaceOut",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "rollfaceFn",
+      "fromProperty": "out-canBack",
+      "toId": "rollfaceOut",
+      "toProperty": "canBack"
+    },
+    {
+      "fromId": "rollfaceFn",
+      "fromProperty": "out-canForward",
+      "toId": "rollfaceOut",
+      "toProperty": "canForward"
+    },
+    {
+      "fromId": "rollfaceFn",
+      "fromProperty": "out-position",
+      "toId": "rollfaceOut",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "rollfaceFn",
+      "fromProperty": "success",
+      "toId": "rollfaceOut",
+      "toProperty": "done"
+    }
+  ]
+}

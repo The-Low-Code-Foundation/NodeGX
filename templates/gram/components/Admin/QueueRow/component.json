@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b5bb3f80-a140-5812-806a-2b4c451ab44f",
+  "name": "QueueRow",
+  "path": "/Admin/QueueRow",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One row in the queue: why, what and whose, and Look"
+}

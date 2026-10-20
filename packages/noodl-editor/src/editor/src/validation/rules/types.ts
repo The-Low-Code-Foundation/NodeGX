@@ -34,6 +34,13 @@ export interface ValidatorOptions {
    * validator stays free of the specs and the project files: the caller (the agent server) supplies it.
    */
   drawnPorts?: DrawnPortsLookup;
+  /**
+   * P107 R40 — what a node's saved settings make it tell the editor once the app runs, read from its spec's `settings: true`
+   * diagnostics (`settingsDiagnosticLookup.ts`). `settingsDiagnostic` asks it of every node; absent, that rule reads nothing.
+   * Supplied by the caller (the Problems panel, the agent server) for the same reason as `drawnPorts`: the validator stays free
+   * of the specs, and a consumer that cannot resolve `@nodegx/node-spec` (the CLIs under scripts/) still loads it.
+   */
+  settingsDiagnostics?: SettingsDiagnosticsLookup;
   /** When set, only these rules run. */
   only?: Set<DiagnosticCode>;
   /** Rules to skip. */
@@ -46,6 +53,13 @@ export type DrawnPortsLookup = (
   nodeId: string,
   nodeType: string
 ) => { input: ReadonlySet<string>; output: ReadonlySet<string> } | undefined;
+
+/** `ValidatorOptions.settingsDiagnostics`: one node's settings-only warnings, by its type, its saved params and the input ports wired into it. */
+export type SettingsDiagnosticsLookup = (
+  nodeType: string,
+  params: Readonly<Record<string, unknown>>,
+  wired: readonly string[]
+) => readonly { key: string; message: string }[];
 
 /** Per-component view precomputed once and shared across rules. */
 export interface ComponentContext {

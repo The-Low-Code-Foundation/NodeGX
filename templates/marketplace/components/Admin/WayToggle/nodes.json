@@ -1,0 +1,178 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c0f50f9b-e03d-5d89-8c53-01e2a07e0c2d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wtBox",
+      "type": "net.noodl.controls.checkbox",
+      "label": "On in this country",
+      "parameters": {
+        "useLabel": true,
+        "width": {
+          "value": 22,
+          "unit": "px"
+        },
+        "height": {
+          "value": 22,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "borderRadius": "var(--radius-sm)",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "wtIn",
+      "type": "Component Inputs",
+      "label": "One country, for one way",
+      "ports": [
+        {
+          "name": "method",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "countryId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isOn",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "onIds",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "wtGather",
+      "type": "JavaScriptFunction",
+      "label": "This way, with this country on or off",
+      "parameters": {
+        "functionScript": "var on = Array.isArray(Inputs.onIds) ? Inputs.onIds.slice() : [];\nvar id = String(Inputs.countryId || '');\nif (!id || !Inputs.method) return;\non = on.filter(function (x) { return x !== id; });\nif (Inputs.checked) on.push(id);\nOutputs.way = { method: String(Inputs.method), countries: on };\nOutputs.go();",
+        "runOnChange-in-method": false,
+        "runOnChange-in-countryId": false,
+        "runOnChange-in-onIds": false,
+        "runOnChange-in-checked": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-onIds",
+          "displayName": "onIds",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-countryId",
+          "displayName": "countryId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-method",
+          "displayName": "method",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-checked",
+          "displayName": "checked",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-way",
+          "displayName": "way",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 290,
+      "y": 160
+    },
+    {
+      "id": "wtCall",
+      "type": "CloudFunction2",
+      "label": "saveWayToPay(way)",
+      "parameters": {
+        "function": "saveWayToPay"
+      },
+      "x": 290,
+      "y": 280
+    },
+    {
+      "id": "wtStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the ways changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 290,
+      "y": 400
+    },
+    {
+      "id": "wtChanged",
+      "type": "Set Variable",
+      "label": "The ways to pay changed",
+      "parameters": {
+        "name": "waysChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the ways to pay changed: the page reads again, whichever switch or card changed them."
+      },
+      "x": 290,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "wtBox"
+  ]
+}

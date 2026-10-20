@@ -148,7 +148,7 @@ import { File as NodeFile } from 'buffer';
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, PlayContext, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
+import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, MountContext, ParentAxis, PlayContext, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, playContextOf, playOutputs, REPEATER_TEMPLATES, ROUTER_PAGES, specFor, type WorldLocation } from '../../../nodegx-node-spec/src';
 import { AUTH_OPS, backendEvent, canonicalise, hostEvent, invocationEvent, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, OWN_ELEMENT, performRegistryWrite, SELF_REFERENCE, type BackendDelivery, type HostCall, type RegistryTables } from '../../../nodegx-node-spec/src';
 
@@ -1499,6 +1499,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   const states = new Map<string, State>();
   /** NSP-020 L1 (s80) — each mounted instance's PLAY context (the scenario's `wiredOutputs` + its `wired`; s82), by handle id. */
   const portContexts = new Map<string, Readonly<PlayContext>>();
+  /** NSP-019 R38 (s105) — how the holder a lone node is put in lays out (the scenario's `parent`), by handle id; absent, a column. */
+  const parentAxes = new Map<string, ParentAxis>();
   const byNodeId = new Map<string, State>();
   let next = 0;
   /** NSP-015 s20 — the subject whose `update()` is on the stack right now (synchronously); `undefined` between updates. */
@@ -2030,7 +2032,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     }
   }
 
-  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>, graphId?: string, wired?: readonly string[], portContext: Readonly<PlayContext> = {}): RuntimeHandle {
+  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>, graphId?: string, wired?: readonly string[], portContext: Readonly<MountContext> = {}): RuntimeHandle {
     if (!context.nodeRegister.hasNode(type)) throw new Error(`runtime: no node type "${type}" is registered`);
     if (graphId !== undefined && states.has(graphId)) throw new Error(`runtime: a node "${graphId}" is still mounted — a previous play leaked it`);
     const id = graphId ?? `${type}#${next++}`;
@@ -2039,6 +2041,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // interpreter's `mount` folds it; read again by `derivedSignal` after the mount
     const ports: Readonly<PlayContext> = { ...playContextOf(portContext), wired: [...(portContext.wired ?? []), ...(wired ?? [])] };
     portContexts.set(id, ports);
+    if (portContext.parent !== undefined) parentAxes.set(id, portContext.parent);
     const logs: LogLine[] = [];
     const modelCalls: unknown[] = [];
     // NSP-016 s56 — a lone Component Stack builds its pages in its own scope (`createNode`, `createPrimitiveNode`, `deleteNode`):
@@ -2433,10 +2436,12 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // what `getVisualParentNode` reads of the Group holding a lone node (react-component-node.ts :2061-2062): the
     // layout it lays children out in (NoodlReactComponent :1070-1075) and the re-render a Mounted change asks for
     // (:2310-2320 `parent.cachedChildren = undefined; parent.forceUpdate()`)
+    // R38 (s105) — the scenario's `parent` (adapter.ts `mount`): a row or a column; a play that names none is in a column
+    const axis = parentAxes.get(s.h.id) ?? 'column';
     root.parent = {
-      props: { layout: 'column' },
+      props: { layout: axis },
       // :1843 — `setStyle` reads the holder's `style.flexDirection` to place a child in it; a root Group lays out a column
-      style: { flexDirection: 'column' },
+      style: { flexDirection: axis },
       cachedChildren: undefined,
       children: [],
       innerReactComponentRef: null,

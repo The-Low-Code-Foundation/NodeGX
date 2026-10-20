@@ -12,7 +12,7 @@
  * EXP-007's provenance headers/hashes, which need the final bytes) happens in a separate step.
  */
 
-import { ComponentIR, ExportIR } from '../ir/types';
+import { ComponentIR, ExportIR, NodeIR, ParamValue, RouterIR } from '../ir/types';
 
 /** Deliberately minimal provenance line until EXP-007 lands the full marker set. */
 const GENERATED_TS = '// @nodegx:generated (scaffold — placeholder markers complete in EXP-007)\n';
@@ -111,6 +111,9 @@ export function emitScaffold(ir: ExportIR, shell?: ScaffoldShell): Record<string
 export function routedPages(ir: ExportIR): ScaffoldPage[] {
   const router = ir.project.routers[0];
   if (!router) return [];
+  // P18-S110-ROUTERSELF. The Router's own Url Path goes in front of every page's, as `router.tsx` puts it in front of
+  // every pattern it matches and every URL it pushes — so the route table and every exported `navigate(…)` wear it.
+  const prefix = routerPrefix(ir, router);
 
   const byLegacyPath = new Map<string, ComponentIR>();
   for (const component of ir.components) byLegacyPath.set(`/${component.path}`, component);
@@ -121,7 +124,7 @@ export function routedPages(ir: ExportIR): ScaffoldPage[] {
     const component = byLegacyPath.get(legacyPath);
     if (!component) continue;
     const fileBase = dedupe(pascalCase(lastSegment(component.path)), usedNames);
-    const urlPath = `/${trimUrlPart(pageUrlPath(component))}`;
+    const urlPath = `/${prefix}${trimUrlPart(pageUrlPath(component))}`;
     pages.push({
       componentPath: component.path,
       fileBase,
@@ -133,6 +136,87 @@ export function routedPages(ir: ExportIR): ScaffoldPage[] {
     });
   }
   return pages;
+}
+
+/** The Router node a `RouterIR` was read from. Its own ports are read here, at emit time, as every other node's are. */
+function routerNodeOf(ir: ExportIR, router: RouterIR): { component: ComponentIR; node: NodeIR } | undefined {
+  const component = ir.components.find((c) => c.path === router.componentPath);
+  const node = component?.nodes.find((n) => n.id === router.nodeId);
+  return component && node ? { component, node } : undefined;
+}
+
+/**
+ * `"shop/"` for a Router whose Url Path is `/shop`: the runtime's `_trimUrlPart(urlPath) + '/'` (`router.tsx`
+ * `getNavigationRelativeURL`, `matchPageFromUrl`). Blank is none — the runtime's `''` prefixes a lone slash that no
+ * URL it pushes can match, which this export does not reproduce. A wired one is not carried and is said
+ * (`routerNotes`).
+ */
+function routerPrefix(ir: ExportIR, router: RouterIR): string {
+  const value = routerNodeOf(ir, router)?.node.parameters.find((p) => p.name === 'urlPath')?.value;
+  if (value?.kind !== 'literal' || typeof value.value !== 'string') return '';
+  const trimmed = trimUrlPart(value.value);
+  return trimmed === '' ? '' : `${trimmed}/`;
+}
+
+/** The Router element's own paint, in panel order, with the value that paints nothing (`router.tsx`, `react-component-node.ts`). */
+const ROUTER_OWN_STYLE: Array<{ port: string; label: string; paints: (text: string) => boolean }> = [
+  { port: 'backgroundColor', label: 'Background Color', paints: (t) => t.trim() !== '' && t.trim() !== 'transparent' },
+  { port: 'clip', label: 'Clip Behavior', paints: (t) => t === 'scroll' || t === 'clip' },
+  { port: 'cssClassName', label: 'CSS Class', paints: (t) => t.trim() !== '' },
+  // The port's default is a comment, `/* background-color: red; */`: it declares nothing.
+  { port: 'styleCss', label: 'CSS Style', paints: (t) => t.replace(/\/\*[\s\S]*?\*\//g, '').trim() !== '' }
+];
+
+const paramText = (value: ParamValue | undefined): string | undefined =>
+  value === undefined
+    ? undefined
+    : value.kind === 'literal'
+      ? String(value.value)
+      : value.kind === 'script' || value.kind === 'expression'
+        ? value.source
+        : value.kind === 'json'
+          ? JSON.stringify(value.value)
+          : `${value.value}${value.unit}`;
+
+/**
+ * P18-S110-ROUTERSELF. What the export does not do with a Router's own ports, one sentence each. The Router collapses
+ * into `App.tsx` (`plan.ts` `routerShellDisposition`), which renders the pages straight into the route table: there
+ * is no Router element to paint, clip or class, and no Router to unmount.
+ */
+export function routerNotes(ir: ExportIR): string[] {
+  const lines: string[] = [];
+  for (const router of ir.project.routers) {
+    const found = routerNodeOf(ir, router);
+    if (!found) continue;
+    const { component, node } = found;
+    const wired = (port: string) => component.connections.some((c) => c.toId === node.id && c.toProperty === port);
+    const value = (port: string) => node.parameters.find((p) => p.name === port)?.value;
+    const at = `${router.componentPath}: node ${router.nodeId} (Router "${router.name}")`;
+
+    if (wired('mounted')) {
+      lines.push(`${at}: its Mounted is wired — the running app shows no page while the value is false; this export always routes`);
+    } else {
+      const mounted = value('mounted');
+      if (mounted?.kind === 'literal' && mounted.value === false) {
+        lines.push(`${at}: its Mounted is unticked — the running app renders no Router, so it shows no page at all; this export routes every page`);
+      }
+    }
+    if (wired('urlPath')) {
+      lines.push(`${at}: its Url Path is wired — the running app puts the value in front of every page's path; the exported routes carry none`);
+    }
+    const own = ROUTER_OWN_STYLE.filter(({ port, paints }) => {
+      if (wired(port)) return true;
+      const text = paramText(value(port));
+      return text !== undefined && paints(text);
+    }).map((s) => s.label);
+    if (own.length > 0) {
+      const names = own.length === 1 ? own[0] : `${own.slice(0, -1).join(', ')} and ${own[own.length - 1]}`;
+      lines.push(
+        `${at}: its own ${names} ${own.length === 1 ? 'is' : 'are'} not carried — the export renders the pages with no Router element to put ${own.length === 1 ? 'it' : 'them'} on`
+      );
+    }
+  }
+  return lines;
 }
 
 function pageUrlPath(component: ComponentIR): string {
@@ -227,10 +311,26 @@ function indexHtml(ir: ExportIR): string {
 ${moduleStylesheetLinks(ir)}  </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+${moduleDependencyScripts(ir)}    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
 `;
+}
+
+/**
+ * The `<script>` tags a project's kit `dependencies` earn — P109-S17-EXPORTKITDEPS.
+ *
+ * The export copied each dependency to `public/` and nothing loaded it, so a kit reading `window.THREE` at mount threw
+ * in the exported app and drew in the deployed one. These are the deploy injector's `<%modules_dependencies%>` tags
+ * (`buildInjectionTags`), over the list the injector itself ordered (`parseModuleDependencies`): a classic script
+ * per dependency, each once, an `http` entry at its own URL and anything else against `public/`, where it is copied. Classic and before the app's module script on purpose: a
+ * classic script runs as it is parsed and a module script after the document, so the library is defined before the
+ * bundled kit (`src/kits/modules/…`) evaluates — the order the deployed page has.
+ */
+function moduleDependencyScripts(ir: ExportIR): string {
+  return (ir.project.moduleDependencies ?? [])
+    .map((d) => `    <script src="${escapeHtml(d.startsWith('http') ? d : `/${d}`)}"></script>\n`)
+    .join('');
 }
 
 /**

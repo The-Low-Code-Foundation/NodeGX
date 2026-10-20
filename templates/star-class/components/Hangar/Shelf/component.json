@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1900b827-9eb8-5137-8364-254c24f09d3b",
+  "name": "Shelf",
+  "path": "/Hangar/Shelf",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Tabs for Face and Rocket, and a tile for every item on the chosen tab, as Logic/Hangar shelf says the active player sees it. Publishes Pick or Wear with the item id, and whether a pick is waiting."
+}

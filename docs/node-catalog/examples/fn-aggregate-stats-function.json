@@ -42,9 +42,9 @@
         {
           "id": "call_stats",
           "type": "CloudFunction2",
-          "label": "Call TaskStats",
+          "label": "Call Task Stats",
           "parameters": {
-            "function": "TaskStats"
+            "function": "Cloud Functions/Task Stats"
           }
         }
       ],
@@ -64,7 +64,7 @@
       ]
     },
     {
-      "name": "/Cloud Functions/Task Stats",
+      "name": "/#__cloud__/Cloud Functions/Task Stats",
       "nodes": [
         {
           "id": "fn_request",

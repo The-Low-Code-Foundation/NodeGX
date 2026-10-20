@@ -88,6 +88,78 @@
       "toProperty": "items"
     },
     {
+      "fromId": "nfIn",
+      "fromProperty": "skinWord",
+      "toId": "nfSkin",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nfSkinItems",
+      "fromProperty": "items",
+      "toId": "nfSkin",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "nfSkinVar",
+      "fromProperty": "value",
+      "toId": "nfSkin",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfSkin",
+      "fromProperty": "value",
+      "toId": "nfSetSkin",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfSkin",
+      "fromProperty": "changed",
+      "toId": "nfSetSkin",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfSkinVar",
+      "fromProperty": "value",
+      "toId": "nfSkinFace",
+      "toProperty": "in-skin"
+    },
+    {
+      "fromId": "nfSkinFace",
+      "fromProperty": "out-options",
+      "toId": "nfFace",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "nfDefaultSkin",
+      "fromProperty": "result",
+      "toId": "nfResetSkin",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "reset",
+      "toId": "nfResetSkin",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "skin0",
+      "toId": "nfFillSkin",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nfIn",
+      "fromProperty": "fill",
+      "toId": "nfFillSkin",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nfSkinVar",
+      "fromProperty": "value",
+      "toId": "nfOut",
+      "toProperty": "skin"
+    },
+    {
       "fromId": "nfLookVar",
       "fromProperty": "value",
       "toId": "nfLook",

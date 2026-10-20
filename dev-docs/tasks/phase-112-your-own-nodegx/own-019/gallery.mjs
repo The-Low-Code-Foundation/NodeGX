@@ -14,6 +14,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import { kitTarball, hasTarball } from '../own-018/kit-tarball.mjs';
 
 const GALLERY = path.join(process.env.HOME, 'vscode_projects', 'NodeGX test projects', 'OWN-019 Mistral apps');
 const INDEX_PORT = 4800;
@@ -43,12 +44,15 @@ if (cmd === 'add') {
   if (!round || !app) throw new Error('usage: gallery.mjs add <round> <round-root|app-dir> --tgz <tgz-dir> --brief <name>');
   const tgzDir = path.resolve(opt('--tgz', ''));
   const kit = path.basename(tgzDir);
-  if (!fs.existsSync(path.join(tgzDir, 'nodegx-preview-0.2.0.tgz'))) throw new Error(`no preview tarball in ${tgzDir}`);
+  if (!hasTarball(tgzDir, 'nodegx-preview')) throw new Error(`no preview tarball in ${tgzDir}`);
   const kitDir = path.join(GALLERY, 'tgz', kit);
   if (!fs.existsSync(kitDir)) fs.cpSync(tgzDir, kitDir, { recursive: true, filter: (s) => !/\.log$/.test(s) });
   const dest = path.join(GALLERY, round, path.basename(app));
   fs.rmSync(path.join(GALLERY, round), { recursive: true, force: true });
   fs.cpSync(app, dest, { recursive: true, filter: (s) => !/[\\/](\.previews|grade|node_modules[\\/]\.cache)([\\/]|$)/.test(s) });
+  // An app with a local backend: its data lives under the round's HOME (~/.noodl/backends); copy it beside the app.
+  const roundHome = path.join(path.resolve(src), 'home', '.noodl', 'backends');
+  if (fs.existsSync(roundHome)) fs.cpSync(roundHome, path.join(GALLERY, round, 'home', '.noodl', 'backends'), { recursive: true });
   const gradeFile = opt('--grade') || [path.join(path.resolve(src), 'grade', 'grade.json'), path.join(app, 'grade', 'grade.json')].find((f) => fs.existsSync(f));
   const grade = gradeFile ? load(gradeFile, null) : null;
   if (gradeFile) {
@@ -85,8 +89,18 @@ if (cmd === 'add') {
   for (const k of Object.keys(env)) if (k.startsWith('NODEGX_') || k.startsWith('NOODL_') || /KEY|TOKEN|SECRET/.test(k)) delete env[k];
   const pids = [];
   for (const a of apps) {
+    // A backend lives as long as the MCP session that started it (provision.ts); a keeper is that session, held open.
+    if (fs.existsSync(path.join(GALLERY, a.round, 'home', '.noodl', 'backends'))) {
+      const ready = path.join(GALLERY, a.round, 'home', 'keeper.ready');
+      fs.rmSync(ready, { force: true });
+      const k = spawn(process.execPath, [new URL(import.meta.url).pathname, 'keep', a.round], { detached: true, stdio: ['ignore', fs.openSync(path.join(logs, `${a.round}-backend.log`), 'w'), fs.openSync(path.join(logs, `${a.round}-backend.log`), 'a')] });
+      k.unref();
+      pids.push(-k.pid); // the group: keeper, its MCP server and the backend it started
+      for (let i = 0; i < 240 && !fs.existsSync(ready); i++) await new Promise((r) => setTimeout(r, 500));
+      console.log(`${a.round.padEnd(6)} backend ${fs.existsSync(ready) ? fs.readFileSync(ready, 'utf8').trim() : 'did not start (see logs)'}`);
+    }
     const out = fs.openSync(path.join(logs, `${a.round}.log`), 'w');
-    const p = spawn('npx', ['-y', `--package=${path.join(GALLERY, 'tgz', a.kit, 'nodegx-preview-0.2.0.tgz')}`, 'noodl-preview', path.join(GALLERY, a.app), '--port', String(a.port), '--no-watch'],
+    const p = spawn('npx', ['-y', `--package=${kitTarball(path.join(GALLERY, 'tgz', a.kit), 'nodegx-preview')}`, 'noodl-preview', path.join(GALLERY, a.app), '--port', String(a.port), '--no-watch'],
       { env, cwd: home, detached: true, stdio: ['ignore', out, out] });
     p.unref();
     pids.push(-p.pid); // the process group: npx and the server it starts
@@ -97,6 +111,26 @@ if (cmd === 'add') {
   fs.writeFileSync(PIDS, JSON.stringify(pids) + '\n');
   console.log(`index  http://localhost:${INDEX_PORT}`);
   for (const a of apps) console.log(`${a.round.padEnd(6)} http://localhost:${a.port}  ${a.brief}  ${a.score ?? ''}`);
+} else if (cmd === 'keep') {
+  const a = apps.find((x) => x.round === rest[0]);
+  const home = path.join(GALLERY, a.round, 'home');
+  const appDir = path.join(GALLERY, a.app);
+  const dir = path.join(home, '.noodl', 'backends');
+  const instance = (fs.readFileSync(path.join(appDir, 'nodegx.project.json'), 'utf8').match(/"instanceId"\s*:\s*"([^"]+)"/) || [])[1];
+  const name = JSON.parse(fs.readFileSync(path.join(dir, instance, 'config.json'), 'utf8')).name;
+  const { createRequire } = await import('node:module');
+  const req = createRequire(path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../../packages/noodl-mcp/package.json'));
+  const { Client } = await import(req.resolve('@modelcontextprotocol/sdk/client/index.js'));
+  const { StdioClientTransport } = await import(req.resolve('@modelcontextprotocol/sdk/client/stdio.js'));
+  const env = { ...process.env, HOME: home, npm_config_cache: path.join(GALLERY, '.home', '.npm') };
+  for (const k of Object.keys(env)) if (k.startsWith('NODEGX_') || k.startsWith('NOODL_') || /KEY|TOKEN|SECRET/.test(k)) delete env[k];
+  const client = new Client({ name: 'own019-gallery-keeper', version: '0' });
+  await client.connect(new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${kitTarball(path.join(GALLERY, 'tgz', a.kit), 'nodegx-mcp')}`, 'noodl-mcp', appDir, '--allow-writes'], cwd: home, env, stderr: 'inherit' }));
+  const r = await client.callTool({ name: 'call_tool', arguments: { name: 'provision_backend', arguments: { name } } }, undefined, { timeout: 180000 });
+  const text = (r.content || []).map((c) => c.text).join('');
+  console.log(text.slice(0, 400));
+  fs.writeFileSync(path.join(home, 'keeper.ready'), (text.match(/"endpoint":"([^"]+)"/) || [, 'started'])[1] + '\n');
+  setInterval(() => {}, 1 << 30); // held open: the backend lives while this session does
 } else if (cmd === 'index-server') {
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   http.createServer((req, res) => {

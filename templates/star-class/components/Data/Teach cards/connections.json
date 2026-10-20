@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "669f201a-752b-5089-8ea5-d3ce6727a57e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "datateachcardsData",
+      "fromProperty": "items",
+      "toId": "datateachcardsOut",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "datateachcardsData",
+      "fromProperty": "count",
+      "toId": "datateachcardsOut",
+      "toProperty": "count"
+    }
+  ]
+}

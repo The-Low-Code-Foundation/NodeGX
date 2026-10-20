@@ -119,6 +119,12 @@
     },
     {
       "fromId": "activeprofilFn",
+      "fromProperty": "out-skin",
+      "toId": "activeprofilOut",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "activeprofilFn",
       "fromProperty": "out-paint",
       "toId": "activeprofilOut",
       "toProperty": "paint"

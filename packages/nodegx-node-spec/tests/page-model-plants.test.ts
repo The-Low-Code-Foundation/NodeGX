@@ -59,7 +59,7 @@ const PLANTS: Plant[] = [
     key: 'paintedValue',
     follows: (s) => s.authorValue,
     edits: [
-      ['  pending: boolean;\n};', '  pending: boolean;\n  paintedValue: number;\n};'],
+      ['  grow: string | null;\n};', '  grow: string | null;\n  paintedValue: number;\n};'],
       ['shown: 0, pending: true', 'shown: 0, pending: true, paintedValue: undefined'],
       // v3 (P109 ISL-031): the paint draws the handle at every frame — the plant drops a word equal to the one it last drew
       [
@@ -78,7 +78,7 @@ const PLANTS: Plant[] = [
     key: 'selected',
     follows: (s) => s.value,
     edits: [
-      ['  domSelected: string | null;\n};', '  domSelected: string | null;\n  selected: string | undefined;\n};'],
+      ['  grow: string | null;\n};', '  grow: string | null;\n  selected: string | undefined;\n};'],
       ["items: DEFAULT_ITEMS, domSelected: ''", "items: DEFAULT_ITEMS, domSelected: '', selected: undefined"],
       ["    set.onPage = true;\n    emit.push('didMount');\n  }\n  const value = s.value;", "    set.onPage = true;\n    set.selected = s.value;\n    emit.push('didMount');\n  }\n  const value = fresh ? s.value : s.selected;"],
       ['{ set: { value: picked, domSelected: picked }', '{ set: { value: picked, domSelected: picked, selected: picked }']
@@ -142,7 +142,7 @@ describe.each(PLANTS)('$shape', (plant) => {
 
 describe('a turn-like hook (React commits a component\'s own update at a turn of the event loop)', () => {
   test('in a spec: a world handler the format does not have goes red', async () => {
-    const spec = plantedSpec('slider.ts', [['    world: { place: (s) => painted(s) },', '    world: { place: (s) => painted(s), turn: (s) => ({ set: {}, send: [] }) },']]);
+    const spec = plantedSpec('slider.ts', [['    world: { place: (s, i, w) => withGrow(s, painted(s), undefined, i.position, w) },', '    world: { place: (s, i, w) => withGrow(s, painted(s), undefined, i.position, w), turn: (s) => ({ set: {}, send: [] }) },']]);
     expect(Object.keys(spec.world ?? {})).toContain('turn');
     const out = await guardFindings(spec, PAGE_MODELS[spec.type], SEEDS, N);
     expect(out).toEqual(['G8 world.turn: not a kind of the format']);

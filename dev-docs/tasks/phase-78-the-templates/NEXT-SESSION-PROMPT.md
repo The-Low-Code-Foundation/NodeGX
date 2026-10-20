@@ -1,5 +1,70 @@
 # Phase 78 — next session
 
+> ### 🟨 2026-10-15 (TPL-013 s5) — STAR CLASS: HUNT FOLLOWS THE RATING, P1–P2 PICTURE HUNT, SC-4 ENGLISH + SCIENCE — START HERE
+>
+> - **Built, gated, driven, second-read; COMMITTED** (Richard's go, 2026-10-15). Detail: [TPL-013 §6 s5](TPL-013-STAR-CLASS.md).
+>   1. Number Hunt and Make Ten play at the rating's class (the race's rule), not the class picked.
+>   2. P1–P2's hunt is `❓ + ❓ = 14`, no words.
+>   3. SC-4 banks 1–2: English (10 skills) and Basic Science with health (11), P3–JSS1, 245 items, English only; every science
+>      item sourced; read by an independent agent and all its fixes made. Chooser: Maths, 🔤 English, 🔬 Science, French;
+>      Rocket's French↔English lists refiled under French as "French words".
+> - **Readings:** 583/583 (tpl007Engine + GameKit + Template + tpl013Edition); `typecheck:mcp` 0; Rocket School byte-identical;
+>   `drive-tpl013-hunt.js` (new) 17/17 at 390 and 1024; `drive-tpl013-classes.js --subject Science --level P3 --expect P3`
+>   15/15 at both (the drive now takes `--subject`, through Change → the pill → Practise this).
+> - **Richard ruled (2026-10-15):** the jump stays automatic, no choice; banks stay English for now; ✋🏽 ✋🏾 ✋🏿 stands;
+>   s1–s5 committed. **Still owed:** a TEACHER's read of the banks before SC-8.
+> - **Next, an agent alone:** SC-4 banks 3–4 — Verbal Reasoning (P4–P6, + a Quantitative Reasoning generator: fresh
+>   function/case names, gate counts them) and Africa and world geography (P4–JSS3; §2.2.4's traps; capitals with twists in
+>   the note; Wikidata/Natural Earth). Then the hunt's hint and progress lines as icons for P1–P2, then the indices superscripts.
+
+> ### 🟨 2026-10-15 (TPL-013 s4) — STAR CLASS: THE ⬆️ CARD, SKIN TONES (BOTH GAMES), JSS MATHS (superseded by s5 above)
+>
+> - **Built, gated and driven; NOT committed** (Richard's go first). Detail and every finding: [TPL-013 §6 s4](TPL-013-STAR-CLASS.md).
+>   1. **The jump has its own card.** Five right in a row now shows a big orange **⬆️ P2** pill above the verdict's headline
+>      (36 px against its 30, popping in with Rocket School's own animations). A drop stays silent. The "· ⬆️ P2" left the
+>      speed line. Edition data: the grader publishes `jumpTo`; `addNodes` entries are now `Graft`s with `ports` and `place`.
+>   2. **SC-5, skin tones, for both games.** A ✋🏻 ✋🏼 ✋🏽 ✋🏾 ✋🏿 row on the new-player form, in Edit player and in the
+>      hangar. The pick is `wear.skin`, so the save code carries it with no format change. With none picked, Rocket School
+>      leaves DiceBear its own range (unchanged faces); Star Class's seed chooses among ✋🏽 ✋🏾 ✋🏿 (edition `skinDefault`).
+>   3. **SC-3, maths for JSS.** Ten trap skills in `tpl013Jss.ts`, each pinned in `JSS_SOURCES` to a NERDC JSS topic (JSS2's
+>      three are weak-sourced, said so). JSS1–3 no longer borrow P6's maths.
+> - **Corrected along the way:**
+>   - 🔴 the first JSS draft reused Rocket's `proportion` / `proportionQ` names and silently replaced P6's money question.
+>     It is renamed, and a gate now counts every `function` and `case` in the picker;
+>   - **P78-TPL013-MISSINGTHREE** (filed, fixed): one P2 row offered 3 answers;
+>   - units now stay with their numbers at 390 px;
+>   - two of my own drive clauses were wrong, not the game: DiceBear's pixel-art palette shares ✋🏾's `8d5524`, and a new
+>     JSS3 player is asked P6 + JSS1 (the class below too).
+> - **Readings (2026-10-15, uncommitted tree on `cline-dev` at `bd0d1681d`):**
+>   - gates: `tpl007Engine` + `tpl007GameKit` + `tpl007Template` + `tpl013Edition`, **543/543**;
+>   - `def038` green but `templates/nightbook` (known);
+>   - `typecheck:mcp` 0;
+>   - Rocket School byte-identical after the card and after SC-3 (336 files). SC-5 changes it on purpose.
+>   - Drives at 390 and 1024 px, on a local deploy (3171 wires, 0 broken):
+>     - `drive-tpl013-classes.js`: P1 `--right` **17/17**, P5 **14/14**, JSS3 `--rating 2560` **14/14**;
+>     - `drive-tpl013-skin.js` (new): **22/22** for Star Class AND Rocket School.
+> - **Waits on Richard:**
+>   - §5.3: the jump is built automatic with its card. Is "offered" still wanted now that it is visible?
+>   - §5.4: French. Keep the interface, write the SC-4 banks in English only (recommended)?
+>   - Is ✋🏽 ✋🏾 ✋🏿 the right default range? It is one line, `skinDefault`.
+>   - His look at all of it, then the go to commit.
+> - **Next, an agent alone, in order:**
+>   1. Number Hunt's instruction as icons for P1–P2 (it says "Pick 2 numbers that add up to 14"). Then Hunt and Make Ten
+>      following the rating's class (`playIndex`), not the class picked. This needs the Hunt and Merge pages to hand the
+>      model's rating to their builders.
+>   2. SC-4, banks 1–4, in English unless he rules otherwise on §5.4. Each bank needs a second reader before it ships.
+>   3. The indices answers' superscripts are small on the buttons: worth a size rule like `obSize`'s.
+> - **Commit only with Richard's go, by pathspec** (package.json has a PEER's `template:marketplace` line). Star Class's
+>   untracked files:
+>   - `templates/star-class/`;
+>   - `packages/noodl-mcp/tests/tpl013*.ts`, now with `tpl013Jss.ts`;
+>   - `scripts/generate-star-class-template.ts`;
+>   - `scripts/devtools/drive-tpl013-classes.js` and `drive-tpl013-skin.js`;
+>   - the bug file `dev-docs/bugs/p78-tpl013-missingthree-*.md`.
+>
+>   SC-5 also edited Rocket School's own files: `tpl007Scripts.ts`, `tpl007Components.ts`, `tpl007Curriculum.ts`, their
+>   tests, and `templates/rocket-school/`. Those files also hold the uncommitted Moon M1 work.
+
 > ### 🟩 2026-09-22 (s6) — R2.7: THE DEMO CAN BE EMPTIED, AND THE FIRST DAY NOW WORKS — START HERE
 >
 > Richard asked for a button that clears the dummy data so the demo can be used for real. It is on the

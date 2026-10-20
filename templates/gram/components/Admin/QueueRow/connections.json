@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b5bb3f80-a140-5812-806a-2b4c451ab44f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "qrIn",
+      "fromProperty": "pill",
+      "toId": "qrPill",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qrIn",
+      "fromProperty": "pillClass",
+      "toId": "qrPill",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "qrIn",
+      "fromProperty": "hasPill",
+      "toId": "qrPill",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "qrIn",
+      "fromProperty": "title",
+      "toId": "qrTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qrIn",
+      "fromProperty": "hasTitle",
+      "toId": "qrTitle",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "qrIn",
+      "fromProperty": "sub",
+      "toId": "qrSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "qrIn",
+      "fromProperty": "look",
+      "toId": "qrLook",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "qrIn",
+      "fromProperty": "kind",
+      "toId": "qrWhere",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "qrLook",
+      "fromProperty": "onClick",
+      "toId": "qrWhere",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "qrIn",
+      "fromProperty": "itemId",
+      "toId": "qrToPost",
+      "toProperty": "pm-post"
+    },
+    {
+      "fromId": "qrIn",
+      "fromProperty": "itemId",
+      "toId": "qrToComment",
+      "toProperty": "pm-comment"
+    },
+    {
+      "fromId": "qrIn",
+      "fromProperty": "itemId",
+      "toId": "qrToMember",
+      "toProperty": "pm-memberId"
+    },
+    {
+      "fromId": "qrWhere",
+      "fromProperty": "out-post",
+      "toId": "qrToPost",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "qrWhere",
+      "fromProperty": "out-comment",
+      "toId": "qrToComment",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "qrWhere",
+      "fromProperty": "out-member",
+      "toId": "qrToMember",
+      "toProperty": "navigate"
+    }
+  ]
+}

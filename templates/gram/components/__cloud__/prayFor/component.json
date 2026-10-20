@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "be927815-ef8a-55e0-846f-98803387036f",
+  "name": "prayFor",
+  "path": "/#__cloud__/prayFor",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "I prayed on a prayer request, or taken back; the count, by person, kept on the request"
+}

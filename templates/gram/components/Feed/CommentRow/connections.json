@@ -1,0 +1,157 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f3bdda6e-e0f0-5937-89a8-934d054d04c9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cmIn",
+      "fromProperty": "name",
+      "toId": "cmName",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "face",
+      "toId": "cmFace",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "hasFace",
+      "toId": "cmFace",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "noFace",
+      "toId": "cmInitials",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "initials",
+      "toId": "cmInitials",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "shade",
+      "toId": "cmAv",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "memberId",
+      "toId": "cmToMember",
+      "toProperty": "pm-memberId"
+    },
+    {
+      "fromId": "cmName",
+      "fromProperty": "onClick",
+      "toId": "cmToMember",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "when",
+      "toId": "cmWhen",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "text",
+      "toId": "cmText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "canReport",
+      "toId": "cmReport",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "canTakeDown",
+      "toId": "cmTakeDown",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "canLook",
+      "toId": "cmLook",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "id",
+      "toId": "cmToReport",
+      "toProperty": "pm-comment"
+    },
+    {
+      "fromId": "cmReport",
+      "fromProperty": "onClick",
+      "toId": "cmToReport",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "id",
+      "toId": "cmToLook",
+      "toProperty": "pm-comment"
+    },
+    {
+      "fromId": "cmLook",
+      "fromProperty": "onClick",
+      "toId": "cmToLook",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "cmIn",
+      "fromProperty": "id",
+      "toId": "cmDownGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "cmTakeDown",
+      "fromProperty": "onClick",
+      "toId": "cmDownGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cmDownGather",
+      "fromProperty": "out-hide",
+      "toId": "cmDownCall",
+      "toProperty": "in-hide"
+    },
+    {
+      "fromId": "cmDownGather",
+      "fromProperty": "out-go",
+      "toId": "cmDownCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "cmDownCall",
+      "fromProperty": "error",
+      "toId": "cmError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cmDownCall",
+      "fromProperty": "done",
+      "toId": "cmStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cmStamp",
+      "fromProperty": "out-at",
+      "toId": "cmChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "cmStamp",
+      "fromProperty": "out-go",
+      "toId": "cmChanged",
+      "toProperty": "do"
+    }
+  ]
+}

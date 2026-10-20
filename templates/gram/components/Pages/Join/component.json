@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e2770499-a4a0-50a1-8107-eafd29f2c7bb",
+  "name": "Join",
+  "path": "/Pages/Join",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Ask to join: a name, an email, 13 or older"
+}

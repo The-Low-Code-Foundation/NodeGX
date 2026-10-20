@@ -129,14 +129,16 @@ Twenty-two nodes. With Tier 3.11's three: **25 scheduled ⇒ ceiling 117 of 127 
 
 ### Not a target — re-ruled 2026-09-03 (§50), and every one of them must now be **badged**
 
-`Action Dispatcher` / `Action Handler`, `Optimistic Update`, `State History` / `State Snapshot` /
-`Undo / Redo`, ~~`Parse CSV` / `To CSV`~~, `Pattern Extractor`, and `Sign In With` (until provider
-sign-in is a product decision).
+~~`Action Dispatcher` / `Action Handler`~~, ~~`Optimistic Update`~~, ~~`State History` / `State Snapshot` /
+`Undo / Redo`~~, ~~`Parse CSV` / `To CSV`~~, ~~`Pattern Extractor`~~, and ~~`Sign In With`~~ (built §79, session 109:
+the BOARD's lane 6 of 2026-10-14, "the last seven picker nodes export", is the newer ruling).
 
-Ten nodes — **eight since 2026-09-26**: Richard reversed the parsers' exclusion (*"Can we not finish
-the code export nodes? If we had 100% coverage that would be a big deal"* — the whole list is now a
-target, §75), and `Parse CSV` / `To CSV` are **built in §75** beside `Parse XML` / `Parse Feed`, which
-his 2026-09-18 ruling had already scheduled. The original list held twenty-two; the other twelve are in Tier 2.8 and 3.11 above.
+Ten nodes — **eight since 2026-09-26, seven since session 101, two since session 107, one since session 108, none since
+session 109** (§77 built the Dispatcher pair, §78 State History, State Snapshot and Undo / Redo, §79 Sign In With): Richard reversed the parsers'
+exclusion (*"Can we not finish the code export nodes? If we had 100% coverage that would be a big
+deal"* — the whole list is now a target, §75), and `Parse CSV` / `To CSV` are **built in §75** beside
+`Parse XML` / `Parse Feed`, which his 2026-09-18 ruling had already scheduled. `Pattern Extractor` is
+**built in §76** (session 101). The original list held twenty-two; the other twelve are in Tier 2.8 and 3.11 above.
 🔴 **An exclusion is only honest if the person placing the node is told.** Nothing in the editor
 reads the ledger today (§50.2): the first a person hears is the pre-flight modal at export, which
 lists components with counts, not nodes. That is **EXP-013**, and it is the next first job — before
@@ -6675,7 +6677,7 @@ Richard, 2026-09-03: *"Let's do it"*, on this split —
 - **Build, Tier 3.11, the transports**: Subscribe To Changes, Server-Sent Events, WebSocket.
 - **Out of scope, and badged**: Action Dispatcher, Action Handler, Optimistic Update, State History,
   State Snapshot, Undo / Redo, ~~Parse CSV, To CSV~~ (built §75, 2026-09-26 — the ruling reversed, see §3),
-  Pattern Extractor, Sign In With.
+  ~~Pattern Extractor~~ (built §76, session 101 — same reversal), Sign In With.
 - **EXP-013 before row 1**: *"we need to be super clear when someone is doing code export which
   nodes can't be exported and what will happen"* — a badge where the node is placed, the pre-flight
   naming nodes and what each refusal silences, and a plain verdict when the cascade is large:
@@ -11124,3 +11126,1808 @@ editor's webpack pass would add is the editor tsconfig's dialect over the same f
 4. `To CSV` over a `Parse CSV` with Has Header unticked writes rows of cells (the runtime's `isRowsOfCells`) — covered by §A but not
    by a §B graph; and `Parse CSV` → `Array Filter` / `Array Map` (a transform over a parsed list) is untested in either direction.
    Both are the existing paths composing; neither has a new clause. Owner NONE.
+
+## §76 `Pattern Extractor` — `Hash`'s crypto-call shape widened to seven value outputs and a third signal pair (session 101, 2026-09-26/27)
+
+**Continues §75's ruling** (Richard, 2026-09-26: *"Can we not finish the code export nodes? If we had 100% coverage
+that would be a big deal"*): the second of the eight remaining picker rows, and the first §50.3 exclusion actually
+reversed rather than merely re-scoped (the four parsers were already scheduled by the 2026-09-18 ruling). **122 →
+123 of 130 (93.8% → 94.6%).**
+
+### §76.0 What was measured before a line of code
+
+- **`Pattern Extractor` is `Hash`'s shape (§59, `crypto-call`), generalised.** `doExtract` reads the four setter
+  values into `extractPattern`, writes every value output on every run (a failure CLEARS the values — where `Hash`
+  leaves its Digest as it was), raises `pattern-extractor/extract-failed` on the channel before the Failure pulse,
+  and on success sends `Found` or `Not Found` **before** `reportOutcome('done')` — two results off one Extract,
+  where the two verbs have one result and one outcome. `CRYPTO_NODES` gained `values` (a table of typed, SEEDED
+  value outputs — `PATTERN_VALUE_OUTPUTS`) and `results` (`['found', 'notFound']`); `node: CryptoNodeKind` widens
+  to include `'pattern'`; `CryptoCallAction` gained `foundThen` / `notFoundThen` (compiled as two more chain arms
+  off `cryptoChainScope`, which widened to `'done' | 'failure' | 'found' | 'notFound'`) and `materializeByPort` (one
+  row per value output a read allocates, by port name).
+- **Every value row is seeded, unlike the two verbs'.** `initialize` writes `match: null` (→ `''`), `matches: []`,
+  `groups: []`, `namedGroups: {}`, `error: ''` before the first Extract — so nothing here is ever undefined, in
+  either the row or the chain-local form. `maybeUndefinedExpr` (`crypto-out`) and the fold whitelist both gained
+  the `expr.node !== 'pattern'` guard; the Error row is the family's odd one (allocated by `cryptoErrorStateOf`,
+  which every other crypto node leaves `null`-booted) and needed its own marker — `outcome-error` gained an optional
+  `seeded` field, set true only for the extractor's Error, so `{percentError}` prints bare where `{hashError ?? ''}`
+  folds. **Found by building it, not by reading**: the first emit printed `{percentError ?? ''}`, silently wrong
+  in the same direction §59's finding named for `Hash` — the tenth instance of the text-sink-fold hazard, this time
+  in the *opposite* direction (a row that never needed the fold, printing one anyway, rather than a row that needed
+  one and got none).
+- **Matches and Groups are lists, and the repeater's gate is `tsType.endsWith('[]')` (Pass 5 §4e).** `exprTsType`
+  for a `crypto-out` reads `PATTERN_VALUE_OUTPUTS[field].tsType` — `string[]` for the two — so a For Each over
+  `percent.matches` binds directly, keyed by index (`listExprFields` answers `null` for it: a match is a string,
+  not a record, so nothing maps a field off the row).
+- **The inputs are the four setters' coercions, transcribed once** in `src/lib/pattern.ts`, not re-derived per
+  argument: `asText` (`''` for null/undefined, `String(value)` otherwise) for Text/Pattern/Flags, `!!value` for
+  Extract All. `extractPattern` itself (NDA-012's blank-pattern refusal, the flag filter, `describeError`,
+  `captureGroups`/`namedCaptureGroups`) is transcribed from `stream-parsers.ts` unchanged.
+- **Every crypto-family call's arguments needed to become optional.** The emitter drops trailing `undefined`
+  arguments so a Hash with nothing authored prints `tryHash()` rather than `tryHash(undefined, undefined,
+  undefined)` — `browser-utilities.test.ts` E2 already asserted this — but `tryHash`/`tryRandomBytes`'s own
+  signatures still required all their parameters, so `tryHash()` was a call the exported app's own strict `tsc`
+  refused. Not caught by any existing gate (E2 asserts the printed *text*, never typechecks it) — found writing
+  §76's differential and fixed at the same time (`cryptoLib.ts`'s two signatures now take optional arguments,
+  with the reason stated at the call site).
+
+### §76.1 What is built
+
+**`src/emit/patternLib.ts` → `src/lib/pattern.ts`.** One module, one verb: `tryExtract(text?, pattern?, flags?,
+extractAll?): ExtractResult`, a single result object carrying every value port plus `ok` and `found` — a
+discriminated shape would not fit, since the runtime writes all seven fields on both outcomes. Generated from a
+real `.ts` file, typechecked strict with no ambient types, and graded by `tests/the-pattern-extractor.test.ts`
+§B's differential before being turned into the string-array form.
+
+**The plan (`plan.ts`).** `PATTERN_EXTRACTOR_TYPE`; `CryptoNodeKind = 'hash' | 'random-bytes' | 'pattern'`;
+`PATTERN_VALUE_OUTPUTS` (six ports, each labelled, typed, and seeded — `bootCode: '[]'` / `'{}'` where the boot
+is not a plain literal); `CRYPTO_NODES[PATTERN_EXTRACTOR_TYPE]` (four inputs, `results: ['found', 'notFound']`);
+`cryptoOutputLabel` (the sentence helper, now reading a value's own label or the two verbs' `outputLabel`);
+`cryptoStateOf` widened to take an optional `port` and key its cache by `node:port`; `cryptoErrorStateOf`'s row is
+`string` (never `| undefined`) and seeded `''` for the extractor; `compileCryptoCall` compiles two more chain arms
+(`found`, `notFound`) after `done`/`failure`, refusing a pulse-into-value-sink on each by its own display name
+*before* the chain compiler tries and mis-names it (§59.4 #2's rule, generalised); `resolveExpr`'s crypto branch
+gained the `values` lookup (any of the six ports, inside any of the four arms via the local, outside via a seeded
+row) ahead of the existing `output`/`error` checks; the date-sweep's "never fired" sentence and the two-wires-per-
+input sentence both read `cryptoOutputLabel`/`CRYPTO_INPUT_LABELS` so they name Text/Pattern/Flags/Extract All
+correctly rather than the two verbs' four labels.
+
+**The emitter (`component.ts`, `emitApp.ts`).** The `crypto-call` print branches on `action.node === 'pattern'`:
+every value row and the Error row written from the result BEFORE any arm (as `doExtract` writes them), then
+`if (ok)` — the Found/Not Found `if` first (only printed where a chain hangs off one of the two), the Done chain
+after it — `else` the raise and the Failure chain. `cryptoLocalReadOf` takes an optional `field` and reads
+`${local}.${field}` for the extractor, `.digest`/`.value` for the two verbs. The import splits three ways now:
+`crypto.ts` for the two verbs, `pattern.ts` for the extractor (`isPatternHelper`), never both from one component
+unless it uses both families. `emitApp.ts` ships `src/lib/pattern.ts` only where a component calls `tryExtract`.
+
+### §76.2 The test — `tests/the-pattern-extractor.test.ts`, 39 rows, and the fixture
+
+Built on `tests/fixtures/pattern-desk`: a text input → Variable → the extractor's Text; a button fires Extract
+over an authored `(\d+)%`; Match/First Group/Match Count/Error are four Texts; Matches feeds a For Each of a
+one-line `MatchRow` component; Found/Not Found each remember a word in a Variable; Done writes the Match Count
+into another. **§A** the fixture whole (17 files, the pattern lib shipped and the crypto lib absent, the app
+typechecks, every seeded row prints bare with no `?? ''`, the repeater keyed by index). **§B** `tryExtract`
+against the runtime's own `extractPattern` plus the node's setters/getters applied by hand — an 11×12×8×5 grid
+(5,280 cells) agreeing on all nine fields, the NDA-012 blank-pattern sentence, an invalid-regex sentence through
+`describeError`, the flag filter, unmatched optional groups as `''`, named groups by name, the setters'
+coercions, and every argument's optionality. **§C** the shapes a wire changes: a value read from the Failure arm
+(the local, because a failure clears the row), Error refused from the Found chain (cleared before Found fires,
+same as Done), wired vs. authored inputs, only-Not-Found/neither/nothing-wired forms, a value read only inside a
+chain (no row), Groups/Named Groups from render (a `string[]` row and a `Record` row, both seeded), Extract fired
+from a non-element trigger. **§D** nine refusals by exact sentence. **§E** the fold finding and the crypto-verb
+optional-arguments finding, both pinned. **§F** the ledger row and the earned-not-shipped controls.
+
+### §76.3 The gate chain
+
+**This tree, read off exit status.** `tests/the-pattern-extractor.test.ts` **39/39**. The nine tests that
+previously used `net.noodl.Hash` or `net.noodl.PatternExtractor` as their "node with no rule" example
+(`drag.test.ts`, `component-object-trio.test.ts`, `relation-pair.test.ts` D18, `relation-verbs.test.ts` ×2,
+`streaming-trio.test.ts`, `script.test.ts` ×2, `record.test.ts`, `unreported-deferrals.test.ts`) re-pointed to
+`net.noodl.user.SignInWith` — the next row down the §75.5 order (§79) — and re-run **353/353**.
+`browser-utilities.test.ts` (the two crypto verbs, whose signatures this section changed) re-run **55/55**.
+Package `tsc --noEmit` **exit 0**. `export-ledger:check` **OK — 180 types, 130 translated, 32 deferred, 1
+stubbed, 17 backend-only**. `export-ledger:picker --check` **holds at 123/130 (94.6%)**, floor raised in the
+ledger in the same change. Fifteen `pickerCoverageFloor` pin comments moved to the new number and note.
+**Editor `tsc -p tsconfig.json --noEmit`: exit 0, empty log** (run on this tree before building, per the §75
+handoff's owed-gates order). ⚠️ **Not yet run at session close: the whole-package `nodegx-export` jest** (101+
+files) and the editor's `test:ci` — the box was carrying a peer's session for the whole drive, and the session
+closed before a slot opened. **Owed by the next session before anything else.** Nothing under `src/` was touched
+after the specs above went green, so a clean whole-package run is the expectation, not a risk — but it is
+unverified, and this section does not claim more than what actually ran.
+
+### §76.4 What this leaves
+
+1. 🔴 **The whole-package jest run and the editor `test:ci` are owed** — see §76.3. Read them before building the
+   next row; if either is red for a reason unrelated to this section, that is this session's own miss, not a
+   pre-existing floor.
+2. **Seven rows left on the picker** (`export-ledger:picker`): `Action Dispatcher` / `Action Handler` (~1,600
+   runtime lines, an in-app bus — read `Send Event`/`Receive Event`'s translation first), the history family —
+   `State Snapshot` / `State History` / `Undo / Redo` / `Optimistic Update` (~1,300 lines + `outcome.ts`,
+   stateful, two sessions), `Sign In With` (the §48 "waits on a provider decision" reason is stale — the backend
+   has a GitHub provider and `RestAuthAdapter.signInWithProvider` is implemented; needs a drive of the redirect's
+   return leg against the real backend).
+3. **Two Do pulses in one tick** are coalesced by `scheduleAfterInputsHaveUpdated` into one Extract that answers
+   both tokens; the export runs once per pulse. Recorded, not translated — the same divergence §59 recorded for
+   Hash/Random Bytes and §75 for the parsers' Changed/Failure.
+4. Per-parameter coverage (EXP-008's open question, §75.5 #3) is still open: a 130/130 badge would still hide a
+   parameter gap the node-count number cannot see. One session, still queued.
+5. The extractor's own catastrophic-backtracking risk is the author's, in both the interpreter and the export —
+   recorded in the lib's header, not fixed (the runtime cannot bound the platform regex engine either).
+6. Not driven in a built app (no browser drive this session — see §76.3's owed-gates note). The differential (§B,
+   5,280 cells) and the emitted-app typecheck (§A2) are the instruments that graded it this session.
+
+### §76.5 Session 102 (2026-10-14): the two owed gates, read, and the pile committed
+
+**Measured before anything else.** The pile was still s101's alone (every file last written 26 Sep). Five of its
+files had since been committed to by P109 (`a6193856c`, `b9a17871a`, `06e65ab47`); the pile's diff against HEAD
+is purely additive on all five, so committing it reverts none of their work.
+
+**Gate 1 — whole-package `nodegx-export` jest, on this tree: 6 suites / 16 tests red, exit 1** (3845 passed,
+397 s). Attributed by a control, the same six suites run in a fresh worktree at HEAD `a66ebd2c5` (no pile):
+- **Two were the pile's, and are fixed in this commit.** `sse.test.ts` F1 pinned the floor at 122. s101 moved 15 pins
+  and missed this one, the 16th (`git grep "pickerCoverageFloor).toBe("`: 15 × 123, 1 × 122). And HLS-001's corpus
+  golden did not know `pattern-desk` (52 → 53) or the README sentence. Regenerated and counted line by line: 52
+  `README.md` (the sentence only, read as text), `utility-desk/src/lib/crypto.ts` (§76's optional arguments), and
+  `sheet-desk/src/lib/parse.ts`, red at HEAD from P107 `dccaa77e0`, attributed by a control that reproduces the old hash.
+  The record is in the test's docblock.
+- **Four are red at HEAD without the pile, each from another phase's commit, and none is §76's:**
+  P18-S102-NAVENCODE (§15.6's tripwire fired on P107-D21's runtime fix: the exported Navigate To Path still
+  sends Query values unencoded), P18-S102-DATEHARNESS (ISL-032's `toDate` import blanks the date-family harness),
+  P18-S102-GRAPHNOSPEC (NSP-008 on the export throws on NSP-012's Global Store scenario, since 2026-10-01), and
+  P18-S102-CATALOGNAME (ISL-034's regression spec names the catalog). Each one is a row in `dev-docs/bugs/`.
+- **Why nobody saw them:** no CI job runs this package's jest (P18-S102-NOEXPORTCI).
+
+After the two fixes, `sse` and `hls001-corpus-identity` pass 40/40. `export-ledger:check` reads OK (180 types, 130 translated)
+and `export-ledger:picker --check` holds at 123/130.
+
+**Gate 2 — editor `test:ci`, on this tree: `Jasmine: 3017 specs, 0 failures`, exit 0**, seed 35586, HEAD `a66ebd2c`.
+
+**What this leaves (lane 6, in order):** the three graders ISL-043 needs come first: GRAPHNOSPEC (the instrument
+itself), then NAVENCODE and DATEHARNESS (both are the exported app disagreeing with the running one, or nobody
+being able to tell). CATALOGNAME and NOEXPORTCI are small. After them come ISL-043, and then §77–§79 (the seven picker rows).
+
+---
+
+## §77 Action Dispatcher and Action Handler (session 106, 2026-10-15): picker 123 → 125 of 130
+
+### §77.1 What is built
+
+**The shape: the streaming table, members eight and nine.** Every port of both nodes fits the table as it stands. Signal
+inputs are verbs on a handle (`dispatch(action)` / `cancel()`, `complete()` / `fail()`). Signal outputs are listeners.
+Value outputs are live getters. Value inputs are options, applied through the node's own setters. The unmount cleanup is
+the node's delete listener. Two shapes were rejected. Send / Receive Event discovers its channels
+statically and types their payloads, while this registry is dynamic by design. Run Tasks and the crypto family print
+their outcome arms at each call site, while here the outcomes belong to the node.
+
+**`src/emit/actionsLib.ts` → emitted `src/lib/actions.ts`.** `action-dispatcher.ts` is transcribed near-verbatim: the
+registry, the queue, `payloadOf`, `builtInFieldOf`, `parseList`, and the built-in store actions. The one change is the
+store: it is injected, and the default refuses, because no exported dispatcher enables a built-in in this slice. Then
+come the two node shells, which transcribe `actiondispatchernode.ts` and `actionhandlernode.ts`: every setter's
+coercion, values before every signal, `node.ts`'s outcome contract (a Failure raises on `./errors` before its pulse;
+Completed fires after every outcome), and the delete listeners. Then the two hooks. `export const actionRegistry` is a
+module singleton, so a Dispatcher in `Pages/Home` reaches a Handler in `Components/Greeter` by channel name alone, as
+the runtime's process-global registry does. The lib was written as a plain `.ts` file, typechecked strict, and graded
+(§77.2) before it was turned into the string-array form (`gen.js`, the session's scratchpad).
+
+- **Options apply on change.** The hook runs a setter only when an option's value differs from the last one applied
+  (`Object.is`). An undefined option runs nothing, because an undefined value is never sent (C3). Running the setters on
+  every render, as Repeat's idempotent one does, would re-set Last Error from a misspelt Enabled Built-ins on every
+  render and clobber a later refusal.
+- **A Handler registers after mount, and again when Channel, Action Type or Enabled changes.** The effect is keyed on
+  the three; this is the runtime's `scheduleSetup`. It registers only once one of the three has been set, because the
+  runtime schedules a setup only from those setters. A Handler with nothing authored therefore raises nothing, as the
+  runtime's raises nothing.
+
+**Plan (`plan.ts`).** There are two table rows, `StreamKind += dispatcher | handler`, `lib += actions`,
+`streamTypeOfKind` and `OWN_CHAIN_OUTPUTS`. Two refusals are added to `streamPlanOf`, by sentence:
+- `it enables the built-in store action(s) <names> — a server writing the app's Global Store is not exported in this slice`,
+  and `its Enabled Built-ins input is wired — which store writes a server may make must be readable off the graph`. A
+  literal that names only misspelt built-ins enables nothing and translates.
+- `its Result input is wired while Auto Complete is on — the runtime hands back the value its Trigger chain has just
+  written, and the export would hand back the one from the render before`. With Auto Complete off it translates:
+  Complete is a later pulse, after the render that carries Result.
+
+**`component.ts` / `emitApp.ts`.** `actions` joins the hook-import loop, `actionsLib` is the flag, and `actions.ts`
+ships with `errors.ts`.
+
+### §77.2 The test: `tests/the-action-bus.test.ts`, 24 rows, and `tests/fixtures/action-desk`
+
+§A runs the fixture whole: the app typechecks, both modules ship, and there are no notes beyond the router shell. A
+Dispatcher in Home and two Handlers in the placed Greeter import one module. **§B is the differential.** A seeded script
+(register / unregister with five handler behaviours, dispatch from a pool of 23 shapes, complete, fail, cancel, advance
+a scripted clock) is played against the runtime's own `action-dispatcher.ts` and against the lib, each loaded fresh,
+over **8 option rows × 60 scripts × 24 operations**. Every hook, its arguments, and `queueSize` / `isExecuting` /
+`waitingFor` after each event must be equal in order. A control asserts that the grid reached every hook, all four
+store calls and all five refusal reasons. §C covers the wire shapes and the refusals by sentence. §D is the finding
+(§77.3). §E covers the ledger and the floor.
+
+**On the export, the node shells are graded by NSP-008** (`tests/node-spec-graph.test.ts`). t04's "Action Dispatcher
+runs an action through the Action Handler…" and "an array of actions runs in order…" (the late handler and Fail) both
+**play and pass**. The graph line moves from 2 to **4 of 85 conforming**, with 11 played. t04's built-in scenario is
+outside on the new refusal; its two clock scenarios wait on the harness's clock.
+
+### §77.3 What building it found
+
+1. **A streaming node that nothing pulses, whose own chain reads its own value, read as "its trigger chain is cyclic".**
+   GREET's Trigger writes its own Payload into a Variable. The registration pass reaches a node with no wired action
+   port last; the dropped-wire pass compiled the Set Variable first and registered the handler from inside that sink,
+   and the listener compile re-entered the same key. §54 named this trap for On App Error. It is fixed the same way:
+   the trigger-side loop registers a streaming node with no wired action port. This applies to the whole table, not
+   only §77's two (a Subscribe To Changes or a Repeat whose chain reads itself met the same trap).
+2. **The graph harness could not load a lib that imports its sibling.** It resolved a component's `../lib/<name>` and
+   not a lib's `./errors`. No graph scenario had played a raising lib before this one; it is fixed in the harness.
+3. **The comment said "a Action Dispatcher".** The table's article is now computed, and every existing member's name
+   starts with a consonant, so nothing else moved.
+
+### §77.4 Recorded differences (not refused)
+
+- **Registration order across components.** Two handlers on one type in two components register in React's effect
+  order (children first). The runtime registers in node-creation order, and handlers on one type run in registration
+  order.
+- **A wired input re-sent with the same value.** The runtime's setter runs again; for Channel / Action Type / Enabled,
+  that tears down and re-registers, moving the handler to the end of its type's list. The hook sees no change.
+- **The clocks.** Wait For Handler and Handler Timeout run on `setTimeout`. The differential grades them on a scripted
+  clock, but no graph scenario does yet (t04's two clock scenarios are outside on the harness).
+
+### §77.5 What this leaves
+
+The picker is at **125 / 130**: State Snapshot, State History, Undo / Redo, Optimistic Update, Sign In With (§78, §79).
+Built-ins on the Dispatcher are the next slice of this row. They need the Dispatcher's store resolved as a Global Store
+module (`appState.ts` discovery, a key typed `unknown` for each key a server may write) and a store adapter over
+`@nodegx/core`'s `Store`, which has no delete.
+
+## §78 State History, Undo / Redo and State Snapshot (session 107, 2026-10-15): picker 125 → 128 of 130
+
+### §78.1 What is built
+
+**The shape: the streaming table, members ten to twelve.** Every port fits the table as §77 left it. The signal inputs
+are verbs on a handle (`clearHistory()`; `undo()` / `redo()` / `jumpTo(index)`; `save(name)` / `restore(name)`), the
+signal outputs are listeners, the value outputs live getters, and the value inputs options applied through the node's
+own setters when they change. Two ports are carried by the pulse rather than read from the render, because the runtime
+defers each verb to the end of the frame and so reads the value that arrived with it: Target Index rides Jump To, and
+Snapshot Name rides both Save and Restore.
+
+**Store Name is the store module, not an option.** A history-family plan carries `store` (the store's name), and the
+component prints it first in the options (`{ store: app, maxHistory: 20 }`) and imports `../stores/app`. The lib is
+handed the same `@nodegx/core` `store()` object the app's Set and Subscribe nodes write and read. Resolving the store by
+name inside the lib was rejected: `store(name, {})` creates a store when none is registered yet, so a history that ran
+before the store module would have created it empty and the module's initial state would have been lost. `appState.ts`
+now counts the three as naming their store (`historians`), so a store only a history node names still gets its module,
+and the module's doc comment says which nodes keep its history, step through it and checkpoint it.
+
+**`src/emit/historyLib.ts` → emitted `src/lib/history.ts`**, in three parts:
+
+- **The store seam.** `globalstore.ts` gives the runtime's history five things `@nodegx/core`'s store has not got, and
+  the seam supplies each over the store's public surface (`peek`, `set`, `subscribe`): which keys a write changed (a
+  write that changed nothing is no commit, though the core store notifies on every `set`, CONTRACT.md C2); a key filter
+  on a subscription; a deep snapshot with the keys it can only hold by reference (`cloneValue` verbatim); a full replace
+  that deletes what the snapshot has not got; and the runtime's key order (§78.3 #1). A deleted key is written as
+  `undefined`, and `undefined` is absence throughout: the exported store has no delete, and a Set never sends
+  `undefined`, so a key holding it is a key the runtime would not have.
+- **The manager**, `statehistory.ts`'s `StateHistoryManager` near-verbatim with each `globalStoreManager` call replaced
+  by the seam: one history per store name for the app, reference-counted attach, Max History with the current entry
+  never dropped, Coalesce in a sliding window, a restore never recording itself, Track Keys projecting and restoring
+  only its keys, Enabled pausing and resuming with a fresh entry if the state drifted, and the named snapshots.
+- **The three node shells and their hooks**: each node's setters, values before every signal, and the outcome contract
+  (Undo / Redo's failures raise `undo/operation-failed` through `reportOutcome`; State Snapshot raises
+  `state-snapshot/operation-failed` itself, once per new message, and reports its Failure per invocation with
+  `raise: false`; Completed after every outcome). A State History attaches after mount and reconfigures in place when an
+  option changes, which is the runtime's scheduled setup; unmounting detaches it.
+
+The lib was written as a plain `.ts` (session scratchpad `historylib/history.ts`), typechecked strict, graded (§78.2),
+and turned into the line array by `historylib/gen.js`, which checks the round trip byte for byte.
+
+**Plan (`plan.ts`).** Three table rows, `StreamKind += history | undo | snapshot`, `lib += history`, `streamTypeOfKind`
+and `OWN_CHAIN_OUTPUTS`. Two refusals in `streamPlanOf`, by sentence:
+- `its Store Name is wired — which store it works on must be readable off the graph, where the store module is`
+- `the store "<name>" it names is not exported: <the store's own reason>` (an authored Persist, for one).
+
+### §78.2 The test: `tests/the-state-history.test.ts`, 20 rows, and `tests/fixtures/history-desk`
+
+§A runs the fixture whole: the app typechecks, `history.ts` and `errors.ts` ship, no notes beyond the router shell, and
+a State Snapshot in `Components/Checkpoint` is handed the same store module as the State History and Undo / Redo on
+`Pages/Home`. **§B is the differential.** The runtime's own `statehistory.ts` over its own `globalstore.ts` and
+`model.ts` (each loaded fresh per script) against the lib over `@nodegx/core`'s own store (from source, fresh per
+script), on **300 seeded scripts of 30 steps**: writes of 16 value shapes (two of them by reference), deletes, undo,
+redo, jump, clear, save, restore by name, restore from data (good, JSON text, bad, not JSON), a clock advance,
+reconfigure (Max History, Coalesce, Enabled, Track Keys, including the clamps) and a second attach that detaches. After
+every step the result, the number of history listeners that heard it, the whole history and the store's snapshot must
+be equal. A control asserts the grid reached every verb, every end-stop and refusal, coalescing, a by-reference key, a
+pause and resume, and a projected restore. Two mutants must be caught: a seam that commits a write which changed
+nothing, and a recorder that records its own restores. §C covers the wire shapes and the refusals by sentence, §D the
+findings, §E the ledger.
+
+**On the export, the node shells are graded by NSP-008** (`tests/node-spec-graph.test.ts`): t02's four scenarios (State
+History records each commit; a new write discards the redo stack; an untracked store and an out-of-range Jump To are
+failures that say so; Save and Restore with the restore undone) **all play and pass**. The graph line moves from 4 to
+**8 of 85 conforming, 15 played**. Their claims on the Global Store node's own `state` output are not graded on the
+export: that output is not lifted (t01, §78.5), so the reach drops those claims and grades the history's.
+
+### §78.3 What building it found
+
+1. **The store's key order leaks into two outputs.** The runtime's Model deletes a key outright, so writing it again
+   appends it at the end; the exported store keeps a deleted key in place. The first differential run had 26 of 300
+   scripts differ, in the State History's By-Reference Keys (`d,a` against `a,d`) and in the order of a full restore's
+   Changed description. The seam now keeps the runtime's order itself (a key that appears joins at the end, one that
+   disappears leaves), and snapshots, restores and the by-reference keys walk it: 1,000 scripts, 0 differ.
+2. **The graph harness could not load a store module.** It served a component's `../lib/<name>` and nothing under
+   `../stores/`. No scenario had played one before: t01's three Global Store scenarios have always been outside on the
+   store translation's own refusals. It now serves `src/stores/<name>.ts` once per graph, over a cleared store registry
+   (`store(name, initial)` would otherwise return the store a previous scenario made under that name).
+3. **The graph harness had no clock.** The runtime target installs the world's clock (`Date.now` reads it for the play),
+   so a history entry is stamped 0 there; the export stamped the real time and all four t02 scenarios differed on
+   `history[0].timestamp`. The export target's `install` now puts `Date.now` on the world's clock the same way.
+   Advancing it is still outside (`canPlay` keeps every `advance` step out).
+4. **The table's own invariant caught a port the first draft left out.** `streaming-trio.test.ts` holds every row to
+   the catalog's port set, and Store Name was in none of data / config / actions. The row now carries it as `store`
+   (StreamNodeSpec.store), and the invariant counts it, rather than the test excusing it.
+
+### §78.4 Recorded differences (not refused)
+
+- **A deleted key is `undefined`, not absent, in the store itself.** Every reader of the history and the snapshots
+  treats the two as one. A key the store module's interface types as required (one from a declarer's initial state)
+  can read `undefined` after a Restore from Snapshot Data that lacks it; in the runtime it reads `undefined` too, because
+  the key is gone.
+- **A step runs at its pulse.** The runtime queues Undo / Redo / Jump To, Save / Restore and Clear History and runs them
+  at the end of the frame, after every input that arrived with them; the export runs each where it is pulsed. A chain
+  that writes the store and steps the history in the same frame orders the two differently.
+- **A State History attaches after mount.** The runtime attaches once the node is in a scope. A write made in an
+  earlier mount effect lands in the baseline rather than as the first entry.
+- **A Snapshot's `revision`** counts the commits the history module has seen since it first saw the store, not the
+  store's whole life (the runtime counts the initial-state fill as a commit, too).
+
+### §78.5 What this leaves
+
+The picker is at **128 / 130**: Optimistic Update (the history family's fourth, `optimisticupdatenode.ts` over
+`globalstore.ts`'s patches: `applyPatch` / `commitPatch` / `rollbackPatch` with overlapping patches handing values to
+each other, and a deadline) and Sign In With (§79). Optimistic Update can be built on this module's seam: a patch is a
+`writeKeys` with the values each key held before, and the seam already sees every write. t03's two clock-free scenarios
+will grade it; its third needs the harness's clock to advance.
+
+The t01 line is the store translation itself: a Global Store node's outputs (`state`, `changedKeys`, `stateChanged`) are
+not lifted, and a number written to a key the initial state types as a number is refused ("only string writes translate
+in this slice"). Lifting those would put three more scenarios on the line and grade the t02 claims this section could not.
+
+**Readings.** Whole-package export jest: the first full run read `Test Suites: 2 failed, 119 passed, 121` (386 s). One
+was `streaming-trio` (§78.3 #4, fixed; 60 / 60 after). The other was HLS-001, red on the corpus count (54 → 55) and on 74
+paths, counted by cause: the 54 projects' `README.md` (the coverage sentence) and history-desk's own 20 files, nothing
+else. Golden regenerated and its diff counted the same way (54 lines out, all README; 54 README lines and history-desk's
+22-line block in); HLS-001 4 / 4 after. `the-state-history` 20 / 20 and `node-spec-graph` 7 / 7 rerun on the final tree.
+`export-ledger:check` OK (135 translated); `export-ledger:picker --check` holds at 128 / 130; package and editor `tsc` 0.
+
+## §78 part 2: Optimistic Update (session 108, 2026-10-15): picker 128 → 129 of 130
+
+### §78.6 What is built
+
+**The shape: the streaming table's thirteenth member, in the history family's module.** Every port fits the table as §78
+left it. Apply, Commit and Rollback are verbs on a handle; Applied, Committed, Rolled Back, Timed Out and the outcome trio
+are listeners; the eight value outputs are live getters. **Optimistic Value is the data port, carried by Apply** and read
+at the pulse (the runtime defers the apply to the end of the frame, so the value that arrived with it is the one it
+writes), so a chain that sets a Variable and then pulses Apply writes the new value. Key, Error Message, Transaction Id,
+Timeout and When Removed are config, applied through the node's setters as they change; a new Key re-subscribes, as the
+runtime's scheduled setup does. Store Name is the store module (§78.1).
+
+**`src/lib/history.ts` grew two parts** (the plain source is session 108's scratchpad `historylib/history.ts`, generated by
+the same `gen.js`, round trip byte-exact, 1,211 → 1,689 lines):
+
+- **The patches**, `globalstore.ts`'s `applyPatch` / `commitPatch` / `rollbackPatch` / `getOpenPatches` transcribed over
+  the seam. A patch captures what each key held, with absence kept apart from every value (`ABSENT`), so a rollback
+  deletes a key the update introduced. It is one `writeKeys`, so the history records it and every Subscribe sees it.
+  Rolling back under a newer open patch on the same key hands that patch the value instead of writing it. Ids are unique
+  across stores, as in the runtime's one index.
+- **The node shell**, `optimisticupdatenode.ts` near-verbatim: Apply (Key is required; an id already open is the store's
+  own sentence), Commit and Rollback resolving the authored Transaction Id or else the oldest open update, a plain write
+  since the Apply read as supersession (the newer value stays, Unchanged, and Error says so), a newer patch on the key
+  *not* read as supersession, the deadline on `setTimeout` (Rolled Back then Timed Out, and no outcome: nobody pulsed),
+  and When Removed on unmount (signals nothing). `optimistic-update/operation-failed` is raised before Failure.
+
+**Plan.** One table row (`OPTIMISTIC_UPDATE_TYPE`), `StreamKind += optimistic`, `streamTypeOfKind`, `OWN_CHAIN_OUTPUTS`.
+`appState.ts`'s history family counts it, so a store only an Optimistic Update names gets its module, and the module's
+doc comment says *Written optimistically by …*. No new refusal sentence: a wired Store Name and a deferred store are
+§78's, and an Optimistic Value only a handler holds is the table's own *reads a value that only exists inside a handler*.
+
+### §78.7 The test: `tests/the-optimistic-update.test.ts`, 18 rows, and `tests/fixtures/optimistic-desk`
+
+§A runs the fixture whole: the app typechecks, `history.ts` and `errors.ts` ship, no notes beyond the router shell.
+Publish (Home) writes a literal status with a deadline, and its Rolled Back writes a notice through a Set Global Store.
+Rename (a placed component) writes title, its Optimistic Value wired from a Variable a text input writes
+(`rename.apply(draftTitle.get())`). **§B is the differential**: the runtime's *own node* in a `NodeContext` (each pulse
+deferred to a tick, as in the runtime's own spec) over its own `globalstore.ts`, against the lib over `@nodegx/core`'s
+store, both loaded fresh per script, under one fake clock. 300 seeded scripts of 42 steps: two nodes, mostly on one key so
+overlapping patches are common; every input including the odd ones (Timeout `-1` and `'soon'`, When Removed
+`'nonsense'`, a blank Key), plain writes and deletes, removal, and the clock. After every step the signals and raises in
+order, all eight outputs of both nodes, the store, and the open patches must be equal (a generated id is named by the
+order it first appeared). 0 of 300 differ, and 0 of 1,000 on a one-off run. A control asserts the grid reached all eight
+signals, all six refusal sentences, both removal policies with an update open, and two open patches on one key. Three
+mutants must be caught: a rollback that clobbers a newer patch, a newer patch read as supersession, and When Removed
+ignored. §C covers the wire shapes and the refusals, §D the recorded difference (pinned on both sides) and the harness
+finding, §E the ledger.
+
+**On the export, NSP-008** (`tests/node-spec-graph.test.ts`): t03's two clock-free scenarios (Apply / Commit seen by every
+view; a Rollback after a plain write leaves the newer value, and the two refusals) **play and pass**. The graph line
+moves from 8 to **10 of 85 conforming, 17 played**. t03's third advances the clock and stays outside.
+
+### §78.8 What building it found
+
+1. **The graph harness drew `Math.random` from the real generator.** Both t03 scenarios differed on the generated
+   Transaction Id (`'tx_' + the clock + Math.random`), and nothing else. The runtime target points `Math.random` at the
+   world's seeded generator (`world.ts` `installWorld`); the export target only installed the clock (§78.3 #3). It now
+   installs both, and the line moved by exactly the two.
+2. **An Apply with no Optimistic Value is the one place "undefined is absence" shows** (§78.9). The first differential run
+   had 4 of 300 scripts differ, all on the one sequence below. The generator now never deletes a key an unvalued Apply has
+   written, and §D pins the sequence on both sides.
+3. **The fixture's first draft wired a text input's `onTextChanged` straight into Optimistic Value**, and the exporter
+   refused it in its own words (a change event's payload exists only inside a handler). That is the right verdict: the
+   house pattern is the input writing a Variable and the Variable feeding the node. It is a §C row now.
+
+### §78.9 Recorded differences (not refused)
+
+- **After an Apply with no Optimistic Value, a delete of the key.** The runtime writes `undefined` into the key: it
+  exists, holding `undefined`. The exported store has no such state. A later delete (an Undo, a Restore, another
+  patch's rollback) is a change in the runtime, which supersedes the update, so the Rollback keeps (Unchanged). In the
+  export it is no change, so the Rollback restores (Done). Without the delete the two agree.
+- **An action runs at its pulse.** The runtime defers Apply, Commit and Rollback to the end of the frame and drops a
+  second pulse of the same action in that frame (two outcomes, one action); the export runs each pulse. As §78.4.
+- **Config is read from the render the pulse fires in.** Only Optimistic Value rides the pulse; a chain that writes the
+  Variable feeding Key or Transaction Id and then pulses in the same handler reads the value from before.
+
+### §78.10 What this leaves
+
+The picker is at **129 / 130**: Sign In With (§79). The t01 line (the store translation's own outputs and number writes,
+§78.5) and the harness clock (t03 ×1, t04 ×2) are unchanged.
+
+**Readings.** `the-optimistic-update` 18 / 18; `node-spec-graph` 7 / 7 (pinned at 10 / 17 / 22 / 46); HLS-001 red on
+exactly the predicted 77 paths (55 README, history-desk's `history.ts`, optimistic-desk's 21 files), golden regenerated
+and its diff counted (56 out, 79 in), 4 / 4 after; `streaming-trio` and `the-state-history` green; the 19 floor pins
+moved. Whole-package export jest **122 / 122 suites, exit 0** (4,053 passed, 3 skipped; `nice -n 19 --runInBand`,
+1,261 s). `export-ledger:check` OK (136 translated); `export-ledger:picker --check` holds at 129 / 130; package `tsc` 0;
+editor `tsc --noEmit` 0.
+
+## §79 Sign In With (session 109, 2026-10-15): picker 129 → 130 of 130
+
+The last picker row. §50 had put it out of scope "until provider sign-in is a product decision"; the BOARD's lane 6
+(2026-10-14, "the last seven picker nodes export") is the newer ruling, the same reversal §77 and §78 rode. §75.5 #2 was
+right that nothing waited on a provider: the backend has a generic OIDC provider, and the backend suite already has a
+real OIDC issuer (`tests/helpers/fake-oidc-provider.ts`), so the drive needed nobody's credentials.
+
+### §79.1 What is built
+
+- **`src/api/client.ts` gains the sign-in return leg** (`emitApp.ts` `authReturnLegSource`), shipped where the app can
+  START a sign-in that comes back to it: a Sign In With, or a Request Magic Link (its link returns the same
+  `?nodegx_auth=` code). Every other app's client is byte-identical (live-desk, pinned). Transcribed from
+  `ParseAuthAdapter.ts`: `signInWithProviderRequest` (the handover: `<endpoint>/oauth/<provider>/start?redirect=`, a
+  blank Redirect is this page minus the sign-in parameters, no Provider refused in the call with
+  `Sign In With: no provider was set.`), and `consumeAuthReturn` (strip first, a provider error deferred a tick, the
+  code exchanged, the answer stored whole as the session, then announced), run once when the module is evaluated. The
+  exchange is its own request, `exchangeAuthCode`, read as `_makeRequest` reads an answer (finding 3).
+- **`src/lib/signIn.ts`** (`src/emit/signInLib.ts`, generated from session 109's scratchpad `signinlib/signIn.ts` +
+  `gen.js`, round trip byte-exact): signinwith.ts's launcher (Do: Signing In, then the handover; a refusal sets Error
+  and Signing In, raises `user/sign-in-with-failed`, then Failure and Completed) and its receiver (at mount it subscribes
+  to the client's return and reads it; in progress sets Signing In; a settled return reported once, C50: Done after
+  Notice and Error are written, or Failure with the node's code).
+- **Table row 14** (`plan.ts`): Provider and Redirect are config read at the press; Do (`signIn`) is the verb and
+  carries nothing; Done, Completed and Failure are the listeners in the node's declaration order; Signing In, Error and
+  Notice are live getters. Refused by name: a project with no backend. The node has no Backend input (the runtime always
+  reaches the active backend).
+- **The alpha sentence** (`ledger.ts` `alphaNotice`, read by the pre-flight modal, the settings section and every
+  exported README) reads "All 130 nodes you can place export today." at a complete picker; "the rest are left out by
+  name" named nothing.
+
+### §79.2 The test: `tests/the-sign-in-with.test.ts`, 72 rows, and `tests/fixtures/signin-desk`
+
+The fixture: `acme` (Provider acme) pressed by a button, its three values in Texts, Done and Failure writing `last`;
+`nobody` (no Provider) with its Error shown and its Completed writing `refused`; a User node for who is signed in.
+
+- §A the fixture whole (the app typechecks; the client carries the leg and calls it once; an app that can start no
+  sign-in has none; account-desk's magic link earns it).
+- §B **the client against the runtime's own `ParseAuthAdapter.consumeAuthReturn`**, the same page load and backend
+  answer on both sides (a fake browser: location, history, localStorage, fetch and XHR, the answers held so both see the
+  in-progress window): 9 page-load shapes × 4 answers, 36 rows, compared whole (what was consumed, the state at once and
+  settled, every announcement, the address bar after, every request, the stored session). A reach row (all five arms)
+  and two client mutants (no strip; a provider error announced at once).
+- §C **the node against the runtime's own `signinwith.ts` in a `NodeContext`**, over a UserService stand-in on that
+  same adapter (made at the first reach, consuming then; `on` and `oauthReturn` forwarded; the handover to the active
+  backend). 18 scripts: presses with and without a Provider and Redirect, an encoded Provider, a blank one, values set
+  after mount, a plain page load, returns that land (with and without a notice), returns refused with and without a
+  sentence, a provider error, two nodes, a late mount, an unmount and remount, a press after Done, a refusal during the
+  exchange. Compared whole: every signal with the three values a listener reads at it, every raise, each node's outputs
+  after every step, the navigations, the session, the address bar. A reach row, three lib mutants (no C50 guard; Done
+  before Notice; no Signing In on a press) and a fourth (a mount read that pulses).
+- §D wires and refusals (a wired Provider, a literal Redirect, no backend, a port it has not got, a pulse into a value,
+  two wires). §E the findings pinned. §F the ledger.
+
+No graph scenario plays on the export: every Sign In With scenario seeds a backend world, which the export graph harness
+keeps outside. The line stays at 10 of 85.
+
+### §79.3 What building it found
+
+1. 🔴 **An exported magic link has never signed anyone in** (P18-S109-MAGICRETURN, fixed here). The exported client had no
+   return leg, so the code the backend hands back after the click in the inbox sat in the address bar unexchanged.
+   `Request Magic Link` has been `translated` since §44; its spec asserted the request and never followed the link
+   back. account-desk's client moved in the golden by exactly this.
+2. 🔴 **A return read at mount reaches no wire in the runtime** (P18-S109-MOUNTPULSE, runtime, open). `nodescope.ts`
+   makes every node of a component before it attaches the connections (:425 then :429), and the node reports a
+   settled return in `initialize`, so that pulse goes nowhere. The export transcribes it: a return read at mount sets
+   values and raises, and calls no listener (an exported page entered again does not re-run a Done its first visit
+   handled, which is also what the running app does). The defect is the other half: a provider error is settled
+   before any node exists, so since P107-C50 kept the report made at mount and dropped the announcement, **a person who
+   cancels at the provider never fires Failure** in the running app. The first draft of the lib fired at mount; reading
+   `reportOutcome` and `nodescope` before running the differential caught it, and the §C harness now models the order
+   (a signal is logged only once the node is wired).
+3. **The exchange cannot ride `request()`.** The differential's first run differed on 4 of 36 rows: a 500 with no
+   `error` in its body read `Request failed (500)` in the export and `Sign-in could not be completed.` in the runtime.
+   The exchange now does its own fetch, read as `_makeRequest` reads: 200/201 is the session, else the body's `error`,
+   else the raw text, else the node's sentence — which is also what the runtime says for an unreachable backend (status
+   0, no text), so that difference is gone too rather than recorded. The magic-link spec's §43 cardinality row (A6)
+   now counts three fetch sites, two wrapped.
+4. Eight specs borrowed Sign In With as their "node with no rule". With the picker complete there is no placeable node
+   without one: they use `Verify Email`, deprecated and out of the picker (deferred by name in the ledger).
+5. A one-line harness fact: `nodeRegister._constructors[name]` is a factory, not a class; a patch on its `.prototype`
+   catches nothing. The runtime's raise during `initialize` is caught on the loaded `node.ts`'s `Node.prototype`.
+
+### §79.4 Recorded differences (not refused)
+
+- **When the return is consumed.** The runtime consumes it when UserService is first made, at the first user-family
+  node's `initialize`; the export when `src/api/client.ts` is first evaluated, at app start. On a returning page with
+  no user-family node the runtime leaves the code in the address bar until a page with one is made; the export
+  exchanges at once. Only an app whose redirect target has no user-family node can tell.
+
+### §79.5 The drive: a real backend, a real browser, both arms
+
+`EXPECTED79.md` first (session 109 scratchpad `drive79/`). The real `nodegx-backend` from `src` on :8591, provider
+`acme` = generic OIDC on the backend suite's FakeOidcProvider plus a one-route consent page (`/authorize` → 302 back with
+a code, or with `error=access_denied` in deny mode). The emitted signin-desk built (`npm install` against the published
+`@nodegx/core@0.1.0`, `tsc -b && vite build` exit 0) and served on :4391; the control arm is the same build with the
+`consumeAuthReturn();` call removed, on :4392. Headless Chrome through `drive-page.js`.
+
+| row | expected | read |
+|---|---|---|
+| C1 control boot | Signing In `false`, rest blank | ✓ |
+| C2 control, Sign in with Acme | four hops; back on `/home?nodegx_auth=…`, code still in the address bar, nobody signed in, no exchange | ✓ `?nodegx_auth=bQ7k…`; storage `[]`; 0 exchanges |
+| D1 fixed boot | Signing In `false`, rest blank; errors `[]` | ✓ |
+| D2 Sign in with nobody | Refusal `Sign In With: no provider was set.`, Refused `completed`, no navigation, one error | ✓ |
+| D3 Sign in with Acme | stripped to `/home`; one exchange 200; Last `done`; Signed in as `ann@example.com`; session stored | ✓ (a 204 preflight, then 200; the session whole with its token, `authOutcome` `signed-in`). **Missed:** Refused read `completed` — the `nobody` node is a receiver too and fired Done + Completed on the same return, as the runtime does (§C "two nodes") |
+| D4 reload | still signed in; Last blank; no exchange | ✓ |
+| D5 deny | stripped; Error the backend's sentence; no Failure pulse; one error; no exchange; still signed in | ✓ `Sign-in was not completed: access_denied`, Last and Refused blank. **Missed:** two console errors, one per node (both receivers raise), as the runtime would |
+
+Both misses were the expectation sheet forgetting that the second node is a receiver; neither is a defect. Everything
+started was torn down by its listening port.
+
+### §79.6 What this leaves
+
+The picker is complete: **130 / 130**. The graph line is unchanged at 10 of 85.
+
+**Readings.** `the-sign-in-with` 72 / 72; HLS-001 red on exactly the predicted paths (the 56 projects' README for the alpha sentence, account-desk's `src/api/client.ts`, signin-desk's 21 new entries), golden regenerated and its diff counted (57 out, 80 in), green after; 20 floor pins moved; the eight re-pointed specs and the magic-link spec green. Whole-package export jest **123 / 123 suites, exit 0** (4,143 passed, 3 skipped; `nice -n 19 --runInBand`, 497 s). `export-ledger:check` OK (137 translated); `export-ledger:picker --check` holds at **130 / 130**; package `tsc` 0; editor `tsc --noEmit` 0 (empty log).
+
+1. **P18-S109-MOUNTPULSE** (runtime, Sign In With): Failure on a cancelled sign-in. A small runtime fix; the export's
+   mount read (`applyReturn(s, current, false)`) moves with it.
+2. **Before anyone quotes 100%: EXP-008's per-parameter coverage** (§75.5 #3). Now the next row, not a footnote.
+3. The Dispatcher's built-ins (§77.5); raising the graph line (t01's three, the harness clock, the one-component limit).
+4. Not driven: a magic link's own round trip (it needs a mail transport); the return leg it uses is the one driven here.
+
+
+## §80 A Record shows the app's one copy of its record (session 113, 2026-10-15): P18-S111-RECORDLIVE, EXP-008's last gap port
+
+### §80.0 What the runtime does
+
+Every Record is bound to the process-wide `Model` for its Id (`Model.get(id)`, keyed by the id alone). With "Record
+properties" ticked under Run On Value Change (the default), every change to that Model re-flags the node's `prop-*`
+outputs (dbmodelnode2.ts `onModelChangedCallback`). Three things write it: a read merges its answer field by field
+(`CloudStore._fromJSON`: a Record's Fetch, Query Records' rows, Create Record's answer); Set Record Properties writes
+its values **before** the save, the answer's fields after it, and puts back what the record held when the save fails
+(setdbmodelpropertiesnode.ts, P107-C34). Delete only notifies `delete`, which a Record does not listen to. With Fetch
+wired and the box unstated, NDA-017's migration settles it unticked, and the export's parser settles it the same way
+(`settleComponent`), so that Record follows nothing, in the editor and in the export alike.
+
+Before this the exported Record's row was component state written only by its own read: a page kept the old title
+after a form elsewhere renamed the record. Counted first: 236 of 312 Records in the fixtures, templates and test
+projects share a collection with a Set Record Properties in the same app (most are site-builder copies of one Page
+editor; none of those translates today, for other reasons), so the reach is the product surface: a detail page and an
+edit form.
+
+### §80.1 What is built
+
+| piece | what it is |
+|---|---|
+| the held records (`emitApp.ts` `HELD_RECORDS_SOURCE`) | `heldRecords: Map<id, row>` and `holdRecord(fields)`, which merges and hands the new row to every listener; `subscribeRecord(id, listener)` hands the current copy at once and every later one, and returns the unsubscribe |
+| the merges | `fetchOne` returns `holdRecord(fromWire(answer))`, so the Record's row is the merged copy; `query` holds each row; `create` holds its answer |
+| `update` (`HELD_UPDATE_SOURCE`) | the runtime's order: `holdRecord({ ...data, id })` before the PUT; on a throw, `holdRecord({ ...before, id })` then rethrow (the node's Failure arm is unchanged); after the answer, `holdRecord({ ...fields, id })` |
+| the gate | `RecordReadPlan.live` = the project declares a backend and the box is not literally `false`; `emitApp` ships the held records only where some Record is live, so every other client is byte-identical (`PLAIN_UPDATE_SOURCE` is the old body, verbatim) |
+| the component | per live Record whose row this component holds: `useEffect(() => (row?.id === undefined ? undefined : subscribeRecord<T>(row.id, setRow)), [row?.id])`, the import from `../api/client`, and `useEffect` in the react import gate. The row's setters are untouched: the Record's own read still sets it, now to the held copy |
+
+Beside it, **P18-S113-IDREADTWICE**, found by the new fixture: an Update Record whose Id is a Variable exported
+`if (!pageId.get()) throw …; await updatePage(pageId.get(), …)`, which fails `tsc` (a second call is not narrowed).
+The record verbs' `guardId` now binds a call-shaped read to `<stem>RecordId` first, the relations' naming (§62). A plain
+identifier and a coerced read are left as they were; no corpus app moved.
+
+### §80.2 The test: `tests/the-live-record.test.ts`, 21 rows, and `tests/fixtures/record-desk`
+
+§A the client (the held records shipped with a live Record; every read merges; the update's five steps in order; with
+every Record unticked the plain client, the old `update` verbatim). §B the component (one subscription, for the ticked
+Record only; none unticked; page-desk's wired Fetch with the box unstated settles unticked, and ticked by hand it
+subscribes; with no backend, no client and no subscription, and the app typechecks; the form unchanged). §C the emitted client transpiled and run against a scripted wire whose every request
+waits to be answered: nothing before a read; the read hands the row; a late subscriber gets the row at once, the same
+object; an update shows before the PUT answers, then carries `updatedAt`; a refused update hands back the old values
+and still throws; a query's rows reach the Record; a read keeps a field its answer lacks; a created record is held;
+another id's write and an unsubscribed listener hear nothing. §D record-desk whole: the notes are the router shell and
+the backend only, the form reads its Id once, and it and page-desk typecheck.
+
+`record-desk`: two Records on one Id with Load wired to both Fetches, **Shown** ticked by hand and **Frozen** unticked,
+and a `Rename` component with a Set Record Properties. Generated by `s113-recordlive-drive/gen-fixture.py`.
+
+**Mutant arms**, each restored and `cmp`-checked: no held records 13 rows; no write before the save 3; no put-back 2;
+query not held 2; no subscription 2; the box ignored 4; replace instead of merge 2; the Id read twice 3. 🔴 The last
+arm first read **0**: replacing its whole condition with `false` lost the narrowing of `action`, the suite failed to
+compile, and a suite that does not run prints no ✕. Re-shaped to keep the types, it kills 3.
+
+### §80.3 What building it found
+
+- 🔴 **P18-S113-IDBINDREAD (open, medium).** §43's "effect form" (Fetch unwired) reads the backend on every Id change.
+  The runtime never did: the Id setter only binds (`setModelID`), and the one `scheduleFetch()` is behind the Fetch
+  port, unchanged since the initial commit; the published doc says the same. The drive measured it (run 1: the runtime
+  made no request and showed nothing until the write). §43.1's reading of `runOnValueChange: { controlSignal: 'fetch' }`
+  was the error: the control signal governs whether the Id *rebinds*, not whether it reads.
+- **P18-S113-LISTLIVE (open, medium).** One node over: the runtime's Query Records list follows a create, save or delete
+  anywhere in the app (`bindStoreEvents`); the exported list is state written only by its own read.
+- **P18-S113-IDREADTWICE (fixed, above).**
+- 🔴 **The first whole-package run found a defect of this change**: an app with no backend ships no `client.ts`, and its
+  live Record imported `subscribeRecord` from it (TS2307 in `file-record`, `css-definition` and `date-column`'s
+  "without a backend" rows). With no backend the read is a stub that throws, so nothing can be held: `live` now
+  requires `ir.project.cloudservices`, and §B has the row. That run had loaded the pre-fix `plan.ts`, so its four reds
+  served as the control: exactly the no-backend rows.
+
+### §80.4 Recorded differences (not refused)
+
+- The copy is keyed by the id alone, as the runtime's is: two classes holding the same id share it, in both.
+- A read merges and never removes a field, as `_fromJSON`; a column deleted on the backend stays in the copy until the
+  page reloads, in both.
+- `Changed` / `changed-<column>` stay refused by name (§43): the copy now changes as the runtime's does, but the
+  export still has no pulse to fire from it.
+- A refused save's sentence: the runtime's store says `Failed to save.` where the export's client says `Could not reach
+  the backend at …` for a refused connection, two producers (§43.6).
+- The relation verbs and Set User Properties do not write the copy; a Record bound to a user record or reading a
+  relation's `updatedAt` does not follow them.
+
+### §80.5 The drive: a real backend, a real browser, three arms (`s113-recordlive-drive/`)
+
+`EXPECTED.md` first. The real `nodegx-backend` from `src` on :8594, one `Page` seeded `Home`; the runtime arm through
+`render-from-disk.js` (its viewer bundle newer than every runtime file involved), the export arms bundled with esbuild,
+the control being the same export with every Record's box unticked (the plain client and no subscription, which is what
+HEAD emitted for this app). Run 2, every cell as expected:
+
+| step | runtime | export-control | export-fixed |
+|---|---|---|---|
+| D1 id typed, Load | Home / Home | Home / Home | Home / Home |
+| D2 `Welcome` saved (200) | **Welcome** / Home | **Home** / Home | **Welcome** / Home |
+| D4 the next PUT refused, `Gone` saved | **Welcome** / Home + error | Home / Home + error | **Welcome** / Home + error |
+
+The backend held `Welcome` after D2 and D4 in every arm. Run 1 (Fetch unwired) is what found IDBINDREAD.
+
+### §80.6 What this leaves
+
+EXP-008: **0 gap ports**, floor 1,234 of 1,396. HLS-001: 58 projects; this change moved exactly `client.ts` and
+`Home.tsx` in the four projects with an effect-form Record (65 diff lines each, read by hand in three), plus
+`record-desk`'s entries.
+
+1. **P18-S113-IDBINDREAD**: the effect form becomes a bind (the row is the held copy for the Id, via `subscribeRecord`;
+   no request, no Error, no Done). Re-grades `record.test.ts`'s effect rows and §43.6's drive, and moves the four
+   fixtures. Its own change.
+2. **P18-S113-LISTLIVE**: the store's create / save / delete events in the exported client, with the query's filter
+   and sort applied in the browser.
+3. P18-S112-NATIVESELECT; then P18-S109-MOUNTPULSE, §77.5, the graph line, the two `unexamined` ports (Radio Button's
+   icon colour and size), the 112 unprobed ports, the four low rows.
+
+## §81 A Record whose Fetch is unwired binds; it does not read (session 114, 2026-10-16): P18-S113-IDBINDREAD
+
+### §81.0 What the runtime does, and where §43 read it wrong
+
+The Id setter calls `setModelID` when `shouldRunOnValueChanged('modelId', …)` says so, which with Fetch unwired is every
+change of the Id. `setModelID` binds the node to the process-wide record (`Model.get(id)`), flags every `prop-*` the
+record already holds and fires Fetched. That is all: the one `scheduleFetch()` is behind the Fetch port, so no request
+is made, Done and Failure never fire and Error is never written. An empty Id binds nothing (`setModel(undefined)` flags
+only `id`), and a record nobody holds flags nothing, so a wire from a property keeps what it last carried. The published
+doc says the same. §43.1 read `runOnValueChange: { controlSignal: 'fetch' }` as "reads on every Id change"; it governs
+whether the Id *rebinds*. s71's 72-cell drive passed because its sheet was written from the same reading; only s113's
+runtime arm showed it.
+
+Counted first: 301 explicit-Id Records across the fixtures, the editor templates, the NodeGX test projects and the MCP
+corpus; 83 have Fetch unwired; **none wires Done or Failure**; Error is wired on three, all fixtures built from the
+misreading; Fetched on ten (refused by name since §43).
+
+### §81.1 What is built
+
+| piece | what it is |
+|---|---|
+| the bind (`component.ts`, `recordBinds`) | `useEffect(() => { const id = <render local>; if (empty) return undefined; return subscribeRecord<T>(id, setRow); }, [<the Id>])`: the row is the client's copy, now and after every write. A literal Id has no guard and `[]` |
+| unticked "Record properties" | the copy once at the bind: `subscribeRecord<T>(id, setRow)();` (binding flags whatever the record holds, whatever the box says) |
+| the refusal (`plan.ts`, `recordBindRefusal`) | a Done or Failure wired on a Record whose Fetch is unwired: `its Done output is consumed and its Fetch is unwired — both fire only after a Fetch, and an Id only binds the record it names (dbmodelnode2.ts setModelID)`. Shared with `recordWillFire`, with s110's unticked-Id refusal moved into it, so the two cannot disagree |
+| the module (`emitApp.ts`) | `RecordReadPlan.binds`: no `fetch<Type>ById` for a Record that only binds, and it is no "Source:" of one; a module left holding only the interface imports nothing from the client (it printed `import {  } from './client'`) |
+| the client | ships the held records wherever a Record binds, whatever its box says |
+| the rows | a `record-out` render read earns its row in both expression walkers (it had been earned only by the read action, which a bind does not have); the bind's row and Error rows say what they hold |
+| RECORDLIVE's subscription | no longer added for a binding Record (the bind already follows the copy; HEAD subscribed twice) |
+| no backend | nothing is held: no bind is emitted and the row stays unset, where HEAD called a stub that threw and wrote Error |
+
+`viaEffect` and its two branches in the read's emitter are gone; the read is only ever the wired form now.
+
+### §81.2 The test
+
+`record.test.ts` §B, nine rows replacing §43's three: the bind (no request, no Error, no raise, no `fetchPageById`, the
+module the interface alone, the client holding records); Done and Failure refused by name; a column read only in a
+handler earns the row and binds it; Error declared and never
+written; no row read, nothing emitted; the wired form keeps its throw; a literal Id at mount; the box unticked; no
+backend. §E page-desk: the live Record binds. Re-pinned to the bind: `file-record` B5, D4 (one function in the module)
+and B6 (a Done chain needs a Fetch, so the Record is fetched by a button there), `relation-pair` A8 and C4 (two raise
+sites, not three), `variable-seed` F1, F2, F5 (the bind reads the Id's render local), `the-live-record` §B (one
+subscription), `relation-verbs` §17's two Record rows (the module is the interface alone). HLS-001: **8 hashes moved**, predicted before the red run: `Home.tsx` and the class module in due-desk,
+gallery-desk, link-desk and page-desk; `client.ts` moved nowhere. With HEAD's three source files put back the gate was
+4 / 4; regenerated.
+
+**Mutant arms**, run in a copy of the package (`packages/.nx-mut-s114`, `node_modules` symlinked, removed after) so a
+peer working in the package (one was: `style.ts` changed under this session) never ran a mutant; each restored and
+`cmp`-checked against the working tree; six suites, 165 rows:
+
+| arm | what it removes | killed |
+|---|---|---|
+| A | the bind's emission | 10 |
+| B | the empty-Id guard | 15 (TS2345 in every typecheck row) |
+| C | the unticked form (always follow) | 1 |
+| D | `binds` (the module keeps its read) | 9 |
+| E | the Done / Failure refusal | 1 |
+| F | the first walker's `record-out` clause | 1 |
+| F2 | the second walker's | 24 |
+| G | RECORDLIVE's exclusion of a binding Record | 2 |
+| H | the empty client import guard | 2 |
+| I | a binding Record listed as a read site | 3 |
+| J | held records shipped for binds | 1 |
+| K | the no-backend gate | 3 |
+
+🔴 Arm B first read **0 total, "failed to run"**: `kind !== 'never'` is a TS2367, so nothing compiled and nothing was
+graded, s113's trap again. Re-shaped as `(… || true)`. 🔴 Arm F first **survived**: no row read a binding Record's
+column only in a handler, so the first walker's clause was unmeasured. The row was added (the press reads the copy) and
+F kills it.
+
+### §81.3 The drive (`s114-idbind-drive/`)
+
+s113's run-1 graph (`bind-desk`), `EXPECTED.md` first, three arms on a real backend: the runtime, HEAD's export, the
+working tree's. Two steps added to run 1's: an id nobody holds (D5) and the held id again (D6, the only cell that grades
+the unticked bind). **Every cell as expected; the runtime and the fixed export agree on every title in all seven
+steps**, both made 2 PUTs and no GET; HEAD's export made six GETs and cleared both titles on a 404 at D5.
+
+### §81.4 Recorded differences (not refused)
+
+- D4's sentence for a refused save, two producers (§43.6, §80.4).
+- Fetched stays refused by name: the bind fires it in the runtime, and the export has no pulse for it.
+- A held copy replaces the row whole, where the runtime re-flags only the keys the new record holds: switching between
+  two held records, a column the second lacks reads `undefined` in the export and keeps the first record's value in the
+  runtime. Neither D-step reaches it (one record in the app).
+- Staleness on an empty Id or an unheld record is the runtime's, carried: the Text keeps the previous record's title.
+
+### §81.5 What this leaves
+
+1. **P18-S113-LISTLIVE**: the store's create / save / delete events in the exported client, with the query's filter and
+   sort applied in the browser.
+2. P18-S112-NATIVESELECT; P18-S109-MOUNTPULSE; §77.5; the graph line; the two `unexamined` ports; the 112 unprobed ports;
+   the four low rows.
+
+## §82 A Query Records asks for what its Filter, Sort and Limit say (session 115, 2026-10-16): P18-S115-QUERYFILTER
+
+### §82.0 What was wrong, and why nothing measured it
+
+Session 115 opened P18-S113-LISTLIVE, which needs the query's own filter and sort in the browser, and found the query
+had none: the api module's `fetch<Plural>()` was `query<T>('<Class>')` with no parameters and the page called it bare,
+whatever the node said. A filtered, sorted, limited list exported as the whole class in the backend's order, and the
+report said nothing. On `puppy-test-3`, setting a visual Filter (either saved shape), a Sort, Use Limit with Limit and
+Skip, the Javascript filter, a Search term or Total Count left every emitted file and note byte-identical.
+
+EXP-008's probe could not see it, for two reasons (filed as **P18-S115-DYNPROBE**). The coverage ledger lists Query
+Records as `stubbed`, an exemption from before EXP-009 connected the query, and the probe reads `translated` types
+only. And every one of its inputs is a dynamic port, which the probe never varies; 63 translated picker nodes declare
+dynamic ports. "0 gap ports" is a statement about static ports.
+
+Counted first: 43 projects on this machine hold 323 Query Records. 125 carry a Filter, 105 of them reading at least one
+value from a port; 62 carry a Sort, 12 a Limit.
+
+### §82.1 What is built
+
+| piece | what it is |
+|---|---|
+| `src/analyze/querySettings.ts` | the node's request, computed by the runtime's own translator at export time: `visualQueryToNeutral` (QueryEditor shape, a proxy recording which parameters it reads) or `savedFilterToNeutral` with `dropUnresolvedConnected` (builder shape), then `toParseWhere` for `nodegx`, an empty `where` dropped. The schema comes from the project's `dbCollections` as `QueryUtils.schemaFor` reads it. Sort is `convertVisualSorting` verbatim; Limit and Skip are `getStorageLimit` / `getStorageSkip`. A `qp-` port's typed-in value is the parameter's value, as the setter stores it |
+| the dependency | `@noodl/backend-contract` as a `file:` devDependency (the runtime's and the editor's own), bundled by `build.mjs`; one line in the lockfile's workspace entry |
+| the refusals, by name | the Javascript filter; a Search term, typed or wired (an empty one is no search); a wired `storageFilterType` / `visualFilter` / `visualSort` / `storageEnableLimit` / `storageLimit` / `storageSkip`; a filter value read from a wired port (**P18-S115-QUERYPARAMS**); a relation question with no class (the runtime reads it off a loaded record); a "points to" condition (the snapshot has no target class); a filter the translator refuses, which in the runtime is Failure and no request, carrying the translator's sentence |
+| `plan.ts` | one reading per node (`querySettingsFor`), used at the three places a query is read: the repeater feed (wire dropped with the reason), the list read (`ctx.defer`), the disposition (deferred with the reason) |
+| `QueryPlan.params` | absent when the runtime sends none of the four, so an unfiltered query is byte-identical to before |
+| the module (`emitApp.ts`) | `fetch<Plural>(params?: QueryParams)` → `query<T>('<Class>', params)` and `type QueryParams` imported, only where some site passes them; the stub takes `_params?: unknown` and still answers `[]` |
+| the call (`component.ts`) | `fetch<Plural>({ where: <the translator's JSON>, sort: [...], limit: n, skip: n }).then(set<Plural>)` |
+
+### §82.2 The test (`tests/the-query-asks.test.ts`, 64 rows)
+
+§A grades 23 cases, one per filter shape and operator family plus sort, limit and skip, and one translator refusal,
+against the **runtime node's own methods**: `getStorageFilter`, `getStorageLimit` and `getStorageSkip` called on a
+stand-in `this` filled the way the node's setters fill it, with the project's schema in `CloudStore._collections`. That
+arm runs in a child process (`tests/helpers/runtime-query-arm.js`), because ts-jest typechecks every file it transforms
+against this package's strict config and the runtime is not written for it. §B checks the emitted call, the module, a
+typecheck with and without a backend, and the unfiltered query emitting byte-for-byte what it did. §C checks every
+refusal's sentence and that a refusal reaches the report. §D compares the emitted client's body, run against a stubbed
+`fetch`, with what `ParseWireAdapter.query` writes for the same request, for every §A case.
+
+**Mutant arms** ran in a copy (`packages/.nx-mut-s115`), each restored after:
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | no parameters at all (HEAD's wire) | 38 |
+| B | `dropUnresolvedConnected` off | 4 |
+| C | no schema | 2 |
+| D | Limit default 0 | 2 |
+| E | sort never descending | 5 |
+| F | an empty `where` kept | **0: equivalent**. Neither shape yields a non-null filter that translates to `{}`; the guard is the runtime's own (`convertVisualFilter`) |
+| G | the wired-parameter refusal | 1 |
+| H | the Javascript-filter refusal | 2 |
+| I | the call printed bare | 1 |
+| J | the module drops `params` | 1 |
+| K | every module takes `params` | 1 (the byte-identical row) |
+| L | Skip 0 not sent | 5 |
+| M | the repeater feed ignores a refusal | 1 |
+
+🔴 I and M first read **0 total**: a mutant that breaks a narrowing does not compile and grades nothing (s113's and
+s114's trap a third time). Re-shaped so they compile (`(…, '')`, `&& connection.key === '__never__'`).
+🔴 **A mutant copy inside `packages/` is seen by a repo-wide gate.** The whole-package run read 129 / 131: one red was
+the peer's (`parameter-coverage`, P121's three uncommitted Upload File ports, total 1,399 vs 1,396, as in s110–s114),
+the other was this session's own: `hls006-every-listener` scans the repository and found `.nx-mut-s115/src/cli/serve.ts`
+as an unenrolled socket. The copy was removed at once (a peer running that gate would have gone red on it) and the gate
+re-read 4 / 4. Whole package, then: **130 / 131 suites, 4,443 passed + hls006's row, 3 skipped**; the one red is the
+peer's. Next time: remove the copy the moment the mutant arms end, before any whole-package or repo-wide run (it must
+sit in `packages/`, beside `noodl-runtime`, for its relative paths to resolve).
+
+### §82.3 The drive (`s115-query-drive/`)
+
+`query-desk`, `EXPECTED.md` first: ten contacts. The Filter has three groups and a Date column, the sort two keys,
+Limit 3 and Skip 1. Three arms ran on a real backend. **Every cell as expected.** The runtime and the fixed export both
+show Cleo, Eve and Gus, in that order, from the same `where`, `order`, `limit` and `skip`. HEAD's export showed all
+ten after a bare `{"_method":"GET"}`.
+
+### §82.4 Recorded differences (not refused)
+
+- The runtime always sends `count` (Total Count's box, `false` unless ticked); the export sends none. With the box
+  ticked the backend answers a total the export never reads: Total Count's output is not translated, and a wire from it
+  is dropped with the generic note ("wire … has no deterministic translation in step 5"), measured.
+- The schema is the `dbCollections` snapshot's `columns` (name and type). A Parse-era `schema.properties` entry reads
+  as no schema here, so a typed-in date on such a class goes as text where the runtime would send the date envelope.
+  None of the corpus's filtered classes is in that shape.
+- In a development bundle the exported app queries twice on mount (`<StrictMode>`); a production build queries once.
+
+### §82.5 What this leaves
+
+1. **P18-S115-QUERYPARAMS**: the `where` built in the app from wired values, the query re-run as each changes (105 of
+   the 125 filters).
+2. **P18-S113-LISTLIVE** on top of it: the store's create / save / delete in the client, the query's `where` matched
+   and its order applied in the browser (`QueryUtils.matchesQuery` / `compareObjects`, against the `where` this section
+   now carries).
+3. **P18-S115-DYNPROBE**: Query Records re-statused `translated`, and a dynamic-port arm for the probe.
+4. Then §81.5's list.
+
+## §83 A Query Records' Filter reads its wires (session 116, 2026-10-16): P18-S115-QUERYPARAMS
+
+### §83.0 What was wrong
+
+Since §82 the export translated a Filter whose values are all known when the project is exported, and refused one
+that reads a value from a wired `qp-` port, so the page lost its list ("tasks of the project a person picked"). In the
+running app `setQueryParameter` stores the value and, its Run On Value Change box ticked (the default), queries again;
+`getStorageFilter` builds the `where` from whatever the inputs hold, and the translator drops a condition whose value
+is unset.
+
+Measured first, on 48 projects (281 Query Records, 105 filtered): **84 read a wired value.** Every wired leaf is in the
+QueryEditor shape, on `equal to` (75), `greater than or equal to` (9) or `less than or equal to` (3), never on a Date
+column; 81 read one value and 3 read two. 0 of 87 wired ports also hold a typed-in value.
+
+### §83.1 What is built
+
+| piece | what it is |
+|---|---|
+| `querySettings.ts` `wiredWhereOf` | the runtime's own translator, run once per combination of the wired values being set or unset (at most 3 values, 8 translations), a NUL-delimited marker standing for each set value. `cases[mask]` is the translator's `where` for that combination, or no `where` |
+| `placeMarkers` | a marker must land whole under `$eq` / `$ne` / `$lt` / `$gt` / `$lte` / `$gte` on a field, where the Parse dialect passes the value through `parseValue` and nothing else; it becomes a `WiredValueMark` carrying whether the field is a Date column. Anywhere else (a lowered regex, an `$in` list, a relation's `objectId`) is refused by name |
+| the refusals, by name | a wired Fetch (the query runs when Fetch is sent: **P18-S116-QUERYFETCH**, filed); an unticked box; two wires into one input; a wired input that also holds a typed-in value; more than three values; a marker outside a plain comparison; a source `resolveExpr` cannot read, or one that only exists in a handler; a value read off the query's own rows (a cycle guard in `querySettingsFor`) |
+| `plan.ts` | `querySettingsFor` resolves each value's wire with `resolveExpr` (the States `follow` path) into `QueryPlan.wiredValues`; the wires, logic nodes and subscribers are consumed **before pass 6** for a query that lands (`queryLands`, the disposition pass's own test, now shared) |
+| `component.ts` | one effect: each value read in render (a render local is used as it is, never re-bound), `const where = <conditional on each value being undefined, down to each case's document>`, `fetch<Plural>({ where, … })`, dependencies the values' (`effectDeps`). A Date column passes `true` |
+| `emitApp.ts` `FILTER_VALUE_SOURCE` | `filterValue(value, dateColumn)` in `src/api/client.ts`: the translator's `parseValue` (a Date instance goes as the date envelope; text on a Date column too, when it parses). Shipped only where a page uses it; with no backend the page passes the raw values to the stub |
+
+### §83.2 The test (`tests/the-query-reads-its-wires.test.ts`, 140 rows)
+
+§A evaluates the `where` line of the **emitted page** (its own text, the Variable's render local holding each value,
+the emitted client's `filterValue`) against the runtime node's own `getStorageFilter`, called in the child-process
+arm on a stand-in `this` whose `queryParameters` hold the same values (the arm now takes `values`, a Date crossing as
+`{ $date }`). Ten filters, both shapes, groups, one value read twice, a range from two values, a Date column, a typed-in
+parameter beside a wired one; each over 11 single values (unset, `"Collie"`, `""`, `null`, `0`, `3`, `false`, `true`,
+a Date, a date as text, text that is not a date) or 12 pairs. A guard row checks each filter both drops and keeps a
+condition across its values. §B pins the effect's text, the two-value conditional, the Date column's `true`, the
+client export and page import, no `filterValue` where no filter reads a wire, the typecheck of every filter's app,
+and the no-backend stub. §C pins every refusal's sentence and that an unreadable source reaches the report.
+
+s115's §C row that pinned the old refusal now pins the wired plan instead (`the-query-asks.test.ts`, 64 rows).
+
+**Mutant arms**, in a copy (`packages/.nx-mut-s116`, removed straight after; the four sources `cmp`-checked against the
+working tree first). Control: 204 / 204 across both specs.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | an unset value kept (no drop) | 34 |
+| B | `filterValue` without its Date-instance branch | 27 |
+| C | a Date column never flagged | 4 |
+| D | `$regex`, `$in`, `objectId` counted as plain comparisons | 2 |
+| E | the wired-Fetch refusal gone | 1 |
+| F | the unticked-box refusal gone | 1 |
+| G | the effect's dependency list empty | 2 |
+| H | the wires not consumed | 1 |
+| I | the set and unset arms swapped | 117 |
+| J | the typed-in-and-wired refusal gone | 1 |
+| K | the three-value cap off by one | 1 |
+| L | `filterValue` not applied | 24 |
+
+### §83.3 The drive (`s116-queryparams-drive/`)
+
+`params-desk`, `EXPECTED.md` first: a City box writing the Variable `city`, wired into `city equal to <city>` AND `vip
+equal to true`, sorted by name; s115's ten contacts on a real backend; five steps typed in each of three arms.
+
+**S1 to S4 agree**: "Berlin" → Ada, Gus, Ivo; "Paris" → Cleo; cleared → no rows (`""` is a value, its condition kept);
+"Oslo" → Finn. The runtime and the fixed export sent the same `where` per step, one query each. HEAD's export had no
+list and made no request.
+
+**S0 differs, and the `where` is not why.** The runtime's first query is the export's (`vip` only, `city` unset);
+then the City box mounts, publishes its Value `""` (`TextInput.tsx` `componentDidMount` → `setText(startValue)` →
+`onTextChanged`), and the runtime asks again with `city = ""` and shows no rows. The exported box writes `city` only
+on `onChange`, so it shows all eight vips until someone types. EXPECTED.md named that reading as the one it could not
+settle. Filed **P18-S116-FIELDMOUNT**: every sink of a text input's Value sees the mount value in the runtime (792
+such wires in 46 projects on this machine; a dozen export fixtures), so the fix is the field's, not the query's.
+
+Also read off the screenshots, in this drive and s115's: two Texts in a row share its width in the runtime and sit at
+their content width in the export (**P18-S116-ROWSPREAD**, low, cause not yet read).
+
+### §83.4 What this reaches, measured
+
+On the same 48 projects, after the fix: **none of the 84 wired filters exports yet**, each stopped one step earlier.
+42 read a Function fed by another Function ("JS-node chains are not translated in this slice"), 21 have Fetch wired
+(P18-S116-QUERYFETCH), 18 sit in a logic component with no page ("logic node"), 3 read the clock. The row's "105 of
+125" was the reach of the refusal, not of this fix. What exports now is a filter fed by a Variable, a component input,
+the signed-in user or anything else `resolveExpr` reads in render.
+
+### §83.5 What this leaves
+
+1. **P18-S116-QUERYFETCH** (112 of 281 Query Records have Fetch wired): the query as a handler action in its sender's
+   chain. The largest single block on the 84.
+2. **P18-S116-FIELDMOUNT**: a text input's Value delivered at mount.
+3. P18-S113-LISTLIVE (the store's events in the client, `matchesQuery` against the `where` the plan now carries; for a
+   wired filter, the `where` of the current values).
+4. P18-S115-DYNPROBE; then §81.5's list.
+
+## §84 A Query Records asks when its Fetch is sent (session 117, 2026-10-16): P18-S116-QUERYFETCH
+
+### §84.0 What was wrong
+
+In the running app a Query Records' Fetch (`storageFetch`, display name "Do") is `scheduleFetch`: the query asks after
+the pulse's writes, reading its filter's wired values then. Wiring Fetch settles every Run On Value Change box unticked
+(NDA-017's migration, which the export's parser applies too), and `nodescope.ts` applies a box before the input it
+governs, so a query with Fetch wired asks at creation only where an author ticked a box again. The export had no rule
+for the port: the query asked once at mount and never again, whatever sent Fetch; the wire was reported as "no
+deterministic translation in step 5". A query whose filter also read a wired value was refused outright (§83's
+QUERYFETCH refusal), and a Create Record whose Done sent the Fetch was refused whole ("its done output drives no
+translatable action"), because the Done chain had nowhere to put the Fetch.
+
+Measured first, over every project under `NodeGX test projects/`, `Noodl projects/` and the export suite's fixtures
+(35 projects with a Query Records, 216 Query Records): **61 have Fetch wired**, 22 of them reading a wired filter value
+too, through 107 wires. The senders: a For Each row's Changed (40), a Create Record's Done (39), a component input
+(`refresh`, `loadHistory`, `Moderator`, `Member`: 17), a Condition's On True (3), a Cloud Function's or Set Record's
+Done (4), a Page's Did Mount (1), a Query Records' Changed (1). The boxes: Class and Query settings both unticked on 49,
+Class ticked on 11 (4 of those Query settings too), unset on 1. At HEAD, 27 of the 61 exported, each asking once at
+mount and never again; not one of the 107 wires exported.
+
+### §84.1 What is built
+
+| piece | what it is |
+|---|---|
+| `plan.ts` `QueryFetchAction` (`query-fetch`) | the Fetch as a handler action, `DbCollection2: 'storageFetch'` in `TRIGGER_PORTS`, `compileQueryFetch` at the sink dispatch. It carries the filter's wired values (`queryWirings`), so every walker sees what it reads; refused with the query's own reason when the query's settings are refused |
+| `QueryPlan.fetchWired` | `mount`: the query also asks as it is made: its Class box ticked (or unset), or its Query settings box with a setting authored (the setters that consult it: `setVisualFilter`, `setVisualSorting`, `backendId`, `userInputSetter`), or a Page's Did Mount sends the Fetch. `onValues`: the wired values' boxes are ticked, so a new value asks too |
+| `pageMountFetch` | a Page's Did Mount into its query's Fetch is the mount: skipped by the attach pass, consumed where the query lands. Any other node's Did Mount stays a handler the emitter reports ("no DOM event equivalent") |
+| `querySettings.ts` | with Fetch wired, an unticked value box is no refusal (the value waits for Fetch); one ticked beside one unticked is refused by name ("two schedules for one query"); §83's QUERYFETCH refusal is gone |
+| `lateQueryFetchWrite` | the one order the runtime's scheduling hides: a later action in the same chain or handler writing a value the filter reads (a Variable, a Global Store key, a state row). Refused by name; asked in `snapActionList` and where a DOM handler or a receiver is assembled wire by wire |
+| `component.ts` | the action prints `void fetch<Plural>(<settings>).then(set<Plural>)`, a wired filter's `where` built from the values as the HANDLER reads them (a store's `.get()` at the pulse, not the render local). The effect prints only where `queryHasEffect` says a box asks; a page with none imports no `useEffect`, and a value read only in a handler earns no `useValue`. A Fetch into a query the export does not keep prints nothing (`expandActions`); the query's own row says why |
+
+### §84.2 The test (`tests/the-query-fetch.test.ts`, 38 rows)
+
+§A grades when the query asks against the runtime node's **own setters**: the child-process arm gained a creation mode
+(`runtime-query-arm.js`): the box answers recorded first through the runtime's `setRunOnValueChange`, as `nodescope.ts`
+hoists them, then each parameter through its setter, `Node.prototype`'s `shouldRunOnValueChange(d)` deciding; it
+counts `scheduleFetch` at creation and on a wired value's change. Eight box combinations: the page has a mount effect
+exactly where the runtime asks at creation, and a value effect exactly where a new value asks. §B pins what is emitted:
+no effect and no `useEffect` with every box unticked, the settings in the Fetch's call, a ticked Class box keeping the
+mount effect beside the Click, a Page's Did Mount as the mount with the wire consumed, a Create Record's Done asking
+inside the save's try after the await, two senders, and the typecheck of every combination. §C evaluates the `where` the
+**handler** builds (its own text, the emitted `filterValue`, a store whose `get()` holds the value) against the runtime's
+`getStorageFilter` over nine values. §D pins the refusals: disagreeing boxes, a later write, a refused query refusing
+the chain that fetches it, and a Fetch into a query nothing renders printing nothing beside the button's other action.
+
+§83's row that pinned the QUERYFETCH refusal now pins that a wired Fetch is not refused (`the-query-reads-its-wires`,
+140 rows).
+
+**Mutant arms**, in a copy (`packages/.nx-mut-s117`, the three sources `cmp`-checked against the working tree before
+and after, removed straight after). Control: 178 / 178 across both specs. Every arm printed its Tests line.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | `mount` always true | 4 |
+| B | the Query settings box never asks at mount | 1 |
+| C | any Query settings box asks, setting or none | 1 |
+| D | a ticked value box never asks on a change | 1 |
+| E | a Page's Did Mount is not the mount | 1 |
+| F | the Fetch carries no values | 11 |
+| G | the Fetch reads values as render saw them | 11 |
+| H | disagreeing boxes not refused | 1 |
+| I | a later write not refused | 1 |
+| J | a Fetch into a dropped query not skipped | 1 |
+| K | an unticked value box refused even with Fetch wired | 14 |
+| L | Fetch not a trigger port | 27 |
+| M | the boxes-unticked branch prints the mount effect anyway | 4 (first shaped `false && …`, which broke a narrowing: "0 total", re-shaped) |
+
+**The whole-package run caught what the drive could not** (`nice -n 19 --runInBand`, 542 s: 131 / 133 suites, 4,621
+passed, 3 failed). Two of the failures were `parameter-coverage` on the P121 peer's three uncommitted Upload File
+ports (`photoQuality`, `readers`, `shrinkTo`; total 1,399 vs 1,396; reaching unchanged at 1,234), as in sessions
+110–116. The third was this spec's typecheck row for a value whose box is unticked: `Cannot find name 'breed'`. Dropping
+the render hook such a page no longer needs had also dropped the Variable's import, because the handler-side import
+walker (`collectExprUse` over each action's fields, an if-chain by kind) had no `query-fetch` case. Added; 38 / 38. The
+drive's page imported `city` anyway, since the City box's own `city.set(…)` earns it, so the drive could not have seen
+this.
+
+### §84.3 The drive (`s117-queryfetch-drive/`)
+
+`fetch-desk`, `EXPECTED.md` first: a City box writing the Variable `city`, wired into `city equal to <city>`, sorted by
+name; Fetch sent by a Refresh button and by a Create Record's Done; every box unticked. s115's ten contacts on a real
+backend, **started fresh for each arm** (the first run shared one, and the runtime arm's Zed showed up in the export
+arm's S2: a harness artefact, not a reading). Six steps in each of three arms.
+
+**Every step agrees** between the runtime and the fixed export, rows and request key for key: no request at load or on
+typing "Berlin"; Refresh → Ada, Dan, Gus, Ivo; Add → one POST then one query, + Zed; cleared and Refresh → `city = ""`,
+no rows; "Oslo" and Refresh → Finn. HEAD had no list, no request and no POST in any step. EXPECTED.md held in every
+cell.
+
+Read off the screenshots: the runtime's Button is black with white text by default, the exported one is the browser's
+grey button (**P18-S117-BUTTONLOOK**, low; 518 Buttons in 78 project folders author no background and no variant).
+
+### §84.4 What this reaches, measured
+
+Over the same 216 Query Records, **every disposition kept its kind**: the 27 Fetch-wired queries that exported still do,
+now asking when Fetch is sent (and at mount only where a box asks); the rest stay refused, each with a truer reason.
+The 19 wired filters the QUERYFETCH refusal stopped now stop one step later: 18 read a Function's output (a value that
+exists only in a handler: the Function-chain gap), 1 a Page Inputs value. Of the 107 Fetch wires, **27 now export**
+(HEAD: none). 65 are still reported by name: 38 because the query itself is refused (its filter reads a Function
+chain), 25 because the sender's own trigger is not exported ("not a rendered element event or a receiver": for one,
+`tut003-log-a-thing-solution`'s Create Record runs from a Condition's Ok), and 2 from a Cloud Function's Done (`d40-wizard-drive`,
+`sbr014-drive`), still pass 6's generic line. 15 sit in components no route reaches or with no visual root. No Create
+Record whose Done sends a Fetch is refused for that any more, and none changed kind either (one changed its reason):
+each is stopped by something else first, read per row in the disposition diff, not yet sorted by cause.
+
+### §84.5 What this leaves
+
+1. **P18-S116-FIELDMOUNT**: a text input's Value at mount. With a wired Fetch it is invisible (the box is unticked), as
+   the drive's S0 shows; with a ticked box it is §83.3's S0.
+2. The Function-chain gap: 18 of the 22 Fetch-wired filters and 42 of §83's 84 read a Function's output.
+3. P18-S113-LISTLIVE (a ticked Record changes box; 20 of the 61 Fetch-wired queries tick it, and the export never
+   follows a write made elsewhere); P18-S115-DYNPROBE; P18-S117-BUTTONLOOK.
+4. A Query Records' Fetched and Failure outputs (19 and 10 of the 61 consume them) are still reported, not chained.
+
+## §85 A text input announces its Value as it mounts (session 118, 2026-10-16): P18-S116-FIELDMOUNT
+
+### §85.0 What was wrong
+
+In the running app a Text Input announces its Value when it mounts: `TextInput.tsx` `componentDidMount` calls
+`setText(startValue)`, which sends `onTextChanged` with `outwardValueForFieldType(type, text)`, and the output's
+`onChange` sends Value Changed with it (`text-input.ts`). GAM-009's rule only stops a *remount* that returns to the
+value it last announced. So every sink of the Value and every chain on Value Changed runs once as the field appears,
+with the start value or `""`. The exported field wrote only from its `onChange`. A Variable it writes held nothing
+until the first keystroke, so a filter reading it dropped its condition; s116's drive measured it at S0 (the runtime
+asked twice and showed no rows, the export showed all eight).
+
+Measured first, over every project under `NodeGX test projects/`, `Noodl projects/` and the export fixtures (213
+projects): 645 text inputs have a Value or Value Changed wire (830 wires). The export carries 76 of them through the
+field's own change chain, and those are the ones whose sinks see the mount: 38 write a Variable, 34 send a component's
+output signal from Value Changed (all of them kit fields whose Value is wired from the component's inputs, so in the
+runtime the parent's chain runs as the field mounts), 4 write a state row or a Global Store key. The 465 read only from
+handlers (a state row booted at the start value) already agreed. The other 104 are refused for reasons of their own.
+
+### §85.1 What is built
+
+| piece | what it is |
+|---|---|
+| `plan.ts` `FieldMountPlan`, `plan.fieldMounts` | registered beside the variable seeds for each rendered text input with a change chain: `start` (the text the control's boot computes, `String(startValue ?? '')`) and `source` (the wired Value's expression, where a sync effect carries it) |
+| the refusals, by name in the notes | a field or a group it sits in mounted from a wire (it announces when the wire first says true); a wired Type; a Number field (`null` or a number, while the exported field carries text: **P18-S118-NUMBERFIELD**, filed); a wired Value the export does not carry. A field authored Mounted false, or inside a group that is, is never drawn, so nothing is announced and nothing refused |
+| `component.ts` | one mount effect per field, guarded by a ref (StrictMode's second mount), printed after the sync effects: the field's own change chain, with the field's reads printed as the announced value (`announcedCode`, consulted where `input-text` prints) instead of `event.target.value`. A wired Value lands first, as the runtime delivers it at node creation: `undefined` is never delivered (the start value stands), `null` clears, anything else is `String`, the sync effect's own rule |
+
+### §85.2 The test (`tests/the-field-announces-at-mount.test.ts`, 31 rows)
+
+§A grades the value against the **runtime's own field**: `tests/helpers/runtime-field-arm.js` builds a real Text
+Input node in a corpus graph and draws it through its own `render()` into a real `createRoot` under jsdom (GAM-009's
+harness, in a child process), and records every write of the Value output from the first paint and every Value
+Changed. A known-firing row: in all 15 cases the runtime writes once at mount and sends Value Changed once. Then 8
+authored cases (empty, a typed value, spaces, a number typed into Value, Text Area, Email, Password, URL) on
+search-desk's Search box, and 7 wired cases on cheer's CheerMeter (text, `""`, `null`, a number, a boolean, nothing
+delivered with and without a start value). The emitted effect is evaluated with the store's `set` recording, and it
+must equal the runtime's writes. §B pins the shape: one guarded effect after the query's, typing unchanged, nothing
+for a field whose Value reaches nothing, a Value Changed chain (cheer's Mood page, a Global Store Set) run at mount,
+the wired form, a control for the helper the neighbouring specs read pages through, and the typecheck of three apps.
+§C pins the refusals, and that Visible false still announces (it mounts).
+
+**Mutant arms**, in a copy (`packages/.nx-mut-s118`, its sources `cmp`-checked against the working tree afterwards and
+removed straight after), run on the spec's first 30 rows, before the helper's control row was added. Control 30 / 30.
+Every arm printed its Tests line.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the start value ignored (always `""`) | 7 |
+| B | the wired source dropped | 5 |
+| C | a wired `null` not cleared | 2 |
+| D | nothing delivered ignores the start value | 1 |
+| E | a field mounted from a wire announces anyway | 2 |
+| F | the ancestors not walked | 1 |
+| G | a Number field not refused | 1 |
+| H | the event read printed at mount (`event.target.value`) | 21 |
+| I | a field authored Mounted false announces | 1 |
+| J | a wired Type not refused | 1 |
+| K | no field announces | 19 (first shaped `if (false)`, which failed the typecheck: "0 total", reshaped) |
+
+**Neighbours.** Thirteen suites changed, all for this. Five hand-written targets now carry the field's announcement
+(Mood, Notes, step 5's Home, CheerMeter, the Variable Dial's page), each diff the import and the block and nothing
+else. Three import pins gained `useRef`. Six negative rows were wider than their claims (`not 'if ('` for "no Condition
+branch", `not 'useRef'` for "no timer ref", `not 'useEffect'` for "no effect of the socket's or the record's own") and
+now read the page without the announcement (`tests/helpers/fieldMount.ts`, its own control row) and the call
+(`useEffect(`), not the word the import now carries. `hls001`'s golden was regenerated once, deliberately, after
+counting: every fixture emitted at HEAD and with the fix, 25 files differ, each by the announcement block and its
+import only, and the golden's diff is those 25 hashes.
+
+### §85.3 The drive (`s118-fieldmount-drive/`)
+
+s116's drive re-run unchanged (`params-desk`, the ten contacts on a real backend, five steps typed into the City box),
+`EXPECTED.md` first. **The runtime and the fixed export agree in every step, S0 included**: at load both ask with
+`city` unset (`vip` only), the box announces `""`, and both ask again with `city = ""` and show no rows. The fixed
+export's first query shows twice (`<StrictMode>`); the announcement is guarded and its query does not. HEAD (s117's
+export) shows all eight vips at load, as s116's fixed arm did. S1 to S4 agree in all three arms. No console errors.
+
+Read off the screenshots: the runtime's City box is narrower and its placeholder smaller than the export's
+(**P18-S118-INPUTLOOK**, low, by eye, cause not read).
+
+### §85.4 What this reaches, measured
+
+Over the same 213 projects, after the fix: **66 fields announce at mount** (35 with a wired Value, 31 authored), their
+chains 33 component output signals, 31 Variable writes and 2 Global Store writes. 8 are refused by name: 5 sit in a
+group (or are themselves) mounted from a wire, 1 has a wired Type, 2 have a wired Value the export does not carry. The
+remaining 2 of the 76 sit in a group authored Mounted false with nothing wired (driftwood TL4's waitlist form): never
+drawn, so the runtime never announces either. No Number field has a change chain on this machine; the 21 Number fields
+with a wired Value are all read from handlers, and P18-S118-NUMBERFIELD is theirs.
+
+### §85.5 What this leaves
+
+1. P18-S118-NUMBERFIELD (filed): a Number field's Value as a number or `null`, at every read (21 fields).
+2. GAM-009's remount rule in the export: a component remounted inside a conditionally mounted parent announces again
+   in the export, where the runtime's node survives the remount and announces only a real change. Not measured on the
+   corpus yet.
+3. The Function-chain gap (18 of the 22 Fetch-wired filters, 42 of §83's 84); P18-S113-LISTLIVE; P18-S115-DYNPROBE;
+   P18-S117-BUTTONLOOK and P18-S118-INPUTLOOK (low).
+
+## §86 A Function's own signals run their chains (session 119, 2026-10-16): the Function-chain gap
+
+### §86.0 What was measured first, and what the gap turned out to be
+
+The row said "the Function-chain gap: 18 of the 22 Fetch-wired filters and 42 of §83's 84 read a Function's output;
+measure what those Functions are first". Measured over every project under `NodeGX test projects/`, `Noodl projects/`
+and the export fixtures (214 projects, `s119-fnchain-measure/measure.ts`): 62 Query Records read a wired filter value,
+and every one stopped at a Function is a copy of the **Site Builder template**. 18 are its `PageEditor`'s "Hold the
+page id" (run by the page's Did Mount, its output read by the query: "a value that only exists inside a handler"), 14
+its `Site` page's "The slug to show" (it writes `Noodl.Variables`), 5 a real Function-to-Function chain on the same
+page. The current template (`site-builder.content.json`, materialized with the editor's own `ProjectExporter`,
+`materialize.ts`) has three such filters, not 42. The stale copies also differ from it: SBR-016 ticked the PageEditor
+query's box after they were made.
+
+So the filters were a symptom. The refusal behind "Hold the page id" is a family of its own: **a Function run by an
+event (`Run` wired) whose outputs are read by a logic node** ("its out-x output is consumed outside the Run chain by an
+unrendered sink"). 134 Functions in 28 projects carry it (`stray.ts`). Their sinks are mostly actions (a Cloud
+Function's `in-*` 97, a Set Record's `prop-*` 71, a Create Record's 54, a Record's Id 52), and the actions are mostly
+fired by **the same Function's own signal**: `Outputs.go()` in the body, wired into the action's trigger. 130 of the
+134 send such a signal, and 76 have every value read on their own signal's targets (`sigchain.ts`). Only `done`
+continued a run in the export; a signal of the author's own was not a chain at all.
+
+### §86.1 What the runtime does, measured on its own node
+
+A signal call publishes the run's held writes (GAM-011: a write of the value already held is published with the next
+signal) and sends a pulse. The pulse's targets act in the drain, after the body. Each target applies one queued entry
+per port per pass, values before signals (C7, FB-025), so **the k-th pulse reads the k-th value each output published
+since the run began**, or the last when there are fewer, or what the output last sent when the run published nothing.
+`undefined` is never sent (C3). Values live on the node across runs. Read with a recorder on the runtime's own Function
+(`sigprobe.js`, then `tests/helpers/runtime-function-arm.js`): `a=1; go(); a=2` reads 1; `go(); a=3` reads 3;
+`a=1; go(); a=2; go2()` reads 1 at `go2`; `a=1; a=2; go()` reads 1.
+
+That last reading means a body that resets an output and then sets it hands the signal's target the reset. Filed as
+**P18-S119-FIRSTWRITE** (needs a ruling; the export follows the runtime until it is given). The drive below shows it in
+the real app.
+
+Measuring the Site Builder found a template defect on the way: its Setup page's "Hold the token until the account
+exists" is run by Sign Up's Done, but the template ticks its token input's box, and since NDA-017 a ticked box re-runs a
+Run-wired Function. **Every keystroke in the setup token field calls `claimSite`** with the token typed so far, before
+the account exists (`tokenprobe.js`: four calls for "s", "se", "set" and Done; one with the box unticked). Filed as
+**P18-S119-TOKENCLAIM** (high).
+
+### §86.2 What is built
+
+| piece | what it is |
+|---|---|
+| `plan.ts` `pulseChainsOf` | for a Function run by an event: each signal of its own that a wire consumes becomes an arm (`jsfun-pulse`, its chain compiled as a Done chain is), all arms inside one `jsfun-pulses` placed first in the run's `then` (the targets act before Done is sent). The arms' reads are ordinary `jsfun-out` reads, valid inside the run's chain as Done's are |
+| refused by name, the Function's | a ticked (or unset) value box: a new value runs it and sends its signals again, where the export runs it on Run alone; one port fed by two of its signals |
+| refused by name, the signal's | a signal whose chain does not compile: its wires say why; the other signals still chain |
+| 🔴 the signals, not the run | a refusal here leaves the run compiling as before §86 (its Done, its rendered reads), and each signal wire is reported (`pulseRefusals`, read where the attach pass reports a trigger it cannot attach). Refusing the run instead took three exported nodes out of gram's Member and Post pages, measured over the shipped templates and reverted |
+| `JsFunctionPlan.pulsed` | set only on a run that compiles with arms |
+| the attach scan (`scanActions`) | had no case for a Function's chains at all: a Cloud Function called from a run's Done never earned its export. Now walks `jsfun-run`, `jsfun-pulses` and `jsfun-pulse` |
+| the control-state rule, the eleventh family | a Function run from another element's event reads its `in-*` from that handler, so the control feeding it earns its state row (the Site Builder's contact form: three fields, Run on Send) |
+| `src/lib/functionRun.ts` (`functionRunLib.ts`) | `functionNode(signals)` (the node's values across runs, and what each output last sent) and `runFunction(body, inputs, node)`: the body against a recording `Outputs`, the runtime's change test and held writes, then each pulse's values in lockstep. Emitted only where a component prints a pulsed run |
+| `component.ts` | the wrapper takes `Outputs` as a parameter with its signal seeds as the default; one `useRef(functionNode<…>([signals])).current` per pulsed Function; the run prints `const <fn>Run = runFunction(<fn>, {…}, <fn>Node)`, then `for (const <fn>Pulse of <fn>Run.pulses) { if (<fn>Pulse.signal === 'go') { … } else if … }`. Inside an arm the Function's outputs print as `<fn>Pulse.values.x`; in its Done chain as `<fn>Run.outputs.x` (the node's values, where a re-run of the body would start from an empty record) |
+
+### §86.3 The test (`tests/the-function-sends-its-signals.test.ts`, 37 rows)
+
+§A grades `runFunction` against the **runtime's own Function** (`runtime-function-arm.js`: the corpus graph harness, a
+pulser into Run, one recorder per signal reading its inputs after they update, in a child process), body by body over
+16 cases: one signal, a write after it, a signal sent twice, two signals, the signal before the write, an output written
+twice, a held write, a held write queued ahead of a later one, an unwritten output, `undefined`, the body reading its
+own output across three runs, an early return, a throw after the signal, the `.send()` form, three pulses, and the
+fixture's own body over five runs. A control row proves the cases discriminate: "every pulse reads the run's last
+values" is wrong on exactly six of them. A second control counts the pulses the runtime arm saw (31). The fixture's
+emitted wrapper, run by the emitted helper, agrees with the runtime over the fixture's runs. §B pins the fixture's page
+(`tests/fixtures/pulse-desk`: a name field, Send, a Function sending `go` or `refused` into three Set Variables), Done
+after the pulses reading the node's values, the field's state row and its control (run by the field's own Text
+Changed, no state), no helper in a project without a pulsed run, and the typecheck. §C the refusals and their controls;
+§D a Cloud Function called from a pulse earns its export and typechecks.
+
+**Mutant arms**, in a copy (`packages/.nx-mut-s119`, the three sources `cmp`-checked against the working tree before
+and after, removed straight after). Control 36 / 36 for A to O, 37 / 37 for P and Q (added with the fallback). Every arm
+printed its Tests line.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | no pulses compiled | 12 |
+| B | a ticked box not refused | 2 |
+| C | two signals on one port not refused | 1 |
+| D | each pulse reads the last value (no lockstep) | 5 |
+| E | held writes not published with the signal | 1 (survived the first case list: no case told it apart; the held-write-queued case added, predicted, and the runtime agreed) |
+| F | `undefined` sent | 1 |
+| G | an output nothing published reads nothing, not what it last sent | 4 |
+| H | one pulse count across all signals | 1 |
+| I | arms read a re-run of the body | 2 |
+| J | the eleventh family off | 8 |
+| K | the attach scan skips the chains | 2 |
+| L | values not kept across runs | 3 |
+| M | Done reads a re-run | 1 |
+| N | the pulses after Done | 1 |
+| O | no `.send()` form | 1 |
+| P | a refused signal refuses the run | 3 |
+| Q | one signal's failure refuses every signal | 2 |
+
+**Neighbours.** `hls001-corpus-identity`: the corpus gained `pulse-desk`. Predicted before regenerating: no path moves,
+because every byte row stayed green on the red run. The golden's diff counted the same: 0 lines out, 19 in, all
+pulse-desk's. jsfun, controlled-state, emitted-syntax, cloud-function, stores-events and the other Function specs green
+(243 / 243 beside it). Package `tsc` 0, strict and loose (the editor's gate).
+
+### §86.4 The drive (`s119-pulse-drive/`)
+
+`pulse-desk` with the reset ahead of the empty-name test, so a refused Send writes `problem` twice before `refused`.
+`EXPECTED.md` first, from the runtime's rules. No backend; three arms in one headless Chrome, a real click on Send.
+
+| step | runtime | export-fixed | export-control (HEAD `8baf5a3fd`) |
+|---|---|---|---|
+| S1 Send, empty | **no problem text** | the same | nothing |
+| S2 "Ada", Send | Hello, Ada · 1 | the same | nothing |
+| S3 Send again | Hello, Ada · 2 | the same | nothing |
+| S4 clear, Send | Hello, Ada · 2 · **Type a name first** | the same | nothing |
+| S5 "Grace", Send | Hello, Grace · 3 · Type a name first | the same | nothing |
+
+**The runtime and the fixed export agree in every step**, and EXPECTED.md held in every cell. S1 against S4 is
+P18-S119-FIRSTWRITE in a running app: the same empty Send shows nothing the first time (the refused pulse reads the
+reset, `''`) and the sentence the second (`''` is now the value held, so the sentence is the only publication). No
+console errors in any arm.
+
+### §86.5 What this reaches, measured
+
+Dispositions, HEAD against the tree (`dispdiff.ts`), node by node:
+
+- **The shipped templates** (the two `*.content.json` templates materialized, and `templates/`, 19 projects): **27
+  nodes newly exported, none lost**, 10 with a truer reason. gram 12 (SetUp: the form's Function, `setUpCommunity`, the
+  sign-in and the navigation after it; Join; the queue row's three navigations), marketplace 11 (SetUp, GiveLogin, Name,
+  a pay option's pick), nightbook 2, todo-list and todo-list-demo 1 each.
+- **The corpus** (215 projects): 4 nodes, all `pulse-desk`'s. Every other Function keeps its HEAD disposition and
+  reason. Its signal wires now say why they are not chained where its run cannot use them.
+
+The Site Builder itself moves no node yet. Its ContactForm's chain reaches the Cloud Function, whose Done and Failure
+send Evaluate to two Conditions with their boxes unticked, showing a confirmation or a refusal: "its value outputs are
+snapshots of the last Evaluate… only a live comparator translates". That refusal holds 36 Conditions in 11 components
+of the shipped templates (the Site Builder's ContactForm, landing-pages' Contact, todo-list's Sign in, eight
+members-area pages) and 122 in 56 components of the corpus, each read by a Group's or a Text's Mounted
+(`snapcond.ts`). Its PageEditor and Setup Functions tick their input boxes: P18-S119-TICKEDRUN, and for Setup,
+P18-S119-TOKENCLAIM.
+
+### §86.6 What this leaves
+
+1. **The Evaluate-driven Condition** (the snapshot latch above): its result as state written where Evaluate is sent,
+   read by Mounted. The next step for the Site Builder's contact form and eight members-area pages.
+2. **P18-S119-TICKEDRUN** (filed): a Run-wired Function that also runs on a ticked input.
+3. The 54 Functions whose value reads sit partly off their own signals' targets (`sigchain.ts`: Todo's "Is there
+   anything to write?" commands read by a Write history component, 27): §4f's state read by a logic sink.
+4. P18-S119-FIRSTWRITE (a ruling) and P18-S119-TOKENCLAIM (the template's box) are not this lane's to fix.
+5. Carried: P18-S118-NUMBERFIELD, GAM-009's remount rule, P18-S113-LISTLIVE, P18-S115-DYNPROBE, BUTTONLOOK and
+   INPUTLOOK (low).
+
+## §87 A Condition remembers its answer (session 120, 2026-10-16): the Evaluate-driven Condition, P18-S120-SNAPCOND
+
+### §87.0 What was measured first
+
+§86.6 #1. Every such Condition in the shipped templates (`s120-snapcond/census.ts` over the two `*.content.json`
+templates materialized and `templates/`) is the same idiom: the box unticked, the condition a literal (`true` to show,
+`false` to put away), Evaluate sent by a signal (a Cloud Function's Done or Failure 14, a Function's own signal 13, a
+Button 6, an External Link's Done 2, a Record verb's 6, Log In's or Sign Up's Failure 3, a Function's Failure 1:
+45 wires, as three Conditions take two and three take three), and Is True read by one thing
+only: a Group's Mounted (30) or a Text's (6), each authored false. Two Conditions often share one element: landing-pages'
+"Say it went" and "Put "it went" away if the next try is empty" both write "It went"'s Mounted. The corpus (122) adds a
+Text's Visible (54) and one Condition whose condition is wired (an Expression).
+
+### §87.1 What the runtime does, measured on its own node
+
+`condprobe.js` → `condprobe.out`: the runtime's Condition, box unticked, Evaluate from a pulser, Is True into a recorder.
+
+- **Before the first Evaluate the wire hands the sink `null`**, over whatever is authored there (authored `true` is set,
+  then `null` arrives at load). Mounted and Visible both store `value ? true : false`, so the element starts hidden.
+- **Every Evaluate sends its answer again**, the same answer included (show, show sends `true` twice). Nothing is
+  silent, so "show, put away, show" shows it again.
+- **Two Conditions on one element are last-pulse-wins**, in pulse order, two pulses in one frame included.
+
+### §87.2 What is built
+
+| piece | what it is |
+|---|---|
+| `plan.ts` `snapshotVerdicts` | per component, the Conditions with the box unticked, Evaluate wired and a value wire out: `null` (it latches) or the reason. Settled together as a fixed point: a cell is only honest when every wire into its element's port is such a Condition, so one that fails takes the others on that port with it. The cause is named first (a feeder that is no snapshot), then a refused partner ("also written by Condition x") |
+| refused by name | a snapshot into anything but a Mounted or a Visible ("its result feeds Text.text…"); an element the export does not draw; a Mounted on the component root (the router's); an element also fed by something else ("also fed by Switch.state…") |
+| `snapshotCellOf` | one boolean cell per element port (`StateVarPlan.origin` `'condition'`), named for the element ("It went" Mounted → `itWentMounted`), booting `false` |
+| `compileConditionBranch` | a latching Condition's value wires are no longer "stray": each Evaluate writes its answer into each cell (Is False its negation), before its On True / On False arm (the runtime flags its values, then sends the signal). A literal condition has one side, written without an `if` (`branch.flat`, printed as following statements by `expandActions`); a wired one is a branch read at the press |
+| Pass 4c | a latching Condition's read binds its element to the cell (`state-get`); a refused one's wire carries the verdict as its note |
+
+### §87.3 The test (`tests/the-condition-remembers-its-answer.test.ts`, 40 rows)
+
+§A grades the emitted page against the **runtime's own Condition and Switch** running the same fixture page
+(`tests/helpers/runtime-condition-arm.js`: the page's nodes and wires on the corpus graph harness, a Button as a pulser, a
+Text as a stand-in holding `value ? true : false` from a default of true). The export's arm renders the emitted
+`Home.tsx`, transpiled as the bundler does, with a stand-in for `useState`, and presses its buttons. Six scenarios over
+four variants of the fixture (`tests/fixtures/gate-desk`: as written; "It went" authored Mounted true; "Put it away" an
+Is False of a true Condition; Show also sending Check), compared as absent / hidden / shown. A first row pins the runtime
+arm to the probe; a control row shows HEAD's export (the wires dropped) disagrees in every scenario. §B pins the cells,
+the flat writes, the wired branch, Mounted and Visible, no note on the page, every Condition collapsed, the typecheck.
+§C the refusals: a Text's text, a sink shared with a Switch, a ticked Condition (no cell), an unticked Condition nothing
+evaluates, an element outside the visual roots. §D a Condition with arms as well as cells, against the runtime.
+
+**Mutant arms**, in a copy (`packages/.nx-mut-s120`, removed straight after). Control 40 / 40. Every arm printed its
+Tests line; the first run of two arms read "0 total" (one broke a narrowing; one made the export arm throw while the
+suite was collected) and both were reshaped: the arm now fails its rows, not the suite.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the cell boots true | 27 |
+| B | Is False written as Is True | 20 |
+| C | no fixed point | 2 |
+| D | a literal side ignores the answer | 11 |
+| E | no `flat` marker (`if (true)`) | 1 |
+| F | the cells written after the arm | 1 (the shape row: inside one React handler the two orders render the same) |
+| G | the element reads a constant, not the cell | 20 |
+| H | a Text's text admitted as a sink | 1 |
+| I | a refused partner named before the cause | 1 |
+| J | no writes in the chain | 31 |
+| K | the wired branch's writes swapped | 14 |
+| L | `flat` not expanded | 1 |
+| M | ticked Conditions latch too | 1 |
+| N | an undrawn element admitted | 1 |
+
+**Neighbours.** `hls001-corpus-identity`: the corpus gained `gate-desk`. Predicted before regenerating: no path moves
+(every byte row green on the red run; no fixture's dispositions changed under `dispdiff.ts`). The golden's diff counted
+the same: 0 lines out, 17 in, all gate-desk's. `logic.test.ts`'s "a Condition value output wired anywhere defers the
+branch": the branch still defers; its sentence is now the snapshot's (the row wires into `noteDraftVar`, which is not a
+node of Mood: "its result feeds a missing node.value…"). `parameter-coverage`: **`Condition.condition` reaches now** (the
+probe wires Evaluate, which was refused; it was ledgered `gated`), so it leaves the silent list and EXP-008's floor rises
+**1,234 → 1,235** of 1,396. Ten more neighbours green (375 / 375 with the two above and the new spec). Package `tsc` 0.
+
+### §87.4 The drive (`s120-snapcond/`)
+
+`gate-desk` itself. `EXPECTED.md` first, from the probe and HEAD's report. No backend; three arms in one headless
+Chrome, a real click per press, each Text read from the DOM as absent, hidden (`visibility: hidden`) or shown.
+
+| step | runtime | export-fixed | export-control (HEAD `25592b3e2`) |
+|---|---|---|---|
+| S0 load | It went absent · Not yet **hidden** · switch absent | the same | Not yet **shown**, and nothing ever changes |
+| S1 Show | It went **shown** | the same | unchanged |
+| S2 Hide | It went absent | the same | unchanged |
+| S3 Both | It went **absent** (shown, then put away, in one press) | the same | unchanged |
+| S4 Show | It went shown | the same | unchanged |
+| S5 Flip | switch **still absent** | the same | unchanged |
+| S6 Check | switch shown | the same | unchanged |
+| S7 Flip | switch **still shown** (a snapshot, not followed) | the same | unchanged |
+| S8 Check | switch absent | the same | unchanged |
+
+**The runtime and the fixed export agree in all nine steps**; EXPECTED.md held in every cell; no console errors or
+warnings in any arm. The S6 screenshots show the same lines in the same places, the hidden "Not yet" keeping its space;
+the buttons differ as P18-S117-BUTTONLOOK says.
+
+### §87.5 What this reaches, measured
+
+Dispositions, HEAD against the tree (`dispdiff.ts`), node by node:
+
+- **The shipped templates** (19 projects): **26 nodes newly exported, none lost**: 18 Conditions, 5 Cloud Functions, 3
+  Functions. Whole now: the Site Builder's ContactForm (the Function, `submitContactForm`, both Conditions: Send sends the
+  message and shows the confirmation or the refusal), members-area Account (9), Setup (5), Join (3), the Announcement's
+  and Meeting's confirmations, todo-list's Sign in's clear.
+- **The corpus** (215 projects): **115 nodes newly exported, none lost**: 61 Conditions, 25 Cloud Functions, 23 Functions,
+  2 Page Inputs, 2 Records, 2 Navigates.
+
+18 of the 36 template Conditions still defer, each now naming its sender: a Record's or a Delete's Failure chain, Log
+In's or Sign Up's Failure, an External Link's Done, a Create Record's Done, a Function whose own run is not attached
+(landing-pages' "Write the email", fed by a `/Site/Field` component). Where one Condition of a pair exports and its
+partner does not (todo-list's Sign in: the clear exports, the show waits on Sign Up's Failure), the element's cell is
+written by the one that exports; the line never shows in the export, as before, and the partner's refusal says why.
+
+Found on the way and filed: **P18-S120-TEXTAREA** (medium: a Text Area field exports as a one-line `<input>`; 33 in the
+shipped templates, the contact forms' message boxes among them).
+
+### §87.6 What this leaves
+
+1. **P18-S119-TICKEDRUN**: a Run-wired Function that also runs on a ticked input.
+2. The senders the 18 remaining Conditions wait on: a Record verb's and Log In's / Sign Up's Failure chains as handler
+   chains, an External Link's Done, a Function fed by a component's output.
+3. **P18-S120-TEXTAREA**, P18-S118-NUMBERFIELD, the 54 Functions whose reads sit partly off their own signals,
+   GAM-009's remount rule, P18-S113-LISTLIVE, P18-S115-DYNPROBE, BUTTONLOOK and INPUTLOOK (low).
+4. Not this lane's: P18-S119-TOKENCLAIM (the template's box) and the ruling P18-S119-FIRSTWRITE asks.
+
+## §88 A ticked input runs the Function again, and Did Mount runs once per mount (session 121, 2026-10-17): P18-S119-TICKEDRUN, P18-S121-DIDMOUNT
+
+### §88.0 What was measured first
+
+The census (`s121-tickedrun/census.ts`, the shipped templates with the two `*.content.json` materialized, and the
+corpus): **46 Run-wired Functions with a ticked value input in the templates, 68 in the corpus, and every one refused
+already**, each by something other than the box: the Noodl API (30 in the templates), a Query Records' `fetched` as the
+trigger, a stray read by an unrendered sink, a source with no static translation, a Function chain. So nothing exported
+wrongly, and the fix alone exports none of them; the bug's thirteen were the ones whose signals §86 refused for the box.
+"Hold the id" (the board's target) stands behind two more: its id read by a Record (the stray read) and a second Function
+fed by the first. And emitting the fixture found a second gap in front of it: **a Page's Did Mount was dropped** ("no DOM
+event equivalent") although the attach pass had compiled its chain: 23 handler sets in 5 shipped templates.
+
+### §88.1 What the runtime does, measured on its own node and in the viewer
+
+`tickprobe.js` → `tickprobe.out` (the runtime's Function, Run wired, a ticked input from a producer):
+
+- A value **arriving at creation runs it** (S1, S11 `null` included); `undefined` is never delivered (S2, S8).
+- The same value again does not run it (S1); **the same object again does** (S4: `valueDidChange` treats objects as
+  always changed).
+- **Two arrivals in one update make one run** (S5), and so does an arrival with a Run, in either order: one run, the
+  Run's, with Done (S6, S7). A run an arrival starts sends the Function's own signals and **never Done**.
+- **A literal on a ticked input runs it once at load** (S9); unticked, not (S10).
+
+In the viewer (`readings.json`, the runtime arm of the drive): at load **the arrival's run comes first, then Did Mount's
+Run** (Runs 2, Done 2); Did Mount is sent once per mount.
+
+⚠️ A format-4 project with the box unset reads unticked: the editor's load runs NDA-017's migration (a Run-wired node's
+unset boxes are written false), and `parseProject` settles the same way. `render-from-disk.js` does not, so the fixture
+writes its boxes out, as the templates' "Hold the id" does (`runOnChange-in-announcementId: true`).
+
+### §88.2 What is built
+
+| piece | what it is |
+|---|---|
+| `src/lib/functionRun.ts` `tickedArrival(held, values)` | whether the ticked inputs' values are an arrival (one is not `undefined` and is not what that input holds); records each that arrived |
+| `plan.ts` `tickedWatchOf` | a Run-wired Function's or Expression's ticked inputs (wired, or literal), as the values an effect watches. Refused by name where one exists only inside a handler (a received payload). A Visual Function has none |
+| `compileJsRun` | keeps the run's ticked half (`tickedRunPieces`): the body, its signals' chains and its §4f write, **without Done**; refused by name where those chains read a handler's values. §86's refusal of the signals for a ticked box is gone |
+| `TickedRunPlan`, the pass after the attach pass | one per Function a trigger attached: a `useEffect` keyed on the watched values' sources, reading them fresh (`item.get()`), so a value a mount effect above stored arrives at load as the runtime's does at creation |
+| a Run, wherever it is printed | records what it read on the ticked inputs before it runs, so a click that writes a ticked value and sends Run is one run, with Done (S4 of the drive) |
+| `component.ts` `mountChains` (P18-S121-DIDMOUNT) | each element's Did Mount chain as a once-guarded mount effect, post-order, after the ticked runs; a Page's merged sole Group included. Refused by name where the element or one above it is mounted by a value; noted where one is authored Mounted false |
+| P18-S121-SAMEOUTPUTS | a pulsed run hands its §4f state a copy of the node's record: React keeps a state it is handed again, so the render showed the first run's values until something else re-rendered |
+| the signals' targets of a refused Function | name its first refusal ("the Function that sends its "ready" signal is not exported: …"), where most read "trigger … is not a rendered element event" |
+
+### §88.3 The test (`tests/the-ticked-input-runs-it-again.test.ts`, 30 rows)
+
+§A grades the emitted page against the **runtime's own Function, Variable and Set Variable** running the same fixture
+page (`tests/helpers/runtime-ticked-arm.js`: the page on the corpus harness, a Button a pulser, a Page or Group a
+stand-in sending Did Mount after the graph settles, children first). The export's arm is the emitted app itself
+(`tests/helpers/export-react-arm.js`): bundled by esbuild in development mode, rendered by real React under
+StrictMode into jsdom, buttons clicked. Eight variants of `tests/fixtures/ticked-desk`: as written; the item box
+unticked; no Did Mount; no seed; two ticked inputs set in one click; a Group's Did Mount; ready writing a constant (only
+the run re-renders); the literal unticked. A row pins the runtime arm to the viewer's readings; a control row shows the
+page without its ticked and Did Mount effects disagrees. §B the plan and the emitted lines (the effect, the record, the
+mount effect, children before parents, the import, a field's state watched, an Expression's ticked run, the typecheck).
+§C the refusals (a received payload as a ticked input, and in a signal's chain; an unticked box; an unset box in a
+format-4 project; a Did Mount under a bound Mounted; under an authored Mounted false). §D `tickedArrival` against the
+probe's delivery rule, the object case pinned as the known difference (an effect never sees the same object either).
+
+**Mutant arms**, in a copy (`packages/nx-mut-s121`, removed straight after; a dot-named copy reads "0 total" in jest).
+Control 30 / 30.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | `undefined` arrives | 1 |
+| B | every value arrives | 14 |
+| C | nothing is held | 14 |
+| D | a Run records nothing | 8 |
+| E | the ticked run sends Done | 8 |
+| F | the effect reads the render closure | 11 |
+| G | no once-guard on Did Mount | 7 |
+| H | literals not watched | 10 |
+| I | the box ignored | 4 |
+| J | the merged Group skipped | 1 |
+| K | a bound Mounted not refused | 1 |
+| L | a handler-only input watched | 1 |
+| M | the same record handed to React | 2 |
+| N | Did Mount printed before the ticked runs | 7 |
+| O | parent before child | 2 |
+
+**Neighbours.** `the-function-sends-its-signals`: its two §C rows that pinned the ticked refusal now pin the effect on
+the field's state beside Send (37 / 37). `drag.test.ts` C12: a Drag's Did Mount is a mount effect now (52 / 52).
+`hls001-corpus-identity`: the corpus gained `ticked-desk`; predicted before regenerating: one path moves (pulse-desk's
+`src/lib/functionRun.ts`, which carries `tickedArrival`), and the golden's diff counted the same, 1 line out and back,
+plus ticked-desk's 19-line block. 🔴 **The fixture's first name was `tick-desk`, which §39's Timer fixture already
+held**: the generator's `rmtree` wrote over it, hls001 showed its files gone, and git restored it before the golden was
+taken. Search `tests/fixtures/` before naming a fixture.
+
+**The whole package** (`nice -n 19 --runInBand`, JSON written 16:52): 136 / 137 suites, 4,814 passed, 2 failed, both
+`parameter-coverage` on the P121 peer's three uncommitted Upload File ports (reaching 1,235, the floor, unmoved). Package `tsc` 0.
+
+### §88.4 The drive (`s121-tickedrun/`)
+
+`ticked-desk` itself. The runtime arm first, then `EXPECTED.md` for the two export arms, from the emitted code. No
+backend; three arms in one headless Chrome, a real click per press.
+
+| step | runtime | export-fixed | export-control (HEAD `2419c0897`) |
+|---|---|---|---|
+| S0 load | a · 2 · 2 · 2 · 1 | the same | all blank |
+| S1 Pick b | b · 3 · 3 · 2 · 1 | the same | unchanged |
+| S2 Pick b again | unchanged | the same | unchanged |
+| S3 Run | b · 4 · 4 · 4 · 1 | the same | unchanged |
+| S4 Pick c and run | c · 5 · 5 · 5 · 1 | the same | unchanged |
+| S5 Again | c · 5 · 5 · 5 · 2 | the same | Said 1, the rest blank |
+
+(Holding · Runs · Ready at · Done at · Said.) **The runtime and the fixed export agree in every step**; EXPECTED.md held
+in every cell; no console errors in any arm. HEAD refuses "Hold the item" whole and drops the page's Did Mount.
+
+### §88.5 What this reaches, measured
+
+Dispositions, HEAD against the tree (`dispdiff.ts`): **the shipped templates, none newly exported and none lost** (as
+§88.0 measured); the corpus, 3 newly exported (all ticked-desk's), none lost; about 80 refused nodes' reasons now name
+the refused Function that sends their signal. Emitted (`s121` `emitcount`): **20 Did Mount effects in the shipped
+templates** where HEAD printed none (rocket-school 7, star-class 7, nightbook 3, marketplace 1, planning 1, todo-list 1),
+4 refused by name, 0 dropped as "no DOM event". todo-list's Sign in now sends a signed-in person on to the list on
+mount, as the running app does. Ticked effects in the shipped templates: 0, as measured.
+
+Found on the way and filed: **P18-S121-ONEUPDATE** (medium: inside one update the runtime runs a Function at the end
+and once per arriving write; a Run before a write in one event, or two writes to one watched value, differ),
+**P18-S121-SEEDTWICE** (low: a Variable seed runs again on StrictMode's second mount, over a later mount write),
+**P18-S121-FRESHOUTPUTS** (low, 0 reach: a Function with no signal forgets its outputs between runs),
+**P18-S121-STATENAME** (low, 0 reach: a field's state can shadow a Variable the page imports).
+
+### §88.6 What this leaves
+
+1. **"Hold the id"**: its id read by a Record (the stray read: "its out-announcementId output is consumed outside the Run
+   chain by an unrendered sink") and the second Function fed by the first ("JS-node chains are not translated").
+2. The senders the 18 remaining §87 Conditions wait on (§87.5).
+3. P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE; BUTTONLOOK and
+   INPUTLOOK (low).
+
+## §89 Hold the id (session 122, 2026-10-17): a Function's row read by nodes that are not drawn, and a second Function fed by the first
+
+### §89.0 What was measured first
+
+`s119-fnchain-measure/dump.ts` on members-area's Announcement: "Hold the id" (Page Did Mount → Run, its id input ticked
+from the Page Inputs) was refused for its id read by the second Function ("consumed outside the Run chain by an
+unrendered sink"), and the second Function for being fed by the first ("JS-node chains are not translated"). **Cutting
+that one wire in a copy exported Hold the id, the Record its `ready` fetches, and the refusal Condition on its Failure**:
+one blocker, not two (the Record's Id is read inside `ready`'s own chain). Meeting is the same graph. The Site Builder's
+PageEditor holds the page id the same way and reads it from a Record, a Set Record, a New Record, a Cloud Function and
+a Query's parameter.
+
+### §89.1 What the runtime does (`s122-holdtheid/probe.ts`, the runtime's own Function, Variable and Set Variable)
+
+- The second Function's input holds the last value Hold the id **delivered**; a run that returns before writing leaves it.
+- **A Set Variable whose Do the same click sends reads the run's new value, whichever wire comes first** (its Do waits for
+  the update's inputs). The export runs a click in wire order, so it agrees with the reader's wire after the Run and
+  read the run before with it first.
+
+### §89.2 What is built
+
+| piece | what it is |
+|---|---|
+| `compileJsRun`, the stray reads | an unrendered reader no longer refuses the run when it is a Function, and the reader is one that reads its input at its own trigger or asks again on a change (`isRowReader`: a Function's input, a Set Variable's Value, a Record's Id, a Set Record's and New Record's values, a Delete's Id, a Cloud Function's input, a Query's parameter). HEAD's own rule (the first stray drawn) is kept where it materialized, so nothing HEAD exported is lost |
+| own signals | a read on a target of one of the Function's own signals whose chain is refused is that chain's, and names it ("its out-shelf output feeds CloudFunction2.in-shelf, which its "go" signal runs, and that chain is not exported: …"); counting it materialized a row nothing read, and marketplace's ShelfRow button lost its TODO |
+| the same click | a reader whose Do the click that runs the Function sends **before** the Run is refused by name |
+| `jsFunReadExpr` | a Function's input fed by a Run-wired, materialized Function reads its row; a feeder whose run is refused names its reason ("the Function that feeds it is not exported: …") |
+| the sink loop | compiles a node's Function feeders first (`compileFunctionFeedersOf`), only those an element's event or a Did Mount runs. Forcing the compile from inside a reader's resolution re-entered sinks already compiling (nightbook's three toggles share one Set Variable) and refused them as cyclic; a feeder run from elsewhere may never attach (P18-S122-DEADROW) |
+| `component.ts`, a row read in a handler | the kept node's `delivered` value (`holdTheIdNode.delivered.id`), current within the click that ran it; render reads the row |
+| P18-S121-FRESHOUTPUTS, half | a materialized run keeps its node (`pulsed`), so an output a later run does not write keeps the last value |
+| an effect's dependency | the field read (`holdTheIdOut?.id`), never the row, which is a fresh copy every run: the sections Query asked again on every run of Hold the id |
+
+### §89.3 The test (`tests/the-id-is-held.test.ts`, 22 rows)
+
+§A the emitted page, rendered by real React under StrictMode (`helpers/export-react-arm.js`), against the runtime's own
+nodes (`helpers/runtime-ticked-arm.js`), press by press, over `fixtures/held-desk` and six variants (the box unticked,
+no seed, no ready, the second Function ticked, the same click after, a Group's Did Mount); a row pins the runtime to
+`EXPECTED.md`; two controls (the click reading the state row lags the same-click reader; a fresh node per run loses the
+id); every variant typechecks. §B the dispositions, the handler read, the kept node, the reader listed before its feeder,
+the effect's field dependency. §C the same-click refusal, an own signal's refused chain, a reader not on the list (an
+Expression), HEAD's rule kept, a feeder run by no element event, a refused feeder named. Beside it,
+`the-query-reads-its-wires` gains a row (a Run-wired Function feeding the Query's value), `the-function-sends-its-signals`
+re-pins two §C rows and gains one (the reverse order), `jsfun` re-pins two (the materialized run through the kept node).
+
+**Mutant arms**, in a copy (`packages/nx-mut-s122`, removed straight after). Control 248 / 248.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | a handler reads the state row | 6 |
+| B | a materialized run keeps no node | 4 |
+| C | no same-click refusal | 2 |
+| D | own-signal reads never excused | 2 |
+| E | every reader allowed | 1 |
+| F | no Function-fed input | 14 |
+| G | HEAD's rule dropped | 1 |
+| H | the effect keyed on the row | 1 |
+| I | no feeder-first compile | 1 |
+| J | feeder-first for any trigger | 1 |
+| K | the Query not a reader | 1 |
+| L | the handler reads `outputs`, not `delivered` | 4 |
+
+(A, C and D first failed the typecheck and graded nothing; reshaped to compile.)
+
+**Neighbours.** `hls001-corpus-identity`: predicted by emitting every fixture with HEAD's `src` and the tree's (only
+`held-desk` differs); regenerated, 0 lines out, held-desk's 17 in. **The whole package** (`nice -n 19 --runInBand`, JSON written 18:46): 137 / 138 suites, 4,856 passed, 2 failed, both `parameter-coverage` on the P121 peer's three uncommitted Upload File ports (reaching 1,235, the floor, unmoved). Package `tsc` 0.
+
+### §89.4 The drive (`s122-holdtheid/`)
+
+`held-desk` itself, three arms in one headless Chrome, a real click per press, no backend.
+
+| step | runtime | export-fixed | export-control (HEAD `63ed6b0f6`) |
+|---|---|---|---|
+| S0 load | a · Text · Text | a · · | all blank |
+| S1 Remove | a · removing a · a | the same | unchanged |
+| S2 Pick b | b · removing a · a | the same | unchanged |
+| S3 Remove | b · removing b · b | the same | unchanged |
+| S4 Pick nothing | b · removing b · b | the same | unchanged |
+| S5 Remove | b · removing b · b | the same | unchanged |
+
+(Loaded · Saying · Removed.) **The runtime and the fixed export agree in every step after load.** At load the runtime
+shows the Text node's default "Text" where nothing has been written: P18-S122-TEXTDEFAULT, filed (222 wired Texts in the
+templates have no text of their own). No console errors.
+
+### §89.5 What this reaches, measured
+
+Dispositions, HEAD against the tree (`dispdiff.ts`): **15 template nodes newly exported, none lost** (members-area's
+Announcement and Meeting: Hold the id, its Page Inputs, the Record, the refusal Condition, 4 each; the Site Builder's
+PageEditor: Hold the page id, its Page Inputs, the sections Query, and the three Functions that read the fetched page,
+6; nightbook's Coming, "A fresh form", 1, which never runs: its Did Mount is refused by name). **The corpus: 129, none
+lost** (older Site Builder copies also gain "Save the page fields", which reads the held id at the Save click). The
+Announcement's and Meeting's second Function still waits on Delete Record's Failure chain (§87.5's family).
+
+### §89.6 What this leaves
+
+1. **P18-S122-DEADROW** (high, filed): 10 of the 15 rows the templates materialize are never written, 6 read (members-
+   area's Landing 8 times), with no note. Pre-existing; this session adds no read to one.
+2. **P18-S122-TPLBUILD** (high, filed): 13 of 19 template exports fail their own `tsc -b` (rocket-school and star-class 78 each); one class is an author's untyped parameter in a Function body, which the PageEditor's "Is there anything unsaved?" adds two of. The fixtures typecheck; the templates were never gated.
+3. The senders the 18 remaining §87 Conditions wait on: a Record verb's and Log In's / Sign Up's Failure chains (now the
+   Announcement's and Meeting's Remove), an External Link's Done.
+4. A reactive Function's own signals (no Run wire: it runs when an input changes) are refused whole.
+5. P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE, P18-S122-TEXTDEFAULT;
+   BUTTONLOOK and INPUTLOOK (low).
+
+## §90 The failure runs its chain (session 123, 2026-10-17): a record or user verb's Failure, and the click's later wires before the answer
+
+### §90.0 What was measured first
+
+`s123-failchain/conds.ts` over the shipped templates: the §87 Conditions still deferred wait on a Delete's Failure
+(members-area's Announcement and Meeting), Log In's and Sign Up's Failure (members-area's, todo-list's, the Site
+Builder's and the planner's Sign in), New Record's Done (members-area's Post, refused for its access-control rules) and an
+External Link's Done (landing-pages' contact, behind a `/Site/Field`). Every record, relation and user verb refused a wired
+Failure whole: "its failure output is consumed — only the done chain and the Error value are translated in this slice".
+
+### §90.1 What the runtime does
+
+- `setError` writes the Error, raises, then pulses Failure (`dbmodelcrudbase.ts`, `login.ts`; `node.ts` `reportOutcome`
+  raises before it sends the signal). The Cloud Function's catch already printed that order (§41).
+- **Log In, Delete Record, Condition, Cloud Function and HTTP Request each act in an after-update callback**
+  (`scheduleAfterInputsHaveUpdated` / `scheduleOnce`), in the order their wires fired, and a request answers later. So a
+  click's later wires run before any answer; a failure found inside the callback (Delete's "Missing Record Id", "no
+  backend configured") runs its chain before a later wire's callback. Measured on the runtime's own nodes in
+  `helpers/runtime-failure-arm.js`, both ways.
+
+### §90.2 What is built
+
+| piece | what it is |
+|---|---|
+| `api-call.failThen` | the Failure chain (`verbFailChainOf`, `doneChainOf` on `failure`), compiled by `compileRecordOp`, `compileRelationOp` and `compileUserOp`; printed in the catch after the Error row and the raise. Completed keeps its refusal ("only the done and failure chains and the Error value are translated in this slice") |
+| the verb's Error inside it | the catch's `<errorState>Message` local (`outcome-error`, `verbChainScope`); everywhere else the row, as before |
+| the walkers | `actionsValidIn`, `snapAction`, the attach sweep (`scanActions`), the session walk, `fillMaterialize`; in the emitter `collectActionUse`, `deepActions`, the reads walk, `actionExprsOf` |
+| `detached` | the planner's last pass marks an awaited call (`api-call`, `http-call`, `cloud-call`, `record-fetch`, the three file calls, an async crypto call) that a later action of its own list follows; the emitter prints it `void (async () => { … })();`, so the later wires run where the click is and the outcome chains when the answer comes. A failure before the first await (the `Missing Record Id` guard) still runs its chain first, as the runtime's synchronous `setError` does. A call last in its list is awaited in place, as before |
+| the late write | `lateQueryFetchWrite`'s rule, for every awaited call: a later wire of the same list writing a value the call sends is refused by name (the runtime reads it after the update; the export where the call starts) |
+| `compiledOf` | a compile that reads a Failure scope's catch local is kept under that scope's key only; inside a scope, a plain one that reads a scoped verb's row is compiled again; a sink whose outside compile is still open is compiled again inside the scope, not refused as cyclic |
+| `lastValueWireOf` | a Set Variable or Global Store Set with several Value wires reads the one from the innermost open sender (`chainSenders`, pushed by `doneChainOf`): the runtime's Value holds whichever wire wrote last, and a sender writes just before it pulses. With none, "two wires feed its Value input — last-writer-wins is not statically ordered". Compiled per wire. A signal wired into Value is not a writer |
+
+### §90.3 The test (`tests/the-failure-runs-its-chain.test.ts`, 23 rows)
+
+§A the emitted page rendered by real React under StrictMode, its api functions answering when the test says
+(`helpers/export-answer-arm.js`), against the runtime's own Delete Record, Condition, Variable and Set Variable with a
+store the test answers (`helpers/runtime-failure-arm.js`), step by step (press, answer): `fixtures/fail-desk` and five
+variants (the clear first, no clear, the id from a Variable, an empty one, two verbs into one Set Variable). Rows pin
+the runtime to `s123-failchain/EXPECTED.md` (the four predicted variants matched; the two-verb one was added after,
+measured). Two controls disagree: the call awaited in place (HEAD's order) and no Failure chain. Every variant
+typechecks. §B the dispositions, the catch's order, the Done chain in the try, the detached call and the call awaited
+in place, Log In's catch, a verb inside a Failure chain attached. §C Completed refused; a Set fed by two wires and Done
+by a button that sends neither; a button beside the chain reads no catch local; the late write.
+
+Re-pinned to the new claim: `record-verbs` gate 11, `user-family` 5.4, `set-user-properties-magic-link` C1,
+`relation-pair` D10 (the catch runs the chain after the raise) and D11 (the new sentence).
+
+**Mutant arms**, in a copy (`packages/nx-mut-s123`, removed straight after). Control 23 / 23.
+
+| arm | what it changes | killed |
+|---|---|---|
+| A | the catch prints no Failure chain | 11 |
+| B | no detach pass | 4 |
+| C | no Failure scope (the Error read from the row) | 18 |
+| D | the Failure chain not compiled | 12 |
+| E | the compile cache not scoped | 2 |
+| G | the late write allowed | 1 |
+| H | the attach sweep skips the Failure chain | 1 |
+| I | a detached call printed awaited | 4 |
+| J | the scoped read returns the row | 10 |
+| K | a sink still compiling outside not compiled again inside | 1 |
+| L | Failure still refused | 18 |
+| M | the first Value wire always wins | 2 |
+| N | one compile per Set, whatever wire it reads | 2 |
+
+(B, D, G and I first failed the typecheck and graded nothing; reshaped to compile. F, the blanket two-wire refusal, was
+replaced by M once the blanket rule lost nightbook's "Another one".)
+
+**Neighbours.** `hls001-corpus-identity`: predicted with `after-await.ts` over the fixtures (fail-desk in, record-desk's
+Home.tsx changed: its Load sends two Record Fetches, and the first is now started, not waited for); regenerated, key by
+key, exactly those two. `parameter-coverage`: `DeleteDbModelProperties.modelId` reaches now (the probe's Delete has a
+Failure wired), so it leaves the silent list and the floor rises 1,235 → 1,236. **The whole package**
+(`nice -n 19 --runInBand`, JSON written 20:27): 138 / 139 suites, 4,897 passed, 2 failed, both `parameter-coverage` on
+the P121 peer's three uncommitted Upload File ports (total 1,399; reaching 1,236, the floor). Package `tsc` 0.
+
+### §90.4 The drive (`s123-failchain/`)
+
+`fail-desk`, three arms, one headless Chrome, a real click per press. **Run 1, no backend:** the runtime refused before
+any request ("This project has no backend configured"), so its Failure ran before the clear (refusal hidden); the fixed
+export's no-backend stub throws from an `async` function, after the clear (refusal shown): two ways of not being
+connected, filed as P18-S123-STUBORDER. **Run 2, a backend at a port where nothing listens:**
+
+| step | runtime | export-fixed | export-control (HEAD `06ea65ea3`) |
+|---|---|---|---|
+| S0 load | hidden · Text · Text · Text | hidden · · · | hidden, Remove unwired |
+| S1 Remove | **shown** · Object not found. · Object not found. · Text | **shown** · Could not reach the backend … · the same · | unchanged |
+| S2 Remove | the same | the same | unchanged |
+
+(The refusal · Error · Said · Gone.) **The runtime and the fixed export agree at every step**: each client words its
+network failure its own way, and the runtime shows "Text" in an unwritten wired Text (P18-S122-TEXTDEFAULT).
+
+### §90.5 What this reaches, measured
+
+Dispositions, HEAD against the tree (`dispdiff.ts`): **templates 26 newly exported, none lost; corpus 134, none lost.**
+Reachable: the Sign-in pages of members-area (3), todo-list (3), the Site Builder (2) and the planner (4: both buttons,
+each Failure saying its own error into one Variable), and nightbook's Me (4: the code and question toggles, each
+setting the form from its own pulse). **Not reachable (10)**: members-area's Announcement and Meeting Remove (4 each),
+whose section is mounted by `/Members/Chrome`'s isModerator, which a logic-only component (`/Members/Standing`) feeds and
+the export does not lift; nightbook's Tonight "No question tonight" (2), whose button sits in a box authored Mounted
+false. Filed as P18-S123-UNDRAWNTRIGGER: the report counts them exported. **Changed without a disposition change** (the
+detached call; read against the runtime's order, not driven): digital-bricks-training's Settings, which said "preparing"
+for ever, and Unsubscribe, "stopping" for ever; members-area's Setup; record-desk's Load (two Record Fetches, the first
+now started without waiting, as the runtime's two requests go out together).
+
+### §90.6 What this leaves
+
+1. **P18-S123-UNDRAWNTRIGGER** (medium, filed): a node collapsed into an element the export does not draw is counted
+   exported and never runs (10 template nodes here; s122's nightbook "A fresh form" is the same).
+2. P18-S123-STUBORDER (low, filed): the no-backend stub fails after a click's later wires; the runtime with no backend
+   refuses before them.
+3. The §87 Conditions still waiting: members-area's Post (New Record's access-control rules, a clock read), the
+   Unsubscribe page (a Function's own Failure), landing-pages' contact (a `/Site/Field`), the Site Builder's Setup (a
+   ticked Condition).
+4. P18-S122-DEADROW, P18-S122-TPLBUILD (high); P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE,
+   P18-S113-LISTLIVE, P18-S115-DYNPROBE; TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).

@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>NodeGX table editor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="bar">
+    <strong class="brand">Table editor</strong>
+    <form id="open-form" class="open">
+      <label for="dir">App folder</label>
+      <input id="dir" name="dir" spellcheck="false" autocomplete="off" placeholder="/path/to/a/nodegx/app">
+      <button type="submit">Open</button>
+    </form>
+    <span id="app-name" class="app-name"></span>
+    <button id="save" class="primary" disabled>Save</button>
+  </header>
+  <div id="status" class="status" role="status" aria-live="polite"></div>
+  <main class="layout">
+    <nav class="components" aria-label="Components">
+      <input id="component-filter" type="search" placeholder="Find a component" aria-label="Find a component">
+      <ul id="component-list"></ul>
+    </nav>
+    <section class="sheet" aria-label="Nodes">
+      <div class="tools">
+        <h1 id="component-title">No component</h1>
+        <button id="add-node" disabled>+ Add node</button>
+        <label class="check"><input type="checkbox" id="all-ports"> Show every port</label>
+        <input id="column-filter" type="search" placeholder="Find a port" aria-label="Find a port column">
+        <button id="revert" disabled title="Drop your unsaved changes to this component">Undo my changes here</button>
+        <span id="hidden-note" class="note"></span>
+      </div>
+      <div id="banner" class="banner" hidden></div>
+      <div class="table-wrap" id="table-wrap">
+        <table id="table"></table>
+      </div>
+      <p class="legend">
+        One row per node, one column per port. Click a cell to change it.
+        In a value cell, plain text is read by the port's type (<code>28</code>, <code>100%</code>, <code>true</code>);
+        start with <code>=</code> to type JSON (<code>="28"</code>, <code>={"a":1}</code>).
+        <span class="wire-in">← from</span> and <span class="wire-out">→ to</span> are wires.
+        A hatched cell is a port the node's type does not have.
+      </p>
+    </section>
+  </main>
+
+  <div id="editor" class="popover" role="dialog" aria-modal="false" hidden></div>
+  <dialog id="add-dialog">
+    <form method="dialog" id="add-form">
+      <h2>Add a node</h2>
+      <label>Type <input name="type" list="type-list" required spellcheck="false" autocomplete="off"></label>
+      <datalist id="type-list"></datalist>
+      <label>Label <input name="label" autocomplete="off"></label>
+      <label>Parent <select name="parent"></select></label>
+      <label>Place among its parent's children <input name="place" placeholder="last" inputmode="numeric" autocomplete="off"></label>
+      <fieldset class="xy"><legend>Position (for a node with no parent)</legend>
+        <label>x <input name="x" inputmode="numeric" autocomplete="off"></label>
+        <label>y <input name="y" inputmode="numeric" autocomplete="off"></label>
+      </fieldset>
+      <p id="add-error" class="error"></p>
+      <menu><button value="cancel" formnovalidate>Cancel</button><button value="add" class="primary">Add</button></menu>
+    </form>
+  </dialog>
+  <div id="vocab-host" aria-hidden="true"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

@@ -105,6 +105,7 @@ import { SELF_REFERENCE } from '../trace';
 import { FIELD_FOCUS_NOT_MOUNTED, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
+import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
 
 type State = {
   /** text-input.ts :74-91 `props.type` — read at each render and each write; `'text'` by default */
@@ -176,6 +177,9 @@ type State = {
   onPage: boolean;
   /** v7 — the last Focus found the node off the page: the editor is told (focus-not-mounted.ts) */
   focusMissed: boolean;
+  /** NSP-019 R38 — what the size ports hold, and what the last render on the page said of them (wired-grow.ts) */
+  sizes: Sizes;
+  grow: string | null;
 };
 
 type O = typeof TextInput extends { outputs: infer X } ? X : never;
@@ -258,9 +262,10 @@ export const TextInput = defineNode({
   // v5 (P109 ISL-031, P107-C64 ruled "Ignore touches, keep hover"): a finger on a disabled control reports nothing — no Pressed, no Pointer Down or Up — as Enabled promises; the pointer's hover still reports
   // v6 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v7 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
-  version: 7,
-  changes: [focusAndIconSourceChange(7)],
-  diagnostics: { ...focusDiagnostics(FIELD_FOCUS_NOT_MOUNTED), ...iconSourceDiagnostics() },
+  // v8 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
+  version: 8,
+  changes: [focusAndIconSourceChange(7), growChange(8)],
+  diagnostics: { ...focusDiagnostics(FIELD_FOCUS_NOT_MOUNTED), ...iconSourceDiagnostics(), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/controls/text-input.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the page following the node at each paint, like the disabled
@@ -268,6 +273,8 @@ export const TextInput = defineNode({
   synced: ['pageEnabled', 'pageVisible', 'pageOpacityZero', 'pageType', 'caret'],
 
   state: {
+    sizes: { width: sizeAtDefault(), height: sizeAtDefault() },
+    grow: null,
     fieldType: 'text',
     runOnChange: true,
     maxLength: undefined,
@@ -573,6 +580,9 @@ export const TextInput = defineNode({
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the field can be seen', send: [] }),
     // pointerlisteners.ts :113-133 — a blocker on every pointer event (docblock: the drain); what reaches the nodes around it is a graph's matter
     blockTouch: (_s, v) => ({ says: 'always: on, a pointer act that lands here goes no further — the nodes it sits inside do not hear it', set: { blocksPointer: !!v }, send: [] }),
+    // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
+    width: sizeReducer('width'),
+    height: sizeReducer('height'),
     // node-shared-port-definitions.ts :366-375, :320-328 — the page follows at the next paint (TextInput.tsx :118-120 compares the
     // Opacity the style holds with the number 0)
     visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] }),
@@ -590,13 +600,13 @@ export const TextInput = defineNode({
     },
     world: {
       // placed on the page with its params set — the first render: Did Mount, and the mount's announcement of the Value (TextInput.tsx :97-110)
-      place: (s) => painted(s)
+      place: (s, i, w) => withGrow(s, painted(s), i.sizeMode, i.position, w)
     },
     // the frame's end: the scheduled callbacks in order (nodecontext.ts :478-486 — before the paint, which the target's frame
     // end raises after `update()`), then the paint
-    afterInputs: (s) => {
+    afterInputs: (s, i, w) => {
       const d = drained(s);
-      const p = painted(after(s, d));
+      const p = withGrow(after(s, d), painted(after(s, d)), i.sizeMode, i.position, w);
       return { set: { ...d.set, ...p.set }, send: [...d.send, ...p.send], emit: [...d.emit, ...p.emit], outcomes: d.outcomes };
     },
     // a person acts on a PAINTED page (adapter.ts `act`): the page follows first, then the act meets what is there

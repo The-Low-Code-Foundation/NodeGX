@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fdd213a6-9c19-57b8-8621-03affc036013",
+  "name": "ProductForm",
+  "path": "/Pages/Seller/ProductForm",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Add a product, or change one"
+}

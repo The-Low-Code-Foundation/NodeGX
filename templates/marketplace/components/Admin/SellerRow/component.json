@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e0e0b05a-ffe4-5abe-857c-1286654bb99d",
+  "name": "SellerRow",
+  "path": "/Admin/SellerRow",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One seller on the admin’s list, with its actions"
+}

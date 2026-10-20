@@ -1,0 +1,869 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d7a75ea8-4391-5175-8d86-24a4fae11e0b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "epPage",
+      "type": "Page",
+      "label": "Edit profile",
+      "parameters": {
+        "title": "Edit profile",
+        "urlPath": "profile/edit"
+      },
+      "children": [
+        "epRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "epRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "epPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app"
+      },
+      "children": [
+        "epBar",
+        "epBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "epBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "epRoot",
+      "parameters": {},
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "epBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "epRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "epContent",
+        "epRefused"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "epContent",
+      "type": "Group",
+      "label": "Edit profile",
+      "parent": "epBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "epBack",
+        "epTitle",
+        "epPhotoRow",
+        "epUploading",
+        "epPhotoError",
+        "epPhotoFine",
+        "epName",
+        "epBio",
+        "epSave",
+        "epError"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "epBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "epContent",
+      "parameters": {
+        "label": "← Your profile",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "epTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "epContent",
+      "parameters": {
+        "text": "Edit profile",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "epPhotoRow",
+      "type": "Group",
+      "label": "Your photo, and changing it",
+      "parent": "epContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-4)"
+      },
+      "children": [
+        "epAv",
+        "epPhotoActions"
+      ],
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "epAv",
+      "type": "Group",
+      "label": "Their face",
+      "parent": "epPhotoRow",
+      "parameters": {
+        "width": {
+          "value": 80,
+          "unit": "px"
+        },
+        "height": {
+          "value": 80,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "cssClassName": "gm-av"
+      },
+      "children": [
+        "epFace",
+        "epInitials"
+      ],
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "epFace",
+      "type": "Image",
+      "label": "Their photo",
+      "parent": "epAv",
+      "parameters": {
+        "width": {
+          "value": 80,
+          "unit": "px"
+        },
+        "height": {
+          "value": 80,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": {
+          "value": 50,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 400,
+      "y": 1120
+    },
+    {
+      "id": "epInitials",
+      "type": "Text",
+      "label": "Their initials, with no photo",
+      "parent": "epAv",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--primary-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1240
+    },
+    {
+      "id": "epPhotoActions",
+      "type": "Group",
+      "label": "Change or remove",
+      "parent": "epPhotoRow",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "alignItems": "flex-start"
+      },
+      "children": [
+        "epChange",
+        "epRemove"
+      ],
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "epChange",
+      "type": "net.noodl.controls.button",
+      "label": "Change photo",
+      "parent": "epPhotoActions",
+      "parameters": {
+        "label": "Change photo",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1480
+    },
+    {
+      "id": "epRemove",
+      "type": "net.noodl.controls.button",
+      "label": "Remove photo",
+      "parent": "epPhotoActions",
+      "parameters": {
+        "label": "Remove photo",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 400,
+      "y": 1600
+    },
+    {
+      "id": "epUploading",
+      "type": "Text",
+      "label": "Sending the photo",
+      "parent": "epContent",
+      "parameters": {
+        "text": "Making the photo smaller and sending it…",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "epPhotoError",
+      "type": "Text",
+      "label": "Why the photo didn’t go",
+      "parent": "epContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "epPhotoFine",
+      "type": "Text",
+      "label": "Who sees it",
+      "parent": "epContent",
+      "parameters": {
+        "text": "Only members who’ve been let in see your photo and your profile.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "epName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your name",
+      "parent": "epContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Your name"
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "epBio",
+      "type": "net.noodl.controls.textinput",
+      "label": "Bio (150 characters at most)",
+      "parent": "epContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Bio (150 characters at most)",
+        "type": "textArea",
+        "placeholder": "A line about you: what you do at church, a verse you love."
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "epSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "epContent",
+      "parameters": {
+        "label": "Save",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "epError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "epContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "epRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "epBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "epRefusedWhy",
+        "epRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 2560
+    },
+    {
+      "id": "epRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "epRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "epRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "epRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "epToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "epLoad",
+      "type": "JavaScriptFunction",
+      "label": "Your profile as it is",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nfunction shown(posts, members) {\n  var by = {};\n  members.forEach(function (m) { by[m.objectId] = m; });\n  return posts\n    .filter(function (p) { var m = by[idOf(p.member)]; return !p.endedAt && m && !m.endedAt; })\n    .sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });\n}\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\n/** Slice 4b: what each kind but a post is called on its pill. */\nvar KIND_NAMES = {\"prayer\":\"Prayer request\",\"testimony\":\"Testimony\",\"event\":\"Event\"};\n/**\n * When an event is, in the reader's own time: \"Saturday 18 October, 9:00\", the year only when it isn't this one, and\n * \"was\" once it has passed.\n */\nfunction eventWhen(at) {\n  var t = at ? new Date(at.iso || at) : null;\n  if (!t || !isFinite(t.getTime())) return '';\n  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n  var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];\n  var year = t.getFullYear() === new Date().getFullYear() ? '' : ' ' + t.getFullYear();\n  var said = days[t.getDay()] + ' ' + t.getDate() + ' ' + months[t.getMonth()] + year + ', ' + t.getHours() + ':' + String(t.getMinutes()).padStart(2, '0');\n  return (t.getTime() < Date.now() ? 'was ' : '') + said;\n}\nfunction firstName(m) { return String((m && m.name) || '').trim().split(' ')[0]; }\n/** A link for each photo, kept on the page until a minute before it runs out: a reload asks again for none of them. */\nasync function linked(photos) {\n  var keep = Component.Object;\n  var links = keep.get('links') || {};\n  var soon = Date.now() + 60000;\n  var urls = await Promise.all((photos || []).map(async function (f) {\n    var name = f && f.name ? String(f.name) : '';\n    if (!name) return '';\n    if (links[name] && links[name].until > soon) return links[name].url;\n    try {\n      var l = await Noodl.Files.sign(f);\n      links[name] = { url: l.url, until: l.expiresAt ? Date.parse(l.expiresAt) : soon + 3600000 };\n      return l.url;\n    } catch (e) { return ''; }\n  }));\n  keep.set('links', links);\n  return urls;\n}\n/**\n * The cards: who, when, the photos, the hearts by person (mine among them), the comments not hidden. A prayer request\n * (slice 4) has no hearts: its words, \"I prayed\" with the count kept on it, and who prayed for the person who asked\n * only (W4: the prayed rows are the ones the reader may read, their own and those on their own requests). Slice 4b: a\n * testimony leads with its words, as a prayer request does, and has hearts; an event says when it is where a post says\n * when it was shared. Every kind but a post wears its pill. A card with no photo leads with its words too (the shots:\n * an event's words sat under \"No hearts yet\").\n */\nasync function cardsOf(posts, members, hearts, comments, mine, onItsPage, prayed) {\n  var by = {}, byLogin = {};\n  members.forEach(function (m) { by[m.objectId] = m; byLogin[idOf(m.login)] = m; });\n  var cards = [];\n  for (var i = 0; i < posts.length; i++) {\n    var p = posts[i];\n    var m = by[idOf(p.member)] || {};\n    var isPrayer = p.kind === 'prayer';\n    var kindName = KIND_NAMES[p.kind] || '';\n    // Words lead a prayer request, a testimony, and any card with no photo (else the heart comes before what it's on).\n    var wordsFirst = isPrayer || p.kind === 'testimony' || (p.photos || []).length === 0;\n    var asked = !!mine && idOf(m.login) === mine;\n    var prayers = [];\n    (prayed || []).forEach(function (r) { var u = idOf(r.doneBy); if (idOf(r.post) === p.objectId && prayers.indexOf(u) < 0) prayers.push(u); });\n    var iPrayed = prayers.indexOf(mine) >= 0;\n    var count = Math.max(0, Number(p.prayedCount) || 0);\n    var people = [];\n    hearts.forEach(function (h) { var u = idOf(h.doneBy); if (idOf(h.post) === p.objectId && people.indexOf(u) < 0) people.push(u); });\n    var said = comments.filter(function (c) { return idOf(c.post) === p.objectId && !c.endedAt; }).length;\n    var hearted = people.indexOf(mine) >= 0;\n    var names = people.slice(0, 2).map(function (u) { return u === mine ? 'you' : firstName(byLogin[u]); }).filter(Boolean);\n    var urls = (await linked(p.photos)).filter(Boolean);\n    var face = await faceOf(m);\n    cards.push({\n      id: p.objectId,\n      memberId: m.objectId || '',\n      name: m.name || '',\n      face: face,\n      hasFace: !!face,\n      noFace: !face,\n      initials: initials(m.name),\n      shade: shade(m.objectId || p.objectId),\n      when: p.kind === 'event' ? 'Event · ' + (eventWhen(p.eventOn) || 'its day isn’t known') : p.kind === 'testimony' ? 'Testimony · ' + ago(p.createdAt) : ago(p.createdAt),\n      caption: p.caption || '',\n      hasCaption: !!p.caption && !wordsFirst,\n      isPrayer: isPrayer,\n      notPrayer: !isPrayer,\n      kindName: kindName,\n      hasKind: !!kindName,\n      wordsFirst: wordsFirst,\n      kindClass: isPrayer ? 'gm-prayer' : '',\n      ask: wordsFirst ? p.caption || '' : '',\n      prayed: iPrayed,\n      prayLabel: (iPrayed ? '🙏 You prayed' : '🙏 I prayed') + (count > 0 ? ' · ' + count : ''),\n      prayInk: iPrayed ? 'var(--primary-foreground)' : 'var(--primary)',\n      prayFill: iPrayed ? 'var(--primary)' : 'var(--surface)',\n      whoPrayed: !isPrayer ? '' : asked ? whoPrayed(prayers, byLogin, mine, onItsPage) : 'Only ' + (firstName(m) || 'the person who asked') + ' sees who prayed.',\n      photos: urls.map(function (u, n) { return { id: u, src: u, alt: 'Photo ' + (n + 1) + ' of ' + urls.length + ', shared by ' + (m.name || 'a member') }; }),\n      hasPhotos: urls.length > 0,\n      lostPhotos: (p.photos || []).length > urls.length,\n      hearted: hearted,\n      heartLabel: hearted ? '♥ Hearted' : '♡ Heart',\n      heartColor: hearted ? 'var(--heart)' : 'var(--foreground)',\n      hearts: people.length === 0 ? 'No hearts yet' : plural(people.length, 'heart', 'hearts') + ' · ' + (people.length > 2 ? names.join(', ') + ' and ' + plural(people.length - 2, 'other', 'others') : names.join(' and ')),\n      comments: said === 0 ? '' : said === 1 ? 'View 1 comment' : 'View all ' + said + ' comments',\n      toComments: !onItsPage,\n      listComments: !onItsPage && said > 0\n    });\n  }\n  return cards;\n}\n/** \"a, b and c\". */\nfunction listed(names) { return names.length < 2 ? names.join('') : names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]; }\n/** Who prayed, for the person who asked: everyone on the request's own page, the first two and how many more on a card. */\nfunction whoPrayed(prayers, byLogin, mine, everyone) {\n  if (prayers.length === 0) return 'Nobody has prayed yet. Only you will see who does.';\n  var names = prayers.map(function (u) { return u === mine ? 'you' : (byLogin[u] && byLogin[u].name) || 'a member'; });\n  var shown = everyone || names.length <= 3 ? names : names.slice(0, 2).concat([plural(names.length - 2, 'other', 'others')]);\n  return 'Prayed: ' + listed(shown) + '. Only you see who.';\n}\n/** A member's profile photo by its signed link, or '' (no photo, or the backend won't sign it): then their initials. */\nasync function faceOf(m) {\n  return m && m.photo && m.photo.name ? (await linked([m.photo]))[0] || '' : '';\n}\nfunction refused(e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; }\n\nvar who = await me();\nif (!who) { refused({ error: 'Sign in to change your profile.' }); return; }\nif (who.status !== 'approved') { Outputs.waiting(); return; }\ntry {\n  var rows = await all('Member', { objectId: { equalTo: String(who.id || '') } });\n} catch (e) { refused(e); return; }\nvar m = rows[0] || {};\nOutputs.memberId = String(who.id || '');\nOutputs.name = m.name || '';\nOutputs.bio = m.bio || '';\nOutputs.initials = initials(m.name);\nOutputs.shade = shade(m.objectId || who.id);\nOutputs.current = await faceOf(m);\nOutputs.band = who.role === 'admin' ? 'Admin' : '';\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "out-waiting",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-memberId",
+          "displayName": "memberId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bio",
+          "displayName": "bio",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-initials",
+          "displayName": "initials",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shade",
+          "displayName": "shade",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-current",
+          "displayName": "current",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "epPick",
+      "type": "Open File Picker",
+      "label": "Choose a photo",
+      "parameters": {
+        "acceptedFileTypes": "image/*"
+      },
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "epUpload",
+      "type": "Upload File",
+      "label": "Send it, shrunk to 800 px, for the members only",
+      "parameters": {
+        "readers": "role:member, role:admin",
+        "shrinkTo": 800,
+        "photoQuality": 80
+      },
+      "x": 650,
+      "y": 1840
+    },
+    {
+      "id": "epBusy",
+      "type": "Switch",
+      "label": "Sending a photo",
+      "x": 650,
+      "y": 1720
+    },
+    {
+      "id": "epPhoto",
+      "type": "JavaScriptFunction",
+      "label": "The photo, while the page is open",
+      "parameters": {
+        "functionScript": "var keep = Component.Object;\nvar up = Inputs.added;\nif (up && up !== keep.get('addedFrom')) {\n  keep.set('addedFrom', up);\n  if (typeof up.getName === 'function' && up.getName()) {\n    var shown = '';\n    try { shown = (await Noodl.Files.sign(up)).url; } catch (e) { shown = ''; }\n    keep.set('choice', { kind: 'new', name: up.getName(), url: up.getUrl(), shown: shown });\n  }\n}\nif (Inputs.removed && Inputs.removed !== keep.get('removedFrom')) {\n  keep.set('removedFrom', Inputs.removed);\n  keep.set('choice', { kind: 'none' });\n}\nvar c = keep.get('choice') || { kind: 'keep' };\nvar src = c.kind === 'new' ? c.shown : c.kind === 'none' ? '' : String(Inputs.current || '');\nOutputs.choice = c.kind;\nOutputs.photo = c.kind === 'new' ? { name: c.name, url: c.url } : {};\nOutputs.face = src;\nOutputs.hasFace = !!src;\nOutputs.noFace = !src;\nOutputs.canRemove = c.kind === 'new' || (c.kind === 'keep' && !!Inputs.current);"
+      },
+      "ports": [
+        {
+          "name": "in-added",
+          "displayName": "added",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-removed",
+          "displayName": "removed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-current",
+          "displayName": "current",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-choice",
+          "displayName": "choice",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-photo",
+          "displayName": "photo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-face",
+          "displayName": "face",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasFace",
+          "displayName": "hasFace",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noFace",
+          "displayName": "noFace",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canRemove",
+          "displayName": "canRemove",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1120
+    },
+    {
+      "id": "epRemoveStamp",
+      "type": "JavaScriptFunction",
+      "label": "Take the photo off",
+      "parameters": {
+        "functionScript": "Outputs.removed = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-removed",
+          "displayName": "removed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1600
+    },
+    {
+      "id": "epGather",
+      "type": "JavaScriptFunction",
+      "label": "The profile, as one save",
+      "parameters": {
+        "functionScript": "function v(typed, loaded) { return typed === undefined ? (loaded || '') : String(typed); }\nvar name = v(Inputs.name, Inputs.name0).trim();\nvar bio = v(Inputs.bio, Inputs.bio0).trim();\nif (!name) { Outputs.problem = 'Your name, as the community knows you.'; Outputs.held(); return; }\nif (name.length > 80) { Outputs.problem = 'A name of 80 characters or fewer. This one has ' + name.length + '.'; Outputs.held(); return; }\nif (bio.length > 150) { Outputs.problem = 'A bio of 150 characters or fewer. This one has ' + bio.length + '.'; Outputs.held(); return; }\nvar profile = { name: name, bio: bio };\nif (Inputs.choice === 'new') profile.photo = Inputs.photo;\nif (Inputs.choice === 'none') profile.photo = null;\nOutputs.problem = '';\nOutputs.profile = profile;\nOutputs.go();",
+        "runOnChange-in-name": false,
+        "runOnChange-in-name0": false,
+        "runOnChange-in-bio": false,
+        "runOnChange-in-bio0": false,
+        "runOnChange-in-choice": false,
+        "runOnChange-in-photo": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-held",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name0",
+          "displayName": "name0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-bio",
+          "displayName": "bio",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-bio0",
+          "displayName": "bio0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-choice",
+          "displayName": "choice",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-photo",
+          "displayName": "photo",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-profile",
+          "displayName": "profile",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 2440
+    },
+    {
+      "id": "epCall",
+      "type": "CloudFunction2",
+      "label": "editProfile(profile)",
+      "parameters": {
+        "function": "editProfile"
+      },
+      "x": 650,
+      "y": 2560
+    },
+    {
+      "id": "epToProfile",
+      "type": "RouterNavigate",
+      "label": "To your profile",
+      "parameters": {
+        "target": "/Pages/Member"
+      },
+      "x": 650,
+      "y": 640
+    },
+    {
+      "id": "epToWaiting",
+      "type": "RouterNavigate",
+      "label": "Not let in yet: to waiting",
+      "parameters": {
+        "target": "/Pages/Waiting"
+      },
+      "x": 650,
+      "y": 2920
+    }
+  ],
+  "visualRoots": [
+    "epPage"
+  ]
+}

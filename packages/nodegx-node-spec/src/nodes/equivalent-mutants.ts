@@ -195,7 +195,21 @@ const NO_DRAG_WITHOUT_A_TAG: EquivalentMutant[] = ['fileLeave', 'fileDrop'].map(
   why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag from the desktop on a node with no Tag (no files, no target, nothing counted)`)
 }));
 
-export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
+/**
+ * P121-TWO008-UPLOADSHRINK — Upload File's Shrink To and Photo Quality are read by the browser's canvas step
+ * (noodl-viewer-react `shrinkphoto.ts`), which this world has not got: with no decoder a photo goes as it was picked, so the
+ * request is the same whatever they hold. Graded where there is a canvas: `noodl-viewer-react/tests/shrinkphoto.test.ts`
+ * (the rules, 13 mutants killed) and the P121 TWO-003 drive (a 4032×3024 JPEG stored at 1600×1200).
+ */
+const SHRINK_UNREAD = (port: string) => `${port} is read only by the browser's canvas step, which this world has not got: a photo goes as picked whatever it holds — graded by shrinkphoto.test.ts and the TWO-003 drive`;
+
+const DECLARED: Readonly<Record<string, EquivalentMutant[]>> = {
+  'Upload File': (['shrinkTo', 'photoQuality'] as const).map((port) => ({
+    reducer: port,
+    kind: 'drop-set' as const,
+    branch: `{"set":["${port}"],"emit":[],"outcome":null,"outcomes":[],"request":false}`,
+    why: SHRINK_UNREAD(port === 'shrinkTo' ? 'Shrink To' : 'Photo Quality')
+  })),
   // NSP-016 s55 — the Drag writes its whole held state on every path (drag.ts `toPatch`); placed off the page, its paint records the
   // props with no component to read them, and the next paint (an act's, or the frame's end) records them again before anything does
   Drag: [{ reducer: 'world.place', kind: 'drop-set', branch: '"emit":[],"outcome":null', why: PLACED_OFF_PAGE }],
@@ -237,7 +251,8 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     // off the page: the list it writes holds Source Object writes only (the twin's), which run at the next mount on a new `<video>`,
     // where a reload changes nothing, and are the oldest in the list, so the cap pushes them out first, without a word
     // a placing off the page draws the flags with no element to draw them on; the mount draws them again (PLACED_OFF_PAGE)
-    { reducer: 'world.place', kind: 'drop-set', branch: `"set":${JSON.stringify(VIDEO_PAINT)},"emit":[]`, why: 'a placing on a node placed off the page: its set holds the flags, which nothing reads before the frame end repaints them, and the element and media as they already stand' },
+    // (s105, R38: every paint writes `grow` too, and off the page the sentence it found — wired-grow.ts)
+    { reducer: 'world.place', kind: 'drop-set', branch: `"set":${JSON.stringify([...VIDEO_PAINT, 'grow'].sort())},"emit":[]`, why: 'a placing on a node placed off the page: its set holds the flags, which nothing reads before the frame end repaints them, and the element, the media and the editor\'s warning as they already stand' },
     // a drag from the desktop entering in the frame Mounted comes back, its paint making the element (and running what waited), handed a
     // twin that makes none: the frame's end mounts it instead and runs what waited there, reporting at the same frame end; the element it
     // makes is numbered one more, so the file bookkeeping the twin wrote names an element no longer there, and the next drag over the
@@ -552,4 +567,19 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
         "the frame end's outcomes and pops stand without its `set`; only the NEXT settle shows the presses it failed to take (they pop again). A sequence ending at that settle cannot show it, and the branch keys are combinations of press ports and answers, so which branches end a sequence moves with the seed — States' frame end exactly. Every hand scenario with two presses in a frame settles again after it, and a frame end reached there is killed"
     }
   ],
+};
+
+/**
+ * NSP-019 R38 (s105) — the nine nodes that keep what a wired size along the parent's axis tells the editor (wired-grow.ts): every
+ * paint writes `grow`, and off the page it writes the sentence it found (the editor keeps what it last had). So a paint off the
+ * page whose set holds nothing else — a placing with Mounted off, a frame end with nothing to repaint — writes what is there.
+ * On the page the same branch writes the sentence the render says, and the R38 scenarios kill a drop of it there.
+ */
+const GROW_KEPT = 'a paint off the page whose set holds only the warning the editor keeps (wired-grow.ts): it writes the sentence it found';
+const GROW_NODES = ['Group', 'Text', 'Image', 'Video', 'net.noodl.controls.button', 'net.noodl.controls.textinput', 'net.noodl.controls.options', 'net.noodl.controls.range', 'Radio Button Group'];
+const GROW_ROWS: EquivalentMutant[] = ['world.place', 'afterInputs'].map((reducer) => ({ reducer, kind: 'drop-set' as const, branch: '"set":["grow"],"emit":[]', why: GROW_KEPT }));
+
+export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
+  ...DECLARED,
+  ...Object.fromEntries(GROW_NODES.map((type) => [type, [...(DECLARED[type] ?? []), ...GROW_ROWS]]))
 });

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7789c1de-725c-5b45-8cf9-20ad25ad0315",
+  "name": "placeOrder",
+  "path": "/#__cloud__/placeOrder",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Place an order, with or without an account: one part per seller, each line at today’s price"
+}

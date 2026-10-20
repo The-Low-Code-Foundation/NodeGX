@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "387a644c-f75e-5e40-8e75-e88c787fc2d1",
+  "name": "Round",
+  "path": "/Race/Round",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One question of a race: Ask picks it, the box or the clock answers it, the grader scores it, the banner shows it. Publishes Graded with the gains and the new model, then Next or ShowMe when the banner is dismissed. Abandon stops the clock, so a question left behind never grades."
+}

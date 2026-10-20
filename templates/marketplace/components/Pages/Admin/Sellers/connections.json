@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "eb2b883e-8229-53df-888e-a594cb047f2f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "asRoot",
+      "fromProperty": "didMount",
+      "toId": "asLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "asLoad",
+      "fromProperty": "out-rows",
+      "toId": "asEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "asLoad",
+      "fromProperty": "out-ok",
+      "toId": "asContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "asLoad",
+      "fromProperty": "out-empty",
+      "toId": "asEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "asLoad",
+      "fromProperty": "out-problem",
+      "toId": "asRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "asLoad",
+      "fromProperty": "out-refused",
+      "toId": "asRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "asRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "asToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "asAdd",
+      "fromProperty": "onClick",
+      "toId": "asToNew",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "asRename",
+      "fromProperty": "onClick",
+      "toId": "asToName",
+      "toProperty": "navigate"
+    }
+  ]
+}

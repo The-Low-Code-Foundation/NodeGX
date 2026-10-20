@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b490b010-f838-5744-8b56-8628b80d0f12",
+  "name": "Hangar shelf",
+  "path": "/Logic/Hangar shelf",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "RKT-011: one tab of the shelf (face or rocket) as the active player sees it. Every item is a row, owned, wearable or still to pick, with what a tap would do."
+}

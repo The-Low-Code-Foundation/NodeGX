@@ -1,0 +1,13 @@
+[
+ {
+  "waitFor": "window.__map?.ui.ready",
+  "timeout": 90000
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "label": "render ms (median of 7, after 3 warm-up renders) for each part hidden in turn",
+  "eval": "(() => { const m = __map.map; const gl = m.renderer.getContext(); const px = new Uint8Array(4); const time = () => { for (let i = 0; i < 3; i++) m.renderer.render(m.scene, m.camera); const ts = []; for (let i = 0; i < 7; i++) { const t0 = performance.now(); m.renderer.render(m.scene, m.camera); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); ts.push(performance.now() - t0); } ts.sort((a, b) => a - b); return +ts[3].toFixed(0); }; const ships = [...m.plates.values()].map((p) => p.shipGroup); const cards = [...m.plates.values()].flatMap((p) => [...p.cards.values()]); const glows = [...m.plates.values()].flatMap((p) => p.engineGlows); const out = {}; out.all = time(); ships.forEach((s) => (s.visible = false)); out.noShips = time(); ships.forEach((s) => (s.visible = true)); m.space.sky.visible = false; out.noSky = time(); m.space.sky.visible = true; cards.forEach((c) => (c.visible = false)); out.noCards = time(); cards.forEach((c) => (c.visible = true)); glows.forEach((g) => (g.visible = false)); out.noEngineGlows = time(); glows.forEach((g) => (g.visible = true)); m.space.dust.visible = false; out.noDust = time(); m.space.dust.visible = true; out.allAgain = time(); return JSON.stringify(out); })()"
+ }
+]

@@ -1,0 +1,59 @@
+## S1 source defined at creation, box unset
+   [load]
+   go x="p|undefined"
+   [produce p again]
+   [produce q]
+   go x="q|undefined"
+## S2 source undefined at creation, box unset
+   [load]
+   [produce p]
+   go x="p|undefined"
+## S3 box false, source defined at creation
+   [load]
+   [produce q]
+   [Run]
+   go x="q|undefined"
+   done
+## S4 same object twice
+   [load]
+   [produce obj]
+   go x="[object Object]|undefined"
+   [produce obj again]
+   go x="[object Object]|undefined"
+## S5 two ticked inputs in one frame
+   [load]
+   [produce a=p and b=q in one frame]
+   go x="p|q"
+## S6 value and Run in one frame
+   [load]
+   [produce p + Run]
+   go x="p|undefined"
+   done
+   [Run alone]
+   go x="p|undefined"
+   done
+## S7 Run then value in one frame
+   [load]
+   [Run + produce p]
+   go x="p|undefined"
+   done
+## S8 defined then undefined
+   [load]
+   go x="p|undefined"
+   [produce undefined]
+   [produce undefined again]
+## S9 literal on a ticked input, Run wired
+   [load]
+   go x="lit|undefined"
+   [Run]
+   go x="lit|undefined"
+   done
+## S10 literal on an unticked input, Run wired
+   [load]
+   [Run]
+   go x="lit|undefined"
+   done
+## S11 source null at creation
+   [load]
+   go x="null|undefined"
+   [produce null]

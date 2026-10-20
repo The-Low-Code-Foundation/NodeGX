@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2e8e1133-d219-5670-8a98-5130747f56c1",
+  "name": "Profile card",
+  "path": "/Game/Profile card",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One player in the who-is-playing list: face, name, class, what is due. Selected changes the border. Publishes Chosen with the profile id."
+}

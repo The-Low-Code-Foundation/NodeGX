@@ -23,6 +23,7 @@ import {
   HandlerAction,
   IdNewAction,
   CryptoCallAction,
+  CryptoNodeKind,
   MintedTarget,
   JsFunctionPlan,
   RefusedScriptPlan,
@@ -46,6 +47,7 @@ import {
 import { ExportIR, ITEM_OUTPUT_SIGNAL, NodeIR } from '../ir/types';
 import { KitBinding, tsTypeOf as kitPortTsType } from './kits';
 import { assignClassNames, ClassCandidate, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
+import { WiredWhere, wiredWhereCode } from '../analyze/querySettings';
 import { tsLiteral } from './state';
 import { UTIL_LIB_PATH, utilCallMayBeUndefined } from './utilLib';
 import { FEED_ITEM_FIELDS, PARSE_LIB_PATH, isParseHelper } from './parseLib';
@@ -63,15 +65,63 @@ import { SSE_LIB_PATH } from './sseLib';
 import { WEBSOCKET_LIB_PATH } from './websocketLib';
 import { REALTIME_LIB_PATH } from './realtimeLib';
 import { REPEAT_LIB_PATH } from './repeatLib';
+import { ACTIONS_LIB_PATH } from './actionsLib';
+import { HISTORY_LIB_PATH } from './historyLib';
+import { SIGN_IN_LIB_PATH } from './signInLib';
 import { SCRIPT_CODE_PREFIX } from '../analyze/script';
+import { FUNCTION_RUN_LIB_PATH } from './functionRunLib';
 import { ID_HELPERS_BY_FN, ID_LIB_PATH, IdHelper } from './idLib';
 import { CRYPTO_LIB_PATH, CryptoHelper } from './cryptoLib';
+import { PATTERN_LIB_PATH, PatternHelper, isPatternHelper } from './patternLib';
 import { SCREEN_LIB_PATH } from './screenLib';
 import { MEDIA_ATTRS, MEDIA_LIB_PATH, MediaHelper, absoluteUrl } from './mediaLib';
 import { COMPONENT_OBJECT_LIB_PATH } from './componentObjectLib';
 import { PAGE_STACK_LIB_PATH } from './pageStackLib';
 import { POPUP_DIALOG_LIB_PATH } from './popupDialogLib';
 import { computeNodeStyle, computeRoleCss, CONTENT_ATTR_ORDER, CONTENT_PARAMS, Decl, iconSourceOf, RoleCss, StyleRole, WIRED_STYLE_SINKS } from './style';
+
+/**
+ * P18-S115-QUERYFILTER. A query's parameters as the object literal its fetch is called with, keys in the wire's order.
+ * The `where` is the runtime translator's own document, printed as JSON (its `$eq` keys need the quotes).
+ */
+/**
+ * P18-S116-QUERYFETCH. Whether the page asks for a query in an effect: always, unless its Fetch is wired and no box asks
+ * (none at mount, and no wired filter value whose box asks on a change).
+ */
+function queryHasEffect(query: QueryPlan): boolean {
+  const fetched = query.fetchWired;
+  return fetched === undefined || fetched.mount || (fetched.onValues && query.params?.wired !== undefined);
+}
+
+function queryParamsLiteral(params: NonNullable<QueryPlan['params']>, whereLocal?: string): string {
+  const parts: string[] = [];
+  if (whereLocal !== undefined) parts.push(whereLocal === 'where' ? 'where' : `where: ${whereLocal}`);
+  else if (params.where !== undefined) parts.push(`where: ${JSON.stringify(params.where)}`);
+  if (params.sort !== undefined) parts.push(`sort: [${params.sort.map((s) => tsLiteral(s)).join(', ')}]`);
+  if (params.limit !== undefined) parts.push(`limit: ${params.limit}`);
+  if (params.skip !== undefined) parts.push(`skip: ${params.skip}`);
+  return `{ ${parts.join(', ')} }`;
+}
+
+/**
+ * P18-S115-QUERYPARAMS. The `where` a query with wired filter values sends, as one expression over the values' locals:
+ * a conditional on each value being set, down to the translator's own document for that combination. Two branches that
+ * print the same collapse into one; `undefined` is no `where`.
+ */
+function wiredWhereExpr(wired: WiredWhere, locals: string[], valueCode: (name: string, date: boolean) => string): string {
+  const at = (index: number, mask: number): string => {
+    if (index === wired.params.length) {
+      const where = wired.cases[mask];
+      return where === undefined ? 'undefined' : wiredWhereCode(where, valueCode);
+    }
+    const unset = at(index + 1, mask);
+    const set = at(index + 1, mask | (1 << index));
+    if (unset === set) return set;
+    const arm = (code: string) => (code.includes(' ? ') ? `(${code})` : code);
+    return `${locals[index]} === undefined ? ${arm(unset)} : ${arm(set)}`;
+  };
+  return at(0, 0);
+}
 
 const GENERATED_TS = '// @nodegx:generated (visual — provenance markers complete in EXP-007)\n';
 const GENERATED_CSS = '/* @nodegx:generated (visual) */\n';
@@ -140,6 +190,14 @@ const VOID_ELEMENTS: ReadonlySet<string> = new Set([
 ]);
 
 /**
+ * The old Look-preset markers (P100-UPG001-VARIANT). No runtime, viewer or exporter reads them (UPG-001 §3.4), so a
+ * node that still carries one has lost nothing, and the report must not say it was dropped. The editor's own list is
+ * `PRESET_MARKERS` in `noodl-editor/…/models/Looks/looks.ts`. This package may not import the editor (HLS-001 AC2),
+ * so `tests/p100-upg001-variant.test.ts` holds the two copies equal.
+ */
+export const PRESET_MARKERS = ['_variant', '_size'] as const;
+
+/**
  * EXP-015. The element an author asked a node to render as, validated, with the sentence to report
  * when the answer is "not that one".
  *
@@ -167,6 +225,7 @@ const VOID_ELEMENTS: ReadonlySet<string> = new Set([
  * 3. **The value is outside the port's enum.** The editor cannot produce one; a hand-authored
  *    project or a future catalog change can.
  */
+
 export function authoredTag(
   node: NodeIR,
   fallback: string,
@@ -250,6 +309,8 @@ export interface EmittedComponent {
   idHelpers: Set<string>;
   /** `src/lib/timer.ts` verbs this component calls (EXP-011 §39). */
   timerHelpers: Set<string>;
+  /** EXP-011 §86. Whether this component runs a Function whose signals have chains (`src/lib/functionRun.ts`). */
+  functionRunLib: boolean;
   /** EXP-011 §49. Whether this component imports `src/lib/animate.ts` / `src/lib/states.ts`. */
   animateLib: boolean;
   statesLib: boolean;
@@ -273,6 +334,12 @@ export interface EmittedComponent {
   realtimeLib: boolean;
   /** GAM-013. `src/lib/repeat.ts` is owed when this component keeps a Repeat node. */
   repeatLib: boolean;
+  /** EXP-011 §77. `src/lib/actions.ts` is owed when this component keeps an Action Dispatcher or an Action Handler. */
+  actionsLib: boolean;
+  /** EXP-011 §78. `src/lib/history.ts` is owed when this component keeps a State History, an Undo / Redo, a State Snapshot or an Optimistic Update. */
+  historyLib: boolean;
+  /** EXP-011 §79. `src/lib/signIn.ts` is owed when this component keeps a Sign In With. */
+  signInLib: boolean;
   /** EXP-011 §59. `src/lib/crypto.ts` verbs this component calls; `src/lib/screen.ts` is owed when a viewport hook prints. */
   cryptoHelpers: Set<string>;
   screenLib: boolean;
@@ -377,6 +444,7 @@ export function emitComponent(
     for (const name of style.unhandled) {
       if (name === 'visible' || name === 'mounted') continue; // §4b: handled by the render wrap / class toggle
       if (name === 'cssClassName' && authoredClassName(node) !== undefined) continue; // §48: folded into className
+      if ((PRESET_MARKERS as readonly string[]).includes(name)) continue; // P100-UPG001-VARIANT: inert, nothing to drop
       notes.push(`${plan.path}: parameter ${name} on ${id} has no style/content mapping — dropped, reported`);
       unmappedParams.push({ id, name });
     }
@@ -521,8 +589,13 @@ export function emitComponent(
   const usedIdHelpers = new Set<IdHelper>();
   // EXP-011 §59. The crypto verbs called, and the Screen Resolution nodes some emitted expression reads —
   // a registered hook nothing reads prints no line (§56 E1's rule, decided here at emit time).
-  const usedCryptoHelpers = new Set<CryptoHelper>();
+  const usedCryptoHelpers = new Set<CryptoHelper | PatternHelper>();
   const usedScreenNodeIds = new Set<string>();
+  /**
+   * P109-S21-EXPORTBLENDNAN — the `useRef` locals a `blendColorKept` call reads, one per Color Blend. 🔴 Recorded by
+   * BOTH walkers, in the clause that earns the helper's import, so the declaration and the import cannot part.
+   */
+  const usedKeptLocals = new Set<string>();
   // EXP-011 §60. Whether an emitted expression or action reaches the record hook / the parent hook — the parent hook
   // prints only where something reads or writes through it; the record hook prints whenever the plan registered it
   // (the provider is owed to descendants even when the host itself reads nothing).
@@ -533,6 +606,61 @@ export function emitComponent(
   // reference print — the plan registers every resolved definition, referenced or not.
   const jsFunByNode = plan.jsFunctions;
   const referencedJsIds = new Set<string>();
+  /** EXP-011 §86. Runs whose signals have chains: each keeps a `functionNode` ref and imports `src/lib/functionRun.ts`. */
+  const pulsedRunIds = new Set<string>();
+  /** P18-S119-TICKEDRUN. Functions a ticked input also runs: their Runs record what they read (`tickedArrival`). */
+  const tickedRunIds = new Set(plan.tickedRuns.map((t) => t.nodeId));
+  /** P18-S119-TICKEDRUN. `held, [a, b]`: the node's held values and its ticked inputs read fresh, in input order. */
+  const tickedRecordArgs = (nodeId: string): string => {
+    const ticked = plan.tickedRuns.find((t) => t.nodeId === nodeId)!;
+    return `${pulseNamesOf(jsFunByNode[nodeId]!).held}, [${ticked.watch.map((e) => exprCode(e, 'handler')).join(', ')}]`;
+  };
+  /**
+   * P18-S121-DIDMOUNT. An element's Did Mount chain, as a mount effect: the runtime sends Did Mount from the element's own
+   * `componentDidMount`, once per mount, children before their parent. The attach pass has always compiled these chains as
+   * the element's handlers; the emitter found no DOM event for them and dropped them, reported. A mount effect is the
+   * component's mount, so it stands in only for an element that mounts with the component: refused by name where the
+   * element or an element above it has a Mounted that a value decides, and dropped where one is authored Mounted false
+   * (it never mounts, so its Did Mount never fires). Post-order over the tree, the runtime's order.
+   */
+  const mountChains: Array<{ nodeId: string; actions: HandlerAction[] }> = [];
+  const mountRefusals = new Map<string, string>();
+  {
+    const mountGateOf = (id: string): string | null => {
+      for (let at: string | undefined = id; at !== undefined; at = nodeById.get(at)?.parent) {
+        const bound = plan.bindings[at]?.['mounted'];
+        const literal = nodeById.get(at)?.parameters.find((p) => p.name === 'mounted')?.value;
+        const never =
+          (bound !== undefined && bound.kind === 'computed' && (bound.expr.kind === 'undefined' || (bound.expr.kind === 'literal' && !bound.expr.value))) ||
+          (bound === undefined && literal?.kind === 'literal' && literal.value === false);
+        const whose = at === id ? 'it is' : `an element above it (${at}) is`;
+        if (never) return `${whose} never mounted, so its Did Mount never fires`;
+        if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal')) {
+          return `${whose} mounted by a value, so its Did Mount fires when that value says, and a mount effect runs when the component mounts`;
+        }
+        if (at === plan.rootId) break;
+      }
+      return null;
+    };
+    const consider = (id: string) => {
+      const actions = plan.handlers[id]?.['didMount'];
+      if (actions === undefined) return;
+      const why = mountGateOf(id);
+      if (why === null) mountChains.push({ nodeId: id, actions });
+      else mountRefusals.set(id, why);
+    };
+    const visit = (id: string) => {
+      for (const child of plan.childrenOf[id] ?? []) visit(child);
+      // A page's sole Group renders as the page div (TARGET-OUTPUT §2): its children are the page's now, and it mounts
+      // with the page, after them and before the Page.
+      if (id === plan.rootId && plan.collapsedGroupId) consider(plan.collapsedGroupId);
+      consider(id);
+    };
+    if (plan.rootId !== null) visit(plan.rootId);
+  }
+  const mountHandled = new Set(mountChains.map((m) => m.nodeId));
+  /** EXP-011 §86. While a pulse loop prints its arms: the Function's id → the loop's pulse local. */
+  const activePulses = new Map<string, string>();
   // State rows print only when something references them (CONTROLLED-STATE §3.1) — the
   // jsFunctions precedent: a definition nothing kept costs nothing.
   const referencedStateNames = new Set<string>();
@@ -589,6 +717,7 @@ export function emitComponent(
     // nothing; only the arguments read anything.
     if (expr.kind === 'util-call') {
       usedUtilHelpers.add(expr.fn);
+      if (expr.kept !== undefined) usedKeptLocals.add(expr.kept);
       expr.args.forEach(collectExprUse);
     }
     // A read through the row earns that row; the chain-local form names a local the enclosing
@@ -610,6 +739,8 @@ export function emitComponent(
     // the `outcome-error` note below: the row would be written by the action, read by the sink,
     // then dropped as unreferenced — a component naming an identifier it never declares.
     if (expr.kind === 'id-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
+    // P18-S113-IDBINDREAD. A Record's row and Error read off the row: a Record bound by its Id has no read action to earn them.
+    if (expr.kind === 'record-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     // EXP-011 §59. The same clause for the crypto rows; a viewport read earns its hook.
     if (expr.kind === 'crypto-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     if (expr.kind === 'screen-out') usedScreenNodeIds.add(expr.nodeId);
@@ -646,6 +777,8 @@ export function emitComponent(
     if (action.kind === 'runtasks-run') collectExprUse(action.items);
     // EXP-011 §58. The data read at the pulse earns whatever its source earns.
     if (action.kind === 'stream-action' && action.value !== undefined) collectExprUse(action.value);
+    // P18-S116-QUERYFETCH. The wired filter values, read at the pulse: a Variable there is `.get()`, which earns its import.
+    if (action.kind === 'query-fetch') for (const v of action.values) collectExprUse(v.expr);
     if (action.kind === 'state-set') {
       referencedStateNames.add(action.name);
       if (action.expr !== undefined) collectExprUse(action.expr);
@@ -715,6 +848,9 @@ export function emitComponent(
     if (action.kind === 'popup-show' || action.kind === 'popup-close') {
       action.then.forEach(collectActionUse);
     }
+    if (action.kind === 'jsfun-pulses' || action.kind === 'jsfun-pulse') {
+      action.then.forEach(collectActionUse);
+    }
     /**
      * The asynchronous actions' arguments and chains (EXP-011 Tier 1.2).
      *
@@ -736,6 +872,7 @@ export function emitComponent(
         }
       }
       action.then.forEach(collectActionUse);
+      action.failThen.forEach(collectActionUse);
     }
     if (action.kind === 'http-call' || action.kind === 'cloud-call') {
       action.args.forEach((a) => collectExprUse(a.expr));
@@ -780,9 +917,13 @@ export function emitComponent(
     if (action.kind === 'crypto-call') {
       if (action.materialize !== undefined) referencedStateNames.add(action.materialize);
       if (action.errorMaterialize !== undefined) referencedStateNames.add(action.errorMaterialize);
+      // EXP-011 §76. The extractor's rows by port, and its two result chains.
+      for (const m of action.materializeByPort ?? []) referencedStateNames.add(m.state);
       for (const input of action.inputs) if (input.expr !== undefined) collectExprUse(input.expr);
       action.then.forEach(collectActionUse);
       action.failThen.forEach(collectActionUse);
+      action.foundThen.forEach(collectActionUse);
+      action.notFoundThen.forEach(collectActionUse);
     }
     // EXP-011 §61. The parameters the push sets, the row its callback writes, and every callback's chain.
     if (action.kind === 'stack-push') {
@@ -858,6 +999,9 @@ export function emitComponent(
       referencedJsIds.add(action.nodeId);
       jsArgExprs(action.nodeId).forEach(collectExprUse);
       action.then.forEach(collectActionUse);
+      // EXP-011 §86. A run that sends pulses keeps the node's last values and imports the run helper; so does a Function's
+      // materialized run (P18-S121-FRESHOUTPUTS: the plan marks both `pulsed`).
+      if (runIsPulsed(action) || (action.materialize !== undefined && jsFunByNode[action.nodeId]?.pulsed === true)) pulsedRunIds.add(action.nodeId);
       // Same as the expression side: the wrapper's Noodl.Variables facade earns the imports.
       for (const name of jsFunByNode[action.nodeId]?.variables ?? []) {
         if (variableByName.has(name)) usedVariableNames.add(name);
@@ -873,14 +1017,15 @@ export function emitComponent(
     ...plan.branchEffects.map((e) => e.action),
     // EXP-011 §39. A Value Changed's chain earns imports and references exactly as a handler's does.
     ...plan.valueChangedEffects.flatMap((e) => e.actions),
+    // P18-S119-TICKEDRUN. The run a ticked input starts is a chain like any other.
+    ...plan.tickedRuns.map((t) => t.action),
     // EXP-011 §49. The listeners and the arrive chain are chains like any other: a store write
     // inside one earns its import here, a state setter its row.
     ...plan.statesMachines.flatMap((m) =>
       [m.listeners.stateChanged, m.listeners.done, m.listeners.unchanged, m.listeners.failure, ...Object.values(m.listeners.reached)].flatMap((chain) => chain ?? [])
     ),
     ...plan.animations.flatMap((a) => a.arrive ?? []),
-    // EXP-011 §43. A Record's Id effect is a read chain run from an effect.
-    ...plan.recordEffects.map((e) => e.action),
+    // P18-S113-IDBINDREAD. A Record's Id bind runs no chain and reads nothing: it earns only its own lines (`recordBinds`).
     // EXP-011 §67. A Variable's authored Value is a store write run from a mount effect — it earns its import here.
     ...plan.variableSeeds.map(variableSeedAction),
     // EXP-011 §71. An Object's own authored property values are a store write run from a mount effect — it earns its import here.
@@ -898,12 +1043,15 @@ export function emitComponent(
     ...plan.drags.flatMap((d) => Object.values(d.listeners).flatMap((chain) => chain ?? []))
   ];
   allActions.forEach(collectActionUse);
+  // EXP-011 §78. A history-family hook is handed its store module.
+  for (const stream of plan.streams) if (stream.store !== undefined) usedStoreNames.add(stream.store);
   /** Nested actions (branch arms, popup done-chains) flattened — the `usesNavigate` sweep. */
   const deepActions = (actions: HandlerAction[]): HandlerAction[] =>
     actions.flatMap((a) =>
       a.kind === 'branch'
         ? [a, ...deepActions(a.whenTrue), ...deepActions(a.whenFalse)]
-        : a.kind === 'http-call' || a.kind === 'cloud-call' || a.kind === 'record-fetch' || a.kind === 'external-link'
+        : // EXP-011 §90. A record or user verb's Failure chain rides the same line.
+          a.kind === 'api-call' || a.kind === 'http-call' || a.kind === 'cloud-call' || a.kind === 'record-fetch' || a.kind === 'external-link'
           ? [a, ...deepActions(a.then), ...deepActions(a.failThen)]
           : // EXP-011 §45. The two-arm files actions ride the line above's shape; the picker has a third arm.
             a.kind === 'file-upload' || a.kind === 'file-sign'
@@ -917,8 +1065,11 @@ export function emitComponent(
             ? [a, ...deepActions(a.then), ...deepActions(a.failThen), ...deepActions(a.completedThen)]
           : // EXP-011 §37. Two arms, so it cannot join the single-chain list below — a popup
             // opened from a UUID's Failure chain is a popup nothing here knows is attached.
-            a.kind === 'id-new' || a.kind === 'crypto-call'
+            a.kind === 'id-new'
             ? [a, ...deepActions(a.then), ...deepActions(a.failThen)]
+          : // EXP-011 §76. Four arms: the extractor's two result chains print inside the Done arm.
+            a.kind === 'crypto-call'
+            ? [a, ...deepActions(a.then), ...deepActions(a.failThen), ...deepActions(a.foundThen), ...deepActions(a.notFoundThen)]
             : // EXP-011 §60. Three chains — a popup opened from a record write's Done, or a raise in a parent write's
               // Failure, is nowhere without this line.
               a.kind === 'component-object-set'
@@ -948,7 +1099,9 @@ export function emitComponent(
                 a.kind === 'popup-show' ||
                 a.kind === 'popup-close' ||
                 a.kind === 'jsfun-run' ||
-                a.kind === 'api-call' ||
+                // EXP-011 §86. The pulse loop and each signal's arm.
+                a.kind === 'jsfun-pulses' ||
+                a.kind === 'jsfun-pulse' ||
                 a.kind === 'date-now-read' ||
                 a.kind === 'collection-remove' ||
                 a.kind === 'array-new' ||
@@ -1043,12 +1196,15 @@ export function emitComponent(
     }
     if (expr.kind === 'util-call') {
       usedUtilHelpers.add(expr.fn);
+      if (expr.kept !== undefined) usedKeptLocals.add(expr.kept);
       expr.args.forEach(hookExprSources);
     }
     if (expr.kind === 'now-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     // EXP-011 §37. A render read of an id is *always* the row form — the local exists only
     // inside the New chain — so this clause earns every id row render can see.
     if (expr.kind === 'id-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
+    // P18-S113-IDBINDREAD. The same clause, the second walker.
+    if (expr.kind === 'record-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     // EXP-011 §59. The same clause; a viewport read from a hook argument earns the hook too.
     if (expr.kind === 'crypto-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     if (expr.kind === 'screen-out') usedScreenNodeIds.add(expr.nodeId);
@@ -1110,6 +1266,8 @@ export function emitComponent(
   }
   // EXP-011 §39. The watched Input is the effect's dependency and prints as the render local.
   for (const effect of plan.valueChangedEffects) hookExprSources(effect.watch);
+  // P18-S119-TICKEDRUN. The watched values' sources are the effect's dependencies, spelled as render locals.
+  for (const ticked of plan.tickedRuns) ticked.watch.forEach(hookExprSources);
   // EXP-011 §49. The target and its two numbers, and the wired State, print as render locals —
   // 🔴 without this the hook was handed the store *object* (`useAnimatedValue(level, …)`), which
   // typechecks against `unknown` and never animates. Read off the emitted page, not off a gate.
@@ -1119,6 +1277,12 @@ export function emitComponent(
     hookExprSources(animation.delay);
   }
   for (const machine of plan.statesMachines) if (machine.follow !== undefined) hookExprSources(machine.follow);
+  // P18-S115-QUERYPARAMS. A query's wired filter values are read in its effect, as render reads.
+  // P18-S116-QUERYFETCH. Read in render only by an effect that asks; a query only its Fetch runs reads them in the handler.
+  for (const query of plan.queries) {
+    if (!queryHasEffect(query)) continue;
+    for (const value of query.wiredValues ?? []) hookExprSources(value.expr);
+  }
   // EXP-011 §63. The options are render reads — a wired Snap Value off a Variable is its `useValue` local.
   for (const drag of plan.drags) for (const option of drag.options) hookExprSources(option.expr);
   // EXP-011 §58. The config reads are render reads (the data is read at the pulse, in handler mode).
@@ -1127,10 +1291,6 @@ export function emitComponent(
   for (const run of plan.runTasks) {
     hookExprSources(run.maxRunningTasks);
     hookExprSources(run.stopOnFailure);
-  }
-  // EXP-011 §43. The Id is the effect's dependency and prints as the render local.
-  for (const effect of plan.recordEffects) {
-    if (effect.action.kind === 'record-fetch') hookExprSources(effect.action.id);
   }
   // A rendered stateful control references its own row (value/checked + onChange), a sync
   // effect its target, a lifted callback its setter — whether or not any expression reads it.
@@ -1176,10 +1336,29 @@ export function emitComponent(
     }
   }
   const referencedStateVars = plan.stateVars.filter((v) => referencedStateNames.has(v.name));
+  /** P18-S111-RECORDLIVE. Each live Record whose row this component holds, with that row's state var. */
+  const liveRecordRows = plan.recordReads.flatMap((read) => {
+    const row = read.live && !read.binds ? referencedStateVars.find((v) => v.originNodeId === read.nodeId && v.origin === 'record-row') : undefined;
+    return row === undefined ? [] : [{ read, row }];
+  });
+  /**
+   * P18-S113-IDBINDREAD. Each Record bound by its Id (Fetch unwired) whose row something reads, where a client holds
+   * records. Unread, or with no backend, the bind changes nothing anyone sees, and nothing is emitted for it.
+   */
+  const recordBinds = plan.recordEffects.flatMap((effect) => {
+    const action = effect.action;
+    if (action.kind !== 'record-fetch' || !effect.held) return [];
+    const row = referencedStateVars.find((v) => v.originNodeId === effect.nodeId && v.origin === 'record-row');
+    const read = plan.recordReads.find((r) => r.nodeId === effect.nodeId);
+    return row === undefined || read === undefined ? [] : [{ effect, action, read, row }];
+  });
+  // EXP-011 §43. The Id is the bind's dependency and prints as the render local.
+  for (const { action } of recordBinds) hookExprSources(action.id);
 
   // EXP-011 §15. Both kinds call `navigate(...)`, so both earn the hook. A `some` over one
   // kind is the shape that silently emits a call to an undeclared identifier.
-  const usesNavigate = deepActions(allActions).some((a) => a.kind === 'navigate' || a.kind === 'navigate-path');
+  // A new-tab Navigate is `window.open` and needs no hook (P18-S110-NEWTAB).
+  const usesNavigate = deepActions(allActions).some((a) => (a.kind === 'navigate' && !a.newTab) || a.kind === 'navigate-path');
   // EXP-011 §54. The failure arms that raise on the error channel — each earns the `raiseAppError` import.
   // EXP-011 §60. The parent Set raises on a miss (base.ts reportOutcome 'failure'); the self variant cannot miss.
   const raisesAppErrors = deepActions(allActions).some((a) => RAISING_ACTION_KINDS.has(a.kind) || mintedGuards(a) || (a.kind === 'component-object-set' && a.parent));
@@ -1595,8 +1774,9 @@ export function emitComponent(
       case 'id-out':
         return expr.fn === 'randomUuid' && expr.viaState !== undefined;
       // EXP-011 §59. The row until the first Do; the local never. Must agree with plan.ts maybeUndefinedExpr.
+      // EXP-011 §76. An extractor's rows are seeded — never undefined in either form.
       case 'crypto-out':
-        return expr.viaState !== undefined;
+        return expr.node !== 'pattern' && expr.viaState !== undefined;
       case 'screen-out':
         return false;
       // EXP-011 §60. The record boots empty; a parent read is undefined at the root. Must agree with plan.ts maybeUndefinedExpr.
@@ -1614,7 +1794,8 @@ export function emitComponent(
       // The row is undefined until the first failure; the chain-local is assigned on the line
       // above the read and never is. Must agree with plan.ts maybeUndefinedExpr (EXP-011 §24).
       case 'outcome-error':
-        return expr.viaState !== undefined;
+        // EXP-011 §76. A seeded row (the extractor's) is never undefined in either form. Must agree with plan.ts.
+        return expr.viaState !== undefined && expr.seeded !== true;
       case 'state-get':
         return expr.maybeUndefined === true;
       // FLD-015. A hoisted Static Data constant is a frozen module-scope literal — present from
@@ -1721,6 +1902,12 @@ export function emitComponent(
    * got subtly wrong. Where the row shape is unknown the reader is the plain member access, and
    * every field is fine because the row is already `any`.
    */
+  /**
+   * P109-S15-ARRAYFILTERPATHEXPORT. Whether an Array Filter test printed a dotted key through `rowField`, the
+   * transcription of `filtercollectionnode.ts` `fieldOf` appended to the file. Set where the read prints, which is
+   * before the file is assembled, so no walker has to predict it.
+   */
+  let usesRowField = false;
   const rowFieldReader = (source: ValueExpr, what: string): ((field: string) => string) => {
     const known = listExprFields(source);
     return (field: string) => {
@@ -1802,17 +1989,24 @@ export function emitComponent(
     return action.fn === 'randomUuid' ? `${action.local}.uuid` : action.local;
   };
   /** EXP-011 §59. The same, one family over: the local is the whole result, and the value is `.digest` / `.value`. */
-  const cryptoLocalReadOf = (nodeId: string, node: 'hash' | 'random-bytes'): string => {
+  const cryptoLocalReadOf = (nodeId: string, node: CryptoNodeKind, field?: string): string => {
     const action = deepActions(allActions).find((a) => a.kind === 'crypto-call' && a.nodeId === nodeId);
     const local = action !== undefined && action.kind === 'crypto-call' ? action.local : 'cryptoResult';
+    // EXP-011 §76. The extractor's local carries every value port under the port's own name.
+    if (node === 'pattern') return `${local}.${field ?? 'match'}`;
     return `${local}.${node === 'hash' ? 'digest' : 'value'}`;
   };
+  /**
+   * P18-S116-FIELDMOUNT. While a field's mount effect prints its change chain, the field's reads are the value it announces
+   * (a literal, or the local its wired Value lands in); everywhere else they are the DOM event's.
+   */
+  let announcedCode: { inputId: string; code: string } | undefined;
   const exprCode = (expr: ValueExpr, mode: 'handler' | 'render'): string => {
     switch (expr.kind) {
       case 'prop':
         return propName(expr.name);
       case 'input-text':
-        return 'event.target.value';
+        return announcedCode?.inputId === expr.inputId ? announcedCode.code : 'event.target.value';
       /**
        * A url parameter (EXP-011 Tier 2.5) — the query first, the path segment behind it.
        *
@@ -1927,7 +2121,7 @@ export function emitComponent(
         return expr.viaState ?? idLocalReadOf(expr.nodeId);
       // EXP-011 §59. The row anywhere, the Done arm's own binding inside it; the viewport's field off its handle.
       case 'crypto-out':
-        return expr.viaState ?? cryptoLocalReadOf(expr.nodeId, expr.node);
+        return expr.viaState ?? cryptoLocalReadOf(expr.nodeId, expr.node, expr.field);
       case 'screen-out':
       // EXP-011 §63. A live getter off the handle, in both modes.
       case 'drag-out':
@@ -1982,6 +2176,7 @@ export function emitComponent(
           const entries = expr.cases.map((c) => `${tsLiteral(c.from)}: ${c.to === undefined ? 'undefined' : tsLiteral(c.to)}`);
           printed.splice(1, 0, `{ ${entries.join(', ')} }`);
         }
+        if (expr.kept !== undefined) printed.unshift(expr.kept);
         return `${expr.fn}(${printed.join(', ')})`;
       }
       // One `const session = useSession()` per component, read the same way in both modes — the
@@ -2084,7 +2279,14 @@ export function emitComponent(
         let code = listSourceCode(expr.source, mode);
         const readTest = rowFieldReader(expr.source, 'Array Filter');
         for (const test of expr.tests) {
-          code = `${code}.filter((${LIST_ROW}) => ${readTest(test.field)} ${FILTER_OPERATORS[test.op]} ${tsLiteral(test.value)})`;
+          /**
+           * P109-S15-ARRAYFILTERPATHEXPORT. The runtime reads a dotted key as a path (`owner.id` is the id inside
+           * `owner`) unless the row has a field with that exact name — per row, so it prints as the runtime's own
+           * rule rather than as a member read. The sort keeps flat reads: `sorter` reads `a[key]`.
+           */
+          const read = test.field.includes('.') ? `rowField(${LIST_ROW}, ${JSON.stringify(test.field)})` : readTest(test.field);
+          if (test.field.includes('.')) usesRowField = true;
+          code = `${code}.filter((${LIST_ROW}) => ${read} ${FILTER_OPERATORS[test.op]} ${tsLiteral(test.value)})`;
         }
         if (expr.sort.length > 0) {
           const comparisons = expr.sort.map((s) => {
@@ -2163,7 +2365,17 @@ export function emitComponent(
         const def = jsFunByNode[expr.nodeId]!;
         // A materialized read (§4f) goes through the state var in render — the last run's
         // value, undefined before the first invocation, exactly the runtime getter's answer.
-        if (expr.viaState !== undefined && mode === 'render') {
+        // "Hold the id": a read from outside the node's own Run chain carries `viaState` (the chain's reads resolve before the
+        // run materializes). In a handler it reads the kept node's values as its wires delivered them: current within the
+        // click that ran it, where the state would still hold the value from before (the chain-local snapshot rule).
+        if (expr.viaState !== undefined && mode === 'handler' && def.kind === 'function' && pulsedRunIds.has(expr.nodeId)) {
+          const delivered = memberExpr(`${pulseNamesOf(def).node}.delivered`, expr.output);
+          if (expr.fold === 'string') return `String(${delivered} ?? '')`;
+          if (expr.fold === 'number') return `(typeof ${delivered} === 'number' ? ${delivered} : Number(${delivered}) || 0)`;
+          if (expr.fold === 'boolean') return `!!${delivered}`;
+          return delivered;
+        }
+        if (expr.viaState !== undefined) {
           // Function and Visual Function both materialize an Outputs record keyed by port name;
           // Expression materializes its single value raw.
           const base =
@@ -2177,8 +2389,16 @@ export function emitComponent(
           if (expr.fold === 'boolean') return `!!${base}`;
           return base;
         }
+        /**
+         * EXP-011 §86. Inside a pulse's arm the Function's outputs are what that pulse's targets read (C7 lockstep). Elsewhere
+         * in a pulsed run's chain (its Done) they are the node's values after the run, kept across runs: a re-run of the body
+         * would start from an empty record. A handler reads an invoked Function only inside its run's chain (`exprValidIn`),
+         * where the run's `const` is in scope.
+         */
+        const pulse = mode === 'handler' ? activePulses.get(expr.nodeId) : undefined;
+        const ran = mode === 'handler' && pulse === undefined && pulsedRunIds.has(expr.nodeId) ? `${pulseNamesOf(def).run}.outputs` : undefined;
         const local = mode === 'render' ? jsLocals.get(expr.nodeId) : undefined;
-        const callee = local ?? `${def.fnName}(${jsArgsObject(def, mode)})`;
+        const callee = pulse !== undefined ? `${pulse}.values` : ran ?? local ?? `${def.fnName}(${jsArgsObject(def, mode)})`;
         const base = def.kind === 'function' ? memberExpr(callee, expr.output) : callee;
         if (expr.fold === 'string') return `String(${base} ?? '')`;
         if (expr.fold === 'number') return `(typeof ${base} === 'number' ? ${base} : Number(${base}) || 0)`;
@@ -2298,8 +2518,10 @@ export function emitComponent(
           e.args.forEach(walk);
           break;
         case 'jsfun-out': {
+          // "Hold the id": the field read is the dependency, never the row, which is a fresh copy every run
+          // (P18-S121-SAMEOUTPUTS): the runtime sends nothing when a run writes the value it already holds.
           if (e.viaState !== undefined) {
-            add(e.viaState);
+            add(exprCode({ ...e, fold: undefined }, 'render'));
             break;
           }
           const local = jsLocals.get(e.nodeId);
@@ -2345,10 +2567,17 @@ export function emitComponent(
           // at their sinks, so the run itself needs no statement — unless it materializes its
           // output record (CONTROLLED-STATE §4f), which is one setter statement before the chain.
           a.kind === 'jsfun-run'
-          ? a.materialize !== undefined
+          ? a.materialize !== undefined || runIsPulsed(a)
             ? [{ ...a, then: [] }, ...expandActions(a.then)]
             : expandActions(a.then)
-          : [a]
+          : // P18-S116-QUERYFETCH. A Fetch into a query the export does not keep (nothing it renders reads the rows) asks
+            // for nothing anyone sees; the query's own row in the report says why it is not kept.
+            a.kind === 'query-fetch' && !plan.queries.some((q) => q.nodeId === a.nodeId)
+            ? []
+            : // EXP-011 §87. A literal Condition's one side is following statements.
+              a.kind === 'branch' && a.flat === true
+              ? expandActions(a.whenTrue)
+              : [a]
     );
   /** The `prop-*` record a record verb sends — the runtime's `_internal.inputValues`, by value. */
   /**
@@ -2440,7 +2669,8 @@ export function emitComponent(
         case 'api-call':
           return (
             a.args.some((arg) => (arg.kind === 'expr' ? reads(arg.expr) : arg.props.some((p) => reads(p.expr)))) ||
-            a.then.some(inAction)
+            a.then.some(inAction) ||
+            a.failThen.some(inAction)
           );
         case 'http-call':
         // EXP-011 §41. The same, one node over.
@@ -2513,12 +2743,17 @@ export function emitComponent(
           return reads(a.items);
         case 'runtasks-abort':
           return false;
+        // P18-S116-QUERYFETCH. The wired filter values are read at the pulse.
+        case 'query-fetch':
+          return a.values.some((v) => reads(v.expr));
         // EXP-011 §58. The data is read at the pulse.
         case 'stream-action':
           return a.value !== undefined && reads(a.value);
         case 'popup-show':
         case 'popup-close':
         case 'jsfun-run':
+        case 'jsfun-pulses':
+        case 'jsfun-pulse':
         case 'date-now-read':
           return a.then.some(inAction);
         // EXP-011 §37. Both arms, on the hazard the two notes above name: the Failure arm can
@@ -2527,7 +2762,13 @@ export function emitComponent(
           return a.then.some(inAction) || a.failThen.some(inAction);
         // EXP-011 §59. The inputs, then both arms.
         case 'crypto-call':
-          return a.inputs.some((i) => i.expr !== undefined && reads(i.expr)) || a.then.some(inAction) || a.failThen.some(inAction);
+          return (
+            a.inputs.some((i) => i.expr !== undefined && reads(i.expr)) ||
+            a.then.some(inAction) ||
+            a.failThen.some(inAction) ||
+            a.foundThen.some(inAction) ||
+            a.notFoundThen.some(inAction)
+          );
         // EXP-011 §61. The parameters, then every callback; the results, then both arms; the one chain.
         case 'stack-push':
           return (
@@ -2637,6 +2878,10 @@ export function emitComponent(
     return [`if (${m.stateName} === null) {`, ...guard, `${at}} else {`, ...elseLines.map((l) => `${inner}${l}`), `${at}}`].join('\n');
   };
   const actionCode = (action: HandlerAction, indent = 0): string => {
+    // EXP-011 §90. A call a later action of its list follows runs on its own: started here, not waited for.
+    if ('detached' in action && action.detached === true) {
+      return `void (async () => {\n${pad(indent + 2)}${actionCode({ ...action, detached: undefined }, indent + 2)}\n${pad(indent)}})()`;
+    }
     switch (action.kind) {
       /**
        * The url the runtime's `getRelativeURL` would build, built here instead.
@@ -2652,13 +2897,13 @@ export function emitComponent(
        * `Navigate To Path` (EXP-011 §15) — `navigate-to-path.ts`'s own url builder, line for
        * line, and **not** the `navigate` case below with different inputs.
        *
-       * 🔴 **No `encodeURIComponent`, and that is the faithful answer rather than a missing
-       * one.** The Router encodes both halves (`router.tsx:620, 630`) and this node encodes
-       * neither — `formattedPath.replace('{id}', String(v))` and `q + '=' + v`. Encoding here
-       * would make the exported app disagree with the app it came from on every value carrying
-       * a url-special character, in the direction §11.3 calls being *better* than the app: the
-       * export would route where the interpreter does not. `tests/navigate-to-path.test.ts`
-       * pins the runtime file's side of this so the two cannot drift apart silently.
+       * 🔴 **The query half is encoded and the path half is not, which is the runtime's own split.**
+       * P107-D21 (`9404f00c4`) made the node encode each query name and value
+       * (`encodeURIComponent(q) + '=' + encodeURIComponent(String(v))`) and leave a null out; P107-D20
+       * inserts a path value as written. Until P18-S102-NAVENCODE this case still transcribed the
+       * pre-D21 node, so a value with `&` or `#` split into two parameters here and arrived whole
+       * there. `tests/navigate-to-path.test.ts` §15.6 pins the runtime file's side of both halves so
+       * the two cannot drift apart silently — which is how this one was caught.
        *
        * `?? ''` on a maybe-undefined path value is likewise the runtime's own
        * `v !== undefined ? String(v) : ''`, not this exporter's invention.
@@ -2698,7 +2943,8 @@ export function emitComponent(
         if (omittable.length === 0) {
           /**
            * With every value present the query is a static suffix, exactly as the runtime's
-           * `query.length >= 1 ? '?' + query.join('&') : ''` resolves for it.
+           * `query.length >= 1 ? '?' + query.join('&') : ''` resolves for it. A literal is encoded
+           * here, once, by the runtime's own call; an expression is encoded where it is read.
            */
           const suffix =
             action.query.length === 0
@@ -2707,17 +2953,26 @@ export function emitComponent(
                 action.query
                   .map(
                     (q) =>
-                      `${lit(q.name)}=${q.expr.kind === 'literal' ? lit(q.expr.value) : `\${${exprCode(q.expr, 'handler')}}`}`
+                      `${lit(encodeURIComponent(q.name))}=${
+                        q.expr.kind === 'literal'
+                          ? lit(encodeURIComponent(String(q.expr.value)))
+                          : `\${encodeURIComponent(String(${exprCode(q.expr, 'handler')}))}`
+                      }`
                   )
                   .join('&');
           const url = `${filled}${suffix}`;
           urlCode = isTemplate ? `\`${url}\`` : `'${url}'`;
         } else {
           /**
-           * ⚠️ **An unset query parameter is omitted from the url, never sent as `name=`** — the
-           * runtime's `if (internal.query[q] !== undefined)`. A `URLSearchParams` here would send
-           * the key with an empty value *and* percent-encode to a different table, so it would be
-           * wrong twice.
+           * ⚠️ **An unset or null query parameter is omitted from the url, never sent as `name=`
+           * or `name=null`** — the runtime's `if (v !== undefined && v !== null)` (P107-D21). A
+           * `URLSearchParams` here would send the key with an empty value *and* percent-encode to a
+           * different table (a space becomes `+`), so it would be wrong twice. The key is a literal,
+           * so it is encoded here, at emit time; the value is encoded where it is read.
+           *
+           * ⚠️ Only the `omittable` values can be undefined, and so only they get the null test in
+           * a form that reads it: the never-undefined kinds are seeded rows and typed answers.
+           * A literal `null` cannot be authored on a query port.
            *
            * 🔴 **The pairs go through one `for` rather than one `if` each, so every expression is
            * read exactly once.** Two reads of `formatShout({ name })` — the guard and the push —
@@ -2729,12 +2984,15 @@ export function emitComponent(
           // The key sits in expression position, never inside the url string, so it is quoted
           // independently of `isTemplate`.
           const pairs = action.query
-            .map((q) => `['${String(q.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', ${exprCode(q.expr, 'handler')}]`)
+            .map(
+              (q) =>
+                `['${encodeURIComponent(q.name).replace(/\\/g, '\\\\').replace(/'/g, "\\'")}', ${exprCode(q.expr, 'handler')}]`
+            )
             .join(', ');
           pre.push(
             `const ${local}: string[] = [];`,
             `for (const [key, value] of [${pairs}] as Array<[string, unknown]>) {`,
-            `  if (value !== undefined) ${local}.push(\`\${key}=\${value}\`);`,
+            `  if (value !== undefined && value !== null) ${local}.push(\`\${key}=\${encodeURIComponent(String(value))}\`);`,
             '}'
           );
           urlCode = `\`${filled}\${${local}.length > 0 ? \`?\${${local}.join('&')}\` : ''}\``;
@@ -2904,9 +3162,9 @@ export function emitComponent(
         const url = query === '' ? filled : `${filled}?${query}`;
         // A url with nothing substituted into it is the string it always was — a plain literal
         // reads better than a template with no holes, and the two are the same value.
-        return action.pathParams.length === 0 && action.query.length === 0
-          ? `navigate('${url}')`
-          : `navigate(\`${url}\`)`;
+        const literal = action.pathParams.length === 0 && action.query.length === 0 ? `'${url}'` : `\`${url}\``;
+        // P18-S110-NEWTAB. The runtime's own call, bare: no features string, and nothing reads what it returns.
+        return action.newTab ? `window.open(${literal}, '_blank')` : `navigate(${literal})`;
       }
       // The optional call is the runtime's hasOutput/unwired case: a parent that passes
       // nothing gets nothing (COMPONENT-OUTPUTS-TARGET §3).
@@ -3081,16 +3339,69 @@ export function emitComponent(
         return `${action.local}.run(${exprCode(action.items, 'handler')})`;
       case 'runtasks-abort':
         return `${action.local}.abort()`;
+      /**
+       * P18-S116-QUERYFETCH. A Query Records' Fetch: the query's own settings, a wired filter's `where` from the values as
+       * the handler reads them at the pulse (a store fresh, `.get()`). Not awaited: the runtime schedules its fetch.
+       */
+      case 'query-fetch': {
+        const query = plan.queries.find((q) => q.nodeId === action.nodeId)!;
+        const wired = query.params?.wired;
+        if (query.params === undefined) return `void ${query.fetchName}().then(${query.setterName})`;
+        if (wired === undefined) return `void ${query.fetchName}(${queryParamsLiteral(query.params)}).then(${query.setterName})`;
+        const codes = action.values.map((v) => exprCode(v.expr, 'handler'));
+        const codeOf = (name: string) => codes[action.values.findIndex((v) => v.name === name)];
+        const tested = codes.map((code) => (SIMPLE_REF.test(code) ? code : `(${code})`));
+        const valueCode = (name: string, date: boolean) => (query.wiredClient ? `filterValue(${codeOf(name)}${date ? ', true' : ''})` : codeOf(name));
+        return `void ${query.fetchName}(${queryParamsLiteral(query.params, wiredWhereExpr(wired, tested, valueCode))}).then(${query.setterName})`;
+      }
       /** A streaming node's action (EXP-011 §58) — one call on the handle, the data read at the pulse where the verb takes it. */
       case 'stream-action':
         return `${action.local}.${action.verb}(${action.value !== undefined ? exprCode(action.value, 'handler') : ''})`;
       case 'jsfun-run': {
+        const def = jsFunByNode[action.nodeId]!;
+        /**
+         * EXP-011 §86. A run whose signals have chains: the body against the recording `Outputs`, the node's last values
+         * kept across runs. `expandActions` printed this statement with an empty `then`, so the pulses are known from the
+         * plan, not the action.
+         */
+        // P18-S119-TICKEDRUN. A Run records what it read on the ticked inputs, so the effect does not run it again for them.
+        const record = action.ticked !== true && tickedRunIds.has(action.nodeId) ? `tickedArrival(${tickedRecordArgs(action.nodeId)});\n${pad(indent)}` : '';
+        if (pulsedRunIds.has(action.nodeId) && action.then.length === 0) {
+          const names = pulseNamesOf(def);
+          const run = `${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler')}, ${names.node})`;
+          if (action.materialize === undefined) return run;
+          // P18-S121-SAMEOUTPUTS. A copy: the node's own record is the same object every run, and React keeps a state it is
+          // handed again, so the render would show the first run's values until something else re-rendered.
+          return `${run};\n${pad(indent)}${stateSetterOf(action.materialize)}({ ...${names.run}.outputs })`;
+        }
         if (action.materialize !== undefined) {
-          const def = jsFunByNode[action.nodeId]!;
-          return `${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler')}))`;
+          return `${record}${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler')}))`;
         }
         return expandActions(action.then).map(actionCode).join('; ');
       }
+      /**
+       * EXP-011 §86. One loop over the pulses the run sent, in the order it sent them; each arm is one signal's chain,
+       * and inside it this Function's outputs read as that pulse's targets read them (`exprCode`'s `jsfun-out`).
+       */
+      case 'jsfun-pulses': {
+        const names = pulseNamesOf(jsFunByNode[action.nodeId]!);
+        const arms = action.then.filter((a): a is Extract<HandlerAction, { kind: 'jsfun-pulse' }> => a.kind === 'jsfun-pulse');
+        activePulses.set(action.nodeId, names.pulse);
+        try {
+          const lines = [`for (const ${names.pulse} of ${names.run}.pulses) {`];
+          arms.forEach((arm, i) => {
+            const head = `${i === 0 ? '' : '} else '}if (${names.pulse}.signal === ${tsLiteral(arm.signal)}) {`;
+            lines.push(`${pad(indent + 2)}${head}`, ...blockBody(expandActions(arm.then), indent + 4));
+          });
+          lines.push(`${pad(indent + 2)}}`, `${pad(indent)}}`);
+          return lines.join('\n');
+        } finally {
+          activePulses.delete(action.nodeId);
+        }
+      }
+      // Printed by its loop above; never on its own.
+      case 'jsfun-pulse':
+        return expandActions(action.then).map((a) => actionCode(a, indent)).join('; ');
       // The functional updates are §3.3's closure-staleness-immune forms.
       case 'state-set': {
         const setter = stateSetterOf(action.name);
@@ -3112,7 +3423,15 @@ export function emitComponent(
         // transcription; `?? ''` keeps an unwritten variable on the `Missing Record Id` road.
         if (action.coerceId === 'string') args[0] = `String(${args[0]} ?? '')`;
         const inner = pad(indent + 2);
+        // P18-S113-IDREADTWICE. An Id read through a call (`pageId.get()`) is bound once, as the relation guards below
+        // bind theirs: TypeScript narrows a local, never a second call (TS2345), and the runtime reads the stored value
+        // once. A plain identifier narrows already, and a coerced read is a `string`, so both are left as they were.
+        const boundId =
+          action.guardId && action.coerceId !== 'string' && args[0].endsWith(')') ? `${action.errorState.replace(/Error$/, '')}RecordId` : undefined;
+        const idRead = args[0];
+        if (boundId !== undefined) args[0] = boundId;
         const body = [
+          ...(boundId !== undefined ? [`${inner}const ${boundId} = ${idRead};`] : []),
           // The runtime's "Missing Record Id" (RECORD-VERBS-TARGET §1), thrown rather than
           // branched so it lands in the catch below — which is already the graph's own error
           // path — skips the call and the done chain, and narrows the id for the call itself.
@@ -3148,6 +3467,8 @@ export function emitComponent(
           `${inner}${stateSetterOf(action.errorState)}(${action.errorState}Message);`,
           // EXP-011 §54. The Error row first, then the raise, then nothing — the order the setError funnels keep.
           `${inner}${raiseLine(action.nodeId, errorCodeOf(action), `${action.errorState}Message`)}`,
+          // EXP-011 §90. Then the Failure pulse's chain: `reportOutcome` raises before it sends the signal.
+          ...expandActions(action.failThen).map((a) => `${inner}${actionCode(a, indent + 2)};`),
           `${pad(indent)}}`
         ].join('\n');
       }
@@ -3205,9 +3526,10 @@ export function emitComponent(
       /**
        * A `Record`'s Fetch (EXP-011 §43). One argument, the Id; the runtime's own `Missing Id.`
        * thrown inside the try where the Id is empty — `scheduleFetch` reports it as Failure before
-       * any request, so the catch is exactly the arm it belongs in. The row is replaced, not
-       * merged: `setModelID` binds a fresh model per Id, so a column the answer lacks reads
-       * undefined, as the node's output does for a record that never carried it.
+       * any request, so the catch is exactly the arm it belongs in. The row is replaced by what
+       * the read answers. Where the app has a live Record (P18-S111-RECORDLIVE) that answer is the
+       * client's one copy of the record, the read merged into it field by field as `_fromJSON`
+       * merges into `Model.get(id)`; otherwise it is the wire's answer alone.
        */
       case 'record-fetch': {
         const names = recordNamesOf(action.nodeId);
@@ -3217,22 +3539,10 @@ export function emitComponent(
         const idLocal = names.idLocal;
         // A literal Id was refused empty by the planner, and a guard on a string literal is a
         // TS2367 (no overlap) — so the guard is emitted only where the Id is read from something.
-        // The effect form (§43.2) returns silently where the handler form throws: the runtime binds
-        // nothing on an empty Id and reads nothing, and reports `Missing Id.` only to a Fetch.
         const empty = `${idLocal} === undefined || ${idLocal} === null || ${idLocal} === ''`;
-        const guard =
-          action.id.kind === 'literal'
-            ? []
-            : action.viaEffect
-              ? [`${inner}if (${empty}) return;`]
-              : [`${inner}if (${empty}) throw new Error('Missing Id.');`];
-        // The effect form clears the row before it reads: a new Id rebinds the node to a fresh
-        // model, whose outputs read undefined until the read answers (dbmodelnode2.ts setModelID).
-        const clear =
-          action.viaEffect && action.materialize !== undefined ? [`${inner}${stateSetterOf(action.materialize)}(undefined);`] : [];
+        const guard = action.id.kind === 'literal' ? [] : [`${inner}if (${empty}) throw new Error('Missing Id.');`];
         return [
           'try {',
-          ...clear,
           `${inner}const ${idLocal} = ${idCode};`,
           ...guard,
           `${inner}const ${names.answerLocal} = await ${action.fnName}(${idLocal});`,
@@ -3825,6 +4135,36 @@ export function emitComponent(
         // Trailing `undefined`s are the lib's own defaults — dropped so `tryRandomBytes(16, 'hex')` reads as written.
         while (args.length > 0 && args[args.length - 1] === 'undefined') args.pop();
         const call = `${action.async ? 'await ' : ''}${action.fn}(${args.join(', ')})`;
+        /**
+         * EXP-011 §76. The extractor is `doExtract`'s order, not `_run`'s: every value row and the Error row
+         * are written from the result BEFORE the arms, on every run (a failed pattern clears the values —
+         * `Hash` leaves its Digest); then `if (ok)` — the `Found` / `Not Found` chain first (the runtime sends
+         * that pulse before `reportOutcome('done')`), then the Done chain — `else` the raise and the Failure
+         * chain. The result-pulse `if` prints only where a chain hangs off one of the two.
+         */
+        if (action.node === 'pattern') {
+          const head = `const ${action.local} = ${call};`;
+          const writes: string[] = [];
+          for (const m of action.materializeByPort ?? []) writes.push(`${at}${stateSetterOf(m.state)}(${action.local}.${m.port});`);
+          if (action.errorMaterialize !== undefined) writes.push(`${at}${stateSetterOf(action.errorMaterialize)}(${action.local}.error);`);
+          const found = blockBody(expandActions(action.foundThen), indent + 4);
+          const notFound = blockBody(expandActions(action.notFoundThen), indent + 4);
+          const okLines: string[] = [];
+          if (found.length > 0) {
+            okLines.push(`${inner}if (${action.local}.found) {`, ...found);
+            if (notFound.length > 0) okLines.push(`${inner}} else {`, ...notFound);
+            okLines.push(`${inner}}`);
+          } else if (notFound.length > 0) {
+            okLines.push(`${inner}if (!${action.local}.found) {`, ...notFound, `${inner}}`);
+          }
+          okLines.push(...blockBody(expandActions(action.then), indent + 2));
+          const failLines = [
+            `${inner}${raiseLine(action.nodeId, errorCodeOf(action), `${action.local}.error`)}`,
+            ...blockBody(expandActions(action.failThen), indent + 2)
+          ];
+          if (okLines.length === 0) return [head, ...writes, `${at}if (!${action.local}.ok) {`, ...failLines, `${at}}`].join('\n');
+          return [head, ...writes, `${at}if (${action.local}.ok) {`, ...okLines, `${at}} else {`, ...failLines, `${at}}`].join('\n');
+        }
         const valueField = action.node === 'hash' ? 'digest' : 'value';
         const doneStatements: string[] = [];
         if (action.materialize !== undefined) doneStatements.push(`${stateSetterOf(action.materialize)}(${action.local}.${valueField})`);
@@ -3888,6 +4228,11 @@ export function emitComponent(
   function actionIsStatement(a: HandlerAction): boolean {
     return (
     a.kind === 'branch' ||
+    // EXP-011 §86. A run with pulses declares its `const`, and its loop is a `for`.
+    (a.kind === 'jsfun-run' && pulsedRunIds.has(a.nodeId)) ||
+    // P18-S119-TICKEDRUN. A Run that records what it read is two statements: the record, then the run. The sixth instance.
+    (a.kind === 'jsfun-run' && a.ticked !== true && tickedRunIds.has(a.nodeId)) ||
+    a.kind === 'jsfun-pulses' ||
     (a.kind === 'popup-close' && a.then.length > 0) ||
     (a.kind === 'collection-clear' && (a.then.length > 0 || a.unchangedThen.length > 0)) ||
     // EXP-011 §55. The mint is statements; a guarded mutator is an `if`/`else`.
@@ -3950,7 +4295,11 @@ export function emitComponent(
    * other action keeps the semicolon the existing goldens pin.
    */
   function actionTakesNoTerminator(a: HandlerAction): boolean {
+    // EXP-011 §90. `void (async () => { … })()` ends in `)` and takes its `;`.
+    if ('detached' in a && a.detached === true) return false;
     return (
+      // EXP-011 §86. The pulse loop ends in `}`.
+      a.kind === 'jsfun-pulses' ||
       a.kind === 'api-call' ||
       a.kind === 'http-call' ||
       // EXP-011 §41. A try/catch, like the two above.
@@ -4004,7 +4353,7 @@ export function emitComponent(
     return expanded.map((a) =>
       actionTakesNoTerminator(a)
         ? `${pad(indent)}${actionCode(a, indent)}`
-        : `${pad(indent)}${actionCode(a, a.kind === 'date-now-read' || a.kind === 'id-new' || a.kind === 'crypto-call' || a.kind === 'branch' || a.kind === 'array-new' || a.kind === 'component-object-set' || a.kind === 'stack-push' || a.kind === 'stack-reset' ? indent : 0)};`
+        : `${pad(indent)}${actionCode(a, ('detached' in a && a.detached === true) || a.kind === 'date-now-read' || a.kind === 'id-new' || a.kind === 'crypto-call' || a.kind === 'branch' || a.kind === 'array-new' || a.kind === 'component-object-set' || a.kind === 'stack-push' || a.kind === 'stack-reset' || a.kind === 'jsfun-run' ? indent : 0)};`
     );
   }
   /**
@@ -4070,7 +4419,8 @@ export function emitComponent(
     externalImports.push(`import { ${coreHooks.sort().join(', ')} } from '@nodegx/core/react';`);
   }
   const reactImports: string[] = [];
-  if (plan.queries.length > 0) reactImports.push('useEffect', 'useState');
+  // P18-S116-QUERYFETCH. A query that only its Fetch runs holds its rows in state and asks from a handler: no effect.
+  if (plan.queries.length > 0) reactImports.push(...(plan.queries.some((q) => queryHasEffect(q)) ? ['useEffect'] : []), 'useState');
   if (plan.popups.length > 0 && !reactImports.includes('useState')) reactImports.push('useState');
   if (referencedStateVars.length > 0 && !reactImports.includes('useState')) reactImports.push('useState');
   if (
@@ -4079,8 +4429,12 @@ export function emitComponent(
       plan.branchEffects.length > 0 ||
       // EXP-011 §39. A Value Changed is an effect; a Delay owes the unmount cleanup effect.
       plan.valueChangedEffects.length > 0 ||
-      // EXP-011 §43. A Record with Fetch unwired is an effect keyed on its Id.
-      plan.recordEffects.length > 0 ||
+      // P18-S119-TICKEDRUN. A ticked input's run is an effect.
+      plan.tickedRuns.length > 0 ||
+      // EXP-011 §43, P18-S113-IDBINDREAD. A Record with Fetch unwired is a bind keyed on its Id.
+      recordBinds.length > 0 ||
+      // P18-S111-RECORDLIVE. A live Record's row subscribes to the client's copy of its record.
+      liveRecordRows.length > 0 ||
       // EXP-011 §67. A Variable's authored Value is a mount effect.
       plan.variableSeeds.length > 0 ||
       // EXP-011 §71. An Object's own authored property values are a mount effect.
@@ -4098,10 +4452,12 @@ export function emitComponent(
   }
   if (radioNameLocals.size > 0) reactImports.push('useId');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
-  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0) reactImports.push('useRef');
+  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0) reactImports.push('useRef');
   // EXP-011 §53. A task template's mount effect and its once-guard (StrictMode mounts twice; startTask pulses once).
   // EXP-011 §57. A Repeater Item's Added effect takes the same pair, for the same reason.
-  if (plan.task !== undefined || plan.repeaterItems.length > 0) {
+  // P18-S116-FIELDMOUNT. A field's mount announcement takes the same pair: its chain may reach a parent or a backend.
+  // P18-S121-DIDMOUNT. A Did Mount chain takes the pair too: its runtime pulse is once per mount.
+  if (plan.task !== undefined || plan.repeaterItems.length > 0 || plan.fieldMounts.length > 0 || mountChains.length > 0) {
     if (!reactImports.includes('useEffect')) reactImports.push('useEffect');
     if (!reactImports.includes('useRef')) reactImports.push('useRef');
   }
@@ -4136,7 +4492,7 @@ export function emitComponent(
   for (const read of plan.recordReads) stubModule(read.moduleBase).reads.push(read);
   for (const [moduleBase, { queries, mutations, reads }] of stubModules) {
     const specifier = `${relRoot}/api/${moduleBase}`;
-    const fetchNames = [...new Set([...queries.map((q) => q.fetchName), ...reads.map((r) => r.fnName)])].sort();
+    const fetchNames = [...new Set([...queries.map((q) => q.fetchName), ...reads.filter((r) => !r.binds).map((r) => r.fnName)])].sort();
     const fnNames = [...new Set(mutations.map((m) => m.fnName))].sort();
     const typeNames = [
       ...new Set([
@@ -4151,6 +4507,13 @@ export function emitComponent(
       `import { ${[...fetchNames, ...fnNames, ...typeNames.map((t) => `type ${t}`)].join(', ')} } from '${specifier}';`
     );
   }
+  // P18-S111-RECORDLIVE. A live Record's row follows the client's one copy of its record.
+  // P18-S115-QUERYPARAMS. A wired filter value goes on the wire through the client's `filterValue`.
+  const clientNames = [
+    ...(plan.queries.some((q) => q.wiredClient === true && q.params?.wired !== undefined) ? ['filterValue'] : []),
+    ...(liveRecordRows.length > 0 || recordBinds.length > 0 ? ['subscribeRecord'] : [])
+  ];
+  if (clientNames.length > 0) internalImports.set(`${relRoot}/api/client`, `import { ${clientNames.join(', ')} } from '${relRoot}/api/client';`);
   // The session module is not keyed on anything — a project has one session — so every
   // user-family node in this component imports from the same specifier (USER-FAMILY-TARGET §4d).
   if (plan.sessionCalls.length > 0) {
@@ -4279,10 +4642,13 @@ export function emitComponent(
   }
   // EXP-011 §58 + §64 + §65 + §66. The streaming hooks, one import per hook the plan kept, grouped by the module each lives in.
   // GAM-013. Repeat's hook is the table's seventh, in its own module.
-  for (const lib of ['streaming', 'sse', 'websocket', 'realtime', 'repeat'] as const) {
+  // EXP-011 §77. The dispatcher's and the handler's hooks, the eighth and ninth, share one module.
+  // EXP-011 §78. The history family's three, the tenth to twelfth, share another.
+  // EXP-011 §79. Sign In With's hook, the fourteenth, in its own.
+  for (const lib of ['streaming', 'sse', 'websocket', 'realtime', 'repeat', 'actions', 'history', 'signIn'] as const) {
     const hooks = [...new Set(plan.streams.filter((s) => STREAM_NODES[s.type].lib === lib).map((s) => STREAM_NODES[s.type].hook))].sort();
     if (hooks.length === 0) continue;
-    const libPath = lib === 'streaming' ? STREAMING_LIB_PATH : lib === 'sse' ? SSE_LIB_PATH : lib === 'websocket' ? WEBSOCKET_LIB_PATH : lib === 'repeat' ? REPEAT_LIB_PATH : REALTIME_LIB_PATH;
+    const libPath = lib === 'streaming' ? STREAMING_LIB_PATH : lib === 'sse' ? SSE_LIB_PATH : lib === 'websocket' ? WEBSOCKET_LIB_PATH : lib === 'repeat' ? REPEAT_LIB_PATH : lib === 'actions' ? ACTIONS_LIB_PATH : lib === 'history' ? HISTORY_LIB_PATH : lib === 'signIn' ? SIGN_IN_LIB_PATH : REALTIME_LIB_PATH;
     const specifier = `${relRoot}/${libPath.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${hooks.join(', ')} } from '${specifier}';`);
   }
@@ -4314,9 +4680,16 @@ export function emitComponent(
     // EXP-011 §59. `src/lib/crypto.ts`, earned from the calls that print.
     if (a.kind === 'crypto-call') usedCryptoHelpers.add(a.fn);
   }
-  if (usedCryptoHelpers.size > 0) {
+  // EXP-011 §76. One kind, two modules: the extractor's verb imports from `src/lib/pattern.ts`, the two verbs from `crypto.ts`.
+  const usedPlainCryptoHelpers = [...usedCryptoHelpers].filter((fn) => !isPatternHelper(fn)).sort();
+  const usedPatternHelpers = [...usedCryptoHelpers].filter(isPatternHelper).sort();
+  if (usedPlainCryptoHelpers.length > 0) {
     const specifier = `${relRoot}/${CRYPTO_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
-    internalImports.set(specifier, `import { ${[...usedCryptoHelpers].sort().join(', ')} } from '${specifier}';`);
+    internalImports.set(specifier, `import { ${usedPlainCryptoHelpers.join(', ')} } from '${specifier}';`);
+  }
+  if (usedPatternHelpers.length > 0) {
+    const specifier = `${relRoot}/${PATTERN_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { ${usedPatternHelpers.join(', ')} } from '${specifier}';`);
   }
   // EXP-011 §61. `src/lib/pageStack.ts`, earned from the calls that print, the hook line, and the reserved prop's type.
   const usedPageStackNames = new Set<string>();
@@ -4364,6 +4737,13 @@ export function emitComponent(
   if (usedIdHelpers.size > 0) {
     const specifier = `${relRoot}/${ID_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${[...usedIdHelpers].sort().join(', ')} } from '${specifier}';`);
+  }
+  // EXP-011 §86. `src/lib/functionRun.ts`, earned by a run that prints its pulses.
+  // P18-S119-TICKEDRUN. `tickedArrival` too, earned by a run a ticked input starts.
+  if (pulsedRunIds.size > 0 || tickedRunIds.size > 0) {
+    const specifier = `${relRoot}/${FUNCTION_RUN_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    const helpers = [...(pulsedRunIds.size > 0 ? ['functionNode', 'runFunction'] : []), ...(tickedRunIds.size > 0 ? ['tickedArrival'] : [])];
+    internalImports.set(specifier, `import { ${helpers.join(', ')} } from '${specifier}';`);
   }
   if (usedVariableNames.size > 0) {
     const specifier = `${relRoot}/stores/variables`;
@@ -4822,6 +5202,13 @@ export function emitComponent(
     for (const [port, actions] of Object.entries(plan.handlers[node.id] ?? {})) {
       // A stateful control's Changed chain merges into its controlled onChange (§4c).
       if (port === 'onChange' && controlVarByNode.has(node.id)) continue;
+      // P18-S121-DIDMOUNT. A mount effect, printed with the others; or a refusal that says why.
+      if (port === 'didMount' && mountHandled.has(node.id)) continue;
+      if (port === 'didMount' && mountRefusals.has(node.id)) {
+        notes.push(`${plan.path}: signal ${node.id}.didMount dropped: ${mountRefusals.get(node.id)} — reported`);
+        defer(node.id, 'the "didMount" signal', mountRefusals.get(node.id)!);
+        continue;
+      }
       const eventAttr = roleEvents[port] ?? EVENT_ATTRS[port];
       if (!eventAttr) {
         notes.push(`${plan.path}: signal ${node.id}.${port} has no DOM event equivalent — dropped, reported`);
@@ -6030,9 +6417,12 @@ export function emitComponent(
       const outputsType = outputFields.length > 0 ? `{ ${outputFields.join('; ')} }` : 'Record<string, never>';
       const seeds = def.signals.map((s) => `${fieldKey(s)}: () => {}`);
       lines.push(`// From the Function node "${def.fnName}" — the body is preserved verbatim (EXP-003 §4).`);
-      lines.push(`function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}): ${outputsType} {`);
+      const seedRecord = `{${seeds.length > 0 ? ` ${seeds.join(', ')} ` : ''}}`;
+      // EXP-011 §86. A run whose signals have chains hands the body `runFunction`'s recording record instead.
+      const outputsParam = def.pulsed ? `, Outputs: ${outputsType} = ${seedRecord}` : '';
+      lines.push(`function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}${outputsParam}): ${outputsType} {`);
       if (hasInputs) lines.push(`  const Inputs = ${scopeCast(INPUTS_PARAM)};`);
-      lines.push(`  const Outputs: ${outputsType} = {${seeds.length > 0 ? ` ${seeds.join(', ')} ` : ''}};`);
+      if (!def.pulsed) lines.push(`  const Outputs: ${outputsType} = ${seedRecord};`);
       lines.push('  try {');
       /*
        * P109 ISL-005 AC7. The files the Function lists under Uses, from the one registry — never pasted
@@ -6150,12 +6540,45 @@ export function emitComponent(
       for (const alias of def.mathAliases) {
         lines.push(alias === 'pi' ? '  const pi = Math.PI;' : `  const ${alias} = Math.${alias};`);
       }
-      lines.push('  try {');
-      lines.push(`    return (${def.body});`);
-      lines.push('  } catch (e) {');
-      lines.push(`    console.error('Expression node ${def.fnName} threw:', e);`);
-      lines.push('    return 0;');
-      lines.push('  }');
+      /*
+       * P18-S110-EVALATLOAD, the load's evaluation (`JsFunctionPlan.loadGate`). Nothing has arrived
+       * while every wire-fed input reads `undefined`; unticked, the runtime publishes nothing then,
+       * and ticked it evaluates but keeps `null` for a throw or a NaN. With no wire-fed input at
+       * all, every evaluation is that one.
+       */
+      const gate = def.loadGate;
+      const unsetTest = gate !== undefined ? gate.unset.map((n) => `${n} === undefined`).join(' && ') : '';
+      if (gate?.atLoad === 'wait') {
+        lines.push(`  // Evaluate At Load is unticked: no answer until an input arrives.`);
+        lines.push(`  if (${unsetTest}) return null;`);
+      }
+      if (gate?.atLoad === 'evaluate' && gate.unset.length === 0) {
+        lines.push('  // Nothing feeds its inputs: the load evaluation over them, which keeps null for a throw or a NaN.');
+        lines.push('  try {');
+        lines.push(`    const __value = (${def.body});`);
+        lines.push('    return Number.isNaN(__value) ? null : __value;');
+        lines.push('  } catch {');
+        lines.push('    return null;');
+        lines.push('  }');
+      } else if (gate?.atLoad === 'evaluate') {
+        lines.push('  // Until an input arrives this is the load evaluation, which keeps null for a throw or a NaN.');
+        lines.push(`  const __unset = ${unsetTest};`);
+        lines.push('  try {');
+        lines.push(`    const __value = (${def.body});`);
+        lines.push('    return __unset && Number.isNaN(__value) ? null : __value;');
+        lines.push('  } catch (e) {');
+        lines.push('    if (__unset) return null;');
+        lines.push(`    console.error('Expression node ${def.fnName} threw:', e);`);
+        lines.push('    return 0;');
+        lines.push('  }');
+      } else {
+        lines.push('  try {');
+        lines.push(`    return (${def.body});`);
+        lines.push('  } catch (e) {');
+        lines.push(`    console.error('Expression node ${def.fnName} threw:', e);`);
+        lines.push('    return 0;');
+        lines.push('  }');
+      }
       lines.push('}');
     }
     return lines;
@@ -6474,6 +6897,9 @@ export function emitComponent(
         ? `export function ${symbol}(_props: ${symbol}Props) {`
         : `export function ${symbol}() {`;
   body.push(signature);
+  // P109-S21-EXPORTBLENDNAN. A Color Blend's memory (the blend it last received, the colour it last showed), first:
+  // it reads nothing, and a render local may read it.
+  for (const local of usedKeptLocals) body.push(`  const ${local} = useRef<{ blend: unknown; color?: string }>({ blend: 0 });`);
   if (usesNavigate) body.push('  const navigate = useNavigate();');
   // EXP-011 Tier 2.5. `useSearchParams` returns a tuple whose setter this slice never uses —
   // nothing in the vocabulary writes the query string.
@@ -6538,6 +6964,13 @@ export function emitComponent(
   // EXP-011 §39. The refs: a Delay's timer handle, and a Value Changed's last value seen.
   for (const [, ref] of delayRefs) body.push(`  const ${ref} = useRef<DelayHandle | null>(null);`);
   for (const effect of plan.valueChangedEffects) body.push(`  const ${effect.lastLocal} = useRef<unknown>(undefined);`);
+  // EXP-011 §86. The Function node's values across runs, one per instance, as the running app's node keeps them.
+  for (const id of pulsedRunIds) {
+    const def = jsFunByNode[id]!;
+    body.push(`  const ${pulseNamesOf(def).node} = useRef(functionNode<NonNullable<Parameters<typeof ${def.fnName}>[1]>>([${def.signals.map(tsLiteral).join(', ')}])).current;`);
+  }
+  // P18-S119-TICKEDRUN. What each ticked input of a Run-wired Function holds, one per instance, as the node's inputs do.
+  for (const ticked of plan.tickedRuns) body.push(`  const ${pulseNamesOf(jsFunByNode[ticked.nodeId]!).held} = useRef<unknown[]>([]).current;`);
   for (const [id, local] of jsLocals) {
     const def = jsFunByNode[id]!;
     body.push(`  const ${local} = ${def.fnName}(${jsArgsObject(def, 'render')});`);
@@ -6627,7 +7060,12 @@ export function emitComponent(
   // listeners print inline so each closes over this render; the config is read live by the hook.
   for (const stream of plan.streams) {
     const spec = STREAM_NODES[stream.type];
-    const options = stream.config.length > 0 ? `{ ${stream.config.map((c) => `${c.port}: ${exprCode(c.expr, 'render')}`).join(', ')} }` : '{}';
+    // EXP-011 §78. A history-family node's store module leads its options.
+    const optionEntries = [
+      ...(stream.store !== undefined ? [`store: ${storeByName.get(stream.store)!.exportName}`] : []),
+      ...stream.config.map((c) => `${c.port}: ${exprCode(c.expr, 'render')}`)
+    ];
+    const options = optionEntries.length > 0 ? `{ ${optionEntries.join(', ')} }` : '{}';
     const listenerLines = spec.signals
       .filter((port) => stream.listeners[port] !== undefined)
       .map((port) => `    ${port}: ${handlerArrow(stream.listeners[port], '()', 4)}`);
@@ -6690,7 +7128,48 @@ export function emitComponent(
     body.push('');
   }
   for (const query of plan.queries) {
-    body.push('  useEffect(() => {', `    ${query.fetchName}().then(${query.setterName});`, '  }, []);', '');
+    const wired = query.params?.wired;
+    const label = nodeById.get(query.nodeId)?.authoredLabel;
+    // P18-S116-QUERYFETCH. With Fetch wired the query asks in the chain that sends it; here only what else asks.
+    const fetched = query.fetchWired;
+    if (!queryHasEffect(query)) {
+      body.push(`  // ${label ? `"${label}"` : 'The query'} asks only when its Fetch is sent (dbcollectionnode2.ts storageFetch); its boxes are unticked.`, '');
+      continue;
+    }
+    const once = fetched !== undefined && !fetched.onValues;
+    if (query.params !== undefined && wired !== undefined && query.wiredValues !== undefined) {
+      // P18-S115-QUERYPARAMS. Each wired value is read where the effect runs, and a new one asks again
+      // (`setQueryParameter`, its box ticked). An unset value drops its condition, as the runtime's translator does.
+      const values = query.wiredValues;
+      // A read that is already a render local is used as it is; anything else is bound once, under a name its own code
+      // does not read (`const breedValue = breedValue` would read the binding before it exists).
+      const codes = values.map((v) => exprCode(v.expr, 'render'));
+      const locals = codes.map((code, i) => {
+        if (/^[A-Za-z_$][\w$]*$/.test(code)) return code;
+        let local = `${propIdentifier(values[i].name)}Value`;
+        while (codes.some((c) => new RegExp(`\\b${local.replace(/\$/g, '\\$')}\\b`).test(c))) local = `${local}_`;
+        return local;
+      });
+      const localOf = (name: string) => locals[values.findIndex((v) => v.name === name)];
+      // `filterValue` is the translator's `parseValue`: a Date goes as the date envelope. With no backend the fetch is a stub.
+      const valueCode = (name: string, date: boolean) => (query.wiredClient ? `filterValue(${localOf(name)}${date ? ', true' : ''})` : localOf(name));
+      const deps = [...new Set(values.flatMap((v) => effectDeps(v.expr)))].join(', ');
+      body.push(
+        once
+          ? `  // ${label ? `"${label}"` : 'The query'} asks once as it is made (its Class or Query settings box is ticked); a new ${values.map((v) => `"${v.name}"`).join(' or ')} waits for its Fetch.`
+          : `  // ${label ? `"${label}"` : 'The query'} asks again whenever ${values.map((v) => `"${v.name}"`).join(' or ')} changes (dbcollectionnode2.ts setQueryParameter).`,
+        '  useEffect(() => {',
+        ...codes.flatMap((code, i) => (code === locals[i] ? [] : [`    const ${locals[i]} = ${code};`])),
+        `    const where = ${wiredWhereExpr(wired, locals, valueCode)};`,
+        `    ${query.fetchName}(${queryParamsLiteral(query.params, 'where')}).then(${query.setterName});`,
+        ...(once ? ['    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the node is made', '  }, []);'] : [`  }, [${deps}]);`]),
+        ''
+      );
+      continue;
+    }
+    // P18-S115-QUERYFILTER. The node's own where / order / limit / skip, as the runtime sends them at its first fetch.
+    const params = query.params === undefined ? '' : queryParamsLiteral(query.params);
+    body.push('  useEffect(() => {', `    ${query.fetchName}(${params}).then(${query.setterName});`, '  }, []);', '');
   }
   // Sync effects (§3.4): the graph path of a wired control-state input — the input setter's
   // own coercion and abstain rules (§1's table), and never the Changed chain.
@@ -6794,6 +7273,39 @@ export function emitComponent(
       );
     }
   }
+  // P18-S116-FIELDMOUNT. A text input announces its Value as it mounts, so the chain its typing runs runs once then, with
+  // the start value: `""` for an empty field. A wired Value lands first (the runtime delivers it at node creation): `undefined`
+  // is never delivered, `null` clears, as the sync effect above coerces it. The ref guards StrictMode's second mount.
+  for (const mount of plan.fieldMounts) {
+    const chain = plan.changeHandlers[mount.inputId] ?? [];
+    if (chain.length === 0) continue;
+    const once = dedupeLocal('announced');
+    const lines: string[] = [];
+    let code = tsLiteral(mount.start);
+    if (mount.source !== undefined) {
+      const arrival = dedupeLocal('arrival');
+      code = dedupeLocal('mountValue');
+      lines.push(
+        `    const ${arrival} = ${exprCode(mount.source, 'render')};`,
+        `    const ${code} = ${arrival} === undefined ? ${tsLiteral(mount.start)} : ${arrival} === null ? '' : String(${arrival});`
+      );
+    }
+    announcedCode = { inputId: mount.inputId, code };
+    const chainLines = effectBody(chain, 4);
+    announcedCode = undefined;
+    body.push(
+      `  // ${mount.comment}`,
+      `  const ${once} = useRef(false);`,
+      '  useEffect(() => {',
+      `    if (${once}.current) return;`,
+      `    ${once}.current = true;`,
+      ...lines,
+      ...chainLines,
+      "    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts",
+      '  }, []);',
+      ''
+    );
+  }
   // Push effects (§3.5): the lifted value output — fires on change and once at mount, which
   // is the boot delivery a parent wire gets from the interpreter.
   for (const push of plan.pushEffects) {
@@ -6814,12 +7326,36 @@ export function emitComponent(
     const deps = effectDeps(action.cond).join(', ');
     body.push(`  // ${effect.comment}`, '  useEffect(() => {', ...effectBody([action], 4), `  }, [${deps}]);`, '');
   }
-  // EXP-011 §43. A Record with Fetch unwired: the read re-runs whenever its Id changes — an
-  // effect keyed on the Id, with the read's own try/catch as the body (an async IIFE, §40.3).
-  for (const effect of plan.recordEffects) {
-    const action = effect.action as Extract<HandlerAction, { kind: 'record-fetch' }>;
+  // EXP-011 §43, P18-S113-IDBINDREAD. A Record with Fetch unwired: whenever its Id changes the row becomes the client's
+  // copy of that record, now and after every write to it (`subscribeRecord` hands the copy at once where one is held).
+  // No request, no Error, no Done. An empty Id binds nothing and leaves the row as it was: the runtime's
+  // `setModel(undefined)` flags only `id`, so a wire from a property keeps what it last carried.
+  for (const { effect, action, read, row } of recordBinds) {
     const deps = effectDeps(action.id).join(', ');
-    body.push(`  // ${effect.comment}`, '  useEffect(() => {', ...effectBody([action], 4), `  }, [${deps}]);`, '');
+    const idCode = action.coerceId === 'string' ? `String(${exprCode(action.id, 'render')} ?? '')` : exprCode(action.id, 'render');
+    const bind = `subscribeRecord<${read.typeName}>(${read.idLocal}, ${stateSetterOf(row.name)})`;
+    body.push(
+      `  // ${effect.comment}`,
+      '  useEffect(() => {',
+      `    const ${read.idLocal} = ${idCode};`,
+      ...(action.id.kind === 'literal' ? [] : [`    if (${read.idLocal} === undefined || ${read.idLocal} === null || ${read.idLocal} === '') return undefined;`]),
+      ...(effect.follows
+        ? [`    return ${bind};`]
+        : ['    // "Record properties" is unticked: the copy as it is at the bind, and no later write.', `    ${bind}();`, '    return undefined;']),
+      `  }, [${deps}]);`,
+      ''
+    );
+  }
+  // P18-S111-RECORDLIVE. The runtime binds a Record to the app's one copy of its record (`Model.get(id)`), and with
+  // "Record properties" ticked every write to that copy re-flags the node's outputs: a Set Record Properties
+  // elsewhere in the app shows here at once. The row follows the client's copy of the record it last read.
+  for (const { read, row } of liveRecordRows) {
+    const label = nodeById.get(read.nodeId)?.authoredLabel;
+    body.push(
+      `  // ${label ? `"${label}"` : 'The Record'} shows the app's one copy of its record, so a write anywhere in the app reaches it (dbmodelnode2.ts, "Record properties" ticked).`,
+      `  useEffect(() => (${row.name}?.id === undefined ? undefined : subscribeRecord<${read.typeName}>(${row.name}.id, ${stateSetterOf(row.name)})), [${row.name}?.id]);`,
+      ''
+    );
   }
   // EXP-011 §39. A Delay's countdown dies with the component — `addDeleteListener` in timer.ts.
   for (const [, ref] of delayRefs) {
@@ -6870,6 +7406,36 @@ export function emitComponent(
       ''
     );
   }
+  // P18-S119-TICKEDRUN. A ticked input's new value runs the Function: read fresh, as its Run reads them, so a value a mount
+  // effect above has just stored arrives at load as the runtime's arrives at creation. After the mount effects above.
+  for (const ticked of plan.tickedRuns) {
+    const deps = [...new Set(ticked.watch.flatMap(effectDeps))].join(', ');
+    body.push(
+      `  // ${ticked.comment}`,
+      '  useEffect(() => {',
+      `    if (!tickedArrival(${tickedRecordArgs(ticked.nodeId)})) return;`,
+      ...effectBody([ticked.action], 4),
+      `  }, [${deps}]);`,
+      ''
+    );
+  }
+  // P18-S121-DIDMOUNT. Each element's Did Mount chain: once, on mount, children first. After the ticked runs: at load the
+  // runtime runs a ticked arrival before a Did Mount's Run (s121 drive S0). The ref guards StrictMode's second mount.
+  for (const mount of mountChains) {
+    const node = nodeById.get(mount.nodeId)!;
+    const mounted = dedupeLocal('mounted');
+    body.push(
+      `  // ${node.authoredLabel ?? node.type} — Did Mount: once, when it mounts, as the running app sends it.`,
+      `  const ${mounted} = useRef(false);`,
+      '  useEffect(() => {',
+      `    if (${mounted}.current) return;`,
+      `    ${mounted}.current = true;`,
+      ...effectBody(mount.actions, 4),
+      "    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, like the element's own Did Mount",
+      '  }, []);',
+      ''
+    );
+  }
   const actionExprsOf = (a: HandlerAction): ValueExpr[] => {
     switch (a.kind) {
       case 'emit':
@@ -6907,11 +7473,16 @@ export function emitComponent(
         return [a.items];
       case 'runtasks-abort':
         return [];
+      case 'query-fetch':
+        return a.values.map((v) => v.expr);
       // EXP-011 §58. The data; the config and listeners are walked off the plan.
       case 'stream-action':
         return a.value !== undefined ? [a.value] : [];
       case 'jsfun-run':
         return [...jsArgExprs(a.nodeId), ...a.then.flatMap(actionExprsOf)];
+      case 'jsfun-pulses':
+      case 'jsfun-pulse':
+        return a.then.flatMap(actionExprsOf);
       case 'http-call':
       // EXP-011 §41. The same, one node over.
       case 'cloud-call':
@@ -6935,7 +7506,8 @@ export function emitComponent(
       case 'api-call':
         return [
           ...a.args.flatMap((arg) => (arg.kind === 'expr' ? [arg.expr] : arg.props.map((p) => p.expr))),
-          ...a.then.flatMap(actionExprsOf)
+          ...a.then.flatMap(actionExprsOf),
+          ...a.failThen.flatMap(actionExprsOf)
         ];
       // EXP-011 Tier 1.3. The Read reads nothing of its own; the chain is where the expressions
       // are, and a reader of this function wants them (the `usesPayload` test below is one).
@@ -6951,7 +7523,9 @@ export function emitComponent(
         return [
           ...a.inputs.flatMap((i) => (i.expr !== undefined ? [i.expr] : [])),
           ...a.then.flatMap(actionExprsOf),
-          ...a.failThen.flatMap(actionExprsOf)
+          ...a.failThen.flatMap(actionExprsOf),
+          ...a.foundThen.flatMap(actionExprsOf),
+          ...a.notFoundThen.flatMap(actionExprsOf)
         ];
       // EXP-011 §61. The parameters, then every callback; the results, then both arms; the one chain.
       case 'stack-push':
@@ -7053,6 +7627,25 @@ export function emitComponent(
   if (jsxLines.length === 1 && jsxLines[0] === '    null') body.push(...preReturnComment, '  return null;', '}');
   else body.push(...preReturnComment, '  return (', ...providedJsx, '  );', '}');
 
+  if (usesRowField) {
+    body.push(
+      '',
+      '/**',
+      ' * An Array Filter key, read as the runtime reads it (`filtercollectionnode.ts` `fieldOf`): the field with that exact',
+      ' * name when the row has one, else the path through the row, `undefined` past anything that is not an object.',
+      ' */',
+      'function rowField(row: unknown, key: string): any {',
+      '  const item = row as Record<string, unknown>;',
+      "  if (Object.prototype.hasOwnProperty.call(item, key) || !key.includes('.')) return item[key];",
+      '  let at: unknown = item;',
+      "  for (const step of key.split('.')) {",
+      "    if (at === null || typeof at !== 'object') return undefined;",
+      '    at = (at as Record<string, unknown>)[step];',
+      '  }',
+      '  return at;',
+      '}'
+    );
+  }
   const tsx = GENERATED_TS + importLines.join('\n') + '\n\n' + body.join('\n') + '\n';
 
   const files: Record<string, string> = {};
@@ -7101,6 +7694,8 @@ export function emitComponent(
     utilHelpers: usedUtilHelpers,
     idHelpers: usedIdHelpers,
     timerHelpers: usedTimerHelpers,
+    // EXP-011 §86.
+    functionRunLib: pulsedRunIds.size > 0 || tickedRunIds.size > 0,
     // EXP-011 §49. `states.ts` imports `animate.ts`, so a States alone earns both modules.
     animateLib: plan.animations.length > 0 || plan.statesMachines.length > 0,
     statesLib: plan.statesMachines.length > 0,
@@ -7121,6 +7716,11 @@ export function emitComponent(
     realtimeLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'realtime'),
     // GAM-013.
     repeatLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'repeat'),
+    // EXP-011 §77.
+    actionsLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'actions'),
+    // EXP-011 §78.
+    historyLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'history'),
+    signInLib: plan.streams.some((s) => STREAM_NODES[s.type].lib === 'signIn'),
     // EXP-011 §59.
     cryptoHelpers: usedCryptoHelpers,
     screenLib: screenHooks.length > 0,
@@ -7318,9 +7918,13 @@ function jsxAttr(name: string, value: string | number | boolean): string {
   return `${name}={${value}}`;
 }
 
-/** JSX text children: plain prose passes through; anything JSX-significant becomes a string literal. */
+/**
+ * A literal as a JSX child, exactly. Bare text is kept where JSX reads it back unchanged; anything JSX would rewrite takes
+ * the string form. P18-S110-NOWRAP: JSX turns a line break into a space and drops the whitespace beside it, trims a
+ * child printed on its own line, and decodes `&amp;`. Under a Text's `pre-wrap` each of those is visible.
+ */
 function jsxText(text: string): string {
-  if (/[{}<>]/.test(text)) return `{${JSON.stringify(text)}}`;
+  if (/[{}<>&\r\n]/.test(text) || /^\s|\s$/.test(text)) return `{${JSON.stringify(text)}}`;
   return text;
 }
 
@@ -7407,4 +8011,17 @@ function filledArcPath(x: number, y: number, radius: number, startAngle: number,
     'L', svgNumber(x), svgNumber(y),
     'L', svgNumber(start.x), svgNumber(start.y)
   ].join(' ');
+}
+
+/** EXP-011 §86. Whether a Function's run prints its pulses: its `then` opens with the pulse loop. */
+function runIsPulsed(action: Extract<HandlerAction, { kind: 'jsfun-run' }>): boolean {
+  return action.then.some((a) => a.kind === 'jsfun-pulses');
+}
+
+/** EXP-011 §86. The three locals a pulsed run prints, off the wrapper's name: `holdThePageId` → `holdThePageIdRun`. */
+function pulseNamesOf(def: JsFunctionPlan): { run: string; node: string; pulse: string; held: string } {
+  const camel = def.fnName.replace(/_+([A-Za-z0-9])/g, (_m, c: string) => c.toUpperCase()).replace(/_+$/, '');
+  const base = camel.charAt(0).toLowerCase() + camel.slice(1);
+  // P18-S119-TICKEDRUN. `held`: what its ticked inputs hold (`tickedArrival`).
+  return { run: `${base}Run`, node: `${base}Node`, pulse: `${base}Pulse`, held: `${base}Held` };
 }

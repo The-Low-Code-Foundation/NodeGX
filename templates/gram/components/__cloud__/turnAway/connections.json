@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f8044a2b-dff3-504f-8849-5fd030c901d9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req-5",
+      "fromProperty": "userId",
+      "toId": "run-2",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "req-5",
+      "fromProperty": "pm-turnAway",
+      "toId": "run-2",
+      "toProperty": "in-turnAway"
+    },
+    {
+      "fromId": "req-5",
+      "fromProperty": "receive",
+      "toId": "run-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "run-2",
+      "fromProperty": "out-loginId",
+      "toId": "off",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "run-2",
+      "fromProperty": "out-disabled",
+      "toId": "off",
+      "toProperty": "prop-disabled"
+    },
+    {
+      "fromId": "run-2",
+      "fromProperty": "out-done",
+      "toId": "off",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "run-2",
+      "fromProperty": "out-id",
+      "toId": "ok-4",
+      "toProperty": "pm-id"
+    },
+    {
+      "fromId": "off",
+      "fromProperty": "done",
+      "toId": "ok-4",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "off",
+      "fromProperty": "failure",
+      "toId": "no-5",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run-2",
+      "fromProperty": "out-reason",
+      "toId": "no-5",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "run-2",
+      "fromProperty": "out-refused",
+      "toId": "no-5",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run-2",
+      "fromProperty": "failure",
+      "toId": "no-5",
+      "toProperty": "send"
+    }
+  ]
+}

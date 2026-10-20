@@ -466,6 +466,14 @@ export interface UploadFileOptions extends FileCallbacks<(result: FileRef) => vo
    */
   private?: boolean;
   /**
+   * P121-TWO001-MEMBERSPHOTO: roles that may read the file as well as its
+   * uploader, written `role:<name>` and separated by commas, carried as the
+   * `X-NodeGX-File-Readers` header and sent as written (the backend refuses a
+   * malformed one, or a role the uploader does not hold, in words). Setting it
+   * makes the file private. **Ours, like `private`**: no other backend reads it.
+   */
+  readers?: string;
+  /**
    * Only exists on the XHR upload path. An adapter built on `fetch` cannot
    * report progress at all, so it declares `files.progress` **degraded** — the
    * file still uploads, the bar just never moves.

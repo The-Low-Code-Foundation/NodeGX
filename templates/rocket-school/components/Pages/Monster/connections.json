@@ -119,6 +119,12 @@
     },
     {
       "fromId": "zgMe",
+      "fromProperty": "skin",
+      "toId": "zgHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "zgMe",
       "fromProperty": "faceOptions",
       "toId": "zgHeader",
       "toProperty": "options"

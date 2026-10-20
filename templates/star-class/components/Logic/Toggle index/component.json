@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "10e0af89-3205-51b0-86ed-27c38dbdb1de",
+  "name": "Toggle index",
+  "path": "/Logic/Toggle index",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The list with one index added or removed, capped."
+}

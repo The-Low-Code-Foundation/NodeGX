@@ -1,7 +1,8 @@
 ---
 id: P109-S24-EXPORTBADBODY
 title: An exported HTTP Request reports a body it cannot read as JSON under http/network-error, where the runtime now says http/bad-body
-status: scheduled
+status: fixed
+regression: packages/nodegx-export/tests/http-request.test.ts "P109-S24-EXPORTBADBODY — a body that is not JSON fails under http/bad-body" (runs the emitted fetchQuote against a stubbed fetch; the bad-body row red on HEAD's emitter, both controls green)
 phase: P109
 task: ISL-043
 severity: low
@@ -19,3 +20,13 @@ was never reached."*
 
 **Proposed:** wrap the body read in the emitted function and throw `HttpError(<the parser's message>, 'http/bad-body')`,
 as the timeout and network arms already throw theirs. The runtime's ruling covers it; no new question.
+
+**Re-measured and fixed 2026-10-14 (P18 session 104, ISL-043 AC1).** It still fired at HEAD. Read first, then run: the
+emitted `fetchQuote`, transpiled and called with a stubbed `fetch` whose `json()` rejects, threw a bare `SyntaxError`
+with no `code`. The emitted request now wraps the JSON read and throws `HttpError(<the parser's message>,
+'http/bad-body')`, which is the proposal. As `httpnode.ts` marks only the JSON read, a failed `text()` is not a bad
+body, and a row pins that. The module header now names the code. HLS-001 golden: 1 line predicted and 1 counted
+(`quote-desk/src/api/http.ts`). The spec reads 23/23, the http.ts readers 359/359, and the package's `tsc` is 0.
+
+Found on the way and filed as P18-S104-RESPONSETYPE: the export ignores Response Type altogether, so this fix covers
+only the Auto path, which is the only one the export has.

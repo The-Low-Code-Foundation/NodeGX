@@ -1,0 +1,416 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1a0d65f7-8546-5c0d-8893-039cb4ba6a21",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "suPage",
+      "type": "Page",
+      "label": "Set up",
+      "parameters": {
+        "title": "Set up",
+        "urlPath": "setup"
+      },
+      "children": [
+        "suRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "suRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "suPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app"
+      },
+      "children": [
+        "suBar",
+        "suBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "suBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "suRoot",
+      "parameters": {},
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "suBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "suRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "suTitle",
+        "suLead",
+        "suToken",
+        "suCommunity",
+        "suName",
+        "suEmail",
+        "suPassword",
+        "suGo",
+        "suError"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "suTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "suBody",
+      "parameters": {
+        "text": "Set up the community",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "suLead",
+      "type": "Text",
+      "label": "What this does",
+      "parent": "suBody",
+      "parameters": {
+        "text": "This names the community and makes you its first admin. It works once, with the setup token from whoever started the backend.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "suToken",
+      "type": "net.noodl.controls.textinput",
+      "label": "Setup token",
+      "parent": "suBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Setup token",
+        "type": "password"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "suCommunity",
+      "type": "net.noodl.controls.textinput",
+      "label": "The community’s name",
+      "parent": "suBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "The community’s name"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "suName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your name",
+      "parent": "suBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Your name"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "suEmail",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your email",
+      "parent": "suBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Your email",
+        "type": "email"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "suPassword",
+      "type": "net.noodl.controls.textinput",
+      "label": "A password (8 characters or more)",
+      "parent": "suBody",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "A password (8 characters or more)",
+        "type": "password"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "suGo",
+      "type": "net.noodl.controls.button",
+      "label": "Set up",
+      "parent": "suBody",
+      "parameters": {
+        "label": "Set up the community",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "suError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "suBody",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "suGather",
+      "type": "JavaScriptFunction",
+      "label": "The form, as one setup",
+      "parameters": {
+        "functionScript": "Outputs.setup = { setupToken: Inputs.token || '', community: Inputs.community || '', name: Inputs.name || '', email: Inputs.email || '', password: Inputs.password || '' };\nOutputs.go();",
+        "runOnChange-in-token": false,
+        "runOnChange-in-community": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-email": false,
+        "runOnChange-in-password": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-token",
+          "displayName": "token",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-community",
+          "displayName": "community",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-email",
+          "displayName": "email",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-password",
+          "displayName": "password",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-setup",
+          "displayName": "setup",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "suCall",
+      "type": "CloudFunction2",
+      "label": "setUpCommunity(setup)",
+      "parameters": {
+        "function": "setUpCommunity"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "suLogIn",
+      "type": "net.noodl.user.LogIn",
+      "label": "Sign the new admin in",
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "suToQueue",
+      "type": "RouterNavigate",
+      "label": "To the admins’ queue",
+      "parameters": {
+        "target": "/Pages/Admin/Queue"
+      },
+      "x": 470,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "suPage"
+  ]
+}

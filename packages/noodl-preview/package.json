@@ -1,6 +1,6 @@
 {
   "name": "@nodegx/preview",
-  "version": "0.2.0",
+  "version": "0.2.2",
   "description": "Standalone live-preview harness: renders a NodeGX (OpenNoodl) v2 project in a browser with no editor process, and reloads it when the files on disk change.",
   "license": "GPL-3.0-only",
   "homepage": "https://nodegx.io",
@@ -12,7 +12,8 @@
   "main": "src/index.ts",
   "bin": {
     "noodl-preview": "./bin/noodl-preview.js",
-    "nodegx-deploy": "./bin/nodegx-deploy.js"
+    "nodegx-deploy": "./bin/nodegx-deploy.js",
+    "preview": "./bin/noodl-preview.js"
   },
   "files": [
     "bin",
@@ -22,8 +23,8 @@
   ],
   "scripts": {
     "build": "node build.mjs",
-    "prepack": "node build.mjs && node scripts/pack-runtime.mjs",
-    "postpack": "node scripts/pack-runtime.mjs --remove",
+    "prepack": "node build.mjs && node scripts/pack-runtime.mjs && node ../noodl-mcp/build-backend-copy.mjs --out dist/backend",
+    "postpack": "node scripts/pack-runtime.mjs --remove && node ../noodl-mcp/build-backend-copy.mjs --remove --out dist/backend",
     "in-page-check": "node scripts/in-page-check.mjs",
     "graph-target-check": "node scripts/graph-target-check.mjs",
     "test": "jest",

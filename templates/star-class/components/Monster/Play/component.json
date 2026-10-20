@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4da83bda-873b-586c-8fab-83cf17f938d7",
+  "name": "Play",
+  "path": "/Monster/Play",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Monster Gate itself (§2.2 D, ruled in §16): three monsters come at the gate one at a time, and three hearts keep it. The questions are the race's: Race/Round asks, grades (the answers pay stars and move the learner model as a race's do, under the game's id) and shows the verdict, and Logic/Monster move (answer) turns each graded answer into a hit, a creep closer, a push, a step, a heart gone or a monster beaten; Next runs Logic/Monster move (next) and asks again. In Beat it to the gate with Challenge, the monster walks off the round's own clock. Show me how opens the Teach card in the round's place. When the game is over, Logic/Finish monster pays it once and Next brings Race/Result. Restart starts a new game; Change the game hands back to setup. The whole game is one Variable (monsterGame, global by name: one game per page). Publishes Model and Graded (store the model), ChangeGame, Hangar, Cheer and Sigh."
+}

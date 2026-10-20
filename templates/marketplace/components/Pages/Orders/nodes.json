@@ -1,0 +1,501 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8bebcfd1-448d-5855-8e01-33606362f6c5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "orPage",
+      "type": "Page",
+      "label": "Orders",
+      "parameters": {
+        "title": "Orders",
+        "urlPath": "orders"
+      },
+      "children": [
+        "orRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "orRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "orPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "orBar",
+        "orBand",
+        "orAdminTabsBox",
+        "orSellerTabsBox",
+        "orBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "orBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "orRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "orBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "orBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "orBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "orBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "orRoot",
+      "parameters": {
+        "words": ""
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "orAdminTabsBox",
+      "type": "Group",
+      "label": "The admin’s tabs",
+      "parent": "orRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "mounted": false
+      },
+      "children": [
+        "orAdminTabs"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "orAdminTabs",
+      "type": "/Admin/Tabs",
+      "label": "The admin’s tabs",
+      "parent": "orAdminTabsBox",
+      "parameters": {
+        "on": "orders"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "orSellerTabsBox",
+      "type": "Group",
+      "label": "A seller’s tabs",
+      "parent": "orRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "mounted": false
+      },
+      "children": [
+        "orSellerTabs"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "orSellerTabs",
+      "type": "/Seller/Tabs",
+      "label": "Orders, Products, Enquiries",
+      "parent": "orSellerTabsBox",
+      "parameters": {
+        "on": "orders"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "orBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "orRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "orContent",
+        "orRefused"
+      ],
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "orContent",
+      "type": "Group",
+      "label": "The orders",
+      "parent": "orBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "orTitle",
+        "orKpis",
+        "orEmpty",
+        "orSections",
+        "orFine"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "orTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "orContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "orKpis",
+      "type": "Group",
+      "label": "How many, at a glance",
+      "parent": "orContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "orEachKpi"
+      ],
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "orEachKpi",
+      "type": "For Each",
+      "label": "To confirm, to be paid, to pack and send, on their way",
+      "parent": "orKpis",
+      "parameters": {
+        "template": "/Seller/Kpi"
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "orEmpty",
+      "type": "Text",
+      "label": "No orders yet",
+      "parent": "orContent",
+      "parameters": {
+        "text": "No orders yet. They arrive here when a buyer checks out.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "orSections",
+      "type": "Group",
+      "label": "The parts, by what they need",
+      "parent": "orContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-6)"
+      },
+      "children": [
+        "orEach"
+      ],
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "orEach",
+      "type": "For Each",
+      "label": "One section per kind",
+      "parent": "orSections",
+      "parameters": {
+        "template": "/Seller/OrderSection"
+      },
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "orFine",
+      "type": "Text",
+      "label": "What this page shows, and whose",
+      "parent": "orContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "orRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "orBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "orRefusedWhy",
+        "orRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "orRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "orRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "orRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "orRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "orToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 590,
+      "y": 2440
+    },
+    {
+      "id": "orLoad",
+      "type": "JavaScriptFunction",
+      "label": "The order parts this person may see",
+      "parameters": {
+        "runOnChange-in-changed": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nvar STEPS = [\"new\",\"confirmed\",\"paid\",\"packed\",\"sent\",\"delivered\"];\nvar AT_THE_DOOR = [\"on-delivery\"];\nvar BY_PROVIDER = [\"paystack\",\"flutterwave\"];\nvar SECTIONS = [[\"confirm\",\"To confirm\",\"tell the buyer the delivery cost\"],[\"pay\",\"Waiting for the buyer to pay\",\"mark it paid when the money is with you; a card payment marks itself\"],[\"pack\",\"To pack\",\"\"],[\"send\",\"Packed, to send\",\"\"],[\"sent\",\"On its way\",\"mark it delivered when the buyer has it\"],[\"delivered\",\"Delivered\",\"\"],[\"cancelled\",\"Cancelled\",\"\"]];\nvar MOVES = { paid: 'The buyer has paid', packed: 'Packed', sent: 'Sent', delivered: 'Delivered' };\nvar PILLS = { new: 'New', confirmed: 'Confirmed', paid: 'Paid', packed: 'Packed', sent: 'Sent', delivered: 'Delivered', cancelled: 'Cancelled' };\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nvoid Inputs.changed; // a card moved a part: read again\ntry {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nvar isAdmin = !!me && me.role === 'admin';\nif (!me || (!isAdmin && !me.seller)) { Outputs.problem = 'This page is for the marketplace’s sellers and its admin.'; Outputs.refused = true; Outputs.ok = false; return; }\ntry {\n  var parts = await all('OrderPart', isAdmin ? {} : { seller: { equalTo: ptr('Seller', me.seller.id) } });\n  var orderIds = [];\n  parts.forEach(function (p) { if (orderIds.indexOf(idOf(p.order)) < 0) orderIds.push(idOf(p.order)); });\n  var orders = orderIds.length ? await all('Order', { objectId: { containedIn: orderIds } }) : [];\n  var lines = parts.length ? await all('OrderLine', { orderPart: { containedIn: parts.map(function (p) { return ptr('OrderPart', p.objectId); }) } }) : [];\n  var sellers = await all('Seller', isAdmin ? {} : { objectId: { equalTo: me.seller.id } });\n  var countries = await all('Country');\n  var ways = await all('WayToPay');\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nvar order = {}, seller = {}, country = {}, way = {};\norders.forEach(function (o) { order[o.objectId] = o; });\nsellers.forEach(function (s) { seller[s.objectId] = s; });\ncountries.forEach(function (c) { country[c.objectId] = c; });\nways.forEach(function (w) { way[w.objectId] = w; });\nfunction stageOf(p, atTheDoor) {\n  var s = p.status || 'new';\n  if (s === 'new') return 'confirm';\n  if (s === 'confirmed') return atTheDoor ? 'pack' : 'pay';\n  if (s === 'paid') return 'pack';\n  if (s === 'packed') return 'send';\n  return s;\n}\nvar bySection = {};\nparts\n  .slice()\n  .sort(function (a, b) { return String((order[idOf(b.order)] || {}).number || '').localeCompare(String((order[idOf(a.order)] || {}).number || '')); })\n  .forEach(function (p) {\n    var o = order[idOf(p.order)] || {}, s = seller[idOf(p.seller)] || {}, c = country[idOf(s.country)] || {}, w = way[idOf(p.wayToPay)] || {};\n    var atTheDoor = AT_THE_DOOR.indexOf(w.method) >= 0, byProvider = BY_PROVIDER.indexOf(w.method) >= 0;\n    var steps = atTheDoor ? STEPS.filter(function (x) { return x !== 'paid'; }) : STEPS;\n    var status = p.status || 'new', cur = c.currency || '';\n    var done = status === 'delivered' || status === 'cancelled';\n    var next = done ? '' : steps[steps.indexOf(status) + 1] || '';\n    var mine = lines.filter(function (l) { return idOf(l.orderPart) === p.objectId; });\n    var cost = typeof p.deliveryCost === 'number';\n    var note = status === 'cancelled' ? 'Cancelled: ' + (p.cancelledReason || 'no reason kept') + '.'\n      : cost ? 'Delivery ' + money(p.deliveryCost, cur) + (p.deliveryNote ? ', ' + p.deliveryNote : '') + '. Total ' + money((Number(p.subtotal) || 0) + p.deliveryCost, cur) + '.' + (byProvider && status === 'confirmed' ? ' The buyer pays by card; it says paid here once they have.' : '')\n      : '';\n    var card = {\n      id: p.objectId,\n      head: (o.number || 'An order') + ' · ' + (o.buyerName || ''),\n      pill: PILLS[status] || status,\n      pillBg: status === 'cancelled' ? 'var(--bad-bg)' : status === 'new' ? 'var(--warn-bg)' : 'var(--ok-bg)',\n      pillInk: status === 'cancelled' ? 'var(--bad)' : status === 'new' ? 'var(--warn)' : 'var(--ok)',\n      seller: isAdmin ? (s.name || '') + (c.name ? ' · ' + c.name : '') : '',\n      hasSeller: isAdmin,\n      lines: mine.map(function (l) { return (l.productName || '') + ' × ' + (Number(l.quantity) || 0); }).join(', ') + ' · ' + money(p.subtotal, cur),\n      where: [o.address, o.phone].filter(Boolean).join(' · '),\n      way: (w.name || 'Way to pay not kept') + (w.method === 'bank-transfer' ? ', reference ' + (o.number || '') : ''),\n      note: note,\n      canConfirm: status === 'new',\n      costLabel: 'Delivery cost (' + symbolOf(cur) + ')',\n      confirmLabel: atTheDoor ? 'Confirm: they pay when it arrives' : 'Confirm and ask the buyer to pay',\n      canMove: !done && status !== 'new' && !!next && !(next === 'paid' && byProvider),\n      next: next,\n      moveLabel: next === 'delivered' && atTheDoor ? 'Delivered and paid' : MOVES[next] || '',\n      canCancel: !done,\n      hasActions: !done\n    };\n    var key = stageOf(p, atTheDoor);\n    (bySection[key] = bySection[key] || []).push(card);\n  });\nvar count = function (k) { return (bySection[k] || []).length; };\nOutputs.sections = SECTIONS.filter(function (x) { return count(x[0]); }).map(function (x) { return { id: x[0], heading: x[1], note: x[2], cards: bySection[x[0]] }; });\nOutputs.kpis = [\n  { id: 'confirm', n: String(count('confirm')), words: 'to confirm' },\n  { id: 'pay', n: String(count('pay')), words: 'to be paid' },\n  { id: 'pack', n: String(count('pack') + count('send')), words: 'to pack and send' },\n  { id: 'sent', n: String(count('sent')), words: 'on their way' }\n];\nOutputs.empty = parts.length === 0;\nOutputs.band = isAdmin ? 'Admin' : 'Signed in as ' + (me.seller.name || '');\nOutputs.heading = isAdmin ? 'Every order' : 'Your orders';\nOutputs.fine = isAdmin\n  ? 'You see every seller’s part of every order, and can move any of them.'\n  : 'You see only your part of each order: your products, the buyer’s name, phone and address. Other sellers in the same order don’t see yours.';\nOutputs.isAdmin = isAdmin;\nOutputs.isStaff = !isAdmin;\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sections",
+          "displayName": "sections",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-kpis",
+          "displayName": "kpis",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-heading",
+          "displayName": "heading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fine",
+          "displayName": "fine",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isAdmin",
+          "displayName": "isAdmin",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isStaff",
+          "displayName": "isStaff",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1240
+    },
+    {
+      "id": "orVersion",
+      "type": "Variable2",
+      "label": "An order part moved",
+      "parameters": {
+        "name": "ordersChanged"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: an order part moved: the Orders page reads again, whichever card moved it."
+      },
+      "x": 590,
+      "y": 2560
+    }
+  ],
+  "visualRoots": [
+    "orPage"
+  ]
+}

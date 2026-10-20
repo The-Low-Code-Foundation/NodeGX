@@ -1,0 +1,680 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4f0d6552-35a8-56d7-8625-4fc607d0faee",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "maIn",
+      "type": "Component Inputs",
+      "label": "The adopt card",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "has",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "full",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canAdopt",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "free",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "cost",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "purse",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "button",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "another",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "suggestedName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "species",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "colours",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "colour",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "firstWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moreWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nameWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "askWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cancelWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "haveWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "costWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "leftWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "yesWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "noWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "maCard",
+      "type": "Group",
+      "label": "Adopt an alien",
+      "children": [
+        "maMore",
+        "maBody",
+        "maOver"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "maMore",
+      "type": "net.noodl.controls.button",
+      "label": "Adopt another",
+      "parent": "maCard",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Adopt another alien"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "maBody",
+      "type": "Group",
+      "label": "The choices",
+      "parent": "maCard",
+      "children": [
+        "maTitle",
+        "maSpecies",
+        "maColours",
+        "maNameLabel",
+        "maName",
+        "maButtons"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "maTitle",
+      "type": "Text",
+      "label": "Adopt an alien",
+      "parent": "maBody",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "maSpecies",
+      "type": "Group",
+      "label": "The species",
+      "parent": "maBody",
+      "children": [
+        "maSpeciesEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "maSpeciesEach",
+      "type": "For Each",
+      "label": "One tile per species",
+      "parameters": {
+        "template": "/Moon/Alien tile",
+        "templateType": "explicit"
+      },
+      "parent": "maSpecies",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "maColours",
+      "type": "/Game/Choice row",
+      "label": "The colour",
+      "parent": "maBody",
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "maNameLabel",
+      "type": "Text",
+      "label": "Its name",
+      "parent": "maBody",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "maName",
+      "type": "net.noodl.controls.textinput",
+      "label": "The name box",
+      "parent": "maBody",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "maxWidth": {
+          "value": 320,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "maButtons",
+      "type": "Group",
+      "label": "Adopt, or not now",
+      "parent": "maBody",
+      "children": [
+        "maAdopt",
+        "maCancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "justifyContent": "center"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "maAdopt",
+      "type": "net.noodl.controls.button",
+      "label": "Adopt",
+      "parent": "maButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Adopt"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "maCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Not now",
+      "parent": "maButtons",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Cancel"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "maOver",
+      "type": "Group",
+      "label": "The question, over the screen",
+      "parent": "maCard",
+      "children": [
+        "maConfirm"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "cssClassName": "rkt-buy-over",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "maConfirm",
+      "type": "/Hangar/Confirm",
+      "label": "Adopt it?",
+      "parent": "maOver",
+      "parameters": {
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "maSpVar",
+      "type": "Variable2",
+      "label": "The species so far",
+      "parameters": {
+        "name": "moonDraftSpecies"
+      },
+      "metadata": {
+        "comment": "One adopt card on screen at a time: the draft is the card’s own."
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "maColVar",
+      "type": "Variable2",
+      "label": "The colour so far",
+      "parameters": {
+        "name": "moonDraftColour"
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "maNameVar",
+      "type": "Variable2",
+      "label": "The name so far",
+      "parameters": {
+        "name": "moonDraftName"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "maSetSp",
+      "type": "Set Variable",
+      "label": "Pick a species",
+      "parameters": {
+        "name": "moonDraftSpecies"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "maSetCol",
+      "type": "Set Variable",
+      "label": "Pick a colour",
+      "parameters": {
+        "name": "moonDraftColour"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "maEmpty",
+      "type": "Expression",
+      "label": "No name",
+      "parameters": {
+        "expression": "''"
+      },
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "maClearName",
+      "type": "Set Variable",
+      "label": "Clear the name",
+      "parameters": {
+        "name": "moonDraftName"
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "maOpen",
+      "type": "States",
+      "label": "Folded, or open",
+      "parameters": {
+        "states": "folded,open",
+        "values": "open",
+        "useTransitions": false,
+        "type-open": "boolean",
+        "value-folded-open": false,
+        "value-open-open": true
+      },
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "maBodyShown",
+      "type": "Expression",
+      "label": "Open?",
+      "parameters": {
+        "expression": "open === true || has !== true"
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "maMoreShown",
+      "type": "Expression",
+      "label": "The fold button?",
+      "parameters": {
+        "expression": "has === true && open !== true && full !== true"
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "maTitleText",
+      "type": "Expression",
+      "label": "The first, or another",
+      "parameters": {
+        "expression": "has === true ? more : first"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "maIsFree",
+      "type": "Condition",
+      "label": "Free, or ask first?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "maAsk",
+      "type": "States",
+      "label": "The card, or the question",
+      "parameters": {
+        "states": "idle,asking",
+        "values": "asking",
+        "useTransitions": false,
+        "type-asking": "boolean",
+        "value-idle-asking": false,
+        "value-asking-asking": true
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "maDo",
+      "type": "/Logic/Moon act",
+      "label": "Adopt it",
+      "parameters": {
+        "action": "adopt"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "maOut",
+      "type": "Component Outputs",
+      "label": "Adopted",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "said",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "draftSpecies",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "draftColour",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 2080
+    }
+  ],
+  "visualRoots": [
+    "maCard"
+  ]
+}

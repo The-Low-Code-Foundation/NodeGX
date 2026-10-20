@@ -1,0 +1,50 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5e947074-2492-5eda-81c1-2903bc1022e2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "phImage",
+      "type": "Image",
+      "label": "The photo",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 320,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": "var(--radius-lg)",
+        "cssClassName": "gm-photo"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "phIn",
+      "type": "Component Inputs",
+      "label": "One photo",
+      "ports": [
+        {
+          "name": "src",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "alt",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "phImage"
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ed976f67-a37a-5be4-81c8-d7db6a7acbf7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hnIn",
+      "fromProperty": "word",
+      "toId": "hnBtn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hnIn",
+      "fromProperty": "kind",
+      "toId": "hnKind",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "hnKind",
+      "fromProperty": "ground",
+      "toId": "hnBtn",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hnKind",
+      "fromProperty": "edge",
+      "toId": "hnBtn",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "hnIn",
+      "fromProperty": "fx",
+      "toId": "hnBtn",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "hnIn",
+      "fromProperty": "at",
+      "toId": "hnOut",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "hnBtn",
+      "fromProperty": "onClick",
+      "toId": "hnOut",
+      "toProperty": "tapped"
+    }
+  ]
+}

@@ -144,6 +144,21 @@ describe('TPL-007 — Rocket School, the artefact', () => {
     expect(differing).toEqual([]);
   });
 
+  it('🔴 no two components author the same node id (TPL-014 M1: the door renames the LATER one silently, in another component)', () => {
+    // Measured 2026-10-14: a new Moon/Big things using `mgTitle` made the door rename Pages/Merge's own `mgTitle` to `mgTitle-2`,
+    // a diff in a page nobody touched. `mtIn` (Merge/Tile and Moon/Alien tile) shipped that way in P113 and stays allowed.
+    const owner = new Map<string, string>();
+    const clashes: string[] = [];
+    for (const c of TPL007_COMPONENTS) {
+      for (const n of c.nodes as Array<{ id: string }>) {
+        const first = owner.get(n.id);
+        if (first && first !== c.path && n.id !== 'mtIn') clashes.push(`${n.id}: ${first} and ${c.path}`);
+        if (!first) owner.set(n.id, c.path);
+      }
+    }
+    expect(clashes).toEqual([]);
+  });
+
   it('the kit in the artefact is the one the library ships', () => {
     const inArtefact = fs.readFileSync(path.join(built.projectDir, 'noodl_modules', 'game-kit', 'index.js'));
     expect(inArtefact.equals(fs.readFileSync(KIT_BUILT))).toBe(true);
@@ -1841,6 +1856,41 @@ describe('TPL-007 — Rocket School, the artefact', () => {
         // "{n} questions" is the same sentence in both languages.
         expect({ key, en: row.en.length > 0, fr: row.fr.length > 0, differ: key === 'listCount' || row.en !== row.fr }).toEqual({ key, en: true, fr: true, differ: true });
       }
+    });
+  });
+
+  describe('TPL-013 SC-5 — the skin row, held in the graph (both games)', () => {
+    const has = (conns: LegacyConnection[], [fromId, fromProperty, toId, toProperty]: string[]) =>
+      conns.some((c) => c.fromId === fromId && c.fromProperty === fromProperty && c.toId === toId && c.toProperty === toProperty);
+    const missing = (name: string, wires: string[][]) => wires.filter((w) => !has(connectionsOf(built, name), w)).map((w) => w.join(' → '));
+    const params = (name: string, id: string) => nodesOf(built, name).find((n) => n.id === id)!.parameters as Record<string, unknown>;
+
+    it('🔴 the form has a skin row under the face styles, five ✋ to tap, and the face it draws wears the one picked', () => {
+      const card = nodesOf(built, C.newPlayer).find((n) => n.id === 'nfCard')!;
+      const kids = (card.children ?? []).map((c: any) => (typeof c === 'string' ? c : c.id));
+      expect(kids.indexOf('nfSkin')).toBe(kids.indexOf('nfLook') + 1);
+      expect(JSON.parse(String(params(C.newPlayer, 'nfSkinItems').json)).map((i: { label: string }) => i.label)).toEqual(['✋🏻', '✋🏼', '✋🏽', '✋🏾', '✋🏿']);
+      expect(missing(C.newPlayer, [
+        ['nfSkinItems', 'items', 'nfSkin', 'items'], ['nfSkinVar', 'value', 'nfSkin', 'value'], ['nfSkin', 'changed', 'nfSetSkin', 'do'],
+        ['nfSkinVar', 'value', 'nfSkinFace', 'in-skin'], ['nfSkinFace', 'out-options', 'nfFace', 'options'],
+        ['nfIn', 'reset', 'nfResetSkin', 'do'], ['nfIn', 'fill', 'nfFillSkin', 'do'], ['nfSkinVar', 'value', 'nfOut', 'skin']
+      ])).toEqual([]);
+    });
+
+    it('🔴 a new player is made with it, Edit player is filled with theirs and saves it, and every page’s bar is told it', () => {
+      expect(missing(C.pageProfiles, [['pfForm', 'skin', 'pfCreate', 'skin'], ['pfT', 'yourSkin', 'pfForm', 'skinWord']])).toEqual([]);
+      expect(missing(C.header, [['hdIn', 'skin', 'hdForm', 'skin0'], ['hdForm', 'skin', 'hdRename', 'skin'], ['hdT', 'yourSkin', 'hdForm', 'skinWord']])).toEqual([]);
+      for (const [page, p] of [[C.pageHome, 'hm'], [C.pageRace, 'rc'], [C.pageHangar, 'hg']] as const) expect(missing(page, [[`${p}Me`, 'skin', `${p}Header`, 'skin']])).toEqual([]);
+    });
+
+    it('🔴 the hangar has the row under the preview: it shows theirs, and a tap keeps the new one in the store', () => {
+      const wrap = nodesOf(built, C.pageHangar).find((n) => n.id === 'hgWrap')!;
+      const kids = (wrap.children ?? []).map((c: any) => (typeof c === 'string' ? c : c.id));
+      expect(kids.indexOf('hgSkin')).toBe(kids.indexOf('hgPreview') + 1);
+      expect(missing(C.pageHangar, [
+        ['hgMe', 'skin', 'hgSkin', 'value'], ['hgSkin', 'value', 'hgSkinSet', 'skin'], ['hgSkin', 'changed', 'hgSkinSet', 'run'],
+        ['hgSkinSet', 'app', 'hgStore', 'app'], ['hgSkinSet', 'done', 'hgStore', 'write'], ['hgT', 'yourSkin', 'hgSkin', 'label']
+      ])).toEqual([]);
     });
   });
 

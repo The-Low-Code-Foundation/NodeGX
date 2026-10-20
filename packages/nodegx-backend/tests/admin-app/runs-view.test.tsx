@@ -16,6 +16,7 @@ import { EXECUTION_STATUSES, runStatusWord } from '../../src/admin/app/format';
 import { fieldOps, windowRange, Group } from '../../src/admin/app/filters';
 import { FilterRows } from '../../src/admin/app/composers/FilterRow';
 import { RUN_KINDS } from '../../src/execution/kind';
+import { ModalHost } from '../../src/admin/app/ui/modal';
 import { PAGE_SIZE, RunsView, canCancel, groupFromQuery, listQueryString, runsFields, runsQuery } from '../../src/admin/app/views/runs';
 import { WorkflowsView, inferInputs, lastRunWord, startingRows } from '../../src/admin/app/views/workflows';
 
@@ -216,6 +217,49 @@ describe('BMG-009 AC5 — the pages at rest, over a stubbed backend', () => {
     expect(text(q(drawer, '.drawer-title, h2, h3'))).toMatch(/Run Greet/);
     expect(qa<HTMLInputElement>(drawer, '#run-payload .kv-key').map((i) => i.value)).toEqual(['name']);
     expect(text(q(drawer, '#run-inputs'))).toMatch(/ask for “name” by name/);
+    unmount(root);
+  });
+});
+
+describe('P121 TWO-004 — a run refused before its first step says why in its Detail', () => {
+  const realFetch = globalThis.fetch;
+  const REFUSED = {
+    id: 'exec_9',
+    kind: 'function',
+    workflowId: 'paystackEvent',
+    workflowName: 'paystackEvent',
+    triggerType: 'webhook',
+    status: 'error',
+    startedAt: Date.now() - 1000,
+    durationMs: 1,
+    errorMessage: 'HMAC-SHA512 signature mismatch',
+    steps: [],
+    metadata: { triggerId: 'trg_9', rejected: true }
+  };
+  beforeAll(() => {
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url = String(input);
+      const body = url === '/executions/exec_9' ? REFUSED : url.startsWith('/executions?') ? [REFUSED] : url.startsWith('/admin/triggers') ? { triggers: [{ id: 'trg_9', name: 'Paystack Ghana' }] } : {};
+      return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json', 'X-Total-Count': '1' } });
+    }) as typeof fetch;
+  });
+  afterAll(() => {
+    globalThis.fetch = realFetch;
+  });
+
+  it('the reason the run carries is in the failure band, not only in Raw JSON', async () => {
+    const root = mount(
+      <>
+        <RunsView params={['exec_9']} query={{}} />
+        <ModalHost />
+      </>
+    );
+    await settle(50);
+    await settle(50);
+    const band = qa(root, '.rec-danger');
+    expect(band.length).toBe(1);
+    expect(text(band[0])).toContain('Why it failed');
+    expect(text(band[0])).toContain('HMAC-SHA512 signature mismatch');
     unmount(root);
   });
 });

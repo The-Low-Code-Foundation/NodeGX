@@ -77,6 +77,7 @@ import {
   VISUAL_FUNCTION_LABEL
 } from './logicbuilder';
 import { ScriptUsePlan, scriptUsesPlan } from './scriptUses';
+import { QueryParamsPlan, QuerySettings, querySettingsOf } from './querySettings';
 import {
   AppStateRegistry,
   ChannelPlan,
@@ -209,7 +210,9 @@ const HTTP_CONFIG_PORTS = [
   'bodyType',
   'bodyFields',
   'authType',
-  'responseMapping'
+  'responseMapping',
+  // P18-S104-RESPONSETYPE. `allowEditOnly`, and decides how the body is read, so it is configuration like the rest.
+  'responseType'
 ];
 
 /** The standard value outputs, minus `error` — which is a state row of its own, never in the answer. */
@@ -267,6 +270,28 @@ export const HASH_TYPE = 'net.noodl.Hash';
 /** `Random Bytes` (EXP-011 §59). `crypto.getRandomValues` rendered as text — synchronous, never `Math.random()`. */
 export const RANDOM_BYTES_TYPE = 'net.noodl.RandomBytes';
 /**
+ * `Pattern Extractor` (EXP-011 §76). A regular expression over a text — `Hash`'s shape (an action port, an
+ * outcome pair, a raise on failure) with SEVEN value outputs where Hash has one, and a third signal pair
+ * (`Found` / `Not Found`) the runtime fires BEFORE `Done` off the same Extract: two RESULTS, one outcome.
+ */
+export const PATTERN_EXTRACTOR_TYPE = 'net.noodl.PatternExtractor';
+/** The crypto family's members — `node` on {@link CRYPTO_NODES}, on `crypto-out` and on `crypto-call`. */
+export type CryptoNodeKind = 'hash' | 'random-bytes' | 'pattern';
+/**
+ * `Pattern Extractor`'s value outputs (EXP-011 §76), each a row of its own when read outside the chain —
+ * and, unlike the two crypto rows, each SEEDED: `initialize` writes every internal (`match: null`, `[]`,
+ * `{}`, `''`) and the getters answer them, so nothing here is ever undefined. `tsType` is what the getter
+ * publishes; `boot` / `bootCode` is what `initialize` leaves for the getter to read.
+ */
+export const PATTERN_VALUE_OUTPUTS: Record<string, { label: string; tsType: string; boot: string | number; bootCode?: string }> = {
+  match: { label: 'Match', tsType: 'string', boot: '' },
+  matches: { label: 'Matches', tsType: 'string[]', boot: '', bootCode: '[]' },
+  groups: { label: 'Groups', tsType: 'string[]', boot: '', bootCode: '[]' },
+  firstGroup: { label: 'First Group', tsType: 'string', boot: '' },
+  namedGroups: { label: 'Named Groups', tsType: 'Record<string, string>', boot: '', bootCode: '{}' },
+  matchCount: { label: 'Match Count', tsType: 'number', boot: 0 }
+};
+/**
  * The two crypto verbs (EXP-011 §59), which are `UUID`'s shape (§37) and not a request's: read the
  * inputs the setters stored, answer a value or a failure in the one call (`_run` / `_generate`),
  * write the value row or leave it as it was, clear or write the Error, report the outcome. Two
@@ -281,16 +306,27 @@ export const RANDOM_BYTES_TYPE = 'net.noodl.RandomBytes';
 export const CRYPTO_NODES: Record<
   string,
   {
-    node: 'hash' | 'random-bytes';
-    /** The value output port. */
+    node: CryptoNodeKind;
+    /** The value output port — the ONE for the two verbs, the first of {@link PATTERN_VALUE_OUTPUTS} for the extractor. */
     output: string;
+    /**
+     * EXP-011 §76. Every value output where a node has more than one, each typed and seeded; a read of any of
+     * them is a `crypto-out` carrying the port as `field`. Absent for the two verbs (their one output is `output`).
+     */
+    values?: Record<string, { label: string; tsType: string; boot: string | number; bootCode?: string }>;
+    /**
+     * EXP-011 §76. The RESULT pulses the node fires before `Done` — `Found` when the pattern matched at least
+     * once, `Not Found` when it ran and matched nothing (ERG-001 §4: a result, not an `Unchanged`). Two more
+     * chains compiled off one Extract, printed inside the Done arm ahead of the Done chain.
+     */
+    results?: readonly ['found', 'notFound'];
     /** The action port, and what the editor shows it as. */
     trigger: string;
     triggerLabel: string;
     /** The value output's display name, for the sentence about a read nothing ever writes. */
     outputLabel: string;
     /** The lib verb, the raised code, whether the call is awaited. */
-    fn: 'tryHash' | 'tryRandomBytes';
+    fn: 'tryHash' | 'tryRandomBytes' | 'tryExtract';
     code: string;
     async: boolean;
     inputs: readonly string[];
@@ -327,10 +363,42 @@ export const CRYPTO_NODES: Record<
     numeric: 'length',
     label: 'Random Bytes',
     neverFired: 'no random bytes are ever generated'
+  },
+  // EXP-011 §76. `doExtract`: the four setters' values into `extractPattern`, every value output rewritten
+  // on every run (a failed pattern CLEARS them — where the two verbs leave their value as it was), the
+  // Error `''` on success, `pattern-extractor/extract-failed` raised before the Failure pulse, and on
+  // success `Found` or `Not Found` sent BEFORE `Done`. Synchronous.
+  [PATTERN_EXTRACTOR_TYPE]: {
+    node: 'pattern',
+    output: 'match',
+    trigger: 'extract',
+    triggerLabel: 'Extract',
+    outputLabel: 'Match',
+    fn: 'tryExtract',
+    code: 'pattern-extractor/extract-failed',
+    async: false,
+    inputs: ['text', 'pattern', 'flags', 'extractAll'],
+    label: 'Pattern Extractor',
+    neverFired: 'no pattern is ever run',
+    values: PATTERN_VALUE_OUTPUTS,
+    results: ['found', 'notFound']
   }
 };
 /** The display name of a crypto input port, for a sentence. */
-const CRYPTO_INPUT_LABELS: Record<string, string> = { value: 'Value', algorithm: 'Algorithm', encoding: 'Encoding', length: 'Length' };
+const CRYPTO_INPUT_LABELS: Record<string, string> = {
+  value: 'Value',
+  algorithm: 'Algorithm',
+  encoding: 'Encoding',
+  length: 'Length',
+  // EXP-011 §76.
+  text: 'Text',
+  pattern: 'Pattern',
+  flags: 'Flags',
+  extractAll: 'Extract All'
+};
+/** EXP-011 §76. The display name of a crypto-family value output, for the sentence about a read nothing ever writes. */
+const cryptoOutputLabel = (type: string, port: string): string =>
+  port === 'error' ? 'Error' : (CRYPTO_NODES[type].values?.[port]?.label ?? CRYPTO_NODES[type].outputLabel);
 
 /** `Screen Resolution` (EXP-011 §59). The type id IS the display name. Three numbers off one `resize` listener. */
 export const SCREEN_RESOLUTION_TYPE = 'Screen Resolution';
@@ -481,6 +549,13 @@ const CLOUD_FUNCTION_OUTPUTS = ['done', 'failure', 'completed', 'error'];
  * change of its Id (`runOnValueChange`, `controlSignal: 'fetch'`), which is the effect form.
  */
 const RECORD_TYPE = 'DbModel2';
+/**
+ * P18-S110-RUNONCHANGE. Variable's `runOnChange-variable` unticked: variablenode2.ts's change callback
+ * neither flags Value nor fires Changed, so a reader keeps what it read until a Fetch. The exported
+ * `useValue` is live — a reader of that node is refused rather than made fresher than the runtime.
+ */
+const VARIABLE_FROZEN =
+  'its Variable changes box is unticked under Run On Value Change — it keeps the value it read until a Fetch, and the exported variable is read live';
 const RECORD_OUTPUTS = ['done', 'failure', 'completed', 'error', 'id'];
 
 /**
@@ -574,7 +649,7 @@ export const APP_ERROR_TS_TYPE = '{ code: string; message: string; nodeId: strin
 export const STREAM_PARSER_TYPE = 'net.noodl.JSONStreamParser';
 export const STREAM_BUFFER_TYPE = 'net.noodl.StreamBuffer';
 export const TEXT_ACCUMULATOR_TYPE = 'net.noodl.TextAccumulator';
-export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat';
+export type StreamKind = 'parser' | 'buffer' | 'accumulator' | 'sse' | 'websocket' | 'subscription' | 'repeat' | 'dispatcher' | 'handler' | 'history' | 'undo' | 'snapshot' | 'optimistic' | 'signin';
 /** EXP-011 §64. `Server-Sent Events` — the fourth member of the table: no data port, two Actions, its own module. */
 export const SSE_TYPE = 'net.noodl.SSE';
 /** EXP-011 §65. `WebSocket` — the fifth member: a data port (Message) that only the Send verb carries, three Actions, its own module. */
@@ -591,6 +666,35 @@ export const SUBSCRIBE_TO_CHANGES_TYPE = 'SubscribeToChanges';
  * where Delay's per-verb callbacks (§39) could not carry a node whose Tick belongs to the node and whose Count is a value.
  */
 export const REPEAT_TYPE = 'Repeat';
+/**
+ * EXP-011 §77. `Action Dispatcher` and `Action Handler` — the eighth and ninth members, one module (`src/lib/actions.ts`)
+ * holding the app's one registry, so the two meet across components by channel name alone, as in the runtime.
+ */
+export const ACTION_DISPATCHER_TYPE = 'net.noodl.ActionDispatcher';
+export const ACTION_HANDLER_TYPE = 'net.noodl.ActionHandler';
+/** The four built-in store actions (action-dispatcher.ts BUILT_IN_ACTIONS) — a dispatcher that enables one is refused in this slice. */
+export const ACTION_BUILT_INS = ['SET_STORE', 'MERGE_STORE', 'DELETE_STORE_KEY', 'CLEAR_STORE'] as const;
+/**
+ * EXP-011 §78. `State History`, `Undo / Redo` and `State Snapshot` — the tenth, eleventh and twelfth members, one module
+ * (`src/lib/history.ts`) holding the app's one history manager and its named checkpoints over the exported Global Store.
+ * Each names its store by a literal Store Name, printed as the store module itself (`store: app`), so the history reads
+ * and writes the same `store()` the app's Set and Subscribe nodes do.
+ */
+export const STATE_HISTORY_TYPE = 'net.noodl.StateHistory';
+export const UNDO_REDO_TYPE = 'net.noodl.StateHistory.Undo';
+export const STATE_SNAPSHOT_TYPE = 'net.noodl.StateSnapshot';
+/**
+ * EXP-011 §78 part 2. `Optimistic Update` — the thirteenth member, in the same module: a patch on the exported Global Store
+ * (apply now, commit or roll back later, overlapping patches handing values to each other) is one write through the
+ * history's store seam, so the history records it and every Subscribe sees it.
+ */
+export const OPTIMISTIC_UPDATE_TYPE = 'net.noodl.OptimisticUpdate';
+/**
+ * EXP-011 §79. `Sign In With` — the fourteenth member, its own module (`src/lib/signIn.ts`): a launcher (Do hands the browser
+ * over to the backend's `/oauth/<provider>/start`) and a receiver (at mount it hears the sign-in coming back, which the
+ * client consumes when the app starts). Rides EXP-009's client, so it is kept only where the project declares a backend.
+ */
+export const SIGN_IN_WITH_TYPE = 'net.noodl.user.SignInWith';
 /** EXP-011 §66. The structural RealtimeError — `src/lib/realtime.ts`'s, spelled so a store row needs no import. */
 export const REALTIME_ERROR_TS_TYPE = '{ message: string; code: string; kind: string } | null';
 export interface StreamValueField {
@@ -606,11 +710,13 @@ export interface StreamNodeSpec {
   hook: string;
   localStem: string;
   /** The module the hook lives in (component.ts maps it to a path; emitApp.ts ships it). */
-  lib: 'streaming' | 'sse' | 'websocket' | 'realtime' | 'repeat';
+  lib: 'streaming' | 'sse' | 'websocket' | 'realtime' | 'repeat' | 'actions' | 'history' | 'signIn';
   /** The runtime file the hook transcribes, for the emitted comment. */
   sourceFile: string;
   /** The data port, delivered with the pulse — absent on a node whose actions carry nothing (§64's SSE). */
   data?: { port: string; displayName: string };
+  /** EXP-011 §78. The input naming the store module the hook is handed (StreamPlan.store) — never an option. */
+  store?: { port: string; displayName: string };
   /** The config ports, read live off the options object. `param` names the on-disk parameter / wire port where it differs from the option (§66's Class is `collectionName` on disk). */
   config: Array<{ port: string; displayName: string; param?: string }>;
   /** The action ports: the verb on the handle, and whether the call carries the data port's value. */
@@ -843,12 +949,224 @@ export const STREAM_NODES: Record<string, StreamNodeSpec> = {
     values: {
       count: { tsType: 'number', cast: 'number', maybeUndefined: false }
     }
+  },
+  // EXP-011 §77. Action is the data port — stored by its setter, read by Dispatch at the pulse (the runtime acts on the
+  // signal at once, never deferred, so the action that belongs to the pulse has already landed); the other nine inputs
+  // are config, applied through the node's setters as they change; the four per-action Events, Idle, Refused, Cancelled
+  // and the outcome trio are the listeners in actiondispatchernode.ts's declaration order; every value a live getter.
+  // Payload and Result are undefined until the first action, as the node's `_internal` holds them.
+  [ACTION_DISPATCHER_TYPE]: {
+    kind: 'dispatcher',
+    displayName: 'Action Dispatcher',
+    hook: 'useActionDispatcher',
+    localStem: 'Dispatcher',
+    lib: 'actions',
+    sourceFile: 'actiondispatchernode.ts',
+    data: { port: 'action', displayName: 'Action' },
+    config: [
+      { port: 'channel', displayName: 'Channel' },
+      { port: 'builtIns', displayName: 'Enabled Built-ins' },
+      { port: 'storeName', displayName: 'Store Name' },
+      { port: 'allowedKeys', displayName: 'Allowed Keys' },
+      { port: 'handlerTimeout', displayName: 'Handler Timeout (ms)' },
+      { port: 'waitForHandler', displayName: 'Wait For Handler (ms)' },
+      { port: 'maxQueueSize', displayName: 'Max Queue Size' },
+      { port: 'rateLimit', displayName: 'Rate Limit' },
+      { port: 'rateLimitWindow', displayName: 'Rate Limit Window (ms)' }
+    ],
+    actions: { dispatch: { verb: 'dispatch', takesData: true }, cancel: { verb: 'cancel', takesData: false } },
+    signals: ['dispatched', 'actionCompleted', 'failed', 'idle', 'refused', 'cancelled', ...OUTCOME_SIGNALS],
+    values: {
+      actionType: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      actionId: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      payload: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      result: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      refusedType: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      refusalReason: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      refusalMessage: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      lastError: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      queueSize: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      isExecuting: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      waitingFor: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      completedCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      failedCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      refusedCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      cancelledCount: { tsType: 'number', cast: 'number', maybeUndefined: false }
+    }
+  },
+  // EXP-011 §77. No data port; six config inputs (Channel, Action Type and Enabled re-register, as the runtime's scheduled
+  // setup does; Result and Error Message are read when the action completes or fails); Complete and Fail carry nothing;
+  // Trigger and the outcome pair are the listeners (no Unchanged: neither verb has a state where nothing needs doing).
+  [ACTION_HANDLER_TYPE]: {
+    kind: 'handler',
+    displayName: 'Action Handler',
+    hook: 'useActionHandler',
+    localStem: 'Handler',
+    lib: 'actions',
+    sourceFile: 'actionhandlernode.ts',
+    config: [
+      { port: 'channel', displayName: 'Channel' },
+      { port: 'actionType', displayName: 'Action Type' },
+      { port: 'enabled', displayName: 'Enabled' },
+      { port: 'autoComplete', displayName: 'Auto Complete' },
+      { port: 'result', displayName: 'Result' },
+      { port: 'errorMessage', displayName: 'Error Message' }
+    ],
+    actions: { complete: { verb: 'complete', takesData: false }, fail: { verb: 'fail', takesData: false } },
+    signals: ['trigger', 'done', 'completed', 'failure'],
+    values: {
+      payload: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      actionId: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      registered: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      triggeredCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      error: { tsType: 'string', cast: 'string', maybeUndefined: false }
+    }
+  },
+  // EXP-011 §78. Store Name is the store module (StreamPlan.store), never an option; the other four inputs are config,
+  // applied through the node's setters as they change (the runtime's scheduled setup: reconfigure in place, keeping the
+  // history). Clear History carries nothing. History Changed and the outcome pair are the listeners (no Failure: the
+  // node is the tracker, so there is no store it can be asked for and fail to find). Every value a live getter.
+  [STATE_HISTORY_TYPE]: {
+    kind: 'history',
+    store: { port: 'storeName', displayName: 'Store Name' },
+    displayName: 'State History',
+    hook: 'useStateHistory',
+    localStem: 'History',
+    lib: 'history',
+    sourceFile: 'statehistorynode.ts',
+    config: [
+      { port: 'trackKeys', displayName: 'Track Keys' },
+      { port: 'maxHistory', displayName: 'Max History' },
+      { port: 'coalesceMs', displayName: 'Coalesce (ms)' },
+      { port: 'enabled', displayName: 'Enabled' }
+    ],
+    actions: { clearHistory: { verb: 'clearHistory', takesData: false } },
+    signals: ['historyChanged', 'done', 'completed', 'unchanged'],
+    values: {
+      historySize: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      currentIndex: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      canUndo: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      canRedo: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      fullyRestorable: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      byReferenceKeys: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      history: { tsType: 'unknown[]', cast: 'array', maybeUndefined: false }
+    }
+  },
+  // EXP-011 §78. Target Index is the data port, carried by Jump To and read at the pulse (the runtime defers the jump
+  // to the end of the frame so the index that arrived with it is the one it reads); Undo and Redo carry nothing. The
+  // three per-step Events and the outcome trio are the listeners in undonode.ts's declaration order. Error is
+  // undefined until a step fails, as the node's `_internal` holds it.
+  [UNDO_REDO_TYPE]: {
+    kind: 'undo',
+    store: { port: 'storeName', displayName: 'Store Name' },
+    displayName: 'Undo / Redo',
+    hook: 'useUndoRedo',
+    localStem: 'UndoRedo',
+    lib: 'history',
+    sourceFile: 'undonode.ts',
+    data: { port: 'targetIndex', displayName: 'Target Index' },
+    config: [],
+    actions: {
+      undo: { verb: 'undo', takesData: false },
+      redo: { verb: 'redo', takesData: false },
+      jumpTo: { verb: 'jumpTo', takesData: true }
+    },
+    signals: ['undone', 'redone', 'jumped', ...OUTCOME_SIGNALS],
+    values: {
+      fullyRestorable: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      byReferenceKeys: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      error: { tsType: 'string', cast: 'string', maybeUndefined: true }
+    }
+  },
+  // EXP-011 §78. Snapshot Name is the data port, carried by both Save and Restore and read at the pulse; Snapshot Data
+  // is config (an exported Snapshot fed back in wins over the name). Saved, Restored and the outcome pair (no
+  // Unchanged: Save copies and Restore writes every time) are the listeners. Snapshot and Error are undefined until a
+  // Save or Restore, as the node's `_internal` holds them.
+  [STATE_SNAPSHOT_TYPE]: {
+    kind: 'snapshot',
+    store: { port: 'storeName', displayName: 'Store Name' },
+    displayName: 'State Snapshot',
+    hook: 'useStateSnapshot',
+    localStem: 'Snapshot',
+    lib: 'history',
+    sourceFile: 'statesnapshotnode.ts',
+    data: { port: 'snapshotName', displayName: 'Snapshot Name' },
+    config: [{ port: 'snapshotData', displayName: 'Snapshot Data' }],
+    actions: { save: { verb: 'save', takesData: true }, restore: { verb: 'restore', takesData: true } },
+    signals: ['saved', 'restored', 'done', 'completed', 'failure'],
+    values: {
+      snapshot: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      fullyRestorable: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      byReferenceKeys: { tsType: 'string', cast: 'string', maybeUndefined: false },
+      error: { tsType: 'string', cast: 'string', maybeUndefined: true }
+    }
+  },
+  // EXP-011 §78 part 2. Optimistic Value is the data port, carried by Apply and read at the pulse (the runtime defers the
+  // apply to the end of the frame, so the value that arrived with it is the one it writes); Commit and Rollback carry
+  // nothing. Key, Error Message, Transaction Id, Timeout and When Removed are config, applied through the node's setters
+  // as they change (a new Key re-subscribes, the runtime's scheduled setup). The four lifecycle Events and the outcome
+  // trio are the listeners. Value follows the key whoever writes it; Previous Value, Transaction Id and Error are
+  // undefined until an Apply (or a refusal), as the node's `_internal` holds them.
+  [OPTIMISTIC_UPDATE_TYPE]: {
+    kind: 'optimistic',
+    store: { port: 'storeName', displayName: 'Store Name' },
+    displayName: 'Optimistic Update',
+    hook: 'useOptimisticUpdate',
+    localStem: 'Update',
+    lib: 'history',
+    sourceFile: 'optimisticupdatenode.ts',
+    data: { port: 'optimisticValue', displayName: 'Optimistic Value' },
+    config: [
+      { port: 'key', displayName: 'Key' },
+      { port: 'errorMessage', displayName: 'Error Message' },
+      { port: 'transactionId', displayName: 'Transaction Id' },
+      { port: 'timeout', displayName: 'Timeout (ms)' },
+      { port: 'onDispose', displayName: 'When Removed' }
+    ],
+    actions: {
+      apply: { verb: 'apply', takesData: true },
+      commit: { verb: 'commit', takesData: false },
+      rollback: { verb: 'rollback', takesData: false }
+    },
+    signals: ['applied', 'committed', 'rolledBack', 'timedOut', ...OUTCOME_SIGNALS],
+    values: {
+      value: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      previousValue: { tsType: 'unknown', cast: 'unknown', maybeUndefined: true },
+      isPending: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      pendingCount: { tsType: 'number', cast: 'number', maybeUndefined: false },
+      isCommitted: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      isRolledBack: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      transactionId: { tsType: 'string', cast: 'string', maybeUndefined: true },
+      error: { tsType: 'string', cast: 'string', maybeUndefined: true }
+    }
+  },
+  // EXP-011 §79. Provider and Redirect are config, held as they arrive and read at the press; Do is the one Action and
+  // carries nothing. Done, Completed and Failure are the listeners, in the node's declaration order (outcomeOutputs; no
+  // Unchanged). Signing In starts false (initialize); Error and Notice are undefined until a refusal or a return.
+  [SIGN_IN_WITH_TYPE]: {
+    kind: 'signin',
+    displayName: 'Sign In With',
+    hook: 'useSignInWith',
+    localStem: 'SignIn',
+    lib: 'signIn',
+    sourceFile: 'signinwith.ts',
+    config: [
+      { port: 'provider', displayName: 'Provider' },
+      { port: 'redirect', displayName: 'Redirect' }
+    ],
+    actions: { signIn: { verb: 'signIn', takesData: false } },
+    signals: ['done', 'completed', 'failure'],
+    values: {
+      signingIn: { tsType: 'boolean', cast: 'boolean', maybeUndefined: false },
+      error: { tsType: 'string', cast: 'string', maybeUndefined: true },
+      notice: { tsType: 'string', cast: 'string', maybeUndefined: true }
+    }
   }
 };
 
 /** EXP-011 §64. The type id behind a `stream-out`'s kind — the one ladder component.ts and the maybe-undefined answer share. */
 export function streamTypeOfKind(kind: StreamKind): string {
-  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
+  return kind === 'parser' ? STREAM_PARSER_TYPE : kind === 'buffer' ? STREAM_BUFFER_TYPE : kind === 'accumulator' ? TEXT_ACCUMULATOR_TYPE : kind === 'sse' ? SSE_TYPE : kind === 'websocket' ? WEBSOCKET_TYPE : kind === 'repeat' ? REPEAT_TYPE : kind === 'dispatcher' ? ACTION_DISPATCHER_TYPE : kind === 'handler' ? ACTION_HANDLER_TYPE : kind === 'history' ? STATE_HISTORY_TYPE : kind === 'undo' ? UNDO_REDO_TYPE : kind === 'snapshot' ? STATE_SNAPSHOT_TYPE : kind === 'optimistic' ? OPTIMISTIC_UPDATE_TYPE : kind === 'signin' ? SIGN_IN_WITH_TYPE : SUBSCRIBE_TO_CHANGES_TYPE;
 }
 export const RUN_TASKS_TYPE = 'RunTasks';
 /** EXP-011 §57. `Repeater Item` — the type id is the runtime's `name`, not the display name. */
@@ -884,6 +1202,16 @@ const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
   [SUBSCRIBE_TO_CHANGES_TYPE]: STREAM_NODES[SUBSCRIBE_TO_CHANGES_TYPE].signals,
   // GAM-013. Tick and the outcome trio, the same footing.
   [REPEAT_TYPE]: STREAM_NODES[REPEAT_TYPE].signals,
+  // EXP-011 §77. The dispatcher's and the handler's signals, the same footing.
+  [ACTION_DISPATCHER_TYPE]: STREAM_NODES[ACTION_DISPATCHER_TYPE].signals,
+  [ACTION_HANDLER_TYPE]: STREAM_NODES[ACTION_HANDLER_TYPE].signals,
+  // EXP-011 §78. The history family's signals, the same footing.
+  [STATE_HISTORY_TYPE]: STREAM_NODES[STATE_HISTORY_TYPE].signals,
+  [UNDO_REDO_TYPE]: STREAM_NODES[UNDO_REDO_TYPE].signals,
+  [STATE_SNAPSHOT_TYPE]: STREAM_NODES[STATE_SNAPSHOT_TYPE].signals,
+  [OPTIMISTIC_UPDATE_TYPE]: STREAM_NODES[OPTIMISTIC_UPDATE_TYPE].signals,
+  // EXP-011 §79. Sign In With's outcomes, the same footing.
+  [SIGN_IN_WITH_TYPE]: STREAM_NODES[SIGN_IN_WITH_TYPE].signals,
   [LOG_TYPE]: ['done'],
   [TIMER_TYPE]: TIMER_OUTPUTS,
   [VALUE_CHANGED_TYPE]: ['valueChanged'],
@@ -898,6 +1226,8 @@ const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
   // EXP-011 §59. The two crypto verbs, UUID's shape; `completed` is refused by their compile, on UUID's sentence.
   [HASH_TYPE]: ['done', 'failure', 'completed'],
   [RANDOM_BYTES_TYPE]: ['done', 'failure', 'completed'],
+  // EXP-011 §76. The extractor's outcome pair plus its two result pulses; `completed` refused on the same sentence.
+  [PATTERN_EXTRACTOR_TYPE]: ['done', 'failure', 'found', 'notFound', 'completed'],
   [CLOUD_FUNCTION_TYPE]: ['done', 'failure', 'completed'],
   [RECORD_TYPE]: ['done', 'failure', 'completed'],
   // EXP-011 §45. The picker owns an Unchanged arm (cancel / nothing chosen / superseded).
@@ -948,16 +1278,16 @@ const NOW_OUTPUTS: Record<string, 'date' | 'timestamp' | 'iso'> = {
 /**
  * One argument of an emitted date helper, in the helper's own parameter order.
  *
- * `enum: true` marks a port the editor constrains to a fixed set. A wire on one of those defers
- * the node — not out of caution, but because the interpreter **throws** on a unit it does not
- * know (`addToDate`'s final `else`) rather than answering, and an export whose failure mode is a
- * crash in someone's page is worse than one that says it did not translate the node.
+ * There used to be an `enum: true` here, and a wire on such a port deferred the node, because the
+ * interpreter threw on a Unit it did not know. P109 ISL-026 (P107-C16 / D15) made the setter count
+ * an unknown or empty Unit as days (`datemath.ts` `unitOrDays`), and Date Compare's Granularity
+ * never threw (an unknown one truncates nothing). So the emitted helpers take both as values,
+ * coerced as the setters coerce them, and a wired one translates (P109-S21-EXPORTDATEUNITWIRED).
  */
 interface DateArgSpec {
   port: string;
   /** What `initialize` writes — the real default. A declared `default` never runs its setter. */
   fallback?: string | number | boolean;
-  enum?: true;
 }
 
 /**
@@ -977,7 +1307,7 @@ interface DateArgSpec {
 const DATE_NODES: Record<string, { fn: DateHelper; args: DateArgSpec[]; outputs: Record<string, string | null> }> = {
   'net.noodl.DateAdd': {
     fn: 'dateAdd',
-    args: [{ port: 'input' }, { port: 'amount', fallback: 0 }, { port: 'unit', fallback: 'days', enum: true }],
+    args: [{ port: 'input' }, { port: 'amount', fallback: 0 }, { port: 'unit', fallback: 'days' }],
     outputs: { result: null }
   },
   'net.noodl.DateDifference': {
@@ -985,14 +1315,14 @@ const DATE_NODES: Record<string, { fn: DateHelper; args: DateArgSpec[]; outputs:
     args: [
       { port: 'from' },
       { port: 'to' },
-      { port: 'unit', fallback: 'days', enum: true },
+      { port: 'unit', fallback: 'days' },
       { port: 'absolute', fallback: false }
     ],
     outputs: { difference: null }
   },
   'net.noodl.DateCompare': {
     fn: 'dateCompare',
-    args: [{ port: 'a' }, { port: 'b' }, { port: 'granularity', fallback: 'millisecond', enum: true }],
+    args: [{ port: 'a' }, { port: 'b' }, { port: 'granularity', fallback: 'millisecond' }],
     outputs: { before: 'before', after: 'after', same: 'same' }
   },
   'net.noodl.DateParts': {
@@ -1044,9 +1374,9 @@ const DATE_NODES: Record<string, { fn: DateHelper; args: DateArgSpec[]; outputs:
  * because it was always read from `initialize`.
  *
  * ⚠️ `clamp` and `inputValue` are the editor-constrained pair on `Number Remapper`
- * (`allowEditOnly` and `allowConnectionOnly`), and neither constraint earns a deferral the way
- * the date family's enums do: that gate exists because `addToDate` **throws** on a unit it does
- * not know. Nothing here throws — `clamp`'s setter is `value ? true : false` and the arithmetic
+ * (`allowEditOnly` and `allowConnectionOnly`), and neither constraint earns a deferral. (The date
+ * family's enums once did, because `addToDate` threw on a unit it did not know; that gate went with
+ * P109-S21-EXPORTDATEUNITWIRED.) Nothing here throws — `clamp`'s setter is `value ? true : false` and the arithmetic
  * coerces — so a wire on either is translated rather than refused.
  */
 const UTIL_NODES: Record<
@@ -1341,6 +1671,22 @@ const USER_VERBS: Record<
  * The user family's verbs, as the `api-call` action and the session module name them.
  * `update-user` and `magic-link` are EXP-011 §44.
  */
+/** EXP-011 §90. The actions whose emitted form awaits — the ones a later sibling waited on before §90. */
+function isAwaitedAction(value: unknown): value is Extract<HandlerAction, { detached?: true }> {
+  if (value === null || typeof value !== 'object') return false;
+  const kind = (value as { kind?: unknown }).kind;
+  return (
+    kind === 'api-call' ||
+    kind === 'http-call' ||
+    kind === 'cloud-call' ||
+    kind === 'record-fetch' ||
+    kind === 'file-pick' ||
+    kind === 'file-upload' ||
+    kind === 'file-sign' ||
+    (kind === 'crypto-call' && (value as { async?: unknown }).async === true)
+  );
+}
+
 export type UserVerb = 'login' | 'logout' | 'signup' | 'update-user' | 'magic-link';
 
 /** The `User` node's outputs this slice reads off the session stub (USER-FAMILY-TARGET §4c). */
@@ -1682,7 +2028,13 @@ export type ValueExpr =
    * the chain-local (`<local>.digest` / `<local>.value`) inside the node's own Done arm. The row is
    * always maybe-undefined: neither node seeds it, so it reads nothing until the first Do.
    */
-  | { kind: 'crypto-out'; nodeId: string; node: 'hash' | 'random-bytes'; viaState?: string }
+  | { kind: 'crypto-out'; nodeId: string; node: CryptoNodeKind; viaState?: string; field?: string }
+  /**
+   * EXP-011 §76. A `Pattern Extractor`'s value output carries its port as `field` (`match`, `matches`,
+   * `groups`, `firstGroup`, `namedGroups`, `matchCount`); the row is one per field, seeded, never
+   * undefined; inside ANY of the node's four arms the read is the local's field — the Failure arm too,
+   * because a failed pattern clears the values and the render closure's row is the stale one.
+   */
   /**
    * A `Screen Resolution`'s width, height or aspect ratio (EXP-011 §59) — a number off the
    * `useScreenResolution` handle, never undefined (the hook seeds from the window at mount).
@@ -1735,7 +2087,12 @@ export type ValueExpr =
    * `local` is carried on the expression rather than looked up from the node, so the emitter
    * needs no second table to agree with about a name.
    */
-  | { kind: 'outcome-error'; nodeId: string; local: string; viaState?: string }
+  | { kind: 'outcome-error'; nodeId: string; local: string; viaState?: string; seeded?: true }
+  /**
+   * EXP-011 §76. `seeded` marks an Error row that `initialize` wrote `''` into and every run rewrites — the
+   * extractor's — so the row form is never undefined either. Absent for every other node, whose row reads
+   * undefined until the first failure.
+   */
   /**
    * One of the five **pure** date nodes (EXP-011 Tier 1.3) — `Date Add`, `Date Compare`,
    * `Date Difference`, `Date Parts`, `Date To String`.
@@ -1747,10 +2104,9 @@ export type ValueExpr =
    * a literal. They compose, which is the whole point: `Now → Date Add → Date To String` is one
    * nested expression and needs no per-consumer field to carry it.
    *
-   * ⚠️ **The configuration arguments are literals by gate, not by luck.** A wired `Unit` or
-   * `Granularity` defers: the enum is a value the editor constrains, a wire can deliver any
-   * string, and the interpreter *throws* on one it does not know rather than answering. Every
-   * other input may be wired, because none of them has a throwing branch.
+   * Every input may be wired, `Unit` and `Granularity` included since P109-S21-EXPORTDATEUNITWIRED:
+   * the emitted helpers coerce both as the setters do (`unitOrDays`; an unknown Granularity
+   * truncates nothing), and none of them has a throwing branch.
    */
   | {
       kind: 'date-call';
@@ -1785,6 +2141,12 @@ export type ValueExpr =
       fn: UtilHelper;
       args: ValueExpr[];
       cases?: Array<{ from: string; to: string | undefined }>;
+      /**
+       * P109-S21-EXPORTBLENDNAN — `blendColorKept`'s first argument: the `useRef` local holding the blend this
+       * Color Blend last received and the colour it last showed, declared once per node at the top of the component. 🔴 Both expression walkers
+       * (`collectExprUse` and `hookExprSources`) record it; missing one prints a call naming a local nobody declared.
+       */
+      kept?: string;
     }
   /**
    * A `States` node's value outputs (EXP-011 §49) — a read off the `useStates` handle the
@@ -1840,6 +2202,14 @@ export type RunTasksAction =
   | { kind: 'runtasks-run'; nodeId: string; local: string; items: ValueExpr }
   | { kind: 'runtasks-abort'; nodeId: string; local: string };
 
+/**
+ * P18-S116-QUERYFETCH. A `Query Records`' Fetch (`storageFetch` → `scheduleFetch`): the query asks again, its wired
+ * filter values read at the pulse, and the list is replaced by the answer. `void fetch<Plural>(…).then(set<Plural>)`:
+ * the runtime's fetch is scheduled, so the chain does not wait for it. `values` are {@link QueryPlan.wiredValues}, carried
+ * so every walker sees what the action reads. A query the export does not keep prints nothing (`expandActions`).
+ */
+export type QueryFetchAction = { kind: 'query-fetch'; nodeId: string; values: Array<{ name: string; expr: ValueExpr }> };
+
 export type ScriptSignalAction = {
   kind: 'script-signal';
   nodeId: string;
@@ -1865,6 +2235,12 @@ export type HandlerAction =
       to: string;
       pathParams: Array<{ name: string; expr: ValueExpr }>;
       query: Array<{ name: string; expr: ValueExpr }>;
+      /**
+       * P18-S110-NEWTAB. `Open In New Tab` ticked: router.tsx `navigateAsync` builds the page's
+       * url and calls `window.open(url, '_blank')` — no features string, no blocked test, `Done`
+       * either way. The exported url is the BrowserRouter path the in-place arm would push.
+       */
+      newTab?: true;
     }
   /**
    * `Navigate To Path` (EXP-011 §15, session 44) — a navigation to an **authored path string**
@@ -1904,7 +2280,7 @@ export type HandlerAction =
       nodeId: string;
       to: string;
       pathParams: Array<{ name: string; expr: ValueExpr }>;
-      /** `omittable` values print inside the `if` the runtime's `!== undefined` test describes. */
+      /** `omittable` values print inside the `if` the runtime's `v !== undefined && v !== null` test describes (P107-D21). */
       query: Array<{ name: string; expr: ValueExpr; omittable: boolean }>;
       /** The `const` the omittable form collects into; unused when every value is present. */
       queryLocal: string;
@@ -2110,8 +2486,12 @@ export type HandlerAction =
    * the compile proves it rather than assuming it: see `compileCollectionRemove`.
    */
   | { kind: 'collection-remove'; collectionName: string; repeaterId: string; then: HandlerAction[]; minted?: MintedTarget }
-  /** A Condition in a handler chain: `if (cond) whenTrue; else whenFalse;` (LOGIC-TARGET §3). */
-  | { kind: 'branch'; cond: ValueExpr; whenTrue: HandlerAction[]; whenFalse: HandlerAction[] }
+  /**
+   * A Condition in a handler chain: `if (cond) whenTrue; else whenFalse;` (LOGIC-TARGET §3). `flat` (EXP-011 §87): a
+   * Condition whose answer is a literal and which writes its sinks' cells has one side; its `cond` is `true`, its
+   * `whenFalse` empty, and `whenTrue` prints as following statements.
+   */
+  | { kind: 'branch'; cond: ValueExpr; whenTrue: HandlerAction[]; whenFalse: HandlerAction[]; flat?: true }
   /** Fires the component's own signal output: `onWaved?.()` (COMPONENT-OUTPUTS-TARGET §4). */
   | { kind: 'output-signal'; prop: string }
   /**
@@ -2133,8 +2513,18 @@ export type HandlerAction =
    * `materialize` (CONTROLLED-STATE-TARGET §4f) names the state var the run writes when the
    * node's outputs also feed render sinks: `setStockCheckOut(stockCheck({ … }))` precedes the
    * chain, and render reads go through the var.
+   * `ticked` (P18-S119-TICKEDRUN) marks the run a ticked input's new value starts (`TickedRunPlan`): it has no Done, and
+   * its effect has already recorded the values it read.
    */
-  | { kind: 'jsfun-run'; nodeId: string; then: HandlerAction[]; materialize?: string }
+  | { kind: 'jsfun-run'; nodeId: string; then: HandlerAction[]; materialize?: string; ticked?: true }
+  /**
+   * EXP-011 §86. The chains of a Function's own signals (`Outputs.go()`), first in its run's `then`: one loop over the
+   * pulses the run sent, in the order it sent them, each arm (`jsfun-pulse`) the chain of one signal. Inside an arm the
+   * Function's outputs read as that pulse's targets read them (C7 lockstep, `src/lib/functionRun.ts`).
+   */
+  | { kind: 'jsfun-pulses'; nodeId: string; then: HandlerAction[] }
+  /** EXP-011 §86. One signal's chain inside `jsfun-pulses`: the actions its wires describe, in wire order. */
+  | { kind: 'jsfun-pulse'; nodeId: string; signal: string; then: HandlerAction[] }
   /**
    * A state var write (CONTROLLED-STATE-TARGET §3.3). `op` is a functional update
    * (`setX(v => !v)`) — immune to closure staleness, which is why Switch's `flip` and
@@ -2156,6 +2546,13 @@ export type HandlerAction =
    */
   | {
       kind: 'api-call';
+      /**
+       * EXP-011 §90. Set by the planner's last pass where a later action of the same list follows it: printed as
+       * `void (async () => { … })();`, so the click's later wires run before the answer arrives, as the runtime's do
+       * (each node acts after the update; the request answers later). A failure before the first await (the
+       * `Missing Record Id` guard) still runs its chain first, as the runtime's synchronous `setError` does.
+       */
+      detached?: true;
       nodeId: string;
       /** What produced the call — for notes and the stub's provenance line. EXP-011 §62: the relation pair rides the same action. */
       verb: 'create' | 'update' | 'delete' | RelationVerb | UserVerb;
@@ -2204,6 +2601,12 @@ export type HandlerAction =
        */
       clearErrorOnDone?: true;
       then: HandlerAction[];
+      /**
+       * EXP-011 §90. The `failure` chain, printed in the catch after the Error row and the raise: the runtime's
+       * `setError` writes the row, raises, then pulses Failure (`node.ts` `reportOutcome`). A read of this node's Error
+       * inside it is the catch's `<errorState>Message` local (`outcome-error`), never the row.
+       */
+      failThen: HandlerAction[];
     }
   /**
    * An `HTTP Request`'s `Fetch` (EXP-011 Tier 1.2) — the vocabulary's second asynchronous action,
@@ -2236,6 +2639,8 @@ export type HandlerAction =
    */
   | {
       kind: 'http-call';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       /** `src/api/http.ts`'s exported function for this node. */
       fnName: string;
@@ -2266,6 +2671,8 @@ export type HandlerAction =
    */
   | {
       kind: 'cloud-call';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       /** `src/api/functions.ts`'s exported function for this node. */
       fnName: string;
@@ -2296,6 +2703,8 @@ export type HandlerAction =
    */
   | {
       kind: 'record-fetch';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       /** The collection module's exported `fetch<Type>ById`. */
       fnName: string;
@@ -2306,13 +2715,6 @@ export type HandlerAction =
       materialize?: string;
       /** The `Error` output's row — written on every failure, never cleared (the runtime's own). */
       errorState: string;
-      /**
-       * §43.2 — the effect form. `setModelID` rebinds the node to a fresh model the moment a new
-       * Id arrives (its outputs read undefined before any read) and binds *nothing* on an empty
-       * one, reading nothing and reporting nothing — so the effect clears the row first and
-       * returns silently on an empty Id, where the wired form's Fetch throws `Missing Id.`.
-       */
-      viaEffect?: true;
       then: HandlerAction[];
       failThen: HandlerAction[];
     }
@@ -2336,6 +2738,8 @@ export type HandlerAction =
    */
   | {
       kind: 'file-pick';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       accept?: ValueExpr;
       capture?: ValueExpr;
@@ -2355,6 +2759,8 @@ export type HandlerAction =
    */
   | {
       kind: 'file-upload';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       file: ValueExpr;
       /** `Private` — absent where unset or authored false; a literal `true` or the wired expression otherwise. */
@@ -2370,6 +2776,8 @@ export type HandlerAction =
    */
   | {
       kind: 'file-sign';
+      /** EXP-011 §90, as `api-call`'s. */
+      detached?: true;
       nodeId: string;
       file: ValueExpr;
       materialize?: string;
@@ -2416,6 +2824,7 @@ export type HandlerAction =
   | DragSnapAction
   | ScriptSignalAction
   | RunTasksAction
+  | QueryFetchAction
   | StreamAction;
 
 /**
@@ -2582,9 +2991,11 @@ export interface MintedArrayPlan {
  */
 export type CryptoCallAction = {
   kind: 'crypto-call';
+  /** EXP-011 §90, as `api-call`'s. */
+  detached?: true;
   nodeId: string;
-  node: 'hash' | 'random-bytes';
-  fn: 'tryHash' | 'tryRandomBytes';
+  node: CryptoNodeKind;
+  fn: 'tryHash' | 'tryRandomBytes' | 'tryExtract';
   /** The raised code — `hash/failed` / `random-bytes/failed` (the node files). */
   code: string;
   /** Whether the call is awaited (`crypto.subtle.digest` is a promise; `getRandomValues` is not). */
@@ -2602,8 +3013,16 @@ export type CryptoCallAction = {
   materialize?: string;
   /** The Error row, allocated by a read. */
   errorMaterialize?: string;
+  /**
+   * EXP-011 §76. A `Pattern Extractor`'s rows, one per value output something reads outside the chain —
+   * written from the local's field of the same name BEFORE the arms, on every run, as `doExtract` writes them.
+   */
+  materializeByPort?: Array<{ port: string; state: string }>;
   then: HandlerAction[];
   failThen: HandlerAction[];
+  /** EXP-011 §76. The `Found` / `Not Found` chains — printed inside the Done arm, ahead of `then`. Empty for the two verbs. */
+  foundThen: HandlerAction[];
+  notFoundThen: HandlerAction[];
 };
 
 /**
@@ -2755,6 +3174,25 @@ export interface JsFunctionPlan {
    * invoked — `run` wired: calls inline inside its own handler chain only (grade I).
    */
   mode: 'reactive' | 'invoked';
+  /**
+   * EXP-011 §86. Function only, invoked only: a run of it sends a signal of its own that a chain consumes, or (P18-S121-
+   * FRESHOUTPUTS) it materializes a row a reader reads between runs. The wrapper then takes its `Outputs` record as a
+   * parameter, so `runFunction` can hand it the recording one, and the component keeps the node's last values across
+   * runs (`functionNode`), as the runtime's node does.
+   */
+  pulsed?: true;
+  /**
+   * P18-S110-EVALATLOAD. Expression only, reactive only: present when nothing is sure to arrive at
+   * load — no input has a literal (a parameter is set at load, so it always arrives) and the body
+   * reads at least one port. `unset` names the wire-fed inputs; while every one reads `undefined`
+   * nothing has arrived, because the runtime never delivers `undefined` over a wire.
+   *
+   * That is the state GAM-001's load evaluation runs in (`expression.ts` `_scheduleEvaluateExpression`):
+   * ticked (`evaluate`, the default) it evaluates over the unset inputs but publishes no answer for
+   * a throw or a NaN — Result stays `null`, where an arrival's evaluation answers `0` and `NaN`;
+   * unticked (`wait`) it publishes nothing until an input arrives.
+   */
+  loadGate?: { unset: string[]; atLoad: 'evaluate' | 'wait' };
 }
 
 export interface ReceiverPlan {
@@ -2828,7 +3266,9 @@ export interface StateVarPlan {
     | 'crypto'
     | 'crypto-error'
     /** EXP-011 §61 — a pusher's back-results row (`Record<string, unknown>`, boots `{}`). */
-    | 'stack-back';
+    | 'stack-back'
+    /** EXP-011 §87 — a Mounted or Visible written by the Evaluate of the unticked Conditions wired into it. */
+    | 'condition';
   /** The provenance comment above the row. */
   comment: string;
 }
@@ -2900,6 +3340,27 @@ export interface ValueChangedEffectPlan {
   /** The `useRef` local holding the last value the effect saw. */
   lastLocal: string;
   actions: HandlerAction[];
+  comment: string;
+}
+
+/**
+ * P18-S119-TICKEDRUN. A Function or Expression whose Run is wired also runs when one of its value inputs whose Run On Value
+ * Change box is ticked (or unset, which is ticked) gets a new value (NDA-017 §2, `setScriptInputValue`). A wired value
+ * arrives when its source first has one and whenever it changes after; a literal arrives once, at load. Such a run sends
+ * the Function's own signals and writes its outputs, but never Done (no Run sent it). Two arrivals, or an arrival and a
+ * Run, in one update make one run.
+ *
+ * Printed as a `useEffect` keyed on the watched values' sources, beside the Run chains: it asks `tickedArrival` whether
+ * a value arrived (not `undefined`, not the one held), and runs `action` if so. A Run records what it read the same way,
+ * so a click that sets a watched value and sends Run makes one run, the Run's, with its Done (measured, s121 drive S4).
+ * Measured in the viewer (s121 drive S0): at load the arrival's run comes first, then a Did Mount's Run, two runs.
+ */
+export interface TickedRunPlan {
+  nodeId: string;
+  /** The ticked inputs the runtime delivers, in input order: a wired one as the value it reads, a literal as itself. */
+  watch: ValueExpr[];
+  /** The run without its Done: the body, its signals' chains, its §4f write. `ticked: true`. */
+  action: Extract<HandlerAction, { kind: 'jsfun-run' }>;
   comment: string;
 }
 
@@ -3114,6 +3575,8 @@ export interface StreamPlan {
   config: Array<{ port: string; expr: ValueExpr }>;
   /** The signal outputs, as the chains wired off them. */
   listeners: Record<string, HandlerAction[]>;
+  /** EXP-011 §78. The store a history-family node names — printed as its store module (`store: app`) and imported. */
+  store?: string;
   comment: string;
 }
 
@@ -3235,6 +3698,26 @@ export interface QueryPlan {
   fetchName: string;
   typeName: string;
   moduleBase: string;
+  /**
+   * P18-S115-QUERYFILTER (EXP-011 §82). The `where` / `order` / `limit` / `skip` the runtime sends for this node, its
+   * filter translated by the runtime's own translator (`querySettings.ts`). Absent when it sends none of them, so an
+   * unfiltered query's call is the bare `fetch<Plural>()` it always was.
+   */
+  params?: QueryParamsPlan;
+  /**
+   * P18-S115-QUERYPARAMS. With `params.wired`: each wired filter value as the render read its wire resolves to, in
+   * `params.wired.params` order. The query re-runs whenever one changes (`setQueryParameter`, its box ticked).
+   */
+  wiredValues?: Array<{ name: string; expr: ValueExpr }>;
+  /** The project declares a backend, so `src/api/client.ts` exists to put each value on the wire (`filterValue`). */
+  wiredClient?: boolean;
+  /**
+   * P18-S116-QUERYFETCH. Its Fetch is wired, so the query asks when Fetch is sent (`query-fetch` in the sender's
+   * chain). `mount`: it also asks as the node is made, its Class box ticked or its Query settings box ticked with a
+   * setting authored (a wired Fetch settles both unticked, NDA-017; an author can tick them again). `onValues`: the
+   * wired filter values' boxes are ticked, so a new value asks too (the effect, mount included).
+   */
+  fetchWired?: { mount: boolean; onValues: boolean };
 }
 
 /**
@@ -3343,6 +3826,11 @@ export interface HttpCallPlan {
   method: string;
   /** Milliseconds; `timeout || 30000`, the runtime's own defaulting, already applied. */
   timeout: number;
+  /**
+   * P18-S104-RESPONSETYPE — how the body is read (FED-001 §3.2). `setResponseType` stores `value || 'auto'` and the
+   * fetch tests for `'text'` and `'json'` only, so any other value reads as Auto; that defaulting is applied here.
+   */
+  responseType: 'auto' | 'text' | 'json';
   pathParams: HttpValuePlan[];
   queryParams: HttpValuePlan[];
   headers: HttpValuePlan[];
@@ -3395,6 +3883,18 @@ export interface RecordReadPlan {
   idLocal: string;
   /** Columns the graph reads off this node that the schema snapshot does not carry — `unknown` in the interface. */
   reads: Array<{ name: string; tsType: string }>;
+  /**
+   * P18-S111-RECORDLIVE. "Record properties" ticked under Run On Value Change, the default: the node shows the app's one
+   * copy of its record, so a write anywhere in the app reaches its outputs (dbmodelnode2.ts `onModelChangedCallback`).
+   * Unticked, the callback returns early and the outputs move only on the node's own read, which is the row as it was.
+   * False where the project declares no backend: the read is a stub that throws and no client is emitted.
+   */
+  live: boolean;
+  /**
+   * P18-S113-IDBINDREAD. Fetch unwired: the node never reads, its Id only binds the row to the client's copy of the
+   * record (`RecordEffectPlan`). Its class's module carries no `fetch<Type>ById` for it, and the client holds records.
+   */
+  binds?: true;
 }
 
 /**
@@ -3445,6 +3945,26 @@ export interface ObjectSeedPlan {
   comment: string;
 }
 
+/**
+ * P18-S116-FIELDMOUNT. A rendered text input whose Value reaches a chain the export translated (its `onChange`). The
+ * runtime's field announces its Value as it mounts: `componentDidMount` calls `setText(startValue)`, which sends
+ * `onTextChanged` with `outwardValueForFieldType(type, text)` and, through the output's `onChange`, Value Changed
+ * (TextInput.tsx, text-input.ts). So every sink of the Value, and every chain on Value Changed, runs once as the field
+ * appears, with the start value or `""`. The export runs the field's own change chain once from a mount effect, with
+ * the announced value where the chain reads the field.
+ */
+export interface FieldMountPlan {
+  inputId: string;
+  /** The text the field starts from with nothing wired, as the control's boot computes it (`String(startValue ?? '')`). */
+  start: string;
+  /**
+   * The wired Value's source, where a sync effect carries it. The runtime delivers it at node creation, before the
+   * mount, so the field announces it: `undefined` is never delivered (the start value stands), `null` clears.
+   */
+  source?: ValueExpr;
+  comment: string;
+}
+
 /** The seed as the action it prints — one patch, read off the plan so the import sweep and the emitter cannot disagree. */
 export function objectSeedAction(seed: ObjectSeedPlan): HandlerAction {
   return {
@@ -3455,11 +3975,23 @@ export function objectSeedAction(seed: ObjectSeedPlan): HandlerAction {
   };
 }
 
-/** A `Record` whose `Fetch` is unwired (EXP-011 §43): the read, run from an effect keyed on its Id. */
+/**
+ * A `Record` whose `Fetch` is unwired (EXP-011 §43, P18-S113-IDBINDREAD): the Id binds the row to the client's copy of
+ * that record, from an effect keyed on the Id. `action` is the node's `record-fetch` with empty chains (a Done or a
+ * Failure wired is refused, as neither fires without a Fetch); it carries the Id and the row the planner fills, and
+ * the emitter prints the bind from it, never the read.
+ */
 export interface RecordEffectPlan {
   nodeId: string;
   action: HandlerAction;
   comment: string;
+  /** The project declares a backend, so the client holds records; with none, nothing is held and the row stays unset. */
+  held: boolean;
+  /**
+   * "Record properties" ticked (the default): the row follows every later write to the copy (`onModelChangedCallback`).
+   * Unticked, the bind flags the outputs once, so the row is the copy as it was at the bind.
+   */
+  follows: boolean;
 }
 
 export interface RepeaterPlan {
@@ -3725,12 +4257,16 @@ export interface ComponentPlan {
   branchEffects: BranchEffectPlan[];
   /** Value Changed effects (EXP-011 §39), compile order — one useEffect + one useRef each. */
   valueChangedEffects: ValueChangedEffectPlan[];
+  /** P18-S119-TICKEDRUN. Run-wired Functions a ticked input also runs, node order — one useEffect + one useRef each. */
+  tickedRuns: TickedRunPlan[];
   /** EXP-011 §43. Records whose Fetch is unwired, compile order — one useEffect keyed on the Id each. */
   recordEffects: RecordEffectPlan[];
   /** EXP-011 §67. Variables with an authored Value, node order — one mount effect each. */
   variableSeeds: VariableSeedPlan[];
   /** EXP-011 §71. Object nodes with values typed into their own property inputs, node order — one mount effect each. */
   objectSeeds: ObjectSeedPlan[];
+  /** P18-S116-FIELDMOUNT. Text inputs that announce their Value as they mount, node order — one mount effect each. */
+  fieldMounts: FieldMountPlan[];
   /** EXP-011 §48. CSS Definitions, node order — one module constant + one mount effect each. */
   styleSheets: StyleSheetPlan[];
   /** EXP-011 §49. The States nodes that translated, registration order. */
@@ -4073,7 +4609,9 @@ function planComponent(
     recordEffects: [],
     variableSeeds: [],
     objectSeeds: [],
+    fieldMounts: [],
     valueChangedEffects: [],
+    tickedRuns: [],
     styleSheets: [],
     statesMachines: [],
     animations: [],
@@ -4313,6 +4851,13 @@ function planComponent(
   const renderedStackIds: string[] = [];
   const roleOf = (node: NodeIR): RenderRole | 'unsupported' | null => {
     const role = renderRole(node, catalog, kits);
+    // P18-S110-DYNAMICTEMPLATE. Template Type dynamic chooses each row's component with `templateScript(model)`
+    // (foreach.tsx); the repeater path renders the static Template for every row, so the node is refused whole —
+    // the template-host index above already treats a dynamic For Each as the template of nothing.
+    if (role === 'repeater' && (literalParam(node, 'templateType') === 'dynamic' || wiredIn.has(`${node.id}:templateType`))) {
+      deferReasons.set(node.id, "its Template Type is dynamic — each row's component is chosen by the Template Script at run time, and this slice renders one static template");
+      return 'unsupported';
+    }
     if (role === null || role === 'unsupported' || role === 'instance' || role === 'repeater' || role === 'slot') return role;
     // EXP-010: the structure/content walls are statements about *built-in* ports — a wired
     // `layoutString`, a wire-fed icon source. A kit node has none of those ports; every port it
@@ -4847,6 +5392,15 @@ function planComponent(
     return plan !== undefined && plan.origin === 'object' ? plan : undefined;
   };
   const objectNodeGate = (node: NodeIR, store: StorePlan): string | null => {
+    // P18-S110-RUNONCHANGE. The exported store is read live and from the first render; either unticked box
+    // (modelnode2.ts: `setModelID` behind `runOnChange-modelId`, the change callback behind `runOnChange-object`)
+    // makes the runtime's outputs empty until a Fetch or frozen after a write — Component Object's rule, below.
+    if (literalParam(node, 'runOnChange-modelId') === false) {
+      return 'Id is unticked under Run On Value Change — its properties read nothing until a Fetch, and the exported store is read at once';
+    }
+    if (literalParam(node, 'runOnChange-object') === false) {
+      return 'Object properties is unticked under Run On Value Change — its outputs freeze between Fetch pulses, and the exported store is read live';
+    }
     const propInput = component.connections.find((c) => c.toId === node.id && c.toProperty.startsWith('prop-'));
     if (propInput !== undefined) {
       return `its "${propInput.toProperty.slice('prop-'.length)}" property input is wired — a write through the Object node itself is not translated in this slice; a Set Object Properties naming "${store.name}" is`;
@@ -5641,6 +6195,9 @@ function planComponent(
       const logicNodeIds: string[] = [];
       const subscriberIds: string[] = [];
       let anyDelivery = false;
+      // P18-S110-EVALATLOAD: a literal is set at load, under a wire or not, so it always arrives.
+      let anyLiteral = false;
+      const wireFed: string[] = [];
       jsResolving.add(node.id);
       try {
         for (const name of inputNames) {
@@ -5650,6 +6207,7 @@ function planComponent(
             return { defer: `two wires feed input "${name}" — last-writer-wins is not statically ordered` };
           }
           const runChangeParam = kind === 'function' ? `runOnChange-in-${name}` : `runOnChange-${name}`;
+          if (literalParam(node, port) !== undefined) anyLiteral = true;
           if (wires.length === 1) {
             const wire = wires[0];
             // Absent means ticked (the Evaluate-additive family). An unticked input's changes
@@ -5673,6 +6231,7 @@ function planComponent(
               return { defer: `input "${name}" is fed a logic truth value — only truthiness sinks take one in this slice` };
             }
             anyDelivery = true;
+            wireFed.push(name);
             const tsType = exprTsType(expr);
             inputs.push({
               name,
@@ -5698,11 +6257,24 @@ function planComponent(
         jsResolving.delete(node.id);
       }
 
-      // Automatic evaluation is gated on any input having arrived unless the expression
-      // references no ports (expression.ts) — an expression whose inputs never arrive never
-      // evaluates, and its outputs abstain null where a render local would compute.
-      if (kind === 'expression' && mode === 'reactive' && exprIds.ports.length > 0 && !anyDelivery) {
-        return { defer: 'none of its inputs is ever delivered — the expression never evaluates (its outputs abstain null)' };
+      /**
+       * P18-S110-EVALATLOAD. The load's evaluation, when no referenced input can have arrived by then
+       * (GAM-001, `expression.ts` `_scheduleLoadEvaluation`). An Expression that reads no port, or has
+       * a literal on any input, evaluates at load as an arrival would, so the box changes nothing there.
+       * Unticked over inputs nothing ever feeds, it never evaluates at all: refused, because there is
+       * no answer to compute. Ticked, the default, it runs over them — the refusal that stood here
+       * read the rule from before GAM-001, and dropped a value the editor computes.
+       */
+      const evaluateAtLoad = literalParam(node, 'evaluateAtLoad') !== false;
+      const loadGate: JsFunctionPlan['loadGate'] =
+        kind === 'expression' && mode === 'reactive' && exprIds.ports.length > 0 && !anyLiteral
+          ? { unset: wireFed, atLoad: evaluateAtLoad ? 'evaluate' : 'wait' }
+          : undefined;
+      if (loadGate?.atLoad === 'wait' && !anyDelivery) {
+        return {
+          defer:
+            'Evaluate At Load is unticked and none of its inputs is ever delivered — the expression never evaluates (its outputs abstain null)'
+        };
       }
 
       // The Outputs record types every name the body can write: mined value assignments,
@@ -5776,6 +6348,7 @@ function planComponent(
         signals,
         mathAliases: exprIds.mathAliases,
         mode,
+        ...(loadGate !== undefined ? { loadGate } : {}),
         ...(scriptUses.length > 0 ? { scripts: scriptUses } : {}),
         ...(kind === 'visual'
           ? {
@@ -5820,9 +6393,23 @@ function planComponent(
       }
       return null;
     }
+    /**
+     * "Hold the id". A Function's input fed by another Function: legal where the feeder is Run-wired and its run
+     * materialized (§4f), so the reader reads the last run's value from the row at its own run, exactly as the runtime's
+     * input holds the last delivery. The feeder's run has compiled by then: the sink loop compiles a node's Function
+     * feeders before the node (`compileFunctionFeedersOf`). A feeder whose run is refused names its reason.
+     */
     if (jsResolving.size > 0) {
-      ctx.defer = 'it is fed by another Function/Expression node — JS-node chains are not translated in this slice';
-      return null;
+      const runKey = `${fromNode.id}:run`;
+      const materialized = kind === 'function' && wiredPorts.has(runKey) && !jsResolving.has(fromNode.id) && jsMaterializedVars.has(fromNode.id);
+      if (!materialized) {
+        const compiled = kind === 'function' ? compiledSinks.get(runKey) : undefined;
+        ctx.defer =
+          compiled !== undefined && 'defer' in compiled
+            ? `the Function that feeds it is not exported: ${compiled.defer}`
+            : 'it is fed by another Function/Expression node — JS-node chains are not translated in this slice';
+        return null;
+      }
     }
     const record = jsFunDefOf(fromNode);
     if ('defer' in record) {
@@ -5853,8 +6440,9 @@ function planComponent(
     switch (output) {
       case 'result':
         return base;
-      // The abstain-null pre-first-evaluation state is unreachable in the emitted world —
-      // every vocabulary source has a boot value (§4, noted not modeled).
+      // The abstain-null pre-first-evaluation state: Result is `null` there (a `loadGate`,
+      // P18-S110-EVALATLOAD), but the four folds below still compute from it where the runtime's
+      // getters abstain (§4, noted not modeled) — `isTrue` reads false, not "nothing yet".
       case 'isTrue':
         return truthyExpr(base);
       case 'isFalse':
@@ -5930,6 +6518,32 @@ function planComponent(
    * succeeds"*, and `_internal.error` is assigned only in `setError`.
    */
   const verbErrorVars = new Map<string, StateVarPlan>();
+  /** EXP-011 §90. Which of a record or user verb's outcome chains is being compiled, while it is. */
+  const verbChainScope = new Map<string, 'done' | 'failure'>();
+  /**
+   * EXP-011 §90. The nodes whose outcome chains are being compiled, innermost last (`doneChainOf`): a Function's pulse, a
+   * verb's Failure. A node a chain runs reads, at that pulse, the value its sender has just written over every other wire.
+   */
+  const chainSenders: string[] = [];
+  /**
+   * EXP-011 §90. A Set's Value wire where several feed it: the one from the innermost sender whose chain runs the Set, as
+   * the runtime's Value holds whichever wire wrote last and the sender writes just before it pulses. Undefined where no
+   * open sender feeds one (none is statically last), or where the innermost one feeds two.
+   */
+  const valueWiresInto = (node: NodeIR): ConnectionIR[] =>
+    component.connections.filter((c) => c.toId === node.id && c.toProperty === 'value' && c.kind !== 'signal');
+  const lastValueWireOf = (node: NodeIR): ConnectionIR | undefined => {
+    // A signal wired into Value writes nothing to read; the chain that carries it names that mistake on its own.
+    const wires = valueWiresInto(node);
+    // One value wire, or none (a lone signal into Value is compiled as before, and refused where it is read).
+    if (wires.length < 2) return wires[0] ?? component.connections.find((c) => c.toId === node.id && c.toProperty === 'value');
+    for (const sender of [...chainSenders].reverse()) {
+      const own = wires.filter((c) => c.fromId === sender);
+      if (own.length === 1) return own[0];
+      if (own.length > 1) return undefined;
+    }
+    return undefined;
+  };
   /**
    * Verbs whose `Do` actually attached to a handler, filled by the attachment sweep. Every
    * binding pass runs after it, so an `Error` read can require it: a verb whose trigger the
@@ -6203,7 +6817,10 @@ function planComponent(
         null,
         node.id,
         'record-row-error',
-        `The Error output of ${node.authoredLabel ? `"${node.authoredLabel}"` : 'the Record'} — why the last read failed, and never cleared by a later success (dbmodelnode2.ts).`
+        // P18-S113-IDBINDREAD. With Fetch unwired the node is the Id bind, which reads nothing and so reports nothing.
+        wiredPorts.has(`${node.id}:fetch`)
+          ? `The Error output of ${node.authoredLabel ? `"${node.authoredLabel}"` : 'the Record'} — why the last read failed, and never cleared by a later success (dbmodelnode2.ts).`
+          : `The Error output of ${node.authoredLabel ? `"${node.authoredLabel}"` : 'the Record'} — its Fetch is unwired and only a Fetch reports one, so it stays empty (dbmodelnode2.ts).`
       );
       recordErrorVars.set(node.id, stateVar);
     }
@@ -6221,7 +6838,9 @@ function planComponent(
         null,
         node.id,
         'record-row',
-        `The record the last ${names.fnName} read — undefined until the first read, as the node's property outputs read before one has been made.`
+        wiredPorts.has(`${node.id}:fetch`)
+          ? `The record the last ${names.fnName} read — undefined until the first read, as the node's property outputs read before one has been made.`
+          : `The app's copy of the record ${node.authoredLabel ? `"${node.authoredLabel}"` : 'the Record'}'s Id names — undefined until the app holds it, as the node's property outputs read before anything has filled the record (dbmodelnode2.ts setModelID).`
       );
       recordAnswerVars.set(node.id, stateVar);
     }
@@ -6229,6 +6848,22 @@ function planComponent(
   };
   /** Record nodes whose `Fetch` attached — from a trigger, or from the Id effect (§43.2). */
   const attachedRecordNodes = new Set<string>();
+  /**
+   * P18-S113-IDBINDREAD. Why a Record with `Fetch` unwired cannot become the Id bind, asked by the bind pass and by
+   * `recordWillFire` alike. With Fetch unwired the Id setter only binds (`setModelID`): no request, so Done and Failure
+   * never fire, and unticked under Run On Value Change it does not even bind.
+   */
+  const recordBindRefusal = (node: NodeIR): string | undefined => {
+    // P18-S110-RUNONCHANGE. Unticked, the Id setter only stores the Id (dbmodelnode2.ts `modelId`).
+    if (literalParam(node, 'runOnChange-modelId') === false) {
+      return 'its Id is unticked under Run On Value Change and its Fetch is unwired — the runtime never reads the row';
+    }
+    const pulse = component.connections.find((c) => c.fromId === node.id && (c.fromProperty === 'done' || c.fromProperty === 'failure'));
+    if (pulse !== undefined) {
+      return `its ${pulse.fromProperty === 'done' ? 'Done' : 'Failure'} output is consumed and its Fetch is unwired — both fire only after a Fetch, and an Id only binds the record it names (dbmodelnode2.ts setModelID)`;
+    }
+    return undefined;
+  };
   /**
    * EXP-011 §46 — the compile-time answer to "is this Record fired at all?", for a read compiled
    * before the attach pass has run (§45.3's rule, one family over). A sibling handler — a Sign
@@ -6245,6 +6880,7 @@ function planComponent(
   const recordWillFire = (node: NodeIR): boolean => {
     if (wiredPorts.has(`${node.id}:fetch`)) return false;
     if (!plan.file) return false;
+    if (recordBindRefusal(node) !== undefined) return false;
     const compiled = compiledOf(node, 'fetch');
     return !('defer' in compiled) && actionsValidIn([compiled.action], { kind: 'render' });
   };
@@ -6782,9 +7418,81 @@ function planComponent(
    * file does not declare.
    */
   const staticRowsReadIds = new Set<string>();
+  /** P18-S115-QUERYFILTER. One reading per node: what it asks the backend for, or why the export cannot ask the same. */
+  const querySettingsCache = new Map<string, QuerySettings>();
+  /**
+   * P18-S115-QUERYPARAMS. A query whose Filter reads wired values: each value's render read, and what the reads
+   * consume, applied when the query lands (the disposition pass below).
+   */
+  const queryWirings = new Map<string, { values: Array<{ name: string; expr: ValueExpr }>; consumes: string[]; collapses: string[]; subscribes: string[] }>();
+  const querySettingsFor = (node: NodeIR): QuerySettings => {
+    let settings = querySettingsCache.get(node.id);
+    if (settings === undefined) {
+      // A value read off this query's own rows comes back here while it resolves.
+      querySettingsCache.set(node.id, { refuse: 'its Filter reads a value that depends on the query itself' });
+      settings = querySettingsOf(node, component, ir.project.collections);
+      if ('params' in settings && settings.params.wired !== undefined) settings = wireQueryValues(node, settings.params.wired.params) ?? settings;
+      querySettingsCache.set(node.id, settings);
+    }
+    return settings;
+  };
+  /** Each wired filter value's source as a render read, or the refusal naming the one that has none. */
+  const wireQueryValues = (node: NodeIR, names: string[]): { refuse: string } | undefined => {
+    const wiring = { values: [] as Array<{ name: string; expr: ValueExpr }>, consumes: [] as string[], collapses: [] as string[], subscribes: [] as string[] };
+    for (const name of names) {
+      const wire = component.connections.find((c) => c.toId === node.id && c.toProperty === `qp-${name}`);
+      if (wire === undefined) return { refuse: `its "${name}" input has no wire` };
+      const ctx = newCtx();
+      const expr = resolveExpr(nodeById.get(wire.fromId), wire.fromProperty, ctx);
+      if (expr === null) return { refuse: `its Filter reads "${name}" from a wire the export cannot read: ${ctx.defer ?? 'no statically known source'}` };
+      if (!exprValidIn(expr, { kind: 'render' })) return { refuse: `its Filter reads "${name}" from a value that only exists inside a handler` };
+      wiring.values.push({ name, expr });
+      wiring.consumes.push(wire.key, ...ctx.consumes);
+      wiring.collapses.push(...ctx.logicNodeIds);
+      wiring.subscribes.push(...ctx.subscriberIds);
+    }
+    queryWirings.set(node.id, wiring);
+    return undefined;
+  };
+  /**
+   * A query that the disposition pass keeps: read by a rendered repeater, or by a list transform whose read LANDED
+   * (EXP-011 §56: `queryReaders` fills at read time, and a transform refused after the read would otherwise leave a
+   * state row and a fetch effect nothing prints; the items wire's key is in `consumed` iff it did).
+   */
+  const queryLands = (node: NodeIR): boolean =>
+    Object.values(plan.repeaters).some((r) => r.itemsQueryId === node.id) ||
+    (queryReaders.has(node.id) && component.connections.some((c) => c.fromId === node.id && c.fromProperty === 'items' && consumed.has(c.key)));
+  /**
+   * P18-S116-QUERYFETCH. A page's Did Mount into a query's Fetch: the page node is the component's root, so its mount is
+   * the component's, and the query asks then, as it does with its Class box ticked. Consumed where the query lands.
+   */
+  const pageMountFetch = (wire: ConnectionIR): boolean =>
+    wire.toProperty === 'storageFetch' &&
+    wire.fromProperty === 'didMount' &&
+    nodeById.get(wire.fromId)?.type === 'Page' &&
+    nodeById.get(wire.toId)?.type === 'DbCollection2';
+  /**
+   * P18-S116-QUERYFETCH. With Fetch wired, when else the query asks (dbcollectionnode2.ts): as the node is made where its
+   * Class box is ticked (`setCollectionName`), or its Query settings box with a setting authored (`setVisualFilter`,
+   * `setVisualSorting`, the `backendId` setter, `userInputSetter`); and on a wired filter value's change where that
+   * box is ticked (`setQueryParameter`). A box left unset is ticked (`runOnValueChange`'s default). Search is refused.
+   */
+  const fetchWiredOf = (node: NodeIR): QueryPlan['fetchWired'] => {
+    const fetches = component.connections.filter((c) => c.toId === node.id && c.toProperty === 'storageFetch');
+    if (fetches.length === 0) return undefined;
+    const ticked = (input: string) => literalParam(node, `runOnChange-${input}`) !== false;
+    const NOT_QUERY_SETTINGS = new Set(['collectionName', 'search', 'realtime']);
+    const setting = node.parameters.some((p) => !NOT_QUERY_SETTINGS.has(p.name) && !p.name.startsWith('qp-') && !p.name.startsWith('runOnChange-'));
+    const wired = queryWirings.get(node.id)?.values ?? [];
+    return {
+      mount: ticked('collectionName') || (setting && ticked('querySettings')) || fetches.some(pageMountFetch),
+      onValues: wired.length > 0 && wired.every((v) => ticked(`qp-${v.name}`))
+    };
+  };
   const queryPlanOf = (node: NodeIR): QueryPlan => {
     const existing = plan.queries.find((q) => q.nodeId === node.id);
     if (existing !== undefined) return existing;
+    const settings = querySettingsFor(node);
     const collectionName = String(literalParam(node, 'collectionName') ?? 'Record');
     const { typeName, plural, moduleBase, fetchName } = collectionModuleNames(collectionName);
     const stateName = dedupe(plural, usedQueryStateNames);
@@ -6796,7 +7504,10 @@ function planComponent(
       itemName: typeName.charAt(0).toLowerCase() + typeName.slice(1),
       fetchName,
       typeName,
-      moduleBase
+      moduleBase,
+      ...('params' in settings && Object.keys(settings.params).length > 0 ? { params: settings.params } : {}),
+      ...(queryWirings.has(node.id) ? { wiredValues: queryWirings.get(node.id)!.values, wiredClient: ir.project.cloudservices !== undefined } : {}),
+      ...(fetchWiredOf(node) !== undefined ? { fetchWired: fetchWiredOf(node) } : {})
     };
     plan.queries.push(query);
     return query;
@@ -6870,20 +7581,39 @@ function planComponent(
    * no row and no setter. Boots `undefined`: the getter reads an unwritten `_internal` until the first Do.
    */
   const cryptoVars = new Map<string, StateVarPlan>();
-  const cryptoStateOf = (node: NodeIR): StateVarPlan => {
-    let stateVar = cryptoVars.get(node.id);
+  /**
+   * EXP-011 §76. Keyed by node for the two verbs (one row), by `node:port` for the extractor (a row per value
+   * output read). An extractor's row is SEEDED from {@link PATTERN_VALUE_OUTPUTS} — `initialize` writes every
+   * internal, so the getter never reads undefined — and rewritten on every Extract, success or failure.
+   */
+  const cryptoStateOf = (node: NodeIR, port?: string): StateVarPlan => {
+    const spec = CRYPTO_NODES[node.type];
+    const value = port === undefined ? undefined : spec.values?.[port];
+    const key = value === undefined ? node.id : `${node.id}:${port}`;
+    let stateVar = cryptoVars.get(key);
     if (stateVar === undefined) {
-      const spec = CRYPTO_NODES[node.type];
-      stateVar = allocStateVar(
-        node.authoredLabel,
-        spec.node === 'hash' ? 'digest' : 'randomBytes',
-        'string | undefined',
-        null,
-        node.id,
-        'crypto',
-        `The ${spec.outputLabel} ${node.authoredLabel ? `"${node.authoredLabel}"` : spec.label} holds. Empty until the first ${spec.triggerLabel}, replaced on every one that succeeds and left as it was by one that fails.`
-      );
-      cryptoVars.set(node.id, stateVar);
+      stateVar =
+        value === undefined
+          ? allocStateVar(
+              node.authoredLabel,
+              spec.node === 'hash' ? 'digest' : 'randomBytes',
+              'string | undefined',
+              null,
+              node.id,
+              'crypto',
+              `The ${spec.outputLabel} ${node.authoredLabel ? `"${node.authoredLabel}"` : spec.label} holds. Empty until the first ${spec.triggerLabel}, replaced on every one that succeeds and left as it was by one that fails.`
+            )
+          : allocStateVar(
+              node.authoredLabel === undefined ? undefined : `${node.authoredLabel} ${value.label}`,
+              port!,
+              value.tsType,
+              value.boot,
+              node.id,
+              'crypto',
+              `The ${value.label} ${node.authoredLabel ? `"${node.authoredLabel}"` : spec.label} holds. Rewritten on every ${spec.triggerLabel}, whether the pattern matched, missed or could not run.`
+            );
+      if (value !== undefined && value.bootCode !== undefined) stateVar.bootCode = value.bootCode;
+      cryptoVars.set(key, stateVar);
     }
     return stateVar;
   };
@@ -6893,11 +7623,12 @@ function planComponent(
     let stateVar = cryptoErrorVars.get(node.id);
     if (stateVar === undefined) {
       const spec = CRYPTO_NODES[node.type];
+      // EXP-011 §76. The extractor's Error is seeded `''` by `initialize` and written on every run (`''` on success).
       stateVar = allocStateVar(
         node.authoredLabel === undefined ? undefined : `${node.authoredLabel} Error`,
-        spec.node === 'hash' ? 'digestError' : 'randomBytesError',
-        'string | undefined',
-        null,
+        spec.node === 'hash' ? 'digestError' : spec.node === 'pattern' ? 'patternError' : 'randomBytesError',
+        spec.node === 'pattern' ? 'string' : 'string | undefined',
+        spec.node === 'pattern' ? '' : null,
         node.id,
         'crypto-error',
         `Why ${node.authoredLabel ? `"${node.authoredLabel}"` : spec.label} failed. Cleared on every ${spec.triggerLabel} that succeeds, as the node's own run clears it.`
@@ -6907,7 +7638,7 @@ function planComponent(
     return stateVar;
   };
   /** The crypto nodes currently having a chain compiled, and which arm — `idChainScope`'s shape. */
-  const cryptoChainScope = new Map<string, 'done' | 'failure'>();
+  const cryptoChainScope = new Map<string, 'done' | 'failure' | 'found' | 'notFound'>();
   /** Crypto nodes whose Do / New attached to a handler. `attachedIdNodes`'s twin, and the same rule. */
   const attachedCryptoNodes = new Set<string>();
 
@@ -7748,6 +8479,15 @@ function planComponent(
       ctx.defer = `its ${wiredSetting.slice(node.id.length + 1)} setting is wired — the filter is not statically known`;
       return null;
     }
+    // P18-S110-RUNONCHANGE. The exported filter is a derived value, always current; unticked Array or Items
+    // (filtercollectionnode.ts: the change callback and the Items setter) re-filter only on Filter. Enabled
+    // and the settings boxes govern wired inputs only, which are refused above.
+    for (const box of ['items', 'array']) {
+      if (literalParam(node, `runOnChange-${box}`) === false) {
+        ctx.defer = `its Run On Value Change box for "${box === 'items' ? 'Items' : 'Array changes'}" is unticked — it would re-filter only on its Filter signal, which this slice does not translate`;
+        return null;
+      }
+    }
     // `enabled` false passes the array straight through, unfiltered, unsorted and unlimited
     // (`scheduleFilter` skips the whole block) — so the translation is the source itself.
     if (literalParam(node, 'enabled') === false) {
@@ -7843,18 +8583,6 @@ function planComponent(
         return null;
       }
       if (wires.length === 1) {
-        /**
-         * 🔴 A wired enum defers, and the reason is a throw rather than a doubt. `unit` and
-         * `granularity` are `allowEditOnly` in the editor, so the port set the runtime publishes
-         * admits a wire the panel would never draw — and `addToDate`'s final `else` throws on a
-         * unit it does not recognise. An export that reproduced that would put an uncaught
-         * exception in somebody's page; one that reproduced it *loosely* would answer a different
-         * date. Neither is worth the case.
-         */
-        if (arg.enum === true) {
-          ctx.defer = `its ${arg.port} is wired — that input is an editor-constrained list, and the interpreter throws on a value outside it rather than answering`;
-          return null;
-        }
         const expr = resolveExpr(nodeById.get(wires[0].fromId), wires[0].fromProperty, ctx);
         if (expr === null) {
           if (ctx.defer === undefined) ctx.defer = `its ${arg.port} input has no statically known source`;
@@ -7873,7 +8601,12 @@ function planComponent(
          * that actually matters. `now-out` never reaches here at all, being the one read in this
          * family that cannot be undefined.
          */
-        if (maybeUndefinedExpr(expr) && expr.kind !== 'date-call') {
+        /**
+         * Not for `unit` / `granularity` (P109-S21-EXPORTDATEUNITWIRED): their setters turn an empty value into
+         * the default and recompute, and the emitted helpers do the same (`unitOrDays`; an empty Granularity
+         * truncates nothing), so there is no divergence to report.
+         */
+        if (maybeUndefinedExpr(expr) && expr.kind !== 'date-call' && arg.port !== 'unit' && arg.port !== 'granularity') {
           notes.push(
             `node ${node.id} (${node.type}) reads ${arg.port} from a source that can be empty — the interpreter keeps its previous answer when that input goes away, and the exported call answers nothing instead`
           );
@@ -7901,6 +8634,9 @@ function planComponent(
     ctx.logicNodeIds.push(node.id);
     return { kind: 'date-call', fn: spec.fn, args };
   };
+
+  /** The `useRef` local a Color Blend's last shown colour lives in — one per node, whichever reader asks (EXPORTBLENDNAN). */
+  const blendShownLocals = new Map<string, string>();
 
   /**
    * One of the three small pure utilities read as a value (EXP-011 Tier 2.7).
@@ -8045,6 +8781,18 @@ function planComponent(
     // EXP-011 §75. Several answers off one node: the output port's name selects, as `DATE_NODES`' selector does.
     if (spec.select === true) args.push({ kind: 'literal', value: fromProperty });
     ctx.logicNodeIds.push(node.id);
+    /**
+     * P109-S21-EXPORTBLENDNAN (P107-D8, ruled "Keep last colour"). A Blend Value that is not a number keeps the
+     * colour the node last showed, and an unset source delivers nothing, so the blend last received stands —
+     * per-instance memory either way, so the call carries a ref the component holds. Only a wire earns it; a
+     * numeric literal is neither, and an authored blend still prints the pure call.
+     */
+    if (spec.fn === 'blendColor') {
+      const blend = args[0];
+      if (!(blend.kind === 'literal' && !Number.isNaN(Number(blend.value)))) {
+        return { kind: 'util-call', fn: 'blendColorKept', args, kept: mintLocal(blendShownLocals, node, 'colorBlend', 'Shown') };
+      }
+    }
     return { kind: 'util-call', fn: spec.fn, args, ...(cases !== undefined ? { cases } : {}) };
   };
 
@@ -8130,6 +8878,11 @@ function planComponent(
     if (fromNode.type === 'DbCollection2' && fromProperty === 'items') {
       if (wiredPorts.has(`${fromNode.id}:collectionName`) || literalParam(fromNode, 'collectionName') === undefined) {
         ctx.defer = 'the Query Records it reads names no Class statically';
+        return null;
+      }
+      const settings = querySettingsFor(fromNode);
+      if ('refuse' in settings) {
+        ctx.defer = `the Query Records it reads is not exported: ${settings.refuse}`;
         return null;
       }
       const query = queryPlanOf(fromNode);
@@ -8469,6 +9222,10 @@ function planComponent(
     }
     if (fromNode.type === 'Variable2' && fromProperty === 'value') {
       const name = variableNameOf(fromNode);
+      if (name !== undefined && literalParam(fromNode, 'runOnChange-variable') === false) {
+        ctx.defer = VARIABLE_FROZEN;
+        return null;
+      }
       return name !== undefined ? { kind: 'store-get', variableName: name } : null;
     }
     if (fromNode.type === GLOBAL_STORE_SUBSCRIBE && fromProperty === 'value') {
@@ -8546,6 +9303,11 @@ function planComponent(
       (RECORD_VERBS[fromNode.type] !== undefined || RELATION_VERBS[fromNode.type] !== undefined || USER_VERBS[fromNode.type] !== undefined) &&
       fromProperty === 'error'
     ) {
+      // EXP-011 §90. Inside its own Failure chain the row has not changed yet (the setter was called in this closure):
+      // the read is the catch's local, which holds this failure's message, as the runtime's getter does at the pulse.
+      if (verbChainScope.get(fromNode.id) === 'failure') {
+        return { kind: 'outcome-error', nodeId: fromNode.id, local: `${verbErrorStateOf(fromNode).name}Message` };
+      }
       if (!attachedRecordVerbs.has(fromNode.id)) {
         const trigger = USER_VERBS[fromNode.type]?.trigger ?? 'store';
         const compiled = compiledOf(fromNode, trigger);
@@ -8994,7 +9756,7 @@ function planComponent(
         const rowIsReadable = (): boolean => {
           if (arm === undefined && !attachedCryptoNodes.has(fromNode.id)) {
             if (!wiredPorts.has(`${fromNode.id}:${spec.trigger}`)) {
-              ctx.defer = `its ${fromProperty === 'error' ? 'Error' : spec.outputLabel} is read, but nothing fires its ${spec.triggerLabel} — ${spec.neverFired}`;
+              ctx.defer = `its ${cryptoOutputLabel(fromNode.type, fromProperty)} is read, but nothing fires its ${spec.triggerLabel} — ${spec.neverFired}`;
               return false;
             }
             const compiled = compiledOf(fromNode, spec.trigger);
@@ -9004,6 +9766,17 @@ function planComponent(
           ctx.logicNodeIds.push(fromNode.id);
           return true;
         };
+        // EXP-011 §76. The extractor: any of its value outputs, by field; inside ANY of its four arms the local's
+        // field (a failed pattern clears the values, so the render closure's row is stale in the Failure arm too);
+        // outside, a seeded row per field.
+        if (spec.values !== undefined && spec.values[fromProperty] !== undefined) {
+          if (arm !== undefined) {
+            ctx.logicNodeIds.push(fromNode.id);
+            return { kind: 'crypto-out', nodeId: fromNode.id, node: spec.node, field: fromProperty };
+          }
+          if (!rowIsReadable()) return null;
+          return { kind: 'crypto-out', nodeId: fromNode.id, node: spec.node, field: fromProperty, viaState: cryptoStateOf(fromNode, fromProperty).name };
+        }
         if (fromProperty === spec.output) {
           if (arm === 'done') {
             ctx.logicNodeIds.push(fromNode.id);
@@ -9013,7 +9786,7 @@ function planComponent(
           return { kind: 'crypto-out', nodeId: fromNode.id, node: spec.node, viaState: cryptoStateOf(fromNode).name };
         }
         if (fromProperty === 'error') {
-          if (arm === 'done') {
+          if (arm === 'done' || arm === 'found' || arm === 'notFound') {
             ctx.defer =
               'its Error is read from its own Done chain — the node clears the message before Done fires, so that read is always empty';
             return null;
@@ -9027,13 +9800,20 @@ function planComponent(
             kind: 'outcome-error',
             nodeId: fromNode.id,
             local: `${cryptoLocalOf(fromNode)}.error`,
-            viaState: cryptoErrorStateOf(fromNode).name
+            viaState: cryptoErrorStateOf(fromNode).name,
+            // EXP-011 §76. The extractor's Error is seeded and rewritten on every run.
+            ...(spec.node === 'pattern' ? { seeded: true as const } : {})
           };
         }
         ctx.defer =
           fromProperty === 'done' || fromProperty === 'failure' || fromProperty === 'completed'
             ? `its ${fromProperty.charAt(0).toUpperCase()}${fromProperty.slice(1)} output is consumed as a value — a pulse carries nothing to read`
-            : `its ${fromProperty} output is not a port this node has`;
+            : // EXP-011 §76. The two result pulses, by their display names.
+              fromProperty === 'found' && spec.results !== undefined
+              ? 'its Found output is consumed as a value — a pulse carries nothing to read'
+              : fromProperty === 'notFound' && spec.results !== undefined
+                ? 'its Not Found output is consumed as a value — a pulse carries nothing to read'
+                : `its ${fromProperty} output is not a port this node has`;
         return null;
       }
     }
@@ -9302,7 +10082,8 @@ function planComponent(
        * is minted only in the Done arm, where the verb has just answered. Must agree with component.ts.
        */
       case 'crypto-out':
-        return expr.viaState !== undefined;
+        // EXP-011 §76. An extractor's rows are seeded by `initialize`; never undefined in either form.
+        return expr.node !== 'pattern' && expr.viaState !== undefined;
       /** EXP-011 §59. The hook seeds all three from the window at mount; never undefined. */
       case 'screen-out':
         return false;
@@ -9322,7 +10103,8 @@ function planComponent(
        * (EXP-011 §24). Must agree with component.ts maybeUndefined.
        */
       case 'outcome-error':
-        return expr.viaState !== undefined;
+        // EXP-011 §76. A seeded row (the extractor's) is never undefined in either form.
+        return expr.viaState !== undefined && expr.seeded !== true;
       case 'state-get':
         return expr.maybeUndefined === true;
       // FLD-015. A hoisted Static Data constant is a frozen module-scope literal: it exists from
@@ -9469,6 +10251,91 @@ function planComponent(
     }
     ctx.logicNodeIds.push(node.id);
     return output === 'result' ? truthyExpr(cond) : notExpr(cond);
+  };
+
+  /**
+   * EXP-011 §87, P18-S120-SNAPCOND. A Condition with its box unticked and Evaluate wired, whose Is True / Is False
+   * feeds only a drawn element's Mounted or Visible: the confirmation after a Send, the refusal after a Failure.
+   * Measured on the runtime's own Condition (`s120-snapcond/condprobe.js`): before the first Evaluate the wire hands
+   * the sink `null` (over an authored value), which both setters read as false; every Evaluate sends its answer
+   * again, the same answer included; two Conditions on one sink are last-pulse-wins. So the sink is one boolean cell
+   * that boots false, and each Evaluate writes its answer into it in the sending chain (`compileConditionBranch`).
+   *
+   * The verdict is per Condition and settled together: a cell is only honest when every wire into its sink port is
+   * such a Condition, so one that fails takes the others on its sinks with it (a fixed point over the component).
+   * `null` latches; a string is the reason it does not. Conditions that are not candidates are absent.
+   */
+  const SNAPSHOT_SINK_PORTS = new Set(['mounted', 'visible']);
+  const snapshotWiresOf = (node: NodeIR): ConnectionIR[] =>
+    component.connections.filter((c) => c.fromId === node.id && (c.fromProperty === 'result' || c.fromProperty === 'isfalse'));
+  let snapshotVerdictMemo: Map<string, string | null> | undefined;
+  const snapshotVerdicts = (): Map<string, string | null> => {
+    if (snapshotVerdictMemo !== undefined) return snapshotVerdictMemo;
+    const verdicts = new Map<string, string | null>();
+    for (const node of component.nodes) {
+      if (node.type !== 'Condition' || literalParam(node, 'runOnChange-condition') !== false) continue;
+      if (!wiredPorts.has(`${node.id}:eval`)) continue;
+      const wires = snapshotWiresOf(node);
+      if (wires.length === 0) continue;
+      let reason: string | null = null;
+      for (const w of wires) {
+        const sink = nodeById.get(w.toId);
+        // The port first: a Variable's Value is not an element at all, and "not drawn" would say it is one.
+        if (!SNAPSHOT_SINK_PORTS.has(w.toProperty)) {
+          reason = `its ${w.fromProperty} feeds ${sink?.type ?? 'a missing node'}.${w.toProperty} — a snapshot of the last Evaluate lands only in a Mounted or a Visible in this slice`;
+        } else if (!sink || !rendered.has(sink.id)) {
+          reason = `its ${w.fromProperty} feeds an element that is not drawn — a snapshot lands only in a drawn element's Mounted or Visible in this slice`;
+        } else if (w.toProperty === 'mounted' && sink.id === plan.rootId) {
+          reason = 'a mounted wire into the component root is a router concern — not translated in this slice';
+        }
+        if (reason !== null) break;
+      }
+      verdicts.set(node.id, reason);
+    }
+    for (let changed = true; changed; ) {
+      changed = false;
+      for (const [id, verdict] of verdicts) {
+        if (verdict !== null) continue;
+        for (const w of snapshotWiresOf(nodeById.get(id)!)) {
+          const feeders = component.connections.filter((c) => c.toId === w.toId && c.toProperty === w.toProperty);
+          const isSnapshot = (c: ConnectionIR) => (c.fromProperty === 'result' || c.fromProperty === 'isfalse') && verdicts.has(c.fromId);
+          // The cause first: a feeder that is no snapshot at all; then a snapshot Condition this pass has refused.
+          const outsider = feeders.find((c) => !isSnapshot(c));
+          const peer = feeders.find((c) => isSnapshot(c) && verdicts.get(c.fromId) !== null);
+          if (outsider === undefined && peer === undefined) continue;
+          verdicts.set(
+            id,
+            outsider !== undefined
+              ? `${w.toId}.${w.toProperty} is also fed by ${nodeById.get(outsider.fromId)?.type ?? 'a missing node'}.${outsider.fromProperty}, which is not an Evaluate snapshot this slice carries — the runtime shows whichever wrote last`
+              : `${w.toId}.${w.toProperty} is also written by Condition ${peer!.fromId}, which does not translate here — the runtime shows whichever wrote last`
+          );
+          changed = true;
+          break;
+        }
+      }
+    }
+    snapshotVerdictMemo = verdicts;
+    return verdicts;
+  };
+  /** One boolean cell per sink port, shared by every Condition writing it; boots false (the runtime's `null`). */
+  const snapshotCells = new Map<string, StateVarPlan>();
+  const snapshotCellOf = (toId: string, toProperty: string): StateVarPlan => {
+    const key = `${toId}\u0000${toProperty}`;
+    let cell = snapshotCells.get(key);
+    if (cell === undefined) {
+      const sink = nodeById.get(toId);
+      cell = allocStateVar(
+        sink?.authoredLabel === undefined ? undefined : `${sink.authoredLabel} ${toProperty}`,
+        toProperty === 'mounted' ? 'shown' : 'visible',
+        'boolean',
+        false,
+        toId,
+        'condition',
+        `${toProperty === 'mounted' ? 'Mounted' : 'Visible'} of ${sink?.authoredLabel ? `"${sink.authoredLabel}"` : toId}, written by the Evaluate of the Condition${component.connections.filter((c) => c.toId === toId && c.toProperty === toProperty).length > 1 ? 's' : ''} wired into it — false until the first one (EXP-011 §87).`
+      );
+      snapshotCells.set(key, cell);
+    }
+    return cell;
   };
 
   /**
@@ -9654,7 +10521,8 @@ function planComponent(
         return 'string';
       /** EXP-011 §59. A rendered digest or block is a string in both forms; the viewport's three are numbers. */
       case 'crypto-out':
-        return 'string';
+        // EXP-011 §76. An extractor's field carries the getter's own type — `string[]` for the two lists.
+        return expr.node === 'pattern' ? (PATTERN_VALUE_OUTPUTS[expr.field ?? 'match']?.tsType ?? 'string') : 'string';
       case 'screen-out':
         return 'number';
       // EXP-011 §60. The key's own type, read off its statically-known writers; `unknown` for a parent read.
@@ -9731,6 +10599,8 @@ function planComponent(
     [CLOUD_FUNCTION_TYPE]: 'call',
     // EXP-011 §43. `Record`'s only action port; with it unwired the node is an effect (§43.2).
     [RECORD_TYPE]: 'fetch',
+    // P18-S116-QUERYFETCH. `Query Records`' only action port (display name "Do"); with it unwired the node is an effect.
+    DbCollection2: 'storageFetch',
     // EXP-011 §45. The three files nodes' only action ports (`Cloud File` has none — it is a read).
     [FILE_PICKER_TYPE]: 'open',
     [UPLOAD_FILE_TYPE]: 'upload',
@@ -9869,6 +10739,14 @@ function planComponent(
    * asking exactly what it asked before.
    */
   const doneChainOf = (node: NodeIR, port = 'done'): DoneChain | { defer: string } => {
+    chainSenders.push(node.id);
+    try {
+      return doneChainOfSender(node, port);
+    } finally {
+      chainSenders.pop();
+    }
+  };
+  const doneChainOfSender = (node: NodeIR, port: string): DoneChain | { defer: string } => {
     const then: HandlerAction[] = [];
     const consumes: string[] = [];
     const collapses: string[] = [];
@@ -9899,6 +10777,25 @@ function planComponent(
       subscribes.push(...(compiled.subscribes ?? []));
     }
     return { then, consumes, collapses, subscribes };
+  };
+
+  /**
+   * EXP-011 §90. A record or user verb's `failure` chain: `doneChainOf` on the other port, with the scope that makes a
+   * read of the verb's own Error inside it the catch's local (the row has not changed inside the closure that set it).
+   */
+  const verbFailChainOf = (node: NodeIR): DoneChain | { defer: string } => {
+    const outer = verbChainScope.get(node.id);
+    verbChainScope.set(node.id, 'failure');
+    let chain: DoneChain | { defer: string };
+    try {
+      chain = doneChainOf(node, 'failure');
+    } finally {
+      // A verb its own Failure chain fires again is compiled inside its own scope: leave the outer one as it was.
+      if (outer === undefined) verbChainScope.delete(node.id);
+      else verbChainScope.set(node.id, outer);
+    }
+    // A sink two chains run is compiled once per Failure scope that reads its local (`compiledOf`), never shared.
+    return chain;
   };
 
   /** Show Popup → the slot set + `done`-chain (POPUPS-TARGET §3). */
@@ -10031,15 +10928,114 @@ function planComponent(
   }
 
   /**
+   * EXP-011 §86. A Function's own signals as chains: `Outputs.go()` in the body, wired into an action.
+   *
+   * In the runtime the call publishes the run's held writes and sends a pulse; the pulse's targets act in the drain, after
+   * the body, reading their inputs in C7 lockstep (the k-th pulse with the k-th value queued since the run began). The
+   * export runs the body against a recording `Outputs` (`runFunction`) and then each pulse's chain, in the order the body
+   * sent them; the emitter prints a chain's reads of this Function as that pulse's values.
+   *
+   * Refused by name: one port fed by two of its signals (which pulse its values pair with would need one count across
+   * both). Function only: a Visual Function's block-declared signals keep `compileJsRun`'s own refusal. A ticked value box
+   * was refused here too until P18-S119-TICKEDRUN: a new value runs the Function and sends its signals again, which
+   * `TickedRunPlan` now prints beside the Run chains.
+   *
+   * 🔴 **A refusal here refuses the signals, not the run.** The run then compiles as it did before §86 (its Done, its
+   * rendered reads), and each signal wire is reported: by its target's own reason where the target does not compile,
+   * else by this one (`pulseRefusals`, read where the attach pass reports a trigger it cannot attach). Refusing the run
+   * instead took three exported nodes out of gram's Member and Post pages, measured over the shipped templates. The two
+   * refusals above are the Function's (`pulseRefusals` by node id); a signal whose own chain does not compile is that
+   * signal's (by `<id>:out-<signal>`), and the others still chain.
+   */
+  const pulseRefusals = new Map<string, string>();
+  const pulseChainsOf = (node: NodeIR, def: JsFunctionPlan): DoneChain | { defer: string } => {
+    const none: DoneChain = { then: [], consumes: [], collapses: [], subscribes: [] };
+    if (def.kind !== 'function') return none;
+    const sentWires = component.connections.filter((c) => c.fromId === node.id && def.signals.includes(c.fromProperty.slice('out-'.length)));
+    if (sentWires.length === 0) return none;
+    const signalsByPort = new Map<string, Set<string>>();
+    for (const c of sentWires) {
+      const port = `${c.toId}:${c.toProperty}`;
+      const signals = signalsByPort.get(port) ?? new Set<string>();
+      signals.add(c.fromProperty.slice('out-'.length));
+      signalsByPort.set(port, signals);
+    }
+    for (const [port, signals] of signalsByPort) {
+      if (signals.size < 2) continue;
+      const target = nodeById.get(port.slice(0, port.indexOf(':')));
+      return {
+        defer: `two of its signals (${[...signals].map((s) => `"${s}"`).join(', ')}) drive ${target?.type ?? 'a missing node'}.${port.slice(port.indexOf(':') + 1)} — which value each pulse reads there is not translated`
+      };
+    }
+    const arms: HandlerAction[] = [];
+    const result: DoneChain = { then: [], consumes: [], collapses: [], subscribes: [] };
+    for (const signal of def.signals) {
+      if (!sentWires.some((c) => c.fromProperty === `out-${signal}`)) continue;
+      const arm = doneChainOf(node, `out-${signal}`);
+      if ('defer' in arm) {
+        pulseRefusals.set(`${node.id}:out-${signal}`, arm.defer.replace(`its out-${signal} output`, `its "${signal}" signal`));
+        continue;
+      }
+      arms.push({ kind: 'jsfun-pulse', nodeId: node.id, signal, then: arm.then });
+      result.consumes.push(...arm.consumes);
+      result.collapses.push(...arm.collapses);
+      result.subscribes.push(...arm.subscribes);
+    }
+    if (arms.length > 0) result.then.push({ kind: 'jsfun-pulses', nodeId: node.id, then: arms });
+    return result;
+  };
+
+  /**
    * A2h (EXP-003 §4): `run` wired from a handler chain, outputs consumed in that chain. The
    * compiled action carries only the `done`-chain — a pure body run without reading its outputs
    * is unobservable, and every output read inside the chain inlines the call at its sink. The
    * runtime's `done` is invocation-only for both nodes (empty-token runs pulse nothing), so the
    * handler-only translation is exact, not an approximation.
    */
+  /**
+   * P18-S119-TICKEDRUN. The ticked inputs a Run-wired node also runs on, as the values the effect watches (`TickedRunPlan`).
+   * A Visual Function has none: its setters store and run nothing. Refused by name where a ticked input's value exists
+   * only inside a handler (a field's own Text Changed, a received payload): no effect can watch it, so the runs it starts
+   * would be missing.
+   */
+  const tickedWatchOf = (node: NodeIR, def: JsFunctionPlan): { watch: ValueExpr[] } | { defer: string } => {
+    if (def.kind === 'visual') return { watch: [] };
+    const watch: ValueExpr[] = [];
+    for (const input of def.inputs) {
+      if (input.expr === undefined) continue;
+      if (literalParam(node, def.kind === 'function' ? `runOnChange-in-${input.name}` : `runOnChange-${input.name}`) === false) continue;
+      if (!exprValidIn(input.expr, { kind: 'render' })) {
+        return {
+          defer: `its "${input.name}" input is ticked under Run On Value Change, so a new value runs it again, and that value exists only inside a handler — the export cannot watch it`
+        };
+      }
+      watch.push(input.expr);
+    }
+    return { watch };
+  };
+  /**
+   * "Hold the id". The unrendered nodes that may read a Function's row (§4f) and how: each reads the input at its own
+   * trigger (a Function's Run, a Set Variable's Do, a record verb's Do, a Cloud Function's Call, a Record's Fetch), or, a
+   * Query's parameter, asks again when it changes. Measured on `fixtures/held-desk` against the runtime's own nodes, and
+   * on the shipped templates' "Hold the id"s (members-area's Announcement and Meeting, the Site Builder's PageEditor).
+   */
+  const isRowReader = (reader: NodeIR, port: string): boolean =>
+    (reader.type === JS_FUNCTION && port.startsWith('in-')) ||
+    (reader.type === 'Set Variable' && port === 'value') ||
+    (reader.type === 'DbModel2' && port === 'modelId') ||
+    (reader.type === 'SetDbModelProperties' && (port === 'modelId' || port.startsWith('prop-'))) ||
+    (reader.type === 'NewDbModelProperties' && port.startsWith('prop-')) ||
+    (reader.type === 'DeleteDbModelProperties' && port === 'modelId') ||
+    (reader.type === CLOUD_FUNCTION_TYPE && port.startsWith('in-')) ||
+    (reader.type === 'DbCollection2' && port.startsWith('qp-'));
+  /** P18-S119-TICKEDRUN. A compiled run's ticked half, by node id: what the effect watches and runs. Read after the attach pass. */
+  const tickedRunPieces = new Map<string, { watch: ValueExpr[]; action: Extract<HandlerAction, { kind: 'jsfun-run' }> }>();
+
   const compileJsRun = (node: NodeIR): CompiledSink => {
     const record = jsFunDefOf(node);
     if ('defer' in record) return { defer: record.defer };
+    const ticked = tickedWatchOf(node, record.def);
+    if ('defer' in ticked) return { defer: ticked.defer };
     // §3.6 over the run path: success co-fires with done, failure/unchanged/error report the
     // run itself, isTrueEv/isFalseEv pulse per evaluation — any of them consumed defers.
     for (const c of component.connections) {
@@ -10061,22 +11057,107 @@ function planComponent(
       }
       return { defer: `its ${c.fromProperty} output is consumed — only done continues a Run chain in this slice` };
     }
-    const chain = doneChainOf(node);
-    if ('defer' in chain) return chain;
-    const strayRead = component.connections.find(
+    const done = doneChainOf(node);
+    if ('defer' in done) return done;
+    const pulsed = pulseChainsOf(node, record.def);
+    if ('defer' in pulsed) pulseRefusals.set(node.id, pulsed.defer);
+    const pulses: DoneChain = 'defer' in pulsed ? { then: [], consumes: [], collapses: [], subscribes: [] } : pulsed;
+    // P18-S119-TICKEDRUN. A ticked arrival runs the signals' chains from an effect, where no handler's values exist.
+    if (ticked.watch.length > 0 && !actionsValidIn([{ kind: 'jsfun-run', nodeId: node.id, then: pulses.then }], { kind: 'render' })) {
+      return {
+        defer: 'a ticked input runs it again from no handler, and its signals\' chains read values that exist only inside a handler'
+      };
+    }
+    // The pulses run before Done, as the runtime's targets act in the drain and Done is sent after the run's await.
+    const chain = {
+      then: [...pulses.then, ...done.then],
+      consumes: [...pulses.consumes, ...done.consumes],
+      collapses: [...pulses.collapses, ...done.collapses],
+      subscribes: [...pulses.subscribes, ...done.subscribes]
+    };
+    const strays = component.connections.filter(
       (c) => c.fromId === node.id && isJsValueOutput(node, c.fromProperty) && !chain.consumes.includes(c.key)
     );
+    /**
+     * "Hold the id". An unrendered sink reads the row too: a logic node's input (a Record's Id, another Function's input,
+     * a Query's filter value) resolves this read through `jsFunReadExpr`, which compiles this run first and so finds the
+     * row. Each sink still compiles or refuses by its own rules.
+     *
+     * 🔴 **Except a sink one of this Function's own signals runs.** Its read belongs to that signal's chain, and is a stray
+     * only because the chain was refused (marketplace's ShelfRow: `go` calls a Cloud Function whose Done reads the clock).
+     * Counting it materialized a row nothing reads, and the button that ran it lost its TODO.
+     */
+    const signalTargetOf = (toId: string) =>
+      record.def.kind !== 'function'
+        ? undefined
+        : component.connections.find((c) => c.fromId === node.id && c.toId === toId && record.def.signals.includes(c.fromProperty.slice('out-'.length)));
+    const missingSink = strays.find((c) => nodeById.get(c.toId) === undefined);
+    if (missingSink) {
+      return { defer: `its ${missingSink.fromProperty} output is consumed outside the Run chain by a missing node` };
+    }
+    // A read on a target of one of its signals whose chain was refused: that chain's, and reported with it.
+    const ownSignalStray = (c: ConnectionIR) => {
+      if (rendered.has(c.toId)) return false;
+      const signalWire = signalTargetOf(c.toId);
+      return signalWire !== undefined && (pulseRefusals.has(`${node.id}:${signalWire.fromProperty}`) || pulseRefusals.has(node.id));
+    };
+    /**
+     * An unrendered reader reads the node's own values in a handler (`delivered`, current within the click that ran it),
+     * so only a Function, which keeps a node, has them; an Expression or a Visual Function keeps the old refusal. And only
+     * a reader that reads its input at its own trigger, or asks again when it changes (`ROW_READERS`). 🔴 Not a Component
+     * Outputs value: todo-list's lists send `add` with the title the parent never got, where HEAD refused the button.
+     */
+    // HEAD's rule where it materialized: the first stray drawn, the rest read the row as they could. Kept, so no export
+    // HEAD made is lost (todo-list's Project editor); the rules below decide only what HEAD refused.
+    const headMaterialized = strays.length > 0 && rendered.has(strays[0].toId);
+    const unreadable = headMaterialized
+      ? undefined
+      : strays.find(
+          (c) => !rendered.has(c.toId) && !ownSignalStray(c) && (record.def.kind !== 'function' || !isRowReader(nodeById.get(c.toId)!, c.toProperty))
+        );
+    if (unreadable) {
+      return {
+        defer: `its ${unreadable.fromProperty} output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there`
+      };
+    }
+    const readers = headMaterialized ? strays : strays.filter((c) => !ownSignalStray(c));
+    /**
+     * 🔴 **The same event, the reader's wire first.** A Set Variable's Do fired by the click that also runs this Function
+     * reads the run's new value in the runtime, whichever wire comes first: it waits until the update's inputs have
+     * arrived. The export runs a click's actions in wire order, so with the reader's wire first it would read the run
+     * before (measured: `s122-holdtheid/probe.ts`, "same click, before"). Refused by name; the wire after the Run agrees.
+     */
+    const runWires = component.connections.filter((c) => c.toId === node.id && c.toProperty === 'run');
+    for (const reader of readers) {
+      if (rendered.has(reader.toId)) continue;
+      const early = component.connections.find(
+        (w, i) =>
+          w.toId === reader.toId &&
+          runWires.some((r) => r.fromId === w.fromId && r.fromProperty === w.fromProperty && i < component.connections.indexOf(r))
+      );
+      if (early) {
+        return {
+          defer: `its ${reader.fromProperty} output is read by ${nodeById.get(reader.toId)!.type}.${reader.toProperty}, whose ${early.toProperty} the same ${early.fromProperty} sends before it runs this — the runtime's reader waits for the run's value, the export's would read the one before`
+        };
+      }
+    }
+    if (readers.length === 0 && strays.length > 0 && chain.then.length === 0) {
+      const stray = strays[0];
+      const signalWire = signalTargetOf(stray.toId)!;
+      const refused = pulseRefusals.get(`${node.id}:${signalWire.fromProperty}`) ?? pulseRefusals.get(node.id);
+      return {
+        defer:
+          refused !== undefined
+            ? `its ${stray.fromProperty} output feeds ${nodeById.get(stray.toId)!.type}.${stray.toProperty}, which its "${signalWire.fromProperty.slice('out-'.length)}" signal runs, and that chain is not exported: ${refused}`
+            : `its ${stray.fromProperty} output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there`
+      };
+    }
+    const strayRead = readers[0];
     // §4f (CONTROLLED-STATE-TARGET): outputs read outside the Run chain materialize the output
     // record as a state var written where the chain runs — render reads are maybe-undefined
     // until the first invocation, the runtime's own pre-first-run contract.
     let materialize: string | undefined;
     if (strayRead) {
-      const strayRendered = nodeById.get(strayRead.toId);
-      if (!strayRendered || !rendered.has(strayRead.toId)) {
-        return {
-          defer: `its ${strayRead.fromProperty} output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there`
-        };
-      }
       const def = record.def;
       const fields = def.outputs.map(
         (o) => `${/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(o.name) ? o.name : JSON.stringify(o.name)}?: ${o.tsType}`
@@ -10099,6 +11180,17 @@ function planComponent(
     }
     if (chain.then.length === 0 && materialize === undefined) {
       return { defer: 'its Run drives nothing this slice translates — no done-chain action consumes its work' };
+    }
+    // Only on a run that compiles: a refused one prints no wrapper change and keeps no node state.
+    // P18-S121-FRESHOUTPUTS, for a materialized run: its row is what a reader reads between runs, and the runtime's node
+    // keeps its outputs across them (a run that returns early writes nothing). So it keeps a node, as a pulsed run does.
+    if (pulses.then.length > 0 || (materialize !== undefined && record.def.kind === 'function')) record.def.pulsed = true;
+    // P18-S119-TICKEDRUN. Done is the Run's alone; a ticked run that sends nothing and writes nothing is unobservable.
+    if (ticked.watch.length > 0 && (pulses.then.length > 0 || materialize !== undefined)) {
+      tickedRunPieces.set(node.id, {
+        watch: ticked.watch,
+        action: { kind: 'jsfun-run', nodeId: node.id, then: pulses.then, ...(materialize !== undefined ? { materialize } : {}), ticked: true }
+      });
     }
     return {
       action: {
@@ -10216,6 +11308,23 @@ function planComponent(
     if (literalParam(node, 'idSource') === 'foreach' || authoredOrWired('repeaterComponent')) {
       return { defer: 'its Id Source is the enclosing repeater\'s row — row identity is not statically knowable in this slice' };
     }
+    // P18-S110-UPSERTON. A non-empty Upsert On is an `X-NodeGX-Upsert` header on the create (ParseWireAdapter
+    // `create`): a clash on that unique property updates the row there. The api module's create sends none.
+    /** Wired, or authored as text the setter keeps: `upsertOn` trims, `onlyIfUnchanged` splits on commas, then trims. */
+    const namesProperties = (name: 'upsertOn' | 'onlyIfUnchanged') => {
+      const value = literalParam(node, name);
+      if (wiredPorts.has(`${node.id}:${name}`)) return true;
+      if (typeof value !== 'string') return false;
+      return name === 'upsertOn' ? value.trim() !== '' : value.split(',').some((n) => n.trim() !== '');
+    };
+    if (verb === 'create' && namesProperties('upsertOn')) {
+      return { defer: 'its Upsert On names a unique property — a clash would update the existing row in the runtime, and the exported create always creates' };
+    }
+    // P18-S110-ONLYIFUNCHANGED. The precondition is what the record held when it was read (setdbmodelpropertiesnode.ts
+    // `scheduleSave`, an `X-NodeGX-If` header); the export holds no read copy of the record to take it from.
+    if (verb === 'update' && namesProperties('onlyIfUnchanged')) {
+      return { defer: 'its Only If Unchanged names properties — the runtime writes only if they still hold what the record was read with, and the exported update writes unconditionally' };
+    }
     if (verb === 'update') {
       if (literalParam(node, 'storeType') === 'local' || wiredPorts.has(`${node.id}:storeType`)) {
         return { defer: 'Store to is Local only — an in-memory-only write, and the export holds no record to write into' };
@@ -10238,8 +11347,9 @@ function planComponent(
     // Consumed outcome pulses beyond `done`, and the `id` output: the runtime pulses/publishes
     // them per invocation and nothing in this slice's shape carries them (§5.11).
     for (const wire of component.connections.filter((c) => c.fromId === node.id)) {
-      if (wire.fromProperty === 'failure' || wire.fromProperty === 'completed') {
-        return { defer: `its ${wire.fromProperty} output is consumed — only the done chain and the Error value are translated in this slice` };
+      // EXP-011 §90. Failure is a chain now (`verbFailChainOf`); Completed is not.
+      if (wire.fromProperty === 'completed') {
+        return { defer: `its ${wire.fromProperty} output is consumed — only the done and failure chains and the Error value are translated in this slice` };
       }
       if (wire.fromProperty === 'id') {
         return { defer: 'its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need' };
@@ -10305,6 +11415,8 @@ function planComponent(
 
     const chain = doneChainOf(node);
     if ('defer' in chain) return { defer: chain.defer };
+    const failChain = verbFailChainOf(node);
+    if ('defer' in failChain) return { defer: failChain.defer };
 
     const { typeName, moduleBase } = collectionModuleNames(collectionName);
     const fnName = `${verb}${typeName}`;
@@ -10340,11 +11452,12 @@ function planComponent(
         // EXP-011 §72. An `unknown` id (an untyped Variable, a store key nothing types) into a `string` parameter.
         ...(idExpr !== undefined && idExpr.kind !== 'literal' && exprTsType(idExpr) === 'unknown' ? { coerceId: 'string' as const } : {}),
         errorState: verbErrorStateOf(node).name,
-        then: chain.then
+        then: chain.then,
+        failThen: failChain.then
       },
-      consumes: [...consumes, ...chain.consumes, ...ctx.consumes],
-      collapses: [...ctx.logicNodeIds, ...chain.collapses],
-      subscribes: [...ctx.subscriberIds, ...chain.subscribes]
+      consumes: [...consumes, ...chain.consumes, ...failChain.consumes, ...ctx.consumes],
+      collapses: [...ctx.logicNodeIds, ...chain.collapses, ...failChain.collapses],
+      subscribes: [...ctx.subscriberIds, ...chain.subscribes, ...failChain.subscribes]
     };
   };
 
@@ -10384,8 +11497,8 @@ function planComponent(
 
     // Consumed outcome pulses beyond `done`, and the `id` output (the record verbs' rule, §5.11).
     for (const wire of component.connections.filter((c) => c.fromId === node.id)) {
-      if (wire.fromProperty === 'failure' || wire.fromProperty === 'completed') {
-        return { defer: `its ${wire.fromProperty} output is consumed — only the done chain and the Error value are translated in this slice` };
+      if (wire.fromProperty === 'completed') {
+        return { defer: `its ${wire.fromProperty} output is consumed — only the done and failure chains and the Error value are translated in this slice` };
       }
       if (wire.fromProperty === 'id') {
         return { defer: 'its Id output is consumed — it republishes the Id it was given, and that read is not translated in this slice' };
@@ -10446,6 +11559,8 @@ function planComponent(
 
     const chain = doneChainOf(node);
     if ('defer' in chain) return { defer: chain.defer };
+    const failChain = verbFailChainOf(node);
+    if ('defer' in failChain) return { defer: failChain.defer };
 
     const { typeName, moduleBase } = collectionModuleNames(collectionName);
     const fnName = `${spec.fnPrefix}${typeName}Relation`;
@@ -10480,11 +11595,12 @@ function planComponent(
         guardId: false,
         ...(guards.length > 0 ? { guards } : {}),
         errorState: verbErrorStateOf(node).name,
-        then: chain.then
+        then: chain.then,
+        failThen: failChain.then
       },
-      consumes: [...consumes, ...chain.consumes, ...ctx.consumes],
-      collapses: [...ctx.logicNodeIds, ...chain.collapses],
-      subscribes: [...ctx.subscriberIds, ...chain.subscribes]
+      consumes: [...consumes, ...chain.consumes, ...failChain.consumes, ...ctx.consumes],
+      collapses: [...ctx.logicNodeIds, ...chain.collapses, ...failChain.collapses],
+      subscribes: [...ctx.subscriberIds, ...chain.subscribes, ...failChain.subscribes]
     };
   };
 
@@ -10504,9 +11620,9 @@ function planComponent(
     // Consumed outcome pulses beyond `done`: the runtime pulses them per invocation, and only
     // the done chain and the Error value are translated in this slice (§5.4).
     for (const wire of component.connections.filter((c) => c.fromId === node.id)) {
-      if (wire.fromProperty === 'failure' || wire.fromProperty === 'completed') {
+      if (wire.fromProperty === 'completed') {
         return {
-          defer: `its ${wire.fromProperty} output is consumed — only the done chain and the Error value are translated in this slice`
+          defer: `its ${wire.fromProperty} output is consumed — only the done and failure chains and the Error value are translated in this slice`
         };
       }
     }
@@ -10590,6 +11706,8 @@ function planComponent(
 
     const chain = doneChainOf(node);
     if ('defer' in chain) return { defer: chain.defer };
+    const failChain = verbFailChainOf(node);
+    if ('defer' in failChain) return { defer: failChain.defer };
 
     const call: SessionCallPlan = { nodeId: node.id, verb: spec.verb, fnName: spec.fnName };
     if (spec.columns === true) {
@@ -10630,11 +11748,12 @@ function planComponent(
         guardId: false,
         errorState: verbErrorStateOf(node).name,
         ...(spec.clearsErrorOnDone === true ? { clearErrorOnDone: true as const } : {}),
-        then: chain.then
+        then: chain.then,
+        failThen: failChain.then
       },
-      consumes: [...consumes, ...chain.consumes, ...ctx.consumes],
-      collapses: [...ctx.logicNodeIds, ...chain.collapses],
-      subscribes: [...ctx.subscriberIds, ...chain.subscribes]
+      consumes: [...consumes, ...chain.consumes, ...failChain.consumes, ...ctx.consumes],
+      collapses: [...ctx.logicNodeIds, ...chain.collapses, ...failChain.collapses],
+      subscribes: [...ctx.subscriberIds, ...chain.subscribes, ...failChain.subscribes]
     };
   };
 
@@ -10730,6 +11849,8 @@ function planComponent(
     // the default rather than "no timeout".
     const timeoutParam = literalParam(node, 'timeout');
     const timeout = typeof timeoutParam === 'number' && timeoutParam !== 0 ? timeoutParam : 30000;
+    const responseTypeParam = literalParam(node, 'responseType');
+    const responseType = responseTypeParam === 'text' || responseTypeParam === 'json' ? responseTypeParam : 'auto';
 
     const ctx = newCtx();
     const args: Array<{ param: string; expr: ValueExpr }> = [];
@@ -10892,6 +12013,7 @@ function planComponent(
       url,
       method,
       timeout,
+      responseType,
       pathParams,
       queryParams,
       headers,
@@ -11403,7 +12525,9 @@ function planComponent(
       answerLocal: names.answerLocal,
       messageLocal: names.messageLocal,
       idLocal: names.idLocal,
-      reads
+      reads,
+      // With no backend the read is a stub that throws, the row is never set, and there is no client to hold a copy.
+      live: ir.project.cloudservices !== undefined && literalParam(node, 'runOnChange-record') !== false
     });
     return {
       action: {
@@ -11421,6 +12545,22 @@ function planComponent(
       consumes: [...consumes, ...ctx.consumes, ...chain.consumes, ...failChain.consumes],
       collapses: [...ctx.logicNodeIds, ...chain.collapses, ...failChain.collapses],
       subscribes: [...ctx.subscriberIds, ...chain.subscribes, ...failChain.subscribes]
+    };
+  };
+
+  /**
+   * P18-S116-QUERYFETCH. A `Query Records`' Fetch: the query asks again, the wired filter values read at the pulse.
+   * Refused as the query itself is (its settings, by name). The value wires are consumed where the query lands, as for
+   * the effect form (`queryWirings`); a query that does not land prints nothing, and its own row says why.
+   */
+  const compileQueryFetch = (node: NodeIR): CompiledSink => {
+    const settings = querySettingsFor(node);
+    if ('refuse' in settings) return { defer: `the Query Records it fetches is not exported: ${settings.refuse}` };
+    return {
+      action: { kind: 'query-fetch', nodeId: node.id, values: queryWirings.get(node.id)?.values ?? [] },
+      consumes: [],
+      collapses: [],
+      subscribes: []
     };
   };
 
@@ -11739,7 +12879,7 @@ function planComponent(
    */
   const compileCryptoCall = (node: NodeIR): CompiledSink => {
     const spec = CRYPTO_NODES[node.type];
-    const readable = new Set([spec.output, 'done', 'failure', 'error']);
+    const readable = new Set([spec.output, 'done', 'failure', 'error', ...Object.keys(spec.values ?? {}), ...(spec.results ?? [])]);
     for (const wire of component.connections.filter((c) => c.fromId === node.id)) {
       if (readable.has(wire.fromProperty)) continue;
       if (wire.fromProperty === 'completed') {
@@ -11777,24 +12917,34 @@ function planComponent(
     // A pulse into a value port is a read of nothing, and the sentence has to say which — decided from the
     // sink's own port kind BEFORE the chain compiles (§52.4's rule), or the chain compiler names it first
     // as "drives no translatable action", which is true of the wire and silent about the mistake.
-    for (const wireOut of component.connections.filter((c) => c.fromId === node.id && (c.fromProperty === 'done' || c.fromProperty === 'failure'))) {
+    const PULSE_LABELS: Record<string, string> = { done: 'Done', failure: 'Failure', found: 'Found', notFound: 'Not Found' };
+    const pulses = ['done', 'failure', ...(spec.results ?? [])];
+    for (const wireOut of component.connections.filter((c) => c.fromId === node.id && pulses.includes(c.fromProperty))) {
       const target = nodeById.get(wireOut.toId);
       if (target === undefined || target.type === 'Component Outputs') continue;
       const sinkKind =
         target.declaredPorts.find((p) => p.plug === 'input' && p.name === wireOut.toProperty)?.kind ??
         catalog.portKind(target.type, wireOut.toProperty, 'input');
       if (sinkKind === 'value') {
-        return { defer: `its ${wireOut.fromProperty === 'done' ? 'Done' : 'Failure'} output is consumed as a value — a pulse carries nothing to read` };
+        return { defer: `its ${PULSE_LABELS[wireOut.fromProperty]} output is consumed as a value — a pulse carries nothing to read` };
       }
     }
     const local = cryptoLocalOf(node);
+    const emptyChain: DoneChain = { then: [], consumes: [], collapses: [], subscribes: [] };
     cryptoChainScope.set(node.id, 'done');
     const done = doneChainOf(node, 'done');
     cryptoChainScope.set(node.id, 'failure');
-    const fail = !('defer' in done) ? doneChainOf(node, 'failure') : { then: [], consumes: [], collapses: [], subscribes: [] };
+    const fail = !('defer' in done) ? doneChainOf(node, 'failure') : emptyChain;
+    // EXP-011 §76. The two result chains, each compiled in its own arm (the local is readable in both).
+    cryptoChainScope.set(node.id, 'found');
+    const found = spec.results !== undefined && !('defer' in done) && !('defer' in fail) ? doneChainOf(node, 'found') : emptyChain;
+    cryptoChainScope.set(node.id, 'notFound');
+    const notFound = spec.results !== undefined && !('defer' in done) && !('defer' in fail) && !('defer' in found) ? doneChainOf(node, 'notFound') : emptyChain;
     cryptoChainScope.delete(node.id);
     if ('defer' in done) return { defer: done.defer };
     if ('defer' in fail) return { defer: fail.defer };
+    if ('defer' in found) return { defer: found.defer };
+    if ('defer' in notFound) return { defer: notFound.defer };
     return {
       action: {
         kind: 'crypto-call',
@@ -11806,11 +12956,13 @@ function planComponent(
         inputs,
         local,
         then: done.then,
-        failThen: fail.then
+        failThen: fail.then,
+        foundThen: found.then,
+        notFoundThen: notFound.then
       },
-      consumes: [...consumes, ...done.consumes, ...fail.consumes],
-      collapses: [...collapses, ...done.collapses, ...fail.collapses],
-      subscribes: [...subscribes, ...done.subscribes, ...fail.subscribes]
+      consumes: [...consumes, ...done.consumes, ...fail.consumes, ...found.consumes, ...notFound.consumes],
+      collapses: [...collapses, ...done.collapses, ...fail.collapses, ...found.collapses, ...notFound.collapses],
+      subscribes: [...subscribes, ...done.subscribes, ...fail.subscribes, ...found.subscribes, ...notFound.subscribes]
     };
   };
 
@@ -12234,6 +13386,12 @@ function planComponent(
      * the same reason: the runtime's port holds *whichever arrived last*, and a wire that
      * delivers is always after the parameter the project file was loaded with.
      */
+    // P18-S110-NEWTAB. The runtime stores `!!value` in the input's own setter (router-navigate.ts); a wire
+    // would choose between the two arms per press, which this action does not carry.
+    if (wiredPorts.has(`${node.id}:openInNewTab`)) {
+      return { defer: 'its Open In New Tab port is wired — whether it opens a tab or navigates in place is a runtime value' };
+    }
+    const newTab = literalParam(node, 'openInNewTab') === true;
     const values = new Map<string, ValueExpr>();
     for (const param of node.parameters) {
       if (!param.name.startsWith('pm-')) continue;
@@ -12268,7 +13426,7 @@ function planComponent(
     const query = Array.from(values, ([name, expr]) => ({ name, expr }));
 
     return {
-      action: { kind: 'navigate', to: page.urlPath, pathParams, query },
+      action: { kind: 'navigate', to: page.urlPath, pathParams, query, ...(newTab ? { newTab: true as const } : {}) },
       consumes: [...consumes, ...ctx.consumes],
       collapses: ctx.logicNodeIds,
       subscribes: ctx.subscriberIds
@@ -12606,6 +13764,36 @@ function planComponent(
     if (typeof dur !== 'number' || typeof delay !== 'number') return { defer: `its ${name} has no numeric duration and delay` };
     return { curve: [...curve] as number[], dur, delay };
   };
+
+  /**
+   * One snapshot per handler owner; a stateful control's own chain seeds its user-path value.
+   *
+   * 🔴 **Declared here, above `statesPlanOf`, and not beside the snapshot rule further down**
+   * (P100-UPG001-SNAP). A States node's listeners are snapshotted when it registers, and the first
+   * registration can be a Component Outputs read in the value-output pass, which runs before the
+   * snapshot rule's own lines. Declared below, both were a temporal-dead-zone throw.
+   */
+  const chainSnapshots = new Map<string, ChainSnapshot>();
+  function chainSnapshotFor(ownerKey: string, seedControlId?: string): ChainSnapshot {
+    let snap = chainSnapshots.get(ownerKey);
+    if (snap === undefined) {
+      snap = new Map();
+      if (seedControlId !== undefined) {
+        const stateVar = controlStateVars.get(seedControlId);
+        const spec = controlSpecOf(seedControlId);
+        if (stateVar !== undefined && spec !== undefined) {
+          snap.set(
+            stateVar.name,
+            spec.coerce === 'textinput'
+              ? { kind: 'input-text', inputId: seedControlId }
+              : { kind: 'control-event', controlId: seedControlId, form: spec.eventForm }
+          );
+        }
+      }
+      chainSnapshots.set(ownerKey, snap);
+    }
+    return snap;
+  }
 
   const statesPlans = new Map<string, StatesPlan | { defer: string }>();
   const statesLocals = new Map<string, string>();
@@ -13142,6 +14330,13 @@ function planComponent(
     for (const key of consumes) consumed.add(key);
     for (const id of collapses) dispositions[id] = { kind: 'collapsed', into };
     for (const id of subscribes) boundSubscribers.add(id);
+    // P18-S110-TASKERROR. runtasks.ts reads the template's error output off the failing task into its
+    // run-tasks/task-failed report; runTasks.ts has no value channel from the element and says so in a comment.
+    // Said per node, and only where the template has that output to lose.
+    const errorPort = outputPorts.find((p) => p.name === contract.error);
+    if (errorPort !== undefined) {
+      notes.push(`node ${node.id} (${RUN_TASKS_TYPE}): a failed task is reported without its Template's "${contract.error}" output — the runtime puts that value in the run-tasks/task-failed error, and the exported host has no value channel from a task`);
+    }
     return core;
   };
 
@@ -13415,6 +14610,35 @@ function planComponent(
       const filtered = node.parameters.some((p) => p.name === 'visualFilter') || component.connections.some((c) => c.toId === node.id && (c.toProperty === 'visualFilter' || c.toProperty.startsWith('qp-')));
       if (filtered) return refuse('its Filter is authored — a subscription filter is evaluated by the server and this slice does not translate the filter tree; dropping it would deliver every change in the class');
     }
+    // EXP-011 §79. A Sign In With hands over to the project's own backend and hears its return through EXP-009's client.
+    // The node has no Backend input: the runtime always reaches the active backend (userservice.ts, `backendId` absent).
+    if (spec.kind === 'signin' && ir.project.cloudservices === undefined) {
+      return refuse('the project declares no backend (metadata.cloudservices is absent) — there is no /oauth/<provider>/start to hand the browser over to');
+    }
+    // EXP-011 §77. The built-in store actions write a Global Store a server names keys in; which store and which keys must be
+    // readable off the graph, and this slice exports none of them. A literal naming only misspelt built-ins enables nothing
+    // (the node reports them on Last Error, and the lib does the same), so it translates.
+    if (spec.kind === 'dispatcher') {
+      if (wiredPorts.has(`${node.id}:builtIns`)) return refuse('its Enabled Built-ins input is wired — which store writes a server may make must be readable off the graph');
+      const builtIns = literalParam(node, 'builtIns');
+      const enabled = typeof builtIns === 'string' ? builtIns.split(',').map((n) => n.trim()).filter((n) => (ACTION_BUILT_INS as readonly string[]).includes(n)) : [];
+      if (enabled.length > 0) return refuse(`it enables the built-in store action${enabled.length > 1 ? 's' : ''} ${enabled.join(', ')} — a server writing the app's Global Store is not exported in this slice`);
+    }
+    // EXP-011 §77. With Auto Complete on, the runtime completes with the Result its Trigger chain has just written; the
+    // export reads Result from the render the Trigger fired in, so a wired Result would hand back the value from before.
+    if (spec.kind === 'handler' && wiredPorts.has(`${node.id}:result`) && (wiredPorts.has(`${node.id}:autoComplete`) || literalParam(node, 'autoComplete') !== false)) {
+      return refuse('its Result input is wired while Auto Complete is on — the runtime hands back the value its Trigger chain has just written, and the export would hand back the one from the render before');
+    }
+    // EXP-011 §78. A history-family node's Store Name is the store module the hook is handed, so it must name one the
+    // export emits: a literal (or the default 'app'), never a wire, and not a store that defers as a whole.
+    let store: string | undefined;
+    if (spec.store !== undefined) {
+      if (wiredPorts.has(`${node.id}:${spec.store.port}`)) return refuse('its Store Name is wired — which store it works on must be readable off the graph, where the store module is');
+      const named = storePlanOf(node);
+      if (named === undefined) return refuse('its Store Name is not a literal');
+      if (named.deferred !== undefined) return refuse(`the store "${named.name}" it names is not exported: ${named.deferred}`);
+      store = named.name;
+    }
     const valueInputs: Array<{ port: string; displayName: string; param?: string }> = [...(spec.data !== undefined ? [spec.data] : []), ...spec.config];
     for (const wire of component.connections.filter((c) => c.toId === node.id)) {
       if (spec.actions[wire.toProperty] !== undefined || valueInputs.some((p) => (p.param ?? p.port) === wire.toProperty)) continue;
@@ -13469,7 +14693,8 @@ function planComponent(
       data,
       config,
       listeners: {},
-      comment: `${label} — a ${spec.displayName} (${spec.sourceFile}), hosted by ${spec.lib}.ts; its value outputs read live off the handle.`
+      ...(store !== undefined ? { store } : {}),
+      comment: `${label} — ${/^[AEIOU]/.test(spec.displayName) ? 'an' : 'a'} ${spec.displayName} (${spec.sourceFile}), hosted by ${spec.lib}.ts; its value outputs read live off the handle.`
     };
     streamPlans.set(node.id, core);
     plan.streams.push(core);
@@ -13988,7 +15213,11 @@ function planComponent(
       if (keyType === 'number' || keyType === 'boolean') {
         return { defer: `key "${key}" is ${keyType}-typed by the initial state; only string writes translate in this slice` };
       }
-      const wire = component.connections.find((c) => c.toId === node.id && c.toProperty === 'value');
+      // EXP-011 §90. The Set Variable's rule, one node over.
+      const wire = lastValueWireOf(node);
+      if (wire === undefined && valueWiresInto(node).length > 1) {
+        return { defer: 'two wires feed its Value input — last-writer-wins is not statically ordered' };
+      }
       if (!wire) {
         /**
          * EXP-011 §70. A value typed into the node with nothing wired over it is what every Set
@@ -14071,6 +15300,7 @@ function planComponent(
     if (node.type === HTTP_TYPE) return compileHttpFetch(node);
     if (node.type === CLOUD_FUNCTION_TYPE) return compileCloudCall(node);
     if (node.type === RECORD_TYPE) return compileRecordFetch(node);
+    if (node.type === 'DbCollection2') return compileQueryFetch(node);
     // EXP-011 §45.
     if (node.type === FILE_PICKER_TYPE) return compileFilePick(node);
     if (node.type === UPLOAD_FILE_TYPE) return compileFileUpload(node);
@@ -14108,12 +15338,18 @@ function planComponent(
      * refused every non-string enum refused four values the runtime never converts.
      */
     const setWith = literalParam(node, 'setWith');
-    const wire = component.connections.find((c) => c.toId === node.id && c.toProperty === 'value');
+    // EXP-011 §90. Where several wires feed Value, the one the runtime's Value holds at this Do (`lastValueWireOf`).
+    const wire = lastValueWireOf(node);
     if (setWith === 'object' || setWith === 'array') {
       return { defer: `setWith "${String(setWith)}" conversion is not translated in step 5` };
     }
     if (setWith === 'emptyString') {
       return { action: { kind: 'store-set', variableName, expr: { kind: 'literal', value: '' } }, consumes: wire ? [wire.key] : [], collapses: [], subscribes: [] };
+    }
+    // EXP-011 §90. The runtime's Value holds whichever wire wrote last; this compiled the first and dropped the rest. The
+    // sender's own wire is last at its pulse (nightbook's "Another one"); with none, which wrote last is not known.
+    if (wire === undefined && valueWiresInto(node).length > 1) {
+      return { defer: 'two wires feed its Value input — last-writer-wins is not statically ordered' };
     }
     if (setWith === 'boolean' && wire) {
       return { defer: `setWith "boolean" conversion is not translated in step 5` };
@@ -14389,10 +15625,21 @@ function planComponent(
    * reactive effect (LOGIC-TARGET §10) — they differ in *what fires the branch*, never in what it does.
    */
   const compileConditionBranch = (node: NodeIR): CompiledSink => {
+    // EXP-011 §87. A snapshot Condition's value wires are its sinks' cells, written below; Pass 4c binds and consumes them.
+    const snapshotVerdict = snapshotVerdicts().get(node.id);
+    const snapshotWires = snapshotVerdict === null ? snapshotWiresOf(node) : [];
     const stray = component.connections.find(
-      (c) => c.fromId === node.id && c.fromProperty !== 'ontrue' && c.fromProperty !== 'onfalse'
+      (c) => c.fromId === node.id && c.fromProperty !== 'ontrue' && c.fromProperty !== 'onfalse' && !snapshotWires.includes(c)
     );
-    if (stray) return { defer: `its ${stray.fromProperty} output drives logic this slice does not translate` };
+    if (stray) {
+      const valueOut = stray.fromProperty === 'result' || stray.fromProperty === 'isfalse';
+      return {
+        defer:
+          valueOut && typeof snapshotVerdict === 'string'
+            ? snapshotVerdict
+            : `its ${stray.fromProperty} output drives logic this slice does not translate`
+      };
+    }
 
     const ctx = newCtx();
     let cond: ValueExpr;
@@ -14449,6 +15696,29 @@ function planComponent(
     if ('defer' in whenTrue) return whenTrue;
     const whenFalse = arm('onfalse');
     if ('defer' in whenFalse) return whenFalse;
+    if (snapshotWires.length > 0) {
+      // EXP-011 §87. The answer goes into each sink's cell before the arm runs (the runtime flags its values dirty,
+      // then sends On True / On False). A literal condition has one side, so it is written without an `if`.
+      const writes = (answer: boolean): HandlerAction[] =>
+        snapshotWires.map((w) => ({
+          kind: 'state-set',
+          name: snapshotCellOf(w.toId, w.toProperty).name,
+          expr: { kind: 'literal', value: w.fromProperty === 'result' ? answer : !answer }
+        }));
+      const truth = truthyExpr(cond);
+      if (truth.kind === 'literal') {
+        const side = [...writes(truth.value === true), ...(truth.value === true ? whenTrue : whenFalse)];
+        const action: HandlerAction =
+          side.length === 1 ? side[0] : { kind: 'branch', cond: { kind: 'literal', value: true }, whenTrue: side, whenFalse: [], flat: true };
+        return { action, consumes, collapses, subscribes };
+      }
+      return {
+        action: { kind: 'branch', cond, whenTrue: [...writes(true), ...whenTrue], whenFalse: [...writes(false), ...whenFalse] },
+        consumes,
+        collapses,
+        subscribes
+      };
+    }
     if (whenTrue.length === 0 && whenFalse.length === 0) {
       return { defer: 'neither branch drives a translatable action' };
     }
@@ -14467,16 +15737,47 @@ function planComponent(
   const recordEffectDefers = new Map<string, string>();
   const compiling = new Set<string>();
   const compiledOf = (node: NodeIR, port: string): CompiledSink => {
-    const key = `${node.id}:${port}`;
-    const cached = compiledSinks.get(key);
-    if (cached !== undefined) return cached;
+    // EXP-011 §90. A Set with several Value wires compiles per wire it reads, which depends on the chain it is in.
+    const valueWires = (node.type === 'Set Variable' || node.type === GLOBAL_STORE_SET) && valueWiresInto(node).length > 1;
+    const plainKey = `${node.id}:${port}${valueWires ? `@value:${lastValueWireOf(node)?.key ?? 'none'}` : ''}`;
+    /**
+     * EXP-011 §90. Inside a verb's Failure chain a read of its Error is the catch's local, outside it the row; one sink
+     * that two chains run would carry whichever was compiled first into the other (planning's Sign in: Sign Up's catch
+     * read Log In's local; a button beside a Failure chain read a local nothing declared). A compile that reads a scoped
+     * verb's local is kept under that scope's key only; inside a scope, a plain one that reads a scoped verb's row is not
+     * reused. Everything else is one compile, as before.
+     */
+    const scoped = [...verbChainScope].filter(([, s]) => s === 'failure').map(([id]) => id);
+    const scopeKey = scoped.length > 0 ? `${plainKey}@failure:${[...scoped].sort().join(',')}` : undefined;
+    const readsScoped = (result: CompiledSink, form: 'local' | 'row'): boolean => {
+      if ('defer' in result || scoped.length === 0) return false;
+      const rows = form === 'row' ? new Set(scoped.map((id) => verbErrorVars.get(id)?.name).filter((n) => n !== undefined)) : undefined;
+      let found = false;
+      const visit = (value: unknown): void => {
+        if (found || value === null || typeof value !== 'object') return;
+        if (Array.isArray(value)) return value.forEach(visit);
+        const v = value as { kind?: unknown; nodeId?: unknown; viaState?: unknown; name?: unknown };
+        if (form === 'local' && v.kind === 'outcome-error' && v.viaState === undefined && scoped.includes(v.nodeId as string)) found = true;
+        if (form === 'row' && v.kind === 'state-get' && rows!.has(v.name as string)) found = true;
+        for (const child of Object.values(value)) visit(child);
+      };
+      visit(result.action);
+      return found;
+    };
+    const cachedScoped = scopeKey !== undefined ? compiledSinks.get(scopeKey) : undefined;
+    if (cachedScoped !== undefined) return cachedScoped;
+    const cached = compiledSinks.get(plainKey);
+    if (cached !== undefined && !readsScoped(cached, 'row')) return cached;
+    // Inside a scope, a sink whose outside compile is still open (it reached this verb through the verb's Error) is a
+    // second compile, not a cycle: the two read the Error differently.
+    const key = scopeKey !== undefined && (cached !== undefined || compiling.has(plainKey)) ? scopeKey : plainKey;
     // A chain that re-enters itself (done-chains or arms wired in a loop) defers rather than
     // recursing forever; the outer call records the reason.
     if (compiling.has(key)) return { defer: 'its trigger chain is cyclic' };
     compiling.add(key);
     const result = compileSink(node, port);
     compiling.delete(key);
-    compiledSinks.set(key, result);
+    compiledSinks.set(key === plainKey && readsScoped(result, 'local') ? scopeKey! : key, result);
     return result;
   };
 
@@ -14707,7 +16008,9 @@ function planComponent(
               arg.kind === 'expr'
                 ? exprValidIn(arg.expr, context, invokedScope)
                 : arg.props.every((p) => exprValidIn(p.expr, context, invokedScope))
-            ) && actionsValidIn(action.then, context, invokedScope)
+            ) &&
+            actionsValidIn(action.then, context, invokedScope) &&
+            actionsValidIn(action.failThen, context, invokedScope)
           );
         case 'jsfun-run': {
           const def = plan.jsFunctions[action.nodeId];
@@ -14786,7 +16089,9 @@ function planComponent(
           return (
             action.inputs.every((i) => i.expr === undefined || exprValidIn(i.expr, context, invokedScope)) &&
             actionsValidIn(action.then, context, invokedScope) &&
-            actionsValidIn(action.failThen, context, invokedScope)
+            actionsValidIn(action.failThen, context, invokedScope) &&
+            actionsValidIn(action.foundThen, context, invokedScope) &&
+            actionsValidIn(action.notFoundThen, context, invokedScope)
           );
         // EXP-011 §61. The parameters are read where the handler is; every callback runs in that same closure.
         case 'stack-push':
@@ -14888,6 +16193,13 @@ function planComponent(
           return exprValidIn(action.items, context, invokedScope);
         case 'runtasks-abort':
           return true;
+        // P18-S116-QUERYFETCH. The wired filter values are read at the pulse, in the handler that pulses.
+        case 'query-fetch':
+          return action.values.every((v) => exprValidIn(v.expr, context, invokedScope));
+        // EXP-011 §86. A run's pulse loop and its arms sit inside the run's own `then`, so its scope already holds the node.
+        case 'jsfun-pulses':
+        case 'jsfun-pulse':
+          return actionsValidIn(action.then, context, invokedScope);
         // EXP-011 §58. The data is read at the pulse, in the handler that pulses; the listeners are validated where they compile.
         case 'stream-action':
           return action.value === undefined || exprValidIn(action.value, context, invokedScope);
@@ -15085,6 +16397,12 @@ function planComponent(
           (w) => w.toId === sink.id && w.toProperty === trigger && w.fromId === node.id
         );
         return !firedByOwnChange;
+      }
+      // EXP-011 §86 — the eleventh family: a Function run from another element's event (the Site Builder's contact
+      // form: three fields into the Function, its Run on Send) reads its `in-*` from that handler. A Function only this
+      // control runs reads `input-text` in the control's own handler, as a Set Variable fired by its own change does.
+      if (sink.type === JS_FUNCTION && c.toProperty.startsWith('in-')) {
+        return component.connections.some((w) => w.toId === sink.id && w.toProperty === 'run' && w.fromId !== node.id);
       }
       return rendered.has(sink.id) && !isTriggerInto(sink, c.toProperty);
     });
@@ -15433,7 +16751,15 @@ function planComponent(
   // to the written expression; a read after an `op` write defers the reading node — the
   // compiler never silently emits the stale read.
   type ChainSnapshot = Map<string, ValueExpr | 'op'>;
-  const exprTouchesSnap = (e: ValueExpr, snap: ChainSnapshot): boolean => {
+  /**
+   * 🔴 **Function declarations, not `const` arrows, because the four are reached before this line runs**
+   * (P100-UPG001-SNAP). The component-output pass far above asks `resolveExpr` for a States output,
+   * which registers the node through `statesPlanOf`, and its chains are snapshotted here. As `const`s,
+   * that was a temporal-dead-zone throw, "Cannot access 'snapActionList' before initialization", and the
+   * export stopped on four real projects. The four close over nothing but each other, so hoisting them
+   * is safe wherever they are first called.
+   */
+  function exprTouchesSnap(e: ValueExpr, snap: ChainSnapshot): boolean {
     switch (e.kind) {
       case 'state-get':
         return snap.has(e.name);
@@ -15481,8 +16807,8 @@ function planComponent(
       default:
         return false;
     }
-  };
-  const snapExpr = (expr: ValueExpr, snap: ChainSnapshot): ValueExpr | { defer: string } => {
+  }
+  function snapExpr(expr: ValueExpr, snap: ChainSnapshot): ValueExpr | { defer: string } {
     switch (expr.kind) {
       case 'state-get': {
         const written = snap.get(expr.name);
@@ -15569,17 +16895,77 @@ function planComponent(
       default:
         return expr;
     }
-  };
-  const snapActionList = (actions: HandlerAction[], snap: ChainSnapshot): HandlerAction[] | { defer: string } => {
+  }
+  function snapActionList(actions: HandlerAction[], snap: ChainSnapshot): HandlerAction[] | { defer: string } {
     const out: HandlerAction[] = [];
     for (const a of actions) {
       const r = snapAction(a, snap);
       if ('defer' in r) return r;
       out.push(r);
     }
+    const late = lateQueryFetchWrite(out);
+    if (late !== undefined) return { defer: late };
     return out;
-  };
-  const snapAction = (action: HandlerAction, snap: ChainSnapshot): HandlerAction | { defer: string } => {
+  }
+  /**
+   * P18-S116-QUERYFETCH. The runtime's Fetch is scheduled (`scheduleAfterInputsHaveUpdated`), so it reads its filter's
+   * values after every write the same pulse makes; the export's fetch is a statement where the wire sits in the chain.
+   * They differ only where a later action in the same list writes a value the filter reads, and that is refused by name.
+   */
+  function lateQueryFetchWrite(actions: HandlerAction[]): string | undefined {
+    const writes = (a: HandlerAction): string | undefined =>
+      a.kind === 'store-set' ? `store:${a.variableName}` : a.kind === 'globalstore-set' ? `key:${a.storeName}:${a.key}` : a.kind === 'state-set' ? `state:${a.name}` : undefined;
+    const reads = (e: ValueExpr, into: Set<string>): Set<string> => {
+      if (e.kind === 'store-get') into.add(`store:${e.variableName}`);
+      else if (e.kind === 'store-key-get') into.add(`key:${e.storeName}:${e.key}`);
+      else if (e.kind === 'state-get') into.add(`state:${e.name}`);
+      else if (e.kind === 'format') e.parts.forEach((p) => typeof p !== 'string' && reads(p, into));
+      else if (e.kind === 'logical') e.operands.forEach((o) => reads(o, into));
+      else if (e.kind === 'not' || e.kind === 'truthy') reads(e.operand, into);
+      return into;
+    };
+    for (const [i, a] of actions.entries()) {
+      if (a.kind !== 'query-fetch') continue;
+      for (const v of a.values) {
+        const read = reads(v.expr, new Set());
+        if (actions.slice(i + 1).some((b) => read.has(writes(b) ?? ''))) {
+          return `its Fetch is sent before the chain writes "${v.name}", which its Filter reads — the runtime fetches after the pulse's writes (scheduleFetch), and that order is not exported in this slice`;
+        }
+      }
+    }
+    // EXP-011 §90. The same order for every awaited call: its node reads what it sends after the update, so after the
+    // click's later wires; the export reads it where the call starts. Its own arguments only — its chains run later.
+    for (const [i, a] of actions.entries()) {
+      if (!isAwaitedAction(a)) continue;
+      const sent = new Set<string>();
+      const collect = (value: unknown, top: boolean): void => {
+        if (value === null || typeof value !== 'object') return;
+        if (Array.isArray(value)) return value.forEach((v) => collect(v, false));
+        const kind = (value as { kind?: unknown }).kind;
+        if (!top && typeof kind === 'string' && (kind === 'store-get' || kind === 'store-key-get' || kind === 'state-get')) {
+          reads(value as ValueExpr, sent);
+          return;
+        }
+        for (const [key, child] of Object.entries(value)) if (!/Then$|^then$/.test(key)) collect(child, false);
+      };
+      collect(a, true);
+      const laterWrites = new Map<string, string>();
+      const writtenIn = (b: unknown): void => {
+        if (b === null || typeof b !== 'object') return;
+        if (Array.isArray(b)) return b.forEach(writtenIn);
+        const key = writes(b as HandlerAction);
+        if (key !== undefined && !laterWrites.has(key)) laterWrites.set(key, key.split(':').pop() ?? key);
+        for (const child of Object.values(b)) writtenIn(child);
+      };
+      writtenIn(actions.slice(i + 1));
+      const clash = [...sent].find((k) => laterWrites.has(k));
+      if (clash !== undefined) {
+        return `its node sends "${laterWrites.get(clash)}" after the click's later wires have written it — the runtime reads what it sends after the update, the export where the call starts, and that order is not exported in this slice`;
+      }
+    }
+    return undefined;
+  }
+  function snapAction(action: HandlerAction, snap: ChainSnapshot): HandlerAction | { defer: string } {
     switch (action.kind) {
       case 'state-set': {
         if (action.expr !== undefined) {
@@ -15732,7 +17118,10 @@ function planComponent(
         }
         const then = snapActionList(action.then, snap);
         if (!Array.isArray(then)) return then;
-        return { ...action, args, then };
+        // EXP-011 §90. The catch runs in the same closure, so the Failure chain carries the map on too.
+        const failThen = snapActionList(action.failThen, snap);
+        if (!Array.isArray(failThen)) return failThen;
+        return { ...action, args, then, failThen };
       }
       // Same rule for a request (EXP-011 Tier 1.2): the values it sends are read where the
       // handler is, before the await, so a `Set Variable` earlier in the chain must reach them —
@@ -15811,10 +17200,27 @@ function planComponent(
       }
       case 'runtasks-abort':
         return action;
+      // P18-S116-QUERYFETCH. A value the chain wrote a statement earlier is read as written, as `stream-action`'s.
+      case 'query-fetch': {
+        const values: Array<{ name: string; expr: ValueExpr }> = [];
+        for (const v of action.values) {
+          const expr = snapExpr(v.expr, snap);
+          if ('defer' in expr) return expr;
+          values.push({ name: v.name, expr });
+        }
+        return { ...action, values };
+      }
       case 'jsfun-run': {
         if ((plan.jsFunctions[action.nodeId]?.inputs ?? []).some((i) => i.expr !== undefined && exprTouchesSnap(i.expr, snap))) {
           return { defer: 'a Function argument reads state written earlier in this chain — not translated in this slice' };
         }
+        const then = snapActionList(action.then, snap);
+        if (!Array.isArray(then)) return then;
+        return { ...action, then };
+      }
+      // EXP-011 §86. The arms run in the run's closure, after the body: a write earlier in the chain reaches them.
+      case 'jsfun-pulses':
+      case 'jsfun-pulse': {
         const then = snapActionList(action.then, snap);
         if (!Array.isArray(then)) return then;
         return { ...action, then };
@@ -15916,7 +17322,11 @@ function planComponent(
         if (!Array.isArray(then)) return then;
         const failThen = snapActionList(action.failThen, snap);
         if (!Array.isArray(failThen)) return failThen;
-        return { ...action, inputs, then, failThen };
+        const foundThen = snapActionList(action.foundThen, snap);
+        if (!Array.isArray(foundThen)) return foundThen;
+        const notFoundThen = snapActionList(action.notFoundThen, snap);
+        if (!Array.isArray(notFoundThen)) return notFoundThen;
+        return { ...action, inputs, then, failThen, foundThen, notFoundThen };
       }
       // EXP-011 §39. The message and data are read where the handler is, so a `Set Variable`
       // earlier in the chain must reach them; the chain carries the map onward.
@@ -15953,34 +17363,36 @@ function planComponent(
       default:
         return action;
     }
-  };
-  /** One snapshot per handler owner; a stateful control's own chain seeds its user-path value. */
-  const chainSnapshots = new Map<string, ChainSnapshot>();
-  const chainSnapshotFor = (ownerKey: string, seedControlId?: string): ChainSnapshot => {
-    let snap = chainSnapshots.get(ownerKey);
-    if (snap === undefined) {
-      snap = new Map();
-      if (seedControlId !== undefined) {
-        const stateVar = controlStateVars.get(seedControlId);
-        const spec = controlSpecOf(seedControlId);
-        if (stateVar !== undefined && spec !== undefined) {
-          snap.set(
-            stateVar.name,
-            spec.coerce === 'textinput'
-              ? { kind: 'input-text', inputId: seedControlId }
-              : { kind: 'control-event', controlId: seedControlId, form: spec.eventForm }
-          );
-        }
-      }
-      chainSnapshots.set(ownerKey, snap);
-    }
-    return snap;
-  };
+  }
 
   // Every action sink compiles before attachment — the sweeps that report unattached sinks
   // read compiledSinks for their reasons. (This loop sits below outputSinkOf because the popup
   // compilers' done-chains reach it.)
+  /**
+   * "Hold the id". The runs of the Run-wired Functions whose outputs feed `node`, compiled before it, feeders first: a reader
+   * finds the row a feeder's run materialized (§4f) only if that run has compiled. Here, at the top of the sink loop, as
+   * the loop itself would compile them, with no chain open; compiling them from inside a reader's resolution instead
+   * re-entered sinks already compiling (nightbook's three toggles share one Set Variable) and refused them as cyclic.
+   */
+  const feedersCompiled = new Set<string>();
+  const compileFunctionFeedersOf = (node: NodeIR): void => {
+    if (feedersCompiled.has(node.id)) return;
+    feedersCompiled.add(node.id);
+    for (const c of component.connections) {
+      if (c.toId !== node.id || !c.fromProperty.startsWith('out-')) continue;
+      const from = nodeById.get(c.fromId);
+      if (!from || jsNodeKindOf(from.type) !== 'function' || !wiredPorts.has(`${from.id}:run`)) continue;
+      // 🔴 Only a run an element's event or a Did Mount sends: a row whose run never attaches is never written
+      // (P18-S122-DEADROW, open), and a reader compiled after it would read nothing where HEAD refused it (the Site
+      // Builder's Home link, its settings Function run by a refused Query's Fetched).
+      const runs = component.connections.filter((w) => w.toId === from.id && w.toProperty === 'run');
+      if (!runs.every((w) => w.fromProperty === 'didMount' || rendered.has(w.fromId))) continue;
+      compileFunctionFeedersOf(from);
+      compiledOf(from, 'run');
+    }
+  };
   for (const node of component.nodes) {
+    compileFunctionFeedersOf(node);
     if (TRIGGER_PORTS[node.type] !== undefined) compiledOf(node, TRIGGER_PORTS[node.type]);
     else if (node.type === 'NavigationShowPopup') compiledOf(node, 'show');
     else if (node.type === 'NavigationClosePopup') {
@@ -16012,7 +17424,12 @@ function planComponent(
       for (const port of ['run', 'abort']) if (wiredPorts.has(`${node.id}:${port}`)) compiledOf(node, port);
     } else if (STREAM_NODES[node.type] !== undefined) {
       // EXP-011 §58. Every wired action port compiles.
-      for (const port of Object.keys(STREAM_NODES[node.type].actions)) if (wiredPorts.has(`${node.id}:${port}`)) compiledOf(node, port);
+      const fired = Object.keys(STREAM_NODES[node.type].actions).filter((port) => wiredPorts.has(`${node.id}:${port}`));
+      for (const port of fired) compiledOf(node, port);
+      // EXP-011 §77. With no action port wired, this loop is the node's trigger side, as it is On App Error's below: an
+      // Action Handler whose Trigger chain reads its own Payload was otherwise first registered from inside that chain's
+      // sink and read as "its trigger chain is cyclic".
+      if (fired.length === 0) streamPlanOf(node);
     } else if (node.type === ON_APP_ERROR_TYPE) {
       // EXP-011 §54. No trigger port — it registers HERE, unconditionally, because it must register before any
       // other pass compiles a sink that reads it: a Set Variable in its own Error chain reads its Message, and a
@@ -16313,6 +17730,8 @@ function planComponent(
     if (fromNode?.type === 'Condition' && (connection.fromProperty === 'ontrue' || connection.fromProperty === 'onfalse')) {
       continue;
     }
+    // P18-S116-QUERYFETCH. A page's Did Mount into a query's Fetch is the query asking at mount (`fetchWiredOf`).
+    if (pageMountFetch(connection)) continue;
     if (
       (fromNode?.type === 'NavigationShowPopup' || fromNode?.type === 'NavigationClosePopup') &&
       connection.fromProperty === 'done'
@@ -16496,6 +17915,13 @@ function planComponent(
         compiled.action,
         chainSnapshotFor(`dom:${fromNode.id}:${connection.fromProperty}`, seedId)
       );
+      // P18-S116-QUERYFETCH. A handler is assembled wire by wire, so the late-write rule is asked of it here too.
+      const lateWrite = 'defer' in snapped ? undefined : lateQueryFetchWrite([...(plan.handlers[fromNode.id]?.[connection.fromProperty] ?? []), snapped]);
+      if (lateWrite !== undefined) {
+        dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason: lateWrite };
+        notes.push(wireNote(connection, lateWrite));
+        continue;
+      }
       if ('defer' in snapped) {
         if (outputsSink) {
           if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, snapped.defer);
@@ -16533,6 +17959,12 @@ function planComponent(
         continue;
       }
       const snappedRecv = snapAction(compiled.action, chainSnapshotFor(`recv:${fromNode.id}`));
+      const lateRecvWrite = 'defer' in snappedRecv ? undefined : lateQueryFetchWrite([...(receiverActions.get(fromNode.id) ?? []), snappedRecv]);
+      if (lateRecvWrite !== undefined) {
+        dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason: lateRecvWrite };
+        notes.push(wireNote(connection, lateRecvWrite));
+        continue;
+      }
       if ('defer' in snappedRecv) {
         if (outputsSink) {
           if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, snappedRecv.defer);
@@ -16549,13 +17981,25 @@ function planComponent(
       for (const id of compiled.subscribes ?? []) boundSubscribers.add(id);
       continue;
     }
-    const untranslatable = `trigger ${connection.fromId}.${connection.fromProperty} is not a rendered element event or a receiver`;
+    // EXP-011 §86. A Function's signal whose chains were refused says why, not that a signal is no event.
+    // P18-S119-TICKEDRUN. Or, where the Function's run is itself refused, that refusal: the signal is sent by a run the
+    // export does not print (before, the ticked box's refusal stood here and named a cause that was not the first).
+    const sendingRun = fromNode !== undefined && wiredPorts.has(`${fromNode.id}:run`) ? compiledSinks.get(`${fromNode.id}:run`) : undefined;
+    const pulseRefusal =
+      fromNode !== undefined && jsNodeKindOf(fromNode.type) === 'function'
+        ? (pulseRefusals.get(`${fromNode.id}:${connection.fromProperty}`) ??
+          pulseRefusals.get(fromNode.id) ??
+          (sendingRun !== undefined && 'defer' in sendingRun && connection.fromProperty.startsWith('out-')
+            ? `the Function that sends its "${connection.fromProperty.slice('out-'.length)}" signal is not exported: ${sendingRun.defer}`
+            : undefined))
+        : undefined;
+    const untranslatable = pulseRefusal ?? `trigger ${connection.fromId}.${connection.fromProperty} is not a rendered element event or a receiver`;
     if (outputsSink) {
       if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, untranslatable);
     } else {
       dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason: untranslatable };
     }
-    notes.push(wireNote(connection, `the trigger is not a rendered element event or a receiver`));
+    notes.push(wireNote(connection, pulseRefusal ?? `the trigger is not a rendered element event or a receiver`));
   }
 
   // Component Outputs nodes rule once, after every wire has spoken: the interface declaration
@@ -16627,6 +18071,7 @@ function planComponent(
         } else if (action.kind === 'api-call') {
           attachedMutations.add(action.nodeId);
           scanActions(action.then);
+          scanActions(action.failThen);
         } else if (action.kind === 'http-call') {
           attachedHttpNodes.add(action.nodeId);
           scanActions(action.then);
@@ -16669,6 +18114,8 @@ function planComponent(
           attachedCryptoNodes.add(action.nodeId);
           scanActions(action.then);
           scanActions(action.failThen);
+          scanActions(action.foundThen);
+          scanActions(action.notFoundThen);
         } else if (action.kind === 'stack-push') {
           // EXP-011 §61. Every callback is a chain like any other; the pusher gets a registry for the sweep's reason.
           attachedStackPushes.add(action.nodeId);
@@ -16727,6 +18174,10 @@ function planComponent(
           scanActions(action.minted?.failThen ?? []);
         } else if (action.kind === 'array-new') {
           // EXP-011 §55. The mint's Done chain — a popup opened there, a record verb called there.
+          scanActions(action.then);
+        } else if (action.kind === 'jsfun-run' || action.kind === 'jsfun-pulses' || action.kind === 'jsfun-pulse') {
+          // EXP-011 §86. A Function's Done chain and its signals' chains: a Cloud Function called from `Outputs.go()`
+          // earns its export here. The Done chain had the same hole before the signals did.
           scanActions(action.then);
         }
       }
@@ -16941,6 +18392,26 @@ function planComponent(
     for (const id of [...ctx.subscriberIds, ...chain.subscribes]) boundSubscribers.add(id);
   }
 
+  // P18-S119-TICKEDRUN. A Run-wired Function's ticked half, for every run a trigger attached (its node collapsed): a
+  // useEffect beside the Run chains. After the attach pass, which rules the node; before the session and wire sweeps,
+  // which must see its reads and its consumed wires.
+  for (const node of component.nodes) {
+    const pieces = tickedRunPieces.get(node.id);
+    if (pieces === undefined || dispositions[node.id]?.kind !== 'collapsed' || !plan.file) continue;
+    const snapped = snapAction(pieces.action, chainSnapshotFor(`ticked:${node.id}`));
+    if ('defer' in snapped) {
+      dispositions[node.id] = { kind: 'deferred', to: 'EXP-003', reason: `the run a ticked input starts: ${snapped.defer}` };
+      notes.push(`node ${node.id} (${node.type}) deferred: the run a ticked input starts: ${snapped.defer}`);
+      continue;
+    }
+    plan.tickedRuns.push({
+      nodeId: node.id,
+      watch: pieces.watch,
+      action: snapped as TickedRunPlan['action'],
+      comment: `${node.authoredLabel ?? node.type} — also runs when a ticked input gets a new value, sending its signals and never Done (NDA-017 §2).`
+    });
+  }
+
   // Reactive Conditions (LOGIC-TARGET §10): the box is ticked and nothing drives `Evaluate`, so
   // the node re-tests whenever a value arrives on `condition` and fires exactly one arm. That is
   // a re-run keyed on the condition — a useEffect, not a handler. The Evaluate-only twin (§3) is
@@ -16992,13 +18463,19 @@ function planComponent(
     for (const id of compiled.subscribes ?? []) boundSubscribers.add(id);
   }
 
-  // EXP-011 §43. A `Record` whose `Fetch` is unwired reads on every change of its Id
-  // (`runOnValueChange`, `controlSignal: 'fetch'`, dbmodelnode2.ts) — a re-run keyed on the Id,
-  // which is a useEffect, not a handler. The reactive Condition's shape, for the same reason;
-  // a Record with `Fetch` wired is a handler action and never reaches here.
+  // EXP-011 §43, P18-S113-IDBINDREAD. A `Record` whose `Fetch` is unwired is bound to the app's copy of the record
+  // its Id names whenever the Id changes (dbmodelnode2.ts `setModelID`, `Model.get(id)`): no request, no Done, no
+  // Error. §43 read `controlSignal: 'fetch'` as "reads on every Id change"; it governs whether the Id rebinds. A
+  // re-run keyed on the Id is a useEffect, not a handler — the reactive Condition's shape, for the same reason; a
+  // Record with `Fetch` wired is a handler action and never reaches here.
   for (const node of component.nodes) {
     if (node.type !== RECORD_TYPE || dispositions[node.id] !== undefined) continue;
     if (wiredPorts.has(`${node.id}:fetch`)) continue;
+    const refusal = recordBindRefusal(node);
+    if (refusal !== undefined) {
+      recordEffectDefers.set(node.id, refusal);
+      continue;
+    }
     if (!plan.file) {
       recordEffectDefers.set(node.id, 'component emits no file to host the effect');
       continue;
@@ -17020,9 +18497,14 @@ function planComponent(
     const into = `src/${plan.file.dir}/${plan.file.fileBase}.tsx`;
     plan.recordEffects.push({
       nodeId: node.id,
-      action: snapped.kind === 'record-fetch' ? { ...snapped, viaEffect: true } : snapped,
-      comment: `${node.authoredLabel ?? 'Record'} — read again whenever its Id changes (dbmodelnode2.ts runOnValueChange).`
+      action: snapped,
+      comment: `${node.authoredLabel ?? 'Record'} — bound to the app's copy of the record its Id names, whenever the Id changes; binding reads nothing (dbmodelnode2.ts setModelID).`,
+      held: ir.project.cloudservices !== undefined,
+      follows: literalParam(node, 'runOnChange-record') !== false
     });
+    // Its class's module owes it no `fetch<Type>ById`: nothing here reads.
+    const read = plan.recordReads.find((r) => r.nodeId === node.id);
+    if (read !== undefined) read.binds = true;
     dispositions[node.id] = { kind: 'collapsed', into };
     for (const id of compiled.collapses ?? []) dispositions[id] = { kind: 'collapsed', into };
     for (const key of compiled.consumes) consumed.add(key);
@@ -17031,6 +18513,7 @@ function planComponent(
 
     for (const effect of plan.branchEffects) scanActions([effect.action]);
     for (const effect of plan.valueChangedEffects) scanActions(effect.actions);
+    for (const ticked of plan.tickedRuns) scanActions([ticked.action]);
     for (const effect of plan.recordEffects) scanActions([effect.action]);
     // EXP-011 §49. A popup opened from a Has Reached, a record verb in a State Changed chain, an
     // At Target Value that navigates — every listener is a chain like any other.
@@ -17211,6 +18694,10 @@ function planComponent(
       notes.push(wireNote(connection, `variable name is not a literal`));
       continue;
     }
+    if (literalParam(fromNode, 'runOnChange-variable') === false) {
+      notes.push(wireNote(connection, VARIABLE_FROZEN));
+      continue;
+    }
     if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
       notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
@@ -17295,6 +18782,20 @@ function planComponent(
     const toNode = nodeById.get(connection.toId);
     if (!toNode || !rendered.has(toNode.id)) continue; // leave for the catch-all
     consumed.add(connection.key);
+    // EXP-011 §87. A snapshot Condition's read is its sink's cell, which the Evaluate chain writes (`compileConditionBranch`).
+    const snapshotVerdict = fromNode.type === 'Condition' ? snapshotVerdicts().get(fromNode.id) : undefined;
+    if (snapshotVerdict === null) {
+      plan.bindings[toNode.id] = plan.bindings[toNode.id] ?? {};
+      plan.bindings[toNode.id][connection.toProperty] = {
+        kind: 'computed',
+        expr: { kind: 'state-get', name: snapshotCellOf(toNode.id, connection.toProperty).name }
+      };
+      continue;
+    }
+    if (snapshotVerdict !== undefined) {
+      notes.push(wireNote(connection, snapshotVerdict));
+      continue;
+    }
     const ctx = newCtx();
     const expr = resolveExpr(fromNode, connection.fromProperty, ctx);
     if (expr === null) {
@@ -17607,7 +19108,10 @@ function planComponent(
     // EXP-011 §59. A crypto verb's value or Error (the id nodes' footing), and the viewport's three (a handle read).
     const isCryptoRead =
       CRYPTO_NODES[fromNode.type] !== undefined &&
-      (connection.fromProperty === CRYPTO_NODES[fromNode.type].output || connection.fromProperty === 'error');
+      (connection.fromProperty === CRYPTO_NODES[fromNode.type].output ||
+        connection.fromProperty === 'error' ||
+        // EXP-011 §76. Any of the extractor's value outputs.
+        CRYPTO_NODES[fromNode.type].values?.[connection.fromProperty] !== undefined);
     const isScreenRead = fromNode.type === SCREEN_RESOLUTION_TYPE;
     // EXP-011 §63. A Drag's four value outputs, off its handle — the same footing.
     const isDragRead = fromNode.type === DRAG_TYPE && DRAG_VALUE_OUTPUTS[connection.fromProperty] !== undefined;
@@ -17930,6 +19434,12 @@ function planComponent(
       fromNode?.type === 'DbCollection2' &&
       plan.repeaters[toNode.id]
     ) {
+      const settings = querySettingsFor(fromNode);
+      if ('refuse' in settings) {
+        consumed.add(connection.key);
+        notes.push(wireNote(connection, `the Query Records it reads is not exported: ${settings.refuse}`));
+        continue;
+      }
       plan.repeaters[toNode.id].itemsQueryId = fromNode.id;
       consumed.add(connection.key);
       continue;
@@ -18400,6 +19910,7 @@ function planComponent(
               else for (const p of arg.props) walkExpr(p.expr);
             }
             walkActions(action.then);
+            walkActions(action.failThen);
             break;
           // A session read is at its most ordinary inside a request — the signed-in user's id in
           // a path parameter, their token in a header. Missing it here would leave the page
@@ -18416,6 +19927,8 @@ function planComponent(
             for (const input of action.inputs) if (input.expr !== undefined) walkExpr(input.expr);
             walkActions(action.then);
             walkActions(action.failThen);
+            walkActions(action.foundThen);
+            walkActions(action.notFoundThen);
             break;
           // EXP-011 §61. The signed-in user's id is an ordinary parameter to push, or result to hand back.
           case 'stack-push':
@@ -18506,6 +20019,10 @@ function planComponent(
             break;
           case 'runtasks-abort':
             break;
+          // P18-S116-QUERYFETCH. The wired filter values, read at the pulse.
+          case 'query-fetch':
+            for (const v of action.values) walkExpr(v.expr);
+            break;
           // EXP-011 §58. The data read at the pulse; the config and listeners are walked off the plan below.
           case 'stream-action':
             if (action.value !== undefined) walkExpr(action.value);
@@ -18518,6 +20035,8 @@ function planComponent(
           case 'popup-show':
           case 'popup-close':
           case 'jsfun-run':
+          case 'jsfun-pulses':
+          case 'jsfun-pulse':
           // EXP-011 §30, and the same omission the sibling walker had: a session read inside an
           // array mutator's Done chain is as ordinary as one inside a request's, and missing it
           // here leaves the page importing a `useSession` the module never exported.
@@ -18553,6 +20072,13 @@ function planComponent(
       walkExpr(effect.watch);
       walkActions(effect.actions);
     }
+    // P18-S119-TICKEDRUN. The values a ticked run watches, and its run.
+    for (const ticked of plan.tickedRuns) {
+      ticked.watch.forEach(walkExpr);
+      walkActions([ticked.action]);
+    }
+    // P18-S115-QUERYPARAMS. A query's wired filter value — the signed-in user's id is the commonest there is.
+    for (const query of plan.queries) for (const value of query.wiredValues ?? []) walkExpr(value.expr);
     // EXP-011 §49. The wired State, the target and its two numbers, and every listener chain.
     for (const machine of plan.statesMachines) {
       if (machine.follow !== undefined) walkExpr(machine.follow);
@@ -18605,6 +20131,20 @@ function planComponent(
     }
   }
 
+  // P18-S115-QUERYPARAMS. A landing query's wired filter values are read in its effect: their wires and logic land
+  // there. Before pass 6, which reports every wire nothing consumed.
+  for (const node of component.nodes) {
+    if (node.type !== 'DbCollection2' || !queryLands(node)) continue;
+    // P18-S116-QUERYFETCH. A page's Did Mount into its Fetch is the query's mount.
+    for (const wire of component.connections) if (wire.toId === node.id && pageMountFetch(wire)) consumed.add(wire.key);
+    const wiring = queryWirings.get(node.id);
+    if (wiring === undefined) continue;
+    const into = plan.file ? `src/${plan.file.dir}/${plan.file.fileBase}.tsx` : plan.path;
+    for (const key of wiring.consumes) consumed.add(key);
+    for (const id of wiring.collapses) dispositions[id] = { kind: 'collapsed', into };
+    for (const id of wiring.subscribes) boundSubscribers.add(id);
+  }
+
   // Pass 6: report every wire nothing translated.
   for (const connection of component.connections) {
     if (consumed.has(connection.key)) continue;
@@ -18648,6 +20188,66 @@ function planComponent(
       value,
       comment: `${label} — its authored Value is stored on every mount of this component (variablenode2.ts: the value setter runs at node creation).`
     });
+  }
+
+  // P18-S116-FIELDMOUNT. A text input announces its Value as it mounts (TextInput.tsx componentDidMount → setText(startValue)
+  // → onTextChanged, and Value Changed with it), so its change chain runs once then, with the start value. Where the field
+  // is not drawn as the component mounts, or its announcement is not text, the mount half is refused by name; the
+  // field's typing still runs the chain.
+  {
+    const parentOf = parentMapOf(component);
+    for (const node of component.nodes) {
+      if (!isTextInputType(node.type) || !rendered.has(node.id)) continue;
+      const stateVar = controlStateVars.get(node.id);
+      const chain = plan.changeHandlers[node.id] ?? [];
+      if (chain.length === 0) continue;
+      const label = node.authoredLabel ? `"${node.authoredLabel}"` : 'The text input';
+      const refuse = (why: string) =>
+        notes.push(`node ${node.id} (${node.type}): its Value at mount is not announced — ${why}; typing still runs its chain (P18-S116-FIELDMOUNT)`);
+      // The field and every ancestor up to the root: a Mounted that is false or wired means the field is not there at mount.
+      let away: 'never' | 'later' | undefined;
+      for (let id: string | undefined = node.id; id !== undefined; id = parentOf.get(id)) {
+        const bound = plan.bindings[id]?.['mounted'];
+        if (bound !== undefined) {
+          const literal = bound.kind === 'computed' && (bound.expr.kind === 'literal' || bound.expr.kind === 'undefined');
+          if (!literal) away = away ?? 'later';
+          else if (bound.expr.kind === 'undefined' || !(bound.expr as { value: unknown }).value) away = 'never';
+        } else if (literalParam(nodeById.get(id)!, 'mounted') === false) away = 'never';
+      }
+      if (away === 'never') continue;
+      if (away === 'later') {
+        refuse('it or a group it sits in mounts from a wire, so it announces when that wire first says true, not as the component mounts');
+        continue;
+      }
+      const type = literalParam(node, 'type');
+      if (wiredPorts.has(`${node.id}:type`) || (type !== undefined && typeof type !== 'string')) {
+        refuse('its Type is wired, so whether it announces text or a number is not known here');
+        continue;
+      }
+      if (type === 'number') {
+        refuse('a Number field announces a number or null, and the exported field carries text (P18-S118-NUMBERFIELD)');
+        continue;
+      }
+      const sync = stateVar === undefined ? undefined : plan.syncEffects.find((e) => e.stateName === stateVar.name);
+      if (sync === undefined && wiredPorts.has(`${node.id}:startValue`) && literalParam(node, 'runOnChange-startValue') !== false) {
+        refuse('its Value is wired and the export does not carry that wire');
+        continue;
+      }
+      const authored = literalParam(node, 'startValue');
+      const catalogDefault = node.catalogRef ? catalog.inputDefault(node.catalogRef, 'startValue') : undefined;
+      const raw =
+        authored !== undefined
+          ? authored
+          : typeof catalogDefault === 'string' || typeof catalogDefault === 'number'
+            ? catalogDefault
+            : undefined;
+      plan.fieldMounts.push({
+        inputId: node.id,
+        start: raw === undefined ? '' : String(raw),
+        ...(sync !== undefined ? { source: sync.source } : {}),
+        comment: `${label} announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).`
+      });
+    }
   }
 
   // Variables collapse into the stores module — the node is the module's provenance.
@@ -18742,14 +20342,14 @@ function planComponent(
   // stub (TARGET-OUTPUT §2); anything else about it defers.
   for (const node of component.nodes) {
     if (node.type !== 'DbCollection2') continue;
-    const consumedByRepeater = Object.values(plan.repeaters).some((r) => r.itemsQueryId === node.id);
-    // EXP-011 §56. A query read by a translated list transform (a Filter Records, an Array Filter) is consumed too —
-    // but only when that read LANDED: `queryReaders` fills at read time, and a transform refused after the read would
-    // otherwise leave a state row and a fetch effect nothing prints. The items wire's key is in `consumed` iff it did.
-    const readByLandedTransform =
-      queryReaders.has(node.id) &&
-      component.connections.some((c) => c.fromId === node.id && c.fromProperty === 'items' && consumed.has(c.key));
-    if (!consumedByRepeater && !readByLandedTransform) {
+    // P18-S115-QUERYFILTER. A query the export cannot ask the way the runtime does is refused by name, wherever it is read.
+    const settings = querySettingsFor(node);
+    if ('refuse' in settings) {
+      plan.queries = plan.queries.filter((q) => q.nodeId !== node.id);
+      dispositions[node.id] = { kind: 'deferred', to: 'EXP-003', reason: settings.refuse };
+      continue;
+    }
+    if (!queryLands(node)) {
       plan.queries = plan.queries.filter((q) => q.nodeId !== node.id);
       dispositions[node.id] = {
         kind: 'deferred',
@@ -18984,6 +20584,7 @@ function planComponent(
           // EXP-011 §53. Nothing nested on the action; the listeners are filled off the plan below.
           case 'runtasks-run':
           case 'runtasks-abort':
+          case 'query-fetch':
             break;
           // EXP-011 §58. Nothing nested on the action; the listeners are filled off the plan below.
           case 'stream-action':
@@ -19019,8 +20620,16 @@ function planComponent(
             if (row !== undefined && plan.stateVars.includes(row)) action.materialize = row.name;
             const errorRow = cryptoErrorVars.get(action.nodeId);
             if (errorRow !== undefined && plan.stateVars.includes(errorRow)) action.errorMaterialize = errorRow.name;
+            // EXP-011 §76. One row per value output a read allocated, in the table's order.
+            const byPort = Object.keys(CRYPTO_NODES[nodeById.get(action.nodeId)?.type ?? '']?.values ?? {})
+              .map((port) => ({ port, row: cryptoVars.get(`${action.nodeId}:${port}`) }))
+              .filter((e): e is { port: string; row: StateVarPlan } => e.row !== undefined && plan.stateVars.includes(e.row))
+              .map((e) => ({ port: e.port, state: e.row.name }));
+            if (byPort.length > 0) action.materializeByPort = byPort;
             fillMaterialize(action.then);
             fillMaterialize(action.failThen);
+            fillMaterialize(action.foundThen);
+            fillMaterialize(action.notFoundThen);
             break;
           }
           /**
@@ -19100,8 +20709,14 @@ function planComponent(
           case 'popup-show':
           case 'popup-close':
           case 'jsfun-run':
+          case 'jsfun-pulses':
+          case 'jsfun-pulse':
+            fillMaterialize(action.then);
+            break;
+          // EXP-011 §90. Both chains.
           case 'api-call':
             fillMaterialize(action.then);
+            fillMaterialize(action.failThen);
             break;
           default:
             break;
@@ -19113,6 +20728,7 @@ function planComponent(
     for (const receiver of plan.receivers) fillMaterialize(receiver.actions);
     for (const effect of plan.branchEffects) fillMaterialize([effect.action]);
     for (const effect of plan.valueChangedEffects) fillMaterialize(effect.actions);
+    for (const ticked of plan.tickedRuns) fillMaterialize([ticked.action]);
     // EXP-011 §43. A Record's Id effect writes its row exactly as a handler's Fetch does.
     for (const effect of plan.recordEffects) fillMaterialize([effect.action]);
     // EXP-011 §49. A request or a Now inside a listener chain materializes as it would in a handler.
@@ -19135,6 +20751,27 @@ function planComponent(
     // whose node was then deferred would be a listener nothing observes — §56 E1's read-time mark. Only a node
     // that collapsed into this file keeps its hook.
     plan.screenResolutions = plan.screenResolutions.filter((s) => dispositions[s.nodeId]?.kind === 'collapsed');
+  }
+
+  // EXP-011 §90. An awaited call that a later action of its own list follows is detached: the runtime runs the click's
+  // other wires before the answer arrives (every one of these nodes acts after the update, and the request answers
+  // later), and an awaited call in place held them back until it answered. Walked over the whole plan, as every list
+  // that holds an action is reached from it; an action is an object with a `kind` in one of its arrays.
+  {
+    const seen = new Set<object>();
+    const visit = (value: unknown): void => {
+      if (value === null || typeof value !== 'object' || seen.has(value)) return;
+      seen.add(value);
+      if (Array.isArray(value)) {
+        value.forEach((item, i) => {
+          if (i < value.length - 1 && isAwaitedAction(item)) item.detached = true;
+          visit(item);
+        });
+        return;
+      }
+      for (const child of Object.values(value)) visit(child);
+    };
+    visit(plan);
   }
 
   // EXP-011 §53. A Run Tasks nothing fires: named as a Cloud Function nothing calls is, by what hangs off it,

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ef990703-84da-51aa-88ae-2aae0cb5db40",
+  "name": "Option button",
+  "path": "/Game/Option button",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One answer button. Publishes Picked with its value."
+}

@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e2c640f5-3305-57fe-8541-318137f0cc8e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "drawmonsterIn",
+      "fromProperty": "game",
+      "toId": "drawmonsterFn",
+      "toProperty": "in-game"
+    },
+    {
+      "fromId": "drawmonsterIn",
+      "fromProperty": "lang",
+      "toId": "drawmonsterFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-hearts",
+      "toId": "drawmonsterOut",
+      "toProperty": "hearts"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-heartsLeft",
+      "toId": "drawmonsterOut",
+      "toProperty": "heartsLeft"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-line",
+      "toId": "drawmonsterOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-note",
+      "toId": "drawmonsterOut",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-pips",
+      "toId": "drawmonsterOut",
+      "toProperty": "pips"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-look",
+      "toId": "drawmonsterOut",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-monsterClass",
+      "toId": "drawmonsterOut",
+      "toProperty": "monsterClass"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-laneClass",
+      "toId": "drawmonsterOut",
+      "toProperty": "laneClass"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-rest",
+      "toId": "drawmonsterOut",
+      "toProperty": "rest"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-walkFrom",
+      "toId": "drawmonsterOut",
+      "toProperty": "walkFrom"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-phase",
+      "toId": "drawmonsterOut",
+      "toProperty": "phase"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-over",
+      "toId": "drawmonsterOut",
+      "toProperty": "over"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-won",
+      "toId": "drawmonsterOut",
+      "toProperty": "won"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-beaten",
+      "toId": "drawmonsterOut",
+      "toProperty": "beaten"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "out-right",
+      "toId": "drawmonsterOut",
+      "toProperty": "right"
+    },
+    {
+      "fromId": "drawmonsterFn",
+      "fromProperty": "success",
+      "toId": "drawmonsterOut",
+      "toProperty": "done"
+    }
+  ]
+}

@@ -1,0 +1,593 @@
+{
+ "runtime": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "box": "",
+    "lines": [
+     "Params Desk"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "vip": {
+         "$eq": true
+        }
+       },
+       "order": "name",
+       "count": false
+      }
+     },
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": ""
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name",
+       "count": false
+      }
+     }
+    ]
+   },
+   {
+    "step": "S1 type Berlin",
+    "box": "Berlin",
+    "lines": [
+     "Params Desk",
+     "Ada",
+     "Berlin",
+     "Gus",
+     "Berlin",
+     "Ivo",
+     "Berlin"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": "Berlin"
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name",
+       "count": false
+      }
+     }
+    ]
+   },
+   {
+    "step": "S2 replace with Paris",
+    "box": "Paris",
+    "lines": [
+     "Params Desk",
+     "Cleo",
+     "Paris"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": "Paris"
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name",
+       "count": false
+      }
+     }
+    ]
+   },
+   {
+    "step": "S3 clear",
+    "box": "",
+    "lines": [
+     "Params Desk"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": ""
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name",
+       "count": false
+      }
+     }
+    ]
+   },
+   {
+    "step": "S4 type Oslo",
+    "box": "Oslo",
+    "lines": [
+     "Params Desk",
+     "Finn",
+     "Oslo"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/__backend/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": "Oslo"
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name",
+       "count": false
+      }
+     }
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-control": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "box": "",
+    "lines": [
+     "Params Desk",
+     "Ada",
+     "Berlin",
+     "Ben",
+     "Bern",
+     "Cleo",
+     "Paris",
+     "Eve",
+     "Bergen",
+     "Finn",
+     "Oslo",
+     "Gus",
+     "Berlin",
+     "Hana",
+     "Rome",
+     "Ivo",
+     "Berlin"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "vip": {
+         "$eq": true
+        }
+       },
+       "order": "name"
+      }
+     },
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "vip": {
+         "$eq": true
+        }
+       },
+       "order": "name"
+      }
+     },
+     {
+      "method": "OPTIONS",
+      "path": "/classes/Contact"
+     },
+     {
+      "method": "OPTIONS",
+      "path": "/classes/Contact"
+     }
+    ]
+   },
+   {
+    "step": "S1 type Berlin",
+    "box": "Berlin",
+    "lines": [
+     "Params Desk",
+     "Ada",
+     "Berlin",
+     "Gus",
+     "Berlin",
+     "Ivo",
+     "Berlin"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": "Berlin"
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name"
+      }
+     }
+    ]
+   },
+   {
+    "step": "S2 replace with Paris",
+    "box": "Paris",
+    "lines": [
+     "Params Desk",
+     "Cleo",
+     "Paris"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": "Paris"
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name"
+      }
+     }
+    ]
+   },
+   {
+    "step": "S3 clear",
+    "box": "",
+    "lines": [
+     "Params Desk"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": ""
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name"
+      }
+     }
+    ]
+   },
+   {
+    "step": "S4 type Oslo",
+    "box": "Oslo",
+    "lines": [
+     "Params Desk",
+     "Finn",
+     "Oslo"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": "Oslo"
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name"
+      }
+     }
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-fixed": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "box": "",
+    "lines": [
+     "Params Desk"
+    ],
+    "requests": [
+     {
+      "method": "OPTIONS",
+      "path": "/classes/Contact"
+     },
+     {
+      "method": "OPTIONS",
+      "path": "/classes/Contact"
+     },
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "vip": {
+         "$eq": true
+        }
+       },
+       "order": "name"
+      }
+     },
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "vip": {
+         "$eq": true
+        }
+       },
+       "order": "name"
+      }
+     },
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": ""
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name"
+      }
+     }
+    ]
+   },
+   {
+    "step": "S1 type Berlin",
+    "box": "Berlin",
+    "lines": [
+     "Params Desk",
+     "Ada",
+     "Berlin",
+     "Gus",
+     "Berlin",
+     "Ivo",
+     "Berlin"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": "Berlin"
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name"
+      }
+     }
+    ]
+   },
+   {
+    "step": "S2 replace with Paris",
+    "box": "Paris",
+    "lines": [
+     "Params Desk",
+     "Cleo",
+     "Paris"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": "Paris"
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name"
+      }
+     }
+    ]
+   },
+   {
+    "step": "S3 clear",
+    "box": "",
+    "lines": [
+     "Params Desk"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": ""
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name"
+      }
+     }
+    ]
+   },
+   {
+    "step": "S4 type Oslo",
+    "box": "Oslo",
+    "lines": [
+     "Params Desk",
+     "Finn",
+     "Oslo"
+    ],
+    "requests": [
+     {
+      "method": "POST",
+      "path": "/classes/Contact",
+      "body": {
+       "_method": "GET",
+       "where": {
+        "$and": [
+         {
+          "city": {
+           "$eq": "Oslo"
+          }
+         },
+         {
+          "vip": {
+           "$eq": true
+          }
+         }
+        ]
+       },
+       "order": "name"
+      }
+     }
+    ]
+   }
+  ],
+  "console": []
+ }
+}

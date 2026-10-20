@@ -1,0 +1,71 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a7c10d00-0000-4000-8000-000000000189",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "box",
+      "type": "Group",
+      "label": "Box",
+      "children": [
+        "saveCp",
+        "restoreCp",
+        "cpError"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "columnGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "saveCp",
+      "type": "net.noodl.controls.button",
+      "label": "Save checkpoint",
+      "parent": "box",
+      "parameters": {
+        "label": "Save checkpoint"
+      },
+      "x": 100,
+      "y": 120
+    },
+    {
+      "id": "restoreCp",
+      "type": "net.noodl.controls.button",
+      "label": "Restore checkpoint",
+      "parent": "box",
+      "parameters": {
+        "label": "Restore checkpoint"
+      },
+      "x": 100,
+      "y": 200
+    },
+    {
+      "id": "cpError",
+      "type": "Text",
+      "label": "Checkpoint error",
+      "parent": "box",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "cp",
+      "type": "net.noodl.StateSnapshot",
+      "label": "Checkpoint",
+      "parameters": {
+        "storeName": "app",
+        "snapshotName": "saved"
+      },
+      "x": 400,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "box"
+  ]
+}

@@ -56,6 +56,7 @@
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { controlFocusNotMounted, focusChange, focusDiagnostics, focusMissed } from './focus-not-mounted';
+import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` */
@@ -93,6 +94,9 @@ type State = {
   shown: number;
   /** v2 — the graph gave the handle a word the page has not drawn yet (the author's Value, at the next paint) */
   pending: boolean;
+  /** NSP-019 R38 — what the size ports hold, and what the last render on the page said of them (wired-grow.ts) */
+  sizes: Sizes;
+  grow: string | null;
 };
 
 /** v7 — the editor's keys this node says under (slider.ts) */
@@ -121,7 +125,8 @@ export const Slider = defineNode({
   // v6 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it (`diagnostics`)
   // v7 (NSP-019 R39, ruled "Yes, warn"): a Max below Min warns, as the Counter's Min above Max does; and a Value that is not a
   // number, which the runtime always reported on the error bus, is declared with it (the editor records the `slider/` keys)
-  version: 7,
+  // v8 (NSP-019 R38): a wired Width in a row that is a percent shows as its warning (wired-grow.ts)
+  version: 8,
   changes: [
     focusChange(6),
     {
@@ -129,12 +134,15 @@ export const Slider = defineNode({
       says: 'The editor is told when Max is below Min: the handle stays at Min and cannot be moved. And what the runtime has always told it about a Value that is not a number is now in this spec',
       row: 'NSP-019 R39 (P107 s104)',
       migration: { none: 'Only the editor is told. Nothing a wire carries changes, and nothing a person does moves differently' }
-    }
+    },
+    growChange(8)
   ],
   diagnostics: {
     ...focusDiagnostics(controlFocusNotMounted('slider')),
+    // v8 — layout.ts `reportMainAxisGrow`, at every render on the page (wired-grow.ts)
+    ...wiredGrowDiagnostic,
     // v7 — slider.ts `_attributeChanged`: every Min, Max or Step write, over the attributes as the browser reads them
-    [MAX_BELOW_MIN]: { says: 'Max is below Min', message: (_i: unknown, s: State) => maxBelowMin(s) },
+    [MAX_BELOW_MIN]: { says: 'Max is below Min', settings: ['min', 'max'], message: (_i: unknown, s: State) => maxBelowMin(s) },
     // v7 — slider.ts `_setInputValue` (`raiseRuntimeError`): the last one raised; nothing withdraws it
     [VALUE_NOT_A_NUMBER]: { says: 'a Value arrived that is not a number', message: (_i: unknown, s: State) => s.valueWarning }
   },
@@ -146,6 +154,8 @@ export const Slider = defineNode({
   // react-component-node.ts :1274-1301 the defaults into props, then slider.ts `initialize`: the author's Value is Min (0),
   // `_reportValue(0)` finds the node's 0 unchanged and Value Percent 0; the making's Value is a word for the first paint (`pending`)
   state: {
+    sizes: { width: sizeAtDefault() },
+    grow: null,
     enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false, focusMissed: false, valueWarning: undefined,
     min: 0, max: 100, step: 1, authorValue: 0, out: 0, percent: 0, shown: 0, pending: true
   } as State,
@@ -344,13 +354,15 @@ export const Slider = defineNode({
     },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the slider can be seen', send: [] }),
+    // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
+    width: sizeReducer('width', false),
     // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
     visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set — the first render: Did Mount, and the mount's effect (Slider.tsx :88-90)
-    world: { place: (s) => painted(s) },
-    afterInputs: (s) => painted(s),
+    world: { place: (s, i, w) => withGrow(s, painted(s), undefined, i.position, w) },
+    afterInputs: (s, i, w) => withGrow(s, painted(s), undefined, i.position, w),
     person: {
       hover: (s) => onPainted(s, () => ({ set: { hover: true }, send: ['hoverState'], emit: ['hoverStart'] })),
       leave: (s) => onPainted(s, () => ({ set: { hover: false, pressed: false }, send: ['hoverState', 'pressedState'], emit: ['hoverEnd'] })),

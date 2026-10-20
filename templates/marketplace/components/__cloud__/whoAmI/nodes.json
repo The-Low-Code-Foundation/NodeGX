@@ -1,0 +1,82 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fb8c5ace-0861-5373-8f1c-a1d77958a3bf",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-2",
+      "type": "noodl.cloud.request",
+      "label": "whoAmI()",
+      "parameters": {
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run",
+      "type": "JavaScriptFunction",
+      "label": "Read the caller’s person and seller",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nif (Inputs.userId === undefined) return;\nvar me = await caller(Inputs.userId);\nif (!me) { refuse('This sign-in has no place in the marketplace.'); return; }\nvar out = { personId: me.objectId, name: me.name || '', role: me.role || '' };\nvar sellerId = idOf(me.seller);\nif (sellerId) {\n  var s = await one('Seller', { objectId: { equalTo: sellerId } });\n  out.seller = s ? { id: s.objectId, name: s.name || '', stopped: !!s.endedAt } : null;\n}\nOutputs.me = out;\nOutputs.done();",
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-me",
+          "displayName": "me",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-2",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "me"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-2",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

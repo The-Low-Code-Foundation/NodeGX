@@ -1,0 +1,651 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cec31e62-2300-528a-8e3c-bb0b1ea5d371",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "bkPage",
+      "type": "Page",
+      "label": "Your basket",
+      "parameters": {
+        "title": "Your basket",
+        "urlPath": "basket"
+      },
+      "children": [
+        "bkRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "bkRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "bkPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "bkTop",
+        "bkBody",
+        "bkNav"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "bkTop",
+      "type": "/Shop/Top",
+      "label": "The bar",
+      "parent": "bkRoot",
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "bkBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "bkRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 1080,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "bkBack",
+        "bkTitle",
+        "bkGone",
+        "bkProblem",
+        "bkEmpty",
+        "bkContent"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "bkNav",
+      "type": "/Shop/Nav",
+      "label": "The bottom bar",
+      "parent": "bkRoot",
+      "parameters": {
+        "on": "basket"
+      },
+      "x": 160,
+      "y": 2680
+    },
+    {
+      "id": "bkBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "bkBody",
+      "parameters": {
+        "label": "← The shop",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "bkTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "bkBody",
+      "parameters": {
+        "text": "Your basket",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "bkGone",
+      "type": "Text",
+      "label": "Taken out: no longer on sale",
+      "parent": "bkBody",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "bkProblem",
+      "type": "Text",
+      "label": "The basket could not be read",
+      "parent": "bkBody",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "bkEmpty",
+      "type": "Group",
+      "label": "Nothing in it",
+      "parent": "bkBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "bkEmptyWords",
+        "bkShop"
+      ],
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "bkEmptyWords",
+      "type": "Text",
+      "label": "Nothing in it",
+      "parent": "bkEmpty",
+      "parameters": {
+        "text": "Your basket is empty. Products you add on this phone stay here until you check out.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "bkShop",
+      "type": "net.noodl.controls.button",
+      "label": "To the shop",
+      "parent": "bkEmpty",
+      "parameters": {
+        "label": "To the shop",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "bkContent",
+      "type": "Group",
+      "label": "The sellers beside the totals (tablet), above them (phone)",
+      "parent": "bkBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "cssClassName": "mk-two",
+        "mounted": false
+      },
+      "children": [
+        "bkSellers",
+        "bkSide"
+      ],
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "bkSellers",
+      "type": "Group",
+      "label": "By seller",
+      "parent": "bkContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "bkEachSeller"
+      ],
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "bkEachSeller",
+      "type": "For Each",
+      "label": "One box per seller",
+      "parent": "bkSellers",
+      "parameters": {
+        "template": "/Shop/BasketSeller"
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "bkSide",
+      "type": "Group",
+      "label": "What is paid, and how much",
+      "parent": "bkContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "bkTwo",
+        "bkTotals",
+        "bkCheckout",
+        "bkNoAccount"
+      ],
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "bkTwo",
+      "type": "Group",
+      "label": "Two countries, two payments",
+      "parent": "bkSide",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--warn-bg)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "bkTwoWords"
+      ],
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "bkTwoWords",
+      "type": "Text",
+      "label": "Why it is paid more than once",
+      "parent": "bkTwo",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)"
+      },
+      "x": 400,
+      "y": 1960
+    },
+    {
+      "id": "bkTotals",
+      "type": "Group",
+      "label": "One total per seller country",
+      "parent": "bkSide",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "bkEachTotal",
+        "bkTogether"
+      ],
+      "x": 340,
+      "y": 2080
+    },
+    {
+      "id": "bkEachTotal",
+      "type": "For Each",
+      "label": "One row per country",
+      "parent": "bkTotals",
+      "parameters": {
+        "template": "/Shop/TotalRow"
+      },
+      "x": 400,
+      "y": 2200
+    },
+    {
+      "id": "bkTogether",
+      "type": "Text",
+      "label": "About how much together; delivery comes later",
+      "parent": "bkTotals",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "cssClassName": "mk-num"
+      },
+      "x": 400,
+      "y": 2320
+    },
+    {
+      "id": "bkCheckout",
+      "type": "net.noodl.controls.button",
+      "label": "Check out",
+      "parent": "bkSide",
+      "parameters": {
+        "label": "Check out",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "bkNoAccount",
+      "type": "Text",
+      "label": "No account needed",
+      "parent": "bkSide",
+      "parameters": {
+        "text": "No account needed.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 340,
+      "y": 2560
+    },
+    {
+      "id": "bkLoad",
+      "type": "JavaScriptFunction",
+      "label": "The basket on this phone, and what is in it",
+      "parameters": {
+        "runOnChange-in-basket": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nvoid Inputs.basket;\nvar b = readBasket();\nvar gone = Component.Object.get('gone') || [];\nif (!b.length) { Outputs.failed = false; Outputs.data = { lines: [], products: [], sellers: [], countries: [], rates: [], gone: gone }; return; }\ntry {\n  var products = await all('Product', { objectId: { containedIn: b.map(function (l) { return l.productId; }) } });\n  var got = await Promise.all([all('Seller', { objectId: { containedIn: products.map(function (p) { return idOf(p.seller); }) } }), all('Country'), all('Rate')]);\n} catch (e) { Outputs.problem = 'Your basket could not be read just now. Check the connection, then open it again.'; Outputs.failed = true; return; }\nvar product = {}, seller = {};\nproducts.forEach(function (p) { product[p.objectId] = p; });\ngot[0].forEach(function (s) { seller[s.objectId] = s; });\nvar live = b.filter(function (l) {\n  var p = product[l.productId], s = p ? seller[idOf(p.seller)] : null;\n  var ok = !!(p && s && !p.endedAt && !s.endedAt && p.mode === 'buy');\n  if (!ok) gone = gone.concat([p ? p.name || 'A product' : 'A product that is no longer here']);\n  return ok;\n});\nComponent.Object.set('gone', gone);\nOutputs.failed = false;\nOutputs.data = { lines: live, products: products, sellers: got[0], countries: got[1], rates: got[2], gone: gone };\nif (live.length !== b.length) { Outputs.basket = writeBasket(live); Outputs.cleaned(); }"
+      },
+      "ports": [
+        {
+          "name": "out-cleaned",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-basket",
+          "displayName": "basket",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-failed",
+          "displayName": "failed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-data",
+          "displayName": "data",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-basket",
+          "displayName": "basket",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 880
+    },
+    {
+      "id": "bkShape",
+      "type": "JavaScriptFunction",
+      "label": "The basket, by seller and by country",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nvar d = Inputs.data;\nif (!d) return;\nvar product = {}, seller = {}, country = {};\nd.products.forEach(function (p) { product[p.objectId] = p; });\nd.sellers.forEach(function (s) { seller[s.objectId] = s; });\nd.countries.forEach(function (c) { country[c.objectId] = c; });\nvar cur = Inputs.currency || '';\nvar groups = [], groupOf = {}, places = [], placeOf = {}, items = 0;\nd.lines.forEach(function (l) {\n  var p = product[l.productId], s = p ? seller[idOf(p.seller)] : null;\n  if (!p || !s) return;\n  var c = country[idOf(s.country)] || { objectId: '', name: '', currency: '' };\n  if (!groupOf[s.objectId]) {\n    groupOf[s.objectId] = Object.assign(sellerChip(s, c), { place: (c.name ? c.name + ' · ' : '') + 'pays in ' + symbolOf(c.currency), lines: [] });\n    groups.push(groupOf[s.objectId]);\n  }\n  var price = Number(p.price) || 0, first = (p.photos || []).filter(hasFile)[0];\n  groupOf[s.objectId].lines.push({ id: p.objectId, name: p.name || '', thumb: thumb(first, 'sm'), hasThumb: !!first, noThumb: !first, each: l.quantity + ' × ' + money(price, c.currency), total: money(price * l.quantity, c.currency), less: l.quantity > 1 });\n  if (!placeOf[c.objectId]) { placeOf[c.objectId] = { name: c.name, currency: c.currency, amount: 0, sellers: [] }; places.push(placeOf[c.objectId]); }\n  placeOf[c.objectId].amount += price * l.quantity;\n  if (placeOf[c.objectId].sellers.indexOf(s.name) < 0) placeOf[c.objectId].sellers.push(s.name);\n  items += l.quantity;\n});\nOutputs.groups = groups;\nOutputs.places = places.map(function (x) { return { id: x.name, words: x.name + ', in ' + symbolOf(x.currency), total: money(x.amount, x.currency) }; });\nvar n = places.length;\nOutputs.two = n > 1;\nOutputs.twoWords = n > 1 ? (n === 2 ? 'Two countries, two payments.' : n + ' countries, ' + n + ' payments.') + ' Your sellers are in ' + list(places.map(function (x) { return x.name; })) + ', so you pay ' + (n === 2 ? 'twice' : n + ' times') + ': ' + list(places.map(function (x) { return 'once in ' + symbolOf(x.currency) + ' for ' + list(x.sellers); })) + '. Each payment goes straight to its sellers.' : '';\nvar mine = rateOf(d.rates, cur), sure = !!mine && n > 0, about = 0;\nplaces.forEach(function (x) { var r = rateOf(d.rates, x.currency); if (!r) sure = false; else about += x.amount * r / (mine || 1); });\nvar plain = n === 1 && places[0].currency === cur;\nOutputs.together = (sure && !plain ? 'About ' + money(about, cur) + ' together. ' : '') + 'Delivery is added when each seller confirms it.';\nOutputs.heading = items ? 'Your basket · ' + plural(items, 'item', 'items') : 'Your basket';\nOutputs.gone = d.gone.length ? list(d.gone) + (d.gone.length === 1 ? ' isn’t' : ' aren’t') + ' on sale now, so ' + (d.gone.length === 1 ? 'it was' : 'they were') + ' taken out of your basket.' : '';\nOutputs.hasGone = d.gone.length > 0;\nOutputs.empty = groups.length === 0;\nOutputs.full = groups.length > 0;"
+      },
+      "ports": [
+        {
+          "name": "in-data",
+          "displayName": "data",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-currency",
+          "displayName": "currency",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-groups",
+          "displayName": "groups",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-places",
+          "displayName": "places",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-two",
+          "displayName": "two",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-twoWords",
+          "displayName": "twoWords",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-together",
+          "displayName": "together",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-heading",
+          "displayName": "heading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gone",
+          "displayName": "gone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasGone",
+          "displayName": "hasGone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-full",
+          "displayName": "full",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 640
+    },
+    {
+      "id": "bkBasket",
+      "type": "Variable2",
+      "label": "The basket changed",
+      "parameters": {
+        "name": "basket"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the basket on this phone: every page shows the same one."
+      },
+      "x": 650,
+      "y": 2560
+    },
+    {
+      "id": "bkCurrency",
+      "type": "Variable2",
+      "label": "The currency prices are shown in",
+      "parameters": {
+        "name": "currency"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the currency a buyer picked, the same on every page."
+      },
+      "x": 650,
+      "y": 2680
+    },
+    {
+      "id": "bkCleaned",
+      "type": "Set Variable",
+      "label": "The basket changed: something was taken out",
+      "parameters": {
+        "name": "basket",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the basket on this phone: every page shows the same one."
+      },
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "bkToShop",
+      "type": "RouterNavigate",
+      "label": "To the shop",
+      "parameters": {
+        "target": "/Pages/Shop/Home"
+      },
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "bkToCheckout",
+      "type": "RouterNavigate",
+      "label": "To check out",
+      "parameters": {
+        "target": "/Pages/Shop/Checkout"
+      },
+      "x": 650,
+      "y": 2440
+    }
+  ],
+  "visualRoots": [
+    "bkPage"
+  ]
+}

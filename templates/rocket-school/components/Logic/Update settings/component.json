@@ -7,5 +7,5 @@
   "created": "2026-09-12T00:00:00.000Z",
   "modified": "2026-09-12T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "The store with a profile's name, language, layout, level, sound, answer mode or face changed. A name is trimmed to 24 characters, and an empty one is refused."
+  "description": "The store with a profile's name, language, layout, level, sound, answer mode, face or skin changed. A name is trimmed to 24 characters, and an empty one is refused."
 }

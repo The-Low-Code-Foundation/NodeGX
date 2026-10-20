@@ -1,0 +1,212 @@
+{
+ "runtime": {
+  "lines": [
+   "Query Desk",
+   "Cleo",
+   "Paris",
+   "Eve",
+   "Bergen",
+   "Gus",
+   "Berlin"
+  ],
+  "requests": [
+   {
+    "method": "POST",
+    "path": "/__backend/classes/Contact",
+    "body": {
+     "_method": "GET",
+     "where": {
+      "$and": [
+       {
+        "vip": {
+         "$eq": true
+        }
+       },
+       {
+        "joined": {
+         "$gt": {
+          "__type": "Date",
+          "iso": "2020-01-01T00:00:00.000Z"
+         }
+        }
+       },
+       {
+        "$or": [
+         {
+          "city": {
+           "$regex": "^Ber"
+          }
+         },
+         {
+          "age": {
+           "$gt": 40
+          }
+         }
+        ]
+       }
+      ]
+     },
+     "limit": 3,
+     "skip": 1,
+     "order": "-age,name",
+     "count": false
+    }
+   }
+  ],
+  "console": []
+ },
+ "export-control": {
+  "lines": [
+   "Query Desk",
+   "Ada",
+   "Berlin",
+   "Ben",
+   "Bern",
+   "Cleo",
+   "Paris",
+   "Dan",
+   "Berlin",
+   "Eve",
+   "Bergen",
+   "Finn",
+   "Oslo",
+   "Gus",
+   "Berlin",
+   "Hana",
+   "Rome",
+   "Ivo",
+   "Berlin",
+   "Jo",
+   "Madrid"
+  ],
+  "requests": [
+   {
+    "method": "OPTIONS",
+    "path": "/classes/Contact"
+   },
+   {
+    "method": "OPTIONS",
+    "path": "/classes/Contact"
+   },
+   {
+    "method": "POST",
+    "path": "/classes/Contact",
+    "body": {
+     "_method": "GET"
+    }
+   },
+   {
+    "method": "POST",
+    "path": "/classes/Contact",
+    "body": {
+     "_method": "GET"
+    }
+   }
+  ],
+  "console": []
+ },
+ "export-fixed": {
+  "lines": [
+   "Query Desk",
+   "Cleo",
+   "Paris",
+   "Eve",
+   "Bergen",
+   "Gus",
+   "Berlin"
+  ],
+  "requests": [
+   {
+    "method": "OPTIONS",
+    "path": "/classes/Contact"
+   },
+   {
+    "method": "OPTIONS",
+    "path": "/classes/Contact"
+   },
+   {
+    "method": "POST",
+    "path": "/classes/Contact",
+    "body": {
+     "_method": "GET",
+     "where": {
+      "$and": [
+       {
+        "vip": {
+         "$eq": true
+        }
+       },
+       {
+        "joined": {
+         "$gt": {
+          "__type": "Date",
+          "iso": "2020-01-01T00:00:00.000Z"
+         }
+        }
+       },
+       {
+        "$or": [
+         {
+          "city": {
+           "$regex": "^Ber"
+          }
+         },
+         {
+          "age": {
+           "$gt": 40
+          }
+         }
+        ]
+       }
+      ]
+     },
+     "order": "-age,name",
+     "limit": 3,
+     "skip": 1
+    }
+   },
+   {
+    "method": "POST",
+    "path": "/classes/Contact",
+    "body": {
+     "_method": "GET",
+     "where": {
+      "$and": [
+       {
+        "vip": {
+         "$eq": true
+        }
+       },
+       {
+        "joined": {
+         "$gt": {
+          "__type": "Date",
+          "iso": "2020-01-01T00:00:00.000Z"
+         }
+        }
+       },
+       {
+        "$or": [
+         {
+          "city": {
+           "$regex": "^Ber"
+          }
+         },
+         {
+          "age": {
+           "$gt": 40
+          }
+         }
+        ]
+       }
+      ]
+     },
+     "order": "-age,name",
+     "limit": 3,
+     "skip": 1
+    }
+   }
+  ],
+  "console": []
+ }
+}

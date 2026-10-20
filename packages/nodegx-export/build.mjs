@@ -22,7 +22,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import { chmodSync, copyFileSync, existsSync, globSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { isBuiltin } from 'node:module';
+import { createRequire, isBuiltin } from 'node:module';
 import { dirname, relative, resolve } from 'node:path';
 import esbuild from 'esbuild';
 import ts from 'typescript';
@@ -132,7 +132,11 @@ if (!cliText.startsWith('#!/usr/bin/env node\n') || shebangs !== 1) {
 // Declarations come from tsc, which esbuild does not emit. `tsconfig.build.json` sets an explicit
 // `outDir`: a `tsc -p` without one emits beside the sources, which is how this repo has previously
 // turned a typecheck into eighty-five red suites.
-execFileSync('npx', ['tsc', '--project', 'tsconfig.build.json'], { stdio: 'inherit' });
+// P78-D82: tsc runs through this Node by absolute path, never as a bare `npx`. On Windows npm's launcher is
+// `npx.cmd`, which `execFileSync` cannot start without a shell, so the build stopped at `spawnSync npx ENOENT`.
+execFileSync(process.execPath, [createRequire(import.meta.url).resolve('typescript/bin/tsc'), '--project', 'tsconfig.build.json'], {
+  stdio: 'inherit'
+});
 
 /**
  * 🔴 The declarations are pruned to what the entry points actually reach, and then gated.

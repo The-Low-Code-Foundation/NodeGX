@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d14b4b8a-e6dd-51f3-8f4d-ddf2857a5ffb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "prIn",
+      "fromProperty": "name",
+      "toId": "prName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "thumb",
+      "toId": "prThumb",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hasThumb",
+      "toId": "prThumb",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "line",
+      "toId": "prLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "onSale",
+      "toId": "prOn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "offSale",
+      "toId": "prOff",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "toggleLabel",
+      "toId": "prToggle",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "id",
+      "toId": "prGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "onSale",
+      "toId": "prGather",
+      "toProperty": "in-onSale"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "id",
+      "toId": "prToEdit",
+      "toProperty": "pm-productId"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "urlSeller",
+      "toId": "prToEdit",
+      "toProperty": "pm-sellerId"
+    },
+    {
+      "fromId": "prEdit",
+      "fromProperty": "onClick",
+      "toId": "prToEdit",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "prToggle",
+      "fromProperty": "onClick",
+      "toId": "prGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "prGather",
+      "fromProperty": "out-sale",
+      "toId": "prCall",
+      "toProperty": "in-sale"
+    },
+    {
+      "fromId": "prGather",
+      "fromProperty": "out-go",
+      "toId": "prCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "prCall",
+      "fromProperty": "error",
+      "toId": "prError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prCall",
+      "fromProperty": "done",
+      "toId": "prStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "prStamp",
+      "fromProperty": "out-at",
+      "toId": "prChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "prStamp",
+      "fromProperty": "out-go",
+      "toId": "prChanged",
+      "toProperty": "do"
+    }
+  ]
+}

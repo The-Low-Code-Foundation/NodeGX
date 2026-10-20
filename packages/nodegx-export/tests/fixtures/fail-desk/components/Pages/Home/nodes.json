@@ -1,0 +1,228 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000000703",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Fail Desk",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "headline",
+        "removeBtn",
+        "refusal",
+        "errorLabel",
+        "errorText",
+        "saidLabel",
+        "saidText",
+        "goneLabel",
+        "goneText"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 240
+    },
+    {
+      "id": "headline",
+      "type": "Text",
+      "label": "Headline",
+      "parent": "shell",
+      "parameters": {
+        "text": "Fail Desk",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 320
+    },
+    {
+      "id": "removeBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Remove",
+      "parent": "shell",
+      "parameters": {
+        "label": "Remove"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "refusal",
+      "type": "Text",
+      "label": "It did not go",
+      "parent": "shell",
+      "parameters": {
+        "text": "That could not be removed.",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 480
+    },
+    {
+      "id": "errorLabel",
+      "type": "Text",
+      "label": "Error",
+      "parent": "shell",
+      "parameters": {
+        "text": "Error",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 560
+    },
+    {
+      "id": "errorText",
+      "type": "Text",
+      "label": "Error \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "saidLabel",
+      "type": "Text",
+      "label": "Said",
+      "parent": "shell",
+      "parameters": {
+        "text": "Said",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 720
+    },
+    {
+      "id": "saidText",
+      "type": "Text",
+      "label": "Said \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 800
+    },
+    {
+      "id": "goneLabel",
+      "type": "Text",
+      "label": "Gone",
+      "parent": "shell",
+      "parameters": {
+        "text": "Gone",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "goneText",
+      "type": "Text",
+      "label": "Gone \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 960
+    },
+    {
+      "id": "del",
+      "type": "DeleteDbModelProperties",
+      "label": "Remove it",
+      "parameters": {
+        "collectionName": "Note",
+        "modelId": "n1"
+      },
+      "x": 700,
+      "y": 1040
+    },
+    {
+      "id": "putAway",
+      "type": "Condition",
+      "label": "Put the refusal away",
+      "parameters": {
+        "condition": false,
+        "runOnChange-condition": false
+      },
+      "x": 700,
+      "y": 1120
+    },
+    {
+      "id": "show",
+      "type": "Condition",
+      "label": "Say it did not go",
+      "parameters": {
+        "condition": true,
+        "runOnChange-condition": false
+      },
+      "x": 700,
+      "y": 1200
+    },
+    {
+      "id": "saidSet",
+      "type": "Set Variable",
+      "label": "Say why",
+      "parameters": {
+        "name": "said"
+      },
+      "x": 700,
+      "y": 1280
+    },
+    {
+      "id": "saidRead",
+      "type": "Variable2",
+      "label": "Said",
+      "parameters": {
+        "name": "said"
+      },
+      "x": 700,
+      "y": 1360
+    },
+    {
+      "id": "goneSet",
+      "type": "Set Variable",
+      "label": "Say it went",
+      "parameters": {
+        "name": "gone",
+        "value": "gone"
+      },
+      "x": 700,
+      "y": 1440
+    },
+    {
+      "id": "goneRead",
+      "type": "Variable2",
+      "label": "Gone",
+      "parameters": {
+        "name": "gone"
+      },
+      "x": 700,
+      "y": 1520
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

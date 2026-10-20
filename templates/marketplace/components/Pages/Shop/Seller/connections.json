@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c1757756-e3f4-5dd4-822d-3fbae28f3996",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "slUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "slLoad",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "slCurrency",
+      "fromProperty": "value",
+      "toId": "slLoad",
+      "toProperty": "in-currency"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-ok",
+      "toId": "slContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-gone",
+      "toId": "slGone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-problem",
+      "toId": "slGone",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-title",
+      "toId": "slPage",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-name",
+      "toId": "slName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-place",
+      "toId": "slPlace",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-story",
+      "toId": "slStory",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-hasStory",
+      "toId": "slStory",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-cards",
+      "toId": "slEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-empty",
+      "toId": "slEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-logo",
+      "toId": "slLogo",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-hasLogo",
+      "toId": "slLogo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-noLogo",
+      "toId": "slInitials",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-tint",
+      "toId": "slInitials",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "slLoad",
+      "fromProperty": "out-initials",
+      "toId": "slInitialsWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "slBack",
+      "fromProperty": "onClick",
+      "toId": "slToShop",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "slFootSignIn",
+      "fromProperty": "onClick",
+      "toId": "slToSignIn",
+      "toProperty": "navigate"
+    }
+  ]
+}

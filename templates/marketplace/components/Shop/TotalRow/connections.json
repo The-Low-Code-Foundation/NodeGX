@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d7aefc5f-1872-5761-8cd1-f8aff9526e71",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "trIn",
+      "fromProperty": "words",
+      "toId": "trName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "trIn",
+      "fromProperty": "total",
+      "toId": "trTotal",
+      "toProperty": "text"
+    }
+  ]
+}

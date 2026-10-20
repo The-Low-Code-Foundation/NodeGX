@@ -1,0 +1,22 @@
+{
+  "name": "nodegx-map-editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A 3D map of a NodeGX app you can fly through and rewire.",
+  "type": "module",
+  "license": "GPL-3.0",
+  "scripts": {
+    "prestart": "node tools/ensure-installed.mjs",
+    "start": "node server.mjs ../todo-list --open",
+    "suite": "node tools/run-suite.mjs suite/adapter.mjs",
+    "suite:control": "node tools/run-suite.mjs suite/adapter-broken.mjs",
+    "preview": "noodl-preview ../todo-list --open"
+  },
+  "dependencies": {
+    "@nodegx/canvas-look": "^0.1.0",
+    "@nodegx/node-spec": "^0.1.0",
+    "@nodegx/preview": "^0.2.2",
+    "@nodegx/project-contract": "^0.1.0",
+    "three": "^0.186.1"
+  }
+}

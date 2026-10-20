@@ -1,0 +1,316 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e908b81e-2ff2-5032-86a2-0c886a0a532c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wcRoot",
+      "type": "Group",
+      "label": "A way to pay",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "wcName",
+        "wcWhere",
+        "wcToggles",
+        "wcWords",
+        "wcSave",
+        "wcError"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "wcName",
+      "type": "Text",
+      "label": "Its name",
+      "parent": "wcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "wcWhere",
+      "type": "Text",
+      "label": "Where it is on",
+      "parent": "wcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "wcToggles",
+      "type": "Group",
+      "label": "One switch per country",
+      "parent": "wcRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-4)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "wcEach"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "wcEach",
+      "type": "For Each",
+      "label": "One switch per country",
+      "parent": "wcToggles",
+      "parameters": {
+        "template": "/Admin/WayToggle"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "wcWords",
+      "type": "net.noodl.controls.textinput",
+      "label": "What it tells buyers at checkout",
+      "parent": "wcRoot",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "What it tells buyers at checkout",
+        "type": "textArea"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "wcSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save the words",
+      "parent": "wcRoot",
+      "parameters": {
+        "label": "Save the words",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "wcError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "wcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "wcIn",
+      "type": "Component Inputs",
+      "label": "One way",
+      "ports": [
+        {
+          "name": "method",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "where",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "instructions",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "onIds",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "toggles",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "wcGather",
+      "type": "JavaScriptFunction",
+      "label": "This way, with its words",
+      "parameters": {
+        "functionScript": "function v(typed, loaded) { return typed === undefined ? (loaded || '') : String(typed); }\nOutputs.way = { method: String(Inputs.method || ''), countries: Array.isArray(Inputs.onIds) ? Inputs.onIds : [], instructions: v(Inputs.words, Inputs.words0) };\nOutputs.go();",
+        "runOnChange-in-method": false,
+        "runOnChange-in-onIds": false,
+        "runOnChange-in-words": false,
+        "runOnChange-in-words0": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-method",
+          "displayName": "method",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-onIds",
+          "displayName": "onIds",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words0",
+          "displayName": "words0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-way",
+          "displayName": "way",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "wcCall",
+      "type": "CloudFunction2",
+      "label": "saveWayToPay(way)",
+      "parameters": {
+        "function": "saveWayToPay"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "wcStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the ways changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "wcChanged",
+      "type": "Set Variable",
+      "label": "The ways to pay changed",
+      "parameters": {
+        "name": "waysChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the ways to pay changed: the page reads again, whichever switch or card changed them."
+      },
+      "x": 410,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "wcRoot"
+  ]
+}

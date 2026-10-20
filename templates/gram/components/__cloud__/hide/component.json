@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f4fcf520-5dca-55bd-846b-035aae02f829",
+  "name": "hide",
+  "path": "/#__cloud__/hide",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Hide a post or a comment from the members (your own, or as an admin), or bring it back"
+}

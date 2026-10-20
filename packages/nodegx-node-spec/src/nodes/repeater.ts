@@ -540,11 +540,11 @@ export const Repeater = defineNode({
   diagnostics: {
     [ITEMS_CODE]: { says: 'Items is not a list', message: (_i: unknown, s: State) => s.warnings[ITEMS_CODE] },
     [EMPTY_ENTRY_CODE]: { says: 'Items has an empty entry', message: (_i: unknown, s: State) => s.warnings[EMPTY_ENTRY_CODE] },
-    [SCRIPT_SYNTAX_CODE]: { says: 'Script does not compile', message: (_i: unknown, s: State) => s.warnings[SCRIPT_SYNTAX_CODE] },
+    [SCRIPT_SYNTAX_CODE]: { says: 'Script does not compile', settings: ['templateScript'], message: (_i: unknown, s: State) => s.warnings[SCRIPT_SYNTAX_CODE] },
     [SCRIPT_THREW_CODE]: { says: 'Script threw for an item, or set its component to something other than a name', message: (_i: unknown, s: State) => s.warnings[SCRIPT_THREW_CODE] },
     [NO_TEMPLATE_FOR_ITEM_CODE]: { says: 'an item has no component to build its row from', message: (_i: unknown, s: State) => s.warnings[NO_TEMPLATE_FOR_ITEM_CODE] },
     [NOT_FOUND_CODE]: { says: "an item's component is not in the project", message: (_i: unknown, s: State) => s.warnings[NOT_FOUND_CODE] },
-    [MAPPING_SYNTAX_CODE]: { says: 'the input mapping does not compile', message: (_i: unknown, s: State) => s.warnings[MAPPING_SYNTAX_CODE] },
+    [MAPPING_SYNTAX_CODE]: { says: 'the input mapping does not compile', settings: ['inputMappingScript'], message: (_i: unknown, s: State) => s.warnings[MAPPING_SYNTAX_CODE] },
     [MAPPING_THREW_CODE]: { says: 'the input mapping threw for an item', message: (_i: unknown, s: State) => s.warnings[MAPPING_THREW_CODE] },
     [NO_TEMPLATE_CODE]: { says: 'a Refresh found nothing to build the rows from', message: (_i: unknown, s: State) => s.warnings[NO_TEMPLATE_CODE] },
     [NO_ITEMS_CODE]: { says: 'a Refresh found no Items', message: (_i: unknown, s: State) => s.warnings[NO_ITEMS_CODE] }

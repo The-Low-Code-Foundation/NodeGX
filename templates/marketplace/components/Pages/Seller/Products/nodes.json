@@ -1,0 +1,548 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "46f4ab6d-4b46-5d43-8498-05e6ff74b8d8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "spPage",
+      "type": "Page",
+      "label": "Products",
+      "parameters": {
+        "title": "Products",
+        "urlPath": "products/{sellerId}"
+      },
+      "children": [
+        "spRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "spRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "spPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "spBar",
+        "spBand",
+        "spTabsBox",
+        "spBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "spBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "spRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "spBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "spBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "spBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "spBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "spRoot",
+      "parameters": {
+        "words": ""
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "spTabsBox",
+      "type": "Group",
+      "label": "A seller’s tabs (not the admin’s)",
+      "parent": "spRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "mounted": false
+      },
+      "children": [
+        "spTabs"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "spTabs",
+      "type": "/Seller/Tabs",
+      "label": "Orders, Products, Enquiries",
+      "parent": "spTabsBox",
+      "parameters": {
+        "on": "products"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "spBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "spRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "spContent",
+        "spRefused"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "spUrl",
+      "type": "PageInputs",
+      "label": "Whose products",
+      "parameters": {
+        "pathParams": "sellerId"
+      },
+      "x": 590,
+      "y": 2440
+    },
+    {
+      "id": "spContent",
+      "type": "Group",
+      "label": "Products",
+      "parent": "spBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "spBack",
+        "spTitle",
+        "spStopped",
+        "spAdd",
+        "spEmpty",
+        "spList",
+        "spNote"
+      ],
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "spBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back to the sellers (admin)",
+      "parent": "spContent",
+      "parameters": {
+        "label": "← Sellers",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "spTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "spContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "spStopped",
+      "type": "Text",
+      "label": "This seller is stopped",
+      "parent": "spContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "spAdd",
+      "type": "net.noodl.controls.button",
+      "label": "Add a product",
+      "parent": "spContent",
+      "parameters": {
+        "label": "Add a product",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "spEmpty",
+      "type": "Text",
+      "label": "No products yet",
+      "parent": "spContent",
+      "parameters": {
+        "text": "No products yet. Add the first one.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "spList",
+      "type": "Group",
+      "label": "The products",
+      "parent": "spContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "spEach"
+      ],
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "spEach",
+      "type": "For Each",
+      "label": "One row per product",
+      "parent": "spList",
+      "parameters": {
+        "template": "/Seller/ProductRow"
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "spNote",
+      "type": "Text",
+      "label": "What off sale means",
+      "parent": "spContent",
+      "parameters": {
+        "text": "Taking a product off sale hides it from buyers. Orders that already have it keep it, at the price it had.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "spRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "spBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "spRefusedWhy",
+        "spRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 2080
+    },
+    {
+      "id": "spRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "spRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "spRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "spRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "spToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 590,
+      "y": 2320
+    },
+    {
+      "id": "spLoad",
+      "type": "JavaScriptFunction",
+      "label": "This seller’s products",
+      "parameters": {
+        "runOnChange-in-sellerId": true,
+        "runOnChange-in-changed": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nif (Inputs.sellerId === undefined) return;\nvoid Inputs.changed; // a row took a product off sale or put it back: read the list again\ntry {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nvar isAdmin = me.role === 'admin';\nvar sellerId = Inputs.sellerId === 'mine' ? (me.seller && me.seller.id) : String(Inputs.sellerId);\nif (!sellerId || (!isAdmin && (!me.seller || me.seller.id !== sellerId))) { Outputs.problem = 'These are another seller’s products.'; Outputs.refused = true; Outputs.ok = false; return; }\ntry {\n  var s = (await all('Seller', { objectId: { equalTo: sellerId } }))[0];\n  var country = s ? (await all('Country', { objectId: { equalTo: idOf(s.country) } }))[0] : null;\n  var shelves = await all('Category');\n  var products = await all('Product', { seller: { equalTo: ptr('Seller', sellerId) } });\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nvar shelf = {};\nshelves.forEach(function (c) { shelf[c.objectId] = c.name || ''; });\nvar cur = country ? country.currency : '';\nOutputs.band = isAdmin ? 'Admin · ' + (s ? s.name : '') : 'Signed in as ' + (s ? s.name : '');\nOutputs.heading = isAdmin ? (s ? s.name : '') + '’s products' : 'Your products';\nOutputs.isAdmin = isAdmin;\nOutputs.isStaff = !isAdmin;\nOutputs.urlSeller = String(Inputs.sellerId);\nOutputs.stoppedNote = s && s.endedAt ? 'This seller is stopped: its products are hidden from buyers and can’t change until it is brought back.' : '';\nOutputs.isStopped = !!(s && s.endedAt);\nOutputs.rows = products\n  .sort(function (a, b) { return String(a.name || '').localeCompare(String(b.name || '')); })\n  .map(function (p) {\n    var on = !p.endedAt;\n    return {\n      id: p.objectId,\n      urlSeller: String(Inputs.sellerId),\n      name: p.name || '',\n      thumb: thumb((p.photos || [])[0], 'sm'),\n      hasThumb: !!((p.photos || [])[0] && p.photos[0].url),\n      line: money(p.price, cur) + ' · ' + (shelf[idOf(p.category)] || '') + (p.mode === 'enquire' ? ' · Enquire' : ''),\n      onSale: on,\n      offSale: !on,\n      toggleLabel: on ? 'Take off sale' : 'Put on sale'\n    };\n  });\nOutputs.empty = products.length === 0;\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-heading",
+          "displayName": "heading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isAdmin",
+          "displayName": "isAdmin",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isStaff",
+          "displayName": "isStaff",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-urlSeller",
+          "displayName": "urlSeller",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stoppedNote",
+          "displayName": "stoppedNote",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isStopped",
+          "displayName": "isStopped",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1000
+    },
+    {
+      "id": "spVersion",
+      "type": "Variable2",
+      "label": "A product changed",
+      "parameters": {
+        "name": "productsChanged"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a product changed: the list reads again, whichever row changed it."
+      },
+      "x": 590,
+      "y": 2560
+    },
+    {
+      "id": "spToNew",
+      "type": "RouterNavigate",
+      "label": "To a new product",
+      "parameters": {
+        "target": "/Pages/Seller/ProductForm",
+        "pm-productId": "new"
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "spToSellers",
+      "type": "RouterNavigate",
+      "label": "Back to the sellers",
+      "parameters": {
+        "target": "/Pages/Admin/Sellers"
+      },
+      "x": 590,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "spPage"
+  ]
+}

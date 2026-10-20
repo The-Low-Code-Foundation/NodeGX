@@ -611,6 +611,43 @@ describe('§A States against states.ts, the whole node, frame by frame', () => {
     ]);
   });
 
+  /**
+   * P109-S25-EXPORTSTATESRUN (P107-C22, ruled "Stop the running animation"). To bright animates for 600 ms; at 300 ms
+   * To dim, whose transition is zero, sets every value at once. The runtime stops the run, as `jumpToState` does; the
+   * emitted machine used to leave it running, so it landed bright's values while the node said dim, and Has Reached
+   * bright fired a second time.
+   */
+  test('A5 a move that sets every value at once stops the run still going, in both worlds', () => {
+    const instant = { curve: [0, 0, 0.58, 1], dur: 0, delay: 0 };
+    const params = { ...PANEL_PARAMS, 'transitiondef-dim': instant };
+    const def = { ...PANEL_DEF, transitions: { ...PANEL_DEF.transitions, dim: instant } };
+    const script = passes({ 0: { pulses: ['to-bright'] }, 300: { pulses: ['to-dim'] } });
+    const want = interpreter(params, script, READS);
+    const got = emitted(statesLib, animateLib, def, undefined, script, READS);
+    expect(got.events).toEqual(want.events);
+    expect(got.frames).toEqual(want.frames);
+    // The consequence, read off the runtime's own trace: dim's values hold to the end, and bright is never reached.
+    const last = want.frames[want.frames.length - 1][1];
+    expect(last).toMatchObject({ opacity: 0.2, tint: '#334455', label: 'Dim', currentState: 'dim' });
+    expect(want.events.filter(([name]) => name === 'reached-bright')).toEqual([]);
+  });
+
+  /**
+   * P107-D19, the same runtime commit: a text a state leaves empty is sent as empty text, so a move into that state
+   * clears the label rather than leaving the last one.
+   */
+  test('A5 a text a state leaves unset reads as the empty text after a move into it, in both worlds, typed', () => {
+    const params = { states: 'off,on', values: 'label', 'type-label': 'string', 'value-on-label': 'x' };
+    const def = { states: ['off', 'on'], values: { label: { type: 'string', byState: { on: 'x' } } }, useTransitions: true };
+    const reads = ['label', 'currentState'];
+    const script = passes({ 50: { pulses: ['to-on'] }, 100: { pulses: ['to-off'] } }, 150);
+    const typed = (trace: Trace) => trace.frames.map(([now, values]) => [now, Object.fromEntries(Object.entries(values).map(([k, v]) => [k, `${typeof v}:${String(v)}`]))]);
+    const want = interpreter(params, script, reads);
+    const got = emitted(statesLib, animateLib, def, undefined, script, reads);
+    expect(typed(want).find(([now]) => now === 100)![1]).toEqual({ label: 'string:', currentState: 'string:off' });
+    expect(typed(got)).toEqual(typed(want));
+  });
+
   test('A5 ISL-002 — the first state publishes a false as false and an empty text as the empty text, in both worlds, typed', () => {
     const params = {
       states: 'off,on',
@@ -1013,7 +1050,7 @@ describe('§B the translation — the fixture, then graphs mutated one fact at a
       expect(entry.status).toBe('translated');
       expect(entry.note).toContain('EXP-011 §49');
     }
-    expect(ledger.pickerCoverageFloor).toBe(122); // EXP-011 §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85) // §51 added Component Children (session 79); §52 Script (session 80); §53 Run Tasks (session 81); §54 On App Error (session 82) §56 Filter Records
+    expect(ledger.pickerCoverageFloor).toBe(130); // EXP-011 §79 Sign In With (session 109) on top of EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §61 the component-stack trio + §60 the component-object trio + §62 the relation pair + §63 Drag (session 86); §57 + §58 + §59 (session 85) // §51 added Component Children (session 79); §52 Script (session 80); §53 Run Tasks (session 81); §54 On App Error (session 82) §56 Filter Records
   });
 });
 

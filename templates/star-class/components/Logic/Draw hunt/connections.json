@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5137bc6a-aa27-59f2-8a16-09cb35a0c4d8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "drawhuntIn",
+      "fromProperty": "game",
+      "toId": "drawhuntFn",
+      "toProperty": "in-game"
+    },
+    {
+      "fromId": "drawhuntIn",
+      "fromProperty": "lang",
+      "toId": "drawhuntFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-rows",
+      "toId": "drawhuntOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-instruction",
+      "toId": "drawhuntOut",
+      "toProperty": "instruction"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-progress",
+      "toId": "drawhuntOut",
+      "toProperty": "progress"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-note",
+      "toId": "drawhuntOut",
+      "toProperty": "note"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-noteKind",
+      "toId": "drawhuntOut",
+      "toProperty": "noteKind"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-phase",
+      "toId": "drawhuntOut",
+      "toProperty": "phase"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-over",
+      "toId": "drawhuntOut",
+      "toProperty": "over"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-canShow",
+      "toId": "drawhuntOut",
+      "toProperty": "canShow"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-made",
+      "toId": "drawhuntOut",
+      "toProperty": "made"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-helped",
+      "toId": "drawhuntOut",
+      "toProperty": "helped"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "out-round",
+      "toId": "drawhuntOut",
+      "toProperty": "round"
+    },
+    {
+      "fromId": "drawhuntFn",
+      "fromProperty": "success",
+      "toId": "drawhuntOut",
+      "toProperty": "done"
+    }
+  ]
+}

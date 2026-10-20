@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0596343b-b6f6-5250-8056-1c18db0d11bc",
+  "name": "Tabs",
+  "path": "/Seller/Tabs",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A seller’s tabs: Orders, Products, Enquiries"
+}

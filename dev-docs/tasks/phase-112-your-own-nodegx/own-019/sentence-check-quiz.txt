@@ -1,0 +1,11 @@
+Someone built my quiz game for me and it is already in this folder (capital-quiz). Before I show it to anyone I need to know whether it really does what I asked for. This is exactly what I asked for:
+
+I'd like a small, good-looking quiz game called "Capital Quiz" that works nicely on a phone. A start screen with the title and a Start button. Then these five questions, one at a time, with the three answers in exactly this order:
+1. What is the capital of Portugal? Lisbon / Porto / Coimbra (right: Lisbon)
+2. What is the capital of Australia? Sydney / Canberra / Melbourne (right: Canberra)
+3. What is the capital of Canada? Toronto / Vancouver / Ottawa (right: Ottawa)
+4. What is the capital of Morocco? Rabat / Casablanca / Marrakesh (right: Rabat)
+5. What is the capital of Switzerland? Zurich / Geneva / Bern (right: Bern)
+Each question shows "Question 2 of 5" (and so on) and a countdown from 10 seconds. When I tap an answer, the right answer turns green and a wrong answer I tapped turns red, my score goes up by one if I was right, and after about a second the next question appears. If the countdown reaches 0 it counts as wrong and moves on. After the fifth question, a results screen says "You scored 3 out of 5" (with my real score) and "Best: 4 out of 5" (my best score so far, still there after I reload the page), with a Play again button that starts again from question 1 with the score back at 0.
+
+Please check every part of that on the running app, the way I would use it on my phone, and then tell me line by line what works and what does not. Do not change or fix anything yet: I only want the report, and I will decide what to fix afterwards. Please just do it without waiting for me to answer questions.

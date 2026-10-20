@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "936cfc49-861e-5257-821e-8d5ac46e0997",
+  "name": "ProductCard",
+  "path": "/Shop/ProductCard",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One product as a card: photo, name, seller and country, price in the buyer’s currency; opens its page"
+}

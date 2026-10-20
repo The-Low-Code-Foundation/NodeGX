@@ -1,0 +1,347 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ae90e67f-58fd-53c8-8a25-be68088bb32a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "htIn",
+      "type": "Component Inputs",
+      "label": "The item",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isFace",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "look",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "seed",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "options",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "paint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pattern",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cost",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "worn",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canWear",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canPick",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "dim",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "htCard",
+      "type": "Group",
+      "label": "The tile",
+      "children": [
+        "htFaceBox",
+        "htSwatch",
+        "htLabel",
+        "htNote"
+      ],
+      "parameters": {
+        "width": {
+          "value": 132,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "cssClassName": "pressable rkt-tile"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "htFaceBox",
+      "type": "Group",
+      "label": "The face, wearing it",
+      "parent": "htCard",
+      "children": [
+        "htFace"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "htFace",
+      "type": "/Game/Face",
+      "label": "The face",
+      "parent": "htFaceBox",
+      "parameters": {
+        "size": 64
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "htSwatch",
+      "type": "Group",
+      "label": "The rocket",
+      "parent": "htCard",
+      "children": [
+        "htRocket"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 64,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "htRocket",
+      "type": "game-kit.RaceTrack",
+      "label": "This paint and decal",
+      "parent": "htSwatch",
+      "parameters": {
+        "progressA": 0.5,
+        "showB": false,
+        "celebrate": false,
+        "aspect": "wide",
+        "rocketSize": 52,
+        "goal": ""
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "htLabel",
+      "type": "Text",
+      "label": "Its name",
+      "parent": "htCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "htNote",
+      "type": "Text",
+      "label": "What a tap does",
+      "parent": "htCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "htKindOf",
+      "type": "Expression",
+      "label": "A face or a paint?",
+      "parameters": {
+        "expression": "isFace === false ? 'paint' : 'face'"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "htKind",
+      "type": "States",
+      "label": "A face or a paint",
+      "parameters": {
+        "states": "face,paint",
+        "values": "face,swatch",
+        "useTransitions": false,
+        "type-face": "boolean",
+        "value-face-face": true,
+        "value-paint-face": false,
+        "type-swatch": "boolean",
+        "value-face-swatch": false,
+        "value-paint-swatch": true
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "htToneOf",
+      "type": "Expression",
+      "label": "Worn, plain or greyed?",
+      "parameters": {
+        "expression": "worn === true ? 'worn' : dim === true ? 'dim' : 'plain'"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "htTone",
+      "type": "States",
+      "label": "Worn, plain or greyed",
+      "parameters": {
+        "states": "plain,worn,dim",
+        "values": "ground,opacity",
+        "useTransitions": false,
+        "type-ground": "color",
+        "value-plain-ground": "var(--surface)",
+        "value-worn-ground": "var(--accent)",
+        "value-dim-ground": "var(--muted)",
+        "type-opacity": "number",
+        "value-plain-opacity": 1,
+        "value-worn-opacity": 1,
+        "value-dim-opacity": 0.8
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "htCanPick",
+      "type": "Condition",
+      "label": "A pick to spend on it?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "htCanWear",
+      "type": "Condition",
+      "label": "Theirs to put on or take off?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "htOut",
+      "type": "Component Outputs",
+      "label": "Tapped",
+      "ports": [
+        {
+          "name": "pick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "wear",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "cost",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 410,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "htCard"
+  ]
+}

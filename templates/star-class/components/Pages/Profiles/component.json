@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "79d2eef7-26e6-5cf4-89cc-e590ab59d0f9",
+  "name": "Profiles",
+  "path": "/Pages/Profiles",
+  "type": "page",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Who is playing: the profiles in this browser as cards, and the new-player form. Choosing one goes Home."
+}

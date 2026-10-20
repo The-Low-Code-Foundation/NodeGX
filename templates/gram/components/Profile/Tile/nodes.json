@@ -1,0 +1,140 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "fce29c19-fd62-5b7c-86fb-9a30ca10ae20",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tlRoot",
+      "type": "Group",
+      "label": "A post in the grid",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-tile"
+      },
+      "children": [
+        "tlImage",
+        "tlOpen",
+        "tlWords"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tlImage",
+      "type": "Image",
+      "label": "Its first photo",
+      "parent": "tlRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tlOpen",
+      "type": "net.noodl.controls.button",
+      "label": "Open the post (over the photo)",
+      "parent": "tlRoot",
+      "parameters": {
+        "label": "",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "color": "transparent",
+        "fontSize": "var(--text-xs)",
+        "cssClassName": "gm-tile-hit",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "tlWords",
+      "type": "net.noodl.controls.button",
+      "label": "Open the post (its first words)",
+      "parent": "tlRoot",
+      "parameters": {
+        "label": "",
+        "backgroundColor": "var(--accent)",
+        "color": "var(--accent-foreground)",
+        "borderStyle": "none",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "cssClassName": "gm-tile-hit gm-tile-words",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "tlIn",
+      "type": "Component Inputs",
+      "label": "One post in the grid",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "src",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasPhoto",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "noPhoto",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "tlToPost",
+      "type": "RouterNavigate",
+      "label": "To the post",
+      "parameters": {
+        "target": "/Pages/Post"
+      },
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "tlRoot"
+  ]
+}

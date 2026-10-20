@@ -5,6 +5,7 @@ import { Catalog, loadCatalog } from '../src/catalog';
 import { emitApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
 import { ComponentIR, ExportIR, NodeIR, ParamValue } from '../src/ir/types';
+import { withoutAnnouncement } from './helpers/fieldMount';
 
 const FIXTURE = path.join(__dirname, 'fixtures', 'cheer');
 
@@ -184,7 +185,7 @@ describe('what defers, all with notes (LOGIC-TARGET §4)', () => {
     const hasVisitor = nodeOf(mutated, 'Pages/Mood', 'hasVisitor');
     hasVisitor.parameters = hasVisitor.parameters.filter((p) => p.name !== 'runOnChange-condition');
     const result = emitApp(mutated, catalog);
-    expect(result.files['src/pages/Mood.tsx']).not.toContain('if (');
+    expect(withoutAnnouncement(result.files['src/pages/Mood.tsx'])).not.toContain('if (');
     expect(result.notes.join('\n')).toContain('Run On Value Change is ticked');
   });
 
@@ -192,8 +193,12 @@ describe('what defers, all with notes (LOGIC-TARGET §4)', () => {
     const mutated = cloneIr();
     wire(mutated, 'Pages/Mood', 'hasVisitor', 'result', 'noteDraftVar', 'value');
     const result = emitApp(mutated, catalog);
-    expect(result.files['src/pages/Mood.tsx']).not.toContain('if (');
-    expect(result.notes.join('\n')).toContain('its result output drives logic this slice does not translate');
+    expect(withoutAnnouncement(result.files['src/pages/Mood.tsx'])).not.toContain('if (');
+    // EXP-011 §87. hasVisitor is unticked with Evaluate wired, so its value wires are snapshots, and one that lands
+    // anywhere but a Mounted or a Visible is named for where it lands (`noteDraftVar` is not a node of Mood).
+    expect(result.notes.join('\n')).toContain(
+      'its result feeds a missing node.value — a snapshot of the last Evaluate lands only in a Mounted or a Visible in this slice'
+    );
   });
 
   test('an arm reading another handler-only value defers at attachment', () => {
@@ -202,7 +207,7 @@ describe('what defers, all with notes (LOGIC-TARGET §4)', () => {
     // exist inside the button's click handler.
     wire(mutated, 'Pages/Mood', 'hasVisitor', 'onfalse', 'setNote', 'set', 'signal');
     const result = emitApp(mutated, catalog);
-    expect(result.files['src/pages/Mood.tsx']).not.toContain('if (');
+    expect(withoutAnnouncement(result.files['src/pages/Mood.tsx'])).not.toContain('if (');
     expect(result.notes.join('\n')).toContain('the action reads values that only exist in another handler');
   });
 
@@ -219,7 +224,7 @@ describe('what defers, all with notes (LOGIC-TARGET §4)', () => {
     });
     wire(mutated, 'Pages/Mood', 'hasVisitor', 'onfalse', 'innerCondition', 'eval', 'signal');
     const result = emitApp(mutated, catalog);
-    expect(result.files['src/pages/Mood.tsx']).not.toContain('if (');
+    expect(withoutAnnouncement(result.files['src/pages/Mood.tsx'])).not.toContain('if (');
     expect(result.notes.join('\n')).toContain('nesting is not translated in this slice');
   });
 

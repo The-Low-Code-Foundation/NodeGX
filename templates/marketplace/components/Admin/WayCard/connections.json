@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e908b81e-2ff2-5032-86a2-0c886a0a532c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "wcIn",
+      "fromProperty": "name",
+      "toId": "wcName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wcIn",
+      "fromProperty": "where",
+      "toId": "wcWhere",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wcIn",
+      "fromProperty": "toggles",
+      "toId": "wcEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "wcIn",
+      "fromProperty": "instructions",
+      "toId": "wcWords",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "wcIn",
+      "fromProperty": "instructions",
+      "toId": "wcGather",
+      "toProperty": "in-words0"
+    },
+    {
+      "fromId": "wcWords",
+      "fromProperty": "onTextChanged",
+      "toId": "wcGather",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "wcIn",
+      "fromProperty": "method",
+      "toId": "wcGather",
+      "toProperty": "in-method"
+    },
+    {
+      "fromId": "wcIn",
+      "fromProperty": "onIds",
+      "toId": "wcGather",
+      "toProperty": "in-onIds"
+    },
+    {
+      "fromId": "wcSave",
+      "fromProperty": "onClick",
+      "toId": "wcGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wcGather",
+      "fromProperty": "out-way",
+      "toId": "wcCall",
+      "toProperty": "in-way"
+    },
+    {
+      "fromId": "wcGather",
+      "fromProperty": "out-go",
+      "toId": "wcCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "wcCall",
+      "fromProperty": "error",
+      "toId": "wcError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wcCall",
+      "fromProperty": "done",
+      "toId": "wcStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "wcStamp",
+      "fromProperty": "out-at",
+      "toId": "wcChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "wcStamp",
+      "fromProperty": "out-go",
+      "toId": "wcChanged",
+      "toProperty": "do"
+    }
+  ]
+}

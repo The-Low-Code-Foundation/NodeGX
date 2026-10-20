@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000000403",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "showBtn",
+      "fromProperty": "onClick",
+      "toId": "showGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "hideBtn",
+      "fromProperty": "onClick",
+      "toId": "hideGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "bothBtn",
+      "fromProperty": "onClick",
+      "toId": "showGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "bothBtn",
+      "fromProperty": "onClick",
+      "toId": "hideGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "showGate",
+      "fromProperty": "result",
+      "toId": "sentText",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hideGate",
+      "fromProperty": "result",
+      "toId": "sentText",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "showGate",
+      "fromProperty": "isfalse",
+      "toId": "noteText",
+      "toProperty": "visible"
+    },
+    {
+      "fromId": "flipBtn",
+      "fromProperty": "onClick",
+      "toId": "flip",
+      "toProperty": "flip"
+    },
+    {
+      "fromId": "flip",
+      "fromProperty": "state",
+      "toId": "liveGate",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "checkBtn",
+      "fromProperty": "onClick",
+      "toId": "liveGate",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "liveGate",
+      "fromProperty": "result",
+      "toId": "liveText",
+      "toProperty": "mounted"
+    }
+  ]
+}

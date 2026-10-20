@@ -16,6 +16,8 @@ import type {
 import { fileFailureOf } from '@noodl/runtime/src/api/backends/fileRef';
 import { outcomeOutputs, reportOutcomes } from '@noodl/runtime/src/outcome';
 
+import { isShrinkable, shrinkPhoto } from './shrinkphoto';
+
 /** What `CloudStore.uploadFile`'s `error` callback is given, and what `setError` reads. */
 interface UploadError {
   error?: string;
@@ -30,6 +32,11 @@ interface UploadFileInstance extends NodeInstance {
     backendId?: string;
     /** BAK-006 follow-up: upload as a private (owner-only, ACL'd) file. */
     private?: boolean;
+    /** P121-TWO001-MEMBERSPHOTO: roles that may read the file too — see the `readers` input. */
+    readers?: string;
+    /** P121-TWO008-UPLOADSHRINK — see the `Shrink Photos` input group. */
+    shrinkTo?: number;
+    photoQuality?: number;
     /** BCN-007 step 3 — see the `File Location` input group. */
     bucket?: string;
     path?: string;
@@ -43,7 +50,7 @@ interface UploadFileInstance extends NodeInstance {
     progressLoaded?: number;
   };
   setError(err: UploadError | string, tokens?: OutcomeToken[]): void;
-  fileTarget(): FileTarget | undefined;
+  fileTarget(sent?: File): FileTarget | undefined;
   cloudStore(tokens: OutcomeToken[]): CloudStoreLike | undefined;
 }
 
@@ -90,6 +97,45 @@ const UploadFile: NodeDefinitionOptions = {
       description: 'Restricts the stored file to whoever uploaded it, so reading it later needs a Sign File URL node',
       set(this: UploadFileInstance, value: boolean) {
         this._internal.private = value;
+      }
+    },
+    // P121-TWO001-MEMBERSPHOTO: Private alone is the uploader's alone, and a feed shows every
+    // member's photos to every other member. `X-NodeGX-File-Readers` shares a private file with
+    // roles; the backend refuses a malformed list, or a role the uploader does not hold, in words.
+    readers: {
+      group: 'General',
+      displayName: 'Readers',
+      type: 'string',
+      description:
+        'Roles that may read the file as well as whoever uploaded it, such as role:member, separated by commas; setting it makes the file private. NodeGX backends only',
+      set(this: UploadFileInstance, value: string) {
+        this._internal.readers = value;
+      }
+    },
+    // ── P121-TWO008-UPLOADSHRINK: Shrink Photos ──────────────────────────
+    //
+    // A phone photo is 3 to 8 MB, and the backend's thumbnails shrink what is served, not what
+    // is sent. Off unless set, so every existing graph sends exactly what it sent before.
+    shrinkTo: {
+      group: 'Shrink Photos',
+      displayName: 'Shrink To',
+      type: 'number',
+      default: 0,
+      description:
+        'Makes a photo smaller in the browser before sending it, so its longer side is at most this many pixels; 0 sends every file as picked',
+      set(this: UploadFileInstance, value: number) {
+        this._internal.shrinkTo = value;
+      }
+    },
+    photoQuality: {
+      group: 'Shrink Photos',
+      displayName: 'Photo Quality',
+      type: 'number',
+      default: 80,
+      description:
+        'How much detail a shrunk JPEG or WebP keeps, from 1 to 100; PNG keeps every pixel and its transparency, GIF and SVG are never shrunk',
+      set(this: UploadFileInstance, value: number) {
+        this._internal.photoQuality = value;
       }
     },
     // ── BCN-007 step 3: File Location ────────────────────────────────────
@@ -181,10 +227,11 @@ const UploadFile: NodeDefinitionOptions = {
           const store = this.cloudStore([outcome]);
           if (!store) return;
 
-          store.uploadFile({
-            file,
+          const send = (sent: File) => store.uploadFile({
+            file: sent,
             private: this._internal.private,
-            target: this.fileTarget(),
+            readers: this._internal.readers,
+            target: this.fileTarget(sent),
             onUploadProgress: (p: { total: number; loaded: number }) => {
               this._internal.progressTotal = p.total;
               this._internal.progressLoaded = p.loaded;
@@ -210,8 +257,9 @@ const UploadFile: NodeDefinitionOptions = {
             }) => {
               // P107-C52 (P109 ISL-030, ruled "Keep the real name"): the name the file was uploaded as — the backend's
               // when it reports one (Directus), else the name of the file this upload sent.
-              const sent = file && typeof (file as { name?: unknown }).name === 'string' ? (file as { name: string }).name : undefined;
-              const filename = response.filename !== undefined ? response.filename : sent;
+              // A shrunk HEIC was sent as a JPEG, so its name is the one sent, not the one picked.
+              const sentName = sent && typeof (sent as { name?: unknown }).name === 'string' ? (sent as { name: string }).name : undefined;
+              const filename = response.filename !== undefined ? response.filename : sentName;
               this._internal.cloudFile = new CloudFile(filename !== undefined ? Object.assign({}, response, { filename }) : response);
               this.flagOutputDirty('cloudFile');
               // Last, after the value it is about.
@@ -219,6 +267,15 @@ const UploadFile: NodeDefinitionOptions = {
             },
             error: (e: UploadError) => this.setError(e, [outcome])
           });
+
+          // Synchronous when nothing is to be shrunk, as it always was. `shrinkPhoto` never
+          // rejects: a photo the browser cannot decode goes as it was picked.
+          const shrinkTo = this._internal.shrinkTo;
+          if (typeof shrinkTo === 'number' && shrinkTo > 0 && isShrinkable(file.type)) {
+            shrinkPhoto(file, { largestSide: shrinkTo, quality: this._internal.photoQuality }).then(send);
+          } else {
+            send(file);
+          }
         });
       }
     }
@@ -369,8 +426,9 @@ const UploadFile: NodeDefinitionOptions = {
      * meaningful: a project has one backend selected, and only one of the two
      * backends reads either group.
      */
-    fileTarget(this: UploadFileInstance): FileTarget | undefined {
-      const { bucket, path, collection, recordId, field, file } = this._internal;
+    fileTarget(this: UploadFileInstance, sent?: File): FileTarget | undefined {
+      const { bucket, path, collection, recordId, field } = this._internal;
+      const file = sent || this._internal.file;
 
       if (bucket) {
         // Path defaults to the file's own name — the one value here that CAN be

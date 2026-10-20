@@ -1,0 +1,82 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "66a88ae9-8df5-54f8-8b4f-9a682bd03a98",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "whoAmI()",
+      "parameters": {
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run",
+      "type": "JavaScriptFunction",
+      "label": "Read the caller’s member",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\nasync function member(userId) {\n  if (!userId) return null;\n  return one('Member', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction email(v) {\n  var e = typeof v === 'string' ? v.trim().toLowerCase() : '';\n  var at = e.indexOf('@');\n  if (e.length > 200 || at < 1 || e.indexOf(' ') >= 0 || e.indexOf('@', at + 1) >= 0) return '';\n  var dot = e.lastIndexOf('.');\n  return dot > at + 1 && dot < e.length - 1 ? e : '';\n}\n\nif (Inputs.userId === undefined) return;\nvar m = await member(Inputs.userId);\nif (!m) { refuse('This sign-in isn’t a member of the community.'); return; }\nOutputs.me = { id: idOf(m), name: m.name || '', status: m.status, role: m.role, blocked: !!m.endedAt };\nOutputs.done();",
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-me",
+          "displayName": "me",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "me"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

@@ -40,7 +40,10 @@ export function exportNode(node: NodeGraphNode) {
     id: node.id,
     type: node.type.name,
     version: node.version,
-    variant: node.variant ? node.variant.name : undefined,
+    // P123-S2-VARIANTLOST: `node.variant` is a lookup through the node library's registered modules, and a project
+    // that is not `ProjectModel.instance` (the kit's in-page preview, the headless render) is not one — the name the
+    // node wears is on the node itself, and the runtime looks the variant up by name.
+    variant: node.variant ? node.variant.name : node.variantName || undefined,
     parameters: clone(node.parameters),
     stateParameters: node.stateParameters ? clone(node.stateParameters) : undefined,
     stateTransitions: node.stateTransitions ? clone(node.stateTransitions) : undefined,

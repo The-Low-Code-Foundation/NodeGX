@@ -47,6 +47,7 @@
         "hgTitle",
         "hgMoon",
         "hgPreview",
+        "hgSkin",
         "hgStack"
       ],
       "parameters": {
@@ -149,6 +150,14 @@
       "y": 760
     },
     {
+      "id": "hgSkin",
+      "type": "/Game/Choice row",
+      "label": "Your skin",
+      "parent": "hgWrap",
+      "x": 220,
+      "y": 880
+    },
+    {
       "id": "hgStack",
       "type": "Group",
       "label": "The shelf, and the question over it",
@@ -168,7 +177,7 @@
         "cssClassName": "rkt-shelf-stack"
       },
       "x": 220,
-      "y": 880
+      "y": 1000
     },
     {
       "id": "hgShelfBox",
@@ -188,7 +197,7 @@
         "alignItems": "stretch"
       },
       "x": 280,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "hgShelf",
@@ -196,7 +205,7 @@
       "label": "The shelf",
       "parent": "hgShelfBox",
       "x": 340,
-      "y": 1120
+      "y": 1240
     },
     {
       "id": "hgOver",
@@ -218,7 +227,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "hgConfirm",
@@ -229,7 +238,7 @@
         "mounted": false
       },
       "x": 340,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "hgStore",
@@ -250,7 +259,7 @@
       "type": "/Data/Words",
       "label": "The words",
       "x": 590,
-      "y": 1720
+      "y": 1960
     },
     {
       "id": "hgT",
@@ -264,21 +273,21 @@
       "type": "/Data/Curriculum",
       "label": "The skills",
       "x": 590,
-      "y": 1840
+      "y": 2080
     },
     {
       "id": "hgWordLists",
       "type": "/Data/Word lists",
       "label": "The typing words",
       "x": 590,
-      "y": 1960
+      "y": 2200
     },
     {
       "id": "hgItems",
       "type": "/Data/Hangar",
       "label": "What the shelf offers",
       "x": 590,
-      "y": 1360
+      "y": 1600
     },
     {
       "id": "hgPick",
@@ -303,7 +312,7 @@
         "value-asking-asking": true
       },
       "x": 590,
-      "y": 1480
+      "y": 1720
     },
     {
       "id": "hgBuyTitle",
@@ -313,7 +322,7 @@
         "expression": "String(word || '').replace('{item}', String(label || ''))"
       },
       "x": 590,
-      "y": 1600
+      "y": 1840
     },
     {
       "id": "hgWear",
@@ -323,6 +332,24 @@
       "y": 1240
     },
     {
+      "id": "hgSkinItems",
+      "type": "Static Data",
+      "label": "The five skins",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"label\":\"✋🏻\",\"value\":\"t1\"},{\"label\":\"✋🏼\",\"value\":\"t2\"},{\"label\":\"✋🏽\",\"value\":\"t3\"},{\"label\":\"✋🏾\",\"value\":\"t4\"},{\"label\":\"✋🏿\",\"value\":\"t5\"}]"
+      },
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "hgSkinSet",
+      "type": "/Logic/Update settings",
+      "label": "Keep the skin",
+      "x": 590,
+      "y": 1480
+    },
+    {
       "id": "hgNoOne",
       "type": "Expression",
       "label": "Nobody signed in?",
@@ -330,7 +357,7 @@
         "expression": "has === false"
       },
       "x": 590,
-      "y": 2080
+      "y": 2320
     },
     {
       "id": "hgGuard",

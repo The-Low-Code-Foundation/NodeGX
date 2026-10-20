@@ -13,6 +13,7 @@
  */
 
 import { memoryFiles } from '../format/files';
+import { pinAuthoredRunOnChange, projectWillBeCleanedUp } from '../format/run-on-change-pins';
 import { V2ProjectStore, type ComponentFiles } from '../format/store';
 import type { RegistryV2File } from '../format/types';
 import { SCHEMA_IDS, SchemaValidator } from '../format/validator';
@@ -115,6 +116,11 @@ const now = () => (typeof performance !== 'undefined' ? performance.now() : Date
 /**
  * The reference: the edits applied through this package's store on a project held in memory. It
  * is also the adapter that must pass (AC1), and a thin example of what an adapter looks like.
+ *
+ * P112-OWN008-FORMAT4PIN — in a project the NodeGX editor will still clean up (format < 5), each write
+ * ticks the run-on-value-change boxes of the nodes it authors, as the `nodegx` server's store does
+ * (ISL-018). Without that, the suite would pass the editor whose wired inputs the clean-up then
+ * silences, and fail the one that writes what the official writer writes.
  */
 export function referenceAdapter(
   mint?: (editIndex: number) => string
@@ -122,6 +128,7 @@ export function referenceAdapter(
   let files = memoryFiles();
   let store: V2ProjectStore | undefined;
   let index = 0;
+  let pins = false;
   return {
     name: 'reference (@nodegx/project-contract/format)',
     store: () => {
@@ -132,13 +139,17 @@ export function referenceAdapter(
       files = memoryFiles(initial);
       store = new V2ProjectStore(files);
       index = 0;
+      pins = projectWillBeCleanedUp(store.readProjectFile()?.version);
     },
     apply(edit) {
       if (!store) throw new Error('open() first');
       const i = index++;
       const stored = store.readComponent(edit.component);
       const { files: next, id } = applyEdit(stored.files, edit, () => (mint ? mint(i) : `suite-${i}`));
-      store.writeComponent(stored.key, next, { ifRevision: stored.revision });
+      store.writeComponent(stored.key, next, {
+        ifRevision: stored.revision,
+        prepare: pins ? (onDisk) => void pinAuthoredRunOnChange(stored.key, next, onDisk ?? null) : undefined
+      });
       return id !== undefined ? { id } : undefined;
     },
     save() {
@@ -341,7 +352,8 @@ export async function runSuite(
 /** The report as the command prints it: PASS, or the first ten sentences and how many more. */
 export function formatReport(report: SuiteReport, limit = 10): string {
   const head = `${report.adapter} on ${report.fixture} (${Math.round(report.timings.total)} ms)`;
-  if (report.pass) return `PASS — ${head}${report.graph ? `; ${report.graph.summary}` : ''}`;
+  // P112-OWN008-FILESONLY: an adapter with no runner is graded on files only, and the line says so, as the brief does.
+  if (report.pass) return `PASS — ${head}; ${report.graph ? report.graph.summary : 'files only: the adapter offers no graph runner'}`;
   const lines = report.sentences.slice(0, limit).map((s, i) => `${i + 1}. ${s}`);
   const more = report.sentences.length - lines.length;
   return [

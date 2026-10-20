@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7789c1de-725c-5b45-8cf9-20ad25ad0315",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-13",
+      "type": "noodl.cloud.request",
+      "label": "placeOrder(order)",
+      "parameters": {
+        "params": "order",
+        "ptype-order": "object",
+        "preq-order": true,
+        "allowNoAuth": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-11",
+      "type": "JavaScriptFunction",
+      "label": "Place an order, with or without an account: one part per seller, each line at today’s price",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nvar BUILT = {\"on-delivery\":\"Pay on delivery\",\"bank-transfer\":\"Bank transfer\",\"whatsapp\":\"Order on WhatsApp\",\"paystack\":\"Card or mobile money\"};\nvar o = Inputs.order;\nif (o === undefined) return;\nif (!o || typeof o !== 'object' || Array.isArray(o)) { refuse('The order arrived empty.'); return; }\nvar buyer = { buyerName: text(o.buyerName, 120), phone: text(o.phone, 40), email: text(o.email, 200), address: text(o.address, 500) };\nif (!buyer.buyerName) { refuse('Say who the order is for.'); return; }\nif (buyer.phone.replace(/[^0-9]/g, '').length < 6) { refuse('A phone number the sellers can call.'); return; }\nif (!buyer.address) { refuse('Say where it goes.'); return; }\nif (buyer.email && buyer.email.indexOf('@') < 1) { refuse('That email doesn’t look right. Leave it empty if you’d rather.'); return; }\nvar to = await one('Country', { objectId: { equalTo: idOf(o.country) } });\nif (!to) { refuse('Say which country it goes to.'); return; }\nif (!Array.isArray(o.lines) || o.lines.length === 0) { refuse('The basket is empty.'); return; }\nif (o.lines.length > 50) { refuse('A basket holds 50 different products at most.'); return; }\nvar qty = {}, order = [];\nfor (var i = 0; i < o.lines.length; i++) {\n  var l = o.lines[i] || {};\n  var pid = idOf(l.productId), q = Number(l.quantity);\n  if (!pid || !isFinite(q) || q < 1 || Math.floor(q) !== q) { refuse('Each product needs a whole number of 1 or more.'); return; }\n  if (!qty[pid]) order.push(pid);\n  qty[pid] = (qty[pid] || 0) + q;\n  if (qty[pid] > 99) { refuse('99 of one product at most.'); return; }\n}\nvar products = await Noodl.Records.query('Product', { objectId: { containedIn: order } }, { plain: true, limit: 50 });\nvar sellers = await Noodl.Records.query('Seller', { objectId: { containedIn: products.map(function (p) { return idOf(p.seller); }) } }, { plain: true, limit: 50 });\nvar countries = await Noodl.Records.query('Country', {}, { plain: true, limit: 1000 });\nvar rates = await Noodl.Records.query('Rate', {}, { plain: true, limit: 1000 });\nvar product = {}, seller = {}, country = {};\nproducts.forEach(function (p) { product[p.objectId] = p; });\nsellers.forEach(function (s) { seller[s.objectId] = s; });\ncountries.forEach(function (c) { country[c.objectId] = c; });\n// The parts: one per seller, in the order the buyer put their products in the basket.\nvar parts = [], partOf = {};\nfor (var j = 0; j < order.length; j++) {\n  var p = product[order[j]];\n  var s = p ? seller[idOf(p.seller)] : null;\n  if (!p || !s || p.endedAt || s.endedAt) { refuse((p ? p.name : 'A product') + ' isn’t on sale now. Take it out of the basket and check out again.'); return; }\n  if (p.mode !== 'buy') { refuse(p.name + ' isn’t bought here: message the seller about it.'); return; }\n  if (!partOf[s.objectId]) { partOf[s.objectId] = { seller: s, country: country[idOf(s.country)], lines: [], subtotal: 0 }; parts.push(partOf[s.objectId]); }\n  var price = Number(p.price) || 0;\n  partOf[s.objectId].lines.push({ product: p, quantity: qty[p.objectId], price: price });\n  partOf[s.objectId].subtotal += price * qty[p.objectId];\n}\n// The way each seller country is paid: picked by the buyer, turned on there by the admin.\nvar pay = o.pay && typeof o.pay === 'object' ? o.pay : {};\nvar wayFor = {};\nfor (var k = 0; k < parts.length; k++) {\n  var c = parts[k].country;\n  if (!c) { refuse('A seller in the basket has no country the marketplace sells in.'); return; }\n  if (wayFor[c.objectId]) { parts[k].way = wayFor[c.objectId]; continue; }\n  var way = await one('WayToPay', { objectId: { equalTo: idOf(pay[c.objectId]) } });\n  if (!way || !BUILT[way.method]) { refuse('Pick how you’ll pay in ' + c.name + '.'); return; }\n  var on = await Noodl.Records.query('Country', { relatedTo: { id: way.objectId, key: 'country', className: 'WayToPay' } }, { plain: true, limit: 1000 });\n  if (!on.some(function (x) { return x.objectId === c.objectId; })) { refuse(way.name + ' isn’t a way to pay in ' + c.name + '.'); return; }\n  wayFor[c.objectId] = way;\n  parts[k].way = way;\n}\nfor (var m = 0; m < parts.length; m++) {\n  if (parts[m].way.method === 'whatsapp' && !String(parts[m].seller.whatsapp || '').replace(/[^0-9]/g, '')) { refuse(parts[m].seller.name + ' has no WhatsApp number: pick another way to pay in ' + parts[m].country.name + '.'); return; }\n  if (parts[m].way.method === 'paystack' && !/^ACCT_[A-Za-z0-9]+$/.test(String(parts[m].seller.payoutAccount || ''))) { refuse(parts[m].seller.name + ' can’t be paid by card yet: pick another way to pay in ' + parts[m].country.name + '.'); return; }\n  if (parts[m].way.method === 'paystack' && !buyer.email) { refuse('Paying by card needs your email: Paystack sends the receipt there.'); return; }\n}\n// What the buyer saw it in: a currency there is a rate for, else the currency of where it goes.\nvar rateOf = {};\nrates.forEach(function (r) { if (Number(r.value) > 0) rateOf[r.currency] = Number(r.value); });\nvar seen = text(o.currency, 20).toUpperCase();\nif (!rateOf[seen]) seen = to.currency;\nvar total = 0, sure = !!rateOf[seen];\nparts.forEach(function (pt) { var r = rateOf[pt.country.currency]; if (!r) sure = false; else total += pt.subtotal * r / rateOf[seen]; });\n// The private link: random, long, made here.\nif (typeof crypto === 'undefined' || !crypto.getRandomValues) { refuse('This order could not be placed just now.'); return; }\nvar bytes = new Uint8Array(24);\ncrypto.getRandomValues(bytes);\nvar token = Array.prototype.map.call(bytes, function (b) { return ('0' + b.toString(16)).slice(-2); }).join('');\n// The number: the next one this year. Two checkouts at once may reach for the same one; the store's unique index\n// refuses the second, which takes the next.\nvar year = new Date().getUTCFullYear();\nvar prefix = 'MK-' + year + '-';\nvar last = await Noodl.Records.query('Order', { number: { startsWith: prefix } }, { plain: true, limit: 1, sort: ['-number'] });\nvar n = last[0] ? parseInt(String(last[0].number).slice(prefix.length), 10) || 0 : 0;\nvar row = Object.assign({}, buyer, { currency: seen, followToken: token, country: ptr('Country', to.objectId) });\nif (sure) row.total = Math.round(total * 100) / 100;\nif (!row.email) delete row.email;\nvar made = null, problem = null;\nfor (var attempt = 1; attempt <= 5 && !made; attempt++) {\n  row.number = prefix + String(n + attempt).padStart(5, '0');\n  try { made = await Noodl.Records.create('Order', row); } catch (e) { problem = e; }\n}\nif (!made) { refuse('This order could not be placed just now: ' + ((problem && (problem.error || problem.message)) || 'try again') + '.'); return; }\nvar orderId = made.getId();\nfor (var t = 0; t < parts.length; t++) {\n  var pt = parts[t];\n  var partRow = { status: 'new', subtotal: pt.subtotal, order: ptr('Order', orderId), seller: ptr('Seller', pt.seller.objectId), wayToPay: ptr('WayToPay', pt.way.objectId) };\n  var part = await Noodl.Records.create('OrderPart', partRow);\n  await history('OrderPart', 'orderPart', part.getId(), Inputs.userId, { status: { from: null, to: 'new' }, wayToPay: { from: null, to: pt.way.name } });\n  for (var u = 0; u < pt.lines.length; u++) {\n    var ln = pt.lines[u];\n    await Noodl.Records.create('OrderLine', { quantity: ln.quantity, price: ln.price, productName: ln.product.name || '', orderPart: ptr('OrderPart', part.getId()), product: ptr('Product', ln.product.objectId) });\n  }\n}\nOutputs.order = { number: row.number, followToken: token };\nOutputs.done();",
+        "runOnChange-in-order": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-order",
+          "displayName": "order",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-order",
+          "displayName": "order",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-13",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "order"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-13",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

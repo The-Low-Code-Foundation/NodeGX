@@ -1,0 +1,298 @@
+{
+  "name": "map",
+  "at": "2026-10-18T08:16:31.390Z",
+  "isolation": {
+    "toolCalls": 164,
+    "skillsLoaded": [
+      "nodegx-your-own-editor"
+    ],
+    "pathsOutsideLab": [
+      {
+        "tool": "Bash",
+        "path": "/tmp/types.mjs"
+      },
+      {
+        "tool": "Bash",
+        "path": "/tmp/nodegx-map-copies"
+      },
+      {
+        "tool": "Bash",
+        "path": "/tmp/nodegx-map-copies/suite"
+      },
+      {
+        "tool": "mcp__nodegx__open_project",
+        "path": "/tmp/nodegx-map-copies/ui"
+      },
+      {
+        "tool": "Write",
+        "path": "/Applications/Google"
+      },
+      {
+        "tool": "Read",
+        "path": "/private/tmp/claude-501/-private-tmp-claude-501--Users-richardosborne-vscode-projects-OpenNoodl-fb80ee72-487e-4743-926a-d498f1a9a44c-scratchpad-own008-lab-map/3abfe4b2-9a97-4453-8ebb-94cebfc9986c/tasks/b06zs72gi.output"
+      },
+      {
+        "tool": "Read",
+        "path": "/private/tmp/claude-501/-private-tmp-claude-501--Users-richardosborne-vscode-projects-OpenNoodl-fb80ee72-487e-4743-926a-d498f1a9a44c-scratchpad-own008-lab-map/3abfe4b2-9a97-4453-8ebb-94cebfc9986c/tasks/buo6z8obi.output"
+      },
+      {
+        "tool": "Write",
+        "path": "/private/tmp/nodegx-map-copies/steps1.json"
+      },
+      {
+        "tool": "Bash",
+        "path": "/tmp/nodegx-map-copies/steps1.json"
+      },
+      {
+        "tool": "Bash",
+        "path": "/tmp/nodegx-map-copies/shots"
+      },
+      {
+        "tool": "Read",
+        "path": "/tmp/nodegx-map-copies/shots/02-later.png"
+      },
+      {
+        "tool": "Write",
+        "path": "/private/tmp/nodegx-map-copies/steps2.json"
+      },
+      {
+        "tool": "Bash",
+        "path": "/tmp/nodegx-map-copies/steps2.json"
+      },
+      {
+        "tool": "Read",
+        "path": "/tmp/nodegx-map-copies/shots/10-overview.png"
+      },
+      {
+        "tool": "Read",
+        "path": "/tmp/nodegx-map-copies/shots/11-header.png"
+      },
+      {
+        "tool": "Write",
+        "path": "/private/tmp/nodegx-map-copies/steps3.json"
+      },
+      {
+        "tool": "Bash",
+        "path": "/tmp/nodegx-map-copies/steps3.json"
+      },
+      {
+        "tool": "Read",
+        "path": "/tmp/nodegx-map-copies/shots/21-pick-port.png"
+      },
+      {
+        "tool": "Read",
+        "path": "/tmp/nodegx-map-copies/shots/25-saved.png"
+      },
+      {
+        "tool": "Bash",
+        "path": "/tmp/nodegx-map-copies/steps4.json"
+      },
+      {
+        "tool": "Write",
+        "path": "/tmp/nodegx-map-copies/ui2"
+      },
+      {
+        "tool": "Read",
+        "path": "/private/tmp/claude-501/-private-tmp-claude-501--Users-richardosborne-vscode-projects-OpenNoodl-fb80ee72-487e-4743-926a-d498f1a9a44c-scratchpad-own008-lab-map/3abfe4b2-9a97-4453-8ebb-94cebfc9986c/tasks/bmky7s1p5.output"
+      },
+      {
+        "tool": "Bash",
+        "path": "/tmp/nodegx-map-copies/steps5.json"
+      },
+      {
+        "tool": "Read",
+        "path": "/tmp/nodegx-map-copies/shots/41-pulses.png"
+      }
+    ],
+    "relativeClimbs": [
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/map/editor/package.json\n{\n  \"name\": \"nodegx-map-editor\",\n  \"version\":"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/map/editor/suite/adapter.mjs\n// The editor suite's adapter for the ma"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/map/editor/tools/check.mjs\n// Runs the map's save checks and the kit'"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/map/editor/package.json\n{\n  \"name\": \"nodegx-map-editor\",\n  \"version\":"
+      }
+    ],
+    "refused": [
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"cd \\\"$PWD\\\"; date +%s; ls -la; find todo-list -type f | grep -v node_modules | head -50; node -v; npm -v\",\"description\":\"Inspect the folder and the todo-list app\"}"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"mkdir -p editor && cd editor && npm init -y >/dev/null && npm install @nodegx/project-contract @nodegx/node-spec @nodegx/preview @nodegx/canvas-look three 2>&1 | tail -5; npm ls --depth=0;"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"cd editor/node_modules/@nodegx; for p in *; do echo \\\"== $p\\\"; ls $p; cat $p/package.json | head -30; done\",\"description\":\"List the kit packages' contents\"}"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"cd editor/node_modules/@nodegx/project-contract; cat editor-suite.d.ts; cat editor-suite-node.d.ts; ls editor-suite format; cat format.d.ts | head -50\",\"description\":\"Read the editor suite"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"cd editor/node_modules/@nodegx && cat node-spec/package.json canvas-look/package.json preview/package.json project-contract/package.json | grep -v '^\\\\s*$' | head -150; ls node-spec/dist n"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"cat > /tmp/types.mjs <<'EOF'\\nimport { V2ProjectStore } from '@nodegx/project-contract/format.js';\\nimport { diskFiles } from '@nodegx/project-contract/format-node.js';\\nimport { specFor, "
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"cat > editor/tools/q.mjs <<'EOF'\\nimport * as ns from '@nodegx/node-spec';\\nconsole.log(Object.keys(ns).filter(k => /spec|port/i.test(k)).join(' '));\\nconsole.log(typeof ns.specs, Array.is"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"mkdir -p /tmp/nodegx-map-copies && rm -rf /tmp/nodegx-map-copies/suite && cp -R todo-list /tmp/nodegx-map-copies/suite && node editor/node_modules/@nodegx/project-contract/editor-suite-nod"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"SUITE_BREAK=1 node editor/node_modules/@nodegx/project-contract/editor-suite-node.js editor/suite/adapter.mjs /tmp/nodegx-map-copies/suite editor/suite/edits.json; echo \\\"exit $?\\\"\",\"descr"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"F=editor/node_modules/@nodegx/preview/dist/browser/noodl-preview-in-page.js; grep -o '.\\\\{600\\\\}for(let [a-zA-Z$]* of m)[^;]*;.\\\\{200\\\\}' $F | head -c 2000; echo; grep -o 'traceIntervalMs."
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"node editor/tools/copy.mjs todo-list /tmp/nodegx-map-copies/ui; ls \\\"/Applications/Google Chrome.app/Contents/MacOS/\\\" 2>&1; ls ~/Library/Caches/ms-playwright 2>&1 | head\",\"description\":\"M"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"pkill -f \\\"server.mjs /tmp/nodegx-map-copies\\\"; pkill -f \\\"nodegx-map-copies/shots/.chrome-profile\\\"; echo done\",\"description\":\"Stop the test servers and any headless Chrome left over\"}"
+      }
+    ],
+    "labTodoUnchanged": true,
+    "repoTodoUnchanged": true
+  },
+  "run": {
+    "minutes": 24.061616666666666,
+    "turns": 166,
+    "costUsd": 8.528386399999999,
+    "subtype": "success",
+    "usage": {
+      "input_tokens": 242,
+      "cache_creation_input_tokens": 268888,
+      "cache_read_input_tokens": 19145772,
+      "output_tokens": 127358,
+      "output_tokens_details": {
+        "thinking_tokens": 29561
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 268888,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1160,
+          "cache_read_input_tokens": 277646,
+          "cache_creation_input_tokens": 3502,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 3502
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "suite": {
+    "command": "editor/node_modules/@nodegx/project-contract/editor-suite-node.js",
+    "adapter": "editor/suite/adapter.mjs",
+    "repoScript": {
+      "exit": 0,
+      "out": [
+        "PASS — NodeGX map editor on todo-list (135 ms)"
+      ]
+    },
+    "control": {
+      "exit": 1,
+      "out": [
+        "FAIL — NodeGX map editor (control: paddingTop as a string) on todo-list (232 ms): 1 difference(s)",
+        "1. node \"app_root\" in components/App/nodes.json: \"parameters.paddingTop\" is \"8\"; the official editor saves 8."
+      ]
+    },
+    "ownScript": {
+      "exit": 0,
+      "out": [
+        "PASS — NodeGX map editor on todo-list (177 ms)"
+      ]
+    }
+  },
+  "officialValidator": {
+    "base": {
+      "errors": 0,
+      "warnings": 0,
+      "infos": 1,
+      "nodesChecked": 888,
+      "endpointsChecked": 2943
+    },
+    "saved": {
+      "errors": 0,
+      "warnings": 0,
+      "infos": 1,
+      "nodesChecked": 888,
+      "endpointsChecked": 2943
+    },
+    "exit": 0,
+    "newDiagnostics": []
+  },
+  "mcpValidate": {
+    "summary": {
+      "errors": 0,
+      "warnings": 0,
+      "infos": 28,
+      "nodesChecked": 888,
+      "endpointsChecked": 2943
+    },
+    "codes": [
+      "info gate-starts-shown /Pages/Todo",
+      "info gate-starts-shown /Pages/Todo",
+      "info gate-starts-shown /Pages/Todo",
+      "info gate-starts-shown /Pages/Todo",
+      "info oversized-page /Pages/Todo",
+      "info gate-starts-shown /Pages/Todo",
+      "info gate-starts-shown /Projects/Money sheet",
+      "info gate-starts-shown /Projects/Money sheet",
+      "info gate-starts-shown /Projects/Project editor",
+      "info gate-starts-shown /Projects/Project row",
+      "info gate-starts-shown /Projects/Project row",
+      "info gate-starts-shown /Projects/Project row",
+      "info gate-starts-shown /Projects/Project row",
+      "info gate-starts-shown /Projects/View",
+      "info gate-starts-shown /Todo/Action row",
+      "info gate-starts-shown /Todo/Action row",
+      "info gate-starts-shown /Todo/Done list",
+      "info gate-starts-shown /Todo/History entry",
+      "info gate-starts-shown /Todo/Log entry",
+      "info gate-starts-shown /Todo/Log entry",
+      "info gate-starts-shown /Todo/Log list",
+      "info gate-starts-shown /Todo/Routine list",
+      "info gate-starts-shown /Todo/Task list",
+      "info gate-starts-shown /Todo/Task row",
+      "info gate-starts-shown /Todo/Today list",
+      "info gate-starts-shown /Todo/Today row",
+      "info gate-starts-shown /Todo/Today row",
+      "info gate-starts-shown /Todo/Today row"
+    ]
+  }
+}

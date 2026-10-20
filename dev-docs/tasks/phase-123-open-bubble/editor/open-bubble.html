@@ -1,0 +1,1825 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open Bubble</title>
+<!--
+  P123 Open Bubble — a Bubble-shaped editor for a NodeGX app, built from the kit (P112's "your own editor").
+
+  Four tabs on an icon rail, as Bubble has them:
+    Design    the real app in the page (`@nodegx/preview`), an element palette and tree on the left, a property
+              editor on the right; click an element in the page to select it, drag it to another place in its
+              layout, pull a handle to resize it; the red distance lines and the padding / margin bands on hover
+    Workflow  "When <element> <event>" → numbered action steps read from the wires; a Branch step (a Condition node)
+              splits the chain into a Yes and a No column that never rejoin (s2)
+    Data      data types and fields (the project file's `dbCollections`), the rows on the bound backend, and the
+              option sets (one logic component with a Static Data node per set) (s2)
+    Styles    the project's variants in nodegx.styles.json, by element type — Bubble's global styles, NodeGX's Looks (s2)
+
+  Every value a field takes can be composed: the composer (chips), pure JavaScript, or both over the same text —
+  it is NodeGX's Expression node, whose free names are its inputs and are wired from what the chips name (s2).
+  A custom state is a Variable node that remembers which element it hangs on (`metadata.customState`) (s2).
+
+  Every change is an edit through the kit's own store (`V2ProjectStore`, the same eight edits the editor suite
+  grades: add_node, remove_node, connect, disconnect, set_parameter, move, rename, add_child — plus set_variant and
+  set_metadata, two fields of the same node record), saved to the project folder by serve.mjs, and the app rebuilt
+  from the files. Nothing here draws the app or runs a node.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef0f3; --panel: #ffffff; --panel-2: #f7f8fa; --line: #e3e6eb; --line-2: #d3d7de; --ink: #171b22; --ink-2: #3d4452; --muted: #717886;
+    --accent: #1f5eff; --accent-ink: #1446c7; --accent-soft: #e9efff; --accent-line: #b9caff;
+    --ok: #16a34a; --warn: #d97706; --danger: #dc2626; --branch-yes: #0f9d58; --branch-no: #c2410c;
+    --hover: #4ade80; --sel: #1f5eff; --guide: #ef3b3b; --pad: rgba(110, 200, 120, .32); --mar: rgba(255, 170, 60, .34);
+    --r: 6px; --r-lg: 10px; --shadow: 0 10px 30px rgba(17, 24, 39, .14), 0 1px 3px rgba(17, 24, 39, .08);
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-family: Inter, -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 13px; line-height: 1.4; color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; background: var(--bg); overflow: hidden; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; border: 1px solid var(--line-2); background: var(--panel); border-radius: var(--r); padding: 5px 10px; line-height: 18px; display: inline-flex; align-items: center; gap: 6px; }
+  button:hover { background: var(--panel-2); border-color: #b8bec8; }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 500; }
+  button.primary:hover { background: var(--accent-ink); }
+  button.quiet { border-color: transparent; background: transparent; color: var(--ink-2); }
+  button.quiet:hover { background: var(--panel-2); color: var(--ink); }
+  button.danger { color: var(--danger); }
+  button.tiny { padding: 2px 7px; font-size: 12px; line-height: 16px; }
+  button svg { width: 14px; height: 14px; flex: none; }
+  input[type=text], input[type=number], select, textarea { border: 1px solid var(--line-2); border-radius: var(--r); padding: 5px 8px; background: #fff; width: 100%; min-width: 0; line-height: 18px; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23717886' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; padding-right: 26px; }
+  textarea { font-family: var(--mono); font-size: 12px; }
+  code, .mono { font-family: var(--mono); font-size: 12px; }
+  svg.i { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  kbd { font: 11px var(--mono); background: var(--panel-2); border: 1px solid var(--line-2); border-radius: 4px; padding: 0 4px; color: var(--muted); }
+
+  /* ---- shell: rail · header · tab ---- */
+  #shell { display: grid; grid-template-columns: 48px 1fr; grid-template-rows: 44px 1fr; height: 100%; }
+  #rail { grid-row: 1 / span 2; background: #14181f; display: flex; flex-direction: column; align-items: center; padding: 8px 0; gap: 4px; }
+  #rail .logo { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg, #3b82f6, #1f5eff); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+  #rail button { width: 36px; height: 36px; padding: 0; justify-content: center; border: 0; background: transparent; color: #8b93a3; border-radius: 8px; position: relative; }
+  #rail button svg { width: 18px; height: 18px; }
+  #rail button:hover { background: #222833; color: #fff; }
+  #rail button[aria-selected=true] { background: #2a3140; color: #fff; }
+  #rail button[aria-selected=true]::before { content: ''; position: absolute; left: -6px; top: 10px; width: 3px; height: 16px; border-radius: 2px; background: var(--accent); }
+  #rail .tip { position: absolute; left: 44px; top: 50%; transform: translateY(-50%); background: #14181f; color: #fff; font-size: 12px; padding: 3px 8px; border-radius: 4px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .12s; z-index: 60; }
+  #rail button:hover .tip { opacity: 1; }
+  #rail .grow { flex: 1; }
+  header { grid-column: 2; display: flex; align-items: center; gap: 10px; padding: 0 14px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  header .crumb { display: flex; align-items: center; gap: 6px; color: var(--ink-2); font-weight: 500; }
+  header .crumb .sep { color: var(--line-2); }
+  header .crumb select { width: auto; padding: 3px 24px 3px 8px; border-color: transparent; background-color: transparent; font-weight: 500; }
+  header .crumb select:hover { border-color: var(--line-2); }
+  header .seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: var(--r); overflow: hidden; }
+  header .seg button { border: 0; border-radius: 0; padding: 4px 9px; color: var(--muted); }
+  header .seg button[aria-pressed=true] { background: var(--accent-soft); color: var(--accent-ink); }
+  header .toggle { display: inline-flex; align-items: center; gap: 8px; color: var(--ink-2); cursor: pointer; user-select: none; }
+  header .toggle i { width: 30px; height: 16px; border-radius: 8px; background: var(--line-2); position: relative; transition: background .15s; }
+  header .toggle i::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 6px; background: #fff; transition: left .15s; }
+  header .toggle input { display: none; }
+  header .toggle input:checked + i { background: var(--accent); }
+  header .toggle input:checked + i::after { left: 16px; }
+  header .spacer { flex: 1; }
+  header .status { color: var(--muted); font-size: 12px; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 6px; }
+  header .status::before { content: ''; width: 7px; height: 7px; border-radius: 4px; background: var(--ok); flex: none; }
+  header .status.busy::before { background: var(--warn); }
+  header .status.bad { color: var(--danger); }
+  header .status.bad::before { background: var(--danger); }
+  main { grid-column: 2; min-height: 0; }
+  section.tab { height: 100%; display: grid; min-height: 0; }
+  section[hidden] { display: none; }
+  aside { background: var(--panel); border-right: 1px solid var(--line); overflow: auto; display: flex; flex-direction: column; min-height: 0; }
+  aside.right { border-right: 0; border-left: 1px solid var(--line); }
+  h3.sec { margin: 0; padding: 12px 12px 6px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); display: flex; align-items: center; justify-content: space-between; }
+  h3.sec button { padding: 1px 6px; }
+  .search { position: relative; padding: 8px 12px 4px; }
+  .search input { padding-left: 28px; }
+  .search svg { position: absolute; left: 20px; top: 15px; width: 14px; height: 14px; color: var(--muted); pointer-events: none; }
+  .empty { color: var(--muted); padding: 20px; }
+  .hint { color: var(--muted); padding: 8px 12px; font-size: 12px; }
+  .row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: var(--r); cursor: default; white-space: nowrap; color: var(--ink-2); }
+  .row:hover { background: var(--panel-2); color: var(--ink); }
+  .row[aria-selected=true] { background: var(--accent-soft); color: var(--accent-ink); }
+  .row .t { color: var(--muted); font-size: 11px; margin-left: auto; }
+  .row[aria-selected=true] .t { color: var(--accent-ink); opacity: .7; }
+  .list { padding: 0 6px 12px; }
+
+  /* ---- Design ---- */
+  #design { grid-template-columns: 260px 1fr 330px; }
+  .palette { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 12px 12px; }
+  .palette button { text-align: left; padding: 6px 8px; display: flex; gap: 8px; align-items: center; border-color: var(--line); color: var(--ink-2); }
+  .palette button:hover { border-color: var(--accent-line); color: var(--ink); }
+  .palette button[aria-pressed=true] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); }
+  .palette button svg.i { color: var(--accent); }
+  .tree .row { padding-top: 4px; padding-bottom: 4px; }
+  .tree .row svg.i { width: 14px; height: 14px; color: var(--muted); }
+  .tree .row[aria-selected=true] svg.i { color: var(--accent-ink); }
+  #stage { position: relative; overflow: auto; background: var(--bg); background-image: radial-gradient(var(--line-2) .6px, transparent .6px); background-size: 16px 16px; display: flex; justify-content: center; align-items: flex-start; padding: 20px; flex-wrap: wrap; gap: 14px; }
+  #problems { width: 100%; max-width: 960px; background: #fff7ed; border: 1px solid #fdba74; border-left: 4px solid #ea580c; border-radius: var(--r); padding: 10px 14px; }
+  #problems h4 { margin: 0 0 6px; font-size: 13px; }
+  #problems li { margin: 4px 0; }
+  #problems li small { color: var(--muted); display: block; }
+  #appwrap { position: relative; height: calc(100vh - 44px - 40px); min-height: 500px; background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.06), 0 8px 28px rgba(0,0,0,.1); border-radius: 4px; flex: 0 0 auto; }
+  #app { position: absolute; inset: 0; border-radius: 4px; overflow: hidden; }
+  #overlay { position: absolute; inset: 0; z-index: 10; cursor: default; }
+  #overlay.preview { pointer-events: none; }
+  #overlay.adding { cursor: crosshair; }
+  .box { position: absolute; pointer-events: none; border: 1px solid var(--hover); }
+  .box.sel { border: 1.5px solid var(--sel); }
+  .box .tag { position: absolute; left: -1px; top: -22px; background: var(--sel); color: #fff; font-size: 11px; font-weight: 500; padding: 2px 7px; border-radius: 4px 4px 0 0; white-space: nowrap; display: flex; gap: 6px; align-items: center; }
+  .box.hov .tag { background: var(--hover); color: #052e16; }
+  .handle { position: absolute; width: 9px; height: 9px; background: #fff; border: 1.5px solid var(--sel); border-radius: 2px; pointer-events: auto; box-shadow: 0 1px 2px rgba(0,0,0,.2); }
+  .handle.e { right: -5px; top: calc(50% - 5px); cursor: ew-resize; }
+  .handle.s { bottom: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+  .handle.se { right: -5px; bottom: -5px; cursor: nwse-resize; }
+  .band { position: absolute; pointer-events: none; }
+  .band.pad { background: var(--pad); }
+  .band.mar { background: var(--mar); }
+  .guide { position: absolute; pointer-events: none; background: var(--guide); }
+  .guide.h { height: 1px; } .guide.v { width: 1px; }
+  .guide .n { position: absolute; background: #fff; color: var(--guide); font: 600 11px var(--mono); padding: 0 3px; border-radius: 3px; white-space: nowrap; border: 1px solid #fecaca; }
+  .guide.h .n { left: 50%; top: -9px; transform: translateX(-50%); }
+  .guide.v .n { top: 50%; left: 4px; transform: translateY(-50%); }
+  .drop { position: absolute; background: var(--accent); pointer-events: none; border-radius: 2px; }
+  .drop.into { background: transparent; border: 2px dashed var(--accent); }
+  .props { padding: 0 12px 24px; }
+  .props .head { padding: 12px 12px 10px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 1fr auto; gap: 6px 8px; align-items: center; }
+  .props .head input { font-weight: 600; }
+  .props .head .type { color: var(--muted); font-size: 12px; grid-column: 1 / -1; }
+  .group { border-bottom: 1px solid var(--line); }
+  .group summary { padding: 9px 0; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; color: var(--ink); }
+  .group summary::after { content: ''; width: 8px; height: 8px; border-right: 1.5px solid var(--muted); border-bottom: 1.5px solid var(--muted); transform: rotate(45deg); margin-right: 4px; transition: transform .12s; }
+  .group:not([open]) summary::after { transform: rotate(-45deg); }
+  .group > *:last-child { padding-bottom: 8px; }
+  .field { display: grid; grid-template-columns: 96px 1fr; gap: 4px 8px; align-items: center; padding: 3px 0; }
+  .field label { color: var(--ink-2); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .field .unit { display: grid; grid-template-columns: 1fr 58px; gap: 4px; }
+  .field .color { display: grid; grid-template-columns: 1fr 26px; gap: 6px; align-items: center; }
+  .field .swatch { width: 24px; height: 24px; border-radius: 5px; border: 1px solid var(--line-2); box-shadow: inset 0 0 0 1px #fff; }
+  .field.wired input, .field.wired select, .field.wired textarea { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent-ink); }
+  .field .from { grid-column: 2; display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .field .from .chip { max-width: 100%; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; background: var(--accent-soft); color: var(--accent-ink); border: 1px solid var(--accent-line); border-radius: 4px; padding: 1px 6px; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .chip.expr { background: #fdf4ff; color: #86198f; border-color: #e9d5ff; }
+  .chip.state { background: #ecfeff; color: #155e75; border-color: #a5f3fc; }
+  .chip.opt { background: #fefce8; color: #854d0e; border-color: #fde68a; }
+  .chip button { border: 0; background: transparent; padding: 0; color: inherit; opacity: .6; }
+  .chip button:hover { opacity: 1; background: transparent; }
+  .states table { width: 100%; border: 0; }
+  .states td, .states th { padding: 3px 2px; border: 0; }
+  .states input, .states select { padding: 3px 6px; }
+
+  /* ---- Workflow ---- */
+  #workflow { grid-template-columns: 280px 1fr; }
+  .events .row { padding: 7px 8px; flex-direction: column; align-items: flex-start; gap: 1px; white-space: normal; }
+  .events .row small { color: var(--muted); font-size: 11px; }
+  .events .row[aria-selected=true] small { color: var(--accent-ink); opacity: .75; }
+  #steps { overflow: auto; padding: 24px 28px; }
+  .wf { max-width: 860px; }
+  .event-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 12px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .event-card .ic { width: 32px; height: 32px; border-radius: 8px; background: #fff7ed; color: #c2410c; display: grid; place-items: center; }
+  .event-card h2 { margin: 0; font-size: 15px; font-weight: 600; }
+  .event-card small { color: var(--muted); display: block; }
+  .chain { display: flex; flex-direction: column; gap: 0; }
+  .chain .link { width: 2px; height: 14px; background: var(--line-2); margin-left: 27px; }
+  .step { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 10px 14px 10px 12px; display: grid; grid-template-columns: 30px 1fr auto; gap: 4px 10px; align-items: start; box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .step:hover { border-color: var(--line-2); }
+  .step .num { width: 30px; height: 30px; border-radius: 8px; background: var(--accent-soft); color: var(--accent-ink); display: grid; place-items: center; font-weight: 600; font-size: 12px; }
+  .step.cond .num { background: #fdf4ff; color: #86198f; }
+  .step h3 { margin: 0; font-size: 13px; font-weight: 600; display: flex; gap: 8px; align-items: baseline; }
+  .step h3 span { color: var(--muted); font-weight: 400; font-size: 12px; }
+  .step .lines { grid-column: 2; color: var(--ink-2); font-size: 12px; display: flex; flex-wrap: wrap; gap: 4px 10px; }
+  .step .lines code { background: var(--panel-2); padding: 0 4px; border-radius: 3px; }
+  .step .acts { display: flex; gap: 4px; }
+  .step .settings { grid-column: 1 / -1; border-top: 1px solid var(--line); margin-top: 6px; padding-top: 4px; }
+  .branches { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 0 0 0 0; }
+  .branch { border: 1px dashed var(--line-2); border-radius: var(--r-lg); padding: 10px; background: rgba(255,255,255,.5); }
+  .branch h4 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; display: flex; align-items: center; gap: 6px; }
+  .branch.yes h4 { color: var(--branch-yes); } .branch.no h4 { color: var(--branch-no); }
+  .branch h4::before { content: ''; width: 8px; height: 8px; border-radius: 4px; background: currentColor; }
+  .addrow { display: flex; gap: 8px; margin-top: 10px; }
+  .cond-line { grid-column: 2; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); }
+
+  /* ---- popovers (the action picker, the source picker, the composer) ---- */
+  .menu { position: fixed; background: var(--panel); border: 1px solid var(--line-2); border-radius: var(--r-lg); box-shadow: var(--shadow); padding: 6px; z-index: 50; min-width: 300px; max-width: 420px; max-height: min(64vh, 560px); overflow: auto; }
+  .menu .search { padding: 2px 2px 6px; position: sticky; top: 0; background: var(--panel); }
+  .menu .search svg { left: 10px; top: 9px; }
+  .menu .h { padding: 8px 8px 4px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+  .menu .item { padding: 6px 8px; border-radius: var(--r); cursor: default; display: flex; align-items: center; gap: 8px; }
+  .menu .item svg.i { color: var(--muted); }
+  .menu .item:hover, .menu .item[aria-selected=true] { background: var(--accent-soft); color: var(--accent-ink); }
+  .menu .item:hover svg.i, .menu .item[aria-selected=true] svg.i { color: var(--accent-ink); }
+  .menu .item small { color: var(--muted); margin-left: auto; font-size: 11px; white-space: nowrap; }
+  .menu .item:hover small { color: var(--accent-ink); opacity: .7; }
+  .composer { width: 560px; max-width: 92vw; padding: 0; }
+  .composer .bar { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  .composer .bar strong { font-weight: 600; }
+  .composer .bar .seg { margin-left: auto; display: inline-flex; border: 1px solid var(--line-2); border-radius: var(--r); overflow: hidden; }
+  .composer .bar .seg button { border: 0; border-radius: 0; padding: 3px 9px; color: var(--muted); font-size: 12px; }
+  .composer .bar .seg button[aria-pressed=true] { background: var(--accent-soft); color: var(--accent-ink); }
+  .composer .body { padding: 12px; }
+  .composer .chips { min-height: 44px; border: 1px solid var(--line-2); border-radius: var(--r); padding: 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-family: var(--mono); font-size: 12px; }
+  .composer .chips .lit { color: var(--ink-2); }
+  .composer .chips .op { color: #9333ea; font-weight: 500; }
+  .composer .mixed { min-height: 60px; border: 1px solid var(--line-2); border-radius: var(--r); padding: 8px; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; white-space: pre-wrap; outline: none; }
+  .composer .mixed:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+  .composer .mixed .chip { font-family: Inter, sans-serif; vertical-align: baseline; user-select: all; }
+  .composer textarea { min-height: 72px; }
+  .composer .tools { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .composer .tools button { padding: 3px 8px; font-size: 12px; }
+  .composer .foot { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid var(--line); align-items: center; }
+  .composer .foot .note { color: var(--muted); font-size: 12px; flex: 1; }
+  .composer .foot .note.bad { color: var(--danger); }
+
+  /* ---- Data ---- */
+  #data { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+  .subtabs { display: flex; gap: 2px; padding: 8px 20px 0; background: var(--panel); border-bottom: 1px solid var(--line); }
+  .subtabs button { border: 0; background: transparent; border-radius: 0; padding: 8px 10px; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .subtabs button:hover { color: var(--ink); background: transparent; }
+  .subtabs button[aria-selected=true] { color: var(--accent-ink); border-bottom-color: var(--accent); font-weight: 500; }
+  .split { display: grid; grid-template-columns: 260px 1fr; min-height: 0; height: 100%; }
+  .split[hidden] { display: none; }
+  #datamain, #optmain { overflow: auto; padding: 20px 24px; }
+  #datamain h2, #optmain h2, #stylemain h2 { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
+  table { border-collapse: separate; border-spacing: 0; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); width: 100%; max-width: 1100px; overflow: hidden; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  tr:last-child td { border-bottom: 0; }
+  th { background: var(--panel-2); font-weight: 600; font-size: 12px; color: var(--ink-2); }
+  td input, td select { padding: 3px 6px; }
+  td.cell { cursor: text; max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  td.cell:hover { background: var(--panel-2); }
+  .bar { display: flex; gap: 8px; align-items: center; margin: 14px 0 8px; }
+  .bar .note { color: var(--muted); font-size: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 14px; max-width: 1100px; }
+  .card h4 { margin: 0 0 8px; font-size: 13px; }
+
+  /* ---- Styles ---- */
+  #styles { grid-template-columns: 280px 1fr 330px; }
+  #stylemain { overflow: auto; padding: 24px 28px; }
+  .swatch-stage { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r-lg); min-height: 220px; display: grid; place-items: center; padding: 30px; margin-bottom: 14px; background-image: radial-gradient(var(--line-2) .6px, transparent .6px); background-size: 16px 16px; }
+  .swatch-stage .sample { min-width: 160px; }
+  .styles .row { padding-left: 20px; }
+  .styles .grp { padding: 10px 8px 4px; font-weight: 600; color: var(--ink); }
+  #toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%) translateY(8px); background: #14181f; color: #fff; padding: 9px 14px; border-radius: 8px; font-size: 12.5px; opacity: 0; transition: opacity .18s, transform .18s; pointer-events: none; z-index: 100; max-width: 70vw; box-shadow: var(--shadow); }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-design" viewBox="0 0 24 24"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></symbol>
+  <symbol id="i-workflow" viewBox="0 0 24 24"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><path d="M9 6h6M18 9v6M6 9v9h9"/></symbol>
+  <symbol id="i-data" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+  <symbol id="i-styles" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.9 0 1.7-.7 1.7-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.7 1.7-1.7H16c3.3 0 6-2.7 6-6 0-4.7-4.5-8.4-10-8.4z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></symbol>
+  <symbol id="i-group" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></symbol>
+  <symbol id="i-text" viewBox="0 0 24 24"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></symbol>
+  <symbol id="i-button" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="3"/><path d="M8 12h8"/></symbol>
+  <symbol id="i-input" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10v4"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12l3 3 5-6"/></symbol>
+  <symbol id="i-dropdown" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M15 11l2 2 2-2"/></symbol>
+  <symbol id="i-icon" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18.5 21 12 17l-6.5 4 2-7.5L2 9h7z"/></symbol>
+  <symbol id="i-columns" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18"/></symbol>
+  <symbol id="i-component" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5 9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
+  <symbol id="i-page" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></symbol>
+  <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 1l4 4-4 4"/><path d="M3 11V9a4 4 0 014-4h14"/><path d="M7 23l-4-4 4-4"/><path d="M21 13v2a4 4 0 01-4 4H3"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+  <symbol id="i-branch" viewBox="0 0 24 24"><circle cx="6" cy="4" r="2"/><circle cx="6" cy="20" r="2"/><circle cx="18" cy="9" r="2"/><path d="M6 6v12"/><path d="M18 11a6 6 0 01-6 6h-2"/></symbol>
+  <symbol id="i-fx" viewBox="0 0 24 24"><path d="M4 18c3 0 3-12 6-12 2 0 1 4 4 4"/><path d="M14 10l6 8M20 10l-6 8"/></symbol>
+  <symbol id="i-state" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 9h10M7 13h6"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-15-6.7L3 13"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007.5.5l3-3a5 5 0 00-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 00-7.5-.5l-3 3a5 5 0 007 7l1.7-1.7"/></symbol>
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></symbol>
+  <symbol id="i-nav" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></symbol>
+  <symbol id="i-code" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></symbol>
+</svg>
+
+<div id="shell">
+  <nav id="rail" role="tablist" aria-label="Tabs">
+    <div class="logo">b</div>
+    <button role="tab" data-tab="design" aria-selected="true" title="Design"><svg class="i"><use href="#i-design"/></svg><span class="tip">Design</span></button>
+    <button role="tab" data-tab="workflow" title="Workflow"><svg class="i"><use href="#i-workflow"/></svg><span class="tip">Workflow</span></button>
+    <button role="tab" data-tab="data" title="Data"><svg class="i"><use href="#i-data"/></svg><span class="tip">Data</span></button>
+    <button role="tab" data-tab="styles" title="Styles"><svg class="i"><use href="#i-styles"/></svg><span class="tip">Styles</span></button>
+    <div class="grow"></div>
+    <button id="undo" title="Undo (⌘Z)"><svg class="i"><use href="#i-undo"/></svg><span class="tip">Undo <kbd>⌘Z</kbd></span></button>
+  </nav>
+  <header>
+    <div class="crumb"><span id="projname">…</span><span class="sep">/</span><label id="pagepick-l"><select id="pagepick" title="Page"></select></label></div>
+    <div class="seg" id="widthseg" title="Preview width">
+      <button data-w="100%" aria-pressed="true">Fill</button><button data-w="1280">1280</button><button data-w="1024">1024</button><button data-w="768">768</button><button data-w="390">Phone</button>
+    </div>
+    <label class="toggle" id="previewmode-l"><input type="checkbox" id="previewmode"><i></i>Use the app</label>
+    <div class="spacer"></div>
+    <div class="status" id="status">starting…</div>
+  </header>
+
+  <main>
+    <section class="tab" id="design">
+      <aside>
+        <div class="search"><svg class="i"><use href="#i-search"/></svg><input type="text" id="treesearch" placeholder="Search elements"></div>
+        <h3 class="sec">Elements on this page</h3>
+        <div class="tree list" id="tree"></div>
+        <h3 class="sec">Visual elements</h3>
+        <div class="palette" id="palette"></div>
+        <h3 class="sec">Reusable components</h3>
+        <div class="palette" id="components"></div>
+      </aside>
+      <div id="stage"><div id="problems" hidden></div><div id="appwrap"><div id="app"></div><div id="overlay"></div></div></div>
+      <aside class="right" id="right"><div class="empty">Click an element in the page to see its properties.</div></aside>
+    </section>
+
+    <section class="tab" id="workflow" hidden>
+      <aside>
+        <h3 class="sec">Workflows on this page <button class="tiny primary" id="newevent"><svg class="i"><use href="#i-plus"/></svg>New</button></h3>
+        <div class="events list" id="events"></div>
+      </aside>
+      <div id="steps"><div class="empty">Pick a workflow on the left.</div></div>
+    </section>
+
+    <section class="tab" id="data" hidden>
+      <div class="subtabs" role="tablist">
+        <button role="tab" data-sub="types" aria-selected="true">Data types</button>
+        <button role="tab" data-sub="options">Option sets</button>
+      </div>
+      <div class="split" id="data-types">
+        <aside>
+          <h3 class="sec">Data types <button class="tiny primary" id="newtype"><svg class="i"><use href="#i-plus"/></svg>New</button></h3>
+          <div class="types list" id="types"></div>
+        </aside>
+        <div id="datamain"><div class="empty">Pick a data type.</div></div>
+      </div>
+      <div class="split" id="data-options" hidden>
+        <aside>
+          <h3 class="sec">Option sets <button class="tiny primary" id="newoptset"><svg class="i"><use href="#i-plus"/></svg>New</button></h3>
+          <div class="types list" id="optsets"></div>
+        </aside>
+        <div id="optmain"><div class="empty">Pick an option set, or make one. An option set is a fixed list the app loads with the page.</div></div>
+      </div>
+    </section>
+
+    <section class="tab" id="styles" hidden>
+      <aside>
+        <h3 class="sec">Styles <button class="tiny primary" id="newstyle"><svg class="i"><use href="#i-plus"/></svg>New</button></h3>
+        <div class="styles list" id="stylelist"></div>
+      </aside>
+      <div id="stylemain"><div class="empty">Pick a style. A style is a set of properties every element of one type can wear; here it is a variant in nodegx.styles.json.</div></div>
+      <aside class="right" id="styleprops"><div class="empty">The style's properties appear here.</div></aside>
+    </section>
+  </main>
+</div>
+<div id="toast"></div>
+
+<script src="/preview.js"></script>
+<script type="module">
+import { hasSpec, specs, drawnPorts, portProjectFromStore, portContextFor, expressionPorts } from './specs.js';
+
+const $ = (id) => document.getElementById(id);
+const h = (tag, attrs = {}, ...kids) => {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (k === 'html') el.innerHTML = v;
+    else if (v !== undefined && v !== null && v !== false) el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const kid of kids.flat()) if (kid !== null && kid !== undefined && kid !== false) el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  return el;
+};
+const icon = (name, cls = 'i') => { const s = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); s.setAttribute('class', cls); const u = document.createElementNS('http://www.w3.org/2000/svg', 'use'); u.setAttribute('href', '#i-' + name); s.append(u); return s; };
+let toastTimer;
+const toast = (msg) => { $('toast').textContent = msg; $('toast').classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('show'), 3400); };
+const status = (msg, kind = '') => { $('status').textContent = msg; $('status').className = 'status ' + kind; $('status').title = msg; };
+const uuid = () => crypto.randomUUID();
+const slug = (s) => String(s).replace(/[^A-Za-z0-9]+/g, ' ').trim().split(' ').map((w, i) => (i ? w[0].toUpperCase() + w.slice(1) : w[0].toLowerCase() + w.slice(1))).join('') || 'value';
+
+/* ================= the project: files in memory, the kit's store over them, saved by serve.mjs ================= */
+const opened = await (await fetch('/api/project')).json();
+$('projname').textContent = opened.name;
+document.title = `${opened.name} — Open Bubble`;
+let files = NodegxPreview.memoryFiles(opened.files);
+let store = new NodegxPreview.V2ProjectStore(files);
+let persisted = { ...opened.files };
+const undoStack = [];
+
+async function persist() {
+  const now = files.entries();
+  const changed = {};
+  for (const [p, t] of Object.entries(now)) if (persisted[p] !== t) changed[p] = t;
+  const removed = Object.keys(persisted).filter((p) => !(p in now));
+  if (!Object.keys(changed).length && !removed.length) return;
+  const r = await fetch('/api/save', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ files: changed, removed }) });
+  const j = await r.json();
+  if (!r.ok) { toast(`Not saved: ${j.error}`); return; }
+  persisted = { ...now };
+  lastSaved = new Date().toLocaleTimeString();
+  if (!rebuilding) status(`Saved · app on screen`);
+}
+let lastSaved = '';
+const snapshot = () => { undoStack.push(files.entries()); if (undoStack.length > 60) undoStack.shift(); };
+async function undo() {
+  const snap = undoStack.pop();
+  if (!snap) return toast('Nothing to undo');
+  files = NodegxPreview.memoryFiles(snap);
+  store = new NodegxPreview.V2ProjectStore(files);
+  await persist();
+  readGraph();
+  rebuild();
+  renderAll();
+}
+$('undo').onclick = undo;
+
+/* ================= the eight edits, with the reference's semantics (editor-suite/edits.ts), plus two fields ================= */
+function applyEdit(filesIn, edit) {
+  const out = JSON.parse(JSON.stringify(filesIn));
+  const nodes = out.nodes.nodes;
+  const byId = new Map(nodes.map((n) => [n.id, n]));
+  const must = (id, what) => { const n = byId.get(id); if (!n) throw new Error(`${what}: node "${id}" does not exist.`); return n; };
+  const attach = (child, parentId, index) => {
+    const parent = must(parentId, 'attach');
+    if (!parent.children) parent.children = [];
+    if (!parent.children.includes(child.id)) {
+      const at = index !== undefined ? Math.max(0, Math.min(index, parent.children.length)) : parent.children.length;
+      parent.children.splice(at, 0, child.id);
+    }
+    child.parent = parentId;
+  };
+  switch (edit.edit) {
+    case 'add_node': {
+      const id = edit.id ?? uuid();
+      if (byId.has(id)) throw new Error(`add_node: "${id}" exists`);
+      const node = { id, type: edit.type };
+      if (edit.label !== undefined) node.label = edit.label;
+      if (edit.x !== undefined) node.x = edit.x;
+      if (edit.y !== undefined) node.y = edit.y;
+      if (edit.parameters) node.parameters = { ...edit.parameters };
+      if (edit.metadata) node.metadata = { ...edit.metadata };
+      if (edit.parent !== undefined) attach(node, edit.parent, edit.index);
+      nodes.push(node);
+      return { files: out, id };
+    }
+    case 'remove_node': {
+      must(edit.id, 'remove_node');
+      const doomed = new Set([edit.id]);
+      let grew = true;
+      while (grew) { grew = false; for (const n of nodes) if (n.parent !== undefined && doomed.has(n.parent) && !doomed.has(n.id)) { doomed.add(n.id); grew = true; } }
+      out.nodes.nodes = nodes.filter((n) => !doomed.has(n.id));
+      for (const n of out.nodes.nodes) if (n.children) { n.children = n.children.filter((c) => !doomed.has(c)); if (!n.children.length) delete n.children; }
+      out.connections.connections = out.connections.connections.filter((c) => !doomed.has(c.fromId) && !doomed.has(c.toId));
+      if (out.nodes.visualRoots) { out.nodes.visualRoots = out.nodes.visualRoots.filter((id) => !doomed.has(id)); if (!out.nodes.visualRoots.length) delete out.nodes.visualRoots; }
+      return { files: out };
+    }
+    case 'connect': {
+      const c = { fromId: edit.from.node, fromProperty: edit.from.port, toId: edit.to.node, toProperty: edit.to.port };
+      must(c.fromId, 'connect'); must(c.toId, 'connect');
+      if (out.connections.connections.some((x) => sameWire(x, c))) throw new Error('connect: that wire exists');
+      out.connections.connections.push(c);
+      return { files: out };
+    }
+    case 'disconnect': {
+      const c = { fromId: edit.from.node, fromProperty: edit.from.port, toId: edit.to.node, toProperty: edit.to.port };
+      out.connections.connections = out.connections.connections.filter((x) => !sameWire(x, c));
+      return { files: out };
+    }
+    case 'set_parameter': {
+      const node = must(edit.id, 'set_parameter');
+      if (edit.value === undefined) { if (node.parameters) delete node.parameters[edit.name]; }
+      else node.parameters = { ...(node.parameters ?? {}), [edit.name]: edit.value };
+      return { files: out };
+    }
+    case 'move': { const node = must(edit.id, 'move'); node.x = edit.x; node.y = edit.y; return { files: out }; }
+    case 'rename': { const node = must(edit.id, 'rename'); node.label = edit.label; return { files: out }; }
+    case 'add_child': {
+      const node = must(edit.id, 'add_child'); must(edit.parent, 'add_child');
+      if (edit.parent === edit.id) throw new Error('add_child: own parent');
+      for (let cur = byId.get(edit.parent); cur; cur = cur.parent !== undefined ? byId.get(cur.parent) : undefined) if (cur.id === edit.id) throw new Error('add_child: inside own subtree');
+      if (node.parent !== undefined) { const old = byId.get(node.parent); if (old?.children) { old.children = old.children.filter((c) => c !== node.id); if (!old.children.length) delete old.children; } }
+      attach(node, edit.parent, edit.index);
+      return { files: out };
+    }
+    // two fields of the node record the eight do not touch: the variant it wears, and what the editor remembers about it
+    case 'set_variant': { const node = must(edit.id, 'set_variant'); if (edit.variant) node.variant = edit.variant; else delete node.variant; return { files: out }; }
+    case 'set_metadata': { const node = must(edit.id, 'set_metadata'); node.metadata = { ...(node.metadata ?? {}), ...edit.metadata }; for (const k of Object.keys(edit.metadata)) if (edit.metadata[k] === undefined) delete node.metadata[k]; if (!Object.keys(node.metadata).length) delete node.metadata; return { files: out }; }
+  }
+  throw new Error('unknown edit');
+}
+const sameWire = (a, b) => a.fromId === b.fromId && a.fromProperty === b.fromProperty && a.toId === b.toId && a.toProperty === b.toProperty;
+
+/** One gesture = one write: every edit applied to the component's files, then written once with ifRevision. */
+function edits(componentKey, list, { rebuildApp = true, redraw } = {}) {
+  snapshot();
+  const c = store.readComponent(componentKey);
+  let cur = c.files, ids = [];
+  for (const e of list) { const r = applyEdit(cur, e); cur = r.files; if (r.id) ids.push(r.id); }
+  try { store.writeComponent(componentKey, cur, { ifRevision: c.revision }); }
+  catch (err) { undoStack.pop(); toast(err.message); throw err; }
+  persist();
+  if (componentKey === pageKey) readGraph();
+  if (rebuildApp) rebuild();
+  // an edit that changes which fields or steps exist redraws the panel; typing into a field does not (it would lose the caret)
+  const structural = redraw ?? list.some((e) => !['set_parameter', 'rename', 'move'].includes(e.edit) || (e.edit === 'set_parameter' && e.name === 'collectionName'));
+  if (structural) setTimeout(() => { if (tab === 'workflow') renderWorkflow(); else if (tab === 'design') { renderTree(); renderProps(); } }, 0);
+  return ids;
+}
+/** A brand-new component (an option set): three files and a registry entry through the store. */
+function createComponent(key, type, nodes, connections, metadata) {
+  snapshot();
+  const name = key.split('/').pop();
+  const filesOut = {
+    component: { $schema: 'https://opennoodl.dev/schemas/component-v2.json', id: uuid(), name, path: '/' + key, type, created: new Date().toISOString(), modified: new Date().toISOString(), modifiedBy: 'open-bubble', ...(metadata ? { metadata } : {}) },
+    nodes: { $schema: 'https://opennoodl.dev/schemas/nodes-v2.json', nodes },
+    connections: { $schema: 'https://opennoodl.dev/schemas/connections-v2.json', connections }
+  };
+  try { store.writeComponent(key, filesOut, { expectNew: true }); }
+  catch (err) { undoStack.pop(); toast(err.message); throw err; }
+  persist(); rebuild();
+}
+/** The project file and the styles file are plain JSON here (the serializer is not in the bundle); the official editor reads either unchanged. */
+function writeJsonFile(path, value) { snapshot(); files.write(path, JSON.stringify(value, null, 2)); persist(); rebuild(); }
+
+/* ================= the real app ================= */
+const preview = await NodegxPreview.mountPreview($('app'), { runtimeBase: '/runtime/' });
+window.__ob = { preview, get store() { return store; }, get files() { return files; } };
+let lib, libIndex = new Map();
+let lastShow = null;
+let rebuildTimer;
+let rebuilding = false;
+function rebuild(delay = 120) {
+  clearTimeout(rebuildTimer);
+  rebuildTimer = setTimeout(async () => {
+    rebuilding = true;
+    status('Rebuilding the app…', 'busy');
+    const s = await preview.update(files.entries());
+    lastShow = s; window.__ob.shows = (window.__ob.shows || 0) + 1;
+    rebuilding = false;
+    showProblems(s);
+    if (s.status === 'ok') {
+      lib = preview.nodeLibrary; libIndex = new Map((lib?.nodetypes || []).map((t) => [t.name, t]));
+      status(`App on screen · ${Math.round(s.exportMs)} ms export, ${Math.round(s.frameMs)} ms draw${s.warnings?.length ? ` · ${s.warnings.length} warning(s)` : ''}${lastSaved ? ` · saved ${lastSaved}` : ''}`);
+      await showPage(pageKey);
+      hookFrame();
+      mapElements();
+      draw();
+    } else {
+      const first = s.report?.diagnostics?.find((d) => d.severity === 'error');
+      status(`The app is not shown: ${first ? first.message.slice(0, 160) : s.message || s.status}`, 'bad');
+    }
+  }, delay);
+}
+
+/** Why the app is not on screen, as Bubble's issue checker lists it: every error with its component and node, and a fix where the editor can make one. */
+function showProblems(s) {
+  const box = $('problems');
+  if (!s || s.status === 'ok') { box.hidden = true; box.innerHTML = ''; return; }
+  const errors = (s.report?.diagnostics || []).filter((d) => d.severity === 'error');
+  box.hidden = false; box.innerHTML = '';
+  box.append(h('h4', {}, errors.length ? `The app is not shown: ${errors.length} problem(s) in the project files` : `The app is not shown: ${s.message || s.status}`));
+  const ul = h('ul', {});
+  for (const d of errors) {
+    const li = h('li', {}, d.message.split('. ')[0] + '.', h('small', {}, [d.component, d.nodeLabel || d.nodeId].filter(Boolean).join(' · ')));
+    const hit = d.component && store.resolve(d.component);
+    if (d.code === 'malformed-node' && hit && d.nodeId) li.append(' ', h('button', { class: 'tiny', onclick: () => { edits(hit.key, [{ edit: 'remove_node', component: hit.key, id: d.nodeId }]); toast(`Removed the broken node from ${hit.key}`); } }, 'Delete that node'));
+    ul.append(li);
+  }
+  if (errors.length) box.append(ul);
+}
+
+/* ================= the graph of the current page, read from the files ================= */
+const registry = () => store.readRegistry().components;
+const pageKeys = () => Object.keys(registry()).filter((k) => registry()[k].type === 'page');
+function startPageKey() {
+  for (const k of Object.keys(registry())) {
+    try { const r = store.readComponent(k).files.nodes.nodes.find((n) => n.type === 'Router'); const s = r?.parameters?.pages?.startPage; if (s) { const key = s.replace(/^\//, ''); if (registry()[key]) return key; } } catch { /* skip */ }
+  }
+  return undefined;
+}
+let pageKey = startPageKey() ?? pageKeys()[0] ?? Object.keys(registry())[0];
+function pageShownByApp() {
+  const w = preview.frame?.contentWindow; if (!w) return undefined;
+  const loc = w.location.hash ? w.location.hash.replace(/^#\/?/, '') : w.location.pathname.replace(/^\/runtime\/?/, '').replace(/^\//, '');
+  const path = loc.split('?')[0].replace(/\/$/, '');
+  for (const k of pageKeys()) {
+    try { const p = store.readComponent(k).files.nodes.nodes.find((n) => n.type === 'Page'); if ((p?.parameters?.urlPath ?? '').replace(/^\//, '') === path) return k; } catch { /* skip */ }
+  }
+  return undefined;
+}
+function followApp() {
+  const shown = pageShownByApp();
+  if (shown && shown !== pageKey) {
+    const asked = pageKey; pageKey = shown; sel = null; readGraph(); renderPagePick();
+    toast(`The app's own logic went from ${asked.replace(/^Pages\//, '')} to ${shown.replace(/^Pages\//, '')} (a redirect wired on that page), so that is the page shown.`);
+  }
+}
+let nodes = [], conns = [], byId = {}, visualIds = [], depthOf = {}, legacyName = '';
+function readGraph() {
+  const stored = store.readComponent(pageKey);
+  const comp = stored.files;
+  legacyName = stored.legacyName;
+  try { portProject = portProjectFromStore(store); } catch (e) { console.warn('port context:', e.message); portProject = null; }
+  nodes = comp.nodes.nodes; conns = comp.connections.connections;
+  byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+  visualIds = []; depthOf = {};
+  const walk = (id, d) => { if (!byId[id] || id in depthOf) return; depthOf[id] = d; visualIds.push(id); for (const c of byId[id].children || []) walk(c, d + 1); };
+  const roots = comp.nodes.visualRoots?.length ? comp.nodes.visualRoots : nodes.filter((n) => n.parent === undefined && (n.children || isVisualType(n.type))).map((n) => n.id);
+  for (const r of roots) walk(r, 0);
+}
+const typeDef = (type) => libIndex.get(type);
+const typeName = (type) => typeDef(type)?.displayNodeName || typeDef(type)?.displayName || (type.startsWith('/') ? type.split('/').pop() : type);
+const labelOf = (id) => byId[id]?.label || typeName(byId[id]?.type ?? '?');
+const isVisualType = (type) => type.startsWith('/') ? registry()[type.slice(1)]?.type !== 'logic' : (typeDef(type)?.category === 'Visual' || ['Group', 'Text', 'Page', 'For Each', 'Component Children'].includes(type) || type.startsWith('net.noodl.controls.') || type.startsWith('net.noodl.visual.'));
+const holdsChildren = (type) => { const t = typeDef(type); return !!(t?.allowChildren || t?.allowChildrenWithCategory) || (type.startsWith('/') && isVisualType(type)); };
+const libPorts = (type) => { const t = typeDef(type); return t ? [...(t.ports || []), ...(t.dynamicports || []).flatMap((d) => d.ports || [])] : []; };
+const tname = (t) => (typeof t === 'object' && t !== null ? t.name : t) ?? '*';
+/** The custom states of the page: Variable nodes that remember which element they hang on. */
+const statesOf = (elementId) => nodes.filter((n) => n.metadata?.customState && (elementId === undefined || n.metadata.customState.of === elementId));
+const stateName = (n) => n.metadata.customState.name;
+/** The expressions the composer made: Expression nodes that remember the field they feed. */
+const isComposed = (n) => n.type === 'Expression' && n.metadata?.composedFor;
+/** The option sets: logic components under `Option sets/`, one Static Data node each. */
+const optionSetKeys = () => Object.keys(registry()).filter((k) => k.startsWith('Option sets/'));
+function optionSet(key) {
+  try {
+    const c = store.readComponent(key).files;
+    const data = c.nodes.nodes.find((n) => n.type === 'Static Data');
+    let options = []; try { options = JSON.parse(data?.parameters?.json || '[]'); } catch { options = []; }
+    return { key, name: key.split('/').pop(), attributes: c.component.metadata?.optionSet?.attributes || [{ name: 'display', type: 'text' }], options, dataId: data?.id, files: c };
+  } catch { return null; }
+}
+
+let portProject = null;
+const specPortsFor = (type, params, nodeId) => {
+  const spec = specs[type];
+  if (!spec) return null;
+  try {
+    const context = nodeId && portProject ? portContextFor(portProject, nodeId, {}, legacyName) : {};
+    const list = drawnPorts(spec, params, context).map((p) => ({
+      name: p.name, plug: p.plug, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal', default: p.default,
+      enums: p.enums ? [...p.enums] : undefined, labels: p.labels, group: p.group, description: p.description, editOnly: p.editOnly, connectionsOnly: p.connectionsOnly, codeEditor: p.codeEditor
+    }));
+    return { inputs: list.filter((p) => p.plug === 'input'), outputs: list.filter((p) => p.plug === 'output') };
+  } catch (e) { console.warn(`spec ${type}:`, e.message); return null; }
+};
+/** Every port the node could have (static, dynamic and spec), by plug. */
+function portsOf(node, plug) {
+  const seen = new Map();
+  if (node.type.startsWith('/')) {
+    const key = node.type.slice(1);
+    try {
+      const comp = store.readComponent(key).files;
+      const ioType = plug === 'input' ? 'Component Inputs' : 'Component Outputs';
+      for (const n of comp.nodes.nodes) if (n.type === ioType) for (const p of n.ports || []) if (!seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal', group: 'Component' });
+    } catch { /* unknown component */ }
+  }
+  for (const p of libPorts(node.type)) if (p.plug === plug || p.plug === 'input/output') if (!seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal', raw: p });
+  const spec = specPortsFor(node.type, node.parameters || {}, node.id);
+  if (spec) for (const p of spec[plug === 'input' ? 'inputs' : 'outputs']) if (!seen.has(p.name)) seen.set(p.name, p);
+  for (const p of node.ports || []) if ((p.plug === plug || p.plug === 'input/output') && !seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal' });
+  for (const p of node.dynamicports || []) if ((p.plug === plug || p.plug === 'input/output') && !seen.has(p.name)) seen.set(p.name, { name: p.name, label: p.displayName || p.name, type: tname(p.type), signal: tname(p.type) === 'signal' });
+  // an Expression's inputs are the free names of its text (the spec's own lexer)
+  if (node.type === 'Expression' && plug === 'input') for (const name of exprNames(node.parameters?.expression)) if (!seen.has(name)) seen.set(name, { name, label: name, type: '*', signal: false, group: 'Inputs' });
+  return [...seen.values()];
+}
+const exprNames = (text) => { try { return text ? expressionPorts(String(text)) : []; } catch { return []; } };
+const portLabel = (node, plug, name) => portsOf(node, plug).find((p) => p.name === name)?.label || name;
+const isSignalPort = (node, plug, name) => { const p = portsOf(node, plug).find((p) => p.name === name); return p ? p.signal : /^(on[A-Z]|did|do$|navigate$|store$|fetch$|login$|logout$|send$|eval$)/.test(name) && !/changed$/i.test(name); };
+
+/* ================= pages ================= */
+function renderPagePick() {
+  const sel = $('pagepick'); sel.innerHTML = '';
+  for (const k of pageKeys()) sel.append(h('option', { value: k, selected: k === pageKey }, k.replace(/^Pages\//, '')));
+}
+async function showPage(key) {
+  const w = preview.frame?.contentWindow;
+  const page = (() => { try { return store.readComponent(key).files.nodes.nodes.find((n) => n.type === 'Page'); } catch { return undefined; } })();
+  const path = page?.parameters?.urlPath;
+  if (!w?.Noodl?.Navigation || path === undefined) return;
+  try { w.Noodl.Navigation.navigateToPath('/' + path.replace(/^\//, '')); } catch (e) { console.warn('navigate', e); }
+  await new Promise((r) => setTimeout(r, 350));
+  followApp();
+}
+$('pagepick').onchange = async () => { pageKey = $('pagepick').value; sel = null; selEvent = null; readGraph(); await showPage(pageKey); mapElements(); renderAll(); };
+for (const b of $('widthseg').querySelectorAll('button')) b.onclick = () => { for (const x of $('widthseg').querySelectorAll('button')) x.setAttribute('aria-pressed', x === b); const v = b.dataset.w; $('appwrap').style.width = v.endsWith('%') ? v : v + 'px'; setTimeout(draw, 300); };
+$('appwrap').style.width = '100%';
+$('previewmode').onchange = () => { $('overlay').classList.toggle('preview', $('previewmode').checked); draw(); };
+
+/* ================= the elements the app draws, by node ================= */
+let elMap = new Map();
+function mapElements() {
+  elMap = new Map();
+  for (const id of visualIds) for (const el of preview.elementsOf(id)) elMap.set(el, id);
+}
+function hitAt(x, y) {
+  const doc = preview.frame?.contentDocument; if (!doc) return null;
+  let el = doc.elementFromPoint(x, y);
+  while (el && !elMap.has(el)) el = el.parentElement;
+  return el ? { id: elMap.get(el), el } : null;
+}
+const elOf = (id) => preview.elementsOf(id)[0];
+const rectOf = (id) => elOf(id)?.getBoundingClientRect();
+let frameHooked = null;
+function hookFrame() {
+  const w = preview.frame?.contentWindow;
+  if (!w || frameHooked === w) return;
+  frameHooked = w;
+  w.addEventListener('scroll', () => draw(), true);
+  w.addEventListener('resize', () => draw());
+}
+preview.onTrace(({ dictionary }) => { if (dictionary) { mapElements(); draw(); } });
+
+/* ================= selection, hover, the overlay: boxes, the spacing guide, the handles ================= */
+let sel = null, hover = null, pending = null;
+let gesture = null; // { kind: 'maybe-drag' | 'drag' | 'resize', ... }
+const overlay = $('overlay');
+// s4 (P123-S4-CANVASSCROLL): a wheel over the app while editing scrolls the app, as Bubble's canvas does. The overlay sits on the
+// frame and took the wheel, so in Design mode the page could not be scrolled at all; the browser chained the scroll to #stage
+// instead (Richard: "blank below the fold ... jumps the preview back to the top"). The frame's own scroll event redraws the boxes.
+overlay.addEventListener('wheel', (e) => { const w = preview.frame?.contentWindow; if (!w) return; e.preventDefault(); w.scrollBy(e.deltaX, e.deltaY); }, { passive: false });
+const px = (v) => Math.round(parseFloat(v) || 0);
+/** The element's padding and margin, and its rect against its parent's content box: what Bubble's red lines and the inspector's bands say. */
+function spacingOf(id) {
+  const el = elOf(id); const w = preview.frame?.contentWindow; if (!el || !w) return null;
+  const cs = w.getComputedStyle(el); const r = el.getBoundingClientRect();
+  const pad = { t: px(cs.paddingTop), r: px(cs.paddingRight), b: px(cs.paddingBottom), l: px(cs.paddingLeft) };
+  const mar = { t: px(cs.marginTop), r: px(cs.marginRight), b: px(cs.marginBottom), l: px(cs.marginLeft) };
+  let parent = null;
+  const pid = byId[id]?.parent;
+  const pel = pid !== undefined ? elOf(pid) : el.parentElement;
+  if (pel) {
+    const pcs = w.getComputedStyle(pel); const pr = pel.getBoundingClientRect();
+    parent = { left: pr.left + px(pcs.paddingLeft), top: pr.top + px(pcs.paddingTop), right: pr.right - px(pcs.paddingRight), bottom: pr.bottom - px(pcs.paddingBottom) };
+  }
+  return { r, pad, mar, parent };
+}
+function drawSpacing(id, withGuides) {
+  const s = spacingOf(id); if (!s) return;
+  const { r, pad, mar, parent } = s;
+  const band = (cls, l, t, w, hh) => { if (w > 0 && hh > 0) overlay.append(h('div', { class: `band ${cls}`, style: `left:${l}px;top:${t}px;width:${w}px;height:${hh}px` })); };
+  band('mar', r.left - mar.l, r.top - mar.t, r.width + mar.l + mar.r, mar.t); band('mar', r.left - mar.l, r.bottom, r.width + mar.l + mar.r, mar.b);
+  band('mar', r.left - mar.l, r.top, mar.l, r.height); band('mar', r.right, r.top, mar.r, r.height);
+  band('pad', r.left, r.top, r.width, pad.t); band('pad', r.left, r.bottom - pad.b, r.width, pad.b);
+  band('pad', r.left, r.top + pad.t, pad.l, r.height - pad.t - pad.b); band('pad', r.right - pad.r, r.top + pad.t, pad.r, r.height - pad.t - pad.b);
+  if (!withGuides || !parent) return;
+  const guide = (dir, l, t, len, n) => { if (len <= 0.5) return; overlay.append(h('div', { class: `guide ${dir}`, 'data-n': Math.round(n), style: dir === 'h' ? `left:${l}px;top:${t}px;width:${len}px` : `left:${l}px;top:${t}px;height:${len}px` }, h('span', { class: 'n' }, `${Math.round(n)}px`))); };
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  guide('v', cx, parent.top, r.top - parent.top, r.top - parent.top);
+  guide('v', cx, r.bottom, parent.bottom - r.bottom, parent.bottom - r.bottom);
+  guide('h', parent.left, cy, r.left - parent.left, r.left - parent.left);
+  guide('h', r.right, cy, parent.right - r.right, parent.right - r.right);
+}
+function draw() {
+  overlay.innerHTML = '';
+  if (rebuilding) return;
+  const editing = !$('previewmode').checked;
+  if (hover && hover !== sel && byId[hover]) { const r = rectOf(hover); if (r) { if (editing) drawSpacing(hover, false); overlay.append(box(r, 'hov', labelOf(hover))); } }
+  if (sel && byId[sel]) {
+    const r = rectOf(sel);
+    if (r) {
+      if (editing && !gesture) drawSpacing(sel, true);
+      const b = box(r, 'sel', `${labelOf(sel)}`, `${Math.round(r.width)} × ${Math.round(r.height)}`);
+      if (editing) for (const dir of ['e', 's', 'se']) b.append(h('div', { class: `handle ${dir}`, 'data-dir': dir, onmousedown: (e) => startResize(e, dir) }));
+      overlay.append(b);
+    }
+  }
+  if (gesture?.kind === 'drag' && gesture.drop) {
+    const d = gesture.drop;
+    if (d.line) overlay.append(h('div', { class: 'drop', style: `left:${d.line.x}px;top:${d.line.y}px;width:${d.line.w}px;height:${d.line.h}px` }));
+    else if (d.rect) overlay.append(h('div', { class: 'drop into', style: `left:${d.rect.left}px;top:${d.rect.top}px;width:${d.rect.width}px;height:${d.rect.height}px` }));
+  }
+}
+const box = (r, cls, tag, size) => h('div', { class: `box ${cls}`, style: `left:${r.left}px;top:${r.top}px;width:${r.width}px;height:${r.height}px` }, h('div', { class: 'tag' }, tag, size ? h('span', { style: 'opacity:.75;font-weight:400' }, size) : null));
+function select(id) { sel = id; hover = null; renderTree(); renderProps(); draw(); }
+
+overlay.addEventListener('mousemove', (e) => {
+  if (gesture) return onGestureMove(e);
+  const hit = hitAt(e.offsetX, e.offsetY);
+  const id = hit?.id ?? null;
+  if (id !== hover) { hover = id; draw(); }
+});
+overlay.addEventListener('mouseleave', () => { if (!gesture) { hover = null; draw(); } });
+overlay.addEventListener('mousedown', (e) => {
+  if (e.target.classList.contains('handle')) return;
+  const hit = hitAt(e.offsetX, e.offsetY);
+  if (pending) return placePending(hit);
+  if (!hit) { select(null); return; }
+  select(hit.id);
+  if (hit.id === pageRootId()) return;
+  gesture = { kind: 'maybe-drag', id: hit.id, x0: e.offsetX, y0: e.offsetY };
+});
+window.addEventListener('mouseup', (e) => { if (gesture) endGesture(e); });
+window.addEventListener('keydown', (e) => {
+  const inField = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName) || document.activeElement?.isContentEditable;
+  if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !inField) { e.preventDefault(); undo(); return; }
+  if (e.key === 'Escape') { closeMenu(); if (!inField) { pending = null; overlay.classList.remove('adding'); for (const b of $('palette').querySelectorAll('button')) b.setAttribute('aria-pressed', 'false'); select(null); } }
+  if (inField) return;
+  if ((e.key === 'Delete' || e.key === 'Backspace') && sel && sel !== pageRootId() && $('design').hidden === false) { e.preventDefault(); removeNode(sel); }
+});
+const pageRootId = () => visualIds[0];
+function removeNode(id) {
+  const label = labelOf(id);
+  const list = [{ edit: 'remove_node', component: pageKey, id }];
+  for (const s of statesOf(id)) list.push({ edit: 'remove_node', component: pageKey, id: s.id }); // its custom states go with it
+  edits(pageKey, list);
+  select(null);
+  toast(`Deleted ${label}`);
+}
+
+/* ---- a drag: reorder among siblings, move into another container, or (position: absolute) move by margins ---- */
+function onGestureMove(e) {
+  const g = gesture;
+  if (g.kind === 'maybe-drag') {
+    if (Math.hypot(e.offsetX - g.x0, e.offsetY - g.y0) < 5) return;
+    g.kind = 'drag';
+    g.absolute = byId[g.id]?.parameters?.position === 'absolute';
+    g.el = elOf(g.id);
+    overlay.style.cursor = 'grabbing';
+  }
+  if (g.kind === 'drag') {
+    if (g.absolute) {
+      if (g.el) g.el.style.transform = `translate(${e.offsetX - g.x0}px, ${e.offsetY - g.y0}px)`;
+      g.dx = e.offsetX - g.x0; g.dy = e.offsetY - g.y0;
+      draw(); return;
+    }
+    g.drop = dropTargetAt(e.offsetX, e.offsetY, g.id);
+    draw();
+  } else if (g.kind === 'resize') {
+    const w = Math.max(10, g.w0 + (g.dir !== 's' ? e.clientX - g.cx : 0));
+    const hgt = Math.max(10, g.h0 + (g.dir !== 'e' ? e.clientY - g.cy : 0));
+    if (g.dir !== 's') g.el.style.width = w + 'px';
+    if (g.dir !== 'e') g.el.style.height = hgt + 'px';
+    g.w = w; g.h = hgt;
+    draw();
+  }
+}
+function inside(id, ancestor) { for (let cur = byId[id]; cur; cur = cur.parent !== undefined ? byId[cur.parent] : undefined) if (cur.id === ancestor) return true; return false; }
+function dropTargetAt(x, y, dragged) {
+  let hit = hitAt(x, y);
+  let container = hit?.id ?? null;
+  while (container && (container === dragged || inside(container, dragged) || !holdsChildren(byId[container].type))) container = byId[container].parent ?? null;
+  if (!container) return null;
+  const node = byId[container];
+  const dir = node.parameters?.flexDirection ?? 'column';
+  const kids = (node.children || []).filter((c) => c !== dragged);
+  const crect = rectOf(container);
+  let index = kids.length, line = null;
+  const rects = kids.map((c) => rectOf(c));
+  for (let i = 0; i < kids.length; i++) {
+    const r = rects[i]; if (!r) continue;
+    const mid = dir === 'row' ? r.left + r.width / 2 : r.top + r.height / 2;
+    if ((dir === 'row' ? x : y) < mid) { index = i; break; }
+  }
+  if (crect) {
+    const at = index < kids.length ? rects[index] : null;
+    const last = rects[kids.length - 1];
+    if (dir === 'row') line = at ? { x: at.left - 2, y: at.top, w: 3, h: at.height } : (last ? { x: last.right - 1, y: last.top, w: 3, h: last.height } : null);
+    else line = at ? { x: at.left, y: at.top - 2, w: at.width, h: 3 } : (last ? { x: last.left, y: last.bottom - 1, w: last.width, h: 3 } : null);
+  }
+  return { container, index, line, rect: line ? null : crect };
+}
+function startResize(e, dir) {
+  e.stopPropagation(); e.preventDefault();
+  const el = elOf(sel); if (!el) return;
+  const r = el.getBoundingClientRect();
+  gesture = { kind: 'resize', id: sel, dir, el, cx: e.clientX, cy: e.clientY, w0: r.width, h0: r.height, w: r.width, h: r.height, parentW: el.parentElement?.getBoundingClientRect().width || r.width, parentH: el.parentElement?.getBoundingClientRect().height || r.height };
+}
+function endGesture() {
+  const g = gesture; gesture = null; overlay.style.cursor = '';
+  if (g.kind === 'drag') {
+    if (g.absolute) {
+      if (g.el) g.el.style.transform = '';
+      const node = byId[g.id]; const p = node.parameters || {};
+      const num = (v) => (typeof v === 'number' ? v : typeof v === 'object' && v ? Number(v.value) || 0 : parseFloat(v) || 0);
+      edits(pageKey, [
+        { edit: 'set_parameter', component: pageKey, id: g.id, name: 'marginLeft', value: { value: Math.round(num(p.marginLeft) + (g.dx || 0)), unit: 'px' } },
+        { edit: 'set_parameter', component: pageKey, id: g.id, name: 'marginTop', value: { value: Math.round(num(p.marginTop) + (g.dy || 0)), unit: 'px' } }
+      ]);
+      return;
+    }
+    if (g.drop) {
+      const { container, index } = g.drop;
+      const node = byId[g.id];
+      const same = node.parent === container && node.parent !== undefined;
+      const oldIndex = same ? (byId[container].children || []).indexOf(g.id) : -1;
+      if (same && (oldIndex === index)) { draw(); return; }
+      edits(pageKey, [{ edit: 'add_child', component: pageKey, id: g.id, parent: container, index }]);
+      toast(`Moved ${labelOf(g.id)} into ${labelOf(container)}`);
+    }
+    draw();
+  } else if (g.kind === 'resize') {
+    const node = byId[g.id]; const p = node.parameters || {};
+    const list = [];
+    const unitOf = (v, def) => (typeof v === 'object' && v?.unit) || (typeof v === 'string' && /%$/.test(v) ? '%' : def);
+    const changedW = g.dir !== 's' && Math.round(g.w) !== Math.round(g.w0);
+    const changedH = g.dir !== 'e' && Math.round(g.h) !== Math.round(g.h0);
+    let mode = p.sizeMode ?? defaultSizeMode(node.type);
+    if (changedW && changedH) mode = 'explicit';
+    else if (changedW && !['explicit', 'contentHeight'].includes(mode)) mode = 'explicit';
+    else if (changedH && !['explicit', 'contentWidth'].includes(mode)) mode = 'explicit';
+    if (mode !== (p.sizeMode ?? defaultSizeMode(node.type))) list.push({ edit: 'set_parameter', component: pageKey, id: g.id, name: 'sizeMode', value: mode });
+    if (changedW) { const u = unitOf(p.width, 'px'); list.push({ edit: 'set_parameter', component: pageKey, id: g.id, name: 'width', value: { value: u === '%' ? Math.round(g.w / g.parentW * 1000) / 10 : Math.round(g.w), unit: u === '%' ? '%' : 'px' } }); }
+    if (changedH) { const u = unitOf(p.height, 'px'); list.push({ edit: 'set_parameter', component: pageKey, id: g.id, name: 'height', value: { value: u === '%' ? Math.round(g.h / g.parentH * 1000) / 10 : Math.round(g.h), unit: u === '%' ? '%' : 'px' } }); }
+    if (list.length) edits(pageKey, list); else draw();
+  }
+}
+const defaultSizeMode = (type) => (type === 'Group' || type === 'Page' ? 'explicit' : 'contentHeight');
+
+/* ---- adding an element: pick it in the palette, click where it goes ---- */
+const PALETTE = [
+  ['Group', 'group', { sizeMode: 'contentHeight', width: { value: 100, unit: '%' }, flexDirection: 'column', paddingTop: { value: 12, unit: 'px' }, paddingBottom: { value: 12, unit: 'px' }, paddingLeft: { value: 12, unit: 'px' }, paddingRight: { value: 12, unit: 'px' } }],
+  ['Text', 'text', { text: 'New text', sizeMode: 'contentHeight', width: { value: 100, unit: '%' } }],
+  ['net.noodl.controls.button', 'button', { label: 'Button', sizeMode: 'contentHeight' }],
+  ['net.noodl.controls.textinput', 'input', { placeholder: 'Type here', sizeMode: 'contentHeight', width: { value: 100, unit: '%' } }],
+  ['Image', 'image', { sizeMode: 'explicit', width: { value: 200, unit: 'px' }, height: { value: 120, unit: 'px' } }],
+  ['net.noodl.controls.checkbox', 'check', { sizeMode: 'contentHeight' }],
+  ['net.noodl.controls.options', 'dropdown', { sizeMode: 'contentHeight', width: { value: 100, unit: '%' } }],
+  ['net.noodl.visual.icon', 'icon', { sizeMode: 'contentHeight' }],
+  ['net.noodl.visual.columns', 'columns', { sizeMode: 'contentHeight', width: { value: 100, unit: '%' } }]
+];
+const glyphOf = (type) => { const g = PALETTE.find(([t]) => t === type)?.[1]; return g || (type === 'Page' ? 'page' : type === 'For Each' ? 'repeat' : type.startsWith('/') ? 'component' : 'group'); };
+function renderPalette() {
+  const pal = $('palette'); pal.innerHTML = '';
+  for (const [type, glyph, params] of PALETTE) {
+    if (lib && !libIndex.has(type)) continue;
+    pal.append(h('button', { 'aria-pressed': pending?.type === type, onclick: (e) => armPending({ type, params }, e.currentTarget) }, icon(glyph), typeName(type)));
+  }
+  const comps = $('components'); comps.innerHTML = '';
+  for (const k of Object.keys(registry())) {
+    const e = registry()[k];
+    if (e.type === 'page' || e.type === 'root' || e.type === 'logic' || k === pageKey || k === 'App' || k.startsWith('__') || k.startsWith('Option sets/')) continue;
+    comps.append(h('button', { title: k, onclick: (ev) => armPending({ type: '/' + k, params: {} }, ev.currentTarget) }, icon('component'), k.split('/').pop()));
+  }
+}
+function armPending(p, btn) {
+  pending = p;
+  // placing is an editor click, so the overlay must take it: "Use the app" goes off for this
+  if ($('previewmode').checked) { $('previewmode').checked = false; overlay.classList.remove('preview'); }
+  for (const b of document.querySelectorAll('.palette button')) b.setAttribute('aria-pressed', b === btn);
+  overlay.classList.add('adding');
+  toast(`Click in the page where the ${typeName(p.type)} goes (Esc to cancel)`);
+}
+function placePending(hit) {
+  const p = pending; pending = null; overlay.classList.remove('adding');
+  for (const b of document.querySelectorAll('.palette button')) b.setAttribute('aria-pressed', 'false');
+  let parent = hit?.id ?? pageRootId();
+  while (parent && !holdsChildren(byId[parent].type)) parent = byId[parent].parent;
+  if (!parent) return toast('Nowhere to put it on this page');
+  const [id] = edits(pageKey, [{ edit: 'add_node', component: pageKey, type: p.type, parent, parameters: p.params, label: undefined }]);
+  sel = id; renderTree(); renderProps();
+  toast(`Added a ${typeName(p.type)} to ${labelOf(parent)}`);
+}
+
+/* ================= the element tree ================= */
+$('treesearch').oninput = () => renderTree();
+function renderTree() {
+  const tree = $('tree'); tree.innerHTML = '';
+  const q = $('treesearch').value.trim().toLowerCase();
+  for (const id of visualIds) {
+    const n = byId[id];
+    if (q && !labelOf(id).toLowerCase().includes(q) && !typeName(n.type).toLowerCase().includes(q)) continue;
+    const nStates = statesOf(id).length;
+    tree.append(h('div', { class: 'row', 'aria-selected': sel === id, style: `padding-left:${8 + (q ? 0 : depthOf[id]) * 14}px`, onclick: () => { select(id); elOf(id)?.scrollIntoView({ block: 'nearest' }); }, onmouseenter: () => { hover = id; draw(); }, onmouseleave: () => { hover = null; draw(); } },
+      icon(glyphOf(n.type)), h('span', { style: 'overflow:hidden;text-overflow:ellipsis' }, labelOf(id)), nStates ? h('span', { class: 'chip state', title: `${nStates} custom state(s)` }, nStates) : null, h('span', { class: 't' }, n.label ? typeName(n.type) : '')));
+  }
+}
+
+/* ================= the property editor ================= */
+const HIDDEN_GROUPS = new Set(['Advanced HTML', 'Data Attributes', 'Accessibility', 'Hover Events', 'Pointer Events', 'Focus Events', 'Mounted', 'Events', 'Actions', 'States', 'Scroll']);
+function conditionHolds(cond, params) {
+  if (!cond) return true;
+  return cond.split(/\s+OR\s+/).some((alt) => alt.split(/\s+AND\s+/).every((term) => {
+    let m = term.trim().match(/^(\w+)\s*(!=|=)\s*(.+)$/);
+    if (m) { const v = params[m[1]]; const has = v !== undefined && String(v) === m[3].trim(); return m[2] === '=' ? has : !has; }
+    m = term.trim().match(/^(\w+)\s+NOT SET$/);
+    if (m) return params[m[1]] === undefined;
+    return true;
+  }));
+}
+/** Ports the spec does not draw yet: a Navigate's router, a variable's name. */
+function synthPorts(node) {
+  const out = [];
+  const enumOf = (name, displayName, values, group = 'General') => ({ name, displayName, plug: 'input', group, type: { name: 'enum', enums: values.map((v) => ({ value: v, label: String(v).replace(/^\/Pages\//, '') })) } });
+  if (node.type === 'RouterNavigate') {
+    const routers = []; const pages = [];
+    for (const k of Object.keys(registry())) { try { for (const n of store.readComponent(k).files.nodes.nodes) if (n.type === 'Router') { routers.push(n.parameters?.name || 'Main'); for (const r of n.parameters?.pages?.routes || []) pages.push(r); } } catch { /* skip */ } }
+    out.push(enumOf('router', 'Router', routers.length ? routers : ['Main']), enumOf('target', 'Target Page', pages.length ? pages : pageKeys().map((k) => '/' + k)));
+  }
+  if (['NewDbModelProperties', 'SetDbModelProperties', 'DeleteDbModelProperties', 'DbCollection2', 'DbModel2'].includes(node.type)) {
+    const names = collections().map((c) => c.name).concat(schemaTables().map((t) => t.table).filter((n) => !collections().some((c) => c.name === n)));
+    out.push(enumOf('collectionName', 'Data type (collection)', names));
+  }
+  if (node.type === 'Set Variable' || node.type === 'Variable2' || node.type === 'Variable') out.push({ name: 'name', displayName: 'Variable name', plug: 'input', group: 'General', type: 'string' });
+  return out;
+}
+function editablePorts(node, { wireOnly = false } = {}) {
+  const t = typeDef(node.type);
+  const params = node.parameters || {};
+  const out = [];
+  const seen = new Set();
+  const push = (p) => {
+    if (p.plug !== 'input' && p.plug !== 'input/output') return;
+    if (seen.has(p.name)) return;
+    seen.add(p.name);
+    const ty = tname(p.type);
+    if (ty === 'signal' || /\{\{/.test(p.name) || p.name === 'variant' || ['stringlist', 'reference', 'variant', 'cssdefinition', 'curve', 'proplist'].includes(ty)) return;
+    if (HIDDEN_GROUPS.has(p.group)) return;
+    const onlyWire = !!p.type?.allowConnectionsOnly || ['array', 'object'].includes(ty);
+    if (onlyWire && !wireOnly) return;
+    out.push(onlyWire ? { ...p, wireOnly: true } : p);
+  };
+  const spec = specPortsFor(node.type, params, node.id);
+  if (spec) for (const p of spec.inputs) push({ name: p.name, displayName: p.label, plug: 'input', group: p.group || 'General', type: p.enums ? { name: 'enum', enums: p.enums.map((v) => ({ value: v, label: p.labels?.[v] ?? String(v).replace(/^\/Pages\//, '') })) } : (p.codeEditor ? { name: p.type, codeeditor: p.codeEditor } : p.connectionsOnly ? { name: p.type, allowConnectionsOnly: true } : p.type), default: p.default, description: p.description });
+  for (const p of node.dynamicports || []) push({ ...p, group: p.group || 'General' });
+  for (const p of synthPorts(node)) push(p);
+  if (t) {
+    for (const p of t.ports || []) push(p);
+    for (const d of t.dynamicports || []) if (d.ports && conditionHolds(d.condition, { ...defaultsOf(t), ...params })) for (const p of d.ports) push(p);
+  }
+  if (node.type.startsWith('/')) for (const p of portsOf(node, 'input')) push({ name: p.name, displayName: p.label, type: p.type, group: 'Component', plug: 'input' });
+  const priority = t?.connectionPanel?.groupPriority || [];
+  const rank = (g) => { const i = priority.indexOf(g); return i === -1 ? 50 + g.length : i; };
+  out.sort((a, b) => rank(a.group || 'General') - rank(b.group || 'General') || (a.index ?? 0) - (b.index ?? 0));
+  return out;
+}
+const defaultsOf = (t) => Object.fromEntries((t.ports || []).filter((p) => p.default !== undefined).map((p) => [p.name, p.default]));
+function tokensOf(category) {
+  const pj = store.readProjectFile();
+  return (pj?.metadata?.designTokens?.customTokens || []).filter((t) => !category || (t.category || '').startsWith(category)).map((t) => t.name);
+}
+let propTimer;
+function renderProps() {
+  const right = $('right'); right.innerHTML = '';
+  if (!sel || !byId[sel]) { right.append(h('div', { class: 'empty' }, 'Click an element in the page to see its properties.')); return; }
+  const node = byId[sel];
+  const params = node.parameters || {};
+  const head = h('div', { class: 'head' },
+    h('input', { type: 'text', value: node.label || '', placeholder: typeName(node.type), onchange: (e) => edits(pageKey, [{ edit: 'rename', component: pageKey, id: sel, label: e.target.value }], { rebuildApp: false }) }),
+    sel !== pageRootId() ? h('button', { class: 'quiet danger', title: 'Delete element', onclick: () => removeNode(sel) }, icon('trash')) : h('span'),
+    h('div', { class: 'type' }, `${typeName(node.type)}${node.parent !== undefined ? ` · in ${labelOf(node.parent)}` : ''}`));
+  right.append(head);
+  const wrap = h('div', { class: 'props' });
+  // the style it wears (a variant of its type), as Bubble's style dropdown at the top of the element
+  const mine = variantsFor(node.type);
+  if (!node.type.startsWith('/') && node.type !== 'Page') {
+    const det = h('details', { class: 'group', open: true }, h('summary', {}, 'Style'));
+    // a node's own value wins over its variant's, so wearing a style means dropping the element's own values for what the style sets (Bubble: a styled element has no overrides)
+    const s = h('select', { onchange: (e) => { const v = mine.find((x) => x.name === e.target.value); edits(pageKey, [{ edit: 'set_variant', component: pageKey, id: sel, variant: e.target.value || undefined }, ...Object.keys(v?.parameters || {}).filter((k) => params[k] !== undefined).map((k) => ({ edit: 'set_parameter', component: pageKey, id: sel, name: k, value: undefined }))], { redraw: true }); toast(e.target.value ? `${labelOf(sel)} now wears ${e.target.value}` : `${labelOf(sel)} wears no style`); } }, h('option', { value: '' }, '(no style)'));
+    for (const v of mine) s.append(h('option', { value: v.name, selected: node.variant === v.name }, v.name));
+    det.append(h('div', { class: 'field' }, h('label', {}, 'Style'), s));
+    det.append(h('div', { class: 'field' }, h('label', {}), h('div', { style: 'display:flex;gap:6px' }, h('button', { class: 'tiny', title: 'Save this element\'s properties as a style every element of this type can wear', onclick: () => saveAsStyle(node) }, icon('styles'), 'Save as a style'), node.variant ? h('button', { class: 'tiny', onclick: () => { tab = 'styles'; selStyle = { typename: node.type, name: node.variant }; switchTab('styles'); } }, 'Edit style') : null)));
+    wrap.append(det);
+  }
+  const wiredIn = Object.fromEntries(conns.filter((c) => c.toId === sel).map((c) => [c.toProperty, c]));
+  const groups = new Map();
+  for (const p of editablePorts(node)) { const g = p.group || 'General'; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(p); }
+  let first = true;
+  for (const [g, ports] of groups) {
+    const det = h('details', { class: 'group', open: first || ports.some((p) => params[p.name] !== undefined || wiredIn[p.name]) }, h('summary', {}, g));
+    first = false;
+    for (const p of ports) det.append(fieldFor(node, p, params[p.name], wiredIn[p.name]));
+    wrap.append(det);
+  }
+  wrap.append(customStatesSection(node));
+  right.append(wrap);
+}
+/** Bubble's Custom States on an element: type, name, default, list — each a Variable node on the page that remembers the element. */
+function customStatesSection(node) {
+  const mine = statesOf(node.id);
+  const det = h('details', { class: 'group states', open: true }, h('summary', {}, `Custom states${mine.length ? ` (${mine.length})` : ''}`));
+  const table = h('table', {}, h('tr', {}, h('th', {}, 'Name'), h('th', {}, 'Type'), h('th', {}, 'Default'), h('th', { title: 'A list of values' }, 'List'), h('th', {})));
+  const TYPES = ['text', 'number', 'yes / no', 'date', 'any'];
+  for (const s of mine) {
+    const cs = s.metadata.customState;
+    const setMeta = (patch) => edits(pageKey, [{ edit: 'set_metadata', component: pageKey, id: s.id, metadata: { customState: { ...cs, ...patch } } }], { rebuildApp: false, redraw: false });
+    table.append(h('tr', {},
+      h('td', {}, h('input', { type: 'text', value: cs.name, onchange: (e) => { const name = slug(e.target.value); edits(pageKey, [{ edit: 'set_metadata', component: pageKey, id: s.id, metadata: { customState: { ...cs, name } } }, { edit: 'set_parameter', component: pageKey, id: s.id, name: 'name', value: stateVarName(node, name) }, { edit: 'rename', component: pageKey, id: s.id, label: `${labelOf(node.id)}'s ${name}` }], { redraw: true }); } })),
+      h('td', {}, h('select', { onchange: (e) => setMeta({ type: e.target.value }) }, ...TYPES.map((t) => h('option', { value: t, selected: cs.type === t }, t)))),
+      h('td', {}, h('input', { type: 'text', value: s.parameters?.value ?? '', placeholder: '(empty)', onchange: (e) => { const raw = e.target.value; const v = raw === '' ? undefined : cs.type === 'number' ? Number(raw) : cs.type === 'yes / no' ? /^(yes|true|1)$/i.test(raw) : raw; edits(pageKey, [{ edit: 'set_parameter', component: pageKey, id: s.id, name: 'value', value: v }], { redraw: false }); } })),
+      h('td', {}, h('input', { type: 'checkbox', style: 'width:auto', checked: !!cs.list, onchange: (e) => setMeta({ list: e.target.checked }) })),
+      h('td', {}, h('button', { class: 'quiet danger tiny', title: 'Remove this state', onclick: () => { edits(pageKey, [{ edit: 'remove_node', component: pageKey, id: s.id }]); toast(`Removed the state ${cs.name}`); } }, icon('x')))));
+  }
+  if (mine.length) det.append(table);
+  det.append(h('div', { style: 'padding:6px 0 2px' }, h('button', { class: 'tiny', onclick: () => addCustomState(node) }, icon('plus'), 'New state'), h('span', { class: 'hint', style: 'padding:0 8px' }, 'read it anywhere as ', h('i', {}, `${labelOf(node.id)}'s <state>`))));
+  return det;
+}
+const stateVarName = (node, name) => `${slug(labelOf(node.id))}.${name}`;
+function addCustomState(node) {
+  const n = statesOf(node.id).length;
+  const name = n ? `state${n + 1}` : 'state';
+  const logicN = nodes.filter((n) => !isVisualType(n.type)).length;
+  edits(pageKey, [{ edit: 'add_node', component: pageKey, type: 'Variable2', label: `${labelOf(node.id)}'s ${name}`, x: 1000, y: 100 + logicN * 70, parameters: { name: stateVarName(node, name) }, metadata: { customState: { of: node.id, name, type: 'text', list: false } } }]);
+  toast(`Added the state ${name} on ${labelOf(node.id)} — a Variable the whole page can read`);
+}
+function fieldFor(node, p, value, wire, setter) {
+  const ty = tname(p.type);
+  const set = (v, immediate = true) => { clearTimeout(propTimer); const run = setter ? () => setter(v) : () => edits(pageKey, [{ edit: 'set_parameter', component: pageKey, id: node.id, name: p.name, value: v }], { rebuildApp: true }); immediate ? run() : (propTimer = setTimeout(run, 350)); };
+  const f = h('div', { class: `field${wire ? ' wired' : ''}`, title: p.description || '' }, h('label', {}, p.displayName || p.name));
+  const units = p.type?.units;
+  const srcNode = wire && byId[wire.fromId];
+  const composed = srcNode && isComposed(srcNode) && srcNode.metadata.composedFor.node === node.id && srcNode.metadata.composedFor.port === p.name ? srcNode : null;
+  if (composed) f.append(h('div', { class: 'chip expr', title: composed.parameters?.expression || '', style: 'cursor:pointer;max-width:100%', onclick: (e) => openComposer(e, node, p, composed) }, icon('fx'), h('span', { style: 'overflow:hidden;text-overflow:ellipsis' }, composedPreview(composed))));
+  else if (p.wireOnly) f.append(h('div', { style: 'color:var(--muted);font-size:12px' }, wire ? '' : 'only from a value'));
+  else if (ty === 'boolean') f.append(h('input', { type: 'checkbox', style: 'width:auto;justify-self:start', checked: value ?? p.default ?? false, onchange: (e) => set(e.target.checked) }));
+  else if (ty === 'component' && Array.isArray(p.type?.components)) {
+    const s = h('select', { onchange: (e) => set(e.target.value === '' ? undefined : e.target.value) }, h('option', { value: '' }, '(none)'));
+    for (const c of p.type.components) s.append(h('option', { value: c, selected: value === c }, c.replace(/^\/Pages\//, '')));
+    f.append(s);
+  } else if (ty === 'enum') {
+    const s = h('select', { onchange: (e) => set(e.target.value === '' ? undefined : e.target.value) }, h('option', { value: '' }, `(default${p.default !== undefined ? `: ${p.default}` : ''})`));
+    for (const o of p.type.enums || []) { const v = typeof o === 'object' ? o.value : o; s.append(h('option', { value: v, selected: value === v }, typeof o === 'object' ? o.label : o)); }
+    f.append(s);
+  } else if (ty === 'color') {
+    const text = h('input', { type: 'text', value: value ?? '', placeholder: String(p.default ?? ''), list: 'tokens-color', oninput: (e) => { sw.style.background = resolveColor(e.target.value); set(e.target.value || undefined, false); } });
+    const sw = h('div', { class: 'swatch', style: `background:${resolveColor(value ?? p.default ?? '')}` });
+    f.append(h('div', { class: 'color' }, text, sw));
+  } else if ((units || (typeof value === 'object' && value && 'unit' in value)) && (ty === 'number' || ty === 'dimension' || ty === '*' || typeof value === 'object')) {
+    const unitList = units || ['px', '%'];
+    const cur = typeof value === 'object' && value ? value : { value: typeof value === 'number' ? value : (typeof value === 'string' && /^-?[\d.]+/.test(value) ? parseFloat(value) : ''), unit: typeof value === 'string' && /var\(/.test(value) ? 'var' : (p.type?.defaultUnit || unitList[0]) };
+    const isVar = typeof value === 'string' && /var\(/.test(value);
+    const num = h('input', { type: 'text', value: isVar ? value : (cur.value ?? ''), placeholder: String(p.default ?? ''), list: 'tokens-space', oninput: (e) => commit(e.target.value, unit.value, false), onchange: (e) => commit(e.target.value, unit.value, true) });
+    const unit = h('select', { onchange: () => commit(num.value, unit.value, true) }, ...unitList.map((u) => h('option', { value: u, selected: cur.unit === u }, u)), h('option', { value: 'var', selected: isVar }, 'var'));
+    const commit = (text, u, immediate) => {
+      if (text === '') return set(undefined, immediate);
+      if (/var\(/.test(text) || u === 'var') return set(text, immediate);
+      const n = Number(text); if (Number.isNaN(n)) return;
+      set({ value: n, unit: u }, immediate);
+    };
+    f.append(h('div', { class: 'unit' }, num, unit));
+  } else if (ty === 'number') f.append(h('input', { type: 'text', value: value ?? '', placeholder: String(p.default ?? ''), oninput: (e) => set(e.target.value === '' ? undefined : (Number.isNaN(Number(e.target.value)) ? e.target.value : Number(e.target.value)), false) }));
+  else if (p.type?.codeeditor || p.type?.multiline || (typeof value === 'string' && value.length > 60)) f.append(h('textarea', { rows: 3, oninput: (e) => set(e.target.value || undefined, false) }, value ?? ''));
+  else f.append(h('input', { type: 'text', value: value ?? '', placeholder: String(p.default ?? ''), list: ty === 'string' && /font|Font/.test(p.name) ? 'tokens-font' : undefined, oninput: (e) => set(e.target.value === '' ? undefined : e.target.value, false) }));
+  // Bubble's dynamic data: a value from an element, a custom state, an option set, or a composed expression — as a wire
+  if (setter) return f;
+  if (wire && !composed) f.append(h('div', { class: 'from' }, sourceChip(wire.fromId, wire.fromProperty), h('button', { class: 'quiet tiny', title: 'Stop taking the value from there', onclick: () => edits(pageKey, [{ edit: 'disconnect', component: pageKey, from: { node: wire.fromId, port: wire.fromProperty }, to: { node: node.id, port: p.name } }]) }, icon('x'))));
+  else if (!composed) f.append(h('div', { class: 'from' }, h('button', { class: 'quiet tiny', title: 'Take this value from an element, a state, an option set, or compose it', onclick: (e) => sourceMenu(e, node, p) }, icon('bolt'), 'Insert dynamic data')));
+  return f;
+}
+/** How a source reads: an element's value, "Card's count" for a state, "Colours · all options" for a set, an expression's text. */
+function sourceChip(fromId, port) {
+  const n = byId[fromId]; if (!n) return h('span', { class: 'chip' }, `${fromId.slice(0, 6)} · ${port}`);
+  if (n.metadata?.customState) return h('span', { class: 'chip state' }, icon('state'), `${labelOf(n.metadata.customState.of)}'s ${stateName(n)}`);
+  if (n.type.startsWith('/Option sets/')) return h('span', { class: 'chip opt' }, icon('list'), `${n.type.split('/').pop()} · ${portLabel(n, 'output', port)}`);
+  if (isComposed(n)) return h('span', { class: 'chip expr' }, icon('fx'), composedPreview(n));
+  return h('span', { class: 'chip' }, `${labelOf(fromId)}'s ${portLabel(n, 'output', port)}`);
+}
+/** Every value a field can take from the page, grouped as Bubble's dropdown is. */
+function valueSources(forNode) {
+  const groups = [];
+  const rank = (o) => { const g = (o.raw?.group || o.group || 'General'); return g === 'General' ? 0 : /Advanced|Bounding Box|Mounted/.test(g) ? 3 : /States|Events|Component/.test(g) ? 1 : 2; };
+  const outs = (n) => portsOf(n, 'output').filter((o) => !o.signal).sort((a, b) => rank(a) - rank(b));
+  const states = statesOf().filter((n) => n.id !== forNode?.id).map((n) => ({ node: n.id, port: 'value', text: `${labelOf(n.metadata.customState.of)}'s ${stateName(n)}`, sub: n.metadata.customState.type, kind: 'state' }));
+  if (states.length) groups.push(['Custom states', states]);
+  const sets = optionSetKeys().map((k) => ({ setKey: k, text: `${k.split('/').pop()} · all options`, sub: 'option set', kind: 'opt' }));
+  if (sets.length) groups.push(['Option sets', sets]);
+  const elements = [], logic = [];
+  for (const n of nodes) {
+    if (n.id === forNode?.id || n.metadata?.customState || isComposed(n) || n.type.startsWith('/Option sets/')) continue;
+    const list = isVisualType(n.type) ? elements : logic;
+    for (const o of outs(n)) list.push({ node: n.id, port: o.name, text: `${labelOf(n.id)}'s ${o.label}`, sub: `${typeName(n.type)} · ${o.type}`, kind: isVisualType(n.type) ? 'el' : 'logic' });
+  }
+  if (elements.length) groups.push(['Elements', elements]);
+  if (logic.length) groups.push(['Logic on this page', logic]);
+  return groups;
+}
+/** An instance of the option set on this page, placed once and reused: the Static Data is loaded with the page. */
+function optionSetInstance(setKey) {
+  const found = nodes.find((n) => n.type === '/' + setKey);
+  if (found) return found.id;
+  const logicN = nodes.filter((n) => !isVisualType(n.type)).length;
+  const [id] = edits(pageKey, [{ edit: 'add_node', component: pageKey, type: '/' + setKey, label: setKey.split('/').pop(), x: 1000, y: 100 + logicN * 70 }], { redraw: false });
+  return id;
+}
+function sourceMenu(e, node, p, onPick) {
+  closeMenu(onPick ? '.menu:not(.composer)' : '.menu');
+  const menu = popover(e);
+  const search = h('input', { type: 'text', placeholder: 'Search values…' });
+  const list = h('div');
+  const pick = (src) => {
+    closeMenu(onPick ? '.menu:not(.composer)' : '.menu');
+    if (src.setKey) src = { ...src, node: optionSetInstance(src.setKey), port: 'items' };
+    if (onPick) return onPick(src);
+    edits(pageKey, [{ edit: 'connect', component: pageKey, from: { node: src.node, port: src.port }, to: { node: node.id, port: p.name } }]);
+    toast(`${p.displayName || p.name} now comes from ${src.text}`);
+  };
+  const fill = (q) => {
+    list.innerHTML = '';
+    const q2 = (q || '').toLowerCase();
+    if (!q2 && !onPick) list.append(h('div', { class: 'item', onclick: () => { closeMenu(); openComposer(e, node, p, null, onPick); } }, icon('fx'), 'Compose an expression…', h('small', {}, 'chips, JavaScript, or both')));
+    for (const [title, items] of valueSources(node)) {
+      const shown = items.filter((it) => !q2 || it.text.toLowerCase().includes(q2));
+      if (!shown.length) continue;
+      list.append(h('div', { class: 'h' }, title));
+      for (const it of shown) list.append(h('div', { class: 'item', onclick: () => pick(it) }, icon(it.kind === 'state' ? 'state' : it.kind === 'opt' ? 'list' : it.kind === 'el' ? glyphOf(byId[it.node].type) : 'code'), it.text, h('small', {}, it.sub)));
+    }
+    if (!list.children.length) list.append(h('div', { class: 'hint' }, 'Nothing on this page matches.'));
+  };
+  search.oninput = () => fill(search.value);
+  fill('');
+  menu.append(h('div', { class: 'search' }, icon('search'), search), list); document.body.append(menu); search.focus();
+  dismissOnOutside(menu);
+}
+function popover(e, cls = '') {
+  const x = Math.min(e.clientX, innerWidth - 440), y = Math.min(e.clientY + 8, innerHeight - 300);
+  return h('div', { class: `menu ${cls}`, style: `left:${Math.max(8, x)}px;top:${Math.max(8, y)}px` });
+}
+/** A menu closes on a click outside it; a listener left by a menu already gone does nothing (it used to close whatever opened after it). */
+function dismissOnOutside(menu) { setTimeout(() => document.addEventListener('mousedown', function outside(ev) { if (!menu.isConnected) return; if (!menu.contains(ev.target)) closeMenu(); else document.addEventListener('mousedown', outside, { once: true }); }, { once: true }), 0); }
+const closeMenu = (selector = '.menu') => { for (const m of document.querySelectorAll(selector)) m.remove(); };
+function resolveColor(v) {
+  if (!v) return 'transparent';
+  const m = String(v).match(/^var\((--[\w-]+)\)/);
+  if (m) { const t = (store.readProjectFile()?.metadata?.designTokens?.customTokens || []).find((t) => t.name === m[1]); return t?.value || '#eee'; }
+  return v;
+}
+function renderDatalists() {
+  for (const old of document.querySelectorAll('datalist')) old.remove();
+  const dl = (id, names) => document.body.append(h('datalist', { id }, ...names.map((n) => h('option', { value: `var(${n})` }))));
+  dl('tokens-color', tokensOf('color')); dl('tokens-space', tokensOf('spacing').concat(tokensOf('radius'), tokensOf('typography-size'), tokensOf('typography'))); dl('tokens-font', tokensOf('typography'));
+}
+
+/* ================= the expression composer: chips, JavaScript, or both — one Expression node ================= */
+/** The chips of a composed Expression: each input name → where its value comes from. */
+function chipsOf(expr) {
+  const map = new Map();
+  for (const c of conns.filter((c) => c.toId === expr.id)) if (byId[c.fromId]) map.set(c.toProperty, { node: c.fromId, port: c.fromProperty, text: chipText(c.fromId, c.fromProperty) });
+  return map;
+}
+function chipText(fromId, port) {
+  const n = byId[fromId]; if (!n) return port;
+  if (n.metadata?.customState) return `${labelOf(n.metadata.customState.of)}'s ${stateName(n)}`;
+  if (n.type.startsWith('/Option sets/')) return `${n.type.split('/').pop()} · ${portLabel(n, 'output', port)}`;
+  return `${labelOf(fromId)}'s ${portLabel(n, 'output', port)}`;
+}
+function composedPreview(expr) {
+  const text = expr.parameters?.expression || '';
+  const chips = chipsOf(expr);
+  return text.replace(/[A-Za-z_$][\w$]*/g, (m) => (chips.has(m) ? `[${chips.get(m).text}]` : m)) || '(empty expression)';
+}
+const OPS = [['is', ' === '], ['is not', ' !== '], ['and', ' && '], ['or', ' || '], ['+', ' + '], ['−', ' - '], ['×', ' * '], ['÷', ' / '], ['>', ' > '], ['<', ' < '], ['not', '!'], ['( )', '()'], ['contains', '.includes()'], ['? :', ' ? : ']];
+function openComposer(e, node, p, existing, onPick) {
+  closeMenu();
+  let text = existing?.parameters?.expression || '';
+  const chips = existing ? chipsOf(existing) : new Map();
+  let mode = localStorage.getItem('ob.composer.mode') || 'mixed';
+  const menu = popover(e, 'composer');
+  menu.style.left = `${Math.max(8, Math.min(e.clientX - 200, innerWidth - 580))}px`;
+  const fieldName = p.displayName || p.name;
+  const seg = h('div', { class: 'seg' });
+  const body = h('div', { class: 'body' });
+  const note = h('div', { class: 'note' });
+  const setMode = (m) => { mode = m; localStorage.setItem('ob.composer.mode', m); for (const b of seg.children) b.setAttribute('aria-pressed', b.dataset.m === m); renderBody(); };
+  for (const [m, label] of [['chips', 'Composer'], ['mixed', 'Both'], ['js', 'JavaScript']]) seg.append(h('button', { 'data-m': m, 'aria-pressed': m === mode, onclick: () => setMode(m) }, label));
+  const check = () => {
+    const names = exprNames(text);
+    const unknown = names.filter((n) => !chips.has(n));
+    try { new Function(...names, 'Noodl', 'return (' + (text || 'undefined') + ');'); note.className = 'note'; note.textContent = text ? (unknown.length ? `${unknown.join(', ')} ${unknown.length > 1 ? 'are names' : 'is a name'} with no value yet — insert dynamic data for ${unknown.length > 1 ? 'them' : 'it'}, or it is a JavaScript global` : `Reads ${names.length} value${names.length === 1 ? '' : 's'} · JavaScript, run by the app's Expression node`) : 'Type JavaScript, or insert dynamic data as chips.'; }
+    catch (err) { note.className = 'note bad'; note.textContent = `Will not compile: ${err.message}`; }
+  };
+  /** A chip for a name in the text; in the mixed view it is a non-editable island with its own delete. */
+  const chip = (name, editable) => h('span', { class: `chip ${chipKind(name)}`, contenteditable: editable ? 'false' : undefined, 'data-name': name, title: name }, chips.get(name).text, h('button', { title: 'Remove', onclick: (ev) => { ev.preventDefault(); removeName(name); } }, icon('x')));
+  const chipKind = (name) => { const c = chips.get(name); const n = byId[c.node]; return n?.metadata?.customState ? 'state' : n?.type.startsWith('/Option sets/') ? 'opt' : ''; };
+  const removeName = (name) => { text = text.replace(new RegExp(`\\b${name.replace(/[$]/g, '\\$')}\\b`, 'g'), '').replace(/\s{2,}/g, ' ').trim(); chips.delete(name); renderBody(); };
+  const insertName = (src) => {
+    let base = slug(src.text.replace(/'s/g, ' ').replace(/·/g, ' ')); let name = base, i = 2;
+    while (chips.has(name) || /^(min|max|cos|sin|tan|sqrt|pi|round|floor|ceil|abs|random|run|expression|evaluateAtLoad|Noodl|Variables|Objects|Arrays)$/.test(name)) name = `${base}${i++}`;
+    chips.set(name, src);
+    insertAtCaret(name);
+  };
+  let mixedEl = null, caretAt = null;
+  const insertAtCaret = (s) => {
+    if (mode === 'mixed' && mixedEl && caretAt !== null) { const before = text.slice(0, caretAt), after = text.slice(caretAt); const pad = (before && !/\s$/.test(before) ? ' ' : '') + s + (after && !/^\s/.test(after) ? ' ' : ''); text = before + pad + after; caretAt += pad.length; }
+    else text = (text && !/\s$/.test(text) ? text + ' ' : text) + s + ' ';
+    renderBody();
+  };
+  const tokens = () => { const out = []; const re = /[A-Za-z_$][\w$]*|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|\d+(?:\.\d+)?|\s+|./g; let m; while ((m = re.exec(text))) out.push(m[0]); return out; };
+  function renderBody() {
+    body.innerHTML = '';
+    if (mode === 'chips') {
+      const row = h('div', { class: 'chips' });
+      for (const t of tokens()) {
+        if (chips.has(t)) row.append(chip(t, false));
+        else if (/^\s+$/.test(t)) continue;
+        else row.append(h('span', { class: /^["'\d]/.test(t) ? 'lit' : /^[A-Za-z_$]/.test(t) ? '' : 'op', style: 'cursor:text', title: 'Edit it in the Both or JavaScript view' }, t));
+      }
+      if (!text) row.append(h('span', { style: 'color:var(--muted);font-family:Inter' }, 'Nothing composed yet. Insert dynamic data, an operator, a text or a number.'));
+      body.append(row);
+    } else if (mode === 'js') {
+      const ta = h('textarea', { spellcheck: 'false', oninput: (ev) => { text = ev.target.value; check(); } }, text);
+      body.append(ta);
+      body.append(h('div', { class: 'hint', style: 'padding:6px 0 0' }, chips.size ? ['Chips in the text: ', ...[...chips.keys()].flatMap((n, i) => [i ? ', ' : '', h('code', {}, n), ` = ${chips.get(n).text}`])] : 'A chip you insert becomes a name in the text.'));
+    } else {
+      mixedEl = h('div', { class: 'mixed', contenteditable: 'true', spellcheck: 'false' });
+      for (const t of tokens()) mixedEl.append(chips.has(t) ? chip(t, true) : document.createTextNode(t));
+      const read = () => { let s = ''; for (const n of mixedEl.childNodes) s += n.nodeType === 3 ? n.textContent : n.dataset?.name ? n.dataset.name : n.textContent; return s; };
+      const caret = () => { const selx = getSelection(); if (!selx.rangeCount || !mixedEl.contains(selx.anchorNode)) return null; const r = selx.getRangeAt(0).cloneRange(); r.setStart(mixedEl, 0); let s = ''; for (const n of r.cloneContents().childNodes) s += n.nodeType === 3 ? n.textContent : n.dataset?.name ? n.dataset.name : n.textContent; return s.length; };
+      mixedEl.oninput = () => { text = read(); for (const n of [...chips.keys()]) if (!new RegExp(`\\b${n}\\b`).test(text)) chips.delete(n); check(); };
+      mixedEl.onkeyup = mixedEl.onmouseup = () => { caretAt = caret(); };
+      mixedEl.onpaste = (ev) => { ev.preventDefault(); document.execCommand('insertText', false, ev.clipboardData.getData('text/plain')); };
+      body.append(mixedEl);
+    }
+    const tools = h('div', { class: 'tools' }, h('button', { class: 'primary', onclick: (ev) => sourceMenu(ev, node, p, insertName) }, icon('bolt'), 'Insert dynamic data'));
+    for (const [label, js] of OPS) tools.append(h('button', { title: js.trim(), onclick: () => insertAtCaret(js.trim()) }, label));
+    tools.append(h('button', { onclick: () => insertAtCaret('""') }, '"text"'), h('button', { onclick: () => insertAtCaret('0') }, '123'));
+    body.append(tools);
+    check();
+  }
+  const save = () => {
+    const names = exprNames(text);
+    const list = [];
+    let exprId = existing?.id;
+    if (!exprId) {
+      const logicN = nodes.filter((n) => !isVisualType(n.type)).length;
+      exprId = uuid();
+      list.push({ edit: 'add_node', component: pageKey, id: exprId, type: 'Expression', label: `${fieldName} of ${labelOf(node.id)}`, x: 1000, y: 100 + logicN * 70, parameters: { expression: text }, metadata: { composedFor: { node: node.id, port: p.name } } });
+    } else list.push({ edit: 'set_parameter', component: pageKey, id: exprId, name: 'expression', value: text });
+    const wiredNow = existing ? conns.filter((c) => c.toId === existing.id) : [];
+    for (const c of wiredNow) if (!names.includes(c.toProperty) || !chips.has(c.toProperty) || chips.get(c.toProperty).node !== c.fromId || chips.get(c.toProperty).port !== c.fromProperty) list.push({ edit: 'disconnect', component: pageKey, from: { node: c.fromId, port: c.fromProperty }, to: { node: exprId, port: c.toProperty } });
+    for (const n of names) { const src = chips.get(n); if (src && !wiredNow.some((c) => c.toProperty === n && c.fromId === src.node && c.fromProperty === src.port && names.includes(n) && chips.has(n))) list.push({ edit: 'connect', component: pageKey, from: { node: src.node, port: src.port }, to: { node: exprId, port: n } }); }
+    if (!onPick && !conns.some((c) => c.fromId === exprId && c.fromProperty === 'result' && c.toId === node.id && c.toProperty === p.name)) {
+      for (const c of conns.filter((c) => c.toId === node.id && c.toProperty === p.name)) list.push({ edit: 'disconnect', component: pageKey, from: { node: c.fromId, port: c.fromProperty }, to: { node: node.id, port: p.name } });
+      list.push({ edit: 'connect', component: pageKey, from: { node: exprId, port: 'result' }, to: { node: node.id, port: p.name } });
+    }
+    closeMenu();
+    edits(pageKey, list);
+    if (onPick) onPick({ node: exprId, port: 'result', text: composedPreview(byId[exprId]) });
+    toast(`${fieldName} is now the expression ${text.slice(0, 60)}`);
+  };
+  menu.append(
+    h('div', { class: 'bar' }, icon('fx'), h('strong', {}, fieldName), h('span', { style: 'color:var(--muted)' }, `of ${labelOf(node.id)}`), seg),
+    body,
+    h('div', { class: 'foot' }, note, existing ? h('button', { class: 'danger', onclick: () => { closeMenu(); edits(pageKey, [{ edit: 'remove_node', component: pageKey, id: existing.id }]); toast('Expression removed'); } }, 'Remove') : null, h('button', { onclick: closeMenu }, 'Cancel'), h('button', { class: 'primary', onclick: save }, 'Save')));
+  document.body.append(menu);
+  renderBody();
+  // the composer stays open while its own source menu is up
+  setTimeout(() => document.addEventListener('mousedown', function outside(ev) { if (!menu.isConnected) return; if (!menu.contains(ev.target) && !ev.target.closest('.menu')) closeMenu(); else document.addEventListener('mousedown', outside, { once: true }); }, { once: true }), 0);
+}
+
+/* ================= Workflow: events and their steps, read from the wires; a Condition splits the chain ================= */
+let selEvent = null; // { node, port }
+const draftEvents = [];
+const openSteps = new Set();
+const isHelperNode = (n) => n.metadata?.customState || isComposed(n) || n.type.startsWith('/Option sets/');
+function events() {
+  const list = [];
+  const seen = new Set();
+  const signalInWired = (id) => conns.some((c) => c.toId === id && isSignalPort(byId[id], 'input', c.toProperty));
+  for (const c of conns) {
+    const from = byId[c.fromId]; if (!from || isHelperNode(from)) continue;
+    if (!isSignalPort(from, 'output', c.fromProperty)) continue;
+    if (!isVisualType(from.type) && signalInWired(from.id)) continue; // a step, not an event
+    const key = `${c.fromId}.${c.fromProperty}`;
+    if (seen.has(key)) continue; seen.add(key);
+    list.push({ node: c.fromId, port: c.fromProperty });
+  }
+  for (const d of draftEvents) if (!seen.has(`${d.node}.${d.port}`)) list.push(d);
+  return list;
+}
+const eventTitle = (ev) => `When ${labelOf(ev.node)}: ${portLabel(byId[ev.node], 'output', ev.port)}`;
+const countSteps = (steps) => steps.reduce((n, s) => n + 1 + (s.branches ? countSteps(s.branches.yes) + countSteps(s.branches.no) : 0), 0);
+function renderEvents() {
+  const box = $('events'); box.innerHTML = '';
+  const list = events();
+  if (!list.length) box.append(h('div', { class: 'hint' }, 'No workflows on this page yet. New picks an element and one of its events.'));
+  for (const ev of list) box.append(h('div', { class: 'row', 'aria-selected': selEvent && selEvent.node === ev.node && selEvent.port === ev.port, onclick: () => { selEvent = ev; renderWorkflow(); } },
+    h('span', {}, eventTitle(ev)), h('small', {}, `${isVisualType(byId[ev.node].type) ? 'element' : 'logic'} · ${countSteps(chain(ev.node, ev.port))} step(s)`)));
+}
+/** The chain from a signal: follow the first wired target, then its Done, and so on; a Condition ends the chain with two of its own. */
+function chain(node, port, visited = new Set()) {
+  const steps = [];
+  while (true) {
+    const outs = conns.filter((c) => c.fromId === node && c.fromProperty === port && byId[c.toId] && isSignalPort(byId[c.toId], 'input', c.toProperty));
+    if (!outs.length) break;
+    const next = outs[0];
+    if (visited.has(next.toId)) break;
+    visited.add(next.toId);
+    const step = { id: next.toId, via: next.toProperty, from: { node, port }, siblings: outs.slice(1) };
+    steps.push(step);
+    if (byId[next.toId].type === 'Condition') { step.branches = { yes: chain(next.toId, 'ontrue', visited), no: chain(next.toId, 'onfalse', visited) }; break; }
+    const d = doneOf(byId[next.toId]); if (!d) break;
+    node = next.toId; port = d;
+  }
+  return steps;
+}
+const DONE = /^(done|success|stored|updated|deleted|loggedin|loggedout|signedup|completed|fetched|navigated|finished|sent|created|saved|didmount)$/i;
+function doneOf(node) {
+  const outs = portsOf(node, 'output').filter((p) => p.signal);
+  const wired = outs.filter((p) => conns.some((c) => c.fromId === node.id && c.fromProperty === p.name));
+  return (wired.find((p) => DONE.test(p.name)) || outs.find((p) => DONE.test(p.name)) || wired[0] || outs[0])?.name;
+}
+function triggerOf(node) {
+  const ins = portsOf(node, 'input').filter((p) => p.signal);
+  return (ins.find((p) => /^(do|store|navigate|fetch|login|logout|signup|send|run|set|evaluate|eval|save|delete|update|show|hide|start)$/i.test(p.name)) || ins[0])?.name;
+}
+function renderWorkflow() {
+  renderEvents();
+  const main = $('steps'); main.innerHTML = '';
+  if (!selEvent || !byId[selEvent.node]) { main.append(h('div', { class: 'empty' }, 'Pick a workflow on the left, or make a new one.')); return; }
+  const ev = selEvent;
+  const wf = h('div', { class: 'wf' });
+  wf.append(h('div', { class: 'event-card' }, h('div', { class: 'ic' }, icon('bolt')), h('div', {}, h('h2', {}, eventTitle(ev)), h('small', {}, `${typeName(byId[ev.node].type)} · the "${portLabel(byId[ev.node], 'output', ev.port)}" signal`)),
+    h('div', { style: 'margin-left:auto' }, countSteps(chain(ev.node, ev.port)) ? null : h('button', { class: 'quiet', onclick: () => { const i = draftEvents.findIndex((d) => d.node === ev.node && d.port === ev.port); if (i >= 0) draftEvents.splice(i, 1); selEvent = null; renderWorkflow(); } }, 'Discard'))));
+  renderChain(wf, chain(ev.node, ev.port), { node: ev.node, port: ev.port }, 1);
+  main.append(wf);
+}
+let stepCounter = 0;
+function renderChain(into, steps, from, startN, prefix = '') {
+  const col = h('div', { class: 'chain' });
+  let n = startN;
+  let last = from;
+  for (const s of steps) {
+    if (col.children.length) col.append(h('div', { class: 'link' }));
+    col.append(stepCard(s, `${prefix}${n}`));
+    if (s.branches) {
+      col.append(h('div', { class: 'link' }));
+      const grid = h('div', { class: 'branches' });
+      for (const [side, port, label] of [['yes', 'ontrue', 'Yes'], ['no', 'onfalse', 'No']]) {
+        const b = h('div', { class: `branch ${side}` }, h('h4', {}, label));
+        renderChain(b, s.branches[side], { node: s.id, port }, 1, `${prefix}${n}${side === 'yes' ? 'a' : 'b'}.`);
+        grid.append(b);
+      }
+      col.append(grid);
+      last = null; break;
+    }
+    const d = doneOf(byId[s.id]);
+    last = d ? { node: s.id, port: d } : null;
+    n++;
+  }
+  into.append(col);
+  if (last) into.append(h('div', { class: 'addrow' }, h('button', { class: steps.length ? '' : 'primary', onclick: (e) => addActionMenu(e, last) }, icon('plus'), 'Add an action'), h('button', { title: 'A step that splits this workflow into a Yes and a No chain (a Condition node)', onclick: () => addAction('Condition', last) }, icon('branch'), 'Add a branch')));
+}
+function stepCard(s, n) {
+  const node = byId[s.id];
+  const params = node.parameters || {};
+  const ins = portsOf(node, 'input');
+  const isCond = node.type === 'Condition';
+  const lines = [];
+  for (const [k, v] of Object.entries(params)) {
+    if (['x', 'y'].includes(k) || typeof v === 'object' || (isCond && k === 'condition')) continue;
+    const p = ins.find((p) => p.name === k);
+    if (p?.signal) continue;
+    lines.push(h('span', {}, `${p?.label || k}: `, h('code', {}, String(v).slice(0, 80))));
+  }
+  for (const c of conns.filter((c) => c.toId === s.id && !isSignalPort(node, 'input', c.toProperty) && !(isCond && c.toProperty === 'condition'))) lines.push(h('span', { style: 'display:inline-flex;gap:4px;align-items:center' }, `${portLabel(node, 'input', c.toProperty)} = `, sourceChip(c.fromId, c.fromProperty)));
+  const settings = h('div', { class: 'props settings', style: `display:${openSteps.has(s.id) ? '' : 'none'}` });
+  const wiredIn = Object.fromEntries(conns.filter((c) => c.toId === s.id).map((c) => [c.toProperty, c]));
+  const ports = editablePorts(node, { wireOnly: true }).filter((p) => !['x', 'y'].includes(p.name) && !(isCond && p.name === 'condition'));
+  if (!ports.length) settings.append(h('div', { class: 'hint' }, 'This action has no settings to type; its inputs come from values.'));
+  for (const p of ports) settings.append(fieldFor(node, p, params[p.name], wiredIn[p.name]));
+  const card = h('div', { class: `step${isCond ? ' cond' : ''}` },
+    h('div', { class: 'num' }, isCond ? icon('branch') : n),
+    h('h3', {}, isCond ? 'Branch' : typeName(node.type), h('span', {}, isCond ? 'if the condition holds, Yes; otherwise No' : node.label || '')),
+    h('div', { class: 'acts' },
+      ports.length ? h('button', { class: 'quiet tiny', title: 'Settings', onclick: () => { const open = settings.style.display === 'none'; settings.style.display = open ? '' : 'none'; open ? openSteps.add(s.id) : openSteps.delete(s.id); } }, icon('settings')) : null,
+      h('button', { class: 'quiet tiny danger', title: isCond ? 'Delete the branch and both chains' : 'Delete step', onclick: () => deleteStep(s) }, icon('trash'))));
+  if (isCond) {
+    const cw = wiredIn.condition; const src = cw && byId[cw.fromId];
+    const pCond = { name: 'condition', displayName: 'Condition' };
+    const line = h('div', { class: 'cond-line' }, 'If ');
+    if (src && isComposed(src)) line.append(h('span', { class: 'chip expr', style: 'cursor:pointer', onclick: (e) => openComposer(e, node, pCond, src) }, icon('fx'), composedPreview(src)), h('button', { class: 'quiet tiny', onclick: (e) => openComposer(e, node, pCond, src) }, 'Edit'));
+    else if (src) line.append(sourceChip(cw.fromId, cw.fromProperty), h('button', { class: 'quiet tiny', onclick: () => edits(pageKey, [{ edit: 'disconnect', component: pageKey, from: { node: cw.fromId, port: cw.fromProperty }, to: { node: node.id, port: 'condition' } }]) }, icon('x')));
+    else line.append(h('button', { class: 'primary tiny', onclick: (e) => sourceMenu(e, node, pCond) }, icon('bolt'), 'Set the condition…'), h('span', { style: 'color:var(--muted)' }, '(a Yes / No value, or an expression)'));
+    card.append(line);
+  } else card.append(h('div', { class: 'lines' }, ...(lines.length ? lines : [h('span', { style: 'color:var(--muted)' }, 'No settings yet')]), s.siblings.length ? h('span', { style: 'color:var(--muted)' }, `+ ${s.siblings.length} more wired from the same signal`) : null));
+  card.append(settings);
+  return card;
+}
+function deleteStep(s) {
+  const node = byId[s.id];
+  const doomed = [s.id];
+  if (s.branches) for (const side of ['yes', 'no']) (function walk(list) { for (const x of list) { doomed.push(x.id); if (x.branches) { walk(x.branches.yes); walk(x.branches.no); } } })(s.branches[side]);
+  for (const id of [...doomed]) for (const e of nodes) if (isComposed(e) && e.metadata.composedFor.node === id) doomed.push(e.id); // its composed expressions go with it
+  edits(pageKey, doomed.map((id) => ({ edit: 'remove_node', component: pageKey, id })));
+  toast(s.branches ? 'Deleted the branch and its chains' : `Deleted the ${typeName(node.type)} step`);
+}
+const ACTIONS = [
+  ['RouterNavigate', 'Go to page', 'nav'], ['NewDbModelProperties', 'Create a new record', 'db'], ['SetDbModelProperties', 'Make changes to a record', 'db'], ['DeleteDbModelProperties', 'Delete a record', 'db'],
+  ['DbCollection2', 'Fetch records (query)', 'db'], ['Set Variable', 'Set a custom state or variable', 'state'], ['Condition', 'Branch (Yes / No)', 'branch'], ['net.noodl.user.LogIn', 'Log the user in', 'user'], ['net.noodl.user.LogOut', 'Log the user out', 'user'],
+  ['net.noodl.user.SignUp', 'Sign the user up', 'user'], ['Send Event', 'Send an event', 'bolt'], ['JavaScriptFunction', 'Run JavaScript', 'code'], ['Timer', 'Wait (timer)', 'bolt'], ['Navigate To Path', 'Go to a URL path', 'nav'], ['Show Popup', 'Show a popup', 'page']
+];
+function addActionMenu(e, from) {
+  closeMenu();
+  const menu = popover(e);
+  const search = h('input', { type: 'text', placeholder: 'Search actions…', oninput: () => fill(search.value) });
+  const list = h('div');
+  const fill = (q) => {
+    list.innerHTML = '';
+    const q2 = q.toLowerCase();
+    const named = ACTIONS.filter(([t]) => libIndex.has(t) || hasSpec(t));
+    const rest = (lib?.nodetypes || []).filter((t) => t.category !== 'Visual' && !ACTIONS.some(([a]) => a === t.name)).map((t) => [t.name, t.displayNodeName || t.name, 'code']);
+    for (const [title, all] of [['Actions', named], ['Every other node', rest]]) {
+      const shown = all.filter(([type, label]) => (!q2 || label.toLowerCase().includes(q2) || type.toLowerCase().includes(q2)) && triggerOf({ type, parameters: {} }));
+      if (!shown.length) continue;
+      list.append(h('div', { class: 'h' }, title));
+      for (const [type, label, ic] of shown) list.append(h('div', { class: 'item', onclick: () => { closeMenu(); if (type === 'Set Variable' && statesOf().length) return setStateMenu(e, from); addAction(type, from); } }, icon(ic), label, h('small', {}, typeName(type))));
+    }
+  };
+  fill('');
+  menu.append(h('div', { class: 'search' }, icon('search'), search), list); document.body.append(menu); search.focus();
+  dismissOnOutside(menu);
+}
+/** Bubble's "Set state": which custom state (or a plain page variable) the Set Variable step writes. */
+function setStateMenu(e, from) {
+  const menu = popover(e);
+  menu.append(h('div', { class: 'h' }, 'Which state?'));
+  for (const s of statesOf()) menu.append(h('div', { class: 'item', onclick: () => { closeMenu(); addAction('Set Variable', from, { name: s.parameters?.name }, `Set ${labelOf(s.metadata.customState.of)}'s ${stateName(s)}`); } }, icon('state'), `${labelOf(s.metadata.customState.of)}'s ${stateName(s)}`, h('small', {}, s.metadata.customState.type)));
+  menu.append(h('div', { class: 'item', onclick: () => { closeMenu(); addAction('Set Variable', from); } }, icon('code'), 'A page variable by name'));
+  document.body.append(menu); dismissOnOutside(menu);
+}
+function addAction(type, from, params = {}, label) {
+  const trig = triggerOf({ type, parameters: {} });
+  const n = nodes.filter((n) => !isVisualType(n.type) && !isHelperNode(n)).length;
+  const [id] = edits(pageKey, [{ edit: 'add_node', component: pageKey, type, label, x: 700 + (n % 3) * 220, y: 200 + Math.floor(n / 3) * 90, parameters: Object.keys(params).length ? params : undefined }], { redraw: false });
+  edits(pageKey, [{ edit: 'connect', component: pageKey, from: { node: from.node, port: from.port }, to: { node: id, port: trig } }]);
+  if (!events().some((ev) => ev.node === selEvent.node && ev.port === selEvent.port)) draftEvents.length = 0;
+  if (type !== 'Condition') openSteps.add(id);
+  renderWorkflow();
+  toast(type === 'Condition' ? 'Added a branch: set its condition, then add actions under Yes and No' : `Added ${label || typeName(type)} after ${labelOf(from.node)}`);
+}
+$('newevent').onclick = (e) => {
+  closeMenu();
+  const menu = popover(e);
+  const search = h('input', { type: 'text', placeholder: 'Search elements and events…', oninput: () => fill(search.value) });
+  const list = h('div');
+  const fill = (q) => {
+    list.innerHTML = '';
+    const q2 = q.toLowerCase();
+    for (const id of visualIds) {
+      const node = byId[id];
+      const sigs = portsOf(node, 'output').filter((p) => p.signal);
+      const shown = sigs.filter((p) => !q2 || `${labelOf(id)} ${p.label}`.toLowerCase().includes(q2));
+      if (!shown.length) continue;
+      list.append(h('div', { class: 'h' }, labelOf(id)));
+      for (const p of shown) list.append(h('div', { class: 'item', onclick: () => { closeMenu(); draftEvents.push({ node: id, port: p.name }); selEvent = { node: id, port: p.name }; renderWorkflow(); } }, icon(glyphOf(node.type)), `When ${labelOf(id)}: ${p.label}`, h('small', {}, typeName(node.type))));
+    }
+  };
+  fill('');
+  menu.append(h('div', { class: 'search' }, icon('search'), search), list);
+  document.body.append(menu); search.focus();
+  dismissOnOutside(menu);
+};
+
+/* ================= Data: types and fields (the project file), rows (the backend), option sets (a component each) ================= */
+let selType = null, selSet = null, dataSub = 'types';
+const projectJson = () => store.readProjectFile();
+const writeProject = (pj) => writeJsonFile('nodegx.project.json', pj);
+const collections = () => projectJson()?.metadata?.dbCollections || [];
+const schemaTables = () => { try { return JSON.parse(files.read('backend/schema.json') || '[]').filter((s) => s.action === 'createTable'); } catch { return []; } };
+for (const b of document.querySelectorAll('#data .subtabs button')) b.onclick = () => { dataSub = b.dataset.sub; for (const x of document.querySelectorAll('#data .subtabs button')) x.setAttribute('aria-selected', x === b); $('data-types').hidden = dataSub !== 'types'; $('data-options').hidden = dataSub !== 'options'; renderData(); };
+function renderTypes() {
+  const box = $('types'); box.innerHTML = '';
+  const names = new Set();
+  for (const c of collections()) { names.add(c.name); box.append(h('div', { class: 'row', 'aria-selected': selType === c.name, onclick: () => { selType = c.name; renderData(); } }, icon('db'), c.name, h('span', { class: 't' }, `${c.columns?.length ?? 0} fields`))); }
+  for (const t of schemaTables()) if (!names.has(t.table)) box.append(h('div', { class: 'row', 'aria-selected': selType === t.table, onclick: () => { selType = t.table; renderData(); } }, icon('db'), t.table, h('span', { class: 't' }, 'schema.json')));
+  if (!box.children.length) box.append(h('div', { class: 'hint' }, 'No data types yet.'));
+}
+$('newtype').onclick = () => {
+  const name = prompt('Name of the new data type (a collection)');
+  if (!name) return;
+  const pj = projectJson(); pj.metadata ??= {}; pj.metadata.dbCollections ??= [];
+  if (pj.metadata.dbCollections.some((c) => c.name === name)) return toast('That type exists');
+  pj.metadata.dbCollections.push({ name, columns: [] });
+  writeProject(pj); selType = name; renderData();
+};
+const FIELD_TYPES = ['String', 'Number', 'Boolean', 'Date', 'Pointer', 'Array', 'Object', 'File', 'GeoPoint'];
+async function renderData() {
+  if (dataSub === 'options') return renderOptionSets();
+  renderTypes();
+  const main = $('datamain'); main.innerHTML = '';
+  if (!selType) { main.append(h('div', { class: 'empty' }, 'Pick a data type.')); return; }
+  const pj = projectJson();
+  const coll = (pj?.metadata?.dbCollections || []).find((c) => c.name === selType);
+  const fromSchema = schemaTables().find((t) => t.table === selType);
+  const cols = coll?.columns || fromSchema?.columns || [];
+  main.append(h('h2', {}, selType));
+  if (fromSchema && !coll) main.append(h('div', { class: 'bar' }, h('span', { class: 'note' }, 'Defined in backend/schema.json (read-only here).')));
+  const ft = h('table', {}, h('tr', {}, h('th', {}, 'Field'), h('th', {}, 'Type'), h('th', {}, 'Of type'), h('th', {})));
+  cols.forEach((col, i) => ft.append(h('tr', {},
+    h('td', {}, coll ? h('input', { type: 'text', value: col.name, onchange: (e) => { col.name = e.target.value; writeProject(pj); renderData(); } }) : col.name),
+    h('td', {}, coll ? h('select', { onchange: (e) => { col.type = e.target.value; writeProject(pj); renderData(); } }, ...FIELD_TYPES.map((t) => h('option', { value: t, selected: col.type === t }, t))) : col.type),
+    h('td', {}, col.type === 'Pointer' ? (coll ? h('input', { type: 'text', value: col.targetClass || '', placeholder: 'target type', onchange: (e) => { col.targetClass = e.target.value; writeProject(pj); } }) : col.targetClass) : ''),
+    h('td', {}, coll ? h('button', { class: 'quiet tiny danger', onclick: () => { coll.columns.splice(i, 1); writeProject(pj); renderData(); } }, icon('x')) : ''))));
+  main.append(ft);
+  if (coll) main.append(h('div', { class: 'bar' }, h('button', { onclick: () => { const name = prompt('Field name'); if (!name) return; coll.columns ??= []; coll.columns.push({ name, type: 'String' }); writeProject(pj); renderData(); } }, icon('plus'), 'New field'),
+    h('button', { class: 'quiet danger', onclick: () => { if (!confirm(`Remove the type ${selType} from the project? (Rows on the backend are kept.)`)) return; pj.metadata.dbCollections = pj.metadata.dbCollections.filter((c) => c.name !== selType); writeProject(pj); selType = null; renderData(); } }, 'Remove type')));
+  main.append(h('h2', { style: 'margin-top:26px' }, 'App data'));
+  const rowsBox = h('div', {}, h('div', { class: 'note' }, 'Loading…'));
+  main.append(rowsBox);
+  await renderRows(rowsBox, cols);
+}
+async function api(path, init) {
+  const r = await fetch('/api/backend' + path, { headers: { 'content-type': 'application/json' }, ...init });
+  let body = null; try { body = await r.json(); } catch { /* empty */ }
+  if (!r.ok) throw new Error(body?.error || `${r.status} ${r.statusText}`);
+  return body;
+}
+async function renderRows(box, cols) {
+  box.innerHTML = '';
+  const backend = opened.backend;
+  if (!backend?.endpoint) { box.append(h('div', { class: 'note' }, 'This project is not bound to a backend, so there are no rows to show. Provision one with the nodegx server (provision_backend).')); return; }
+  let rows;
+  try { rows = (await api(`/classes/${encodeURIComponent(selType)}?limit=100`)).results || []; }
+  catch (err) { box.append(h('div', { class: 'note' }, `The backend at ${backend.endpoint} did not answer for ${selType}: ${err.message}`)); return; }
+  const names = cols.map((c) => c.name);
+  const t = h('table', {}, h('tr', {}, h('th', {}, 'id'), ...names.map((n) => h('th', {}, n)), h('th', {}, 'created'), h('th', {})));
+  for (const row of rows) {
+    const tr = h('tr', {}, h('td', {}, h('code', {}, String(row.objectId || row.id || '').slice(0, 10))));
+    for (const n of names) {
+      const v = row[n];
+      const td = h('td', { class: 'cell', onclick: () => editCell(td, row, n, v) }, v === undefined || v === null ? '' : typeof v === 'object' ? JSON.stringify(v) : String(v));
+      tr.append(td);
+    }
+    tr.append(h('td', {}, (row.createdAt || '').slice(0, 16)), h('td', {}, h('button', { class: 'quiet tiny danger', onclick: async () => { if (!confirm('Delete this row?')) return; try { await api(`/classes/${encodeURIComponent(selType)}/${row.objectId}`, { method: 'DELETE' }); renderData(); } catch (e) { toast(e.message); } } }, icon('x'))));
+    t.append(tr);
+  }
+  box.append(h('div', { class: 'bar' }, h('button', { class: 'primary', onclick: async () => { try { await api(`/classes/${encodeURIComponent(selType)}`, { method: 'POST', body: JSON.stringify({}) }); renderData(); } catch (e) { toast(e.message); } } }, icon('plus'), 'New entry'), h('span', { class: 'note' }, `${rows.length} row(s) on ${backend.endpoint}`)), t);
+}
+function editCell(td, row, field, value) {
+  if (td.querySelector('input')) return;
+  const col = (collections().find((c) => c.name === selType)?.columns || []).find((c) => c.name === field);
+  const inp = h('input', { type: 'text', value: value === undefined || value === null ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value) });
+  td.textContent = ''; td.append(inp); inp.focus(); inp.select();
+  let done = false;
+  const commit = async () => {
+    if (done) return; done = true;
+    let v = inp.value;
+    if (col?.type === 'Number') v = v === '' ? null : Number(v);
+    else if (col?.type === 'Boolean') v = /^(true|yes|1)$/i.test(v);
+    else if (['Array', 'Object', 'Pointer', 'GeoPoint'].includes(col?.type)) { try { v = JSON.parse(v); } catch { /* keep text */ } }
+    try { await api(`/classes/${encodeURIComponent(selType)}/${row.objectId}`, { method: 'PUT', body: JSON.stringify({ [field]: v }) }); td.textContent = inp.value; }
+    catch (e) { toast(e.message); td.textContent = value ?? ''; }
+  };
+  inp.onblur = commit; inp.onkeydown = (e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { done = true; td.textContent = value ?? ''; } };
+}
+
+/* ---- option sets: a logic component with one Static Data node (JSON) and Component Outputs (Items, Count) ---- */
+const ATTR_TYPES = ['text', 'number', 'yes / no', 'date'];
+$('newoptset').onclick = () => {
+  const name = prompt('Name of the option set (e.g. Colours, Countries, Priorities)');
+  if (!name) return;
+  const key = `Option sets/${name.trim()}`;
+  if (registry()[key]) return toast('That option set exists');
+  createComponent(key, 'logic', [
+    { id: 'data', type: 'Static Data', label: `${name} · the options`, x: 100, y: 100, parameters: { type: 'json', json: '[]' } },
+    { id: 'out', type: 'Component Outputs', label: 'What the page reads', x: 420, y: 100, ports: [{ name: 'items', displayName: 'All options', plug: 'input', type: 'array' }, { name: 'count', displayName: 'Count', plug: 'input', type: 'number' }] }
+  ], [{ fromId: 'data', fromProperty: 'items', toId: 'out', toProperty: 'items' }, { fromId: 'data', fromProperty: 'count', toId: 'out', toProperty: 'count' }],
+  { optionSet: { attributes: [{ name: 'display', type: 'text' }] } });
+  selSet = key; renderData();
+  toast(`${name} is an option set: a component the page loads as plain JSON`);
+};
+function writeOptionSet(set, { attributes, options }) {
+  const c = store.readComponent(set.key);
+  const out = JSON.parse(JSON.stringify(c.files));
+  if (attributes) out.component.metadata = { ...(out.component.metadata || {}), optionSet: { attributes } };
+  if (options) { const d = out.nodes.nodes.find((n) => n.id === set.dataId); d.parameters = { ...(d.parameters || {}), type: 'json', json: JSON.stringify(options, null, 2) }; }
+  snapshot();
+  try { store.writeComponent(set.key, out, { ifRevision: c.revision }); } catch (err) { undoStack.pop(); toast(err.message); throw err; }
+  persist(); rebuild(); renderData();
+}
+function renderOptionSets() {
+  const box = $('optsets'); box.innerHTML = '';
+  for (const k of optionSetKeys()) { const s = optionSet(k); box.append(h('div', { class: 'row', 'aria-selected': selSet === k, onclick: () => { selSet = k; renderData(); } }, icon('list'), s.name, h('span', { class: 't' }, `${s.options.length} option(s)`))); }
+  if (!box.children.length) box.append(h('div', { class: 'hint' }, 'No option sets yet.'));
+  const main = $('optmain'); main.innerHTML = '';
+  const set = selSet && optionSet(selSet);
+  if (!set) { main.append(h('div', { class: 'empty' }, 'Pick an option set, or make one. An option set is a fixed list (colours, countries, priorities) the app loads with the page: no request, no backend.')); return; }
+  main.append(h('h2', {}, set.name), h('div', { class: 'bar', style: 'margin-top:-6px' }, h('span', { class: 'note' }, `Read it anywhere as `, h('b', {}, `${set.name} · all options`), ` — the component `, h('code', {}, `/${set.key}`), `, one Static Data node, loaded with the page.`)));
+  // attributes
+  const card = h('div', { class: 'card' }, h('h4', {}, 'Attributes (fields that describe each option)'));
+  const at = h('table', {}, h('tr', {}, h('th', {}, 'Attribute'), h('th', {}, 'Type'), h('th', {})));
+  const attrs = JSON.parse(JSON.stringify(set.attributes));
+  attrs.forEach((a, i) => at.append(h('tr', {},
+    h('td', {}, i === 0 ? h('span', {}, a.name, h('span', { class: 'note', style: 'margin-left:8px' }, 'built in')) : h('input', { type: 'text', value: a.name, onchange: (e) => { const old = a.name; a.name = slug(e.target.value); writeOptionSet(set, { attributes: attrs, options: set.options.map((o) => { const { [old]: v, ...rest } = o; return { ...rest, [a.name]: v }; }) }); } })),
+    h('td', {}, h('select', { onchange: (e) => { a.type = e.target.value; writeOptionSet(set, { attributes: attrs }); } }, ...ATTR_TYPES.map((t) => h('option', { value: t, selected: a.type === t }, t)))),
+    h('td', {}, i === 0 ? '' : h('button', { class: 'quiet tiny danger', onclick: () => { attrs.splice(i, 1); writeOptionSet(set, { attributes: attrs, options: set.options.map((o) => { const { [a.name]: _, ...rest } = o; return rest; }) }); } }, icon('x'))))));
+  card.append(at, h('div', { class: 'bar' }, h('button', { onclick: () => { const name = prompt('Attribute name'); if (!name) return; attrs.push({ name: slug(name), type: 'text' }); writeOptionSet(set, { attributes: attrs }); } }, icon('plus'), 'New attribute')));
+  main.append(card);
+  // options
+  const oc = h('div', { class: 'card' }, h('h4', {}, 'Options'));
+  const ot = h('table', {}, h('tr', {}, ...attrs.map((a) => h('th', {}, a.name)), h('th', {})));
+  const options = JSON.parse(JSON.stringify(set.options));
+  options.forEach((o, i) => ot.append(h('tr', {}, ...attrs.map((a) => h('td', {}, h('input', { type: 'text', value: o[a.name] ?? '', onchange: (e) => { const v = e.target.value; o[a.name] = a.type === 'number' ? Number(v) : a.type === 'yes / no' ? /^(yes|true|1)$/i.test(v) : v; writeOptionSet(set, { options }); } }))), h('td', {}, h('button', { class: 'quiet tiny danger', onclick: () => { options.splice(i, 1); writeOptionSet(set, { options }); } }, icon('x'))))));
+  const newRow = h('input', { type: 'text', placeholder: 'New option (its display)', style: 'max-width:280px', onkeydown: (e) => { if (e.key === 'Enter') addOpt(); } });
+  const addOpt = () => { if (!newRow.value.trim()) return; options.push({ [attrs[0].name]: newRow.value.trim() }); writeOptionSet(set, { options }); };
+  oc.append(ot, h('div', { class: 'bar' }, newRow, h('button', { class: 'primary', onclick: addOpt }, icon('plus'), 'Create')));
+  main.append(oc);
+  main.append(h('div', { class: 'bar' }, h('button', { class: 'quiet danger', onclick: () => { if (!confirm(`Delete the option set ${set.name}? Pages that read it keep a dangling instance.`)) return; snapshot(); store.deleteComponent(set.key); persist(); rebuild(); selSet = null; renderData(); } }, icon('trash'), 'Delete option set')));
+}
+
+/* ================= Styles: the project's variants in nodegx.styles.json, by element type (Bubble's styles, NodeGX's Looks) ================= */
+let selStyle = null; // { typename, name }
+const stylesFile = () => store.readStyles() || { version: 2 };
+const writeStyles = (s) => writeJsonFile('nodegx.styles.json', s);
+const variantsFor = (typename) => (stylesFile().variants || []).filter((v) => v.typename === typename);
+const NOT_STYLE = new Set(['text', 'label', 'placeholder', 'source', 'value', 'checked', 'items', 'sizeMode', 'width', 'height', 'marginTop', 'marginBottom', 'marginLeft', 'marginRight', 'position', 'flexDirection', 'alignX', 'alignY', 'urlPath', 'title']);
+function saveAsStyle(node) {
+  const name = prompt(`Name of the style for every ${typeName(node.type)} (e.g. Primary, Outline, Danger)`);
+  if (!name) return;
+  const s = stylesFile(); s.variants ??= [];
+  if (s.variants.some((v) => v.typename === node.type && v.name === name)) return toast('A style of that name exists for this type');
+  const parameters = Object.fromEntries(Object.entries(node.parameters || {}).filter(([k]) => !NOT_STYLE.has(k)));
+  s.variants.push({ name, typename: node.type, parameters, stateParameters: {}, stateTransitions: {}, defaultStateTransitions: {} });
+  writeStyles(s);
+  edits(pageKey, [{ edit: 'set_variant', component: pageKey, id: node.id, variant: name }, ...Object.keys(parameters).map((k) => ({ edit: 'set_parameter', component: pageKey, id: node.id, name: k, value: undefined }))], { redraw: true });
+  toast(`${name} is a style every ${typeName(node.type)} can wear — ${Object.keys(parameters).length} properties`);
+}
+const STYLE_TYPES = ['net.noodl.controls.button', 'Text', 'Group', 'net.noodl.controls.textinput', 'Image', 'net.noodl.controls.checkbox', 'net.noodl.controls.options', 'net.noodl.visual.icon'];
+$('newstyle').onclick = (e) => {
+  closeMenu();
+  const menu = popover(e);
+  menu.append(h('div', { class: 'h' }, 'A style for which element?'));
+  for (const t of STYLE_TYPES.filter((t) => libIndex.has(t))) menu.append(h('div', { class: 'item', onclick: () => { closeMenu(); const name = prompt(`Name of the new ${typeName(t)} style`); if (!name) return; const s = stylesFile(); s.variants ??= []; if (s.variants.some((v) => v.typename === t && v.name === name)) return toast('That style exists'); s.variants.push({ name, typename: t, parameters: {}, stateParameters: {}, stateTransitions: {}, defaultStateTransitions: {} }); writeStyles(s); selStyle = { typename: t, name }; renderStyles(); } }, icon(glyphOf(t)), typeName(t)));
+  document.body.append(menu); dismissOnOutside(menu);
+};
+function renderStyles() {
+  const list = $('stylelist'); list.innerHTML = '';
+  const all = stylesFile().variants || [];
+  const byType = new Map();
+  for (const v of all) { if (!byType.has(v.typename)) byType.set(v.typename, []); byType.get(v.typename).push(v); }
+  if (!all.length) list.append(h('div', { class: 'hint' }, 'No styles yet. Select an element in Design and "Save as a style", or make one here.'));
+  for (const [t, vs] of byType) {
+    list.append(h('div', { class: 'grp' }, typeName(t)));
+    for (const v of vs) list.append(h('div', { class: 'row', 'aria-selected': selStyle && selStyle.typename === t && selStyle.name === v.name, onclick: () => { selStyle = { typename: t, name: v.name }; renderStyles(); } }, icon(glyphOf(t)), v.name, h('span', { class: 't' }, `${Object.keys(v.parameters || {}).length}`)));
+  }
+  const main = $('stylemain'); main.innerHTML = '';
+  const props = $('styleprops'); props.innerHTML = '';
+  const v = selStyle && all.find((x) => x.typename === selStyle.typename && x.name === selStyle.name);
+  if (!v) { main.append(h('div', { class: 'empty' }, 'Pick a style. A style is a set of properties every element of one type can wear; here it is a variant in nodegx.styles.json.')); props.append(h('div', { class: 'empty' }, 'The style\'s properties appear here.')); return; }
+  const wearers = []; for (const k of Object.keys(registry())) { try { for (const n of store.readComponent(k).files.nodes.nodes) if (n.variant === v.name && n.type === v.typename) wearers.push({ key: k, id: n.id, label: n.label || typeName(n.type) }); } catch { /* skip */ } }
+  main.append(h('div', { style: 'color:var(--muted);font-size:12px;margin-bottom:4px' }, typeName(v.typename)), h('h2', {}, v.name));
+  const stage = h('div', { class: 'swatch-stage' });
+  const sample = h('div', { class: 'sample' });
+  const params = v.parameters || {};
+  const keys = Object.keys(params);
+  if (!keys.length) sample.append(h('div', { class: 'note' }, 'No properties yet — set some on the right.'));
+  else sample.append(h('div', { style: 'display:flex;flex-wrap:wrap;gap:6px;justify-content:center;max-width:460px' }, ...keys.map((k) => { const val = params[k]; const text = typeof val === 'object' && val ? `${val.value}${val.unit ?? ''}` : String(val); const isCol = /color|Color|background/.test(k) || /^#|^var\(--/.test(text); return h('span', { class: 'chip', style: 'background:#fff;color:var(--ink-2);border-color:var(--line-2)' }, isCol ? h('i', { style: `width:12px;height:12px;border-radius:3px;background:${resolveColor(text)};border:1px solid var(--line-2)` }) : null, `${k}: ${text}`); })));
+  stage.append(sample);
+  main.append(stage);
+  const card = h('div', { class: 'card' }, h('h4', {}, `Elements wearing it · ${wearers.length}`));
+  if (!wearers.length) card.append(h('div', { class: 'note' }, 'None yet. Select an element in Design and pick this style at the top of its properties.'));
+  for (const w of wearers.slice(0, 40)) card.append(h('div', { class: 'row', onclick: () => { if (registry()[w.key]?.type === 'page') { pageKey = w.key; readGraph(); } sel = w.id; switchTab('design'); showPage(pageKey); } }, icon(glyphOf(v.typename)), w.label, h('span', { class: 't' }, w.key)));
+  main.append(card, h('div', { class: 'bar' }, h('button', { class: 'quiet danger', onclick: () => { if (!confirm(`Delete the style ${v.name}? The ${wearers.length} element(s) wearing it fall back to their own properties.`)) return; const s = stylesFile(); s.variants = s.variants.filter((x) => x !== v); writeStyles(s); selStyle = null; renderStyles(); } }, icon('trash'), 'Delete style')));
+  // the style's properties, edited with the same fields as an element's
+  props.append(h('div', { class: 'head' }, h('input', { type: 'text', value: v.name, onchange: (e) => { const name = e.target.value.trim(); if (!name) return; const s = stylesFile(); const me = s.variants.find((x) => x.typename === v.typename && x.name === v.name); me.name = name; writeStyles(s); for (const w of wearers) edits(w.key, [{ edit: 'set_variant', component: w.key, id: w.id, variant: name }], { redraw: false }); selStyle.name = name; renderStyles(); } }), h('span'), h('div', { class: 'type' }, `a style of ${typeName(v.typename)}`)));
+  const wrap = h('div', { class: 'props' });
+  const fake = { id: undefined, type: v.typename, parameters: params };
+  const setter = (name) => (value) => { const s = stylesFile(); const me = s.variants.find((x) => x.typename === v.typename && x.name === v.name); me.parameters ??= {}; if (value === undefined) delete me.parameters[name]; else me.parameters[name] = value; writeStyles(s); };
+  const groups = new Map();
+  for (const p of editablePorts(fake)) { if (NOT_STYLE.has(p.name)) continue; const g = p.group || 'General'; if (!groups.has(g)) groups.set(g, []); groups.get(g).push(p); }
+  let first = true;
+  for (const [g, ports] of groups) {
+    const det = h('details', { class: 'group', open: first || ports.some((p) => params[p.name] !== undefined) }, h('summary', {}, g));
+    first = false;
+    for (const p of ports) det.append(fieldFor(fake, p, params[p.name], undefined, setter(p.name)));
+    wrap.append(det);
+  }
+  props.append(wrap);
+}
+
+/* ================= tabs, boot ================= */
+let tab = 'design';
+function switchTab(name) {
+  tab = name;
+  for (const x of document.querySelectorAll('#rail [role=tab]')) x.setAttribute('aria-selected', x.dataset.tab === name);
+  for (const s of document.querySelectorAll('main > section.tab')) s.hidden = s.id !== name;
+  $('pagepick-l').style.display = name === 'data' || name === 'styles' ? 'none' : '';
+  $('widthseg').style.display = name === 'design' ? '' : 'none';
+  $('previewmode-l').style.display = name === 'design' ? '' : 'none';
+  renderAll();
+}
+for (const b of document.querySelectorAll('#rail [role=tab]')) b.onclick = () => switchTab(b.dataset.tab);
+function renderAll() {
+  renderPagePick(); renderDatalists();
+  if (tab === 'design') { renderPalette(); renderTree(); renderProps(); draw(); }
+  if (tab === 'workflow') renderWorkflow();
+  if (tab === 'data') renderData();
+  if (tab === 'styles') renderStyles();
+}
+readGraph();
+renderPagePick();
+renderPalette(); renderTree();
+status('Starting the app…', 'busy');
+const first = await preview.update(files.entries());
+lastShow = first;
+lib = preview.nodeLibrary; libIndex = new Map((lib?.nodetypes || []).map((t) => [t.name, t]));
+readGraph();
+showProblems(first);
+if (first.status === 'ok') {
+  status(`App on screen · ${Math.round(first.exportMs)} ms export, ${Math.round(first.frameMs)} ms draw${first.warnings?.length ? ` · ${first.warnings.length} warning(s)` : ''}`);
+  await showPage(pageKey); hookFrame(); mapElements();
+} else {
+  const d = first.report?.diagnostics?.find((d) => d.severity === 'error');
+  status(`The app is not shown: ${d ? d.message.slice(0, 160) : first.message || first.status}`, 'bad');
+}
+renderAll();
+document.title = `ready ${opened.name} pages=${pageKeys().length} visual=${visualIds.length}`;
+</script>
+</html>

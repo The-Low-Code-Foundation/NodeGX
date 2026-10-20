@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "77e4f358-5014-5481-893e-b9ca734f2ebc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-15",
+      "type": "noodl.cloud.request",
+      "label": "movePart(move)",
+      "parameters": {
+        "params": "move",
+        "ptype-move": "object",
+        "preq-move": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-13",
+      "type": "JavaScriptFunction",
+      "label": "Move an order part one step along, or cancel it with why: its seller’s staff, or the admin",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nvar STEPS = [\"new\",\"confirmed\",\"paid\",\"packed\",\"sent\",\"delivered\"];\nvar AT_THE_DOOR = [\"on-delivery\"];\nvar BY_PROVIDER = [\"paystack\",\"flutterwave\"];\nvar NAMES = {\"new\":\"New\",\"confirmed\":\"Confirmed\",\"paid\":\"Paid\",\"packed\":\"Packed\",\"sent\":\"Sent\",\"delivered\":\"Delivered\",\"cancelled\":\"Cancelled\"};\nvar m = Inputs.move;\nif (m === undefined || Inputs.userId === undefined) return;\nif (!m || typeof m !== 'object' || Array.isArray(m)) { refuse('Say which part, and where it moves.'); return; }\nvar me = await caller(Inputs.userId);\nif (!me) { refuse('This sign-in has no place in the marketplace.'); return; }\nvar id = text(m.partId, 64);\nvar part = id ? await one('OrderPart', { objectId: { equalTo: id } }) : null;\nif (!part) { refuse('There is no such order part.'); return; }\nif (me.role !== 'admin' && (!idOf(me.seller) || idOf(part.seller) !== idOf(me.seller))) { refuse('That part of the order is another seller’s.'); return; }\nvar from = part.status || 'new';\nif (from === 'delivered' || from === 'cancelled') { refuse('This part is ' + from + ': it doesn’t move any more.'); return; }\nvar way = await one('WayToPay', { objectId: { equalTo: idOf(part.wayToPay) } });\nvar steps = way && AT_THE_DOOR.indexOf(way.method) >= 0 ? STEPS.filter(function (s) { return s !== 'paid'; }) : STEPS;\nvar to = typeof m.to === 'string' ? m.to : '';\nvar fields = {};\nif (to === 'cancelled') {\n  var why = text(m.reason, 500);\n  if (!why) { refuse('Say why it is cancelled: the buyer sees it.'); return; }\n  fields = { status: 'cancelled', cancelledReason: why };\n} else {\n  var next = steps[steps.indexOf(from) + 1];\n  if (to !== next) { refuse('From ' + NAMES[from] + ' it moves to ' + NAMES[next] + ' next.'); return; }\n  if (to === 'paid' && way && BY_PROVIDER.indexOf(way.method) >= 0) { refuse('A card payment is marked paid by the payment provider, once the buyer has paid.'); return; }\n  fields.status = to;\n  if (to === 'confirmed') {\n    var typed = m.deliveryCost === undefined || m.deliveryCost === null ? '' : String(m.deliveryCost).trim().replace(',', '.');\n    var cost = Number(typed);\n    if (!typed || !isFinite(cost) || cost < 0) { refuse('Say what delivery costs: 0 if it is free.'); return; }\n    fields.deliveryCost = Math.round(cost * 100) / 100;\n    fields.deliveryNote = text(m.deliveryNote, 200);\n  }\n}\nawait Noodl.Records.save(id, fields, { className: 'OrderPart' });\nawait history('OrderPart', 'orderPart', id, Inputs.userId, diff(part, fields));\nOutputs.part = { id: id, status: fields.status };\nOutputs.done();",
+        "runOnChange-in-move": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-move",
+          "displayName": "move",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-part",
+          "displayName": "part",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-15",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "part"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-15",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

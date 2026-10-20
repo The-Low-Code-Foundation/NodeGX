@@ -1,7 +1,8 @@
 ---
 id: P100-UPG001-SNAP
 title: nodegx export stops outright with "Cannot access 'snapActionList' before initialization" on four real projects
-status: scheduled
+status: fixed
+regression: packages/nodegx-export/tests/p100-upg001-snap.test.ts (3 of 4 red on HEAD's plan.ts; the control green on both)
 phase: P109
 task: ISL-043
 severity: high
@@ -28,3 +29,18 @@ has executed, which is a temporal-dead-zone throw.
 **Proposed:** hoist `snapExpr` / `snapActionList` / `snapAction` above the first closure that can reach them,
 or make them `function` declarations. Pin it with a spec that runs a planned States/Script chain on the
 smallest project that reproduces. Small.
+
+**Re-measured and fixed 2026-10-14 (P18 session 104, ISL-043 AC1).** It still reproduced at HEAD `393d01038`.
+`nodegx export --dry-run` on a copy of *Landing page test V2* exited 2. From source, the stack is `planComponent`
+→ the value-output pass (`plan.ts:15406`) → `resolveExpr` → `statesPlanOf`, which snapshots the States node's
+listener chains when it registers. The shape is `ServiceCard`: `At open` → Component Outputs `isOpen`, and
+`Reached open` → `opened`.
+
+🔴 **There were two TDZs, not one.** Fixing `snapActionList` (with its three siblings `exprTouchesSnap`, `snapExpr`,
+`snapAction`, now hoisted `function` declarations, because they close over nothing but each other) exposed
+`chainSnapshotFor`, which reads the `chainSnapshots` Map. Both are now declared above `statesPlanOf`. For every
+project that exported before, evaluation order is unchanged, because this path always threw.
+
+Readings: all four projects export from source (59 / 63 / 59 / 59 files) and their emitted apps typecheck with 0
+diagnostics. The new spec reads 4/4 on the fix and 3 failed on HEAD's `plan.ts`. The whole export jest reads
+`Test Suites: 116 passed, 116` and the HLS-001 corpus golden did not move. Package and editor `tsc --noEmit` are 0.

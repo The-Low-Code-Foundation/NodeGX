@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a7c10d00-0000-4000-8000-000000000179",
+  "name": "Greeter",
+  "path": "/Components/Greeter",
+  "type": "visual",
+  "modified": "2026-10-15T12:00:00.000Z",
+  "description": "EXP-011 §77 fixture: two Action Handlers on channel desk. GREET completes on its own with Result \"hello\" and its Trigger writes the Payload into a Variable shown in a Text. SLOW has Auto Complete off: Complete and Fail are two buttons, its Error Message is authored, and its Triggered Count is a second Text."
+}

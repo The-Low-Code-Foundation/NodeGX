@@ -1,0 +1,24 @@
+{
+  "name": "nodegx-table-editor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A NodeGX editor that is a table: one row per node, one column per port. Edit a cell, press Save, and the app's files change.",
+  "type": "module",
+  "license": "GPL-3.0-only",
+  "scripts": {
+    "prestart": "node tools/ensure-deps.mjs",
+    "start": "node server.mjs",
+    "test": "node tools/unit-test.mjs && node suite/run.mjs && node suite/run.mjs --control",
+    "test:suite": "node suite/run.mjs",
+    "test:control": "node suite/run.mjs --control",
+    "test:page": "node tools/page-test.mjs"
+  },
+  "dependencies": {
+    "@nodegx/node-spec": "^0.1.0",
+    "@nodegx/preview": "^0.2.2",
+    "@nodegx/project-contract": "^0.1.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

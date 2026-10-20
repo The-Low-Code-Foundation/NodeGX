@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "eb2b883e-8229-53df-888e-a594cb047f2f",
+  "name": "Sellers",
+  "path": "/Pages/Admin/Sellers",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The admin’s sellers: add, change, give a login, stop or bring back"
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f29e4f1b-2863-5cc1-8c2a-fb3e14d645d1",
+  "name": "Finish race",
+  "path": "/Logic/Finish race",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The stars a race pays that are not answers: the landing, win or lose, and a new personal best. Once per race id. Publishes the model (store it), the race's whole take and why."
+}

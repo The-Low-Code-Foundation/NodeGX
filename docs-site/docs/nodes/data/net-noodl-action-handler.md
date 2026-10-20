@@ -18,6 +18,7 @@ For every action a backend should be able to trigger, one node each. This is als
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -94,7 +95,13 @@ The idiomatic shape for a backend that sends commands rather than data. Server-S
 
 [Action Dispatcher](./net-noodl-action-dispatcher.md), [Set Global Store](./net-noodl-global-store-set.md), [Server-Sent Events](./net-noodl-sse.md), [WebSocket](./net-noodl-web-socket.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

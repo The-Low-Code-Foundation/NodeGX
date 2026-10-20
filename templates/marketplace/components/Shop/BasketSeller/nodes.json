@@ -1,0 +1,235 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2b3c99c3-ed56-5c84-878a-694ce17dbcc0",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "bsRoot",
+      "type": "Group",
+      "label": "A seller’s products",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "bsHead",
+        "bsEach"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "bsHead",
+      "type": "Group",
+      "label": "The seller",
+      "parent": "bsRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "bsLogo",
+        "bsInitials",
+        "bsWords"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "bsLogo",
+      "type": "Image",
+      "label": "Logo",
+      "parent": "bsHead",
+      "parameters": {
+        "width": {
+          "value": 40,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": "var(--radius-full)",
+        "alt": "",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "bsInitials",
+      "type": "Group",
+      "label": "Initials, when there is no logo",
+      "parent": "bsHead",
+      "parameters": {
+        "width": {
+          "value": 40,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "borderRadius": "var(--radius-full)",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "mounted": false
+      },
+      "children": [
+        "bsInitialsWords"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "bsInitialsWords",
+      "type": "Text",
+      "label": "Initials",
+      "parent": "bsInitials",
+      "parameters": {
+        "text": "",
+        "textAlignX": "center",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--secondary-foreground)",
+        "cssClassName": "mk-display"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "bsWords",
+      "type": "Group",
+      "label": "Name, and where it pays",
+      "parent": "bsHead",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "bsName",
+        "bsPlace"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "bsName",
+      "type": "Text",
+      "label": "Name",
+      "parent": "bsWords",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "bsPlace",
+      "type": "Text",
+      "label": "Country, and the currency it is paid in",
+      "parent": "bsWords",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "bsEach",
+      "type": "For Each",
+      "label": "One line per product",
+      "parent": "bsRoot",
+      "parameters": {
+        "template": "/Shop/BasketLine"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "bsIn",
+      "type": "Component Inputs",
+      "label": "One seller",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "place",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lines",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "logo",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasLogo",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "noLogo",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "initials",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tint",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "bsRoot"
+  ]
+}

@@ -1,0 +1,80 @@
+{
+ "runtime": [
+  {
+   "text": "Choose a size",
+   "color": "rgb(15, 23, 42)",
+   "opacity": "0.5",
+   "selectOpacity": "0",
+   "border": "rgb(0, 0, 0)",
+   "optionColor": "rgb(0, 0, 0)"
+  },
+  {
+   "text": "Choose a size",
+   "color": "rgb(15, 23, 42)",
+   "opacity": "1",
+   "selectOpacity": "0",
+   "border": "rgb(0, 0, 0)",
+   "optionColor": "rgb(0, 0, 0)"
+  },
+  {
+   "text": "Choose a size",
+   "color": "rgb(204, 0, 0)",
+   "opacity": "0.3",
+   "selectOpacity": "0",
+   "border": "rgb(0, 0, 0)",
+   "optionColor": "rgb(0, 0, 0)"
+  }
+ ],
+ "export-HEAD": [
+  {
+   "text": "Choose a size",
+   "color": "rgb(0, 0, 0)",
+   "opacity": "1",
+   "selectOpacity": "1",
+   "border": "rgb(0, 0, 0)",
+   "optionColor": "rgb(0, 0, 0)"
+  },
+  {
+   "text": "Choose a size",
+   "color": "rgb(0, 0, 0)",
+   "opacity": "1",
+   "selectOpacity": "1",
+   "border": "rgb(0, 0, 0)",
+   "optionColor": "rgb(0, 0, 0)"
+  },
+  {
+   "text": "Choose a size",
+   "color": "rgb(204, 0, 0)",
+   "opacity": "1",
+   "selectOpacity": "1",
+   "border": "rgb(0, 0, 0)",
+   "optionColor": "rgb(204, 0, 0)"
+  }
+ ],
+ "export-patched": [
+  {
+   "text": "Choose a size",
+   "color": "color(srgb 0 0 0 / 0.5)",
+   "opacity": "1",
+   "selectOpacity": "1",
+   "border": "rgb(0, 0, 0)",
+   "optionColor": "rgb(0, 0, 0)"
+  },
+  {
+   "text": "Choose a size",
+   "color": "rgb(0, 0, 0)",
+   "opacity": "1",
+   "selectOpacity": "1",
+   "border": "rgb(0, 0, 0)",
+   "optionColor": "rgb(0, 0, 0)"
+  },
+  {
+   "text": "Choose a size",
+   "color": "color(srgb 0.8 0 0 / 0.3)",
+   "opacity": "1",
+   "selectOpacity": "1",
+   "border": "rgb(0, 0, 0)",
+   "optionColor": "rgb(204, 0, 0)"
+  }
+ ]
+}

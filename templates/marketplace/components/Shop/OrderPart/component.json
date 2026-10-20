@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7831ea42-c2f3-5c9d-81a7-689d8f23f70c",
+  "name": "OrderPart",
+  "path": "/Shop/OrderPart",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One seller’s part of an order, as its buyer follows it: where it is, what is owed and how"
+}

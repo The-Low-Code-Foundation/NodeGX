@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "71844a6a-eb4f-5863-85e1-e4c5f9fe4b27",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ctRoot",
+      "type": "Group",
+      "label": "A count",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "cssClassName": "gm-count"
+      },
+      "children": [
+        "ctNumber",
+        "ctWord"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ctNumber",
+      "type": "Text",
+      "label": "The number",
+      "parent": "ctRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ctWord",
+      "type": "Text",
+      "label": "What is counted",
+      "parent": "ctRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ctIn",
+      "type": "Component Inputs",
+      "label": "One count",
+      "ports": [
+        {
+          "name": "number",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "word",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "ctRoot"
+  ]
+}

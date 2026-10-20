@@ -232,7 +232,10 @@ describe('HLS-004 AC4 — the contract is asserted at the type level, not by the
     // NDA-017 removed, reinstated in generated code. `months + drift` must stay able to answer
     // NaN in the exported app, so no `?? 0`, no `= 0`, no `|| 0` may appear around the binding.
     const wrapper = app.files[gauge].match(/function withDrift[\s\S]*?\n\}/)![0];
-    expect(wrapper).toContain('return (months + drift);');
+    // P18-S110-EVALATLOAD: the body is held in `__value` so that, until `months` arrives, the load
+    // evaluation can keep null for the NaN (GAM-001); once it arrives the NaN is answered as before.
+    expect(wrapper).toContain('const __value = (months + drift);');
+    expect(wrapper).toContain('return __unset && Number.isNaN(__value) ? null : __value;');
     expect(wrapper).not.toMatch(/drift\s*(=|\?\?|\|\|)/);
   });
 });

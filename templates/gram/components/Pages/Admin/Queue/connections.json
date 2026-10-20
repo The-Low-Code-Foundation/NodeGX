@@ -1,0 +1,187 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5e61d04f-0dfc-5a64-8cef-89de3df835df",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "quRoot",
+      "fromProperty": "didMount",
+      "toId": "quLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "quVersion",
+      "fromProperty": "value",
+      "toId": "quLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "quLoad",
+      "fromProperty": "out-ok",
+      "toId": "quContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "quLoad",
+      "fromProperty": "out-rows",
+      "toId": "quEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "quLoad",
+      "fromProperty": "out-heading",
+      "toId": "quHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "quLoad",
+      "fromProperty": "out-empty",
+      "toId": "quEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "quLoad",
+      "fromProperty": "out-hasRows",
+      "toId": "quList",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "quLoad",
+      "fromProperty": "out-hasRows",
+      "toId": "quHow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "quLast",
+      "fromProperty": "value",
+      "toId": "quNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "quLoad",
+      "fromProperty": "out-problem",
+      "toId": "quRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "quLoad",
+      "fromProperty": "out-refused",
+      "toId": "quRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "quRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "quToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "quRoot",
+      "fromProperty": "didMount",
+      "toId": "quModLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "quFeedChanged",
+      "fromProperty": "value",
+      "toId": "quModLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "quVersion",
+      "fromProperty": "value",
+      "toId": "quModLoad",
+      "toProperty": "in-members"
+    },
+    {
+      "fromId": "quLiveReport",
+      "fromProperty": "changed",
+      "toId": "quModLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "quLiveCommentReport",
+      "fromProperty": "changed",
+      "toId": "quModLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "quModLoad",
+      "fromProperty": "out-ok",
+      "toId": "quMod",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "quModLoad",
+      "fromProperty": "out-reportedHeading",
+      "toId": "quReportedHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "quModLoad",
+      "fromProperty": "out-noneReported",
+      "toId": "quNoneReported",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "quModLoad",
+      "fromProperty": "out-reported",
+      "toId": "quEachReported",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "quModLoad",
+      "fromProperty": "out-hiddenHeading",
+      "toId": "quHiddenHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "quModLoad",
+      "fromProperty": "out-hasHidden",
+      "toId": "quHiddenBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "quModLoad",
+      "fromProperty": "out-hidden",
+      "toId": "quEachHidden",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "quModLoad",
+      "fromProperty": "out-blockedHeading",
+      "toId": "quBlockedHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "quModLoad",
+      "fromProperty": "out-hasBlocked",
+      "toId": "quBlockedBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "quModLoad",
+      "fromProperty": "out-blocked",
+      "toId": "quEachBlocked",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "quRules",
+      "fromProperty": "onClick",
+      "toId": "quToRules",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "quAdmins",
+      "fromProperty": "onClick",
+      "toId": "quToAdmins",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "quFeed",
+      "fromProperty": "onClick",
+      "toId": "quToFeed",
+      "toProperty": "navigate"
+    }
+  ]
+}

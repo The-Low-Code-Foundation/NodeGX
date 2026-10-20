@@ -1,0 +1,315 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1617ab02-d342-57ea-8d99-6f5c45ae67a1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "wtPage",
+      "type": "Page",
+      "label": "Waiting to be let in",
+      "parameters": {
+        "title": "Waiting to be let in",
+        "urlPath": "waiting"
+      },
+      "children": [
+        "wtRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "wtRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "wtPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app"
+      },
+      "children": [
+        "wtBar",
+        "wtBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "wtBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "wtRoot",
+      "parameters": {},
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "wtBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "wtRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "wtContent",
+        "wtRefused"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "wtContent",
+      "type": "Group",
+      "label": "On the list",
+      "parent": "wtBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "alignItems": "center",
+        "paddingTop": "var(--space-8)",
+        "mounted": false
+      },
+      "children": [
+        "wtThanks",
+        "wtFine",
+        "wtRules"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "wtThanks",
+      "type": "Text",
+      "label": "Thanks",
+      "parent": "wtContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1",
+        "textAlignX": "center"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "wtFine",
+      "type": "Text",
+      "label": "What happens next",
+      "parent": "wtContent",
+      "parameters": {
+        "text": "An admin lets each new member in, usually within a day. We’ll send you a message when you’re in.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "textAlignX": "center"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "wtRules",
+      "type": "net.noodl.controls.button",
+      "label": "Read the community rules",
+      "parent": "wtContent",
+      "parameters": {
+        "label": "Read the community rules",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "wtRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "wtBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "wtRefusedWhy",
+        "wtRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "wtRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "wtRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "wtRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "wtRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "wtToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "wtLoad",
+      "type": "JavaScriptFunction",
+      "label": "Their name; in already?",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\nvar who = await me();\nif (!who) { Outputs.problem = 'Sign in to see where your request is.'; Outputs.refused = true; Outputs.ok = false; return; }\nif (who.status === 'approved') { Outputs.isIn(); return; }\nOutputs.thanks = 'Thanks, ' + String(who.name || '').trim().split(' ')[0] + '. You’re on the list.';\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "out-isIn",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-thanks",
+          "displayName": "thanks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "wtToRules",
+      "type": "RouterNavigate",
+      "label": "To the rules",
+      "parameters": {
+        "target": "/Pages/Rules"
+      },
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "wtToStart",
+      "type": "RouterNavigate",
+      "label": "In already: to the start, which sends them on",
+      "parameters": {
+        "target": "/Pages/Welcome"
+      },
+      "x": 530,
+      "y": 1360
+    }
+  ],
+  "visualRoots": [
+    "wtPage"
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "613f7dd0-32cd-5343-8949-1daf444fa9c8",
+  "name": "Monster",
+  "path": "/Game/Monster",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One Monster Gate monster, drawn by the stylesheet: Monster Class names its look (rkt-monster-horns, -eye or -spikes, a shape and a colour each, pixel art in one box-shadow) and what it is doing (a hit, a lunge closer, running away, arriving). 65 px square."
+}

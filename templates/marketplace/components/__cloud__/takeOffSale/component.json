@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6b144660-1804-5716-897c-579febce6c74",
+  "name": "takeOffSale",
+  "path": "/#__cloud__/takeOffSale",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Take a product off sale, or put it back"
+}

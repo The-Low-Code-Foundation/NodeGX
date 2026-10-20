@@ -1,0 +1,283 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5c8c4773-f0ff-5390-8931-f9347f1b8a98",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lkRoot",
+      "fromProperty": "didMount",
+      "toId": "lkLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lkUrl",
+      "fromProperty": "pm-post",
+      "toId": "lkLoad",
+      "toProperty": "in-post"
+    },
+    {
+      "fromId": "lkUrl",
+      "fromProperty": "pm-comment",
+      "toId": "lkLoad",
+      "toProperty": "in-comment"
+    },
+    {
+      "fromId": "lkFeedChanged",
+      "fromProperty": "value",
+      "toId": "lkLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-ok",
+      "toId": "lkContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-gone",
+      "toId": "lkGone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-problem",
+      "toId": "lkRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-refused",
+      "toId": "lkRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lkRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "lkToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-title",
+      "toId": "lkTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-state",
+      "toId": "lkState",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-stateClass",
+      "toId": "lkState",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-isPost",
+      "toId": "lkCardBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-card",
+      "toId": "lkEachCard",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-isComment",
+      "toId": "lkComment",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-commentBy",
+      "toId": "lkCommentBy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-commentText",
+      "toId": "lkCommentText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-under",
+      "toId": "lkUnder",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-reportsHeading",
+      "toId": "lkReportsHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-reports",
+      "toId": "lkEachReport",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-canHide",
+      "toId": "lkHideBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-canBringBack",
+      "toId": "lkBringBack",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-blockedNote",
+      "toId": "lkBlockedNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-hasBlockedNote",
+      "toId": "lkBlockedNote",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-suggest",
+      "toId": "lkReason",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-suggest",
+      "toId": "lkHideGather",
+      "toProperty": "in-reason0"
+    },
+    {
+      "fromId": "lkReason",
+      "fromProperty": "onTextChanged",
+      "toId": "lkHideGather",
+      "toProperty": "in-reason"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-kind",
+      "toId": "lkHideGather",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-id",
+      "toId": "lkHideGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "lkHideGather",
+      "fromProperty": "out-hide",
+      "toId": "lkCall",
+      "toProperty": "in-hide"
+    },
+    {
+      "fromId": "lkHideGather",
+      "fromProperty": "out-go",
+      "toId": "lkCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-kind",
+      "toId": "lkBackGather",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-id",
+      "toId": "lkBackGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "lkBackGather",
+      "fromProperty": "out-hide",
+      "toId": "lkCall",
+      "toProperty": "in-hide"
+    },
+    {
+      "fromId": "lkBackGather",
+      "fromProperty": "out-go",
+      "toId": "lkCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "lkHide",
+      "fromProperty": "onClick",
+      "toId": "lkHideGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lkHideGather",
+      "fromProperty": "out-problem",
+      "toId": "lkError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkBringBack",
+      "fromProperty": "onClick",
+      "toId": "lkBackGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lkCall",
+      "fromProperty": "error",
+      "toId": "lkError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lkCall",
+      "fromProperty": "done",
+      "toId": "lkStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lkStamp",
+      "fromProperty": "out-at",
+      "toId": "lkChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "lkStamp",
+      "fromProperty": "out-go",
+      "toId": "lkChanged",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-profileLabel",
+      "toId": "lkProfile",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lkLoad",
+      "fromProperty": "out-authorId",
+      "toId": "lkToMember",
+      "toProperty": "pm-memberId"
+    },
+    {
+      "fromId": "lkProfile",
+      "fromProperty": "onClick",
+      "toId": "lkToMember",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "lkBack",
+      "fromProperty": "onClick",
+      "toId": "lkToQueue",
+      "toProperty": "navigate"
+    }
+  ]
+}

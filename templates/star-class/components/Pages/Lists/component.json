@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0813c475-b837-5144-8461-3770030d7c77",
+  "name": "Lists",
+  "path": "/Pages/Lists",
+  "type": "page",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "My revision lists (P113 REV-002): the lists in the store as rows, New list, and the editor. A saved list is written to the store and offered by the chooser under My lists."
+}

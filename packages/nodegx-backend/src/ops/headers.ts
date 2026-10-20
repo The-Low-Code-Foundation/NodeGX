@@ -46,6 +46,9 @@ const ALLOW_HEADERS =
   // SBR-007 finding above, one header over: same-origin previews never preflight, which is why
   // nothing had noticed. Found by an exported app driving a live backend.
   'X-NodeGX-File-Private, ' +
+  // P121-TWO001-MEMBERSPHOTO (2026-10-15): a private file shared with a role. Added the day it
+  // was made, so the fourth time is not found by an exported app.
+  'X-NodeGX-File-Readers, ' +
   // P99 HLT-016 (2026-09-22): `X-NodeGX-If` is new. `X-NodeGX-Upsert` (FED-002) had been missing
   // since it shipped, so a cross-origin upsert failed its preflight: the same defect as the two
   // comments above, a third time.

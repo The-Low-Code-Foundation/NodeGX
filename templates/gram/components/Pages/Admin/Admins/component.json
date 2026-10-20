@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3f61e821-a1a7-5c68-85e5-8ffc109ed241",
+  "name": "Admins",
+  "path": "/Pages/Admin/Admins",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The admins, and making a member one"
+}

@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9d6e6d6c-0dd2-5d6c-84f3-ff21d9d07f14",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "species",
+      "toId": "mtAlien",
+      "toProperty": "species"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "name",
+      "toId": "mtAlien",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "grown",
+      "toId": "mtAlien",
+      "toProperty": "grown"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "hat",
+      "toId": "mtAlien",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "eyes",
+      "toId": "mtAlien",
+      "toProperty": "eyes"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "neck",
+      "toId": "mtAlien",
+      "toProperty": "neck"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "happy",
+      "toId": "mtAlien",
+      "toProperty": "happy"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "colour",
+      "toId": "mtAlien",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "name",
+      "toId": "mtName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "line",
+      "toId": "mtLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "selected",
+      "toId": "mtToneOf",
+      "toProperty": "selected"
+    },
+    {
+      "fromId": "mtToneOf",
+      "fromProperty": "result",
+      "toId": "mtTone",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "mtTone",
+      "fromProperty": "ground",
+      "toId": "mtCard",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mtCard",
+      "fromProperty": "onClick",
+      "toId": "mtOut",
+      "toProperty": "tap"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "id",
+      "toId": "mtOut",
+      "toProperty": "id"
+    }
+  ]
+}

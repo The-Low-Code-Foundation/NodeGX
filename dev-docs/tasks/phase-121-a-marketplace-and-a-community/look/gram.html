@@ -1,0 +1,462 @@
+<title>The gram, first picture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&family=Mulish:wght@400;600;800&display=swap">
+<style>
+/* Layout: page chrome (themed) around one device frame (the app's own fixed look), scaled to fit; screens swap inside it. */
+:root {
+  --page: #f3f0f5; --page-ink: #231a2b; --page-muted: #67596f; --page-line: #ddd4e2; --chip: #e7e0ec; --chip-on: #3b1f4a; --chip-on-ink: #ffffff;
+  /* the app's look: white, ink, a deep plum, morning gold for the devotional */
+  --white: #ffffff; --ink: #1c1620; --muted: #776c7d; --line: #ece7ef; --plum: #4a2160; --plum-soft: #f1e9f5; --gold: #c98a12; --gold-soft: #fbf1dc;
+  --heart: #d4314c; --ok: #1e7a4f; --ok-bg: #e2f4ea; --bad: #a3271f; --bad-bg: #fbe4e1;
+  --read: "Literata", Georgia, "Times New Roman", serif;
+  --ui: "Mulish", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #17121b; --page-ink: #efe8f3; --page-muted: #ad9fb6; --page-line: #352a3d; --chip: #2a2131; --chip-on: #e3b65a; --chip-on-ink: #1c1620; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --page: #17121b; --page-ink: #efe8f3; --page-muted: #ad9fb6; --page-line: #352a3d; --chip: #2a2131; --chip-on: #e3b65a; --chip-on-ink: #1c1620; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--page); color: var(--page-ink); font-family: var(--ui); margin: 0; padding-inline: 16px; padding-block: 20px 40px }
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 16px }
+header.top h1 { font-family: var(--read); font-weight: 600; font-size: 1.6rem; margin: 0; text-wrap: balance }
+header.top p { margin: 4px 0 0; color: var(--page-muted); max-width: 70ch; line-height: 1.45 }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center }
+.seg, .picker { display: flex; flex-wrap: wrap; gap: 6px }
+.controls .label { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--page-muted) }
+.chipbtn { font: inherit; font-size: .85rem; border: 0; border-radius: 999px; padding: 6px 12px; background: var(--chip); color: var(--page-ink); cursor: pointer }
+.chipbtn[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-ink) }
+.chipbtn:focus-visible, .app :focus-visible { outline: 3px solid var(--gold); outline-offset: 2px }
+.group { display: grid; gap: 6px }
+.stage { overflow: hidden }
+.device { width: 390px; height: 800px; transform-origin: top left; border-radius: 34px; border: 10px solid #120d16; background: var(--white); color: var(--ink); overflow: hidden; position: relative; box-shadow: 0 20px 50px rgba(20, 10, 30, .25) }
+.device.tablet { width: 1024px; height: 640px; border-radius: 22px }
+.note { color: var(--page-muted); font-size: .9rem; line-height: 1.45; max-width: 75ch }
+.note b { color: var(--page-ink) }
+
+/* ---------- the app ---------- */
+.app { height: 100%; display: flex; font-family: var(--ui); font-size: 15px; line-height: 1.35 }
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0 }
+.screen { display: none; flex: 1; min-height: 0; flex-direction: column }
+.screen.on { display: flex }
+.scroll { flex: 1; overflow-y: auto; min-height: 0 }
+.top-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); background: var(--white) }
+.word { font-family: var(--read); font-weight: 600; font-size: 1.55rem; letter-spacing: -.01em; flex: 1 }
+.word i { color: var(--gold); font-style: normal }
+.icon-btn { background: none; border: 0; font: inherit; font-size: 1.2rem; cursor: pointer; color: var(--ink); padding: 2px 4px }
+.back { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-weight: 800 }
+.back button { background: none; border: 0; font: inherit; font-size: 1.2rem; cursor: pointer; color: var(--ink) }
+.pad { padding: 14px 16px; display: grid; gap: 14px; align-content: start }
+.av { width: 34px; height: 34px; border-radius: 50%; flex: none; display: grid; place-items: center; color: var(--white); font-weight: 800; font-size: .8rem }
+.av.big { width: 84px; height: 84px; font-size: 1.6rem }
+.dev-card { margin: 12px 16px 4px; border-radius: 16px; background: var(--gold-soft); border: 1px solid #f0dcae; padding: 14px 16px; display: grid; gap: 6px; cursor: pointer; text-align: left; font: inherit; color: inherit }
+.eyebrow { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; font-weight: 800; color: var(--gold) }
+.dev-card h3 { font-family: var(--read); font-weight: 600; font-size: 1.2rem; margin: 0 }
+.dev-card p { font-family: var(--read); margin: 0; font-size: .95rem; line-height: 1.45 }
+.ref { font-size: .8rem; font-weight: 800; color: var(--plum) }
+.post { border-bottom: 1px solid var(--line); padding-bottom: 6px }
+.post-head { display: flex; align-items: center; gap: 10px; padding: 10px 16px }
+.post-head .who { flex: 1; font-weight: 800; font-size: .9rem }
+.post-head .who small { display: block; font-weight: 400; color: var(--muted); font-size: .75rem }
+.photo { aspect-ratio: 1 / 1; max-width: 100%; display: grid; place-items: end start; padding: 10px; font-size: .75rem; color: rgba(255, 255, 255, .92); text-shadow: 0 1px 2px rgba(0, 0, 0, .45) }
+.acts { display: flex; gap: 16px; padding: 8px 16px 2px; font-size: 1.25rem }
+.acts span { cursor: pointer }
+.acts .on { color: var(--heart) }
+.cap { padding: 2px 16px 6px; font-size: .9rem; line-height: 1.4 }
+.cap b { margin-right: 4px }
+.meta { padding: 0 16px 6px; color: var(--muted); font-size: .8rem }
+.kind { display: inline-block; font-size: .7rem; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 3px 8px; border-radius: 6px; background: var(--plum-soft); color: var(--plum) }
+.prayer { margin: 10px 16px; border-radius: 16px; border: 1px solid var(--line); padding: 14px 16px; display: grid; gap: 10px; background: var(--white) }
+.prayer p { margin: 0; font-size: .95rem; line-height: 1.45 }
+.prayed-btn { justify-self: start; font: inherit; font-weight: 800; border: 1.5px solid var(--plum); color: var(--plum); background: var(--white); border-radius: 999px; padding: 7px 14px; cursor: pointer }
+.prayed-btn.on { background: var(--plum); color: var(--white) }
+.nav { display: flex; border-top: 1px solid var(--line); padding: 8px 4px 12px; background: var(--white) }
+.nav button { flex: 1; background: none; border: 0; font: inherit; font-size: .68rem; color: var(--muted); display: grid; justify-items: center; gap: 2px; cursor: pointer }
+.nav button b { font-size: 1.3rem; font-weight: 400; line-height: 1 }
+.nav button.on { color: var(--ink); font-weight: 800 }
+.rail { display: none }
+.btn { font: inherit; font-weight: 800; border: 0; border-radius: 12px; padding: 12px 14px; cursor: pointer; text-align: center }
+.btn.main { background: var(--plum); color: var(--white) }
+.btn.line { background: var(--white); color: var(--plum); border: 1.5px solid var(--plum) }
+.btn.small { padding: 6px 10px; font-size: .8rem; border-radius: 9px }
+.btn.ok { background: var(--ok); color: var(--white) }
+.fine { font-size: .82rem; color: var(--muted); line-height: 1.4 }
+.offline { display: inline-flex; gap: 6px; align-items: center; font-size: .75rem; font-weight: 800; color: var(--ok); background: var(--ok-bg); padding: 3px 9px; border-radius: 999px; justify-self: start }
+.reading { font-family: var(--read); font-size: 1.05rem; line-height: 1.65; max-width: 62ch }
+.reading p { margin: 0 0 12px }
+.scripture { font-family: var(--read); font-style: italic; border-left: 3px solid var(--gold); padding: 4px 0 4px 14px; line-height: 1.55 }
+.prof { display: flex; gap: 18px; align-items: center }
+.counts { display: flex; gap: 18px; text-align: center; font-size: .8rem; color: var(--muted) }
+.counts b { display: block; color: var(--ink); font-size: 1.05rem; font-variant-numeric: tabular-nums }
+.pgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px }
+.pgrid .photo { font-size: .6rem; padding: 6px }
+.field { display: grid; gap: 5px; font-size: .85rem; font-weight: 600 }
+.field input, .field textarea, .field select { font: inherit; font-weight: 400; font-size: .95rem; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; color: var(--ink); background: var(--white) }
+.kinds { display: flex; flex-wrap: wrap; gap: 8px }
+.kinds span { border: 1.5px solid var(--line); border-radius: 999px; padding: 6px 12px; font-size: .85rem; font-weight: 600 }
+.kinds span.on { border-color: var(--plum); background: var(--plum-soft); color: var(--plum) }
+.list { display: grid; border: 1px solid var(--line); border-radius: 14px; overflow: hidden }
+.list > div { display: flex; gap: 10px; align-items: center; padding: 11px 14px; border-top: 1px solid var(--line) }
+.list > div:first-child { border-top: 0 }
+.list .grow { flex: 1; min-width: 0 }
+.list .sub { color: var(--muted); font-size: .8rem }
+.pill { font-size: .7rem; font-weight: 800; padding: 3px 8px; border-radius: 999px; white-space: nowrap }
+.pill.bad { background: var(--bad-bg); color: var(--bad) }
+.pill.gold { background: var(--gold-soft); color: #7a5208 }
+.books { display: grid; grid-template-columns: 1fr 1fr; gap: 6px }
+.books span { padding: 9px 12px; border: 1px solid var(--line); border-radius: 10px; font-size: .88rem }
+.books span.on { border-color: var(--plum); background: var(--plum-soft); color: var(--plum); font-weight: 800 }
+.verse { font-family: var(--read); line-height: 1.6; font-size: 1rem }
+.verse sup { font-family: var(--ui); font-weight: 800; color: var(--muted); font-size: .65rem; margin-right: 3px }
+.verse .marked { background: var(--gold-soft); border-bottom: 2px solid var(--gold) }
+.note-pop { border: 1px solid #f0dcae; background: var(--gold-soft); border-radius: 14px; padding: 12px 14px; display: grid; gap: 8px; font-size: .9rem }
+.wait { flex: 1; display: grid; place-content: center; text-align: center; gap: 14px; padding: 30px }
+.wait h2 { font-family: var(--read); font-weight: 600; margin: 0; font-size: 1.4rem }
+.roleband { font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; padding: 5px 16px; background: var(--plum); color: var(--white); font-weight: 800 }
+.side { display: none }
+
+/* tablet: a rail on the left, the feed in the middle, the day and prayer on the right */
+.device.tablet .nav { display: none }
+.device.tablet .rail { display: flex; flex-direction: column; gap: 4px; width: 200px; border-right: 1px solid var(--line); padding: 16px 10px }
+.device.tablet .rail .word { padding: 4px 10px 14px; flex: none }
+.device.tablet .rail button { background: none; border: 0; font: inherit; text-align: left; padding: 10px; border-radius: 10px; cursor: pointer; display: flex; gap: 10px; align-items: center; color: var(--ink) }
+.device.tablet .rail button.on { background: var(--plum-soft); font-weight: 800; color: var(--plum) }
+.device.tablet .top-bar .word { display: none }
+.device.tablet .feed-cols { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 0; align-items: start }
+.device.tablet .feed-col { max-width: 470px; margin: 0 auto; width: 100% }
+.device.tablet .side { display: grid; gap: 12px; padding: 14px 16px; border-left: 1px solid var(--line); align-content: start; position: sticky; top: 0 }
+.device.tablet .bible-cols { display: grid; grid-template-columns: 240px 1fr; gap: 18px; align-items: start }
+.device:not(.tablet) .only-tablet { display: none }
+.device.tablet .pgrid { grid-template-columns: repeat(5, 1fr) }
+@media (prefers-reduced-motion: no-preference) { .screen.on { animation: in .18s ease-out } @keyframes in { from { opacity: .4 } to { opacity: 1 } } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>The gram, first picture</h1>
+    <p>A clickable picture of the community app: a church's members around its daily devotional, with posts, prayer
+      requests, an offline Bible and private notes. Nothing here is built. It borrows the layout people know from
+      Instagram, not its marks. The members, posts and photos are made up.</p>
+  </header>
+
+  <div class="controls">
+    <div class="group"><span class="label">Size</span>
+      <div class="seg" role="group" aria-label="Size">
+        <button class="chipbtn" aria-pressed="true" data-size="phone">Phone, 390 px</button>
+        <button class="chipbtn" aria-pressed="false" data-size="tablet">Tablet, 1024 × 640</button>
+      </div>
+    </div>
+    <div class="group"><span class="label">A member</span>
+      <div class="picker">
+        <button class="chipbtn" data-pick="feed">The feed</button>
+        <button class="chipbtn" data-pick="devotional">Today's devotional</button>
+        <button class="chipbtn" data-pick="new">Posting</button>
+        <button class="chipbtn" data-pick="prayer">Prayer</button>
+        <button class="chipbtn" data-pick="profile">A profile</button>
+        <button class="chipbtn" data-pick="bible">The Bible</button>
+        <button class="chipbtn" data-pick="notes">Notes</button>
+      </div>
+    </div>
+    <div class="group"><span class="label">Others</span>
+      <div class="picker">
+        <button class="chipbtn" data-pick="admin">The admins' queue</button>
+        <button class="chipbtn" data-pick="waiting">Waiting to be let in</button>
+        <button class="chipbtn" data-pick="public">A shared devotional, no account</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="device" id="device">
+      <div class="app" id="app">
+        <nav class="rail" aria-label="Sections">
+          <div class="word">gr<i>a</i>m</div>
+          <button data-go="feed" data-tab="feed">⌂ Feed</button>
+          <button data-go="search" data-tab="search">⌕ Search</button>
+          <button data-go="new" data-tab="new">＋ Post</button>
+          <button data-go="prayer" data-tab="prayer">🙏 Prayer</button>
+          <button data-go="bible" data-tab="bible">✚ Bible</button>
+          <button data-go="notes" data-tab="notes">✎ Notes</button>
+          <button data-go="profile" data-tab="profile">◯ Profile</button>
+          <button data-go="admin" data-tab="admin">⚑ Admin</button>
+        </nav>
+        <div class="main">
+
+        <!-- ================= FEED ================= -->
+        <section class="screen on" id="feed" aria-label="The feed">
+          <div class="top-bar"><div class="word">gr<i>a</i>m</div><button class="icon-btn" data-go="bible" aria-label="Bible">✚</button><button class="icon-btn" data-go="notes" aria-label="Notes">✎</button></div>
+          <div class="scroll"><div class="feed-cols"><div class="feed-col">
+            <button class="dev-card" data-go="devotional">
+              <span class="eyebrow">Today · Wednesday 14 October</span>
+              <h3>New every morning</h3>
+              <span class="ref">Lamentations 3:22–23</span>
+              <p>"It is of the LORD's mercies that we are not consumed, because his compassions fail not…"</p>
+              <span class="fine">Read today's devotional →</span>
+            </button>
+
+            <article class="post">
+              <div class="post-head"><div class="av" style="background:#7a3e1d">GA</div><div class="who">Grace Addo<small>Sunday service</small></div><span>⋯</span></div>
+              <div class="photo" style="background:linear-gradient(135deg,#3a2a52,#9b6fb0 60%,#e0b56a)">photo: the choir after the service</div>
+              <div class="acts"><span class="on" aria-label="Hearted">♥</span><span aria-label="Comments">💬</span><span aria-label="Share">↗</span></div>
+              <div class="meta"><b style="color:var(--ink)">38 hearts</b> · Kofi, Ama and 36 others</div>
+              <div class="cap"><b>Grace Addo</b>The choir sang "It Is Well" and nobody left early. What a morning. 🙌</div>
+              <div class="meta">View all 7 comments · 2 h</div>
+            </article>
+
+            <div class="prayer">
+              <div class="post-head" style="padding:0"><div class="av" style="background:#2b5a7a">EM</div><div class="who">Esi Mensah<small>3 h</small></div><span class="kind">Prayer request</span></div>
+              <p>Please pray for my mother, who goes into surgery on Friday morning. We trust God for a good outcome and quick healing.</p>
+              <button class="prayed-btn" id="pray-1">🙏 I prayed · 24</button>
+              <span class="fine">Only Esi sees who prayed.</span>
+            </div>
+
+            <article class="post">
+              <div class="post-head"><div class="av" style="background:#1e6a4f">PK</div><div class="who">Pastor Kwesi<small>Event · Saturday 18 October, 9:00</small></div><span class="kind">Event</span></div>
+              <div class="photo" style="background:linear-gradient(135deg,#1d4b3a,#5ea37f 70%,#d9c37a)">photo: the church hall, set for a meeting</div>
+              <div class="acts"><span aria-label="Heart">♡</span><span aria-label="Comments">💬</span><span aria-label="Share">↗</span></div>
+              <div class="meta"><b style="color:var(--ink)">15 hearts</b></div>
+              <div class="cap"><b>Pastor Kwesi</b>Men's breakfast this Saturday. Bring a friend, and an appetite.</div>
+              <div class="meta">View all 3 comments · 5 h</div>
+            </article>
+
+            <article class="post">
+              <div class="post-head"><div class="av" style="background:#8a3a5c">AB</div><div class="who">Ama Boateng<small>Testimony</small></div><span class="kind">Testimony</span></div>
+              <div class="cap" style="font-size:1rem;padding-top:6px">Six months ago I asked you all to pray about my visa. It came through this morning. Thank you, every one of you. God is faithful.</div>
+              <div class="acts"><span class="on" aria-label="Hearted">♥</span><span aria-label="Comments">💬</span><span aria-label="Share">↗</span></div>
+              <div class="meta"><b style="color:var(--ink)">61 hearts</b> · View all 19 comments · yesterday</div>
+            </article>
+          </div>
+          <aside class="side">
+            <div class="dev-card" style="margin:0"><span class="eyebrow">Today</span><h3>New every morning</h3><span class="ref">Lamentations 3:22–23</span><span class="offline">✓ saved for offline</span></div>
+            <b>Prayer requests</b>
+            <div class="list">
+              <div><div class="av" style="background:#2b5a7a">EM</div><div class="grow">Esi's mother, surgery Friday<div class="sub">24 prayed</div></div></div>
+              <div><div class="av" style="background:#5a4a1d">KO</div><div class="grow">A job for my brother<div class="sub">11 prayed</div></div></div>
+            </div>
+            <span class="fine">New members wait for an admin to let them in. Nothing here is public.</span>
+          </aside></div></div>
+          <nav class="nav"><button class="on" data-go="feed"><b>⌂</b>Feed</button><button data-go="search"><b>⌕</b>Search</button><button data-go="new"><b>＋</b>Post</button><button data-go="prayer"><b>🙏</b>Prayer</button><button data-go="profile"><b>◯</b>Profile</button></nav>
+        </section>
+
+        <!-- ================= DEVOTIONAL ================= -->
+        <section class="screen" id="devotional" aria-label="Today's devotional">
+          <div class="back"><button data-go="feed" aria-label="Back">←</button>Today's devotional</div>
+          <div class="scroll"><div class="pad">
+            <span class="eyebrow">Wednesday 14 October 2026</span>
+            <h2 style="font-family:var(--read);font-weight:600;font-size:1.6rem;margin:0;text-wrap:balance">New every morning</h2>
+            <span class="offline">✓ saved for offline</span>
+            <div class="scripture">It is of the LORD's mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness.<br><span class="ref" style="font-style:normal">Lamentations 3:22–23 (KJV)</span></div>
+            <div class="reading">
+              <p>Jeremiah wrote these words while Jerusalem lay in ruins. He was not looking at a good morning. He was looking at the worst one, and he still found the mercy waiting in it.</p>
+              <p>Whatever yesterday held, today did not come to you second-hand. The mercy you need for it was made fresh, for this day and no other.</p>
+              <p><b>Pray:</b> Lord, thank you that I don't have to live today on yesterday's strength.</p>
+            </div>
+            <div class="row" style="display:flex;gap:10px"><button class="btn line small">↗ Share link</button><button class="btn line small" data-go="notes">✎ Write a note on this</button></div>
+            <span class="fine">The link opens this page for anyone, with no account, from today on.</span>
+          </div></div>
+        </section>
+
+        <!-- ================= NEW POST ================= -->
+        <section class="screen" id="new" aria-label="Posting">
+          <div class="back"><button data-go="feed" aria-label="Back">←</button>New post</div>
+          <div class="scroll"><div class="pad">
+            <div class="photo" style="background:linear-gradient(135deg,#3a2a52,#9b6fb0 60%,#e0b56a);border-radius:14px;aspect-ratio:4/3">your photo (picked from the phone)</div>
+            <div class="kinds"><span class="on">Post</span><span>Prayer request</span><span>Testimony</span><span>Event</span></div>
+            <label class="field" for="np-cap">Caption<textarea id="np-cap" rows="3">Youth group cleaned up the church garden today. Proud of these young people!</textarea></label>
+            <div class="note-pop"><b>Before you post a photo of children</b>No photo of a child without their parent's yes. Members can report a photo that breaks this, and admins see those reports first.</div>
+            <button class="btn main" data-go="feed">Share with the members</button>
+            <span class="fine">Only members who've been let in see posts. Nothing is public.</span>
+          </div></div>
+        </section>
+
+        <!-- ================= PRAYER ================= -->
+        <section class="screen" id="prayer" aria-label="Prayer">
+          <div class="top-bar"><div class="word">Prayer</div><button class="icon-btn" data-go="new" aria-label="New prayer request">＋</button></div>
+          <div class="scroll"><div class="feed-col">
+            <div class="prayer">
+              <div class="post-head" style="padding:0"><div class="av" style="background:#2b5a7a">EM</div><div class="who">Esi Mensah<small>3 h</small></div></div>
+              <p>Please pray for my mother, who goes into surgery on Friday morning.</p>
+              <button class="prayed-btn on">🙏 You prayed · 24</button>
+            </div>
+            <div class="prayer">
+              <div class="post-head" style="padding:0"><div class="av" style="background:#5a4a1d">KO</div><div class="who">Kojo Owusu<small>yesterday</small></div></div>
+              <p>My brother has an interview on Monday after a long time out of work. Pray for peace and favour.</p>
+              <button class="prayed-btn">🙏 I prayed · 11</button>
+            </div>
+            <div class="prayer">
+              <div class="post-head" style="padding:0"><div class="av" style="background:#8a3a5c">AB</div><div class="who">Ama Boateng<small>2 days</small></div><span class="kind" style="background:var(--ok-bg);color:var(--ok)">Answered</span></div>
+              <p>The visa came through. Thank you for praying!</p>
+            </div>
+          </div></div>
+          <nav class="nav"><button data-go="feed"><b>⌂</b>Feed</button><button data-go="search"><b>⌕</b>Search</button><button data-go="new"><b>＋</b>Post</button><button class="on" data-go="prayer"><b>🙏</b>Prayer</button><button data-go="profile"><b>◯</b>Profile</button></nav>
+        </section>
+
+        <!-- ================= SEARCH ================= -->
+        <section class="screen" id="search" aria-label="Search">
+          <div class="pad" style="padding-bottom:0"><label class="field" for="q">Search<input id="q" value="breakfast" aria-label="Search members and posts"></label></div>
+          <div class="scroll"><div class="pad">
+            <b>Members</b>
+            <div class="list"><div><div class="av" style="background:#1e6a4f">PK</div><div class="grow">Pastor Kwesi<div class="sub">Admin</div></div></div></div>
+            <b>Posts</b>
+            <div class="list"><div><div class="grow">Men's breakfast this Saturday<div class="sub">Pastor Kwesi · Event · 18 October</div></div></div></div>
+          </div></div>
+          <nav class="nav"><button data-go="feed"><b>⌂</b>Feed</button><button class="on" data-go="search"><b>⌕</b>Search</button><button data-go="new"><b>＋</b>Post</button><button data-go="prayer"><b>🙏</b>Prayer</button><button data-go="profile"><b>◯</b>Profile</button></nav>
+        </section>
+
+        <!-- ================= PROFILE ================= -->
+        <section class="screen" id="profile" aria-label="A profile">
+          <div class="top-bar"><div class="word" style="font-family:var(--ui);font-weight:800;font-size:1.05rem">grace.addo</div><button class="icon-btn" data-go="notes" aria-label="Notes">✎</button><button class="icon-btn" aria-label="Settings">⚙</button></div>
+          <div class="scroll"><div class="pad">
+            <div class="prof"><div class="av big" style="background:#7a3e1d">GA</div><div class="counts"><div><b>42</b>posts</div><div><b>3</b>prayer requests</div><div><b>1</b>testimony</div></div></div>
+            <div><b>Grace Addo</b><div style="font-size:.9rem;line-height:1.4">Alto in the choir. Teaching Sunday school since 2019. Psalm 46:10.</div></div>
+            <button class="btn line small" style="justify-self:start">Edit profile</button>
+          </div>
+          <div class="pgrid">
+            <div class="photo" style="background:linear-gradient(135deg,#3a2a52,#9b6fb0)">choir</div>
+            <div class="photo" style="background:linear-gradient(135deg,#7a3e1d,#d99a5b)">harvest</div>
+            <div class="photo" style="background:linear-gradient(135deg,#1d4b3a,#5ea37f)">hall</div>
+            <div class="photo" style="background:linear-gradient(135deg,#2b3a6a,#7d93c8)">baptism</div>
+            <div class="photo" style="background:linear-gradient(135deg,#6a2b3a,#c87d93)">flowers</div>
+            <div class="photo" style="background:linear-gradient(135deg,#4a4a1d,#b0a75e)">retreat</div>
+            <div class="photo only-tablet" style="background:linear-gradient(135deg,#1d3a4a,#5e93b0)">beach</div>
+            <div class="photo only-tablet" style="background:linear-gradient(135deg,#3a1d4a,#935eb0)">easter</div>
+            <div class="photo only-tablet" style="background:linear-gradient(135deg,#4a2b1d,#b07d5e)">kitchen</div>
+            <div class="photo only-tablet" style="background:linear-gradient(135deg,#1d4a2b,#5eb07d)">garden</div>
+          </div></div>
+          <nav class="nav"><button data-go="feed"><b>⌂</b>Feed</button><button data-go="search"><b>⌕</b>Search</button><button data-go="new"><b>＋</b>Post</button><button data-go="prayer"><b>🙏</b>Prayer</button><button class="on" data-go="profile"><b>◯</b>Profile</button></nav>
+        </section>
+
+        <!-- ================= BIBLE ================= -->
+        <section class="screen" id="bible" aria-label="The Bible">
+          <div class="back"><button data-go="feed" aria-label="Back">←</button><span style="flex:1">Psalm 23 · King James</span><span class="offline">✓ works offline</span></div>
+          <div class="scroll"><div class="pad bible-cols">
+            <div class="pad only-tablet" style="padding:0">
+              <label class="field" for="bq">Search the Bible<input id="bq" placeholder="shepherd"></label>
+              <div class="books"><span>Job</span><span class="on">Psalms</span><span>Proverbs</span><span>Ecclesiastes</span><span>Isaiah</span><span>Jeremiah</span><span>Matthew</span><span>John</span></div>
+            </div>
+            <div class="pad" style="padding:0">
+              <div class="verse">
+                <sup>1</sup>The LORD is my shepherd; I shall not want.
+                <sup>2</sup>He maketh me to lie down in green pastures: he leadeth me beside the still waters.
+                <sup>3</sup>He restoreth my soul: he leadeth me in the paths of righteousness for his name's sake.
+                <sup>4</sup><span class="marked">Yea, though I walk through the valley of the shadow of death, I will fear no evil: for thou art with me; thy rod and thy staff they comfort me.</span>
+                <sup>5</sup>Thou preparest a table before me in the presence of mine enemies: thou anointest my head with oil; my cup runneth over.
+                <sup>6</sup>Surely goodness and mercy shall follow me all the days of my life: and I will dwell in the house of the LORD for ever.
+              </div>
+              <div class="note-pop"><b>Your note on verse 4</b>Read this at Grandma's thanksgiving service. Remember: "with me", not "ahead of me".<span class="fine">Only you can see your notes.</span></div>
+              <div style="display:flex;gap:10px"><button class="btn line small">← Psalm 22</button><button class="btn line small">Psalm 24 →</button></div>
+            </div>
+          </div></div>
+        </section>
+
+        <!-- ================= NOTES ================= -->
+        <section class="screen" id="notes" aria-label="Notes">
+          <div class="back"><button data-go="feed" aria-label="Back">←</button><span style="flex:1">My notes</span><button class="btn main small">New note</button></div>
+          <div class="scroll"><div class="pad">
+            <div class="list">
+              <div><div class="grow"><b>Psalm 23:4</b><div class="sub">Read this at Grandma's thanksgiving service…</div></div><span class="fine">today</span></div>
+              <div><div class="grow"><b>New every morning</b> <span class="pill gold">Devotional</span><div class="sub">Ask Esi how her mother is on Friday.</div></div><span class="fine">today</span></div>
+              <div><div class="grow"><b>Sermon, 12 October</b><div class="sub">Three things about rest: it's commanded, it's a gift, it's…</div></div><span class="fine">Sun</span></div>
+              <div><div class="grow"><b>John 15:5</b><div class="sub">Abide. Not "try harder".</div><div class="sub" style="color:var(--gold)">Saved on this phone; goes to your account when you're back online.</div></div><span class="fine">Sat</span></div>
+            </div>
+            <span class="fine">Your notes are yours alone. Admins can't read them.</span>
+          </div></div>
+        </section>
+
+        <!-- ================= ADMIN QUEUE ================= -->
+        <section class="screen" id="admin" aria-label="The admins' queue">
+          <div class="roleband">Admin</div>
+          <div class="back" style="border-top:0">Waiting for you</div>
+          <div class="scroll"><div class="pad">
+            <b>New members (3)</b>
+            <div class="list">
+              <div><div class="av" style="background:#4a6a2b">YA</div><div class="grow">Yaw Asante<div class="sub">Confirmed 13 or older · asked 2 h ago</div></div><button class="btn ok small">Let in</button><button class="btn line small">No</button></div>
+              <div><div class="av" style="background:#6a4a2b">AF</div><div class="grow">Abigail Frimpong<div class="sub">Confirmed 13 or older · asked yesterday</div></div><button class="btn ok small">Let in</button><button class="btn line small">No</button></div>
+              <div><div class="av" style="background:#2b4a6a">NT</div><div class="grow">Nana Tetteh<div class="sub">Confirmed 13 or older · asked yesterday</div></div><button class="btn ok small">Let in</button><button class="btn line small">No</button></div>
+            </div>
+            <b>Reported (2)</b>
+            <div class="list">
+              <div><div class="grow"><span class="pill bad">A child shown without a parent's yes</span><div class="sub" style="margin-top:4px">Post by Kofi Darko · reported by 2 members · 40 min ago</div></div><button class="btn line small">Look</button></div>
+              <div><div class="grow"><span class="pill gold">Unkind</span><div class="sub" style="margin-top:4px">Comment by a member · reported by 1 · yesterday</div></div><button class="btn line small">Look</button></div>
+            </div>
+            <div class="note-pop"><b>Hiding</b>A hidden post keeps its photos, comments and reports. Members stop seeing it; admins still see it, with the reason. Nothing is deleted, and it can be brought back.</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn line small">Write a devotional</button><button class="btn line small">Community rules</button><button class="btn line small">Admins</button></div>
+          </div></div>
+        </section>
+
+        <!-- ================= WAITING ================= -->
+        <section class="screen" id="waiting" aria-label="Waiting to be let in">
+          <div class="wait">
+            <div class="word" style="font-size:2.2rem">gr<i>a</i>m</div>
+            <h2>Thanks, Yaw. You're on the list.</h2>
+            <p class="fine" style="max-width:32ch;margin:0 auto">An admin lets each new member in, usually within a day. We'll send you a message when you're in.</p>
+            <button class="btn line small" style="justify-self:center">Read the community rules</button>
+          </div>
+        </section>
+
+        <!-- ================= PUBLIC DEVOTIONAL ================= -->
+        <section class="screen" id="public" aria-label="A shared devotional, opened with no account">
+          <div class="top-bar"><div class="word">gr<i>a</i>m</div><span class="fine">Daily devotional</span></div>
+          <div class="scroll"><div class="pad">
+            <span class="eyebrow">Wednesday 14 October 2026</span>
+            <h2 style="font-family:var(--read);font-weight:600;font-size:1.6rem;margin:0">New every morning</h2>
+            <div class="scripture">It is of the LORD's mercies that we are not consumed, because his compassions fail not. They are new every morning: great is thy faithfulness.<br><span class="ref" style="font-style:normal">Lamentations 3:22–23 (KJV)</span></div>
+            <div class="reading"><p>Jeremiah wrote these words while Jerusalem lay in ruins. He was not looking at a good morning…</p></div>
+            <div class="note-pop"><b>Part of a church community</b>Members read a new devotional every morning, pray for each other and share what God is doing.<button class="btn main small" style="justify-self:start" data-go="waiting">Ask to join</button></div>
+            <span class="fine">Opened from a shared link. Nothing else in the app is public.</span>
+          </div></div>
+        </section>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note"><b>For Richard first, then the builder.</b> What the picture decides: the day's devotional sits at the top of the feed and works offline; an "I prayed" is counted, and only the person who asked sees who; members are 13 and over and nothing they post is public (a shared devotional is the one exception); notes are private, even from admins. Photos are coloured blocks with a label. The name and logo are placeholders until the builder's logo arrives.</p>
+</div>
+
+<script>
+(function () {
+  var device = document.getElementById('device');
+  var stage = document.getElementById('stage');
+  var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
+  var pickers = Array.prototype.slice.call(document.querySelectorAll('[data-pick]'));
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.rail [data-tab]'));
+  function go(id) {
+    screens.forEach(function (s) { s.classList.toggle('on', s.id === id); });
+    pickers.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.pick === id)); });
+    tabs.forEach(function (b) { b.classList.toggle('on', b.dataset.tab === id); });
+    var on = document.getElementById(id);
+    var sc = on && on.querySelector('.scroll');
+    if (sc) sc.scrollTop = 0;
+    try { localStorage.setItem('gram-screen', id); } catch (e) {}
+  }
+  function fit() {
+    var w = device.classList.contains('tablet') ? 1044 : 410;
+    var h = device.classList.contains('tablet') ? 660 : 820;
+    var s = Math.min(1, stage.clientWidth / w);
+    device.style.transform = 'scale(' + s + ')';
+    stage.style.height = Math.ceil(h * s) + 'px';
+  }
+  document.addEventListener('click', function (e) {
+    var pray = e.target.closest('#pray-1');
+    if (pray) { var on = pray.classList.toggle('on'); pray.textContent = on ? '🙏 You prayed · 25' : '🙏 I prayed · 24'; return; }
+    var t = e.target.closest('[data-go]');
+    if (t && device.contains(t)) { e.preventDefault(); go(t.dataset.go); return; }
+    var p = e.target.closest('[data-pick]');
+    if (p) { go(p.dataset.pick); return; }
+    var z = e.target.closest('[data-size]');
+    if (z) {
+      device.classList.toggle('tablet', z.dataset.size === 'tablet');
+      document.querySelectorAll('[data-size]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === z)); });
+      fit();
+    }
+  });
+  window.addEventListener('resize', fit);
+  var start = 'feed';
+  try { start = localStorage.getItem('gram-screen') || 'feed'; } catch (e) {}
+  if (!document.getElementById(start)) start = 'feed';
+  go(start);
+  fit();
+})();
+</script>

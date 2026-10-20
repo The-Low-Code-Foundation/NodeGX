@@ -30,8 +30,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-import type { AnyNodeSpec, Step, TargetAdapter, TraceEvent } from '../src';
-import { compareTraces, discoverBranches, formatReport, generateSequence, interpreterAdapter, loadScenarios, mutantsOf, play, PlayError, runConformance, validateTrace, withoutUnseenDiagnostics, World, type WorldScript } from '../src';
+import type { AnyNodeSpec, MountContext, Step, TargetAdapter, TraceEvent } from '../src';
+import { compareTraces, discoverBranches, formatReport, generateSequence, interpreterAdapter, loadScenarios, mutantsOf, play, playContextOfScenario, PlayError, runConformance, validateTrace, withoutUnseenDiagnostics, World, type WorldScript } from '../src';
 import { specFor } from '../src/nodes';
 import { EQUIVALENT_MUTANTS } from '../src/nodes/equivalent-mutants';
 
@@ -170,15 +170,17 @@ for (const round of rounds.ROUNDS) {
   describe(`NSP-006 AC2 ${label} — every mutant of a spec is caught by the stranger's target (the suite is not trivially satisfied)`, () => {
     for (const spec of graded) {
       test(`${spec.type}: with each mutant as the reference, the stranger disagrees somewhere`, async () => {
-        const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript }> = loadScenarios(spec.type).map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world }));
+        // s105 — each item keeps the wires its scenario names (`wired`, C155) and its mount context (`wiredOutputs`, R38's
+        // `parent`), as runConformance plays it: without them a play the spec reads a wire in (R38's warning) was not the scenario
+        const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript; wired?: readonly string[]; context?: Readonly<MountContext> }> = loadScenarios(spec.type).map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world, wired: s.wired, context: playContextOfScenario(s) }));
         for (let i = 0; i < 200; i++) {
           const seq = generateSequence(spec, 20726, i);
-          suite.push({ name: `sequence ${i}`, params: seq.params, steps: seq.steps, world: seq.world });
+          suite.push({ name: `sequence ${i}`, params: seq.params, steps: seq.steps, world: seq.world, context: playContextOfScenario(seq) });
         }
         // branches are DISCOVERED by playing the suite through the wrapped spec (as runConformance does)
         const discovered = discoverBranches(spec);
         const probe = interpreterAdapter({ resolve: () => discovered.spec });
-        for (const item of suite) await play(probe, spec.type, item.params, item.steps, worldFor(spec, item.world));
+        for (const item of suite) await play(probe, spec.type, item.params, item.steps, worldFor(spec, item.world), item.wired, item.context);
         const mutants = mutantsOf(spec, discovered.branches);
         expect(mutants.length).toBeGreaterThan(0);
         // NSP-019 s95 — the reference as this target can see it (runConformance does the same): a stranger's target has no
@@ -187,7 +189,7 @@ for (const round of rounds.ROUNDS) {
         // NSP-019 R35 (s103) — what an editor would see of the spec itself: a mutant this target cannot catch that differs from it
         // there changes only what the node tells the editor (runConformance's `editorOnly`), graded where there is one
         const truth: TraceEvent[][] = [];
-        for (const item of suite) truth.push(await play(interpreterAdapter({ resolve: () => spec }), spec.type, item.params, item.steps, worldFor(spec, item.world)));
+        for (const item of suite) truth.push(await play(interpreterAdapter({ resolve: () => spec }), spec.type, item.params, item.steps, worldFor(spec, item.world), item.wired, item.context));
         const survivors: string[] = [];
         let editorOnly = 0;
         for (const m of mutants) {
@@ -197,7 +199,7 @@ for (const round of rounds.ROUNDS) {
           for (const [i, item] of suite.entries()) {
             let reference: TraceEvent[];
             try {
-              const full = await play(mutant, spec.type, item.params, item.steps, worldFor(spec, item.world));
+              const full = await play(mutant, spec.type, item.params, item.steps, worldFor(spec, item.world), item.wired, item.context);
               if (!seenBy.diagnostics && !seenByEditor && compareTraces(truth[i], full).index >= 0) seenByEditor = true;
               reference = withoutUnseenDiagnostics(full, seenBy);
             } catch (e) {
@@ -206,7 +208,7 @@ for (const round of rounds.ROUNDS) {
             }
             let actual: TraceEvent[];
             try {
-              actual = await play(strangerTarget(), spec.type, item.params, item.steps, worldFor(spec, item.world));
+              actual = await play(strangerTarget(), spec.type, item.params, item.steps, worldFor(spec, item.world), item.wired, item.context);
             } catch (e) {
               if (!(e instanceof PlayError)) throw e;
               caught = `${item.name}: the stranger threw (${e.message})`;
@@ -236,14 +238,16 @@ for (const round of rounds.ROUNDS) {
   if (round.page) describe(`NSP-023 AC5 ${label} — every act reaches the node through the page: deafen it and the target disagrees`, () => {
     for (const spec of graded) {
       test(`${spec.type}: each declared act, raised on no element, changes some trace`, async () => {
-        const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript }> = loadScenarios(spec.type).map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world }));
+        // s105 — each item keeps the wires its scenario names (`wired`, C155) and its mount context (`wiredOutputs`, R38's
+        // `parent`), as runConformance plays it: without them a play the spec reads a wire in (R38's warning) was not the scenario
+        const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript; wired?: readonly string[]; context?: Readonly<MountContext> }> = loadScenarios(spec.type).map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world, wired: s.wired, context: playContextOfScenario(s) }));
         for (let i = 0; i < 200; i++) {
           const seq = generateSequence(spec, 20726, i);
-          suite.push({ name: `sequence ${i}`, params: seq.params, steps: seq.steps, world: seq.world });
+          suite.push({ name: `sequence ${i}`, params: seq.params, steps: seq.steps, world: seq.world, context: playContextOfScenario(seq) });
         }
         const reference = interpreterAdapter({ resolve: () => spec });
         const references: TraceEvent[][] = [];
-        for (const item of suite) references.push(await play(reference, spec.type, item.params, item.steps, worldFor(spec, item.world)));
+        for (const item of suite) references.push(await play(reference, spec.type, item.params, item.steps, worldFor(spec, item.world), item.wired, item.context));
         const page = pageOf();
         const unheard: string[] = [];
         for (const act of Object.keys(spec.acts ?? {})) {
@@ -252,7 +256,7 @@ for (const round of rounds.ROUNDS) {
           for (let i = 0; i < suite.length && !heard; i++) {
             if (!suite[i].steps.some((st) => typeof st === 'object' && 'act' in st && st.act === act)) continue;
             try {
-              heard = compareTraces(references[i], await play(strangerTarget(deaf), spec.type, suite[i].params, suite[i].steps, worldFor(spec, suite[i].world))).index >= 0;
+              heard = compareTraces(references[i], await play(strangerTarget(deaf), spec.type, suite[i].params, suite[i].steps, worldFor(spec, suite[i].world), suite[i].wired, suite[i].context)).index >= 0;
             } catch (e) {
               if (!(e instanceof PlayError)) throw e;
               heard = true;

@@ -1,0 +1,1134 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "07cb8587-335a-5d86-8db7-cdd3269307fb",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mpPage",
+      "type": "Page",
+      "label": "A profile",
+      "parameters": {
+        "title": "A profile",
+        "urlPath": "member/{memberId}"
+      },
+      "children": [
+        "mpRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mpRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "mpPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app gm-has-nav"
+      },
+      "children": [
+        "mpBar",
+        "mpBody",
+        "mpNav"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mpBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "mpRoot",
+      "parameters": {},
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "mpBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "mpRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "mpBack",
+        "mpContent",
+        "mpGone",
+        "mpRefused"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "mpNav",
+      "type": "/UI/Nav",
+      "label": "The sections",
+      "parent": "mpRoot",
+      "parameters": {
+        "on": ""
+      },
+      "x": 160,
+      "y": 3760
+    },
+    {
+      "id": "mpUrl",
+      "type": "PageInputs",
+      "label": "Whose profile",
+      "parameters": {
+        "pathParams": "memberId"
+      },
+      "x": 650,
+      "y": 3760
+    },
+    {
+      "id": "mpBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "mpBody",
+      "parameters": {
+        "label": "← The feed",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "mpContent",
+      "type": "Group",
+      "label": "The profile",
+      "parent": "mpBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "mpHead",
+        "mpWho",
+        "mpEdit",
+        "mpBlocked",
+        "mpBlockedFine",
+        "mpLetBack",
+        "mpBlock",
+        "mpBlockError",
+        "mpEmpty",
+        "mpGrid"
+      ],
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "mpHead",
+      "type": "Group",
+      "label": "Photo, how many posts, prayer requests and testimonies",
+      "parent": "mpContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-5)"
+      },
+      "children": [
+        "mpAv",
+        "mpCounts"
+      ],
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "mpAv",
+      "type": "Group",
+      "label": "Their face",
+      "parent": "mpHead",
+      "parameters": {
+        "width": {
+          "value": 80,
+          "unit": "px"
+        },
+        "height": {
+          "value": 80,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "cssClassName": "gm-av"
+      },
+      "children": [
+        "mpFace",
+        "mpInitials"
+      ],
+      "x": 340,
+      "y": 880
+    },
+    {
+      "id": "mpFace",
+      "type": "Image",
+      "label": "Their photo",
+      "parent": "mpAv",
+      "parameters": {
+        "width": {
+          "value": 80,
+          "unit": "px"
+        },
+        "height": {
+          "value": 80,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": {
+          "value": 50,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 400,
+      "y": 1000
+    },
+    {
+      "id": "mpInitials",
+      "type": "Text",
+      "label": "Their initials, with no photo",
+      "parent": "mpAv",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--primary-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1120
+    },
+    {
+      "id": "mpCounts",
+      "type": "Group",
+      "label": "How many posts, prayer requests and testimonies",
+      "parent": "mpHead",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-4)",
+        "cssClassName": "gm-count"
+      },
+      "children": [
+        "mpEachCount"
+      ],
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "mpEachCount",
+      "type": "For Each",
+      "label": "One box per count",
+      "parent": "mpCounts",
+      "parameters": {
+        "template": "/Profile/Count"
+      },
+      "x": 400,
+      "y": 1360
+    },
+    {
+      "id": "mpWho",
+      "type": "Group",
+      "label": "Name and bio",
+      "parent": "mpContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "mpName",
+        "mpBio"
+      ],
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "mpName",
+      "type": "Text",
+      "label": "Name",
+      "parent": "mpWho",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1"
+      },
+      "x": 340,
+      "y": 1600
+    },
+    {
+      "id": "mpBio",
+      "type": "Text",
+      "label": "Bio",
+      "parent": "mpWho",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "mpEdit",
+      "type": "net.noodl.controls.button",
+      "label": "Edit profile",
+      "parent": "mpContent",
+      "parameters": {
+        "label": "Edit profile",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "mpBlocked",
+      "type": "Text",
+      "label": "Blocked, and why (admins)",
+      "parent": "mpContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "cssClassName": "gm-pill gm-wrap gm-pill-bad",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "mpBlockedFine",
+      "type": "Text",
+      "label": "What being blocked means",
+      "parent": "mpContent",
+      "parameters": {
+        "text": "They can’t sign in, and nothing they wrote is shown to members. Nothing is deleted.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "mpLetBack",
+      "type": "net.noodl.controls.button",
+      "label": "Let them back",
+      "parent": "mpContent",
+      "parameters": {
+        "label": "",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "mpBlock",
+      "type": "Group",
+      "label": "Block (admins)",
+      "parent": "mpContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "borderStyle": "solid",
+        "borderColor": "var(--border)",
+        "borderTopWidth": {
+          "value": 1,
+          "unit": "px"
+        },
+        "borderBottomWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "borderLeftWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "borderRightWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "mounted": false
+      },
+      "children": [
+        "mpBlockWhy",
+        "mpBlockGo",
+        "mpBlockFine"
+      ],
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "mpBlockWhy",
+      "type": "net.noodl.controls.textinput",
+      "label": "Why block them (admins see this; 500 characters at most)",
+      "parent": "mpBlock",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Why block them (admins see this; 500 characters at most)"
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "mpBlockGo",
+      "type": "net.noodl.controls.button",
+      "label": "Block",
+      "parent": "mpBlock",
+      "parameters": {
+        "label": "",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--bad)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--bad)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 2560
+    },
+    {
+      "id": "mpBlockFine",
+      "type": "Text",
+      "label": "What blocking does",
+      "parent": "mpBlock",
+      "parameters": {
+        "text": "They can’t sign in, and their posts and comments are hidden from members until an admin lets them back. Nothing is deleted.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 340,
+      "y": 2680
+    },
+    {
+      "id": "mpBlockError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "mpContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "mpEmpty",
+      "type": "Text",
+      "label": "Nothing posted yet",
+      "parent": "mpContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "mpGrid",
+      "type": "Group",
+      "label": "Their posts",
+      "parent": "mpContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-grid"
+      },
+      "children": [
+        "mpEach"
+      ],
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "mpEach",
+      "type": "For Each",
+      "label": "One tile per post",
+      "parent": "mpGrid",
+      "parameters": {
+        "template": "/Profile/Tile"
+      },
+      "x": 340,
+      "y": 3160
+    },
+    {
+      "id": "mpGone",
+      "type": "Text",
+      "label": "Not in the community",
+      "parent": "mpBody",
+      "parameters": {
+        "text": "This member isn’t in the community.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 3280
+    },
+    {
+      "id": "mpRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "mpBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "mpRefusedWhy",
+        "mpRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 3400
+    },
+    {
+      "id": "mpRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "mpRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 3520
+    },
+    {
+      "id": "mpRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "mpRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 3640
+    },
+    {
+      "id": "mpToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 650,
+      "y": 3640
+    },
+    {
+      "id": "mpLoad",
+      "type": "JavaScriptFunction",
+      "label": "Their profile and posts",
+      "parameters": {
+        "runOnChange-in-changed": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nfunction shown(posts, members) {\n  var by = {};\n  members.forEach(function (m) { by[m.objectId] = m; });\n  return posts\n    .filter(function (p) { var m = by[idOf(p.member)]; return !p.endedAt && m && !m.endedAt; })\n    .sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });\n}\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\n/** Slice 4b: what each kind but a post is called on its pill. */\nvar KIND_NAMES = {\"prayer\":\"Prayer request\",\"testimony\":\"Testimony\",\"event\":\"Event\"};\n/**\n * When an event is, in the reader's own time: \"Saturday 18 October, 9:00\", the year only when it isn't this one, and\n * \"was\" once it has passed.\n */\nfunction eventWhen(at) {\n  var t = at ? new Date(at.iso || at) : null;\n  if (!t || !isFinite(t.getTime())) return '';\n  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n  var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];\n  var year = t.getFullYear() === new Date().getFullYear() ? '' : ' ' + t.getFullYear();\n  var said = days[t.getDay()] + ' ' + t.getDate() + ' ' + months[t.getMonth()] + year + ', ' + t.getHours() + ':' + String(t.getMinutes()).padStart(2, '0');\n  return (t.getTime() < Date.now() ? 'was ' : '') + said;\n}\nfunction firstName(m) { return String((m && m.name) || '').trim().split(' ')[0]; }\n/** A link for each photo, kept on the page until a minute before it runs out: a reload asks again for none of them. */\nasync function linked(photos) {\n  var keep = Component.Object;\n  var links = keep.get('links') || {};\n  var soon = Date.now() + 60000;\n  var urls = await Promise.all((photos || []).map(async function (f) {\n    var name = f && f.name ? String(f.name) : '';\n    if (!name) return '';\n    if (links[name] && links[name].until > soon) return links[name].url;\n    try {\n      var l = await Noodl.Files.sign(f);\n      links[name] = { url: l.url, until: l.expiresAt ? Date.parse(l.expiresAt) : soon + 3600000 };\n      return l.url;\n    } catch (e) { return ''; }\n  }));\n  keep.set('links', links);\n  return urls;\n}\n/**\n * The cards: who, when, the photos, the hearts by person (mine among them), the comments not hidden. A prayer request\n * (slice 4) has no hearts: its words, \"I prayed\" with the count kept on it, and who prayed for the person who asked\n * only (W4: the prayed rows are the ones the reader may read, their own and those on their own requests). Slice 4b: a\n * testimony leads with its words, as a prayer request does, and has hearts; an event says when it is where a post says\n * when it was shared. Every kind but a post wears its pill. A card with no photo leads with its words too (the shots:\n * an event's words sat under \"No hearts yet\").\n */\nasync function cardsOf(posts, members, hearts, comments, mine, onItsPage, prayed) {\n  var by = {}, byLogin = {};\n  members.forEach(function (m) { by[m.objectId] = m; byLogin[idOf(m.login)] = m; });\n  var cards = [];\n  for (var i = 0; i < posts.length; i++) {\n    var p = posts[i];\n    var m = by[idOf(p.member)] || {};\n    var isPrayer = p.kind === 'prayer';\n    var kindName = KIND_NAMES[p.kind] || '';\n    // Words lead a prayer request, a testimony, and any card with no photo (else the heart comes before what it's on).\n    var wordsFirst = isPrayer || p.kind === 'testimony' || (p.photos || []).length === 0;\n    var asked = !!mine && idOf(m.login) === mine;\n    var prayers = [];\n    (prayed || []).forEach(function (r) { var u = idOf(r.doneBy); if (idOf(r.post) === p.objectId && prayers.indexOf(u) < 0) prayers.push(u); });\n    var iPrayed = prayers.indexOf(mine) >= 0;\n    var count = Math.max(0, Number(p.prayedCount) || 0);\n    var people = [];\n    hearts.forEach(function (h) { var u = idOf(h.doneBy); if (idOf(h.post) === p.objectId && people.indexOf(u) < 0) people.push(u); });\n    var said = comments.filter(function (c) { return idOf(c.post) === p.objectId && !c.endedAt; }).length;\n    var hearted = people.indexOf(mine) >= 0;\n    var names = people.slice(0, 2).map(function (u) { return u === mine ? 'you' : firstName(byLogin[u]); }).filter(Boolean);\n    var urls = (await linked(p.photos)).filter(Boolean);\n    var face = await faceOf(m);\n    cards.push({\n      id: p.objectId,\n      memberId: m.objectId || '',\n      name: m.name || '',\n      face: face,\n      hasFace: !!face,\n      noFace: !face,\n      initials: initials(m.name),\n      shade: shade(m.objectId || p.objectId),\n      when: p.kind === 'event' ? 'Event · ' + (eventWhen(p.eventOn) || 'its day isn’t known') : p.kind === 'testimony' ? 'Testimony · ' + ago(p.createdAt) : ago(p.createdAt),\n      caption: p.caption || '',\n      hasCaption: !!p.caption && !wordsFirst,\n      isPrayer: isPrayer,\n      notPrayer: !isPrayer,\n      kindName: kindName,\n      hasKind: !!kindName,\n      wordsFirst: wordsFirst,\n      kindClass: isPrayer ? 'gm-prayer' : '',\n      ask: wordsFirst ? p.caption || '' : '',\n      prayed: iPrayed,\n      prayLabel: (iPrayed ? '🙏 You prayed' : '🙏 I prayed') + (count > 0 ? ' · ' + count : ''),\n      prayInk: iPrayed ? 'var(--primary-foreground)' : 'var(--primary)',\n      prayFill: iPrayed ? 'var(--primary)' : 'var(--surface)',\n      whoPrayed: !isPrayer ? '' : asked ? whoPrayed(prayers, byLogin, mine, onItsPage) : 'Only ' + (firstName(m) || 'the person who asked') + ' sees who prayed.',\n      photos: urls.map(function (u, n) { return { id: u, src: u, alt: 'Photo ' + (n + 1) + ' of ' + urls.length + ', shared by ' + (m.name || 'a member') }; }),\n      hasPhotos: urls.length > 0,\n      lostPhotos: (p.photos || []).length > urls.length,\n      hearted: hearted,\n      heartLabel: hearted ? '♥ Hearted' : '♡ Heart',\n      heartColor: hearted ? 'var(--heart)' : 'var(--foreground)',\n      hearts: people.length === 0 ? 'No hearts yet' : plural(people.length, 'heart', 'hearts') + ' · ' + (people.length > 2 ? names.join(', ') + ' and ' + plural(people.length - 2, 'other', 'others') : names.join(' and ')),\n      comments: said === 0 ? '' : said === 1 ? 'View 1 comment' : 'View all ' + said + ' comments',\n      toComments: !onItsPage,\n      listComments: !onItsPage && said > 0\n    });\n  }\n  return cards;\n}\n/** \"a, b and c\". */\nfunction listed(names) { return names.length < 2 ? names.join('') : names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]; }\n/** Who prayed, for the person who asked: everyone on the request's own page, the first two and how many more on a card. */\nfunction whoPrayed(prayers, byLogin, mine, everyone) {\n  if (prayers.length === 0) return 'Nobody has prayed yet. Only you will see who does.';\n  var names = prayers.map(function (u) { return u === mine ? 'you' : (byLogin[u] && byLogin[u].name) || 'a member'; });\n  var shown = everyone || names.length <= 3 ? names : names.slice(0, 2).concat([plural(names.length - 2, 'other', 'others')]);\n  return 'Prayed: ' + listed(shown) + '. Only you see who.';\n}\n/** A member's profile photo by its signed link, or '' (no photo, or the backend won't sign it): then their initials. */\nasync function faceOf(m) {\n  return m && m.photo && m.photo.name ? (await linked([m.photo]))[0] || '' : '';\n}\nfunction refused(e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; }\n\nif (Inputs.memberId === undefined) return;\n// Read so that a block or a let-back runs the page again.\nvar version = Inputs.changed;\nvar who = await me();\nif (!who) { refused({ error: 'Sign in to see members’ profiles.' }); return; }\nif (who.status !== 'approved') { Outputs.waiting(); return; }\nvar id = String(Inputs.memberId || '') || String(who.id || '');\ntry {\n  var members = await all('Member');\n  var theirs = await all('Post', { member: { equalTo: ptr('Member', id) } });\n} catch (e) { refused(e); return; }\nOutputs.band = who.role === 'admin' ? 'Admin' : '';\nOutputs.meId = who.id;\nOutputs.inside = true;\nOutputs.refused = false;\nvar m = members.filter(function (x) { return x.objectId === id; })[0];\nvar admin = who.role === 'admin';\n// Slice 5: an admin sees a blocked member's profile (and someone not let in), to see why and let them back.\nif (!m || (!admin && (m.status !== 'approved' || m.endedAt))) { Outputs.gone = true; Outputs.ok = false; return; }\n// A blocked member's posts are hidden from members with them; an admin sees those not hidden for their own reason.\nvar posts = m.endedAt\n  ? theirs.filter(function (p) { return !p.endedAt; }).sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); })\n  : shown(theirs, members);\nOutputs.blocked = !!m.endedAt;\nvar why = String(m.blockedReason || '').trim();\nfunction sentence(w) { return /[.!?]$/.test(w) ? w : w + '.'; }\nvar out = m.status === 'waiting' ? (why && why !== 'Not let in.' ? 'Not let in: ' + sentence(why) : 'Not let in.') : 'Blocked: ' + sentence(why || 'no reason given');\nOutputs.blockedWords = out;\n// Not an admin, so never yourself (only an admin sees Block); the block function refuses both in words anyway.\nOutputs.canBlock = admin && m.role !== 'admin' && !m.endedAt;\nOutputs.canLetBack = admin && !!m.endedAt;\nOutputs.blockLabel = 'Block ' + (firstName(m) || 'them');\nOutputs.letBackLabel = 'Let ' + (firstName(m) || 'them') + ' back';\nvar face = await faceOf(m);\nvar mine = String(who.id || '') === m.objectId;\n// Slice 4: a prayer request is counted beside the posts, and isn't a tile in the grid (the picture's counts). Slice 4b:\n// a testimony too, which leads with its words as a prayer request does; an event is a post with a day, in the grid.\nvar asks = posts.filter(function (p) { return p.kind === 'prayer'; }).length;\nvar told = posts.filter(function (p) { return p.kind === 'testimony'; }).length;\nposts = posts.filter(function (p) { return p.kind !== 'prayer' && p.kind !== 'testimony'; });\nOutputs.name = m.name || '';\nOutputs.bio = m.bio || '';\nOutputs.hasBio = !!m.bio;\nOutputs.initials = initials(m.name);\nOutputs.shade = shade(m.objectId);\nOutputs.face = face;\nOutputs.hasFace = !!face;\nOutputs.noFace = !face;\n// The picture's counts, each number over its word: one box per count, drawn by a For Each.\nvar counts = [\n  { id: 'posts', number: String(posts.length), word: posts.length === 1 ? 'post' : 'posts' },\n  { id: 'prayers', number: String(asks), word: asks === 1 ? 'prayer request' : 'prayer requests' },\n  { id: 'testimonies', number: String(told), word: told === 1 ? 'testimony' : 'testimonies' }\n];\nOutputs.counts = counts;\nOutputs.posts = counts[0].number;\nOutputs.postsWord = counts[0].word;\nOutputs.prayers = counts[1].number;\nOutputs.prayersWord = counts[1].word;\nOutputs.testimonies = counts[2].number;\nOutputs.testimoniesWord = counts[2].word;\nOutputs.isMe = mine;\nOutputs.navOn = mine ? 'profile' : '';\nvar tiles = [];\nfor (var i = 0; i < posts.length; i++) {\n  var p = posts[i];\n  var first = (await linked((p.photos || []).slice(0, 1)))[0] || '';\n  var words = String(p.caption || '').trim();\n  var cut = words.length > 60 ? words.slice(0, 59).trim() + '…' : words;\n  tiles.push({\n    id: p.objectId,\n    src: first,\n    hasPhoto: !!first,\n    noPhoto: !first,\n    words: cut || 'A photo that couldn’t be loaded',\n    label: (first ? 'Photo post' : 'Post') + ', ' + ago(p.createdAt) + (words ? ': ' + cut : '')\n  });\n}\nOutputs.tiles = tiles;\nOutputs.empty = posts.length === 0;\nOutputs.emptyWords = mine ? 'You haven’t posted yet. What you share shows here.' : firstName(m) + ' hasn’t posted yet.';\nOutputs.gone = false;\nOutputs.ok = true;",
+        "runOnChange-in-memberId": false
+      },
+      "ports": [
+        {
+          "name": "out-waiting",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-memberId",
+          "displayName": "memberId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-meId",
+          "displayName": "meId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-inside",
+          "displayName": "inside",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gone",
+          "displayName": "gone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocked",
+          "displayName": "blocked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blockedWords",
+          "displayName": "blockedWords",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canBlock",
+          "displayName": "canBlock",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canLetBack",
+          "displayName": "canLetBack",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blockLabel",
+          "displayName": "blockLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-letBackLabel",
+          "displayName": "letBackLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-bio",
+          "displayName": "bio",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasBio",
+          "displayName": "hasBio",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-initials",
+          "displayName": "initials",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shade",
+          "displayName": "shade",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-face",
+          "displayName": "face",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasFace",
+          "displayName": "hasFace",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noFace",
+          "displayName": "noFace",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-counts",
+          "displayName": "counts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-posts",
+          "displayName": "posts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-postsWord",
+          "displayName": "postsWord",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-prayers",
+          "displayName": "prayers",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-prayersWord",
+          "displayName": "prayersWord",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-testimonies",
+          "displayName": "testimonies",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-testimoniesWord",
+          "displayName": "testimoniesWord",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isMe",
+          "displayName": "isMe",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-navOn",
+          "displayName": "navOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tiles",
+          "displayName": "tiles",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-emptyWords",
+          "displayName": "emptyWords",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1960
+    },
+    {
+      "id": "mpBlockGather",
+      "type": "JavaScriptFunction",
+      "label": "Block them, with why",
+      "parameters": {
+        "functionScript": "var reason = typeof Inputs.reason === 'string' ? Inputs.reason.trim() : '';\nif (!reason) { Outputs.problem = 'Say why. Admins see the reason; the member doesn’t.'; Outputs.held(); return; }\nif (reason.length > 500) { Outputs.problem = 'A reason of 500 characters or fewer. This one has ' + reason.length + '.'; Outputs.held(); return; }\nOutputs.problem = '';\nOutputs.block = { memberId: Inputs.memberId, blocked: true, reason: reason };\nOutputs.go();",
+        "runOnChange-in-memberId": false,
+        "runOnChange-in-reason": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-held",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-reason",
+          "displayName": "reason",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-memberId",
+          "displayName": "memberId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-block",
+          "displayName": "block",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "mpLetBackGather",
+      "type": "JavaScriptFunction",
+      "label": "Let them back",
+      "parameters": {
+        "functionScript": "Outputs.block = { memberId: Inputs.memberId, blocked: false };\nOutputs.go();",
+        "runOnChange-in-memberId": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-memberId",
+          "displayName": "memberId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-block",
+          "displayName": "block",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 2200
+    },
+    {
+      "id": "mpBlockCall",
+      "type": "CloudFunction2",
+      "label": "block(block)",
+      "parameters": {
+        "function": "block"
+      },
+      "x": 650,
+      "y": 2920
+    },
+    {
+      "id": "mpStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the members changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 3880
+    },
+    {
+      "id": "mpChanged",
+      "type": "Set Variable",
+      "label": "The members changed",
+      "parameters": {
+        "name": "membersChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a member was let in, turned away or made an admin: the list reads again, whichever row changed it."
+      },
+      "x": 650,
+      "y": 4000
+    },
+    {
+      "id": "mpVersion",
+      "type": "Variable2",
+      "label": "The members changed",
+      "parameters": {
+        "name": "membersChanged"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a member was let in, turned away or made an admin: the list reads again, whichever row changed it."
+      },
+      "x": 650,
+      "y": 4120
+    },
+    {
+      "id": "mpToFeed",
+      "type": "RouterNavigate",
+      "label": "To the feed",
+      "parameters": {
+        "target": "/Pages/Feed"
+      },
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "mpToEdit",
+      "type": "RouterNavigate",
+      "label": "To edit your profile",
+      "parameters": {
+        "target": "/Pages/EditProfile"
+      },
+      "x": 650,
+      "y": 1840
+    },
+    {
+      "id": "mpToWaiting",
+      "type": "RouterNavigate",
+      "label": "Not let in yet: to waiting",
+      "parameters": {
+        "target": "/Pages/Waiting"
+      },
+      "x": 650,
+      "y": 4240
+    }
+  ],
+  "visualRoots": [
+    "mpPage"
+  ]
+}

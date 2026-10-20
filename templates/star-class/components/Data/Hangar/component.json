@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "63e9116c-e5cb-560c-894d-cc9f9cb64bc0",
+  "name": "Hangar",
+  "path": "/Data/Hangar",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Everything the hangar offers (RKT-011): face items as DiceBear parts per face they fit, and rocket paints as tokens. A free item is everyone’s from the start. Add a row to add an item."
+}

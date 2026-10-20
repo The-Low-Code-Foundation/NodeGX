@@ -1,0 +1,203 @@
+[
+ {
+  "waitFor": "window.__map?.ui.ready",
+  "timeout": 90000
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "clickSel": "#goto"
+ },
+ {
+  "type": "Todo/Header"
+ },
+ {
+  "eval": "document.querySelector('#goto').dispatchEvent(new Event('change')); 'ok'",
+  "label": "goto"
+ },
+ {
+  "waitFor": "!__map.map.flight",
+  "timeout": 20000
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "clickCard": [
+   "Todo/Header",
+   "hdIn"
+  ]
+ },
+ {
+  "wait": 600
+ },
+ {
+  "clickSel": "[data-act=\"wire-from\"][data-port=\"listLabel\"]"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "clickCard": [
+   "Todo/Header",
+   "hdTitle"
+  ]
+ },
+ {
+  "wait": 600
+ },
+ {
+  "clickSel": "[data-act=\"wire-to\"][data-port=\"text\"]"
+ },
+ {
+  "wait": 600
+ },
+ {
+  "eval": "JSON.stringify(__map.model.wires('Todo/Header').filter(w => w.toId === 'hdTitle'))",
+  "label": "wires into hdTitle"
+ },
+ {
+  "eval": "(() => { const i = __map.map.plates.get('Todo/Header').info.get('hdTitle'); return JSON.stringify({ rows: i.rows, depth: i.depth.toFixed(1) }); })()",
+  "label": "hdTitle card rows"
+ },
+ {
+  "clickCard": [
+   "Todo/Header",
+   "hdDone"
+  ]
+ },
+ {
+  "wait": 600
+ },
+ {
+  "clickSel": "[data-act=\"cut\"][data-tp=\"label\"]"
+ },
+ {
+  "wait": 400
+ },
+ {
+  "eval": "JSON.stringify(__map.model.wires('Todo/Header').filter(w => w.toId === 'hdDone'))",
+  "label": "wires into hdDone"
+ },
+ {
+  "clickCard": [
+   "Todo/Header",
+   "hdTitle"
+  ]
+ },
+ {
+  "wait": 600
+ },
+ {
+  "eval": "document.querySelector('#f-label').select(); 'ok'"
+ },
+ {
+  "type": "Title"
+ },
+ {
+  "clickSel": "[data-act=\"rename\"]"
+ },
+ {
+  "wait": 400
+ },
+ {
+  "eval": "(() => { const i = document.querySelector('input[data-param=\"text\"]'); i.focus(); i.select(); return i.value; })()",
+  "label": "text param before"
+ },
+ {
+  "type": "My todo list"
+ },
+ {
+  "key": "Enter",
+  "keyName": "Enter",
+  "vk": 13
+ },
+ {
+  "wait": 500
+ },
+ {
+  "eval": "JSON.stringify(__map.model.node('Todo/Header','hdTitle'))",
+  "label": "hdTitle now"
+ },
+ {
+  "clickCard": [
+   "Todo/Header",
+   "hdLook"
+  ]
+ },
+ {
+  "wait": 600
+ },
+ {
+  "eval": "JSON.stringify({ x: __map.model.node('Todo/Header','hdLook').x, y: __map.model.node('Todo/Header','hdLook').y })",
+  "label": "hdLook before drag"
+ },
+ {
+  "dragCard": [
+   "Todo/Header",
+   "hdLook",
+   90,
+   40
+  ]
+ },
+ {
+  "wait": 600
+ },
+ {
+  "eval": "JSON.stringify({ x: __map.model.node('Todo/Header','hdLook').x, y: __map.model.node('Todo/Header','hdLook').y })",
+  "label": "hdLook after drag"
+ },
+ {
+  "dragCard": [
+   "Todo/Header",
+   "hdLook",
+   0,
+   0
+  ]
+ },
+ {
+  "clickCard": [
+   "Todo/Header",
+   "hdLook"
+  ]
+ },
+ {
+  "wait": 400
+ },
+ {
+  "clickSel": "[data-act=\"add-open\"]"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "type": "Set Variable"
+ },
+ {
+  "wait": 300
+ },
+ {
+  "clickSel": "[data-act=\"add\"][data-type=\"Set Variable\"]"
+ },
+ {
+  "wait": 800
+ },
+ {
+  "eval": "JSON.stringify({ dirty: __map.model.dirtyCount(), node: __map.model.node(__map.ui.selection.key, __map.ui.selection.id) })",
+  "label": "after add"
+ },
+ {
+  "shot": "80-edited.png"
+ },
+ {
+  "clickSel": "#btn-save"
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "eval": "document.querySelector('#toast').innerText",
+  "label": "toast"
+ }
+]

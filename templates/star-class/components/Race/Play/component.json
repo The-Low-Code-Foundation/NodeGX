@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3906e21a-9217-5824-8ab8-6dee64d48d64",
+  "name": "Play",
+  "path": "/Race/Play",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The race itself: rounds until a rocket reaches the planet. One player races the computer (its speed follows the player's rating); two players take turns on one keyboard. Publishes Finished with the winner, and the model after every round. RKT-002: a right answer bursts sparks from the rocket it moved; when a rocket lands, Race/Result takes the round's place under the track, Cheer or Sigh says which fanfare, and ChangeRace hands back to setup. RKT-004: Show me puts the missed skill's Teach card where the round was, and Got it asks the next question. RKT-006: Restart (while racing or teaching) sends both rockets home through the same reset as Start, and Change the race stops the clock and hands back to setup. The rockets' progress lives in the Variables raceProgressA/B, global by name (D57): harmless with one race per page. RKT-010: every start mints a race id; answers pay stars as they are graded (none on player two's turns), and a landing runs Logic/Finish race once, whose model goes out through Model and Graded like a round's, and whose take the result screen shows."
+}

@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7c699c88-254a-5a59-891e-520d39960c85",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ssUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "ssLoad",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "ssUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "ssGatherStop",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "ssUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "ssGatherBack",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "ssLoad",
+      "fromProperty": "out-ok",
+      "toId": "ssContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ssLoad",
+      "fromProperty": "out-name",
+      "toId": "ssName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ssLoad",
+      "fromProperty": "out-selling",
+      "toId": "ssSelling",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ssLoad",
+      "fromProperty": "out-stopped",
+      "toId": "ssStopped",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ssLoad",
+      "fromProperty": "out-reason",
+      "toId": "ssWhyWords",
+      "toProperty": "reason"
+    },
+    {
+      "fromId": "ssWhyWords",
+      "fromProperty": "result",
+      "toId": "ssWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ssLoad",
+      "fromProperty": "out-problem",
+      "toId": "ssRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ssLoad",
+      "fromProperty": "out-refused",
+      "toId": "ssRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ssRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "ssToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "ssReason",
+      "fromProperty": "onTextChanged",
+      "toId": "ssGatherStop",
+      "toProperty": "in-reason"
+    },
+    {
+      "fromId": "ssStop",
+      "fromProperty": "onClick",
+      "toId": "ssGatherStop",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ssBringBack",
+      "fromProperty": "onClick",
+      "toId": "ssGatherBack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ssGatherStop",
+      "fromProperty": "out-stop",
+      "toId": "ssCall",
+      "toProperty": "in-stop"
+    },
+    {
+      "fromId": "ssGatherStop",
+      "fromProperty": "out-go",
+      "toId": "ssCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ssGatherBack",
+      "fromProperty": "out-stop",
+      "toId": "ssCall",
+      "toProperty": "in-stop"
+    },
+    {
+      "fromId": "ssGatherBack",
+      "fromProperty": "out-go",
+      "toId": "ssCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ssCall",
+      "fromProperty": "error",
+      "toId": "ssError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ssCall",
+      "fromProperty": "done",
+      "toId": "ssToSellers",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "ssBack",
+      "fromProperty": "onClick",
+      "toId": "ssToSellers",
+      "toProperty": "navigate"
+    }
+  ]
+}

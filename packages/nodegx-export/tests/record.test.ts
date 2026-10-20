@@ -7,6 +7,7 @@ import { emitApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
 import { typecheckEmittedApp } from './helpers/typecheckApp';
 import { ExportIR, ComponentIR, ConnectionIR, NodeIR, ParamValue } from '../src/ir/types';
+import { withoutAnnouncement } from './helpers/fieldMount';
 
 /**
  * EXP-011 §43 — `Record` (`DbModel2`), the second of the nine Cloud Services and the most used of
@@ -18,7 +19,9 @@ import { ExportIR, ComponentIR, ConnectionIR, NodeIR, ParamValue } from '../src/
  * throws, because a record that does not exist is a Failure in the interpreter too.
  * Two forms, decided by the `Fetch` port: wired, a handler action (the Cloud Function's
  * try/catch, with the runtime's own `Missing Id.` thrown for an empty Id — `scheduleFetch`);
- * unwired, a `useEffect` keyed on the Id (`runOnValueChange`, `controlSignal: 'fetch'`).
+ * unwired, a bind: a `useEffect` keyed on the Id that makes the row the client's copy of that
+ * record (`setModelID`, `Model.get(id)`), with no request (P18-S113-IDBINDREAD — §43 first read
+ * `controlSignal: 'fetch'` as a read on every Id change; it governs whether the Id rebinds).
  * §A the module, §B the component, §C every refusal by its sentence, §D the §40 class rows for
  * this node, §E the fixture `tests/fixtures/page-desk` — both forms on one page, a backend and a
  * schema declared — exported whole and typechecked.
@@ -123,17 +126,19 @@ const base = (notes: ComponentIR) => {
   connect(notes, 'rec', 'failure', 'onFail', 'do', 'signal');
   connect(notes, 'rec', 'error', 'onFail', 'value');
 };
-/** The effect form: the same, with Fetch unwired. */
+/** The bind form (P18-S113-IDBINDREAD): Id from the draft variable, Fetch unwired, the title on the heading. */
 const baseEffect = (notes: ComponentIR) => {
   addRecord(notes);
   connect(notes, 'noteDraftVar', 'value', 'rec', 'modelId');
-  addBareSetter(notes, 'after', 'lastPublished');
-  connect(notes, 'rec', 'done', 'after', 'do', 'signal');
-  connect(notes, 'rec', 'prop-title', 'after', 'value');
-  addBareSetter(notes, 'onFail', 'lastError');
-  connect(notes, 'rec', 'failure', 'onFail', 'do', 'signal');
-  connect(notes, 'rec', 'error', 'onFail', 'value');
+  connect(notes, 'rec', 'prop-title', 'notesHeading', 'text');
 };
+const BIND =
+  "  // Page — bound to the app's copy of the record its Id names, whenever the Id changes; binding reads nothing (dbmodelnode2.ts setModelID).\n" +
+  '  useEffect(() => {\n' +
+  '    const pageRecordId = draft;\n' +
+  "    if (pageRecordId === undefined || pageRecordId === null || pageRecordId === '') return undefined;\n" +
+  '    return subscribeRecord<Page>(pageRecordId, setPageRow);\n' +
+  '  }, [draft]);';
 
 const HANDLER =
   '          try {\n' +
@@ -260,46 +265,79 @@ describe('EXP-011 §43 §B — the component', () => {
     expect(typecheckEmittedApp(app)).toEqual([]);
   });
 
-  it('Fetch unwired: the read is a useEffect keyed on the Id — the node reads again whenever its Id changes', () => {
-    const app = withGraph((notes) => {
-      baseEffect(notes);
-      connect(notes, 'rec', 'prop-title', 'notesHeading', 'text');
-    }, { connected: true, schema: true });
+  it('Fetch unwired: the Id binds the row to the app’s copy of the record — no request, no Error, no Done (P18-S113-IDBINDREAD)', () => {
+    const app = withGraph(baseEffect, { connected: true, schema: true });
     const page = notesFile(app);
-    expect(page).toContain("import { useEffect, useState } from 'react';");
-    expect(page).toContain(
-      '  // Page — read again whenever its Id changes (dbmodelnode2.ts runOnValueChange).\n' +
-        '  useEffect(() => {\n' +
-        '    void (async () => {\n' +
-        '      try {\n' +
-        // §43.2: the row is cleared first — a new Id rebinds the node to a fresh model — and an empty
-        // Id returns silently, where the handler form throws the runtime's `Missing Id.`.
-        '        setPageRow(undefined);\n' +
-        '        const pageRecordId = noteDraft.get();\n' +
-        "        if (pageRecordId === undefined || pageRecordId === null || pageRecordId === '') return;\n" +
-        '        const pageRecord = await fetchPageById(pageRecordId);\n' +
-        '        setPageRow(pageRecord);\n' +
-        '        lastPublished.set(pageRecord.title);\n' +
-        '      } catch (error) {\n' +
-        '        const pageMessage = error instanceof Error ? error.message : String(error);\n' +
-        '        setPageError(pageMessage);\n' +
-        "        raiseAppError({ code: 'record/storage-op-failed', message: pageMessage, nodeId: 'rec', nodeType: 'DbModel2', componentName: '/Pages/Notes' });\n" +
-        '        lastError.set(pageMessage);\n' +
-        '      }\n' +
-        '    })();\n' +
-        '  }, [draft]);'
-    );
-    // The Add button is a plain handler again — nothing of the read is in it.
-    expect(page).not.toContain('onClick={async');
+    // `useRef`: the Draft box's mount announcement (P18-S116-FIELDMOUNT), not the bind.
+    expect(page).toContain("import { useEffect, useRef, useState } from 'react';");
+    expect(page).toContain("import { subscribeRecord } from '../api/client';");
+    // The row's type, and no read: the module carries no fetchPageById for a Record that only binds.
+    expect(page).toContain("import { type Page } from '../api/pages';");
+    expect(page).toContain(BIND);
+    expect(page).toContain("{pageRow?.title ?? ''}");
+    expect(page).not.toContain('fetchPageById');
+    expect(page).not.toContain('raiseAppError');
+    expect(page).not.toContain('pageError');
+    expect(pagesFile(app)).not.toContain('fetchPageById');
+    expect(pagesFile(app)).toContain('export interface Page {');
+    // The client holds the records the bind shows, though no read is made here.
+    expect(app.files['src/api/client.ts']).toContain('export function subscribeRecord<T extends { id: string }>');
+    expect(app.notes.filter((n) => n.startsWith('Pages/Notes'))).toEqual([]);
     expect(typecheckEmittedApp(app)).toEqual([]);
   });
 
-  it('Fetch unwired with no row: nothing to clear, and an empty Id still returns rather than failing', () => {
-    const app = withGraph(baseEffect, { connected: true, schema: true });
+  it('Fetch unwired with Done or Failure wired is refused by name: both fire only after a Fetch', () => {
+    for (const port of ['done', 'failure'] as const) {
+      const app = withGraph((notes) => {
+        baseEffect(notes);
+        addBareSetter(notes, 'after', 'lastPublished');
+        connect(notes, 'rec', port, 'after', 'do', 'signal');
+        connect(notes, 'noteDraftVar', 'value', 'after', 'value');
+      }, { connected: true, schema: true });
+      expect(deferralFor(app, 'rec')).toContain(
+        `its ${port === 'done' ? 'Done' : 'Failure'} output is consumed and its Fetch is unwired — both fire only after a Fetch, and an Id only binds the record it names (dbmodelnode2.ts setModelID)`
+      );
+      expect(typecheckEmittedApp(app)).toEqual([]);
+    }
+  });
+
+  it('Fetch unwired with its Error read: the row is declared and never written — only a Fetch reports one', () => {
+    const app = withGraph((notes) => {
+      addRecord(notes);
+      connect(notes, 'noteDraftVar', 'value', 'rec', 'modelId');
+      connect(notes, 'rec', 'error', 'notesHeading', 'text');
+    }, { connected: true, schema: true });
     const page = notesFile(app);
-    expect(page).toContain("        if (pageRecordId === undefined || pageRecordId === null || pageRecordId === '') return;");
-    expect(page).not.toContain('(undefined);');
-    expect(page).not.toContain("Missing Id.");
+    expect(page).toContain("its Fetch is unwired and only a Fetch reports one, so it stays empty (dbmodelnode2.ts).");
+    expect(page).toContain('const [pageError, setPageError] = useState<string | undefined>();');
+    expect(page).not.toContain('setPageError(');
+    expect(typecheckEmittedApp(app)).toEqual([]);
+  });
+
+  it('Fetch unwired with a column read only in a handler: the row is earned there and bound, so the press reads the copy', () => {
+    const app = withGraph((notes) => {
+      addRecord(notes);
+      connect(notes, 'noteDraftVar', 'value', 'rec', 'modelId');
+      addBareSetter(notes, 'after', 'lastPublished');
+      connect(notes, 'addButton', 'onClick', 'after', 'do', 'signal');
+      connect(notes, 'rec', 'prop-title', 'after', 'value');
+    }, { connected: true, schema: true });
+    const page = notesFile(app);
+    expect(page).toContain('const [pageRow, setPageRow] = useState<Page | undefined>();');
+    expect(page).toContain('return subscribeRecord<Page>(pageRecordId, setPageRow);');
+    expect(page).toContain('lastPublished.set(pageRow?.title)');
+    expect(typecheckEmittedApp(app)).toEqual([]);
+  });
+
+  it('Fetch unwired with no row read: the bind changes nothing anyone sees, so nothing is emitted for it', () => {
+    const app = withGraph((notes) => {
+      addRecord(notes);
+      connect(notes, 'noteDraftVar', 'value', 'rec', 'modelId');
+    }, { connected: true, schema: true });
+    const page = notesFile(app);
+    expect(page).not.toContain('subscribeRecord');
+    expect(page).not.toContain('pageRow');
+    expect(page).not.toContain('fetchPageById');
     expect(typecheckEmittedApp(app)).toEqual([]);
   });
 
@@ -307,10 +345,10 @@ describe('EXP-011 §43 §B — the component', () => {
     const app = withGraph(base, { connected: true, schema: true });
     const page = notesFile(app);
     expect(page).toContain("throw new Error('Missing Id.');");
-    expect(page).not.toContain(') return;');
+    expect(withoutAnnouncement(page)).not.toContain(') return;');
   });
 
-  it('Fetch unwired with a literal Id runs once, at mount — the effect has no dependency', () => {
+  it('Fetch unwired with a literal Id binds once, at mount — the effect has no dependency and no guard', () => {
     const app = withGraph((notes) => {
       addRecord(notes, {
         parameters: [
@@ -322,10 +360,44 @@ describe('EXP-011 §43 §B — the component', () => {
       connect(notes, 'rec', 'prop-title', 'notesHeading', 'text');
     }, { connected: true, schema: true });
     const page = notesFile(app);
-    expect(page).toContain("        const pageRecordId = 'home';");
+    expect(page).toContain(
+      '  useEffect(() => {\n' +
+        "    const pageRecordId = 'home';\n" +
+        '    return subscribeRecord<Page>(pageRecordId, setPageRow);\n' +
+        '  }, []);'
+    );
     // No guard on a literal: the planner refused an empty one, and a guard on a string literal is a TS2367.
     expect(page).not.toContain("pageRecordId === ''");
-    expect(page).toContain('  }, []);');
+    expect(typecheckEmittedApp(app)).toEqual([]);
+  });
+
+  it('Fetch unwired with "Record properties" unticked: the copy as it is at the bind, and no later write', () => {
+    const app = withGraph((notes) => {
+      baseEffect(notes);
+      notes.nodes.find((n) => n.id === 'rec')!.parameters.push({ name: 'runOnChange-record', value: literal(false) });
+    }, { connected: true, schema: true });
+    const page = notesFile(app);
+    expect(page).toContain(
+      "    if (pageRecordId === undefined || pageRecordId === null || pageRecordId === '') return undefined;\n" +
+        '    // "Record properties" is unticked: the copy as it is at the bind, and no later write.\n' +
+        '    subscribeRecord<Page>(pageRecordId, setPageRow)();\n' +
+        '    return undefined;\n' +
+        '  }, [draft]);'
+    );
+    // The bind still needs the client's copy, whatever the box says.
+    expect(app.files['src/api/client.ts']).toContain('export function subscribeRecord<T extends { id: string }>');
+    expect(typecheckEmittedApp(app)).toEqual([]);
+  });
+
+  it('Fetch unwired with no backend: nothing is held, so no bind — the row stays unset, and no stub that throws', () => {
+    const app = withGraph(baseEffect, { schema: true });
+    const page = notesFile(app);
+    expect(app.files['src/api/client.ts']).toBeUndefined();
+    expect(page).not.toContain('subscribeRecord');
+    // The import's `useEffect` is the Draft box's announcement (P18-S116-FIELDMOUNT); no effect of the record's own.
+    expect(withoutAnnouncement(page)).not.toContain('useEffect(');
+    expect(page).toContain("{pageRow?.title ?? ''}");
+    expect(pagesFile(app)).not.toContain('fetchPageById');
     expect(typecheckEmittedApp(app)).toEqual([]);
   });
 
@@ -445,8 +517,8 @@ describe('EXP-011 §43 §D — the §40 class, for this node', () => {
       connect(notes, 'rec', 'prop-title', 'notesHeading', 'text');
       // A wire INTO fetch keeps the port wired (so the effect form does not apply) from a node
       // that carries no signal this slice can hear. (§59 re-pointed it from `Hash`, whose Done is
-      // a chain the exporter owns since, to `Pattern Extractor` — §50's own out-of-scope list.)
-      addNode(notes, { id: 'pattern', type: 'net.noodl.PatternExtractor' });
+      // a chain the exporter owns since, to `Sign In With`, and §79 translated that, the last picker row: it is `Verify Email` now, a retired type no rule will ever claim.)
+      addNode(notes, { id: 'pattern', type: 'net.noodl.user.VerifyEmail' });
       connect(notes, 'pattern', 'done', 'rec', 'fetch', 'signal');
     }, { connected: true, schema: true });
     // The attach pass disposes the sink with the trigger's own reason — the class rule, not this
@@ -479,19 +551,22 @@ describe('EXP-011 §43 §E — the fixture', () => {
     expect(typecheckEmittedApp(app)).toEqual([]);
   });
 
-  it('the page carries both forms: the Load handler and the live effect, each with its own row and Error', () => {
+  it('the page carries both forms: the Load handler, and the live Record bound to the copy its Id names', () => {
     expect(home).toContain('const [pageRow, setPageRow] = useState<Page | undefined>();');
     expect(home).toContain('const [livePageRow, setLivePageRow] = useState<Page | undefined>();');
     expect(home).toContain('const pageRecordId = pageId.get();');
     expect(home).toContain('const pageRecord = await fetchPageById(pageRecordId);');
-    expect(home).toContain('const livePageRecord = await fetchPageById(livePageRecordId);');
-    expect(home).toContain('  }, [id]);');
+    // P18-S113-IDBINDREAD. The live Record reads nothing: its Id binds the row to the client's copy.
+    expect(home).not.toContain('livePageRecord = await');
+    expect(home).toContain('    return subscribeRecord<Page>(livePageRecordId, setLivePageRow);\n  }, [id]);');
     expect(home).toContain('<p className={styles.text}>{id}</p>');
     expect(home).toContain("{pageRow?.title ?? ''}");
     expect(home).toContain("{String(pageRow?.published ?? '')}");
     expect(home).toContain("{String(pageRow?.navOrder ?? '')}");
     expect(home).toContain("{livePageRow?.title ?? ''}");
     expect(home).toContain('{pageError}');
+    // Its Error is shown and never written: only a Fetch reports one.
     expect(home).toContain('{livePageError}');
+    expect(home).not.toContain('setLivePageError(');
   });
 });

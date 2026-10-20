@@ -102,6 +102,16 @@
           "name": "noWord",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "skinWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "skin0",
+          "plug": "output",
+          "type": "string"
         }
       ],
       "x": 530,
@@ -116,6 +126,7 @@
         "nfName",
         "nfFaceRow",
         "nfLook",
+        "nfSkin",
         "nfLevel",
         "nfLangWrap",
         "nfActions",
@@ -420,12 +431,20 @@
       "y": 1360
     },
     {
+      "id": "nfSkin",
+      "type": "/Game/Choice row",
+      "label": "Which skin",
+      "parent": "nfCard",
+      "x": 100,
+      "y": 1480
+    },
+    {
       "id": "nfLevel",
       "type": "/Game/Choice row",
       "label": "Which class",
       "parent": "nfCard",
       "x": 100,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "nfLangWrap",
@@ -444,7 +463,7 @@
         "flexDirection": "column"
       },
       "x": 100,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "nfLang",
@@ -452,7 +471,7 @@
       "label": "Which language",
       "parent": "nfLangWrap",
       "x": 160,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "nfActions",
@@ -472,7 +491,7 @@
         "rowGap": "var(--space-3)"
       },
       "x": 100,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "nfCreate",
@@ -511,7 +530,7 @@
         "label": "Let’s go!"
       },
       "x": 160,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "nfCancel",
@@ -550,7 +569,7 @@
         "label": "Cancel"
       },
       "x": 160,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "nfLookItems",
@@ -587,7 +606,97 @@
         "json": "[{\"label\":\"CE2\",\"value\":\"CE2\"},{\"label\":\"CM1\",\"value\":\"CM1\"},{\"label\":\"CM2\",\"value\":\"CM2\"},{\"label\":\"6e\",\"value\":\"6e\"}]"
       },
       "x": 530,
+      "y": 2320
+    },
+    {
+      "id": "nfSkinItems",
+      "type": "Static Data",
+      "label": "The five skins",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"label\":\"✋🏻\",\"value\":\"t1\"},{\"label\":\"✋🏼\",\"value\":\"t2\"},{\"label\":\"✋🏽\",\"value\":\"t3\"},{\"label\":\"✋🏾\",\"value\":\"t4\"},{\"label\":\"✋🏿\",\"value\":\"t5\"}]"
+      },
+      "x": 530,
       "y": 1960
+    },
+    {
+      "id": "nfSkinVar",
+      "type": "Variable2",
+      "label": "The chosen skin",
+      "parameters": {
+        "name": "newSkin"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
+      },
+      "x": 530,
+      "y": 2080
+    },
+    {
+      "id": "nfSetSkin",
+      "type": "Set Variable",
+      "label": "Choose a skin",
+      "parameters": {
+        "name": "newSkin"
+      },
+      "x": 530,
+      "y": 2200
+    },
+    {
+      "id": "nfSkinFace",
+      "type": "JavaScriptFunction",
+      "label": "The face in that skin",
+      "parameters": {
+        "functionScript": "var SKIN_TONES = {\"t1\":\"f2d3b1\",\"t2\":\"e0ac80\",\"t3\":\"c68642\",\"t4\":\"8d5524\",\"t5\":\"5c3317\"};\nvar SKIN_DEFAULT = [];\nfunction skinOf(w) { return w && typeof w.skin === 'string' && SKIN_TONES[w.skin] ? w.skin : ''; }\nfunction skinOptions(skin) { return SKIN_TONES[skin] ? { skinColor: [SKIN_TONES[skin]] } : SKIN_DEFAULT.length ? { skinColor: SKIN_DEFAULT.map(function (t) { return SKIN_TONES[t]; }) } : {}; }\nOutputs.options = skinOptions(String(Inputs.skin || ''));\n"
+      },
+      "x": 530,
+      "y": 520,
+      "ports": [
+        {
+          "name": "in-skin",
+          "displayName": "skin",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-options",
+          "displayName": "options",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "nfDefaultSkin",
+      "type": "Expression",
+      "label": "No skin picked yet",
+      "parameters": {
+        "expression": "''"
+      },
+      "x": 530,
+      "y": 3400
+    },
+    {
+      "id": "nfResetSkin",
+      "type": "Set Variable",
+      "label": "Back to none",
+      "parameters": {
+        "name": "newSkin"
+      },
+      "x": 530,
+      "y": 3520
+    },
+    {
+      "id": "nfFillSkin",
+      "type": "Set Variable",
+      "label": "Their skin",
+      "parameters": {
+        "name": "newSkin"
+      },
+      "x": 530,
+      "y": 3640
     },
     {
       "id": "nfLangItems",
@@ -598,7 +707,7 @@
         "json": "[{\"label\":\"English\",\"value\":\"en\"},{\"label\":\"Français\",\"value\":\"fr\"}]"
       },
       "x": 530,
-      "y": 2440
+      "y": 2800
     },
     {
       "id": "nfLookVar",
@@ -634,7 +743,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 2080
+      "y": 2440
     },
     {
       "id": "nfSetLevel",
@@ -644,7 +753,7 @@
         "name": "newLevel"
       },
       "x": 530,
-      "y": 2200
+      "y": 2560
     },
     {
       "id": "nfLangVar",
@@ -657,7 +766,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 2560
+      "y": 2920
     },
     {
       "id": "nfSetLang",
@@ -667,7 +776,7 @@
         "name": "newLang"
       },
       "x": 530,
-      "y": 2680
+      "y": 3040
     },
     {
       "id": "nfSeedVar",
@@ -680,7 +789,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 520
+      "y": 640
     },
     {
       "id": "nfSetSeed",
@@ -690,7 +799,7 @@
         "name": "newSeed"
       },
       "x": 530,
-      "y": 3040
+      "y": 3760
     },
     {
       "id": "nfRandom",
@@ -713,7 +822,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 3160
+      "y": 3880
     },
     {
       "id": "nfSetHist",
@@ -723,7 +832,7 @@
         "name": "newSeedHistory"
       },
       "x": 530,
-      "y": 3280
+      "y": 4000
     },
     {
       "id": "nfAtVar",
@@ -736,7 +845,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 3400
+      "y": 4120
     },
     {
       "id": "nfSetAt",
@@ -746,7 +855,7 @@
         "name": "newSeedAt"
       },
       "x": 530,
-      "y": 3520
+      "y": 4240
     },
     {
       "id": "nfRollSet",
@@ -796,7 +905,7 @@
         "expression": "'pixel-art'"
       },
       "x": 530,
-      "y": 3640
+      "y": 4360
     },
     {
       "id": "nfDefaultLevel",
@@ -806,7 +915,7 @@
         "expression": "'CE2'"
       },
       "x": 530,
-      "y": 3760
+      "y": 4480
     },
     {
       "id": "nfDefaultLang",
@@ -816,7 +925,7 @@
         "expression": "'en'"
       },
       "x": 530,
-      "y": 3880
+      "y": 4600
     },
     {
       "id": "nfResetLook",
@@ -826,7 +935,7 @@
         "name": "newLook"
       },
       "x": 530,
-      "y": 4000
+      "y": 4720
     },
     {
       "id": "nfResetLevel",
@@ -836,7 +945,7 @@
         "name": "newLevel"
       },
       "x": 530,
-      "y": 4120
+      "y": 4840
     },
     {
       "id": "nfResetLang",
@@ -846,7 +955,7 @@
         "name": "newLang"
       },
       "x": 530,
-      "y": 4240
+      "y": 4960
     },
     {
       "id": "nfShown",
@@ -866,7 +975,7 @@
         "expression": "editing === true ? 'edit' : 'create'"
       },
       "x": 530,
-      "y": 4360
+      "y": 5080
     },
     {
       "id": "nfMode",
@@ -884,7 +993,7 @@
         "value-edit-edit": true
       },
       "x": 530,
-      "y": 2320
+      "y": 2680
     },
     {
       "id": "nfDanger",
@@ -905,7 +1014,7 @@
         "rowGap": "var(--space-3)"
       },
       "x": 100,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "nfDelete",
@@ -944,7 +1053,7 @@
         "label": "Delete this player"
       },
       "x": 160,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "nfAsk",
@@ -965,7 +1074,7 @@
         "rowGap": "var(--space-3)"
       },
       "x": 160,
-      "y": 2440
+      "y": 2560
     },
     {
       "id": "nfAskText",
@@ -980,7 +1089,7 @@
         "fontWeight": "var(--font-semibold)"
       },
       "x": 220,
-      "y": 2560
+      "y": 2680
     },
     {
       "id": "nfAskButtons",
@@ -1004,7 +1113,7 @@
         }
       },
       "x": 220,
-      "y": 2680
+      "y": 2800
     },
     {
       "id": "nfNo",
@@ -1043,7 +1152,7 @@
         "label": "No, keep"
       },
       "x": 280,
-      "y": 2800
+      "y": 2920
     },
     {
       "id": "nfYes",
@@ -1082,7 +1191,7 @@
         "label": "Yes, delete"
       },
       "x": 280,
-      "y": 2920
+      "y": 3040
     },
     {
       "id": "nfAskState",
@@ -1100,7 +1209,7 @@
         "value-asking-asking": true
       },
       "x": 530,
-      "y": 2800
+      "y": 3160
     },
     {
       "id": "nfAskLine",
@@ -1110,7 +1219,7 @@
         "functionScript": "Outputs.line = String(Inputs.word || '').replace('{name}', String(Inputs.name || ''));"
       },
       "x": 530,
-      "y": 2920,
+      "y": 3280,
       "ports": [
         {
           "name": "in-word",
@@ -1143,7 +1252,7 @@
         "name": "newLook"
       },
       "x": 530,
-      "y": 4480
+      "y": 5200
     },
     {
       "id": "nfFillLevel",
@@ -1153,7 +1262,7 @@
         "name": "newLevel"
       },
       "x": 530,
-      "y": 4600
+      "y": 5320
     },
     {
       "id": "nfOut",
@@ -1199,6 +1308,11 @@
           "name": "delete",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "skin",
+          "plug": "input",
+          "type": "string"
         }
       ],
       "x": 530,

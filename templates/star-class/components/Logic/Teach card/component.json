@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "798416f1-f9ae-54e0-829c-db6eac152e25",
+  "name": "Teach card",
+  "path": "/Logic/Teach card",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One Teach card at one fading step, in the chosen language."
+}

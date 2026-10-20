@@ -1,0 +1,49 @@
+[
+ {
+  "waitFor": "window.__map?.ui.ready",
+  "timeout": 90000
+ },
+ {
+  "wait": 2500
+ },
+ {
+  "label": "the crawl is on",
+  "eval": "JSON.stringify({ shown: !!document.querySelector('#crawl'), text: document.querySelector('.crawl-text')?.innerText })"
+ },
+ {
+  "shot": "crawl-intro.png"
+ },
+ {
+  "wait": 5500
+ },
+ {
+  "shot": "crawl-logo.png"
+ },
+ {
+  "wait": 11000
+ },
+ {
+  "shot": "crawl-text.png"
+ },
+ {
+  "key": "Space",
+  "keyName": " "
+ },
+ {
+  "wait": 900
+ },
+ {
+  "label": "any key skips it",
+  "eval": "JSON.stringify({ shown: !!document.querySelector('#crawl') })"
+ },
+ {
+  "clickSel": "#project-name"
+ },
+ {
+  "wait": 400
+ },
+ {
+  "label": "the name plays it again",
+  "eval": "JSON.stringify({ shown: !!document.querySelector('#crawl') })"
+ }
+]

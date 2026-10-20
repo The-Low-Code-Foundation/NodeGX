@@ -2,7 +2,7 @@
 
 **Opened 2026-10-10 (s4), from R4's ruling: *teach both equally*** (README §8). **Depends on OWN-004** (the real app
 beside it, `preview.elementsOf`, the trace) **and P107 NSP-016 AC4** (the layout model).
-**Status: 📋 not started.**
+**Status: 🟡 steps 1–3 done (s2, 2026-10-18, Fable 5.1): the drawer lives in `@nodegx/node-spec` (`src/draw.ts`, 20 unit tests top-down over the 24 recorded fixtures, 316 boxes matched, 6 KNOWN rows all the one automatic-minimum limit, two mutant arms red); a drawer-only entry is 12.1 KB gzipped against 308 KB for the full table; the todo template's first page (its sign-in page, which the app shows with no backend) is drawn and graded at both viewports: 17 boxes, 0 defects of the layout model, 2 named root causes (a text that wraps, a stylesheet class), 1 spec gap filed (P112-OWN012-FONTDEFAULT). Step 4 and AC4 next.**
 **Model:** **Opus** for step 1 (a measurement with a clear finish line); **Fable** for steps 2–3, a drawer graded
 box by box against a browser, where a wrong reading of the layout model becomes every editor's wrong screen. At the
 start of a session on this task, and again if the work changes kind, say which model you are running on and whether
@@ -67,3 +67,189 @@ that plainly, not hiding it.
   drifts silently*); the layout model is the description, and the grade is what keeps it honest.
 - A box that matches is not a screen that matches: colour, text and clipping are look, graded separately if at all.
 - The one visual node with no spec yet (NSP-016's remaining one) is named, not guessed.
+
+## 6. Built
+
+### s1 (2026-10-18 night, Opus 5.5): step 1, the measurement
+
+**What was built.** `own-012/draw.ts` takes files and values in and gives boxes out: a component's nodes as the files
+store them, the values its wires carry, the viewport, and a caller's measurer for a leaf's content. It's the recursion
+over a visual tree that the layout check (`nodegx-node-spec/tests/layout-check.test.ts`) leaves out. That check takes
+each parent's size from the browser and grades one level. Here, only the leaves' text comes from outside, and every
+other size is the model's own (`layoutOf`, `layoutChildren`, `hugSize`). It reads and writes no CSS and copies none of
+the runtime's layout code. `prototype/real/drawn.html` runs Orbit's real app in `@nodegx/preview`, takes the wired
+values from its trace, draws the same screen on a 2D canvas beside it, and grades each visual node against
+`preview.elementsOf(id)` (read to grade only). `own-012/measure.mjs` drives it headless, one Chrome at a time, and
+writes `own-012/measured/`. `own-012/build.sh` bundles the drawer.
+
+**The result, Orbit at 390×844 and 1280×800** (`measured/measure-*.json`, `drawn-*.png`):
+
+| node | Δ from the real app |
+|---|---|
+| screen, phaseTxt, track, bar, footTxt, btnRow, pauseBtn, skipBtn | **0 px** on x, y, width and height, both viewports |
+| timeTxt (the clock) | width −10.4 px (x +5.2 px, the centring of it): **named limit, measured** |
+
+The clock's 10.4 px is the Text spec's *Numerals: tabular-nums*, which a canvas can't apply (it has no font-feature
+setting). **Control:** in the real frame, the clock's own font measures "24:59" at 269.09 px with tabular-nums (the
+real box exactly) and 258.69 px without it, and the canvas gives 258.68. So it's a limit of measuring text on a
+canvas, not of the layout model: the measurer reports it on the node (`limits`), and the grade names it.
+
+**The two arms with teeth:**
+- **The FLD-004 trap (`--variant row`)**: Orbit's track is turned into a row in memory, for both sides. The bar's
+  wired value (about 0.067 at the moment graded) then draws 21.4 px of 318 at 390 wide and 81.3 px of 1208 at 1280
+  wide, the real app's boxes to 0 px: a share of the free space, not a percent. In the column, the same value draws
+  0.2 px, as the real app does. The layout model already gets it right.
+- **A mutant (`--mutant nogap`)**: the drawer alone loses every gap. 6 of 9 nodes go off at both viewports (phaseTxt
+  +32 px, the buttons 14 px across and 32 px up), and `measure.mjs` exits 1.
+
+**A trap found on the way: a moving screen.** Orbit's clock ticks and its bar eases for 800 ms, and the trace is read
+every 150 ms. A drawing from the last trace value can be one read behind the box it's graded against. The row
+variant measured +3.4, −3.3 and −3.3 px on the 1208 px row over three runs: the sign flipped, so it was timing, not
+the model. The page now presses Orbit's own Pause and waits for the ease to finish before it draws (`stilled: true`,
+the trace unchanged across 600 ms). `?still=0` grades the moving screen. A drawer fed by a trace draws what was, not
+what is. Grading it needs a still screen, and an editor drawing a live app will lag by one read.
+
+**What the drawing needed that no spec or model gave it** (the step's question):
+1. **The values on the wires**: the real app's trace. A drawn screen can't run the graph (§2): five of the nine
+   nodes show a wired value (three texts, a label and the bar's width).
+2. **The text's content size**: the model doesn't measure text, as its header says. A canvas measured it, in the
+   font the system resolves `system-ui` to.
+3. **Line Height Auto**: the font's own (ascent + descent, read from the font by the canvas). The spec says "follow
+   the font" and gives no number. It matched to 0 px on all three texts.
+4. **Numerals: tabular-nums**: a canvas can't measure it (above). A DOM measurer could, but that's CSS.
+5. **The root's parent**: the app's root element is the viewport's size and stacks down. No node and no spec says
+   so. It's an assumption in `draw.ts`, and the grade held it (the screen at 0 px).
+6. **Not needed by Orbit, but open in the spec**: the Text spec gives no default Font Size or Font Family (every Orbit
+   text sets both). A text that sets neither would be drawn at a guessed 16 px in `system-ui`, and the measurer says
+   so as a need.
+
+**Step 2's decision: the drawer lives with the layout model, in `@nodegx/node-spec`.** It needs only the specs and
+the layout model, and nothing from the preview. Values come from whoever has them (a trace, or the graph runner),
+and text is measured by the caller (a canvas measurer can ship beside it as a helper). **What it adds to a page:**
+`draw.ts` is 2,285 bytes minified, and the layout model with its mapping is 11,673. The bundle is 1.27 MB (324 KB
+gzipped) because the browser entry brings every node's full spec (1.15 MB, `src/nodes/`): runners, scenarios and
+descriptions a drawer never reads. That's P107-SIZE's row. A drawer-only entry, carrying each visual spec's inputs
+and layout roles, would be small, and step 2 should measure it.
+
+**Not done in step 1:** Orbit's screen on the 3D phone (step 4), the todo template's first page (AC2), and the
+brief (AC4). Look (colour, corner radius, clipping) is drawn roughly and not graded (§5). Rounded corners aren't
+drawn at all.
+
+### s2 (2026-10-18, Fable 5.1): steps 2 and 3 — the drawer in the package, and the todo page graded
+
+**Step 2, what was built.** The drawer moved into `@nodegx/node-spec` beside the layout model:
+`packages/nodegx-node-spec/src/draw.ts` (`createDrawer(specs)`, the public types, and a header in the style of
+`layout.ts` that lists the eight things a drawing needs that no spec gives — wire values, a leaf's content, the
+root's parent, the Router and the Page, a placed component, a For Each, text that wraps, a setting outside the
+model). It now draws a whole project, not one component: a placed component's visual roots stand in its place (as
+the runtime places them), a Router shows the page a caller names (else its start page), a Page and a Router are drawn
+by the two rules their runtime elements have (read once, named as assumptions, graded below), and each box carries
+a `path` (the placed components' ids, then its own) so a component placed twice gives two boxes and a value can
+reach one of them. `src/draw-canvas.ts` is the canvas text measurer, typed without the DOM library, reporting the
+same needs and limits `drawn.html`'s `measure()` did and now the Button's paddings and border and the Text Input's
+label line. `src/draw-full.ts` binds the drawer to the full spec table and is what `src/browser.ts` exports;
+`own-012/draw.ts` is a thin re-export, and `own-012/build.sh` bundles `own-012/entry.ts`.
+
+**The small entry.** `src/draw-only.ts` carries the drawer, the measurer, the layout model and
+`src/draw-specs.generated.ts`: for the 17 types whose spec gives an input a layout role, every input's `default`,
+`layout` and `portability` — the three fields `layoutOf` and the drawer read — written by
+`scripts/gen-draw-specs.mjs` from `src/nodes` and held equal to the live table by `tests/draw-specs.test.ts`
+(a spec edit that moves one of those fields fails until the file is regenerated; `--check` exits 1). Not a hand
+copy: a derivation with a gate. `scripts/draw-size.mjs` (esbuild, minified, `fast-xml-parser` external):
+
+| entry | minified | gzipped |
+|---|---|---|
+| `draw-only` (drawer + measurer + model + table) | 82.6 KB (84,551 B) | **12.1 KB** (12,385 B) |
+| `draw-full` (the same drawer over the full specs) | 1,210.7 KB | 308.2 KB |
+| `browser` (the whole browser entry, P107-SIZE) | 1,391.4 KB | 361.1 KB |
+
+Inside the page's bundle (`drawn.js`, 103,129 B): the table 63.1 KB, the default tokens 17.5 KB, the drawer 6.8 KB,
+the layout model 11.6 KB, the measurer 2.8 KB. A page that only draws pays 12 KB gzipped, not 308. The numbers are
+on the P107-SIZE row.
+
+**The tests** (`tests/draw.test.ts`, `tests/draw-specs.test.ts`; `nice -n 19 npx jest --runInBand`, exit 0, 20
+passed; `tsc --noEmit` exit 0; the sibling `layout-check` and `layout-map` suites 747 passed, exit 0). The
+fixtures are graded top-down: the project `layout-measure.js` builds around each fixture (an App Group 100% × 100%,
+a Router, the fixture's Page) is drawn from the files with only the leaves' recorded sizes given, and every box
+— the Page included — is compared with the recording's `box` at 0.5 px. **316 matched.** KNOWN has 6 rows, all the
+one limit the model's header names (flexbox's automatic minimum): `g1` on `min-content-floor` at both viewports, as
+the layout check has it, and the Page on `scroll-align` and `scroll-slides` at both, where the content is 1600 /
+1200 px tall and the browser keeps the Page at its content while the model shrinks it to the window — every box
+inside still matches, a column stacks from the top either way. Two mutant arms go red: the drawer losing every gap
+(new mismatches on `column-gap`, `text-row`, `button-row`) and a table whose Group has no cross-align role
+(`header-row`, `justify-space-between`); a third shows that without an axis role nothing below the App Group is
+drawn. The small table draws the same boxes as the full one on every fixture (asserted). Placed components, a
+value by path and by id, a For Each, a missing component, files with `children` lists only, Body Scroll and the
+labelled Text Input each have a row.
+
+**Step 3, the grade on the todo template.** `own-012/measure.mjs --project <folder>` drives
+`prototype/real/drawn.html?project=…` for any project folder beside `serve.mjs`; the todo template is a copy there
+(`todo-list-copy/`, gitignored — `templates/` untouched). The page draws every component by path with the tokens
+from the project file and `@nodegx/project-contract/tokens` (not from CSS), follows the page the real Router shows,
+matches each box to the real element by path (the runtime's scopes walked once, to grade), and gives each
+difference a verdict that follows the cause: `within 2 px`; named by the node's own setting (a limit the model or
+the measurer states, or an assumption the drawer names); `holds` a descendant that is off (a hugging parent is its
+children); `follows` a parent or an earlier sibling that is off (a stack places what came before); `placed by its
+own size` (an end-aligned box); or OFF, a defect counted once at its source. Exit 0 when nothing is OFF.
+
+**What the first page is without a backend.** The start page is `/Pages/Todo`, but its User node finds no session
+and the page's own `RouterNavigate` sends the app to `/Pages/Sign in` — so that is what the real app shows and what
+is drawn (`pages: {"app_router": "/Pages/Sign in"}`; the preview reported `ok`, no page errors). The Todo page
+itself needs a signed-in user: a backend with the todo collections, and a session. Nothing was faked.
+
+**The result, the sign-in page at 390×844 and 1280×800** (`measured/measure-todo-list-copy-*.json`, the two
+`drawn-todo-list-copy-*.png`; the same verdicts at both viewports — only x and widths change with the width):
+
+| box (path) | drawn (390×844) | real | Δ x,y w×h | verdict |
+|---|---|---|---|---|
+| `app_root` Group | 0,0 390×465.5 | 0,0 390×504.5 | 0,0 0×−39 | holds siRoot (the three below) |
+| `app_router` Router | 0,0 390×465.5 | 0,0 390×504.5 | 0,0 0×−39 | assumption (no size/axis role); holds |
+| `app_router/siPage` Page | 0,0 390×465.5 | 0,0 390×504.5 | 0,0 0×−39 | assumption (no spec yet); holds |
+| `siRoot` Group | 0,0 390×465.5 | 0,0 390×504.5 | 0,0 0×−39 | holds siCard, thRoot |
+| `siTop` Group | 16,16 358×74 | 16,16 358×75 | 0,0 0×−1 | **within 2 px** |
+| `siTheme/thRoot` Group | 318.1,16 55.9×26 | 348.4,16 25.6×27 | −30.2,0 30.2×−1 | holds thToDark; placed by its own size |
+| `siTheme/thToDark` Button | 318.1,16 30.2×26 | none (0×0) | — | **named**: `cssClassName` (web-only) is set — the project's CSS Definition hides `.todo-theme-to-dark` in dark mode (R17) |
+| `siTheme/thToLight` Button | 348.4,16 25.6×26 | 348.4,16 25.6×27 | 0,0 0×−1 | **within 2 px** |
+| `siCard` Group | 16,90 358×311.5 | 16,91 358×349.5 | 0,−1 0×−38 | holds siLead (−34), siEmail, siPassword (−2 each) |
+| `siTitle` Text | 41,115 308×27.5 | 41,116 308×27.5 | 0,−1 0×0 | **within 2 px** |
+| `siLead` Text | 41,158.5 308×17 | 41,159.5 308×51 | 0,−1 0×−34 | **named limit** (layout.ts header): its content is 715.9 px in a 308 px box — the text wraps to three lines, the model takes one content size per leaf |
+| `siEmail` Text Input | 41,191.5 308×59 | 41,226.5 308×61 | 0,−35 0×−2 | size within 2 px; follows siLead |
+| `siPassword` Text Input | 41,266.5 308×59 | 41,303.5 308×61 | 0,−37 0×−2 | size within 2 px; follows siLead, siEmail |
+| `siButtons` Group | 41,341.5 308×35 | 41,380.5 308×35 | 0,−39 0×0 | size exact; follows the three above (`flexWrap` is set, named, but the row did not wrap) |
+| `siSignIn` Button | 41,342.5 77.6×33 | 41,381.5 77.6×33 | 0,−39 0×0 | size exact; follows siButtons |
+| `siCreate` Button | 126.6,341.5 137.1×35 | 126.6,380.5 137.1×35 | 0,−39 0×0 | size exact; follows siButtons |
+| `siError` Text | not mounted | none | — | absent on both |
+
+Read by cause: **two root causes, both named limits, zero defects of the layout model.** (1) `siLead` wraps: the
+one limit the header states for text, 34 px here, and every shift below it (−35, −37, −39) is that 34 plus the two
+fields' 2 px. (2) `thToDark` is hidden by a stylesheet rule the file carries as a `web-only` class, so the theme
+row is 30.2 px narrower in the real app and its right-aligned box moves by that. Everything whose own size the
+model and the measurer could say is within 2 px: both buttons' labels with their paddings exact (77.6×33,
+137.1×35), the title, the top row, the theme button, and the two fields at −2 px once the label above the field was
+measured (Enable Label, Spacing, the label's font size — all ports of the spec; the 2 px left is the browser's own
+line box for an `<input>`, reported as a need). **What the page needed that no spec gave, beyond step 1's six:**
+(7) **Body Scroll** — the project's `settings.bodyScroll: true` makes the app's root element `height: auto;
+min-height: 100vh` (the deploy page), so the App Group's 100% height is its content (504.5 px at both viewports, not
+844 / 800); the drawer takes `bodyScroll` and reports it. Before this the root chain read OFF at +339.5 px. (8) The
+**Text Input's label** (above). (9) **Font Family** — nine nodes set a size and no family; the specs give neither
+a default, so the measurer assumes the browser's and says so: **filed, P112-OWN012-FONTDEFAULT** (`kit: node-spec`,
+low — the pixels matched, the description is incomplete). Look is not graded and shows it: the real app is in dark
+mode (headless Chrome's preference, the CSS Definition's media query) while the drawing paints the project's light
+tokens.
+
+**Orbit again, through the same page:** 8 of 9 at 0 px at both viewports, the clock named, as in s1
+(`measured/measure-390x844.json`, `-1280x800.json` re-recorded). The no-gap mutant on Orbit at 390×844 exits 1:
+`phaseTxt` OFF (+32 px) at its source and five boxes reading as its consequences (`follows`), where s1's page
+counted six off.
+
+**Gates run:** `tsc -p tsconfig.json --noEmit` exit 0; `jest --runInBand tests/draw.test.ts tests/draw-specs.test.ts`
+exit 0 (20 passed); `jest --runInBand tests/layout-check.test.ts tests/layout-map.test.ts` exit 0 (747 passed);
+`node scripts/gen-draw-specs.mjs --check` exit 0; `node scripts/draw-size.mjs` exit 0; `node measure.mjs --project
+orbit` exit 0; `node measure.mjs --project todo-list-copy` exit 0; `node measure.mjs --project orbit --viewports
+390x844 --mutant nogap` exit 1 (as it must); `node scripts/bugs.js check` exit 1 on 99 rows that predate this
+session, none of them this one's.
+
+**Not done in s2:** step 4 (the 3D phone pose in `orbit.html`) and AC4 (the brief). The todo page's own screen
+(`/Pages/Todo`) is not drawn: it needs a session. A width-aware text measurer would turn the wrap limit into a
+measurement (the drawer would hand the measurer the width the box got, a second pass), and is the next thing a
+drawer of real pages wants.

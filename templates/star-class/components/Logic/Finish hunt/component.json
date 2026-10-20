@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f9f79b58-52af-5eef-8faa-1b999d9b9b97",
+  "name": "Finish hunt",
+  "path": "/Logic/Finish hunt",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What a finished Number Hunt pays: a star a way the child found (capped; a way shown pays nothing) and the five a landing pays, once per hunt id. Publishes the model (store it), the take and why, whether it crossed a 🎁 milestone, and the end screen’s words."
+}

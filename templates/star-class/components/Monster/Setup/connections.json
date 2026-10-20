@@ -1,0 +1,493 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0d73fed6-ad88-598a-83d0-053606a5ecec",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "zsIn",
+      "fromProperty": "mounted",
+      "toId": "zsShown",
+      "toProperty": "m"
+    },
+    {
+      "fromId": "zsShown",
+      "fromProperty": "result",
+      "toId": "zsCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zsDefStyle",
+      "fromProperty": "result",
+      "toId": "zsInitStyle",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zsSeeded",
+      "fromProperty": "seeded",
+      "toId": "zsFirst",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "zsCard",
+      "fromProperty": "didMount",
+      "toId": "zsFirst",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "zsFirst",
+      "fromProperty": "onfalse",
+      "toId": "zsInitStyle",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zsDefTimed",
+      "fromProperty": "result",
+      "toId": "zsInitTimed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zsInitStyle",
+      "fromProperty": "done",
+      "toId": "zsInitTimed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zsInitTimed",
+      "fromProperty": "done",
+      "toId": "zsSeeded",
+      "toProperty": "to-seeded"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "gateWord",
+      "toId": "zsStyleItems",
+      "toProperty": "in-gate"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "pushWord",
+      "toId": "zsStyleItems",
+      "toProperty": "in-push"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "practiceWord",
+      "toId": "zsTimedItems",
+      "toProperty": "in-practice"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "challengeWord",
+      "toId": "zsTimedItems",
+      "toProperty": "in-challenge"
+    },
+    {
+      "fromId": "zsStyleItems",
+      "fromProperty": "out-items",
+      "toId": "zsStyle",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "zsTimedItems",
+      "fromProperty": "out-items",
+      "toId": "zsTimed",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "zsStyleVar",
+      "fromProperty": "value",
+      "toId": "zsStyle",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zsStyle",
+      "fromProperty": "value",
+      "toId": "zsSetStyle",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zsStyle",
+      "fromProperty": "changed",
+      "toId": "zsSetStyle",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zsTimedVar",
+      "fromProperty": "value",
+      "toId": "zsTimed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zsTimed",
+      "fromProperty": "value",
+      "toId": "zsSetTimed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "zsTimed",
+      "fromProperty": "changed",
+      "toId": "zsSetTimed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "zsStyleVar",
+      "fromProperty": "value",
+      "toId": "zsRuleText",
+      "toProperty": "style"
+    },
+    {
+      "fromId": "zsTimedVar",
+      "fromProperty": "value",
+      "toId": "zsRuleText",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "gatePracticeWord",
+      "toId": "zsRuleText",
+      "toProperty": "gatePractice"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "gateChallengeWord",
+      "toId": "zsRuleText",
+      "toProperty": "gateChallenge"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "pushPracticeWord",
+      "toId": "zsRuleText",
+      "toProperty": "pushPractice"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "pushChallengeWord",
+      "toId": "zsRuleText",
+      "toProperty": "pushChallenge"
+    },
+    {
+      "fromId": "zsRuleText",
+      "fromProperty": "result",
+      "toId": "zsRule",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "startWord",
+      "toId": "zsStart",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "zsTimedVar",
+      "fromProperty": "value",
+      "toId": "zsIsTimed",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "zsIsTimed",
+      "fromProperty": "result",
+      "toId": "zsOut",
+      "toProperty": "timed"
+    },
+    {
+      "fromId": "zsStyleVar",
+      "fromProperty": "value",
+      "toId": "zsOut",
+      "toProperty": "style"
+    },
+    {
+      "fromId": "zsStart",
+      "fromProperty": "onClick",
+      "toId": "zsOut",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "practisingWord",
+      "toId": "zsFocusLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "changeWord",
+      "toId": "zsChange",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "curriculum",
+      "toId": "zsFocus",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "sets",
+      "toId": "zsFocus",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "level",
+      "toId": "zsFocus",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "lang",
+      "toId": "zsFocus",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "everythingWord",
+      "toId": "zsFocus",
+      "toProperty": "everythingWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "countWord",
+      "toId": "zsFocus",
+      "toProperty": "countWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "listWord",
+      "toId": "zsFocus",
+      "toProperty": "listWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "subject0",
+      "toId": "zsFocus",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "skills0",
+      "toId": "zsFocus",
+      "toProperty": "skills"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "line",
+      "toId": "zsFocusLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "mode",
+      "toId": "zsOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "focus",
+      "toId": "zsOut",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "customSet",
+      "toId": "zsOut",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "customSetId",
+      "toId": "zsOut",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "zsFocus",
+      "fromProperty": "customSetBoth",
+      "toId": "zsOut",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "app",
+      "toId": "zsSetFocus",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "profileId",
+      "toId": "zsSetFocus",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "subject",
+      "toId": "zsSetFocus",
+      "toProperty": "focusSubject"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "skills",
+      "toId": "zsSetFocus",
+      "toProperty": "focusSkills"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "save",
+      "toId": "zsSetFocus",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "zsSetFocus",
+      "fromProperty": "app",
+      "toId": "zsOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "zsSetFocus",
+      "fromProperty": "done",
+      "toId": "zsOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "zsChoosing",
+      "fromProperty": "setup",
+      "toId": "zsRows",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zsChoosing",
+      "fromProperty": "picking",
+      "toId": "zsPicker",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "zsChange",
+      "fromProperty": "onClick",
+      "toId": "zsPicker",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "zsChange",
+      "fromProperty": "onClick",
+      "toId": "zsChoosing",
+      "toProperty": "to-picking"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "save",
+      "toId": "zsChoosing",
+      "toProperty": "to-setup"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "cancel",
+      "toId": "zsChoosing",
+      "toProperty": "to-setup"
+    },
+    {
+      "fromId": "zsPicker",
+      "fromProperty": "editLists",
+      "toId": "zsOut",
+      "toProperty": "editLists"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "curriculum",
+      "toId": "zsPicker",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "sets",
+      "toId": "zsPicker",
+      "toProperty": "sets"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "level",
+      "toId": "zsPicker",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "lang",
+      "toId": "zsPicker",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "subject0",
+      "toId": "zsPicker",
+      "toProperty": "subject0"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "skills0",
+      "toId": "zsPicker",
+      "toProperty": "skills0"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "titleWord",
+      "toId": "zsPicker",
+      "toProperty": "titleWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "subjectWord",
+      "toId": "zsPicker",
+      "toProperty": "subjectWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "topicWord",
+      "toId": "zsPicker",
+      "toProperty": "topicWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "skillsHint",
+      "toId": "zsPicker",
+      "toProperty": "skillsHint"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "allWord",
+      "toId": "zsPicker",
+      "toProperty": "allWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "noneWord",
+      "toId": "zsPicker",
+      "toProperty": "noneWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "saveWord",
+      "toId": "zsPicker",
+      "toProperty": "saveWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "cancelWord",
+      "toId": "zsPicker",
+      "toProperty": "cancelWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "listsWord",
+      "toId": "zsPicker",
+      "toProperty": "listsWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "editListsWord",
+      "toId": "zsPicker",
+      "toProperty": "editListsWord"
+    },
+    {
+      "fromId": "zsIn",
+      "fromProperty": "noListsWord",
+      "toId": "zsPicker",
+      "toProperty": "noListsWord"
+    }
+  ]
+}

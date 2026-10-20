@@ -94,6 +94,13 @@ export interface ProjectIR {
    */
   modules: ModuleIR[];
   /**
+   * P109-S17-EXPORTKITDEPS — the kit `dependencies` the deployed page loads, in its order, each once: project-relative
+   * (`noodl_modules/<dir>/<file>`) or an `http(s)` URL. Computed by the deploy injector itself
+   * (`@nodegx/module-inject` `toInjectModules`: its path rule, its module order, its `requires` refusals), never
+   * transcribed. Absent is none. These become classic `<script>`s before the app in the exported `index.html`.
+   */
+  moduleDependencies?: string[];
+  /**
    * STY-004. The project's style dictionary — `nodegx.styles.json`, or the legacy `metadata.styles`
    * plus `variants` in the project file. The three things a node can *point at* instead of holding:
    * a colour style, a text style, a Look (today's `VariantModel`).

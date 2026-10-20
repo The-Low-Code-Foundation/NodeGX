@@ -59,6 +59,15 @@ describe('P112-OWN019-NESTEDCALLTOOL — call_tool through call_tool is the inne
     expect(Array.isArray(r.examples) || Array.isArray(r)).toBe(true);
   });
 
+  // P112-OWN019-DESCRIBEINSIDE — Q1 (s4) put the flag inside `arguments`; the schema stripped it and a dummy drive
+  // ran in its place. Control: on HEAD before the fix, `{ steps: [] }` beside it is refused as too few steps.
+  it('describes the tool when describe sits inside its arguments (Q1, s4)', async () => {
+    for (const args of [{ describe: true }, { describe: true, steps: [] }]) {
+      const r = await call(s.client, { name: 'drive_page', arguments: args });
+      expect({ ok: r.ok, name: r.name, steps: !!r.inputSchema?.properties?.steps }).toEqual({ ok: undefined, name: 'drive_page', steps: true });
+    }
+  });
+
   it('still refuses call_tool with no inner name', async () => {
     const r = await call(s.client, { name: 'call_tool' });
     expect(r.ok).toBe(false);

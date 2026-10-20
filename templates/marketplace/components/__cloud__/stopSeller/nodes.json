@@ -1,0 +1,112 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9769e3b5-98e0-515d-86e3-03bb556bd153",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-4",
+      "type": "noodl.cloud.request",
+      "label": "stopSeller(stop)",
+      "parameters": {
+        "params": "stop",
+        "ptype-stop": "object",
+        "preq-stop": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-3",
+      "type": "JavaScriptFunction",
+      "label": "Stop or bring back the seller, and list its logins",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nvar a = Inputs.stop;\nif (a === undefined || Inputs.userId === undefined) return;\nif (!a || typeof a !== 'object') { refuse('Say which seller to stop or bring back.'); return; }\nvar id = text(a.sellerId, 64);\nvar before = id ? await one('Seller', { objectId: { equalTo: id } }) : null;\nif (!before) { refuse('There is no such seller.'); return; }\nvar stop = a.stopped !== false;\nvar reason = text(a.reason, 500);\nif (stop && !reason) { refuse('Say why the seller is stopped: it is kept with the seller.'); return; }\nvar fields = stop ? { endedAt: now(), stoppedReason: reason } : { endedAt: null, stoppedReason: null };\nif (!stop && !before.endedAt) { Outputs.logins = []; Outputs.id = id; Outputs.done(); return; }\nawait Noodl.Records.save(id, fields, { className: 'Seller' });\nawait history('Seller', 'seller', id, Inputs.userId, stop ? { stopped: { from: !!before.endedAt, to: true }, stoppedReason: { from: before.stoppedReason || null, to: reason } } : { stopped: { from: true, to: false } });\n// Rule 4: its logins stop too (and start again when it comes back). Each is one Update User, run per login.\nvar staff = await Noodl.Records.query('Person', { seller: { equalTo: ptr('Seller', id) } }, { plain: true, limit: 1000 });\nOutputs.logins = staff.map(function (p) { return { loginId: idOf(p.login), disabled: stop }; }).filter(function (l) { return l.loginId; });\nOutputs.id = id;\nOutputs.done();",
+        "runOnChange-in-stop": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-stop",
+          "displayName": "stop",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-logins",
+          "displayName": "logins",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "logins",
+      "type": "RunTasks",
+      "label": "Switch each login to match",
+      "parameters": {
+        "taskTemplate": "/#__cloud__/helpers/setLoginDisabled",
+        "maxRunningTasks": 4,
+        "stopOnFailure": true
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "ok-4",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "id"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "no-4",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

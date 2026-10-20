@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "77673e50-3f4d-551c-80e0-8b0c5b614346",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rrIn",
+      "fromProperty": "label",
+      "toId": "rrLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "changed",
+      "toId": "rrChanged",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "value",
+      "toId": "rrValue",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "notOwn",
+      "toId": "rrValue",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rrIn",
+      "fromProperty": "currency",
+      "toId": "rrTyped",
+      "toProperty": "in-currency"
+    },
+    {
+      "fromId": "rrTypedNow",
+      "fromProperty": "value",
+      "toId": "rrTyped",
+      "toProperty": "in-typed"
+    },
+    {
+      "fromId": "rrValue",
+      "fromProperty": "onTextChanged",
+      "toId": "rrTyped",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "rrValue",
+      "fromProperty": "textChanged",
+      "toId": "rrTyped",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rrTyped",
+      "fromProperty": "out-typed",
+      "toId": "rrSetTyped",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "rrTyped",
+      "fromProperty": "out-go",
+      "toId": "rrSetTyped",
+      "toProperty": "do"
+    }
+  ]
+}

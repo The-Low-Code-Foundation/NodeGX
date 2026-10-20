@@ -208,18 +208,18 @@ describe('§17 — the Record node', () => {
    * fails for a reason that has nothing to do with what it is testing. `net.noodl.ToCSV` is one
    * nobody is waiting on, so the example stops being a moving target.
    */
-  // EXP-011 §75 translated `To CSV`, this row's former example of an untranslated feeder; `Pattern Extractor`
+  // EXP-011 §75 translated `To CSV`, this row's former example of an untranslated feeder; `Verify Email`
   // is the one still out (relation-pair D18 uses it for the same reason).
   it('a Record whose Id is fed by an untranslated node names that feeder', () => {
     const source = cloneIr();
-    addNode(source, ADMIN, 'toCsv', 'net.noodl.PatternExtractor', {});
+    addNode(source, ADMIN, 'toCsv', 'net.noodl.user.VerifyEmail', {});
     addNode(source, ADMIN, 'puppyModel', 'DbModel2', {
       collectionName: lit('Puppy'),
       idSource: lit('explicit')
     });
     wire(source, ADMIN, 'toCsv', 'match', 'puppyModel', 'modelId');
     expect(reasonFor(source, ADMIN, 'puppyModel')).toBe(
-      'its Id is fed by net.noodl.PatternExtractor, which has no statically known source'
+      'its Id is fed by net.noodl.user.VerifyEmail, which has no statically known source'
     );
   });
 
@@ -245,10 +245,13 @@ describe('§17 — the Record node', () => {
     });
     wire(source, ADMIN, 'pageInputs', 'pm-id', 'puppyModel', 'modelId');
     // EXP-011 §43 built the single-record read: with `Fetch` unwired the node is an effect keyed
-    // on the page parameter, so there is no reason left to give — the row below pins that the
-    // module export exists, which is the positive half of what this test used to pin negatively.
+    // on the page parameter, so there is no reason left to give. Since P18-S113-IDBINDREAD that
+    // effect binds the row to the client's copy and reads nothing, so the module is the class
+    // interface alone — the positive half of what this test used to pin negatively.
     expect(reasonFor(source, ADMIN, 'puppyModel')).toBeUndefined();
-    expect(emitApp(source, catalog).files['src/api/puppies.ts']).toContain('export async function fetchPuppyById(id: string): Promise<Puppy>');
+    const puppies = emitApp(source, catalog).files['src/api/puppies.ts'];
+    expect(puppies).toContain('export interface Puppy {');
+    expect(puppies).not.toContain('fetchPuppyById');
   });
 
   it('a Record bound to the enclosing repeater row hits the row-identity wall by name', () => {
@@ -278,10 +281,12 @@ describe('§17 — the Record node', () => {
     expect(reasonFor(source, ADMIN, 'puppyModel')).toBe('two wires feed its Id — last-writer-wins is not statically ordered');
   });
 
-  it('a well-formed Record translates (EXP-011 §43) — the reason this row used to pin is gone, and the read is in the module', () => {
+  it('a well-formed Record translates (EXP-011 §43) — the reason this row used to pin is gone; its Fetch is unwired, so it binds and the module carries no read (P18-S113-IDBINDREAD)', () => {
     const source = withRelationGraph();
     expect(reasonFor(source, ADMIN, 'puppyModel')).toBeUndefined();
-    expect(emitApp(source, catalog).files['src/api/puppies.ts']).toContain('export async function fetchPuppyById(id: string): Promise<Puppy>');
+    const puppies = emitApp(source, catalog).files['src/api/puppies.ts'];
+    expect(puppies).toContain('export interface Puppy {');
+    expect(puppies).not.toContain('fetchPuppyById');
   });
 });
 
@@ -367,12 +372,12 @@ describe('§17 — the sweep replaces the catch-all and nothing else', () => {
    * `Counter` was the first pick here and it does **not** fall to the catch-all — it has a reason
    * of its own. A control that never reaches the thing it controls for proves nothing, so this
    * uses a type the audit shows genuinely landing on `logic node (…)`. (`net.noodl.WebSocket` stood here until
-   * EXP-011 §65 translated it; Pattern Extractor is deliberately out of scope, so it stays on the catch-all.)
+   * EXP-011 §65 translated it; §79 translated Sign In With, the last picker row, so the catch-all's example is `Verify Email`, a retired type.)
    */
   it('a node the sweep does not know still falls to the catch-all', () => {
     const source = cloneIr();
-    addNode(source, ADMIN, 'someLogic', 'net.noodl.PatternExtractor');
-    expect(reasonFor(source, ADMIN, 'someLogic')).toBe('logic node (net.noodl.PatternExtractor)');
+    addNode(source, ADMIN, 'someLogic', 'net.noodl.user.VerifyEmail');
+    expect(reasonFor(source, ADMIN, 'someLogic')).toBe('logic node (net.noodl.user.VerifyEmail)');
   });
 });
 
@@ -404,11 +409,11 @@ describe('§17 — a component with no visual root gets the named reasons too', 
 
   it('the component really does take the early return — the control this needs', () => {
     const source = withLogicOnlyComponent();
-    addNode(source, LOGIC_ONLY, 'someLogic', 'net.noodl.PatternExtractor');
+    addNode(source, LOGIC_ONLY, 'someLogic', 'net.noodl.user.VerifyEmail');
     const project = planProject(source, new CatalogIndex(catalog));
     const plan = project.plans.find((p) => p.path === LOGIC_ONLY)!;
     expect(plan.skipReason).toBe('no visual root — logic-only components defer to EXP-003');
-    expect(reasonFor(source, LOGIC_ONLY, 'someLogic')).toBe('logic node (net.noodl.PatternExtractor)');
+    expect(reasonFor(source, LOGIC_ONLY, 'someLogic')).toBe('logic node (net.noodl.user.VerifyEmail)');
   });
 
   it('a relation verb there is named, not swept into the catch-all', () => {

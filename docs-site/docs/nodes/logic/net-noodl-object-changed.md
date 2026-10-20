@@ -22,6 +22,7 @@ Use it when a graph must react to *what* changed inside an Object rather than me
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -63,7 +64,15 @@ Use it when a graph must react to *what* changed inside an Object rather than me
 
 [Value Changed](./value-changed.md), [Array Changed](./net-noodl-array-changed.md), [Object](../data/model2.md), [Set Object Properties](../data/set-model-properties.md)
 
+## Code export
+
+Does not export to React yet. A project that uses it exports with this node named in the export report.
+
+Why: deliberately out of scope — not offered in the node picker, so it cannot be placed. It exists for graphs that already have one, and those export as named deferrals.
+
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

@@ -33,6 +33,7 @@
 
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
 
 type Phase = 'idle' | 'pending' | 'holding' | 'lifted';
 
@@ -94,6 +95,9 @@ type State = {
   /** the browser's drag from the desktop: the files it carries (`undefined`: no drag), and the element it is over (-1: none of this node's) */
   fileCarry: readonly FileLike[] | undefined;
   fileOn: number;
+  /** NSP-019 R38 — what the size ports hold, and what the last render on the page said of them (wired-grow.ts) */
+  sizes: Sizes;
+  grow: string | null;
 };
 
 /** A file the browser hands (adapter.ts `file`): what the filter and the outputs read of it. */
@@ -123,7 +127,10 @@ export const Image = defineNode({
   // v3 (P109 ISL-038, s29): a file drop zone tracks itself — an enter on a new element starts the count again, and Accept File Drops off or leaving the page turns Is Dragging Over off (row C81)
   // v4 (P109 ISL-031, s30): a drag never takes its own node as its zone — a keyboard lift does not start in itself, Enter or Space then cancels, and a pointer drag over a new element of its own finds no zone (row C78)
   // v5 (P109 ISL-031, s30–31): every element of a Draggable node takes the keyboard — a remount, a new Tag or a mount however late gets the attributes (row C77); which element is on the page is the paint's sync (`synced`), and the keyboard is held by an element (`focusedElem`), so a paint writes nothing about it
-  version: 5,
+  // v6 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
+  version: 6,
+  changes: [growChange(6)],
+  diagnostics: wiredGrowDiagnostic,
   source: 'packages/noodl-viewer-react/src/nodes/visual/image.ts',
   needs: ['person', 'clock'],
   // the page's syncs (spec.ts `synced`): which element is on the page, written only by a paint. Not branches (row C77, P109 s31):
@@ -133,6 +140,8 @@ export const Image = defineNode({
   worldPool: { advances: [0, 1, 499, 500, 1000] },
 
   state: {
+    sizes: { width: sizeAtDefault(), height: sizeAtDefault() },
+    grow: null,
     mounted: true,
     onPage: false,
     elem: 0,
@@ -335,6 +344,9 @@ export const Image = defineNode({
         : { says: 'the value it already holds: nothing', send: [] },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the element can be seen', send: [] }),
+    // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
+    width: sizeReducer('width'),
+    height: sizeReducer('height'),
     // :366-375
     visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer', set: { visible: !!v }, send: [] }),
     // :320-328 — the style holds the value as written; Image.tsx :53-55 compares it with the number 0
@@ -379,7 +391,7 @@ export const Image = defineNode({
   {
     world: {
       // placed on the page with its params set — the first render: Did Mount, unless a Mounted parameter said no
-      place: (s) => painted(s),
+      place: (s, i, w) => withGrow(s, painted(s), i.sizeMode, i.position, w),
       // drag-drop.ts :267-269 — the hold timer lifts a gesture still held; :920-927 — the turn that unswallows a click
       timer: (s, _i, tag) => {
         if (tag === 'unswallow') return { set: { swallow: false }, send: [] };
@@ -389,7 +401,7 @@ export const Image = defineNode({
       }
     },
     // every frame's end is a paint (react-component-node.ts :1675-1689)
-    afterInputs: (s) => painted(s),
+    afterInputs: (s, i, w) => withGrow(s, painted(s), i.sizeMode, i.position, w),
     // a person acts on a PAINTED page (adapter.ts `act`): the page follows first, then the act meets what is there
     person: {
       // node-shared-port-definitions.ts :826-848 — Hover Start and Pointer Enter

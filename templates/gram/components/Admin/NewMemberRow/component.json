@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7f9c6d8c-ba10-5d12-8842-3ac1ab9d1cc5",
+  "name": "NewMemberRow",
+  "path": "/Admin/NewMemberRow",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One person waiting: Let in, or No"
+}

@@ -1,0 +1,269 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c7f94f56-eb4c-5da9-8283-73c799b322cd",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tpRoot",
+      "type": "Group",
+      "label": "The bar",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "tpBrand",
+        "tpCurrency"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tpBrand",
+      "type": "net.noodl.controls.button",
+      "label": "The marketplace’s name: to the shop",
+      "parent": "tpRoot",
+      "parameters": {
+        "label": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--secondary-foreground)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "sizeMode": "contentSize",
+        "cssClassName": "mk-display"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tpCurrency",
+      "type": "net.noodl.controls.options",
+      "label": "Prices in",
+      "parent": "tpRoot",
+      "parameters": {
+        "useLabel": false,
+        "mounted": false,
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--secondary-hover)",
+        "color": "var(--secondary-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "tpLoad",
+      "type": "JavaScriptFunction",
+      "label": "The currencies there are rates for, and which one is shown",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\ntry { var rates = await all('Rate'); } catch (e) { Outputs.has = false; return; }\nvar usable = rates.filter(function (r) { return r.currency && Number(r.value) > 0; }).sort(function (a, b) { return String(a.currency).localeCompare(String(b.currency)); });\nvar codes = usable.map(function (r) { return r.currency; });\nOutputs.items = usable.map(function (r) { var s = symbolOf(r.currency); return { Label: s === r.currency ? r.currency : s + ' ' + r.currency, Value: r.currency }; });\nOutputs.has = usable.length > 1;\nvar want = Inputs.current;\nif (codes.indexOf(want) < 0) { try { want = localStorage.getItem('mk-currency'); } catch (e) { want = ''; } }\nif (codes.indexOf(want) < 0) { var own = usable.filter(function (r) { return Number(r.value) === 1; })[0]; want = own ? own.currency : codes[0] || ''; }\nif (want && want !== Inputs.current) { Outputs.chosen = want; Outputs.set(); }",
+        "runOnChange-in-current": false
+      },
+      "ports": [
+        {
+          "name": "out-set",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-current",
+          "displayName": "current",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-has",
+          "displayName": "has",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-chosen",
+          "displayName": "chosen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "tpPicked",
+      "type": "JavaScriptFunction",
+      "label": "A currency picked: remember it",
+      "parameters": {
+        "functionScript": "var v = String(Inputs.picked || '');\nif (!v) return;\ntry { localStorage.setItem('mk-currency', v); } catch (e) {}\nOutputs.chosen = v;\nOutputs.set();",
+        "runOnChange-in-picked": false
+      },
+      "ports": [
+        {
+          "name": "out-set",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-picked",
+          "displayName": "picked",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-chosen",
+          "displayName": "chosen",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "tpCurrent",
+      "type": "Variable2",
+      "label": "The currency prices are shown in",
+      "parameters": {
+        "name": "currency"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the currency a buyer picked, the same on every page."
+      },
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "tpSetFirst",
+      "type": "Set Variable",
+      "label": "The currency to start with",
+      "parameters": {
+        "name": "currency",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the currency a buyer picked, the same on every page."
+      },
+      "x": 350,
+      "y": 760
+    },
+    {
+      "id": "tpSetPicked",
+      "type": "Set Variable",
+      "label": "The currency picked",
+      "parameters": {
+        "name": "currency",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the currency a buyer picked, the same on every page."
+      },
+      "x": 350,
+      "y": 880
+    },
+    {
+      "id": "tpToShop",
+      "type": "RouterNavigate",
+      "label": "To the shop",
+      "parameters": {
+        "target": "/Pages/Shop/Home"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "tpNameLoad",
+      "type": "JavaScriptFunction",
+      "label": "The marketplace’s name, read",
+      "parameters": {
+        "functionScript": "var rows = [];\ntry { rows = await Noodl.Records.query('Marketplace', {}, { plain: true, limit: 1 }); } catch (e) { return; }\nvar name = rows[0] && rows[0].name ? String(rows[0].name) : '';\nif (name === String(Inputs.current || '')) return;\nOutputs.name = name;\nOutputs.set();",
+        "runOnChange-in-current": false
+      },
+      "ports": [
+        {
+          "name": "out-set",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-current",
+          "displayName": "current",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "tpNameNow",
+      "type": "Variable2",
+      "label": "The marketplace’s name",
+      "parameters": {
+        "name": "marketplaceName"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the marketplace’s name: one for the whole app, read by every page’s bar."
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "tpNameSet",
+      "type": "Set Variable",
+      "label": "The marketplace’s name, as read",
+      "parameters": {
+        "name": "marketplaceName",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the marketplace’s name: one for the whole app, read by every page’s bar."
+      },
+      "x": 350,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "tpRoot"
+  ]
+}

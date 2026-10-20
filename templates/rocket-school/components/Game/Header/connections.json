@@ -376,6 +376,18 @@
       "toProperty": "level0"
     },
     {
+      "fromId": "hdIn",
+      "fromProperty": "skin",
+      "toId": "hdForm",
+      "toProperty": "skin0"
+    },
+    {
+      "fromId": "hdT",
+      "fromProperty": "yourSkin",
+      "toId": "hdForm",
+      "toProperty": "skinWord"
+    },
+    {
       "fromId": "hdT",
       "fromProperty": "yourName",
       "toId": "hdForm",
@@ -482,6 +494,12 @@
       "fromProperty": "level",
       "toId": "hdRename",
       "toProperty": "level"
+    },
+    {
+      "fromId": "hdForm",
+      "fromProperty": "skin",
+      "toId": "hdRename",
+      "toProperty": "skin"
     },
     {
       "fromId": "hdForm",

@@ -18,6 +18,7 @@ Use it wherever you have the boolean you need, but backwards — e.g. a Switch's
 | Available in | browser, cloud |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
+| Behaviour spec | version 1 ([under the hood](#under-the-hood)) |
 
 ## Inputs
 
@@ -68,7 +69,97 @@ Sign-up validation as a chain of small truths rather than one function: an `Expr
 
 [And](./and.md), [Or](./or.md), [Condition](./condition.md), [Switch](./switch.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
+## Under the hood
+
+This node's behaviour is written down as an executable spec in `@nodegx/node-spec`, version 1. The spec is the reference the conformance tests grade the runtime against. Every rule in it cites the line of the runtime it was read from. The full spec is at the bottom of this page.
+
+### What it depends on outside the node
+
+Nothing. Its outputs depend only on its inputs and its own state.
+
+### Starting state
+
+```json
+{}
+```
+
+### The code it replaces
+
+What you would write by hand instead:
+
+- a negated flag: `const hidden = !visible`
+
+## The full spec {#spec-source}
+
+The spec's source, as the docs were generated. Helpers it imports live beside it in `packages/nodegx-node-spec/src`.
+
+```ts title="packages/nodegx-node-spec/src/nodes/inverter.ts"
+/**
+ * Inverter — read from `packages/noodl-runtime/src/nodes/std-library/inverter.ts` on 2026-09-30
+ * (NSP-011).
+ *
+ * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
+ *
+ * The one thing worth a sentence: the `undefined` passthrough (:5-9). An Inverter that has never
+ * received a value reports `undefined`, not `true` — so nothing is published until the first
+ * value (C3), and the description says so.
+ */
+
+import { defineNode } from '../spec';
+
+/** :10-15 — `undefined` stays `undefined`; everything else is `!value`. */
+export function invert(value: unknown): boolean | undefined {
+  return value === undefined ? undefined : !value;
+}
+
+export const Inverter = defineNode({
+  type: 'Inverter',
+  version: 1,
+  source: 'packages/noodl-runtime/src/nodes/std-library/inverter.ts',
+  // NSP-018 — the hand-written code this node replaces (read by nothing yet; `spec-ledger` counts it)
+  idioms: [
+    { says: 'a negated flag', example: 'const hidden = !visible' }
+  ],
+
+  // initialize (:27-29): currentValue undefined
+  state: { value: undefined as unknown },
+  // :30-32
+  inspect: (s) => String(invert(s.value)),
+
+  inputs: {
+    // :34-45 — the setter stores what arrived (:42); truthiness is applied at read (:14)
+    value: {
+      type: 'boolean',
+      coerce: 'none',
+      displayName: 'Value',
+      group: 'Values',
+      description: 'Value to negate; anything falsy counts as false, and leaving it unset keeps Result unset too'
+    }
+  },
+
+  outputs: {
+    // :48-56 getter → `invert(currentValue)`
+    result: {
+      type: 'boolean',
+      from: (s) => invert(s.value),
+      displayName: 'Result',
+      group: 'Values',
+      description: 'The opposite of Value, and unset rather than true while Value has never been set'
+    }
+  }
+}).on({
+  // :41-44 — store, flag `result` (every write, even the same value; the wire dedups)
+  value: (_s, v) => ({ says: 'always: Result becomes its opposite', set: { value: v } })
+});
+```
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

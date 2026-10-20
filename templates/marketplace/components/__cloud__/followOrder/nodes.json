@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "87d2685a-408e-50a9-8ac9-484163fe1648",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-14",
+      "type": "noodl.cloud.request",
+      "label": "followOrder(follow)",
+      "parameters": {
+        "params": "follow",
+        "ptype-follow": "object",
+        "preq-follow": true,
+        "allowNoAuth": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-12",
+      "type": "JavaScriptFunction",
+      "label": "An order, as its private link opens it",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nvar a = Inputs.follow;\nif (a === undefined) return;\nvar token = a && typeof a === 'object' ? text(a.token, 100) : '';\nvar order = token.length >= 32 ? await one('Order', { followToken: { equalTo: token } }) : null;\nif (!order) { refuse('There is no order at this link. Check it was copied whole.'); return; }\nvar parts = await Noodl.Records.query('OrderPart', { order: { equalTo: ptr('Order', order.objectId) } }, { plain: true, limit: 100, sort: ['createdAt'] });\nvar partIds = parts.map(function (p) { return p.objectId; });\nvar lines = partIds.length ? await Noodl.Records.query('OrderLine', { orderPart: { containedIn: parts.map(function (p) { return ptr('OrderPart', p.objectId); }) } }, { plain: true, limit: 1000, sort: ['createdAt'] }) : [];\nvar sellers = await Noodl.Records.query('Seller', { objectId: { containedIn: parts.map(function (p) { return idOf(p.seller); }) } }, { plain: true, limit: 100 });\nvar ways = await Noodl.Records.query('WayToPay', {}, { plain: true, limit: 100 });\nvar countries = await Noodl.Records.query('Country', {}, { plain: true, limit: 1000 });\nvar payments = await Noodl.Records.query('Payment', { order: { equalTo: ptr('Order', order.objectId) } }, { plain: true, limit: 100, sort: ['at'] });\nvar seller = {}, way = {}, country = {};\nsellers.forEach(function (s) { seller[s.objectId] = s; });\nways.forEach(function (w) { way[w.objectId] = w; });\ncountries.forEach(function (c) { country[c.objectId] = c; });\nOutputs.order = {\n  number: order.number,\n  placedAt: order.createdAt,\n  buyerName: order.buyerName || '',\n  phone: order.phone || '',\n  email: order.email || '',\n  address: order.address || '',\n  country: (country[idOf(order.country)] || {}).name || '',\n  currency: order.currency || '',\n  total: typeof order.total === 'number' ? order.total : null,\n  payments: payments.map(function (x) { return { country: x.country || '', currency: x.currency || '', amount: Number(x.amount) || 0, outcome: x.outcome || '', at: x.at && x.at.iso ? x.at.iso : x.at || '' }; }),\n  parts: parts.map(function (p) {\n    var s = seller[idOf(p.seller)] || {}, w = way[idOf(p.wayToPay)] || {}, c = country[idOf(s.country)] || {};\n    return {\n      seller: s.name || '',\n      sellerId: s.objectId || '',\n      whatsapp: String(s.whatsapp || '').replace(/[^0-9]/g, ''),\n      phone: s.phone || '',\n      country: c.name || '',\n      countryId: c.objectId || '',\n      currency: c.currency || '',\n      status: p.status || 'new',\n      subtotal: Number(p.subtotal) || 0,\n      deliveryCost: typeof p.deliveryCost === 'number' ? p.deliveryCost : null,\n      deliveryNote: p.deliveryNote || '',\n      cancelledReason: p.cancelledReason || '',\n      way: { name: w.name || '', method: w.method || '', instructions: w.instructions || '' },\n      lines: lines.filter(function (l) { return idOf(l.orderPart) === p.objectId; }).map(function (l) { return { name: l.productName || '', quantity: Number(l.quantity) || 0, price: Number(l.price) || 0 }; })\n    };\n  })\n};\nOutputs.done();",
+        "runOnChange-in-follow": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-follow",
+          "displayName": "follow",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-order",
+          "displayName": "order",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-14",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "order"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-14",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

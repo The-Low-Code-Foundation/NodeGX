@@ -1,0 +1,78 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5b020271-3047-53f2-83fe-054c95675172",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "chButton",
+      "type": "net.noodl.controls.button",
+      "label": "The shelf",
+      "parameters": {
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-normal)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "sizeMode": "contentSize",
+        "cssClassName": "mk-chip"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "chIn",
+      "type": "Component Inputs",
+      "label": "One shelf",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "ink",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "chPick",
+      "type": "Set Variable",
+      "label": "The shelf picked",
+      "parameters": {
+        "name": "shelf",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the shelf picked: one pick for every chip."
+      },
+      "x": 290,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "chButton"
+  ]
+}

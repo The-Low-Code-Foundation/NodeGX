@@ -77,6 +77,11 @@
           "name": "showHangar",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "skin",
+          "plug": "output",
+          "type": "string"
         }
       ],
       "x": 470,

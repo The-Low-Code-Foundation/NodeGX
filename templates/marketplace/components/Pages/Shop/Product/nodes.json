@@ -1,0 +1,1699 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b523f001-2604-5036-8d17-93595ed4f3d2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ppPage",
+      "type": "Page",
+      "label": "A product",
+      "parameters": {
+        "title": "A product",
+        "urlPath": "item/{productId}"
+      },
+      "children": [
+        "ppRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ppRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "ppPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "ppTop",
+        "ppBody",
+        "ppNav"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ppTop",
+      "type": "/Shop/Top",
+      "label": "The bar",
+      "parent": "ppRoot",
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ppBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "ppRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 1080,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "ppBack",
+        "ppContent",
+        "ppGone",
+        "ppFoot"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "ppNav",
+      "type": "/Shop/Nav",
+      "label": "The bottom bar",
+      "parent": "ppRoot",
+      "parameters": {
+        "on": ""
+      },
+      "x": 160,
+      "y": 6400
+    },
+    {
+      "id": "ppUrl",
+      "type": "PageInputs",
+      "label": "Which product",
+      "parameters": {
+        "pathParams": "productId"
+      },
+      "x": 770,
+      "y": 6400
+    },
+    {
+      "id": "ppBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "ppBody",
+      "parameters": {
+        "label": "← The shop",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "ppContent",
+      "type": "Group",
+      "label": "Photos beside the rest (tablet), above it (phone)",
+      "parent": "ppBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "cssClassName": "mk-two",
+        "mounted": false
+      },
+      "children": [
+        "ppGallery",
+        "ppSwipe",
+        "ppInfo"
+      ],
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "ppGallery",
+      "type": "Group",
+      "label": "The photos",
+      "parent": "ppContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "mk-gallery",
+        "mounted": false
+      },
+      "children": [
+        "ppEachPhoto"
+      ],
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "ppEachPhoto",
+      "type": "For Each",
+      "label": "One per photo",
+      "parent": "ppGallery",
+      "parameters": {
+        "template": "/Shop/GalleryPhoto"
+      },
+      "x": 340,
+      "y": 880
+    },
+    {
+      "id": "ppSwipe",
+      "type": "Text",
+      "label": "More photos: swipe (phone only)",
+      "parent": "ppContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center",
+        "cssClassName": "mk-phone-only",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "ppInfo",
+      "type": "Group",
+      "label": "Name, price, seller, how to get it",
+      "parent": "ppContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "ppName",
+        "ppPriceRow",
+        "ppSeller",
+        "ppDescription",
+        "ppEnquireBox",
+        "ppAsk",
+        "ppBuyBox",
+        "ppWhatsapp",
+        "ppCall",
+        "ppDelivery"
+      ],
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "ppName",
+      "type": "Text",
+      "label": "Name",
+      "parent": "ppInfo",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "ppPriceRow",
+      "type": "Group",
+      "label": "Price",
+      "parent": "ppInfo",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-end",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "ppPrice",
+        "ppWas",
+        "ppEnquireTag"
+      ],
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "ppPrice",
+      "type": "Text",
+      "label": "Price, in the buyer’s currency",
+      "parent": "ppPriceRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-num"
+      },
+      "x": 400,
+      "y": 1480
+    },
+    {
+      "id": "ppWas",
+      "type": "Text",
+      "label": "Price, in the seller’s currency",
+      "parent": "ppPriceRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "cssClassName": "mk-num",
+        "mounted": false
+      },
+      "x": 400,
+      "y": 1600
+    },
+    {
+      "id": "ppEnquireTag",
+      "type": "Group",
+      "label": "Enquire",
+      "parent": "ppPriceRow",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-sm)",
+        "backgroundColor": "var(--warn-bg)",
+        "mounted": false
+      },
+      "children": [
+        "ppEnquireTagWords"
+      ],
+      "x": 400,
+      "y": 1720
+    },
+    {
+      "id": "ppEnquireTagWords",
+      "type": "Text",
+      "label": "Enquire",
+      "parent": "ppEnquireTag",
+      "parameters": {
+        "text": "Enquire",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--warn)"
+      },
+      "x": 460,
+      "y": 1840
+    },
+    {
+      "id": "ppSeller",
+      "type": "Group",
+      "label": "The seller",
+      "parent": "ppInfo",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "cssClassName": "mk-pointer"
+      },
+      "children": [
+        "ppLogo",
+        "ppInitials",
+        "ppSellerWords"
+      ],
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "ppLogo",
+      "type": "Image",
+      "label": "Logo",
+      "parent": "ppSeller",
+      "parameters": {
+        "width": {
+          "value": 40,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": "var(--radius-full)",
+        "alt": "",
+        "mounted": false
+      },
+      "x": 400,
+      "y": 2080
+    },
+    {
+      "id": "ppInitials",
+      "type": "Group",
+      "label": "Initials, when there is no logo",
+      "parent": "ppSeller",
+      "parameters": {
+        "width": {
+          "value": 40,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "borderRadius": "var(--radius-full)",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "mounted": false
+      },
+      "children": [
+        "ppInitialsWords"
+      ],
+      "x": 400,
+      "y": 2200
+    },
+    {
+      "id": "ppInitialsWords",
+      "type": "Text",
+      "label": "Initials",
+      "parent": "ppInitials",
+      "parameters": {
+        "text": "",
+        "textAlignX": "center",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--secondary-foreground)",
+        "cssClassName": "mk-display"
+      },
+      "x": 460,
+      "y": 2320
+    },
+    {
+      "id": "ppSellerWords",
+      "type": "Group",
+      "label": "Name and place",
+      "parent": "ppSeller",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "ppSellerName",
+        "ppSellerPlace"
+      ],
+      "x": 400,
+      "y": 2440
+    },
+    {
+      "id": "ppSellerName",
+      "type": "net.noodl.controls.button",
+      "label": "Seller: to their page",
+      "parent": "ppSellerWords",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "color": "var(--foreground)",
+        "clickBubbling": "never",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "sizeMode": "contentSize",
+        "cssClassName": "mk-left"
+      },
+      "x": 460,
+      "y": 2560
+    },
+    {
+      "id": "ppSellerPlace",
+      "type": "Text",
+      "label": "Country and shelf",
+      "parent": "ppSellerWords",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 460,
+      "y": 2680
+    },
+    {
+      "id": "ppDescription",
+      "type": "Text",
+      "label": "Description",
+      "parent": "ppInfo",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 2800
+    },
+    {
+      "id": "ppEnquireBox",
+      "type": "Group",
+      "label": "Settled off the site",
+      "parent": "ppInfo",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--warn-bg)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "ppEnquireWords"
+      ],
+      "x": 340,
+      "y": 2920
+    },
+    {
+      "id": "ppEnquireWords",
+      "type": "Text",
+      "label": "How an enquiry works",
+      "parent": "ppEnquireBox",
+      "parameters": {
+        "text": "This one isn’t bought here. Message the seller: you agree the price and the handover between you, away from the site.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)"
+      },
+      "x": 400,
+      "y": 3040
+    },
+    {
+      "id": "ppAsk",
+      "type": "Group",
+      "label": "Ask the seller (enquire)",
+      "parent": "ppInfo",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "ppAskForm",
+        "ppAskSent"
+      ],
+      "x": 340,
+      "y": 3160
+    },
+    {
+      "id": "ppAskForm",
+      "type": "Group",
+      "label": "The message",
+      "parent": "ppAsk",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "ppAskName",
+        "ppAskContact",
+        "ppAskMessage",
+        "ppAskGo",
+        "ppAskError"
+      ],
+      "x": 400,
+      "y": 3280
+    },
+    {
+      "id": "ppAskName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your name",
+      "parent": "ppAskForm",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Your name"
+      },
+      "x": 460,
+      "y": 3400
+    },
+    {
+      "id": "ppAskContact",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your phone or WhatsApp, with the country code",
+      "parent": "ppAskForm",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Your phone or WhatsApp, with the country code",
+        "inputMode": "tel",
+        "placeholder": "+233 24 555 0187"
+      },
+      "x": 460,
+      "y": 3520
+    },
+    {
+      "id": "ppAskMessage",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your message",
+      "parent": "ppAskForm",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Your message",
+        "type": "textArea",
+        "placeholder": "Is it still for sale? Can I see it on Saturday?"
+      },
+      "x": 460,
+      "y": 3640
+    },
+    {
+      "id": "ppAskGo",
+      "type": "net.noodl.controls.button",
+      "label": "Send to the seller",
+      "parent": "ppAskForm",
+      "parameters": {
+        "label": "Send",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 460,
+      "y": 3760
+    },
+    {
+      "id": "ppAskError",
+      "type": "Text",
+      "label": "Why it was not sent",
+      "parent": "ppAskForm",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "mounted": false
+      },
+      "x": 460,
+      "y": 3880
+    },
+    {
+      "id": "ppAskSent",
+      "type": "Group",
+      "label": "Sent",
+      "parent": "ppAsk",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--ok-bg)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "ppAskSentWords"
+      ],
+      "x": 400,
+      "y": 4000
+    },
+    {
+      "id": "ppAskSentWords",
+      "type": "Text",
+      "label": "Who has it, and how they’ll reach you",
+      "parent": "ppAskSent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)"
+      },
+      "x": 460,
+      "y": 4120
+    },
+    {
+      "id": "ppBuyBox",
+      "type": "Group",
+      "label": "Buy: how many, and the basket",
+      "parent": "ppInfo",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "mounted": false
+      },
+      "children": [
+        "ppQtyRow",
+        "ppAdd",
+        "ppAdded"
+      ],
+      "x": 340,
+      "y": 4240
+    },
+    {
+      "id": "ppQtyRow",
+      "type": "Group",
+      "label": "How many",
+      "parent": "ppBuyBox",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "ppQtyLabel",
+        "ppStepper"
+      ],
+      "x": 400,
+      "y": 4360
+    },
+    {
+      "id": "ppQtyLabel",
+      "type": "Text",
+      "label": "How many",
+      "parent": "ppQtyRow",
+      "parameters": {
+        "text": "How many",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 460,
+      "y": 4480
+    },
+    {
+      "id": "ppStepper",
+      "type": "Group",
+      "label": "One fewer, how many, one more",
+      "parent": "ppQtyRow",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "ppLess",
+        "ppQty",
+        "ppMore"
+      ],
+      "x": 460,
+      "y": 4600
+    },
+    {
+      "id": "ppLess",
+      "type": "net.noodl.controls.button",
+      "label": "One fewer",
+      "parent": "ppStepper",
+      "parameters": {
+        "label": "−",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 520,
+      "y": 4720
+    },
+    {
+      "id": "ppQty",
+      "type": "Text",
+      "label": "How many",
+      "parent": "ppStepper",
+      "parameters": {
+        "text": "1",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "cssClassName": "mk-num"
+      },
+      "x": 520,
+      "y": 4840
+    },
+    {
+      "id": "ppMore",
+      "type": "net.noodl.controls.button",
+      "label": "One more",
+      "parent": "ppStepper",
+      "parameters": {
+        "label": "+",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 520,
+      "y": 4960
+    },
+    {
+      "id": "ppAdd",
+      "type": "net.noodl.controls.button",
+      "label": "Add to basket",
+      "parent": "ppBuyBox",
+      "parameters": {
+        "label": "Add to basket",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 400,
+      "y": 5080
+    },
+    {
+      "id": "ppAdded",
+      "type": "Group",
+      "label": "In the basket now",
+      "parent": "ppBuyBox",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "mounted": false
+      },
+      "children": [
+        "ppAddedWords",
+        "ppSeeBasket"
+      ],
+      "x": 400,
+      "y": 5200
+    },
+    {
+      "id": "ppAddedWords",
+      "type": "Text",
+      "label": "How many the basket holds",
+      "parent": "ppAdded",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 460,
+      "y": 5320
+    },
+    {
+      "id": "ppSeeBasket",
+      "type": "net.noodl.controls.button",
+      "label": "See your basket",
+      "parent": "ppAdded",
+      "parameters": {
+        "label": "See your basket →",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 460,
+      "y": 5440
+    },
+    {
+      "id": "ppWhatsapp",
+      "type": "net.noodl.controls.button",
+      "label": "WhatsApp",
+      "parent": "ppInfo",
+      "parameters": {
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--whatsapp)",
+        "color": "var(--secondary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 340,
+      "y": 5560
+    },
+    {
+      "id": "ppCall",
+      "type": "Text",
+      "label": "No WhatsApp: their phone",
+      "parent": "ppInfo",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 5680
+    },
+    {
+      "id": "ppDelivery",
+      "type": "Text",
+      "label": "Who confirms the delivery",
+      "parent": "ppInfo",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 5800
+    },
+    {
+      "id": "ppGone",
+      "type": "Text",
+      "label": "Not on sale",
+      "parent": "ppBody",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 5920
+    },
+    {
+      "id": "ppLoad",
+      "type": "JavaScriptFunction",
+      "label": "The product, its seller, its price in the buyer’s currency",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nif (Inputs.productId === undefined) return;\ntry {\n  var p = (await all('Product', { objectId: { equalTo: String(Inputs.productId) } }))[0];\n  var s = p ? (await all('Seller', { objectId: { equalTo: idOf(p.seller) } }))[0] : null;\n  var got = s ? await Promise.all([all('Country', { objectId: { equalTo: idOf(s.country) } }), all('Category', { objectId: { equalTo: idOf(p.category) } }), all('Rate'), waysByCountry()]) : null;\n} catch (e) { Outputs.problem = 'This product could not be read just now. Check the connection, then open it again.'; Outputs.gone = true; Outputs.ok = false; return; }\nif (!p || !s || p.endedAt || s.endedAt) { Outputs.problem = p ? 'This product isn’t on sale now.' : 'There is no such product here.'; Outputs.gone = true; Outputs.ok = false; return; }\nvar country = got[0][0], shelf = got[1][0], cur = country ? country.currency : '';\nvar pr = priced(p.price, cur, Inputs.currency || '', got[2]);\nvar enquire = p.mode === 'enquire';\nvar photos = (p.photos || []).filter(hasFile);\nvar chip = sellerChip(s, country);\nvar wa = String(s.whatsapp || '').replace(/[^0-9]/g, '');\nvar line = (enquire ? 'Hello, is this still for sale? ' : 'Hello, I would like to order this: ') + (p.name || '') + ' (' + money(p.price, cur) + '). ';\nvar waOn = (got[3][idOf(s.country)] || []).some(function (w) { return w.method === 'whatsapp'; });\nvar unit = converted(p.price, cur, Inputs.currency || '', got[2]);\nOutputs.productId = p.objectId;\nOutputs.unit = unit.amount;\nOutputs.unitCurrency = unit.currency;\nOutputs.title = p.name || 'A product';\nOutputs.name = p.name || '';\nOutputs.price = pr.price;\nOutputs.was = pr.was;\nOutputs.hasWas = !!pr.was;\nOutputs.enquire = enquire;\nOutputs.buy = !enquire;\nOutputs.photos = photos.map(function (f, i) { return { id: f.url, src: thumb(f, 'lg'), alt: (p.name || 'The product') + ', photo ' + (i + 1) + ' of ' + photos.length }; });\nOutputs.hasPhotos = photos.length > 0;\nOutputs.swipe = photos.length > 1 ? plural(photos.length, 'photo', 'photos') + ': swipe to see them all' : '';\nOutputs.hasSwipe = photos.length > 1;\nOutputs.description = p.description || '';\nOutputs.hasDescription = !!p.description;\nOutputs.sellerId = s.objectId;\nOutputs.sellerName = s.name || '';\nOutputs.sellerPlace = [country && country.name, shelf && shelf.name].filter(Boolean).join(' · ');\nOutputs.logo = chip.logo;\nOutputs.hasLogo = chip.hasLogo;\nOutputs.noLogo = chip.noLogo;\nOutputs.initials = chip.initials;\nOutputs.tint = chip.tint;\nOutputs.delivery = (s.name || 'The seller') + ' confirms the delivery and what it costs before you pay.';\nOutputs.hasWhatsapp = !!wa && (enquire || waOn);\nOutputs.whatsappLabel = enquire ? 'Message ' + (s.name || 'the seller') + ' on WhatsApp' : 'Order on WhatsApp instead';\nOutputs.askLabel = 'Send to ' + (s.name || 'the seller');\nOutputs.whatsappLink = wa ? 'https://wa.me/' + wa + '?text=' + encodeURIComponent(line + location.href) : '';\nOutputs.call = !wa && s.phone ? 'Call ' + (s.name || 'the seller') + ': ' + s.phone : !wa ? (s.name || 'The seller') + ' hasn’t left a number here yet.' : '';\nOutputs.hasCall = !wa;\nOutputs.gone = false;\nOutputs.ok = true;\nOutputs.loaded();"
+      },
+      "ports": [
+        {
+          "name": "out-loaded",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-productId",
+          "displayName": "productId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-currency",
+          "displayName": "currency",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gone",
+          "displayName": "gone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-productId",
+          "displayName": "productId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-unit",
+          "displayName": "unit",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-unitCurrency",
+          "displayName": "unitCurrency",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-price",
+          "displayName": "price",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-was",
+          "displayName": "was",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasWas",
+          "displayName": "hasWas",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-enquire",
+          "displayName": "enquire",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-buy",
+          "displayName": "buy",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-photos",
+          "displayName": "photos",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasPhotos",
+          "displayName": "hasPhotos",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-swipe",
+          "displayName": "swipe",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasSwipe",
+          "displayName": "hasSwipe",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-description",
+          "displayName": "description",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasDescription",
+          "displayName": "hasDescription",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sellerId",
+          "displayName": "sellerId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sellerName",
+          "displayName": "sellerName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sellerPlace",
+          "displayName": "sellerPlace",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-logo",
+          "displayName": "logo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasLogo",
+          "displayName": "hasLogo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noLogo",
+          "displayName": "noLogo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-initials",
+          "displayName": "initials",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tint",
+          "displayName": "tint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-delivery",
+          "displayName": "delivery",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasWhatsapp",
+          "displayName": "hasWhatsapp",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-whatsappLabel",
+          "displayName": "whatsappLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-askLabel",
+          "displayName": "askLabel",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-whatsappLink",
+          "displayName": "whatsappLink",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-call",
+          "displayName": "call",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasCall",
+          "displayName": "hasCall",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 770,
+      "y": 640
+    },
+    {
+      "id": "ppCount",
+      "type": "Counter",
+      "label": "How many (1 to 99)",
+      "parameters": {
+        "startValue": 1,
+        "limitsEnabled": true,
+        "limitsMin": 1,
+        "limitsMax": 99
+      },
+      "x": 770,
+      "y": 4720
+    },
+    {
+      "id": "ppAddLabel",
+      "type": "JavaScriptFunction",
+      "label": "The Add button’s words",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nvar q = Math.max(1, Math.floor(Number(Inputs.quantity) || 1));\nOutputs.label = 'Add to basket · ' + money((Number(Inputs.unit) || 0) * q, Inputs.unitCurrency || '');\nOutputs.quantityWords = String(q);"
+      },
+      "ports": [
+        {
+          "name": "in-quantity",
+          "displayName": "quantity",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-unit",
+          "displayName": "unit",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-unitCurrency",
+          "displayName": "unitCurrency",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-label",
+          "displayName": "label",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-quantityWords",
+          "displayName": "quantityWords",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 770,
+      "y": 5080
+    },
+    {
+      "id": "ppAddIt",
+      "type": "JavaScriptFunction",
+      "label": "Put them in the basket on this phone",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nvar id = String(Inputs.productId || '');\nif (!id) return;\nvar q = Math.max(1, Math.min(99, Math.floor(Number(Inputs.quantity) || 1)));\nvar b = readBasket();\nvar line = b.filter(function (l) { return l.productId === id; })[0];\nif (line) line.quantity = Math.min(99, line.quantity + q); else b.push({ productId: id, quantity: q });\nOutputs.basket = writeBasket(b);\nOutputs.added = (line ? line.quantity : q) + ' in your basket.';\nOutputs.has = true;\nOutputs.go();",
+        "runOnChange-in-productId": false,
+        "runOnChange-in-quantity": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-productId",
+          "displayName": "productId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-quantity",
+          "displayName": "quantity",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-basket",
+          "displayName": "basket",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-added",
+          "displayName": "added",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-has",
+          "displayName": "has",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 770,
+      "y": 5320
+    },
+    {
+      "id": "ppSetBasket",
+      "type": "Set Variable",
+      "label": "The basket changed",
+      "parameters": {
+        "name": "basket",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the basket on this phone: every page shows the same one."
+      },
+      "x": 770,
+      "y": 6520
+    },
+    {
+      "id": "ppToBasket",
+      "type": "RouterNavigate",
+      "label": "To the basket",
+      "parameters": {
+        "target": "/Pages/Shop/Basket"
+      },
+      "x": 770,
+      "y": 5440
+    },
+    {
+      "id": "ppCurrency",
+      "type": "Variable2",
+      "label": "The currency prices are shown in",
+      "parameters": {
+        "name": "currency"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: the currency a buyer picked, the same on every page."
+      },
+      "x": 770,
+      "y": 6640
+    },
+    {
+      "id": "ppOpenWhatsapp",
+      "type": "net.noodl.externallink",
+      "label": "Open WhatsApp",
+      "parameters": {
+        "openInNewTab": true
+      },
+      "x": 770,
+      "y": 5560
+    },
+    {
+      "id": "ppAskGather",
+      "type": "JavaScriptFunction",
+      "label": "The message, as one enquiry",
+      "parameters": {
+        "functionScript": "var s = function (v) { return v === undefined || v === null ? '' : String(v); };\nOutputs.enquiry = { productId: s(Inputs.productId), buyerName: s(Inputs.name), contact: s(Inputs.contact), message: s(Inputs.message) };\nOutputs.go();",
+        "runOnChange-in-productId": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-contact": false,
+        "runOnChange-in-message": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-productId",
+          "displayName": "productId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-contact",
+          "displayName": "contact",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-message",
+          "displayName": "message",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-enquiry",
+          "displayName": "enquiry",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 770,
+      "y": 3400
+    },
+    {
+      "id": "ppAskCall",
+      "type": "CloudFunction2",
+      "label": "sendEnquiry(enquiry)",
+      "parameters": {
+        "function": "sendEnquiry"
+      },
+      "x": 770,
+      "y": 3880
+    },
+    {
+      "id": "ppAskFailed",
+      "type": "Switch",
+      "label": "The last send was refused",
+      "x": 770,
+      "y": 4000
+    },
+    {
+      "id": "ppAskDone",
+      "type": "Switch",
+      "label": "Sent (a new product starts unsent)",
+      "x": 770,
+      "y": 4120
+    },
+    {
+      "id": "ppAskOpen",
+      "type": "Inverter",
+      "label": "Not sent yet: the form shows",
+      "x": 770,
+      "y": 3280
+    },
+    {
+      "id": "ppAskSay",
+      "type": "JavaScriptFunction",
+      "label": "Who has it, and how they’ll reach you",
+      "parameters": {
+        "functionScript": "var seller = String(Inputs.seller || 'The seller');\n// A number reads whole: its spaces don't break across lines.\nvar contact = String(Inputs.contact || '').trim().split(' ').join(String.fromCharCode(160));\nOutputs.words = 'Sent to ' + seller + '. They’ll reach you on ' + contact + ', and you agree the rest between you.';",
+        "runOnChange-in-seller": false,
+        "runOnChange-in-contact": false
+      },
+      "ports": [
+        {
+          "name": "in-seller",
+          "displayName": "seller",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-contact",
+          "displayName": "contact",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-words",
+          "displayName": "words",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 770,
+      "y": 4240
+    },
+    {
+      "id": "ppToShop",
+      "type": "RouterNavigate",
+      "label": "To the shop",
+      "parameters": {
+        "target": "/Pages/Shop/Home"
+      },
+      "x": 770,
+      "y": 520
+    },
+    {
+      "id": "ppToSeller",
+      "type": "RouterNavigate",
+      "label": "To the seller",
+      "parameters": {
+        "target": "/Pages/Shop/Seller"
+      },
+      "x": 770,
+      "y": 1960
+    },
+    {
+      "id": "ppFoot",
+      "type": "Group",
+      "label": "For sellers",
+      "parent": "ppBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "paddingTop": "var(--space-6)"
+      },
+      "children": [
+        "ppFootWords",
+        "ppFootSignIn"
+      ],
+      "x": 220,
+      "y": 6040
+    },
+    {
+      "id": "ppFootWords",
+      "type": "Text",
+      "label": "Sell here?",
+      "parent": "ppFoot",
+      "parameters": {
+        "text": "Selling here?",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 6160
+    },
+    {
+      "id": "ppFootSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in (sellers and the admin)",
+      "parent": "ppFoot",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "Sign in"
+      },
+      "x": 280,
+      "y": 6280
+    },
+    {
+      "id": "ppToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 770,
+      "y": 6280
+    }
+  ],
+  "visualRoots": [
+    "ppPage"
+  ]
+}

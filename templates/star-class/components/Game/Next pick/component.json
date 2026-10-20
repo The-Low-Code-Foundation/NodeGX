@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f4b2fe29-4793-5eef-8868-2c149f49c880",
+  "name": "Next pick",
+  "path": "/Game/Next pick",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The way to the next 🎁 pick: one line (\"Next 🎁 in 12 ⭐\", or the picks waiting) over a bar filled Percent of the way from the last milestone. Has picks turns the bar tomato. Publishes Open when tapped."
+}

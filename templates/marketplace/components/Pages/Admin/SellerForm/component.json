@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2ebf6519-c7ed-53ab-89f5-0e6c1da86b1f",
+  "name": "SellerForm",
+  "path": "/Pages/Admin/SellerForm",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Add a seller, or change one"
+}

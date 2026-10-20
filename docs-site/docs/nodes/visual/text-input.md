@@ -22,6 +22,7 @@ Do not use in new graphs — use net.noodl.controls.textinput instead.
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -149,7 +150,13 @@ Declared-port-groups: size-mode and option-dependent ports swap by parameters, a
 
 [Text Input](./net-noodl-controls-textinput.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

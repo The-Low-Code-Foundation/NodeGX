@@ -1,0 +1,231 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ccb6a5e2-9a6b-5473-839b-1b3caa2c859e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "brRoot",
+      "type": "Group",
+      "label": "Bar",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "brTop",
+        "brBand"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "brTop",
+      "type": "Group",
+      "label": "Wordmark and Sign out",
+      "parent": "brRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderColor": "var(--border)",
+        "borderBottomWidth": {
+          "value": 1,
+          "unit": "px"
+        },
+        "borderTopWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "borderLeftWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "borderRightWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "brWord",
+        "brOut"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "brWord",
+      "type": "Text",
+      "label": "The wordmark",
+      "parent": "brTop",
+      "parameters": {
+        "text": "gram",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-grow"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "brOut",
+      "type": "net.noodl.controls.button",
+      "label": "Sign out",
+      "parent": "brTop",
+      "parameters": {
+        "label": "Sign out",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "brBand",
+      "type": "Group",
+      "label": "The role band",
+      "parent": "brRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--primary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": {
+          "value": 5,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 5,
+          "unit": "px"
+        },
+        "mounted": false
+      },
+      "children": [
+        "brBandWords"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "brBandWords",
+      "type": "Text",
+      "label": "Who",
+      "parent": "brBand",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "textTransform": "uppercase",
+        "letterSpacing": "var(--tracking-wider)",
+        "color": "var(--primary-foreground)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "brIn",
+      "type": "Component Inputs",
+      "label": "Inputs",
+      "ports": [
+        {
+          "name": "band",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "brWho",
+      "type": "JavaScriptFunction",
+      "label": "Signed in? A band?",
+      "parameters": {
+        "runOnChange-in-band": true,
+        "functionScript": "Outputs.signedIn = !!Noodl.Users.Current;\nOutputs.hasBand = !!Inputs.band;"
+      },
+      "ports": [
+        {
+          "name": "in-band",
+          "displayName": "band",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-signedIn",
+          "displayName": "signedIn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasBand",
+          "displayName": "hasBand",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "brLogOut",
+      "type": "net.noodl.user.LogOut",
+      "label": "Sign out",
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "brToWelcome",
+      "type": "RouterNavigate",
+      "label": "To the start",
+      "parameters": {
+        "target": "/Pages/Welcome"
+      },
+      "x": 410,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "brRoot"
+  ]
+}

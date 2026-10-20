@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d0c12976-efb9-5698-8c38-dc4e1e4cedd7",
+  "name": "Word lists",
+  "path": "/Data/Word lists",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The words the typing skills draw from, per language. Add your own."
+}

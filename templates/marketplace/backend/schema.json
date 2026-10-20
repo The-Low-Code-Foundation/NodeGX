@@ -1,0 +1,811 @@
+[
+  {
+    "action": "createTable",
+    "table": "Person",
+    "description": "Someone with a login: the admin who runs the marketplace, a seller's staff, or a buyer who made an account.",
+    "columns": [
+      {
+        "name": "name",
+        "type": "String"
+      },
+      {
+        "name": "email",
+        "type": "String"
+      },
+      {
+        "name": "phone",
+        "type": "String"
+      },
+      {
+        "name": "role",
+        "type": "String"
+      },
+      {
+        "name": "login",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "a person is who signs in"
+      },
+      {
+        "name": "seller",
+        "type": "Pointer",
+        "targetClass": "Seller",
+        "whenTargetGoes": "blocks",
+        "description": "a seller's staff log in as that seller"
+      }
+    ],
+    "checks": [
+      {
+        "field": "role",
+        "oneOf": [
+          "admin",
+          "seller",
+          "buyer"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "PersonHistory",
+    "description": "who changed what on a person, and when: one record per change Not kept by the database yet: every change to a person is written to its history.",
+    "columns": [
+      {
+        "name": "person",
+        "type": "Pointer",
+        "targetClass": "Person",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the person that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Seller",
+    "description": "A business that sells on the marketplace. The admin adds it, gives it a login and can change anything it sells; sellers don't sign themselves up.",
+    "columns": [
+      {
+        "name": "name",
+        "type": "String"
+      },
+      {
+        "name": "story",
+        "type": "String"
+      },
+      {
+        "name": "logo",
+        "type": "File"
+      },
+      {
+        "name": "phone",
+        "type": "String"
+      },
+      {
+        "name": "whatsapp",
+        "type": "String"
+      },
+      {
+        "name": "payoutAccount",
+        "type": "String"
+      },
+      {
+        "name": "stoppedReason",
+        "type": "String"
+      },
+      {
+        "name": "country",
+        "type": "Pointer",
+        "targetClass": "Country",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each seller is in one country"
+      },
+      {
+        "name": "endedAt",
+        "type": "Date",
+        "description": "the admin can stop a seller; its products leave the marketplace and its logins stop working"
+      }
+    ],
+    "checks": [
+      {
+        "allOrNone": [
+          "stoppedReason",
+          "endedAt"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "SellerHistory",
+    "description": "who changed what on a seller, and when: one record per change Not kept by the database yet: every change to a seller is written to its history.",
+    "columns": [
+      {
+        "name": "seller",
+        "type": "Pointer",
+        "targetClass": "Seller",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the seller that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Country",
+    "description": "A country the marketplace sells in. Each has its currency, and the admin turns the ways to pay on or off for it.",
+    "columns": [
+      {
+        "name": "name",
+        "type": "String"
+      },
+      {
+        "name": "currency",
+        "type": "String"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "CountryHistory",
+    "description": "who changed what on a country, and when: one record per change Not kept by the database yet: every change to a country is written to its history.",
+    "columns": [
+      {
+        "name": "country",
+        "type": "Pointer",
+        "targetClass": "Country",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the country that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Rate",
+    "description": "What one unit of a currency is worth in the marketplace's own currency, set by the admin by hand; no live exchange rates.",
+    "columns": [
+      {
+        "name": "currency",
+        "type": "String"
+      },
+      {
+        "name": "value",
+        "type": "Number"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "RateHistory",
+    "description": "who changed what on a rate, and when: one record per change Not kept by the database yet: every change to a rate is written to its history.",
+    "columns": [
+      {
+        "name": "rate",
+        "type": "Pointer",
+        "targetClass": "Rate",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the rate that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Category",
+    "description": "A shelf of the marketplace: food and drinks, phones and laptops, cars.",
+    "columns": [
+      {
+        "name": "name",
+        "type": "String"
+      },
+      {
+        "name": "picture",
+        "type": "File"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Product",
+    "description": "Something a seller sells: photos, a description and a price in the seller's currency. It is either bought through the basket, or enquired about (a car), and then the buyer and seller settle it between them, off the site.",
+    "columns": [
+      {
+        "name": "name",
+        "type": "String"
+      },
+      {
+        "name": "description",
+        "type": "String"
+      },
+      {
+        "name": "photos",
+        "type": "Array"
+      },
+      {
+        "name": "price",
+        "type": "Number"
+      },
+      {
+        "name": "mode",
+        "type": "String"
+      },
+      {
+        "name": "seller",
+        "type": "Pointer",
+        "targetClass": "Seller",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each product is sold by one seller"
+      },
+      {
+        "name": "category",
+        "type": "Pointer",
+        "targetClass": "Category",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each product is on one shelf"
+      },
+      {
+        "name": "endedAt",
+        "type": "Date",
+        "description": "a product is taken off sale, not deleted, so old orders still show it"
+      }
+    ],
+    "checks": [
+      {
+        "field": "mode",
+        "oneOf": [
+          "buy",
+          "enquire"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "ProductHistory",
+    "description": "who changed what on a product, and when: one record per change Not kept by the database yet: every change to a product is written to its history.",
+    "columns": [
+      {
+        "name": "product",
+        "type": "Pointer",
+        "targetClass": "Product",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the product that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "WayToPay",
+    "description": "A way buyers can pay: on delivery, a bank transfer with a reference, ordering on WhatsApp, or a card or mobile money through a payment provider.",
+    "columns": [
+      {
+        "name": "name",
+        "type": "String"
+      },
+      {
+        "name": "method",
+        "type": "String"
+      },
+      {
+        "name": "instructions",
+        "type": "String"
+      },
+      {
+        "name": "country",
+        "type": "Relation",
+        "targetClass": "Country",
+        "description": "the admin turns a way to pay on for a country"
+      }
+    ],
+    "checks": [
+      {
+        "field": "method",
+        "oneOf": [
+          "on-delivery",
+          "bank-transfer",
+          "whatsapp",
+          "paystack",
+          "flutterwave"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "WayToPayHistory",
+    "description": "who changed what on a wayToPay, and when: one record per change Not kept by the database yet: every change to a wayToPay is written to its history.",
+    "columns": [
+      {
+        "name": "wayToPay",
+        "type": "Pointer",
+        "targetClass": "WayToPay",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the wayToPay that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Order",
+    "description": "One checkout by one buyer, with or without an account: what they bought from one or more sellers, where it goes, the currency they saw, and how they chose to pay. A buyer without an account follows it by a private link.",
+    "columns": [
+      {
+        "name": "buyerName",
+        "type": "String"
+      },
+      {
+        "name": "phone",
+        "type": "String"
+      },
+      {
+        "name": "email",
+        "type": "String"
+      },
+      {
+        "name": "address",
+        "type": "String"
+      },
+      {
+        "name": "currency",
+        "type": "String"
+      },
+      {
+        "name": "total",
+        "type": "Number"
+      },
+      {
+        "name": "followToken",
+        "type": "String"
+      },
+      {
+        "name": "number",
+        "type": "String",
+        "description": "an order's number, which people read aloud",
+        "series": {
+          "format": "MK-{YYYY}-{#####}",
+          "restart": "year"
+        }
+      },
+      {
+        "name": "person",
+        "type": "Pointer",
+        "targetClass": "Person",
+        "whenTargetGoes": "stays-unlinked",
+        "description": "an order can be by a buyer with an account"
+      },
+      {
+        "name": "country",
+        "type": "Pointer",
+        "targetClass": "Country",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "an order is delivered in one country"
+      }
+    ],
+    "checks": [],
+    "indexes": [
+      {
+        "fields": [
+          "number"
+        ],
+        "unique": true
+      }
+    ]
+  },
+  {
+    "action": "createTable",
+    "table": "OrderPart",
+    "description": "The part of an order one seller sends. The seller confirms the delivery and its cost, and moves it along: paid, packed, sent, delivered. Paid on delivery has no paid step: it is paid when it is delivered. A part can be cancelled, with why, until it is delivered.",
+    "columns": [
+      {
+        "name": "status",
+        "type": "String"
+      },
+      {
+        "name": "deliveryCost",
+        "type": "Number"
+      },
+      {
+        "name": "deliveryNote",
+        "type": "String"
+      },
+      {
+        "name": "subtotal",
+        "type": "Number"
+      },
+      {
+        "name": "cancelledReason",
+        "type": "String"
+      },
+      {
+        "name": "wayToPay",
+        "type": "Pointer",
+        "targetClass": "WayToPay",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each order part is paid one way, the one the buyer picked for its seller's country"
+      },
+      {
+        "name": "order",
+        "type": "Pointer",
+        "targetClass": "Order",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each order part is part of one order"
+      },
+      {
+        "name": "seller",
+        "type": "Pointer",
+        "targetClass": "Seller",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each order part is sent by one seller"
+      }
+    ],
+    "checks": [
+      {
+        "field": "status",
+        "oneOf": [
+          "new",
+          "confirmed",
+          "paid",
+          "packed",
+          "sent",
+          "delivered",
+          "cancelled"
+        ]
+      }
+    ],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "OrderPartHistory",
+    "description": "who changed what on an orderPart, and when: one record per change Not kept by the database yet: every change to an orderPart is written to its history.",
+    "columns": [
+      {
+        "name": "orderPart",
+        "type": "Pointer",
+        "targetClass": "OrderPart",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the orderPart that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "OrderLine",
+    "description": "One product in an order part: how many, and the price it had when the buyer ordered.",
+    "columns": [
+      {
+        "name": "quantity",
+        "type": "Number"
+      },
+      {
+        "name": "price",
+        "type": "Number"
+      },
+      {
+        "name": "productName",
+        "type": "String"
+      },
+      {
+        "name": "orderPart",
+        "type": "Pointer",
+        "targetClass": "OrderPart",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each order line is in one order part"
+      },
+      {
+        "name": "product",
+        "type": "Pointer",
+        "targetClass": "Product",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each order line is for one product"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Enquiry",
+    "description": "A buyer's message to a seller about one product, for things bought by talking, like a car. The seller marks it answered once they have talked. The marketplace takes no part in the sale.",
+    "columns": [
+      {
+        "name": "buyerName",
+        "type": "String"
+      },
+      {
+        "name": "contact",
+        "type": "String"
+      },
+      {
+        "name": "message",
+        "type": "String"
+      },
+      {
+        "name": "answeredAt",
+        "type": "Date"
+      },
+      {
+        "name": "product",
+        "type": "Pointer",
+        "targetClass": "Product",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "each enquiry is about one product"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Marketplace",
+    "description": "The marketplace itself: there is one, and its name is what buyers see at the top of every page. It is named when it is set up. Not kept by the database yet: there is only one marketplace.",
+    "columns": [
+      {
+        "name": "name",
+        "type": "String"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "MarketplaceHistory",
+    "description": "who changed what on a marketplace, and when: one record per change Not kept by the database yet: every change to a marketplace is written to its history.",
+    "columns": [
+      {
+        "name": "marketplace",
+        "type": "Pointer",
+        "targetClass": "Marketplace",
+        "required": true,
+        "whenTargetGoes": "goes-too",
+        "description": "the marketplace that changed"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "when"
+      },
+      {
+        "name": "who",
+        "type": "Pointer",
+        "targetClass": "_User",
+        "description": "who changed it"
+      },
+      {
+        "name": "changed",
+        "type": "Object",
+        "description": "what changed: each detail, before and after"
+      }
+    ],
+    "checks": [],
+    "indexes": []
+  },
+  {
+    "action": "createTable",
+    "table": "Payment",
+    "description": "a payment provider said a payment for an order was made, or failed; a basket across two seller countries is paid once per country",
+    "columns": [
+      {
+        "name": "order",
+        "type": "Pointer",
+        "targetClass": "Order",
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "description": "a payment provider said a payment for an order was made, or failed; a basket across two seller countries is paid once per country"
+      },
+      {
+        "name": "at",
+        "type": "Date",
+        "required": true,
+        "description": "a payment provider said a payment for an order was made, or failed; a basket across two seller countries is paid once per country"
+      },
+      {
+        "name": "provider",
+        "type": "String"
+      },
+      {
+        "name": "reference",
+        "type": "String"
+      },
+      {
+        "name": "currency",
+        "type": "String"
+      },
+      {
+        "name": "country",
+        "type": "String"
+      },
+      {
+        "name": "amount",
+        "type": "Number"
+      },
+      {
+        "name": "outcome",
+        "type": "String"
+      }
+    ],
+    "checks": [
+      {
+        "field": "provider",
+        "oneOf": [
+          "paystack",
+          "flutterwave"
+        ]
+      },
+      {
+        "field": "outcome",
+        "oneOf": [
+          "paid",
+          "failed"
+        ]
+      }
+    ],
+    "indexes": [
+      {
+        "fields": [
+          "reference"
+        ],
+        "unique": true
+      }
+    ]
+  }
+]

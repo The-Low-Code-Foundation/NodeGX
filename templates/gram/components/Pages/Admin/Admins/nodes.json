@@ -1,0 +1,343 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3f61e821-a1a7-5c68-85e5-8ffc109ed241",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "adPage",
+      "type": "Page",
+      "label": "Admins",
+      "parameters": {
+        "title": "Admins",
+        "urlPath": "admin/admins"
+      },
+      "children": [
+        "adRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "adRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "adPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app"
+      },
+      "children": [
+        "adBar",
+        "adBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "adBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "adRoot",
+      "parameters": {
+        "band": "Admin"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "adBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "adRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "adContent",
+        "adRefused"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "adContent",
+      "type": "Group",
+      "label": "Admins",
+      "parent": "adBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "adBack",
+        "adTitle",
+        "adLead",
+        "adList"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "adBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "adContent",
+      "parameters": {
+        "label": "← Waiting for you",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "adTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "adContent",
+      "parameters": {
+        "text": "Admins",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "adLead",
+      "type": "Text",
+      "label": "What an admin does",
+      "parent": "adContent",
+      "parameters": {
+        "text": "Admins let people in, hide posts and comments, block members and write devotionals. Make a member you trust an admin.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "adList",
+      "type": "Group",
+      "label": "Everyone who is in",
+      "parent": "adContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-list"
+      },
+      "children": [
+        "adEach"
+      ],
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "adEach",
+      "type": "For Each",
+      "label": "One row per member",
+      "parent": "adList",
+      "parameters": {
+        "template": "/Admin/MemberRow"
+      },
+      "x": 340,
+      "y": 1120
+    },
+    {
+      "id": "adRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "adBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "adRefusedWhy",
+        "adRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "adRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "adRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "adRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "adRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "adToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "adLoad",
+      "type": "JavaScriptFunction",
+      "label": "Everyone who is in, admins first",
+      "parameters": {
+        "runOnChange-in-changed": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\n// Read so that a row's change runs the list again.\nvar version = Inputs.changed;\ntry {\n  await adminsOnly();\n  var members = await all('Member', { status: { equalTo: 'approved' } });\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nmembers = members.filter(function (m) { return !m.endedAt; });\nmembers.sort(function (a, b) {\n  if ((a.role === 'admin') !== (b.role === 'admin')) return a.role === 'admin' ? -1 : 1;\n  return String(a.name || '').localeCompare(String(b.name || ''));\n});\nOutputs.rows = members.map(function (m) {\n  var admin = m.role === 'admin';\n  return { id: m.objectId, name: m.name || '', initials: initials(m.name), shade: shade(m.objectId), sub: admin ? 'Admin' : 'Member', canMake: !admin };\n});\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "adVersion",
+      "type": "Variable2",
+      "label": "The members changed",
+      "parameters": {
+        "name": "membersChanged"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a member was let in, turned away or made an admin: the list reads again, whichever row changed it."
+      },
+      "x": 590,
+      "y": 1600
+    },
+    {
+      "id": "adToQueue",
+      "type": "RouterNavigate",
+      "label": "To the admins’ queue",
+      "parameters": {
+        "target": "/Pages/Admin/Queue"
+      },
+      "x": 590,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "adPage"
+  ]
+}

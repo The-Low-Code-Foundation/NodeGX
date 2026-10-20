@@ -1,0 +1,444 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f4c7ad07-555a-5f54-8d10-f63ce42a0455",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ruPage",
+      "type": "Page",
+      "label": "Community rules",
+      "parameters": {
+        "title": "Community rules",
+        "urlPath": "rules"
+      },
+      "children": [
+        "ruRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ruRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "ruPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app"
+      },
+      "children": [
+        "ruBar",
+        "ruBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ruBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "ruRoot",
+      "parameters": {},
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "ruBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "ruRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "ruBack",
+        "ruTitle",
+        "ruRules",
+        "ruReport",
+        "ruEdit"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "ruBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "ruBody",
+      "parameters": {
+        "label": "← Back",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "ruTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "ruBody",
+      "parameters": {
+        "text": "Community rules",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "ruRules",
+      "type": "Text",
+      "label": "The rules",
+      "parent": "ruBody",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-read gm-wrap gm-lines"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "ruReport",
+      "type": "Text",
+      "label": "Breaking them",
+      "parent": "ruBody",
+      "parameters": {
+        "text": "A post or comment that breaks them can be reported from its page. Only the admins see who reported it.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "ruEdit",
+      "type": "Group",
+      "label": "Change the rules (admins)",
+      "parent": "ruBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "borderStyle": "solid",
+        "borderColor": "var(--border)",
+        "borderTopWidth": {
+          "value": 1,
+          "unit": "px"
+        },
+        "borderBottomWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "borderLeftWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "borderRightWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "mounted": false
+      },
+      "children": [
+        "ruWrite",
+        "ruSave",
+        "ruSaved",
+        "ruError"
+      ],
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "ruWrite",
+      "type": "net.noodl.controls.textinput",
+      "label": "The rules, as members will read them (5,000 characters at most)",
+      "parent": "ruEdit",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "The rules, as members will read them (5,000 characters at most)",
+        "type": "textArea",
+        "cssClassName": "gm-tall"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "ruSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save the rules",
+      "parent": "ruEdit",
+      "parameters": {
+        "label": "Save the rules",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "ruSaved",
+      "type": "Text",
+      "label": "Saved",
+      "parent": "ruEdit",
+      "parameters": {
+        "text": "Saved. Every member reads these now, and who changed them is kept.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "ruError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "ruEdit",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "ruLoad",
+      "type": "JavaScriptFunction",
+      "label": "The rules, as the admins wrote them",
+      "parameters": {
+        "runOnChange-in-changed": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\n// Read so that a save runs the page again.\nvar version = Inputs.changed;\nvar rows = [];\ntry { rows = await Noodl.Records.query('Community', {}, { plain: true, limit: 1 }); } catch (e) { rows = []; }\nvar c = rows[0];\nOutputs.rules = c && c.rules ? c.rules : 'The admins haven’t written the rules yet.';\nOutputs.current = c && c.rules ? c.rules : '';\nvar who = await me();\nvar admin = !!who && who.status === 'approved' && who.role === 'admin';\nOutputs.isAdmin = admin;\nOutputs.band = admin ? 'Admin' : '';"
+      },
+      "ports": [
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rules",
+          "displayName": "rules",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-current",
+          "displayName": "current",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isAdmin",
+          "displayName": "isAdmin",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "ruGoBack",
+      "type": "JavaScriptFunction",
+      "label": "Back where they came from",
+      "parameters": {
+        "functionScript": "if (typeof window !== 'undefined') window.history.back();"
+      },
+      "ports": [],
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "ruGather",
+      "type": "JavaScriptFunction",
+      "label": "The rules, as one save",
+      "parameters": {
+        "functionScript": "var typed = Inputs.rules === undefined ? Inputs.rules0 : Inputs.rules;\nvar rules = String(typed || '').trim();\nif (!rules) { Outputs.problem = 'Write the rules first.'; Outputs.held(); return; }\nif (rules.length > 5000) { Outputs.problem = 'Rules of 5,000 characters or fewer. These have ' + rules.length.toLocaleString('en-GB') + '.'; Outputs.held(); return; }\nOutputs.problem = '';\nOutputs.save = { rules: rules };\nOutputs.go();",
+        "runOnChange-in-rules": false,
+        "runOnChange-in-rules0": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-held",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-rules",
+          "displayName": "rules",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rules0",
+          "displayName": "rules0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-save",
+          "displayName": "save",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "ruCall",
+      "type": "CloudFunction2",
+      "label": "writeRules(rules)",
+      "parameters": {
+        "function": "writeRules"
+      },
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "ruSavedSw",
+      "type": "Switch",
+      "label": "Saved",
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "ruStamp",
+      "type": "JavaScriptFunction",
+      "label": "Read the rules again",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 530,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "ruPage"
+  ]
+}

@@ -1,0 +1,458 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "16ceec30-b25d-5532-8f42-da761af05da4",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rrIn",
+      "type": "Component Inputs",
+      "label": "How it ended",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "won",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "headline",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "stars",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "why",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "againWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "otherWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasPick",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "pickWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hangarWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "rrCard",
+      "type": "Group",
+      "label": "The result",
+      "children": [
+        "rrGlyph",
+        "rrTitle",
+        "rrLine",
+        "rrStars",
+        "rrWhy",
+        "rrPick",
+        "rrRow"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-5)",
+        "paddingRight": "var(--space-5)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "cssClassName": "rkt-result",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rrGlyph",
+      "type": "Text",
+      "label": "The glyph",
+      "parent": "rrCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-4xl)",
+        "cssClassName": "rkt-result-glyph"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rrTitle",
+      "type": "Text",
+      "label": "Who got there",
+      "parent": "rrCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "rrLine",
+      "type": "Text",
+      "label": "How many were right",
+      "parent": "rrCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "rrStars",
+      "type": "Text",
+      "label": "The stars this race earned",
+      "parent": "rrCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-2xl)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "fontFamily": "Grandstander",
+        "fontWeight": "var(--font-extrabold)",
+        "textAlignX": "center",
+        "cssClassName": "rkt-stars"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "rrWhy",
+      "type": "Text",
+      "label": "Where the stars came from",
+      "parent": "rrCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "rrPick",
+      "type": "Text",
+      "label": "A 🎁 pick was earned",
+      "parent": "rrCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "fontFamily": "Grandstander",
+        "fontWeight": "var(--font-extrabold)",
+        "textAlignX": "center",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "rrRow",
+      "type": "Group",
+      "label": "The ways on",
+      "parent": "rrCard",
+      "children": [
+        "rrAgain",
+        "rrHangar",
+        "rrOther"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "justifyContent": "center"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "rrAgain",
+      "type": "net.noodl.controls.button",
+      "label": "Play again",
+      "parent": "rrRow",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Play again"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "rrHangar",
+      "type": "net.noodl.controls.button",
+      "label": "To the hangar",
+      "parent": "rrRow",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "To the hangar",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "rrOther",
+      "type": "net.noodl.controls.button",
+      "label": "Change the race",
+      "parent": "rrRow",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Change the race"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "rrIsWon",
+      "type": "Condition",
+      "label": "Won?",
+      "parameters": {},
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "rrTone",
+      "type": "States",
+      "label": "A cheer or a consolation",
+      "parameters": {
+        "states": "lost,won",
+        "values": "ground,glyph",
+        "useTransitions": false,
+        "type-ground": "color",
+        "value-lost-ground": "var(--surface)",
+        "value-won-ground": "var(--accent)",
+        "type-glyph": "string",
+        "value-lost-glyph": "🚀",
+        "value-won-glyph": "🏆"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "rrHasLine",
+      "type": "Expression",
+      "label": "Anything to count?",
+      "parameters": {
+        "expression": "((line || '') + '').length > 0"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "rrHasStars",
+      "type": "Expression",
+      "label": "Any stars to say?",
+      "parameters": {
+        "expression": "((s || '') + '').length > 0"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "rrOut",
+      "type": "Component Outputs",
+      "label": "Which way on",
+      "ports": [
+        {
+          "name": "again",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "other",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "hangar",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "rrCard"
+  ]
+}

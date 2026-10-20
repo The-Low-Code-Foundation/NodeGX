@@ -1,0 +1,570 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0cf660e4-0622-5aab-8bc0-516a50a0f728",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "glPage",
+      "type": "Page",
+      "label": "Give a login",
+      "parameters": {
+        "title": "Give a login",
+        "urlPath": "admin/seller/{sellerId}/login"
+      },
+      "children": [
+        "glRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "glRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "glPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "glBar",
+        "glBand",
+        "glBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "glBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "glRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "glBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "glBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "glBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "glBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "glRoot",
+      "parameters": {
+        "words": "Admin"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "glBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "glRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "glContent",
+        "glRefused"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "glUrl",
+      "type": "PageInputs",
+      "label": "Which seller",
+      "parameters": {
+        "pathParams": "sellerId"
+      },
+      "x": 530,
+      "y": 2320
+    },
+    {
+      "id": "glContent",
+      "type": "Group",
+      "label": "The form",
+      "parent": "glBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "glBack",
+        "glTitle",
+        "glFor",
+        "glLead",
+        "glName",
+        "glEmail",
+        "glPassword",
+        "glSave",
+        "glError"
+      ],
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "glBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "glContent",
+      "parameters": {
+        "label": "← Sellers",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "glTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "glContent",
+      "parameters": {
+        "text": "Give a login",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "glFor",
+      "type": "Text",
+      "label": "For which seller",
+      "parent": "glContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "glLead",
+      "type": "Text",
+      "label": "What a login can do",
+      "parent": "glContent",
+      "parameters": {
+        "text": "They sign in with this email and password, and see and change only this seller’s products and orders. Tell them the password yourself.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "glName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Their name",
+      "parent": "glContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Their name"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "glEmail",
+      "type": "net.noodl.controls.textinput",
+      "label": "Their email",
+      "parent": "glContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Their email",
+        "type": "email"
+      },
+      "x": 280,
+      "y": 1480
+    },
+    {
+      "id": "glPassword",
+      "type": "net.noodl.controls.textinput",
+      "label": "A password (8 characters or more)",
+      "parent": "glContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "A password (8 characters or more)",
+        "type": "password"
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "glSave",
+      "type": "net.noodl.controls.button",
+      "label": "Give the login",
+      "parent": "glContent",
+      "parameters": {
+        "label": "Give the login",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "glError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "glContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "glRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "glBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "glRefusedWhy",
+        "glRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 1960
+    },
+    {
+      "id": "glRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "glRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "glRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "glRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "glToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 530,
+      "y": 2200
+    },
+    {
+      "id": "glLoad",
+      "type": "JavaScriptFunction",
+      "label": "The seller",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nif (Inputs.sellerId === undefined) return;\ntry {\n  await adminOnly();\n  var s = (await all('Seller', { objectId: { equalTo: String(Inputs.sellerId) } }))[0];\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nif (!s) { Outputs.problem = 'There is no such seller.'; Outputs.refused = true; Outputs.ok = false; return; }\nOutputs.name = s.name || '';\nOutputs.stopped = !!s.endedAt;\nOutputs.selling = !s.endedAt;\nOutputs.reason = s.stoppedReason || '';\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stopped",
+          "displayName": "stopped",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-selling",
+          "displayName": "selling",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "glGather",
+      "type": "JavaScriptFunction",
+      "label": "The form, as one login",
+      "parameters": {
+        "functionScript": "Outputs.login = { sellerId: String(Inputs.sellerId || ''), name: Inputs.name || '', email: Inputs.email || '', password: Inputs.password || '' };\nOutputs.go();",
+        "runOnChange-in-sellerId": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-email": false,
+        "runOnChange-in-password": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-email",
+          "displayName": "email",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-password",
+          "displayName": "password",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-login",
+          "displayName": "login",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "glCall",
+      "type": "CloudFunction2",
+      "label": "giveLogin(login)",
+      "parameters": {
+        "function": "giveLogin"
+      },
+      "x": 530,
+      "y": 1840
+    },
+    {
+      "id": "glToSellers",
+      "type": "RouterNavigate",
+      "label": "Back to the sellers",
+      "parameters": {
+        "target": "/Pages/Admin/Sellers"
+      },
+      "x": 530,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "glPage"
+  ]
+}

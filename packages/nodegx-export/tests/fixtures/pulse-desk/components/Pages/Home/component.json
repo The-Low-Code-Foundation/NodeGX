@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b8d20e00-0000-4000-8000-000000000303",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-16T12:00:00.000Z",
+  "description": "EXP-011 \u00a786 fixture: Send runs a Function that reads the name field. With a name it writes the greeting, counts the sends in its own output (read back from Outputs, so the count lives on the node across runs) and sends go; with none it writes the problem and sends refused. go sets two Variables, refused one; three Texts show them."
+}

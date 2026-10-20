@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "58777b6d-48ca-5fc1-88c0-b02b983ef096",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fcIn",
+      "fromProperty": "look",
+      "toId": "fcAvatar",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "fcIn",
+      "fromProperty": "seed",
+      "toId": "fcAvatar",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "fcIn",
+      "fromProperty": "size",
+      "toId": "fcAvatar",
+      "toProperty": "size"
+    },
+    {
+      "fromId": "fcIn",
+      "fromProperty": "options",
+      "toId": "fcAvatar",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "fcIn",
+      "fromProperty": "selected",
+      "toId": "fcIsOn",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "fcIsOn",
+      "fromProperty": "ontrue",
+      "toId": "fcStates",
+      "toProperty": "to-on"
+    },
+    {
+      "fromId": "fcIsOn",
+      "fromProperty": "onfalse",
+      "toId": "fcStates",
+      "toProperty": "to-off"
+    },
+    {
+      "fromId": "fcStates",
+      "fromProperty": "ring",
+      "toId": "fcAvatar",
+      "toProperty": "ringWidth"
+    },
+    {
+      "fromId": "fcAvatar",
+      "fromProperty": "onClick",
+      "toId": "fcOut",
+      "toProperty": "clicked"
+    }
+  ]
+}

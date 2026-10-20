@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/world-v1.json#/definitions/rulesFile",
+  "rules": [
+    {
+      "id": "payment-reference-once",
+      "on": "payment",
+      "says": "A payment's reference is one payment: it is kept once.",
+      "holds": {
+        "unique": [
+          "reference"
+        ]
+      },
+      "mutant": "the buyer's page and the payment provider's webhook both keep the same payment, and the order shows it paid twice",
+      "from": "oral"
+    }
+  ]
+}

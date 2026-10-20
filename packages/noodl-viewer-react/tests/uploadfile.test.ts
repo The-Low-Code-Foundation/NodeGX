@@ -31,9 +31,11 @@ jest.mock('@noodl/runtime/src/api/cloudfile', () => {
   return class FakeCloudFile {
     name: string;
     url: string;
-    constructor({ name, url }: { name: string; url: string }) {
+    filename?: string;
+    constructor({ name, url, filename }: { name: string; url: string; filename?: string }) {
       this.name = name;
       this.url = url;
+      this.filename = filename;
     }
   };
 });
@@ -134,6 +136,18 @@ describe('Upload File node — Private input', () => {
 
     expect(uploadFileSpy.mock.calls[0][0].private).toBe(false);
   });
+
+  // P121-TWO001-MEMBERSPHOTO
+  test('Readers is threaded straight through to CloudStore.uploadFile, and absent until set', () => {
+    const instance = makeInstance();
+    setInput(instance, 'file', { name: 'a.png', type: 'image/png' });
+    triggerUpload(instance);
+    expect(uploadFileSpy.mock.calls[0][0].readers).toBeUndefined();
+
+    setInput(instance, 'readers', 'role:member, role:admin');
+    triggerUpload(instance);
+    expect(uploadFileSpy.mock.calls[1][0].readers).toBe('role:member, role:admin');
+  });
 });
 
 
@@ -222,5 +236,83 @@ describe('Upload File node — the File Location target', () => {
     expect(target({ collection: 'docs' })).toBeUndefined();
     expect(target({ field: 'attachment' })).toBeUndefined();
     expect(target({})).toBeUndefined();
+  });
+});
+
+// ── P121-TWO008-UPLOADSHRINK: Shrink Photos ───────────────────────────────
+
+describe('Upload File node — Shrink Photos', () => {
+  const realCreateImageBitmap = (globalThis as { createImageBitmap?: unknown }).createImageBitmap;
+  afterEach(() => {
+    (globalThis as { createImageBitmap?: unknown }).createImageBitmap = realCreateImageBitmap;
+  });
+
+  const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  test('off by default: the picked file is sent synchronously, exactly as before', () => {
+    const instance = makeInstance();
+    const file = new File([new Uint8Array(1000)], 'a.jpg', { type: 'image/jpeg' });
+    setInput(instance, 'file', file);
+    triggerUpload(instance);
+
+    expect(uploadFileSpy).toHaveBeenCalledTimes(1);
+    expect(uploadFileSpy.mock.calls[0][0].file).toBe(file);
+  });
+
+  test('on, for a file the browser cannot decode: the picked file is still sent, once', async () => {
+    // node has no canvas, so the decode fails — the same path a phone's HEIC takes in a browser
+    // that cannot read it. The upload must not be lost to the shrink.
+    (globalThis as { createImageBitmap?: unknown }).createImageBitmap = () => Promise.reject(new Error('no decoder'));
+    const instance = makeInstance();
+    const file = new File([new Uint8Array(1000)], 'a.heic', { type: 'image/heic' });
+    setInput(instance, 'file', file);
+    setInput(instance, 'shrinkTo', 1600);
+    triggerUpload(instance);
+
+    expect(uploadFileSpy).not.toHaveBeenCalled();
+    await flush();
+    expect(uploadFileSpy).toHaveBeenCalledTimes(1);
+    expect(uploadFileSpy.mock.calls[0][0].file).toBe(file);
+  });
+
+  test('on, for a file that is not a photo: sent synchronously, never decoded', () => {
+    const decode = jest.fn();
+    (globalThis as { createImageBitmap?: unknown }).createImageBitmap = decode;
+    const instance = makeInstance();
+    const file = new File([new Uint8Array(1000)], 'menu.pdf', { type: 'application/pdf' });
+    setInput(instance, 'file', file);
+    setInput(instance, 'shrinkTo', 1600);
+    triggerUpload(instance);
+
+    expect(uploadFileSpy).toHaveBeenCalledTimes(1);
+    expect(decode).not.toHaveBeenCalled();
+  });
+
+  test('the name the shrunk file was sent as is the Cloud File\'s filename', async () => {
+    // A fake decoder and canvas, so the HEIC really is rewritten as a JPEG.
+    (globalThis as { createImageBitmap?: unknown }).createImageBitmap = async () => ({ width: 4000, height: 3000 });
+    (globalThis as { document?: unknown }).document = {
+      createElement: () => ({
+        getContext: () => ({ drawImage: () => undefined }),
+        toBlob: (cb: (b: Blob) => void, type: string) => cb(new Blob([new Uint8Array(10)], { type }))
+      })
+    };
+    try {
+      const instance = makeInstance();
+      setInput(instance, 'file', new File([new Uint8Array(1000)], 'IMG_1.HEIC', { type: 'image/heic' }));
+      setInput(instance, 'shrinkTo', 1600);
+      triggerUpload(instance);
+      await flush();
+
+      const options = uploadFileSpy.mock.calls[0][0];
+      expect(options.file.name).toBe('IMG_1.jpg');
+      expect(options.file.type).toBe('image/jpeg');
+      expect(options.file.size).toBe(10);
+      options.success({ name: 'stored_IMG_1.jpg', url: 'http://x/files/stored_IMG_1.jpg' });
+      expect(instance.signals).toContain('done');
+      expect((instance._internal.cloudFile as { filename?: string }).filename).toBe('IMG_1.jpg');
+    } finally {
+      delete (globalThis as { document?: unknown }).document;
+    }
   });
 });

@@ -99,6 +99,12 @@ export enum DiagnosticCode {
    * every one after the first, as the editor marks it.
    */
   DuplicateSingleton = 'duplicate-singleton',
+  /**
+   * P107 R40: a node's saved settings are ones its runtime warns about once the app runs (a Counter's Min above its Max, a
+   * Unit that is not one of the eight), read from its spec's `settings: true` diagnostics in the runtime's own words.
+   * `warning`: the app still runs.
+   */
+  SettingsDiagnostic = 'settings-diagnostic',
   TypeIncompatibleConnection = 'type-incompatible-connection',
   /**
    * NDA-017: a control signal fires without waiting for the asynchronous producer of a value

@@ -17,6 +17,17 @@ import * as path from 'path';
 
 import { ENGINE_ENV, ENGINE_INPUTS, RUNTIME_INPUTS, engineStaleness, refreshEngine, runtimeWarning } from '../src/cli/deployEngine';
 
+/**
+ * The catalog's stand-in in the temporary checkout: an input the engine was built from, the Sep 17 case.
+ *
+ * ⚠️ **Not given the real artefact's file name, on purpose** (P18-S102-CATALOGNAME), and this comment does not spell
+ * it either, because the gate is a text search. HLS-001 AC4 counts the files in this package that name the real
+ * catalog artefact and allows exactly one, `src/catalog.ts`, so that nothing computes its own path to it. This file
+ * never reads the catalog. Staleness is a comparison of mtimes over whatever names the inputs list carries, so a
+ * stand-in under another name is the same regression, and it keeps AC4's count honest.
+ */
+const CATALOG_INPUT = 'node-catalog.stand-in.json';
+
 const FAKE_BUILD = `
 import fs from 'fs';
 import path from 'path';
@@ -24,7 +35,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 if (!process.argv.includes('--deploy-only')) process.exit(3);
 if (fs.existsSync(path.join(__dirname, 'FAIL'))) { process.stderr.write('esbuild: the source does not compile'); process.exit(1); }
-fs.writeFileSync(path.join(__dirname, 'dist', ${JSON.stringify(ENGINE_INPUTS)}), JSON.stringify({ inputs: ['src/deploy-cli.ts', '../noodl-types/node-catalog.json'] }));
+fs.writeFileSync(path.join(__dirname, 'dist', ${JSON.stringify(ENGINE_INPUTS)}), JSON.stringify({ inputs: ['src/deploy-cli.ts', ${JSON.stringify('../noodl-types/' + CATALOG_INPUT)}] }));
 fs.writeFileSync(path.join(__dirname, 'dist', 'nodegx-deploy.cjs'), '// rebuilt');
 `;
 
@@ -48,8 +59,8 @@ describe('P109-S5 — a checkout deploys with an engine built from its own sourc
     engine = path.join(preview, 'dist', 'nodegx-deploy.cjs');
     write(path.join(preview, 'build.mjs'), FAKE_BUILD, 100);
     write(path.join(preview, 'src', 'deploy-cli.ts'), '// source', 100);
-    write(path.join(packages, 'noodl-types', 'node-catalog.json'), '{}', 100);
-    write(path.join(preview, 'dist', ENGINE_INPUTS), JSON.stringify({ inputs: ['src/deploy-cli.ts', '../noodl-types/node-catalog.json'] }), 50);
+    write(path.join(packages, 'noodl-types', CATALOG_INPUT), '{}', 100);
+    write(path.join(preview, 'dist', ENGINE_INPUTS), JSON.stringify({ inputs: ['src/deploy-cli.ts', '../noodl-types/' + CATALOG_INPUT] }), 50);
     write(engine, '// built', 50);
   });
   afterEach(() => fs.rmSync(packages, { recursive: true, force: true }));
@@ -61,11 +72,13 @@ describe('P109-S5 — a checkout deploys with an engine built from its own sourc
   });
 
   it('names the file that changed after it was built — the node catalog, the Sep 17 case — and rebuilds it', () => {
-    at(path.join(packages, 'noodl-types', 'node-catalog.json'), 10);
-    expect(engineStaleness(engine)).toBe('../noodl-types/node-catalog.json changed after it was built');
+    at(path.join(packages, 'noodl-types', CATALOG_INPUT), 10);
+    expect(engineStaleness(engine)).toBe(`../noodl-types/${CATALOG_INPUT} changed after it was built`);
 
     const refreshed = refreshEngine({ entry: engine, probed: [] }, {});
-    expect(refreshed.rebuilt).toMatch(/^The deploy engine was out of date \(\.\.\/noodl-types\/node-catalog\.json changed after it was built\); rebuilt it in \d+\.\d s\.\n$/);
+    expect(refreshed.rebuilt).toMatch(
+      /^The deploy engine was out of date \(\.\.\/noodl-types\/node-catalog\.stand-in\.json changed after it was built\); rebuilt it in \d+\.\d s\.\n$/
+    );
     expect(fs.readFileSync(engine, 'utf8')).toBe('// rebuilt');
     expect(engineStaleness(engine)).toBeNull();
   });

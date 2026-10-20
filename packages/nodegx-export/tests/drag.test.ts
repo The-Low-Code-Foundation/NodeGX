@@ -140,7 +140,7 @@ describe('§A the fixture, whole — a card in a bounded board, four live reads,
     expect(ledgerEntryOf('Drag')?.status).toBe('translated');
     expect(exportBadgeOf('Drag')).toBeUndefined();
     const ledger = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'coverage-ledger.json'), 'utf8'));
-    expect(ledger.pickerCoverageFloor).toBe(122); // EXP-011 §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §63 Drag + §61 the component-stack trio (session 86) on top of §57 + §58 + §59 (session 85)
+    expect(ledger.pickerCoverageFloor).toBe(130); // EXP-011 §79 Sign In With (session 109) on top of EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §63 Drag + §61 the component-stack trio (session 86) on top of §57 + §58 + §59 (session 85)
   });
 
   test('A9 style.ts\'s own port list names exactly the option ports plan.ts prints (the two files cannot import each other)', () => {
@@ -767,7 +767,7 @@ describe('§C the refused shapes, by mutation — each sentence exact', () => {
   test('C7 an option fed by a node with no rule: dropped with that node\'s own sentence', () => {
     const ir = cloneIr();
     const component = componentOf(ir, HOME);
-    addNode(component, { id: 'extractor', type: 'net.noodl.PatternExtractor' });
+    addNode(component, { id: 'extractor', type: 'net.noodl.user.VerifyEmail' });
     connect(component, 'extractor', 'result', 'drag', 'scale', 'value');
     const out = emitApp(ir, catalog);
     const note = out.notes.find((n) => n.includes('drag:scale dropped'));
@@ -834,9 +834,11 @@ describe('§C the refused shapes, by mutation — each sentence exact', () => {
     const boxNotes = notesOf(boxIr);
     expect(boxNotes).toContain('wire drag:boundingWidth->xText:text has no deterministic translation in step 5 (deferred to EXP-003)');
     expect(home(emitApp(boxIr, catalog))).toContain(WRAPPER);
+    // P18-S121-DIDMOUNT. A Did Mount pulse is a once-guarded mount effect now, as a Group's is.
     const mountIr = cloneIr();
     connect(componentOf(mountIr, HOME), 'drag', 'didMount', 'setSnapped', 'do');
-    expect(notesOf(mountIr)).toContain('signal drag.didMount has no DOM event equivalent — dropped, reported');
+    expect(notesOf(mountIr)).not.toContain('didMount');
+    expect(home(emitApp(mountIr, catalog))).toContain('Did Mount: once, when it mounts, as the running app sends it.');
   });
 
   test('C13 a wired Mounted on the Drag wraps the wrapper, as it wraps any rendered node', () => {

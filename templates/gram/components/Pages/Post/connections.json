@@ -1,0 +1,313 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4c064cb9-4328-54c9-8af5-4f349d267c27",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "poUrl",
+      "fromProperty": "pm-postId",
+      "toId": "poLoad",
+      "toProperty": "in-postId"
+    },
+    {
+      "fromId": "poRoot",
+      "fromProperty": "didMount",
+      "toId": "poLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "poChanged",
+      "fromProperty": "value",
+      "toId": "poLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "poLiveHeart",
+      "fromProperty": "changed",
+      "toId": "poLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "poLiveComment",
+      "fromProperty": "changed",
+      "toId": "poLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "poLivePost",
+      "fromProperty": "changed",
+      "toId": "poLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-meId",
+      "toId": "poNav",
+      "toProperty": "meId"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-inside",
+      "toId": "poNav",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-ok",
+      "toId": "poContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-gone",
+      "toId": "poGone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-card",
+      "toId": "poEachCard",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-comments",
+      "toId": "poEachComment",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-heading",
+      "toId": "poHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-band",
+      "toId": "poBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-waiting",
+      "toId": "poToWaiting",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-problem",
+      "toId": "poRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-refused",
+      "toId": "poRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "poRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "poToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "poBack",
+      "fromProperty": "onClick",
+      "toId": "poToFeed",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-hiddenWords",
+      "toId": "poHidden",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-isHidden",
+      "toId": "poHidden",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-canReport",
+      "toId": "poReport",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-canTakeDown",
+      "toId": "poTakeDown",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "poLoad",
+      "fromProperty": "out-canLook",
+      "toId": "poLook",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "poUrl",
+      "fromProperty": "pm-postId",
+      "toId": "poToReport",
+      "toProperty": "pm-post"
+    },
+    {
+      "fromId": "poReport",
+      "fromProperty": "onClick",
+      "toId": "poToReport",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "poUrl",
+      "fromProperty": "pm-postId",
+      "toId": "poToLook",
+      "toProperty": "pm-post"
+    },
+    {
+      "fromId": "poLook",
+      "fromProperty": "onClick",
+      "toId": "poToLook",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "poTakeDown",
+      "fromProperty": "onClick",
+      "toId": "poConfirmSw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "poKeep",
+      "fromProperty": "onClick",
+      "toId": "poConfirmSw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "poConfirmSw",
+      "fromProperty": "state",
+      "toId": "poConfirm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "poUrl",
+      "fromProperty": "pm-postId",
+      "toId": "poDownGather",
+      "toProperty": "in-postId"
+    },
+    {
+      "fromId": "poDown",
+      "fromProperty": "onClick",
+      "toId": "poDownGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "poDownGather",
+      "fromProperty": "out-hide",
+      "toId": "poDownCall",
+      "toProperty": "in-hide"
+    },
+    {
+      "fromId": "poDownGather",
+      "fromProperty": "out-go",
+      "toId": "poDownCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "poDownCall",
+      "fromProperty": "error",
+      "toId": "poError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "poDownCall",
+      "fromProperty": "done",
+      "toId": "poDownStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "poDownStamp",
+      "fromProperty": "out-at",
+      "toId": "poDownSay",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "poDownStamp",
+      "fromProperty": "out-go",
+      "toId": "poDownSay",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "poDownCall",
+      "fromProperty": "done",
+      "toId": "poToFeed",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "poUrl",
+      "fromProperty": "pm-postId",
+      "toId": "poGather",
+      "toProperty": "in-postId"
+    },
+    {
+      "fromId": "poWrite",
+      "fromProperty": "onTextChanged",
+      "toId": "poGather",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "poSend",
+      "fromProperty": "onClick",
+      "toId": "poGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "poGather",
+      "fromProperty": "out-problem",
+      "toId": "poError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "poGather",
+      "fromProperty": "out-comment",
+      "toId": "poCall",
+      "toProperty": "in-comment"
+    },
+    {
+      "fromId": "poGather",
+      "fromProperty": "out-go",
+      "toId": "poCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "poCall",
+      "fromProperty": "error",
+      "toId": "poError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "poCall",
+      "fromProperty": "done",
+      "toId": "poWrite",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "poCall",
+      "fromProperty": "done",
+      "toId": "poStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "poStamp",
+      "fromProperty": "out-at",
+      "toId": "poSay",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "poStamp",
+      "fromProperty": "out-go",
+      "toId": "poSay",
+      "toProperty": "do"
+    }
+  ]
+}

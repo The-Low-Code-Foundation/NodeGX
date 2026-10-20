@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a9edc749-a915-5a14-8aca-7bc903708e6d",
+  "name": "Band",
+  "path": "/UI/Band",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The saffron band: who is signed in, and Sign out"
+}

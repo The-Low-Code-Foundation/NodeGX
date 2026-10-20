@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "10f7c5d6-8fa3-5944-851e-96f7f1e60c5f",
+  "name": "Confirm",
+  "path": "/Hangar/Confirm",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Before a purchase: the item’s name, what the child has, what it costs and what they will have left, then Yes and No. Shown only when Mounted. Publishes Yes or No. One Function does the whole sum, so the three numbers on the card can never disagree."
+}

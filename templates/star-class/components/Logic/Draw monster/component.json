@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e2c640f5-3305-57fe-8541-318137f0cc8e",
+  "name": "Draw monster",
+  "path": "/Logic/Draw monster",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Monster Gate game as the lane draws it: the hearts, which monster of three, its hits left, what just happened in words, the monster's class and the lane's, where the monster stands between answers (Rest: 0 the gate, 1 the far side), Walk From (where a Challenge walk starts, 0 when nothing walks), and Phase (playing or over)."
+}

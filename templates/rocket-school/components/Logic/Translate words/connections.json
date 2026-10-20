@@ -599,9 +599,21 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-moonBig",
+      "toId": "translateworOut",
+      "toProperty": "moonBig"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-moonBlurb",
       "toId": "translateworOut",
       "toProperty": "moonBlurb"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonBookClose",
+      "toId": "translateworOut",
+      "toProperty": "moonBookClose"
     },
     {
       "fromId": "translateworFn",
@@ -1064,6 +1076,12 @@
       "fromProperty": "out-yourName",
       "toId": "translateworOut",
       "toProperty": "yourName"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-yourSkin",
+      "toId": "translateworOut",
+      "toProperty": "yourSkin"
     },
     {
       "fromId": "translateworFn",

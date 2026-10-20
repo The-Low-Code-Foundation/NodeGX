@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9364539f-c293-5c20-8f3d-6f8a9cb1e882",
+  "name": "PhotoTile",
+  "path": "/Seller/PhotoTile",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One photo on the product form, with a way to take it off"
+}

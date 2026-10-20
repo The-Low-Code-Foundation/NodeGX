@@ -1,0 +1,6 @@
+{
+  "name": "Game Kit",
+  "main": "index.js",
+  "dependencies": [],
+  "nodeKitTypes": "1.0.0"
+}

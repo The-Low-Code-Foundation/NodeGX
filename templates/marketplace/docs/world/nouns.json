@@ -1,0 +1,419 @@
+{
+  "nouns": [
+    {
+      "id": "person",
+      "name": "Person",
+      "sentence": "Someone with a login: the admin who runs the marketplace, a seller's staff, or a buyer who made an account.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "email",
+          "kind": "text",
+          "freeWords": true,
+          "secret": true
+        },
+        {
+          "name": "phone",
+          "kind": "text",
+          "freeWords": true,
+          "secret": true
+        },
+        {
+          "name": "role",
+          "kind": "choice",
+          "values": [
+            "admin",
+            "seller",
+            "buyer"
+          ]
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": true,
+        "history": true,
+        "calledBy": "name"
+      },
+      "signsIn": true
+    },
+    {
+      "id": "seller",
+      "name": "Seller",
+      "sentence": "A business that sells on the marketplace. The admin adds it, gives it a login and can change anything it sells; sellers don't sign themselves up.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "story",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "logo",
+          "kind": "file"
+        },
+        {
+          "name": "phone",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "whatsapp",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "payoutAccount",
+          "kind": "text",
+          "freeWords": true,
+          "secret": true
+        },
+        {
+          "name": "stoppedReason",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": true,
+        "history": true,
+        "calledBy": "name"
+      }
+    },
+    {
+      "id": "country",
+      "name": "Country",
+      "sentence": "A country the marketplace sells in. Each has its currency, and the admin turns the ways to pay on or off for it.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "currency",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "history": true,
+        "calledBy": "name"
+      }
+    },
+    {
+      "id": "rate",
+      "name": "Rate",
+      "sentence": "What one unit of a currency is worth in the marketplace's own currency, set by the admin by hand; no live exchange rates.",
+      "properties": [
+        {
+          "name": "currency",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "value",
+          "kind": "number"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "history": true,
+        "calledBy": "currency"
+      }
+    },
+    {
+      "id": "category",
+      "name": "Category",
+      "sentence": "A shelf of the marketplace: food and drinks, phones and laptops, cars.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "picture",
+          "kind": "file"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "history": false,
+        "calledBy": "name"
+      }
+    },
+    {
+      "id": "product",
+      "name": "Product",
+      "sentence": "Something a seller sells: photos, a description and a price in the seller's currency. It is either bought through the basket, or enquired about (a car), and then the buyer and seller settle it between them, off the site.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "description",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "photos",
+          "kind": "list"
+        },
+        {
+          "name": "price",
+          "kind": "number"
+        },
+        {
+          "name": "mode",
+          "kind": "choice",
+          "values": [
+            "buy",
+            "enquire"
+          ]
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "history": true,
+        "calledBy": "name"
+      }
+    },
+    {
+      "id": "wayToPay",
+      "name": "Way to pay",
+      "sentence": "A way buyers can pay: on delivery, a bank transfer with a reference, ordering on WhatsApp, or a card or mobile money through a payment provider.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "method",
+          "kind": "choice",
+          "values": [
+            "on-delivery",
+            "bank-transfer",
+            "whatsapp",
+            "paystack",
+            "flutterwave"
+          ]
+        },
+        {
+          "name": "instructions",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "history": true,
+        "calledBy": "name"
+      }
+    },
+    {
+      "id": "order",
+      "name": "Order",
+      "sentence": "One checkout by one buyer, with or without an account: what they bought from one or more sellers, where it goes, the currency they saw, and how they chose to pay. A buyer without an account follows it by a private link.",
+      "properties": [
+        {
+          "name": "buyerName",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "phone",
+          "kind": "text",
+          "freeWords": true,
+          "secret": true
+        },
+        {
+          "name": "email",
+          "kind": "text",
+          "freeWords": true,
+          "secret": true
+        },
+        {
+          "name": "address",
+          "kind": "text",
+          "freeWords": true,
+          "secret": true
+        },
+        {
+          "name": "currency",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "total",
+          "kind": "number"
+        },
+        {
+          "name": "followToken",
+          "kind": "text",
+          "freeWords": true,
+          "secret": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": true,
+        "secret": true,
+        "history": false,
+        "calledBy": "buyerName",
+        "looksLike": "MK-{YYYY}-{#####}",
+        "maySkip": true,
+        "restarts": "each year"
+      }
+    },
+    {
+      "id": "orderPart",
+      "name": "Order part",
+      "sentence": "The part of an order one seller sends. The seller confirms the delivery and its cost, and moves it along: paid, packed, sent, delivered. Paid on delivery has no paid step: it is paid when it is delivered. A part can be cancelled, with why, until it is delivered.",
+      "properties": [
+        {
+          "name": "status",
+          "kind": "choice",
+          "values": [
+            "new",
+            "confirmed",
+            "paid",
+            "packed",
+            "sent",
+            "delivered",
+            "cancelled"
+          ]
+        },
+        {
+          "name": "deliveryCost",
+          "kind": "number"
+        },
+        {
+          "name": "deliveryNote",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "subtotal",
+          "kind": "number"
+        },
+        {
+          "name": "cancelledReason",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "history": true,
+        "calledBy": "status"
+      }
+    },
+    {
+      "id": "orderLine",
+      "name": "Order line",
+      "sentence": "One product in an order part: how many, and the price it had when the buyer ordered.",
+      "properties": [
+        {
+          "name": "quantity",
+          "kind": "number"
+        },
+        {
+          "name": "price",
+          "kind": "number"
+        },
+        {
+          "name": "productName",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": false,
+        "history": false,
+        "calledBy": "productName"
+      }
+    },
+    {
+      "id": "enquiry",
+      "name": "Enquiry",
+      "sentence": "A buyer's message to a seller about one product, for things bought by talking, like a car. The seller marks it answered once they have talked. The marketplace takes no part in the sale.",
+      "properties": [
+        {
+          "name": "buyerName",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "contact",
+          "kind": "text",
+          "freeWords": true,
+          "secret": true
+        },
+        {
+          "name": "message",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "answeredAt",
+          "kind": "date"
+        }
+      ],
+      "answers": {
+        "onlyOne": false,
+        "readAloud": false,
+        "secret": true,
+        "history": false,
+        "calledBy": "buyerName"
+      }
+    },
+    {
+      "id": "marketplace",
+      "name": "Marketplace",
+      "sentence": "The marketplace itself: there is one, and its name is what buyers see at the top of every page. It is named when it is set up.",
+      "properties": [
+        {
+          "name": "name",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "onlyOne": true,
+        "readAloud": false,
+        "secret": false,
+        "history": true,
+        "calledBy": "name"
+      }
+    }
+  ]
+}

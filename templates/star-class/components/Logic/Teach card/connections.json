@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "798416f1-f9ae-54e0-829c-db6eac152e25",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "teachcardIn",
+      "fromProperty": "cards",
+      "toId": "teachcardFn",
+      "toProperty": "in-cards"
+    },
+    {
+      "fromId": "teachcardIn",
+      "fromProperty": "teachId",
+      "toId": "teachcardFn",
+      "toProperty": "in-teachId"
+    },
+    {
+      "fromId": "teachcardIn",
+      "fromProperty": "lang",
+      "toId": "teachcardFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "teachcardIn",
+      "fromProperty": "step",
+      "toId": "teachcardFn",
+      "toProperty": "in-step"
+    },
+    {
+      "fromId": "teachcardFn",
+      "fromProperty": "out-found",
+      "toId": "teachcardOut",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "teachcardFn",
+      "fromProperty": "out-title",
+      "toId": "teachcardOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "teachcardFn",
+      "fromProperty": "out-text",
+      "toId": "teachcardOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "teachcardFn",
+      "fromProperty": "out-example",
+      "toId": "teachcardOut",
+      "toProperty": "example"
+    },
+    {
+      "fromId": "teachcardFn",
+      "fromProperty": "out-step",
+      "toId": "teachcardOut",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "teachcardFn",
+      "fromProperty": "out-isFaded",
+      "toId": "teachcardOut",
+      "toProperty": "isFaded"
+    },
+    {
+      "fromId": "teachcardFn",
+      "fromProperty": "success",
+      "toId": "teachcardOut",
+      "toProperty": "done"
+    }
+  ]
+}

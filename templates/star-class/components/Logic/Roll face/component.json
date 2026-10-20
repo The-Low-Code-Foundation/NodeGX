@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d0ced17a-7463-528f-86f9-ce3efabd0445",
+  "name": "Roll face",
+  "path": "/Logic/Roll face",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The faces rolled so far, and where in them the child is standing (PLY-005). Action is a parameter, placed once per action: set (start the list at one face), roll (add one and step to it), back, forward. Publishes the History and At to hold in two Variables, the Seed to draw, and whether Back and Forward can be used."
+}

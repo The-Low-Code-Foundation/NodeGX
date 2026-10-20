@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d6f4843e-6e21-52e4-8958-2fb30d6fca7a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mtIn",
+      "fromProperty": "word",
+      "toId": "mtWord",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mtIn",
+      "fromProperty": "kind",
+      "toId": "mtKind",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "mtKind",
+      "fromProperty": "ground",
+      "toId": "mtCell",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "mtKind",
+      "fromProperty": "edge",
+      "toId": "mtCell",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "mtIn",
+      "fromProperty": "fx",
+      "toId": "mtCell",
+      "toProperty": "cssClassName"
+    }
+  ]
+}

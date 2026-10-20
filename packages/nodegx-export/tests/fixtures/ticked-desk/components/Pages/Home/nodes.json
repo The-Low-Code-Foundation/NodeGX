@@ -1,0 +1,392 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000000503",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Ticked Desk",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "headline",
+        "pickB",
+        "pickCRun",
+        "runBtn",
+        "againBtn",
+        "holdingLabel",
+        "holdingText",
+        "runsLabel",
+        "runsText",
+        "readyLabel",
+        "readyText",
+        "doneLabel",
+        "doneText",
+        "saidLabel",
+        "saidText"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 240
+    },
+    {
+      "id": "headline",
+      "type": "Text",
+      "label": "Headline",
+      "parent": "shell",
+      "parameters": {
+        "text": "Ticked Desk",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 320
+    },
+    {
+      "id": "pickB",
+      "type": "net.noodl.controls.button",
+      "label": "Pick b",
+      "parent": "shell",
+      "parameters": {
+        "label": "Pick b"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "pickCRun",
+      "type": "net.noodl.controls.button",
+      "label": "Pick c and run",
+      "parent": "shell",
+      "parameters": {
+        "label": "Pick c and run"
+      },
+      "x": 100,
+      "y": 480
+    },
+    {
+      "id": "runBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Run",
+      "parent": "shell",
+      "parameters": {
+        "label": "Run"
+      },
+      "x": 100,
+      "y": 560
+    },
+    {
+      "id": "againBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Again",
+      "parent": "shell",
+      "parameters": {
+        "label": "Again"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "holdingLabel",
+      "type": "Text",
+      "label": "Holding",
+      "parent": "shell",
+      "parameters": {
+        "text": "Holding",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 720
+    },
+    {
+      "id": "holdingText",
+      "type": "Text",
+      "label": "Holding \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 800
+    },
+    {
+      "id": "runsLabel",
+      "type": "Text",
+      "label": "Runs",
+      "parent": "shell",
+      "parameters": {
+        "text": "Runs",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "runsText",
+      "type": "Text",
+      "label": "Runs \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 960
+    },
+    {
+      "id": "readyLabel",
+      "type": "Text",
+      "label": "Ready at",
+      "parent": "shell",
+      "parameters": {
+        "text": "Ready at",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1040
+    },
+    {
+      "id": "readyText",
+      "type": "Text",
+      "label": "Ready at \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "doneLabel",
+      "type": "Text",
+      "label": "Done at",
+      "parent": "shell",
+      "parameters": {
+        "text": "Done at",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1200
+    },
+    {
+      "id": "doneText",
+      "type": "Text",
+      "label": "Done at \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1280
+    },
+    {
+      "id": "saidLabel",
+      "type": "Text",
+      "label": "Said",
+      "parent": "shell",
+      "parameters": {
+        "text": "Said",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "saidText",
+      "type": "Text",
+      "label": "Said \u2014 the value",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1440
+    },
+    {
+      "id": "itemRead",
+      "type": "Variable2",
+      "label": "The item",
+      "parameters": {
+        "name": "item",
+        "value": "a"
+      },
+      "x": 700,
+      "y": 1520
+    },
+    {
+      "id": "pickBSet",
+      "type": "Set Variable",
+      "label": "Pick b",
+      "parameters": {
+        "name": "item",
+        "value": "b"
+      },
+      "x": 700,
+      "y": 1600
+    },
+    {
+      "id": "pickCSet",
+      "type": "Set Variable",
+      "label": "Pick c",
+      "parameters": {
+        "name": "item",
+        "value": "c"
+      },
+      "x": 700,
+      "y": 1680
+    },
+    {
+      "id": "hold",
+      "type": "JavaScriptFunction",
+      "label": "Hold the item",
+      "parameters": {
+        "functionScript": "if (Inputs.item === undefined || Inputs.item === '') return;\nOutputs.item = Inputs.item;\nOutputs.runs = (Outputs.runs || 0) + 1;\nOutputs.ready();",
+        "runOnChange-in-item": true
+      },
+      "ports": [
+        {
+          "name": "in-item",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-item",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-runs",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-ready",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 700,
+      "y": 1760
+    },
+    {
+      "id": "readySet",
+      "type": "Set Variable",
+      "label": "Remember the run ready came from",
+      "parameters": {
+        "name": "readyAt"
+      },
+      "x": 700,
+      "y": 1840
+    },
+    {
+      "id": "doneSet",
+      "type": "Set Variable",
+      "label": "Remember the run Done came from",
+      "parameters": {
+        "name": "doneAt"
+      },
+      "x": 700,
+      "y": 1920
+    },
+    {
+      "id": "readyRead",
+      "type": "Variable2",
+      "label": "Ready at",
+      "parameters": {
+        "name": "readyAt"
+      },
+      "x": 700,
+      "y": 2000
+    },
+    {
+      "id": "doneRead",
+      "type": "Variable2",
+      "label": "Done at",
+      "parameters": {
+        "name": "doneAt"
+      },
+      "x": 700,
+      "y": 2080
+    },
+    {
+      "id": "say",
+      "type": "JavaScriptFunction",
+      "label": "Say the word",
+      "parameters": {
+        "functionScript": "Outputs.said = (Outputs.said || 0) + 1;\nOutputs.word = Inputs.word;\nOutputs.spoke();",
+        "in-word": "hello",
+        "runOnChange-in-word": true
+      },
+      "ports": [
+        {
+          "name": "in-word",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-said",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-word",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-spoke",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 700,
+      "y": 2160
+    },
+    {
+      "id": "saidSet",
+      "type": "Set Variable",
+      "label": "Remember how many times it spoke",
+      "parameters": {
+        "name": "saidAt"
+      },
+      "x": 700,
+      "y": 2240
+    },
+    {
+      "id": "saidRead",
+      "type": "Variable2",
+      "label": "Said",
+      "parameters": {
+        "name": "saidAt"
+      },
+      "x": 700,
+      "y": 2320
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

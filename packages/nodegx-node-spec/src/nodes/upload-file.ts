@@ -149,6 +149,11 @@ const FILE_REFS: readonly unknown[] = [
 type UploadState = Presses & {
   file: unknown;
   private: unknown;
+  /** P121-TWO001-MEMBERSPHOTO: `_internal.readers` */
+  readers: unknown;
+  /** P121-TWO008-UPLOADSHRINK: `_internal.shrinkTo` / `photoQuality` */
+  shrinkTo: unknown;
+  photoQuality: unknown;
   bucket: unknown;
   path: unknown;
   collection: unknown;
@@ -177,13 +182,25 @@ export const UploadFile = defineNode({
   // Error always a sentence; v1 read `code || status || 0` and put a message-less envelope on Error.
   // v3 (P109 ISL-030, row C52 ruled "Keep the real name"): the Cloud File keeps the name it was uploaded as (the backend's
   // `filename`, else the sent file's name); v2's dropped `filename` and knew only the stored name.
-  version: 3,
+  // v4 (P121 TWO-001 / TWO-008): three inputs, Readers (roles that may read a private file), Shrink To and Photo Quality.
+  version: 4,
+  changes: [
+    {
+      version: 4,
+      says: 'Three new inputs: Readers names the roles that may read a private file as well as whoever uploaded it, and Shrink To and Photo Quality make a photo smaller in the browser before it is sent. Left empty, each sends the file as v3 did',
+      row: 'P121-TWO001-MEMBERSPHOTO, P121-TWO008-UPLOADSHRINK',
+      migration: { none: 'Each new input is empty in an app built on v3, and an empty one changes nothing: the upload is the same request' }
+    }
+  ],
   source: 'packages/noodl-viewer-react/src/nodes/std-library/uploadfile.ts; noodl-runtime api/cloudstore.js, api/cloudfile.ts',
   needs: ['backend'],
   worldPool: { backends: [...pool('uploadFile', FILE_REFS[0]), ...pool('uploadFile', FILE_REFS[1]).slice(0, 1), ...pool('uploadFile', FILE_REFS[2]).slice(2, 3)] },
   state: {
     file: undefined,
     private: undefined,
+    readers: undefined,
+    shrinkTo: undefined,
+    photoQuality: undefined,
     bucket: undefined,
     path: undefined,
     collection: undefined,
@@ -214,6 +231,36 @@ export const UploadFile = defineNode({
       group: 'General',
       description: 'Restricts the stored file to whoever uploaded it, so reading it later needs a Sign File URL node',
       examples: [true, false]
+    },
+    // P121-TWO001-MEMBERSPHOTO — handed to the store with Private; the backend reads it (files.ts)
+    readers: {
+      type: 'string',
+      coerce: 'none',
+      displayName: 'Readers',
+      group: 'General',
+      description:
+        'Roles that may read the file as well as whoever uploaded it, such as role:member, separated by commas; setting it makes the file private. NodeGX backends only',
+      examples: ['role:member, role:admin', '']
+    },
+    // P121-TWO008-UPLOADSHRINK — the Shrink Photos group. The canvas step (shrinkphoto.ts) is the browser's: this world
+    // has no decoder, so a photo goes as it was picked, which is what the runtime does when the browser cannot read it.
+    shrinkTo: {
+      type: 'number',
+      coerce: 'none',
+      default: 0,
+      displayName: 'Shrink To',
+      group: 'Shrink Photos',
+      description: 'Makes a photo smaller in the browser before sending it, so its longer side is at most this many pixels; 0 sends every file as picked',
+      examples: [0, 1600]
+    },
+    photoQuality: {
+      type: 'number',
+      coerce: 'none',
+      default: 80,
+      displayName: 'Photo Quality',
+      group: 'Shrink Photos',
+      description: 'How much detail a shrunk JPEG or WebP keeps, from 1 to 100; PNG keeps every pixel and its transparency, GIF and SVG are never shrunk',
+      examples: [80, 50]
     },
     // :111-158
     bucket: {
@@ -254,6 +301,21 @@ export const UploadFile = defineNode({
   {
     file: (_s, v) => ({ says: 'always: held as handed; read when the next Upload goes — an upload already running keeps the file it was sent with', set: { file: v }, send: [] }),
     private: (_s, v) => ({ says: 'always: held as handed; read when the next Upload goes', set: { private: v }, send: [] }),
+    readers: (_s, v) => ({
+      says: 'always: held as handed; read when the next Upload goes — set, those roles may read the file as well as whoever uploaded it, and the file is private',
+      set: { readers: v },
+      send: []
+    }),
+    shrinkTo: (_s, v) => ({
+      says: 'always: held as handed; read when the next Upload goes — above 0, a photo (not a GIF or an SVG) is drawn smaller in the browser first, its longer side at most this many pixels, and the smaller file is what goes; it goes as picked when it is already that small, when the smaller one would weigh more, or when the browser cannot read it',
+      set: { shrinkTo: v },
+      send: []
+    }),
+    photoQuality: (_s, v) => ({
+      says: 'always: held as handed; read when the next Upload goes, and only when a photo is shrunk — 1 to 100 for a JPEG or WebP, anything else is 80; a PNG keeps every pixel',
+      set: { photoQuality: v },
+      send: []
+    }),
     bucket: (_s, v) => ({ says: "always: held as handed; read when the next Upload goes — set, the file goes to this bucket at Path (or under the file's own name)", set: { bucket: v }, send: [] }),
     path: (_s, v) => ({ says: 'always: held as handed; read when the next Upload goes, and only with a Bucket', set: { path: v }, send: [] }),
     collection: (_s, v) => ({ says: 'always: held as handed; read when the next Upload goes — with Field set and no Bucket, the file attaches to a record of this collection', set: { collection: v }, send: [] }),
@@ -261,7 +323,7 @@ export const UploadFile = defineNode({
     field: (_s, v) => ({ says: 'always: held as handed; read when the next Upload goes, and only with Collection — a half-filled group is no location at all', set: { field: v }, send: [] }),
     // :170-172 — a token now, the work at the frame end
     upload: (s) => ({
-      says: "always: its own upload at the frame's end — two presses are two uploads — with File, Private and the File Location held then: no File, or a Backend the project does not have, is Error, Error Status Code 0 and Failure at once; otherwise the backend answers with Cloud File then Done, or Error, Error Status Code and Failure",
+      says: "always: its own upload at the frame's end — two presses are two uploads — with File, Private, Readers and the File Location held then: no File, or a Backend the project does not have, is Error, Error Status Code 0 and Failure at once; otherwise the backend answers with Cloud File then Done, or Error, Error Status Code and Failure",
       set: { presses: s.presses + 1 },
       send: [],
       outcome: 'pending'
@@ -278,7 +340,7 @@ export const UploadFile = defineNode({
     },
     // :172-216
     afterInputs: (s, _i, w) => {
-      const r = frame(s, w, !!s.file, 'uploadFile', () => ({ file: s.file, private: s.private, target: fileTarget(s) }), UPLOAD_ERROR_CODE, 'upload');
+      const r = frame(s, w, !!s.file, 'uploadFile', () => ({ file: s.file, private: s.private, readers: s.readers, target: fileTarget(s) }), UPLOAD_ERROR_CODE, 'upload');
       if (!('backend' in r) || !r.backend) return r;
       // v3 (C52): each call remembers the name of the file it sent
       const f = s.file as { name?: unknown } | undefined;

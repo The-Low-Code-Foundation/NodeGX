@@ -34,11 +34,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
+import { kitTarball, kitVersion } from './kit-tarball.mjs';
 
 const [rootArg, tgzDir, promptFile, ...rest] = process.argv.slice(2);
 if (!rootArg || !tgzDir || !promptFile) throw new Error('usage: node round-kit.mjs <root> <tgz-dir> <prompt-file> [--max-price N] [--max-turns N] [--thinking high|low]');
-if (fs.existsSync(rootArg)) throw new Error(`${rootArg} exists; a round starts from an empty folder`);
 const opt = (name, dflt) => { const i = rest.indexOf(name); return i >= 0 ? rest[i + 1] : dflt; };
+// OWN-019 s8 (SP1, Richard's music app, ran out of its 12 sittings mid-restyle): `--again` carries on an EXISTING round —
+// the same root, sealed HOME and app; no create, no seed, the kit config as it was. Sittings number on from the last
+// one (sittings.json is appended), and the recorder writes to a new calls-<time>/ so no earlier request is overwritten.
+const again = rest.includes('--again');
+if (fs.existsSync(rootArg) && !again) throw new Error(`${rootArg} exists; a round starts from an empty folder (or --again to carry one on)`);
+if (again && !fs.existsSync(path.join(rootArg, 'sittings.json'))) throw new Error(`--again: ${rootArg} holds no earlier round (sittings.json)`);
 fs.mkdirSync(rootArg, { recursive: true });
 const root = fs.realpathSync(rootArg);
 
@@ -47,7 +53,7 @@ const VIBE = 'mistral-vibe==2.26.1';
 const HOME = path.join(root, 'home');
 const APPS = path.join(root, 'work', 'apps');
 const OUT = path.join(root, 'out');
-const tgz = (name) => path.resolve(tgzDir, name);
+const tgz = (pkg) => kitTarball(path.resolve(tgzDir), pkg); // by package name, any version (s6)
 fs.mkdirSync(path.join(HOME, '.vibe'), { recursive: true });
 fs.mkdirSync(path.join(HOME, 'tmp'), { recursive: true });
 fs.mkdirSync(path.dirname(APPS), { recursive: true });
@@ -90,11 +96,15 @@ const toml = (v) => JSON.stringify(v);
 // <root>/calls/. The lab's user config replaces Vibe's built-in "mistral" provider (merged by name, the higher layer
 // wins whole) with the same entry pointed at the proxy. Never a header is written (the key travels in one).
 const record = rest.includes('--record');
+const CALLS = path.join(root, again ? `calls-${new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '')}` : 'calls');
 const RECORD_PORT = 8800 + Math.floor(Math.random() * 900);
 let proxy = null;
 if (record) {
-  proxy = spawn(process.execPath, [path.join(path.dirname(new URL(import.meta.url).pathname), 'record-proxy.mjs'), path.join(root, 'calls'), '--port', String(RECORD_PORT)], { stdio: ['ignore', 'pipe', 'pipe'] });
+  proxy = spawn(process.execPath, [path.join(path.dirname(new URL(import.meta.url).pathname), 'record-proxy.mjs'), CALLS, '--port', String(RECORD_PORT)], { stdio: ['ignore', 'pipe', 'pipe'] });
   await new Promise((resolve) => proxy.stdout.once('data', resolve));
+  // s7 (PROXYDIES): the proxy's stderr was piped and never read — T1's proxy died and said so to no one.
+  proxy.stderr.pipe(fs.createWriteStream(path.join(CALLS, 'proxy.stderr'), { flags: 'a' }));
+  proxy.on('exit', (code, sig) => { if (code !== null && code !== 0) fs.appendFileSync(path.join(CALLS, 'log.txt'), `proxy exited ${code} ${sig || ''}\n`); });
 }
 fs.writeFileSync(
   path.join(HOME, '.vibe', 'config.toml'),
@@ -113,26 +123,31 @@ fs.writeFileSync(
 
 // 1. npm create nodegx apps, from the packed tarball.
 const kit = opt('--kit', 'core');
-const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx-0.2.0.tgz')}`, 'create-nodegx', APPS, ...(kit === 'vibe' ? ['--vibe'] : [])], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
+const seedArg = opt('--seed', null);
+if (!again) {
+const created = spawnSync('npx', ['-y', `--package=${tgz('create-nodegx')}`, 'create-nodegx', APPS, ...(kit === 'vibe' ? ['--vibe'] : [])], { cwd: path.dirname(APPS), env, encoding: 'utf8' });
 fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
 if (created.status !== 0) throw new Error(`create-nodegx exited ${created.status}; see create.log`);
 
 // OWN-019 s4 (Richard's bonus: a second run on the quiz app — "your own editor"): `--seed <app-dir>` puts an app that
 // already exists into the folder after create-nodegx, as a person's earlier session would have left it (its docs/
 // included). Copied without its previews, grades or caches; the round's command.txt names the seed.
-const seedArg = opt('--seed', null);
 if (seedArg) {
   const seed = path.resolve(seedArg);
   if (!fs.existsSync(path.join(seed, 'nodegx.project.json'))) throw new Error(`--seed ${seed} holds no nodegx.project.json`);
   fs.cpSync(seed, path.join(APPS, path.basename(seed)), { recursive: true, filter: (s) => !/[\\/](\.previews|grade|node_modules[\\/]\.cache)([\\/]|$)/.test(s) });
+  // s7 (SEEDDONE, TE1): the seed's own docs/NEXT.md says `# Done` — the build that made the seed finished. Left in place,
+  // a sitting that ends without touching it reads as this round finishing; the round writes its own note.
+  fs.rmSync(path.join(APPS, path.basename(seed), 'docs', 'NEXT.md'), { force: true });
+}
 }
 
 // 2. The registry name → the tarball, in the config create-nodegx wrote (and nothing else in it).
 const cfgFile = path.join(APPS, '.vibe', 'config.toml');
-const cfg = fs.readFileSync(cfgFile, 'utf8');
-const pinned = '"@nodegx/mcp@0.2.0"';
-if (!cfg.includes(pinned)) throw new Error('create-nodegx wrote no @nodegx/mcp@0.2.0 server into .vibe/config.toml');
-let next = cfg.replace(pinned, `"--package=${tgz('nodegx-mcp-0.2.0.tgz')}", "noodl-mcp"`);
+const cfg = again ? '' : fs.readFileSync(cfgFile, 'utf8');
+const pinned = `"@nodegx/mcp@${kitVersion(path.resolve(tgzDir))}"`; // the kit's pin = the packed server's version (s6)
+if (!again && !cfg.includes(pinned)) throw new Error(`create-nodegx wrote no ${pinned} server into .vibe/config.toml`);
+let next = cfg.replace(pinned, `"--package=${tgz('nodegx-mcp')}", "noodl-mcp"`);
 const thinking = opt('--thinking', null);
 if (thinking) next = next.replace(/^thinking = "[a-z]+"$/m, `thinking = "${thinking}"`); // a control arm, recorded in command.txt
 const temperature = opt('--temperature', null); // OWN-019 s2: a control arm, as --thinking
@@ -151,8 +166,10 @@ if (model) {
   next = next.replace(/^active_model = "[^"]+"$/m, `active_model = "${model}"`).replace(/\n\[\[mcp_servers\]\]/, `\n[[models]]\n${MODELS[model].join('\n')}\n\n[[mcp_servers]]`);
   if (!next.includes(`active_model = "${model}"`)) throw new Error('the kit config has no active_model line to switch');
 }
-fs.writeFileSync(cfgFile, next);
-fs.writeFileSync(path.join(root, 'vibe-config.toml'), next);
+if (!again) {
+  fs.writeFileSync(cfgFile, next);
+  fs.writeFileSync(path.join(root, 'vibe-config.toml'), next);
+}
 
 // 3. vibe --legacy-harness in the folder, trusted for this run, as the closing words say.
 // OWN-019 s3 (R31): `--sittings N` runs the build as the Vibe kit's process — sitting 1 is the person's paragraph, every
@@ -164,9 +181,10 @@ fs.writeFileSync(path.join(root, 'vibe-config.toml'), next);
 const CONTINUE = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../own-019/continue.txt');
 const sittings = Number(opt('--sittings', 1));
 const maxTotal = Number(opt('--max-total', 20));
-const argsFor = (prompt, out) => [
+const argsFor = (prompt, out, resume) => [
   '--from', VIBE, 'vibe',
   '--prompt-file', prompt,
+  ...(resume ? ['--resume', resume] : []),
   '--legacy-harness', '--trust',
   // `bash` resolves its own permission per command and ignores a configured "never" (kit smoke 2: it asked, and the
   // ask ended the run), so the shells are not offered at all — as s15's Claude stranger had no shell approved.
@@ -177,7 +195,13 @@ const argsFor = (prompt, out) => [
   '--max-turns', opt('--max-turns', '250'),
   '--workdir', APPS
 ];
-fs.writeFileSync(path.join(root, 'command.txt'), ['uvx', ...argsFor(path.resolve(promptFile), OUT)].join(' ') + `\n# key: ${keyName}; kit: ${kit}${model ? `; model = ${model}` : ''}${seedArg ? `; seed = ${seedArg}` : ''}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}${sittings > 1 ? `; sittings ≤ ${sittings}, later prompts ${CONTINUE}, max-total $${maxTotal}` : ''}\n`);
+fs.writeFileSync(path.join(root, again ? 'command-again.txt' : 'command.txt'), ['uvx', ...argsFor(path.resolve(promptFile), OUT)].join(' ') + `\n# key: ${keyName}; kit: ${kit}${model ? `; model = ${model}` : ''}${seedArg ? `; seed = ${seedArg}` : ''}${thinking ? `; thinking = ${thinking}` : ''}${temperature ? `; temperature = ${temperature}` : ''}${sittings > 1 ? `; sittings ≤ ${sittings}, later prompts ${CONTINUE}, max-total $${maxTotal}` : ''}\n`);
+// OWN-019 s6: `--dry` stops here — the kit created and rewritten to the tarball, command.txt written, no Vibe started.
+if (rest.includes('--dry')) {
+  proxy?.kill();
+  console.log(`dry: ${root} — kit ${path.basename(path.resolve(tgzDir))}, server ${tgz('nodegx-mcp')}`);
+  process.exit(0);
+}
 
 // OWN-019 s2: 12 was shorter than Large 4's own productive thinks. Vibe writes a think to the journal only when it
 // ends; the long design thinks of rounds that finished took up to 10.1 min (9–17 KB/min), and v4/v8 were stopped at
@@ -196,11 +220,11 @@ const journalSize = () => {
   return size;
 };
 
-function runSitting(prompt, tag) {
+function runSitting(prompt, tag, resume) {
   const out = path.join(root, `out${tag}`);
   const log = fs.createWriteStream(path.join(root, `agent${tag}.jsonl`));
   const err = fs.createWriteStream(path.join(root, `agent${tag}.stderr`));
-  const child = spawn('uvx', argsFor(prompt, out), { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn('uvx', argsFor(prompt, out, resume), { cwd: APPS, env, stdio: ['ignore', 'pipe', 'pipe'] });
   child.stdout.pipe(log);
   child.stderr.pipe(err);
   const t0 = Date.now();
@@ -224,8 +248,23 @@ function runSitting(prompt, tag) {
     const how = stalled ? `stalled (no journal growth for ${stalled} min)` : String(code);
     const seconds = Math.round((Date.now() - t0) / 1000);
     fs.writeFileSync(path.join(root, `agent${tag}.exit`), `${how} ${seconds}s`);
-    resolve({ how, stalled: Boolean(stalled), seconds, ...measure(out) });
+    resolve({ how, stalled: Boolean(stalled), seconds, ...measure(out), ...approvalEnd(path.join(root, `agent${tag}.jsonl`)) });
   }));
+}
+
+/** A headless Vibe that needs an approval (a tool outside the work folder) ends there, exit 0, outcome "finished" —
+ *  Q1's sitting 2 (s4): 42 s, NEXT.md unchanged, its last entry "Allow grep?" on the round root. Say so. */
+function approvalEnd(journal) {
+  try {
+    // s8 (SP1 sitting 3): Vibe writes the approval callback and THEN the effect and a hooks notice — "Allow grep?" sat
+    // fourth from the end and the sitting read as finished. The last approval among the last 12 entries, with no
+    // assistant answer after it, is where the sitting ended.
+    const tail = fs.readFileSync(journal, 'utf8').trim().split('\n').slice(-12).map((l) => { try { return JSON.parse(l); } catch { return {}; } });
+    const at = tail.map((e) => e.type === 'callback' && e.detail?.kind === 'approval').lastIndexOf(true);
+    const cb = at >= 0 && !tail.slice(at + 1).some((e) => e.role === 'assistant') ? tail[at] : undefined;
+    if (cb) return { outcome: 'approval', stop: `${cb.title} ${cb.detail?.effect?.display?.summary ?? ''}`.trim() };
+  } catch {}
+  return {};
 }
 
 /** One sitting's measures from Vibe's own export and journal: list $, tokens, calls, input per call, longest think. */
@@ -266,15 +305,59 @@ function nextLine() {
   return f ? { file: path.relative(APPS, f), text: fs.readFileSync(f, 'utf8'), first: fs.readFileSync(f, 'utf8').split('\n')[0].trim() } : null;
 }
 
-const sittingsDone = [];
+// OWN-019 s8 (Richard: "I'll give you the prompt I write myself and you can send it and monitor and tell me when I
+// need to reply"): `--relay` puts a person in the loop. After every sitting the lab writes waiting-<k>.md (the agent's
+// last words, its session) and waits for ONE of: reply-<k>.txt — the person's answer, sent into the SAME session
+// (`--resume <session_id>`, a reply in the conversation, not a fresh start); continue-<k> — the kit's fixed
+// "Continue." in a fresh sitting, as every other round; stop-<k> — end. Who writes them is the session running the
+// lab, relaying the person's words verbatim; it never words a reply itself.
+const relay = rest.includes('--relay');
+const lastWords = (tag) => {
+  let last = '';
+  try {
+    for (const l of fs.readFileSync(path.join(root, `agent${tag}.jsonl`), 'utf8').split('\n')) {
+      try { const m = JSON.parse(l); if (m.role === 'assistant' && m.content) last = typeof m.content === 'string' ? m.content : m.content.map((x) => x.text || '').join(' '); } catch {}
+    }
+  } catch {}
+  return last;
+};
+const sessionOf = (tag) => { try { return JSON.parse(fs.readFileSync(path.join(root, `out${tag}`, 'export.json'), 'utf8')).session_id; } catch { return null; } };
+async function waitForRelay(k, tag) {
+  fs.writeFileSync(path.join(root, `waiting-${k}.md`), `# After sitting ${k} (session ${sessionOf(tag)})\n\n${lastWords(tag)}\n`);
+  console.log(`WAITING after sitting ${k}: reply-${k}.txt | continue-${k} | stop-${k}`);
+  for (;;) {
+    for (const [f, what] of [[`reply-${k}.txt`, 'reply'], [`continue-${k}`, 'continue'], [`stop-${k}`, 'stop']]) {
+      if (fs.existsSync(path.join(root, f))) return { what, file: path.join(root, f) };
+    }
+    await new Promise((r) => setTimeout(r, 5000));
+  }
+}
+
+const sittingsDone = again ? JSON.parse(fs.readFileSync(path.join(root, 'sittings.json'), 'utf8')) : [];
+const firstK = sittingsDone.length + 1;
+const lastK = firstK + sittings - 1;
 let unchanged = 0;
-for (let k = 1; k <= sittings; k++) {
+let relayed = null;
+for (let k = firstK; k <= lastK; k++) {
   const before = nextLine();
-  const r = await runSitting(k === 1 ? path.resolve(promptFile) : CONTINUE, k === 1 ? '' : String(k));
+  // s5 (RL2): sitting 1 died 27 s in (Mistral's stream ended without a finish reason — infrastructure_failure) before
+  // any NEXT.md existed, and "continue" then sent three sittings grepping above their folder for a note that was never
+  // written. With no NEXT.md there is nothing to continue: a person would say their request again, so the lab does.
+  const tag = k === 1 ? '' : String(k);
+  const r = relayed?.what === 'reply'
+    ? await runSitting(relayed.file, tag, relayed.session)
+    : await runSitting(k === 1 || !before ? path.resolve(promptFile) : CONTINUE, tag);
   const after = nextLine();
   sittingsDone.push({ sitting: k, ...r, next: after?.first ?? null, nextFile: after?.file ?? null });
   fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify(sittingsDone, null, 2));
   console.log(`sitting ${k}: exit ${r.how} ${r.seconds}s $${r.vibeUsd ?? '?'} — ${after?.first ?? '(no NEXT.md)'}`);
+  if (relay) {
+    if (k === lastK) break;
+    relayed = { ...(await waitForRelay(k, tag)), session: sessionOf(tag) };
+    console.log(`relay after sitting ${k}: ${relayed.what}`);
+    if (relayed.what === 'stop') break;
+    continue;
+  }
   if (sittings === 1) break;
   if (r.stalled) { console.log('stop: stalled'); break; }
   if (after && /^#\s*Done\b/i.test(after.first)) { console.log('stop: done'); break; }
@@ -284,5 +367,5 @@ for (let k = 1; k <= sittings; k++) {
   if (total >= maxTotal) { console.log(`stop: $${total.toFixed(2)} ≥ --max-total ${maxTotal}`); break; }
 }
 if (proxy) proxy.kill();
-const sum = (f) => sittingsDone.reduce((n, x) => n + (f(x) || 0), 0);
+const sum = (f) => sittingsDone.slice(firstK - 1).reduce((n, x) => n + (f(x) || 0), 0);
 console.log('exit', sittingsDone.at(-1).how, `| ${sittingsDone.length} sitting(s), ${Math.round(sum((x) => x.seconds) / 60)} min, $${sum((x) => x.vibeUsd).toFixed(2)} list, ~$${sum((x) => x.estimatedUsd).toFixed(2)} cached`);

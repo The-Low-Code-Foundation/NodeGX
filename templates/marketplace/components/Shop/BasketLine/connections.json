@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "12d4ca3c-290a-50e5-880a-6859b4d0c925",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "blIn",
+      "fromProperty": "name",
+      "toId": "blName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "blIn",
+      "fromProperty": "thumb",
+      "toId": "blThumb",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "blIn",
+      "fromProperty": "hasThumb",
+      "toId": "blThumb",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "blIn",
+      "fromProperty": "noThumb",
+      "toId": "blNoThumb",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "blIn",
+      "fromProperty": "each",
+      "toId": "blEach",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "blIn",
+      "fromProperty": "total",
+      "toId": "blTotal",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "blIn",
+      "fromProperty": "less",
+      "toId": "blLess",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "blIn",
+      "fromProperty": "id",
+      "toId": "blDoLess",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "blLess",
+      "fromProperty": "onClick",
+      "toId": "blDoLess",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "blDoLess",
+      "fromProperty": "out-basket",
+      "toId": "blSetLess",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "blDoLess",
+      "fromProperty": "out-go",
+      "toId": "blSetLess",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "blIn",
+      "fromProperty": "id",
+      "toId": "blDoMore",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "blMore",
+      "fromProperty": "onClick",
+      "toId": "blDoMore",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "blDoMore",
+      "fromProperty": "out-basket",
+      "toId": "blSetMore",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "blDoMore",
+      "fromProperty": "out-go",
+      "toId": "blSetMore",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "blIn",
+      "fromProperty": "id",
+      "toId": "blDoRemove",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "blRemove",
+      "fromProperty": "onClick",
+      "toId": "blDoRemove",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "blDoRemove",
+      "fromProperty": "out-basket",
+      "toId": "blSetRemove",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "blDoRemove",
+      "fromProperty": "out-go",
+      "toId": "blSetRemove",
+      "toProperty": "do"
+    }
+  ]
+}

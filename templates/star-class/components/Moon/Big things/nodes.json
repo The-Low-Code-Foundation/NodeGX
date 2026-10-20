@@ -1,0 +1,318 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "eb11b5e6-7cf3-5879-8ba1-778ec25952c1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "btIn",
+      "type": "Component Inputs",
+      "label": "The big things, and the store",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "purse",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "buyTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "haveWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "costWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "leftWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "yesWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "noWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "btCard",
+      "type": "Group",
+      "label": "Big things",
+      "children": [
+        "btTitle",
+        "btSaid",
+        "btStack"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "btTitle",
+      "type": "Text",
+      "label": "Big things to save for",
+      "parent": "btCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "btSaid",
+      "type": "Text",
+      "label": "What just happened",
+      "parent": "btCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "btStack",
+      "type": "Group",
+      "label": "The big things, and the question over them",
+      "parent": "btCard",
+      "children": [
+        "btBox",
+        "btOver"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "cssClassName": "rkt-shelf-stack"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "btBox",
+      "type": "Group",
+      "label": "The big things",
+      "parent": "btStack",
+      "children": [
+        "btEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "btEach",
+      "type": "For Each",
+      "label": "One tile per big thing",
+      "parameters": {
+        "template": "/Moon/Shop tile",
+        "templateType": "explicit"
+      },
+      "parent": "btBox",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "btOver",
+      "type": "Group",
+      "label": "The question, over the tiles",
+      "parent": "btStack",
+      "children": [
+        "btConfirm"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "cssClassName": "rkt-buy-over",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "btConfirm",
+      "type": "/Hangar/Confirm",
+      "label": "Buy it?",
+      "parent": "btOver",
+      "parameters": {
+        "mounted": false
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "btAsk",
+      "type": "States",
+      "label": "The tiles, or the question",
+      "parameters": {
+        "states": "idle,asking",
+        "values": "idle,asking",
+        "useTransitions": false,
+        "type-idle": "boolean",
+        "value-idle-idle": true,
+        "value-asking-idle": false,
+        "type-asking": "boolean",
+        "value-idle-asking": false,
+        "value-asking-asking": true
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "btBuyTitle",
+      "type": "Expression",
+      "label": "Buy what?",
+      "parameters": {
+        "expression": "String(word || '').replace('{item}', String(label || ''))"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "btWhich",
+      "type": "Expression",
+      "label": "A dome, or the egg?",
+      "parameters": {
+        "expression": "thing === 'egg' ? 'egg' : 'build'"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "btDo",
+      "type": "/Logic/Moon act",
+      "label": "Build it, or hatch it",
+      "parameters": {
+        "action": "build"
+      },
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "btOut",
+      "type": "Component Outputs",
+      "label": "The store to write",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "said",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "btCard"
+  ]
+}

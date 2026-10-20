@@ -102,7 +102,11 @@ describe('the alpha notice (0.2.2) — the same sentence the editor shows, with 
     expect(c.exportable).toBe(ledger.pickerCoverageFloor);
     expect(c.placeable).toBe(ledger.pickerCoverageTotal);
     expect(c.percent).toBe(Math.floor((100 * c.exportable) / c.placeable));
-    expect(alphaNotice()).toContain(`${c.exportable} of the ${c.placeable} nodes you can place export today (${c.percent}%)`);
+    // EXP-011 §79: at 130 of 130 there is no rest to name, so the complete picker says so in its own words.
+    expect(alphaNotice()).toContain(
+      c.exportable >= c.placeable ? `All ${c.placeable} nodes you can place export today.` : `${c.exportable} of the ${c.placeable} nodes you can place export today (${c.percent}%)`
+    );
+    expect(alphaNotice()).not.toContain(c.exportable >= c.placeable ? 'the rest are left out' : 'All ');
     expect(alphaNotice()).toContain('do not ship a production app from it yet');
   });
 });

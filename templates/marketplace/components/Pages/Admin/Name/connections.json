@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bd5e8258-b9ea-5690-8e37-4544d8cd69f8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nmRoot",
+      "fromProperty": "didMount",
+      "toId": "nmLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nmLoad",
+      "fromProperty": "out-ok",
+      "toId": "nmContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nmLoad",
+      "fromProperty": "out-problem",
+      "toId": "nmRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nmLoad",
+      "fromProperty": "out-refused",
+      "toId": "nmRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nmRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "nmToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nmNow",
+      "fromProperty": "value",
+      "toId": "nmName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "nmNow",
+      "fromProperty": "value",
+      "toId": "nmGather",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "nmName",
+      "fromProperty": "onTextChanged",
+      "toId": "nmGather",
+      "toProperty": "in-typed"
+    },
+    {
+      "fromId": "nmSave",
+      "fromProperty": "onClick",
+      "toId": "nmGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nmSave",
+      "fromProperty": "onClick",
+      "toId": "nmShowSaved",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "nmGather",
+      "fromProperty": "out-marketplace",
+      "toId": "nmCall",
+      "toProperty": "in-marketplace"
+    },
+    {
+      "fromId": "nmGather",
+      "fromProperty": "out-go",
+      "toId": "nmCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "nmCall",
+      "fromProperty": "error",
+      "toId": "nmError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nmSave",
+      "fromProperty": "onClick",
+      "toId": "nmShowError",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "nmCall",
+      "fromProperty": "failure",
+      "toId": "nmShowError",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "nmShowError",
+      "fromProperty": "state",
+      "toId": "nmError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nmGather",
+      "fromProperty": "out-name",
+      "toId": "nmSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nmCall",
+      "fromProperty": "done",
+      "toId": "nmSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nmCall",
+      "fromProperty": "done",
+      "toId": "nmShowSaved",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "nmShowSaved",
+      "fromProperty": "state",
+      "toId": "nmSaved",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nmBack",
+      "fromProperty": "onClick",
+      "toId": "nmToSellers",
+      "toProperty": "navigate"
+    }
+  ]
+}

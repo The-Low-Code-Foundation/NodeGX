@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "45669960-a2cc-5492-820f-20cdd4797864",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "checkhuntpicIn",
+      "fromProperty": "cells",
+      "toId": "checkhuntpicFn",
+      "toProperty": "in-cells"
+    },
+    {
+      "fromId": "checkhuntpicIn",
+      "fromProperty": "selected",
+      "toId": "checkhuntpicFn",
+      "toProperty": "in-selected"
+    },
+    {
+      "fromId": "checkhuntpicIn",
+      "fromProperty": "count",
+      "toId": "checkhuntpicFn",
+      "toProperty": "in-count"
+    },
+    {
+      "fromId": "checkhuntpicIn",
+      "fromProperty": "target",
+      "toId": "checkhuntpicFn",
+      "toProperty": "in-target"
+    },
+    {
+      "fromId": "checkhuntpicIn",
+      "fromProperty": "kind",
+      "toId": "checkhuntpicFn",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "checkhuntpicFn",
+      "fromProperty": "out-value",
+      "toId": "checkhuntpicOut",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "checkhuntpicFn",
+      "fromProperty": "out-picked",
+      "toId": "checkhuntpicOut",
+      "toProperty": "picked"
+    },
+    {
+      "fromId": "checkhuntpicFn",
+      "fromProperty": "out-complete",
+      "toId": "checkhuntpicOut",
+      "toProperty": "complete"
+    },
+    {
+      "fromId": "checkhuntpicFn",
+      "fromProperty": "out-correct",
+      "toId": "checkhuntpicOut",
+      "toProperty": "correct"
+    },
+    {
+      "fromId": "checkhuntpicFn",
+      "fromProperty": "success",
+      "toId": "checkhuntpicOut",
+      "toProperty": "done"
+    }
+  ]
+}

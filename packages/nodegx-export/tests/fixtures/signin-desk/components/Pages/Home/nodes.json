@@ -1,0 +1,275 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a7c3e9d1-5b2d-4e8f-9c1a-000000000110",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Sign In Desk",
+        "urlPath": "home"
+      },
+      "x": 100,
+      "y": 40
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "headline",
+        "signingInText",
+        "errorText",
+        "noticeText",
+        "whoText",
+        "acmeBtn",
+        "nobodyBtn",
+        "lastText",
+        "refusedErrorText",
+        "refusedText"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 120
+    },
+    {
+      "id": "headline",
+      "type": "Text",
+      "label": "Headline",
+      "parent": "shell",
+      "parameters": {
+        "text": "Sign In Desk",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 200
+    },
+    {
+      "id": "signingInText",
+      "type": "Text",
+      "label": "Signing In",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "errorText",
+      "type": "Text",
+      "label": "Error",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "noticeText",
+      "type": "Text",
+      "label": "Notice",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 440
+    },
+    {
+      "id": "whoText",
+      "type": "Text",
+      "label": "Signed in as",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "lastText",
+      "type": "Text",
+      "label": "Last",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 600
+    },
+    {
+      "id": "refusedErrorText",
+      "type": "Text",
+      "label": "Refusal",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 680
+    },
+    {
+      "id": "refusedText",
+      "type": "Text",
+      "label": "Refused",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "acmeBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in with Acme",
+      "parent": "shell",
+      "parameters": {
+        "label": "Sign in with Acme"
+      },
+      "x": 100,
+      "y": 840
+    },
+    {
+      "id": "nobodyBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in with nobody",
+      "parent": "shell",
+      "parameters": {
+        "label": "Sign in with nobody"
+      },
+      "x": 100,
+      "y": 920
+    },
+    {
+      "id": "acme",
+      "type": "net.noodl.user.SignInWith",
+      "label": "Acme sign-in",
+      "parameters": {
+        "provider": "acme"
+      },
+      "x": 900,
+      "y": 1000
+    },
+    {
+      "id": "nobody",
+      "type": "net.noodl.user.SignInWith",
+      "label": "No provider",
+      "parameters": {},
+      "x": 900,
+      "y": 1080
+    },
+    {
+      "id": "me",
+      "type": "net.noodl.user.User",
+      "label": "Current User",
+      "parameters": {},
+      "x": 900,
+      "y": 1160
+    },
+    {
+      "id": "lastVar",
+      "type": "Variable2",
+      "label": "Last",
+      "parameters": {
+        "name": "last"
+      },
+      "x": 900,
+      "y": 1240
+    },
+    {
+      "id": "refusedVar",
+      "type": "Variable2",
+      "label": "Refused",
+      "parameters": {
+        "name": "refused"
+      },
+      "x": 900,
+      "y": 1320
+    },
+    {
+      "id": "setDone",
+      "type": "Set Variable",
+      "label": "Last done",
+      "parameters": {
+        "name": "last"
+      },
+      "x": 900,
+      "y": 1400
+    },
+    {
+      "id": "doneStr",
+      "type": "String",
+      "label": "Done",
+      "parameters": {
+        "value": "done"
+      },
+      "x": 900,
+      "y": 1480
+    },
+    {
+      "id": "setFailed",
+      "type": "Set Variable",
+      "label": "Last failed",
+      "parameters": {
+        "name": "last"
+      },
+      "x": 900,
+      "y": 1560
+    },
+    {
+      "id": "failedStr",
+      "type": "String",
+      "label": "Failed",
+      "parameters": {
+        "value": "failed"
+      },
+      "x": 900,
+      "y": 1640
+    },
+    {
+      "id": "setRefused",
+      "type": "Set Variable",
+      "label": "Refusal completed",
+      "parameters": {
+        "name": "refused"
+      },
+      "x": 900,
+      "y": 1720
+    },
+    {
+      "id": "refusedStr",
+      "type": "String",
+      "label": "Completed",
+      "parameters": {
+        "value": "completed"
+      },
+      "x": 900,
+      "y": 1800
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

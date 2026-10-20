@@ -1,0 +1,57 @@
+## write then signal: Outputs.a = 1; Outputs.go();
+   -- run 1
+   r1 now=1
+   r1 after=1
+## write, signal, write: Outputs.a = 1; Outputs.go(); Outputs.a = 2;
+   -- run 1
+   r1 now=1
+   r1 after=1
+## signal twice: Outputs.a = 1; Outputs.go(); Outputs.a = 2; Outputs.go();
+   -- run 1
+   r1 now=1
+   r1 after=1
+   r1 now=2
+   r1 after=2
+## two signals: Outputs.a = 1; Outputs.go(); Outputs.a = 2; Outputs.go2();
+   -- run 1
+   r1 now=1
+   r1 after=1
+   r2 now=1
+   r2 after=1
+## signal before write: Outputs.go(); Outputs.a = 3;
+   -- run 1
+   r1 now=3
+   r1 after=3
+## same value twice over two runs: Outputs.a = 1; Outputs.go();
+   -- run 1
+   r1 now=1
+   r1 after=1
+   -- run 2
+   r1 now=1
+   r1 after=1
+## unwritten keeps last run: if (this.n === undefined) { this.n = 1; Outputs.a = 5; } Outputs.go();
+   -- run 1
+   r1 now=5
+   r1 after=5
+   -- run 2
+   r1 now=5
+   r1 after=5
+## signal then await then write: Outputs.a = 1; Outputs.go(); await Promise.resolve(); Outputs.a = 2;
+   -- run 1
+   r1 now=1
+   r1 after=1
+## write twice then signal: Outputs.a = 1; Outputs.a = 2; Outputs.go();
+   -- run 1
+   r1 now=1
+   r1 after=1
+## reset then set then signal: Outputs.a = ''; if (Inputs.x === undefined) Outputs.a = 'bad'; Outputs.go();
+   -- run 1
+   r1 now=""
+   r1 after=""
+## write twice then signal, 2 runs: Outputs.a = 0; Outputs.a = (this.k = (this.k||0)+1); Outputs.go();
+   -- run 1
+   r1 now=0
+   r1 after=0
+   -- run 2
+   r1 now=0
+   r1 after=0

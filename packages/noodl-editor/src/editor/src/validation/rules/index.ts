@@ -43,6 +43,7 @@ import { labelNotAClickTarget } from './labelNotAClickTarget';
 import { dialogWithoutName } from './dialogWithoutName';
 import { oversizedPage } from './oversizedPage';
 import { unlabelledNode } from './unlabelledNode';
+import { settingsDiagnostic } from './settingsDiagnostic';
 
 export const ALL_RULES: Rule[] = [
   duplicateNodeId,
@@ -72,6 +73,8 @@ export const ALL_RULES: Rule[] = [
   deprecatedNode,
   // P107 R34 — a second Page (or cloud Request) in one component, as the editor marks it
   duplicateSingleton,
+  // P107 R40 — what a node's saved settings make it tell the editor once the app runs, read from its spec
+  settingsDiagnostic,
   typeIncompatibleConnection,
   signalDrivenStaleInput,
   // DEF-002 §3 — beside `typeIncompatibleConnection`'s neighbours because it is
@@ -126,6 +129,7 @@ export {
   invalidHierarchy,
   deprecatedNode,
   duplicateSingleton,
+  settingsDiagnostic,
   typeIncompatibleConnection,
   signalDrivenStaleInput,
   signalIntoValuePort,

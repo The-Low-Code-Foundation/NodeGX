@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "68be5291-c6aa-5f78-8323-6cec10ff7993",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pickitemIn",
+      "fromProperty": "app",
+      "toId": "pickitemFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "pickitemIn",
+      "fromProperty": "profileId",
+      "toId": "pickitemFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "pickitemIn",
+      "fromProperty": "itemId",
+      "toId": "pickitemFn",
+      "toProperty": "in-itemId"
+    },
+    {
+      "fromId": "pickitemIn",
+      "fromProperty": "shelf",
+      "toId": "pickitemFn",
+      "toProperty": "in-shelf"
+    },
+    {
+      "fromId": "pickitemIn",
+      "fromProperty": "run",
+      "toId": "pickitemFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pickitemFn",
+      "fromProperty": "out-app",
+      "toId": "pickitemOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "pickitemFn",
+      "fromProperty": "out-picked",
+      "toId": "pickitemOut",
+      "toProperty": "picked"
+    },
+    {
+      "fromId": "pickitemFn",
+      "fromProperty": "out-why",
+      "toId": "pickitemOut",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "pickitemFn",
+      "fromProperty": "out-cost",
+      "toId": "pickitemOut",
+      "toProperty": "cost"
+    },
+    {
+      "fromId": "pickitemFn",
+      "fromProperty": "out-purseBefore",
+      "toId": "pickitemOut",
+      "toProperty": "purseBefore"
+    },
+    {
+      "fromId": "pickitemFn",
+      "fromProperty": "out-purseAfter",
+      "toId": "pickitemOut",
+      "toProperty": "purseAfter"
+    },
+    {
+      "fromId": "pickitemFn",
+      "fromProperty": "success",
+      "toId": "pickitemOut",
+      "toProperty": "done"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9c66475c-d7d7-5de2-8c15-4db7396eab99",
+  "name": "nameMarketplace",
+  "path": "/#__cloud__/nameMarketplace",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Rename the marketplace"
+}

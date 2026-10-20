@@ -107,6 +107,12 @@
     },
     {
       "fromId": "mnMe",
+      "fromProperty": "skin",
+      "toId": "mnHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "mnMe",
       "fromProperty": "faceOptions",
       "toId": "mnHeader",
       "toProperty": "options"
@@ -554,6 +560,102 @@
       "fromProperty": "write",
       "toId": "mnStore",
       "toProperty": "write"
+    },
+    {
+      "fromId": "mnStore",
+      "fromProperty": "app",
+      "toId": "mnBig",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "profileId",
+      "toId": "mnBig",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "bigs",
+      "toId": "mnBig",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "purse",
+      "toId": "mnBig",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonBig",
+      "toId": "mnBig",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "buyTitle",
+      "toId": "mnBig",
+      "toProperty": "buyTitle"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "youHave",
+      "toId": "mnBig",
+      "toProperty": "haveWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "itCosts",
+      "toId": "mnBig",
+      "toProperty": "costWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "youllHave",
+      "toId": "mnBig",
+      "toProperty": "leftWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "yesBuy",
+      "toId": "mnBig",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "noThanks",
+      "toId": "mnBig",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "mnBig",
+      "fromProperty": "app",
+      "toId": "mnStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnBig",
+      "fromProperty": "write",
+      "toId": "mnStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "book",
+      "toId": "mnBook",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "bookLine",
+      "toId": "mnBook",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonBookClose",
+      "toId": "mnBook",
+      "toProperty": "closeWord"
     }
   ]
 }

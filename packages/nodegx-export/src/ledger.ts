@@ -106,8 +106,10 @@ export function exportCoverage(): ExportCoverage {
  */
 export function alphaNotice(): string {
   const c = exportCoverage();
-  return (
-    `Code export is in alpha. ${c.exportable} of the ${c.placeable} nodes you can place export today (${c.percent}%); ` +
-    'the rest are left out by name. Explore the code and build on it, but do not ship a production app from it yet.'
-  );
+  // EXP-011 §79 took the picker to 130 of 130: with nothing left out, "the rest are left out by name" named nothing.
+  const coverage =
+    c.exportable >= c.placeable
+      ? `All ${c.placeable} nodes you can place export today. `
+      : `${c.exportable} of the ${c.placeable} nodes you can place export today (${c.percent}%); the rest are left out by name. `;
+  return `Code export is in alpha. ${coverage}Explore the code and build on it, but do not ship a production app from it yet.`;
 }

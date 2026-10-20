@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ea5f2f16-a6f8-5e03-81e0-ca185818c928",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gpIn",
+      "fromProperty": "src",
+      "toId": "gpImage",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "gpIn",
+      "fromProperty": "alt",
+      "toId": "gpImage",
+      "toProperty": "alt"
+    }
+  ]
+}

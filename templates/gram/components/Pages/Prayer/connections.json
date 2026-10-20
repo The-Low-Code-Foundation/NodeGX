@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "46c089f6-dd96-52f7-8dc6-11bedf445242",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "prRoot",
+      "fromProperty": "didMount",
+      "toId": "prLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "prChanged",
+      "fromProperty": "value",
+      "toId": "prLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "prLiveComment",
+      "fromProperty": "changed",
+      "toId": "prLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "prLivePost",
+      "fromProperty": "changed",
+      "toId": "prLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "prLoad",
+      "fromProperty": "out-ok",
+      "toId": "prContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prLoad",
+      "fromProperty": "out-cards",
+      "toId": "prEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "prLoad",
+      "fromProperty": "out-empty",
+      "toId": "prEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prLoad",
+      "fromProperty": "out-band",
+      "toId": "prBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "prLoad",
+      "fromProperty": "out-waiting",
+      "toId": "prToWaiting",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "prLoad",
+      "fromProperty": "out-meId",
+      "toId": "prNav",
+      "toProperty": "meId"
+    },
+    {
+      "fromId": "prLoad",
+      "fromProperty": "out-inside",
+      "toId": "prNav",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "prLoad",
+      "fromProperty": "out-problem",
+      "toId": "prRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prLoad",
+      "fromProperty": "out-refused",
+      "toId": "prRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "prToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "prNew",
+      "fromProperty": "onClick",
+      "toId": "prToNew",
+      "toProperty": "navigate"
+    }
+  ]
+}

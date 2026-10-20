@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cec31e62-2300-528a-8e3c-bb0b1ea5d371",
+  "name": "Basket",
+  "path": "/Pages/Shop/Basket",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The basket: by seller, a total per seller country, about how much together; check out with no account"
+}

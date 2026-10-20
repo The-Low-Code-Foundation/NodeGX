@@ -1,0 +1,118 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a7c10d00-0000-4000-8000-000000000179",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "box",
+      "type": "Group",
+      "label": "Greeter",
+      "children": [
+        "greetingText",
+        "slowCountText",
+        "completeBtn",
+        "failBtn"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "greetingText",
+      "type": "Text",
+      "label": "Greeting",
+      "parent": "box",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 120
+    },
+    {
+      "id": "slowCountText",
+      "type": "Text",
+      "label": "Slow count",
+      "parent": "box",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 200
+    },
+    {
+      "id": "completeBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Complete",
+      "parent": "box",
+      "parameters": {
+        "label": "Complete"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "failBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Fail",
+      "parent": "box",
+      "parameters": {
+        "label": "Fail"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "greet",
+      "type": "net.noodl.ActionHandler",
+      "label": "Greet",
+      "parameters": {
+        "channel": "desk",
+        "actionType": "GREET",
+        "result": "hello"
+      },
+      "x": 400,
+      "y": 120
+    },
+    {
+      "id": "slow",
+      "type": "net.noodl.ActionHandler",
+      "label": "Slow",
+      "parameters": {
+        "channel": "desk",
+        "actionType": "SLOW",
+        "autoComplete": false,
+        "errorMessage": "slow failed"
+      },
+      "x": 400,
+      "y": 280
+    },
+    {
+      "id": "setGreeting",
+      "type": "Set Variable",
+      "label": "Remember the greeting",
+      "parameters": {
+        "name": "greeting"
+      },
+      "x": 700,
+      "y": 120
+    },
+    {
+      "id": "greetingVar",
+      "type": "Variable2",
+      "label": "Greeting",
+      "parameters": {
+        "name": "greeting"
+      },
+      "x": 400,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "box"
+  ]
+}

@@ -98,7 +98,7 @@ import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
 import { isRegistryEntry, performRegistryWrite } from './registry';
-import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, HostAnswerEvent, SpecHostCall, Outcome, InputDecl, PlayContext, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
+import type { AnswerCall, AnyNodeSpec, BackendAnswerEvent, ChangeEvent, HostAnswerEvent, SpecHostCall, Outcome, InputDecl, MountContext, ParentAxis, PlayContext, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput, playContextOf } from './spec';
 import { outcomePorts, playOutputs } from './ports';
 import type { TraceEvent } from './trace';
@@ -197,6 +197,8 @@ export interface Instance {
   written: Record<string, unknown>;
   /** NSP-019 s95: the sentence each declared diagnostic last recorded (spec.ts `diagnostics`); a key absent shows nothing. */
   diagnosticsShown: Record<string, string>;
+  /** NSP-019 R38 (s105): how the node's parent stacks it for the whole play (spec.ts `WorldView.parent`); a column unless the mount named a row. */
+  readonly parent: ParentAxis;
 }
 
 export class SpecError extends Error {
@@ -322,6 +324,8 @@ function viewOf(inst: Instance): WorldView {
     group: () => ({ present: world.group.present, load: world.group.load }),
     // P107-C155 — the ports the mount named as wired (adapter.ts `mount`): a fact of this instance, not of the world
     wired: (port) => inst.wired.has(port),
+    // R38 — the mount's context names it (spec.ts `MountContext`)
+    parent: () => inst.parent,
     // NSP-020 (s82) — the runtime's `hasOutput`: declared, an outcome port, or a derived output the instance has NOW
     hasOutput: (name) => name in inst.spec.outputs || name in inst.derivedOutputs || name in outcomePorts(inst.spec)
   };
@@ -464,7 +468,7 @@ function hearRegistryWrites(world: World, all: Instance[]): void {
   });
 }
 
-export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World(), wired: readonly string[] = [], context: Readonly<PlayContext> = {}): Instance {
+export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World(), wired: readonly string[] = [], context: Readonly<MountContext> = {}): Instance {
   const inputs: Record<string, unknown> = {};
   for (const [name, decl] of Object.entries(spec.inputs)) {
     if (!isSignalInput(decl)) inputs[name] = decl.default;
@@ -507,7 +511,9 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
     wired: new Set(wired),
     playContext: portContext,
     written: { ...params },
-    diagnosticsShown: {}
+    diagnosticsShown: {},
+    // R38 — absent, a column: the holder every target puts a lone node in
+    parent: context.parent ?? 'column'
   };
   (inst as { view: WorldView }).view = viewOf(inst);
   // P107-C155 — a wired port is one the node has (the runtime's `connectInput` throws on one it does not); checked before
@@ -1415,7 +1421,7 @@ export function trace(inst: Instance): TraceEvent[] {
 }
 
 /** Runs a scripted sequence from a fresh mount and returns its trace. `wired` (P107-C155): the ports a wire reaches, as `mount` takes them; `context` (NSP-020) likewise. */
-export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], world?: World, wired?: readonly string[], context?: Readonly<PlayContext>): TraceEvent[] {
+export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], world?: World, wired?: readonly string[], context?: Readonly<MountContext>): TraceEvent[] {
   // a play under a world runs in its zone (NSP-013, world.ts TIME ZONE), as the adapter's does
   const restoreZone = world ? installTimeZone(world) : () => undefined;
   try {

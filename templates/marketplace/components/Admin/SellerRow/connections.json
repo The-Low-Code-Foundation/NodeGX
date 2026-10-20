@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e0e0b05a-ffe4-5abe-857c-1286654bb99d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "srIn",
+      "fromProperty": "name",
+      "toId": "srName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "logo",
+      "toId": "srLogo",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "hasLogo",
+      "toId": "srLogo",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "place",
+      "toId": "srPlace",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "selling",
+      "toId": "srSelling",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "stopped",
+      "toId": "srStopped",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "stopLabel",
+      "toId": "srStop",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "id",
+      "toId": "srToEdit",
+      "toProperty": "pm-sellerId"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "id",
+      "toId": "srToLogin",
+      "toProperty": "pm-sellerId"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "id",
+      "toId": "srToProducts",
+      "toProperty": "pm-sellerId"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "id",
+      "toId": "srToStop",
+      "toProperty": "pm-sellerId"
+    },
+    {
+      "fromId": "srEdit",
+      "fromProperty": "onClick",
+      "toId": "srToEdit",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "srLogin",
+      "fromProperty": "onClick",
+      "toId": "srToLogin",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "srProducts",
+      "fromProperty": "onClick",
+      "toId": "srToProducts",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "srStop",
+      "fromProperty": "onClick",
+      "toId": "srToStop",
+      "toProperty": "navigate"
+    }
+  ]
+}

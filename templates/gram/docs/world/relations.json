@@ -1,0 +1,208 @@
+{
+  "relations": [
+    {
+      "id": "postBy",
+      "from": "post",
+      "to": "member",
+      "kind": "belongs-to",
+      "sentence": "each post is by one member",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "commentOn",
+      "from": "comment",
+      "to": "post",
+      "kind": "belongs-to",
+      "sentence": "each comment is under one post",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "commentBy",
+      "from": "comment",
+      "to": "member",
+      "kind": "belongs-to",
+      "sentence": "each comment is by one member",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "heart",
+      "from": "post",
+      "kind": "happened-to",
+      "sentence": "a member hearted a post",
+      "answers": {
+        "forever": false,
+        "undo": "removing this one",
+        "who": true,
+        "outlives": false,
+        "seeHistory": "every approved member sees the count; who hearted is seen by members too, as on any social app"
+      }
+    },
+    {
+      "id": "prayed",
+      "from": "post",
+      "kind": "happened-to",
+      "sentence": "a member pressed I prayed on a prayer request",
+      "answers": {
+        "forever": false,
+        "undo": "removing this one",
+        "who": true,
+        "outlives": false,
+        "seeHistory": "every approved member sees the count; the person who asked sees who prayed"
+      }
+    },
+    {
+      "id": "report",
+      "from": "post",
+      "kind": "happened-to",
+      "sentence": "a member reported a post to the admins, saying why",
+      "properties": [
+        {
+          "name": "reason",
+          "kind": "choice",
+          "values": [
+            "spam",
+            "unkind",
+            "child-photo",
+            "other"
+          ]
+        },
+        {
+          "name": "note",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "forever": true,
+        "undo": "it cannot",
+        "who": true,
+        "outlives": false,
+        "seeHistory": "the admins only; the member reported never sees who reported them"
+      }
+    },
+    {
+      "id": "commentReport",
+      "from": "comment",
+      "kind": "happened-to",
+      "sentence": "a member reported a comment to the admins, saying why",
+      "properties": [
+        {
+          "name": "reason",
+          "kind": "choice",
+          "values": [
+            "spam",
+            "unkind",
+            "other"
+          ]
+        },
+        {
+          "name": "note",
+          "kind": "text",
+          "freeWords": true
+        }
+      ],
+      "answers": {
+        "forever": true,
+        "undo": "it cannot",
+        "who": true,
+        "outlives": false,
+        "seeHistory": "the admins only; the member reported never sees who reported them"
+      }
+    },
+    {
+      "id": "memberBlocked",
+      "from": "member",
+      "kind": "ends",
+      "sentence": "an admin can block a member: they can no longer sign in, and an admin can let them back",
+      "answers": {
+        "whatStays": "the member and everything they posted stay; they cannot sign in, and their posts and comments are hidden from members until they are let back",
+        "comesBack": true,
+        "backAs": "the old one",
+        "whoEnds": "an admin",
+        "endNote": "blockedReason",
+        "endNoteNeeded": true
+      }
+    },
+    {
+      "id": "postHidden",
+      "from": "post",
+      "kind": "ends",
+      "sentence": "an admin can hide a post; members no longer see it, admins still do",
+      "answers": {
+        "whatStays": "the post, its photos, comments, hearts and reports all stay; members stop seeing it; admins see it with why",
+        "comesBack": true,
+        "backAs": "the old one",
+        "whoEnds": "an admin, or the member who wrote it (that is how a member takes their own post down)",
+        "endNote": "hiddenReason",
+        "endNoteNeeded": false
+      }
+    },
+    {
+      "id": "commentHidden",
+      "from": "comment",
+      "kind": "ends",
+      "sentence": "an admin can hide a comment; members no longer see it, admins still do",
+      "answers": {
+        "whatStays": "the comment stays; members stop seeing it; admins see it with why",
+        "comesBack": true,
+        "backAs": "the old one",
+        "whoEnds": "an admin, or the member who wrote it",
+        "endNote": "hiddenReason",
+        "endNoteNeeded": false
+      }
+    },
+    {
+      "id": "devotionalWrittenBy",
+      "from": "devotional",
+      "to": "member",
+      "kind": "belongs-to",
+      "sentence": "a devotional written in the app is by the admin who wrote it",
+      "answers": {
+        "several": false,
+        "required": false,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "noteOwner",
+      "from": "note",
+      "to": "member",
+      "kind": "owned-by",
+      "sentence": "a note is its member's alone",
+      "answers": {
+        "whoElse": "nobody, the admins included",
+        "path": false,
+        "whenOwnerEnds": "goes too"
+      }
+    },
+    {
+      "id": "noteOnDevotional",
+      "from": "note",
+      "to": "devotional",
+      "kind": "belongs-to",
+      "sentence": "a note can be on a devotional",
+      "answers": {
+        "several": false,
+        "required": false,
+        "whenTargetGoes": "stays-unlinked",
+        "moves": false
+      }
+    }
+  ]
+}

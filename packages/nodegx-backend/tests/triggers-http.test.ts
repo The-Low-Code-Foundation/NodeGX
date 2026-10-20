@@ -9,6 +9,8 @@
  *   - triggers survive a service restart (persisted config)
  *   - a manual test-fire runs the target and records the execution
  */
+import { execFile, execFileSync } from 'child_process';
+import { promisify } from 'util';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
@@ -21,7 +23,8 @@ import type {
   TriggerResponse
 } from '../src/server/admin-triggers';
 import { BackendService } from '../src/service';
-import { signWebhookHmac } from '../src/triggers/webhook';
+import { webhookExample } from '../src/admin/app/views/triggers';
+import { signWebhookHmac, signWebhookHmac512 } from '../src/triggers/webhook';
 
 import { adminHeaders, ErrorBody, get, httpClient } from './helpers/http';
 
@@ -188,6 +191,61 @@ describe('WF-005 triggers over HTTP', () => {
     // The trigger's own status also reflects the failed attempt.
     const t = await req<TriggerResponse>('GET', `/admin/triggers/${triggerId}`);
     expect(t.json.trigger.status?.lastResult?.ok).toBe(false);
+  });
+
+  it('webhook hmac-sha512 (Paystack, P121 TWO-004 step 5): its key is supplied, never minted, never handed back', async () => {
+    const minted = await req<ErrorBody>('POST', '/admin/triggers', { type: 'webhook', target: { kind: 'function', name: 'hello' }, webhook: { slug: 'paystack-ghs', scheme: 'hmac-sha512' } });
+    expect(minted.status).toBe(400);
+    expect(minted.json.error).toMatch(/sender’s own key: send it as `secret`/);
+
+    const key = 'sk_test_ghana_business_key';
+    const created = await req<TriggerResponse>('POST', '/admin/triggers', { type: 'webhook', target: { kind: 'function', name: 'hello' }, webhook: { slug: 'paystack-ghs', scheme: 'hmac-sha512' }, secret: key });
+    expect(created.status).toBe(201);
+    expect(created.json.secret).toBeUndefined();
+    expect(JSON.stringify(created.json)).not.toContain(key);
+    const triggerId: string = created.json.trigger.id;
+
+    const event = JSON.stringify({ event: 'charge.success', data: { reference: 'MK-2026-00042-GHS-0a1b2c3d4e5f' } });
+    const send = (signature: string) => fetch(`${base}/hooks/backend_test/paystack-ghs`, { method: 'POST', headers: { 'content-type': 'application/json', 'x-paystack-signature': signature }, body: event });
+
+    const good = await send(signWebhookHmac512(key, event));
+    expect(good.status).toBe(200);
+    expect(await executionFor('triggerType=webhook&limit=100', byTrigger(triggerId))).toMatchObject({ workflowId: 'hello', status: 'success' });
+
+    // 🔴 A wrong signature, and one made with another business's key, are refused 401 and recorded.
+    for (const wrong of ['deadbeef', signWebhookHmac512('sk_test_nigeria_business_key', event), signWebhookHmac(key, event).slice('sha256='.length)]) {
+      const res = await send(wrong);
+      expect(res.status).toBe(401);
+      expect(((await res.json()) as ErrorBody).error).toMatch(/HMAC-SHA512 signature mismatch/);
+    }
+    const rejected = await executionFor('limit=100', byTrigger(triggerId, true));
+    expect(rejected?.metadata).toMatchObject({ rejected: true });
+
+    // Rotating would mint a secret Paystack never signs with: refused. An edit without a key keeps the saved one.
+    const rotate = await req<ErrorBody>('POST', `/admin/triggers/${triggerId}/secret`, {});
+    expect(rotate.status).toBe(400);
+    expect(rotate.json.error).toMatch(/Paystack's signature/);
+    const edited = await req<TriggerResponse>('PUT', `/admin/triggers/${triggerId}`, { type: 'webhook', name: 'Paystack Ghana', target: { kind: 'function', name: 'hello' }, webhook: { slug: 'paystack-ghs', scheme: 'hmac-sha512' } });
+    expect([edited.status, edited.json.secret]).toEqual([200, undefined]);
+    expect((await send(signWebhookHmac512(key, event))).status).toBe(200);
+
+    // A sha256 hook switched to sha512 without a key would keep its minted secret: refused.
+    const github = await req<TriggerResponse>('POST', '/admin/triggers', { type: 'webhook', target: { kind: 'function', name: 'hello' }, webhook: { slug: 'switched' } });
+    const switched = await req<ErrorBody>('PUT', `/admin/triggers/${github.json.trigger.id}`, { type: 'webhook', target: { kind: 'function', name: 'hello' }, webhook: { slug: 'switched', scheme: 'hmac-sha512' } });
+    expect(switched.status).toBe(400);
+  });
+
+  it('webhook hmac-sha512: the admin page’s curl example, run as written, is accepted', async () => {
+    try {
+      execFileSync('openssl', ['version']);
+    } catch {
+      return; // no openssl on this machine: the example cannot be run here
+    }
+    const key = 'sk_test_example_key';
+    await req<TriggerResponse>('POST', '/admin/triggers', { type: 'webhook', target: { kind: 'function', name: 'hello' }, webhook: { slug: 'paystack-example', scheme: 'hmac-sha512' }, secret: key });
+    const script = webhookExample(`${base}/hooks/backend_test/paystack-example`, 'hmac-sha512', key).replace('curl -X POST', 'curl -s -o /dev/null -w "%{http_code}" -X POST');
+    // Async: the backend answers from this same process, so a synchronous child would wait on it forever.
+    expect((await promisify(execFile)('bash', ['-c', script], { encoding: 'utf-8', timeout: 15000 })).stdout).toBe('200');
   });
 
   it('webhook: unknown/disabled slug is 404', async () => {

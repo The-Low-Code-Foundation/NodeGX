@@ -60,15 +60,35 @@ function withoutMachinePaths(message: string, projectDir: string, absoluteMain: 
     .join('.');
 }
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { scanModuleManifestsSync } = require('@nodegx/module-inject') as {
-  scanModuleManifestsSync: (dir: string) => Array<{
-    name: string;
-    dirPath: string;
-    manifest: Record<string, unknown> | null;
-    warnings: string[];
-  }>;
+type ScannedModule = {
+  name: string;
+  dirPath: string;
+  manifest: Record<string, unknown> | null;
+  warnings: string[];
 };
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { scanModuleManifestsSync, toInjectModules } = require('@nodegx/module-inject') as {
+  scanModuleManifestsSync: (dir: string) => ScannedModule[];
+  toInjectModules: (scanned: ScannedModule[]) => Array<{ dependencies?: string[]; runtimes: string[]; refused?: string }>;
+};
+
+/**
+ * P109-S17-EXPORTKITDEPS — the kit dependencies the deployed page loads, in the order it loads them.
+ *
+ * The export copied every dependency to `public/` and nothing referenced it, so a kit that reads `window.THREE` threw
+ * in the exported app and drew in the deployed one. 🔴 **The injector's own `toInjectModules`, not a transcription**:
+ * it owns the path rule (`http…` verbatim, anything else under the module folder), the module order (kits by index
+ * path, then the rest, then `requires`) and the refusals (a refused kit has no dependencies). What is left is
+ * `buildInjectionTags`' loop: browser modules only, each dependency once.
+ */
+export function parseModuleDependencies(projectDir: string): string[] {
+  const out: string[] = [];
+  for (const m of toInjectModules(scanModuleManifestsSync(projectDir))) {
+    if (m.refused !== undefined || m.runtimes.indexOf('browser') === -1) continue;
+    for (const d of m.dependencies ?? []) if (!out.includes(d)) out.push(d);
+  }
+  return out;
+}
 
 /**
  * Every module in a project, in directory order.

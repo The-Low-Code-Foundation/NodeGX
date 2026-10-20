@@ -1,0 +1,270 @@
+{
+  "name": "table",
+  "at": "2026-10-18T07:23:26.772Z",
+  "isolation": {
+    "toolCalls": 114,
+    "skillsLoaded": [
+      "nodegx-your-own-editor"
+    ],
+    "pathsOutsideLab": [
+      {
+        "tool": "Bash",
+        "path": "/Applications"
+      },
+      {
+        "tool": "Glob",
+        "path": "/Applications/*Chrom*"
+      },
+      {
+        "tool": "Glob",
+        "path": "/Users/richardosborne/Library/Caches/ms-playwright"
+      },
+      {
+        "tool": "Write",
+        "path": "/Applications/Google"
+      },
+      {
+        "tool": "Write",
+        "path": "/Applications/Chromium.app/Contents/MacOS/Chromium"
+      },
+      {
+        "tool": "Write",
+        "path": "/usr/bin/google-chrome"
+      },
+      {
+        "tool": "Write",
+        "path": "/usr/bin/chromium"
+      },
+      {
+        "tool": "Read",
+        "path": "/private/tmp/claude-501/-private-tmp-claude-501--Users-richardosborne-vscode-projects-OpenNoodl-fb80ee72-487e-4743-926a-d498f1a9a44c-scratchpad-own008-lab-table/b14a7a2d-29cf-42a8-9369-6c3e442a8d1d/tasks/bqsbtavpi.output"
+      }
+    ],
+    "relativeClimbs": [
+      {
+        "tool": "Bash",
+        "text": "pwd; find todo-list -type f -not -path '*/node_modules/*' | wc -l; ls todo-list todo-list/components; cat todo-list/nodegx.project.json; head -c 1500 todo-list/components/_registry.json; mkdir -p ../_"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/table/editor/src/load-vocabulary.mjs\n// The vocabulary the editor sta"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/table/editor/suite/adapter.mjs\n// The editor suite's adapter for the "
+      },
+      {
+        "tool": "Bash",
+        "text": "cd editor && node tools/manifest.mjs ../todo-list --copy test-copies/suite-fixture && node node_modules/@nodegx/project-contract/editor-suite-node.js suite/adapter.mjs test-copies/suite-fixture suite/"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/table/editor/suite/run.mjs\n// Runs the kit's editor suite on the tabl"
+      },
+      {
+        "tool": "Bash",
+        "text": "node -e \"\nconst r=JSON.parse(require('fs').readFileSync('../todo-list/components/_registry.json','utf8'));\nconst {components, ...rest}=r; console.log(JSON.stringify(rest,null,1)); console.log(JSON.str"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/table/editor/server.mjs\n#!/usr/bin/env node\n// The table editor: `npm"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/table/editor/tools/page-test.mjs\n// The page test: a copy of the app,"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/table/editor/tools/unit-test.mjs\n// Unit tests on a copy of the app, "
+      },
+      {
+        "tool": "Bash",
+        "text": "node suite/run.mjs ../todo-list suite/edits-format4-pin.json; echo \"exit $?\"\nRun the suite on the format-4 pin script"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/table/editor/tools/save-copy.mjs\n// Copies an app into a new folder a"
+      },
+      {
+        "tool": "Bash",
+        "text": "node tools/save-copy.mjs ../todo-list test-copies/saved-by-editor && node tools/manifest.mjs test-copies/saved-by-editor > /dev/null; node -e \"\nconst {readProjectTree}=require('@nodegx/project-contrac"
+      },
+      {
+        "tool": "Bash",
+        "text": "node tools/page-test.mjs 2>&1 | tail -3; node tools/manifest.mjs ../todo-list --check tools/todo-list.before.sha256\nRerun page test and verify todo-list unchanged"
+      },
+      {
+        "tool": "Write",
+        "text": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/table/editor/README.md\n# Table editor for NodeGX apps\n\nOne row per no"
+      }
+    ],
+    "refused": [
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"date; cd /private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/table; ls -la; find todo-list -type f | grep -v "
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"date; D=/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/fb80ee72-487e-4743-926a-d498f1a9a44c/scratchpad/own008/lab/table; ls -la $D; find $D/todo-list -type f -not "
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"pwd; find todo-list -type f -not -path '*/node_modules/*' | wc -l; ls todo-list todo-list/components; cat todo-list/nodegx.project.json; head -c 1500 todo-list/components/_registry.json; m"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"mkdir -p editor/test-copies && cp -R todo-list editor/test-copies/original-snapshot\",\"description\":\"Snapshot the app for later diffing\"}"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"node editor/tools/manifest.mjs todo-list > editor/tools/todo-list.before.sha256 && wc -l editor/tools/todo-list.before.sha256 && ls editor/node_modules/@nodegx/project-contract editor/node"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"cd editor/node_modules/@nodegx/project-contract && cat editor-suite.d.ts format.d.ts format-node.d.ts editor-suite-node.d.ts; ls format editor-suite schemas\",\"description\":\"Read kit type d"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"cd editor/node_modules/@nodegx/preview/dist/browser; wc -c *; grep -o 'nodeLibrary[^;]\\\\{0,200\\\\}' noodl-preview-in-page.js | head -8; echo ---; grep -o 'nodeLibrary[^;]\\\\{0,120\\\\}' noodl-"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"ls /Applications | grep -i -E 'chrom|edge|brave|firefox'; ls ~/Library/Caches/ms-playwright 2>/dev/null; which npx chromium google-chrome 2>/dev/null; ls ~/.cache/puppeteer 2>/dev/null\",\"d"
+      },
+      {
+        "tool": "Glob",
+        "input": "{\"pattern\":\"*/*\",\"path\":\"/Users/richardosborne/Library/Caches/ms-playwright\"}"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"NODEGX_TABLE_BREAK=number-as-string node node_modules/@nodegx/project-contract/editor-suite-node.js suite/adapter.mjs test-copies/suite-fixture suite/edits.json; echo \\\"exit $?\\\"\",\"timeout"
+      },
+      {
+        "tool": "Bash",
+        "input": "{\"command\":\"rm tools/explore.mjs tools/explore2.mjs; rm -r test-copies/suite-fixture; date\",\"description\":\"Remove scratch scripts and an unused copy; show time\"}"
+      }
+    ],
+    "labTodoUnchanged": true,
+    "repoTodoUnchanged": true
+  },
+  "run": {
+    "minutes": 19.02415,
+    "turns": 116,
+    "costUsd": 5.8335328,
+    "subtype": "success",
+    "usage": {
+      "input_tokens": 150,
+      "cache_creation_input_tokens": 220544,
+      "cache_read_input_tokens": 10164704,
+      "output_tokens": 101782,
+      "output_tokens_details": {
+        "thinking_tokens": 26436
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 220544,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1181,
+          "cache_read_input_tokens": 228937,
+          "cache_creation_input_tokens": 3867,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 3867
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "suite": {
+    "command": "editor/node_modules/@nodegx/project-contract/editor-suite-node.js",
+    "adapter": "editor/suite/adapter.mjs",
+    "repoScript": {
+      "exit": 0,
+      "out": [
+        "PASS — table editor on todo-list (61 ms)"
+      ]
+    },
+    "control": {
+      "exit": 1,
+      "out": [
+        "FAIL — table editor (control: paddingTop as a string) on todo-list (60 ms): 1 difference(s)",
+        "1. node \"app_root\" in components/App/nodes.json: \"parameters.paddingTop\" is \"8\"; the official editor saves 8."
+      ]
+    },
+    "ownScript": {
+      "exit": 0,
+      "out": [
+        "PASS — table editor on todo-list (74 ms)"
+      ]
+    }
+  },
+  "officialValidator": {
+    "base": {
+      "errors": 0,
+      "warnings": 0,
+      "infos": 1,
+      "nodesChecked": 888,
+      "endpointsChecked": 2943
+    },
+    "saved": {
+      "errors": 0,
+      "warnings": 0,
+      "infos": 1,
+      "nodesChecked": 888,
+      "endpointsChecked": 2943
+    },
+    "exit": 0,
+    "newDiagnostics": []
+  },
+  "mcpValidate": {
+    "summary": {
+      "errors": 0,
+      "warnings": 0,
+      "infos": 28,
+      "nodesChecked": 888,
+      "endpointsChecked": 2943
+    },
+    "codes": [
+      "info gate-starts-shown /Pages/Todo",
+      "info gate-starts-shown /Pages/Todo",
+      "info gate-starts-shown /Pages/Todo",
+      "info gate-starts-shown /Pages/Todo",
+      "info oversized-page /Pages/Todo",
+      "info gate-starts-shown /Pages/Todo",
+      "info gate-starts-shown /Projects/Money sheet",
+      "info gate-starts-shown /Projects/Money sheet",
+      "info gate-starts-shown /Projects/Project editor",
+      "info gate-starts-shown /Projects/Project row",
+      "info gate-starts-shown /Projects/Project row",
+      "info gate-starts-shown /Projects/Project row",
+      "info gate-starts-shown /Projects/Project row",
+      "info gate-starts-shown /Projects/View",
+      "info gate-starts-shown /Todo/Action row",
+      "info gate-starts-shown /Todo/Action row",
+      "info gate-starts-shown /Todo/Done list",
+      "info gate-starts-shown /Todo/History entry",
+      "info gate-starts-shown /Todo/Log entry",
+      "info gate-starts-shown /Todo/Log entry",
+      "info gate-starts-shown /Todo/Log list",
+      "info gate-starts-shown /Todo/Routine list",
+      "info gate-starts-shown /Todo/Task list",
+      "info gate-starts-shown /Todo/Task row",
+      "info gate-starts-shown /Todo/Today list",
+      "info gate-starts-shown /Todo/Today row",
+      "info gate-starts-shown /Todo/Today row",
+      "info gate-starts-shown /Todo/Today row"
+    ]
+  }
+}

@@ -29,15 +29,20 @@
 //   node grade-editor.mjs <round-root | app-dir> --tgz <tgz-dir> [--out <dir>] [--home <dir>]
 // --home: the HOME the app's backend was made under (default <round-root>/home): a backend lives in ~/.noodl/backends.
 import fs from 'node:fs';
+import net from 'node:net';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { kitTarball, hasTarball } from '../own-018/kit-tarball.mjs';
+// OWN-019 s7 (NODE20): the grader talks CDP over Node's global WebSocket (Node ≥ 22). A lane started from a shell
+// whose PATH found /usr/local/bin/node (v20) graded nothing: say so before a preview starts.
+if (typeof WebSocket === 'undefined') throw new Error(`this grader needs Node 22 or later (a global WebSocket); this is Node ${process.version} at ${process.execPath}`);
 
 const argv = process.argv.slice(2);
 const opt = (name, dflt) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : dflt; };
 const target = path.resolve(argv[0] || '');
 const TGZ = path.resolve(opt('--tgz', ''));
-if (!argv[0] || !fs.existsSync(path.join(TGZ, 'nodegx-preview-0.2.0.tgz'))) throw new Error('usage: node grade-editor.mjs <round-root | app-dir> --tgz <tgz-dir> [--out <dir>] [--home <dir>]');
+if (!argv[0] || !hasTarball(TGZ, 'nodegx-preview')) throw new Error('usage: node grade-editor.mjs <round-root | app-dir> --tgz <tgz-dir> [--out <dir>] [--home <dir>]');
 const findApp = (dir, depth = 0) => {
   if (fs.existsSync(path.join(dir, 'nodegx.project.json'))) return dir;
   if (depth > 3) return null;
@@ -48,12 +53,40 @@ const findApp = (dir, depth = 0) => {
   }
   return null;
 };
-const APP = findApp(target);
-if (!APP) throw new Error(`no nodegx.project.json under ${target}`);
-const ROUNDHOME = path.resolve(opt('--home', path.join(target, 'home')));
-const OUT = path.resolve(opt('--out', path.join(fs.existsSync(path.join(target, 'work')) ? target : APP, 'grade')));
+const ROUND_APP = findApp(target);
+if (!ROUND_APP) throw new Error(`no nodegx.project.json under ${target}`);
+const ROUND_HOME = path.resolve(opt('--home', path.join(target, 'home')));
+const OUT = path.resolve(opt('--out', path.join(fs.existsSync(path.join(target, 'work')) ? target : ROUND_APP, 'grade')));
 fs.mkdirSync(OUT, { recursive: true });
 const LABHOME = fs.mkdtempSync(path.join(OUT, 'home-'));
+// 🔴 The grade SAVES an edit — into the app's backend, on disk. Graded in place, the round's own data became the
+// grader's ("Europe Quiz"), and a second grade found no Portugal to edit (E1/SE1, s4). So every grade works on a COPY
+// of the app and of the backends under the round's HOME (their config holds no absolute path), made fresh each time.
+const APP = path.join(LABHOME, 'app', path.basename(ROUND_APP));
+fs.cpSync(ROUND_APP, APP, { recursive: true, filter: (s) => !/[\\/](\.previews|grade|node_modules[\\/]\.cache)([\\/]|$)/.test(s) });
+const ROUNDHOME = path.join(LABHOME, 'roundhome');
+if (fs.existsSync(path.join(ROUND_HOME, '.noodl', 'backends'))) fs.cpSync(path.join(ROUND_HOME, '.noodl', 'backends'), path.join(ROUNDHOME, '.noodl', 'backends'), { recursive: true });
+// 🔴 The copy keeps the round's port, and the gallery keeps the round's backend alive ON that port (s5): the copy's
+// backend could not bind, provision answered "exited before becoming ready", the grade went on, and the preview
+// saved "Europe Quiz" into the GALLERY's backend — 13/13 against the wrong database, its restart a restart of
+// nothing. So the copy gets a port of its own (config and the app's endpoint), and a backend that does not start
+// stops the grade.
+const freePort = () => new Promise((resolve) => { const s = net.createServer(); s.listen(0, '127.0.0.1', () => { const { port } = s.address(); s.close(() => resolve(port)); }); });
+{
+  const dir = path.join(ROUNDHOME, '.noodl', 'backends');
+  const projectFile = path.join(APP, 'nodegx.project.json');
+  for (const id of fs.existsSync(dir) ? fs.readdirSync(dir) : []) {
+    const f = path.join(dir, id, 'config.json');
+    if (!fs.existsSync(f)) continue;
+    const c = JSON.parse(fs.readFileSync(f, 'utf8'));
+    const port = await freePort();
+    const project = fs.readFileSync(projectFile, 'utf8');
+    if (project.includes(`"instanceId": "${id}"`) || project.includes(`"instanceId":"${id}"`)) {
+      fs.writeFileSync(projectFile, project.split(`127.0.0.1:${c.port}`).join(`127.0.0.1:${port}`).split(`localhost:${c.port}`).join(`localhost:${port}`));
+    }
+    fs.writeFileSync(f, JSON.stringify({ ...c, port }, null, 2) + '\n');
+  }
+}
 const cleanEnv = (home) => {
   const env = { ...process.env, HOME: home, npm_config_cache: path.join(LABHOME, '.npm'), TMPDIR: LABHOME };
   for (const k of Object.keys(env)) if (k.startsWith('NODEGX_') || k.startsWith('NOODL_') || /KEY|TOKEN|SECRET/.test(k)) delete env[k];
@@ -88,7 +121,7 @@ const startBackend = async () => {
   const instance = (projectText().match(/"instanceId"\s*:\s*"([^"]+)"/) || [])[1];
   const mine = configs.find((c) => c.id === instance) || configs[0];
   if (!mine?.name) return { backend: true, started: false, why: `no backend config for ${instance} under ${dir}` };
-  const transport = new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${path.join(TGZ, 'nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', APP, '--allow-writes'], cwd: LABHOME, env: cleanEnv(ROUNDHOME), stderr: 'ignore' });
+  const transport = new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${kitTarball(TGZ, 'nodegx-mcp')}`, 'noodl-mcp', APP, '--allow-writes'], cwd: LABHOME, env: cleanEnv(ROUNDHOME), stderr: 'ignore' });
   mcp = new Client({ name: 'own019-grade-editor', version: '0' });
   await mcp.connect(transport);
   const r = await mcp.callTool({ name: 'call_tool', arguments: { name: 'provision_backend', arguments: { name: mine.name } } }, undefined, { timeout: 180000 });
@@ -100,7 +133,7 @@ const stopBackend = async () => { if (mcp) { try { await mcp.close(); } catch {}
 // ---------------------------------------------------------------- the preview
 let preview = null;
 const startPreview = async () => {
-  preview = spawn('npx', ['-y', `--package=${path.join(TGZ, 'nodegx-preview-0.2.0.tgz')}`, 'noodl-preview', APP, '--port', '0', '--no-watch'], { env: cleanEnv(LABHOME), cwd: LABHOME, stdio: ['ignore', 'pipe', 'pipe'] });
+  preview = spawn('npx', ['-y', `--package=${kitTarball(TGZ, 'nodegx-preview')}`, 'noodl-preview', APP, '--port', '0', '--no-watch'], { env: cleanEnv(LABHOME), cwd: LABHOME, stdio: ['ignore', 'pipe', 'pipe'] });
   let log = '';
   return new Promise((resolve, reject) => {
     const t = setTimeout(() => reject(new Error(`preview printed no URL in 120 s: ${log.slice(-600)}`)), 120000);
@@ -216,6 +249,7 @@ const found = {};
 try {
   observed.backend = await startBackend();
   say('backend', observed.backend);
+  if (observed.backend.backend && !observed.backend.started) throw new Error(`the app's backend did not start: ${observed.backend.why ?? observed.backend.answer}`);
   let url = await startPreview();
   say('preview', { url });
 
@@ -289,7 +323,9 @@ try {
   await A.shot('4-saved');
   check('saved', !!sv && savedMs !== null, { pressed: !!sv, lands: sv?.lands ?? null, ms: savedMs });
   await sleep(1000);
-  await A.send('Page.reload', { ignoreCache: true });
+  // Back to the quiz's own start screen in the same browser — not a reload of the editor, where the new title sits in a
+  // field and is never text on the page (SE1's first grade read that as "not played").
+  await A.send('Page.navigate', { url });
   await sleep(2500);
   const plays = await A.seen('/europe quiz/i');
   check('plays', plays, { titleAfterReload: plays });
@@ -314,6 +350,10 @@ try {
   await B.shot('7-madrid');
   check('rightanswer', madrid.ok && !near(madrid.rgb, WRONG), madrid);
   const q2 = await B.waitFor(() => B.seen('/what is the capital of australia\\?/i'), 5000);
+  // The question's words can land a moment before its answer buttons (E1, SE1: text shown, no Sydney yet) — wait for
+  // the answers too, then tap.
+  await B.waitFor(() => B.page(`['Sydney', 'Canberra', 'Melbourne'].every((n) => leaves(exact(n)).length > 0)`), 3000);
+  await sleep(200);
   const q2answers = await B.page(`['Sydney', 'Canberra', 'Melbourne'].map((n) => leaves(exact(n)).length > 0)`);
   check('unchanged', q2 !== null && q2answers.every(Boolean), { q2: q2 !== null, answers: q2answers });
   await pressText(B, `/^sydney$/i`);
@@ -329,6 +369,7 @@ try {
   await stopPreview();
   await stopBackend();
   observed.backendAgain = await startBackend();
+  if (observed.backendAgain.backend && !observed.backendAgain.started) throw new Error(`the app's backend did not start again: ${observed.backendAgain.why ?? observed.backendAgain.answer}`);
   url = await startPreview();
   const C = await openBrowser(url, 'c');
   const title = await C.seen('/europe quiz/i');
@@ -346,7 +387,7 @@ for (const n of CHECK_NAMES) if (!checks[n]) checks[n] = { ok: false, notReached
 await stopPreview();
 await stopBackend();
 const passed = CHECK_NAMES.filter((n) => checks[n].ok).length;
-const result = { app: APP, at: new Date().toISOString(), score: `${passed}/${CHECK_NAMES.length}`, passed, stopped: fatal, checks, observed };
+const result = { app: ROUND_APP, gradedCopy: true, at: new Date().toISOString(), score: `${passed}/${CHECK_NAMES.length}`, passed, stopped: fatal, checks, observed };
 fs.writeFileSync(path.join(OUT, 'grade.json'), JSON.stringify(result, null, 2) + '\n');
 try { fs.rmSync(LABHOME, { recursive: true, force: true }); } catch {}
 console.log(`\nSCORE ${result.score}  ${CHECK_NAMES.map((n) => `${checks[n].ok ? '✓' : '✗'}${n}`).join(' ')}${fatal ? `  (stopped: ${fatal})` : ''}`);

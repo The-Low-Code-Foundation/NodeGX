@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "09f89764-9e4d-5841-86cc-ef4943cb8fd2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-10",
+      "type": "noodl.cloud.request",
+      "label": "editProfile(profile)",
+      "parameters": {
+        "params": "profile",
+        "ptype-profile": "object",
+        "preq-profile": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-6",
+      "type": "JavaScriptFunction",
+      "label": "Change your own profile: your name, a short bio, a photo only members see",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\nasync function member(userId) {\n  if (!userId) return null;\n  return one('Member', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction email(v) {\n  var e = typeof v === 'string' ? v.trim().toLowerCase() : '';\n  var at = e.indexOf('@');\n  if (e.length > 200 || at < 1 || e.indexOf(' ') >= 0 || e.indexOf('@', at + 1) >= 0) return '';\n  var dot = e.lastIndexOf('.');\n  return dot > at + 1 && dot < e.length - 1 ? e : '';\n}\n\nasync function inMember(userId) {\n  var m = await member(userId);\n  return m && m.status === 'approved' && !m.endedAt ? m : null;\n}\nasync function postInFeed(id) {\n  var p = id ? await one('Post', { objectId: { equalTo: id } }) : null;\n  if (!p || p.endedAt) return null;\n  var by = await one('Member', { objectId: { equalTo: idOf(p.member) } });\n  return by && !by.endedAt ? p : null;\n}\n/**\n * W1, for every photo a member puts in front of the others (a post's, a profile's): '' when it is the caller's,\n * shared with the members and the admins, a photo, and its link its own; otherwise what is wrong with it.\n */\nasync function photoProblem(f, userId) {\n  var name = f && typeof f.name === 'string' ? f.name : '';\n  var url = f && typeof f.url === 'string' ? f.url : '';\n  var file = name ? await one('_Files', { storedName: { equalTo: name } }) : null;\n  if (!file || idOf(file.owner) !== String(userId)) return 'mine';\n  var readers = Array.isArray(file.readers) ? file.readers : [];\n  var shared = [\"role:member\",\"role:admin\"].every(function (r) { return readers.indexOf(r) >= 0; });\n  // No private check of its own: the backend writes readers only on a private file (an equivalent mutant said so).\n  if (!shared) return 'public';\n  if (String(file.contentType || '').indexOf('image/') !== 0) return 'image';\n  if (url.slice(-(name.length + 7)) !== '/files/' + name) return 'mine';\n  return '';\n}\n\nvar a = Inputs.profile;\nif (a === undefined || Inputs.userId === undefined) return;\nif (!a || typeof a !== 'object') { refuse('Say what to change.'); return; }\nvar m = await inMember(Inputs.userId);\nif (!m) { refuse('Only members who’ve been let in have a profile.'); return; }\nvar name = typeof a.name === 'string' ? a.name.trim() : '';\nif (!name) { refuse('Your name, as the community knows you.'); return; }\nif (name.length > 80) { refuse('A name of 80 characters or fewer.'); return; }\nvar bio = typeof a.bio === 'string' ? a.bio.trim() : '';\nif (bio.length > 150) { refuse('A bio of 150 characters or fewer.'); return; }\nvar next = { name: name, bio: bio };\nvar had = m.photo && m.photo.name ? String(m.photo.name) : null;\nvar photo = had;\nif (a.photo === null) { next.photo = null; photo = null; }\nelse if (a.photo !== undefined) {\n  var wrong = await photoProblem(a.photo, Inputs.userId);\n  if (wrong === 'mine') { refuse('That photo isn’t one you added.'); return; }\n  if (wrong === 'public') { refuse('That photo could be seen by people who aren’t members. Add it again in this app.'); return; }\n  if (wrong === 'image') { refuse('Only a photo can be a profile photo.'); return; }\n  next.photo = { __type: 'File', name: a.photo.name, url: a.photo.url };\n  photo = a.photo.name;\n}\nvar changes = diff({ name: m.name || '', bio: m.bio || '', photo: had }, { name: name, bio: bio, photo: photo });\nif (Object.keys(changes).length > 0) {\n  await Noodl.Records.save(m.objectId, next, { className: 'Member' });\n  await history('Member', 'member', m.objectId, Inputs.userId, changes);\n}\nOutputs.memberId = m.objectId;\nOutputs.done();",
+        "runOnChange-in-profile": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-profile",
+          "displayName": "profile",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-memberId",
+          "displayName": "memberId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-9",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "memberId"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-10",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

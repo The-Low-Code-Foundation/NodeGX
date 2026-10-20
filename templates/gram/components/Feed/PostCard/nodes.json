@@ -1,0 +1,803 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "247a541c-feeb-551b-8168-88b810a4cd5a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pcRoot",
+      "type": "Group",
+      "label": "A post",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2-5)",
+        "paddingBottom": "var(--space-4)",
+        "borderStyle": "solid",
+        "borderColor": "var(--border)",
+        "borderBottomWidth": {
+          "value": 1,
+          "unit": "px"
+        },
+        "borderTopWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "borderLeftWidth": {
+          "value": 0,
+          "unit": "px"
+        },
+        "borderRightWidth": {
+          "value": 0,
+          "unit": "px"
+        }
+      },
+      "children": [
+        "pcHead",
+        "pcAsk",
+        "pcGallery",
+        "pcLost",
+        "pcActions",
+        "pcHearts",
+        "pcCaption",
+        "pcWhoPrayed",
+        "pcComments",
+        "pcError"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pcHead",
+      "type": "Group",
+      "label": "Who, and when",
+      "parent": "pcRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2-5)"
+      },
+      "children": [
+        "pcAv",
+        "pcWho",
+        "pcKind"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pcAv",
+      "type": "Group",
+      "label": "Their face",
+      "parent": "pcHead",
+      "parameters": {
+        "width": {
+          "value": 34,
+          "unit": "px"
+        },
+        "height": {
+          "value": 34,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "cssClassName": "gm-av"
+      },
+      "children": [
+        "pcFace",
+        "pcInitials"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pcFace",
+      "type": "Image",
+      "label": "Their photo",
+      "parent": "pcAv",
+      "parameters": {
+        "width": {
+          "value": 34,
+          "unit": "px"
+        },
+        "height": {
+          "value": 34,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": {
+          "value": 50,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "pcInitials",
+      "type": "Text",
+      "label": "Their initials, with no photo",
+      "parent": "pcAv",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--primary-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "pcWho",
+      "type": "Group",
+      "label": "Name and when",
+      "parent": "pcHead",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-grow",
+        "alignItems": "flex-start"
+      },
+      "children": [
+        "pcName",
+        "pcWhen"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pcName",
+      "type": "net.noodl.controls.button",
+      "label": "Name: their profile",
+      "parent": "pcWho",
+      "parameters": {
+        "label": "",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "pcWhen",
+      "type": "Text",
+      "label": "When",
+      "parent": "pcWho",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "pcKind",
+      "type": "Text",
+      "label": "Its kind: Prayer request, Testimony, Event",
+      "parent": "pcHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--accent-foreground)",
+        "sizeMode": "contentSize",
+        "cssClassName": "gm-kind",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "pcAsk",
+      "type": "Text",
+      "label": "Its words first: what to pray for, a testimony",
+      "parent": "pcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "pcGallery",
+      "type": "Group",
+      "label": "The photos, swiped one at a time",
+      "parent": "pcRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-gallery",
+        "mounted": false
+      },
+      "children": [
+        "pcEachPhoto"
+      ],
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "pcEachPhoto",
+      "type": "For Each",
+      "label": "One per photo",
+      "parent": "pcGallery",
+      "parameters": {
+        "template": "/Feed/Photo"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "pcLost",
+      "type": "Text",
+      "label": "A photo that couldn’t be shown",
+      "parent": "pcRoot",
+      "parameters": {
+        "text": "A photo in this post couldn’t be loaded.",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "pcActions",
+      "type": "Group",
+      "label": "Heart (or I prayed) and comment",
+      "parent": "pcRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-4)"
+      },
+      "children": [
+        "pcHeart",
+        "pcPray",
+        "pcComment"
+      ],
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "pcHeart",
+      "type": "net.noodl.controls.button",
+      "label": "Heart",
+      "parent": "pcActions",
+      "parameters": {
+        "label": "♡ Heart",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "pcPray",
+      "type": "net.noodl.controls.button",
+      "label": "I prayed",
+      "parent": "pcActions",
+      "parameters": {
+        "label": "🙏 I prayed",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "pcComment",
+      "type": "net.noodl.controls.button",
+      "label": "Comment",
+      "parent": "pcActions",
+      "parameters": {
+        "label": "Comment",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "pcHearts",
+      "type": "Text",
+      "label": "How many hearts, and whose",
+      "parent": "pcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 100,
+      "y": 2080
+    },
+    {
+      "id": "pcCaption",
+      "type": "Text",
+      "label": "The caption",
+      "parent": "pcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 2200
+    },
+    {
+      "id": "pcWhoPrayed",
+      "type": "Text",
+      "label": "Who prayed (the asker’s alone)",
+      "parent": "pcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 2320
+    },
+    {
+      "id": "pcComments",
+      "type": "net.noodl.controls.button",
+      "label": "The comments",
+      "parent": "pcRoot",
+      "parameters": {
+        "label": "",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 2440
+    },
+    {
+      "id": "pcError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "pcRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 2560
+    },
+    {
+      "id": "pcIn",
+      "type": "Component Inputs",
+      "label": "One post",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "memberId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "initials",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "shade",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "face",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasFace",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "noFace",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "when",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "caption",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasCaption",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "photos",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasPhotos",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "lostPhotos",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hearted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "heartLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "heartColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hearts",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "comments",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "toComments",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "listComments",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "isPrayer",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "notPrayer",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "kindClass",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kindName",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasKind",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "wordsFirst",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "ask",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "prayed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "prayLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "prayInk",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "prayFill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "whoPrayed",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "pcHeartGather",
+      "type": "JavaScriptFunction",
+      "label": "The heart on, or off again",
+      "parameters": {
+        "functionScript": "Outputs.heart = { postId: Inputs.id, on: Inputs.hearted !== true };\nOutputs.go();",
+        "runOnChange-in-id": false,
+        "runOnChange-in-hearted": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hearted",
+          "displayName": "hearted",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-heart",
+          "displayName": "heart",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "pcHeartCall",
+      "type": "CloudFunction2",
+      "label": "heartPost(heart)",
+      "parameters": {
+        "function": "heartPost"
+      },
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "pcPrayGather",
+      "type": "JavaScriptFunction",
+      "label": "I prayed, or taken back",
+      "parameters": {
+        "functionScript": "Outputs.prayer = { postId: Inputs.id, on: Inputs.prayed !== true };\nOutputs.go();",
+        "runOnChange-in-id": false,
+        "runOnChange-in-prayed": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-prayed",
+          "displayName": "prayed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-prayer",
+          "displayName": "prayer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "pcPrayCall",
+      "type": "CloudFunction2",
+      "label": "prayFor(prayer)",
+      "parameters": {
+        "function": "prayFor"
+      },
+      "x": 470,
+      "y": 2680
+    },
+    {
+      "id": "pcFailed",
+      "type": "Switch",
+      "label": "The last heart was refused",
+      "x": 470,
+      "y": 2800
+    },
+    {
+      "id": "pcStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the feed changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 2920
+    },
+    {
+      "id": "pcChanged",
+      "type": "Set Variable",
+      "label": "The feed changed",
+      "parameters": {
+        "name": "feedChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a heart, a comment or a post was made on this phone: the feed and the post read again, whichever card made it."
+      },
+      "x": 470,
+      "y": 3040
+    },
+    {
+      "id": "pcToPost",
+      "type": "RouterNavigate",
+      "label": "To the post and its comments",
+      "parameters": {
+        "target": "/Pages/Post"
+      },
+      "x": 470,
+      "y": 2440
+    },
+    {
+      "id": "pcToMember",
+      "type": "RouterNavigate",
+      "label": "To their profile",
+      "parameters": {
+        "target": "/Pages/Member"
+      },
+      "x": 470,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "pcRoot"
+  ]
+}

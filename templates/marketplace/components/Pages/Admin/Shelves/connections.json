@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "aba7bf90-f87e-53fe-89c9-618494d217fa",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "svRoot",
+      "fromProperty": "didMount",
+      "toId": "svLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "svChanged",
+      "fromProperty": "value",
+      "toId": "svLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "svLoad",
+      "fromProperty": "out-ok",
+      "toId": "svContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "svLoad",
+      "fromProperty": "out-rows",
+      "toId": "svEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "svLoad",
+      "fromProperty": "out-empty",
+      "toId": "svEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "svLoad",
+      "fromProperty": "out-problem",
+      "toId": "svRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "svLoad",
+      "fromProperty": "out-refused",
+      "toId": "svRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "svRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "svToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "svName",
+      "fromProperty": "onTextChanged",
+      "toId": "svGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "svAddGo",
+      "fromProperty": "onClick",
+      "toId": "svGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "svGather",
+      "fromProperty": "out-shelf",
+      "toId": "svCall",
+      "toProperty": "in-shelf"
+    },
+    {
+      "fromId": "svGather",
+      "fromProperty": "out-go",
+      "toId": "svCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "svCall",
+      "fromProperty": "error",
+      "toId": "svError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "svCall",
+      "fromProperty": "done",
+      "toId": "svStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "svStamp",
+      "fromProperty": "out-at",
+      "toId": "svSetChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "svStamp",
+      "fromProperty": "out-go",
+      "toId": "svSetChanged",
+      "toProperty": "do"
+    }
+  ]
+}

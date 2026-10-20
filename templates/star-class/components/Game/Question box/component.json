@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "02fcc340-9ee1-5d3c-8a42-4fbd98078d49",
+  "name": "Question box",
+  "path": "/Game/Question box",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The question, big, and the way to answer it: the kit's answer pad (Kind = typed) or four buttons (Kind = options). RKT-005: the pad draws Pad Keys to tap; a Numeric pad reads digits by key code, so AZERTY needs no Shift, and opens no soft keyboard on a touch screen. While Enabled is false the way to answer is gone, so a verdict can take its place without the screen growing. Publishes Answered with the answer, and Text as it is entered. RKT-012: Expected (a typing word) makes the pad refuse a key that does not continue it and draw ⌫ beside the box; Mistakes and Wrong Key say what it refused."
+}

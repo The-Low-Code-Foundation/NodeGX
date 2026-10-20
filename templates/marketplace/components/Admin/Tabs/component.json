@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6dca1122-3754-58dc-853b-60845378d536",
+  "name": "Tabs",
+  "path": "/Admin/Tabs",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The admin’s tabs: Sellers, Orders, Enquiries, Ways to pay, Rates, Shelves"
+}

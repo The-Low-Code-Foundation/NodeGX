@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "77673e50-3f4d-551c-80e0-8b0c5b614346",
+  "name": "RateRow",
+  "path": "/Admin/RateRow",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One currency’s rate: what one unit is worth in the marketplace’s own"
+}

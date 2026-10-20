@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "81037661-6fff-57ab-89b1-11cb7f4fee08",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pvIn",
+      "fromProperty": "look",
+      "toId": "pvFace",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "seed",
+      "toId": "pvFace",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "options",
+      "toId": "pvFace",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "look",
+      "toId": "pvTrack",
+      "toProperty": "styleA"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "seed",
+      "toId": "pvTrack",
+      "toProperty": "seedA"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "options",
+      "toId": "pvTrack",
+      "toProperty": "optionsA"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "paint",
+      "toId": "pvTrack",
+      "toProperty": "colorA"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "pattern",
+      "toId": "pvTrack",
+      "toProperty": "patternA"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "name",
+      "toId": "pvTrack",
+      "toProperty": "nameA"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "line",
+      "toId": "pvLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "changed",
+      "toId": "pvChanges",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "pvChanges",
+      "fromProperty": "currentCount",
+      "toId": "pvWhich",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "pvWhich",
+      "fromProperty": "result",
+      "toId": "pvPopState",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "pvPopState",
+      "fromProperty": "cls",
+      "toId": "pvPop",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "pvFace",
+      "fromProperty": "clicked",
+      "toId": "pvOut",
+      "toProperty": "clicked"
+    }
+  ]
+}

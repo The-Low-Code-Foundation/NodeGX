@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9c380180-cc42-5730-8c67-58eaa32b85be",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "suToken",
+      "fromProperty": "onTextChanged",
+      "toId": "suGather",
+      "toProperty": "in-token"
+    },
+    {
+      "fromId": "suShop",
+      "fromProperty": "onTextChanged",
+      "toId": "suGather",
+      "toProperty": "in-marketplace"
+    },
+    {
+      "fromId": "suName",
+      "fromProperty": "onTextChanged",
+      "toId": "suGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "suEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "suGather",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "suPassword",
+      "fromProperty": "onTextChanged",
+      "toId": "suGather",
+      "toProperty": "in-password"
+    },
+    {
+      "fromId": "suGo",
+      "fromProperty": "onClick",
+      "toId": "suGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "suGather",
+      "fromProperty": "out-setup",
+      "toId": "suCall",
+      "toProperty": "in-setup"
+    },
+    {
+      "fromId": "suGather",
+      "fromProperty": "out-go",
+      "toId": "suCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "suCall",
+      "fromProperty": "error",
+      "toId": "suError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "suCall",
+      "fromProperty": "done",
+      "toId": "suToSignIn",
+      "toProperty": "navigate"
+    }
+  ]
+}

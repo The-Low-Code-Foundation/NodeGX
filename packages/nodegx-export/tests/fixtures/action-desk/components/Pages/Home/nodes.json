@@ -1,0 +1,219 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a7c10d00-0000-4000-8000-000000000178",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Action Desk",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "headline",
+        "actionInput",
+        "dispatchBtn",
+        "cancelBtn",
+        "resultText",
+        "refusalText",
+        "waitingText",
+        "countText",
+        "busyText",
+        "lastText",
+        "greeter"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "headline",
+      "type": "Text",
+      "label": "Headline",
+      "parent": "shell",
+      "parameters": {
+        "text": "Action Desk",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "actionInput",
+      "type": "net.noodl.controls.textinput",
+      "label": "Action JSON",
+      "parent": "shell",
+      "parameters": {
+        "placeholder": "{\"type\":\"GREET\",\"payload\":\"Ada\"}"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "dispatchBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Dispatch",
+      "parent": "shell",
+      "parameters": {
+        "label": "Dispatch"
+      },
+      "x": 100,
+      "y": 440
+    },
+    {
+      "id": "cancelBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel All",
+      "parent": "shell",
+      "parameters": {
+        "label": "Cancel All"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "resultText",
+      "type": "Text",
+      "label": "Result",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 600
+    },
+    {
+      "id": "refusalText",
+      "type": "Text",
+      "label": "Refusal reason",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 680
+    },
+    {
+      "id": "waitingText",
+      "type": "Text",
+      "label": "Waiting for",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "countText",
+      "type": "Text",
+      "label": "Completed count",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 840
+    },
+    {
+      "id": "busyText",
+      "type": "Text",
+      "label": "Is executing",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 920
+    },
+    {
+      "id": "lastText",
+      "type": "Text",
+      "label": "Last completed",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "greeter",
+      "type": "/Components/Greeter",
+      "label": "Greeter",
+      "parent": "shell",
+      "parameters": {},
+      "x": 100,
+      "y": 1080
+    },
+    {
+      "id": "actionVar",
+      "type": "Variable2",
+      "label": "Action text",
+      "parameters": {
+        "name": "actionText"
+      },
+      "x": 400,
+      "y": 360
+    },
+    {
+      "id": "desk",
+      "type": "net.noodl.ActionDispatcher",
+      "label": "Desk",
+      "parameters": {
+        "channel": "desk",
+        "waitForHandler": 500
+      },
+      "x": 400,
+      "y": 440
+    },
+    {
+      "id": "setLast",
+      "type": "Set Variable",
+      "label": "Remember the last",
+      "parameters": {
+        "name": "lastDone"
+      },
+      "x": 700,
+      "y": 440
+    },
+    {
+      "id": "lastVar",
+      "type": "Variable2",
+      "label": "Last done",
+      "parameters": {
+        "name": "lastDone"
+      },
+      "x": 400,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

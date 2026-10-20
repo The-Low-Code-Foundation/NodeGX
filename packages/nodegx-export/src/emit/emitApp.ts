@@ -23,6 +23,7 @@ import { emitComponent } from './component';
 import { DATE_LIB_PATH, dateLibSource } from './dateLib';
 import { UTIL_LIB_PATH, utilLibSource } from './utilLib';
 import { PARSE_DEPENDENCIES, PARSE_HELPERS_NEEDING_DEPENDENCY, PARSE_LIB_PATH, isParseHelper, parseLibSource } from './parseLib';
+import { FUNCTION_RUN_LIB_PATH, functionRunLibSource } from './functionRunLib';
 import { ID_LIB_PATH, idLibSource } from './idLib';
 import { TIMER_LIB_PATH, timerLibSource } from './timerLib';
 import { ANIMATE_LIB_PATH, animateLibSource } from './animateLib';
@@ -44,7 +45,11 @@ import { SSE_LIB_PATH, sseLibSource } from './sseLib';
 import { WEBSOCKET_LIB_PATH, websocketLibSource } from './websocketLib';
 import { REALTIME_LIB_PATH, realtimeLibSource } from './realtimeLib';
 import { REPEAT_LIB_PATH, repeatLibSource } from './repeatLib';
+import { ACTIONS_LIB_PATH, actionsLibSource } from './actionsLib';
+import { HISTORY_LIB_PATH, historyLibSource } from './historyLib';
+import { SIGN_IN_LIB_PATH, signInLibSource } from './signInLib';
 import { CRYPTO_LIB_PATH, cryptoLibSource } from './cryptoLib';
+import { PATTERN_LIB_PATH, isPatternHelper, patternLibSource } from './patternLib';
 import { SCREEN_LIB_PATH, screenLibSource } from './screenLib';
 import { MEDIA_LIB_PATH, mediaLibSource } from './mediaLib';
 import { COMPONENT_OBJECT_LIB_PATH, componentObjectLibSource } from './componentObjectLib';
@@ -54,7 +59,7 @@ import { POPUP_DIALOG_LIB_PATH, popupDialogLibSource } from './popupDialogLib';
 import { EmittedCopy, emitKits } from './kits';
 import { README_PATH, renderReadme } from './readme';
 import { ExportReportData, REPORT_PATH, ReportComponent, StylesReport, renderReport, stripScope } from './report';
-import { emitScaffold } from './scaffold';
+import { emitScaffold, routerNotes } from './scaffold';
 import { emitStateModules } from './state';
 
 const GENERATED_TS = '// @nodegx:generated (api stub — provenance markers complete in EXP-007)\n';
@@ -133,6 +138,22 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     projectNotes.push(cloud);
   }
 
+  // P18-S110-STORENOTES. A Global Store declarer's notes are about the store, which is app-wide, and a declarer
+  // in a component with no file has no component notes to carry them — so they are routed here, both channels.
+  for (const store of project.stores) {
+    for (const n of store.notes) {
+      const line = `${n.componentPath}: node ${n.nodeId} (net.noodl.GlobalStore, store "${store.name}"): ${n.text}`;
+      notes.push(line);
+      projectNotes.push(line);
+    }
+  }
+
+  // P18-S110-ROUTERSELF. The Router's own ports the export does not carry: it has no Router element. App-wide, both channels.
+  for (const line of routerNotes(ir)) {
+    notes.push(line);
+    projectNotes.push(line);
+  }
+
   // Reachability is reported, never acted on: an unreachable component is still emitted, because
   // the author may be mid-build and the export is not the place to decide their project has dead
   // code. What it changes is how the rest of this list reads — a deferral in a component no route
@@ -154,6 +175,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   const idHelpersUsed = new Set<string>();
   /** The same gate for `src/lib/timer.ts` (EXP-011 §39). */
   const timerHelpersUsed = new Set<string>();
+  /** EXP-011 §86. `src/lib/functionRun.ts`, earned by a component that prints a Function's pulses. */
+  let functionRunLibUsed = false;
   // EXP-011 §49. The animation pair's modules — earned by a component whose plan kept a node.
   let animateLibUsed = false;
   let statesLibUsed = false;
@@ -175,9 +198,17 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   let realtimeLibUsed = false;
   // GAM-013. Repeat's host — earned by a component whose plan kept a Repeat node; it imports errors.ts only.
   let repeatLibUsed = false;
+  // EXP-011 §77. The action bus's host — earned by a component whose plan kept a Dispatcher or a Handler; it imports errors.ts only.
+  let actionsLibUsed = false;
+  // EXP-011 §78. The history's host — earned by a component whose plan kept a State History, an Undo / Redo, a State Snapshot or an Optimistic Update.
+  let historyLibUsed = false;
+  // EXP-011 §79. Sign In With's host — earned by a component whose plan kept one; it imports the client and errors.ts.
+  let signInLibUsed = false;
   // EXP-011 §59.
   let cryptoLibUsed = false;
   let screenLibUsed = false;
+  // EXP-011 §76. The extractor's verb — the crypto family's third member, its own module.
+  let patternLibUsed = false;
   // EXP-014 §14.5. The media URL helpers — earned where a component printed a wired src/srcSet/poster.
   const mediaHelpersUsed = new Set<string>();
   // EXP-011 §60. The component-object record, its context and the parent hook; the lib raises on errors.ts.
@@ -234,6 +265,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     for (const helper of emitted.dateHelpers) dateHelpersUsed.add(helper);
     for (const helper of emitted.utilHelpers) utilHelpersUsed.add(helper);
     for (const helper of emitted.idHelpers) idHelpersUsed.add(helper);
+    if (emitted.functionRunLib) functionRunLibUsed = true;
     for (const helper of emitted.timerHelpers) timerHelpersUsed.add(helper);
     if (emitted.animateLib) animateLibUsed = true;
     if (emitted.statesLib) statesLibUsed = true;
@@ -247,7 +279,11 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     if (emitted.websocketLib) websocketLibUsed = true;
     if (emitted.realtimeLib) realtimeLibUsed = true;
     if (emitted.repeatLib) repeatLibUsed = true;
-    if (emitted.cryptoHelpers.size > 0) cryptoLibUsed = true;
+    if (emitted.actionsLib) actionsLibUsed = true;
+    if (emitted.historyLib) historyLibUsed = true;
+    if (emitted.signInLib) signInLibUsed = true;
+    if ([...emitted.cryptoHelpers].some((fn) => !isPatternHelper(fn))) cryptoLibUsed = true;
+    if ([...emitted.cryptoHelpers].some(isPatternHelper)) patternLibUsed = true;
     if (emitted.screenLib) screenLibUsed = true;
     for (const helper of emitted.mediaHelpers) mediaHelpersUsed.add(helper);
     if (emitted.componentObjectLib) componentObjectLibUsed = true;
@@ -287,6 +323,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
    */
   if (idHelpersUsed.size > 0) {
     files[ID_LIB_PATH] = GENERATED_MODULE_TS + idLibSource();
+  }
+  /** EXP-011 §86. `src/lib/functionRun.ts`, on the same rule as the modules above. */
+  if (functionRunLibUsed) {
+    files[FUNCTION_RUN_LIB_PATH] = GENERATED_MODULE_TS + functionRunLibSource();
   }
   /** `src/lib/timer.ts` (EXP-011 §39) — the fourth module, on the same rule as the other three. */
   if (timerHelpersUsed.size > 0) {
@@ -329,7 +369,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // EXP-011 §64. sse.ts raises `sse/connect-failed` on the channel, so it earns errors.ts too. §65: websocket.ts raises its own codes.
   // EXP-011 §66. realtime.ts raises subscribe-to-changes/realtime-failed on the channel.
   // GAM-013. repeat.ts raises repeat/interval-not-positive on the channel.
-  if (errorsLibUsed || scriptLibUsed || runTasksLibUsed || streamingLibUsed || sseLibUsed || websocketLibUsed || realtimeLibUsed || repeatLibUsed || componentObjectLibUsed || dragLibUsed) {
+  // EXP-011 §77. actions.ts raises action-dispatcher/nothing-admitted and action-handler/operation-failed on the channel.
+  // EXP-011 §78. history.ts raises undo/operation-failed, state-snapshot/operation-failed and optimistic-update/operation-failed on the channel.
+  // EXP-011 §79. signIn.ts raises user/sign-in-with-failed on the channel.
+  if (errorsLibUsed || scriptLibUsed || runTasksLibUsed || streamingLibUsed || sseLibUsed || websocketLibUsed || realtimeLibUsed || repeatLibUsed || actionsLibUsed || historyLibUsed || signInLibUsed || componentObjectLibUsed || dragLibUsed) {
     files[ERRORS_LIB_PATH] = GENERATED_MODULE_TS + errorsLibSource();
   }
   // EXP-011 §58. `src/lib/streaming.ts` — the trio's host; it raises on the channel, so it earns errors.ts above.
@@ -354,10 +397,26 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   if (repeatLibUsed) {
     files[REPEAT_LIB_PATH] = GENERATED_MODULE_TS + repeatLibSource();
   }
+  // EXP-011 §77. `src/lib/actions.ts` — the action bus (one registry for the app), where a component printed a Dispatcher or a Handler.
+  if (actionsLibUsed) {
+    files[ACTIONS_LIB_PATH] = GENERATED_MODULE_TS + actionsLibSource();
+  }
+  // EXP-011 §78. `src/lib/history.ts` — the history manager, the named checkpoints and the patches, where a component printed one of the four.
+  if (historyLibUsed) {
+    files[HISTORY_LIB_PATH] = GENERATED_MODULE_TS + historyLibSource();
+  }
+  // EXP-011 §79. `src/lib/signIn.ts` — the launcher and the receiver, where a component printed a Sign In With.
+  if (signInLibUsed) {
+    files[SIGN_IN_LIB_PATH] = GENERATED_MODULE_TS + signInLibSource();
+  }
   // EXP-011 §56. `src/lib/filterRecords.ts` — the Filter Records matcher, when a component printed one.
   // EXP-011 §59. The crypto verbs and the viewport hook, each only where a component calls into it.
   if (cryptoLibUsed) {
     files[CRYPTO_LIB_PATH] = GENERATED_MODULE_TS + cryptoLibSource();
+  }
+  // EXP-011 §76. `src/lib/pattern.ts` — the extractor's verb, where a component calls it.
+  if (patternLibUsed) {
+    files[PATTERN_LIB_PATH] = GENERATED_MODULE_TS + patternLibSource();
   }
   // EXP-011 §61. Owed by a rendered stack, a push, a pop, or a component the stack pushes (its reserved prop's type).
   if (pageStackLibUsed) {
@@ -541,6 +600,8 @@ function apiModules(
     moduleBase: string;
     fetchName?: string;
     querySites: Site[];
+    /** P18-S115-QUERYFILTER. Some site asks with a `where` / `order` / `limit` / `skip`, so the fetch takes them. */
+    queryParams: boolean;
     /** EXP-011 §43. `fetch<Type>ById` and the Record nodes that read through it. */
     fetchOneName?: string;
     readSites: Site[];
@@ -557,7 +618,7 @@ function apiModules(
     if (entry === undefined) {
       byCollection.set(
         collectionName,
-        (entry = { typeName, moduleBase, querySites: [], readSites: [], mutations: new Map(), writes: new Map(), reads: new Map() })
+        (entry = { typeName, moduleBase, querySites: [], queryParams: false, readSites: [], mutations: new Map(), writes: new Map(), reads: new Map() })
       );
     }
     return entry;
@@ -567,12 +628,16 @@ function apiModules(
       const entry = moduleFor(query.collectionName, query.typeName, query.moduleBase);
       entry.fetchName = query.fetchName;
       entry.querySites.push({ componentPath: plan.path, nodeId: query.nodeId });
+      if (query.params !== undefined) entry.queryParams = true;
     }
     // EXP-011 §43. A Record's read joins its class's module — one module per class, the query's rule.
     for (const read of plan.recordReads) {
       const entry = moduleFor(read.collectionName, read.typeName, read.moduleBase);
-      entry.fetchOneName = read.fnName;
-      entry.readSites.push({ componentPath: plan.path, nodeId: read.nodeId });
+      // P18-S113-IDBINDREAD. A Record whose Id only binds reads nothing: it owes its module no read, and is no site of one.
+      if (!read.binds) {
+        entry.fetchOneName = read.fnName;
+        entry.readSites.push({ componentPath: plan.path, nodeId: read.nodeId });
+      }
       for (const column of read.reads) {
         if (!entry.reads.has(column.name)) entry.reads.set(column.name, column.tsType);
       }
@@ -597,7 +662,19 @@ function apiModules(
   // EXP-011 §66. A Subscribe To Changes rides the client too — its stream is the backend's `/realtime`, its token the session's;
   // the plan keeps one only where the project declares a backend (streamPlanOf refuses it otherwise), so this never lands in the stub arm.
   const hasSubscriptions = project.plans.some((plan) => plan.streams.some((stream) => stream.kind === 'subscription'));
-  const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions;
+  // EXP-011 §79. A Sign In With hands over to the backend and hears its return through the client; streamPlanOf keeps one
+  // only where the project declares a backend, as it does a subscription.
+  const hasSignIns = project.plans.some((plan) => plan.streams.some((stream) => stream.kind === 'signin'));
+  // EXP-011 §79. The return leg ships where the app can START a sign-in that comes back to it: a Sign In With, or a Request
+  // Magic Link (whose link returns the same `?nodegx_auth=` code). Every other app's client is byte-identical.
+  const hasReturnLeg = hasSignIns || project.plans.some((plan) => plan.sessionCalls.some((call) => call.verb === 'magic-link'));
+  // P18-S111-RECORDLIVE. The client holds one copy of each record only where a Record shows it live; every other app's
+  // client is byte-identical.
+  // P18-S113-IDBINDREAD. A Record bound by its Id shows the held copy whatever its box says, so it needs them too.
+  const liveRecords = project.plans.some((plan) => plan.recordReads.some((read) => read.live || read.binds));
+  // P18-S115-QUERYPARAMS. Some page builds a query's `where` from wired values, through `filterValue`.
+  const wiredFilters = project.plans.some((plan) => plan.queries.some((query) => query.params?.wired !== undefined && query.wiredClient === true));
+  const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions || hasSignIns;
   const notes: string[] = [];
   // No collection module can collide with `client.ts` (or `session.ts`): moduleBase is the
   // pluralized class name and every pluralize() result ends in "s"/"es"/"ies", while neither
@@ -629,7 +706,7 @@ function apiModules(
   let anyFileColumn = false;
   for (const [collectionName, module] of byCollection) {
     const schema = ir.project.collections.find((c) => c.name === collectionName);
-    const { typeName, moduleBase, fetchName, querySites, fetchOneName, readSites, mutations, writes, reads } = module;
+    const { typeName, moduleBase, fetchName, querySites, queryParams, fetchOneName, readSites, mutations, writes, reads } = module;
 
     // The schema snapshot is the authority on a column's declared type, and the graph's writes
     // are evidence of columns the snapshot does not carry — most of the corpus has no snapshot
@@ -653,12 +730,16 @@ function apiModules(
         backend !== undefined
           ? `/**\n${querySites.map((s) => siteLine(s, 'DbCollection2')).join('\n')}\n` +
               ` * Fetches the \`${collectionName}\` collection from the project's NodeGX backend\n` +
-              ` * (src/api/client.ts); the export report lists every call site.\n */\n` +
-              `export async function ${fetchName}(): Promise<${typeName}[]> {\n  return query<${typeName}>(${tsStringLiteral(collectionName)});\n}\n`
+              ` * (src/api/client.ts); the export report lists every call site.\n` +
+              (queryParams ? ` * Each site passes its own filter, order and limit, as the running app sends them.\n` : '') +
+              ` */\n` +
+              (queryParams
+                ? `export async function ${fetchName}(params?: QueryParams): Promise<${typeName}[]> {\n  return query<${typeName}>(${tsStringLiteral(collectionName)}, params);\n}\n`
+                : `export async function ${fetchName}(): Promise<${typeName}[]> {\n  return query<${typeName}>(${tsStringLiteral(collectionName)});\n}\n`)
           : `/**\n${querySites.map((s) => siteLine(s, 'DbCollection2')).join('\n')}\n` +
               ` * fetched the \`${collectionName}\` collection from the project's NodeGX backend. Connect this to your\n` +
               ` * own data source; the export report lists every call site.\n */\n` +
-              `export async function ${fetchName}(): Promise<${typeName}[]> {\n  return [];\n}\n`
+              `export async function ${fetchName}(${queryParams ? '_params?: unknown' : ''}): Promise<${typeName}[]> {\n  return [];\n}\n`
       );
     }
 
@@ -757,8 +838,12 @@ function apiModules(
                   : 'remove'
         );
       }
-      const importLine = `import { ${[...clientImports].sort().join(', ')} } from './client';\n`;
-      stubs.push([`src/api/${moduleBase}.ts`, GENERATED_MODULE_TS + importLine + filesImport + '\n' + parts.join('\n')]);
+      // P18-S113-IDBINDREAD. A class whose only Record binds by its Id imports nothing from the client: its module is the interface.
+      // P18-S115-QUERYFILTER. The fetch's parameter type rides the same import, after the values.
+      const clientNames = [...[...clientImports].sort(), ...(fetchName !== undefined && queryParams ? ['type QueryParams'] : [])];
+      const importLine = clientNames.length === 0 ? '' : `import { ${clientNames.join(', ')} } from './client';\n`;
+      const imports = importLine + filesImport;
+      stubs.push([`src/api/${moduleBase}.ts`, GENERATED_MODULE_TS + (imports === '' ? '' : imports + '\n') + parts.join('\n')]);
     } else {
       stubs.push([`src/api/${moduleBase}.ts`, GENERATED_TS + (filesImport === '' ? '' : filesImport + '\n') + parts.join('\n')]);
     }
@@ -784,7 +869,7 @@ function apiModules(
   if (files !== null) stubs.push(files);
 
   if (backend !== undefined && hasApi) {
-    stubs.push(['src/api/client.ts', clientModule(backend)]);
+    stubs.push(['src/api/client.ts', clientModule(backend, hasReturnLeg, liveRecords, wiredFilters)]);
     stubs.push(['.env.example', envExample(backend)]);
     // ⚠️ `README.md` used to be pushed here too, and that was the defect EXP-004 closed: it made
     // the repository's front door conditional on the project having a backend to query. It is now
@@ -831,9 +916,10 @@ function httpModule(project: ProjectPlan): [string, string] | null {
     GENERATED_MODULE_TS +
       '//\n// Requests the graph makes to addresses outside this app. Each function is one\n' +
       "// HTTP Request node's configuration, with the values it was wired for as parameters.\n" +
-      '//\n// Where nothing came back at all — no URL, a timeout, a network error — the function throws an\n' +
-      "// HttpError whose `code` is the node's own (http/no-url, http/timeout, http/network-error), for the\n" +
-      '// failure arm to report on the error channel; a non-2xx answer is `ok: false`, reported there as\n' +
+      '//\n// Where nothing usable came back — no URL, a timeout, a network error, or an answer whose JSON\n' +
+      "// could not be read — the function throws an HttpError whose `code` is the node's own (http/no-url,\n" +
+      '// http/timeout, http/network-error, http/bad-body), for the failure arm to report on the error\n' +
+      '// channel; a non-2xx answer is `ok: false`, reported there as\n' +
       '// http/error-status.\n\n' +
       'export class HttpError extends Error {\n' +
       '  constructor(\n' +
@@ -1058,6 +1144,59 @@ function httpParamsType(call: HttpCallPlan): string | null {
   return rows.length > 0 ? `{ ${rows.join('; ')} }` : null;
 }
 
+/** P18-S104-RESPONSETYPE — the result type's line about `response`, per Response Type. */
+const HTTP_BODY_DOC: Record<HttpCallPlan['responseType'], string> = {
+  auto: 'The body, parsed as JSON when the server said so and as text otherwise.',
+  text: 'The body as text, whatever the server said it was (Response Type: Text).',
+  json: 'The body parsed as JSON, whatever the server said it was (Response Type: JSON).'
+};
+
+/**
+ * How the emitted request reads the body — `httpnode.ts`'s three arms (FED-001 §3.2), one per Response Type.
+ *
+ * P18-S104-RESPONSETYPE: the export used to print Auto whatever was set, so a Text request handed over an object
+ * for an `application/json` answer and a JSON request handed over a string for JSON served as `text/plain`. JSON
+ * reads the text and parses it itself, as the runtime does, so a body that is not JSON fails under `http/bad-body`
+ * with the runtime's own sentence. In every arm only the JSON parse is marked (P107-D11): a text read that fails
+ * stays a network error.
+ */
+function httpBodyReadLines(responseType: HttpCallPlan['responseType']): string[] {
+  if (responseType === 'text') {
+    return ['  // Response Type: Text — the text, whatever the server called it.', '  const parsed: unknown = await response.text();'];
+  }
+  if (responseType === 'json') {
+    return [
+      '  // Response Type: JSON — parsed whatever the server called it; a body that is not JSON is http/bad-body.',
+      '  const bodyText = await response.text();',
+      '  let parsed: unknown;',
+      '  try {',
+      '    parsed = JSON.parse(bodyText);',
+      '  } catch (error) {',
+      '    throw new HttpError(',
+      "      'Response Type is JSON but the body is not JSON: ' + (error instanceof Error && error.message ? error.message : String(error)),",
+      "      'http/bad-body'",
+      '    );',
+      '  }'
+    ];
+  }
+  return [
+    "  const contentType = response.headers.get('content-type') ?? '';",
+    '  // P107-D11 (P109-S24-EXPORTBADBODY): the server answered and its JSON could not be read. That is',
+    "  // http/bad-body, the runtime's own code, not the network error a request that never arrived gets. Only",
+    '  // the JSON read is marked, as `httpnode.ts` marks only that one; a text read that fails stays a network error.',
+    '  let parsed: unknown;',
+    "  if (contentType.includes('application/json')) {",
+    '    try {',
+    '      parsed = await response.json();',
+    '    } catch (error) {',
+    "      throw new HttpError(error instanceof Error && error.message ? error.message : 'Network error', 'http/bad-body');",
+    '    }',
+    '  } else {',
+    '    parsed = await response.text();',
+    '  }'
+  ];
+}
+
 function httpFunction(componentPath: string, call: HttpCallPlan): string {
   const out: string[] = [];
   const paramsType = httpParamsType(call);
@@ -1076,7 +1215,7 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
     `export interface ${call.typeName} {`,
     '  /** True when the server answered 2xx — the node\'s Done outcome; false is its Failure. */',
     '  ok: boolean;',
-    '  /** The body, parsed as JSON when the server said so and as text otherwise. */',
+    `  /** ${HTTP_BODY_DOC[call.responseType]} */`,
     '  response: any;',
     '  statusCode: number;',
     '  /** Every header the server returned, keyed by lower-cased name. */',
@@ -1190,8 +1329,7 @@ function httpFunction(componentPath: string, call: HttpCallPlan): string {
     '  } finally {',
     '    clearTimeout(timer);',
     '  }',
-    "  const contentType = response.headers.get('content-type') ?? '';",
-    "  const parsed: unknown = contentType.includes('application/json') ? await response.json() : await response.text();",
+    ...httpBodyReadLines(call.responseType),
     '  const responseHeaders: Record<string, string> = {};',
     '  response.headers.forEach((value, key) => {',
     '    responseHeaders[key] = value;',
@@ -1494,6 +1632,89 @@ function envLine(name: string, value: string): string {
   return `${name}=${value.replace(/[\r\n]/g, '')}\n`;
 }
 
+/** The record update every client without a live Record ships. */
+const PLAIN_UPDATE_SOURCE = `export async function update<T extends { id: string }>(collection: string, id: string, data: Partial<T>): Promise<T> {
+  // The wire answers a PUT with the changed fields only (\`updatedAt\`), so the
+  // caller's own data is the record the graph continues with.
+  const response = await request<Record<string, unknown>>(\`/classes/\${collection}/\${encodeURIComponent(id)}\`, {
+    method: 'PUT',
+    body: data
+  });
+  const { objectId: _objectId, ...fields } = response;
+  return { ...data, ...fields, id } as unknown as T;
+}
+`;
+
+/**
+ * P18-S111-RECORDLIVE. The running app holds one copy of each record: `Model.get(id)`, keyed by the id alone. Every read
+ * merges its answer into that copy (`CloudStore._fromJSON`: the Record's fetch, Query Records' rows, Create Record's
+ * answer), Set Record Properties writes it, and a Record with "Record properties" ticked (the default) re-flags its
+ * outputs on every change to it (dbmodelnode2.ts `onModelChangedCallback`). Before this the exported Record's row was
+ * component state written only by its own read, so a page kept showing the old values after a form elsewhere saved new
+ * ones. Shipped only where a live Record is, so every other client is byte-identical.
+ */
+const HELD_RECORDS_SOURCE = `
+/**
+ * The app's one copy of each record, keyed by its id alone as the running app keys them
+ * (\`Model.get(id)\`). Every read merges into it field by field, as the running app's
+ * \`_fromJSON\` does, and nothing removes a field. A Record shows this copy, so a write
+ * anywhere in the app reaches it at once.
+ */
+type HeldRecord = { id: string } & Record<string, unknown>;
+const heldRecords = new Map<string, HeldRecord>();
+const recordListeners = new Map<string, Set<(row: HeldRecord) => void>>();
+
+function holdRecord<T extends { id: string }>(fields: T): T {
+  const row = { ...heldRecords.get(fields.id), ...fields } as HeldRecord;
+  heldRecords.set(fields.id, row);
+  recordListeners.get(fields.id)?.forEach((listener) => listener(row));
+  return row as unknown as T;
+}
+
+/** Hands \`listener\` the record's copy now, and again after every write to it, until the returned function is called. */
+export function subscribeRecord<T extends { id: string }>(id: string, listener: (row: T) => void): () => void {
+  const call = listener as unknown as (row: HeldRecord) => void;
+  const listeners = recordListeners.get(id) ?? new Set<(row: HeldRecord) => void>();
+  recordListeners.set(id, listeners);
+  listeners.add(call);
+  const held = heldRecords.get(id);
+  if (held !== undefined) call(held);
+  return () => {
+    listeners.delete(call);
+  };
+}
+`;
+
+/**
+ * P18-S111-RECORDLIVE. Set Record Properties in the running app (setdbmodelpropertiesnode.ts): the values are written
+ * into the record BEFORE the save, the answer's fields after it, and a failed save puts back what the record held
+ * (P107-C34, "Put the old values back"), so a Record showing it moves at the press and never keeps a refused value.
+ */
+const HELD_UPDATE_SOURCE = `export async function update<T extends { id: string }>(collection: string, id: string, data: Partial<T>): Promise<T> {
+  // The running app writes the record before the save and puts back what it held if the
+  // save fails, so a Record showing it moves at the press. The wire answers a PUT with
+  // the changed fields only (\`updatedAt\`), so the caller's own data is the record the
+  // graph continues with.
+  const held: Record<string, unknown> = heldRecords.get(id) ?? {};
+  const before: Record<string, unknown> = {};
+  for (const key of Object.keys(data)) before[key] = held[key];
+  holdRecord({ ...data, id });
+  let response: Record<string, unknown>;
+  try {
+    response = await request<Record<string, unknown>>(\`/classes/\${collection}/\${encodeURIComponent(id)}\`, {
+      method: 'PUT',
+      body: data
+    });
+  } catch (error) {
+    holdRecord({ ...before, id });
+    throw error;
+  }
+  const { objectId: _objectId, ...fields } = response;
+  holdRecord({ ...fields, id });
+  return { ...data, ...fields, id } as unknown as T;
+}
+`;
+
 /**
  * `src/api/client.ts` — the Parse wire protocol the running app speaks (noodl-runtime's
  * `ParseWireAdapter` / `ParseAuthAdapter` / `SessionStore`), reduced to what the generated
@@ -1509,7 +1730,27 @@ function envLine(name: string, value: string): string {
  *   merged into the stored session (`ParseAuthAdapter.signUp` — its absence was a live defect).
  * - no master key, ever: it is a server credential, and this file ships in a browser bundle.
  */
-function clientModule(backend: CloudServicesIR): string {
+/**
+ * P18-S115-QUERYPARAMS. A wired filter value on its way to the wire: the runtime translator's `parseValue`
+ * (`@noodl/backend-contract` translators/parse.ts), the one step it takes between a value and a plain comparison.
+ * Graded against the translator itself (tests/the-query-reads-its-wires.test.ts).
+ */
+const FILTER_VALUE_SOURCE = `
+/**
+ * A filter value as the running app puts it on the wire: a Date goes as the backend's date envelope, and so does a
+ * date written as text when its column is a Date. Anything else goes as it is.
+ */
+export function filterValue(value: unknown, dateColumn = false): unknown {
+  if (value instanceof Date) return { __type: 'Date', iso: value.toISOString() };
+  if (dateColumn && value !== null && value !== undefined) {
+    const asDate = new Date(String(value));
+    if (!Number.isNaN(asDate.getTime())) return { __type: 'Date', iso: asDate.toISOString() };
+  }
+  return value;
+}
+`;
+
+function clientModule(backend: CloudServicesIR, returnLeg: boolean, liveRecords: boolean, wiredFilters = false): string {
   return (
     GENERATED_CLIENT_TS +
     `/**
@@ -1663,7 +1904,7 @@ function fromWire<T extends { id: string }>(record: Record<string, unknown>): T 
   for (const [key, value] of Object.entries(fields)) row[key] = fromWireValue(value);
   return row as unknown as T;
 }
-
+${liveRecords ? HELD_RECORDS_SOURCE : ''}${wiredFilters ? FILTER_VALUE_SOURCE : ''}
 export interface QueryParams {
   where?: unknown;
   sort?: string[];
@@ -1684,13 +1925,13 @@ export async function query<T extends { id: string }>(collection: string, params
       skip: params.skip
     }
   });
-  return response.results.map((record) => fromWire<T>(record));
+  return response.results.map((record) => ${liveRecords ? 'holdRecord(fromWire<T>(record))' : 'fromWire<T>(record)'});
 }
 
 /** One record by Id — the runtime's own \`GET /classes/<collection>/<id>\` (ParseWireAdapter.fetch). */
 export async function fetchOne<T extends { id: string }>(collection: string, id: string): Promise<T> {
   const response = await request<Record<string, unknown>>(\`/classes/\${collection}/\${encodeURIComponent(id)}\`);
-  return fromWire<T>(response);
+  return ${liveRecords ? 'holdRecord(fromWire<T>(response))' : 'fromWire<T>(response)'};
 }
 
 export async function create<T extends { id: string }>(collection: string, data: Partial<T>): Promise<T> {
@@ -1698,20 +1939,10 @@ export async function create<T extends { id: string }>(collection: string, data:
     method: 'POST',
     body: data
   });
-  return fromWire<T>({ ...data, ...response });
+  return ${liveRecords ? 'holdRecord(fromWire<T>({ ...data, ...response }))' : 'fromWire<T>({ ...data, ...response })'};
 }
 
-export async function update<T extends { id: string }>(collection: string, id: string, data: Partial<T>): Promise<T> {
-  // The wire answers a PUT with the changed fields only (\`updatedAt\`), so the
-  // caller's own data is the record the graph continues with.
-  const response = await request<Record<string, unknown>>(\`/classes/\${collection}/\${encodeURIComponent(id)}\`, {
-    method: 'PUT',
-    body: data
-  });
-  const { objectId: _objectId, ...fields } = response;
-  return { ...data, ...fields, id } as unknown as T;
-}
-
+${liveRecords ? HELD_UPDATE_SOURCE : PLAIN_UPDATE_SOURCE}
 export async function remove(collection: string, id: string): Promise<void> {
   await request<unknown>(\`/classes/\${collection}/\${encodeURIComponent(id)}\`, { method: 'DELETE' });
 }
@@ -1881,8 +2112,160 @@ export async function callFunction<T>(name: string, params: Record<string, unkno
   // No result is still success: the node keeps its previous results and fires Done.
   return (json?.result ?? {}) as T;
 }
-`
+` +
+    (returnLeg ? authReturnLegSource() : '')
   );
+}
+
+/**
+ * EXP-011 §79 — the sign-in return leg, appended to `src/api/client.ts` where the app can START a sign-in that comes back
+ * to it: a `Sign In With` (the provider's redirect) or a `Request Magic Link` (the link in the inbox). Both come back as
+ * `?nodegx_auth=<one-time code>` or `?nodegx_auth_error=<sentence>` on the page they named, and the runtime's UserService
+ * picks either up in its constructor (`_consumeAuthReturn` → `ParseAuthAdapter.consumeAuthReturn`). Before this the
+ * exported client had no return leg at all, so a magic link signed nobody in (P18-S109-MAGICRETURN).
+ *
+ * Transcribed: the strip before anything else, the error deferred a tick so a node mounting in the same tick hears it,
+ * `POST /oauth/exchange { code }` read as `_makeRequest` reads it (its own request, not `request()`, whose sentences
+ * differ: the differential found a 500 with no `error` reading "Request failed (500)"), the whole answer stored as the
+ * session (as Log In stores its own), then the announcement. Run once, when the module is first evaluated — at app start, where the runtime runs it at the first
+ * user-family node; see §79.4.
+ */
+function authReturnLegSource(): string {
+  return [
+    '',
+    '// ── The sign-in return leg (EXP-011 §79) ─────────────────────────────────────',
+    '',
+    '/** A sign-in coming back to this page load, as the runtime keeps it (ParseAuthAdapter\'s OAuthReturnState). */',
+    'export interface AuthReturnState {',
+    '  inProgress: boolean;',
+    '  /** Set once the exchange resolves. */',
+    '  succeeded?: boolean;',
+    '  error?: string;',
+    '  /** `created` | `signed-in` | `linked` | `linked-credentials-revoked`. */',
+    '  outcome?: string;',
+    '  /** A message worth showing the user — set when the linking rule revoked an old password. */',
+    '  notice?: string;',
+    '}',
+    '',
+    'let authReturn: AuthReturnState = { inProgress: false };',
+    'const authReturnListeners = new Set<(state: AuthReturnState) => void>();',
+    '',
+    '/** The state of this page load\'s sign-in return: not one, in progress, or settled. */',
+    'export function readAuthReturn(): AuthReturnState {',
+    '  return authReturn;',
+    '}',
+    '',
+    '/** Hear the return settle (and an exchange start). Returns an unsubscribe function. */',
+    'export function subscribeAuthReturn(listener: (state: AuthReturnState) => void): () => void {',
+    '  authReturnListeners.add(listener);',
+    '  return () => {',
+    '    authReturnListeners.delete(listener);',
+    '  };',
+    '}',
+    '',
+    'function announceAuthReturn(): void {',
+    '  for (const listener of [...authReturnListeners]) listener(authReturn);',
+    '}',
+    '',
+    '/**',
+    ' * The Sign In With node\'s handover (ParseAuthAdapter.signInWithProvider). This NAVIGATES AWAY: nothing after it runs,',
+    ' * and the result arrives on a later page load, below. A blank Redirect comes back to this page, minus any leftover',
+    ' * sign-in parameters; the backend refuses a target that is neither same-origin nor on its redirect allow-list.',
+    ' * Refused, in the call and before anything navigates, when no provider is set.',
+    ' */',
+    'export function signInWithProviderRequest(provider: unknown, redirect: unknown): void {',
+    '  if (!provider) throw new Error(\'Sign In With: no provider was set.\');',
+    '  const target = redirect || currentUrlWithoutAuthParams();',
+    '  window.location.href =',
+    '    ENDPOINT + \'/oauth/\' + encodeURIComponent(String(provider)) + \'/start?redirect=\' + encodeURIComponent(String(target));',
+    '}',
+    '',
+    '/** Rewrite the address bar without the sign-in parameters, keeping everything else. */',
+    'function stripAuthParamsFromUrl(remaining: URLSearchParams): void {',
+    '  if (!window.history || typeof window.history.replaceState !== \'function\') return;',
+    '  const query = remaining.toString();',
+    '  const cleaned = window.location.pathname + (query ? \'?\' + query : \'\') + window.location.hash;',
+    '  try {',
+    '    window.history.replaceState(window.history.state, \'\', cleaned);',
+    '  } catch {',
+    '    // A sandboxed iframe can refuse replaceState. Not fatal: the exchange still runs and the code is still single-use.',
+    '  }',
+    '}',
+    '',
+    '/**',
+    ' * Look for a sign-in result in this page\'s URL and act on it (ParseAuthAdapter.consumeAuthReturn). The parameters are',
+    ' * stripped BEFORE anything else: a one-time code left in the address bar survives into history and into anything the',
+    ' * user copies, and a refresh would re-attempt a code that is already spent.',
+    ' */',
+    'function consumeAuthReturn(): boolean {',
+    '  if (typeof window === \'undefined\' || !window.location) return false;',
+    '  let params: URLSearchParams;',
+    '  try {',
+    '    params = new URLSearchParams(window.location.search);',
+    '  } catch {',
+    '    return false;',
+    '  }',
+    '  const code = params.get(\'nodegx_auth\');',
+    '  const error = params.get(\'nodegx_auth_error\');',
+    '  if (!code && !error) return false;',
+    '',
+    '  params.delete(\'nodegx_auth\');',
+    '  params.delete(\'nodegx_auth_error\');',
+    '  stripAuthParamsFromUrl(params);',
+    '',
+    '  if (error) {',
+    '    authReturn = { inProgress: false, succeeded: false, error };',
+    '    // Deferred so a listener attached during this same tick still hears it.',
+    '    setTimeout(announceAuthReturn, 0);',
+    '    return true;',
+    '  }',
+    '',
+    '  authReturn = { inProgress: true };',
+    '  void exchangeAuthCode(code as string);',
+    '  return true;',
+    '}',
+    '',
+    '/**',
+    ' * `POST /oauth/exchange { code }` — the one-time code traded for the session, read as the runtime\'s own auth request',
+    ' * reads its answer (ParseAuthAdapter._makeRequest), not as request() does: 200 or 201 is the session, stored whole as',
+    ' * Log In stores its own; anything else is the body\'s `error`, else its raw text, else the node\'s own sentence — which',
+    ' * is also what an unreachable backend reads (the browser reports status 0 and no text).',
+    ' */',
+    'async function exchangeAuthCode(code: string): Promise<void> {',
+    '  const headers: Record<string, string> = {',
+    '    \'X-Parse-Application-Id\': APP_ID,',
+    '    \'Content-Type\': \'application/json\'',
+    '  };',
+    '  const sessionToken = readSession()?.sessionToken;',
+    '  if (sessionToken !== undefined) headers[\'X-Parse-Session-Token\'] = sessionToken;',
+    '  let status = 0;',
+    '  let text = \'\';',
+    '  try {',
+    '    const response = await fetch(ENDPOINT + \'/oauth/exchange\', { method: \'POST\', headers, body: JSON.stringify({ code }) });',
+    '    status = response.status;',
+    '    text = await response.text();',
+    '  } catch {',
+    '    // status 0 and no text, as the runtime\'s request reads a network failure',
+    '  }',
+    '  let json: (WireSession & { authOutcome?: string; authNotice?: string | null; error?: unknown }) | undefined;',
+    '  try {',
+    '    json = JSON.parse(text);',
+    '  } catch {',
+    '    json = undefined;',
+    '  }',
+    '  if (status === 200 || status === 201) {',
+    '    const response = (json || text) as WireSession & { authOutcome?: string; authNotice?: string | null };',
+    '    writeSession(response);',
+    '    authReturn = { inProgress: false, succeeded: true, outcome: response.authOutcome, notice: response.authNotice || undefined };',
+    '  } else {',
+    '    authReturn = { inProgress: false, succeeded: false, error: ((json ? json.error : text) as string) || \'Sign-in could not be completed.\' };',
+    '  }',
+    '  announceAuthReturn();',
+    '}',
+    '',
+    'consumeAuthReturn();',
+    ''
+  ].join('\n');
 }
 
 function envExample(backend: CloudServicesIR): string {

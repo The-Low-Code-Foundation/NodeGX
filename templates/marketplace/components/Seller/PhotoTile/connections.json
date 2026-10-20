@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9364539f-c293-5c20-8f3d-6f8a9cb1e882",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ptIn",
+      "fromProperty": "thumb",
+      "toId": "ptImage",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "ptIn",
+      "fromProperty": "url",
+      "toId": "ptGone",
+      "toProperty": "in-url"
+    },
+    {
+      "fromId": "ptRemove",
+      "fromProperty": "onClick",
+      "toId": "ptGone",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ptGone",
+      "fromProperty": "out-removed",
+      "toId": "ptRemoved",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ptGone",
+      "fromProperty": "out-go",
+      "toId": "ptRemoved",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -89,6 +89,11 @@ describe('SBR-007 D21 — auth preflight', () => {
     expect(allowed).toContain('x-nodegx-file-private');
   });
 
+  it('P121-TWO001-MEMBERSPHOTO: allows the readers header, which a members-only photo is uploaded with', async () => {
+    const allowed = await preflight([...AUTH_HEADERS, 'x-nodegx-file-readers']);
+    expect(allowed).toContain('x-nodegx-file-readers');
+  });
+
   it('🔴 control: still refuses a header nothing sends', async () => {
     // Asked for in the same call, so this is the same instrument answering
     // about two headers rather than two runs answering about one.

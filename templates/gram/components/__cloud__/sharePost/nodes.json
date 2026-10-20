@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "dbb77b5a-0fe9-5a5f-85d6-3f515d209be7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-7",
+      "type": "noodl.cloud.request",
+      "label": "sharePost(post)",
+      "parameters": {
+        "params": "post",
+        "ptype-post": "object",
+        "preq-post": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-3",
+      "type": "JavaScriptFunction",
+      "label": "Share a post with the members: a caption, photos shared with members only, or both",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\nasync function member(userId) {\n  if (!userId) return null;\n  return one('Member', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction email(v) {\n  var e = typeof v === 'string' ? v.trim().toLowerCase() : '';\n  var at = e.indexOf('@');\n  if (e.length > 200 || at < 1 || e.indexOf(' ') >= 0 || e.indexOf('@', at + 1) >= 0) return '';\n  var dot = e.lastIndexOf('.');\n  return dot > at + 1 && dot < e.length - 1 ? e : '';\n}\n\nasync function inMember(userId) {\n  var m = await member(userId);\n  return m && m.status === 'approved' && !m.endedAt ? m : null;\n}\nasync function postInFeed(id) {\n  var p = id ? await one('Post', { objectId: { equalTo: id } }) : null;\n  if (!p || p.endedAt) return null;\n  var by = await one('Member', { objectId: { equalTo: idOf(p.member) } });\n  return by && !by.endedAt ? p : null;\n}\n/**\n * W1, for every photo a member puts in front of the others (a post's, a profile's): '' when it is the caller's,\n * shared with the members and the admins, a photo, and its link its own; otherwise what is wrong with it.\n */\nasync function photoProblem(f, userId) {\n  var name = f && typeof f.name === 'string' ? f.name : '';\n  var url = f && typeof f.url === 'string' ? f.url : '';\n  var file = name ? await one('_Files', { storedName: { equalTo: name } }) : null;\n  if (!file || idOf(file.owner) !== String(userId)) return 'mine';\n  var readers = Array.isArray(file.readers) ? file.readers : [];\n  var shared = [\"role:member\",\"role:admin\"].every(function (r) { return readers.indexOf(r) >= 0; });\n  // No private check of its own: the backend writes readers only on a private file (an equivalent mutant said so).\n  if (!shared) return 'public';\n  if (String(file.contentType || '').indexOf('image/') !== 0) return 'image';\n  if (url.slice(-(name.length + 7)) !== '/files/' + name) return 'mine';\n  return '';\n}\n\nvar a = Inputs.post;\nif (a === undefined || Inputs.userId === undefined) return;\nif (!a || typeof a !== 'object') { refuse('Write something, or add a photo.'); return; }\nvar m = await inMember(Inputs.userId);\nif (!m) { refuse('Only members who’ve been let in can post.'); return; }\nvar kind = a.kind === undefined ? 'post' : a.kind;\nif ([\"post\",\"prayer\",\"testimony\",\"event\"].indexOf(kind) < 0) { refuse('Share a post, a prayer request, a testimony or an event.'); return; }\nvar caption = typeof a.caption === 'string' ? a.caption.trim() : '';\nif (caption.length > 2200) { refuse('A caption of 2,200 characters or fewer.'); return; }\nvar photos = Array.isArray(a.photos) ? a.photos : [];\nif (photos.length > 4) { refuse('4 photos at most in one post.'); return; }\nif (kind === 'prayer' && photos.length > 0) { refuse('A prayer request is words only.'); return; }\nvar wordsNeeded = {\"prayer\":\"Say what you’d like the members to pray for.\",\"testimony\":\"Tell the members what happened.\",\"event\":\"Say what the event is.\"};\nif (!caption && wordsNeeded[kind]) { refuse(wordsNeeded[kind]); return; }\nif (!caption && photos.length === 0) { refuse('Write something, or add a photo.'); return; }\n// An event's day and time, as an instant (the page sends the poster's local time as one). Only an event keeps it.\nvar eventOn = null;\nif (kind === 'event') {\n  var t = typeof a.eventOn === 'string' && /^[0-9]{4}-[0-9]{2}-[0-9]{2}T/.test(a.eventOn) ? Date.parse(a.eventOn) : NaN;\n  if (!isFinite(t)) { refuse('Say when the event is: its day and its time.'); return; }\n  if (t < Date.now()) { refuse('That time has passed. Choose when the event is.'); return; }\n  if (t > Date.now() + 366 * 86400000) { refuse('An event within the next year, at most.'); return; }\n  eventOn = { __type: 'Date', iso: new Date(t).toISOString() };\n}\nvar kept = [];\nfor (var i = 0; i < photos.length; i++) {\n  var wrong = await photoProblem(photos[i], Inputs.userId);\n  if (wrong === 'mine') { refuse('A photo in this post isn’t one you added.'); return; }\n  if (wrong === 'public') { refuse('A photo in this post could be seen by people who aren’t members. Add it again in this app.'); return; }\n  if (wrong === 'image') { refuse('Only photos can go in a post.'); return; }\n  kept.push({ name: photos[i].name, url: photos[i].url });\n}\nvar row = { caption: caption, photos: kept, kind: kind, member: ptr('Member', m.objectId) };\n// Who prayed is the asker's to see (W4), so the count every member sees is kept on the request itself (prayFor).\nif (kind === 'prayer') row.prayedCount = 0;\nif (eventOn) row.eventOn = eventOn;\nvar made = await Noodl.Records.create('Post', row);\nOutputs.postId = made.getId();\nOutputs.done();",
+        "runOnChange-in-post": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-post",
+          "displayName": "post",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-postId",
+          "displayName": "postId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-6",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "postId"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-7",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

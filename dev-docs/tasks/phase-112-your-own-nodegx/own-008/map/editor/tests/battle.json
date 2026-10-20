@@ -1,0 +1,40 @@
+[
+ {
+  "waitFor": "window.__map?.ui.ready",
+  "timeout": 90000
+ },
+ {
+  "wait": 1500
+ },
+ {
+  "label": "into the battle lane, between the fleets, looking ahead along it",
+  "eval": "(() => { const m = __map.map; const T = m.THREE; const emp = [...m.plates.values()].filter((p) => p.ship.side === 'empire'); const reb = [...m.plates.values()].filter((p) => p.ship.side === 'rebels'); const maxE = Math.max(...emp.map((p) => new T.Box3().setFromObject(p.shipGroup).max.x)); const minR = Math.min(...reb.map((p) => new T.Box3().setFromObject(p.shipGroup).min.x)); const x = (maxE + minR) / 2; const b = m.bounds; const zc = (b.min.z + b.max.z) / 2; m.flyTo(new T.Vector3(x + 60, 70, zc + 160), new T.Vector3(minR + 30, -5, zc - 40)); return JSON.stringify({ empireEdge: Math.round(maxE), rebelEdge: Math.round(minR), lane: Math.round(minR - maxE) }); })()"
+ },
+ {
+  "wait": 5000
+ },
+ {
+  "waitFor": "__map.map.battle.effects.length > 3 && __map.map.battle.bolts.length > 4",
+  "timeout": 20000
+ },
+ {
+  "label": "the battle now",
+  "eval": "JSON.stringify(__map.map.battle.stats())"
+ },
+ {
+  "shot": "battle-lane.png"
+ },
+ {
+  "wait": 700
+ },
+ {
+  "shot": "battle-lane-2.png"
+ },
+ {
+  "waitFor": "__map.map.battle.effects.length > 5",
+  "timeout": 20000
+ },
+ {
+  "shot": "battle-hit.png"
+ }
+]

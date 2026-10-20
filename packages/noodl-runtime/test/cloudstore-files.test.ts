@@ -86,6 +86,33 @@ describe('CloudStore — browser (XHR) path', () => {
 
     const xhr = FakeXHR.instances[0];
     expect(xhr.headers['x-nodegx-file-private']).toBeUndefined();
+    expect(xhr.headers['x-nodegx-file-readers']).toBeUndefined();
+  });
+
+  // P121-TWO001-MEMBERSPHOTO: a photo only the community's members may read.
+  test('uploadFile({ readers }) sends X-NodeGX-File-Readers as written, trimmed', () => {
+    CloudStore.instance.uploadFile({
+      file: { name: 'photo.png', type: 'image/png' },
+      readers: '  role:member, role:admin ',
+      success: () => undefined,
+      error: () => undefined
+    });
+
+    const xhr = FakeXHR.instances[0];
+    expect(xhr.headers['x-nodegx-file-readers']).toBe('role:member, role:admin');
+    // The backend makes it private on the readers alone; the client does not add a second header for it.
+    expect(xhr.headers['x-nodegx-file-private']).toBeUndefined();
+  });
+
+  test('a blank Readers sends nothing, so it never makes an upload private by itself', () => {
+    CloudStore.instance.uploadFile({
+      file: { name: 'photo.png', type: 'image/png' },
+      readers: '   ',
+      success: () => undefined,
+      error: () => undefined
+    });
+
+    expect(FakeXHR.instances[0].headers['x-nodegx-file-readers']).toBeUndefined();
   });
 
   test('uploadFile({ private: false }) also sends no header — only true turns it on', () => {

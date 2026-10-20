@@ -1,0 +1,228 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a7c10d00-0000-4000-8000-000000000191",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "shell"
+      ],
+      "parameters": {
+        "title": "Optimistic Desk",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "headline",
+        "statusText",
+        "publishBtn",
+        "yesBtn",
+        "noBtn",
+        "valueText",
+        "pendingText",
+        "errorText",
+        "noticeText",
+        "rename"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-8)",
+        "paddingLeft": "var(--space-6)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "headline",
+      "type": "Text",
+      "label": "Headline",
+      "parent": "shell",
+      "parameters": {
+        "text": "Optimistic Desk",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "statusText",
+      "type": "Text",
+      "label": "Status now",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "publishBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Publish",
+      "parent": "shell",
+      "parameters": {
+        "label": "Publish"
+      },
+      "x": 100,
+      "y": 440
+    },
+    {
+      "id": "yesBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Server said yes",
+      "parent": "shell",
+      "parameters": {
+        "label": "Server said yes"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "noBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Server said no",
+      "parent": "shell",
+      "parameters": {
+        "label": "Server said no"
+      },
+      "x": 100,
+      "y": 600
+    },
+    {
+      "id": "valueText",
+      "type": "Text",
+      "label": "Update value",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 680
+    },
+    {
+      "id": "pendingText",
+      "type": "Text",
+      "label": "Pending count",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "errorText",
+      "type": "Text",
+      "label": "Update error",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 840
+    },
+    {
+      "id": "noticeText",
+      "type": "Text",
+      "label": "Notice",
+      "parent": "shell",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)"
+      },
+      "x": 100,
+      "y": 920
+    },
+    {
+      "id": "rename",
+      "type": "/Components/Rename",
+      "label": "Rename",
+      "parent": "shell",
+      "parameters": {},
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "appStore",
+      "type": "net.noodl.GlobalStore",
+      "label": "App store",
+      "parameters": {
+        "storeName": "app",
+        "initialState": {
+          "status": "Draft",
+          "notice": "",
+          "title": "Untitled"
+        }
+      },
+      "x": 400,
+      "y": 280
+    },
+    {
+      "id": "watchStatus",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "Watch status",
+      "parameters": {
+        "storeName": "app",
+        "keys": "status"
+      },
+      "x": 400,
+      "y": 360
+    },
+    {
+      "id": "publish",
+      "type": "net.noodl.OptimisticUpdate",
+      "label": "Publish",
+      "parameters": {
+        "storeName": "app",
+        "key": "status",
+        "optimisticValue": "Published",
+        "errorMessage": "The server said no",
+        "timeout": 5000
+      },
+      "x": 400,
+      "y": 520
+    },
+    {
+      "id": "setNotice",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "Write notice",
+      "parameters": {
+        "storeName": "app",
+        "key": "notice",
+        "value": "Put back"
+      },
+      "x": 400,
+      "y": 840
+    },
+    {
+      "id": "watchNotice",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "label": "Watch notice",
+      "parameters": {
+        "storeName": "app",
+        "keys": "notice"
+      },
+      "x": 400,
+      "y": 920
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

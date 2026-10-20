@@ -1,0 +1,965 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2ebf6519-c7ed-53ab-89f5-0e6c1da86b1f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sfPage",
+      "type": "Page",
+      "label": "Seller",
+      "parameters": {
+        "title": "Seller",
+        "urlPath": "admin/seller/{sellerId}"
+      },
+      "children": [
+        "sfRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sfRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "sfPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "sfBar",
+        "sfBand",
+        "sfBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sfBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "sfRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "backgroundColor": "var(--secondary)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)"
+      },
+      "children": [
+        "sfBrand"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "sfBrand",
+      "type": "/UI/Brand",
+      "label": "The marketplace’s name",
+      "parent": "sfBar",
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "sfBand",
+      "type": "/UI/Band",
+      "label": "Who is signed in",
+      "parent": "sfRoot",
+      "parameters": {
+        "words": "Admin"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "sfBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "sfRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "sfContent",
+        "sfRefused"
+      ],
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "sfUrl",
+      "type": "PageInputs",
+      "label": "Which seller",
+      "parameters": {
+        "pathParams": "sellerId"
+      },
+      "x": 590,
+      "y": 3160
+    },
+    {
+      "id": "sfContent",
+      "type": "Group",
+      "label": "The form",
+      "parent": "sfBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "sfBack",
+        "sfTitle",
+        "sfName",
+        "sfLogoRow",
+        "sfUploading",
+        "sfPhotoError",
+        "sfCountry",
+        "sfCountryFixed",
+        "sfPhone",
+        "sfWhatsapp",
+        "sfStory",
+        "sfPayoutAccount",
+        "sfSave",
+        "sfError"
+      ],
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "sfBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "sfContent",
+      "parameters": {
+        "label": "← Sellers",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "sfTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "sfContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "sfName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Name",
+      "parent": "sfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Name"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "sfLogoRow",
+      "type": "Group",
+      "label": "The logo",
+      "parent": "sfContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "sfLogo",
+        "sfLogoPick"
+      ],
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "sfLogo",
+      "type": "Image",
+      "label": "Logo",
+      "parent": "sfLogoRow",
+      "parameters": {
+        "width": {
+          "value": 64,
+          "unit": "px"
+        },
+        "height": {
+          "value": 64,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": "var(--radius-full)",
+        "alt": "The seller’s logo",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "sfLogoPick",
+      "type": "net.noodl.controls.button",
+      "label": "Choose a logo",
+      "parent": "sfLogoRow",
+      "parameters": {
+        "label": "Choose a logo",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "sfUploading",
+      "type": "Text",
+      "label": "Sending the photo",
+      "parent": "sfContent",
+      "parameters": {
+        "text": "Making the photo smaller and sending it…",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "sfPhotoError",
+      "type": "Text",
+      "label": "Why the photo did not go",
+      "parent": "sfContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "sfPick",
+      "type": "Open File Picker",
+      "label": "Choose a photo",
+      "parameters": {
+        "acceptedFileTypes": "image/*"
+      },
+      "x": 590,
+      "y": 1480
+    },
+    {
+      "id": "sfUpload",
+      "type": "Upload File",
+      "label": "Send it, shrunk to 512 px",
+      "parameters": {
+        "shrinkTo": 512,
+        "photoQuality": 80
+      },
+      "x": 590,
+      "y": 1720
+    },
+    {
+      "id": "sfBusy",
+      "type": "Switch",
+      "label": "Sending a photo",
+      "x": 590,
+      "y": 1600
+    },
+    {
+      "id": "sfLogoShown",
+      "type": "JavaScriptFunction",
+      "label": "The logo to show",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nvar up = Inputs.uploaded;\nvar url = up && typeof up.getUrl === 'function' ? up.getUrl() : '';\nOutputs.src = url ? thumb({ url: url }, 'md') : Inputs.loaded || '';\nOutputs.has = !!Outputs.src;"
+      },
+      "ports": [
+        {
+          "name": "in-uploaded",
+          "displayName": "uploaded",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-loaded",
+          "displayName": "loaded",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-src",
+          "displayName": "src",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-has",
+          "displayName": "has",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1360
+    },
+    {
+      "id": "sfCountry",
+      "type": "net.noodl.controls.options",
+      "label": "Country",
+      "parent": "sfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Country",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "sfCountryFixed",
+      "type": "Text",
+      "label": "The country, fixed",
+      "parent": "sfContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "sfPhone",
+      "type": "net.noodl.controls.textinput",
+      "label": "Phone",
+      "parent": "sfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Phone",
+        "inputMode": "tel"
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "sfWhatsapp",
+      "type": "net.noodl.controls.textinput",
+      "label": "WhatsApp number (buyers can message it)",
+      "parent": "sfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "WhatsApp number (buyers can message it)",
+        "inputMode": "tel"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "sfStory",
+      "type": "net.noodl.controls.textinput",
+      "label": "Their story (shown on their page)",
+      "parent": "sfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Their story (shown on their page)",
+        "type": "textArea"
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "sfPayoutAccount",
+      "type": "net.noodl.controls.textinput",
+      "label": "Payout account at the payment provider (only you see it)",
+      "parent": "sfContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "label": "Payout account at the payment provider (only you see it)"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "sfSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "sfContent",
+      "parameters": {
+        "label": "Save",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 2560
+    },
+    {
+      "id": "sfError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "sfContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "sfRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "sfBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "sfRefusedWhy",
+        "sfRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 2800
+    },
+    {
+      "id": "sfRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "sfRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "sfRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "sfRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 3040
+    },
+    {
+      "id": "sfToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 590,
+      "y": 3040
+    },
+    {
+      "id": "sfLoad",
+      "type": "JavaScriptFunction",
+      "label": "The seller, and the countries",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nif (Inputs.sellerId === undefined) return;\nvar isNew = !Inputs.sellerId || Inputs.sellerId === 'new';\ntry {\n  await adminOnly();\n  var countries = await all('Country');\n  var s = isNew ? null : (await all('Seller', { objectId: { equalTo: String(Inputs.sellerId) } }))[0];\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nif (!isNew && !s) { Outputs.problem = 'There is no such seller.'; Outputs.refused = true; Outputs.ok = false; return; }\ncountries.sort(function (a, b) { return String(a.name).localeCompare(String(b.name)); });\nOutputs.countries = countries.map(function (c) { return { Label: c.name + ' (' + c.currency + ')', Value: c.objectId }; });\nvar here = s ? countries.filter(function (c) { return c.objectId === idOf(s.country); })[0] : null;\nOutputs.heading = isNew ? 'Add a seller' : 'Edit ' + (s.name || 'the seller');\nOutputs.isNew = isNew;\nOutputs.notNew = !isNew;\nOutputs.countryFixed = here ? 'Country: ' + here.name + ' (' + here.currency + '). A seller’s country stays: its prices are in that currency.' : '';\nOutputs.country = s ? idOf(s.country) : (countries[0] ? countries[0].objectId : '');\nOutputs.name = s ? s.name || '' : '';\nOutputs.phone = s ? s.phone || '' : '';\nOutputs.whatsapp = s ? s.whatsapp || '' : '';\nOutputs.story = s ? s.story || '' : '';\nOutputs.payoutAccount = s ? s.payoutAccount || '' : '';\nOutputs.logo = s && s.logo && s.logo.url ? { name: s.logo.name || 'logo', url: s.logo.url } : null;\nOutputs.logoThumb = thumb(s && s.logo, 'md');\nOutputs.hasLogo = !!(s && s.logo && s.logo.url);\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-countries",
+          "displayName": "countries",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-heading",
+          "displayName": "heading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isNew",
+          "displayName": "isNew",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-notNew",
+          "displayName": "notNew",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-countryFixed",
+          "displayName": "countryFixed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-country",
+          "displayName": "country",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-phone",
+          "displayName": "phone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-whatsapp",
+          "displayName": "whatsapp",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-story",
+          "displayName": "story",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-payoutAccount",
+          "displayName": "payoutAccount",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-logo",
+          "displayName": "logo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-logoThumb",
+          "displayName": "logoThumb",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasLogo",
+          "displayName": "hasLogo",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 760
+    },
+    {
+      "id": "sfGather",
+      "type": "JavaScriptFunction",
+      "label": "The form, as one seller",
+      "parameters": {
+        "functionScript": "function v(typed, loaded) { return typed === undefined ? (loaded || '') : String(typed); }\nvar isNew = !Inputs.sellerId || Inputs.sellerId === 'new';\nvar seller = {\n  name: v(Inputs.name, Inputs.name0),\n  phone: v(Inputs.phone, Inputs.phone0),\n  whatsapp: v(Inputs.whatsapp, Inputs.whatsapp0),\n  story: v(Inputs.story, Inputs.story0),\n  payoutAccount: v(Inputs.payoutAccount, Inputs.payoutAccount0)\n};\nif (isNew) seller.country = v(Inputs.country, Inputs.country0); else seller.id = String(Inputs.sellerId);\nvar up = Inputs.logo;\nif (up && typeof up.getUrl === 'function') seller.logo = { name: up.getName(), url: up.getUrl() };\nOutputs.seller = seller;\nOutputs.go();",
+        "runOnChange-in-name": false,
+        "runOnChange-in-phone": false,
+        "runOnChange-in-whatsapp": false,
+        "runOnChange-in-story": false,
+        "runOnChange-in-payoutAccount": false,
+        "runOnChange-in-name0": false,
+        "runOnChange-in-phone0": false,
+        "runOnChange-in-whatsapp0": false,
+        "runOnChange-in-story0": false,
+        "runOnChange-in-payoutAccount0": false,
+        "runOnChange-in-country": false,
+        "runOnChange-in-country0": false,
+        "runOnChange-in-sellerId": false,
+        "runOnChange-in-logo": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-sellerId",
+          "displayName": "sellerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name0",
+          "displayName": "name0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-phone",
+          "displayName": "phone",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-phone0",
+          "displayName": "phone0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-whatsapp",
+          "displayName": "whatsapp",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-whatsapp0",
+          "displayName": "whatsapp0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-story",
+          "displayName": "story",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-story0",
+          "displayName": "story0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-payoutAccount",
+          "displayName": "payoutAccount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-payoutAccount0",
+          "displayName": "payoutAccount0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-country",
+          "displayName": "country",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-country0",
+          "displayName": "country0",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-logo",
+          "displayName": "logo",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-seller",
+          "displayName": "seller",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 590,
+      "y": 1840
+    },
+    {
+      "id": "sfCall",
+      "type": "CloudFunction2",
+      "label": "saveSeller(seller)",
+      "parameters": {
+        "function": "saveSeller"
+      },
+      "x": 590,
+      "y": 2680
+    },
+    {
+      "id": "sfToSellers",
+      "type": "RouterNavigate",
+      "label": "Back to the sellers",
+      "parameters": {
+        "target": "/Pages/Admin/Sellers"
+      },
+      "x": 590,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "sfPage"
+  ]
+}

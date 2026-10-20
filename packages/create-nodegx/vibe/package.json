@@ -1,0 +1,29 @@
+{
+  "name": "create-nodegx-vibe",
+  "version": "0.2.2",
+  "description": "npm create nodegx-vibe — sets a folder up so Mistral Vibe (Large 4) can build NodeGX apps in it.",
+  "license": "GPL-3.0-only",
+  "homepage": "https://nodegx.io",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "packages/create-nodegx/vibe"
+  },
+  "bin": {
+    "create-nodegx-vibe": "bin/create-nodegx-vibe.js"
+  },
+  "files": [
+    "bin",
+    "README.md",
+    "LICENSE"
+  ],
+  "dependencies": {
+    "create-nodegx": "0.2.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

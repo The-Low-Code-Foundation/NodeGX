@@ -10,7 +10,11 @@
     "params": "Edit-only name list declaring the result values; drives both this node's inputs and the caller's outputs."
   },
   "runtimeBehavior": "Each name in the `params` stringlist becomes a runtime-registered input (stored as `pm-<name>`, type '*') collected into the success reply. Declared port groups make the ports conditional on `status`: `params` (and its `pm-` inputs) exist while status is 'success' or unset, `errorMessage` exists while status is 'failure'. CloudFunctionAdapter mirrors the union of all Response nodes' `params` onto the browser-side caller as `out-<name>` outputs.",
-  "examples": ["fn-cloud-function-roundtrip", "fn-aggregate-stats-function"],
+  "examples": [
+    "fn-cloud-function-roundtrip",
+    "fn-aggregate-stats-function",
+    "fn-play-audio-a-cloud-function-returns"
+  ],
   "patterns": [
     "Two Response nodes — one with status 'success', one with status 'failure' and an `errorMessage` — triggered from the two branches of a Condition: explicit success/failure replies.",
     "Feed `pm-` inputs as values as your logic computes them; only `send` decides when the reply goes out."
@@ -18,5 +22,9 @@
   "antiPatterns": [
     "Finishing a function path without triggering any Response `send` — the browser-side caller hangs until the request times out."
   ],
-  "relatedNodes": ["noodl.cloud.request", "CloudFunction2", "Condition"]
+  "relatedNodes": [
+    "noodl.cloud.request",
+    "CloudFunction2",
+    "Condition"
+  ]
 }

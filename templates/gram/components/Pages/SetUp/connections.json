@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1a0d65f7-8546-5c0d-8893-039cb4ba6a21",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "suToken",
+      "fromProperty": "onTextChanged",
+      "toId": "suGather",
+      "toProperty": "in-token"
+    },
+    {
+      "fromId": "suCommunity",
+      "fromProperty": "onTextChanged",
+      "toId": "suGather",
+      "toProperty": "in-community"
+    },
+    {
+      "fromId": "suName",
+      "fromProperty": "onTextChanged",
+      "toId": "suGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "suEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "suGather",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "suPassword",
+      "fromProperty": "onTextChanged",
+      "toId": "suGather",
+      "toProperty": "in-password"
+    },
+    {
+      "fromId": "suEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "suLogIn",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "suPassword",
+      "fromProperty": "onTextChanged",
+      "toId": "suLogIn",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "suGo",
+      "fromProperty": "onClick",
+      "toId": "suGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "suGather",
+      "fromProperty": "out-setup",
+      "toId": "suCall",
+      "toProperty": "in-setup"
+    },
+    {
+      "fromId": "suGather",
+      "fromProperty": "out-go",
+      "toId": "suCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "suCall",
+      "fromProperty": "error",
+      "toId": "suError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "suCall",
+      "fromProperty": "done",
+      "toId": "suLogIn",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "suLogIn",
+      "fromProperty": "error",
+      "toId": "suError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "suLogIn",
+      "fromProperty": "done",
+      "toId": "suToQueue",
+      "toProperty": "navigate"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "781c2323-36e6-5515-8130-af0633d158e9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "srIn",
+      "fromProperty": "label",
+      "toId": "srLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "value",
+      "toId": "srValue",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "srIn",
+      "fromProperty": "strong",
+      "toId": "srToneOf",
+      "toProperty": "strong"
+    },
+    {
+      "fromId": "srToneOf",
+      "fromProperty": "result",
+      "toId": "srTone",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "srTone",
+      "fromProperty": "size",
+      "toId": "srValue",
+      "toProperty": "fontSize"
+    },
+    {
+      "fromId": "srTone",
+      "fromProperty": "weight",
+      "toId": "srLabel",
+      "toProperty": "fontWeight"
+    }
+  ]
+}

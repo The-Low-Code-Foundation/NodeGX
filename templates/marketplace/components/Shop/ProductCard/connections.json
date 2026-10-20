@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "936cfc49-861e-5257-821e-8d5ac46e0997",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pcIn",
+      "fromProperty": "photo",
+      "toId": "pcPhoto",
+      "toProperty": "src"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasPhoto",
+      "toId": "pcPhoto",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "noPhoto",
+      "toId": "pcNoPhoto",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "name",
+      "toId": "pcName",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "who",
+      "toId": "pcWho",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "price",
+      "toId": "pcPrice",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "was",
+      "toId": "pcWas",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "hasWas",
+      "toId": "pcWas",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "enquire",
+      "toId": "pcEnquire",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pcIn",
+      "fromProperty": "id",
+      "toId": "pcGo",
+      "toProperty": "pm-productId"
+    },
+    {
+      "fromId": "pcRoot",
+      "fromProperty": "onClick",
+      "toId": "pcGo",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "pcName",
+      "fromProperty": "onClick",
+      "toId": "pcGo",
+      "toProperty": "navigate"
+    }
+  ]
+}

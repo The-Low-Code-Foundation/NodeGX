@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0cf660e4-0622-5aab-8bc0-516a50a0f728",
+  "name": "GiveLogin",
+  "path": "/Pages/Admin/GiveLogin",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Give a seller’s staff member a login"
+}

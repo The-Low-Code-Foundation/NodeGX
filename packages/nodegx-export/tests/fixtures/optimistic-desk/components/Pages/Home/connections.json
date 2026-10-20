@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a7c10d00-0000-4000-8000-000000000191",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "watchStatus",
+      "fromProperty": "value",
+      "toId": "statusText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "publishBtn",
+      "fromProperty": "onClick",
+      "toId": "publish",
+      "toProperty": "apply"
+    },
+    {
+      "fromId": "yesBtn",
+      "fromProperty": "onClick",
+      "toId": "publish",
+      "toProperty": "commit"
+    },
+    {
+      "fromId": "noBtn",
+      "fromProperty": "onClick",
+      "toId": "publish",
+      "toProperty": "rollback"
+    },
+    {
+      "fromId": "publish",
+      "fromProperty": "value",
+      "toId": "valueText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "publish",
+      "fromProperty": "pendingCount",
+      "toId": "pendingText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "publish",
+      "fromProperty": "error",
+      "toId": "errorText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "publish",
+      "fromProperty": "rolledBack",
+      "toId": "setNotice",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "watchNotice",
+      "fromProperty": "value",
+      "toId": "noticeText",
+      "toProperty": "text"
+    }
+  ]
+}

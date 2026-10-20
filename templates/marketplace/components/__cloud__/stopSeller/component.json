@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9769e3b5-98e0-515d-86e3-03bb556bd153",
+  "name": "stopSeller",
+  "path": "/#__cloud__/stopSeller",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Stop a seller with a reason, or bring it back; its logins follow"
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1ce7ea30-a2c3-56dc-8bf6-3e35cee6d0e8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "poIn",
+      "fromProperty": "label",
+      "toId": "poName",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "poIn",
+      "fromProperty": "fine",
+      "toId": "poFine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "poIn",
+      "fromProperty": "line",
+      "toId": "poRoot",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "poIn",
+      "fromProperty": "countryId",
+      "toId": "poPick",
+      "toProperty": "in-countryId"
+    },
+    {
+      "fromId": "poIn",
+      "fromProperty": "wayId",
+      "toId": "poPick",
+      "toProperty": "in-wayId"
+    },
+    {
+      "fromId": "poPicks",
+      "fromProperty": "value",
+      "toId": "poPick",
+      "toProperty": "in-picks"
+    },
+    {
+      "fromId": "poRoot",
+      "fromProperty": "onClick",
+      "toId": "poPick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "poName",
+      "fromProperty": "onClick",
+      "toId": "poPick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "poPick",
+      "fromProperty": "out-picks",
+      "toId": "poSetPicks",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "poPick",
+      "fromProperty": "out-go",
+      "toId": "poSetPicks",
+      "toProperty": "do"
+    }
+  ]
+}

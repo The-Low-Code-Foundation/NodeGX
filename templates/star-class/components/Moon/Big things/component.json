@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "eb11b5e6-7cf3-5879-8ba1-778ec25952c1",
+  "name": "Big things",
+  "path": "/Moon/Big things",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Big things to save for (TPL-014 M1): the domes (room for two more aliens each) and the surprise egg (an alien never had). A tap asks first on Hangar/Confirm, then Logic/Moon act builds the dome or hatches the egg. App in; App, Write and Said out."
+}

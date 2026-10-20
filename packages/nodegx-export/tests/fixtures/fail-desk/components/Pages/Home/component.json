@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b8d20e00-0000-4000-8000-000000000703",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-17T12:00:00.000Z",
+  "description": "\"The failure runs its chain\" fixture: Remove fires Delete Record, then puts the refusal away; the delete's Failure shows the refusal and says why, its Done says it went."
+}

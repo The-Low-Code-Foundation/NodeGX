@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "257cff11-ed94-5e03-817a-b837aefde8ab",
+  "name": "Checkout",
+  "path": "/Pages/Shop/Checkout",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Check out with no account: who, where, and how they’ll pay in each seller country"
+}

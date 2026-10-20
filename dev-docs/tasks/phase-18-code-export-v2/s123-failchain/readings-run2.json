@@ -1,0 +1,130 @@
+{
+ "runtime": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "Text",
+     "Said",
+     "Text",
+     "Gone",
+     "Text"
+    ]
+   },
+   {
+    "step": "S1 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "That could not be removed.",
+     "Error",
+     "Object not found.",
+     "Said",
+     "Object not found.",
+     "Gone",
+     "Text"
+    ]
+   },
+   {
+    "step": "S2 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "That could not be removed.",
+     "Error",
+     "Object not found.",
+     "Said",
+     "Object not found.",
+     "Gone",
+     "Text"
+    ]
+   }
+  ],
+  "console": [
+   "[noodl] DeleteDbModelProperties (/Pages/Home): Object not found. [record/storage-op-failed] Object",
+   "[noodl] DeleteDbModelProperties (/Pages/Home): Object not found. [record/storage-op-failed] Object"
+  ]
+ },
+ "export-control": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "Said",
+     "Gone"
+    ]
+   },
+   {
+    "step": "S1 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "Said",
+     "Gone"
+    ]
+   },
+   {
+    "step": "S2 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "Said",
+     "Gone"
+    ]
+   }
+  ],
+  "console": []
+ },
+ "export-fixed": {
+  "steps": [
+   {
+    "step": "S0 load",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "Error",
+     "Said",
+     "Gone"
+    ]
+   },
+   {
+    "step": "S1 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "That could not be removed.",
+     "Error",
+     "Could not reach the backend at http://localhost:8599",
+     "Said",
+     "Could not reach the backend at http://localhost:8599",
+     "Gone"
+    ]
+   },
+   {
+    "step": "S2 Remove",
+    "lines": [
+     "Fail Desk",
+     "Remove",
+     "That could not be removed.",
+     "Error",
+     "Could not reach the backend at http://localhost:8599",
+     "Said",
+     "Could not reach the backend at http://localhost:8599",
+     "Gone"
+    ]
+   }
+  ],
+  "console": [
+   "DeleteDbModelProperties (/Pages/Home): Could not reach the backend at http://localhost:8599 [record/storage-op-failed] Object",
+   "DeleteDbModelProperties (/Pages/Home): Could not reach the backend at http://localhost:8599 [record/storage-op-failed] Object"
+  ]
+ }
+}

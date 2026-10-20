@@ -1,0 +1,24 @@
+[
+  { "edit": "add_node", "component": "Pages/Sign in", "id": "kidWords", "type": "Text", "parent": "siCard", "index": 0, "parameters": { "text": "Hello!" } },
+  { "edit": "set_parameter", "component": "Pages/Sign in", "id": "kidWords", "name": "fontSize", "value": 32 },
+  { "edit": "set_parameter", "component": "Pages/Sign in", "id": "kidWords", "name": "color", "value": "var(--red-500)" },
+  { "edit": "rename", "component": "Pages/Sign in", "id": "kidWords", "label": "My hello" },
+  { "edit": "set_parameter", "component": "Pages/Sign in", "id": "siTitle", "name": "text", "value": "Welcome to my list" },
+  { "edit": "set_parameter", "component": "Pages/Sign in", "id": "siSignIn", "name": "backgroundColor", "value": "var(--destructive)" },
+  { "edit": "add_node", "component": "Pages/Sign in", "id": "kidBox", "type": "Group", "parent": "siCard", "parameters": { "backgroundColor": "var(--accent)", "flexDirection": "column" } },
+  { "edit": "set_parameter", "component": "Pages/Sign in", "id": "kidBox", "name": "flexDirection", "value": "row" },
+  { "edit": "add_child", "component": "Pages/Sign in", "id": "kidWords", "parent": "kidBox" },
+  { "edit": "add_child", "component": "Pages/Sign in", "id": "siLead", "parent": "siCard", "index": 0 },
+  { "edit": "add_node", "component": "Pages/Sign in", "id": "kidPic", "type": "Image", "parent": "kidBox", "index": 0, "parameters": {} },
+  { "edit": "remove_node", "component": "Pages/Sign in", "id": "kidPic" },
+
+  { "edit": "add_node", "component": "Todo/Theme switch", "id": "kidButton", "type": "net.noodl.controls.button", "parent": "thRoot", "parameters": { "label": "Press me" } },
+  { "edit": "connect", "component": "Todo/Theme switch", "from": { "node": "kidButton", "port": "onClick" }, "to": { "node": "thFlip", "port": "run" } },
+  { "edit": "disconnect", "component": "Todo/Theme switch", "from": { "node": "thToLight", "port": "onClick" }, "to": { "node": "thFlip", "port": "run" } },
+  { "edit": "move", "component": "Todo/Theme switch", "id": "thFlip", "x": 520, "y": 240 },
+  { "edit": "rename", "component": "Todo/Theme switch", "id": "thFlip", "label": "Flip the colours" },
+  { "edit": "set_parameter", "component": "Todo/Theme switch", "id": "thToDark", "name": "fontSize" },
+  { "edit": "add_node", "component": "Todo/Theme switch", "id": "kidHelper", "type": "JavaScriptFunction", "label": "A helper on the shelf", "x": 700, "y": 60, "parameters": { "functionScript": "" } },
+  { "edit": "move", "component": "Todo/Theme switch", "id": "kidHelper", "x": 720, "y": 400 },
+  { "edit": "remove_node", "component": "Todo/Theme switch", "id": "thToLight" }
+]

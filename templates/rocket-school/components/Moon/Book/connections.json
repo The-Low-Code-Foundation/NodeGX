@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c73a103c-85ba-5f68-8268-940f1311cb94",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mkIn",
+      "fromProperty": "line",
+      "toId": "mkOpenIt",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "line",
+      "toId": "mkTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "closeWord",
+      "toId": "mkClose",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mkIn",
+      "fromProperty": "rows",
+      "toId": "mkEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mkOpenIt",
+      "fromProperty": "onClick",
+      "toId": "mkOpen",
+      "toProperty": "to-open"
+    },
+    {
+      "fromId": "mkClose",
+      "fromProperty": "onClick",
+      "toId": "mkOpen",
+      "toProperty": "to-folded"
+    },
+    {
+      "fromId": "mkOpen",
+      "fromProperty": "open",
+      "toId": "mkBody",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mkOpen",
+      "fromProperty": "folded",
+      "toId": "mkOpenIt",
+      "toProperty": "mounted"
+    }
+  ]
+}

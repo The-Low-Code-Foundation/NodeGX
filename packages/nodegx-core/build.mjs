@@ -6,6 +6,7 @@
  * a second copy would break hooks in ways that are miserable to diagnose.
  */
 import { execFileSync } from 'node:child_process';
+import { createRequire } from 'node:module';
 import esbuild from 'esbuild';
 
 const shared = {
@@ -34,4 +35,8 @@ for (const entry of ['index', 'react']) {
 }
 
 // Declarations come from tsc rather than esbuild, which does not emit them.
-execFileSync('npx', ['tsc', '--project', 'tsconfig.build.json'], { stdio: 'inherit' });
+// P78-D82: tsc runs through this Node by absolute path, never as a bare `npx`. On Windows npm's launcher is
+// `npx.cmd`, which `execFileSync` cannot start without a shell, so the build stopped at `spawnSync npx ENOENT`.
+execFileSync(process.execPath, [createRequire(import.meta.url).resolve('typescript/bin/tsc'), '--project', 'tsconfig.build.json'], {
+  stdio: 'inherit'
+});

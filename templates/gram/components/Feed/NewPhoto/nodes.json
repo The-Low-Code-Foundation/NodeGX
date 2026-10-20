@@ -1,0 +1,144 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d581a834-9984-5365-8b18-833c05401c9b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "nfRoot",
+      "type": "Group",
+      "label": "A photo added",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "nfImage",
+        "nfRemove"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "nfImage",
+      "type": "Image",
+      "label": "The photo",
+      "parent": "nfRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 96,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": "var(--radius-md)",
+        "cssClassName": "gm-photo"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "nfRemove",
+      "type": "net.noodl.controls.button",
+      "label": "Remove",
+      "parent": "nfRoot",
+      "parameters": {
+        "label": "Remove",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "nfIn",
+      "type": "Component Inputs",
+      "label": "One photo added",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "src",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "alt",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "nfGone",
+      "type": "JavaScriptFunction",
+      "label": "Take this photo off",
+      "parameters": {
+        "functionScript": "Outputs.removed = Inputs.name + '|' + Date.now();\nOutputs.go();",
+        "runOnChange-in-name": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-removed",
+          "displayName": "removed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "nfSay",
+      "type": "Set Variable",
+      "label": "A photo was taken off",
+      "parameters": {
+        "name": "postPhotoRemoved",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a photo was taken off the new post: the list drops it, whichever tile said so."
+      },
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "nfRoot"
+  ]
+}

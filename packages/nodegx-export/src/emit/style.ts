@@ -414,6 +414,10 @@ const PROPERTY_ORDER = [
   'letter-spacing',
   'text-transform',
   'text-align',
+  // P18-S110-NOWRAP. Text's three white-space arms, together, after the text block they shape.
+  'white-space',
+  'overflow-wrap',
+  'text-overflow',
   'color',
   'opacity',
   'user-select'
@@ -774,6 +778,28 @@ export function computeNodeStyle(
   // The stack's clip is decided with its defaults above (its declared default is true, and the class states it).
   if (role !== 'stack' && literal('clip') === true) decls.push({ prop: 'overflow', value: 'hidden' });
 
+  /*
+   * P18-S110-NOWRAP. `Text.tsx` sets `white-space` on every Text, in three arms, and until now the export set none, so
+   * the default arm differed as well: a typed line break collapsed into a space and a long word ran out of its box.
+   * Truncating (Text Overflow Clip or Ellipsis): `nowrap`, the overflow itself, and `overflow: hidden` unless the
+   * author's clip already stated it. Content Size / Content Width: `pre`. Otherwise `pre-wrap` with
+   * `overflow-wrap: anywhere`. Keyed on the type, not the role: the deprecated Label shares the role and sets none.
+   */
+  if (node.type === 'Text') {
+    const textOverflow = String(literal('textOverflow') ?? catalogDefault('textOverflow') ?? 'wrap');
+    if (textOverflow === 'ellipsis' || textOverflow === 'clip') {
+      decls.push({ prop: 'white-space', value: 'nowrap' });
+      decls.push({ prop: 'text-overflow', value: textOverflow });
+      if (!decls.some((d) => d.prop === 'overflow')) decls.push({ prop: 'overflow', value: 'hidden' });
+    } else if (sizeMode === 'contentSize' || sizeMode === 'contentWidth') {
+      decls.push({ prop: 'white-space', value: 'pre' });
+    } else {
+      decls.push({ prop: 'white-space', value: 'pre-wrap' });
+      decls.push({ prop: 'overflow-wrap', value: 'anywhere' });
+    }
+    consumed.add('textOverflow');
+  }
+
   boxShorthand('padding', params, decls);
   boxShorthand('margin', params, decls);
   for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
@@ -999,6 +1025,31 @@ export function computeRoleCss(
           { prop: 'gap', value: spacing }
         ]
       };
+    }
+  }
+
+  if (role === 'select') {
+    // P18-S110-PLACEHOLDEROPACITY. The runtime draws the placeholder as its own label, `<span style={{ opacity }}>`
+    // (Select.tsx), so only the text fades, never the box. The export's placeholder is the hidden option `renderSelect`
+    // selects, so the fade is the select's text colour while that option is the checked one, mixed toward transparent
+    // by the same factor; the open list's options keep the full colour. Opacity clamps as CSS clamps it. With no
+    // authored colour the select's text is the UA's `FieldText`, and that is what fades.
+    const placeholder = literal('placeholder');
+    if (typeof placeholder === 'string' && placeholder.length > 0) {
+      const raw = params.get('placeholderOpacity');
+      if (raw !== undefined && raw.kind !== 'literal') {
+        result.notes.push(`node ${node.id}'s Placeholder opacity is not a literal; the placeholder is drawn at full opacity`);
+      } else {
+        const authored = Number((raw?.kind === 'literal' ? raw.value : undefined) ?? catalogDefault('placeholderOpacity') ?? 0.5);
+        const opacity = Number.isFinite(authored) ? Math.min(1, Math.max(0, authored)) : 1;
+        if (opacity < 1) {
+          const color = cssParam('color') ?? 'FieldText';
+          const percent = `${Number((opacity * 100).toFixed(4))}%`;
+          const checked = ':has(> option[hidden]:checked)';
+          result.blocks.push({ suffix: checked, decls: [{ prop: 'color', value: `color-mix(in srgb, ${color} ${percent}, transparent)` }] });
+          result.blocks.push({ suffix: `${checked} > option`, decls: [{ prop: 'color', value: color }] });
+        }
+      }
     }
   }
 

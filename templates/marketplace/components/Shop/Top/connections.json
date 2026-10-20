@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c7f94f56-eb4c-5da9-8283-73c799b322cd",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tpNameNow",
+      "fromProperty": "value",
+      "toId": "tpBrand",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tpRoot",
+      "fromProperty": "didMount",
+      "toId": "tpNameLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tpNameNow",
+      "fromProperty": "value",
+      "toId": "tpNameLoad",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "tpNameLoad",
+      "fromProperty": "out-name",
+      "toId": "tpNameSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tpNameLoad",
+      "fromProperty": "out-set",
+      "toId": "tpNameSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tpRoot",
+      "fromProperty": "didMount",
+      "toId": "tpLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tpCurrent",
+      "fromProperty": "value",
+      "toId": "tpLoad",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "tpCurrent",
+      "fromProperty": "value",
+      "toId": "tpCurrency",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tpLoad",
+      "fromProperty": "out-items",
+      "toId": "tpCurrency",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tpLoad",
+      "fromProperty": "out-has",
+      "toId": "tpCurrency",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tpLoad",
+      "fromProperty": "out-chosen",
+      "toId": "tpSetFirst",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tpLoad",
+      "fromProperty": "out-set",
+      "toId": "tpSetFirst",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tpCurrency",
+      "fromProperty": "value",
+      "toId": "tpPicked",
+      "toProperty": "in-picked"
+    },
+    {
+      "fromId": "tpCurrency",
+      "fromProperty": "onChange",
+      "toId": "tpPicked",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tpPicked",
+      "fromProperty": "out-chosen",
+      "toId": "tpSetPicked",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tpPicked",
+      "fromProperty": "out-set",
+      "toId": "tpSetPicked",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tpBrand",
+      "fromProperty": "onClick",
+      "toId": "tpToShop",
+      "toProperty": "navigate"
+    }
+  ]
+}

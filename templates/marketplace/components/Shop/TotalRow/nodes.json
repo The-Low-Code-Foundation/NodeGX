@@ -1,0 +1,82 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d7aefc5f-1872-5761-8cd1-f8aff9526e71",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "trRoot",
+      "type": "Group",
+      "label": "A total",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "trName",
+        "trTotal"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "trName",
+      "type": "Text",
+      "label": "Which country, in what",
+      "parent": "trRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "trTotal",
+      "type": "Text",
+      "label": "How much",
+      "parent": "trRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "cssClassName": "mk-num"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "trIn",
+      "type": "Component Inputs",
+      "label": "One total",
+      "ports": [
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "total",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "trRoot"
+  ]
+}

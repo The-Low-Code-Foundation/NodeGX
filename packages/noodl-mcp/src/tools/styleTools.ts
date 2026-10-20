@@ -93,6 +93,26 @@ function upsertTokens(store: ProjectStore, entries: Array<{ name: string; value:
 }
 
 /** Always-registered read tool. */
+
+/**
+ * P112-OWN019-LAPTOPGAPS (R39, Richard 2026-10-14) — what the look leaves to layout, said where an agent picks the look.
+ * Richard on RL1's laptop page ("funny justification choices and spacing"): a feature number given a fifth of the page
+ * by a Columns "1 4" row; L1's price ~256 px off its centred heading. render_report now names both (`row-gap`,
+ * `alignment-drift`, at desktop width); this is the sentence that heads them off. A result field: no tool-surface cost.
+ */
+export const LAYOUT_RULES =
+  'Design every page at three widths — phone 390, tablet 768, laptop 1280 (render_report shows all three). On a ' +
+  'laptop: a label or number beside text is a row Group (the label at its own width, the text growing), not Columns — ' +
+  "Columns widths are shares of the page, so a two-character number gets a fifth of it. Keep a wide row's parts " +
+  'together with a max width and a gap; space-between across the whole page leaves a hole in the middle. One ' +
+  'section, one alignment: a centred heading means its eyebrow, line, toggle and price are centred too — or ' +
+  'everything shares one left edge. Centring a Group does not centre the letters of a Text inside it: the Text ' +
+  'stretches to the Group\'s width and sets its words left, so a letter in a chip, a badge or a button sits hard ' +
+  'against the left edge — set textAlignX: center on the Text itself.';
+/** The compact form's line — the prompt form has a 4,400-token wire budget (AIX-006), ~40 tokens of it free. */
+export const LAYOUT_RULES_SHORT =
+  'check 390/768/1280; a label beside text is a row Group at its own width, not a Columns share; one alignment per section.';
+
 export function registerStyleReadTools(server: McpServer, binding: ProjectBinding): void {
   server.registerTool(
     'get_style_vocabulary',
@@ -133,10 +153,10 @@ export function registerStyleReadTools(server: McpServer, binding: ProjectBindin
 
       if (args.detail === 'prompt') {
         return jsonResult({
-          vocabulary: `${renderStyleVocabulary(vocab)}\n\n${renderIconSets(icons)}\n\n${renderImagery(imagery)}`
+          vocabulary: `${renderStyleVocabulary(vocab)}\n\n${renderIconSets(icons)}\n\n${renderImagery(imagery)}\n\nLAYOUT: ${LAYOUT_RULES_SHORT}`
         });
       }
-      return jsonResult({ ...vocab, icons, imagery });
+      return jsonResult({ ...vocab, icons, imagery, layout: LAYOUT_RULES });
     })
   );
 }

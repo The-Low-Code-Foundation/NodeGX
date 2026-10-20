@@ -22,6 +22,7 @@ Do not use in new graphs — implement email verification in a cloud function ca
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -52,7 +53,15 @@ Do not use in new graphs — implement email verification in a cloud function ca
 | `error` | String | — | Why the last request failed; empty until one does |
 | `failure` | Signal | — | Fires when the request could not be made, after the reason has been reported on the error channel |
 
+## Code export
+
+Does not export to React yet. A project that uses it exports with this node named in the export report.
+
+Why: deliberately out of scope — the type is deprecated in the catalog, so nobody building today is offered one. A project that still holds one exports it as a named deferral, which is the right answer for a node its own editor has retired.
+
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

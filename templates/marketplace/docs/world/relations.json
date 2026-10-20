@@ -1,0 +1,248 @@
+{
+  "relations": [
+    {
+      "id": "sellerIn",
+      "from": "seller",
+      "to": "country",
+      "kind": "belongs-to",
+      "sentence": "each seller is in one country",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "staffOf",
+      "from": "person",
+      "to": "seller",
+      "kind": "belongs-to",
+      "sentence": "a seller's staff log in as that seller",
+      "answers": {
+        "several": false,
+        "required": false,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "productOf",
+      "from": "product",
+      "to": "seller",
+      "kind": "belongs-to",
+      "sentence": "each product is sold by one seller",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "productIn",
+      "from": "product",
+      "to": "category",
+      "kind": "belongs-to",
+      "sentence": "each product is on one shelf",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": true
+      }
+    },
+    {
+      "id": "orderBy",
+      "from": "order",
+      "to": "person",
+      "kind": "belongs-to",
+      "sentence": "an order can be by a buyer with an account",
+      "answers": {
+        "several": false,
+        "required": false,
+        "whenTargetGoes": "stays-unlinked",
+        "moves": false
+      }
+    },
+    {
+      "id": "orderTo",
+      "from": "order",
+      "to": "country",
+      "kind": "belongs-to",
+      "sentence": "an order is delivered in one country",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "orderPaidBy",
+      "from": "orderPart",
+      "to": "wayToPay",
+      "kind": "belongs-to",
+      "sentence": "each order part is paid one way, the one the buyer picked for its seller's country",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "partOf",
+      "from": "orderPart",
+      "to": "order",
+      "kind": "belongs-to",
+      "sentence": "each order part is part of one order",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "partFrom",
+      "from": "orderPart",
+      "to": "seller",
+      "kind": "belongs-to",
+      "sentence": "each order part is sent by one seller",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "lineIn",
+      "from": "orderLine",
+      "to": "orderPart",
+      "kind": "belongs-to",
+      "sentence": "each order line is in one order part",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "lineOf",
+      "from": "orderLine",
+      "to": "product",
+      "kind": "belongs-to",
+      "sentence": "each order line is for one product",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "enquiryAbout",
+      "from": "enquiry",
+      "to": "product",
+      "kind": "belongs-to",
+      "sentence": "each enquiry is about one product",
+      "answers": {
+        "several": false,
+        "required": true,
+        "whenTargetGoes": "blocks",
+        "moves": false
+      }
+    },
+    {
+      "id": "wayInCountry",
+      "from": "wayToPay",
+      "to": "country",
+      "kind": "together",
+      "sentence": "the admin turns a way to pay on for a country",
+      "answers": {
+        "needsDetails": false,
+        "twice": false
+      }
+    },
+    {
+      "id": "payment",
+      "from": "order",
+      "kind": "happened-to",
+      "sentence": "a payment provider said a payment for an order was made, or failed; a basket across two seller countries is paid once per country",
+      "properties": [
+        {
+          "name": "provider",
+          "kind": "choice",
+          "values": [
+            "paystack",
+            "flutterwave"
+          ]
+        },
+        {
+          "name": "reference",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "currency",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "country",
+          "kind": "text",
+          "freeWords": true
+        },
+        {
+          "name": "amount",
+          "kind": "number"
+        },
+        {
+          "name": "outcome",
+          "kind": "choice",
+          "values": [
+            "paid",
+            "failed"
+          ]
+        }
+      ],
+      "answers": {
+        "forever": true,
+        "undo": "it cannot",
+        "who": false,
+        "outlives": false,
+        "seeHistory": "the admin; a seller sees the payments on orders they have a part in"
+      }
+    },
+    {
+      "id": "productRetired",
+      "from": "product",
+      "kind": "ends",
+      "sentence": "a product is taken off sale, not deleted, so old orders still show it",
+      "answers": {
+        "whatStays": "the product and its photos stay for the orders that have it; buyers stop seeing it",
+        "comesBack": true,
+        "backAs": "the old one",
+        "whoEnds": "its seller or the admin",
+        "endNote": "nothing"
+      }
+    },
+    {
+      "id": "sellerStopped",
+      "from": "seller",
+      "kind": "ends",
+      "sentence": "the admin can stop a seller; its products leave the marketplace and its logins stop working",
+      "answers": {
+        "whatStays": "the seller, its products and its order parts stay; its products are hidden; its staff cannot log in",
+        "comesBack": true,
+        "backAs": "the old one",
+        "whoEnds": "the admin",
+        "endNote": "stoppedReason",
+        "endNoteNeeded": true
+      }
+    }
+  ]
+}

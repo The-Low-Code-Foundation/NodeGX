@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a7c10d00-0000-4000-8000-000000000192",
+  "name": "Rename",
+  "path": "/Components/Rename",
+  "type": "visual",
+  "modified": "2026-10-15T12:00:00.000Z",
+  "description": "EXP-011 §78 part 2 fixture: an Optimistic Update \"Rename\" on store \"app\" key title, its Optimistic Value wired from the Variable a text input writes, and carried by Apply; Transaction Id \"rename\", Timeout 0 (no deadline), When Removed keeps the value. Rename and Confirm are two buttons, and Is Pending is a Text."
+}

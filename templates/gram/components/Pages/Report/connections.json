@@ -1,0 +1,193 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e136ca36-b5e7-530e-8aff-7c6831d86700",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rpRoot",
+      "fromProperty": "didMount",
+      "toId": "rpLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rpUrl",
+      "fromProperty": "pm-post",
+      "toId": "rpLoad",
+      "toProperty": "in-post"
+    },
+    {
+      "fromId": "rpUrl",
+      "fromProperty": "pm-comment",
+      "toId": "rpLoad",
+      "toProperty": "in-comment"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-ok",
+      "toId": "rpContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-gone",
+      "toId": "rpGone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-band",
+      "toId": "rpBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-waiting",
+      "toId": "rpToWaiting",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-problem",
+      "toId": "rpRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-refused",
+      "toId": "rpRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "rpToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-title",
+      "toId": "rpTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-what",
+      "toId": "rpWhat",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-own",
+      "toId": "rpOwn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-other",
+      "toId": "rpForm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-reasons",
+      "toId": "rpReason",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-thanks",
+      "toId": "rpThanksWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-kind",
+      "toId": "rpGather",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "rpLoad",
+      "fromProperty": "out-id",
+      "toId": "rpGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "rpReason",
+      "fromProperty": "value",
+      "toId": "rpGather",
+      "toProperty": "in-reason"
+    },
+    {
+      "fromId": "rpNote",
+      "fromProperty": "onTextChanged",
+      "toId": "rpGather",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "rpSend",
+      "fromProperty": "onClick",
+      "toId": "rpGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rpGather",
+      "fromProperty": "out-problem",
+      "toId": "rpError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpGather",
+      "fromProperty": "out-report",
+      "toId": "rpCall",
+      "toProperty": "in-report"
+    },
+    {
+      "fromId": "rpGather",
+      "fromProperty": "out-go",
+      "toId": "rpCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "rpCall",
+      "fromProperty": "error",
+      "toId": "rpError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rpCall",
+      "fromProperty": "done",
+      "toId": "rpSent",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "rpSent",
+      "fromProperty": "state",
+      "toId": "rpThanks",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpCall",
+      "fromProperty": "done",
+      "toId": "rpSending",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "rpSending",
+      "fromProperty": "state",
+      "toId": "rpContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rpBack",
+      "fromProperty": "onClick",
+      "toId": "rpGoBack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rpDone",
+      "fromProperty": "onClick",
+      "toId": "rpGoBack",
+      "toProperty": "run"
+    }
+  ]
+}

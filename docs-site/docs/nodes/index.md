@@ -5,8 +5,13 @@ title: Node reference
 Every node in the catalog — 180 in total — generated from the same
 enriched catalog the editor reads for its own in-editor help. Grouped by picker category.
 
+125 of them also have an executable behaviour spec,
+shown on the node's page under **Under the hood**: what it depends on, its starting state, how it
+converts its inputs, its version history and the full spec source. Every page also says whether the node
+exports to React.
+
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::
 
 

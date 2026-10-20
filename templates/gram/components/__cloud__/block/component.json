@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "691f1374-4b1b-5e3a-85da-bf34df4da631",
+  "name": "block",
+  "path": "/#__cloud__/block",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Block a member, with why, or let them back: their sign-in, and what they wrote"
+}

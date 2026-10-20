@@ -73,6 +73,7 @@ import { installProjectOverlay } from '../kitOverlay';
 import { writeAgentConfig } from '../project/agentConfig';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import { stableComponentId } from '../project/writeClock';
+import { installStarterAssets } from '../starterAssetFiles';
 import type { ToolDisclosure } from './disclosure';
 import { guarded, jsonResult } from './util';
 
@@ -429,6 +430,11 @@ export interface CreateProjectResponse {
    */
   agentConfig: AgentConfigReport;
   /**
+   * P112-OWN018-NOSTARTERASSETS — the starter set (Inter, Lucide icons, the starter imagery) copied into
+   * `noodl_modules/`, as the editor's new-project path does. A count, not the 61 paths; `failed` when it could not be.
+   */
+  starterAssets: { installed: number; failed?: string };
+  /**
    * BST-002 — what happened to *this* server, when it was the one with no
    * project.
    *
@@ -662,6 +668,8 @@ export function registerCreateProjectTools(server: McpServer, bind?: CreateProje
       });
 
       const skeleton = writeProjectSkeleton(target, name);
+      // P112-OWN018-NOSTARTERASSETS — the typeface, icons and imagery every project the editor makes starts with.
+      const starter = installStarterAssets(target);
 
       const plan = planFromScope(scope, { existingComponents: SKELETON_COMPONENTS });
       // The plan is handed to a human to review, so it is validated here rather
@@ -714,6 +722,17 @@ export function registerCreateProjectTools(server: McpServer, bind?: CreateProje
           'server against this directory with --allow-writes and use create_plan / stage_plan_operation / ' +
           'apply_plan — reviewing each page against docs/CONVENTIONS.md as you go.',
         agentConfig,
+        starterAssets: {
+          installed: starter.written.length + starter.skipped.length,
+          ...(starter.failed
+            ? {
+                failed:
+                  starter.failed +
+                  ' The project has no starter typeface, icons or imagery: get_style_vocabulary says what is installed; ' +
+                  'do not place Icon or Image nodes that name the starter set.'
+              }
+            : {})
+        },
         ...(bound ? { bound } : {})
       };
       return jsonResult(payload);

@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d9203000-cde2-5b62-824e-5ea58417d69b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req-19",
+      "fromProperty": "pm-check",
+      "toId": "which-2",
+      "toProperty": "in-check"
+    },
+    {
+      "fromId": "req-19",
+      "fromProperty": "receive",
+      "toId": "which-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "which-2",
+      "fromProperty": "out-keyName",
+      "toId": "key-2",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "which-2",
+      "fromProperty": "out-go",
+      "toId": "key-2",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "which-2",
+      "fromProperty": "out-notSet",
+      "toId": "noKey-2",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "which-2",
+      "fromProperty": "out-reason",
+      "toId": "no-19",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "which-2",
+      "fromProperty": "out-refused",
+      "toId": "no-19",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "which-2",
+      "fromProperty": "failure",
+      "toId": "no-19",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "key-2",
+      "fromProperty": "failure",
+      "toId": "noKey-2",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "key-2",
+      "fromProperty": "done",
+      "toId": "api-2",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "req-19",
+      "fromProperty": "pm-check",
+      "toId": "run-17",
+      "toProperty": "in-check"
+    },
+    {
+      "fromId": "key-2",
+      "fromProperty": "value",
+      "toId": "run-17",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "api-2",
+      "fromProperty": "value",
+      "toId": "run-17",
+      "toProperty": "in-api"
+    },
+    {
+      "fromId": "api-2",
+      "fromProperty": "done",
+      "toId": "run-17",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "api-2",
+      "fromProperty": "failure",
+      "toId": "run-17",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "run-17",
+      "fromProperty": "out-result",
+      "toId": "ok-19",
+      "toProperty": "pm-result"
+    },
+    {
+      "fromId": "run-17",
+      "fromProperty": "out-done",
+      "toId": "ok-19",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run-17",
+      "fromProperty": "out-reason",
+      "toId": "no-19",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "run-17",
+      "fromProperty": "out-refused",
+      "toId": "no-19",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run-17",
+      "fromProperty": "failure",
+      "toId": "no-19",
+      "toProperty": "send"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8b1720b7-fbd4-579b-8886-42d5c12426cb",
+  "name": "Moon",
+  "path": "/Pages/Moon",
+  "type": "page",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The moon (P113 REV-005): the player’s aliens as tiles, the chosen one close up (Moon/Care: feed it, dress it), and Moon/Adopt. Spends the same purse as the hangar. Reached from the hangar."
+}

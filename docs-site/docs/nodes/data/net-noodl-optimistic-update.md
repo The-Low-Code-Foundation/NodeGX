@@ -18,6 +18,7 @@ Any action where waiting on the network makes the UI feel slow and the write is 
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-runtime` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -101,7 +102,13 @@ Two components that are not parent and child, sharing state through a named stor
 
 [Global Store](./net-noodl-global-store.md), [Set Global Store](./net-noodl-global-store-set.md), [State History](./net-noodl-state-history.md), [REST](./rest2.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

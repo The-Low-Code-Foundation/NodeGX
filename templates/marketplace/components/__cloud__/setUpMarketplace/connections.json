@@ -1,0 +1,187 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a8eec511-0ab9-58e9-80f3-323b9edb02ac",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "pm-setup",
+      "toId": "gate",
+      "toProperty": "in-setup"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "receive",
+      "toId": "secret",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "secret",
+      "fromProperty": "value",
+      "toId": "gate",
+      "toProperty": "in-expected"
+    },
+    {
+      "fromId": "secret",
+      "fromProperty": "done",
+      "toId": "gate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "out-username",
+      "toId": "create",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "out-email",
+      "toId": "create",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "out-password",
+      "toId": "create",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "out-ok",
+      "toId": "create",
+      "toProperty": "create"
+    },
+    {
+      "fromId": "create",
+      "fromProperty": "userId",
+      "toId": "grant",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "create",
+      "fromProperty": "done",
+      "toId": "grant",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "create",
+      "fromProperty": "unchanged",
+      "toId": "no",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "create",
+      "fromProperty": "userId",
+      "toId": "person",
+      "toProperty": "in-loginId"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "out-name",
+      "toId": "person",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "out-email",
+      "toId": "person",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "grant",
+      "fromProperty": "done",
+      "toId": "person",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "grant",
+      "fromProperty": "unchanged",
+      "toId": "person",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "person",
+      "fromProperty": "out-personId",
+      "toId": "ok",
+      "toProperty": "pm-personId"
+    },
+    {
+      "fromId": "create",
+      "fromProperty": "userId",
+      "toId": "named",
+      "toProperty": "in-loginId"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "out-marketplace",
+      "toId": "named",
+      "toProperty": "in-marketplace"
+    },
+    {
+      "fromId": "person",
+      "fromProperty": "out-done",
+      "toId": "named",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "named",
+      "fromProperty": "out-done",
+      "toId": "ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "out-reason",
+      "toId": "why",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "out-refused",
+      "toId": "why",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "out-denied",
+      "toId": "no",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "secret",
+      "fromProperty": "failure",
+      "toId": "no",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "gate",
+      "fromProperty": "failure",
+      "toId": "no",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "create",
+      "fromProperty": "failure",
+      "toId": "no",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "grant",
+      "fromProperty": "failure",
+      "toId": "no",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "person",
+      "fromProperty": "failure",
+      "toId": "no",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "named",
+      "fromProperty": "failure",
+      "toId": "no",
+      "toProperty": "send"
+    }
+  ]
+}

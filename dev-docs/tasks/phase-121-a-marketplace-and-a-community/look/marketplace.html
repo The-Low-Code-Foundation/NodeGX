@@ -1,0 +1,550 @@
+<title>The Market, first picture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: page chrome (themed) around one device frame (the app's own fixed look), scaled to fit; screens swap inside it. */
+:root {
+  --page: #eef0f6; --page-ink: #1a1f36; --page-muted: #5b6283; --page-line: #d5d9e8; --page-card: #ffffff;
+  --chip: #e2e6f3; --chip-on: #1f2a5c; --chip-on-ink: #ffffff;
+  /* the app's look: adire indigo, a saffron accent, paper with a blue cast */
+  --indigo: #1f2a5c; --indigo-2: #2e3d80; --saffron: #f2b705; --paper: #f7f8fc; --ink: #151a33; --muted: #5d6485;
+  --line: #dfe3f0; --white: #ffffff; --ok: #1e7a4f; --ok-bg: #e2f4ea; --warn: #8a5a00; --warn-bg: #fff2cc; --bad: #a3271f; --bad-bg: #fbe4e1;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #11142a; --page-ink: #e8eaf6; --page-muted: #a0a6c6; --page-line: #2c3156; --page-card: #1a1e3a;
+  --chip: #262b4f; --chip-on: #f2b705; --chip-on-ink: #151a33; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --page: #11142a; --page-ink: #e8eaf6; --page-muted: #a0a6c6; --page-line: #2c3156; --page-card: #1a1e3a;
+  --chip: #262b4f; --chip-on: #f2b705; --chip-on-ink: #151a33; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--page); color: var(--page-ink); font-family: var(--body); margin: 0; padding-inline: 16px; padding-block: 20px 40px }
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 16px }
+header.top h1 { font-family: var(--display); font-weight: 800; font-size: 1.6rem; margin: 0; text-wrap: balance }
+header.top p { margin: 4px 0 0; color: var(--page-muted); max-width: 70ch; line-height: 1.45 }
+.controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center }
+.seg, .picker { display: flex; flex-wrap: wrap; gap: 6px }
+.controls .label { font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; color: var(--page-muted) }
+.chipbtn { font: inherit; font-size: .85rem; border: 0; border-radius: 999px; padding: 6px 12px; background: var(--chip); color: var(--page-ink); cursor: pointer }
+.chipbtn[aria-pressed="true"] { background: var(--chip-on); color: var(--chip-on-ink) }
+.chipbtn:focus-visible, .app :focus-visible { outline: 3px solid var(--saffron); outline-offset: 2px }
+.group { display: grid; gap: 6px }
+.stage { overflow: hidden }
+.device { width: 390px; height: 800px; transform-origin: top left; border-radius: 34px; border: 10px solid #0d1024; background: var(--paper); color: var(--ink); overflow: hidden; position: relative; box-shadow: 0 20px 50px rgba(10, 14, 40, .25) }
+.device.tablet { width: 1024px; height: 640px; border-radius: 22px }
+.note { color: var(--page-muted); font-size: .9rem; line-height: 1.45; max-width: 75ch }
+.note b { color: var(--page-ink) }
+
+/* ---------- the app ---------- */
+.app { height: 100%; display: flex; flex-direction: column; font-family: var(--body); font-size: 15px; line-height: 1.35 }
+.screen { display: none; flex: 1; min-height: 0; flex-direction: column }
+.screen.on { display: flex }
+.scroll { flex: 1; overflow-y: auto; min-height: 0 }
+.bar { background: var(--indigo); color: var(--white); padding: 14px 16px 12px; display: grid; gap: 10px }
+.bar .row { display: flex; align-items: center; gap: 10px }
+.brand { font-family: var(--display); font-weight: 800; font-size: 1.35rem; letter-spacing: -.01em; flex: 1 }
+.brand i { color: var(--saffron); font-style: normal }
+.icon-btn { background: transparent; border: 0; color: inherit; font: inherit; cursor: pointer; padding: 4px 6px; border-radius: 8px; position: relative }
+.cur { background: var(--indigo-2); color: var(--white); border: 0; border-radius: 8px; padding: 5px 8px; font: inherit; font-size: .85rem }
+.badge { position: absolute; top: -4px; right: -6px; background: var(--saffron); color: var(--ink); font-size: .7rem; font-weight: 700; border-radius: 999px; padding: 1px 6px }
+.search { background: var(--white); color: var(--muted); border-radius: 10px; padding: 9px 12px; font-size: .95rem }
+.back { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: var(--white); border-bottom: 1px solid var(--line); font-weight: 700 }
+.back button { background: none; border: 0; font: inherit; font-size: 1.2rem; cursor: pointer; color: var(--indigo) }
+.pad { padding: 14px 16px; display: grid; gap: 14px; align-content: start }
+.pad > *, .home-split > *, .two > * { min-width: 0 }
+h2.sec { font-family: var(--display); font-weight: 600; font-size: 1.05rem; margin: 0; display: flex; justify-content: space-between; align-items: baseline }
+h2.sec small { font-family: var(--body); font-weight: 400; color: var(--muted); font-size: .8rem }
+.cats { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px }
+.cat { flex: none; background: var(--white); border: 1px solid var(--line); border-radius: 999px; padding: 7px 12px; font-size: .88rem }
+.cat.on { background: var(--indigo); color: var(--white); border-color: var(--indigo) }
+.sellers { display: flex; gap: 12px; overflow-x: auto }
+.seller { flex: none; width: 92px; display: grid; justify-items: center; gap: 6px; text-align: center; font-size: .8rem; cursor: pointer }
+.logo { width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; font-family: var(--display); font-weight: 800; color: var(--white); font-size: 1.2rem }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px }
+.card { background: var(--white); border-radius: 14px; overflow: hidden; border: 1px solid var(--line); cursor: pointer; display: grid; text-align: left; font: inherit; color: inherit; padding: 0 }
+.photo { aspect-ratio: 1 / 1; max-width: 100%; display: grid; place-items: end start; padding: 8px; font-size: .7rem; color: rgba(255, 255, 255, .92); text-shadow: 0 1px 2px rgba(0, 0, 0, .4) }
+.card .info { padding: 8px 10px 10px; display: grid; gap: 3px }
+.card .name { font-weight: 700; font-size: .92rem }
+.card .who { color: var(--muted); font-size: .78rem }
+.price { font-weight: 700; font-variant-numeric: tabular-nums }
+.price small { font-weight: 400; color: var(--muted); font-size: .75rem }
+.tag { display: inline-block; font-size: .7rem; font-weight: 700; padding: 2px 7px; border-radius: 6px; background: var(--warn-bg); color: var(--warn) }
+.btn { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 13px 14px; cursor: pointer; text-align: center }
+.btn.main { background: var(--saffron); color: var(--ink) }
+.btn.dark { background: var(--indigo); color: var(--white) }
+.btn.line { background: var(--white); color: var(--indigo); border: 1.5px solid var(--indigo) }
+.btn.wa { background: #1f8f4e; color: var(--white) }
+.btn.small { padding: 7px 10px; font-size: .82rem; border-radius: 9px }
+.row2 { display: flex; gap: 10px; align-items: center }
+.row2 > * { flex: 1 }
+.muted { color: var(--muted) }
+.fine { font-size: .82rem; color: var(--muted); line-height: 1.4 }
+.box { background: var(--white); border: 1px solid var(--line); border-radius: 14px; padding: 12px 14px; display: grid; gap: 10px }
+.box.hint { background: var(--warn-bg); border-color: #f0dc9a; color: #4d3800 }
+.line-item { display: grid; grid-template-columns: 52px 1fr auto; gap: 10px; align-items: center }
+.thumb { width: 52px; height: 52px; border-radius: 10px }
+.qty { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden }
+.qty span, .qty button { padding: 6px 12px; background: var(--white); border: 0; font: inherit; font-variant-numeric: tabular-nums }
+.total { display: flex; justify-content: space-between; font-weight: 700; font-variant-numeric: tabular-nums }
+.field { display: grid; gap: 5px; font-size: .85rem }
+.field input, .field select, .field textarea { font: inherit; font-size: .95rem; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--white); color: var(--ink) }
+.pay { display: grid; grid-template-columns: 22px 1fr; gap: 4px 10px; align-items: start; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--white) }
+.pay.on { border-color: var(--indigo); box-shadow: inset 0 0 0 1px var(--indigo) }
+.dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--muted); margin-top: 1px }
+.pay.on .dot { border: 6px solid var(--indigo) }
+.pay b { font-size: .95rem }
+.steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; font-size: .62rem; text-align: center; color: var(--muted) }
+.steps div { display: grid; gap: 4px }
+.steps i { height: 5px; border-radius: 3px; background: var(--line) }
+.steps .done i { background: var(--ok) }
+.steps .now { color: var(--ink); font-weight: 700 }
+.steps .now i { background: var(--saffron) }
+.pill { font-size: .72rem; font-weight: 700; padding: 3px 8px; border-radius: 999px; white-space: nowrap }
+.pill.new { background: var(--warn-bg); color: var(--warn) }
+.pill.ok { background: var(--ok-bg); color: var(--ok) }
+.pill.off { background: var(--bad-bg); color: var(--bad) }
+.pill.info { background: #e3e8fb; color: var(--indigo) }
+.tabs { display: flex; background: var(--white); border-bottom: 1px solid var(--line) }
+.tabs button { flex: 1; font: inherit; font-weight: 700; padding: 11px 6px; background: none; border: 0; border-bottom: 3px solid transparent; color: var(--muted); cursor: pointer }
+.tabs button.on { color: var(--indigo); border-bottom-color: var(--saffron) }
+.list { display: grid; background: var(--white); border: 1px solid var(--line); border-radius: 14px; overflow: hidden }
+.list > div { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; padding: 11px 14px; border-top: 1px solid var(--line); align-items: center }
+.list > div:first-child { border-top: 0 }
+.list .sub { grid-column: 1; color: var(--muted); font-size: .8rem }
+table.t { width: 100%; border-collapse: collapse; font-size: .85rem; background: var(--white); font-variant-numeric: tabular-nums }
+table.t th, table.t td { padding: 9px 10px; border-bottom: 1px solid var(--line); text-align: left }
+table.t th { font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); font-weight: 700 }
+.tw { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px }
+.tog { display: inline-block; width: 34px; height: 20px; border-radius: 999px; background: var(--line); position: relative; vertical-align: middle }
+.tog::after { content: ""; position: absolute; width: 16px; height: 16px; border-radius: 50%; background: var(--white); top: 2px; left: 2px; box-shadow: 0 1px 2px rgba(0, 0, 0, .2) }
+.tog.on { background: var(--ok) }
+.tog.on::after { left: 16px }
+.nav { display: flex; background: var(--white); border-top: 1px solid var(--line); padding: 6px 4px 10px }
+.nav button { flex: 1; background: none; border: 0; font: inherit; font-size: .7rem; color: var(--muted); display: grid; justify-items: center; gap: 2px; cursor: pointer; padding: 4px 0 }
+.nav button b { font-size: 1.15rem; font-weight: 400; line-height: 1 }
+.nav button.on { color: var(--indigo); font-weight: 700 }
+.roleband { font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; padding: 5px 16px; background: var(--saffron); color: var(--ink); font-weight: 700 }
+.gallery { display: grid; grid-template-columns: 1fr; gap: 8px }
+.gallery .photo { aspect-ratio: 4 / 3; border-radius: 14px; font-size: .8rem }
+.dots { display: flex; gap: 5px; justify-content: center }
+.dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line) }
+.dots i.on { background: var(--indigo) }
+.sellerline { display: flex; gap: 10px; align-items: center; cursor: pointer }
+.sellerline .logo { width: 40px; height: 40px; font-size: .9rem }
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px }
+.kpi { background: var(--white); border: 1px solid var(--line); border-radius: 12px; padding: 10px; display: grid; gap: 2px }
+.kpi b { font-family: var(--display); font-size: 1.4rem; font-variant-numeric: tabular-nums }
+.kpi span { font-size: .72rem; color: var(--muted) }
+
+/* tablet: the same screens, laid out wider */
+.device.tablet .grid { grid-template-columns: repeat(4, 1fr) }
+.device.tablet .home-split { display: grid; grid-template-columns: 200px 1fr; gap: 18px; align-items: start }
+.device.tablet .home-split .cats { flex-direction: column; overflow: visible }
+.device.tablet .home-split .cat { text-align: left }
+.device.tablet .two { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; align-items: start }
+.device.tablet .gallery { grid-template-columns: 1fr 1fr }
+.device.tablet .gallery .photo:first-child { grid-column: span 2 }
+.device.tablet .kpis { grid-template-columns: repeat(6, 1fr) }
+.device:not(.tablet) .only-tablet { display: none }
+@media (prefers-reduced-motion: no-preference) { .screen.on { animation: in .18s ease-out } @keyframes in { from { opacity: .4 } to { opacity: 1 } } }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>The Market, first picture</h1>
+    <p>A clickable picture of the marketplace for products made in Africa: buyers across countries, many sellers, one
+      admin. Nothing here is built. Tap through it as a buyer, a seller and the admin, and say what to change. The name,
+      the sellers and the products are made up.</p>
+  </header>
+
+  <div class="controls">
+    <div class="group"><span class="label">Size</span>
+      <div class="seg" role="group" aria-label="Size">
+        <button class="chipbtn" id="sz-phone" aria-pressed="true" data-size="phone">Phone, 390 px</button>
+        <button class="chipbtn" id="sz-tablet" aria-pressed="false" data-size="tablet">Tablet, 1024 × 640</button>
+      </div>
+    </div>
+    <div class="group"><span class="label">A buyer</span>
+      <div class="picker">
+        <button class="chipbtn" data-pick="home">Home</button>
+        <button class="chipbtn" data-pick="product">A product</button>
+        <button class="chipbtn" data-pick="car">Enquire (a car)</button>
+        <button class="chipbtn" data-pick="basket">Basket</button>
+        <button class="chipbtn" data-pick="checkout">Checkout</button>
+        <button class="chipbtn" data-pick="order">Following an order</button>
+      </div>
+    </div>
+    <div class="group"><span class="label">A seller</span>
+      <div class="picker">
+        <button class="chipbtn" data-pick="s-orders">Their orders</button>
+        <button class="chipbtn" data-pick="s-products">Their products</button>
+        <button class="chipbtn" data-pick="s-edit">Add a product</button>
+      </div>
+    </div>
+    <div class="group"><span class="label">The admin</span>
+      <div class="picker">
+        <button class="chipbtn" data-pick="a-sellers">Sellers</button>
+        <button class="chipbtn" data-pick="a-pay">Ways to pay</button>
+        <button class="chipbtn" data-pick="a-rates">Rates</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="device" id="device">
+      <div class="app" id="app">
+
+        <!-- ================= BUYER: HOME ================= -->
+        <section class="screen on" id="home" aria-label="Home">
+          <div class="bar">
+            <div class="row">
+              <div class="brand">The <i>Market</i></div>
+              <select class="cur" aria-label="Show prices in" id="cur-home"><option>GH₵ GHS</option><option>₦ NGN</option><option>CFA XOF</option><option>KSh KES</option></select>
+              <button class="icon-btn" data-go="basket" aria-label="Basket, 3 items">🧺<span class="badge">3</span></button>
+            </div>
+            <div class="search">Search shito, laptops, cars…</div>
+          </div>
+          <div class="scroll"><div class="pad">
+            <div class="home-split">
+              <div class="cats" role="list">
+                <span class="cat on">All</span><span class="cat">Food and drinks</span><span class="cat">Phones</span><span class="cat">Laptops</span><span class="cat">Cars</span><span class="cat">Beauty</span>
+              </div>
+              <div class="pad" style="padding:0">
+                <h2 class="sec">Sellers <small>in 4 countries</small></h2>
+                <div class="sellers">
+                  <div class="seller" data-go="product"><div class="logo" style="background:#a3271f">KK</div>Kofi's Kitchen<span class="muted">Ghana</span></div>
+                  <div class="seller"><div class="logo" style="background:#1e7a4f">AF</div>Ada's Farm Drinks<span class="muted">Nigeria</span></div>
+                  <div class="seller"><div class="logo" style="background:#2e3d80">DT</div>Dakar Tech<span class="muted">Senegal</span></div>
+                  <div class="seller" data-go="car"><div class="logo" style="background:#5a3e85">RM</div>Ring Road Motors<span class="muted">Ghana</span></div>
+                  <div class="seller"><div class="logo" style="background:#8a5a00">NB</div>Nairobi Beans<span class="muted">Kenya</span></div>
+                </div>
+                <h2 class="sec">Fresh this week <small>prices in GH₵</small></h2>
+                <div class="grid">
+                  <button class="card" data-go="product"><div class="photo" style="background:linear-gradient(135deg,#7a1d12,#c0412b)">photo: jars of shito</div><div class="info"><span class="name">Shito pepper sauce, 500 g</span><span class="who">Kofi's Kitchen · Ghana</span><span class="price">GH₵ 45</span></div></button>
+                  <button class="card"><div class="photo" style="background:linear-gradient(135deg,#6b0f3a,#c2185b)">photo: sobolo bottles</div><div class="info"><span class="name">Zobo drink, 6 bottles</span><span class="who">Ada's Farm Drinks · Nigeria</span><span class="price">GH₵ 62 <small>₦ 6,800</small></span></div></button>
+                  <button class="card"><div class="photo" style="background:linear-gradient(135deg,#2b2f3a,#5f6b85)">photo: laptop, open</div><div class="info"><span class="name">ThinkPad T480, refurbished</span><span class="who">Dakar Tech · Senegal</span><span class="price">GH₵ 3,150 <small>CFA 128,000</small></span></div></button>
+                  <button class="card" data-go="car"><div class="photo" style="background:linear-gradient(135deg,#283a52,#7d93b2)">photo: silver saloon car</div><div class="info"><span class="name">Toyota Corolla 2015</span><span class="who">Ring Road Motors · Ghana</span><span class="price">GH₵ 98,000 <span class="tag">Enquire</span></span></div></button>
+                  <button class="card"><div class="photo" style="background:linear-gradient(135deg,#4a2c0f,#9c6b30)">photo: bag of coffee beans</div><div class="info"><span class="name">AA coffee beans, 1 kg</span><span class="who">Nairobi Beans · Kenya</span><span class="price">GH₵ 210 <small>KSh 1,900</small></span></div></button>
+                  <button class="card"><div class="photo" style="background:linear-gradient(135deg,#7b5a00,#d4a017)">photo: bag of gari</div><div class="info"><span class="name">Gari, 2 kg</span><span class="who">Kofi's Kitchen · Ghana</span><span class="price">GH₵ 38</span></div></button>
+                  <button class="card only-tablet"><div class="photo" style="background:linear-gradient(135deg,#1f3a2a,#4f8a64)">photo: phone, screen on</div><div class="info"><span class="name">Tecno Spark 20</span><span class="who">Dakar Tech · Senegal</span><span class="price">GH₵ 1,480</span></div></button>
+                  <button class="card only-tablet"><div class="photo" style="background:linear-gradient(135deg,#5a1f0f,#b5532c)">photo: plantain chips</div><div class="info"><span class="name">Plantain chips, 10 packs</span><span class="who">Ada's Farm Drinks · Nigeria</span><span class="price">GH₵ 55</span></div></button>
+                </div>
+              </div>
+            </div>
+          </div></div>
+          <nav class="nav"><button class="on" data-go="home"><b>⌂</b>Home</button><button><b>☰</b>Shelves</button><button data-go="basket"><b>🧺</b>Basket</button><button data-go="order"><b>◷</b>My order</button></nav>
+        </section>
+
+        <!-- ================= BUYER: PRODUCT ================= -->
+        <section class="screen" id="product" aria-label="A product">
+          <div class="back"><button data-go="home" aria-label="Back">←</button>Shito pepper sauce</div>
+          <div class="scroll"><div class="pad two">
+            <div class="gallery">
+              <div class="photo" style="background:linear-gradient(135deg,#7a1d12,#c0412b)">photo 1 of 3: the jar</div>
+              <div class="photo only-tablet" style="background:linear-gradient(135deg,#5c160d,#9e3322)">photo 2: on rice</div>
+              <div class="photo only-tablet" style="background:linear-gradient(135deg,#3d0e08,#7a2618)">photo 3: the label</div>
+              <div class="dots"><i class="on"></i><i></i><i></i></div>
+            </div>
+            <div class="pad" style="padding:0">
+              <div>
+                <div style="font-family:var(--display);font-weight:800;font-size:1.35rem">Shito pepper sauce, 500 g</div>
+                <div class="price" style="font-size:1.2rem;margin-top:4px">GH₵ 45</div>
+              </div>
+              <div class="sellerline" data-go="home"><div class="logo" style="background:#a3271f">KK</div><div><b>Kofi's Kitchen</b><div class="fine">Accra, Ghana · sells food and drinks</div></div></div>
+              <p style="margin:0;line-height:1.5">Black pepper sauce cooked slowly with dried fish and shrimp, the way it's made at home. Keeps for three months once opened, in the fridge.</p>
+              <div class="row2"><span>How many</span><div class="qty" style="flex:none"><button aria-label="One fewer">−</button><span>2</span><button aria-label="One more">+</button></div></div>
+              <button class="btn main" data-go="basket">Add to basket · GH₵ 90</button>
+              <button class="btn wa">Order on WhatsApp instead</button>
+              <p class="fine">Kofi's Kitchen confirms the delivery and what it costs before you pay.</p>
+            </div>
+          </div></div>
+        </section>
+
+        <!-- ================= BUYER: ENQUIRE (CAR) ================= -->
+        <section class="screen" id="car" aria-label="Enquire about a car">
+          <div class="back"><button data-go="home" aria-label="Back">←</button>Toyota Corolla 2015</div>
+          <div class="scroll"><div class="pad two">
+            <div class="gallery">
+              <div class="photo" style="background:linear-gradient(135deg,#283a52,#7d93b2)">photo 1 of 6: from the front</div>
+              <div class="photo only-tablet" style="background:linear-gradient(135deg,#1d2a3c,#5a6f8e)">photo 2: inside</div>
+              <div class="photo only-tablet" style="background:linear-gradient(135deg,#151f2d,#43546d)">photo 3: the engine</div>
+              <div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <div class="pad" style="padding:0">
+              <div>
+                <div style="font-family:var(--display);font-weight:800;font-size:1.35rem">Toyota Corolla 2015</div>
+                <div class="price" style="font-size:1.2rem;margin-top:4px">GH₵ 98,000 <span class="tag">Enquire</span></div>
+                <div class="fine">84,000 km · automatic · petrol · one owner</div>
+              </div>
+              <div class="sellerline"><div class="logo" style="background:#5a3e85">RM</div><div><b>Ring Road Motors</b><div class="fine">Accra, Ghana</div></div></div>
+              <div class="box hint">This one isn't bought through the basket. Send the seller a message; you agree the price and the handover between you, away from the site.</div>
+              <label class="field" for="enq-name">Your name<input id="enq-name" value="Yaw Mensah"></label>
+              <label class="field" for="enq-phone">Phone or WhatsApp<input id="enq-phone" value="+233 24 555 0142"></label>
+              <label class="field" for="enq-msg">Your message<textarea id="enq-msg" rows="3">Is it still for sale? Can I see it on Saturday?</textarea></label>
+              <button class="btn dark">Send to Ring Road Motors</button>
+            </div>
+          </div></div>
+        </section>
+
+        <!-- ================= BUYER: BASKET ================= -->
+        <section class="screen" id="basket" aria-label="Basket">
+          <div class="back"><button data-go="home" aria-label="Back">←</button>Your basket</div>
+          <div class="scroll"><div class="pad two">
+            <div class="pad" style="padding:0">
+              <div class="box">
+                <div class="sellerline"><div class="logo" style="background:#a3271f">KK</div><div><b>Kofi's Kitchen</b><div class="fine">Ghana · pays in GH₵</div></div></div>
+                <div class="line-item"><div class="thumb" style="background:linear-gradient(135deg,#7a1d12,#c0412b)"></div><div>Shito pepper sauce<div class="fine">2 × GH₵ 45</div></div><b class="price">GH₵ 90</b></div>
+                <div class="line-item"><div class="thumb" style="background:linear-gradient(135deg,#7b5a00,#d4a017)"></div><div>Gari, 2 kg<div class="fine">1 × GH₵ 38</div></div><b class="price">GH₵ 38</b></div>
+              </div>
+              <div class="box">
+                <div class="sellerline"><div class="logo" style="background:#1e7a4f">AF</div><div><b>Ada's Farm Drinks</b><div class="fine">Nigeria · pays in ₦</div></div></div>
+                <div class="line-item"><div class="thumb" style="background:linear-gradient(135deg,#6b0f3a,#c2185b)"></div><div>Zobo drink, 6 bottles<div class="fine">1 × ₦ 6,800</div></div><b class="price">₦ 6,800</b></div>
+              </div>
+            </div>
+            <div class="pad" style="padding:0">
+              <div class="box hint"><b>Two countries, two payments.</b> Your sellers are in Ghana and Nigeria, so you pay twice: once in cedis for Kofi's Kitchen and once in naira for Ada's Farm Drinks. Each payment goes straight to its sellers.</div>
+              <div class="box">
+                <div class="total"><span>Ghana, in GH₵</span><span>GH₵ 128</span></div>
+                <div class="total"><span>Nigeria, in ₦</span><span>₦ 6,800</span></div>
+                <div class="fine">About GH₵ 190 together. Delivery is added when each seller confirms it.</div>
+              </div>
+              <button class="btn main" data-go="checkout">Check out</button>
+              <p class="fine">No account needed.</p>
+            </div>
+          </div></div>
+        </section>
+
+        <!-- ================= BUYER: CHECKOUT ================= -->
+        <section class="screen" id="checkout" aria-label="Checkout">
+          <div class="back"><button data-go="basket" aria-label="Back">←</button>Check out</div>
+          <div class="scroll"><div class="pad two">
+            <div class="pad" style="padding:0">
+              <label class="field" for="co-name">Name<input id="co-name" value="Abena Owusu"></label>
+              <label class="field" for="co-phone">Phone (the sellers call this number)<input id="co-phone" value="+233 20 555 0187"></label>
+              <label class="field" for="co-addr">Where it goes<textarea id="co-addr" rows="2">House 14, Asafoatse Nettey Rd, Osu, Accra</textarea></label>
+              <label class="field" for="co-email">Email, for the receipt (optional)<input id="co-email" placeholder="you@example.com"></label>
+            </div>
+            <div class="pad" style="padding:0">
+              <h2 class="sec">How you'll pay in Ghana <small>GH₵ 128</small></h2>
+              <div class="pay on"><span class="dot"></span><b>Card or mobile money</b><span></span><span class="fine">MTN MoMo, Telecel Cash, AirtelTigo, Visa, Mastercard. Paid after the seller confirms.</span></div>
+              <div class="pay"><span class="dot"></span><b>Pay on delivery</b><span></span><span class="fine">Cash or MoMo to the rider.</span></div>
+              <div class="pay"><span class="dot"></span><b>Bank transfer</b><span></span><span class="fine">You get the account and a reference to use.</span></div>
+              <div class="pay"><span class="dot"></span><b>Order on WhatsApp</b><span></span><span class="fine">Finish the order in a chat with the seller.</span></div>
+              <h2 class="sec">How you'll pay in Nigeria <small>₦ 6,800</small></h2>
+              <div class="pay on"><span class="dot"></span><b>Card or bank transfer</b><span></span><span class="fine">Paid after Ada's Farm Drinks confirms.</span></div>
+              <button class="btn main" data-go="order">Place order</button>
+              <p class="fine">Each seller confirms delivery and its cost first. We send you a private link to follow your order. Want to see your orders later? <u>Make an account</u> (optional).</p>
+            </div>
+          </div></div>
+        </section>
+
+        <!-- ================= BUYER: ORDER STATUS ================= -->
+        <section class="screen" id="order" aria-label="Following an order">
+          <div class="back"><button data-go="home" aria-label="Back">←</button>Order MK-2026-00042</div>
+          <div class="scroll"><div class="pad two">
+            <div class="pad" style="padding:0">
+              <div class="box">
+                <div class="total"><span>Abena Owusu</span><span class="muted" style="font-weight:400">14 Oct 2026</span></div>
+                <div class="fine">Read out the number if you call: <b>M K, twenty twenty-six, four two</b>. This page is private to you: keep the link.</div>
+              </div>
+              <div class="box">
+                <div class="row2"><b>Kofi's Kitchen</b><span class="pill ok" style="flex:none">Paid</span></div>
+                <div class="steps"><div class="done"><i></i>New</div><div class="done"><i></i>Confirmed</div><div class="done now"><i></i>Paid</div><div><i></i>Packed</div><div><i></i>Sent</div><div><i></i>Delivered</div></div>
+                <div class="fine">Delivery GH₵ 20, confirmed by the seller. Paid GH₵ 148 by MTN MoMo.</div>
+              </div>
+            </div>
+            <div class="pad" style="padding:0">
+              <div class="box">
+                <div class="row2"><b>Ada's Farm Drinks</b><span class="pill new" style="flex:none">Waiting for the seller</span></div>
+                <div class="steps"><div class="done now"><i></i>New</div><div><i></i>Confirmed</div><div><i></i>Paid</div><div><i></i>Packed</div><div><i></i>Sent</div><div><i></i>Delivered</div></div>
+                <div class="fine">The seller hasn't confirmed delivery to Accra yet. You'll pay ₦ 6,800 plus delivery once they do.</div>
+                <button class="btn wa small">Message Ada's Farm Drinks on WhatsApp</button>
+              </div>
+            </div>
+          </div></div>
+          <nav class="nav"><button data-go="home"><b>⌂</b>Home</button><button><b>☰</b>Shelves</button><button data-go="basket"><b>🧺</b>Basket</button><button class="on" data-go="order"><b>◷</b>My order</button></nav>
+        </section>
+
+        <!-- ================= SELLER: ORDERS ================= -->
+        <section class="screen" id="s-orders" aria-label="A seller's orders">
+          <div class="roleband">Signed in as Kofi's Kitchen</div>
+          <div class="tabs"><button class="on" data-go="s-orders">Orders</button><button data-go="s-products">Products</button></div>
+          <div class="scroll"><div class="pad">
+            <div class="kpis">
+              <div class="kpi"><b>2</b><span>to confirm</span></div><div class="kpi"><b>3</b><span>paid, to pack</span></div><div class="kpi"><b>5</b><span>sent</span></div>
+              <div class="kpi only-tablet"><b>41</b><span>delivered this month</span></div><div class="kpi only-tablet"><b>GH₵ 6,420</b><span>this month</span></div><div class="kpi only-tablet"><b>1</b><span>enquiry</span></div>
+            </div>
+            <h2 class="sec">To confirm <small>tell the buyer the delivery cost</small></h2>
+            <div class="list">
+              <div><b>MK-2026-00051 · Kwame Boateng</b><span class="pill new">New</span><span class="sub">Shito × 3, Gari × 1 · Tema · GH₵ 173</span></div>
+              <div><b>MK-2026-00049 · Efua Asante</b><span class="pill new">New</span><span class="sub">Shito × 1 · Kumasi · GH₵ 45</span></div>
+            </div>
+            <div class="box">
+              <b>MK-2026-00051, delivery to Tema</b>
+              <div class="row2"><label class="field" for="dl-cost">Delivery cost (GH₵)<input id="dl-cost" value="25"></label><label class="field" for="dl-when">When<input id="dl-when" value="Thursday"></label></div>
+              <button class="btn dark small">Confirm and ask the buyer to pay</button>
+            </div>
+            <h2 class="sec">Paid, to pack</h2>
+            <div class="list">
+              <div><b>MK-2026-00042 · Abena Owusu</b><span class="pill ok">Paid</span><span class="sub">Shito × 2, Gari × 1 · Osu, Accra</span></div>
+              <div><b>MK-2026-00040 · Kojo Darko</b><span class="pill ok">Paid</span><span class="sub">Gari × 4 · Madina</span></div>
+              <div><b>MK-2026-00038 · Akosua Frimpong</b><span class="pill ok">Paid</span><span class="sub">Shito × 6 · Cape Coast</span></div>
+            </div>
+            <p class="fine">You see only your part of each order: your products, the buyer's name, phone and address. Other sellers in the same order don't see yours.</p>
+          </div></div>
+        </section>
+
+        <!-- ================= SELLER: PRODUCTS ================= -->
+        <section class="screen" id="s-products" aria-label="A seller's products">
+          <div class="roleband">Signed in as Kofi's Kitchen</div>
+          <div class="tabs"><button data-go="s-orders">Orders</button><button class="on" data-go="s-products">Products</button></div>
+          <div class="scroll"><div class="pad">
+            <button class="btn main" data-go="s-edit">Add a product</button>
+            <div class="list">
+              <div><span class="row2" style="gap:10px"><span class="thumb" style="flex:none;background:linear-gradient(135deg,#7a1d12,#c0412b)"></span><span><b>Shito pepper sauce, 500 g</b><br><span class="fine">GH₵ 45 · Food and drinks</span></span></span><span class="pill ok">On sale</span></div>
+              <div><span class="row2" style="gap:10px"><span class="thumb" style="flex:none;background:linear-gradient(135deg,#7b5a00,#d4a017)"></span><span><b>Gari, 2 kg</b><br><span class="fine">GH₵ 38 · Food and drinks</span></span></span><span class="pill ok">On sale</span></div>
+              <div><span class="row2" style="gap:10px"><span class="thumb" style="flex:none;background:linear-gradient(135deg,#3f4a2a,#7d8f4f)"></span><span><b>Kontomire stew, frozen</b><br><span class="fine">GH₵ 60 · Food and drinks</span></span></span><span class="pill off">Off sale</span></div>
+            </div>
+            <p class="fine">Taking a product off sale hides it from buyers. Orders that already have it keep it, at the price it had.</p>
+          </div></div>
+        </section>
+
+        <!-- ================= SELLER: ADD / EDIT ================= -->
+        <section class="screen" id="s-edit" aria-label="Add a product">
+          <div class="back"><button data-go="s-products" aria-label="Back">←</button>Add a product</div>
+          <div class="scroll"><div class="pad two">
+            <div class="pad" style="padding:0">
+              <div class="grid" style="grid-template-columns:repeat(3,1fr)">
+                <div class="photo" style="background:linear-gradient(135deg,#7a1d12,#c0412b);border-radius:10px">photo 1</div>
+                <div class="photo" style="background:linear-gradient(135deg,#5c160d,#9e3322);border-radius:10px">photo 2</div>
+                <div class="photo" style="background:var(--white);border:2px dashed var(--line);border-radius:10px;color:var(--muted);text-shadow:none;place-items:center">+ add</div>
+              </div>
+              <p class="fine">Photos are made smaller on your phone before they upload, so they're quick on mobile data.</p>
+            </div>
+            <div class="pad" style="padding:0">
+              <label class="field" for="p-name">Name<input id="p-name" value="Shito pepper sauce, 1 kg"></label>
+              <label class="field" for="p-desc">Description<textarea id="p-desc" rows="3">The big jar, for families and chop bars.</textarea></label>
+              <div class="row2"><label class="field" for="p-price">Price (GH₵)<input id="p-price" value="85"></label><label class="field" for="p-cat">Shelf<select id="p-cat"><option>Food and drinks</option><option>Phones</option><option>Laptops</option><option>Cars</option></select></label></div>
+              <div class="field">How buyers get it
+                <div class="pay on"><span class="dot"></span><b>Buy through the basket</b></div>
+                <div class="pay"><span class="dot"></span><b>Enquire (they message you; you settle it yourselves)</b></div>
+              </div>
+              <button class="btn main" data-go="s-products">Save and put on sale</button>
+            </div>
+          </div></div>
+        </section>
+
+        <!-- ================= ADMIN: SELLERS ================= -->
+        <section class="screen" id="a-sellers" aria-label="The admin's sellers">
+          <div class="roleband">Admin</div>
+          <div class="tabs"><button class="on" data-go="a-sellers">Sellers</button><button data-go="a-pay">Ways to pay</button><button data-go="a-rates">Rates</button></div>
+          <div class="scroll"><div class="pad">
+            <button class="btn main">Add a seller</button>
+            <div class="tw"><table class="t">
+              <thead><tr><th>Seller</th><th>Country</th><th>Products</th><th>Logins</th><th></th></tr></thead>
+              <tbody>
+                <tr><td><b>Kofi's Kitchen</b></td><td>Ghana</td><td>12</td><td>2</td><td><span class="pill ok">Selling</span></td></tr>
+                <tr><td><b>Ada's Farm Drinks</b></td><td>Nigeria</td><td>8</td><td>1</td><td><span class="pill ok">Selling</span></td></tr>
+                <tr><td><b>Dakar Tech</b></td><td>Senegal</td><td>31</td><td>3</td><td><span class="pill ok">Selling</span></td></tr>
+                <tr><td><b>Ring Road Motors</b></td><td>Ghana</td><td>6</td><td>1</td><td><span class="pill ok">Selling</span></td></tr>
+                <tr><td><b>Nairobi Beans</b></td><td>Kenya</td><td>4</td><td>1</td><td><span class="pill ok">Selling</span></td></tr>
+                <tr><td><b>Lomé Prints</b></td><td>Togo</td><td>9</td><td>0</td><td><span class="pill off">Stopped</span></td></tr>
+              </tbody>
+            </table></div>
+            <div class="box">
+              <b>Kofi's Kitchen</b>
+              <div class="row2"><button class="btn line small">Edit</button><button class="btn line small">Give a login</button><button class="btn line small">Their products</button><button class="btn line small">Stop</button></div>
+              <div class="fine">Payout account at the payment provider: <b>set</b> (only you see it). Stopping a seller hides their products and stops their logins; you write why, and you can bring them back.</div>
+            </div>
+          </div></div>
+        </section>
+
+        <!-- ================= ADMIN: WAYS TO PAY ================= -->
+        <section class="screen" id="a-pay" aria-label="Ways to pay per country">
+          <div class="roleband">Admin</div>
+          <div class="tabs"><button data-go="a-sellers">Sellers</button><button class="on" data-go="a-pay">Ways to pay</button><button data-go="a-rates">Rates</button></div>
+          <div class="scroll"><div class="pad">
+            <h2 class="sec">Turn each way on for each country</h2>
+            <div class="tw"><table class="t">
+              <thead><tr><th>Way to pay</th><th>Ghana</th><th>Nigeria</th><th>Senegal</th><th>Kenya</th></tr></thead>
+              <tbody>
+                <tr><td><b>Card or mobile money</b><div class="fine">through Paystack</div></td><td><span class="tog on"></span></td><td><span class="tog on"></span></td><td><span class="tog"></span></td><td><span class="tog on"></span></td></tr>
+                <tr><td><b>Pay on delivery</b></td><td><span class="tog on"></span></td><td><span class="tog on"></span></td><td><span class="tog on"></span></td><td><span class="tog on"></span></td></tr>
+                <tr><td><b>Bank transfer</b><div class="fine">with a reference</div></td><td><span class="tog on"></span></td><td><span class="tog on"></span></td><td><span class="tog"></span></td><td><span class="tog"></span></td></tr>
+                <tr><td><b>Order on WhatsApp</b></td><td><span class="tog on"></span></td><td><span class="tog on"></span></td><td><span class="tog on"></span></td><td><span class="tog on"></span></td></tr>
+              </tbody>
+            </table></div>
+            <p class="fine">Card and mobile money split each payment between the sellers in one country. Where it isn't on (Senegal here), buyers there see the other ways.</p>
+          </div></div>
+        </section>
+
+        <!-- ================= ADMIN: RATES ================= -->
+        <section class="screen" id="a-rates" aria-label="Currency rates">
+          <div class="roleband">Admin</div>
+          <div class="tabs"><button data-go="a-sellers">Sellers</button><button data-go="a-pay">Ways to pay</button><button class="on" data-go="a-rates">Rates</button></div>
+          <div class="scroll"><div class="pad">
+            <h2 class="sec">What one unit is worth in cedis <small>set by hand</small></h2>
+            <div class="tw"><table class="t">
+              <thead><tr><th>Currency</th><th>1 unit = GH₵</th><th>Changed</th></tr></thead>
+              <tbody>
+                <tr><td><b>₦ Nigerian naira</b></td><td>0.0091</td><td>12 Oct, by you</td></tr>
+                <tr><td><b>CFA West African franc</b></td><td>0.0246</td><td>12 Oct, by you</td></tr>
+                <tr><td><b>KSh Kenyan shilling</b></td><td>0.1105</td><td>9 Oct, by you</td></tr>
+              </tbody>
+            </table></div>
+            <p class="fine">Buyers see prices converted with these, marked as approximate. They pay each seller in the seller's own currency.</p>
+            <button class="btn dark">Save rates</button>
+          </div></div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <p class="note"><b>For Richard first, then the builder.</b> Four things the picture decides: a basket across two countries is paid twice (R8); a buyer checks out with no account and follows the order by a private link (W2); a car is enquired about, never bought here (R10); each seller confirms delivery and its cost before the buyer pays. Photos are coloured blocks with a label: the real ones come from the sellers.</p>
+</div>
+
+<script>
+(function () {
+  var device = document.getElementById('device');
+  var stage = document.getElementById('stage');
+  var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
+  var pickers = Array.prototype.slice.call(document.querySelectorAll('[data-pick]'));
+  function go(id) {
+    screens.forEach(function (s) { s.classList.toggle('on', s.id === id); });
+    pickers.forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.pick === id)); });
+    var on = document.getElementById(id);
+    var sc = on && on.querySelector('.scroll');
+    if (sc) sc.scrollTop = 0;
+    try { localStorage.setItem('market-screen', id); } catch (e) {}
+  }
+  function fit() {
+    var w = device.classList.contains('tablet') ? 1044 : 410;
+    var h = device.classList.contains('tablet') ? 660 : 820;
+    var avail = stage.clientWidth;
+    var s = Math.min(1, avail / w);
+    device.style.transform = 'scale(' + s + ')';
+    stage.style.height = Math.ceil(h * s) + 'px';
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-go]');
+    if (t && device.contains(t)) { e.preventDefault(); go(t.dataset.go); return; }
+    var p = e.target.closest('[data-pick]');
+    if (p) { go(p.dataset.pick); return; }
+    var z = e.target.closest('[data-size]');
+    if (z) {
+      device.classList.toggle('tablet', z.dataset.size === 'tablet');
+      document.querySelectorAll('[data-size]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === z)); });
+      fit();
+    }
+  });
+  window.addEventListener('resize', fit);
+  var start = 'home';
+  try { start = localStorage.getItem('market-screen') || 'home'; } catch (e) {}
+  if (!document.getElementById(start)) start = 'home';
+  go(start);
+  fit();
+})();
+</script>

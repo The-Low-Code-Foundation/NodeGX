@@ -164,9 +164,13 @@ describe('§A — the session module and the client', () => {
     );
   });
 
-  test('A6 both ride request() — the §43 cardinality holds: two fetch sites, two wraps, and neither new function is a third', () => {
+  test('A6 both ride request() — the §43 cardinality holds: two wrapped fetch sites, and neither new function is a third', () => {
     const source = client(app);
-    expect(source.match(/await fetch\(/g)).toHaveLength(2);
+    // EXP-011 §79: a magic link earns the client's return leg, whose code exchange is a third fetch site, deliberately
+    // NOT through request(): it reads its answer as the runtime's auth request does (an unreachable backend and a body
+    // with no `error` both say "Sign-in could not be completed."), so it is not one of the wraps.
+    expect(source.match(/await fetch\(/g)).toHaveLength(3);
+    expect(fnBody(source, 'async function exchangeAuthCode(')).toContain("await fetch(ENDPOINT + '/oauth/exchange'");
     expect(source.match(/throw new Error\(`Could not reach the backend at \$\{ENDPOINT\}`\);/g)).toHaveLength(2);
     expect(fnBody(source, 'export async function updateUserRequest(')).toContain('await request<');
     expect(fnBody(source, 'export async function requestMagicLinkRequest(')).toContain('await request<');
@@ -261,16 +265,15 @@ describe('§B — the component', () => {
 });
 
 describe('§C — the refusals, each by its sentence', () => {
-  test('C1 a consumed failure or completed — only the done chain and the Error value are translated', () => {
+  // EXP-011 §90. A consumed failure is a chain now (tests/the-failure-runs-its-chain.test.ts grades it); completed is not.
+  test('C1 a consumed failure is a chain; a consumed completed is refused — only the done and failure chains and the Error value are translated', () => {
     const ir = cloneIr();
     wire(ir, HOME, 'setProps', 'failure', 'sentSet', 'do', 'signal');
-    expect(reasonFor(ir, HOME, 'setProps')).toBe(
-      'its failure output is consumed — only the done chain and the Error value are translated in this slice'
-    );
+    expect(reasonFor(ir, HOME, 'setProps')).toBeUndefined();
     const two = cloneIr();
     wire(two, HOME, 'magic', 'completed', 'savedSet', 'do', 'signal');
     expect(reasonFor(two, HOME, 'magic')).toBe(
-      'its completed output is consumed — only the done chain and the Error value are translated in this slice'
+      'its completed output is consumed — only the done and failure chains and the Error value are translated in this slice'
     );
   });
 

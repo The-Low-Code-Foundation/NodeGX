@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0bcaf982-495b-5386-8081-4484af78fb41",
+  "name": "answerEnquiry",
+  "path": "/#__cloud__/answerEnquiry",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Mark an enquiry answered, or not answered yet: its seller’s staff, or the admin"
+}

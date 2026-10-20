@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ccb6a5e2-9a6b-5473-839b-1b3caa2c859e",
+  "name": "Bar",
+  "path": "/UI/Bar",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The bar: the wordmark, Sign out for someone signed in, and the role band"
+}

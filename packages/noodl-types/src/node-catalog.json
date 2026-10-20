@@ -14717,6 +14717,12 @@
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "opacity": [
           "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"
         ],
@@ -14782,7 +14788,8 @@
         ]
       },
       "warnings": {
-        "focus/not-mounted": "the last Focus arrived while it was not on the page"
+        "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -16941,6 +16948,12 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the element can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
         ],
@@ -16990,6 +17003,9 @@
         "srcSet": [
           "always: the sizes the browser may pick from instead, drawn at the end of the frame"
         ]
+      },
+      "warnings": {
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -26616,9 +26632,18 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the group can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, its buttons take no click"
         ]
+      },
+      "warnings": {
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -32968,6 +32993,12 @@
         "as": [
           "always: the HTML element the next paint draws (a div when empty) — a new Tag draws a new element"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
         ],
@@ -33011,6 +33042,9 @@
         "acceptedFileTypes": [
           "always: read at a drop — which files count as accepted"
         ]
+      },
+      "warnings": {
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -34850,6 +34884,18 @@
           "description": "Object path inside the bucket, such as avatars/me.png. Supabase only. Leave blank to use the file's own name"
         },
         {
+          "name": "photoQuality",
+          "displayName": "Photo Quality",
+          "group": "Shrink Photos",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 80,
+          "description": "How much detail a shrunk JPEG or WebP keeps, from 1 to 100; PNG keeps every pixel and its transparency, GIF and SVG are never shrunk"
+        },
+        {
           "name": "private",
           "displayName": "Private",
           "group": "General",
@@ -34862,6 +34908,17 @@
           "description": "Restricts the stored file to whoever uploaded it, so reading it later needs a Sign File URL node"
         },
         {
+          "name": "readers",
+          "displayName": "Readers",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Roles that may read the file as well as whoever uploaded it, such as role:member, separated by commas; setting it makes the file private. NodeGX backends only"
+        },
+        {
           "name": "recordId",
           "displayName": "Record ID (PocketBase)",
           "group": "File Location",
@@ -34871,6 +34928,18 @@
           },
           "isSignal": false,
           "description": "Existing record to attach the file to. PocketBase only. Leave blank to create a new record as part of the upload"
+        },
+        {
+          "name": "shrinkTo",
+          "displayName": "Shrink To",
+          "group": "Shrink Photos",
+          "plug": "input",
+          "type": {
+            "name": "number"
+          },
+          "isSignal": false,
+          "default": 0,
+          "description": "Makes a photo smaller in the browser before sending it, so its longer side is at most this many pixels; 0 sends every file as picked"
         },
         {
           "name": "upload",
@@ -35014,6 +35083,15 @@
         "private": [
           "always: held as handed; read when the next Upload goes"
         ],
+        "readers": [
+          "always: held as handed; read when the next Upload goes — set, those roles may read the file as well as whoever uploaded it, and the file is private"
+        ],
+        "shrinkTo": [
+          "always: held as handed; read when the next Upload goes — above 0, a photo (not a GIF or an SVG) is drawn smaller in the browser first, its longer side at most this many pixels, and the smaller file is what goes; it goes as picked when it is already that small, when the smaller one would weigh more, or when the browser cannot read it"
+        ],
+        "photoQuality": [
+          "always: held as handed; read when the next Upload goes, and only when a photo is shrunk — 1 to 100 for a JPEG or WebP, anything else is 80; a PNG keeps every pixel"
+        ],
         "bucket": [
           "always: held as handed; read when the next Upload goes — set, the file goes to this bucket at Path (or under the file's own name)"
         ],
@@ -35030,7 +35108,7 @@
           "always: held as handed; read when the next Upload goes, and only with Collection — a half-filled group is no location at all"
         ],
         "upload": [
-          "always: its own upload at the frame's end — two presses are two uploads — with File, Private and the File Location held then: no File, or a Backend the project does not have, is Error, Error Status Code 0 and Failure at once; otherwise the backend answers with Cloud File then Done, or Error, Error Status Code and Failure"
+          "always: its own upload at the frame's end — two presses are two uploads — with File, Private, Readers and the File Location held then: no File, or a Backend the project does not have, is Error, Error Status Code 0 and Failure at once; otherwise the backend answers with Cloud File then Done, or Error, Error Status Code and Failure"
         ]
       }
     },
@@ -37547,6 +37625,12 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the element can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer"
         ],
@@ -37629,6 +37713,9 @@
           "on the page: stops wanting the video playing, goes back to Start Time as last drawn (Playback Position, once loaded; second 0 when there is none) and pauses it — On Pause if it was playing; Autoplay no longer starts it on this load; an embedded player is not reached — Done, in its turn after outcomes the frame has already resolved",
           "off the page: waits for the element (at most 16 wait, and the oldest pushed out reports Failure) and resets at the paint that puts the video there — Done then"
         ]
+      },
+      "warnings": {
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -47150,13 +47237,20 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the button can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
       },
       "warnings": {
         "focus/not-mounted": "the last Focus arrived while it was not on the page",
-        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon",
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -51939,13 +52033,20 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the list can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
       },
       "warnings": {
         "focus/not-mounted": "the last Focus arrived while it was not on the page",
-        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon",
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {
@@ -56522,12 +56623,16 @@
         "scrollIntoView": [
           "always: the page, or the scrolling Group holding it, scrolls until the slider can be seen"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ]
       },
       "warnings": {
         "focus/not-mounted": "the last Focus arrived while it was not on the page",
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size",
         "slider/max-below-min": "Max is below Min",
         "slider/value-not-a-number": "a Value arrived that is not a number"
       }
@@ -59373,6 +59478,12 @@
         "blockTouch": [
           "always: on, a pointer act that lands here goes no further — the nodes it sits inside do not hear it"
         ],
+        "width": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
+        "height": [
+          "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
+        ],
         "visible": [
           "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
         ],
@@ -59382,7 +59493,8 @@
       },
       "warnings": {
         "focus/not-mounted": "the last Focus arrived while it was not on the page",
-        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon"
+        "visual/icon-source-not-an-icon/iconIconSource": "Icon Source holds something that is not an icon",
+        "dimensions/wired-dimension-becomes-grow": "a wired Width in a row, or a wired Height in a column, is a percent, so it shares out the space instead of setting a size"
       }
     },
     {

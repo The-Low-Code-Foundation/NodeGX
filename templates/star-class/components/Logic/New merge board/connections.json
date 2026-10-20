@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bb30ce0f-7aba-59d2-8597-4741d18fb60e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "newmergeboarIn",
+      "fromProperty": "level",
+      "toId": "newmergeboarFn",
+      "toProperty": "in-level"
+    },
+    {
+      "fromId": "newmergeboarIn",
+      "fromProperty": "model",
+      "toId": "newmergeboarFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "newmergeboarIn",
+      "fromProperty": "pool",
+      "toId": "newmergeboarFn",
+      "toProperty": "in-pool"
+    },
+    {
+      "fromId": "newmergeboarIn",
+      "fromProperty": "mode",
+      "toId": "newmergeboarFn",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "newmergeboarIn",
+      "fromProperty": "run",
+      "toId": "newmergeboarFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "newmergeboarFn",
+      "fromProperty": "out-game",
+      "toId": "newmergeboarOut",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "newmergeboarFn",
+      "fromProperty": "out-board",
+      "toId": "newmergeboarOut",
+      "toProperty": "board"
+    },
+    {
+      "fromId": "newmergeboarFn",
+      "fromProperty": "out-pool",
+      "toId": "newmergeboarOut",
+      "toProperty": "pool"
+    },
+    {
+      "fromId": "newmergeboarFn",
+      "fromProperty": "out-mode",
+      "toId": "newmergeboarOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "newmergeboarFn",
+      "fromProperty": "success",
+      "toId": "newmergeboarOut",
+      "toProperty": "done"
+    }
+  ]
+}

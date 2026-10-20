@@ -195,6 +195,12 @@ export function registerLibraryTools(
   binding: ProjectBinding,
   options: { allowWrites: boolean }
 ): void {
+  // P112-OWN018-NOLIBRARY — no library on disk (`npx @nodegx/mcp`, the editor app's bundled server), no shelf
+  // tools. Registered anyway, every call failed with "set NODEGX_LIBRARY_DIR", which a person on npm has nothing
+  // to point at, and `find_tools` handed all four to any agent that asked how to press a button. Decided once, at
+  // registration: the library does not appear under a running server.
+  if (!resolveLibraryRoot().ok) return;
+
   server.registerTool(
     'list_library',
     {

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e6291be0-5bcf-547b-85e3-d6ef424f02eb",
+  "name": "Book tile",
+  "path": "/Moon/Book tile",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One page of the Alien Book: the kit draws the species in its colour (a grey shape when never had), with its kind and colour under it, or ?."
+}

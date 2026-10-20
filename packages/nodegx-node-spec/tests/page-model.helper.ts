@@ -110,13 +110,20 @@ const LEAVES = { frameEnd: ['focused', 'hover', 'pressed'], framePulses: ['onBlu
  * `_fileDropLeftPage` in `componentWillUnmount`). The node's own work at the leaving, reading only node keys.
  */
 const FILE_DROP_LEAVES = ['dragDepth', 'isDragOver'];
+/**
+ * NSP-019 R38 (s105) — the size ports and what the render said of them (wired-grow.ts): what Width and Height hold is the node's
+ * (node.ts `_inputValues`, written by the ports), and the sentence is the node's own memo, written at its render on the page
+ * (layout.ts `_lastMainAxisGrowDiagnostic`), so the paint writes it.
+ */
+const GROW = { node: ['sizes', 'grow'], frameEnd: ['grow'] };
 
 export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   'net.noodl.controls.button': {
-    node: CONTROL_NODE,
+    node: [...CONTROL_NODE, ...GROW.node],
     attr: { onPage, pageEnabled, pageVisible },
     held: { elementFocused: keyboard },
     ...LEAVES,
+    frameEnd: [...LEAVES.frameEnd, ...GROW.frameEnd],
     elementCalls: FOCUS_CALLS
   },
   'net.noodl.controls.checkbox': {
@@ -132,7 +139,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     held: {}
   },
   Text: {
-    node: ['mounted', 'tag', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile'],
+    node: ['mounted', 'tag', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', ...GROW.node],
     attr: {
       onPage,
       // an element's type cannot change: presetting it would claim an element the page does not have
@@ -144,7 +151,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
       // s51 — the zone side: a card beside it holds the keyboard (where the pointer is, and where its own drag started, went with C78)
       cardFocused: keyboard
     },
-    frameEnd: [...FILE_DROP_LEAVES],
+    frameEnd: [...FILE_DROP_LEAVES, ...GROW.frameEnd],
     elementCalls: { 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem'] }
   },
   // s53 — the Text's model with no Tag: the element is always a `<div>`, so only a mount makes a new one
@@ -160,20 +167,20 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   },
   // s53 — the Shape's model, and the picture: the element's source and Source Set as written (node), the last failure's reason
   Image: {
-    node: ['mounted', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'src', 'srcSet', 'imageError'],
+    node: ['mounted', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'src', 'srcSet', 'imageError', ...GROW.node],
     attr: { onPage },
     element: { elem: { changesWith: ['onPage'] } },
     held: { focusedElem: keyboard, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
       cardFocused: keyboard
     },
-    frameEnd: [...FILE_DROP_LEAVES],
+    frameEnd: [...FILE_DROP_LEAVES, ...GROW.frameEnd],
     elementCalls: { 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem'] }
   },
   // s54 — the Image's model, and the Video's: the element a Source draws (an embed or a `<video>`: a new element without a mount, as the
   // Text's Tag) with its `src` and flags, the media element the browser holds, and the component the node calls
   Video: {
     node: ['mounted', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile',
-      'source', 'startTime', 'endTime', 'muted', 'autoplay', 'loop', 'wantToPlay', 'canPlay', 'timeOut', 'videoWidth', 'videoHeight', 'playbackError', 'domElement', 'waiting', 'ran'],
+      'source', 'startTime', 'endTime', 'muted', 'autoplay', 'loop', 'wantToPlay', 'canPlay', 'timeOut', 'videoWidth', 'videoHeight', 'playbackError', 'domElement', 'waiting', 'ran', ...GROW.node],
     attr: {
       onPage,
       // an element's type cannot change: presetting it would claim an element the page does not have
@@ -196,7 +203,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     // at a mount a new component (Video.tsx :115-127: it wants nothing and has seen no load) runs what waited
     // (`_flushPendingInnerActions`) and reports it in order; a new `<video>` is DOM Element (its ref), one that goes is nothing; a load
     // puts the media at 0, which a `timeupdate` sends
-    frameEnd: ['wantToPlay', 'canPlay', 'waiting', 'ran', 'domElement', 'timeOut', ...FILE_DROP_LEAVES],
+    frameEnd: ['wantToPlay', 'canPlay', 'waiting', 'ran', 'domElement', 'timeOut', ...FILE_DROP_LEAVES, ...GROW.frameEnd],
     // the actions and Source Object call the component, which calls its element: what it is, whether it may play, where it is
     elementCalls: {
       'on.acceptDrops': [],
@@ -211,7 +218,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   // s52 — the Text's model with the Group's additions: the focus tracker's list (the viewer's, moved by Focus and by clicks), the
   // element the component mounted with (the tracker finds the node on it, C86), the gesture's index, Block Pointer Events, the scrolls
   Group: {
-    node: ['mounted', 'tag', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran', 'focusMissed'],
+    node: ['mounted', 'tag', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'blocks', 'draggable', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'phase', 'input', 'inZone', 'index', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'depthOn', 'isDragOver', 'droppedFiles', 'droppedFile', 'scrollIndex', 'scrollElement', 'scheduled', 'waiting', 'ran', 'focusMissed', ...GROW.node],
     attr: {
       onPage,
       shownTag: { follows: (s) => (s.onPage ? s.tag : KEEP), preset: false }
@@ -225,13 +232,13 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     },
     // the frame's scrolls (`scheduleAfterInputsHaveUpdated`), the ones waiting for the component, and the
     // outcomes the frame resolved before its end (reported there, in order)
-    frameEnd: ['scheduled', 'waiting', 'ran', ...FILE_DROP_LEAVES],
+    frameEnd: ['scheduled', 'waiting', 'ran', ...FILE_DROP_LEAVES, ...GROW.frameEnd],
     // the Focus action asks the tracker's list, and (v2, R16) whether the Group is on the page; the hold timer's lift meets the page
     // and drains the frame's scrolls
     elementCalls: { 'on.acceptDrops': [], 'on.focus': ['listed', 'onPage'], 'world.timer': ['onPage', 'elem'] }
   },
   'net.noodl.controls.textinput': {
-    node: ['fieldType', 'runOnChange', 'maxLength', 'textToInsert', 'text', 'startValue', 'out', 'wire', 'announced', 'hasAnnounced', 'queue', 'blocksPointer', 'opacityZero', ...CONTROL_NODE],
+    node: ['fieldType', 'runOnChange', 'maxLength', 'textToInsert', 'text', 'startValue', 'out', 'wire', 'announced', 'hasAnnounced', 'queue', 'blocksPointer', 'opacityZero', ...CONTROL_NODE, ...GROW.node],
     attr: { onPage, pageEnabled, pageVisible, pageOpacityZero: { follows: (s) => s.opacityZero }, pageType: { follows: (s) => (s.onPage ? s.fieldType : KEEP) } },
     held: {
       elementFocused: keyboard,
@@ -241,7 +248,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
       hadCaret: { keeps: 'the caret' }
     },
     // text-input.ts :190, :263 — the frame-end callbacks a Set or an Insert schedules (node.ts :1276-1279)
-    frameEnd: ['startValue', 'out', 'wire', 'announced', 'hasAnnounced', 'queue', ...LEAVES.frameEnd],
+    frameEnd: ['startValue', 'out', 'wire', 'announced', 'hasAnnounced', 'queue', ...LEAVES.frameEnd, ...GROW.frameEnd],
     framePulses: ['textChanged', ...LEAVES.framePulses],
     // Clear, Backspace and a Start Value write the field at once when there is one (text-input.ts :423, :431
     // `innerReactComponentRef`; the spec's `componentSetText`): they meet its text, its type and its cursor
@@ -249,21 +256,22 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
   },
   'net.noodl.controls.range': {
     // v7 (R39) — `valueWarning`: the sentence a Value that is not a number raised, the node's
-    node: [...CONTROL_NODE, 'min', 'max', 'step', 'authorValue', 'out', 'percent', 'valueWarning', 'pending'],
+    node: [...CONTROL_NODE, 'min', 'max', 'step', 'authorValue', 'out', 'percent', 'valueWarning', 'pending', ...GROW.node],
     attr: { onPage, pageEnabled, pageVisible },
     // the handle shows the Value (R14: the last word, a person's or the graph's)
     held: { elementFocused: keyboard, shown: { shows: (s) => (s.onPage ? s.out : KEEP) } },
     // slider.ts :39-54, :220-236 — the graph's word reaches the node's value at the next paint (v2, D36)
-    frameEnd: ['out', 'percent', 'pending', ...LEAVES.frameEnd],
+    frameEnd: ['out', 'percent', 'pending', ...LEAVES.frameEnd, ...GROW.frameEnd],
     framePulses: LEAVES.framePulses,
     elementCalls: FOCUS_CALLS
   },
   'net.noodl.controls.options': {
-    node: [...CONTROL_NODE, 'value', 'items'],
+    node: [...CONTROL_NODE, 'value', 'items', ...GROW.node],
     attr: { onPage, pageEnabled, pageVisible },
     // the selection shows the Value wherever the list offers it (v3, R14); otherwise it is the browser's (dropdown.ts `painted`)
     held: { elementFocused: keyboard, domSelected: { shows: (s) => (s.onPage && offers(s.items, s.value) ? s.value : KEEP) } },
     ...LEAVES,
+    frameEnd: [...LEAVES.frameEnd, ...GROW.frameEnd],
     elementCalls: FOCUS_CALLS
   },
   'net.noodl.controls.radiobutton': {
@@ -277,9 +285,10 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     elementCalls: FOCUS_CALLS
   },
   'Radio Button Group': {
-    node: ['value', 'mounted', 'visible'],
+    node: ['value', 'mounted', 'visible', ...GROW.node],
     attr: { onPage, pageVisible },
-    held: {}
+    held: {},
+    frameEnd: GROW.frameEnd
   },
   // s55 — the Drag (drag.ts): react-draggable's position and pointer are the component's (node), the finger is where the pointer is
   Drag: {

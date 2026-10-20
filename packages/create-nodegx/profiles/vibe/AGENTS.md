@@ -64,9 +64,10 @@ A session has a size. When it reaches about 100 tool calls, or a fix has failed 
 on: finish what you're on, mark the checklist, and write `docs/NEXT.md` — first line `# Next session: <the step>`,
 then where things are (what is built, what passes, what is left), what you learned, and what to try. Then stop, ending
 with: *Next: <the step>. Type /clear, then "continue".* A new session picks it up from that note with a clear head.
-Handing over is part of the process, never a failure. This folder's hook (`.vibe/hooks.toml`) holds the line the way
-a team's tooling does: at 100 tool calls it asks for the hand-over, and once `NEXT.md` is written only the notes stay
-open.
+Handing over is part of the process, never a failure. Write `NEXT.md` whole, in one `write_file` — never patch it
+with `edit`; to change it, write it whole again. This folder's hook (`.vibe/hooks.toml`) holds the line the way a
+team's tooling does: at 100 tool calls it asks for the hand-over; once `NEXT.md` is written only the notes stay open,
+and after three more writes to them those close too.
 
 When I say "continue" (or nothing new), carry on from `NEXT.md`. When I say "just build it" or "don't wait for me",
 build it without stopping to ask me questions — the process is how you build it. When I ask for a change, add its
@@ -78,8 +79,10 @@ lines to the checklist and go on.
 person sees of a thing by its label — `{ "read": { "look": "Lisbon" }, "expect": { "backgroundName": "green" } }`. A
 read answers what a screenshot would; each screenshot you open makes every later step of the session cost more.
 A look waits for things to settle, so it can't see the moment a screen appears. For that line, `watch` right after
-the tap that changes the screen: `{ "watch": { "look": "Sydney" }, "for_ms": 2000, "expect": { "never": {
-"backgroundName": "green" } } }` lists every state Sydney showed and fails on a flash of green. For a reload line,
+the tap that changes the screen, on EVERY answer of the new screen: `{ "watch": { "look": ["Sydney", "Canberra",
+"Melbourne"] }, "for_ms": 2000, "expect": { "never": { "backgroundName": "green" } } }` lists every state each one
+showed and fails on a flash of green on any of them. Watch them all — a colour left over lands by position, so one
+answer watched can be the one it never touches. For a reload line,
 reload the screen you are on — `{ "reload": true }` — not a navigation to another one.
 
 ## Tools
@@ -92,4 +95,5 @@ arguments first. A new session is not bound to the project: `open_project` it fi
 When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value and
 tell me where to paste it in the project's `.env` file.
 
-To see an app: `npx @nodegx/preview <the app's folder> --open`
+To see an app: `npx @nodegx/preview <the app's folder> --open` — it starts the app's own backend too, when it has
+one on this computer, so it is also how the app opens again another day. Tell me that line when you finish.

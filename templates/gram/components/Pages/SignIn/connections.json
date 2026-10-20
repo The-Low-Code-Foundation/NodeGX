@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8cae553b-f1ae-5016-88b9-b7da35658e8b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "siRoot",
+      "fromProperty": "didMount",
+      "toId": "siBack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "siBack",
+      "fromProperty": "out-redirect",
+      "toId": "siRequest",
+      "toProperty": "redirect"
+    },
+    {
+      "fromId": "siEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "siRequest",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "siSend",
+      "fromProperty": "onClick",
+      "toId": "siRequest",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "siSend",
+      "fromProperty": "onClick",
+      "toId": "siFailSw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "siRequest",
+      "fromProperty": "done",
+      "toId": "siSentSw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "siRequest",
+      "fromProperty": "failure",
+      "toId": "siFailSw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "siRequest",
+      "fromProperty": "failure",
+      "toId": "siSentSw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "siSentSw",
+      "fromProperty": "state",
+      "toId": "siSent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "siFailSw",
+      "fromProperty": "state",
+      "toId": "siFailed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "siEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "siLogIn",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "siPassword",
+      "fromProperty": "onTextChanged",
+      "toId": "siLogIn",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "siGo",
+      "fromProperty": "onClick",
+      "toId": "siLogIn",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "siPassword",
+      "fromProperty": "onEnter",
+      "toId": "siLogIn",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "siLogIn",
+      "fromProperty": "error",
+      "toId": "siError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "siLogIn",
+      "fromProperty": "done",
+      "toId": "siRoute",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "siRoute",
+      "fromProperty": "out-problem",
+      "toId": "siError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "siRoute",
+      "fromProperty": "out-waiting",
+      "toId": "siToWaiting",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "siRoute",
+      "fromProperty": "out-member",
+      "toId": "siToFeed",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "siRoute",
+      "fromProperty": "out-admin",
+      "toId": "siToQueue",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "siJoin",
+      "fromProperty": "onClick",
+      "toId": "siToJoin",
+      "toProperty": "navigate"
+    }
+  ]
+}

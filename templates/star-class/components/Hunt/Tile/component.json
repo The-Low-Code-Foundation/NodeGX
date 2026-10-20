@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ed976f67-a37a-5be4-81c8-d7db6a7acbf7",
+  "name": "Tile",
+  "path": "/Hunt/Tile",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One number in the Number Hunt grid, as a button a tap, a click or Enter presses. Kind colours it for where it stands: idle, picked (sunshine), found (teal), shown (a teal edge), or a wrong pick (a berry edge). Fx is its class, so a way just found pops and a wrong pick shakes. Publishes Tapped with At, its square."
+}

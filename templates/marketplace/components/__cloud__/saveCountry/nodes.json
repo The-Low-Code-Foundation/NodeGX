@@ -1,0 +1,93 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "36a6ed04-dc20-52a0-8101-ef49e2d4269c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-9",
+      "type": "noodl.cloud.request",
+      "label": "saveCountry(country)",
+      "parameters": {
+        "params": "country",
+        "ptype-country": "object",
+        "preq-country": true,
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "run-7",
+      "type": "JavaScriptFunction",
+      "label": "Add a country, or rename one",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nasync function caller(userId) {\n  if (!userId) return null;\n  return one('Person', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\n\nvar c = Inputs.country;\nif (c === undefined || Inputs.userId === undefined) return;\nif (!c || typeof c !== 'object' || Array.isArray(c)) { refuse('The country arrived empty.'); return; }\nvar fields = { name: text(c.name, 80), currency: text(c.currency, 20).toUpperCase() };\nif (!fields.name) { refuse('A country needs a name.'); return; }\nif (!/^[A-Z][A-Z][A-Z]$/.test(fields.currency)) { refuse('A currency is its three-letter code: GHS, NGN, KES.'); return; }\nvar id = text(c.id, 64);\nvar same = await Noodl.Records.query('Country', { name: { equalTo: fields.name } }, { plain: true, limit: 2 });\nif (same.some(function (x) { return x.objectId !== id; })) { refuse('There is already a country called ' + fields.name + '.'); return; }\nif (id) {\n  var before = await one('Country', { objectId: { equalTo: id } });\n  if (!before) { refuse('There is no such country.'); return; }\n  if (fields.currency !== before.currency && await one('Seller', { country: { equalTo: ptr('Country', id) } })) {\n    refuse('Its currency can’t change: its sellers’ prices are in ' + before.currency + '.');\n    return;\n  }\n  var changed = diff(before, fields);\n  if (Object.keys(changed).length) {\n    await Noodl.Records.save(id, fields, { className: 'Country' });\n    await history('Country', 'country', id, Inputs.userId, changed);\n  }\n  Outputs.id = id;\n  Outputs.done();\n  return;\n}\nvar made = await Noodl.Records.create('Country', fields);\nawait history('Country', 'country', made.getId(), Inputs.userId, diff(null, fields));\nOutputs.id = made.getId();\nOutputs.done();",
+        "runOnChange-in-country": false,
+        "runOnChange-in-userId": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-country",
+          "displayName": "country",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "displayName": "userId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ok-9",
+      "type": "noodl.cloud.response",
+      "label": "Done",
+      "parameters": {
+        "params": "id"
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "no-9",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

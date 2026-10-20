@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "39a76cff-4f44-54c5-8493-d67fdcdbb7c1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "monstermoveIn",
+      "fromProperty": "game",
+      "toId": "monstermoveFn",
+      "toProperty": "in-game"
+    },
+    {
+      "fromId": "monstermoveIn",
+      "fromProperty": "action",
+      "toId": "monstermoveFn",
+      "toProperty": "in-action"
+    },
+    {
+      "fromId": "monstermoveIn",
+      "fromProperty": "outcome",
+      "toId": "monstermoveFn",
+      "toProperty": "in-outcome"
+    },
+    {
+      "fromId": "monstermoveIn",
+      "fromProperty": "gain",
+      "toId": "monstermoveFn",
+      "toProperty": "in-gain"
+    },
+    {
+      "fromId": "monstermoveIn",
+      "fromProperty": "cpuGain",
+      "toId": "monstermoveFn",
+      "toProperty": "in-cpuGain"
+    },
+    {
+      "fromId": "monstermoveIn",
+      "fromProperty": "run",
+      "toId": "monstermoveFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "monstermoveFn",
+      "fromProperty": "out-game",
+      "toId": "monstermoveOut",
+      "toProperty": "game"
+    },
+    {
+      "fromId": "monstermoveFn",
+      "fromProperty": "out-changed",
+      "toId": "monstermoveOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "monstermoveFn",
+      "fromProperty": "out-event",
+      "toId": "monstermoveOut",
+      "toProperty": "event"
+    },
+    {
+      "fromId": "monstermoveFn",
+      "fromProperty": "out-timeScale",
+      "toId": "monstermoveOut",
+      "toProperty": "timeScale"
+    },
+    {
+      "fromId": "monstermoveFn",
+      "fromProperty": "success",
+      "toId": "monstermoveOut",
+      "toProperty": "done"
+    }
+  ]
+}

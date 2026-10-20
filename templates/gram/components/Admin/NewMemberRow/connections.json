@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7f9c6d8c-ba10-5d12-8842-3ac1ab9d1cc5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nmIn",
+      "fromProperty": "name",
+      "toId": "nmName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nmIn",
+      "fromProperty": "initials",
+      "toId": "nmInitials",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nmIn",
+      "fromProperty": "shade",
+      "toId": "nmAv",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "nmIn",
+      "fromProperty": "sub",
+      "toId": "nmSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nmIn",
+      "fromProperty": "id",
+      "toId": "nmLetInGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "nmIn",
+      "fromProperty": "id",
+      "toId": "nmNoGather",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "nmIn",
+      "fromProperty": "name",
+      "toId": "nmLetInNote",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "nmIn",
+      "fromProperty": "name",
+      "toId": "nmNoNote",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "nmLetIn",
+      "fromProperty": "onClick",
+      "toId": "nmLetInGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nmLetInGather",
+      "fromProperty": "out-letIn",
+      "toId": "nmLetInCall",
+      "toProperty": "in-letIn"
+    },
+    {
+      "fromId": "nmLetInGather",
+      "fromProperty": "out-go",
+      "toId": "nmLetInCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "nmLetInCall",
+      "fromProperty": "out-emailed",
+      "toId": "nmLetInNote",
+      "toProperty": "in-emailed"
+    },
+    {
+      "fromId": "nmLetInCall",
+      "fromProperty": "done",
+      "toId": "nmLetInNote",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nmNo",
+      "fromProperty": "onClick",
+      "toId": "nmNoGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nmNoGather",
+      "fromProperty": "out-turnAway",
+      "toId": "nmNoCall",
+      "toProperty": "in-turnAway"
+    },
+    {
+      "fromId": "nmNoGather",
+      "fromProperty": "out-go",
+      "toId": "nmNoCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "nmNoCall",
+      "fromProperty": "done",
+      "toId": "nmNoNote",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nmLetInCall",
+      "fromProperty": "error",
+      "toId": "nmError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nmLetInCall",
+      "fromProperty": "failure",
+      "toId": "nmFailed",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "nmLetInCall",
+      "fromProperty": "done",
+      "toId": "nmFailed",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "nmNoCall",
+      "fromProperty": "error",
+      "toId": "nmError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nmNoCall",
+      "fromProperty": "failure",
+      "toId": "nmFailed",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "nmNoCall",
+      "fromProperty": "done",
+      "toId": "nmFailed",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "nmFailed",
+      "fromProperty": "state",
+      "toId": "nmError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nmLetInNote",
+      "fromProperty": "out-note",
+      "toId": "nmSay",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nmLetInNote",
+      "fromProperty": "out-go",
+      "toId": "nmSay",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nmLetInNote",
+      "fromProperty": "out-at",
+      "toId": "nmChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nmLetInNote",
+      "fromProperty": "out-go",
+      "toId": "nmChanged",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nmNoNote",
+      "fromProperty": "out-note",
+      "toId": "nmSay",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nmNoNote",
+      "fromProperty": "out-go",
+      "toId": "nmSay",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "nmNoNote",
+      "fromProperty": "out-at",
+      "toId": "nmChanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "nmNoNote",
+      "fromProperty": "out-go",
+      "toId": "nmChanged",
+      "toProperty": "do"
+    }
+  ]
+}

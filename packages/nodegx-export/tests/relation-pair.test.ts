@@ -184,8 +184,11 @@ describe('§A the fixture, whole — a Record feeds the target, a Variable the r
     );
     expect(mod).toContain('Source: "Link" (AddDbModelRelation `link` on /Pages/Home)');
     expect(mod).toContain('Source: "Unlink" (RemoveDbModelRelation `unlink` on /Pages/Home)');
-    // The Puppy module is §43's, untouched by this row.
-    expect(app.files['src/api/puppies.ts']).toContain('export async function fetchPuppyById(id: string): Promise<Puppy>');
+    // The Puppy module is §43's: its one Record has Fetch unwired and only binds (P18-S113-IDBINDREAD), so the module is the
+    // class interface alone, with nothing to import from the client.
+    expect(app.files['src/api/puppies.ts']).toContain('export interface Puppy {');
+    expect(app.files['src/api/puppies.ts']).not.toContain('fetchPuppyById');
+    expect(app.files['src/api/puppies.ts']).not.toContain("from './client'");
   });
 
   test("A9 the client: the runtime's own PUT with one op and a typed Pointer, transcribed from ParseWireAdapter", () => {
@@ -218,7 +221,7 @@ describe('§A the fixture, whole — a Record feeds the target, a Variable the r
       expect(exportBadgeOf(type)).toBeUndefined();
     }
     const ledger = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'coverage-ledger.json'), 'utf8'));
-    expect(ledger.pickerCoverageFloor).toBe(122); // EXP-011 §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §62 the relation pair + §61 the component-stack trio + §60 + §63 (session 86)
+    expect(ledger.pickerCoverageFloor).toBe(130); // EXP-011 §79 Sign In With (session 109) on top of EXP-011 §78 part 2 Optimistic Update (session 108) on top of §78 State History + Undo / Redo + State Snapshot (session 107) on top of §77 Action Dispatcher + Handler (session 106) on top of §76 Pattern Extractor (session 101) on top of §75 the four parsers (session 100) on top of GAM-013 Repeat (P88) on top of §66 Subscribe To Changes (session 90) on top of §65 WebSocket (session 89) on top of §64 Server-Sent Events (session 88) on top of §62 the relation pair + §61 the component-stack trio + §60 + §63 (session 86)
   });
 });
 
@@ -357,7 +360,8 @@ describe('§C the shapes a wire changes', () => {
 
   test("C4 a Text on the verb's Error while Do is wired from a button reads the row; the raise carries the family's code", () => {
     expect(home(app)).toContain("{linkError ?? ''}");
-    expect(home(app).match(/record\/storage-op-failed/g)).toHaveLength(3); // the Record's effect + the two verbs
+    // The two verbs; the Record binds by its Id and reads nothing, so it never raises (P18-S113-IDBINDREAD).
+    expect(home(app).match(/record\/storage-op-failed/g)).toHaveLength(2);
   });
 });
 
@@ -417,14 +421,18 @@ describe('§D refusals by mutation', () => {
     expect(reasonOf(source, 'unlink')).toBe("its Id Source is the enclosing repeater's row — row identity is not statically knowable in this slice");
   });
 
-  test('D10 a consumed Failure — the record verbs\' rule, one funnel for the family', () => {
+  // EXP-011 §90. A consumed Failure was refused here (one funnel for the family); it is the catch's chain now, after the
+  // Error row and the raise, as the runtime's `setError` writes, raises, then pulses.
+  test('D10 a consumed Failure is a chain: the catch runs it after the raise', () => {
     const source = mutated((h) => connect(h, 'link', 'failure', 'setLinked', 'do', 'signal'));
-    expect(reasonOf(source, 'link')).toBe('its failure output is consumed — only the done chain and the Error value are translated in this slice');
+    expect(reasonOf(source, 'link')).toBeUndefined();
+    const raise = "            raiseAppError({ code: 'record/storage-op-failed', message: linkErrorMessage, nodeId: 'link', nodeType: 'AddDbModelRelation', componentName: '/Pages/Home' });\n";
+    expect(home(emitApp(source, catalog))).toContain(LINK_HANDLER.replace(raise, `${raise}            status.set('Linked.');\n`));
   });
 
   test('D11 a consumed Completed', () => {
     const source = mutated((h) => connect(h, 'unlink', 'completed', 'setUnlinked', 'do', 'signal'));
-    expect(reasonOf(source, 'unlink')).toBe('its completed output is consumed — only the done chain and the Error value are translated in this slice');
+    expect(reasonOf(source, 'unlink')).toBe('its completed output is consumed — only the done and failure chains and the Error value are translated in this slice');
   });
 
   test('D12 a consumed Id', () => {
@@ -470,9 +478,9 @@ describe('§D refusals by mutation', () => {
     expect(reasonOf(source, 'link')).toBe('its Target Record Id has no statically known source');
   });
 
-  test('D18 an Id from a node with no rule names the feeder (net.noodl.PatternExtractor — out of scope by §50, never scheduled)', () => {
+  test('D18 an Id from a node with no rule names the feeder (net.noodl.user.VerifyEmail — a retired type; §79 translated Sign In With, the last picker row)', () => {
     const source = mutated((h) => {
-      addNode(h, { id: 'extract', type: 'net.noodl.PatternExtractor' });
+      addNode(h, { id: 'extract', type: 'net.noodl.user.VerifyEmail' });
       disconnect(h, (c) => c.toId === 'link' && c.toProperty === 'modelId');
       connect(h, 'extract', 'match', 'link', 'modelId');
     });

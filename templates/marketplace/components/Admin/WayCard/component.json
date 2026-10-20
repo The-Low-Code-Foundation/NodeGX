@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e908b81e-2ff2-5032-86a2-0c886a0a532c",
+  "name": "WayCard",
+  "path": "/Admin/WayCard",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One way to pay: the countries it is on in, and what it tells buyers at checkout"
+}

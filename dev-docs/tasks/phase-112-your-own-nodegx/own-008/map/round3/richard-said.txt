@@ -1,0 +1,7 @@
+Ok here's a bigger challenge to update the map:
+
+Make each of the node areas a space ship from Star Wars, a star destroyer or rebel ship, and the nodes are all boxy bits on the top of the ship. YOu can make them polygon minecraft looking for simplicity. And the node connectors are the same as right now, connecting the bits on the top of the ships. And as you're flying around the map, the capital ships (pages and components) are shooting turret lasers at each other (explosions but no ship blowing up), and there's tie fighters and X wings spawning around the map and dog fighting and blowing each other up, and the background is space rather than being just black. The bigger the node component, the bigger the capital ship (so maybe small, medium and large ships for both sides). For a bonus point: make the 'darth vader march' music play in the background, simple 90s video game version if possible. The capital ships have glowing engines on the back but are all flying at the same speed, variable spacing between them.
+
+If you say it can't be done... I'll find your lack of faith disturbing
+
+Please just make the changes without waiting for me to answer questions, test them on copies as before, and add what you changed to REPORT.md.

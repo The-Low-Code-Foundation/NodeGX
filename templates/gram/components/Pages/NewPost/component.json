@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "edabdb79-c394-5a60-81cb-a26cf566d34b",
+  "name": "NewPost",
+  "path": "/Pages/NewPost",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A new post: photos, a caption, shared with the members; or a prayer request, in words; or a testimony; or an event, with its day and time"
+}

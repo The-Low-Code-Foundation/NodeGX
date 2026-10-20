@@ -107,6 +107,12 @@
     },
     {
       "fromId": "nhMe",
+      "fromProperty": "skin",
+      "toId": "nhHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "nhMe",
       "fromProperty": "faceOptions",
       "toId": "nhHeader",
       "toProperty": "options"

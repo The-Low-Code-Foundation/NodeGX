@@ -77,7 +77,7 @@ export function registerRenderTools(
         viewports: z
           .string()
           .optional()
-          .describe('Comma-separated: "desktop,phone" (the default) or explicit sizes like "1440x900,390x844"'),
+          .describe('Comma-separated, default "desktop,768x1024,phone"; or sizes like "1440x900"'),
         screenshot: z
           .enum(['full', 'viewport', 'none'])
           .optional()
@@ -127,7 +127,11 @@ export function registerRenderTools(
               ? path.join(projectDir, '.previews', 'render')
               : undefined;
         const { report, screenshots } = await runRenderReport(projectDir, {
-          viewports: args.viewports,
+          // P112-OWN019 R39 (Richard, 2026-10-14): three sizes by default (768 portrait, not the named 1024 `tablet`: the middle
+          // width is the one a layout breaks at, and 1024 is already the desktop line the layout tells measure at) — a laptop row with a hole in it, or a
+          // section that drifts off its axis, is a width problem the phone shot cannot show. The shared measure's
+          // DEFAULT_VIEWPORTS stays two (the editor's captures); this is the agent's tool deciding for itself.
+          viewports: args.viewports ?? 'desktop,768x1024,phone',
           screenshot: args.screenshot,
           scale,
           backendPort: args.backend_port,
@@ -196,11 +200,13 @@ export function registerRenderTools(
         'edit: "js changing v"} (applied again on the next load, before the app can overwrite it), ' +
         '{clear_storage: true}, {stub_route: "/api/x", json?, body?, status?} (answers that path itself; put it ' +
         'first to meet a fetch made at boot), {reduced_motion: true|false}, {reload: true} (reload THIS page, as a person ' +
-        'does), {watch: {look: T}, for_ms?, expect?: {never: {backgroundName: "green"}}} (every state T showed DURING ' +
-        'a change — a look waits for it to settle and misses a moment\'s flash). A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
+        'does), {watch: {look: T or [T, T, …]}, for_ms?, expect?: {never: {backgroundName: "green"}}} (every state each T ' +
+        'showed DURING a change — a look waits for it to settle and misses a moment\'s flash; watch EVERY answer, ' +
+        'not one: a colour left over lands by position). A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
         'placeholder counts), {testid} (a data-testid set in the node\'s Data Attributes list — NOT its node id) ' +
         'or {selector}; a bare string is exact text. A tap is a real pointer press at the element\'s centre and is ' +
-        'REFUSED when something else covers it, naming what a finger would hit. The first failing step stops the run.',
+        'REFUSED when something else covers it, naming what a finger would hit; it answers once any scroll it started has ' +
+        'stopped (≤2 s). The first failing step stops the run.',
       inputSchema: {
         steps: z
           .array(z.record(z.unknown()))
@@ -313,7 +319,7 @@ export function firstFrameNote(): string {
   // OWN-019 census #38 — the note that leads an agent from the first frame to behaviour testing; on a client whose
   // list never changes, revealing does nothing it can see, so it names the call.
   const door = clientProfile().staticToolList
-    ? 'call call_tool({ name: "drive_page", arguments: { steps: [...] } }) — describe: true shows the steps it takes'
+    ? 'call call_tool({ name: "drive_page", arguments: { steps: [...] } }) — call_tool({ name: "drive_page", describe: true }) shows the steps it takes'
     : 'call find_tools({ query: "press" }) to reveal drive_page and send it a list of steps';
   return (
     'This report is the FIRST FRAME only: nothing was pressed, typed or waited for. To prove a button, form or ' +

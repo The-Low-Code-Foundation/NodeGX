@@ -43,12 +43,30 @@ npm run export-ledger:picker          # ratcheted in PR CI
 node scripts/export-ledger/picker-coverage.js    # the readable report
 ```
 
-> **PICKER COVERAGE: 122 of 130 placeable nodes export (93.8%)** — 2026-09-26, session 100 (§75, the four parsers). Was 73 of 127 (57.5%) at session 65.
+> **PICKER COVERAGE: 130 of 130 placeable nodes export (100%)** — 2026-10-15, session 109 (§79, Sign In With). Was 129 at session 108, 128 at session 107, 125 at session 106, 123 at session 101, 73 of 127 (57.5%) at session 65. Nothing left. ⚠️ Node coverage is not parameter coverage (EXP-008's open question, §75.5 #3): four parameter gaps have been found green behind a `translated` row, so 100% is the node count, not a claim that every port exports.
 
 "Placeable" means `inNodePicker`, not deprecated, browser-capable: what a person can actually drop
 on a canvas. The floor lives in `coverage-ledger.json` as `pickerCoverageFloor` and ratchets both
 ways — a fall fails CI, and a rise fails until the floor is raised in the same commit, so no gain
 is ever lost quietly.
+
+**The second line: does the exported app do what the running one does?**
+
+```
+cd packages/nodegx-export && npx jest tests/node-spec-graph.test.ts   # prints "P18 ledger: …"
+```
+
+> **GRAPH SCENARIOS: 10 of 85 conform on the export** — 2026-10-15, session 108 (8 after §78's t02, 4 after §77 made t04's
+> Dispatcher scenarios play, 2 at the line's first reading). **17 played**: 10 conform, 3 differ as CONTRACT.md Part 2
+> declares (C6/G1, C7, C8), 4 fail on one filed row (P18-S106-PARSERAISE). **68 did not play**: 22 on
+> the exporter's own verdict (it refuses part of the graph, or lifts none of the outputs the scenario watches), 46 on the
+> test harness's limits (23 seed a world, 17 need more than one component, 3 advance a clock, 3 make a wire after
+> mount). Was 1 conforming, 4 played, 81 outside (session 103), and "CONFORM" counted the outside as conforming.
+
+Outside never counts as conforming. The test pins all eight counts, so a move in either direction is seen; and each
+failing scenario is pinned by name to its `dev-docs/bugs/` row, so a new failure is new. To raise the number, either
+make the exporter translate the graph (t01's three Global Store scenarios wait on the store translation itself), or lift a harness
+limit. The harness limits are recorded in `tests/helpers/node-spec-target.ts` `canPlay`.
 
 **🔴 There is a second number and it must never again drive priority.** The corpus audit
 (`coverage-audit.ts` over ~40 old test projects) reads **85.00%**, or **93.38%** over components a
@@ -111,7 +129,7 @@ where export means *taking your app with its backend*. Everything downstream fol
 | [EXP-005](./EXP-005-MULTIFRAMEWORK-PIPELINE.md) | Multi-framework pipeline | Not started (unchanged) |
 | [EXP-006](./EXP-006-EXPORT-AUTHORING-INTENT.md) | Export carries authoring intent | Not started |
 | [EXP-007](./EXP-007-EXPORT-PROVENANCE.md) | Export provenance & regeneration safety | Not started |
-| [EXP-008](./EXP-008-EXPORT-COVERAGE-LEDGER.md) | Coverage ledger & contributor gate | ✅ Built — **picker ratchet added 2026-08-28** |
+| [EXP-008](./EXP-008-EXPORT-COVERAGE-LEDGER.md) | Coverage ledger & contributor gate | ✅ Built — **picker ratchet added 2026-08-28**; **per-parameter check 2026-10-15 s110: 1,215 / 1,396 parameters reach (87.0%), 21 silent drops filed** |
 | [EXP-009](./EXP-009-BACKEND-CONNECTION.md) | **The exported app talks to its deployed backend** | 🟢 **Built + driven s33** — AC4 (cloud functions) waits on EXP-011's node |
 | [EXP-010](./EXP-010-CUSTOM-NODES-AND-MODULES.md) | **Custom nodes, modules and prefabs export** | 🔴 **NEW** |
 | [EXP-011](./EXP-011-PICKER-COVERAGE.md) | **Close the picker gap, ranked by what apps need** | 🟡 **94/127 (74.0%) s80** — §52 built `Script` (Tier 2.8 row 2): the escape hatch, hosted rather than re-hosted — the runtime's parser and lifecycle transcribed into `src/lib/script.ts`, the author's code verbatim and unchecked in its own file, every read of its outputs typed; §51 built `Component Children` (Tier 2.8 row 1), the first row of Richard's re-ruled list: the wrapper's `children` prop rendered where the marker sits, an instance's placed children passed through in order, a marker-less target dropping them with a note, not silently; §49 built the animation pair, `States` and `Animate To Value` (Tier 3.8), as two emitted modules transcribed from `states.ts`, `animate-to-value.ts`, `timerscheduler.ts`, `easecurves.ts` and `bezier-easing`, graded frame by frame against those files, and the **wired style sink** (`opacity`/`color`/`backgroundColor` as an inline `style`) neither could do without; §48 `CSS Definition` + the CSS Class fold + the `Date` column; §47 the named Object; §41–§46 Cloud Services. 🔴 **Re-ruled 2026-09-03 (§50)**: the "not a target" list was wrong — 22 of its rows are now **Tier 2.8**, in the build order §3 lists (Component Children, Script, Run Tasks, On App Error, Create New Array, …), the three transports are Tier 3.11, ten stay out **and must be badged (EXP-013)**. Ceiling 117/127 |

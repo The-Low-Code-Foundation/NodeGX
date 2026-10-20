@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8954364f-dd09-5dce-8764-03f586fff4b1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fdRoot",
+      "fromProperty": "didMount",
+      "toId": "fdLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fdChanged",
+      "fromProperty": "value",
+      "toId": "fdLoad",
+      "toProperty": "in-changed"
+    },
+    {
+      "fromId": "fdLiveHeart",
+      "fromProperty": "changed",
+      "toId": "fdLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fdLiveComment",
+      "fromProperty": "changed",
+      "toId": "fdLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fdLivePost",
+      "fromProperty": "changed",
+      "toId": "fdLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fdLoad",
+      "fromProperty": "out-ok",
+      "toId": "fdContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fdLoad",
+      "fromProperty": "out-cards",
+      "toId": "fdEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fdLoad",
+      "fromProperty": "out-empty",
+      "toId": "fdEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fdLoad",
+      "fromProperty": "out-band",
+      "toId": "fdBar",
+      "toProperty": "band"
+    },
+    {
+      "fromId": "fdLoad",
+      "fromProperty": "out-isAdmin",
+      "toId": "fdQueue",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fdLoad",
+      "fromProperty": "out-waiting",
+      "toId": "fdToWaiting",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "fdLoad",
+      "fromProperty": "out-problem",
+      "toId": "fdRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fdLoad",
+      "fromProperty": "out-refused",
+      "toId": "fdRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fdRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "fdToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "fdNew",
+      "fromProperty": "onClick",
+      "toId": "fdToNew",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "fdLoad",
+      "fromProperty": "out-meId",
+      "toId": "fdNav",
+      "toProperty": "meId"
+    },
+    {
+      "fromId": "fdLoad",
+      "fromProperty": "out-inside",
+      "toId": "fdNav",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "fdQueue",
+      "fromProperty": "onClick",
+      "toId": "fdToQueue",
+      "toProperty": "navigate"
+    }
+  ]
+}

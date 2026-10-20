@@ -1,0 +1,285 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7831ea42-c2f3-5c9d-81a7-689d8f23f70c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "opRoot",
+      "type": "Group",
+      "label": "A seller’s part",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "opHead",
+        "opSteps",
+        "opLines",
+        "opWay",
+        "opFine",
+        "opWhatsapp"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "opHead",
+      "type": "Group",
+      "label": "Seller and where it is",
+      "parent": "opRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "opSeller",
+        "opPill"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "opSeller",
+      "type": "Text",
+      "label": "The seller",
+      "parent": "opHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "opPill",
+      "type": "Group",
+      "label": "Where it is",
+      "parent": "opHead",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-full)"
+      },
+      "children": [
+        "opPillWords"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "opPillWords",
+      "type": "Text",
+      "label": "Where it is",
+      "parent": "opPill",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "cssClassName": "mk-nowrap"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "opSteps",
+      "type": "Group",
+      "label": "New, confirmed, paid, packed, sent, delivered",
+      "parent": "opRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "columnGap": "var(--space-1)"
+      },
+      "children": [
+        "opEachStep"
+      ],
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "opEachStep",
+      "type": "For Each",
+      "label": "One per step",
+      "parent": "opSteps",
+      "parameters": {
+        "template": "/Shop/Step"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "opLines",
+      "type": "Text",
+      "label": "What is in it",
+      "parent": "opRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "opWay",
+      "type": "Text",
+      "label": "How it is paid",
+      "parent": "opRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "opFine",
+      "type": "Text",
+      "label": "What happens next, and what is owed",
+      "parent": "opRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "opWhatsapp",
+      "type": "net.noodl.controls.button",
+      "label": "WhatsApp the seller",
+      "parent": "opRoot",
+      "parameters": {
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--whatsapp)",
+        "color": "var(--secondary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "opIn",
+      "type": "Component Inputs",
+      "label": "One part",
+      "ports": [
+        {
+          "name": "seller",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pill",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pillBg",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pillInk",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "steps",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lines",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "way",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasWhatsapp",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "whatsappLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "whatsappLink",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "opOpenWhatsapp",
+      "type": "net.noodl.externallink",
+      "label": "Open WhatsApp",
+      "parameters": {
+        "openInNewTab": true
+      },
+      "x": 470,
+      "y": 1240
+    }
+  ],
+  "visualRoots": [
+    "opRoot"
+  ]
+}

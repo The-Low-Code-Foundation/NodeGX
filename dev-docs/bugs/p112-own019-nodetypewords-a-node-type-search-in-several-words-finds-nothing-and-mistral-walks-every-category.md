@@ -2,6 +2,7 @@
 id: P112-OWN019-NODETYPEWORDS
 title: "list_node_types matches its query as one phrase — Mistral searched \"timer interval delay countdown repeat\", got no rows, and walked all fifteen categories one call each"
 status: fixed
+commit: cda7ea056
 phase: P112
 task: OWN-019
 severity: low

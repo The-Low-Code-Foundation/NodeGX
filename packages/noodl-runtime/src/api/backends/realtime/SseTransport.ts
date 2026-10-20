@@ -144,7 +144,7 @@ export const NODEGX_SSE: SseDialect = {
   helloEvent: 'connected',
   changeEvents: () => ['change'],
   resyncEvent: 'resync',
-  subscribeRequest(base, token, clientId, subscriptions) {
+  subscribeRequest(base, _token, clientId, subscriptions) {
     // ⚠️ `where` is the **Parse-style `$` grammar**, not the neutral `Filter` — see
     // `RealtimeFilter`. `nodegx-backend/src/realtime/filter.ts` evaluates it with
     // `matchOperator`, which throws on any other operator name, and `RealtimeHub` then
@@ -154,8 +154,11 @@ export const NODEGX_SSE: SseDialect = {
         ? { collection: subscription.collection }
         : { collection: subscription.collection, filter: subscription.where }
     );
+    // 🔴 P121-TWO005-LIVEANON: no credential. The backend checks each collection against the principal the STREAM
+    // opened with (`?token=` above), and the `clientId` it minted is the capability (`HttpServer.realtimeSubscribe`).
+    // A session sent here as `Authorization: Bearer` was read as an admin token, then an API key, and refused 401
+    // before the route ran — so every signed-in member's subscription came back "rejected: no reason given".
     const headers: Record<string, string> = { 'content-type': 'application/json' };
-    if (token) headers['authorization'] = 'Bearer ' + token;
     return {
       url: base + '/realtime/subscriptions',
       init: {

@@ -1,0 +1,250 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4450db42-d868-5db1-8aec-b0fcf6b67e3f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "nvRoot",
+      "type": "Group",
+      "label": "The sections",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-0)",
+        "cssClassName": "gm-nav",
+        "mounted": false
+      },
+      "children": [
+        "nvFeed",
+        "nvPost",
+        "nvPrayer",
+        "nvProfile"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "nvFeed",
+      "type": "net.noodl.controls.button",
+      "label": "⌂ Feed",
+      "parent": "nvRoot",
+      "parameters": {
+        "label": "⌂\nFeed",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "cssClassName": "gm-nav-tab"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "nvPost",
+      "type": "net.noodl.controls.button",
+      "label": "＋ Post",
+      "parent": "nvRoot",
+      "parameters": {
+        "label": "＋\nPost",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "cssClassName": "gm-nav-tab"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "nvPrayer",
+      "type": "net.noodl.controls.button",
+      "label": "🙏 Prayer",
+      "parent": "nvRoot",
+      "parameters": {
+        "label": "🙏\nPrayer",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "cssClassName": "gm-nav-tab"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "nvProfile",
+      "type": "net.noodl.controls.button",
+      "label": "◯ Profile",
+      "parent": "nvRoot",
+      "parameters": {
+        "label": "◯\nProfile",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "color": "var(--muted-foreground)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "cssClassName": "gm-nav-tab"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "nvIn",
+      "type": "Component Inputs",
+      "label": "The section, who, and whether to show",
+      "ports": [
+        {
+          "name": "on",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "meId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "nvLook",
+      "type": "JavaScriptFunction",
+      "label": "Which section is lit",
+      "parameters": {
+        "functionScript": "var on = String(Inputs.on || '');\nOutputs.feedInk = on === 'feed' ? 'var(--primary)' : 'var(--muted-foreground)';\nOutputs.feedWeight = on === 'feed' ? 'var(--font-extrabold)' : 'var(--font-semibold)';\nOutputs.postInk = on === 'post' ? 'var(--primary)' : 'var(--muted-foreground)';\nOutputs.postWeight = on === 'post' ? 'var(--font-extrabold)' : 'var(--font-semibold)';\nOutputs.prayerInk = on === 'prayer' ? 'var(--primary)' : 'var(--muted-foreground)';\nOutputs.prayerWeight = on === 'prayer' ? 'var(--font-extrabold)' : 'var(--font-semibold)';\nOutputs.profileInk = on === 'profile' ? 'var(--primary)' : 'var(--muted-foreground)';\nOutputs.profileWeight = on === 'profile' ? 'var(--font-extrabold)' : 'var(--font-semibold)';"
+      },
+      "ports": [
+        {
+          "name": "in-on",
+          "displayName": "on",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-feedInk",
+          "displayName": "feedInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-feedWeight",
+          "displayName": "feedWeight",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-postInk",
+          "displayName": "postInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-postWeight",
+          "displayName": "postWeight",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-prayerInk",
+          "displayName": "prayerInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-prayerWeight",
+          "displayName": "prayerWeight",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-profileInk",
+          "displayName": "profileInk",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-profileWeight",
+          "displayName": "profileWeight",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "nvToFeed",
+      "type": "RouterNavigate",
+      "label": "To Feed",
+      "parameters": {
+        "target": "/Pages/Feed"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "nvToPost",
+      "type": "RouterNavigate",
+      "label": "To Post",
+      "parameters": {
+        "target": "/Pages/NewPost"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "nvToPrayer",
+      "type": "RouterNavigate",
+      "label": "To Prayer",
+      "parameters": {
+        "target": "/Pages/Prayer"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "nvToProfile",
+      "type": "RouterNavigate",
+      "label": "To Profile",
+      "parameters": {
+        "target": "/Pages/Member"
+      },
+      "x": 350,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "nvRoot"
+  ]
+}

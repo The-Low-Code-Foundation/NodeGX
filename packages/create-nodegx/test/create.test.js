@@ -16,6 +16,7 @@ const {
   VIBE_ALLOWED_TOOLS,
   VIBE_CONFIG,
   VIBE_SERVER_FLAGS,
+  coreSkillFiles,
   renderOpenCodeConfig,
   renderVibeConfig,
   serverEntry,
@@ -37,7 +38,7 @@ test('an empty folder gets the bootstrap server, pinned, and the two agent notes
   const dir = path.join(tmp(), 'my-apps');
   const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
   assert.equal(run.status, 0, run.stderr);
-  assert.deepEqual(fs.readdirSync(dir).sort(), ['.mcp.json', '.vibe', 'AGENTS.md', 'CLAUDE.md', 'opencode.json']);
+  assert.deepEqual(fs.readdirSync(dir).sort(), ['.claude', '.mcp.json', '.vibe', 'AGENTS.md', 'CLAUDE.md', 'opencode.json']);
   const entry = read(path.join(dir, '.mcp.json')).mcpServers.nodegx;
   assert.deepEqual(entry, serverEntry());
   assert.ok(entry.args.includes(`${MCP_PACKAGE}@${MCP_VERSION}`));
@@ -53,6 +54,36 @@ test('P112-S14-NOTNODEGX: the agent notes say an app here is a NodeGX app, and h
   assert.match(AGENT_NOTE, /Don't\nwrite a separate web server/);
   assert.match(AGENT_NOTE, /`set_function_secret` without a value/);
   assert.match(AGENT_NOTE, /`\.env` file/);
+});
+
+test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, named for Claude Code and readable by any agent', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [BIN, dir], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md');
+  assert.ok(fs.existsSync(skill), skill);
+  const text = fs.readFileSync(skill, 'utf8');
+  // Claude Code lists a project skill by its frontmatter; the name must match its folder.
+  assert.match(text, /^---\nname: nodegx-your-own-editor\ndescription: "/);
+  assert.match(text, /LOAD when the person asks for an editor/);
+  // The brief's spine: the kit, the suite, the traps, what it must not do.
+  for (const heading of ['## The kit', '## Done means PASS', '## What the editors before yours got wrong', '## What your editor must not do']) {
+    assert.ok(text.includes(`\n${heading}\n`), heading);
+  }
+  // The kit is written as a copy of profiles/core, so a change there is what ships.
+  assert.deepEqual(coreSkillFiles().map((f) => f.to), [path.join('.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')]);
+  // Every other agent is pointed at the same file from the agent notes.
+  assert.match(AGENT_NOTE, /`nodegx-your-own-editor` \(`\.claude\/skills\/nodegx-your-own-editor\/SKILL\.md`\)/);
+  assert.match(run.stdout, /Wrote \.claude\/skills\/nodegx-your-own-editor\/SKILL\.md/);
+});
+
+test("P112 OWN-007: a person's own skill file is never replaced", () => {
+  const dir = tmp();
+  const skill = path.join(dir, '.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md');
+  fs.mkdirSync(path.dirname(skill), { recursive: true });
+  fs.writeFileSync(skill, 'mine\n');
+  assert.deepEqual(setUp(dir).skills, []);
+  assert.equal(fs.readFileSync(skill, 'utf8'), 'mine\n');
 });
 
 test("a person's own CLAUDE.md or AGENTS.md is never replaced", () => {
@@ -290,4 +321,74 @@ test('P112 OWN-019 s3: the hand-over — at 100 tool calls, or once a session wr
   assert.equal(ask('nodegx_call_tool', { name: 'drive_page' }), 'deny');
   // A broken call never blocks a person's work.
   assert.equal(spawnSync(process.execPath, [hook], { cwd: dir, input: 'not json', encoding: 'utf8' }).status, 0);
+});
+
+test('P112-OWN019-NOTELOOP: after this session writes NEXT.md, three more writes to the notes pass and the fourth is refused', () => {
+  const dir = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, dir, '--vibe'], { encoding: 'utf8' }).status, 0);
+  assert.match(fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8'), /Write `NEXT\.md` whole, in one `write_file` — never patch it/);
+  const hook = path.join(dir, '.vibe', 'hooks', 'hand-over.mjs');
+  const session = path.join(tmp(), 'session_20261014_101451_5b6889f3');
+  fs.mkdirSync(session);
+  const transcript = path.join(session, 'messages.jsonl');
+  fs.writeFileSync(transcript, '');
+  const started = Date.now() - 60000;
+  fs.writeFileSync(path.join(session, 'meta.json'), JSON.stringify({ start_time: new Date(started).toISOString() }));
+  const docs = path.join(dir, 'editor', 'docs');
+  fs.mkdirSync(docs, { recursive: true });
+  const next = path.join(docs, 'NEXT.md');
+  const ask = (tool_name, tool_input) => {
+    const run = spawnSync(process.execPath, [hook], { cwd: dir, input: JSON.stringify({ session_id: 's', transcript_path: transcript, cwd: dir, tool_name, tool_call_id: 'c', tool_input }), encoding: 'utf8' });
+    assert.equal(run.status, 0, run.stderr);
+    return run.stdout ? JSON.parse(run.stdout).decision : 'allow';
+  };
+  // Vibe 2.26.1's transcript: the asked-about call is recorded after the hook answers.
+  const did = (name, file_path) =>
+    fs.appendFileSync(transcript, JSON.stringify({ role: 'assistant', content: '', tool_calls: [{ id: 'x', type: 'function', function: { name, arguments: JSON.stringify({ file_path }) } }] }) + '\n');
+  // Control: an earlier session's NEXT.md closes nothing — the notes are open however often they are written.
+  fs.writeFileSync(next, '# Next session: prove it\n');
+  fs.utimesSync(next, new Date(started - 3600000), new Date(started - 3600000));
+  for (let i = 0; i < 6; i++) {
+    assert.equal(ask('edit', { file_path: path.join(docs, 'CHECKLIST.md') }), 'allow');
+    did('edit', path.join(docs, 'CHECKLIST.md'));
+  }
+  fs.writeFileSync(transcript, '');
+  // This session writes NEXT.md whole; then three more writes to the notes (mark a line, fix a word) pass.
+  assert.equal(ask('write_file', { file_path: next }), 'allow');
+  did('write_file', next);
+  fs.writeFileSync(next, '# Done\n');
+  for (const f of ['CHECKLIST.md', 'NEXT.md', 'PLAN.md']) {
+    assert.equal(ask('edit', { file_path: path.join(docs, f) }), 'allow');
+    did('edit', path.join(docs, f));
+  }
+  // The fourth is refused, NEXT.md included, and the refusal says why and what to do.
+  assert.equal(ask('edit', { file_path: next }), 'deny');
+  assert.equal(ask('write_file', { file_path: path.join(docs, 'PLAN.md') }), 'deny');
+  const run = spawnSync(process.execPath, [hook], { cwd: dir, input: JSON.stringify({ transcript_path: transcript, cwd: dir, tool_name: 'edit', tool_input: { file_path: next } }), encoding: 'utf8' });
+  assert.match(JSON.parse(run.stdout).reason, /^The notes are done: editor\/docs\/NEXT\.md is written/);
+  // Reading stays open.
+  assert.equal(ask('read_file', { file_path: next }), 'allow');
+});
+
+test('P112 OWN-019 (R29): `npm create nodegx-vibe` is create-nodegx --vibe, pinned to the same version', () => {
+  const wrapper = path.join(__dirname, '..', 'vibe');
+  const pkg = read(path.join(wrapper, 'package.json'));
+  const core = read(path.join(__dirname, '..', 'package.json'));
+  assert.equal(pkg.name, 'create-nodegx-vibe');
+  // One release, one version: the wrapper ships with the core it was tested against (R13), pinned exactly.
+  assert.equal(pkg.version, core.version);
+  assert.deepEqual(pkg.dependencies, { 'create-nodegx': core.version });
+  assert.equal(pkg.license, core.license);
+  // Not in create-nodegx's own tarball, and not a workspace (packages/* would take it into the shared lockfile).
+  assert.ok(!core.files.includes('vibe'));
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [path.join(wrapper, pkg.bin['create-nodegx-vibe']), dir], { encoding: 'utf8' });
+  assert.equal(run.status, 0, run.stderr);
+  // The same folder `create-nodegx --vibe` writes, file for file.
+  const direct = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, direct, '--vibe'], { encoding: 'utf8' }).status, 0);
+  const files = (d) => fs.readdirSync(d, { recursive: true }).sort();
+  assert.deepEqual(files(dir), files(direct));
+  for (const f of files(dir)) if (fs.statSync(path.join(dir, f)).isFile()) assert.equal(fs.readFileSync(path.join(dir, f), 'utf8'), fs.readFileSync(path.join(direct, f), 'utf8'), f);
+  assert.match(run.stdout, /vibe --legacy-harness/);
 });

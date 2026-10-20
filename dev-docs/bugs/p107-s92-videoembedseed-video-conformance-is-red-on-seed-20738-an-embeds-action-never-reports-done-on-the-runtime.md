@@ -31,3 +31,9 @@ frame has already resolved") or never sends it on an embed that was never a `<vi
 scenario on a fresh target (`play(withViewerNodes(runtimeTarget()), …)`), then with one more `settle` after the action. Until
 then the whole Video runtime run is red on both seeds measured, and every other spec's run is unaffected (it is one `test()`
 per spec). Whichever it is, it owes a hand scenario that does not depend on the day's seed.
+
+**s105 (2026-10-14), seed 20739:** the same family, 2 generated divergences, both a Restart on a YouTube embed whose Done the
+runtime never records (`{"index":46,"reference":{"t":"outcome","port":"restart","value":"done"}…`, and index 52). Identical in
+three runs that day, so steady on this seed, not flaky. Seen with s105's Video v7 (R38: sizes and the grow warning); not
+re-measured at HEAD's Video, but the divergence is an action's outcome and v7 changed nothing an action reads. At seed 20740 the same run has 1: a Play on a Vimeo embed (`https://vimeo.com/76979871`), Done on the interpreter, nothing on
+the runtime. Every Video mutant is killed or declared on both seeds.

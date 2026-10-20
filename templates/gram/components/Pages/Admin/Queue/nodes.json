@@ -1,0 +1,962 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5e61d04f-0dfc-5a64-8cef-89de3df835df",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "quPage",
+      "type": "Page",
+      "label": "Waiting for you",
+      "parameters": {
+        "title": "Waiting for you",
+        "urlPath": "admin"
+      },
+      "children": [
+        "quRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "quRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "quPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app"
+      },
+      "children": [
+        "quBar",
+        "quBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "quBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "quRoot",
+      "parameters": {
+        "band": "Admin"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "quBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "quRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "quContent",
+        "quMod",
+        "quRefused"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "quContent",
+      "type": "Group",
+      "label": "Waiting for you",
+      "parent": "quBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "quTitle",
+        "quHeading",
+        "quEmpty",
+        "quList",
+        "quNote",
+        "quHow"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "quTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "quContent",
+      "parameters": {
+        "text": "Waiting for you",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "quHeading",
+      "type": "Text",
+      "label": "New members",
+      "parent": "quContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "quEmpty",
+      "type": "Text",
+      "label": "Nobody waiting",
+      "parent": "quContent",
+      "parameters": {
+        "text": "Nobody is waiting to be let in.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "quList",
+      "type": "Group",
+      "label": "The people waiting",
+      "parent": "quContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-list",
+        "mounted": false
+      },
+      "children": [
+        "quEach"
+      ],
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "quEach",
+      "type": "For Each",
+      "label": "One row per person waiting",
+      "parent": "quList",
+      "parameters": {
+        "template": "/Admin/NewMemberRow"
+      },
+      "x": 340,
+      "y": 1120
+    },
+    {
+      "id": "quNote",
+      "type": "Text",
+      "label": "What happened last",
+      "parent": "quContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "quHow",
+      "type": "Text",
+      "label": "What No does",
+      "parent": "quContent",
+      "parameters": {
+        "text": "No keeps them out: they can’t sign in. Nothing is deleted.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "quMod",
+      "type": "Group",
+      "label": "Reported, hidden, blocked",
+      "parent": "quBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "quReportedHeading",
+        "quNoneReported",
+        "quReported",
+        "quHiding",
+        "quHiddenBox",
+        "quBlockedBox",
+        "quMore"
+      ],
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "quReportedHeading",
+      "type": "Text",
+      "label": "Reported",
+      "parent": "quMod",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "quNoneReported",
+      "type": "Text",
+      "label": "Nothing reported",
+      "parent": "quMod",
+      "parameters": {
+        "text": "Nothing is waiting: no member has reported a post or a comment.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "quReported",
+      "type": "Group",
+      "label": "What members reported",
+      "parent": "quMod",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-list"
+      },
+      "children": [
+        "quEachReported"
+      ],
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "quEachReported",
+      "type": "For Each",
+      "label": "One row per post or comment reported",
+      "parent": "quReported",
+      "parameters": {
+        "template": "/Admin/QueueRow"
+      },
+      "x": 340,
+      "y": 1960
+    },
+    {
+      "id": "quHiding",
+      "type": "Group",
+      "label": "Hiding",
+      "parent": "quMod",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "cssClassName": "gm-rule"
+      },
+      "children": [
+        "quHidingTitle",
+        "quHidingWords"
+      ],
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "quHidingTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "quHiding",
+      "parameters": {
+        "text": "Hiding",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--foreground)"
+      },
+      "x": 340,
+      "y": 2200
+    },
+    {
+      "id": "quHidingWords",
+      "type": "Text",
+      "label": "What hiding does",
+      "parent": "quHiding",
+      "parameters": {
+        "text": "A hidden post keeps its photos, comments and reports. Members stop seeing it; admins still see it, with the reason. Nothing is deleted, and it can be brought back.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 340,
+      "y": 2320
+    },
+    {
+      "id": "quHiddenBox",
+      "type": "Group",
+      "label": "What is hidden",
+      "parent": "quMod",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "quHiddenHeading",
+        "quHidden"
+      ],
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "quHiddenHeading",
+      "type": "Text",
+      "label": "Hidden",
+      "parent": "quHiddenBox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--foreground)"
+      },
+      "x": 340,
+      "y": 2560
+    },
+    {
+      "id": "quHidden",
+      "type": "Group",
+      "label": "Hidden from members",
+      "parent": "quHiddenBox",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-list"
+      },
+      "children": [
+        "quEachHidden"
+      ],
+      "x": 340,
+      "y": 2680
+    },
+    {
+      "id": "quEachHidden",
+      "type": "For Each",
+      "label": "One row per post or comment hidden",
+      "parent": "quHidden",
+      "parameters": {
+        "template": "/Admin/QueueRow"
+      },
+      "x": 400,
+      "y": 2800
+    },
+    {
+      "id": "quBlockedBox",
+      "type": "Group",
+      "label": "Who is blocked",
+      "parent": "quMod",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "quBlockedHeading",
+        "quBlocked"
+      ],
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "quBlockedHeading",
+      "type": "Text",
+      "label": "Blocked",
+      "parent": "quBlockedBox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--foreground)"
+      },
+      "x": 340,
+      "y": 3040
+    },
+    {
+      "id": "quBlocked",
+      "type": "Group",
+      "label": "Blocked members",
+      "parent": "quBlockedBox",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "gm-list"
+      },
+      "children": [
+        "quEachBlocked"
+      ],
+      "x": 340,
+      "y": 3160
+    },
+    {
+      "id": "quEachBlocked",
+      "type": "For Each",
+      "label": "One row per member blocked",
+      "parent": "quBlocked",
+      "parameters": {
+        "template": "/Admin/QueueRow"
+      },
+      "x": 400,
+      "y": 3280
+    },
+    {
+      "id": "quMore",
+      "type": "Group",
+      "label": "More",
+      "parent": "quMod",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2-5)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "quRules",
+        "quAdmins",
+        "quFeed"
+      ],
+      "x": 280,
+      "y": 3400
+    },
+    {
+      "id": "quRules",
+      "type": "net.noodl.controls.button",
+      "label": "Community rules",
+      "parent": "quMore",
+      "parameters": {
+        "label": "Community rules",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 3520
+    },
+    {
+      "id": "quAdmins",
+      "type": "net.noodl.controls.button",
+      "label": "Admins",
+      "parent": "quMore",
+      "parameters": {
+        "label": "Admins",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 3640
+    },
+    {
+      "id": "quFeed",
+      "type": "net.noodl.controls.button",
+      "label": "The feed",
+      "parent": "quMore",
+      "parameters": {
+        "label": "The feed",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 340,
+      "y": 3760
+    },
+    {
+      "id": "quRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "quBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "quRefusedWhy",
+        "quRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 3880
+    },
+    {
+      "id": "quRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "quRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 4000
+    },
+    {
+      "id": "quRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "quRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 4120
+    },
+    {
+      "id": "quToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 650,
+      "y": 4120
+    },
+    {
+      "id": "quLoad",
+      "type": "JavaScriptFunction",
+      "label": "Who is waiting",
+      "parameters": {
+        "runOnChange-in-changed": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\n// Read so that a row's change runs the list again.\nvar version = Inputs.changed;\ntry {\n  await adminsOnly();\n  var waiting = await all('Member', { status: { equalTo: 'waiting' } });\n} catch (e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; return; }\nwaiting = waiting.filter(function (m) { return !m.endedAt; }).sort(function (a, b) { return String(a.createdAt).localeCompare(String(b.createdAt)); });\nOutputs.rows = waiting.map(function (m) {\n  return { id: m.objectId, name: m.name || '', initials: initials(m.name), shade: shade(m.objectId), sub: 'Confirmed 13 or older · asked ' + ago(m.createdAt) };\n});\nOutputs.heading = 'New members (' + waiting.length + ')';\nOutputs.empty = waiting.length === 0;\n// Slice 5's shots: an empty list drew its border as a line, and the note on No stood alone.\nOutputs.hasRows = waiting.length > 0;\nOutputs.refused = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-heading",
+          "displayName": "heading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasRows",
+          "displayName": "hasRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "quModLoad",
+      "type": "JavaScriptFunction",
+      "label": "What is reported, hidden and blocked",
+      "parameters": {
+        "runOnChange-in-changed": true,
+        "runOnChange-in-members": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nfunction shown(posts, members) {\n  var by = {};\n  members.forEach(function (m) { by[m.objectId] = m; });\n  return posts\n    .filter(function (p) { var m = by[idOf(p.member)]; return !p.endedAt && m && !m.endedAt; })\n    .sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });\n}\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\n/** Slice 4b: what each kind but a post is called on its pill. */\nvar KIND_NAMES = {\"prayer\":\"Prayer request\",\"testimony\":\"Testimony\",\"event\":\"Event\"};\n/**\n * When an event is, in the reader's own time: \"Saturday 18 October, 9:00\", the year only when it isn't this one, and\n * \"was\" once it has passed.\n */\nfunction eventWhen(at) {\n  var t = at ? new Date(at.iso || at) : null;\n  if (!t || !isFinite(t.getTime())) return '';\n  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n  var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];\n  var year = t.getFullYear() === new Date().getFullYear() ? '' : ' ' + t.getFullYear();\n  var said = days[t.getDay()] + ' ' + t.getDate() + ' ' + months[t.getMonth()] + year + ', ' + t.getHours() + ':' + String(t.getMinutes()).padStart(2, '0');\n  return (t.getTime() < Date.now() ? 'was ' : '') + said;\n}\nfunction firstName(m) { return String((m && m.name) || '').trim().split(' ')[0]; }\n/** A link for each photo, kept on the page until a minute before it runs out: a reload asks again for none of them. */\nasync function linked(photos) {\n  var keep = Component.Object;\n  var links = keep.get('links') || {};\n  var soon = Date.now() + 60000;\n  var urls = await Promise.all((photos || []).map(async function (f) {\n    var name = f && f.name ? String(f.name) : '';\n    if (!name) return '';\n    if (links[name] && links[name].until > soon) return links[name].url;\n    try {\n      var l = await Noodl.Files.sign(f);\n      links[name] = { url: l.url, until: l.expiresAt ? Date.parse(l.expiresAt) : soon + 3600000 };\n      return l.url;\n    } catch (e) { return ''; }\n  }));\n  keep.set('links', links);\n  return urls;\n}\n/**\n * The cards: who, when, the photos, the hearts by person (mine among them), the comments not hidden. A prayer request\n * (slice 4) has no hearts: its words, \"I prayed\" with the count kept on it, and who prayed for the person who asked\n * only (W4: the prayed rows are the ones the reader may read, their own and those on their own requests). Slice 4b: a\n * testimony leads with its words, as a prayer request does, and has hearts; an event says when it is where a post says\n * when it was shared. Every kind but a post wears its pill. A card with no photo leads with its words too (the shots:\n * an event's words sat under \"No hearts yet\").\n */\nasync function cardsOf(posts, members, hearts, comments, mine, onItsPage, prayed) {\n  var by = {}, byLogin = {};\n  members.forEach(function (m) { by[m.objectId] = m; byLogin[idOf(m.login)] = m; });\n  var cards = [];\n  for (var i = 0; i < posts.length; i++) {\n    var p = posts[i];\n    var m = by[idOf(p.member)] || {};\n    var isPrayer = p.kind === 'prayer';\n    var kindName = KIND_NAMES[p.kind] || '';\n    // Words lead a prayer request, a testimony, and any card with no photo (else the heart comes before what it's on).\n    var wordsFirst = isPrayer || p.kind === 'testimony' || (p.photos || []).length === 0;\n    var asked = !!mine && idOf(m.login) === mine;\n    var prayers = [];\n    (prayed || []).forEach(function (r) { var u = idOf(r.doneBy); if (idOf(r.post) === p.objectId && prayers.indexOf(u) < 0) prayers.push(u); });\n    var iPrayed = prayers.indexOf(mine) >= 0;\n    var count = Math.max(0, Number(p.prayedCount) || 0);\n    var people = [];\n    hearts.forEach(function (h) { var u = idOf(h.doneBy); if (idOf(h.post) === p.objectId && people.indexOf(u) < 0) people.push(u); });\n    var said = comments.filter(function (c) { return idOf(c.post) === p.objectId && !c.endedAt; }).length;\n    var hearted = people.indexOf(mine) >= 0;\n    var names = people.slice(0, 2).map(function (u) { return u === mine ? 'you' : firstName(byLogin[u]); }).filter(Boolean);\n    var urls = (await linked(p.photos)).filter(Boolean);\n    var face = await faceOf(m);\n    cards.push({\n      id: p.objectId,\n      memberId: m.objectId || '',\n      name: m.name || '',\n      face: face,\n      hasFace: !!face,\n      noFace: !face,\n      initials: initials(m.name),\n      shade: shade(m.objectId || p.objectId),\n      when: p.kind === 'event' ? 'Event · ' + (eventWhen(p.eventOn) || 'its day isn’t known') : p.kind === 'testimony' ? 'Testimony · ' + ago(p.createdAt) : ago(p.createdAt),\n      caption: p.caption || '',\n      hasCaption: !!p.caption && !wordsFirst,\n      isPrayer: isPrayer,\n      notPrayer: !isPrayer,\n      kindName: kindName,\n      hasKind: !!kindName,\n      wordsFirst: wordsFirst,\n      kindClass: isPrayer ? 'gm-prayer' : '',\n      ask: wordsFirst ? p.caption || '' : '',\n      prayed: iPrayed,\n      prayLabel: (iPrayed ? '🙏 You prayed' : '🙏 I prayed') + (count > 0 ? ' · ' + count : ''),\n      prayInk: iPrayed ? 'var(--primary-foreground)' : 'var(--primary)',\n      prayFill: iPrayed ? 'var(--primary)' : 'var(--surface)',\n      whoPrayed: !isPrayer ? '' : asked ? whoPrayed(prayers, byLogin, mine, onItsPage) : 'Only ' + (firstName(m) || 'the person who asked') + ' sees who prayed.',\n      photos: urls.map(function (u, n) { return { id: u, src: u, alt: 'Photo ' + (n + 1) + ' of ' + urls.length + ', shared by ' + (m.name || 'a member') }; }),\n      hasPhotos: urls.length > 0,\n      lostPhotos: (p.photos || []).length > urls.length,\n      hearted: hearted,\n      heartLabel: hearted ? '♥ Hearted' : '♡ Heart',\n      heartColor: hearted ? 'var(--heart)' : 'var(--foreground)',\n      hearts: people.length === 0 ? 'No hearts yet' : plural(people.length, 'heart', 'hearts') + ' · ' + (people.length > 2 ? names.join(', ') + ' and ' + plural(people.length - 2, 'other', 'others') : names.join(' and ')),\n      comments: said === 0 ? '' : said === 1 ? 'View 1 comment' : 'View all ' + said + ' comments',\n      toComments: !onItsPage,\n      listComments: !onItsPage && said > 0\n    });\n  }\n  return cards;\n}\n/** \"a, b and c\". */\nfunction listed(names) { return names.length < 2 ? names.join('') : names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]; }\n/** Who prayed, for the person who asked: everyone on the request's own page, the first two and how many more on a card. */\nfunction whoPrayed(prayers, byLogin, mine, everyone) {\n  if (prayers.length === 0) return 'Nobody has prayed yet. Only you will see who does.';\n  var names = prayers.map(function (u) { return u === mine ? 'you' : (byLogin[u] && byLogin[u].name) || 'a member'; });\n  var shown = everyone || names.length <= 3 ? names : names.slice(0, 2).concat([plural(names.length - 2, 'other', 'others')]);\n  return 'Prayed: ' + listed(shown) + '. Only you see who.';\n}\n/** A member's profile photo by its signed link, or '' (no photo, or the backend won't sign it): then their initials. */\nasync function faceOf(m) {\n  return m && m.photo && m.photo.name ? (await linked([m.photo]))[0] || '' : '';\n}\nfunction refused(e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; }\n\nvar REASONS = [{\"value\":\"child-photo\",\"words\":\"A child shown without a parent’s yes\"},{\"value\":\"unkind\",\"words\":\"Unkind\"},{\"value\":\"spam\",\"words\":\"Spam\"},{\"value\":\"other\",\"words\":\"Something else\"}];\nfunction reasonWords(v) { var r = REASONS.filter(function (x) { return x.value === v; })[0]; return r ? r.words : 'Something else'; }\nfunction rank(v) { var i = REASONS.map(function (x) { return x.value; }).indexOf(v); return i < 0 ? REASONS.length : i; }\nfunction pillOf(v) { return v === 'child-photo' ? 'gm-pill gm-pill-bad' : 'gm-pill gm-pill-gold'; }\nfunction cut(words, n) { var w = String(words || '').trim(); return w.length > n ? w.slice(0, n - 1).trim() + '…' : w; }\n\n// Read so that a hide, a block or a let-back anywhere runs the lists again.\nvar version = [Inputs.changed, Inputs.members];\ntry {\n  await adminsOnly();\n  var members = await all('Member');\n  var posts = await all('Post');\n  var comments = await all('Comment');\n  var reports = await all('Report');\n  var commentReports = await all('CommentReport');\n} catch (e) { refused(e); return; }\nvar by = {}, byPost = {}, byComment = {};\nmembers.forEach(function (m) { by[m.objectId] = m; });\nposts.forEach(function (p) { byPost[p.objectId] = p; });\ncomments.forEach(function (c) { byComment[c.objectId] = c; });\nfunction out(row) { var m = by[idOf(row.member)]; return !!row.endedAt || !m || !!m.endedAt; }\nfunction off(kind, row) { return out(row) || (kind === 'comment' && (!byPost[idOf(row.post)] || out(byPost[idOf(row.post)]))); }\nfunction thing(kind, row) { return kind === 'comment' ? 'Comment' : row.kind === 'prayer' ? 'Prayer request' : 'Post'; }\nfunction byWhom(row) { return (by[idOf(row.member)] || {}).name || 'a member'; }\nfunction when(v) { return String((v && (v.iso || v)) || ''); }\n/** Why a member is out: blocked, and why; someone not let in says only that, unless the admin wrote more. */\nfunction outWhy(m) {\n  var why = m.blockedReason || '';\n  if (m.status === 'waiting') return 'Not let in' + (why && why !== 'Not let in.' ? ': ' + why : '');\n  return 'Blocked: ' + (why || 'no reason given');\n}\nfunction grouped(list, field, table, kind) {\n  var seen = {};\n  list.forEach(function (r) {\n    var id = idOf(r[field]);\n    var row = table[id];\n    if (!row) return;\n    var g = seen[id] || (seen[id] = { id: id, kind: kind, row: row, people: {}, reasons: {}, latest: '' });\n    var u = idOf(r.doneBy);\n    if (!g.people[u]) { g.people[u] = true; g.reasons[r.reason] = (g.reasons[r.reason] || 0) + 1; }\n    var at = when(r.at) || when(r.createdAt);\n    if (at > g.latest) g.latest = at;\n  });\n  return Object.keys(seen).map(function (k) { return seen[k]; });\n}\n// The child's reason wins whenever anyone gave it; otherwise the reason most people gave.\nfunction top(g) { return Object.keys(g.reasons).sort(function (a, b) { return (a === 'child-photo' ? -1 : 0) - (b === 'child-photo' ? -1 : 0) || g.reasons[b] - g.reasons[a] || rank(a) - rank(b); })[0]; }\nvar open = grouped(reports, 'post', byPost, 'post').concat(grouped(commentReports, 'comment', byComment, 'comment')).filter(function (g) { return !off(g.kind, g.row); });\nopen.forEach(function (g) { g.top = top(g); });\nopen.sort(function (a, b) { return (a.top === 'child-photo' ? 0 : 1) - (b.top === 'child-photo' ? 0 : 1) || b.latest.localeCompare(a.latest); });\nOutputs.reported = open.map(function (g) {\n  var n = Object.keys(g.people).length;\n  return { id: g.kind + ':' + g.id, kind: g.kind, itemId: g.id, pill: reasonWords(g.top), pillClass: pillOf(g.top), hasPill: true, title: '', hasTitle: false, sub: thing(g.kind, g.row) + ' by ' + byWhom(g.row) + ' · reported by ' + plural(n, 'member', 'members') + ' · ' + ago(g.latest), look: 'Look' };\n});\nOutputs.reportedHeading = 'Reported (' + open.length + ')';\nOutputs.noneReported = open.length === 0;\nvar hidden = posts.filter(function (p) { return p.endedAt; }).map(function (p) { return { kind: 'post', row: p }; })\n  .concat(comments.filter(function (c) { return c.endedAt; }).map(function (c) { return { kind: 'comment', row: c }; }));\nhidden.sort(function (a, b) { return when(b.row.endedAt).localeCompare(when(a.row.endedAt)); });\nOutputs.hidden = hidden.map(function (h) {\n  return { id: h.kind + ':' + h.row.objectId, kind: h.kind, itemId: h.row.objectId, pill: 'Hidden', pillClass: 'gm-pill gm-pill-quiet', hasPill: true, title: '', hasTitle: false, sub: thing(h.kind, h.row) + ' by ' + byWhom(h.row) + ' · ' + (h.row.hiddenReason || 'no reason given') + ' · ' + ago(h.row.endedAt), look: 'Look' };\n});\nOutputs.hiddenHeading = 'Hidden from members (' + hidden.length + ')';\nOutputs.hasHidden = hidden.length > 0;\nvar blocked = members.filter(function (m) { return m.endedAt; }).sort(function (a, b) { return when(b.endedAt).localeCompare(when(a.endedAt)); });\nOutputs.blocked = blocked.map(function (m) {\n  return { id: 'member:' + m.objectId, kind: 'member', itemId: m.objectId, pill: '', pillClass: 'gm-pill', hasPill: false, title: m.name || '', hasTitle: true, sub: outWhy(m) + ' · ' + ago(m.endedAt), look: 'Profile' };\n});\nOutputs.blockedHeading = 'Blocked (' + blocked.length + ')';\nOutputs.hasBlocked = blocked.length > 0;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-members",
+          "displayName": "members",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reported",
+          "displayName": "reported",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reportedHeading",
+          "displayName": "reportedHeading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noneReported",
+          "displayName": "noneReported",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hidden",
+          "displayName": "hidden",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hiddenHeading",
+          "displayName": "hiddenHeading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasHidden",
+          "displayName": "hasHidden",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocked",
+          "displayName": "blocked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blockedHeading",
+          "displayName": "blockedHeading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasBlocked",
+          "displayName": "hasBlocked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "quVersion",
+      "type": "Variable2",
+      "label": "The members changed",
+      "parameters": {
+        "name": "membersChanged"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a member was let in, turned away or made an admin: the list reads again, whichever row changed it."
+      },
+      "x": 650,
+      "y": 4240
+    },
+    {
+      "id": "quLast",
+      "type": "Variable2",
+      "label": "What happened last",
+      "parameters": {
+        "name": "membersNote"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: what the admin did last: the queue says it once the row has gone."
+      },
+      "x": 650,
+      "y": 1240
+    },
+    {
+      "id": "quFeedChanged",
+      "type": "Variable2",
+      "label": "The feed changed",
+      "parameters": {
+        "name": "feedChanged"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a heart, a comment or a post was made on this phone: the feed and the post read again, whichever card made it."
+      },
+      "x": 650,
+      "y": 4360
+    },
+    {
+      "id": "quLiveReport",
+      "type": "SubscribeToChanges",
+      "label": "Reports, as they arrive",
+      "parameters": {
+        "collectionName": "Report"
+      },
+      "x": 650,
+      "y": 4480
+    },
+    {
+      "id": "quLiveCommentReport",
+      "type": "SubscribeToChanges",
+      "label": "Reports on comments, as they arrive",
+      "parameters": {
+        "collectionName": "CommentReport"
+      },
+      "x": 650,
+      "y": 4600
+    },
+    {
+      "id": "quToRules",
+      "type": "RouterNavigate",
+      "label": "To the rules",
+      "parameters": {
+        "target": "/Pages/Rules"
+      },
+      "x": 650,
+      "y": 3520
+    },
+    {
+      "id": "quToAdmins",
+      "type": "RouterNavigate",
+      "label": "To the admins",
+      "parameters": {
+        "target": "/Pages/Admin/Admins"
+      },
+      "x": 650,
+      "y": 3640
+    },
+    {
+      "id": "quToFeed",
+      "type": "RouterNavigate",
+      "label": "To the feed",
+      "parameters": {
+        "target": "/Pages/Feed"
+      },
+      "x": 650,
+      "y": 3760
+    }
+  ],
+  "visualRoots": [
+    "quPage"
+  ]
+}

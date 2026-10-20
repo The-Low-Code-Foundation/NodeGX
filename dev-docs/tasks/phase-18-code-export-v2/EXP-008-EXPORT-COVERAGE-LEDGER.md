@@ -1,9 +1,11 @@
 # EXP-008 — The export coverage ledger and its gate
 
-**Status:** Built (2026-08-27, session 8) · **picker ratchet added 2026-08-28, session 32**
+**Status:** Built (2026-08-27, session 8) · **picker ratchet added 2026-08-28, session 32** ·
+**per-parameter check added 2026-10-15, P18 session 110** (§ *The per-parameter check* at the end)
 **Artifacts:** `packages/nodegx-export/coverage-ledger.json` · `scripts/export-ledger/check.js`
 (`export-ledger:check`) · `scripts/export-ledger/picker-coverage.js` (`export-ledger:picker`) —
-both in the PR workflow's `node-catalog` job
+both in the PR workflow's `node-catalog` job · `packages/nodegx-export/parameter-ledger.json` +
+`tests/parameter-coverage.test.ts` (in the export jest suite)
 
 ---
 
@@ -129,3 +131,188 @@ the designed boundary.
      treat a new *visual or interaction* node arriving as `deferred` as a smell — the
      announcement this phase is building toward is only as true as this file.
 3. Backend-only node (`availableIn: ['cloud']`)? Mark `backend-only` and you're done.
+4. CI red in `tests/parameter-coverage.test.ts` after you added or changed a **port** on a translated
+   node? §A prints the port by name. Add it to `parameter-ledger.json`'s `silent` as `unexamined`
+   (honest) or better, and copy the reaching count §A measured into `parameterCoverageFloor`.
+
+## The per-parameter check (P18 session 110, 2026-10-15)
+
+> **1,215 of 1,396 parameters of the 129 translated picker nodes reach the export (87.0%).**
+> 69 change nothing, and each is adjudicated: **21 are real silent drops** (10 bug rows), 21 reach in a
+> context the probe does not build, 23 matter only where the export refuses out loud, 2 are inert,
+> 2 unexamined. 112 have a type the probe cannot vary (component, array, object, image, font…).
+
+**Why.** The picker number counts nodes: 130 of 130. A node can translate while a parameter vanishes
+— §67–§70 of EXP-011 were four sessions of exactly that behind a `translated` row, and §75.5 #3 said
+not to quote 100% without this. It was the open question of this file.
+
+**The instrument** (`tests/helpers/parameter-probe.ts`). For every translated picker type, every
+non-signal input is set to a value other than the one it holds and `emitApp` re-run; if neither the
+emitted files nor the notes move, it is retried with each boolean / enum sibling flipped, then with
+every boolean of its panel group on (a shadow token waits for Shadow Enabled AND Source = token).
+Contexts: the node placed alone on `cheer`'s Home (inside a Radio Button Group for a Radio Button,
+with a child for a Drag); the same with every output and signal wired; then every placed instance in
+the 57 fixtures. **A refusal sentence counts as reaching** — what the gate forbids is silence.
+
+🔴 **Three traps in the instrument, found by reading its silences against the runtime** (each would
+have filed a false defect): `indexPageStacks` caches per IR object, so re-emitting a mutated IR read
+a stale index (Page Stack's Name and Use Routes) — the probe now emits a fresh shallow copy each time;
+a Drag with no child is never drawn; a Router added after parsing never enters `ir.project.routers`
+(the corpus grades Routers instead). And a silence is a measurement, not a verdict:
+`treatUnchangedAs` is silent because the only graph where it matters is refused by name.
+
+**The gate** (`tests/parameter-coverage.test.ts`, 9 specs, ~40 s). §A: the silent set and the
+unprobed set are exactly `parameter-ledger.json`'s, by name in both directions; the reaching count is
+`parameterCoverageFloor` and the total `parameterCoverageTotal`, exactly (a rise must raise the floor
+in the same commit, like the picker). §B: every class is one of five and every `gap` names a bug row
+that exists. §C: a mutant emitter that drops one parameter turns Text's Font Size silent and nothing
+else (the control); a gated port names its sibling; Page Stack's Name reaches past the cache.
+
+**The gaps** (`parameter-ledger.json` `"class": "gap"`): P18-S110-ROUTERSELF (a Router's own
+background, clip, class, style, Mounted and URL Path — six ports), -RUNONCHANGE (Run On Value Change
+boxes on Object, Record, Array Filter and Variable that their twins honour — seven), -NEWTAB
+(Navigate's Open In New Tab), -EVALATLOAD, -DYNAMICTEMPLATE (For Each), -ONLYIFUNCHANGED (Set Record
+Properties), -UPSERTON (Create Record), -TASKERROR (Run Tasks), -NOWRAP (Text), -PLACEHOLDEROPACITY
+(Dropdown). Found beside them: -STORENOTES (a store plan's notes never reach the report),
+-BREAKPOINTS (Columns), -VALUECHANGED (a wrong refusal sentence).
+
+**What 100% would now mean.** The node number can be quoted as "every placeable node exports"; the
+parameter number cannot be quoted as complete until the 21 gaps close or are refused by name. The 112
+unprobed ports are the next measurement (a probe value per structured type).
+
+### Session 111 (2026-10-15): the first ten closed, cheapest first — **1,225 of 1,396 (87.8%)**
+
+Ten ports left `silent`, and the floor rose by exactly ten. Five rows, each closed by the smallest honest change:
+
+| row | ports | how |
+|---|---|---|
+| P18-S110-RUNONCHANGE | Object Id + Object properties; Record Id; Array Filter Items + Array changes; Variable changes (6) | **Refused by name** where the box is unticked, each twin's rule: `objectNodeGate`; the Record Id effect (Fetch unwired only — with Fetch wired the export already reads only on Fetch, as the runtime does); `filterReadOf`; both Variable read sites (`VARIABLE_FROZEN`) |
+| P18-S110-NEWTAB | Navigate Open In New Tab | **Carried.** The `navigate` action gains `newTab`; the emitter prints the runtime's own bare `window.open(url, '_blank')` on the page's BrowserRouter path, and a file with no in-place navigate stops importing `useNavigate`. A wired box is refused by name |
+| P18-S110-UPSERTON | Create Record Upsert On | **Refused by name** (the setter's own emptiness: trimmed). Carrying it is an `X-NodeGX-Upsert` header on `create` in the exported client, which changes every connected fixture's `client.ts` and needs the backend's upsert answer measured first |
+| P18-S110-ONLYIFUNCHANGED | Set Record Properties Only If Unchanged | **Refused by name** (split on commas, then trimmed). The precondition is what the record held when read, and the export holds no read copy of a record to take it from |
+| P18-S110-STORENOTES | Global Store storageKey (+ the channel itself) | **Routed.** `StorePlan.notes` became `StoreNote { componentPath, nodeId, text }` and `emitApp` puts each one in the app notes and the report's project section. Not through component notes, because a declarer in a component with no file has none to carry them |
+
+**Split out:** `DbModel2.runOnChange-record` stays a gap under a new row, **P18-S111-RECORDLIVE**. Unticking the box is
+what the export already does, so the probe's variation could never move it. The gap is on the *ticked* side, the
+default: the runtime's Record re-reads when anything in the app writes its record, and the exported row is component
+state that only its own fetch writes. That is a shared record cache in the exported client, not a refusal.
+
+**Graded:** `tests/silent-parameters-closed.test.ts` (14), each case being the sentence with the parameter varied, beside its
+absence on the same fixture unvaried. Plus the setters' empty values (spaces, bare commas) refusing nothing, and
+Navigate's emitted line. Mutant control: weaken the Variable refusal and the new-tab emission, and exactly those two
+cases go red (12 / 14). `parameter-coverage` at HEAD's catalog: silent 59, floor 1,225.
+
+**Two more, same session (no change to the floor, by construction).** P18-S110-DYNAMICTEMPLATE: a For Each with
+Template Type dynamic (or wired) is refused by name in `roleOf`. P18-S110-TASKERROR: a Run Tasks whose template
+declares the node's error output gets a per-node note that the value is dropped. Neither moves the reaching count. The
+probe varies Template Script *under* dynamic, where both sides now refuse identically, and no fixture's template
+declares an error output. So the two ports are reclassified, **`gap` → `refused-with`** and **`gap` → `gated`**, with
+the spec (`tests/silent-parameters-closed.test.ts`, renamed from `the-silent-ten`, now 18 cases) building the
+context the probe does not. **10 gap ports remain:** P18-S110-ROUTERSELF (6), -EVALATLOAD, -NOWRAP, -PLACEHOLDEROPACITY,
+P18-S111-RECORDLIVE. The last two Text/Dropdown rows were found **wider on the default side**: an exported Text has
+no `white-space` in any arm, and a placeholder's default opacity is 0.5. Both are written into their rows, and neither is a cheap close.
+
+### Session 112 (2026-10-15): Evaluate At Load, carried — **1,226 of 1,396**
+
+P18-S110-EVALATLOAD closed by **carrying** the box rather than refusing it. The rule is GAM-001's
+(`expression.ts` `_scheduleEvaluateExpression`): the box matters only when no referenced input has arrived by the
+load's evaluation. A literal on any input is set at load, so it always arrives, and the box is inert there. The
+export's own model: an input has arrived once its wire-fed value is not `undefined`, because the runtime never
+delivers `undefined` over a wire. `JsFunctionPlan.loadGate` records which inputs are wire-fed and the box, and the
+wrapper prints:
+
+- **unticked** (`wait`): `if (<every wire-fed input> === undefined) return null;`: nothing until an input arrives;
+- **ticked** (`evaluate`, the default): the load evaluation keeps `null` for a throw or a NaN where an arrival's
+  answers `0` and `NaN`. This is a gap on the **default side** that the probe could not see: an exported
+  `months + drift` with `months` unset rendered "NaN" where the editor renders nothing.
+
+**The refusal the row's side note named is gone.** "None of its inputs is ever delivered — the expression never
+evaluates" was the rule from before GAM-001. Ticked, an Expression nothing feeds is now translated as the load
+evaluation over its unset inputs; unticked, it is still refused, with the box named in the sentence.
+
+**Graded:** `tests/the-evaluate-at-load.test.ts` (117). §A runs the runtime's own Expression node in a
+`NodeContext` against the emitted wrapper (transpiled and called): 7 bodies × the box × 8 arrivals (nothing, then
+`'Ada'`, `''`, `0`, `false`, `true`, `null` and an object), 112 rows with 0 differences, plus a reach control
+(the box moves `name !== false` from `true` to `null` on both sides). §A2: a literal makes the box inert on both
+sides. §B: the mutants. Removing the unticked guard turns exactly the 7 unticked/nothing rows red; removing the load
+evaluation's null turns exactly the 3 ticked NaN/throw/nothing rows red. HLS-001: 2 paths moved (budget-desk's
+Gauge, cheer's Home), golden regenerated, diff 2 out / 2 in. `jsfun` gained three cases and re-pinned two. `stores-events`' hand-written cheer Home target and HLS-004 AC4 were re-pinned to the guard.
+
+**Not modelled, recorded:** before anything arrives, Result is `null` on both sides, but the export's `isTrue` /
+`asNumber` folds still compute from it where the runtime's getters abstain (`plan.ts`'s jsfun-out comment). Once an
+input arrives and its source goes back to `undefined`, the runtime holds the last value and the export reads
+`undefined` again. That is the general wire-hold gap, not this box's.
+
+**Then the Text `white-space` rule (P18-S110-NOWRAP), rendered before it was written — 1,227 of 1,396.** The row had
+been widened by reading, so session 112 rendered it first. One headless Chrome, three arms: the runtime
+(`render-from-disk.js`), HEAD's export and the patched export, four Texts, one per arm
+(`s112-nowrap-render/`). HEAD differed on all four: a typed line break collapsed to one line; a long word overflowed
+an 80 px box; Content Size wrapped at its parent; Ellipsis wrapped to three lines. **Two defects, not one.** The CSS had
+no `white-space` in any arm. And the line break never reached the CSS, because `jsxText` printed a literal bare
+and JSX turns a line break into a space. Fixed: the three arms on every `Text` in `emit/style.ts` (by type: the
+deprecated Label shares the role and sets none), Text Overflow carried, and `jsxText` taking the string form wherever
+JSX would rewrite a character. The patched export equals the runtime on every measured field but one: **the
+runtime's Ellipsis draws no "…"**, because its Text is `display: flex`. Filed as a runtime defect, P18-S112-FLEXELLIPSIS;
+the export keeps the author's choice, pinned in §D. **Graded:** `tests/the-white-space-arms.test.ts` (15). Mutant
+controls: the old `jsxText` turns 4 cases red, not the 5 predicted. A short child printed inline keeps its spaces in
+JSX, so only the own-line case needed the string form; the spec says so. Removing the arms turns exactly the 6 Text
+cases red. HLS-001: **103 paths moved, every one a `.module.css`, 0 `.tsx`**. Cross-checked both ways: a file moved
+if and only if it now holds a `white-space` rule. Golden diff 103 / 103. 403 Text nodes, 213 rules: identical
+Text styles share one class, and every Text class carries the rule. `Text.sizeMode` leaves `silent`: it now reaches
+(floor 1,226 → 1,227). Two hand-written targets pinned a Text's exact CSS and were re-pinned to the arm each Text's
+size mode gives (`visual.test.ts`'s PuppyCard: 2 × `pre`, 2 × `pre-wrap`; `sty004` AC4.7's lost style still adds
+nothing). Whole package (`nice -n 19 --runInBand`, 547 s): 124 / 127 suites, the three reds being those two specs
+(re-pinned, 63 / 63) and `parameter-coverage` on the P121 peer's three uncommitted Upload File ports, as in s110–s111.
+**8 gap ports remain:** P18-S110-ROUTERSELF (6), -PLACEHOLDEROPACITY, P18-S111-RECORDLIVE.
+
+**Then a Router's own six (P18-S110-ROUTERSELF) — 1,233 of 1,396.** Counted before building: 1 Router of 227 in the
+fixtures, templates and test projects authors any of them with a value that does anything, so the wrapper element
+(a layout change on every exported page, owed a render) was not built. **Url Path carried**: `routedPages` reads the
+Router node's own parameter at emit time (the probe and the specs vary the node, and `RouterIR` is built once at
+parse), and puts the runtime's `_trimUrlPart(urlPath) + '/'` in front of every page, so routes and every
+`navigate(…)` wear it. Blank is none here; in the runtime it is a defect, measured on the real `matchPageFromUrl`:
+`''` pushes `#/home` and matches nothing (P18-S112-BLANKURLPATH, filed). **Mounted** (unticked or wired), a wired Url
+Path, and the four style ports are **said** (`routerNotes`, both channels), with each port's do-nothing value leaving
+the export byte-identical. **Graded:** `tests/the-router-itself.test.ts` (24); mutants: no prefix → exactly 2 red,
+no notes → exactly 12 red, as predicted. Ledger: six rows out of `silent`, floor 1,227 → 1,233; HLS-001 unmoved.
+**2 gap ports remain:** P18-S110-PLACEHOLDEROPACITY, P18-S111-RECORDLIVE.
+
+**Then the Dropdown placeholder's fade (P18-S110-PLACEHOLDEROPACITY), rendered first — carried, and `gated`.** Three
+Dropdowns in one Chrome (`s112-placeholder-render/`): the visible fade is 0.5 / 1 / 0.3 in the runtime, 1 / 1 / 1 at
+HEAD, 0.5 / 1 / 0.3 patched. The runtime fades only its label span; the export's placeholder is the hidden option
+`renderSelect` selects, so `computeRoleCss` gives the select a `:has(> option[hidden]:checked)` rule mixing its text
+colour toward transparent by the opacity (clamped as CSS clamps), and keeps the open list's options at full colour.
+**Graded:** `tests/the-dropdown-placeholder.test.ts` (9); the mutant (no rule) turns exactly the 5 predicted cases red.
+HLS-001 unmoved (no corpus Dropdown has a placeholder). 🔴 **The probe still reads the port silent, correctly:** the
+fade exists only with a placeholder, and no probe context sets one. So the port moves `gap` → `gated`, not into the
+floor, which stays 1,233. The render also showed what is not this row, filed as P18-S112-NATIVESELECT: the exported
+Dropdown is the native select (its box about 22 px against 32, the native chevron, `FieldText` where the runtime's text
+is `--foreground`). The carry's one cost: the native chevron fades with the text.
+**1 gap port remains:** P18-S111-RECORDLIVE (a shared record cache, sized as an EXP-011 section).
+
+**Session 113: the last gap port (P18-S111-RECORDLIVE), driven — 1,234 of 1,396, 0 gap ports.** Counted first: 236 of
+312 Records in the fixtures, templates and test projects share a collection with a Set Record Properties in the same
+app (most are site-builder copies of one Page editor), though none of those Records translates today for other
+reasons. The exported client now holds **one copy of each record**, keyed by the id alone as the runtime's
+`Model.get(id)` is: `fetchOne`, `query` and `create` merge their answers into it field by field (`_fromJSON`), and
+`update` writes before the save, merges the answer after it, and puts back what the record held when the save fails
+(P107-C34). A Record with "Record properties" ticked subscribes its row to that copy; unticked, or settled unticked as
+the editor settles it (a wired Fetch with the box unstated, NDA-017's migration), it keeps the row it read. Shipped only
+where a live Record is, so every other client is byte-identical. Full record: EXP-011 §80. **Graded:**
+`tests/the-live-record.test.ts` (21; the client run against a scripted wire in the runtime's order), eight mutant arms
+each killing their own rows (one first read as a blank: it broke the narrowing and failed to compile; re-shaped, it
+kills 3). **Driven** (`s113-recordlive-drive/`): the runtime and the fixed export agree on every title in every step,
+the HEAD-equivalent control keeps the old title. HLS-001: 8 hashes moved, exactly `client.ts` and `Home.tsx` in the four
+projects with an effect-form Record, plus the new `record-desk`. Ledger: `DbModel2.runOnChange-record` leaves `silent`,
+floor 1,233 → 1,234. **Found:** P18-S113-IDREADTWICE (an Update Record whose Id is a Variable read twice did not
+typecheck; fixed beside it), P18-S113-IDBINDREAD (open, medium: §43's effect form reads the backend on every Id change;
+the runtime only binds to the copy it holds, measured in run 1 of the drive).
+**0 gap ports remain.** The 50 silent ports left: `gated` 23, `refused-with` 23, `inert` 2, `unexamined` 2 (not yet
+read). Beside them, the P121 peer's three uncommitted Upload File ports, which the gate will ask to classify when they
+land.
+
+**Session 114: P18-S113-IDBINDREAD fixed and driven — reach unchanged, 1,234 of 1,396.** A Record whose Fetch is unwired
+is a bind, not a read: its Id makes the row the client's copy of the record (no request, no Error, no Done), as the
+runtime's `setModelID` does. No port is reclassified: `parameter-coverage` reads exactly as in sessions 110–113 (the only
+red is the P121 peer's three uncommitted Upload File ports). Full record: EXP-011 §81; driven in `s114-idbind-drive/`.
+

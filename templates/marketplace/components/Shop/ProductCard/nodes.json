@@ -1,0 +1,327 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "936cfc49-861e-5257-821e-8d5ac46e0997",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pcRoot",
+      "type": "Group",
+      "label": "Product",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "cssClassName": "mk-card"
+      },
+      "children": [
+        "pcPhoto",
+        "pcNoPhoto",
+        "pcInfo"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pcPhoto",
+      "type": "Image",
+      "label": "First photo (md)",
+      "parent": "pcRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 160,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "alt": "",
+        "cssClassName": "mk-square",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pcNoPhoto",
+      "type": "Group",
+      "label": "No photo yet",
+      "parent": "pcRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 160,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center",
+        "backgroundColor": "var(--muted)",
+        "cssClassName": "mk-square",
+        "mounted": false
+      },
+      "children": [
+        "pcNoPhotoWords"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pcNoPhotoWords",
+      "type": "Text",
+      "label": "No photo yet",
+      "parent": "pcNoPhoto",
+      "parameters": {
+        "text": "No photo yet",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pcInfo",
+      "type": "Group",
+      "label": "Name, seller, price",
+      "parent": "pcRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "pcName",
+        "pcWho",
+        "pcPriceRow"
+      ],
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "pcName",
+      "type": "net.noodl.controls.button",
+      "label": "Name: to the product",
+      "parent": "pcInfo",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0)",
+        "paddingBottom": "var(--space-0)",
+        "color": "var(--foreground)",
+        "clickBubbling": "never",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-wrap mk-left"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "pcWho",
+      "type": "Text",
+      "label": "Seller and country",
+      "parent": "pcInfo",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "pcPriceRow",
+      "type": "Group",
+      "label": "Price",
+      "parent": "pcInfo",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "pcPrice",
+        "pcWas",
+        "pcEnquire"
+      ],
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "pcPrice",
+      "type": "Text",
+      "label": "Price, in the buyer’s currency",
+      "parent": "pcPriceRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-num"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "pcWas",
+      "type": "Text",
+      "label": "Price, in the seller’s currency",
+      "parent": "pcPriceRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "cssClassName": "mk-num",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "pcEnquire",
+      "type": "Group",
+      "label": "Enquire",
+      "parent": "pcPriceRow",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderRadius": "var(--radius-sm)",
+        "backgroundColor": "var(--warn-bg)",
+        "mounted": false
+      },
+      "children": [
+        "pcEnquireWords"
+      ],
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "pcEnquireWords",
+      "type": "Text",
+      "label": "Enquire",
+      "parent": "pcEnquire",
+      "parameters": {
+        "text": "Enquire",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--warn)"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "pcIn",
+      "type": "Component Inputs",
+      "label": "One product",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "who",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "was",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasWas",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "enquire",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "photo",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasPhoto",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "noPhoto",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 530,
+      "y": 160
+    },
+    {
+      "id": "pcGo",
+      "type": "RouterNavigate",
+      "label": "To the product",
+      "parameters": {
+        "target": "/Pages/Shop/Product"
+      },
+      "x": 530,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "pcRoot"
+  ]
+}

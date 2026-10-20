@@ -1,0 +1,834 @@
+{
+  "version": 1,
+  "devOpen": false,
+  "defaults": {
+    "permissions": {
+      "find": "nobody",
+      "get": "nobody",
+      "create": "nobody",
+      "update": "nobody",
+      "delete": "nobody"
+    },
+    "creatorOwns": false
+  },
+  "collections": {
+    "Person": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                }
+              ],
+              "maxDepth": 1
+            }
+          }
+        ],
+        "get": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                }
+              ],
+              "maxDepth": 1
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "seller"
+            ]
+          }
+        }
+      }
+    },
+    "PersonHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Seller": {
+      "permissions": {
+        "find": "public",
+        "get": "public",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "fields": {
+        "payoutAccount": {
+          "read": "role:admin"
+        },
+        "stoppedReason": {
+          "read": "role:admin"
+        }
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "country"
+            ]
+          }
+        },
+        "delete": "never"
+      }
+    },
+    "SellerHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Country": {
+      "permissions": {
+        "find": "public",
+        "get": "public",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "CountryHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Rate": {
+      "permissions": {
+        "find": "public",
+        "get": "public",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "RateHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Category": {
+      "permissions": {
+        "find": "public",
+        "get": "public",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Product": {
+      "permissions": {
+        "find": "public",
+        "get": "public",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "seller"
+            ]
+          }
+        },
+        "delete": "never"
+      }
+    },
+    "ProductHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "WayToPay": {
+      "permissions": {
+        "find": "public",
+        "get": "public",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "WayToPayHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "Order": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "from": "Order",
+                  "by": "person"
+                }
+              ],
+              "maxDepth": 2
+            }
+          },
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "follow": "seller"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "seller"
+                },
+                {
+                  "follow": "order"
+                }
+              ],
+              "maxDepth": 4
+            }
+          }
+        ],
+        "get": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "from": "Order",
+                  "by": "person"
+                }
+              ],
+              "maxDepth": 2
+            }
+          },
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "follow": "seller"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "seller"
+                },
+                {
+                  "follow": "order"
+                }
+              ],
+              "maxDepth": 4
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "fields": {
+        "followToken": {
+          "read": [
+            "role:admin",
+            {
+              "path": {
+                "hops": [
+                  {
+                    "from": "Person",
+                    "by": "login"
+                  },
+                  {
+                    "from": "Order",
+                    "by": "person"
+                  }
+                ],
+                "maxDepth": 2
+              }
+            }
+          ]
+        }
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "number",
+              "person",
+              "country"
+            ]
+          }
+        }
+      }
+    },
+    "OrderPart": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "from": "Order",
+                  "by": "person"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "order"
+                }
+              ],
+              "maxDepth": 3
+            }
+          },
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "follow": "seller"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "seller"
+                }
+              ],
+              "maxDepth": 3
+            }
+          }
+        ],
+        "get": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "from": "Order",
+                  "by": "person"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "order"
+                }
+              ],
+              "maxDepth": 3
+            }
+          },
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "follow": "seller"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "seller"
+                }
+              ],
+              "maxDepth": 3
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "wayToPay",
+              "order",
+              "seller"
+            ]
+          }
+        }
+      }
+    },
+    "OrderPartHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "OrderLine": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "from": "Order",
+                  "by": "person"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "order"
+                },
+                {
+                  "from": "OrderLine",
+                  "by": "orderPart"
+                }
+              ],
+              "maxDepth": 4
+            }
+          },
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "follow": "seller"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "seller"
+                },
+                {
+                  "from": "OrderLine",
+                  "by": "orderPart"
+                }
+              ],
+              "maxDepth": 4
+            }
+          }
+        ],
+        "get": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "from": "Order",
+                  "by": "person"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "order"
+                },
+                {
+                  "from": "OrderLine",
+                  "by": "orderPart"
+                }
+              ],
+              "maxDepth": 4
+            }
+          },
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "follow": "seller"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "seller"
+                },
+                {
+                  "from": "OrderLine",
+                  "by": "orderPart"
+                }
+              ],
+              "maxDepth": 4
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "orderPart",
+              "product"
+            ]
+          }
+        }
+      }
+    },
+    "Enquiry": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "follow": "seller"
+                },
+                {
+                  "from": "Product",
+                  "by": "seller"
+                },
+                {
+                  "from": "Enquiry",
+                  "by": "product"
+                }
+              ],
+              "maxDepth": 4
+            }
+          }
+        ],
+        "get": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "follow": "seller"
+                },
+                {
+                  "from": "Product",
+                  "by": "seller"
+                },
+                {
+                  "from": "Enquiry",
+                  "by": "product"
+                }
+              ],
+              "maxDepth": 4
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": [
+              "product"
+            ]
+          }
+        }
+      }
+    },
+    "Payment": {
+      "permissions": {
+        "find": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "from": "Order",
+                  "by": "person"
+                },
+                {
+                  "from": "Payment",
+                  "by": "order"
+                }
+              ],
+              "maxDepth": 3
+            }
+          },
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "follow": "seller"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "seller"
+                },
+                {
+                  "follow": "order"
+                },
+                {
+                  "from": "Payment",
+                  "by": "order"
+                }
+              ],
+              "maxDepth": 5
+            }
+          }
+        ],
+        "get": [
+          "role:admin",
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "from": "Order",
+                  "by": "person"
+                },
+                {
+                  "from": "Payment",
+                  "by": "order"
+                }
+              ],
+              "maxDepth": 3
+            }
+          },
+          {
+            "path": {
+              "hops": [
+                {
+                  "from": "Person",
+                  "by": "login"
+                },
+                {
+                  "follow": "seller"
+                },
+                {
+                  "from": "OrderPart",
+                  "by": "seller"
+                },
+                {
+                  "follow": "order"
+                },
+                {
+                  "from": "Payment",
+                  "by": "order"
+                }
+              ],
+              "maxDepth": 5
+            }
+          }
+        ],
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      },
+      "onlyWhile": {
+        "update": {
+          "frozen": {
+            "fields": "*"
+          }
+        },
+        "delete": "never"
+      }
+    },
+    "Marketplace": {
+      "permissions": {
+        "find": "public",
+        "get": "public",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    },
+    "MarketplaceHistory": {
+      "permissions": {
+        "find": "role:admin",
+        "get": "role:admin",
+        "create": "nobody",
+        "update": "nobody",
+        "delete": "nobody"
+      }
+    }
+  },
+  "functions": {
+    "setUpMarketplace": {
+      "call": "public",
+      "rateLimit": {
+        "ratePerMinute": 5,
+        "burst": 5
+      }
+    },
+    "whoAmI": {
+      "call": "authenticated"
+    },
+    "saveSeller": {
+      "call": "role:admin"
+    },
+    "stopSeller": {
+      "call": "role:admin"
+    },
+    "giveLogin": {
+      "call": "role:admin"
+    },
+    "saveProduct": {
+      "call": [
+        "role:admin",
+        "role:staff"
+      ]
+    },
+    "takeOffSale": {
+      "call": [
+        "role:admin",
+        "role:staff"
+      ]
+    },
+    "nameMarketplace": {
+      "call": "role:admin"
+    },
+    "saveCountry": {
+      "call": "role:admin"
+    },
+    "saveRates": {
+      "call": "role:admin"
+    },
+    "saveShelf": {
+      "call": "role:admin"
+    },
+    "saveWayToPay": {
+      "call": "role:admin"
+    },
+    "placeOrder": {
+      "call": "public",
+      "rateLimit": {
+        "ratePerMinute": 10,
+        "burst": 10
+      }
+    },
+    "followOrder": {
+      "call": "public",
+      "rateLimit": {
+        "ratePerMinute": 30,
+        "burst": 10
+      }
+    },
+    "movePart": {
+      "call": [
+        "role:admin",
+        "role:staff"
+      ]
+    },
+    "sendEnquiry": {
+      "call": "public",
+      "rateLimit": {
+        "ratePerMinute": 5,
+        "burst": 5
+      }
+    },
+    "answerEnquiry": {
+      "call": [
+        "role:admin",
+        "role:staff"
+      ]
+    },
+    "startPayment": {
+      "call": "public",
+      "rateLimit": {
+        "ratePerMinute": 10,
+        "burst": 5
+      }
+    },
+    "checkPayment": {
+      "call": "public",
+      "rateLimit": {
+        "ratePerMinute": 30,
+        "burst": 10
+      }
+    },
+    "paystackEvent": {
+      "call": "nobody"
+    }
+  },
+  "files": {
+    "upload": [
+      "role:admin",
+      "role:staff"
+    ],
+    "read": "public",
+    "delete": "nobody"
+  },
+  "signup": "nobody"
+}

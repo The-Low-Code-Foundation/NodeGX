@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "a7c10d00-0000-4000-8000-000000000188",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "titleInput",
+      "fromProperty": "onTextChanged",
+      "toId": "setTitle",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "saveBtn",
+      "fromProperty": "onClick",
+      "toId": "setTitle",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "watchTitle",
+      "fromProperty": "value",
+      "toId": "titleText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "undoBtn",
+      "fromProperty": "onClick",
+      "toId": "steps",
+      "toProperty": "undo"
+    },
+    {
+      "fromId": "redoBtn",
+      "fromProperty": "onClick",
+      "toId": "steps",
+      "toProperty": "redo"
+    },
+    {
+      "fromId": "startBtn",
+      "fromProperty": "onClick",
+      "toId": "steps",
+      "toProperty": "jumpTo"
+    },
+    {
+      "fromId": "clearBtn",
+      "fromProperty": "onClick",
+      "toId": "history",
+      "toProperty": "clearHistory"
+    },
+    {
+      "fromId": "history",
+      "fromProperty": "historySize",
+      "toId": "sizeText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "history",
+      "fromProperty": "currentIndex",
+      "toId": "indexText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "history",
+      "fromProperty": "canUndo",
+      "toId": "canUndoText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "steps",
+      "fromProperty": "error",
+      "toId": "errorText",
+      "toProperty": "text"
+    }
+  ]
+}

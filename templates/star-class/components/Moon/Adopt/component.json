@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4f0d6552-35a8-56d7-8625-4fc607d0faee",
+  "name": "Adopt",
+  "path": "/Moon/Adopt",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Adopt an alien: a species (drawn in the colour being chosen), a colour and a name, then Adopt (free for the first; a later one asks first on Hangar/Confirm). Folded to one button once the moon has aliens. App in; App, Write and Said out, and the draft Species and Colour for the view."
+}

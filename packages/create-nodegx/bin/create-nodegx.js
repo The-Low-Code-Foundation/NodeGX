@@ -19,7 +19,7 @@ const path = require('path');
 
 /** The server this release sets up. `test/create.test.js` holds it equal to the checkout's `@nodegx/mcp` version. */
 const MCP_PACKAGE = '@nodegx/mcp';
-const MCP_VERSION = '0.2.0';
+const MCP_VERSION = '0.2.2';
 const PREVIEW_PACKAGE = '@nodegx/preview';
 const SERVER_NAME = 'nodegx';
 
@@ -38,7 +38,8 @@ const AGENT_NOTE = [
   "When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value",
   "and tell me where to paste it in the project's `.env` file.",
   '',
-  `To see an app: \`npx ${PREVIEW_PACKAGE} <the app's folder> --open\``,
+  `To see an app: \`npx ${PREVIEW_PACKAGE} <the app's folder> --open\` — it starts the app's own backend too, when it`,
+  'has one on this computer, so it is also how the app opens again another day.',
   '',
   // P112-OWN018-LISTCHANGED / OWN-018 round 1: Mistral Large 4 (in Mistral Vibe) created the app, then could not see
   // the tools that build it, and wrote one 17-component batch whose every refusal it then had to untangle at once.
@@ -52,8 +53,46 @@ const AGENT_NOTE = [
   // that pressing Start skipped question 1.
   "Try it the way a person arrives: `drive_page` from the app's start page (leave out `page`) and press through it,",
   'not a page opened on its own.',
+  '',
+  // P112 OWN-007 (R3): the method for building an editor of one's own is a skill in this folder, not a server tool.
+  'If I ask for an editor, a viewer or a tool of my own that reads or changes an app here, the guide is the skill',
+  '`nodegx-your-own-editor` (`.claude/skills/nodegx-your-own-editor/SKILL.md`). Read it first; any agent can.',
   ''
 ].join('\n');
+
+/**
+ * P112 OWN-007 (R3, Richard 2026-10-10: "a skill in a public repo, recommended for Claude but can be used with any AI
+ * coder") — the core kit's own skills, kept as plain files under `profiles/core/skills/` and written into the folder's
+ * `.claude/skills/` where Claude Code lists them as project skills; AGENTS.md names the file for every other agent.
+ * Written only when absent, like everything here. The Vibe kit (R29) writes its own skills instead.
+ */
+const CORE_PROFILE_DIR = path.join(__dirname, '..', 'profiles', 'core');
+
+function coreSkillFiles() {
+  const out = [];
+  const walk = (rel) => {
+    for (const entry of fs.readdirSync(path.join(CORE_PROFILE_DIR, rel), { withFileTypes: true })) {
+      const next = path.join(rel, entry.name);
+      if (entry.isDirectory()) walk(next);
+      else out.push(next);
+    }
+  };
+  walk('skills');
+  return out.sort().map((rel) => ({ from: path.join(CORE_PROFILE_DIR, rel), to: path.join('.claude', rel) }));
+}
+
+/** Writes each core skill file that is absent. Returns the paths written. */
+function writeCoreSkills(dir) {
+  const written = [];
+  for (const { from, to } of coreSkillFiles()) {
+    const file = path.join(dir, to);
+    if (fs.existsSync(file)) continue;
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.copyFileSync(from, file);
+    written.push(to);
+  }
+  return written;
+}
 
 /**
  * P112 OWN-018 s2 — OpenCode's settings for this folder (`opencode.json`, read from the folder it runs in): the same
@@ -252,7 +291,7 @@ function setUp(folder, platform = process.platform, options = {}) {
 
   if (!fs.existsSync(file)) {
     fs.writeFileSync(file, JSON.stringify({ mcpServers: { [SERVER_NAME]: entry } }, null, 2) + '\n');
-    return { folder: dir, file, outcome: 'written', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
+    return { folder: dir, file, outcome: 'written', notes: writeAgentNotes(dir), skills: writeCoreSkills(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
   }
   let config;
   try {
@@ -262,10 +301,10 @@ function setUp(folder, platform = process.platform, options = {}) {
   }
   if (!config || typeof config !== 'object' || Array.isArray(config)) throw new Error(`${file} is not a JSON object; left as it is.`);
   const servers = config.mcpServers && typeof config.mcpServers === 'object' ? config.mcpServers : {};
-  if (servers[SERVER_NAME]) return { folder: dir, file, outcome: 'present', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
+  if (servers[SERVER_NAME]) return { folder: dir, file, outcome: 'present', notes: writeAgentNotes(dir), skills: writeCoreSkills(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
   config.mcpServers = { ...servers, [SERVER_NAME]: entry };
   fs.writeFileSync(file, JSON.stringify(config, null, 2) + '\n');
-  return { folder: dir, file, outcome: 'added', notes: writeAgentNotes(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
+  return { folder: dir, file, outcome: 'added', notes: writeAgentNotes(dir), skills: writeCoreSkills(dir), vibe: writeVibeConfig(dir, platform), opencode: writeOpenCodeConfig(dir, platform) };
 }
 
 function vibeSentence(result) {
@@ -279,7 +318,7 @@ function vibeSentence(result) {
     '  2. Say what you want to build. Mistral Large 4 builds it as a NodeGX app — notes first, then a part at a time,',
     '     checking each thing you asked for in a browser — and tells you what passed. If a build runs long it hands',
     '     over and says what is next: type /clear, then "continue".',
-    `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open`,
+    `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open  (any day — it starts the app's backend too)`,
     '',
     'Any time you want the visual editor, open the same folder in NodeGX — nothing needs converting.'
   ].join('\n');
@@ -293,6 +332,7 @@ function sentence(result) {
       ? `${result.file} already has a "${SERVER_NAME}" server; it was left as it is.`
       : `${result.outcome === 'written' ? 'Wrote' : 'Added the NodeGX server to'} ${result.file}.`;
   const notes = result.notes && result.notes.length ? [`Wrote ${result.notes.join(' and ')}: they tell your agent that apps here are NodeGX apps.`] : [];
+  if (result.skills && result.skills.length) notes.push(`Wrote ${result.skills.join(', ')}: how your agent builds you an editor of your own.`);
   if (result.vibe === 'written') notes.push(`Wrote ${VIBE_CONFIG}: Mistral Vibe uses Mistral Large 4 and the NodeGX server here.`);
   if (result.opencode === 'written') notes.push(`Wrote ${OPENCODE_CONFIG}: OpenCode gets the NodeGX server here.`);
   return [
@@ -304,7 +344,7 @@ function sentence(result) {
     `     Mistral Vibe: cd ${here} && vibe --legacy-harness, and trust the folder when it asks.`,
     `     OpenCode: cd ${here} && opencode (with Mistral: opencode -m mistral/mistral-large-4).`,
     '  2. Say what you want to build. Your agent talks it through with you, then makes the app in a folder here.',
-    `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open`,
+    `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open  (any day — it starts the app's backend too)`,
     '',
     'Any time you want the visual editor, open the same folder in NodeGX — nothing needs converting.',
     `Another AI coder: give it the server "npx -y ${MCP_PACKAGE}@${MCP_VERSION} --allow-writes" (stdio).`
@@ -330,4 +370,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { AGENT_FILES, AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, OPENCODE_CONFIG, SERVER_NAME, VIBE_AGENT, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, VIBE_SERVER_FLAGS, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp, vibeProfileFiles };
+module.exports = { AGENT_FILES, AGENT_NOTE, MCP_PACKAGE, MCP_VERSION, MISTRAL_SERVER_FLAGS, OPENCODE_CONFIG, SERVER_NAME, VIBE_AGENT, VIBE_ALLOWED_TOOLS, VIBE_CONFIG, VIBE_SERVER_FLAGS, coreSkillFiles, renderOpenCodeConfig, renderVibeConfig, serverEntry, setUp, vibeProfileFiles };

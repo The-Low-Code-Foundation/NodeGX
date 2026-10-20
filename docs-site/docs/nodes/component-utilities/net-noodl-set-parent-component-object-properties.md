@@ -18,6 +18,7 @@ Child components that advance or edit their host's state — 'next step' control
 | Available in | browser |
 | SSR compatibility | safe |
 | Provided by | `noodl-viewer-react` |
+| Behaviour spec | not written yet |
 
 ## Inputs
 
@@ -70,7 +71,13 @@ Component Object is per-component-instance shared state: every node in the same 
 
 [Parent Component Object](./net-noodl-parent-component-object.md), [Component Object](./net-noodl-component-object.md), [Set Component Object Properties](./net-noodl-set-component-object-properties.md)
 
+## Code export
+
+Exports to React. A project that uses it exports this node as React code.
+
+[How export works](../../how-export-works.md) shows what an export writes, with a worked example.
+
 
 :::info Generated
-This page is generated from `node-catalog-enriched.json`. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source enrichment instead.
+This page is generated from `node-catalog-enriched.json`, the node's spec in `packages/nodegx-node-spec` and the export ledger. Do not edit it by hand — run `npm run docs:nodes` to regenerate, and fix the source instead.
 :::

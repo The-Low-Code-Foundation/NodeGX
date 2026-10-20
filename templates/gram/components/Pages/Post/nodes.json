@@ -1,0 +1,1034 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "4c064cb9-4328-54c9-8af5-4f349d267c27",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "poPage",
+      "type": "Page",
+      "label": "A post",
+      "parameters": {
+        "title": "A post",
+        "urlPath": "post/{postId}"
+      },
+      "children": [
+        "poRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "poRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "poPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app gm-has-nav"
+      },
+      "children": [
+        "poBar",
+        "poBody",
+        "poNav"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "poBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "poRoot",
+      "parameters": {},
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "poBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "poRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "poBack",
+        "poContent",
+        "poGone",
+        "poRefused"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "poNav",
+      "type": "/UI/Nav",
+      "label": "The sections",
+      "parent": "poRoot",
+      "parameters": {
+        "on": ""
+      },
+      "x": 160,
+      "y": 3400
+    },
+    {
+      "id": "poUrl",
+      "type": "PageInputs",
+      "label": "Which post",
+      "parameters": {
+        "pathParams": "postId"
+      },
+      "x": 650,
+      "y": 3520
+    },
+    {
+      "id": "poBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "poBody",
+      "parameters": {
+        "label": "← The feed",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "poContent",
+      "type": "Group",
+      "label": "The post and its comments",
+      "parent": "poBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "poHidden",
+        "poCardBox",
+        "poMod",
+        "poConfirm",
+        "poHeading",
+        "poList",
+        "poWrite",
+        "poSend",
+        "poError"
+      ],
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "poHidden",
+      "type": "Text",
+      "label": "Hidden from members (an admin sees it)",
+      "parent": "poContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "cssClassName": "gm-pill gm-wrap gm-pill-quiet",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "poCardBox",
+      "type": "Group",
+      "label": "The post",
+      "parent": "poContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "poEachCard"
+      ],
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "poEachCard",
+      "type": "For Each",
+      "label": "The post, as the feed shows it",
+      "parent": "poCardBox",
+      "parameters": {
+        "template": "/Feed/PostCard"
+      },
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "poMod",
+      "type": "Group",
+      "label": "Report, take down, its reports",
+      "parent": "poContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-4)",
+        "flexWrap": "wrap",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "poReport",
+        "poTakeDown",
+        "poLook"
+      ],
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "poReport",
+      "type": "net.noodl.controls.button",
+      "label": "Report this post",
+      "parent": "poMod",
+      "parameters": {
+        "label": "Report this post",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 1240
+    },
+    {
+      "id": "poTakeDown",
+      "type": "net.noodl.controls.button",
+      "label": "Take this post down",
+      "parent": "poMod",
+      "parameters": {
+        "label": "Take this post down",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "poLook",
+      "type": "net.noodl.controls.button",
+      "label": "Its reports, and hiding it (admins)",
+      "parent": "poMod",
+      "parameters": {
+        "label": "Reports and hiding",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-semibold)",
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "poConfirm",
+      "type": "Group",
+      "label": "Take it down?",
+      "parent": "poContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)",
+        "paddingLeft": "var(--space-3-5)",
+        "paddingRight": "var(--space-3-5)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "cssClassName": "gm-rule",
+        "mounted": false
+      },
+      "children": [
+        "poConfirmWords",
+        "poConfirmRow"
+      ],
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "poConfirmWords",
+      "type": "Text",
+      "label": "What taking it down does",
+      "parent": "poConfirm",
+      "parameters": {
+        "text": "Take it down? Members stop seeing it straight away. Nothing is deleted, and only an admin can bring it back.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 340,
+      "y": 1720
+    },
+    {
+      "id": "poConfirmRow",
+      "type": "Group",
+      "label": "Yes, or keep it",
+      "parent": "poConfirm",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)"
+      },
+      "children": [
+        "poDown",
+        "poKeep"
+      ],
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "poDown",
+      "type": "net.noodl.controls.button",
+      "label": "Yes, take it down",
+      "parent": "poConfirmRow",
+      "parameters": {
+        "label": "Yes, take it down",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--bad)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--bad)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1960
+    },
+    {
+      "id": "poKeep",
+      "type": "net.noodl.controls.button",
+      "label": "Keep it",
+      "parent": "poConfirmRow",
+      "parameters": {
+        "label": "Keep it",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 2080
+    },
+    {
+      "id": "poHeading",
+      "type": "Text",
+      "label": "How many comments",
+      "parent": "poContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--foreground)"
+      },
+      "x": 280,
+      "y": 2200
+    },
+    {
+      "id": "poList",
+      "type": "Group",
+      "label": "The comments",
+      "parent": "poContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "poEachComment"
+      ],
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "poEachComment",
+      "type": "For Each",
+      "label": "One row per comment",
+      "parent": "poList",
+      "parameters": {
+        "template": "/Feed/CommentRow"
+      },
+      "x": 340,
+      "y": 2440
+    },
+    {
+      "id": "poWrite",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your comment",
+      "parent": "poContent",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Your comment",
+        "type": "textArea"
+      },
+      "x": 280,
+      "y": 2560
+    },
+    {
+      "id": "poSend",
+      "type": "net.noodl.controls.button",
+      "label": "Comment",
+      "parent": "poContent",
+      "parameters": {
+        "label": "Comment",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "poError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "poContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "poGone",
+      "type": "Text",
+      "label": "Not in the feed",
+      "parent": "poBody",
+      "parameters": {
+        "text": "This post isn’t in the feed any more.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 2920
+    },
+    {
+      "id": "poRefused",
+      "type": "Group",
+      "label": "Refused: why, and sign in",
+      "parent": "poBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "poRefusedWhy",
+        "poRefusedSignIn"
+      ],
+      "x": 220,
+      "y": 3040
+    },
+    {
+      "id": "poRefusedWhy",
+      "type": "Text",
+      "label": "Why",
+      "parent": "poRefused",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 3160
+    },
+    {
+      "id": "poRefusedSignIn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign in",
+      "parent": "poRefused",
+      "parameters": {
+        "label": "Sign in",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 3280
+    },
+    {
+      "id": "poToSignIn",
+      "type": "RouterNavigate",
+      "label": "To sign in",
+      "parameters": {
+        "target": "/Pages/SignIn"
+      },
+      "x": 650,
+      "y": 3280
+    },
+    {
+      "id": "poLoad",
+      "type": "JavaScriptFunction",
+      "label": "The post and its comments",
+      "parameters": {
+        "runOnChange-in-changed": true,
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (await Noodl.CloudFunctions.run('whoAmI', {})).me || null; } catch (e) { return null; }\n}\nfunction why(e) { var m = (e && (e.error || e.message)) || String(e || ''); if (/admins’|^Sign in/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page couldn’t be read: ' + m; }\nasync function adminsOnly() {\n  var who = await me();\n  if (!who) throw { error: 'Sign in to see this page.' };\n  if (who.role !== 'admin') throw { error: 'This page is the admins’. Sign in as an admin to see it.' };\n  return who;\n}\nfunction ago(at) {\n  var t = at ? new Date(at.iso || at).getTime() : 0;\n  if (!t) return '';\n  var m = Math.max(0, Math.round((Date.now() - t) / 60000));\n  if (m < 1) return 'just now';\n  if (m < 60) return m + ' min ago';\n  var h = Math.round(m / 60);\n  if (h < 24) return h + ' h ago';\n  var d = Math.round(h / 24);\n  return d === 1 ? 'yesterday' : d + ' days ago';\n}\nvar SHADES = ['#4a6a2b', '#6a4a2b', '#2b4a6a', '#7a3e1d', '#4a2160', '#2b6a5a'];\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join('') || '?'; }\nfunction shade(id) { var n = 0; String(id).split('').forEach(function (c) { n = (n + c.charCodeAt(0)) % SHADES.length; }); return SHADES[n]; }\n\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nfunction shown(posts, members) {\n  var by = {};\n  members.forEach(function (m) { by[m.objectId] = m; });\n  return posts\n    .filter(function (p) { var m = by[idOf(p.member)]; return !p.endedAt && m && !m.endedAt; })\n    .sort(function (a, b) { return String(b.createdAt).localeCompare(String(a.createdAt)); });\n}\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\n/** Slice 4b: what each kind but a post is called on its pill. */\nvar KIND_NAMES = {\"prayer\":\"Prayer request\",\"testimony\":\"Testimony\",\"event\":\"Event\"};\n/**\n * When an event is, in the reader's own time: \"Saturday 18 October, 9:00\", the year only when it isn't this one, and\n * \"was\" once it has passed.\n */\nfunction eventWhen(at) {\n  var t = at ? new Date(at.iso || at) : null;\n  if (!t || !isFinite(t.getTime())) return '';\n  var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];\n  var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];\n  var year = t.getFullYear() === new Date().getFullYear() ? '' : ' ' + t.getFullYear();\n  var said = days[t.getDay()] + ' ' + t.getDate() + ' ' + months[t.getMonth()] + year + ', ' + t.getHours() + ':' + String(t.getMinutes()).padStart(2, '0');\n  return (t.getTime() < Date.now() ? 'was ' : '') + said;\n}\nfunction firstName(m) { return String((m && m.name) || '').trim().split(' ')[0]; }\n/** A link for each photo, kept on the page until a minute before it runs out: a reload asks again for none of them. */\nasync function linked(photos) {\n  var keep = Component.Object;\n  var links = keep.get('links') || {};\n  var soon = Date.now() + 60000;\n  var urls = await Promise.all((photos || []).map(async function (f) {\n    var name = f && f.name ? String(f.name) : '';\n    if (!name) return '';\n    if (links[name] && links[name].until > soon) return links[name].url;\n    try {\n      var l = await Noodl.Files.sign(f);\n      links[name] = { url: l.url, until: l.expiresAt ? Date.parse(l.expiresAt) : soon + 3600000 };\n      return l.url;\n    } catch (e) { return ''; }\n  }));\n  keep.set('links', links);\n  return urls;\n}\n/**\n * The cards: who, when, the photos, the hearts by person (mine among them), the comments not hidden. A prayer request\n * (slice 4) has no hearts: its words, \"I prayed\" with the count kept on it, and who prayed for the person who asked\n * only (W4: the prayed rows are the ones the reader may read, their own and those on their own requests). Slice 4b: a\n * testimony leads with its words, as a prayer request does, and has hearts; an event says when it is where a post says\n * when it was shared. Every kind but a post wears its pill. A card with no photo leads with its words too (the shots:\n * an event's words sat under \"No hearts yet\").\n */\nasync function cardsOf(posts, members, hearts, comments, mine, onItsPage, prayed) {\n  var by = {}, byLogin = {};\n  members.forEach(function (m) { by[m.objectId] = m; byLogin[idOf(m.login)] = m; });\n  var cards = [];\n  for (var i = 0; i < posts.length; i++) {\n    var p = posts[i];\n    var m = by[idOf(p.member)] || {};\n    var isPrayer = p.kind === 'prayer';\n    var kindName = KIND_NAMES[p.kind] || '';\n    // Words lead a prayer request, a testimony, and any card with no photo (else the heart comes before what it's on).\n    var wordsFirst = isPrayer || p.kind === 'testimony' || (p.photos || []).length === 0;\n    var asked = !!mine && idOf(m.login) === mine;\n    var prayers = [];\n    (prayed || []).forEach(function (r) { var u = idOf(r.doneBy); if (idOf(r.post) === p.objectId && prayers.indexOf(u) < 0) prayers.push(u); });\n    var iPrayed = prayers.indexOf(mine) >= 0;\n    var count = Math.max(0, Number(p.prayedCount) || 0);\n    var people = [];\n    hearts.forEach(function (h) { var u = idOf(h.doneBy); if (idOf(h.post) === p.objectId && people.indexOf(u) < 0) people.push(u); });\n    var said = comments.filter(function (c) { return idOf(c.post) === p.objectId && !c.endedAt; }).length;\n    var hearted = people.indexOf(mine) >= 0;\n    var names = people.slice(0, 2).map(function (u) { return u === mine ? 'you' : firstName(byLogin[u]); }).filter(Boolean);\n    var urls = (await linked(p.photos)).filter(Boolean);\n    var face = await faceOf(m);\n    cards.push({\n      id: p.objectId,\n      memberId: m.objectId || '',\n      name: m.name || '',\n      face: face,\n      hasFace: !!face,\n      noFace: !face,\n      initials: initials(m.name),\n      shade: shade(m.objectId || p.objectId),\n      when: p.kind === 'event' ? 'Event · ' + (eventWhen(p.eventOn) || 'its day isn’t known') : p.kind === 'testimony' ? 'Testimony · ' + ago(p.createdAt) : ago(p.createdAt),\n      caption: p.caption || '',\n      hasCaption: !!p.caption && !wordsFirst,\n      isPrayer: isPrayer,\n      notPrayer: !isPrayer,\n      kindName: kindName,\n      hasKind: !!kindName,\n      wordsFirst: wordsFirst,\n      kindClass: isPrayer ? 'gm-prayer' : '',\n      ask: wordsFirst ? p.caption || '' : '',\n      prayed: iPrayed,\n      prayLabel: (iPrayed ? '🙏 You prayed' : '🙏 I prayed') + (count > 0 ? ' · ' + count : ''),\n      prayInk: iPrayed ? 'var(--primary-foreground)' : 'var(--primary)',\n      prayFill: iPrayed ? 'var(--primary)' : 'var(--surface)',\n      whoPrayed: !isPrayer ? '' : asked ? whoPrayed(prayers, byLogin, mine, onItsPage) : 'Only ' + (firstName(m) || 'the person who asked') + ' sees who prayed.',\n      photos: urls.map(function (u, n) { return { id: u, src: u, alt: 'Photo ' + (n + 1) + ' of ' + urls.length + ', shared by ' + (m.name || 'a member') }; }),\n      hasPhotos: urls.length > 0,\n      lostPhotos: (p.photos || []).length > urls.length,\n      hearted: hearted,\n      heartLabel: hearted ? '♥ Hearted' : '♡ Heart',\n      heartColor: hearted ? 'var(--heart)' : 'var(--foreground)',\n      hearts: people.length === 0 ? 'No hearts yet' : plural(people.length, 'heart', 'hearts') + ' · ' + (people.length > 2 ? names.join(', ') + ' and ' + plural(people.length - 2, 'other', 'others') : names.join(' and ')),\n      comments: said === 0 ? '' : said === 1 ? 'View 1 comment' : 'View all ' + said + ' comments',\n      toComments: !onItsPage,\n      listComments: !onItsPage && said > 0\n    });\n  }\n  return cards;\n}\n/** \"a, b and c\". */\nfunction listed(names) { return names.length < 2 ? names.join('') : names.slice(0, -1).join(', ') + ' and ' + names[names.length - 1]; }\n/** Who prayed, for the person who asked: everyone on the request's own page, the first two and how many more on a card. */\nfunction whoPrayed(prayers, byLogin, mine, everyone) {\n  if (prayers.length === 0) return 'Nobody has prayed yet. Only you will see who does.';\n  var names = prayers.map(function (u) { return u === mine ? 'you' : (byLogin[u] && byLogin[u].name) || 'a member'; });\n  var shown = everyone || names.length <= 3 ? names : names.slice(0, 2).concat([plural(names.length - 2, 'other', 'others')]);\n  return 'Prayed: ' + listed(shown) + '. Only you see who.';\n}\n/** A member's profile photo by its signed link, or '' (no photo, or the backend won't sign it): then their initials. */\nasync function faceOf(m) {\n  return m && m.photo && m.photo.name ? (await linked([m.photo]))[0] || '' : '';\n}\nfunction refused(e) { Outputs.problem = why(e); Outputs.refused = true; Outputs.ok = false; }\n\n// Read so that a heart or a comment made anywhere runs the page again.\nvar version = Inputs.changed;\nif (Inputs.postId === undefined) return;\nvar who = await me();\nif (!who) { refused({ error: 'Sign in to see this post.' }); return; }\nif (who.status !== 'approved') { Outputs.waiting(); return; }\nvar id = String(Inputs.postId || '');\nvar admin = who.role === 'admin';\ntry {\n  var members = await all('Member');\n  var found = await all('Post', { objectId: { equalTo: id } });\n  // Slice 5: an admin opens a hidden post too (its ACL lets only the admins read it), and is told it's hidden, and why.\n  var posts = admin ? found : shown(found, members);\n  var on = [ptr('Post', id)];\n  var hearts = posts.length ? await all('Heart', { post: { containedIn: on } }) : [];\n  var comments = posts.length ? await all('Comment', { post: { containedIn: on } }) : [];\n  var prayed = posts.length ? await all('Prayed', { post: { containedIn: on } }) : [];\n} catch (e) { refused(e); return; }\nOutputs.band = who.role === 'admin' ? 'Admin' : '';\nOutputs.meId = who.id;\nOutputs.inside = true;\nOutputs.refused = false;\nif (posts.length === 0) { Outputs.gone = true; Outputs.ok = false; return; }\nvar by = {};\nmembers.forEach(function (m) { by[m.objectId] = m; });\nvar mine = Noodl.Users.Current ? String(Noodl.Users.Current.id || '') : '';\nOutputs.card = await cardsOf(posts, members, hearts, comments, mine, true, prayed);\nvar p0 = posts[0];\nvar author = by[idOf(p0.member)] || {};\nvar meId = String(who.id || '');\nvar own = author.objectId === meId;\nvar hiddenWords = p0.endedAt ? 'Hidden from members: ' + (p0.hiddenReason || 'no reason given') + '.' : author.endedAt ? 'Hidden from members while ' + (author.name || 'its member') + ' is blocked.' : '';\n// Slice 5: a member reports someone else's post and takes their own down; an admin looks at its reports and hides it.\nOutputs.hiddenWords = hiddenWords;\nOutputs.isHidden = !!hiddenWords;\nOutputs.canReport = !own && !hiddenWords;\nOutputs.canTakeDown = own && !hiddenWords;\nOutputs.canLook = admin && !own;\nvar said = comments\n  .filter(function (c) { return !c.endedAt; })\n  // An admin reads a blocked member's comments too; the page lists them for nobody (they come back with the member).\n  .filter(function (c) { var w = by[idOf(c.member)]; return !!w && !w.endedAt; })\n  .sort(function (a, b) { return String(a.createdAt).localeCompare(String(b.createdAt)); });\nvar rows = [];\nfor (var i = 0; i < said.length; i++) {\n  var c = said[i];\n  var m = by[idOf(c.member)] || {};\n  var face = await faceOf(m);\n  var theirs = (m.objectId || '') === meId;\n  rows.push({ id: c.objectId, memberId: m.objectId || '', name: m.name || '', initials: initials(m.name), shade: shade(m.objectId || c.objectId), face: face, hasFace: !!face, noFace: !face, when: ago(c.createdAt), text: c.text || '', canReport: !theirs && !hiddenWords, canTakeDown: theirs && !hiddenWords, canLook: admin && !theirs });\n}\nOutputs.comments = rows;\nOutputs.heading = said.length === 0 ? 'No comments yet' : said.length === 1 ? '1 comment' : said.length + ' comments';\nOutputs.gone = false;\nOutputs.ok = true;",
+        "runOnChange-in-postId": false
+      },
+      "ports": [
+        {
+          "name": "out-waiting",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-changed",
+          "displayName": "changed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-postId",
+          "displayName": "postId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-meId",
+          "displayName": "meId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-inside",
+          "displayName": "inside",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gone",
+          "displayName": "gone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-card",
+          "displayName": "card",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hiddenWords",
+          "displayName": "hiddenWords",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isHidden",
+          "displayName": "isHidden",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canReport",
+          "displayName": "canReport",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canTakeDown",
+          "displayName": "canTakeDown",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-canLook",
+          "displayName": "canLook",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-comments",
+          "displayName": "comments",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-heading",
+          "displayName": "heading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 3400
+    },
+    {
+      "id": "poChanged",
+      "type": "Variable2",
+      "label": "The feed changed",
+      "parameters": {
+        "name": "feedChanged"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a heart, a comment or a post was made on this phone: the feed and the post read again, whichever card made it."
+      },
+      "x": 650,
+      "y": 3640
+    },
+    {
+      "id": "poLiveHeart",
+      "type": "SubscribeToChanges",
+      "label": "Hearts, as they change",
+      "parameters": {
+        "collectionName": "Heart"
+      },
+      "x": 650,
+      "y": 3760
+    },
+    {
+      "id": "poLiveComment",
+      "type": "SubscribeToChanges",
+      "label": "Comments, as they change",
+      "parameters": {
+        "collectionName": "Comment"
+      },
+      "x": 650,
+      "y": 3880
+    },
+    {
+      "id": "poLivePost",
+      "type": "SubscribeToChanges",
+      "label": "Posts, as they change",
+      "parameters": {
+        "collectionName": "Post"
+      },
+      "x": 650,
+      "y": 4000
+    },
+    {
+      "id": "poGather",
+      "type": "JavaScriptFunction",
+      "label": "The comment",
+      "parameters": {
+        "functionScript": "var words = typeof Inputs.text === 'string' ? Inputs.text.trim() : '';\nif (!words) { Outputs.problem = 'Write a comment first.'; Outputs.held(); return; }\nif (words.length > 1000) { Outputs.problem = 'A comment of 1,000 characters or fewer. This one has ' + words.length.toLocaleString('en-GB') + '.'; Outputs.held(); return; }\nOutputs.problem = '';\nOutputs.comment = { postId: Inputs.postId, text: words };\nOutputs.go();",
+        "runOnChange-in-text": false,
+        "runOnChange-in-postId": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-held",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-postId",
+          "displayName": "postId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-comment",
+          "displayName": "comment",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 2800
+    },
+    {
+      "id": "poConfirmSw",
+      "type": "Switch",
+      "label": "Asked: take it down?",
+      "x": 650,
+      "y": 1600
+    },
+    {
+      "id": "poDownGather",
+      "type": "JavaScriptFunction",
+      "label": "Take this post down",
+      "parameters": {
+        "functionScript": "Outputs.hide = { postId: Inputs.postId, hidden: true };\nOutputs.go();",
+        "runOnChange-in-postId": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-postId",
+          "displayName": "postId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hide",
+          "displayName": "hide",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 1960
+    },
+    {
+      "id": "poDownCall",
+      "type": "CloudFunction2",
+      "label": "hide(hide)",
+      "parameters": {
+        "function": "hide"
+      },
+      "x": 650,
+      "y": 2920
+    },
+    {
+      "id": "poDownStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the feed changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 4120
+    },
+    {
+      "id": "poDownSay",
+      "type": "Set Variable",
+      "label": "The feed changed",
+      "parameters": {
+        "name": "feedChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a heart, a comment or a post was made on this phone: the feed and the post read again, whichever card made it."
+      },
+      "x": 650,
+      "y": 4240
+    },
+    {
+      "id": "poToReport",
+      "type": "RouterNavigate",
+      "label": "To report it",
+      "parameters": {
+        "target": "/Pages/Report"
+      },
+      "x": 650,
+      "y": 1240
+    },
+    {
+      "id": "poToLook",
+      "type": "RouterNavigate",
+      "label": "To its reports (admins)",
+      "parameters": {
+        "target": "/Pages/Admin/Look"
+      },
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "poCall",
+      "type": "CloudFunction2",
+      "label": "commentOn(comment)",
+      "parameters": {
+        "function": "commentOn"
+      },
+      "x": 650,
+      "y": 3040
+    },
+    {
+      "id": "poStamp",
+      "type": "JavaScriptFunction",
+      "label": "Say the feed changed",
+      "parameters": {
+        "functionScript": "Outputs.at = String(Date.now());\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-at",
+          "displayName": "at",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 4360
+    },
+    {
+      "id": "poSay",
+      "type": "Set Variable",
+      "label": "The feed changed",
+      "parameters": {
+        "name": "feedChanged",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: a heart, a comment or a post was made on this phone: the feed and the post read again, whichever card made it."
+      },
+      "x": 650,
+      "y": 4480
+    },
+    {
+      "id": "poToFeed",
+      "type": "RouterNavigate",
+      "label": "To the feed",
+      "parameters": {
+        "target": "/Pages/Feed"
+      },
+      "x": 650,
+      "y": 520
+    },
+    {
+      "id": "poToWaiting",
+      "type": "RouterNavigate",
+      "label": "Not let in yet: to waiting",
+      "parameters": {
+        "target": "/Pages/Waiting"
+      },
+      "x": 650,
+      "y": 4600
+    }
+  ],
+  "visualRoots": [
+    "poPage"
+  ]
+}

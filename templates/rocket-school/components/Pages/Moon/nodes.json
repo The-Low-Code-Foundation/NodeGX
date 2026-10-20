@@ -49,6 +49,8 @@
         "mnAliens",
         "mnCare",
         "mnAdopt",
+        "mnBig",
+        "mnBook",
         "mnBack"
       ],
       "parameters": {
@@ -176,6 +178,22 @@
       "y": 1120
     },
     {
+      "id": "mnBig",
+      "type": "/Moon/Big things",
+      "label": "Big things to save for",
+      "parent": "mnWrap",
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "mnBook",
+      "type": "/Moon/Book",
+      "label": "The Alien Book",
+      "parent": "mnWrap",
+      "x": 220,
+      "y": 1360
+    },
+    {
       "id": "mnBack",
       "type": "net.noodl.controls.button",
       "label": "Back to the hangar",
@@ -212,7 +230,7 @@
         "label": "Back to the hangar"
       },
       "x": 220,
-      "y": 1240
+      "y": 1480
     },
     {
       "id": "mnStore",
@@ -233,14 +251,14 @@
       "type": "/Data/Words",
       "label": "The words",
       "x": 530,
-      "y": 1360
+      "y": 1600
     },
     {
       "id": "mnT",
       "type": "/Logic/Translate words",
       "label": "In their language",
       "x": 530,
-      "y": 1240
+      "y": 1480
     },
     {
       "id": "mnView",
@@ -267,7 +285,7 @@
         "expression": "has === false"
       },
       "x": 530,
-      "y": 1480
+      "y": 1720
     },
     {
       "id": "mnGuard",

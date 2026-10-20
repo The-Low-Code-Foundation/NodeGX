@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c45d3a65-5171-5818-8077-fe6dea9aa100",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hmName",
+      "fromProperty": "value",
+      "toId": "hmPage",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "hmRoot",
+      "fromProperty": "didMount",
+      "toId": "hmLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "hmLoad",
+      "fromProperty": "out-data",
+      "toId": "hmShape",
+      "toProperty": "in-data"
+    },
+    {
+      "fromId": "hmLoad",
+      "fromProperty": "out-failed",
+      "toId": "hmProblem",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hmLoad",
+      "fromProperty": "out-problem",
+      "toId": "hmProblem",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hmShelf",
+      "fromProperty": "value",
+      "toId": "hmShape",
+      "toProperty": "in-shelf"
+    },
+    {
+      "fromId": "hmSearched",
+      "fromProperty": "value",
+      "toId": "hmShape",
+      "toProperty": "in-search"
+    },
+    {
+      "fromId": "hmCurrency",
+      "fromProperty": "value",
+      "toId": "hmShape",
+      "toProperty": "in-currency"
+    },
+    {
+      "fromId": "hmSearched",
+      "fromProperty": "value",
+      "toId": "hmSearch",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "hmSearchBar",
+      "fromProperty": "didMount",
+      "toId": "hmSearch",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "hmSearch",
+      "fromProperty": "onTextChanged",
+      "toId": "hmSetSearch",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hmSearch",
+      "fromProperty": "textChanged",
+      "toId": "hmSetSearch",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "hmShape",
+      "fromProperty": "out-shelves",
+      "toId": "hmEachShelf",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hmShape",
+      "fromProperty": "out-sellers",
+      "toId": "hmEachSeller",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hmShape",
+      "fromProperty": "out-hasSellers",
+      "toId": "hmSellersBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hmShape",
+      "fromProperty": "out-sellersSub",
+      "toId": "hmSellersHeadSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hmShape",
+      "fromProperty": "out-heading",
+      "toId": "hmProductsHeadWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hmShape",
+      "fromProperty": "out-sub",
+      "toId": "hmProductsHeadSub",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hmShape",
+      "fromProperty": "out-cards",
+      "toId": "hmEachProduct",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hmShape",
+      "fromProperty": "out-empty",
+      "toId": "hmEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hmShape",
+      "fromProperty": "out-emptyWords",
+      "toId": "hmEmpty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hmFootSignIn",
+      "fromProperty": "onClick",
+      "toId": "hmToSignIn",
+      "toProperty": "navigate"
+    }
+  ]
+}

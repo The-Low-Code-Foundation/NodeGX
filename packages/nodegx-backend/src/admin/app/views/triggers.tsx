@@ -27,7 +27,7 @@ import type { ViewProps } from './index';
 type TriggerType = 'schedule' | 'webhook' | 'db-change';
 type MissedFirePolicy = 'skip' | 'run-once-on-start';
 type OverlapPolicy = 'skip' | 'queue-one' | 'allow';
-type WebhookScheme = 'hmac-sha256' | 'token';
+type WebhookScheme = 'hmac-sha256' | 'hmac-sha512' | 'token';
 type ChangeAction = 'create' | 'update' | 'delete';
 type TargetKind = 'function' | 'workflow';
 
@@ -130,6 +130,18 @@ export function webhookUrl(origin: string, backendId: string, slug: string): str
 export function webhookExample(url: string, scheme: WebhookScheme, secret: string): string {
   if (scheme === 'token') {
     return "curl -X POST -H 'Content-Type: application/json' -H 'X-Webhook-Token: " + secret + "' -d '{\"hello\":\"world\"}' " + url;
+  }
+  if (scheme === 'hmac-sha512') {
+    // The key on a line of its own: the drawer never has the key to show, so a person pastes it there (TWO-004 §10).
+    return (
+      "KEY='" +
+      secret +
+      "'\n" +
+      "BODY='{\"event\":\"charge.success\",\"data\":{\"reference\":\"test\"}}'\n" +
+      "SIG=$(printf '%s' \"$BODY\" | openssl dgst -sha512 -hmac \"$KEY\" | sed 's/^.* //')\n" +
+      "curl -X POST -H 'Content-Type: application/json' -H \"x-paystack-signature: $SIG\" -d \"$BODY\" " +
+      url
+    );
   }
   return (
     "BODY='{\"hello\":\"world\"}'\n" +
@@ -329,6 +341,10 @@ interface Draft {
   slug: string;
   slugTouched: boolean;
   scheme: WebhookScheme;
+  /** P121 TWO-004: an hmac-sha512 hook checks with the sender's key, pasted here; blank on an edit keeps the saved one. */
+  senderKey: string;
+  /** The hook already holds a sender's key (it was saved as hmac-sha512). */
+  senderKeySaved: boolean;
   maxBodyBytes: number;
   collection: string;
   actions: ChangeAction[];
@@ -353,6 +369,8 @@ export function draftFrom(existing: Trigger | null, overlapDefault: OverlapPolic
     slug: w.slug || '',
     slugTouched: !!existing,
     scheme: w.scheme || 'hmac-sha256',
+    senderKey: '',
+    senderKeySaved: w.scheme === 'hmac-sha512',
     maxBodyBytes: w.maxBodyBytes || DEFAULT_BODY_BYTES,
     collection: d.collection || '',
     actions: (d.actions || []).slice(),
@@ -370,6 +388,7 @@ export function draftProblem(d: Draft): string | null {
   if (d.type === 'webhook') {
     if (!d.slug) return 'Give the hook a path.';
     if (!SLUG_RULE.test(d.slug)) return 'A hook path is lowercase letters, digits and hyphens, starting with a letter or digit, up to 64 long.';
+    if (d.scheme === 'hmac-sha512' && !d.senderKeySaved && !d.senderKey.trim()) return 'Paste the Paystack secret key the hook checks with.';
   }
   if (d.type === 'db-change') {
     if (!d.collection) return 'Pick the collection to watch.';
@@ -403,6 +422,7 @@ export function toInput(d: Draft): Record<string, unknown> {
     };
   } else if (d.type === 'webhook') {
     input.webhook = { slug: d.slug, scheme: d.scheme, maxBodyBytes: d.maxBodyBytes };
+    if (d.scheme === 'hmac-sha512' && d.senderKey.trim()) input.secret = d.senderKey.trim();
   } else if (d.type === 'db-change') {
     input.dbChange = { collection: d.collection, actions: d.actions };
   }
@@ -564,7 +584,7 @@ function TriggerDrawer({ existing, overlapDefault, functions, workflows, collect
               Run now
             </WriteBtn>
           ) : null}
-          <WriteBtn kind="primary" disabled={!ready} onClick={submit}>
+          <WriteBtn kind="primary" disabled={!ready} title={problem || undefined} onClick={submit}>
             {existing ? 'Save' : 'Create'}
           </WriteBtn>
         </>
@@ -678,7 +698,7 @@ function TriggerDrawer({ existing, overlapDefault, functions, workflows, collect
                   <Btn tiny onClick={() => copyText(url).then((ok) => toast(ok ? 'URL copied.' : 'The browser refused the clipboard.', ok ? 'ok' : 'bad'))}>
                     Copy the URL
                   </Btn>
-                  {existing ? (
+                  {existing && existing.webhook && existing.webhook.scheme !== 'hmac-sha512' ? (
                     <WriteBtn tiny onClick={rotate} title="Make a new secret and show it once.">
                       Rotate the secret
                     </WriteBtn>
@@ -694,6 +714,23 @@ function TriggerDrawer({ existing, overlapDefault, functions, workflows, collect
                     <input type="radio" name="scheme" checked={draft.scheme === 'hmac-sha256'} disabled={readonly} onChange={() => set({ scheme: 'hmac-sha256' })} /> Signature (GitHub, Stripe)
                   </label>
                   <Hint>An HMAC-SHA256 of the body in X-Hub-Signature-256, X-Signature-256 or X-Webhook-Signature. The secret never crosses the wire.</Hint>
+                  <label class="check">
+                    <input type="radio" name="scheme" checked={draft.scheme === 'hmac-sha512'} disabled={readonly} onChange={() => set({ scheme: 'hmac-sha512' })} /> Paystack signature
+                  </label>
+                  <Hint>An HMAC-SHA512 of the body in x-paystack-signature, made with the Paystack business's secret key. One hook per Paystack business.</Hint>
+                  {draft.scheme === 'hmac-sha512' ? (
+                    <input
+                      type="password"
+                      class="mono"
+                      aria-label="Paystack secret key"
+                      style="margin:6px 0 10px"
+                      autocomplete="off"
+                      placeholder={draft.senderKeySaved ? 'Saved. Paste a new key only to change it.' : 'sk_test_… or sk_live_…'}
+                      value={draft.senderKey}
+                      disabled={readonly}
+                      onInput={(e) => set({ senderKey: (e.currentTarget as HTMLInputElement).value })}
+                    />
+                  ) : null}
                   <label class="check">
                     <input type="radio" name="scheme" checked={draft.scheme === 'token'} disabled={readonly} onChange={() => set({ scheme: 'token' })} /> Shared token
                   </label>
@@ -713,7 +750,16 @@ function TriggerDrawer({ existing, overlapDefault, functions, workflows, collect
                   <Hint>A bigger call is refused with 413 and recorded in Runs.</Hint>
                 </div>
               </div>
-              {existing ? <Hint>The secret was shown when the hook was made and is not kept in a readable form. If it is lost, rotate it.</Hint> : <Hint>The secret is made when you press Create and shown once.</Hint>}
+              {draft.scheme === 'hmac-sha512' ? (
+                <>
+                  <Hint>The key is kept with the backend's secrets and never shown again. Paste the hook's URL into the Paystack dashboard, under Settings, API keys and webhooks.</Hint>
+                  <PaystackTryIt url={url} />
+                </>
+              ) : existing ? (
+                <Hint>The secret was shown when the hook was made and is not kept in a readable form. If it is lost, rotate it.</Hint>
+              ) : (
+                <Hint>The secret is made when you press Create and shown once.</Hint>
+              )}
             </div>
           ) : null}
 
@@ -837,6 +883,31 @@ function CollectionPicker({ collections, value, onChange, disabled }: { collecti
     return Promise.resolve(all.filter((c) => !needle || c.toLowerCase().indexOf(needle) !== -1));
   };
   return <Picker<string> fetch={fetchCols} label={(c) => c} keyOf={(c) => c} value={value || null} onPick={(c) => onChange(c || '')} placeholder={collections === null ? 'Loading collections…' : 'Type a collection name…'} emptyText={all.length ? 'No collection by that name.' : 'No collections yet.'} disabled={disabled} />;
+}
+
+// ------------------------------------------------- a Paystack hook's test --
+
+/** The hook's own test, signed as Paystack signs. The page never holds the key, so the command's first line asks for it. */
+export const PAYSTACK_KEY_PLACEHOLDER = 'paste the secret key here';
+
+function PaystackTryIt({ url }: { url: string }) {
+  const example = webhookExample(url, 'hmac-sha512', PAYSTACK_KEY_PLACEHOLDER);
+  return (
+    <div class="field">
+      <span class="field-head">
+        <b>Try it</b>
+      </span>
+      <pre class="secret-box mono" data-example>
+        {example}
+      </pre>
+      <Row style="margin-top:6px">
+        <Btn tiny onClick={() => copyText(example).then((ok) => toast(ok ? 'Command copied.' : 'The browser refused the clipboard. Select it and copy by hand.', ok ? 'ok' : 'bad'))}>
+          Copy the command
+        </Btn>
+      </Row>
+      <Hint>Put the key in the first line and run it in a terminal on this computer. The answer 200 means the hook accepted the signature. The test names no order, so nothing changes.</Hint>
+    </div>
+  );
 }
 
 // -------------------------------------------------------- the secret card --

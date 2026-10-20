@@ -1,0 +1,5 @@
+I've been playing with the map. Some things to fix:
+
+flying forward and back doesn't work it zooms in and out, and the wire connectors need to curve a bit more, they're hard to see where they start and end, they don't curve into the ports they just kind of fall into them at whatever angle. The elements in the preview don't seem to highlight when you hover the nodes on the map. The connector lines don't glow like in the NodeGX editor to show which direction they go when you hover them, would be nice to have a kind of glowing ball firing on the line to show where it goes
+
+Please just make the changes without waiting for me to answer questions, test them on copies as before, and add what you changed to REPORT.md.

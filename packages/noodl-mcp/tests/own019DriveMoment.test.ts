@@ -65,6 +65,40 @@ describeOrSkip('P112-OWN019 — drive_page sees the moment, and reloads the page
     expect((settled.steps[1] as { value: { backgroundName: string } }).value.backgroundName).toBe('white');
   }, 120_000);
 
+  // P112-OWN019-WATCHONE (s5): R3 watched Canberra while the carried green landed, by position, on Sydney.
+  it('a watch of every answer sees the flash on the one a single watch missed (control in the same run)', async () => {
+    const THREE =
+      "(() => { const names = ['One', 'Two', 'Three']; const bs = names.map((n, i) => { const b = document.createElement('button'); b.textContent = n; b.style.cssText = 'position:fixed;top:' + (10 + i * 50) + 'px;left:10px;width:120px;height:40px;background:#ffffff;color:#000000;z-index:99999'; document.body.appendChild(b); return b; }); setTimeout(() => { bs[0].style.background = '#16a34a'; }, 300); setTimeout(() => { bs[0].style.background = '#ffffff'; }, 380); return true; })()";
+    const never = { never: { backgroundName: 'green' } };
+    // Control: the one answer R3 watched — clean, and wrong to call it clean.
+    const one = await drive(session, [{ read: { expression: THREE } }, { watch: { look: { text: 'Two' } }, for_ms: 900, expect: never }]);
+    expect(one.steps[1].ok).toBe(true);
+    const all = await drive(session, [{ read: { expression: THREE } }, { watch: { look: [{ text: 'One' }, { text: 'Two' }, { text: 'Three' }] }, for_ms: 900, expect: never }]);
+    const row = all.steps[1] as { ok: boolean; error?: string; value: Array<{ target: unknown; states: Array<{ look: { backgroundName?: string } | null }> }> };
+    expect({ ok: row.ok, names: /^\{"text":"One"\}: /.test(row.error ?? ''), one: row.value[0].states.map((st) => st.look?.backgroundName), two: row.value[1].states.map((st) => st.look?.backgroundName) }).toEqual({
+      ok: false,
+      names: true,
+      one: ['white', 'green', 'white'],
+      two: ['white']
+    });
+  }, 120_000);
+
+  // P112-OWN019-WATCHINSIDE (s8, AC3): Large 4 put `expect` and `for_ms` INSIDE the watch; both were dropped, and six
+  // "never green" watches passed with green in their own states. The same flash, the expect nested: it must fail.
+  it('an expect written inside the watch is read, and a key the watch does not know is refused', async () => {
+    const nested = await drive(session, [{ read: { expression: FLASH } }, { watch: { look: { text: 'Flash' }, for_ms: 900, expect: { never: { backgroundName: 'green' } } } }]);
+    const row = nested.steps[1] as { ok: boolean; error?: string; value: Array<{ until: number; look: { backgroundName?: string } | null }> };
+    expect({ ok: row.ok, saidGreen: /"backgroundName":"green"/.test(row.error ?? ''), states: row.value.map((s) => s.look?.backgroundName) }).toEqual({
+      ok: false,
+      saidGreen: true,
+      states: ['white', 'green', 'white']
+    });
+    // for_ms inside was read too: the watch ran ~900 ms, not the 1500 ms default.
+    expect(row.value[row.value.length - 1].until).toBeLessThan(1200);
+    const res = (await session.client.callTool({ name: 'drive_page', arguments: { steps: [{ watch: { look: { text: 'Flash' }, timeout: 900 } }] } })) as { isError?: boolean; content: Array<{ text?: string }> };
+    expect(`${res.isError} ${res.content.map((c) => c.text).join(' ')}`).toMatch(/true .*watch does not take .{0,3}timeout/);
+  }, 120_000);
+
   it('reload loads THIS page again: what lived only in memory is gone, the URL is the same', async () => {
     const r = await drive(session, [
       { read: { expression: "(() => { window.__own019 = 'here'; return location.pathname + location.hash; })()" } },

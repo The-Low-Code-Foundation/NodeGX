@@ -1,0 +1,295 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fdd213a6-9c19-57b8-8621-03affc036013",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pfUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "pfLoad",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "pfUrl",
+      "fromProperty": "pm-productId",
+      "toId": "pfLoad",
+      "toProperty": "in-productId"
+    },
+    {
+      "fromId": "pfUrl",
+      "fromProperty": "pm-productId",
+      "toId": "pfGather",
+      "toProperty": "in-productId"
+    },
+    {
+      "fromId": "pfUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "pfToProducts",
+      "toProperty": "pm-sellerId"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-sellerId",
+      "toId": "pfGather",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-ok",
+      "toId": "pfContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-band",
+      "toId": "pfBand",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-heading",
+      "toId": "pfTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-priceLabel",
+      "toId": "pfPrice",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-shelves",
+      "toId": "pfCategory",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-modes",
+      "toId": "pfMode",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-name",
+      "toId": "pfName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-name",
+      "toId": "pfGather",
+      "toProperty": "in-name0"
+    },
+    {
+      "fromId": "pfName",
+      "fromProperty": "onTextChanged",
+      "toId": "pfGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-description",
+      "toId": "pfDescription",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-description",
+      "toId": "pfGather",
+      "toProperty": "in-description0"
+    },
+    {
+      "fromId": "pfDescription",
+      "fromProperty": "onTextChanged",
+      "toId": "pfGather",
+      "toProperty": "in-description"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-price",
+      "toId": "pfPrice",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-price",
+      "toId": "pfGather",
+      "toProperty": "in-price0"
+    },
+    {
+      "fromId": "pfPrice",
+      "fromProperty": "onTextChanged",
+      "toId": "pfGather",
+      "toProperty": "in-price"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-category",
+      "toId": "pfCategory",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-category",
+      "toId": "pfGather",
+      "toProperty": "in-category0"
+    },
+    {
+      "fromId": "pfCategory",
+      "fromProperty": "value",
+      "toId": "pfGather",
+      "toProperty": "in-category"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-mode",
+      "toId": "pfMode",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-mode",
+      "toId": "pfGather",
+      "toProperty": "in-mode0"
+    },
+    {
+      "fromId": "pfMode",
+      "fromProperty": "value",
+      "toId": "pfGather",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-problem",
+      "toId": "pfRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-refused",
+      "toId": "pfRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pfRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "pfToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "pfAddPhoto",
+      "fromProperty": "onClick",
+      "toId": "pfPick",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "pfPick",
+      "fromProperty": "file",
+      "toId": "pfUpload",
+      "toProperty": "file"
+    },
+    {
+      "fromId": "pfPick",
+      "fromProperty": "done",
+      "toId": "pfUpload",
+      "toProperty": "upload"
+    },
+    {
+      "fromId": "pfPick",
+      "fromProperty": "done",
+      "toId": "pfBusy",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "pfUpload",
+      "fromProperty": "completed",
+      "toId": "pfBusy",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "pfBusy",
+      "fromProperty": "state",
+      "toId": "pfUploading",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pfUpload",
+      "fromProperty": "error",
+      "toId": "pfPhotoError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pfLoad",
+      "fromProperty": "out-photos",
+      "toId": "pfPhotoList",
+      "toProperty": "in-loaded"
+    },
+    {
+      "fromId": "pfUpload",
+      "fromProperty": "cloudFile",
+      "toId": "pfPhotoList",
+      "toProperty": "in-added"
+    },
+    {
+      "fromId": "pfRemoved",
+      "fromProperty": "value",
+      "toId": "pfPhotoList",
+      "toProperty": "in-removed"
+    },
+    {
+      "fromId": "pfPhotoList",
+      "fromProperty": "out-tiles",
+      "toId": "pfEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pfPhotoList",
+      "fromProperty": "out-room",
+      "toId": "pfAddPhoto",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pfPhotoList",
+      "fromProperty": "out-photos",
+      "toId": "pfGather",
+      "toProperty": "in-photos"
+    },
+    {
+      "fromId": "pfSave",
+      "fromProperty": "onClick",
+      "toId": "pfGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pfGather",
+      "fromProperty": "out-product",
+      "toId": "pfCall",
+      "toProperty": "in-product"
+    },
+    {
+      "fromId": "pfGather",
+      "fromProperty": "out-go",
+      "toId": "pfCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pfCall",
+      "fromProperty": "error",
+      "toId": "pfError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pfCall",
+      "fromProperty": "done",
+      "toId": "pfToProducts",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "pfBack",
+      "fromProperty": "onClick",
+      "toId": "pfToProducts",
+      "toProperty": "navigate"
+    }
+  ]
+}

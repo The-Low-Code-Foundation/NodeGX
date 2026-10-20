@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "60f19391-0dc8-5a5d-8f03-977fba698f15",
+  "name": "Rates",
+  "path": "/Pages/Admin/Rates",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The admin’s rates: what one unit of each currency is worth in the marketplace’s own"
+}

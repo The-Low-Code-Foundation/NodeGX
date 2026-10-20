@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3383d7c3-37cd-5079-8b64-6812652fc030",
+  "name": "Active profile",
+  "path": "/Logic/Active profile",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The active profile, field by field, and an honest hasProfile=false when there is none. RKT-011: what the face and rocket wear, the 🎁 picks waiting, and the way to the next one."
+}

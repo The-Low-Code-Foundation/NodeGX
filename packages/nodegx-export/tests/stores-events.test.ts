@@ -100,8 +100,8 @@ export function CheerBanner() {
 
 const GOLDEN_HOME = `// @nodegx:generated (visual — provenance markers complete in EXP-007)
 import { createPortal } from 'react-dom';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useState } from 'react';
 import { useValue } from '@nodegx/core/react';
 
 import { AboutDialog } from '../components/AboutDialog';
@@ -133,9 +133,13 @@ Outputs.text = name.toUpperCase() + '!';
 // From the Expression node "hasLongName" — the expression is preserved verbatim (EXP-003 §4).
 function hasLongName(__inputs: { name: string | undefined }) {
   const { name } = __inputs as { [K in keyof typeof __inputs]: any };
+  // Until an input arrives this is the load evaluation, which keeps null for a throw or a NaN.
+  const __unset = name === undefined;
   try {
-    return ((name || '').length > 1);
+    const __value = ((name || '').length > 1);
+    return __unset && Number.isNaN(__value) ? null : __value;
   } catch (e) {
+    if (__unset) return null;
     console.error('Expression node hasLongName threw:', e);
     return 0;
   }
@@ -150,6 +154,15 @@ export function HomePage() {
   const [draft, setDraft] = useState<string | undefined>();
   const hasLongNameOut = hasLongName({ name });
   const formatShoutOut = formatShout({ name });
+
+  // "Visitor name" announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).
+  const announced = useRef(false);
+  useEffect(() => {
+    if (announced.current) return;
+    announced.current = true;
+    visitorName.set('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts
+  }, []);
 
   return (
     <div className={styles.page}>

@@ -1,0 +1,176 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "48116168-53c3-5e1c-8424-0b2827af5a5b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req-3",
+      "type": "noodl.cloud.request",
+      "label": "askToJoin(join)",
+      "parameters": {
+        "params": "join",
+        "ptype-join": "object",
+        "preq-join": true,
+        "allowNoAuth": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "gate-2",
+      "type": "JavaScriptFunction",
+      "label": "A name, an email, 13 or older",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\nasync function member(userId) {\n  if (!userId) return null;\n  return one('Member', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction email(v) {\n  var e = typeof v === 'string' ? v.trim().toLowerCase() : '';\n  var at = e.indexOf('@');\n  if (e.length > 200 || at < 1 || e.indexOf(' ') >= 0 || e.indexOf('@', at + 1) >= 0) return '';\n  var dot = e.lastIndexOf('.');\n  return dot > at + 1 && dot < e.length - 1 ? e : '';\n}\n\nvar a = Inputs.join;\nif (a === undefined) return;\nif (!a || typeof a !== 'object') { refuse('Fill in your name and your email.'); return; }\nvar name = typeof a.name === 'string' ? a.name.trim() : '';\nif (!name) { refuse('Your name, as the community knows you.'); return; }\nif (name.length > 80) { refuse('A name of 80 characters or fewer.'); return; }\nvar e = email(a.email);\nif (!e) { refuse('An email address, such as name@example.com. Your sign-in link goes there.'); return; }\nif (a.over13 !== true) { refuse('Members are 13 or older. Tick the box to say you are.'); return; }\nOutputs.asked = true;\nOutputs.username = e;\nOutputs.email = e;\nOutputs.name = name;\nOutputs.ok();",
+        "runOnChange-in-join": false
+      },
+      "ports": [
+        {
+          "name": "out-ok",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-join",
+          "displayName": "join",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-asked",
+          "displayName": "asked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-username",
+          "displayName": "username",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-email",
+          "displayName": "email",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "create-2",
+      "type": "noodl.cloud.createuser",
+      "label": "Their sign-in, with no password",
+      "parameters": {
+        "emailVerified": false
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "wait",
+      "type": "JavaScriptFunction",
+      "label": "Their member, waiting, and its history",
+      "parameters": {
+        "functionScript": "function ptr(className, id) { return { __type: 'Pointer', className: className, objectId: String(id) }; }\nfunction idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction now() { return { __type: 'Date', iso: new Date().toISOString() }; }\nfunction text(v, max) { return typeof v === 'string' ? v.trim().slice(0, max || 2000) : ''; }\nasync function one(className, where) {\n  var rows = await Noodl.Records.query(className, where, { plain: true, limit: 1 });\n  return rows[0] || null;\n}\nfunction blank(v) { return v === undefined || v === '' ? null : v; }\nfunction diff(before, after) {\n  var changed = {};\n  Object.keys(after).forEach(function (k) {\n    var a = blank(before ? before[k] : undefined);\n    var b = blank(after[k]);\n    if (JSON.stringify(a) !== JSON.stringify(b)) changed[k] = { from: a, to: b };\n  });\n  return changed;\n}\nasync function history(className, field, id, userId, changed) {\n  var row = { at: now(), changed: changed };\n  row[field] = ptr(className, id);\n  if (userId) row.who = ptr('_User', userId);\n  await Noodl.Records.create(className + 'History', row);\n}\nfunction refuse(why) { Outputs.reason = why; Outputs.refused(); }\nasync function member(userId) {\n  if (!userId) return null;\n  return one('Member', { login: { equalTo: ptr('_User', userId) } });\n}\nfunction email(v) {\n  var e = typeof v === 'string' ? v.trim().toLowerCase() : '';\n  var at = e.indexOf('@');\n  if (e.length > 200 || at < 1 || e.indexOf(' ') >= 0 || e.indexOf('@', at + 1) >= 0) return '';\n  var dot = e.lastIndexOf('.');\n  return dot > at + 1 && dot < e.length - 1 ? e : '';\n}\n\nif (Inputs.loginId === undefined) return;\nvar row = { name: Inputs.name, email: Inputs.email, status: 'waiting', role: 'member', login: ptr('_User', Inputs.loginId) };\nvar made = await Noodl.Records.create('Member', row);\nawait history('Member', 'member', made.getId(), Inputs.loginId, diff(null, { name: row.name, email: row.email, status: row.status, role: row.role }));\nOutputs.asked = true;\nOutputs.done();",
+        "runOnChange-in-loginId": false,
+        "runOnChange-in-name": false,
+        "runOnChange-in-email": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-loginId",
+          "displayName": "loginId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-email",
+          "displayName": "email",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-asked",
+          "displayName": "asked",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "ok-3",
+      "type": "noodl.cloud.response",
+      "label": "Asked",
+      "parameters": {
+        "params": "asked"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "no-3",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That could not be done."
+      },
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

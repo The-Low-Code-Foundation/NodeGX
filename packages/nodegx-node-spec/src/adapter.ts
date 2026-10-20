@@ -123,7 +123,7 @@
  * something every target can compute; declaration order is knowledge of one file.
  */
 
-import type { PlayContext } from './spec';
+import type { MountContext } from './spec';
 import type { TraceEvent } from './trace';
 import type { World } from './world';
 
@@ -139,8 +139,10 @@ export interface TargetAdapter<H extends Handle = Handle> {
    * `wired` (P107-C155) and `context` (NSP-020, spec.ts `PlayContext` — the play's wire fields: `wired` again, and
    * `wiredOutputs`, the outputs a wire leaves from; s82) are the scenario's; a target that takes neither is called with two
    * arguments. At play a node has its params and its wires, never the project: a target hands `derived.*` exactly this.
+   * R38 (s105): `context.parent` is how the node's parent stacks it (spec.ts `ParentAxis`) — the holder the target puts the
+   * node in lays out that way; absent, a column, the holder every play before R38 had.
    */
-  mount(type: string, params: Record<string, unknown>, wired?: readonly string[], context?: Readonly<PlayContext>): H;
+  mount(type: string, params: Record<string, unknown>, wired?: readonly string[], context?: Readonly<MountContext>): H;
   set(h: H, port: string, value: unknown): void;
   signal(h: H, port: string): void;
   settle(): Promise<void>;
@@ -233,7 +235,7 @@ export async function play<H extends Handle>(
   steps: readonly Step[],
   world?: World,
   wired?: readonly string[],
-  context?: Readonly<PlayContext>
+  context?: Readonly<MountContext>
 ): Promise<TraceEvent[]> {
   let h: H | undefined;
   const restore = world && adapter.install ? adapter.install(world) : undefined;

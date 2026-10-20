@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "48116168-53c3-5e1c-8424-0b2827af5a5b",
+  "name": "askToJoin",
+  "path": "/#__cloud__/askToJoin",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Ask to join: a sign-in with no password, and a member waiting to be let in"
+}

@@ -1,0 +1,315 @@
+{
+    "last_change": 68271819512,
+    "data": {
+        "user": {
+            "%d": "User",
+            "%f3": {
+                "name_text": {
+                    "%d": "name",
+                    "%v": "text"
+                },
+                "somefield_number_range": {
+                    "%d": "someField - deleted",
+                    "%v": "number_range",
+                    "%del": true
+                }
+            },
+            "exposed_api": true,
+            "privacy_role": {
+                "everyone": {
+                    "%d": "everyone",
+                    "permissions": {
+                        "view_all": true,
+                        "search_for": true,
+                        "view_fields": {
+                            "0": "name_text",
+                            "1": "Created Date",
+                            "2": "Modified Date",
+                            "3": "Slug",
+                            "4": "email",
+                            "5": "_social_networks"
+                        },
+                        "auto_binding": false,
+                        "view_attachments": true,
+                        "non_filterable_fields": {
+                            "%em": true,
+                            "Slug": true,
+                            "name_text": true,
+                            "Created Date": true,
+                            "Modified Date": true,
+                            "_social_networks": true,
+                            "somefield_number_range": true
+                        }
+                    }
+                },
+                "new_rule_": {
+                    "%c": {
+                        "%n": {
+                            "%x": "Message",
+                            "%nm": "logged_in",
+                            "is_slidable": false
+                        },
+                        "%x": "CurrentUser",
+                        "is_slidable": false
+                    },
+                    "%d": "somePrivacyRule",
+                    "permissions": {
+                        "view_all": true,
+                        "create_api": true,
+                        "delete_api": true,
+                        "modify_api": true,
+                        "search_for": true,
+                        "auto_binding": true,
+                        "binding_fields": {
+                            "0": "name_text"
+                        },
+                        "view_attachments": true
+                    }
+                },
+                "users_own_data": {
+                    "%c": {
+                        "%n": {
+                            "%a": {
+                                "%x": "CurrentUser"
+                            },
+                            "%x": "Message",
+                            "%nm": "equals"
+                        },
+                        "%x": "InjectedValue"
+                    },
+                    "%d": "User's own data",
+                    "permissions": {
+                        "view_all": true,
+                        "search_for": true,
+                        "auto_binding": false,
+                        "view_attachments": true
+                    }
+                }
+            }
+        },
+        "zezd": {
+            "%d": "zezd",
+            "%del": true
+        },
+        "somedatatype": {
+            "%d": "someDataType",
+            "%f3": {
+                "somefield_text": {
+                    "%d": "someField",
+                    "%v": "text"
+                }
+            },
+            "exposed_api": true,
+            "privacy_role": {
+                "everyone": {
+                    "%d": "everyone",
+                    "permissions": {
+                        "view_all": true,
+                        "create_api": false,
+                        "delete_api": false,
+                        "modify_api": false,
+                        "search_for": true,
+                        "view_fields": {
+                            "0": "somefield_text",
+                            "1": "Created Date",
+                            "2": "Modified Date",
+                            "3": "Slug",
+                            "4": "Created By"
+                        },
+                        "auto_binding": false,
+                        "view_attachments": true,
+                        "non_filterable_fields": {
+                            "Slug": true,
+                            "Created By": true,
+                            "Created Date": true,
+                            "Modified Date": true,
+                            "somefield_text": true
+                        }
+                    }
+                },
+                "new_rule_": {
+                    "%c": {
+                        "%n": {
+                            "%x": "Message",
+                            "%nm": "logged_in",
+                            "is_slidable": false
+                        },
+                        "%x": "CurrentUser",
+                        "is_slidable": false
+                    },
+                    "%d": "New rule",
+                    "permissions": {
+                        "view_all": true,
+                        "create_api": false,
+                        "delete_api": false,
+                        "modify_api": false,
+                        "search_for": true,
+                        "auto_binding": false,
+                        "view_attachments": true
+                    }
+                }
+            }
+        },
+        "someotherdatatype": {
+            "%d": "someOtherDataType",
+            "%f3": {
+                "somedate_date": {
+                    "%d": "someDate",
+                    "%v": "date",
+                    "default_val": -3600000
+                },
+                "somefile_file": {
+                    "%d": "someFile",
+                    "%v": "file",
+                    "default_val": "//bfd69f03235ea26862a69a46ad973455.cdn.bubble.io/f1792242164163x306230430622589360/Screenshot%202026-10-12%20at%2013.16.27.png"
+                },
+                "sometext_text": {
+                    "%d": "someText",
+                    "%v": "text",
+                    "default_val": "foobar"
+                },
+                "someimage_image": {
+                    "%d": "someImage",
+                    "%v": "image",
+                    "default_val": "//bfd69f03235ea26862a69a46ad973455.cdn.bubble.io/f1792242187696x973270463339441500/Screenshot%202026-10-12%20at%2013.16.27.png"
+                },
+                "somebool_boolean": {
+                    "%d": "someBool",
+                    "%v": "boolean",
+                    "default_val": true
+                },
+                "somenumber_number": {
+                    "%d": "someNumber",
+                    "%v": "number",
+                    "default_val": 2
+                },
+                "somerange_number_range": {
+                    "%d": "someRange",
+                    "%v": "number_range"
+                },
+                "someuserlist_list_user": {
+                    "%d": "someUserList",
+                    "%v": "list.user"
+                },
+                "somedaterange_date_range": {
+                    "%d": "someDateRange",
+                    "%v": "date_range"
+                },
+                "somegeo_geographic_address": {
+                    "%d": "someGeo",
+                    "%v": "geographic_address",
+                    "default_val": {
+                        "lat": 45.018542,
+                        "lng": 1.0893497,
+                        "address": "285 Chem. de Bord de Côte, 24290 Saint-Léon-sur-Vézère, France",
+                        "placeId": "ChIJM7M3trBX_0cRYrU7r-8jQ2M",
+                        "components": {
+                            "city": "Saint-Léon-sur-Vézère",
+                            "state": "Nouvelle-Aquitaine",
+                            "county": "Dordogne",
+                            "street": "Chemin de Bord de Côte",
+                            "country": "France",
+                            "zip code": "24290",
+                            "state code": "Nouvelle-Aquitaine",
+                            "country code": "FR",
+                            "street number": "285"
+                        }
+                    }
+                },
+                "somedateinterval_dateinterval": {
+                    "%d": "someDateInterval",
+                    "%v": "dateinterval"
+                },
+                "optionset_option_someoptionset": {
+                    "%d": "optionSet",
+                    "%v": "option.someoptionset",
+                    "default_val": "option1"
+                },
+                "relationtosomedatatype_list_custom_somedatatype": {
+                    "%d": "relationToSomeDataType",
+                    "%v": "list.custom.somedatatype"
+                },
+                "singlerelationtosomedatatype_custom_somedatatype": {
+                    "%d": "singleRelationToSomeDataType",
+                    "%v": "custom.somedatatype"
+                }
+            },
+            "exposed_api": true,
+            "privacy_role": {
+                "everyone": {
+                    "%d": "everyone",
+                    "permissions": {
+                        "view_all": true,
+                        "create_api": false,
+                        "delete_api": false,
+                        "modify_api": false,
+                        "search_for": true,
+                        "view_fields": {
+                            "0": "optionset_option_someoptionset",
+                            "1": "relationtosomedatatype_list_custom_somedatatype",
+                            "2": "singlerelationtosomedatatype_custom_somedatatype",
+                            "3": "somebool_boolean",
+                            "4": "somedate_date",
+                            "5": "somedateinterval_dateinterval",
+                            "6": "somedaterange_date_range",
+                            "7": "somefile_file",
+                            "8": "somegeo_geographic_address",
+                            "9": "someimage_image",
+                            "10": "somenumber_number",
+                            "11": "somerange_number_range",
+                            "12": "sometext_text",
+                            "13": "someuserlist_list_user",
+                            "14": "Created Date",
+                            "15": "Modified Date",
+                            "16": "Slug",
+                            "17": "Created By"
+                        },
+                        "auto_binding": false,
+                        "view_attachments": true,
+                        "non_filterable_fields": {
+                            "Slug": true,
+                            "Created By": true,
+                            "Created Date": true,
+                            "Modified Date": true,
+                            "somedate_date": true,
+                            "somefile_file": true,
+                            "sometext_text": true,
+                            "someimage_image": true,
+                            "somebool_boolean": true,
+                            "somenumber_number": true,
+                            "somerange_number_range": true,
+                            "someuserlist_list_user": true,
+                            "somedaterange_date_range": true,
+                            "somegeo_geographic_address": true,
+                            "somedateinterval_dateinterval": true,
+                            "optionset_option_someoptionset": true,
+                            "relationtosomedatatype_list_custom_somedatatype": true,
+                            "singlerelationtosomedatatype_custom_somedatatype": true
+                        }
+                    }
+                },
+                "new_rule_": {
+                    "%c": {
+                        "%n": {
+                            "%x": "Message",
+                            "%nm": "logged_in",
+                            "is_slidable": false
+                        },
+                        "%x": "CurrentUser",
+                        "is_slidable": false
+                    },
+                    "%d": "New rule",
+                    "permissions": {
+                        "view_all": true,
+                        "create_api": false,
+                        "delete_api": false,
+                        "modify_api": false,
+                        "search_for": true,
+                        "auto_binding": false,
+                        "view_attachments": true
+                    }
+                }
+            }
+        }
+    }
+}

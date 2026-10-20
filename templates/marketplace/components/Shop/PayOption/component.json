@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1ce7ea30-a2c3-56dc-8bf6-3e35cee6d0e8",
+  "name": "PayOption",
+  "path": "/Shop/PayOption",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One way to pay in one country, to pick: its name and what it asks of the buyer"
+}

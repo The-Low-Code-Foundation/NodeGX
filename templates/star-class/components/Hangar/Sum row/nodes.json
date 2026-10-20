@@ -1,0 +1,114 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "781c2323-36e6-5515-8130-af0633d158e9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "srIn",
+      "type": "Component Inputs",
+      "label": "The line",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "strong",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "srRow",
+      "type": "Group",
+      "label": "The line",
+      "children": [
+        "srLabel",
+        "srValue"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "justifyContent": "space-between",
+        "alignItems": "center",
+        "flexWrap": "nowrap",
+        "columnGap": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "srLabel",
+      "type": "Text",
+      "label": "The word",
+      "parent": "srRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "srValue",
+      "type": "Text",
+      "label": "The number",
+      "parent": "srRow",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentSize",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "srToneOf",
+      "type": "Expression",
+      "label": "The total, or a line of the sum?",
+      "parameters": {
+        "expression": "strong === true ? 'total' : 'line'"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "srTone",
+      "type": "States",
+      "label": "A line, or the total",
+      "parameters": {
+        "states": "line,total",
+        "values": "size,weight",
+        "useTransitions": false,
+        "type-size": "string",
+        "value-line-size": "var(--text-base)",
+        "value-total-size": "var(--text-xl)",
+        "type-weight": "string",
+        "value-line-weight": "var(--font-normal)",
+        "value-total-weight": "var(--font-bold)"
+      },
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "srRow"
+  ]
+}

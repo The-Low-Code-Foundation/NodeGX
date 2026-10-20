@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0cf660e4-0622-5aab-8bc0-516a50a0f728",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "glUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "glLoad",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "glUrl",
+      "fromProperty": "pm-sellerId",
+      "toId": "glGather",
+      "toProperty": "in-sellerId"
+    },
+    {
+      "fromId": "glLoad",
+      "fromProperty": "out-ok",
+      "toId": "glContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "glLoad",
+      "fromProperty": "out-name",
+      "toId": "glFor",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "glLoad",
+      "fromProperty": "out-problem",
+      "toId": "glRefusedWhy",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "glLoad",
+      "fromProperty": "out-refused",
+      "toId": "glRefused",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "glRefusedSignIn",
+      "fromProperty": "onClick",
+      "toId": "glToSignIn",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "glName",
+      "fromProperty": "onTextChanged",
+      "toId": "glGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "glEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "glGather",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "glPassword",
+      "fromProperty": "onTextChanged",
+      "toId": "glGather",
+      "toProperty": "in-password"
+    },
+    {
+      "fromId": "glSave",
+      "fromProperty": "onClick",
+      "toId": "glGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "glGather",
+      "fromProperty": "out-login",
+      "toId": "glCall",
+      "toProperty": "in-login"
+    },
+    {
+      "fromId": "glGather",
+      "fromProperty": "out-go",
+      "toId": "glCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "glCall",
+      "fromProperty": "error",
+      "toId": "glError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "glCall",
+      "fromProperty": "done",
+      "toId": "glToSellers",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "glBack",
+      "fromProperty": "onClick",
+      "toId": "glToSellers",
+      "toProperty": "navigate"
+    }
+  ]
+}

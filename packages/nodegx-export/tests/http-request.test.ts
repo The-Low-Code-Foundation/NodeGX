@@ -5,6 +5,7 @@ import * as ts from 'typescript';
 import { Catalog, loadCatalog } from '../src/catalog';
 import { emitApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
+import { typecheckEmittedApp } from './helpers/typecheckApp';
 import { ExportIR, ComponentIR, ConnectionIR, NodeIR, ParamValue } from '../src/ir/types';
 
 /**
@@ -452,5 +453,167 @@ describe('EXP-011 Tier 1.2 — HTTP Request', () => {
       expect(notesFile(app)).not.toContain('quoteOut');
       expect(app.files['src/api/http.ts']).toBeUndefined();
     });
+  });
+});
+
+/**
+ * P109-S24-EXPORTBADBODY — the server answered, and its JSON could not be read (P107-D11, ruled "Give it its own code").
+ *
+ * 🔴 **Run, not read.** The emitted `src/api/http.ts` is transpiled and `fetchQuote` is called against a stubbed
+ * `fetch`, so the code graded is the code that reaches the failure arm. Before the fix the parse failure escaped
+ * as a bare `SyntaxError` with no `code`, and the arm's `?? 'http/network-error'` named it a request that never
+ * arrived.
+ */
+describe('P109-S24-EXPORTBADBODY — a body that is not JSON fails under http/bad-body', () => {
+  type FakeAnswer = { contentType: string; json?: () => Promise<unknown>; text?: () => Promise<string> };
+  const run = async (answer: FakeAnswer): Promise<{ code?: string; message?: string } | unknown> => {
+    const { app } = withRequest();
+    const js = ts.transpileModule(httpFile(app), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 }
+    }).outputText;
+    const exported: Record<string, unknown> = {};
+    const fetchStub = async () => ({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      headers: {
+        get: (name: string) => (name.toLowerCase() === 'content-type' ? answer.contentType : null),
+        forEach: (fn: (value: string, key: string) => void) => fn(answer.contentType, 'content-type')
+      },
+      json: answer.json ?? (async () => ({})),
+      text: answer.text ?? (async () => '')
+    });
+    // eslint-disable-next-line no-new-func
+    new Function('exports', 'fetch', js)(exported, fetchStub);
+    try {
+      return await (exported.fetchQuote as () => Promise<unknown>)();
+    } catch (error) {
+      return { code: (error as { code?: string }).code, message: (error as Error).message };
+    }
+  };
+
+  it('an application/json answer whose body does not parse throws http/bad-body, with the parser message', async () => {
+    const result = await run({
+      contentType: 'application/json',
+      json: () => Promise.reject(new SyntaxError('Unexpected token < in JSON at position 0'))
+    });
+    expect(result).toEqual({ code: 'http/bad-body', message: 'Unexpected token < in JSON at position 0' });
+  });
+
+  /** The control: the same answer with a body that parses is a success, so the row above is about the parse. */
+  it('the same answer with a body that parses succeeds', async () => {
+    const result = (await run({ contentType: 'application/json', json: async () => ({ quote: 'hi' }) })) as {
+      ok: boolean;
+      response: unknown;
+    };
+    expect(result.ok).toBe(true);
+    expect(result.response).toEqual({ quote: 'hi' });
+  });
+
+  /** As the runtime marks only the JSON read: a text read that fails is not a bad body. */
+  it('a text answer whose read fails is not reported as a bad body', async () => {
+    const result = (await run({ contentType: 'text/plain', text: () => Promise.reject(new TypeError('terminated')) })) as {
+      code?: string;
+    };
+    expect(result.code).not.toBe('http/bad-body');
+  });
+});
+
+/**
+ * P18-S104-RESPONSETYPE — an HTTP Request's Response Type (FED-001 §3.2), which the export ignored: it transcribed
+ * Auto only and said nothing, so the same request handed over an object in one app and a string in the other.
+ *
+ * 🔴 **Run, not read**, on EXPORTBADBODY's harness: the emitted `fetchQuote` against a stubbed `fetch`, over every
+ * Response Type × a JSON answer served as `application/json` and as `text/plain`, and a body that is not JSON. The
+ * expected column is `httpnode.ts`'s three arms, and the JSON arm's message is read out of that file, so a reworded
+ * runtime sentence turns this red rather than drifting.
+ */
+describe('P18-S104-RESPONSETYPE — the exported request reads the body the way Response Type says', () => {
+  const RUNTIME_HTTP = fs.readFileSync(
+    path.join(__dirname, '..', '..', 'noodl-runtime', 'src', 'nodes', 'std-library', 'data', 'httpnode.ts'),
+    'utf8'
+  );
+  type Answer = { contentType: string; body: string };
+  const run = async (responseType: string | undefined, answer: Answer): Promise<unknown> => {
+    const { app } = withRequest((_ir, _notes, http) => {
+      if (responseType !== undefined) setParam(http, 'responseType', literal(responseType));
+    });
+    const js = ts.transpileModule(httpFile(app), {
+      compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 }
+    }).outputText;
+    const exported: Record<string, unknown> = {};
+    const fetchStub = async () => ({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      headers: {
+        get: (name: string) => (name.toLowerCase() === 'content-type' ? answer.contentType : null),
+        forEach: (fn: (value: string, key: string) => void) => fn(answer.contentType, 'content-type')
+      },
+      json: async () => JSON.parse(answer.body),
+      text: async () => answer.body
+    });
+    // eslint-disable-next-line no-new-func
+    new Function('exports', 'fetch', js)(exported, fetchStub);
+    try {
+      return { response: ((await (exported.fetchQuote as () => Promise<unknown>)()) as { response: unknown }).response };
+    } catch (error) {
+      return { code: (error as { code?: string }).code, message: (error as Error).message };
+    }
+  };
+
+  const jsonAsJson = { contentType: 'application/json; charset=utf-8', body: '{"quote":"hi"}' };
+  const jsonAsText = { contentType: 'text/plain', body: '{"quote":"hi"}' };
+  const notJson = { contentType: 'text/plain', body: '<html>' };
+
+  it('Auto (and unset, and a value the runtime does not know) parses only what the server calls JSON', async () => {
+    for (const responseType of [undefined, 'auto', 'xml']) {
+      expect(await run(responseType, jsonAsJson)).toEqual({ response: { quote: 'hi' } });
+      expect(await run(responseType, jsonAsText)).toEqual({ response: '{"quote":"hi"}' });
+      expect(await run(responseType, notJson)).toEqual({ response: '<html>' });
+    }
+  });
+
+  it('Text hands over the text whatever the server claimed', async () => {
+    expect(await run('text', jsonAsJson)).toEqual({ response: '{"quote":"hi"}' });
+    expect(await run('text', jsonAsText)).toEqual({ response: '{"quote":"hi"}' });
+  });
+
+  it('JSON parses whatever the server claimed, and a body that is not JSON fails under http/bad-body with the runtime’s sentence', async () => {
+    expect(await run('json', jsonAsJson)).toEqual({ response: { quote: 'hi' } });
+    expect(await run('json', jsonAsText)).toEqual({ response: { quote: 'hi' } });
+    const failed = (await run('json', notJson)) as { code: string; message: string };
+    expect(failed.code).toBe('http/bad-body');
+    const prefix = 'Response Type is JSON but the body is not JSON: ';
+    expect(RUNTIME_HTTP).toContain(`'${prefix}'`);
+    let parserMessage = '';
+    try {
+      JSON.parse(notJson.body);
+    } catch (e) {
+      parserMessage = (e as Error).message;
+    }
+    expect(failed.message).toBe(prefix + parserMessage);
+  });
+
+  it('each arm typechecks in the emitted app', () => {
+    for (const responseType of ['text', 'json']) {
+      const { app } = withRequest((_ir, _notes, http) => setParam(http, 'responseType', literal(responseType)));
+      expect(typecheckEmittedApp(app)).toEqual([]);
+    }
+  });
+
+  it('the result type says how the body was read', () => {
+    expect(httpFile(withRequest((_ir, _notes, http) => setParam(http, 'responseType', literal('text'))).app)).toContain(
+      'The body as text, whatever the server said it was (Response Type: Text).'
+    );
+  });
+
+  it('a wire on Response Type defers, with the configuration sentence', () => {
+    const { app } = withRequest((_ir, notes, http) => {
+      addNode(notes, { id: 'kind', type: 'String', parameters: [{ name: 'value', value: literal('json') }] });
+      connect(notes, 'kind', 'savedValue', http.id, 'responseType', 'value');
+    });
+    expect(notesReport(app)).toContain('its responseType is wired — that input configures what the request is');
+    expect(httpFile(app)).toBeUndefined();
   });
 });

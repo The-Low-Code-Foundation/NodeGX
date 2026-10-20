@@ -9,6 +9,7 @@ import { utilLibSource } from '../src/emit/utilLib';
 import { timerLibSource } from '../src/emit/timerLib';
 import { typecheckEmittedApp } from './helpers/typecheckApp';
 import { ExportIR, ComponentIR, ConnectionIR, NodeIR, ParamValue } from '../src/ir/types';
+import { withoutAnnouncement } from './helpers/fieldMount';
 
 /**
  * EXP-011 §39 — the three small non-pure nodes: `Log` (an action), `Delay` (a timer with state)
@@ -575,7 +576,8 @@ describe('EXP-011 §39 §B — Delay', () => {
       connect(notes, 'poll', 'timerStarted', 'onStarted', 'do', 'signal');
     }).app;
     expect(deferralFor(idle, 'poll')).toContain('hangs off a node nothing fires');
-    expect(notesFile(idle)).not.toContain('useRef');
+    // The import's `useRef` is the Draft box's announcement guard (P18-S116-FIELDMOUNT); no timer ref.
+    expect(withoutAnnouncement(notesFile(idle))).not.toContain('useRef(');
     expect(idle.files['src/lib/timer.ts']).toBeUndefined();
   });
 

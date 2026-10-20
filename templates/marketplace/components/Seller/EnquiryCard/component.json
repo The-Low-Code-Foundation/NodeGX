@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "eed3d84f-5585-567a-8553-b576a7d3b66a",
+  "name": "EnquiryCard",
+  "path": "/Seller/EnquiryCard",
+  "type": "visual",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One enquiry, as its seller (or the admin) reads it: about what, from whom, how to reach them; marked answered or not"
+}

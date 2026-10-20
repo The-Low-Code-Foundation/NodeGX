@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8d4cb1d9-c09d-5b59-8ba3-2c81a7baf5c1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "kpIn",
+      "fromProperty": "n",
+      "toId": "kpN",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "kpIn",
+      "fromProperty": "words",
+      "toId": "kpWords",
+      "toProperty": "text"
+    }
+  ]
+}

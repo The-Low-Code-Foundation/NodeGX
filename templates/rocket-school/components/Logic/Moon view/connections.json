@@ -23,6 +23,30 @@
     },
     {
       "fromId": "moonviewFn",
+      "fromProperty": "out-book",
+      "toId": "moonviewOut",
+      "toProperty": "book"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-bookCount",
+      "toId": "moonviewOut",
+      "toProperty": "bookCount"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-bookLine",
+      "toId": "moonviewOut",
+      "toProperty": "bookLine"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-bigs",
+      "toId": "moonviewOut",
+      "toProperty": "bigs"
+    },
+    {
+      "fromId": "moonviewFn",
       "fromProperty": "out-aliens",
       "toId": "moonviewOut",
       "toProperty": "aliens"

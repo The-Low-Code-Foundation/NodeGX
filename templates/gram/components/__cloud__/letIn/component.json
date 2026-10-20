@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a12736ba-ec48-5cee-8178-f55a7e5e5e4a",
+  "name": "letIn",
+  "path": "/#__cloud__/letIn",
+  "type": "cloud",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Let a waiting member in, and email them that they’re in"
+}

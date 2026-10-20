@@ -23,14 +23,18 @@
 //   reload    after a reload: "You're on the list, Ada", a "Not you?" link, and no name/email field shown
 //   notyou    "Not you?" → both fields shown and empty, "You're on the list" gone
 //   The look, measured not judged (Richard judges the screenshots):
-//   font      the font Chrome actually PAINTS body text in (CSS.getPlatformFontsForNode) is not a browser/system
-//             default and not Inter (the template's own font token)
+//   font      the font Chrome actually PAINTS the body text OR the headline in (CSS.getPlatformFontsForNode) is not a
+//             browser/system default and not Inter (the template's own font token) — s5: a display face over an Inter
+//             body is a choice
 //   palette   ≥3 distinct chosen colours (≥ 32 apart) in shown text, backgrounds or gradients: not a pure grey and
 //             not one of the template's own colour tokens (nodegx-project-contract/tokens.ts, read at grade time)
 //   scale     ≥3 distinct font sizes in shown text
 //   contrast  every feature sentence ≥ 4.5:1 against the background painted behind it (read from a screenshot)
 //   phone     no sideways scroll and no shown text past the right edge at 390 wide
-//   laptop    at 1280×800 the layout differs: two feature titles side by side, or ≥2 pairs of long text lines side by
+//   gaps      at 1280: no row with a hole between its parts' ink (render-measure's row-gap; s5 LAPTOPGAPS, R39)
+//   align     at 1280: no section centred by its heading with a part off that centre (alignment-drift)
+//   laptop    at 1280×800 the layout differs: two feature titles side by side, or more pairs of a long text line beside
+//             another or beside a picture (s7, TL1: text beside its photo) than the phone has; was: ≥2 pairs of long text lines side by
 //             side (phone has none)
 // A press is a real CDP mouse press at the element's centre, its target re-read just before; typing is CDP insertText
 // into the focused field, then a settle. Text is read from text nodes whose element is SHOWN (no display:none,
@@ -43,12 +47,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { kitTarball, hasTarball } from '../own-018/kit-tarball.mjs';
+// OWN-019 s7 (NODE20): the grader talks CDP over Node's global WebSocket (Node ≥ 22). A lane started from a shell
+// whose PATH found /usr/local/bin/node (v20) graded nothing: say so before a preview starts.
+if (typeof WebSocket === 'undefined') throw new Error(`this grader needs Node 22 or later (a global WebSocket); this is Node ${process.version} at ${process.execPath}`);
+// s5 LAPTOPGAPS (R39): the render measure itself, so this grader and render_report read a laptop page the same way.
+const rm = createRequire(import.meta.url)('../../../../packages/nodegx-render-measure/src/index.js');
 
 const argv = process.argv.slice(2);
 const opt = (name, dflt) => { const i = argv.indexOf(name); return i >= 0 ? argv[i + 1] : dflt; };
 const target = path.resolve(argv[0] || '');
 const TGZ = path.resolve(opt('--tgz', ''));
-if (!argv[0] || !fs.existsSync(path.join(TGZ, 'nodegx-preview-0.2.0.tgz'))) throw new Error('usage: node grade-launch.mjs <round-root | app-dir> --tgz <tgz-dir> [--out <dir>] [--no-audit]');
+if (!argv[0] || !hasTarball(TGZ, 'nodegx-preview')) throw new Error('usage: node grade-launch.mjs <round-root | app-dir> --tgz <tgz-dir> [--out <dir>] [--no-audit]');
 
 const findApp = (dir, depth = 0) => {
   if (fs.existsSync(path.join(dir, 'nodegx.project.json'))) return dir;
@@ -75,7 +85,7 @@ const DEFAULT_COLOURS = [...fs.readFileSync(path.resolve(path.dirname(new URL(im
   .map((m) => [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16)));
 const FEATURES = ['Plan the week in one sitting', "See what's left at a glance", 'Quiet by default'];
 const checks = {};
-const CHECK_NAMES = ['hero', 'scroll', 'features', 'pricing', 'faq', 'refuse', 'sending', 'joined', 'fail', 'reload', 'notyou', 'font', 'palette', 'scale', 'contrast', 'phone', 'laptop'];
+const CHECK_NAMES = ['hero', 'scroll', 'features', 'pricing', 'faq', 'refuse', 'sending', 'joined', 'fail', 'reload', 'notyou', 'font', 'palette', 'scale', 'contrast', 'phone', 'laptop', 'gaps', 'align'];
 const check = (name, ok, data = {}) => { checks[name] = { ok: !!ok, ...data }; say(`check ${name}`, checks[name]); return ok; };
 const observed = {};
 const found = {};
@@ -101,7 +111,7 @@ const RE = {
 const reSrc = (re) => re.toString();
 
 // ---------------------------------------------------------------- the preview, from the tarball
-const preview = spawn('npx', ['-y', `--package=${path.join(TGZ, 'nodegx-preview-0.2.0.tgz')}`, 'noodl-preview', APP, '--port', '0', '--no-watch'], { env, cwd: LABHOME, stdio: ['ignore', 'pipe', 'pipe'] });
+const preview = spawn('npx', ['-y', `--package=${kitTarball(TGZ, 'nodegx-preview')}`, 'noodl-preview', APP, '--port', '0', '--no-watch'], { env, cwd: LABHOME, stdio: ['ignore', 'pipe', 'pipe'] });
 let previewLog = '';
 const url = await new Promise((resolve, reject) => {
   const t = setTimeout(() => reject(new Error(`preview printed no URL in 120 s: ${previewLog.slice(-600)}`)), 120000);
@@ -352,11 +362,15 @@ try {
 
   // hero
   const hero = await page(`(() => {
-    const b = heroJoin();
+    // s7 (TL1): a top bar can carry its own "Join the waitlist" pill above the hero, with nothing above it. The hero's
+    // button is the first one in the first 1.5 screens with the pitch above it; the form's lower down never counts.
+    const top = (e) => e.getBoundingClientRect().top + scroller().scrollTop;
+    const lines = (b) => leaves(/\\S/).filter((l) => top(l) < top(b) && own(l).split(' ').length >= 3 && !/^\\s*Driftwood\\s*$/i.test(own(l)) && !${reSrc(RE.joinHero)}.test(own(l))).map((l) => own(l).slice(0, 80));
+    const near = leaves(${reSrc(RE.joinHero)}).map(outer).filter((e) => top(e) < 1.5 * innerHeight).sort((a, c) => top(a) - top(c));
+    const b = near.find((e) => lines(e).length >= 2) || near[0] || heroJoin();
     if (!b) return { button: null };
-    const bt = b.getBoundingClientRect().top + scroller().scrollTop;
     const name = leaves(${reSrc(RE.name)})[0];
-    const above = leaves(/\\S/).filter((l) => l.getBoundingClientRect().top + scroller().scrollTop < bt && own(l).split(' ').length >= 3 && !${reSrc(RE.name)}.test(own(l))).map((l) => own(l).slice(0, 80));
+    const above = lines(b);
     return { button: { text: norm(b.textContent), ...at(b, false) }, nameShown: !!name, nameTop: name ? name.getBoundingClientRect().top : null, above };
   })()`);
   check('hero', loaded !== null && hero.button && hero.nameShown && hero.above?.length >= 2, { name: hero.nameShown, lines: hero.above, button: hero.button?.text ?? null });
@@ -419,7 +433,21 @@ try {
   // Inter is the project template's own --font-family token (POL-006, nodegx-project-contract/tokens.ts): painted in
   // Inter means the look was never chosen, whether or not Inter is installed on this Mac.
   const DEFAULT_FACES = /^(inter|times|times new roman|helvetica|helvetica neue|arial|\.?sf ns.*|system font|\.applesystemuifont|sf pro.*|-apple-system|lucida grande|verdana|tahoma|courier|courier new|dejavu.*|liberation.*|roboto|noto sans|segoe ui)$/i;
-  check('font', !!top && !DEFAULT_FACES.test(top.replace(/ \(web\)$/, '')), { painted, declared });
+  // s5: the headline counts too. RL2b paired a chosen serif display face (its headings) with an Inter body — a type
+  // choice the brief asks for ("choose … type … yourself"); the body-only reading failed it. A page that chose
+  // nothing (GL1, s4; the nofont mutant) paints a default face in both.
+  await page(`(() => { const ls = leaves(/\\S/); let best = null, size = 0; for (const l of ls) { const fs = parseFloat(getComputedStyle(l).fontSize); if (fs > size) { size = fs; best = l; } } if (best) best.setAttribute('data-grade-head', '1'); return size; })()`);
+  const headPainted = {};
+  const hq = await send('DOM.querySelectorAll', { nodeId: (await send('DOM.getDocument', { depth: -1 })).result.root.nodeId, selector: '[data-grade-head]' });
+  for (const nodeId of hq.result?.nodeIds || []) {
+    const f = await send('CSS.getPlatformFontsForNode', { nodeId });
+    for (const pf of f.result?.fonts || []) { const k = `${pf.familyName}${pf.isCustomFont ? ' (web)' : ''}`; headPainted[k] = (headPainted[k] || 0) + pf.glyphCount; }
+  }
+  const head = Object.entries(headPainted).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+  const chosenFace = (face) => !!face && !DEFAULT_FACES.test(face.replace(/ \(web\)$/, ''));
+  // The headline counts only as a SHIPPED face (a web font): the control's, the nofont mutant's and GL1's headlines
+  // paint Georgia / Iowan Old Style — system serifs a `serif` stack falls to, not a choice (measured s5).
+  check('font', chosenFace(top) || (!!head && / \(web\)$/.test(head) && chosenFace(head)), { painted, headline: headPainted, declared });
 
   // contrast of every feature sentence against what is painted behind it
   const cons = [];
@@ -585,11 +613,22 @@ try {
     const ls = leaves(/\\S/).filter((l) => own(l).length >= 20).map((l) => { const r = l.getBoundingClientRect(); return { t: r.top + scroller().scrollTop, b: r.bottom + scroller().scrollTop, l: r.left, r: r.right }; });
     let n = 0;
     for (let i = 0; i < ls.length; i++) for (let j = i + 1; j < ls.length; j++) { const a = ls[i], b = ls[j]; if (Math.min(a.b, b.b) - Math.max(a.t, b.t) > 4 && (a.r <= b.l + 2 || b.r <= a.l + 2)) n++; }
+    // s7 (TL1): a long line beside a picture is a pair too — each feature's text beside its photo, stacked on a phone.
+    // A picture is a shown <img> or a background-image of at least 120×80; one behind the text (a hero) overlaps it, so
+    // is never beside it.
+    const pics = [...document.querySelectorAll('body *')].filter((e) => shown(e) && (e.tagName === 'IMG' || /url\\(/.test(getComputedStyle(e).backgroundImage))).map((e) => { const r = e.getBoundingClientRect(); return { t: r.top + scroller().scrollTop, b: r.bottom + scroller().scrollTop, l: r.left, r: r.right, w: r.width, h: r.height }; }).filter((p) => p.w >= 120 && p.h >= 80);
+    for (const a of ls) for (const p of pics) if (Math.min(a.b, p.b) - Math.max(a.t, p.t) > 4 && (a.r <= p.l + 2 || p.r <= a.l + 2)) n++;
     const ft = FEATURES.map((t) => { const l = leaves(exact(t))[0]; if (!l) return null; const r = l.getBoundingClientRect(); return { top: Math.round(r.top + scroller().scrollTop), left: Math.round(r.left) }; });
     const featsRow = ft.filter(Boolean).some((a, i, all) => all.some((b, j) => j !== i && Math.abs(a.top - b.top) < 30 && Math.abs(a.left - b.left) > 50));
     return { pairs: n, features: ft, featsRow };
   })()`;
   const lap = await page(sideBySide);
+  // s5 LAPTOPGAPS (R39, Richard on RL1's rows): render-measure's own measure at 1280, judged by its own summarise.
+  //   gaps   no `row-gap` — two parts of one row with a hole between their ink (RL1's number given a fifth of the page)
+  //   align  no `alignment-drift` — a section centred by its heading with a part off that centre (L1's price)
+  const lay = rm.summarise({ desktop: { ...(await ev(rm.measureExpression([], []))), requested: { width: 1280, height: 800 }, consoleErrors: [] } }).findings;
+  const rowGaps = lay.filter((f) => f.code === rm.RenderFinding.RowGap).map((f) => f.evidence);
+  const drifts = lay.filter((f) => f.code === rm.RenderFinding.AlignmentDrift).map((f) => f.evidence);
   await fullShot('laptop');
   await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
   await send('Page.reload', { ignoreCache: true });
@@ -597,7 +636,11 @@ try {
   await sleep(1000);
   await scrollThrough();
   const ph = await page(sideBySide);
-  check('laptop', lap.featsRow || lap.pairs >= ph.pairs + 2, { laptop: lap, phone: ph });
+  // s5: +1, not +2 — RL1's laptop page is two-column (hero beside its card, a number column beside each feature) and
+  // read 1 pair to the phone's 0; +2 failed a layout that plainly adapts.
+  check('laptop', lap.featsRow || lap.pairs >= ph.pairs + 1, { laptop: lap, phone: ph });
+  check('gaps', rowGaps.length === 0, { rowGaps: rowGaps.map((g) => `${g.left} | ${g.gap}px of ${g.rowWidth} | ${g.right}`) });
+  check('align', drifts.length === 0, { drifts: drifts.map((d) => `"${d.text}" ${d.offBy}px off "${d.centredText}"`) });
 } catch (e) {
   fatal = String(e.message || e);
   say('stopped', { why: fatal });
@@ -645,7 +688,7 @@ if (!argv.includes('--no-audit')) {
     const mcpRequire = createRequire(path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../../../packages/noodl-mcp/package.json'));
     const { Client } = await import(mcpRequire.resolve('@modelcontextprotocol/sdk/client/index.js'));
     const { StdioClientTransport } = await import(mcpRequire.resolve('@modelcontextprotocol/sdk/client/stdio.js'));
-    const transport = new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${path.join(TGZ, 'nodegx-mcp-0.2.0.tgz')}`, 'noodl-mcp', APP], cwd: LABHOME, env, stderr: 'ignore' });
+    const transport = new StdioClientTransport({ command: 'npx', args: ['-y', `--package=${kitTarball(TGZ, 'nodegx-mcp')}`, 'noodl-mcp', APP], cwd: LABHOME, env, stderr: 'ignore' });
     const client = new Client({ name: 'own019-grade', version: '0' });
     await client.connect(transport);
     const txt = (r) => (r.content || []).filter((c) => c.type === 'text').map((c) => c.text).join('\n');

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e2770499-a4a0-50a1-8107-eafd29f2c7bb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "jnName",
+      "fromProperty": "onTextChanged",
+      "toId": "jnGather",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "jnEmail",
+      "fromProperty": "onTextChanged",
+      "toId": "jnGather",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "jnOver13",
+      "fromProperty": "checked",
+      "toId": "jnGather",
+      "toProperty": "in-over13"
+    },
+    {
+      "fromId": "jnGo",
+      "fromProperty": "onClick",
+      "toId": "jnGather",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "jnGather",
+      "fromProperty": "out-join",
+      "toId": "jnCall",
+      "toProperty": "in-join"
+    },
+    {
+      "fromId": "jnGather",
+      "fromProperty": "out-go",
+      "toId": "jnCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "jnGather",
+      "fromProperty": "out-thanks",
+      "toId": "jnThanksWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "jnCall",
+      "fromProperty": "error",
+      "toId": "jnError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "jnCall",
+      "fromProperty": "done",
+      "toId": "jnAsked",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "jnAsked",
+      "fromProperty": "state",
+      "toId": "jnThanks",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "jnCall",
+      "fromProperty": "done",
+      "toId": "jnAsking",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "jnAsking",
+      "fromProperty": "state",
+      "toId": "jnForm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "jnRules",
+      "fromProperty": "onClick",
+      "toId": "jnToRules",
+      "toProperty": "navigate"
+    }
+  ]
+}

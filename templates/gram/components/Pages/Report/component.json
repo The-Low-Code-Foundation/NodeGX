@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e136ca36-b5e7-530e-8aff-7c6831d86700",
+  "name": "Report",
+  "path": "/Pages/Report",
+  "type": "page",
+  "created": "2026-10-14T00:00:00.000Z",
+  "modified": "2026-10-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Report a post or a comment to the admins, saying why"
+}

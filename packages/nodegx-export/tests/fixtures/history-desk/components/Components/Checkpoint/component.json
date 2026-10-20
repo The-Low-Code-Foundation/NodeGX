@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "a7c10d00-0000-4000-8000-000000000189",
+  "name": "Checkpoint",
+  "path": "/Components/Checkpoint",
+  "type": "visual",
+  "modified": "2026-10-15T12:00:00.000Z",
+  "description": "EXP-011 §78 fixture: a State Snapshot of store \"app\" under the name \"saved\"; Save and Restore are two buttons, and its Error is a Text. Restoring is an ordinary write, so the History on the page records it and Undo takes it back."
+}

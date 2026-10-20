@@ -1,0 +1,181 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ab84aa3f-880b-5523-835f-238721f80537",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pbRoot",
+      "type": "Group",
+      "label": "Paying one country",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "pbHead",
+        "pbWords",
+        "pbPay",
+        "pbError"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pbHead",
+      "type": "Text",
+      "label": "Paying in Ghana",
+      "parent": "pbRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pbWords",
+      "type": "Text",
+      "label": "How much, for whom",
+      "parent": "pbRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pbPay",
+      "type": "net.noodl.controls.button",
+      "label": "Pay by card or mobile money",
+      "parent": "pbRoot",
+      "parameters": {
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "pbError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "pbRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "pbIn",
+      "type": "Component Inputs",
+      "label": "One country to pay",
+      "ports": [
+        {
+          "name": "head",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canPay",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "countryId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "token",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "pbGo",
+      "type": "JavaScriptFunction",
+      "label": "Open Paystack for this country",
+      "parameters": {
+        "functionScript": "if (Inputs.token === undefined || Inputs.countryId === undefined) return;\nOutputs.problem = '';\ntry {\n  var r = await Noodl.CloudFunctions.run('startPayment', { pay: { token: String(Inputs.token), country: String(Inputs.countryId), returnUrl: location.origin + location.pathname } });\n  location.href = r.payment.url;\n} catch (e) {\n  Outputs.problem = (e && e.error) || 'Paystack couldn’t be opened just now. Check the connection and try again.';\n}",
+        "runOnChange-in-token": false,
+        "runOnChange-in-countryId": false
+      },
+      "ports": [
+        {
+          "name": "in-token",
+          "displayName": "token",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-countryId",
+          "displayName": "countryId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "pbRoot"
+  ]
+}

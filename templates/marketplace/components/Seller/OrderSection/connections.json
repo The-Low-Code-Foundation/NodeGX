@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4d8f38c3-6769-5725-8450-97b52552edac",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "osIn",
+      "fromProperty": "heading",
+      "toId": "osHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "osIn",
+      "fromProperty": "note",
+      "toId": "osNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "osIn",
+      "fromProperty": "cards",
+      "toId": "osEach",
+      "toProperty": "items"
+    }
+  ]
+}

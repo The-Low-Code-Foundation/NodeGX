@@ -2,6 +2,7 @@
 id: P112-OWN019-RELOADHERE
 title: "drive_page had no reload — o2 proved \"the best is still 4 after a reload\" by navigating to its start page, and a person reloading its results page sees \"You scored  out of 5 · Best:  out of 5\" with no way back"
 status: fixed
+commit: 5f8dee6d7
 phase: P112
 task: OWN-019
 severity: medium

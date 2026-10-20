@@ -56,6 +56,7 @@
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { focusChange, focusDiagnostics, focusMissed, GROUP_FOCUS_NOT_MOUNTED } from './focus-not-mounted';
+import { growChange, growPainted, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, type Sizes } from './wired-grow';
 
 type Phase = 'idle' | 'pending' | 'holding' | 'lifted';
 type ScrollOp = 'scrollToIndex.do' | 'scrollToElement.do';
@@ -136,6 +137,9 @@ type State = {
    * reports them first (docblock)
    */
   ran: readonly Resolved[];
+  /** v9 (R38) — what Width and Height hold, and what the last render on the page said of them (wired-grow.ts) */
+  sizes: Sizes;
+  grow: string | null;
 };
 
 type FileLike = { readonly name?: unknown; readonly type?: unknown; readonly size?: unknown };
@@ -192,9 +196,10 @@ export const Group = defineNode({
   // v6 (P109 ISL-031, s30): a drag never takes its own node as its zone — a keyboard lift does not start in itself, Enter or Space then cancels, and a pointer drag over a new element of its own finds no zone (row C78)
   // v7 (P109 ISL-031, s30–31): every element of a Draggable node takes the keyboard — a remount, a new Tag or a mount however late gets the attributes (row C77); which element is on the page is the paint's sync (`synced`), and the keyboard is held by an element (`focusedElem`), so a paint writes nothing about it
   // v8 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it (`diagnostics`)
-  version: 8,
-  changes: [focusChange(8)],
-  diagnostics: focusDiagnostics(GROUP_FOCUS_NOT_MOUNTED),
+  // v9 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
+  version: 9,
+  changes: [focusChange(8), growChange(9)],
+  diagnostics: { ...focusDiagnostics(GROUP_FOCUS_NOT_MOUNTED), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/visual/group.ts',
   needs: ['person', 'clock'],
   // the page's syncs (spec.ts `synced`): which element is on the page, written only by a paint. Not branches (row C77, P109 s31):
@@ -208,6 +213,8 @@ export const Group = defineNode({
     mounted: true,
     onPage: false,
     focusMissed: false,
+    sizes: { width: sizeAtDefault(), height: sizeAtDefault() },
+    grow: null,
     tag: 'div',
     shownTag: 'div',
     elem: 0,
@@ -449,6 +456,9 @@ export const Group = defineNode({
     scrollIntoView: () => ({ says: 'always: the page, or the scrolling Group holding it, scrolls until the element can be seen', send: [] }),
     as: (_s, v) => ({ says: 'always: the HTML element the next paint draws (a div when empty) — a new Tag draws a new element', set: { tag: v || 'div' }, send: [] }),
     visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, it takes no pointer', set: { visible: !!v }, send: [] }),
+    // v9 (R38) — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
+    width: sizeReducer('width'),
+    height: sizeReducer('height'),
     opacity: (_s, v) => ({ says: 'always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it', set: { opacityZero: v === 0 }, send: [] }),
     pointerEventsMode: (s, v) =>
       v === 'inherit'
@@ -523,9 +533,9 @@ export const Group = defineNode({
   {
     world: {
       // placed on the page with its params set — the first render: Did Mount, and Children Count from the children added before it
-      place: (s) => {
+      place: (s, i, w) => {
         const p = painted(s);
-        return { set: p.set, send: ['childrenCount', ...p.send], emit: p.emit };
+        return { set: { ...p.set, ...growPainted(s, { ...s, ...p.set }.onPage, i.sizeMode, i.position, w) }, send: ['childrenCount', ...p.send], emit: p.emit };
       },
       timer: (s, _i, tag) => {
         if (tag === 'unswallow') return { set: { swallow: false }, send: [] };
@@ -534,11 +544,12 @@ export const Group = defineNode({
       }
     },
     // the frame's end: the scheduled scrolls run first (after the inputs, before the paint), then the paint
-    afterInputs: (s) => {
+    afterInputs: (s, i, world) => {
       const w = frameWork(s);
       const s1 = { ...s, ...w.set };
       const p = painted(s1);
-      return toPatch({ set: { ...w.set, ...p.set, ran: [] }, send: p.send, emit: p.emit, outcomes: [...s.ran, ...(w.outcomes ?? []), ...(p.outcomes ?? [])] });
+      const g = growPainted(s, { ...s1, ...p.set }.onPage, i.sizeMode, i.position, world);
+      return toPatch({ set: { ...w.set, ...p.set, ...g, ran: [] }, send: p.send, emit: p.emit, outcomes: [...s.ran, ...(w.outcomes ?? []), ...(p.outcomes ?? [])] });
     },
     person: {
       hover: (s) => toPatch(pointerAct(s, (p) => (hits(p) ? reach({ ...NONE, emit: ['hoverStart', 'pointerEnter'] }) : NONE))),

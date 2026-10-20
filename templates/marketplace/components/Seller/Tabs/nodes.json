@@ -1,0 +1,182 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0596343b-b6f6-5250-8056-1c18db0d11bc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "stbRoot",
+      "type": "Group",
+      "label": "The tabs",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-0)",
+        "backgroundColor": "var(--surface)",
+        "cssClassName": "mk-tabs"
+      },
+      "children": [
+        "stb_orders",
+        "stb_products",
+        "stb_enquiries"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "stb_orders",
+      "type": "net.noodl.controls.button",
+      "label": "Orders",
+      "parent": "stbRoot",
+      "parameters": {
+        "label": "Orders",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-tab"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "stb_products",
+      "type": "net.noodl.controls.button",
+      "label": "Products",
+      "parent": "stbRoot",
+      "parameters": {
+        "label": "Products",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-tab"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "stb_enquiries",
+      "type": "net.noodl.controls.button",
+      "label": "Enquiries",
+      "parent": "stbRoot",
+      "parameters": {
+        "label": "Enquiries",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "sizeMode": "contentHeight",
+        "cssClassName": "mk-tab"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "stbIn",
+      "type": "Component Inputs",
+      "label": "Which tab",
+      "ports": [
+        {
+          "name": "on",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "stbLook",
+      "type": "JavaScriptFunction",
+      "label": "Which tab is this page",
+      "parameters": {
+        "functionScript": "var on = String(Inputs.on || '');\nOutputs.orders = on === 'orders' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.products = on === 'products' ? 'mk-tab mk-tab-on' : 'mk-tab';\nOutputs.enquiries = on === 'enquiries' ? 'mk-tab mk-tab-on' : 'mk-tab';"
+      },
+      "ports": [
+        {
+          "name": "in-on",
+          "displayName": "on",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-orders",
+          "displayName": "orders",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-products",
+          "displayName": "products",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-enquiries",
+          "displayName": "enquiries",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "stbTo_orders",
+      "type": "RouterNavigate",
+      "label": "To Orders",
+      "parameters": {
+        "target": "/Pages/Orders"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "stbTo_products",
+      "type": "RouterNavigate",
+      "label": "To Products",
+      "parameters": {
+        "target": "/Pages/Seller/Products",
+        "pm-sellerId": "mine"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "stbTo_enquiries",
+      "type": "RouterNavigate",
+      "label": "To Enquiries",
+      "parameters": {
+        "target": "/Pages/Enquiries"
+      },
+      "x": 350,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "stbRoot"
+  ]
+}

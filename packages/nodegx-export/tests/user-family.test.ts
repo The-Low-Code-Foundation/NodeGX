@@ -252,14 +252,16 @@ describe('§5 — the gates, each deferring with its named reason', () => {
     );
   });
 
-  test('5.4 a consumed failure or completed defers — only done and Error are translated', () => {
-    for (const port of ['failure', 'completed']) {
-      const ir = cloneIr();
-      wire(ir, LOGIN_PAGE, 'login', port, 'navigate', 'navigate', 'signal');
-      expect(reasonFor(ir, LOGIN_PAGE, 'login')).toBe(
-        `its ${port} output is consumed — only the done chain and the Error value are translated in this slice`
-      );
-    }
+  // EXP-011 §90. A consumed failure is the catch's chain now (tests/the-failure-runs-its-chain.test.ts); completed is not.
+  test('5.4 a consumed failure is a chain; a consumed completed defers — only done, failure and Error are translated', () => {
+    const failure = cloneIr();
+    wire(failure, LOGIN_PAGE, 'login', 'failure', 'navigate', 'navigate', 'signal');
+    expect(reasonFor(failure, LOGIN_PAGE, 'login')).toBeUndefined();
+    const completed = cloneIr();
+    wire(completed, LOGIN_PAGE, 'login', 'completed', 'navigate', 'navigate', 'signal');
+    expect(reasonFor(completed, LOGIN_PAGE, 'login')).toBe(
+      'its completed output is consumed — only the done and failure chains and the Error value are translated in this slice'
+    );
   });
 
   test('5.6 a wired Fetch defers the session read — a re-read is an invocation', () => {

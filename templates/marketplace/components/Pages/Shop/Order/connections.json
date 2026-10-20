@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "37a01595-c56c-5712-8124-59dd20631369",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "odUrl",
+      "fromProperty": "pm-token",
+      "toId": "odLoad",
+      "toProperty": "in-token"
+    },
+    {
+      "fromId": "odLoad",
+      "fromProperty": "out-order",
+      "toId": "odShape",
+      "toProperty": "in-order"
+    },
+    {
+      "fromId": "odLoad",
+      "fromProperty": "out-ok",
+      "toId": "odContent",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "odLoad",
+      "fromProperty": "out-gone",
+      "toId": "odGone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "odLoad",
+      "fromProperty": "out-problem",
+      "toId": "odGone",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "odShape",
+      "fromProperty": "out-title",
+      "toId": "odTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "odShape",
+      "fromProperty": "out-title",
+      "toId": "odPage",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "odShape",
+      "fromProperty": "out-buyer",
+      "toId": "odBuyer",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "odShape",
+      "fromProperty": "out-placed",
+      "toId": "odPlaced",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "odShape",
+      "fromProperty": "out-where",
+      "toId": "odWhere",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "odShape",
+      "fromProperty": "out-readAloud",
+      "toId": "odReadAloud",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "odShape",
+      "fromProperty": "out-parts",
+      "toId": "odEachPart",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "odUrl",
+      "fromProperty": "pm-token",
+      "toId": "odShape",
+      "toProperty": "in-token"
+    },
+    {
+      "fromId": "odShape",
+      "fromProperty": "out-pays",
+      "toId": "odEachPay",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "odShape",
+      "fromProperty": "out-hasPays",
+      "toId": "odPays",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "odLoad",
+      "fromProperty": "out-paidWords",
+      "toId": "odPaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "odLoad",
+      "fromProperty": "out-hasPaidWords",
+      "toId": "odPaid",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "odBack",
+      "fromProperty": "onClick",
+      "toId": "odToShop",
+      "toProperty": "navigate"
+    }
+  ]
+}

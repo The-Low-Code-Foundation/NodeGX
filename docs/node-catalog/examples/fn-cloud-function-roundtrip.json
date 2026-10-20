@@ -21,8 +21,8 @@
         {
           "id": "call_add",
           "type": "CloudFunction2",
-          "label": "Call AddNumbers",
-          "parameters": { "function": "AddNumbers" }
+          "label": "Call Add Numbers",
+          "parameters": { "function": "Cloud Functions/Add Numbers" }
         }
       ],
       "connections": [
@@ -33,7 +33,7 @@
       ]
     },
     {
-      "name": "/Cloud Functions/Add Numbers",
+      "name": "/#__cloud__/Cloud Functions/Add Numbers",
       "nodes": [
         {
           "id": "fn_request",

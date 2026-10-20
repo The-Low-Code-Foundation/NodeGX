@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4450db42-d868-5db1-8aec-b0fcf6b67e3f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nvIn",
+      "fromProperty": "show",
+      "toId": "nvRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "nvIn",
+      "fromProperty": "on",
+      "toId": "nvLook",
+      "toProperty": "in-on"
+    },
+    {
+      "fromId": "nvIn",
+      "fromProperty": "meId",
+      "toId": "nvToProfile",
+      "toProperty": "pm-memberId"
+    },
+    {
+      "fromId": "nvLook",
+      "fromProperty": "out-feedInk",
+      "toId": "nvFeed",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "nvLook",
+      "fromProperty": "out-feedWeight",
+      "toId": "nvFeed",
+      "toProperty": "fontWeight"
+    },
+    {
+      "fromId": "nvFeed",
+      "fromProperty": "onClick",
+      "toId": "nvToFeed",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nvLook",
+      "fromProperty": "out-postInk",
+      "toId": "nvPost",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "nvLook",
+      "fromProperty": "out-postWeight",
+      "toId": "nvPost",
+      "toProperty": "fontWeight"
+    },
+    {
+      "fromId": "nvPost",
+      "fromProperty": "onClick",
+      "toId": "nvToPost",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nvLook",
+      "fromProperty": "out-prayerInk",
+      "toId": "nvPrayer",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "nvLook",
+      "fromProperty": "out-prayerWeight",
+      "toId": "nvPrayer",
+      "toProperty": "fontWeight"
+    },
+    {
+      "fromId": "nvPrayer",
+      "fromProperty": "onClick",
+      "toId": "nvToPrayer",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "nvLook",
+      "fromProperty": "out-profileInk",
+      "toId": "nvProfile",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "nvLook",
+      "fromProperty": "out-profileWeight",
+      "toId": "nvProfile",
+      "toProperty": "fontWeight"
+    },
+    {
+      "fromId": "nvProfile",
+      "fromProperty": "onClick",
+      "toId": "nvToProfile",
+      "toProperty": "navigate"
+    }
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000000603",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pickB",
+      "fromProperty": "onClick",
+      "toId": "pickBSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pickNothing",
+      "fromProperty": "onClick",
+      "toId": "pickNothingSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "page",
+      "fromProperty": "didMount",
+      "toId": "hold",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "idRead",
+      "fromProperty": "value",
+      "toId": "hold",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-id",
+      "toId": "loadedSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-ready",
+      "toId": "loadedSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "loadedRead",
+      "fromProperty": "value",
+      "toId": "loadedText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hold",
+      "fromProperty": "out-id",
+      "toId": "confirmed",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "removeBtn",
+      "fromProperty": "onClick",
+      "toId": "confirmed",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "confirmed",
+      "fromProperty": "out-saying",
+      "toId": "sayingText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "confirmed",
+      "fromProperty": "out-id",
+      "toId": "removedSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "confirmed",
+      "fromProperty": "out-go",
+      "toId": "removedSet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "removedRead",
+      "fromProperty": "value",
+      "toId": "removedText",
+      "toProperty": "text"
+    }
+  ]
+}

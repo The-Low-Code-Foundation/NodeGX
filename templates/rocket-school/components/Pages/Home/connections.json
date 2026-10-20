@@ -107,6 +107,12 @@
     },
     {
       "fromId": "hmMe",
+      "fromProperty": "skin",
+      "toId": "hmHeader",
+      "toProperty": "skin"
+    },
+    {
+      "fromId": "hmMe",
       "fromProperty": "faceOptions",
       "toId": "hmHeader",
       "toProperty": "options"

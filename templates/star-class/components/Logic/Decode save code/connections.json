@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7479fb22-08c6-55b5-82c8-8c3f9acaa9cd",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "decodesavecoIn",
+      "fromProperty": "app",
+      "toId": "decodesavecoFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "decodesavecoIn",
+      "fromProperty": "code",
+      "toId": "decodesavecoFn",
+      "toProperty": "in-code"
+    },
+    {
+      "fromId": "decodesavecoIn",
+      "fromProperty": "run",
+      "toId": "decodesavecoFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "decodesavecoFn",
+      "fromProperty": "out-app",
+      "toId": "decodesavecoOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "decodesavecoFn",
+      "fromProperty": "out-ok",
+      "toId": "decodesavecoOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "decodesavecoFn",
+      "fromProperty": "out-error",
+      "toId": "decodesavecoOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "decodesavecoFn",
+      "fromProperty": "out-profileId",
+      "toId": "decodesavecoOut",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "decodesavecoFn",
+      "fromProperty": "success",
+      "toId": "decodesavecoOut",
+      "toProperty": "done"
+    }
+  ]
+}

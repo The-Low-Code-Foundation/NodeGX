@@ -1,0 +1,148 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "9364539f-c293-5c20-8f3d-6f8a9cb1e882",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ptRoot",
+      "type": "Group",
+      "label": "Photo",
+      "parameters": {
+        "width": {
+          "value": 96,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "children": [
+        "ptImage",
+        "ptRemove"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ptImage",
+      "type": "Image",
+      "label": "The photo",
+      "parent": "ptRoot",
+      "parameters": {
+        "width": {
+          "value": 96,
+          "unit": "px"
+        },
+        "height": {
+          "value": 96,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "objectFit": "cover",
+        "borderRadius": "var(--radius-md)",
+        "alt": "A photo of the product"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ptRemove",
+      "type": "net.noodl.controls.button",
+      "label": "Take it off",
+      "parent": "ptRoot",
+      "parameters": {
+        "label": "Remove",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--secondary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--secondary)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 96,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ptIn",
+      "type": "Component Inputs",
+      "label": "One photo",
+      "ports": [
+        {
+          "name": "url",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "thumb",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "ptGone",
+      "type": "JavaScriptFunction",
+      "label": "Say which photo goes",
+      "parameters": {
+        "functionScript": "Outputs.removed = String(Inputs.url || '') + '|' + Date.now();\nOutputs.go();",
+        "runOnChange-in-url": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-url",
+          "displayName": "url",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-removed",
+          "displayName": "removed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "ptRemoved",
+      "type": "Set Variable",
+      "label": "A photo was taken off",
+      "parameters": {
+        "name": "photoRemoved",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: which photo was taken off: the form keeps one list, whichever tile said so."
+      },
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "ptRoot"
+  ]
+}

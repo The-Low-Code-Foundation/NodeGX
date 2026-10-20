@@ -79,16 +79,13 @@ interface Fixture extends ComponentFiles {
  * off the list rather than leaving them as a permanent excuse. They are now
  * asserted the other way round, in "§1 … carries authored prose and provenance".
  *
- * `component.type` (A14) is still here and is still real.
+ * `component.type` (A14) went the same way: `ca1ff42a5` (P112-S7-LOGICTYPE) made the writer keep the type the
+ * file says (`component.componentType ?? inferComponentType(...)`), so no round trip relabels `root` → `visual`
+ * any more, and the honesty check took it off (P112-S15-TWOMCPREDS).
  */
 const ALLOWED_DIFFERENCES: Record<string, string> = {
   'component.modified':
-    'A timestamp differs by construction — the re-export is stamped at the moment the gate runs.',
-  'component.type':
-    'A14 — `inferComponentType` recomputes the type from the legacy name and only recognises a root ' +
-    'component by the marker `%rootcomponent`, so a project whose root is `/App` is relabelled ' +
-    '`root` → `visual` on save. Also note the declared return union includes `logic`, which no branch ' +
-    'can ever return.'
+    'A timestamp differs by construction — the re-export is stamped at the moment the gate runs.'
 };
 
 /** Every leaf whose JSON differs, as `dot.path: written=… reexport=…`. */

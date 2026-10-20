@@ -6,12 +6,158 @@ copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5 (`
 the drive in the dev editor found the copy made twice per open, and measured OPENWRITES' cause; both fixed and driven
 (`1ed87f2ef`, OWN-013 §7). IDREPLACE is driven too. Nothing was pushed, branched or tagged. Earlier handoffs are in this file's git history.
 
+## ▶ Lane 1 now (2026-10-14, Opus, after s18): SHIPPED — 0.4.1 and npm 0.2.1 are live; next, the language-app stranger round
+
+**Shipped 2026-10-14.** Richard gave the go. PR #51 merged (`73f52de91`), `v0.4.1` tagged on `main`, the Release run
+green on all four platforms, the draft checked (Mac arm64 zip sha512 = `latest-mac.yml`, notarised, stapled, version
+0.4.1; the merged feed lists both Mac arches; 16 assets) and published as Latest at 18:13 UTC. Richard published npm
+0.2.1 himself; all three registry shasums equal the tested tarballs'. From the registry: `stranger-render.mjs
+@nodegx/mcp@0.2.1` DONE clean; `npm create nodegx@latest` pins 0.2.1. nodegx.io deployed (nodegx-web `a0b52be`): the
+homepage offers the 0.4.1 downloads (it had linked v0.4.0's files), and the changelog shows 0.4.1 and npm 0.2.1.
+**OWN-011 AC2 ✅** on the released 0.4.1 (OWN-011 §12): 0 files written on either open. Windows and Linux were
+not installed on clean machines, as for 0.4.0.
+
+**Next, lane 1:** (1) **the language app built by a stranger from the registry** (OWN-015's sentence, Claude Code,
+an empty folder): does the agent find `fn-play-audio-a-cloud-function-returns`, and is the static gone? That is
+WAVTWICE's unproved half, and the tutorial depends on it. (2) OWN-014 AC4 with that app. (3) P112-S18-HLT010CI (CI's
+renderer gate, red on any tree since ~12:00 UTC). Richard's remaining waits: G8's in-place update click on his own
+0.3.0 (now to 0.4.1), the 0.4.0 feed post's `<strong>` leads (NEWSWHITE for 0.4.0 installs), `build.mac.notarize`.
+
+### The release as it was handed over (s18, before Richard's go)
+
+Richard wants tutorial videos (the language app with text-to-speech, no editor) and the subscriber email about 0.4.0
+and the npm kit as soon as possible. So s18 cut both releases.
+
+**Editor 0.4.1, a hotfix from `v0.4.0`:** branch `release/0.4.1` = `v0.4.0` + `2925e3e74` (UPDATEBEHIND, NEWSWHITE) +
+`76f37308c` (PAGEPORTS), cherry-picked clean, + `afb370d8d` (version, CHANGELOG). **PR #51** into `main`: all six
+required checks green. Four optional checks are red: three were red on PR #50 too, and **HLT-010** is red on every tree
+since about 12:00 UTC, the unchanged v0.4.0 included (P112-S18-HLT010CI, filed). 🔴 **`gh pr merge` was refused by the
+auto-mode classifier ("merge without review")**, so these steps are Richard's:
+1. Merge PR #51 on GitHub with a **merge commit** (not squash).
+2. `git fetch origin main && git tag v0.4.1 origin/main && git push origin v0.4.1`. Then watch Actions → Release
+   (four legs). The draft must hold every asset.
+3. RELEASE-PROCESS §4 checks on the draft, then *Publish release*. 0.4.0 users see the update on the projects list (the
+   changelog's *Good to know* says so). Inside a project, 0.4.0's own update window is the hidden one.
+4. After publishing: re-drive OWN-011 AC2 on 0.4.1 by §10/§11's method to close AC2; deploy nodegx-web for the
+   changelog (step 10). `cline-dev` already says 0.4.1 (`c2eab03bf`) and carries the same changelog entry (`e88ebeeec`).
+
+**npm 0.2.1** (`@nodegx/mcp`, `@nodegx/preview`, `create-nodegx`), packed in a clean worktree at the pushed `e88ebeeec`
+(every dependency's `dist` rebuilt there, not linked). It carries s18's WAVTWICE example (`135244dc0`), the starter set +
+FRESHFONT (`00e569472`), NOLIBRARY (`23ea136b9`), TWOLOADERS (`9e40fc5ab`) and CLOUDCALLNAME (`2aceb7ec2`), plus lane 5's
+s5 commits up to `7f6bee6d9` (BACKENDSESSION, LAPTOPGAPS, TAPHOLD, WATCHONE, DESCRIBEINSIDE, NOTELOOP). Lane 5
+(opennoodl-54) was asked whether any of it should not ship and had not answered by the pack. Tarballs in
+`~/vscode_projects/OpenNoodl-worktrees/tgz021/`:
+
+| tarball | shasum | checked |
+|---|---|---|
+| `nodegx-preview-0.2.1.tgz` | `1aa40877e7e3…` | 973 + 985 bundle inputs, 0 outside the worktree; installed in an empty folder: `/` 200, a planted `.env` and `.mcp.json` 404, rendered in 9 ms |
+| `nodegx-mcp-0.2.1.tgz` | `8647ecf820cb…` | MCP 602 / kit-extract 486 / cloud 702 inputs, 0 first-party outside; `dist/starter-assets` present; `stranger-render.mjs <tgz>`: `create_project` (62 starter files) → `render_report` DONE clean |
+| `create-nodegx-0.2.1.tgz` | `7b93676cbea4…` | empty folder, `HOME` empty: `.mcp.json` pins `@nodegx/mcp@0.2.1`, the skill, CLAUDE.md, AGENTS.md, `.vibe/`, `opencode.json`; its tests 24 / 24 |
+
+Gates: `publishable.js` 6 packages / 0 problems; `bugs.js gate` 0 blockers (mcp, preview, project-contract, node-spec,
+canvas-look). **Richard runs** `scripts/own/publish-npm.sh ~/vscode_projects/OpenNoodl-worktrees/tgz021` in his own
+terminal (2FA). It publishes the MCP before `create-nodegx` and waits for each one to go live. Then:
+`node scripts/own/stranger-render.mjs @nodegx/mcp@0.2.1` from the registry.
+
+**Before the tutorial is recorded:** one stranger round of the language app from the registry (OWN-015's sentence) to
+see whether the agent finds the speaking example and the static is gone. That is WAVTWICE's unproved half.
+
+**Known and open for the video:** P112-S14-KITROOTDEPLOY (a kit-rooted component: the preview and `nodegx deploy`
+refuse it; GAM-014's preview spec is 5 / 5 red on HEAD too; `validate_project` now says so). The example plays audio
+with a Function, so the language app needs no kit node.
+
+**Done s18, first half** (`76f37308c` code): **PAGEPORTS found and fixed** (OWN-011 §11). Nothing in `projectSaveTriggers` armed
+the open-time save: `SchemaHandler._store` → `setMetaData(…, undefined)` over `undefined` (no backend) armed it, on
+open and on every window focus, and the save 1 s later swept in the Page port cache the viewer had just sent. It is a
+race (the release wrote Home on 3 of 3 opens here, first open included), not "the second open". `setMetaData` now
+arms a save only on a changed value. Proved on the release with the rule patched into its renderer (0 files written
+on two opens, the Page's ports seen arriving on each), `test:ci` 3017 / 0 at seed 29054, mutant red. The MCP needed
+no change.
+
+**Next, lane 1:** nothing agent-sized is left that does not wait. (1) **The next editor release** (Richard's go) ships
+UPDATEBEHIND, NEWSWHITE (`2925e3e74`) and PAGEPORTS (`76f37308c`). On it, re-drive OWN-011 AC2 by §10/§11's method
+(first open and launcher card reopen, `shasum` of every file) to close AC2. (2) **OWN-014 AC4** needs OWN-015's
+language app (lane 3). (3) Richard's three waits below are unchanged.
+
+🔴 **Instrumenting the RELEASED bundle** (no source maps, no `req.c`): push a chunk onto `webpackChunknoodl_editor`
+for `req`, then find a module by scanning `req.m[id].toString()` and calling `req(id)`. In 0.4.0: `EventDispatcher` =
+`req(11138).EventDispatcher`, `ProjectModel` = `req(33917).ProjectModel`, `filesystem` = `req(29215).filesystem`.
+Wrapping `window.setTimeout` for `ms === 1000` catches the autosave debounce with its caller's stack.
+
+## Lane 1 s17 (2026-10-14, Opus): PAGEPORTS, then Richard's G8 click
+
+**Done this session** (`2925e3e74` code, `ffbee2c58` docs): OWN-011 AC2 re-driven on the release zip's 0.4.0
+(§10: the first open writes nothing; a reopen with Home active writes Home = PAGEPORTS); OWN-013 G8's agent half
+(§13: 0.3.0's own updater → 0.4.0 downloaded; installed over, a 0.3.0 project migrates once, reopen clean); OWN-014
+AC3 met. Found and fixed for the next release: **UPDATEBEHIND** (the update dialog is invisible inside a project) and
+**NEWSWHITE** (the what's-new post's bold leads and link are white on white; the header named the running version).
+
+**Next: P112-S11-PAGEPORTS** (closes OWN-011 AC2; `kit: mcp`). `instancePortsChanged` is NOT a save trigger
+(`projectmodel.ts` ~:1920), so something else arms the save at load and the component is written with the cache the
+viewer just announced. First suspect: `NodeGraphModel` books `scheduleUpdateTypes` on every
+`Model.instancePortsChanged` (:245-258). Instrument in a dev editor (log which `projectSaveTriggers` event armed the
+save) on a copy of `scratchpad/ac2/my-apps/reading-list`, then choose: the editor stops treating a cache fill as an
+edit (next release) and/or the MCP writes the Page's cache as the viewer would (helps the released 0.4.0 now). The
+indexes differ by project (5, 6 here; 2 in Deadline Desk), so measure before writing them from the kit.
+
+**Waiting on Richard:** (1) G8's in-place update on his own `/Applications/NodeGX.app` (still 0.3.0): launcher →
+*Download and install* → *Restart now*; the zip is already in his updater cache. (2) Whether to rewrite the live 0.4.0
+feed post's `<strong>` leads as plain `<p>` so current installs can read them (NEWSWHITE). (3) `build.mac.notarize:
+false` (OWN-013 §12).
+
+🔴 **Driving the RELEASED app** (no dev stack): `ditto` the bundle to the scratchpad, launch
+`env -u ELECTRON_RUN_AS_NODE NOODLPORT=8774 NOODL_REMOTE_DEBUG_PORT=9333 <app>/Contents/MacOS/NodeGX --user-data-dir=<scratch> -ApplePersistenceIgnoreState YES`.
+Stub the folder picker with `webpackChunknoodl_editor.push([[Symbol()],{},r=>req=r])` and then
+`req(29215).filesystem.openDialog = async () => '<dir>'` (same id in 0.3.0 and 0.4.0). Stubbing
+`require('@electron/remote').dialog` does NOT reach the bundle and pops the real dialog on Richard's screen. The
+updater cache `~/Library/Caches/noodl-editor-updater` is shared with his real app, and *Restart now* relaunches with
+his real profile, so never press it on a copy.
+
+## ✅ 2026-10-14 (s17, Opus): npm packages 0.2.0 PUBLISHED
+
+All three live and `latest` (UTC): `create-nodegx` ~12:00, `@nodegx/preview` ~12:00, `@nodegx/mcp` 12:07:52. Each
+registry `dist.shasum` equals the tested tarball's in the table below. **From the registry**, empty folder, `HOME`
+empty: `npm create nodegx@0.2.0` writes `.mcp.json` pinning `@nodegx/mcp@0.2.0` and the `nodegx-your-own-editor`
+skill; `stranger-render.mjs @nodegx/mcp@0.2.0` → `create_project`, `render_report` DONE clean. The OWN-013 peer was
+told nodegx-web may deploy. Worktree removed.
+
+🔴 **npm's staged publishing (GA May 2026) bit the MCP publish.** Richard's first run published preview and
+create-nodegx, but `@nodegx/mcp` 0.2.0 landed as a STAGED version (the 7.6 MB upload went through npm's browser
+sign-in flow, "Press ENTER to open in the browser"). For about seven minutes `create-nodegx@latest` pinned an MCP that
+did not exist on the registry, so a new folder's agent had no server. The re-run answered `E409 Cannot publish over
+previously staged version "0.2.0"`; the version then appeared (approved through that browser flow). npm 10.9.4 has
+no `npm stage`; `npx npm@11.15.0 stage list` reads the queue (`approve <id>` needs 2FA). **Next publish:** publish
+`@nodegx/mcp` first and poll it to live before `create-nodegx`, or `npm stage publish` all three and approve them
+together. `publish-npm.sh`'s order (preview, mcp, create-nodegx) is right; it does not wait for a staged one.
+
+### What was packed and tested (kept for the record)
+
+`cline-dev` pushed at `54a0ce946` (it carries OWN-019's `cda7ea056` + `5f8dee6d7`, OWN-007's skill, and
+`007e80905` TWOMCPREDS fixed: both MCP specs 19 / 19). Packed in a clean worktree at that commit
+(`scratchpad/npm020-s17`, every build-output link to primary removed; node-spec, canvas-look and the runtime's
+`dist-types` built inside it). Tarballs in this session's `scratchpad/tgz020/`:
+
+| tarball | shasum | checked |
+|---|---|---|
+| `nodegx-preview-0.2.0.tgz` | `7312c5fc1663…` | 971 + 984 bundle inputs, 0 outside the worktree; installed in an empty folder: `/` 200, a planted `.env` and `.mcp.json` **404** (ENVSERVED), Chrome draws the page in 207 ms, 0 page errors |
+| `nodegx-mcp-0.2.0.tgz` | `e332f1d1a733…` | 486 kit-extract inputs, 0 outside; `dist/preset-fonts` 15 files, `drive-steps.js` has `for_ms` (OWN-019's checks); P18's uncommitted `patternLib` absent; `stranger-render.mjs` DONE clean, `--plant` sees the planted defect; `stranger-backend.mjs` key never in the project, canary control found |
+| `create-nodegx-0.2.0.tgz` | `52075786e1e0…` | from the tarball in an empty folder, `HOME` untouched: `.mcp.json` pins `@nodegx/mcp@0.2.0`, CLAUDE.md, AGENTS.md, `.claude/skills/nodegx-your-own-editor/SKILL.md`, `.vibe/`, `opencode.json` |
+
+Gates: `publishable.js` 3 / 0; `bugs.js gate` 0 blockers (mcp, preview, project-contract, node-spec, canvas-look).
+`npm publish` stopped on `EOTP` (2FA) before anything went out. **Richard runs, in his own terminal:**
+`scripts/own/publish-npm.sh <that tgz020 folder>`. Then: poll `npm view <name>@0.2.0 dist.shasum` (a first read can
+404 for a minute) against the table; run `stranger-render.mjs @nodegx/mcp@0.2.0` from the registry; tell the OWN-013
+peer (opennoodl-a4) that nodegx-web may deploy (it is holding so the changelog's npm 0.2.0 section doesn't go live
+before the packages do); then remove the worktree (`git worktree remove --force` it, build outputs only).
+CHANGELOG's npm 0.2.0 section was rewritten for what ships (`54a0ce946`). Known open, high:
+P112-OWN019-BACKENDSESSION (a local backend stops with the agent's session) — in *Good to know*.
+
 ## The board (re-derived from the task files, 2026-10-11)
 
 | task | built | driven / gated | Model |
 |---|---|---|---|
 | OWN-000 – OWN-006 | 🟢 | as s10 (OWN-006 gains a fourth fixture, s11) | — |
-| OWN-007 the brief | 📋 (R3: a skill in a public repo) | — | see its file |
+| OWN-007 the brief | 🟢 **s17 (2026-10-14, Fable): the kit's skill `nodegx-your-own-editor`**, written by `npm create nodegx` into `.claude/skills/`; AC1 ✅, AC2 measured, AC3 waits on OWN-008 (§6) | PASS / FAIL control pair from the registry at 0.1.0; `create-nodegx` tests 23 / 23 | ships on the next `create-nodegx` publish (R11) |
 | OWN-008 three strangers | 📋 | — | see its file |
 | OWN-009 Richard's own | 📋 | — | see its file |
 | OWN-010 every bug teaches the kit | 🟡 ledger + `gate <kit>` | `gate mcp`: 0 blockers, 2 known issues (FORMATSKEW, PAGEPORTS) | see its file |

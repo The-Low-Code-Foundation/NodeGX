@@ -1,0 +1,462 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e2770499-a4a0-50a1-8107-eafd29f2c7bb",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "jnPage",
+      "type": "Page",
+      "label": "Ask to join",
+      "parameters": {
+        "title": "Ask to join",
+        "urlPath": "join"
+      },
+      "children": [
+        "jnRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "jnRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "jnPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "gm-app"
+      },
+      "children": [
+        "jnBar",
+        "jnBody"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "jnBar",
+      "type": "/UI/Bar",
+      "label": "The bar",
+      "parent": "jnRoot",
+      "parameters": {},
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "jnBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "jnRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "jnForm",
+        "jnThanks"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "jnForm",
+      "type": "Group",
+      "label": "The form",
+      "parent": "jnBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "children": [
+        "jnTitle",
+        "jnLead",
+        "jnName",
+        "jnEmail",
+        "jnOver13",
+        "jnGo",
+        "jnError"
+      ],
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "jnTitle",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "jnForm",
+      "parameters": {
+        "text": "Ask to join",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 640
+    },
+    {
+      "id": "jnLead",
+      "type": "Text",
+      "label": "What happens",
+      "parent": "jnForm",
+      "parameters": {
+        "text": "An admin lets each new member in. Then you sign in with your email: we send you a link, no password.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "jnName",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your name",
+      "parent": "jnForm",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Your name"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "jnEmail",
+      "type": "net.noodl.controls.textinput",
+      "label": "Your email",
+      "parent": "jnForm",
+      "parameters": {
+        "useLabel": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-semibold)",
+        "labelcolor": "var(--foreground)",
+        "label": "Your email",
+        "type": "email"
+      },
+      "x": 280,
+      "y": 1000
+    },
+    {
+      "id": "jnOver13",
+      "type": "net.noodl.controls.checkbox",
+      "label": "I am 13 or older",
+      "parent": "jnForm",
+      "parameters": {
+        "useLabel": true,
+        "label": "I am 13 or older",
+        "width": {
+          "value": 22,
+          "unit": "px"
+        },
+        "height": {
+          "value": 22,
+          "unit": "px"
+        },
+        "borderWidth": {
+          "value": 2,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "borderRadius": "var(--radius-sm)",
+        "labelSpacing": {
+          "value": 8,
+          "unit": "px"
+        },
+        "labelfontSize": "var(--text-sm)",
+        "labelcolor": "var(--foreground)",
+        "cssClassName": "gm-check"
+      },
+      "x": 280,
+      "y": 1120
+    },
+    {
+      "id": "jnGo",
+      "type": "net.noodl.controls.button",
+      "label": "Ask to join",
+      "parent": "jnForm",
+      "parameters": {
+        "label": "Ask to join",
+        "borderRadius": "var(--radius-lg)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 1240
+    },
+    {
+      "id": "jnError",
+      "type": "Text",
+      "label": "What went wrong",
+      "parent": "jnForm",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "cssClassName": "gm-wrap"
+      },
+      "x": 280,
+      "y": 1360
+    },
+    {
+      "id": "jnThanks",
+      "type": "Group",
+      "label": "On the list",
+      "parent": "jnBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "alignItems": "center",
+        "paddingTop": "var(--space-8)",
+        "mounted": false
+      },
+      "children": [
+        "jnThanksWords",
+        "jnThanksFine",
+        "jnRules"
+      ],
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "jnThanksWords",
+      "type": "Text",
+      "label": "Thanks",
+      "parent": "jnThanks",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--foreground)",
+        "cssClassName": "gm-read gm-wrap",
+        "as": "h1",
+        "textAlignX": "center"
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "jnThanksFine",
+      "type": "Text",
+      "label": "What happens next",
+      "parent": "jnThanks",
+      "parameters": {
+        "text": "An admin lets each new member in, usually within a day. We’ll send you a message when you’re in.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "lineHeight": "var(--leading-relaxed)",
+        "cssClassName": "gm-wrap",
+        "textAlignX": "center"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "jnRules",
+      "type": "net.noodl.controls.button",
+      "label": "Read the community rules",
+      "parent": "jnThanks",
+      "parameters": {
+        "label": "Read the community rules",
+        "borderRadius": {
+          "value": 9,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "backgroundColor": "var(--surface)",
+        "color": "var(--primary)",
+        "borderStyle": "solid",
+        "borderWidth": {
+          "value": 1.5,
+          "unit": "px"
+        },
+        "borderColor": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "jnGather",
+      "type": "JavaScriptFunction",
+      "label": "The form, as one ask",
+      "parameters": {
+        "functionScript": "Outputs.join = { name: Inputs.name || '', email: Inputs.email || '', over13: Inputs.over13 === true };\nOutputs.thanks = 'Thanks, ' + String(Inputs.name || '').trim().split(' ')[0] + '. You’re on the list.';\nOutputs.go();",
+        "runOnChange-in-name": false,
+        "runOnChange-in-email": false,
+        "runOnChange-in-over13": false
+      },
+      "ports": [
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-email",
+          "displayName": "email",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-over13",
+          "displayName": "over13",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-join",
+          "displayName": "join",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-thanks",
+          "displayName": "thanks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "jnCall",
+      "type": "CloudFunction2",
+      "label": "askToJoin(join)",
+      "parameters": {
+        "function": "askToJoin"
+      },
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "jnAsked",
+      "type": "Switch",
+      "label": "Asked",
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "jnAsking",
+      "type": "Switch",
+      "label": "Not asked yet",
+      "parameters": {
+        "onFromStart": true
+      },
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "jnToRules",
+      "type": "RouterNavigate",
+      "label": "To the rules",
+      "parameters": {
+        "target": "/Pages/Rules"
+      },
+      "x": 530,
+      "y": 1840
+    }
+  ],
+  "visualRoots": [
+    "jnPage"
+  ]
+}

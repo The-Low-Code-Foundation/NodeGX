@@ -373,7 +373,8 @@ describe('§5 — the gates, each with its named reason', () => {
     );
   });
 
-  test('11: a consumed Id output, and a consumed Failure pulse', () => {
+  // EXP-011 §90. A consumed Failure pulse was gate 11's second half; it is the catch's chain now.
+  test('11: a consumed Id output; a consumed Failure pulse is a chain', () => {
     const id = cloneIr();
     wire(id, ADMIN, 'createRecord', 'id', 'updateRecord', 'modelId');
     expect(reasonFor(id, ADMIN, 'createRecord')).toBe(
@@ -382,9 +383,7 @@ describe('§5 — the gates, each with its named reason', () => {
 
     const failure = cloneIr();
     wire(failure, ADMIN, 'createRecord', 'failure', 'navigateLogout', 'navigate', 'signal');
-    expect(reasonFor(failure, ADMIN, 'createRecord')).toBe(
-      'its failure output is consumed — only the done chain and the Error value are translated in this slice'
-    );
+    expect(reasonFor(failure, ADMIN, 'createRecord')).toBeUndefined();
   });
 
   test('a deferred verb does not bind its Error into a render sink', () => {

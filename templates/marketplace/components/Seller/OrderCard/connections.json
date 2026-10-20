@@ -1,0 +1,271 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "da66c3dd-3435-59b0-8b9b-943f2d1cf044",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ocIn",
+      "fromProperty": "head",
+      "toId": "ocTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "pill",
+      "toId": "ocPillWords",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "pillBg",
+      "toId": "ocPill",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "pillInk",
+      "toId": "ocPillWords",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "seller",
+      "toId": "ocSeller",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "hasSeller",
+      "toId": "ocSeller",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "lines",
+      "toId": "ocLines",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "where",
+      "toId": "ocWhere",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "way",
+      "toId": "ocWay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "note",
+      "toId": "ocNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "canConfirm",
+      "toId": "ocConfirm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "costLabel",
+      "toId": "ocCost",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "confirmLabel",
+      "toId": "ocConfirmGo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "canMove",
+      "toId": "ocMove",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "moveLabel",
+      "toId": "ocMove",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "canCancel",
+      "toId": "ocCancelOpen",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "hasActions",
+      "toId": "ocActions",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "id",
+      "toId": "ocGatherConfirm",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "id",
+      "toId": "ocGatherMove",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "id",
+      "toId": "ocGatherCancel",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "ocIn",
+      "fromProperty": "next",
+      "toId": "ocGatherMove",
+      "toProperty": "in-next"
+    },
+    {
+      "fromId": "ocCost",
+      "fromProperty": "onTextChanged",
+      "toId": "ocGatherConfirm",
+      "toProperty": "in-cost"
+    },
+    {
+      "fromId": "ocWhen",
+      "fromProperty": "onTextChanged",
+      "toId": "ocGatherConfirm",
+      "toProperty": "in-when"
+    },
+    {
+      "fromId": "ocReason",
+      "fromProperty": "onTextChanged",
+      "toId": "ocGatherCancel",
+      "toProperty": "in-reason"
+    },
+    {
+      "fromId": "ocConfirmGo",
+      "fromProperty": "onClick",
+      "toId": "ocGatherConfirm",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ocMove",
+      "fromProperty": "onClick",
+      "toId": "ocGatherMove",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ocCancelOpen",
+      "fromProperty": "onClick",
+      "toId": "ocCancelling",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ocCancelKeep",
+      "fromProperty": "onClick",
+      "toId": "ocCancelling",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ocCancelling",
+      "fromProperty": "state",
+      "toId": "ocCancel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ocCancelGo",
+      "fromProperty": "onClick",
+      "toId": "ocGatherCancel",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ocGatherConfirm",
+      "fromProperty": "out-move",
+      "toId": "ocCall",
+      "toProperty": "in-move"
+    },
+    {
+      "fromId": "ocGatherConfirm",
+      "fromProperty": "out-go",
+      "toId": "ocCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ocGatherMove",
+      "fromProperty": "out-move",
+      "toId": "ocCall",
+      "toProperty": "in-move"
+    },
+    {
+      "fromId": "ocGatherMove",
+      "fromProperty": "out-go",
+      "toId": "ocCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ocGatherCancel",
+      "fromProperty": "out-move",
+      "toId": "ocCall",
+      "toProperty": "in-move"
+    },
+    {
+      "fromId": "ocGatherCancel",
+      "fromProperty": "out-go",
+      "toId": "ocCall",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ocCall",
+      "fromProperty": "error",
+      "toId": "ocError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ocCall",
+      "fromProperty": "failure",
+      "toId": "ocFailed",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "ocCall",
+      "fromProperty": "done",
+      "toId": "ocFailed",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ocFailed",
+      "fromProperty": "state",
+      "toId": "ocError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ocCall",
+      "fromProperty": "done",
+      "toId": "ocCancelling",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "ocCall",
+      "fromProperty": "done",
+      "toId": "ocStamp",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ocStamp",
+      "fromProperty": "out-at",
+      "toId": "ocMoved",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ocStamp",
+      "fromProperty": "out-go",
+      "toId": "ocMoved",
+      "toProperty": "do"
+    }
+  ]
+}

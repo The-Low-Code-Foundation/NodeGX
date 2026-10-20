@@ -68,6 +68,13 @@ export interface StoreKeyPlan {
   required: boolean;
 }
 
+/** A sentence about one Global Store declarer, with where it sits. */
+export interface StoreNote {
+  componentPath: string;
+  nodeId: string;
+  text: string;
+}
+
 export interface StorePlan {
   /** The authored store name — 'app' when every naming node used the default. */
   name: string;
@@ -81,10 +88,18 @@ export interface StorePlan {
   declarers: VariableWriter[];
   /** `net.noodl.GlobalStore.Set` nodes writing this store. */
   writers: VariableWriter[];
+  /**
+   * EXP-011 §78. The State History, Undo / Redo, State Snapshot and Optimistic Update nodes naming this store. Each is
+   * handed the store module itself, so a store one of them names is emitted even when no Global Store node declares it.
+   */
+  historians?: VariableWriter[];
   /** Set: the whole store defers (authored persist, unparseable initial state on every declarer). */
   deferred?: string;
-  /** Merged initial states, ignored storageKeys — surfaced through the component notes. */
-  notes: string[];
+  /**
+   * Merged initial states, ignored storageKeys — one per declarer, routed app-wide by `emitApp` (P18-S110-STORENOTES:
+   * this list had no reader, so "nothing dropped silently" did not hold for it).
+   */
+  notes: StoreNote[];
   /**
    * EXP-011 §47. Present when the store is a named **Object** — an `Object` node in "Specify
    * explicitly" mode with a literal Id, and the `Set Object Properties` nodes naming the same
@@ -102,6 +117,12 @@ export const GLOBAL_STORE_SUBSCRIBE = 'net.noodl.GlobalStore.Subscribe';
 
 export function isGlobalStoreFamily(type: string): boolean {
   return type === GLOBAL_STORE || type === GLOBAL_STORE_SET || type === GLOBAL_STORE_SUBSCRIBE;
+}
+
+/** EXP-011 §78. The nodes `src/lib/history.ts` hosts — each names a Global Store with the same `storeName` port. */
+const HISTORY_FAMILY = new Set(['net.noodl.StateHistory', 'net.noodl.StateHistory.Undo', 'net.noodl.StateSnapshot', 'net.noodl.OptimisticUpdate']);
+export function isHistoryFamily(type: string): boolean {
+  return HISTORY_FAMILY.has(type);
 }
 
 /** `Object` — displayed "Object", stored as `Model2` (modelnode2.ts). */
@@ -443,7 +464,7 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
   const objectIds = new Set<string>();
   for (const component of ir.components) {
     for (const node of component.nodes) {
-      if (isGlobalStoreFamily(node.type)) {
+      if (isGlobalStoreFamily(node.type) || isHistoryFamily(node.type)) {
         const name = storeNameOf(node, wiredPortsOf(component));
         if (name !== undefined) globalStoreNames.add(name);
       }
@@ -555,6 +576,14 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
           }
         }
       }
+      // EXP-011 §78. A history-family node names the store it is handed; a wired name defers in plan.ts.
+      if (isHistoryFamily(node.type)) {
+        const storeName = storeNameOf(node, wiredPortsOf(component));
+        if (storeName !== undefined) {
+          const plan = ensureStore(storeName);
+          plan.historians = [...(plan.historians ?? []), writerRef(component, node)];
+        }
+      }
       if (isGlobalStoreFamily(node.type)) {
         const storeName = storeNameOf(node, wiredPortsOf(component));
         if (storeName === undefined) continue; // dynamic name — the node defers in plan.ts
@@ -565,7 +594,7 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
             plan.deferred =
               plan.deferred ?? 'a declarer authors persist — browser-storage rehydration is not translatable';
           } else if (node.parameters.some((p) => p.name === 'storageKey')) {
-            plan.notes.push(`declarer \`${node.id}\` sets storageKey without persist — inert, ignored`);
+            plan.notes.push({ componentPath: component.path, nodeId: node.id, text: 'sets storageKey without persist — inert, ignored' });
           }
           const initial = initialStateOf(node, wiredPortsOf(component));
           if (initial.kind === 'object') {
@@ -575,13 +604,15 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
                 entry.required = true;
                 entry.initial = value;
               } else if (JSON.stringify(entry.initial) !== JSON.stringify(value)) {
-                plan.notes.push(
-                  `two declarers give key "${key}" different initial values — first-seen wins (declarer \`${node.id}\` loses)`
-                );
+                plan.notes.push({
+                  componentPath: component.path,
+                  nodeId: node.id,
+                  text: `gives key "${key}" a different initial value from an earlier declarer — first-seen wins, so this one is ignored`
+                });
               }
             }
           } else if (initial.kind === 'bad') {
-            plan.notes.push(`declarer \`${node.id}\` has a non-literal or non-object initialState — contributes nothing`);
+            plan.notes.push({ componentPath: component.path, nodeId: node.id, text: 'has a non-literal or non-object initialState — contributes nothing' });
           }
         }
         if (node.type === GLOBAL_STORE_SET) {
@@ -1029,7 +1060,8 @@ export function isTextInputType(type: string): boolean {
 
 /**
  * The store a node names: the literal `storeName`, `'app'` when absent or empty (all three
- * runtime nodes default exactly so), undefined when wired or non-literal — genuinely dynamic.
+ * runtime nodes default exactly so, and the history family's three with them), undefined when wired or
+ * non-literal — genuinely dynamic.
  */
 export function storeNameOf(node: NodeIR, wiredPorts: Set<string>): string | undefined {
   if (wiredPorts.has(`${node.id}:storeName`)) return undefined;

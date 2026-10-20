@@ -1,0 +1,530 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "37a01595-c56c-5712-8124-59dd20631369",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "odPage",
+      "type": "Page",
+      "label": "Your order",
+      "parameters": {
+        "title": "Your order",
+        "urlPath": "order/{token}"
+      },
+      "children": [
+        "odRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "odRoot",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "odPage",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--background)",
+        "minHeight": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "alignItems": "center",
+        "cssClassName": "mk-app"
+      },
+      "children": [
+        "odTop",
+        "odBody",
+        "odNav"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "odTop",
+      "type": "/Shop/Top",
+      "label": "The bar",
+      "parent": "odRoot",
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "odBody",
+      "type": "Group",
+      "label": "The page",
+      "parent": "odRoot",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "maxWidth": {
+          "value": 1080,
+          "unit": "px"
+        },
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-8)",
+        "rowGap": "var(--space-4)"
+      },
+      "children": [
+        "odBack",
+        "odContent",
+        "odGone"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "odNav",
+      "type": "/Shop/Nav",
+      "label": "The bottom bar",
+      "parent": "odRoot",
+      "parameters": {
+        "on": "order"
+      },
+      "x": 160,
+      "y": 2320
+    },
+    {
+      "id": "odUrl",
+      "type": "PageInputs",
+      "label": "Which order",
+      "parameters": {
+        "pathParams": "token"
+      },
+      "x": 650,
+      "y": 880
+    },
+    {
+      "id": "odBack",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "parent": "odBody",
+      "parameters": {
+        "label": "← The shop",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--secondary)",
+        "backgroundColor": "transparent",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-0)",
+        "paddingRight": "var(--space-0)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "odContent",
+      "type": "Group",
+      "label": "The order",
+      "parent": "odBody",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "odTitle",
+        "odHead",
+        "odPaid",
+        "odPays",
+        "odParts"
+      ],
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "odTitle",
+      "type": "Text",
+      "label": "Order MK-…",
+      "parent": "odContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "cssClassName": "mk-display",
+        "as": "h1"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "odHead",
+      "type": "Group",
+      "label": "Who, when, where, and how to say the number",
+      "parent": "odContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "rowGap": "var(--space-2)"
+      },
+      "children": [
+        "odWho",
+        "odWhere",
+        "odReadAloud"
+      ],
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "odWho",
+      "type": "Group",
+      "label": "Who and when",
+      "parent": "odHead",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between"
+      },
+      "children": [
+        "odBuyer",
+        "odPlaced"
+      ],
+      "x": 340,
+      "y": 1000
+    },
+    {
+      "id": "odBuyer",
+      "type": "Text",
+      "label": "Who it is for",
+      "parent": "odWho",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1120
+    },
+    {
+      "id": "odPlaced",
+      "type": "Text",
+      "label": "When it was placed",
+      "parent": "odWho",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 400,
+      "y": 1240
+    },
+    {
+      "id": "odWhere",
+      "type": "Text",
+      "label": "Where it goes",
+      "parent": "odHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 340,
+      "y": 1360
+    },
+    {
+      "id": "odReadAloud",
+      "type": "Text",
+      "label": "The number, to read out",
+      "parent": "odHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 340,
+      "y": 1480
+    },
+    {
+      "id": "odPaid",
+      "type": "Text",
+      "label": "What Paystack said",
+      "parent": "odContent",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1600
+    },
+    {
+      "id": "odPays",
+      "type": "Group",
+      "label": "One box per country paid by card",
+      "parent": "odContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "odEachPay"
+      ],
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "odEachPay",
+      "type": "For Each",
+      "label": "One per country paid by card",
+      "parent": "odPays",
+      "parameters": {
+        "template": "/Shop/PayBox"
+      },
+      "x": 340,
+      "y": 1840
+    },
+    {
+      "id": "odParts",
+      "type": "Group",
+      "label": "One box per seller",
+      "parent": "odContent",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)",
+        "cssClassName": "mk-parts"
+      },
+      "children": [
+        "odEachPart"
+      ],
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "odEachPart",
+      "type": "For Each",
+      "label": "One per seller",
+      "parent": "odParts",
+      "parameters": {
+        "template": "/Shop/OrderPart"
+      },
+      "x": 340,
+      "y": 2080
+    },
+    {
+      "id": "odGone",
+      "type": "Text",
+      "label": "No order here",
+      "parent": "odBody",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "odLoad",
+      "type": "JavaScriptFunction",
+      "label": "The order this link opens",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nif (Inputs.token === undefined) return;\nvar token = String(Inputs.token || '');\n// Back from Paystack: the address carries the payment's reference. Ask what happened to it, then forget it.\nvar ref = '';\ntry { ref = new URLSearchParams(location.search).get('reference') || ''; } catch (e) { ref = ''; }\nvar said = '';\nif (ref) {\n  try {\n    var c = (await Noodl.CloudFunctions.run('checkPayment', { check: { reference: ref } })).result || {};\n    said = c.outcome === 'paid' ? 'Paid. Thank you: your sellers can see it.' : c.outcome === 'waiting' ? 'Paystack hasn’t finished with this payment yet. Open this page again in a minute.' : c.wrongAmount ? 'Paystack took a payment that doesn’t match what is owed now. Nothing is marked paid: message your sellers.' : 'That payment didn’t go through. You can try again.';\n  } catch (e) { said = (e && e.error) || 'The payment couldn’t be checked just now. Open this page again in a minute.'; }\n  try { history.replaceState(null, '', location.pathname); } catch (e) {}\n}\nOutputs.paidWords = said;\nOutputs.hasPaidWords = !!said;\ntry {\n  var r = await Noodl.CloudFunctions.run('followOrder', { follow: { token: token } });\n} catch (e) { Outputs.problem = (e && e.error) || 'This order could not be read just now. Check the connection, then open it again.'; Outputs.gone = true; Outputs.ok = false; return; }\nvar o = r && r.order;\nif (!o) { Outputs.problem = 'There is no order at this link. Check it was copied whole.'; Outputs.gone = true; Outputs.ok = false; return; }\nvar orders = readOrders().filter(function (x) { return x.token !== token; });\norders.unshift({ number: o.number, token: token });\ntry { localStorage.setItem('mk-orders', JSON.stringify(orders.slice(0, 20))); } catch (e) {}\nOutputs.order = o;\nOutputs.gone = false;\nOutputs.ok = true;"
+      },
+      "ports": [
+        {
+          "name": "in-token",
+          "displayName": "token",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-paidWords",
+          "displayName": "paidWords",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasPaidWords",
+          "displayName": "hasPaidWords",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-problem",
+          "displayName": "problem",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-gone",
+          "displayName": "gone",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-order",
+          "displayName": "order",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 640
+    },
+    {
+      "id": "odShape",
+      "type": "JavaScriptFunction",
+      "label": "The order, worded for its buyer",
+      "parameters": {
+        "functionScript": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nfunction why(e) { var m = e && (e.error || e.message) || String(e || ''); if (/admin’s/.test(m)) return m; return /session|auth|permission|forbidden|401|403/i.test(m) ? 'Sign in to see this page.' : 'This page could not be read: ' + m; }\nasync function adminOnly() {\n  var me = (await Noodl.CloudFunctions.run('whoAmI', {})).me;\n  if (!me || me.role !== 'admin') throw { error: 'This page is the admin’s. Sign in as the admin to see it.' };\n}\nfunction thumb(f, size) { var u = f && f.url ? String(f.url) : ''; return u ? u + (u.indexOf('?') < 0 ? '?' : '&') + 'thumb=' + size : ''; }\nfunction money(n, cur) { try { return new Intl.NumberFormat(undefined, { style: 'currency', currency: cur || 'GHS', currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 }).format(Number(n) || 0); } catch (e) { return (cur || '') + ' ' + n; } }\n\nfunction plural(n, one, many) { return n + ' ' + (n === 1 ? one : many); }\nfunction byName(a, b) { return String(a.name || '').localeCompare(String(b.name || '')); }\nfunction newest(a, b) { return String(b.createdAt || '').localeCompare(String(a.createdAt || '')) || byName(a, b); }\nfunction symbolOf(cur) {\n  try {\n    var part = new Intl.NumberFormat('en', { style: 'currency', currency: cur, currencyDisplay: 'narrowSymbol' }).formatToParts(0).filter(function (x) { return x.type === 'currency'; })[0];\n    return part ? part.value : cur;\n  } catch (e) { return cur; }\n}\nfunction rateOf(rates, cur) {\n  var r = (rates || []).filter(function (x) { return x.currency === cur; })[0];\n  var v = r ? Number(r.value) : 0;\n  return v > 0 ? v : 0;\n}\nfunction converted(price, from, to, rates) {\n  var a = rateOf(rates, from), b = rateOf(rates, to);\n  if (!to || to === from || !a || !b) return { amount: Number(price) || 0, currency: from, same: true };\n  return { amount: Number(price) * a / b, currency: to, same: false };\n}\nfunction priced(price, from, to, rates) {\n  var c = converted(price, from, to, rates);\n  return c.same ? { price: money(price, from), was: '' } : { price: money(c.amount, to), was: money(price, from) };\n}\nfunction list(words) { return words.length < 2 ? words.join('') : words.slice(0, -1).join(', ') + ' and ' + words[words.length - 1]; }\nfunction readBasket() {\n  var b = [];\n  try { b = JSON.parse(localStorage.getItem('mk-basket') || '[]'); } catch (e) { b = []; }\n  return (Array.isArray(b) ? b : []).filter(function (l) { return l && typeof l.productId === 'string' && Number(l.quantity) >= 1; }).map(function (l) { return { productId: l.productId, quantity: Math.min(99, Math.floor(Number(l.quantity))) }; });\n}\nfunction writeBasket(b) { try { localStorage.setItem('mk-basket', JSON.stringify(b)); } catch (e) {} return Date.now() + ':' + b.map(function (l) { return l.productId + 'x' + l.quantity; }).join(','); }\nfunction basketCount(b) { return b.reduce(function (n, l) { return n + l.quantity; }, 0); }\nfunction readOrders() {\n  var o = [];\n  try { o = JSON.parse(localStorage.getItem('mk-orders') || '[]'); } catch (e) { o = []; }\n  return (Array.isArray(o) ? o : []).filter(function (x) { return x && typeof x.token === 'string' && x.token; });\n}\n/** The ways to pay turned on in each country, by its id, in the order a checkout offers them. */\nasync function waysByCountry() {\n  var ways = await all('WayToPay');\n  var by = {};\n  for (var i = 0; i < ways.length; i++) {\n    var on = await all('Country', { relatedTo: { id: ways[i].objectId, key: 'country', className: 'WayToPay' } });\n    on.forEach(function (c) { (by[c.objectId] = by[c.objectId] || []).push(ways[i]); });\n  }\n  var rank = [\"paystack\",\"flutterwave\",\"on-delivery\",\"bank-transfer\",\"whatsapp\"];\n  Object.keys(by).forEach(function (k) { by[k].sort(function (a, b) { return rank.indexOf(a.method) - rank.indexOf(b.method); }); });\n  return by;\n}\nvar TINTS = ['var(--secondary)', 'var(--ok)', 'var(--bad)', 'var(--warn)', 'var(--secondary-hover)'];\nfunction tintOf(id) { var h = 0; String(id).split('').forEach(function (c) { h = (h * 31 + c.charCodeAt(0)) % 997; }); return TINTS[h % TINTS.length]; }\nfunction initials(name) { return String(name || '?').split(' ').filter(Boolean).slice(0, 2).map(function (w) { return w.charAt(0).toUpperCase(); }).join(''); }\nfunction hasFile(f) { return !!(f && f.url); }\nfunction sellerChip(s, country) {\n  return { id: s.objectId, name: s.name || '', place: country ? country.name || '' : '', logo: thumb(s.logo, 'sm'), hasLogo: hasFile(s.logo), noLogo: !hasFile(s.logo), initials: initials(s.name), tint: tintOf(s.objectId) };\n}\nfunction card(p, s, country, cur, rates) {\n  var pr = priced(p.price, country ? country.currency : '', cur, rates);\n  var first = (p.photos || []).filter(hasFile)[0];\n  return { id: p.objectId, name: p.name || '', who: (s.name || '') + (country ? ' · ' + country.name : ''), price: pr.price, was: pr.was, hasWas: !!pr.was, enquire: p.mode === 'enquire', photo: thumb(first, 'md'), hasPhoto: !!first, noPhoto: !first };\n}\n\nvar o = Inputs.order;\nif (!o) return;\nvar STEPS = [\"new\",\"confirmed\",\"paid\",\"packed\",\"sent\",\"delivered\"];\nvar AT_THE_DOOR = [\"on-delivery\"];\nvar NAMES = { new: 'New', confirmed: 'Confirmed', paid: 'Paid', packed: 'Packed', sent: 'Sent', delivered: 'Delivered' };\nvar PILLS = { new: 'Waiting for the seller', confirmed: 'Confirmed: to pay', paid: 'Paid', packed: 'Packed', sent: 'On its way', delivered: 'Delivered', cancelled: 'Cancelled' };\nfunction spoken(n) {\n  var m = /^([A-Z]+)-([0-9]{4})-([0-9]+)$/.exec(String(n || ''));\n  if (!m) return String(n || '');\n  var ONES = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen', 'eighteen', 'nineteen'];\n  var TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];\n  function two(x) { return x < 20 ? ONES[x] : TENS[Math.floor(x / 10)] + (x % 10 ? '-' + ONES[x % 10] : ''); }\n  var y = Number(m[2]), lo = y % 100;\n  var year = two(Math.floor(y / 100)) + ' ' + (lo === 0 ? 'hundred' : lo < 10 ? 'oh ' + ONES[lo] : two(lo));\n  return m[1].split('').join(' ') + ', ' + year + ', ' + String(Number(m[3])).split('').map(function (d) { return ONES[Number(d)]; }).join(' ');\n}\nfunction owed(p, amount, when) {\n  var how = p.way.method;\n  if (how === 'on-delivery') return 'You’ll pay ' + amount + ' when it arrives.';\n  if (how === 'bank-transfer') return 'You’ll pay ' + amount + ' by bank transfer ' + when + ', with ' + o.number + ' as the reference.';\n  if (how === 'whatsapp') return 'Finish it with them on WhatsApp, and pay ' + amount + ' the way you agree.';\n  if (how === 'paystack') return 'You’ll pay ' + amount + ' here by card or mobile money ' + when + '.';\n  return 'You’ll pay ' + amount + ' ' + when + '.';\n}\nOutputs.title = 'Order ' + o.number;\nOutputs.buyer = o.buyerName || '';\nOutputs.placed = o.placedAt ? new Date(o.placedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '';\nOutputs.readAloud = 'Read out the number if you call: ' + spoken(o.number) + '. This page is private to you: keep the link.';\nOutputs.where = 'It goes to ' + [o.address, o.country].filter(Boolean).join(', ') + '.';\n// One box per country paid through Paystack: the button once every part there is confirmed, never before.\nvar pays = [], payOf = {};\n(o.parts || []).forEach(function (p) {\n  if (p.way.method !== 'paystack' || p.status === 'cancelled') return;\n  if (!payOf[p.countryId]) { payOf[p.countryId] = { id: p.countryId, country: p.country, currency: p.currency, sellers: [], amount: 0, waiting: 0, confirmed: 0, done: 0 }; pays.push(payOf[p.countryId]); }\n  var x = payOf[p.countryId];\n  x.sellers.push(p.seller);\n  x.amount += p.subtotal + (typeof p.deliveryCost === 'number' ? p.deliveryCost : 0);\n  if (p.status === 'new') x.waiting++; else if (p.status === 'confirmed') x.confirmed++; else x.done++;\n});\nOutputs.pays = pays.map(function (x) {\n  var paid = (o.payments || []).filter(function (y) { return y.outcome === 'paid' && y.currency === x.currency && y.country === x.country; })[0];\n  var tried = (o.payments || []).some(function (y) { return y.outcome === 'failed' && y.currency === x.currency && y.country === x.country; });\n  var words;\n  if (x.done && !x.confirmed && !x.waiting) words = 'Paid' + (paid ? ' ' + money(paid.amount, paid.currency) : '') + ' through Paystack. Each seller has their share.';\n  else if (x.waiting) words = 'You’ll pay ' + list(x.sellers) + ' here together, once ' + (x.sellers.length > 1 ? 'they have all' : 'they have') + ' confirmed delivery.';\n  else words = 'One payment for ' + list(x.sellers) + ', through Paystack: card, mobile money or bank. Each seller is paid their share.' + (tried ? ' The last try didn’t go through.' : '');\n  return { id: x.id, head: 'Paying in ' + x.country, words: words, canPay: !x.waiting && x.confirmed > 0 && !x.done, label: 'Pay ' + money(x.amount, x.currency) + ' by card or mobile money', countryId: x.id, token: String(Inputs.token || '') };\n});\nOutputs.hasPays = pays.length > 0;\nOutputs.parts = (o.parts || []).map(function (p, i) {\n  var atTheDoor = AT_THE_DOOR.indexOf(p.way.method) >= 0;\n  var steps = atTheDoor ? STEPS.filter(function (s) { return s !== 'paid'; }) : STEPS;\n  var at = steps.indexOf(p.status), cancelled = p.status === 'cancelled', cost = typeof p.deliveryCost === 'number';\n  var paid = atTheDoor ? p.status === 'delivered' : at >= steps.indexOf('paid');\n  var what = p.lines.map(function (l) { return l.quantity + ' × ' + l.name; }).join(', ');\n  var fine;\n  if (cancelled) fine = 'This part was cancelled' + (p.cancelledReason ? ': ' + p.cancelledReason : '') + '.';\n  else if (at <= 0) fine = p.seller + ' hasn’t confirmed delivery to ' + (o.country || 'you') + ' yet. ' + owed(p, money(p.subtotal, p.currency) + ' plus delivery', 'once they do');\n  else fine = (cost ? 'Delivery ' + money(p.deliveryCost, p.currency) + (p.deliveryNote ? ' (' + p.deliveryNote + ')' : '') + ', confirmed by the seller. ' : '') + (paid ? 'Paid: ' + money(p.subtotal + (cost ? p.deliveryCost : 0), p.currency) + '.' : owed(p, money(p.subtotal + (cost ? p.deliveryCost : 0), p.currency), 'now'));\n  return {\n    id: String(i),\n    seller: p.seller,\n    pill: atTheDoor && p.status === 'confirmed' ? 'Confirmed' : PILLS[p.status] || p.status,\n    pillBg: cancelled ? 'var(--bad-bg)' : at <= 0 ? 'var(--warn-bg)' : 'var(--ok-bg)',\n    pillInk: cancelled ? 'var(--bad)' : at <= 0 ? 'var(--warn)' : 'var(--ok)',\n    steps: steps.map(function (s, k) { return { id: s, name: NAMES[s], bar: !cancelled && k <= at ? 'var(--secondary)' : 'var(--border)', ink: !cancelled && k === at ? 'var(--foreground)' : 'var(--muted-foreground)' }; }),\n    lines: what + ' · ' + money(p.subtotal, p.currency),\n    way: 'Paying in ' + (p.country || 'its country') + ': ' + (p.way.name || 'not said'),\n    fine: fine,\n    hasWhatsapp: !!p.whatsapp,\n    whatsappLabel: 'Message ' + p.seller + ' on WhatsApp',\n    whatsappLink: p.whatsapp ? 'https://wa.me/' + p.whatsapp + '?text=' + encodeURIComponent('Hello, about my order ' + o.number + ': ' + what + '.') : ''\n  };\n});",
+        "runOnChange-in-token": false
+      },
+      "ports": [
+        {
+          "name": "in-order",
+          "displayName": "order",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-token",
+          "displayName": "token",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-buyer",
+          "displayName": "buyer",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-placed",
+          "displayName": "placed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-readAloud",
+          "displayName": "readAloud",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-where",
+          "displayName": "where",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pays",
+          "displayName": "pays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasPays",
+          "displayName": "hasPays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-parts",
+          "displayName": "parts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 760
+    },
+    {
+      "id": "odToShop",
+      "type": "RouterNavigate",
+      "label": "To the shop",
+      "parameters": {
+        "target": "/Pages/Shop/Home"
+      },
+      "x": 650,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "odPage"
+  ]
+}

@@ -612,17 +612,18 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
         // Unbound, a project tool is NOT refused here: its own handler asks `ProjectBinding`, which owns the one
         // no-project refusal (BST-001, `projectBinding.test.ts`), so the answer is the one a direct call would get.
         const schema = handle.inputSchema ? normalizeObjectSchema(handle.inputSchema) ?? handle.inputSchema : undefined;
-        if (args.describe) {
-          return jsonResult({
-            name: args.name,
-            description: handle.description ?? '',
-            inputSchema: schema
-              ? toJsonSchemaCompat(schema as Parameters<typeof toJsonSchemaCompat>[0], {
-                  strictUnions: true,
-                  pipeStrategy: 'input'
-                })
-              : { type: 'object', properties: {} }
-          });
+        const jsonSchema = (): { properties?: Record<string, unknown> } =>
+          schema
+            ? (toJsonSchemaCompat(schema as Parameters<typeof toJsonSchemaCompat>[0], {
+                strictUnions: true,
+                pipeStrategy: 'input'
+              }) as { properties?: Record<string, unknown> })
+            : { type: 'object', properties: {} } as { properties?: Record<string, unknown> };
+        // P112-OWN019-DESCRIBEINSIDE — Q1 (s4) sent `{ name: "drive_page", arguments: { describe: true } }`: the
+        // schema stripped the flag, it ran a dummy drive instead, then went looking for the step shapes outside its
+        // folder and Vibe's approval prompt ended the sitting. A tool with no `describe` of its own means the flag.
+        if (args.describe || (args.arguments?.describe === true && !('describe' in (jsonSchema().properties ?? {})))) {
+          return jsonResult({ name: args.name, description: handle.description ?? '', inputSchema: jsonSchema() });
         }
         let parsed: unknown = undefined;
         if (schema) {

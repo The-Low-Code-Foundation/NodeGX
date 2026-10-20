@@ -918,7 +918,7 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     webhook: z
       .object({
         slug: z.string().describe('URL slug: POST /hooks/<backendId>/<slug>'),
-        scheme: z.enum(['hmac-sha256', 'token']).optional().describe('Secret scheme (default hmac-sha256)'),
+        scheme: z.enum(['hmac-sha256', 'hmac-sha512', 'token']).optional().describe('Secret scheme (default hmac-sha256; hmac-sha512 is Paystack: secret = its key)'),
         maxBodyBytes: z.number().optional().describe('Body size limit (default 1MB)')
       })
       .optional()

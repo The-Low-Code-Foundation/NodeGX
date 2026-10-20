@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "eae35d59-6e59-56ee-8838-cc02c9cb8c48",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req-20",
+      "fromProperty": "pm-body",
+      "toId": "which-3",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "req-20",
+      "fromProperty": "receive",
+      "toId": "which-3",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "which-3",
+      "fromProperty": "out-keyName",
+      "toId": "key-3",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "which-3",
+      "fromProperty": "out-go",
+      "toId": "key-3",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "which-3",
+      "fromProperty": "out-notSet",
+      "toId": "noKey-3",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "which-3",
+      "fromProperty": "out-reason",
+      "toId": "no-20",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "which-3",
+      "fromProperty": "out-refused",
+      "toId": "no-20",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "which-3",
+      "fromProperty": "failure",
+      "toId": "no-20",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "key-3",
+      "fromProperty": "failure",
+      "toId": "noKey-3",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "key-3",
+      "fromProperty": "done",
+      "toId": "api-3",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "req-20",
+      "fromProperty": "pm-body",
+      "toId": "run-18",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "key-3",
+      "fromProperty": "value",
+      "toId": "run-18",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "api-3",
+      "fromProperty": "value",
+      "toId": "run-18",
+      "toProperty": "in-api"
+    },
+    {
+      "fromId": "api-3",
+      "fromProperty": "done",
+      "toId": "run-18",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "api-3",
+      "fromProperty": "failure",
+      "toId": "run-18",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "run-18",
+      "fromProperty": "out-result",
+      "toId": "ok-20",
+      "toProperty": "pm-result"
+    },
+    {
+      "fromId": "run-18",
+      "fromProperty": "out-done",
+      "toId": "ok-20",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run-18",
+      "fromProperty": "out-reason",
+      "toId": "no-20",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "run-18",
+      "fromProperty": "out-refused",
+      "toId": "no-20",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run-18",
+      "fromProperty": "failure",
+      "toId": "no-20",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "which-3",
+      "fromProperty": "out-ignored",
+      "toId": "leave",
+      "toProperty": "send"
+    }
+  ]
+}
