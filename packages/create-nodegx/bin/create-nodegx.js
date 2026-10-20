@@ -21,7 +21,7 @@ const path = require('path');
 
 /** The server this release sets up. `test/create.test.js` holds it equal to the checkout's `@nodegx/mcp` version. */
 const MCP_PACKAGE = '@nodegx/mcp';
-const MCP_VERSION = '0.2.3';
+const MCP_VERSION = '0.2.4';
 const PREVIEW_PACKAGE = '@nodegx/preview';
 const SERVER_NAME = 'nodegx';
 
