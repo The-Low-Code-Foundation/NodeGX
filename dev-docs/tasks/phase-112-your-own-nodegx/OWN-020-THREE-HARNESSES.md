@@ -770,3 +770,46 @@ Large 4 (OWN-018 runs 9 and 10, quiz only).
     six deaths of 10-19 / 10-20, the 5 m 43 s silence, and three asks: the gateway retries upstream, the CLI treats an
     in-band error and a stall as retryable, and a shorter stall timeout. The recorded response is offered privately,
     not attached. Filed on `cline` 3.0.71 (3.0.73 is current, not retested).
+- **The npm 0.2.4 cut, packed and tested (2026-10-20 ~16:45–17:10, Opus; npm 0.2.3 confirmed live first).**
+  - **Before:** all four 0.2.3 packages `latest` = 0.2.3 on the registry, each `dist.shasum` = the tested tarball's (16:45).
+    OWN-024 (opennoodl-8a) had pushed `release/0.4.3` (`4efbce226`) before this bump landed, so none of it rides there.
+  - **Versions (`dce0e876a`):** `@nodegx/mcp`, `@nodegx/preview`, `create-nodegx` (`MCP_VERSION`), `create-nodegx-vibe`,
+    `create-nodegx-cline` (first publish) → 0.2.4, both wrappers pinning `create-nodegx@0.2.4`; `@nodegx/project-contract`
+    → 0.2.1 (`3cb9eb745`); node-spec 0.2.0 and canvas-look 0.1.0 unchanged. Lockfile: the four workspace versions, applied
+    to HEAD's blob (the working copy's uncommitted npm reshuffle from 12:33 left out and kept). create-nodegx 34/34, tsfixme
+    holds.
+  - **Packed** in `own020-pack024` moved to `dce0e876a` (clean before and after), under HEAVY.lock (16:50–16:52, after
+    nodegx-studio's DMG build released it), OWN-021 §10's recipe (`build:types` first; project-contract via
+    `build-publish.mjs` then `dist/publish`). Bundles: 831 first-party module comments, **0 from outside the worktree**;
+    `codeSignals` (the UNWIREDSIGNAL fix) in the MCP's viewer, kit reader and backend and in the preview's bundles.
+    Folder `/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.4-tarballs/`:
+
+    | tarball | sha1 | bytes |
+    |---|---|---|
+    | `nodegx-project-contract-0.2.1.tgz` | `419112c3df86ba97e7148ac8435e6bb322188aba` | 250,053 |
+    | `nodegx-preview-0.2.4.tgz` | `7edb805fac5936052364c41c3f63eaab30f91e26` | 5,575,750 |
+    | `nodegx-mcp-0.2.4.tgz` | `96480d2666f6b147f625e65a606e2beee10b1bd1` | 11,973,381 |
+    | `create-nodegx-0.2.4.tgz` | `191cc6e2fe6d593076bd2f5c0994388766135822` | 42,552 |
+    | `create-nodegx-vibe-0.2.4.tgz` | `ab5cd4daed8e930903a231bb6e2ef32e2abb0f6e` | 13,641 |
+    | `create-nodegx-cline-0.2.4.tgz` | `12e3514daee74f9d89f1b47a8fbfff7afcd8656f` | 13,967 |
+
+    The three `create-*` are byte-identical to the candidate's (same content); mcp, preview, project-contract changed.
+  - **Tested from the tarballs** (expected written first, `scratchpad/t/EXPECTED.md`; empty folder, empty HOME, cache
+    inside): (1) create-nodegx → exit 0, `.mcp.json`, `.vibe/config.toml`, `opencode.json` all `@nodegx/mcp@0.2.4`.
+    (2) create-nodegx-cline → exit 0, AGENTS.md + the skill, ONE `nodegx` entry: `npx -y @nodegx/mcp@0.2.4 --allow-writes
+    --screenshots-to-files`, timeout 300, `writtenBy: create-nodegx`. (3) vibe pins 0.2.4. (4) The MCP as Cline runs it:
+    **connected in 2.2 s cold** (candidate: 9.6–15.2 s; COLDSERVER, the manifest has `dependencies: {}`), `noodl-mcp
+    0.4.3`, 7 bootstrap tools, create_project → `.mcp.json` pinned 0.2.4, 25 tools after bind, validate 0/0, `call_tool
+    get_project_info` answers, `find_tools theme` → `set_element_style` Button starter ok. **(5) UNWIREDSIGNAL in the
+    product:** Home given a Function `Outputs.best = 1; Outputs.done(); Outputs.after = true;`, `out-best` wired to the
+    Text, `out-done` unwired, no `ports` (CDQ2's shape): `render_report` on 0.2.4 → "the render is clean",
+    `consoleErrors` empty; **control `@nodegx/mcp@0.2.3` from the registry → "The script threw: Outputs.done is not a
+    function [function/script-threw]"**. (6) The preview tarball on the same project: up in 7 s, 163 node types, `/` 200,
+    `/.mcp.json` 404, headless Chrome draws `1` (the wired value); torn down, port free. (7) project-contract 0.2.1 +
+    `@nodegx/node-spec@0.2.0` + canvas-look 0.1.0 → one node-spec (deduped), `tokens` and `format/store` load, the styles
+    schema carries the variant. Gates: `publishable.js` 6 packages, 0 problems; `bugs.js gate mcp` 0 blockers (6 known),
+    `gate preview` 0 blockers (7 known).
+  - **Owed:** Richard publishes (`scripts/own/publish-npm.sh <that folder>`: it skips node-spec and canvas-look, which
+    have no tarball there, and publishes project-contract, preview, mcp, create-nodegx, -vibe, -cline in that order).
+    Then a CHANGELOG "npm packages 0.2.4" line (through the content-authoring skill) and the site's npm section.
+

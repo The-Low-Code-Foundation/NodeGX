@@ -51,12 +51,10 @@ Done 2026-10-20 evening (§12's last entry): **UNWIREDSIGNAL fixed in `3026899d4
 disk the throw happened wired too, so the bug's first workaround was wrong) and **CDQ4's double tap read**: the model's
 design (`lock_gate` is a literal-`true` fan-out, by its own comment), not the kit's; no kit note.
 
-1. **When Richard has re-run `publish-npm.sh` for 0.2.3** (check: `npm view @nodegx/mcp version` → 0.2.3; at 14:30 CEST
-   it still read 0.2.2): the real 0.2.4 cut on `cline-dev` (versions as `a6544370c`, plus project-contract 0.2.1, the
-   lockfile, `MCP_VERSION`), packed again from a clean worktree at the pushed commit (the candidate's tarballs are not
-   the cut's, and they predate `3026899d4`). **Its smoke owes one render** through the packed MCP of a Function that
-   calls an unwired signal (`Outputs.best = 1; Outputs.done();`, only `out-best` wired): `consoleErrors` empty. That's
-   the product-level half of the UNWIREDSIGNAL fix, not driven yet (the render engines are built bundles).
+1. ~~The 0.2.4 cut~~ **packed and tested 2026-10-20 17:10** (`dce0e876a`; §12's last entry: tarballs, shasums, the
+   seven tests, UNWIREDSIGNAL proven in the product against a 0.2.3 control). **Waits on Richard to publish:**
+   `scripts/own/publish-npm.sh /Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.4-tarballs`. After:
+   confirm each `dist.shasum` on the registry = §12's table, then the CHANGELOG line (content-authoring skill).
 2. Nothing else is an agent's alone until Richard rules (below).
 
 ## Waits on Richard
