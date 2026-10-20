@@ -28,6 +28,7 @@ import type { ProjectStore } from '../project/ProjectStore';
 import { runDrivePage, runRenderReport, type RenderReportPayload } from '../render';
 import type { RenderLedger } from '../renderVerdict';
 import { guarded, type ToolResult } from './util';
+import { honestySection, projectHonestyOf } from '../honesty';
 
 /**
  * A screenshot scale above this stops being a picture an agent can hold and
@@ -155,6 +156,9 @@ export function registerRenderTools(
             // page nobody could reach.
             ...(verdict ? [{ type: 'text' as const, text: verdictHeadline(verdict) }] : []),
             { type: 'text', text: JSON.stringify(report) },
+            // P111 SEE-001 — the honesty number, the same one get_project_info and every write report (a result block:
+            // no resident-surface cost). Read from the files the render read.
+            { type: 'text' as const, text: honestySection(projectHonestyOf(binding.require())) },
             // FLD-011 AC1 — with `out_dir` the harness wrote files and returned no base64, so
             // `screenshots` is empty and the loop below produces nothing. The manifest replaces it,
             // because a caller told only "written to a folder" has to list a directory to find out

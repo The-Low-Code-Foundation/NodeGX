@@ -184,6 +184,52 @@ function measureExpression(placeholders, probes = []) {
     .filter((x) => x.box > 0 && x.width > x.box + 1)
     .map((x) => ({ text: x.el.textContent.trim().slice(0, 80), width: round(x.width), parentWidth: round(x.box), cls: cls(x.el) }));
 
+  // P112-OWN020-OFFSYSTEM — the controls, measured against the project's type scale. A control nobody styled draws
+  // the runtime's own look (a Radio Button is a 32px circle with a 2px black ring; a native select or button keeps
+  // the browser's 13.33px text), and that is the "chunky" control beside a page on tokens. A radio or checkbox input
+  // is opacity 0, so its box is read on the first ancestor a person can see. The scale is the project's --text-*
+  // tokens, read off :root; the fake DOMs in the tests have no getPropertyValue, so it is guarded.
+  const pxOf = (value) => {
+    const s = String(value || '').trim();
+    if (!s) return NaN;
+    if (s.slice(-3) === 'rem') return parseFloat(s) * (parseFloat(styleOf(document.documentElement).fontSize) || 16);
+    return parseFloat(s);
+  };
+  const textScale = [];
+  const rootStyle = styleOf(document.documentElement);
+  if (rootStyle && typeof rootStyle.getPropertyValue === 'function') {
+    for (const step of ['xs', 'sm', 'base', 'lg', 'xl', '2xl', '3xl', '4xl', '5xl', '6xl']) {
+      const px = pxOf(rootStyle.getPropertyValue('--text-' + step));
+      if (px > 0) textScale.push(Math.round(px * 100) / 100);
+    }
+  }
+  const controlKind = (el) => {
+    const type = String(el.type || '').toLowerCase();
+    if (el.tagName === 'INPUT' && type === 'radio') return 'Radio Button';
+    if (el.tagName === 'INPUT' && type === 'checkbox') return 'Checkbox';
+    if (el.tagName === 'SELECT') return 'Dropdown';
+    if (el.tagName === 'TEXTAREA' || (el.tagName === 'INPUT' && ['', 'text', 'email', 'password', 'search', 'number', 'tel', 'url'].indexOf(type) !== -1)) return 'Text Input';
+    if (el.tagName === 'BUTTON') return 'Button';
+    return null;
+  };
+  const controls = [];
+  for (const el of all) {
+    const kind = controlKind(el);
+    if (!kind) continue;
+    if (kind === 'Radio Button' || kind === 'Checkbox') {
+      let shown = el;
+      for (let hops = 0; shown && hops < 3 && (parseFloat(styleOf(shown).opacity) < 0.05 || shown.getBoundingClientRect().width < 2); hops++) shown = shown.parentElement;
+      if (!shown || shown.offsetParent === null) continue;
+      const r = shown.getBoundingClientRect();
+      let label = null;
+      if (el.id && typeof document.querySelector === 'function') label = document.querySelector('label[for="' + el.id + '"]');
+      controls.push({ kind, box: round(Math.max(r.width, r.height)), textSize: label ? pxOf(styleOf(label).fontSize) : NaN });
+    } else {
+      if (visible.indexOf(el) === -1) continue;
+      controls.push({ kind, box: 0, textSize: pxOf(styleOf(el).fontSize) });
+    }
+  }
+
   // AWP-004 — what is on screen, as opposed to what is in the DOM. The page is
   // never scrolled when this runs, so a rect is already a document position.
   // Kimi K3's storefront was 83 texts in the DOM and about three on screen, and
@@ -642,6 +688,7 @@ function measureExpression(placeholders, probes = []) {
     overflowingCount: overflowing.length,
     textsWiderThanBox: textsWiderThanBox.slice(0, 10),
     textsWiderThanBoxCount: textsWiderThanBox.length,
+    controls: { textScale, items: controls.slice(0, 60), count: controls.length },
     text: {
       elements: textEls.length,
       onScreen: textEls.filter(onScreen).length,
@@ -744,6 +791,13 @@ const RenderFinding = {
    * page-level finding stayed quiet because the page itself kept its width.
    */
   TextWiderThanItsBox: 'text-wider-than-its-box',
+  /**
+   * P112-OWN020-OFFSYSTEM — a control drawn at the runtime's own size beside a page on its token scale: a radio or
+   * checkbox box much bigger than its label, or control text off the project's --text-* scale (a native select or
+   * button keeps the browser's 13.33px). Mistral (SP1) and DeepSeek (OpenTune) both shipped one — the "chunky"
+   * Sort-by circles — because a control placed in passing is the one an agent never styles.
+   */
+  ControlOffScale: 'control-off-scale',
   SingleColumnGrid: 'single-column-grid',
   MinimumLayoutWidth: 'minimum-layout-width',
   HorizontalOverflow: 'horizontal-overflow',
@@ -908,9 +962,37 @@ function widestOffender(v) {
  * carrying a concrete fix were self-corrected 100% of the time and prose was
  * dropped.
  */
+/**
+ * P112-OWN020-OFFSYSTEM — which control kinds are off the page's scale. A radio or checkbox is oversized when its box
+ * is more than 1.5x its label's text (or 20px with no label); any control's text is off-scale when the project has a
+ * --text-* scale and the size is none of its steps. One entry per kind, with the commonest offending reading.
+ */
+function controlsOffScale(controls) {
+  const scale = controls.textScale || [];
+  const onScale = (px) => scale.length === 0 || !(px > 0) || scale.some((s) => Math.abs(s - px) < 0.6);
+  const byKind = {};
+  for (const c of controls.items || []) {
+    const oversized = (c.kind === 'Radio Button' || c.kind === 'Checkbox') && c.box > Math.max(20, 1.5 * (c.textSize > 0 ? c.textSize : 0));
+    const offText = !onScale(c.textSize);
+    if (!oversized && !offText) continue;
+    const k = byKind[c.kind] || (byKind[c.kind] = { kind: c.kind, count: 0, box: c.box, textSize: c.textSize, oversized, offText });
+    k.count += 1;
+  }
+  const fmt = (n) => String(Math.round(n * 100) / 100);
+  return Object.keys(byKind).map((kind) => {
+    const k = byKind[kind];
+    const parts = [];
+    if (k.oversized) parts.push(fmt(k.box) + 'px box' + (k.textSize > 0 ? ' beside a ' + fmt(k.textSize) + 'px label' : ''));
+    if (k.offText) parts.push(fmt(k.textSize) + 'px text, off the type scale (' + scale.map(fmt).join('/') + 'px)');
+    return { kind, count: k.count, box: k.box, textSize: k.textSize, sentence: kind + ' x' + k.count + ': ' + parts.join(', ') };
+  });
+}
+
 function summarise(viewports, diagnosis, overridden = {}) {
   const findings = [];
   const add = (f) => findings.push(f);
+  // P112-OWN020-OFFSYSTEM — one finding for the app, not one per width: an element style is the same at every width.
+  let controlsJudged = false;
 
   for (const [name, v] of Object.entries(viewports)) {
     if (!v || v.error) continue;
@@ -1148,6 +1230,25 @@ function summarise(viewports, diagnosis, overridden = {}) {
           'never wraps; "contentHeight" takes its width from the parent and wraps.',
         evidence: v.textsWiderThanBox
       });
+    }
+
+    if (!controlsJudged && v.controls && v.controls.count > 0) {
+      controlsJudged = true;
+      const off = controlsOffScale(v.controls);
+      if (off.length > 0) {
+        add({
+          code: RenderFinding.ControlOffScale,
+          severity: 'warning',
+          viewport: name,
+          message:
+            'Controls drawn at a size the rest of the page is not: ' +
+            off.map((o) => o.sentence).join('; ') +
+            '. A control nobody styled keeps the runtime\'s own look. Give the type one look for the whole app with ' +
+            'set_element_style (find_tools group "theme"), or set_style_preset to add on-system styles for every ' +
+            'control; a node that sets the parameter itself keeps its own value.',
+          evidence: off.map((o) => ({ kind: o.kind, count: o.count, box: o.box, textSize: o.textSize, textScale: v.controls.textScale }))
+        });
+      }
     }
 
     if (v.text.elements >= 10) {
@@ -1432,6 +1533,8 @@ module.exports = {
   plural,
   widestOffender,
   describeSites,
+  // P112-OWN020-OFFSYSTEM — exported so its spec grades the judgement on readings, not only through a fake DOM.
+  controlsOffScale,
   TEXT_BEARING_PORTS,
   placeholderStringsFromCatalog
 };

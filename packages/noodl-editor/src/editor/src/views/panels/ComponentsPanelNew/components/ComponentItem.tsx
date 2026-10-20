@@ -19,6 +19,7 @@ import { buildCreateMenuItems, createMenuTitle } from '../createMenu';
 import { ComponentItemData, TreeNode } from '../types';
 import { RenameInput } from './RenameInput';
 import { showUsedInPopover } from '../showUsedInPopover';
+import { RowHonestyLabel } from './HonestyLabels';
 import { RowMetaLabel } from './RowMetaLabel';
 import { WarningDot } from './WarningDot';
 
@@ -356,6 +357,8 @@ export function ComponentItem({
           /* TVW-001 (c): the instances are the ones the panel's single walk already found. */
           onUsedIn={(anchor) => showUsedInPopover(component.instances, anchor)}
         />
+        {/* P111 SEE-001: this component's honesty number, when it holds script. */}
+        <RowHonestyLabel componentName={component.name} />
         <WarningDot count={component.warningCount} />
       </div>
     </div>

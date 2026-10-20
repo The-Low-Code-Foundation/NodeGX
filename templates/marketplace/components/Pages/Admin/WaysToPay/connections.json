@@ -100,6 +100,18 @@
       "toProperty": "run"
     },
     {
+      "fromId": "wpCall",
+      "fromProperty": "done",
+      "toId": "wpName",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "wpCall",
+      "fromProperty": "done",
+      "toId": "wpCurrency",
+      "toProperty": "clear"
+    },
+    {
       "fromId": "wpStamp",
       "fromProperty": "out-at",
       "toId": "wpSetChanged",

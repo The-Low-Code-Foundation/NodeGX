@@ -24,7 +24,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParseDate, type ParsePointer, type ParseRecord } from './helpers/http';
 
 jest.setTimeout(90000);
 
@@ -46,11 +46,16 @@ const FUNCTIONS = [
 ];
 
 interface Answer {
-  result?: Record<string, any>;
+  result?: Record<string, unknown>;
   error?: unknown;
   code?: unknown;
 }
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** An Enquiry row, as far as this spec reads one. */
+interface Enquiry extends ParseRecord {
+  product: ParsePointer;
+  answeredAt?: ParseDate;
+}
 
 describe('TWO-003 slice 5 — a buyer messages a seller; only that seller reads it and marks it answered', () => {
   let service: BackendService;
@@ -76,11 +81,11 @@ describe('TWO-003 slice 5 — a buyer messages a seller; only that seller reads 
     if (r.status !== 200) throw new Error(`sign-in ${name}: ${r.status} ${JSON.stringify(r.json)}`);
     who[name] = { 'x-parse-session-token': r.json.sessionToken };
   };
-  const rows = async (collection: string, where: Row = {}, headers: Record<string, string> = master) => {
-    const r = await req<{ results: Row[] }>('GET', `/classes/${collection}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`, undefined, headers);
+  const rows = async <T extends ParseRecord = ParseRecord>(collection: string, where: Row = {}, headers: Record<string, string> = master) => {
+    const r = await req<{ results: T[] }>('GET', `/classes/${collection}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`, undefined, headers);
     return r.status === 200 ? r.json.results : null;
   };
-  const row = async (collection: string, objectId: string) => (await req<Row>('GET', `/classes/${collection}/${objectId}`)).json;
+  const row = async <T extends ParseRecord = ParseRecord>(collection: string, objectId: string) => (await req<T>('GET', `/classes/${collection}/${objectId}`)).json;
   const ask = (productId: string, extra: Row = {}) => ({
     enquiry: { productId, buyerName: 'Kwame Mensah', contact: '+233 24 555 0187', message: 'Is it still for sale? Can I see it on Saturday?', ...extra }
   });
@@ -200,7 +205,7 @@ describe('TWO-003 slice 5 — a buyer messages a seller; only that seller reads 
     it('🔴 its seller marks it answered, then not answered yet; only answeredAt changes', async () => {
       const before = await row('Enquiry', id.q1);
       expect((await ok('answerEnquiry', answer(id.q1, true), 'motors')).enquiry).toEqual({ id: id.q1, answered: true });
-      const marked = await row('Enquiry', id.q1);
+      const marked = await row<Enquiry>('Enquiry', id.q1);
       expect(typeof marked.answeredAt?.iso).toBe('string');
       expect([marked.buyerName, marked.contact, marked.message, marked.product.objectId]).toEqual([before.buyerName, before.contact, before.message, id.corolla]);
       await ok('answerEnquiry', answer(id.q1, false), 'motors');
@@ -230,7 +235,7 @@ describe('TWO-003 slice 5 — a buyer messages a seller; only that seller reads 
     it('the admin marks any seller’s', async () => {
       const van = (await enquiriesAbout(id.van))[0].objectId;
       await ok('answerEnquiry', answer(van, true));
-      expect(typeof (await row('Enquiry', van)).answeredAt?.iso).toBe('string');
+      expect(typeof (await row<Enquiry>('Enquiry', van)).answeredAt?.iso).toBe('string');
     });
   });
 });

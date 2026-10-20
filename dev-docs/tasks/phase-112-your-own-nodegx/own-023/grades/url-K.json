@@ -1,0 +1,361 @@
+{
+  "url": "http://localhost:5101/",
+  "at": "2026-10-19T20:16:41.361Z",
+  "routesReached": 25,
+  "console": {
+    "routesWithErrors": 0,
+    "notFavicon": 0,
+    "errors": []
+  },
+  "overflow390": {
+    "routesScrollingSideways": []
+  },
+  "like": {
+    "result": "not reached",
+    "why": "the press changed nothing a script can read on that control",
+    "found": {
+      "name": "Play Heartbreak Hotel",
+      "x": 734,
+      "y": 1390.25
+    },
+    "before": {
+      "pressed": null,
+      "name": "Play Heartbreak Hotel",
+      "html": "<svg class=\"i \" aria-hidden=\"true\"><use href=\"#i-play\"></use></svg>",
+      "around": ""
+    },
+    "after": {
+      "pressed": null,
+      "name": "Play Heartbreak Hotel",
+      "html": "<svg class=\"i \" aria-hidden=\"true\"><use href=\"#i-play\"></use></svg>",
+      "around": ""
+    }
+  },
+  "routes": [
+    {
+      "n": 0,
+      "url": "http://localhost:5101/",
+      "finalUrl": "http://localhost:5101/",
+      "title": "Home · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 1,
+      "url": "http://localhost:5101/search",
+      "finalUrl": "http://localhost:5101/search",
+      "title": "Search · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 2,
+      "url": "http://localhost:5101/charts",
+      "finalUrl": "http://localhost:5101/charts",
+      "title": "Charts · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 3,
+      "url": "http://localhost:5101/library",
+      "finalUrl": "http://localhost:5101/library",
+      "title": "Your Library · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 4,
+      "url": "http://localhost:5101/upload",
+      "finalUrl": "http://localhost:5101/upload",
+      "title": "Upload · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 5,
+      "url": "http://localhost:5101/track/7",
+      "finalUrl": "http://localhost:5101/track/7",
+      "title": "Umbrella Hours · Velvet Static · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 6,
+      "url": "http://localhost:5101/artist/2",
+      "finalUrl": "http://localhost:5101/artist/2",
+      "title": "Velvet Static · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 7,
+      "url": "http://localhost:5101/track/19",
+      "finalUrl": "http://localhost:5101/track/19",
+      "title": "Origami Girl · The Paper Moons · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 8,
+      "url": "http://localhost:5101/artist/6",
+      "finalUrl": "http://localhost:5101/artist/6",
+      "title": "The Paper Moons · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 9,
+      "url": "http://localhost:5101/track/31",
+      "finalUrl": "http://localhost:5101/track/31",
+      "title": "Confetti Brain · Glitter Bomb · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 10,
+      "url": "http://localhost:5101/artist/10",
+      "finalUrl": "http://localhost:5101/artist/10",
+      "title": "Glitter Bomb · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 11,
+      "url": "http://localhost:5101/track/20",
+      "finalUrl": "http://localhost:5101/track/20",
+      "title": "Folded Up · The Paper Moons · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 12,
+      "url": "http://localhost:5101/track/12",
+      "finalUrl": "http://localhost:5101/track/12",
+      "title": "Overclocked · Kilowatt Kids · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 13,
+      "url": "http://localhost:5101/artist/4",
+      "finalUrl": "http://localhost:5101/artist/4",
+      "title": "Kilowatt Kids · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 14,
+      "url": "http://localhost:5101/track/22",
+      "finalUrl": "http://localhost:5101/track/22",
+      "title": "Cloud Archive · Ozone Choir · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 15,
+      "url": "http://localhost:5101/artist/7",
+      "finalUrl": "http://localhost:5101/artist/7",
+      "title": "Ozone Choir · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 16,
+      "url": "http://localhost:5101/track/13",
+      "finalUrl": "http://localhost:5101/track/13",
+      "title": "Static Shock · Kilowatt Kids · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 17,
+      "url": "http://localhost:5101/track/17",
+      "finalUrl": "http://localhost:5101/track/17",
+      "title": "Satellite · Luna Okafor · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 18,
+      "url": "http://localhost:5101/artist/5",
+      "finalUrl": "http://localhost:5101/artist/5",
+      "title": "Luna Okafor · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 19,
+      "url": "http://localhost:5101/track/6",
+      "finalUrl": "http://localhost:5101/track/6",
+      "title": "Coffee at 3am · Velvet Static · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 20,
+      "url": "http://localhost:5101/track/5",
+      "finalUrl": "http://localhost:5101/track/5",
+      "title": "Polaroid Static · Neon Harbor · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 21,
+      "url": "http://localhost:5101/artist/1",
+      "finalUrl": "http://localhost:5101/artist/1",
+      "title": "Neon Harbor · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 22,
+      "url": "http://localhost:5101/track/15",
+      "finalUrl": "http://localhost:5101/track/15",
+      "title": "Call Me Back · Luna Okafor · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 23,
+      "url": "http://localhost:5101/track/2",
+      "finalUrl": "http://localhost:5101/track/2",
+      "title": "Sodium Lights · Neon Harbor · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 24,
+      "url": "http://localhost:5101/artist/8",
+      "finalUrl": "http://localhost:5101/artist/8",
+      "title": "Brass Tacks Jazz Club · Hum",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    }
+  ]
+}

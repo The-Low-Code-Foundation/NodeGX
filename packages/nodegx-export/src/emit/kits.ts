@@ -230,7 +230,7 @@ function kitFile(module: ModuleIR, bindings: KitBinding[]): string {
       const prop = binding.propOf.get(input.name);
       if (prop === undefined) continue;
       if (input.displayName !== undefined) lines.push(`  /** ${escapeComment(input.displayName)} */`);
-      lines.push(`  ${prop}?: ${tsTypeOf(input)};`);
+      lines.push(`  ${prop}?: ${inputTsTypeOf(input)};`);
     }
     for (const [port, prop] of binding.signalPropOf) {
       lines.push(`  /** Signal output "${escapeComment(port)}". */`);
@@ -333,6 +333,17 @@ export function tsTypeOf(port: KitPortIR): string {
     default:
       return 'unknown';
   }
+}
+
+/**
+ * P18-S122-TPLBUILD (TS2322). A kit's `object` input takes an array at the prop position too: an array is an object to the
+ * kit, the runtime hands the port whatever its wire carries, and digital-bricks-training wires a Component Inputs list into
+ * its TimelineRow's Notes. FLD-015's reasoning for `readonly`: widening a prop costs nothing, the wrapper only passes it on.
+ * The value outputs keep `tsTypeOf`'s type.
+ */
+function inputTsTypeOf(port: KitPortIR): string {
+  const type = tsTypeOf(port);
+  return type === 'Record<string, unknown>' ? 'Record<string, unknown> | readonly unknown[]' : type;
 }
 
 /** The shim. The only file in an exported app that knows what a Noodl node is. */

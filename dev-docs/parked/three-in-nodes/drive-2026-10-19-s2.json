@@ -1,0 +1,499 @@
+{
+ "results": [
+  {
+   "name": "BOOT  the page drew, three.min.js before three-kit/index.js, no console error",
+   "ok": true,
+   "saw": {
+    "marker": true,
+    "iThree": 8107,
+    "iKit": 9353,
+    "consoleErrors": [],
+    "networkErrors": []
+   }
+  },
+  {
+   "name": "SUPP  Supported true out of the port; root data-ready",
+   "ok": true,
+   "saw": {
+    "supported": true,
+    "ready": "true"
+   }
+  },
+  {
+   "name": "READY Ready fired once",
+   "ok": true,
+   "saw": {
+    "readyCount": 1
+   }
+  },
+  {
+   "name": "ROWS  Mesh Count 12 out of the port; one box per Static Data row with its name, x order and height",
+   "ok": true,
+   "saw": {
+    "meshes": 12,
+    "attr": "12",
+    "bars": [
+     [
+      "mon",
+      -4.9,
+      3,
+      1.5
+     ],
+     [
+      "tue",
+      -3.5000000000000004,
+      5,
+      2.5
+     ],
+     [
+      "wed",
+      -2.1000000000000005,
+      2,
+      1
+     ],
+     [
+      "thu",
+      -0.7000000000000011,
+      6,
+      3
+     ],
+     [
+      "fri",
+      0.6999999999999993,
+      4,
+      2
+     ],
+     [
+      "sat",
+      2.0999999999999996,
+      7,
+      3.5
+     ],
+     [
+      "sun",
+      3.4999999999999982,
+      1,
+      0.5
+     ],
+     [
+      "avg",
+      4.899999999999999,
+      4,
+      2
+     ]
+    ]
+   }
+  },
+  {
+   "name": "GROUP the robot is a 3D Group of 3 meshes; its body stands where the group stands (world x −6, z 4, centre y 0.8)",
+   "ok": true,
+   "saw": {
+    "robot": {
+     "id": "tk12",
+     "kind": "group",
+     "name": "robot",
+     "shape": null,
+     "parent": null,
+     "x": -6,
+     "y": 0,
+     "z": 4,
+     "wx": -6,
+     "wy": 0,
+     "wz": 4,
+     "h": 1
+    },
+    "parts": [
+     {
+      "id": "tk13",
+      "kind": "mesh",
+      "name": null,
+      "shape": "box",
+      "parent": "tk12",
+      "x": 0,
+      "y": 0.8,
+      "z": 0,
+      "wx": -6,
+      "wy": 0.8,
+      "wz": 4,
+      "h": 1.6
+     },
+     {
+      "id": "tk14",
+      "kind": "mesh",
+      "name": null,
+      "shape": "box",
+      "parent": "tk12",
+      "x": 0,
+      "y": 2.1,
+      "z": 0,
+      "wx": -6,
+      "wy": 2.1,
+      "wz": 4,
+      "h": 0.8
+     },
+     {
+      "id": "tk15",
+      "kind": "mesh",
+      "name": null,
+      "shape": "sphere",
+      "parent": "tk12",
+      "x": 0,
+      "y": 2.1,
+      "z": 0.42,
+      "wx": -5.79,
+      "wy": 2.1,
+      "wz": 4.363730669589464,
+      "h": 0.3
+     }
+    ]
+   }
+  },
+  {
+   "name": "SIZE  the canvas is the Scene's Height (520 px, set in the graph) by its default Width (100 % = 1024 px)",
+   "ok": true,
+   "saw": {
+    "x": 0,
+    "y": 18,
+    "width": 1024,
+    "height": 520,
+    "top": 18,
+    "right": 1024,
+    "bottom": 538,
+    "left": 0
+   }
+  },
+  {
+   "name": "PIXELS the canvas region of the screenshot has ≥ 100 distinct colours (flat shading: 9 solids + a grid read 165 on 2026-10-19)",
+   "ok": true,
+   "saw": {
+    "colours": 252,
+    "rect": {
+     "x": 0,
+     "y": 18,
+     "width": 1024,
+     "height": 520,
+     "top": 18,
+     "right": 1024,
+     "bottom": 538,
+     "left": 0
+    }
+   }
+  },
+  {
+   "name": "SPIN  the ball spins: frames rise over 600 ms",
+   "ok": true,
+   "saw": {
+    "framesA": 128,
+    "framesB": 164
+   }
+  },
+  {
+   "name": "WIRE  ballY = 4 through a Variable moves the ball to y 4",
+   "ok": true,
+   "saw": {
+    "id": "tk3",
+    "kind": "mesh",
+    "name": "ball",
+    "shape": "sphere",
+    "parent": null,
+    "x": -5,
+    "y": 4,
+    "z": -3,
+    "wx": -5,
+    "wy": 4,
+    "wz": -3,
+    "h": 2
+   }
+  },
+  {
+   "name": "TAP   a press and release on the tallest bar fires Tapped once with Tapped Name \"sat\"",
+   "ok": true,
+   "saw": {
+    "at": {
+     "x": 540.8726344448743,
+     "y": 208.6771084612342
+    },
+    "tappedName": "sat",
+    "taps": 1
+   }
+  },
+  {
+   "name": "ANIM  Animate To Value glides the robot: mid-way strictly between −6 and 6, then at 6 with its body",
+   "ok": true,
+   "saw": {
+    "mid": 2.441110069335938,
+    "end": 6,
+    "endBodyWx": 6
+   }
+  },
+  {
+   "name": "GTAP  a tap on the robot's unnamed body: Tapped Name \"robot\", the group's Tapped once, the Scene's twice in all",
+   "ok": true,
+   "saw": {
+    "at": {
+     "x": 634.0287517834207,
+     "y": 337.3536435187998
+    },
+    "tappedName": "robot",
+    "robotTaps": 1,
+    "taps": 2
+   }
+  }
+ ],
+ "readings": {
+  "scriptOrder": {
+   "three": 8107,
+   "kit": 9353
+  },
+  "census": {
+   "meshes": 12,
+   "objects": [
+    {
+     "id": "tk1",
+     "kind": "light",
+     "name": null,
+     "shape": "sky",
+     "parent": null,
+     "x": 5,
+     "y": 10,
+     "z": 5,
+     "wx": 5,
+     "wy": 10,
+     "wz": 5,
+     "h": 1
+    },
+    {
+     "id": "tk2",
+     "kind": "light",
+     "name": null,
+     "shape": "sun",
+     "parent": null,
+     "x": 6,
+     "y": 12,
+     "z": 4,
+     "wx": 6,
+     "wy": 12,
+     "wz": 4,
+     "h": 1
+    },
+    {
+     "id": "tk3",
+     "kind": "mesh",
+     "name": "ball",
+     "shape": "sphere",
+     "parent": null,
+     "x": -5,
+     "y": 0,
+     "z": -3,
+     "wx": -5,
+     "wy": 0,
+     "wz": -3,
+     "h": 2
+    },
+    {
+     "id": "tk4",
+     "kind": "mesh",
+     "name": "mon",
+     "shape": "box",
+     "parent": null,
+     "x": -4.9,
+     "y": 1.5,
+     "z": 2,
+     "wx": -4.9,
+     "wy": 1.5,
+     "wz": 2,
+     "h": 3
+    },
+    {
+     "id": "tk5",
+     "kind": "mesh",
+     "name": "tue",
+     "shape": "box",
+     "parent": null,
+     "x": -3.5000000000000004,
+     "y": 2.5,
+     "z": 2,
+     "wx": -3.5000000000000004,
+     "wy": 2.5,
+     "wz": 2,
+     "h": 5
+    },
+    {
+     "id": "tk6",
+     "kind": "mesh",
+     "name": "wed",
+     "shape": "box",
+     "parent": null,
+     "x": -2.1000000000000005,
+     "y": 1,
+     "z": 2,
+     "wx": -2.1000000000000005,
+     "wy": 1,
+     "wz": 2,
+     "h": 2
+    },
+    {
+     "id": "tk7",
+     "kind": "mesh",
+     "name": "thu",
+     "shape": "box",
+     "parent": null,
+     "x": -0.7000000000000011,
+     "y": 3,
+     "z": 2,
+     "wx": -0.7000000000000011,
+     "wy": 3,
+     "wz": 2,
+     "h": 6
+    },
+    {
+     "id": "tk8",
+     "kind": "mesh",
+     "name": "fri",
+     "shape": "box",
+     "parent": null,
+     "x": 0.6999999999999993,
+     "y": 2,
+     "z": 2,
+     "wx": 0.6999999999999993,
+     "wy": 2,
+     "wz": 2,
+     "h": 4
+    },
+    {
+     "id": "tk9",
+     "kind": "mesh",
+     "name": "sat",
+     "shape": "box",
+     "parent": null,
+     "x": 2.0999999999999996,
+     "y": 3.5,
+     "z": 2,
+     "wx": 2.0999999999999996,
+     "wy": 3.5,
+     "wz": 2,
+     "h": 7
+    },
+    {
+     "id": "tk10",
+     "kind": "mesh",
+     "name": "sun",
+     "shape": "box",
+     "parent": null,
+     "x": 3.4999999999999982,
+     "y": 0.5,
+     "z": 2,
+     "wx": 3.4999999999999982,
+     "wy": 0.5,
+     "wz": 2,
+     "h": 1
+    },
+    {
+     "id": "tk11",
+     "kind": "mesh",
+     "name": "avg",
+     "shape": "box",
+     "parent": null,
+     "x": 4.899999999999999,
+     "y": 2,
+     "z": 2,
+     "wx": 4.899999999999999,
+     "wy": 2,
+     "wz": 2,
+     "h": 4
+    },
+    {
+     "id": "tk13",
+     "kind": "mesh",
+     "name": null,
+     "shape": "box",
+     "parent": "tk12",
+     "x": 0,
+     "y": 0.8,
+     "z": 0,
+     "wx": -6,
+     "wy": 0.8,
+     "wz": 4,
+     "h": 1.6
+    },
+    {
+     "id": "tk14",
+     "kind": "mesh",
+     "name": null,
+     "shape": "box",
+     "parent": "tk12",
+     "x": 0,
+     "y": 2.1,
+     "z": 0,
+     "wx": -6,
+     "wy": 2.1,
+     "wz": 4,
+     "h": 0.8
+    },
+    {
+     "id": "tk15",
+     "kind": "mesh",
+     "name": null,
+     "shape": "sphere",
+     "parent": "tk12",
+     "x": 0,
+     "y": 2.1,
+     "z": 0.42,
+     "wx": -5.79,
+     "wy": 2.1,
+     "wz": 4.363730669589464,
+     "h": 0.3
+    },
+    {
+     "id": "tk12",
+     "kind": "group",
+     "name": "robot",
+     "shape": null,
+     "parent": null,
+     "x": -6,
+     "y": 0,
+     "z": 4,
+     "wx": -6,
+     "wy": 0,
+     "wz": 4,
+     "h": 1
+    }
+   ],
+   "frames": 116,
+   "camera": {
+    "distance": 22,
+    "height": 9,
+    "angle": 28
+   }
+  },
+  "colours": 252,
+  "frames": {
+   "a": 128,
+   "b": 164
+  },
+  "tap": {
+   "at": {
+    "x": 540.8726344448743,
+    "y": 208.6771084612342
+   },
+   "tappedName": "sat",
+   "taps": 1
+  },
+  "anim": {
+   "mid": 2.441110069335938,
+   "end": 6,
+   "endBodyWx": 6
+  },
+  "groupTap": {
+   "at": {
+    "x": 634.0287517834207,
+    "y": 337.3536435187998
+   },
+   "tappedName": "robot",
+   "robotTaps": 1,
+   "taps": 2
+  },
+  "consoleErrors": [],
+  "networkErrors": []
+ }
+}

@@ -24,6 +24,7 @@ import {
   IdNewAction,
   CryptoCallAction,
   CryptoNodeKind,
+  FieldWrite,
   MintedTarget,
   JsFunctionPlan,
   RefusedScriptPlan,
@@ -42,11 +43,13 @@ import {
   PARENT_COMPONENT_OBJECT_TYPE,
   PAGE_STACK_ENTRY_PROP,
   variableSeedAction,
-  objectSeedAction
+  objectSeedAction,
+  undrawnReasonOf,
+  UNCARRIED_PAGE_GROUP
 } from '../analyze/plan';
 import { ExportIR, ITEM_OUTPUT_SIGNAL, NodeIR } from '../ir/types';
 import { KitBinding, tsTypeOf as kitPortTsType } from './kits';
-import { assignClassNames, ClassCandidate, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
+import { assignClassNames, ClassCandidate, lowerFirst, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
 import { WiredWhere, wiredWhereCode } from '../analyze/querySettings';
 import { tsLiteral } from './state';
 import { UTIL_LIB_PATH, utilCallMayBeUndefined } from './utilLib';
@@ -129,6 +132,28 @@ const PRINT_WIDTH = 100;
 
 /** A bare reference (`name`, `visitorName.get()`) that negates without parentheses. */
 const SIMPLE_REF = /^[A-Za-z_$][A-Za-z0-9_$.]*(\(\))?$/;
+/**
+ * P18 session 126 (EXP-011 §93). `!(cond)` for a printed condition, without the noise: `!!x` negates to `!x`, a bare
+ * reference or a condition already in its own parentheses takes the `!` as it is.
+ */
+function negatedCode(cond: string): string {
+  if (cond.startsWith('!!')) {
+    const rest = cond.slice(2);
+    if (SIMPLE_REF.test(rest)) return `!${rest}`;
+    if (rest.startsWith('(') && closingParenOf(rest) === rest.length - 1) return `!${rest}`;
+  }
+  if (SIMPLE_REF.test(cond) || (cond.startsWith('(') && closingParenOf(cond) === cond.length - 1)) return `!${cond}`;
+  return `!(${cond})`;
+}
+/** The index of the `)` that closes the `(` at index 0 of `code` (strings and comments are not expected there), or -1. */
+function closingParenOf(code: string): number {
+  let depth = 0;
+  for (let i = 0; i < code.length; i++) {
+    if (code[i] === '(') depth++;
+    else if (code[i] === ')' && --depth === 0) return i;
+  }
+  return -1;
+}
 /** EXP-011 §45. The fields of a files answer that are optional even in the chain-local form — must agree with plan.ts. */
 const FILE_OUT_OPTIONAL_FIELDS = new Set(['upload.contentType', 'upload.size', 'sign.expiresAt', 'sign.ttlSeconds']);
 /**
@@ -623,10 +648,16 @@ export function emitComponent(
    * element or an element above it has a Mounted that a value decides, and dropped where one is authored Mounted false
    * (it never mounts, so its Did Mount never fires). Post-order over the tree, the runtime's order.
    */
-  const mountChains: Array<{ nodeId: string; actions: HandlerAction[] }> = [];
+  /**
+   * P18 session 126 (EXP-011 §93). `gates`: the element and every element above it, up to the root, whose Mounted a value
+   * decides. Empty, the chain is a mount effect; otherwise it runs each time those values all say mounted, which is each
+   * time the viewer mounts the element and sends its Did Mount (`componentDidMount`, again after every unmount).
+   */
+  const mountChains: Array<{ nodeId: string; actions: HandlerAction[]; gates: string[] }> = [];
   const mountRefusals = new Map<string, string>();
   {
-    const mountGateOf = (id: string): string | null => {
+    const mountGateOf = (id: string): { never: string } | { gates: string[] } => {
+      const gates: string[] = [];
       for (let at: string | undefined = id; at !== undefined; at = nodeById.get(at)?.parent) {
         const bound = plan.bindings[at]?.['mounted'];
         const literal = nodeById.get(at)?.parameters.find((p) => p.name === 'mounted')?.value;
@@ -634,20 +665,23 @@ export function emitComponent(
           (bound !== undefined && bound.kind === 'computed' && (bound.expr.kind === 'undefined' || (bound.expr.kind === 'literal' && !bound.expr.value))) ||
           (bound === undefined && literal?.kind === 'literal' && literal.value === false);
         const whose = at === id ? 'it is' : `an element above it (${at}) is`;
-        if (never) return `${whose} never mounted, so its Did Mount never fires`;
-        if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal')) {
-          return `${whose} mounted by a value, so its Did Mount fires when that value says, and a mount effect runs when the component mounts`;
+        if (never) return { never: `${whose} never mounted, so its Did Mount never fires` };
+        // A page's sole Group renders as the page div, whose Mounted is not carried: the page is drawn, so when it mounts is
+        // not known here (the plan refuses the chain with the same words).
+        if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal') && at === plan.collapsedGroupId) {
+          return { never: `${UNCARRIED_PAGE_GROUP} ${at}, is mounted by a value the export does not carry (it draws the page), so when it mounts is not known here` };
         }
+        if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal')) gates.push(at);
         if (at === plan.rootId) break;
       }
-      return null;
+      return { gates };
     };
     const consider = (id: string) => {
       const actions = plan.handlers[id]?.['didMount'];
       if (actions === undefined) return;
-      const why = mountGateOf(id);
-      if (why === null) mountChains.push({ nodeId: id, actions });
-      else mountRefusals.set(id, why);
+      const gate = mountGateOf(id);
+      if ('gates' in gate) mountChains.push({ nodeId: id, actions, gates: gate.gates });
+      else mountRefusals.set(id, gate.never);
     };
     const visit = (id: string) => {
       for (const child of plan.childrenOf[id] ?? []) visit(child);
@@ -793,6 +827,8 @@ export function emitComponent(
     if (action.kind === 'store-set') {
       usedVariableNames.add(action.variableName);
       collectExprUse(action.expr);
+      // P18-S127-SETDONE. The Done chain earns what it uses.
+      (action.then ?? []).forEach(collectActionUse);
     }
     if (action.kind === 'globalstore-set') {
       usedStoreNames.add(action.storeName);
@@ -1012,6 +1048,8 @@ export function emitComponent(
     ...Object.values(plan.handlers).flatMap((byPort) => Object.values(byPort).flat()),
     ...Object.values(plan.changeHandlers).flat(),
     ...plan.receivers.flatMap((r) => r.actions),
+    // P18-S126-INSIGNAL. A signal input's chain earns imports and references exactly as a handler's does.
+    ...plan.inputPulses.flatMap((p) => p.actions),
     // A reactive Condition's branch earns imports, `navigate` and state references exactly as a
     // handler's does — it just runs from an effect instead of an event (LOGIC-TARGET §10).
     ...plan.branchEffects.map((e) => e.action),
@@ -1107,6 +1145,9 @@ export function emitComponent(
                 a.kind === 'array-new' ||
                 // EXP-011 §61. A Reset's one chain.
                 a.kind === 'stack-reset'
+              ? [a, ...deepActions(a.then)]
+            : // P18-S127-SETDONE. A Set Variable's Done chain.
+              a.kind === 'store-set' && a.then !== undefined
               ? [a, ...deepActions(a.then)]
               : [a]
     );
@@ -1335,6 +1376,8 @@ export function emitComponent(
       if (stateVar) referencedStateNames.add(stateVar.name);
     }
   }
+  // P18-S127-SIBLINGVALUE. A delivered count is read by the instance's prop and written by its effect.
+  for (const pulse of plan.instancePulses) if (pulse.delivered !== undefined) referencedStateNames.add(pulse.delivered.name);
   const referencedStateVars = plan.stateVars.filter((v) => referencedStateNames.has(v.name));
   /** P18-S111-RECORDLIVE. Each live Record whose row this component holds, with that row's state var. */
   const liveRecordRows = plan.recordReads.flatMap((read) => {
@@ -1528,7 +1571,14 @@ export function emitComponent(
     flushed.add(nodeId);
     // "asked of it" rather than "wired to it": an authored parameter with no mapping is one of
     // these and is not a wire, and a header that named only wires would misdescribe it.
-    const out = [`TODO(export): node ${commentSafe(nodeId)} renders, and part of what the graph`, 'asked of it did not survive:'];
+    // P18-S123-UNDRAWNTRIGGER. An element removed from the tree is not said to render; the marker says why it is not drawn.
+    const undrawn = plan.roleOf[nodeId] !== undefined ? undrawnReasonOf(plan, component, nodeId) : null;
+    const out = [
+      undrawn === null
+        ? `TODO(export): node ${commentSafe(nodeId)} renders, and part of what the graph`
+        : `TODO(export): node ${commentSafe(nodeId)} is not drawn (${commentSafe(undrawn)}), and part of what the graph`,
+      'asked of it did not survive:'
+    ];
     for (const d of deferrals) {
       out.push(`  - ${commentSafe(d.subject)} ${commentSafe(d.reason)}.`);
       if (d.origin !== null) out.push(`    In the graph it is fed by ${commentSafe(d.origin)}.`);
@@ -1713,6 +1763,8 @@ export function emitComponent(
         return expr.field !== 'authenticated';
       case 'payload':
         return true; // payload keys are optional-typed
+      case 'row-relay':
+        return true; // EXP-011 §100: the row's field, which a row's item may lack. Must agree with plan.ts maybeUndefinedExpr.
       case 'undefined':
         return true; // a Component Object property's boot value (COMPONENT-OBJECT-TARGET §3)
       case 'jsfun-out':
@@ -1925,6 +1977,9 @@ export function emitComponent(
   };
   /** The wrapper call's argument record; shorthand where the arg code is the field name. */
   const jsArgsObject = (def: JsFunctionPlan, mode: 'handler' | 'render'): string => {
+    // P18-S122-TPLBUILD (TS2554). An Expression with no inputs prints `function True()`: a call with `{}` passes an
+    // argument it does not take. A Function's and a Visual Function's wrapper always takes its record.
+    if (def.kind === 'expression' && def.inputs.length === 0) return '';
     const entries = def.inputs
       .filter((i) => i.expr !== undefined)
       .map((i) => {
@@ -2001,12 +2056,19 @@ export function emitComponent(
    * (a literal, or the local its wired Value lands in); everywhere else they are the DOM event's.
    */
   let announcedCode: { inputId: string; code: string } | undefined;
+  /**
+   * EXP-011 §100. While a repeater's row callback prints its chain, a read of that repeater's relayed value is what the
+   * row is handed for the input the value passes through (`rowSignalAttrs`); the plan mints `row-relay` nowhere else.
+   */
+  let rowRelayCode: { repeaterId: string; read: (input: string) => string } | undefined;
   const exprCode = (expr: ValueExpr, mode: 'handler' | 'render'): string => {
     switch (expr.kind) {
       case 'prop':
         return propName(expr.name);
       case 'input-text':
         return announcedCode?.inputId === expr.inputId ? announcedCode.code : 'event.target.value';
+      case 'row-relay':
+        return rowRelayCode?.repeaterId === expr.repeaterId ? rowRelayCode.read(expr.input) : 'undefined';
       /**
        * A url parameter (EXP-011 Tier 2.5) — the query first, the path segment behind it.
        *
@@ -2559,6 +2621,10 @@ export function emitComponent(
       (a.kind === 'popup-show' || a.kind === 'collection-remove' || a.kind === 'log' || a.kind === 'object-set' || (a.kind === 'delay' && a.verb === 'restart')) &&
       a.then.length > 0
         ? [{ ...a, then: [] }, ...expandActions(a.then)]
+        : // P18-S127-SETDONE. A Set Variable with a literal Name cannot fail and its write is synchronous: Done, then
+          // Completed, are following statements (`withSetDone` put them in `then` in that order).
+          a.kind === 'store-set' && a.then !== undefined
+          ? [{ ...a, then: undefined }, ...expandActions(a.then)]
         : // EXP-011 §60. The self variant cannot miss and `set` is synchronous: Done then Completed are following
           // statements, in the order reportOutcome sends them. The parent form prints its own two arms.
           a.kind === 'component-object-set' && !a.parent && (a.then.length > 0 || a.completedThen.length > 0)
@@ -2566,8 +2632,9 @@ export function emitComponent(
         : // A jsfun-run is only its done-chain (EXP-003 §4 A2h): output reads inline the call
           // at their sinks, so the run itself needs no statement — unless it materializes its
           // output record (CONTROLLED-STATE §4f), which is one setter statement before the chain.
+          // P18-S129-FNSUCCESS: or a Run of a Function a ticked input also runs, which records what it read first.
           a.kind === 'jsfun-run'
-          ? a.materialize !== undefined || runIsPulsed(a)
+          ? a.materialize !== undefined || runIsPulsed(a) || (a.ticked !== true && tickedRunIds.has(a.nodeId))
             ? [{ ...a, then: [] }, ...expandActions(a.then)]
             : expandActions(a.then)
           : // P18-S116-QUERYFETCH. A Fetch into a query the export does not keep (nothing it renders reads the rows) asks
@@ -2642,7 +2709,9 @@ export function emitComponent(
     };
     const inAction = (a: HandlerAction): boolean => {
       switch (a.kind) {
+        // P18-S127-SETDONE. The value, or anything in the Done chain.
         case 'store-set':
+          return reads(a.expr) || (a.then ?? []).some(inAction);
         case 'globalstore-set':
           return reads(a.expr);
         // EXP-011 §47. Any of the patch's values, or anything in the chain after it.
@@ -3377,6 +3446,9 @@ export function emitComponent(
         if (action.materialize !== undefined) {
           return `${record}${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler')}))`;
         }
+        // P18-S129-FNSUCCESS. A Run of a run that is neither pulsed nor materialized is only its record: the chain after
+        // it reads the outputs where they land, as before. (A Success chain gives such a run a ticked half.)
+        if (record !== '' && action.then.length === 0) return `tickedArrival(${tickedRecordArgs(action.nodeId)})`;
         return expandActions(action.then).map(actionCode).join('; ');
       }
       /**
@@ -3405,6 +3477,7 @@ export function emitComponent(
       // The functional updates are §3.3's closure-staleness-immune forms.
       case 'state-set': {
         const setter = stateSetterOf(action.name);
+        if (action.field !== undefined && fieldWriteIsRun(action)) return fieldWriteCode(action, action.field, indent);
         if (action.op === 'toggle') return `${setter}((v) => !v)`;
         if (action.op === 'inc') return `${setter}((v) => v + 1)`;
         if (action.op === 'dec') return `${setter}((v) => v - 1)`;
@@ -3966,6 +4039,9 @@ export function emitComponent(
       // EXP-011 §63. One call on the handle; Done is the node's listener, passed once to the hook.
       case 'drag-snap':
         return `${action.local}.snapTo(${tsLiteral(action.axis)})`;
+      // P18-S128-FIELDSET. A call on the field's element; nothing when it is not on the page.
+      case 'field-focus':
+        return `${fieldRefs.get(action.inputId)}.current?.${action.focus ? 'focus' : 'blur'}()`;
       /**
        * EXP-011 §61. A push, printed as the runtime's own call (`navigate.ts` `navigate()`): the target, the
        * parameters by the target's own prop identifiers, the back callback (the results row written FIRST, then
@@ -4286,8 +4362,77 @@ export function emitComponent(
     // EXP-011 §61. A push is a multi-line call; a pop is always the block form; a Reset with a chain is a run of statements.
     a.kind === 'stack-push' ||
     a.kind === 'stack-pop' ||
-    (a.kind === 'stack-reset' && a.then.length > 0)
+    (a.kind === 'stack-reset' && a.then.length > 0) ||
+    // P18-S128-FIELDSET. A field's Set is an `if`; a Clear with a chain to run after it is a run of statements.
+    (a.kind === 'state-set' && fieldWriteIsRun(a))
     );
+  }
+
+  /** P18-S128-FIELDSET. The field's own change chain, as its onChange runs it (`changeAttrs`). */
+  const fieldChainOf = (inputId: string): HandlerAction[] => [
+    ...(plan.changeHandlers[inputId] ?? []),
+    ...((plan.handlers[inputId] ?? {})['onChange'] ?? [])
+  ];
+  /** The fields whose chain is being printed: a chain that Sets or Clears its own field is not run again inside itself. */
+  const printingFieldChains = new Set<string>();
+  /** Whether a field write prints more than its setter: a Set always (the focus test), a Clear with a chain or a mark. */
+  function fieldWriteIsRun(a: HandlerAction): boolean {
+    if (a.kind !== 'state-set' || a.field === undefined) return false;
+    if (a.field.port === 'set') return true;
+    return fieldClearedLocals.has(a.field.inputId) || (!printingFieldChains.has(a.field.inputId) && fieldChainOf(a.field.inputId).length > 0);
+  }
+  /**
+   * P18-S128-FIELDSET and P18-S127-CLEAROUT (EXP-011 §97). The write, then the field's change chain with the text written
+   * where the chain reads the field (`announcedCode`, as the mount announcement prints it). A Set is not written into a
+   * focused field (`setText`'s `hasFocus()`), and writes the Value as text: `undefined` leaves the start value, `null` is
+   * `''`, a Clear since the last delivery is `''`. Every line ends its own statement; the first carries no indent.
+   */
+  function fieldWriteCode(action: Extract<HandlerAction, { kind: 'state-set' }>, field: FieldWrite, indent: number): string {
+    const setter = stateSetterOf(action.name);
+    const at = pad(indent);
+    const cleared = fieldClearedLocals.get(field.inputId);
+    const chainLines = (code: string, depth: number): string[] => {
+      if (printingFieldChains.has(field.inputId)) return [];
+      const chain = fieldChainOf(field.inputId);
+      if (chain.length === 0) return [];
+      const outer = announcedCode;
+      announcedCode = { inputId: field.inputId, code };
+      printingFieldChains.add(field.inputId);
+      const lines = effectBody(chain, depth);
+      printingFieldChains.delete(field.inputId);
+      announcedCode = outer;
+      return lines;
+    };
+    if (field.port === 'clear') {
+      const lines = [`${at}${setter}('');`, ...(cleared !== undefined ? [`${at}${cleared}.current = true;`] : []), ...chainLines("''", indent)];
+      return lines.join('\n').slice(at.length);
+    }
+    const ref = fieldRefs.get(field.inputId)!;
+    const inner = pad(indent + 2);
+    const start = tsLiteral(field.start ?? '');
+    const body: string[] = [];
+    let code: string;
+    if (action.expr === undefined || action.expr.kind === 'literal') {
+      const literal = tsLiteral(action.expr?.kind === 'literal' ? String(action.expr.value) : (field.start ?? ''));
+      code = cleared !== undefined ? `(${cleared}.current ? '' : ${literal})` : literal;
+    } else {
+      // Block-scoped, so a name another write's block uses is free here; one the component's scope holds is not.
+      const blockLocal = (base: string): string => {
+        let candidate = base;
+        for (let n = 2; reserved.has(candidate); n++) candidate = `${base}${n}`;
+        return candidate;
+      };
+      const value = blockLocal(`${action.name}Value`);
+      code = blockLocal(`${action.name}Text`);
+      const asText = `String(${value} ?? '')`;
+      const coerced = field.start === undefined || field.start === '' ? asText : `${value} === undefined ? ${start} : ${asText}`;
+      body.push(
+        `${inner}const ${value} = ${exprCode(action.expr, 'handler')};`,
+        `${inner}const ${code} = ${cleared !== undefined ? `${cleared}.current ? '' : ${coerced}` : coerced};`
+      );
+    }
+    body.push(`${inner}${setter}(${code});`, ...chainLines(code, indent + 2));
+    return [`if (${ref}.current !== document.activeElement) {`, ...body, `${at}}`].join('\n');
   }
 
   /**
@@ -4324,7 +4469,9 @@ export function emitComponent(
       // EXP-011 §60. The parent write's `if` ends in `}` and takes no terminator.
       (a.kind === 'component-object-set' && a.parent) ||
       // EXP-011 §61. The pop's block form ends in `}`; the push ends in `)` and takes its `;`, as does a Reset.
-      a.kind === 'stack-pop'
+      a.kind === 'stack-pop' ||
+      // P18-S128-FIELDSET. Each line of a field write ends its own statement.
+      (a.kind === 'state-set' && fieldWriteIsRun(a))
     );
   }
   /** Whether anything in these actions, at any depth, is awaited — the arrow around it is `async`. */
@@ -4351,6 +4498,7 @@ export function emitComponent(
    */
   function blockBody(expanded: HandlerAction[], indent: number): string[] {
     return expanded.map((a) =>
+      // P18-S128-FIELDSET. A field write's lines take the column (`actionTakesNoTerminator` holds for it).
       actionTakesNoTerminator(a)
         ? `${pad(indent)}${actionCode(a, indent)}`
         : `${pad(indent)}${actionCode(a, ('detached' in a && a.detached === true) || a.kind === 'date-now-read' || a.kind === 'id-new' || a.kind === 'crypto-call' || a.kind === 'branch' || a.kind === 'array-new' || a.kind === 'component-object-set' || a.kind === 'stack-push' || a.kind === 'stack-reset' || a.kind === 'jsfun-run' ? indent : 0)};`
@@ -4387,6 +4535,15 @@ export function emitComponent(
     }
     return statements.length === 1 ? `${head} => ${statements[0]}` : `${head} => { ${statements.join('; ')}; }`;
   };
+  /** EXP-011 §99. Statements put in front of a handler arrow's body, in the form `handlerArrow` printed it. */
+  const prependStatements = (arrow: string, statements: string[], indent: number): string => {
+    if (statements.length === 0) return arrow;
+    const head = arrow.slice(0, arrow.indexOf('=> ') + 3);
+    const body = arrow.slice(head.length);
+    if (body.startsWith('{\n')) return `${head}{\n${statements.map((st) => `${pad(indent + 2)}${st};`).join('\n')}\n${body.slice(2)}`;
+    if (body.startsWith('{ ')) return `${head}{ ${statements.join('; ')}; ${body.slice(2)}`;
+    return `${head}{ ${statements.join('; ')}; ${body}; }`;
+  };
 
   /**
    * EXP-011 §39. One `useRef` per Delay node that attached, whichever of its verbs did — read
@@ -4397,6 +4554,29 @@ export function emitComponent(
   const delayRefs = new Map<string, string>();
   for (const a of deepActions(allActions)) {
     if (a.kind === 'delay') delayRefs.set(a.nodeId, a.ref);
+  }
+  /*
+   * P18-S128-FIELDSET (EXP-011 §97). A field a Focus, a Blur or a Set acts on holds its element in a ref (a Set asks whether
+   * the field has focus, as the runtime's does). A field that is both Set and Cleared keeps, in a second ref, whether a Clear
+   * has run since its Value was last delivered: the runtime's Set writes `_internal.text`, which the Clear empties and the
+   * next delivery fills. Read off the actions, as the Delay's refs are.
+   */
+  const fieldRefs = new Map<string, string>();
+  const fieldSetSources = new Map<string, ValueExpr>();
+  const fieldCleared = new Set<string>();
+  for (const a of deepActions(allActions)) {
+    const inputId = a.kind === 'field-focus' ? a.inputId : a.kind === 'state-set' && a.field?.port === 'set' ? a.field.inputId : undefined;
+    if (inputId !== undefined && !fieldRefs.has(inputId)) {
+      const named = lowerFirst(pascalCase(nodeById.get(inputId)?.authoredLabel ?? '')) || 'field';
+      fieldRefs.set(inputId, dedupeLocal(/^[A-Za-z_$]/.test(named) ? `${named}Field` : 'field'));
+    }
+    if (a.kind === 'state-set' && a.field?.port === 'set' && a.expr !== undefined) fieldSetSources.set(a.field.inputId, a.expr);
+    if (a.kind === 'state-set' && a.field?.port === 'clear') fieldCleared.add(a.field.inputId);
+  }
+  const fieldClearedLocals = new Map<string, string>();
+  for (const inputId of fieldCleared) {
+    if (!fieldSetSources.has(inputId)) continue;
+    fieldClearedLocals.set(inputId, dedupeLocal(`${fieldRefs.get(inputId)!.replace(/Field$/, '')}Cleared`));
   }
 
   // ---- imports ---------------------------------------------------------------------------
@@ -4431,6 +4611,10 @@ export function emitComponent(
       plan.valueChangedEffects.length > 0 ||
       // P18-S119-TICKEDRUN. A ticked input's run is an effect.
       plan.tickedRuns.length > 0 ||
+      // P18-S126-INSIGNAL. A signal input's chain is an effect on its count.
+      plan.inputPulses.length > 0 ||
+      // P18-S127-SIBLINGVALUE. A delivered count follows the count sent from an effect.
+      plan.instancePulses.some((p) => p.delivered !== undefined) ||
       // EXP-011 §43, P18-S113-IDBINDREAD. A Record with Fetch unwired is a bind keyed on its Id.
       recordBinds.length > 0 ||
       // P18-S111-RECORDLIVE. A live Record's row subscribes to the client's copy of its record.
@@ -4452,7 +4636,9 @@ export function emitComponent(
   }
   if (radioNameLocals.size > 0) reactImports.push('useId');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
-  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0) reactImports.push('useRef');
+  if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0 || plan.instancePulses.length > 0 || fieldRefs.size > 0) reactImports.push('useRef');
+  // P18-S128-FIELDSET. A Cleared mark's reset is an effect.
+  if ([...fieldClearedLocals.keys()].some((id) => fieldSetSources.get(id)?.kind !== 'literal') && !reactImports.includes('useEffect')) reactImports.push('useEffect');
   // EXP-011 §53. A task template's mount effect and its once-guard (StrictMode mounts twice; startTask pulses once).
   // EXP-011 §57. A Repeater Item's Added effect takes the same pair, for the same reason.
   // P18-S116-FIELDMOUNT. A field's mount announcement takes the same pair: its chain may reach a parent or a backend.
@@ -5209,6 +5395,14 @@ export function emitComponent(
         defer(node.id, 'the "didMount" signal', mountRefusals.get(node.id)!);
         continue;
       }
+      // P18-S128-FIELDSET. A text field's On Enter is its Enter key (TextInput.tsx `onKeyDown`).
+      if (port === 'onEnter' && plan.roleOf[node.id] === 'input') {
+        const expanded = expandActions(actions);
+        attrs.push(
+          `onKeyDown={${actionsAwait(expanded) ? 'async ' : ''}(event) => {\n${pad(attrIndent + 2)}if (event.key !== 'Enter') return;\n${blockBody(expanded, attrIndent + 2).join('\n')}\n${pad(attrIndent)}}}`
+        );
+        continue;
+      }
       const eventAttr = roleEvents[port] ?? EVENT_ATTRS[port];
       if (!eventAttr) {
         notes.push(`${plan.path}: signal ${node.id}.${port} has no DOM event equivalent — dropped, reported`);
@@ -5266,6 +5460,36 @@ export function emitComponent(
     if (base === null) return null;
     if (boolTypedSource(source)) return base;
     return SIMPLE_REF.test(base) ? `!!${base}` : `!!(${base})`;
+  };
+  /**
+   * P18 session 126 (EXP-011 §93). The condition an element's Mounted wire draws it under, as the runtime decides it: the
+   * viewer's `mounted` setter coerces `!!value`, and a wire never delivers `undefined` (`Node.sendValue`), so while the
+   * source has no value the element keeps its own authored Mounted. Authored false, `!!x` already says that; authored true
+   * (the default), an undefined source must draw it: `x === undefined || x` (planning's sheets, a component placed without
+   * the input). Not `x ?? true`: a `null` IS delivered (an Expression's load answer for a throw), and unmounts it.
+   */
+  const mountedCondOf = (id: string, source: BindingSource): string | null => {
+    const cond = truthinessCode(source);
+    if (cond === null) return null;
+    const node = nodeById.get(id);
+    const authored = node?.parameters.find((p) => p.name === 'mounted')?.value;
+    if (authored?.kind === 'literal' && authored.value === false) return cond;
+    // An Expression's answer is computed in render from its inputs, a value from the first render (`null` for a throw):
+    // undefined only when its text says so, which this does not read. The rows a run writes, the props a parent passes,
+    // the stores and the records are undefined until something writes them.
+    const isExpressionAnswer =
+      source.kind === 'computed' && source.expr.kind === 'jsfun-out' && source.expr.viaState === undefined && nodeById.get(source.expr.nodeId)?.type === 'Expression';
+    const undefinedAtFirst =
+      source.kind === 'prop' ||
+      source.kind === 'store' ||
+      source.kind === 'store-key' ||
+      (source.kind === 'computed' && !isExpressionAnswer && maybeUndefined(source.expr));
+    if (!undefinedAtFirst) return cond;
+    // A read only (a prop, a store's local, a row's field): a computed value (a Date Compare's call) would print, and run,
+    // twice; it keeps `!!x`, which differs only while that value is undefined.
+    const base = rawBindingExpr(source);
+    if (base === null || !SIMPLE_REF.test(base) || base.endsWith('()')) return cond;
+    return boolTypedSource(source) ? `(${base} === undefined || ${base})` : `(${base} === undefined || !!${base})`;
   };
   const negatedVisibleCode = (source: BindingSource): string | null => {
     const base = bindingExpr(source, 'truthy');
@@ -5445,6 +5669,8 @@ export function emitComponent(
    * the element prints. A statically-false source removes it with a comment: authored
    * invisibility is authored state, not dead code.
    */
+  /** P18 session 126 (EXP-011 §93). The root's Mounted condition, when a value decides it; printed as the return's guard. */
+  let rootMountedCond: string | null = null;
   const render = (id: string, indent: number, radioCtx?: RadioCtx): string[] => {
     const node = nodeById.get(id)!;
     const mountedBound = plan.bindings[id]?.['mounted'];
@@ -5462,8 +5688,14 @@ export function emitComponent(
       }
       const staticallyTrue = mountedBound.kind === 'computed' && mountedBound.expr.kind === 'literal';
       if (!staticallyTrue) {
-        const cond = truthinessCode(mountedBound);
+        const cond = mountedCondOf(id, mountedBound);
         if (cond !== null) {
+          // P18 session 126 (EXP-011 §93). The root: the component draws nothing while it says not to, after its hooks
+          // (so its state is kept across, as the runtime keeps its nodes), the instance's visual parent drawing again.
+          if (id === plan.rootId) {
+            rootMountedCond = cond;
+            return renderCore(id, indent, radioCtx);
+          }
           const inner = renderCore(id, indent + 2, radioCtx);
           return [`${pad(indent)}{${cond} && (`, ...inner, `${pad(indent)})}`];
         }
@@ -5578,6 +5810,8 @@ export function emitComponent(
     if (controlVar !== undefined) {
       attrs.push(`${role === 'checkbox' ? 'checked' : 'value'}={${controlVar.name}}`);
     }
+    // P18-S128-FIELDSET. The element a Focus, a Blur or a Set acts on.
+    if (role === 'input' && fieldRefs.has(id)) attrs.push(`ref={${fieldRefs.get(id)}}`);
     if (role === 'input' || isControl) attrs.push(...changeAttrs(node, indent + 2));
     attrs.push(...handlerAttrs(node, indent + 2));
 
@@ -5790,10 +6024,21 @@ export function emitComponent(
      * signal. Per-row callbacks run both. Two rows cannot be clicked in one frame, so the
      * divergence needs a programmatic fire to reach.
      */
-    const rowSignalAttrs = (attrIndent: number): string[] => {
+    const rowSignalAttrs = (attrIndent: number, itemRef: string, entries: ReadonlyArray<RowEntry>): string[] => {
       const handlers = plan.handlers[node.id];
       if (handlers === undefined) return [];
       const propByPort = new Map((templatePlan?.outputProps ?? []).map((o) => [o.port, o.prop]));
+      /**
+       * EXP-011 §99. The relayed row values, written first: the runtime copies the firing row's relayed outputs, then sends
+       * its signal. A row output that passes its input through holds what this row is handed for it (`undefined` where the
+       * mapping drops the field, as the runtime's row never gets the input).
+       */
+      const relayWrites = plan.rowRelays
+        .filter((r) => r.repeaterId === node.id)
+        .map((r) => {
+          const entry = entries.find((e) => e.input === r.input);
+          return `${stateSetterOf(r.stateName)}(${entry === undefined ? 'undefined' : memberExpr(itemRef, entry.field)})`;
+        });
       const out: string[] = [];
       for (const [port, actions] of Object.entries(handlers)) {
         if (!port.startsWith(ITEM_OUTPUT_SIGNAL)) {
@@ -5819,7 +6064,16 @@ export function emitComponent(
           defer(node.id, `the relayed row signal "${templatePort}"`, `has no callback prop on ${templateLegacy}`);
           continue;
         }
-        out.push(`${prop}={${handlerArrow(actions, '()', attrIndent)}}`);
+        const outer = rowRelayCode;
+        rowRelayCode = { repeaterId: node.id, read: (input) => {
+          const entry = entries.find((e) => e.input === input);
+          return entry === undefined ? 'undefined' : memberExpr(itemRef, entry.field);
+        } };
+        try {
+          out.push(`${prop}={${prependStatements(handlerArrow(actions, '()', attrIndent), relayWrites, attrIndent)}}`);
+        } finally {
+          rowRelayCode = outer;
+        }
       }
       return out;
     };
@@ -5882,7 +6136,7 @@ export function emitComponent(
       // §3.2: `id` keys only when every row has a unique one, mirroring the runtime's own
       // record identity; otherwise index, which is the same information the runtime has.
       const keyAttr = staticData.keyField ? `key={${itemLocal}.${staticData.keyField}}` : `key={${indexLocal}}`;
-      const attrs = [keyAttr, ...rowAttrs(keptStatic, itemLocal), ...rowSignalAttrs(indent + 2)];
+      const attrs = [keyAttr, ...rowAttrs(keptStatic, itemLocal), ...rowSignalAttrs(indent + 2, itemLocal, keptStatic)];
       const lines = element(target.symbol, attrs, null, indent + 2, false);
       const params = staticData.keyField ? itemLocal : `${itemLocal}, ${indexLocal}`;
       return [`${pad(indent)}{${staticData.constName}.map((${params}) => (`, ...lines, `${pad(indent)}))}`];
@@ -5914,7 +6168,7 @@ export function emitComponent(
           );
         }
       }
-      const attrs = [`key={${indexLocal}}`, ...rowAttrs(keptExpr, itemLocal), ...rowSignalAttrs(indent + 2)];
+      const attrs = [`key={${indexLocal}}`, ...rowAttrs(keptExpr, itemLocal), ...rowSignalAttrs(indent + 2, itemLocal, keptExpr)];
       const lines = element(target.symbol, attrs, null, indent + 2, false);
       const srcCode = exprCode(itemsExpr, 'render');
       // `?? []` is foreach.tsx's own "empty arrival clears the list". EXP-011 §55: a minted read is the hook
@@ -5953,13 +6207,13 @@ export function emitComponent(
       );
     }
     if (collection) {
-      const attrs = [`key={${indexLocal}}`, ...rowAttrs(kept, itemLocal), ...rowSignalAttrs(indent + 2)];
+      const attrs = [`key={${indexLocal}}`, ...rowAttrs(kept, itemLocal), ...rowSignalAttrs(indent + 2, itemLocal, kept)];
       const lines = element(target.symbol, attrs, null, indent + 2, false);
       const local = collectionLocals.get(collection.name)!;
       return [`${pad(indent)}{${local}.map((${itemLocal}, ${indexLocal}) => (`, ...lines, `${pad(indent)}))}`];
     }
     const item = query!.itemName;
-    const attrs = [`key={${item}.id}`, ...rowAttrs(kept, item), ...rowSignalAttrs(indent + 2)];
+    const attrs = [`key={${item}.id}`, ...rowAttrs(kept, item), ...rowSignalAttrs(indent + 2, item, kept)];
     const lines = element(target.symbol, attrs, null, indent + 2, false);
     return [`${pad(indent)}{${query!.stateName}.map((${item}) => (`, ...lines, `${pad(indent)}))}`];
   };
@@ -6122,7 +6376,10 @@ export function emitComponent(
     const specifier = `../kits/${binding.modulePath.split('/').pop()}`;
     const existing = internalImports.get(specifier);
     const symbols = new Set(existing ? existing.replace(/^import \{ | \} from .*$/g, '').split(', ') : []);
-    symbols.add(binding.symbol);
+    // P18-S122-TPLBUILD (TS2440). A component named as the kit node it draws (rocket-school's RaceTrack draws the
+    // GameKit's RaceTrack) imports the kit's under another local name: one name for both is a conflict tsc refuses.
+    const kitLocal = binding.symbol === plan.file!.symbol ? `${binding.symbol}Kit` : binding.symbol;
+    symbols.add(kitLocal === binding.symbol ? binding.symbol : `${binding.symbol} as ${kitLocal}`);
     internalImports.set(specifier, `import { ${[...symbols].sort().join(', ')} } from '${specifier}';`);
 
     const attrs: string[] = [];
@@ -6199,7 +6456,7 @@ export function emitComponent(
       );
     }
     const blocks = renderChildBlocks(node.id, childIds, indent + 2).flat();
-    return element(binding.symbol, attrs, blocks.length > 0 ? blocks : null, indent, blocks.length > 0);
+    return element(kitLocal, attrs, blocks.length > 0 ? blocks : null, indent, blocks.length > 0);
   };
 
   const instanceAttrs = (node: NodeIR): string[] => {
@@ -6223,6 +6480,16 @@ export function emitComponent(
       claimBinding(node.id, toProperty);
       // mounted rides the render wrapper; visible has no class to toggle on an instance.
       if (toProperty === 'mounted') continue;
+      // P18-S126-INSIGNAL. A signal input the parent pulses: the count and the count taken, one prop.
+      const pulse = plan.instancePulses.find((p) => p.nodeId === node.id && p.port === toProperty);
+      if (pulse !== undefined) {
+        const pulseAttr = targetPropName(node.type, toProperty);
+        if (pulseAttr !== null) {
+          // P18-S127-SIBLINGVALUE. A placed component that reads a lifted value is handed the count one commit late.
+          attrs.push(`${pulseAttr}={{ sent: ${pulse.delivered?.name ?? pulse.stateName}, taken: ${pulse.takenLocal} }}`);
+          continue;
+        }
+      }
       if (toProperty === 'visible') {
         notes.push(
           `${plan.path}: wire into instance ${node.id}.visible dropped — an instance has no element class to toggle in this slice`
@@ -6756,11 +7023,22 @@ export function emitComponent(
     internalImports.set(specifier, `import { ${[...usedMediaHelpers].sort().join(', ')} } from '${specifier}';`);
   }
 
-  // P109 ISL-005 AC7. The script-file registry, earned by a printed wrapper that binds `Scripts`.
+  // P109 ISL-005 AC7. The script-file registry, earned by a printed wrapper that binds `Scripts` (only a Function's
+  // does, and a Function's wrapper is in its own file now, which imports it: `functionFileSource`).
   const usesProjectScripts = Object.values(jsFunByNode).some((def) => referencedJsIds.has(def.nodeId) && (def.scripts?.length ?? 0) > 0);
-  if (usesProjectScripts) {
-    const specifier = `${relRoot}/${PROJECT_SCRIPT_FILES_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
-    internalImports.set(specifier, `import { ${PROJECT_SCRIPTS_SYMBOL} } from '${specifier}';`);
+  /*
+   * P18-S122-TPLBUILD, ruled by Richard 2026-10-19: a Function's wrapper moves to its own file, as a Script's code does
+   * (EXP-011 §52), and that one file is not typechecked. The body is the author's JavaScript (`function pick(typed, start)`
+   * is TS7006 under `strict`), and a file-wide no-check directive cannot be scoped to one function in a shared file. The signature is
+   * typed, so every call the component makes is still checked here. An Expression's and a Visual Function's stay.
+   */
+  const functionFiles = Object.values(jsFunByNode)
+    .filter((def) => def.kind === 'function' && referencedJsIds.has(def.nodeId))
+    .map((def) => ({ def, file: `src/functions/${plan.file!.dir}/${plan.file!.fileBase}/${def.fnName}.ts` }));
+  const ownFileIds = new Set(functionFiles.map(({ def }) => def.nodeId));
+  for (const { def, file } of functionFiles) {
+    const from = `${relRoot}/${file.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(from, `import { ${def.fnName} } from '${from}';`);
   }
 
   const importLines: string[] = [];
@@ -6777,6 +7055,7 @@ export function emitComponent(
   // definition nothing kept leaves its source behind as a comment instead (EXP-004), so the node
   // the inline marker names can still be read somewhere in the repo.
   for (const def of Object.values(jsFunByNode)) {
+    if (ownFileIds.has(def.nodeId)) continue;
     if (referencedJsIds.has(def.nodeId)) body.push(...jsWrapperLines(def), '');
     else body.push(...refusedSourceLines(def), '');
   }
@@ -6878,7 +7157,9 @@ export function emitComponent(
     }
     for (const output of plan.outputProps) body.push(`  ${output.prop}?: () => void;`);
     // Lifted value outputs (CONTROLLED-STATE §4d): optional callbacks carrying the value.
-    for (const lifted of plan.liftedOutputProps) body.push(`  ${lifted.prop}?: (value: ${lifted.tsType}) => void;`);
+    // P18-S122-TPLBUILD. The push sends whatever the output holds, `undefined` before its source has a value (a prop
+    // not passed, a row not yet written), and the parent's row is `T | undefined` already: the callback says so too.
+    for (const lifted of plan.liftedOutputProps) body.push(`  ${lifted.prop}?: (value: ${lifted.tsType} | undefined) => void;`);
     // The popup boundary's reserved prop (POPUPS-TARGET §4), after the declared interface.
     if (plan.closesPopup) body.push('  onClose?: (action?: string) => void;');
     // EXP-011 §61. The stack's reserved prop, after the declared interface (Close Popup's placement).
@@ -6963,7 +7244,38 @@ export function emitComponent(
   }
   // EXP-011 §39. The refs: a Delay's timer handle, and a Value Changed's last value seen.
   for (const [, ref] of delayRefs) body.push(`  const ${ref} = useRef<DelayHandle | null>(null);`);
+  // P18-S128-FIELDSET. A field's element, and whether it has been Cleared since its Value was last delivered.
+  for (const [, ref] of fieldRefs) body.push(`  const ${ref} = useRef<HTMLInputElement>(null);`);
+  for (const [inputId, local] of fieldClearedLocals) {
+    const source = fieldSetSources.get(inputId)!;
+    body.push(`  const ${local} = useRef(false);`);
+    if (source.kind === 'literal') continue;
+    const read = exprCode(source, 'handler');
+    const store = /^([A-Za-z_$][A-Za-z0-9_$]*)\.get\(\)$/.exec(read);
+    // A Variable delivers on every write, the same value too (the Set Variable's forceChange); anything else, on a change.
+    body.push(
+      ...(store !== null
+        ? [`  useEffect(() => ${store[1]}.subscribe(() => { ${local}.current = false; }), []);`]
+        : ['  useEffect(() => {', `    ${local}.current = false;`, `  }, [${exprCode(source, 'render')}]);`])
+    );
+  }
   for (const effect of plan.valueChangedEffects) body.push(`  const ${effect.lastLocal} = useRef<unknown>(undefined);`);
+  // P18-S126-INSIGNAL. The count each placed component has acted on, kept here so it outlives the child's unmount.
+  for (const pulse of plan.instancePulses) body.push(`  const ${pulse.takenLocal} = useRef(0);`);
+  /*
+   * P18-S127-SIBLINGVALUE (EXP-011 §96). The count handed to a placed component that reads a lifted value follows the count
+   * sent from this component's own effect: a parent's effects run after its children's, so the push of the value lifted
+   * with the pulse (a child's effect in the same commit) and the delivered count land in one render.
+   */
+  for (const pulse of plan.instancePulses) {
+    if (pulse.delivered === undefined) continue;
+    body.push(
+      `  // "${pulse.port}" is handed on one commit after it is sent: the values lifted with it arrive first, as the running app delivers them.`,
+      '  useEffect(() => {',
+      `    ${pulse.delivered.setterName}(${pulse.stateName});`,
+      `  }, [${pulse.stateName}]);`
+    );
+  }
   // EXP-011 §86. The Function node's values across runs, one per instance, as the running app's node keeps them.
   for (const id of pulsedRunIds) {
     const def = jsFunByNode[id]!;
@@ -6971,15 +7283,53 @@ export function emitComponent(
   }
   // P18-S119-TICKEDRUN. What each ticked input of a Run-wired Function holds, one per instance, as the node's inputs do.
   for (const ticked of plan.tickedRuns) body.push(`  const ${pulseNamesOf(jsFunByNode[ticked.nodeId]!).held} = useRef<unknown[]>([]).current;`);
-  for (const [id, local] of jsLocals) {
+  /*
+   * P18-S122-TPLBUILD (TS2448, TS2454). A render local that reads a hook printed below it (a States value, an animated
+   * number, a Drag's, a Script's or a stream's output) was printed above that hook's `const`: a read in its temporal
+   * dead zone, which throws at the first render ("Cannot access 'foldedOrOpen' before initialization"), and which the
+   * app's `tsc -b` refuses. Such a local, and any local that reads one, prints after the hooks; the rest print here, where
+   * a hook's arguments may read them (an Expression into an animation's target is the corpus's own shape).
+   */
+  const hookLocalNames = [
+    ...plan.animations.map((a) => a.local),
+    ...plan.drags.map((d) => d.local),
+    ...plan.statesMachines.map((m) => m.local),
+    ...plan.scripts.map((s) => s.local),
+    ...plan.runTasks.map((r) => r.local),
+    ...plan.pageStacks.map((s) => s.local),
+    ...screenHooks.map((s) => s.local),
+    ...plan.appErrors.map((b) => b.local),
+    ...plan.streams.map((s) => s.local)
+  ];
+  const codeReads = (code: string, name: string): boolean =>
+    new RegExp(`(^|[^A-Za-z0-9_$.])${name.replace(/\$/g, '\\$')}(?![A-Za-z0-9_$])`).test(code);
+  const renderLocalLines = [...jsLocals].map(([id, local]) => {
     const def = jsFunByNode[id]!;
-    body.push(`  const ${local} = ${def.fnName}(${jsArgsObject(def, 'render')});`);
+    return { local, line: `  const ${local} = ${def.fnName}(${jsArgsObject(def, 'render')});` };
+  });
+  const afterHooks = new Set<string>();
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const { local, line } of renderLocalLines) {
+      if (afterHooks.has(local)) continue;
+      const rhs = line.slice(line.indexOf('='));
+      if (hookLocalNames.some((name) => codeReads(rhs, name)) || [...afterHooks].some((name) => codeReads(rhs, name))) {
+        afterHooks.add(local);
+        grew = true;
+      }
+    }
   }
+  for (const { local, line } of renderLocalLines) if (!afterHooks.has(local)) body.push(line);
   // EXP-011 §49. The animation pair's hooks — after the render locals a target or a wired State
   // may read (an Expression into State is the corpus's own shape), before the effects that read
   // the handles. The listeners are printed inline so each closes over this render.
   for (const animation of plan.animations) {
-    const options = `{ duration: ${exprCode(animation.duration, 'render')}, delay: ${exprCode(animation.delay, 'render')}, ease: ${tsLiteral(animation.ease)} }`;
+    // P18-S122-TPLBUILD. A value that is not statically a number is handed on as it is, as the runtime's setter stores it.
+    const optionCode = (input: 'duration' | 'delay', expr: ValueExpr): string => {
+      const code = exprCode(expr, 'render');
+      return animation.castToNumber?.includes(input) ? `${SIMPLE_REF.test(code) ? code : `(${code})`} as number` : code;
+    };
+    const options = `{ duration: ${optionCode('duration', animation.duration)}, delay: ${optionCode('delay', animation.delay)}, ease: ${tsLiteral(animation.ease)} }`;
     const arrive = animation.arrive !== undefined ? `, ${handlerArrow(animation.arrive, '()', 2)}` : '';
     body.push(`  // ${animation.comment}`, `  const ${animation.local} = useAnimatedValue(${exprCode(animation.target, 'render')}, ${options}${arrive});`);
   }
@@ -7074,6 +7424,8 @@ export function emitComponent(
     if (listenerLines.length === 0) body.push(`  const ${stream.local} = ${spec.hook}(${source}, ${options});`);
     else body.push(`  const ${stream.local} = ${spec.hook}(${source}, ${options}, {`, listenerLines.join(',\n'), '  });');
   }
+  // P18-S122-TPLBUILD. The render locals that read a hook above, in their own order (each after any it reads).
+  for (const { local, line } of renderLocalLines) if (afterHooks.has(local)) body.push(line);
   // EXP-011 §53. A task template's start chain: once, on mount — startTask pulses the start input right after
   // createNode, and never again for that task. The ref guards StrictMode's second mount in development.
   if (plan.task !== undefined) {
@@ -7293,16 +7645,24 @@ export function emitComponent(
     announcedCode = { inputId: mount.inputId, code };
     const chainLines = effectBody(chain, 4);
     announcedCode = undefined;
+    // P18 session 126 (EXP-011 §93). Under a Mounted a value decides: the first time the field's own render condition holds.
+    const gate = (mount.gates ?? [])
+      .map((id) => mountedCondOf(id, plan.bindings[id]['mounted']))
+      .filter((c): c is string => c !== null);
+    const when = gate.length === 0 ? null : gate.length === 1 ? gate[0] : gate.map((c) => (SIMPLE_REF.test(c) ? c : `(${c})`)).join(' && ');
     body.push(
       `  // ${mount.comment}`,
       `  const ${once} = useRef(false);`,
       '  useEffect(() => {',
       `    if (${once}.current) return;`,
+      ...(when !== null ? [`    if (${negatedCode(when)}) return;`] : []),
       `    ${once}.current = true;`,
       ...lines,
       ...chainLines,
-      "    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts",
-      '  }, []);',
+      when !== null
+        ? '    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, the first time the field mounts'
+        : '    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the field mounts',
+      `  }, [${gate.join(', ')}]);`,
       ''
     );
   }
@@ -7310,9 +7670,12 @@ export function emitComponent(
   // is the boot delivery a parent wire gets from the interpreter.
   for (const push of plan.pushEffects) {
     const deps = [...effectDeps(push.expr), push.prop].join(', ');
+    // P18-S122-TPLBUILD. A value whose static type is not the port's is handed on as it is, as the runtime does.
+    const code = exprCode(push.expr, 'render');
+    const pushed = push.castTo === undefined ? code : `${SIMPLE_REF.test(code) ? code : `(${code})`} as ${push.castTo} | undefined`;
     body.push(
       '  useEffect(() => {',
-      `    ${push.prop}?.(${exprCode(push.expr, 'render')});`,
+      `    ${push.prop}?.(${pushed});`,
       `  }, [${deps}]);`,
       ''
     );
@@ -7406,6 +7769,25 @@ export function emitComponent(
       ''
     );
   }
+  /*
+   * P18-S126-INSIGNAL (EXP-011 §94). A signal the parent sends in: the parent passes `{ sent, taken }`, the count of its
+   * pulses and a ref it keeps of the count acted on. The chain runs when `sent` passes `taken`, once per move: never at a
+   * mount with nothing sent (StrictMode's second mount sees the first's `taken`), and at a mount after a pulse sent with the
+   * click that draws this component (the runtime's instance exists while it is not drawn). After the values the parent
+   * set before the pulse have arrived, as a render's props have.
+   */
+  for (const pulse of plan.inputPulses) {
+    const pair = exprCode({ kind: 'prop', name: pulse.port }, 'render');
+    body.push(
+      `  // "${commentSafe(pulse.port)}", a signal the parent sends in: its chain runs once for each pulse sent, never twice.`,
+      '  useEffect(() => {',
+      `    if (${pair} === undefined || ${pair}.taken.current === ${pair}.sent) return;`,
+      `    ${pair}.taken.current = ${pair}.sent;`,
+      ...effectBody(pulse.actions, 4),
+      `  }, [${pair}?.sent]);`,
+      ''
+    );
+  }
   // P18-S119-TICKEDRUN. A ticked input's new value runs the Function: read fresh, as its Run reads them, so a value a mount
   // effect above has just stored arrives at load as the runtime's arrives at creation. After the mount effects above.
   for (const ticked of plan.tickedRuns) {
@@ -7424,6 +7806,27 @@ export function emitComponent(
   for (const mount of mountChains) {
     const node = nodeById.get(mount.nodeId)!;
     const mounted = dedupeLocal('mounted');
+    // P18 session 126 (EXP-011 §93). Under a Mounted a value decides: the element's own render condition, element by element.
+    const gate = mount.gates.map((id) => mountedCondOf(id, plan.bindings[id]['mounted'])).filter((c): c is string => c !== null);
+    if (gate.length > 0) {
+      const when = gate.length === 1 ? gate[0] : gate.map((c) => (SIMPLE_REF.test(c) ? c : `(${c})`)).join(' && ');
+      body.push(
+        `  // ${node.authoredLabel ?? node.type} — Did Mount: each time it mounts, as the running app sends it: when ${commentSafe(when)}.`,
+        `  const ${mounted} = useRef(false);`,
+        '  useEffect(() => {',
+        `    if (${negatedCode(when)}) {`,
+        `      ${mounted}.current = false;`,
+        '      return;',
+        '    }',
+        `    if (${mounted}.current) return;`,
+        `    ${mounted}.current = true;`,
+        ...effectBody(mount.actions, 4),
+        "    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per mount, like the element's own Did Mount",
+        `  }, [${gate.join(', ')}]);`,
+        ''
+      );
+      continue;
+    }
     body.push(
       `  // ${node.authoredLabel ?? node.type} — Did Mount: once, when it mounts, as the running app sends it.`,
       `  const ${mounted} = useRef(false);`,
@@ -7440,7 +7843,9 @@ export function emitComponent(
     switch (a.kind) {
       case 'emit':
         return a.payload.map((p) => p.expr);
+      // P18-S127-SETDONE. The value, then the Done chain.
       case 'store-set':
+        return [a.expr, ...(a.then ?? []).flatMap(actionExprsOf)];
       case 'globalstore-set':
         return [a.expr];
       // EXP-011 §47. The patch's values, then the chain.
@@ -7554,6 +7959,9 @@ export function emitComponent(
       // EXP-011 §63. The same.
       case 'drag-snap':
         return [];
+      // P18-S128-FIELDSET. The same.
+      case 'field-focus':
+        return [];
       // EXP-011 Tier 2.5. The link, the wired Open In New Tab, and both chains — `usesPayload`
       // walks this list, so a link built from a received event's payload is found here or the
       // emitted callback takes no argument and its body reads one.
@@ -7616,8 +8024,14 @@ export function emitComponent(
   }
   // EXP-011 §60. A component that owns a Component Object provides its record to everything below — the
   // transcription of the parent walk's predicate (componentwalk.ts findAncestorWithComponentObject).
+  /*
+   * P18-S122-TPLBUILD (TS2786). A root removed from the tree prints its comment alone, and `return ( {/* … *\/} )` is an
+   * empty object literal: a component React refuses to render ("Objects are not valid as a React child"), and the app's
+   * own `tsc -b` refuses to use as JSX. The element is not drawn, so the component draws nothing: `null`, the comment kept.
+   */
+  const removedRoot = jsxLines.length === 1 ? /^\s*\{\/\* (.*) \*\/\}$/.exec(jsxLines[0]) : null;
   const providedJsx =
-    printsRecord && !(jsxLines.length === 1 && jsxLines[0] === '    null')
+    printsRecord && removedRoot === null && !(jsxLines.length === 1 && jsxLines[0] === '    null')
       ? [
           `    <ParentComponentObjectContext.Provider value={${plan.componentObject!.local}}>`,
           ...jsxLines.map((line) => (line.trim().length === 0 ? line : `  ${line}`)),
@@ -7625,7 +8039,19 @@ export function emitComponent(
         ]
       : jsxLines;
   if (jsxLines.length === 1 && jsxLines[0] === '    null') body.push(...preReturnComment, '  return null;', '}');
-  else body.push(...preReturnComment, '  return (', ...providedJsx, '  );', '}');
+  else if (removedRoot !== null) body.push(...preReturnComment, `  // ${removedRoot[1]}`, '  return null;', '}');
+  else if (rootMountedCond !== null) {
+    const guard = negatedCode(rootMountedCond);
+    body.push(
+      ...preReturnComment,
+      `  // Its root is mounted when ${commentSafe(rootMountedCond)}; while it is not, the running app draws nothing for this instance.`,
+      `  if (${guard}) return null;`,
+      '  return (',
+      ...providedJsx,
+      '  );',
+      '}'
+    );
+  } else body.push(...preReturnComment, '  return (', ...providedJsx, '  );', '}');
 
   if (usesRowField) {
     body.push(
@@ -7686,6 +8112,8 @@ export function emitComponent(
 
   // EXP-011 §52. One file per Script node: the author's code, verbatim, in the runtime's own wrapper.
   for (const script of plan.scripts) files[script.file] = scriptFileSource(script, plan.path, plan.legacyPath);
+  // P18-S122-TPLBUILD. One file per printed Function wrapper, on the same rule.
+  for (const { def, file } of functionFiles) files[file] = functionFileSource(def, jsWrapperLines(def), plan.path);
 
   return {
     files,
@@ -7818,6 +8246,39 @@ function scriptFileSource(script: ScriptPlan, componentPath: string, legacyPath:
     // EXP-011 §54. Where a load failure is raised from (script/source-failed): the node's graph id and its component.
     `  { nodeId: ${JSON.stringify(script.nodeId)}, componentName: ${JSON.stringify(legacyPath)} }`,
     ');',
+    ''
+  ];
+  return lines.join('\n');
+}
+
+const GENERATED_FUNCTION_TS = '// @nodegx:generated (function node — provenance markers complete in EXP-007)';
+
+/**
+ * The file a Function node's wrapper lives in (P18-S122-TPLBUILD, Richard's ruling of 2026-10-19): the wrapper
+ * `jsWrapperLines` prints, exported, under the header a Script's file has (`scriptFileSource`), for the same reason.
+ *
+ * 🔴 The no-check directive on this one file. The body is the author's JavaScript, preserved verbatim (EXP-003 §4), and a
+ * strict check reads it as TypeScript it never was: `function pick(typed, start)` is TS7006, `m[String(id)]` over an
+ * object literal is TS7053, and the app's `build` is `tsc -b && vite build`, so one such line stopped the build. The
+ * directive turns off this file's diagnostics, not its types: the signature is written out, so the component's every call
+ * (its arguments, the outputs it reads, `Parameters<typeof fn>[1]` for a pulsed run) is still checked where it is made.
+ * The path is `src/functions/<dir>/<fileBase>/<fnName>.ts`, three below `src/`, as a Script's is.
+ */
+function functionFileSource(def: JsFunctionPlan, wrapper: string[], componentPath: string): string {
+  const safe = (text: string): string => text.split('*/').join('* /');
+  const signature = `function ${def.fnName}(`;
+  const lines = [
+    '// @ts-nocheck',
+    GENERATED_FUNCTION_TS,
+    '//',
+    `// The Function node "${safe(def.fnName)}" (node ${safe(def.nodeId)}) of ${safe(componentPath)}, in a file of its own.`,
+    "// Type checking is off for this one file, as for a Script node's: the body is the author's JavaScript, not",
+    '// TypeScript. The signature is typed, and every call to it is checked in the component that makes it.',
+    ...((def.scripts?.length ?? 0) > 0
+      ? [`import { ${PROJECT_SCRIPTS_SYMBOL} } from '../../../${PROJECT_SCRIPT_FILES_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}';`]
+      : []),
+    '',
+    ...wrapper.map((line) => (line.startsWith(signature) ? `export ${line}` : line)),
     ''
   ];
   return lines.join('\n');

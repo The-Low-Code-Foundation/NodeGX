@@ -1,0 +1,81 @@
+{
+  "at": "2026-10-20T11:27:41.049Z",
+  "note": "canary and control values are random per run and not recorded here",
+  "letters": {
+    "K": {
+      "letter": "K",
+      "placed": {
+        "key": ".env",
+        "control": "public/own023-control.txt"
+      },
+      "pressed": "pressed: More like this",
+      "responsesSearched": 68,
+      "probes": [
+        "200 /.env",
+        "200 /.env.local",
+        "200 /openwave/.env",
+        "200 /.env.example",
+        "200 /server/mistral.js",
+        "200 /server/index.js",
+        "200 /package.json",
+        "200 /own023-control.txt",
+        "200 /openwave/own023-control.txt"
+      ],
+      "canaryHits": [],
+      "controlHits": [
+        "200 /own023-control.txt"
+      ],
+      "result": "key not in anything the browser received"
+    },
+    "M": {
+      "letter": "M",
+      "placed": {
+        "key": "openwave/.env",
+        "control": "openwave/own023-control.txt"
+      },
+      "pressed": "pressed: More like this",
+      "responsesSearched": 95,
+      "probes": [
+        "404 /.env",
+        "404 /.env.local",
+        "404 /openwave/.env",
+        "404 /.env.example",
+        "404 /server/mistral.js",
+        "404 /server/index.js",
+        "404 /package.json",
+        "200 /own023-control.txt",
+        "404 /openwave/own023-control.txt"
+      ],
+      "canaryHits": [],
+      "controlHits": [
+        "200 /own023-control.txt"
+      ],
+      "result": "key not in anything the browser received"
+    },
+    "R": {
+      "letter": "R",
+      "placed": {
+        "key": ".env.local",
+        "control": "public/own023-control.txt"
+      },
+      "pressed": "pressed: More like this",
+      "responsesSearched": 33,
+      "probes": [
+        "404 /.env",
+        "404 /.env.local",
+        "404 /openwave/.env",
+        "404 /.env.example",
+        "404 /server/mistral.js",
+        "404 /server/index.js",
+        "404 /package.json",
+        "200 /own023-control.txt",
+        "404 /openwave/own023-control.txt"
+      ],
+      "canaryHits": [],
+      "controlHits": [
+        "200 /own023-control.txt"
+      ],
+      "result": "key not in anything the browser received"
+    }
+  }
+}

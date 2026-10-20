@@ -6,7 +6,7 @@
   "exclude": [
     "packages/noodl-runtime/dist-types"
   ],
-  "commit": "b1b701ed3",
+  "commit": "de337f61b",
   "max": {
     "src": {
       "TSFixme": 583,
@@ -16,8 +16,8 @@
       "@ts-expect-error": 67
     },
     "tests": {
-      "TSFixme": 312,
-      "any": 1997,
+      "TSFixme": 307,
+      "any": 1892,
       "@ts-ignore": 1,
       "@ts-nocheck": 2,
       "@ts-expect-error": 8
@@ -33,14 +33,14 @@
     },
     "nodegx-backend": {
       "TSFixme": 0,
-      "any": 137,
+      "any": 103,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
     },
     "nodegx-export": {
       "TSFixme": 0,
-      "any": 174,
+      "any": 153,
       "@ts-ignore": 0,
       "@ts-nocheck": 5,
       "@ts-expect-error": 0
@@ -82,7 +82,7 @@
     },
     "noodl-mcp": {
       "TSFixme": 0,
-      "any": 1395,
+      "any": 1345,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
@@ -102,7 +102,7 @@
       "@ts-expect-error": 0
     },
     "noodl-preview": {
-      "TSFixme": 21,
+      "TSFixme": 16,
       "any": 2,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
@@ -404,13 +404,6 @@
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
     },
-    "packages/nodegx-backend/tests/helpers/fake-paystack.ts": {
-      "TSFixme": 0,
-      "any": 3,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
     "packages/nodegx-backend/tests/hlt016-checks.test.ts": {
       "TSFixme": 0,
       "any": 1,
@@ -463,153 +456,6 @@
     "packages/nodegx-backend/tests/isl040-sessions.test.ts": {
       "TSFixme": 0,
       "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-003-checkout-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-003-checkout.test.ts": {
-      "TSFixme": 0,
-      "any": 2,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-003-enquire-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-003-enquire.test.ts": {
-      "TSFixme": 0,
-      "any": 2,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-003-orders-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-003-orders.test.ts": {
-      "TSFixme": 0,
-      "any": 2,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-004-admin-hook-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-004-paystack-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-004-paystack.test.ts": {
-      "TSFixme": 0,
-      "any": 2,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-feed-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-feed.test.ts": {
-      "TSFixme": 0,
-      "any": 2,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-join-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-join.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-kinds-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 2,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-kinds.test.ts": {
-      "TSFixme": 0,
-      "any": 2,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-moderate-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-moderate.test.ts": {
-      "TSFixme": 0,
-      "any": 2,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-prayer-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-prayer.test.ts": {
-      "TSFixme": 0,
-      "any": 2,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-profile-drive.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-backend/tests/two-005-profile.test.ts": {
-      "TSFixme": 0,
-      "any": 2,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
@@ -750,83 +596,6 @@
     "packages/nodegx-export/tests/subscribe-to-changes.test.ts": {
       "TSFixme": 0,
       "any": 15,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-action-bus.test.ts": {
-      "TSFixme": 0,
-      "any": 3,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-condition-remembers-its-answer.test.ts": {
-      "TSFixme": 0,
-      "any": 3,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-evaluate-at-load.test.ts": {
-      "TSFixme": 0,
-      "any": 3,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-function-sends-its-signals.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-live-record.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-optimistic-update.test.ts": {
-      "TSFixme": 0,
-      "any": 3,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-query-asks.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-query-fetch.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-query-reads-its-wires.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-sign-in-with.test.ts": {
-      "TSFixme": 0,
-      "any": 3,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/nodegx-export/tests/the-state-history.test.ts": {
-      "TSFixme": 0,
-      "any": 1,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
@@ -3416,7 +3185,7 @@
     },
     "packages/noodl-mcp/tests/tpl007Engine.test.ts": {
       "TSFixme": 0,
-      "any": 113,
+      "any": 65,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
@@ -3437,7 +3206,7 @@
     },
     "packages/noodl-mcp/tests/tpl007Template.test.ts": {
       "TSFixme": 0,
-      "any": 8,
+      "any": 6,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
@@ -3561,22 +3330,8 @@
       "@ts-nocheck": 0,
       "@ts-expect-error": 0
     },
-    "packages/noodl-preview/tests/own019-own-backend.test.ts": {
-      "TSFixme": 1,
-      "any": 0,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
     "packages/noodl-preview/tests/p112-s4-tracearm.test.ts": {
       "TSFixme": 1,
-      "any": 0,
-      "@ts-ignore": 0,
-      "@ts-nocheck": 0,
-      "@ts-expect-error": 0
-    },
-    "packages/noodl-preview/tests/p123-s2-variant-exported.test.ts": {
-      "TSFixme": 4,
       "any": 0,
       "@ts-ignore": 0,
       "@ts-nocheck": 0,

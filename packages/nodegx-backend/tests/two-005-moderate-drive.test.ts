@@ -20,7 +20,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParseDate, type ParsePointer, type ParseRecord } from './helpers/http';
 import { clickButton, clickButtonInRow, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
 
@@ -39,7 +39,18 @@ const WRONG = 'Wrong photo, sorry';
 const RUDE = 'Who let you in?';
 const RULES = 'Be kind to each other.\nNo photo of a child without their parent’s yes.\nNothing for sale.';
 
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** The rows this drive reads into: a Report, a CommentReport, and a Post or Member that may have been ended. */
+interface Report extends ParseRecord {
+  post: ParsePointer;
+  doneBy: ParsePointer;
+}
+interface CommentReport extends ParseRecord {
+  comment: ParsePointer;
+}
+interface Ended extends ParseRecord {
+  endedAt?: ParseDate;
+}
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const bodyText = async (page: RenderedPage) => String(await page.evaluate('document.body ? document.body.innerText : ""'));
 async function until(page: RenderedPage, what: string, ok: (text: string) => boolean, ms = 15000): Promise<string> {
@@ -118,8 +129,8 @@ describe('TWO-005 slice 5 — moderation, driven in two browsers', () => {
   const post: Record<string, string> = {};
   let rudeComment = '';
   const ptr = (className: string, objectId: string) => ({ __type: 'Pointer', className, objectId });
-  const rows = async (cls: string, where: Row = {}, headers: Record<string, string> = master) =>
-    (await request<{ results: Row[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, { headers })).json.results ?? [];
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}, headers: Record<string, string> = master) =>
+    (await request<{ results: T[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, { headers })).json.results ?? [];
   const passwordOf = (email: string) => `pw-${email}-long`;
   const login = (email: string) => request<{ sessionToken?: string }>(base, 'POST', '/login', { body: { username: email, password: passwordOf(email) } });
 
@@ -216,7 +227,7 @@ describe('TWO-005 slice 5 — moderation, driven in two browsers', () => {
         await fill(ann, 'Anything the admins should know (500 characters at most)', 'He posts this every day.');
         await clickButton(ann, 'Send to the admins');
         await until(ann, 'thanks', (t) => t.includes('Thanks. The admins will look at it. Bob won’t see who reported it.'));
-        const [reported] = await rows('Report');
+        const [reported] = await rows<Report>('Report');
         expect([reported.post.objectId, reported.doneBy.objectId, reported.reason, reported.note]).toEqual([post.bobs, userId['ann@example.com'], 'spam', 'He posts this every day.']);
         await shot(ann, 'phone-2-reported');
 
@@ -230,7 +241,7 @@ describe('TWO-005 slice 5 — moderation, driven in two browsers', () => {
         await choose(ann, 'Unkind');
         await clickButton(ann, 'Send to the admins');
         await until(ann, 'thanks for the comment', (t) => t.includes('Bob won’t see who reported it.'));
-        expect((await rows('CommentReport')).map((r) => [r.comment.objectId, r.reason])).toEqual([[rudeComment, 'unkind']]);
+        expect((await rows<CommentReport>('CommentReport')).map((r) => [r.comment.objectId, r.reason])).toEqual([[rudeComment, 'unkind']]);
 
         // ── Her wrong post: Take it down, asked first ──
         await ann.navigate(`/post/${post.wrong}`);
@@ -245,7 +256,7 @@ describe('TWO-005 slice 5 — moderation, driven in two browsers', () => {
         await clickButton(ann, 'Take this post down');
         await clickButton(ann, 'Yes, take it down');
         await until(ann, 'the feed without it', (t) => t.includes('The feed') && t.includes(LUNCH) && !t.includes(WRONG));
-        const down = (await rows('Post', { objectId: post.wrong }))[0];
+        const down = (await rows<Ended>('Post', { objectId: post.wrong }))[0];
         expect([typeof down.endedAt?.iso, down.hiddenReason, down.ACL]).toEqual(['string', TAKEN_DOWN, { 'role:admin': { read: true } }]);
         expect(await rows('Post', { objectId: post.wrong }, session['ann@example.com'])).toEqual([]);
 
@@ -284,7 +295,7 @@ describe('TWO-005 slice 5 — moderation, driven in two browsers', () => {
         overflow.push(['tablet Look', await overflowX(ama)]);
         await clickButton(ama, 'Hide from members');
         await until(ama, 'hidden', (t) => t.includes('Hidden from members: Spam.') && t.includes('Bring it back'));
-        const hidden = (await rows('Post', { objectId: post.bobs }))[0];
+        const hidden = (await rows<Ended>('Post', { objectId: post.bobs }))[0];
         expect([typeof hidden.endedAt?.iso, hidden.hiddenReason, hidden.ACL]).toEqual(['string', 'Spam', { 'role:admin': { read: true } }]);
         await shot(ama, 'tablet-3-hidden');
 
@@ -328,7 +339,7 @@ describe('TWO-005 slice 5 — moderation, driven in two browsers', () => {
         await fill(ama, 'Why block them (admins see this; 500 characters at most)', 'Selling in the comments');
         await clickButton(ama, 'Block Bob');
         await until(ama, 'blocked', (t) => t.includes('Blocked: Selling in the comments.') && t.includes('They can’t sign in, and nothing they wrote is shown to members.') && t.includes('Let Bob back'));
-        const bob = (await rows('Member', { objectId: memberId['bob@example.com'] }))[0];
+        const bob = (await rows<Ended>('Member', { objectId: memberId['bob@example.com'] }))[0];
         expect([bob.blockedReason, typeof bob.endedAt?.iso]).toEqual(['Selling in the comments', 'string']);
         expect((await login('bob@example.com')).status === 200).toBe(false);
         expect(await pill(ama, 'Blocked:')).toMatchObject({ fill: BAD_BG });

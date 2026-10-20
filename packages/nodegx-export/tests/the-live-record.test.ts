@@ -29,7 +29,15 @@ const RECORD_DESK = path.join(__dirname, 'fixtures', 'record-desk');
 const PAGE_DESK = path.join(__dirname, 'fixtures', 'page-desk');
 const catalog: Catalog = loadCatalog();
 
-type AnyModule = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+type Row = Record<string, unknown>;
+/** The emitted client's record calls, as far as §C makes them; the rows a query answers here are Pages. */
+interface RecordClient {
+  subscribeRecord(id: string, listener: (row: Row) => void): () => void;
+  fetchOne(className: string, id: string): Promise<Row>;
+  update(className: string, id: string, fields: Row): Promise<unknown>;
+  create(className: string, fields: Row): Promise<unknown>;
+  query(className: string, params: Row): Promise<Array<{ title: string }>>;
+}
 
 const emitWith = (dir: string, edit: (ir: ExportIR) => void = () => undefined) => {
   const ir = parseProject(dir, catalog);
@@ -165,13 +173,13 @@ const scriptedWire = () => {
   return { calls, fetch };
 };
 
-const loadClient = (source: string, fetch: unknown): AnyModule => {
+const loadClient = (source: string, fetch: unknown): RecordClient => {
   const plain = source.replace(/import\.meta\.env\.VITE_NODEGX_\w+/g, 'undefined');
   const js = ts.transpileModule(plain, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
-  const module = { exports: {} as AnyModule };
+  const module: { exports: unknown } = { exports: {} };
   // eslint-disable-next-line no-new-func
   new Function('require', 'module', 'exports', 'fetch', js)(() => ({}), module, module.exports, fetch);
-  return module.exports;
+  return module.exports as RecordClient;
 };
 
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));

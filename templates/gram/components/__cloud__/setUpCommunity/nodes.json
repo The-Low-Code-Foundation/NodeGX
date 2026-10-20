@@ -222,6 +222,17 @@
       "y": 880
     },
     {
+      "id": "taken",
+      "type": "noodl.cloud.response",
+      "label": "Refused: the email has an account",
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This backend already has an account with that email. The admin app’s account may be using it. Use a different email."
+      },
+      "x": 40,
+      "y": 1000
+    },
+    {
       "id": "why",
       "type": "noodl.cloud.response",
       "label": "Refused, with why",
@@ -229,7 +240,7 @@
         "status": "failure"
       },
       "x": 40,
-      "y": 1000
+      "y": 1120
     }
   ]
 }

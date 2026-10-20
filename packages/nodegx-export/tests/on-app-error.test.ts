@@ -646,7 +646,10 @@ describe('§J the controls — who ships the channel, and who does not', () => {
 
   test('the recorded divergence: a Function node’s throw reaches the console, not the channel', () => {
     const batch = load('batch-desk');
-    expect(batch.files['src/pages/Home.tsx']).toContain("console.error('Function node To_guests threw:', e);");
+    // P18-S122-TPLBUILD: the Function's wrapper is in its own file (Richard's ruling, 2026-10-19), and the page imports it.
+    const wrapper = batch.files['src/functions/pages/Home/To_guests.ts'];
+    expect(wrapper).toContain("console.error('Function node To_guests threw:', e);");
+    expect(wrapper.split('raiseAppError(').length - 1).toBe(0);
     expect(batch.files['src/pages/Home.tsx'].split('raiseAppError(').length - 1).toBe(0);
   });
 });

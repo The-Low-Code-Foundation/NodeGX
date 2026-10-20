@@ -117,7 +117,47 @@ describe('§A the fixture whole', () => {
 
 // ---- §B ------------------------------------------------------------------------------------------------------------
 
-type AnyModule = Record<string, any>;
+/** A History Info as both managers report it — the fields the grid reads, and the rest compared as they are. */
+interface HistoryInfo {
+  size: number;
+  enabled: boolean;
+  entries: Array<{ description?: unknown }>;
+  byReferenceKeys: string[];
+  [field: string]: unknown;
+}
+/** The runtime's statehistory.ts manager and the emitted lib's, as far as this file drives them; `store` is a name or a store. */
+interface HistoryManager {
+  setClock(clock: () => number): void;
+  attach(store: unknown, options: unknown, cb: () => void): () => void;
+  saveNamedSnapshot(name: string, store: unknown): unknown;
+  restoreNamedSnapshot(name: string, target: unknown): unknown;
+  restoreSnapshotData(data: unknown, target: unknown): unknown;
+  undo(store: string): unknown;
+  redo(store: string): unknown;
+  jumpTo(store: string, index: number): unknown;
+  clearHistory(store: string): unknown;
+  configure(store: string, options: unknown): unknown;
+  getHistoryInfo(store: string): HistoryInfo | null;
+}
+interface Snapshot {
+  storeName: unknown;
+  state: unknown;
+  byReference: unknown;
+}
+interface RuntimeGlobalStore {
+  configureStore(name: string, options: { initialState: Record<string, unknown> }): void;
+  getSnapshot(name: string): { state: Record<string, unknown> };
+  setKey(name: string, key: string, value: unknown): void;
+  deleteKey(name: string, key: string): void;
+}
+interface CoreStore {
+  set(patch: Record<string, unknown>): void;
+  peek(): Record<string, unknown>;
+}
+interface HistoryLib {
+  stateHistoryManager: HistoryManager;
+  getSnapshot(store: CoreStore): { state: Record<string, unknown> };
+}
 const compiled = new Map<string, string>();
 const transpiled = (key: string, source: () => string): string => {
   if (!compiled.has(key)) {
@@ -127,11 +167,11 @@ const transpiled = (key: string, source: () => string): string => {
 };
 /** A fresh module graph per call: each file evaluated once, a relative import resolved to its `.ts` file. */
 const loaderOf = (stubs: Record<string, unknown> = {}) => {
-  const cache = new Map<string, { exports: AnyModule }>();
-  const load = (file: string): AnyModule => {
+  const cache = new Map<string, { exports: unknown }>();
+  const load = (file: string): unknown => {
     const hit = cache.get(file);
     if (hit) return hit.exports;
-    const module = { exports: {} as AnyModule };
+    const module: { exports: unknown } = { exports: {} };
     cache.set(file, module);
     const req = (id: string): unknown => {
       if (stubs[id] !== undefined) return stubs[id];
@@ -150,17 +190,20 @@ const loaderOf = (stubs: Record<string, unknown> = {}) => {
 /** The runtime's own statehistory.ts over its own globalstore.ts and model.ts, fresh. */
 const runtimeHistory = () => {
   const load = loaderOf();
-  return { gsm: load(path.join(RUNTIME_AGENT, 'globalstore.ts')).globalStoreManager, shm: load(path.join(RUNTIME_AGENT, 'statehistory.ts')).stateHistoryManager };
+  return {
+    gsm: (load(path.join(RUNTIME_AGENT, 'globalstore.ts')) as { globalStoreManager: RuntimeGlobalStore }).globalStoreManager,
+    shm: (load(path.join(RUNTIME_AGENT, 'statehistory.ts')) as { stateHistoryManager: HistoryManager }).stateHistoryManager
+  };
 };
 /** The lib over @nodegx/core's own store, both fresh. `source` defaults to the emitted lib (a mutant can be handed in). */
 const exportHistory = (source = historyLibSource()) => {
-  const core = loaderOf()(path.join(CORE_SRC, 'index.ts'));
+  const core = loaderOf()(path.join(CORE_SRC, 'index.ts')) as { store(name: string, initial: Record<string, unknown>): CoreStore };
   const raised: unknown[] = [];
-  const module = { exports: {} as AnyModule };
+  const module: { exports: unknown } = { exports: {} };
   const req = (id: string): unknown => (id === '@nodegx/core' ? core : id === './errors' ? { raiseAppError: (e: unknown) => raised.push(e) } : {});
   // eslint-disable-next-line no-new-func
   new Function('require', 'module', 'exports', transpiled(`lib:${source.length}:${source.slice(-64)}`, () => source))(req, module, module.exports);
-  return { core, lib: module.exports, raised };
+  return { core, lib: module.exports as HistoryLib, raised };
 };
 
 /** A seeded generator (mulberry32), so a failing script is reproducible by its seed. */
@@ -243,7 +286,7 @@ const norm = (v: unknown): unknown => {
   return v;
 };
 // `takenAt` and `revision` are left out: the revision counts from the history module's first sight of the store (§78.4)
-const snapNorm = (s: AnyModule | undefined) => (s ? { storeName: s.storeName, state: norm(s.state), byReference: s.byReference } : s);
+const snapNorm = (s: Snapshot | undefined) => (s ? { storeName: s.storeName, state: norm(s.state), byReference: s.byReference } : s);
 const attempt = (fn: () => unknown) => {
   try {
     return { ok: fn() };
@@ -259,7 +302,7 @@ const play = (script: Script, side: 'runtime' | 'export', libSource?: string): u
   Date.now = () => clock;
   const log: unknown[] = [];
   try {
-    let api: { state(): unknown; set(k: string, v: unknown): void; del(k: string): void; attach(o: unknown, cb: () => void): () => void; save(n: string): unknown; restore(n: string): unknown; restoreData(d: unknown): unknown; shm: AnyModule };
+    let api: { state(): unknown; set(k: string, v: unknown): void; del(k: string): void; attach(o: unknown, cb: () => void): () => void; save(n: string): unknown; restore(n: string): unknown; restoreData(d: unknown): unknown; shm: HistoryManager };
     if (side === 'runtime') {
       const { gsm, shm } = runtimeHistory();
       shm.setClock(() => clock);
@@ -306,9 +349,9 @@ const play = (script: Script, side: 'runtime' | 'export', libSource?: string): u
       else if (op.op === 'redo') result = attempt(() => api.shm.redo('app'));
       else if (op.op === 'jump') result = attempt(() => api.shm.jumpTo('app', op.index));
       else if (op.op === 'clear') result = attempt(() => api.shm.clearHistory('app'));
-      else if (op.op === 'save') result = attempt(() => snapNorm(api.save(op.name) as AnyModule));
-      else if (op.op === 'restore') result = attempt(() => snapNorm(api.restore(op.name) as AnyModule));
-      else if (op.op === 'restoreData') result = attempt(() => snapNorm(api.restoreData(op.data) as AnyModule));
+      else if (op.op === 'save') result = attempt(() => snapNorm(api.save(op.name) as Snapshot));
+      else if (op.op === 'restore') result = attempt(() => snapNorm(api.restore(op.name) as Snapshot));
+      else if (op.op === 'restoreData') result = attempt(() => snapNorm(api.restoreData(op.data) as Snapshot));
       else if (op.op === 'advance') clock += op.ms;
       else if (op.op === 'configure') result = attempt(() => api.shm.configure('app', op.options));
       else result = attempt(() => api.attach({}, () => notified++)());
@@ -348,7 +391,7 @@ describe('§B the history manager and the store seam, against the runtime’s ow
     const seen = new Set<string>();
     for (let seed = 1; seed <= SEEDS; seed++) {
       const script = scriptOf(seed);
-      const log = play(script, 'runtime') as Array<{ op?: Op; result?: { ok?: unknown; threw?: string }; notified?: number; info: AnyModule }>;
+      const log = play(script, 'runtime') as Array<{ op?: Op; result?: { ok?: unknown; threw?: string }; notified?: number; info: HistoryInfo }>;
       for (let i = 1; i < log.length; i++) {
         const { op, result, notified, info } = log[i];
         const before = log[i - 1].info;
@@ -473,9 +516,9 @@ describe('§D what building it found', () => {
     let heard = 0;
     lib.stateHistoryManager.attach(store, {}, () => heard++);
     store.set({ title: 'x' });
-    expect([heard, lib.stateHistoryManager.getHistoryInfo('app').size]).toEqual([0, 1]);
+    expect([heard, lib.stateHistoryManager.getHistoryInfo('app')!.size]).toEqual([0, 1]);
     store.set({ title: 'y' });
-    expect([heard, lib.stateHistoryManager.getHistoryInfo('app').size]).toEqual([1, 2]);
+    expect([heard, lib.stateHistoryManager.getHistoryInfo('app')!.size]).toEqual([1, 2]);
   });
 
   test('the graph harness serves a store module and installs the world’s clock — t02 could not play without either', () => {

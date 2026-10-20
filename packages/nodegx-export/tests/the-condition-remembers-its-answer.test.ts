@@ -88,10 +88,10 @@ const runtimeArm = (cases: Array<{ graph: Graph; scenarios: string[][] }>): Read
     })
   );
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/** A rendered element as the stand-in `jsx` builds it; the arm reads its children, its class and a button's press. */
 interface Element {
   type: unknown;
-  props: Record<string, any>;
+  props: { children?: unknown; className?: unknown; onClick?: () => void; [prop: string]: unknown };
 }
 const childrenOf = (el: Element): unknown[] => {
   const c = el.props.children;
@@ -126,9 +126,9 @@ const exportArm = (app: EmittedApp, graph: Graph, scenarios: string[][]): Readin
         return [slots[i], (v: unknown) => (slots[i] = typeof v === 'function' ? (v as (p: unknown) => unknown)(slots[i]) : v)];
       }
     };
-    const jsx = (type: unknown, props: Record<string, any>) => ({ type, props });
+    const jsx = (type: unknown, props: Element['props']): Element => ({ type, props });
     const modules: Record<string, unknown> = { react, 'react/jsx-runtime': { jsx, jsxs: jsx, Fragment: 'Fragment' } };
-    const exports: Record<string, any> = {};
+    const exports: Record<string, unknown> = {};
     const requireStub = (m: string) => {
       if (m in modules) return modules[m];
       if (m.endsWith('.module.css')) return { default: new Proxy({}, { get: (_t, k) => String(k) }), __esModule: true };
@@ -137,7 +137,7 @@ const exportArm = (app: EmittedApp, graph: Graph, scenarios: string[][]): Readin
     new Function('require', 'exports', js)(requireStub, exports);
     const render = (): Element => {
       cursor = 0;
-      return exports.HomePage({});
+      return (exports.HomePage as (props: object) => Element)({});
     };
     const read = (tree: Element): Reading => {
       const out: Reading = {};
@@ -159,14 +159,13 @@ const exportArm = (app: EmittedApp, graph: Graph, scenarios: string[][]): Readin
         if (button === undefined && el.type === 'button' && textOf(el) === labels.get(id)) button = el;
       });
       if (button === undefined) throw new Error(`no button "${labels.get(id)}" on the emitted page`);
-      button.props.onClick();
+      button.props.onClick!();
       tree = render();
       readings.push(read(tree));
     }
     return readings;
   });
 };
-/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * The export arm, run while the suite is collected: a page that cannot be pressed (a handler missing) is that row's

@@ -20,8 +20,9 @@ A NodeGX app is a folder of JSON files. Nothing else holds the app: no database,
 
 | file | what it holds |
 |---|---|
-| `nodegx.project.json` | the project's name, its id, the format version (`5`) |
-| `nodegx.routes.json`, `nodegx.styles.json` | the pages a router lists, the design tokens |
+| `nodegx.project.json` | the project's name, its id, the format version (`5`), its design tokens (`metadata.designTokens`) |
+| `nodegx.routes.json` | the pages a router lists |
+| `nodegx.styles.json` | colour and text styles, and `variants`: a named one is a Look a node picks with `variant`; one with no `name` is the type's element style, which every node of that type wears under its own `parameters` |
 | `components/_registry.json` | every component by path, with the three files below |
 | `components/<path>/component.json` | the component's own settings |
 | `components/<path>/nodes.json` | a flat list of nodes: `id`, `type`, `parameters`, `children` (ids) |
@@ -41,7 +42,7 @@ An editor answers six questions. The kit has an answer for each one. You don't i
 | **Format** | What is in the project, and how do I save a change? | `@nodegx/project-contract`: the file types, the schemas, a store that reads and writes with the rules |
 | **Vocabulary** | Which nodes exist, what are their ports, what do they say they do? | `@nodegx/node-spec` for most node types, visual ones included; the runtime's own node library (through `@nodegx/preview`) for the rest |
 | **Logic** | What does the graph do when this changes? | the real engine, in a page, from `@nodegx/preview` |
-| **Screen** | What does the app look like right now? | the real app, rendered by `@nodegx/preview` beside your editor |
+| **Screen** | What does the app look like right now? | the real app, shown by `@nodegx/preview` beside your editor; or the screen drawn from the node specs by `@nodegx/node-spec/draw`. Both are taught below, with what each costs |
 | **Look** | Does it look like NodeGX? | `@nodegx/canvas-look`, if you want it to; your own look, if the person doesn't |
 | **Done** | Is it right? | the editor suite in `@nodegx/project-contract`: PASS, or a sentence naming what differs |
 
@@ -106,11 +107,12 @@ doesn't exist for that node.
 `'net.noodl.controls.textinput'` return full port lists, and `drawnPorts` works on them. For a type node-spec doesn't
 know (`Page`, `CSS Definition`, `Component Inputs`, `Component Outputs`), read the runtime's `nodeLibrary` on the
 preview below. A component instance's ports are the `ports` of its component's Component Inputs and Component
-Outputs nodes, in that component's `nodes.json`. All three OWN-008 strangers worked this out the same way. A spec
-lists a visual node's ports. It doesn't draw the screen. Don't draw the screen from what you think a Group or a Text
-looks like. Show the real app. (OWN-008, NSP-016.)
+Outputs nodes, in that component's `nodes.json`. All three OWN-008 strangers worked this out the same way. A visual
+spec also says which part of the layout each layout port sets. Don't draw the screen from what you think a Group or a
+Text looks like. Show the real app, or draw it with the kit's drawer, which reads those layout roles (see "The screen:
+show it or draw it"). (OWN-008, NSP-016, OWN-012.)
 
-node-spec 0.1.0's browser entry (`dist/index.mjs`) imports `fast-xml-parser` by bare name, so a page with no bundler or
+node-spec's browser entry (`dist/index.mjs`, in 0.1.0 and 0.2.0) imports `fast-xml-parser` by bare name, so a page with no bundler or
 import map can't load it. Work out ports on your server, or bundle node-spec. (P112-OWN008-NODESPECBARE.)
 
 A Function's ports come from its script: `functionScriptPortNames(script)` in `@nodegx/project-contract/function-ports.js`
@@ -161,6 +163,77 @@ The second bundle is `noodl-graph-target.js`. It defines `NodegxGraphTarget`. Ea
 input, send a signal, settle a frame and read the trace. Use it when your editor wants to run a node or a graph without
 the whole app. The suite's Logic half is graded on it.
 
+### The screen: show it or draw it
+
+NodeGX teaches both ways equally. Pick by where the screen has to go.
+
+| | show the real app | draw it from the descriptions |
+|---|---|---|
+| what you get | the app itself: every node, every stylesheet, the backend | one box per visual node, in pixels. You paint them |
+| where it can go | a frame in a web page | anywhere you can paint: a canvas, a texture on a 3D object, SVG, a native window |
+| what it loads | about 3.6 MB of scripts (`@nodegx/preview` 0.2.2: the in-page bundle 1.70 MB, the engine 1.75 MB, React 0.14 MB) | 12.5 KB gzipped |
+| runs the graph | yes | no. The values on the wires come from the running app's trace, or from the graph runner |
+| how exact | it is the app | the same boxes as the app, except where a named limit says otherwise (below) |
+| look | the app's own | yours. A node's colours and text are there to read. The boxes are what the drawer gives you |
+
+Show the real app when the screen sits beside your editor and must be right. Draw it when it has to go where a frame
+can't, or when the person wants the screen in their own look. For live values, keep the real app running out of sight
+and draw from its trace. Orbit, the 3D editor the kit was built with, does both. Its phone is drawn from the
+descriptions. The real app is one press away. (OWN-012.)
+
+The drawer is `@nodegx/node-spec/draw`, in `@nodegx/node-spec` 0.2.0 and later. 0.1.0 has no drawer. Run
+`npm view @nodegx/node-spec version` first. Files and values go in. Boxes come out. It reads no CSS. Unlike the
+package's main entry, it imports nothing by bare name, so a page with no bundler can load it:
+
+```js
+import { draw, canvasTextMeasurer, traceValue } from '@nodegx/node-spec/draw';
+
+const values = {};                                        // node id → input port → value, from the app's trace
+preview.onTrace(({ events }) => {
+  for (const e of events) if (e.kind === 'value') (values[e.toNode] ??= {})[e.toPort] = traceValue(e.value);
+});
+const drawing = draw({
+  nodes: components['/App'],                              // a component's parsed nodes.json
+  components,                                             // every component by path, '/Pages/Home', for the ones it places
+  values,
+  viewport: { width: 390, height: 844 },
+  measure: canvasTextMeasurer({ context: document.createElement('canvas').getContext('2d'), token: tokenValue }),
+  token: tokenPx,                                         // a design token's value in px, or undefined
+  pageOf: (router, path) => pageTheAppShows,              // optional: which page a Router shows (default: its start page)
+  bodyScroll: project.settings?.bodyScroll === true       // the project's Body Scroll setting
+});
+drawing.boxes;  // { id, path, type, parent, x, y, width, height, present, needs, limits, outside }
+```
+
+A component placed twice gives two boxes. `path` tells them apart (`header/title`). Start the design tokens from
+`DEFAULT_TOKENS` in `@nodegx/project-contract/tokens.js`, then lay the project's own over them. On the format-4 todo
+template the project's own are `metadata.designTokens.customTokens` in `nodegx.project.json`. You write the two token
+functions. `tokenValue(name)` returns a token's stored value. `tokenPx(name)` returns it in px, or `undefined` when it
+isn't in px.
+
+What to know before you draw:
+
+- A drawing can't run the graph. A text whose words come down a wire shows what its file stores, often nothing, until
+  something gives the drawer the wire's value. A drawing from the trace draws what the app had, one trace batch (150 ms) ago. To compare a drawing with the
+  app, pause the app first. A moving screen read one batch apart looked like a 3 px error that changed sign. (OWN-012
+  s1.)
+- Every box carries `needs`, the things the drawer assumed. It assumes the root fills the window. It gives a text
+  with no Font Family the browser's font. A box's `limits` are the settings it couldn't honour. `drawing.needs`
+  holds the assumptions for the whole screen. Show them to the person. A drawing that hides them reads as the app.
+- The named limits, measured (OWN-012 s1–s3):
+  - Text that wraps is drawn on one line. A three-line paragraph came out 34 px short. Everything under it moved up
+    by that much.
+  - A stylesheet rule (`cssClassName`, a CSS Definition node) is invisible to the drawer.
+  - A canvas can't measure tabular numerals. A clock came out 9 to 10 px narrow.
+  - A box the browser won't shrink below its content (flexbox's automatic minimum) is drawn shrunk.
+  - A For Each draws no rows, because the drawer has no items for it.
+- Everything else came within 2 px of the real app, most of it at 0 px: Orbit's nine boxes at three screen sizes, the
+  todo template's sign-in page, and 316 recorded layout fixtures.
+- Check your drawing the way it was checked. Read each real element's box with
+  `preview.elementsOf(id)[0].getBoundingClientRect()` and compare it with the drawn one, allowing 2 px. Give every
+  difference a reason. The reason is a limit above, or a box that moved because the one before it moved. A difference
+  with no reason is a bug. Report it.
+
 ### `@nodegx/canvas-look` — the look, as data
 
 This package is optional. It holds the NodeGX canvas colours, card sizes, wire colours and fonts, in both themes.
@@ -206,7 +279,7 @@ spell out their fields. `applyEdit` is the reference semantics, if you want to r
 Two optional methods grade the Logic half. `graphTarget()` returns a fresh engine each call, either what
 `NodegxGraphTarget.graphTarget()` returns or a runner of your own. `playGraph(scenario, file)` is for an editor whose
 runner lives in a page: it plays one scenario itself and returns the trace. Offer one or the other. An adapter with no
-runner is graded on files only. From the next release of `@nodegx/project-contract`, the PASS line says so (`; files
+runner is graded on files only. From `@nodegx/project-contract` 0.2.0, the PASS line says so (`; files
 only: the adapter offers no graph runner`). 0.1.0 prints a bare PASS. Say "files only" in your report yourself.
 (P112-OWN008-FILESONLY.)
 
@@ -328,6 +401,7 @@ Each line cost someone a wrong app or a false claim. The reason is in the senten
 
 - Write into the person's project without a copy first.
 - Claim a node does something its spec or the runtime's notes don't say.
+- Show a drawn screen as if it were the app. Say it's drawn, and show what it assumed.
 - Claim files are unchanged without diffing them.
 - Skip the suite's graph half silently. An adapter with a runner and no grader isn't a pass. The command grades it
   for you.

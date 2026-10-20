@@ -475,6 +475,7 @@ const SET_UP: CloudComponent = {
     { id: 'named', type: 'JavaScriptFunction', label: 'The marketplace’s name, and its history', ports: signals('done'), parameters: { functionScript: NAME_MARKETPLACE_SCRIPT, ...quiet('loginId', 'marketplace') } },
     { id: 'ok', type: 'noodl.cloud.response', label: 'Set up', parameters: { params: 'personId' } },
     { id: 'no', type: 'noodl.cloud.response', label: 'Refused', parameters: { status: 'failure', errorMessage: 'This marketplace could not be set up with that.' } },
+    { id: 'taken', type: 'noodl.cloud.response', label: 'Refused: the email has an account', parameters: { status: 'failure', errorMessage: 'This backend already has an account with that email. The admin app’s account may be using it. Use a different email.' } },
     { id: 'why', type: 'noodl.cloud.response', label: 'Refused, with why', parameters: { status: 'failure' } }
   ],
   connections: [
@@ -488,8 +489,10 @@ const SET_UP: CloudComponent = {
     wire('gate', 'out-ok', 'create', 'create'),
     wire('create', 'userId', 'grant', 'userId'),
     wire('create', 'done', 'grant', 'add'),
-    // An account with this email already exists: refused, never granted (it may be somebody else's).
-    wire('create', 'unchanged', 'no', 'send'),
+    // An account with this email already exists: refused, never granted (it may be somebody else's). The token has
+    // matched, so this is the builder, and saying the email is taken tells nobody else anything
+    // (P112-OWN021-SAMEEMAIL: the backend admin app's own account was the usual one).
+    wire('create', 'unchanged', 'taken', 'send'),
     wire('create', 'userId', 'person', 'in-loginId'),
     wire('gate', 'out-name', 'person', 'in-name'),
     wire('gate', 'out-email', 'person', 'in-email'),

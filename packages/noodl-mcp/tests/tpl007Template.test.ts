@@ -1867,7 +1867,7 @@ describe('TPL-007 — Rocket School, the artefact', () => {
 
     it('🔴 the form has a skin row under the face styles, five ✋ to tap, and the face it draws wears the one picked', () => {
       const card = nodesOf(built, C.newPlayer).find((n) => n.id === 'nfCard')!;
-      const kids = (card.children ?? []).map((c: any) => (typeof c === 'string' ? c : c.id));
+      const kids = (card.children ?? []).map((c: string | LegacyNode) => (typeof c === 'string' ? c : c.id));
       expect(kids.indexOf('nfSkin')).toBe(kids.indexOf('nfLook') + 1);
       expect(JSON.parse(String(params(C.newPlayer, 'nfSkinItems').json)).map((i: { label: string }) => i.label)).toEqual(['✋🏻', '✋🏼', '✋🏽', '✋🏾', '✋🏿']);
       expect(missing(C.newPlayer, [
@@ -1885,7 +1885,7 @@ describe('TPL-007 — Rocket School, the artefact', () => {
 
     it('🔴 the hangar has the row under the preview: it shows theirs, and a tap keeps the new one in the store', () => {
       const wrap = nodesOf(built, C.pageHangar).find((n) => n.id === 'hgWrap')!;
-      const kids = (wrap.children ?? []).map((c: any) => (typeof c === 'string' ? c : c.id));
+      const kids = (wrap.children ?? []).map((c: string | LegacyNode) => (typeof c === 'string' ? c : c.id));
       expect(kids.indexOf('hgSkin')).toBe(kids.indexOf('hgPreview') + 1);
       expect(missing(C.pageHangar, [
         ['hgMe', 'skin', 'hgSkin', 'value'], ['hgSkin', 'value', 'hgSkinSet', 'skin'], ['hgSkin', 'changed', 'hgSkinSet', 'run'],

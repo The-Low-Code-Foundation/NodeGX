@@ -1,0 +1,1 @@
+Read checklist-brief.md and brief.txt in this folder and do what checklist-brief.md asks. Write the checklist to checklist.md in this folder.

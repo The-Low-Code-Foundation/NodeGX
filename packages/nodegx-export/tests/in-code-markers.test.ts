@@ -244,6 +244,8 @@ describe("a refused script node's own source is preserved (EXP-004)", () => {
   const cloneCheer = (): ExportIR => JSON.parse(JSON.stringify(cheerIr));
   const homeOf = (ir: ExportIR): ComponentIR => ir.components.find((c) => c.path === 'Pages/Home')!;
   const homeSourceOf = (ir: ExportIR): string => String(emitApp(ir, catalog).files['src/pages/Home.tsx']);
+  /** P18-S122-TPLBUILD (Richard's ruling, 2026-10-19): a printed Function wrapper is in a file of its own. */
+  const SHOUT_FILE = 'src/functions/pages/Home/formatShout.ts';
   /** The body of cheer's `formatShout`, which the fixture wires and this suite un-wires. */
   const SHOUT_BODY = "name.toUpperCase() + '!'";
 
@@ -261,9 +263,11 @@ describe("a refused script node's own source is preserved (EXP-004)", () => {
      * The control half of the pair below. One wire is the only difference between the two rows,
      * and it is the wire that decides whether anything reads the node's outputs.
      */
-    const home = homeSourceOf(cloneCheer());
-    expect(home).toContain('function formatShout(');
-    expect(home).toContain(SHOUT_BODY);
+    const files = emitApp(cloneCheer(), catalog).files;
+    const home = files['src/pages/Home.tsx'];
+    expect(files[SHOUT_FILE]).toContain('export function formatShout(');
+    expect(files[SHOUT_FILE]).toContain(SHOUT_BODY);
+    expect(home).toContain("import { formatShout } from '../functions/pages/Home/formatShout';");
     expect(home).not.toContain('TODO(export): the Function');
   });
 
@@ -275,8 +279,10 @@ describe("a refused script node's own source is preserved (EXP-004)", () => {
     // The variable is one wire, and it is asserted rather than assumed.
     expect(before - home.connections.length).toBe(1);
 
-    const source = homeSourceOf(ir);
-    expect(source).not.toContain('function formatShout(');
+    const files = emitApp(ir, catalog).files;
+    const source = files['src/pages/Home.tsx'];
+    expect(files[SHOUT_FILE]).toBeUndefined();
+    expect(source).not.toContain('formatShout }');
     expect(source).toContain('TODO(export): the Function "formatShout" (node formatShout)');
     // 🔴 The point of the whole row: the author's code survives the refusal.
     expect(source).toContain(`//   Outputs.text = ${SHOUT_BODY};`);

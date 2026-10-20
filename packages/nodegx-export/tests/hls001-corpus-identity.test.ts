@@ -238,6 +238,12 @@
  * lib gains `blendColorKept`, so every project that emits `src/lib/util.ts` moves (gallery-, mood-, photo-, tick- and
  * ticket-desk), and the corpus's one Color Blend, wired from a Variable, prints the kept call: `mood-desk`'s
  * `src/pages/Mood.tsx`. **6 moved, 0 added, 0 removed.**
+ *
+ * ✅ **Regenerated for P18-S122-TPLBUILD (P18 session 125, 2026-10-19), predicted and counted.** A Function's wrapper
+ * moves to `src/functions/<dir>/<fileBase>/<fnName>.ts` (Richard's ruling). Predicted from the corpus emitted at HEAD:
+ * the 6 projects with a printed Function wrapper move their page (7: scripts-desk has two), their `EXPORT-REPORT.md` and
+ * `@report` (the file count and list), and gain one file per wrapper (9). **19 moved, 9 added, 0 removed**, exactly
+ * those. The session's four earlier classes (TS2554, TS2345, TS2786, TS2448) were predicted at 0 keys each and moved 0.
  */
 import * as fs from 'fs';
 import * as path from 'path';
@@ -394,6 +400,9 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // Failure runs a chain. Predicted before regenerating (`s123-failchain/after-await.ts` over the fixtures): fail-desk in,
     // and record-desk's Home.tsx changed (its Load sends two Record Fetches; the first is started, not waited for, as the
     // runtime's two requests go out together). Regenerated, key by key: exactly those two, nothing else.
+    // Still 63 on 2026-10-19 (P18-S126-INSIGNAL, session 127): a signal input's prop is the pulse pair the parent passes.
+    // Predicted by emitting every fixture with the base's `src` and the tree's: batch-desk's Notify.tsx alone (its `Do`
+    // type). The red run named exactly that key; regenerated, that one hash moved.
     expect(corpusProjects().length).toBe(63);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });

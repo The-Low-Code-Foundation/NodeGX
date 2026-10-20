@@ -16,7 +16,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParseDate, type ParseRecord } from './helpers/http';
 import { clickButton, clickButtonInRow, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
 
@@ -108,14 +108,18 @@ describe('TWO-003 slice 5 — a buyer asks a seller about a car; only that selle
   const overflow: Array<[string, number]> = [];
   const ids: Record<string, string> = {};
 
-  type Row = Record<string, any>;
+  type Row = Record<string, unknown>;
+  /** An Enquiry row, as far as this drive reads one. */
+  interface Enquiry extends ParseRecord {
+    answeredAt?: ParseDate;
+  }
   const fnCall = async (fn: string, body: Record<string, unknown>, headers: Record<string, string> = admin) => {
     const r = await request<{ result?: Row }>(base, 'POST', `/functions/${fn}`, { body, headers });
     if (r.status !== 200) throw new Error(`${fn}: ${r.status} ${r.text}`);
     return r.json.result ?? {};
   };
-  const rows = async (cls: string, where: Row = {}) =>
-    (await request<{ results: Row[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`, { headers: master })).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}) =>
+    (await request<{ results: T[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`, { headers: master })).json.results;
   const ptr = (className: string, objectId: string) => ({ __type: 'Pointer', className, objectId });
   const today = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
@@ -249,7 +253,7 @@ describe('TWO-003 slice 5 — a buyer asks a seller about a car; only that selle
         await clickButtonInRow(page, 'Mark answered', buyer);
         await until(page, 'answered', (x) => x.includes('Answered (1)') && x.includes(`answered ${today}`));
         expect(await sections(page)).toEqual(first ? ['Answered (1)'] : ['To answer (1)', 'Answered (1)']);
-        expect((await rows('Enquiry', { buyerName: buyer }))[0].answeredAt?.iso).toEqual(expect.any(String));
+        expect((await rows<Enquiry>('Enquiry', { buyerName: buyer }))[0].answeredAt?.iso).toEqual(expect.any(String));
         await look('staff-answered');
         if (first) {
           await clickButtonInRow(page, 'Not answered yet', buyer);

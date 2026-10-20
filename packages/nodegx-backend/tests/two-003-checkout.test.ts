@@ -26,7 +26,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 
 jest.setTimeout(90000);
 
@@ -49,12 +49,36 @@ const FUNCTIONS = [
   'followOrder'
 ];
 
-interface Answer {
-  result?: Record<string, any>;
+interface Answer<R = Record<string, unknown>> {
+  result?: R;
   error?: unknown;
   code?: unknown;
 }
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** An order as placeOrder answers it. */
+interface Placed {
+  number: string;
+  followToken: string;
+}
+/** An order as followOrder shows it to its buyer's link, as far as this spec reads it. */
+interface Followed extends Placed {
+  parts: Array<{ way: { method: string; instructions: string }; lines: unknown[]; [field: string]: unknown }>;
+  [field: string]: unknown;
+}
+/** The rows this spec reads into. A history row's `changed` names each field that moved. */
+interface OrderRow extends ParseRecord {
+  country: ParsePointer;
+}
+interface OrderPart extends ParseRecord {
+  seller: ParsePointer;
+  wayToPay: ParsePointer;
+}
+interface OrderLine extends ParseRecord {
+  orderPart: ParsePointer;
+}
+interface History extends ParseRecord {
+  changed: Record<string, { from?: unknown; to?: unknown }>;
+}
 
 describe('TWO-003 slice 3 — what the admin sets, and a buyer’s checkout', () => {
   let service: BackendService;
@@ -65,11 +89,12 @@ describe('TWO-003 slice 3 — what the admin sets, and a buyer’s checkout', ()
   const who: Record<string, Record<string, string>> = { stranger: {} };
   const id: Record<string, string> = {};
 
-  const call = (fn: string, body: Record<string, unknown>, as: string) => req<Answer>('POST', `/functions/${fn}`, body, who[as]);
-  const ok = async (fn: string, body: Record<string, unknown>, as = 'admin') => {
-    const r = await call(fn, body, as);
+  const call = <R = Record<string, unknown>>(fn: string, body: Record<string, unknown>, as: string) => req<Answer<R>>('POST', `/functions/${fn}`, body, who[as]);
+  /** A function's answer, as the caller names its shape; an answer with no result reads as an empty one. */
+  const ok = async <R = Record<string, unknown>>(fn: string, body: Record<string, unknown>, as = 'admin'): Promise<R> => {
+    const r = await call<R>(fn, body, as);
     if (r.status !== 200) throw new Error(`${fn} refused: ${r.status} ${JSON.stringify(r.json)}`);
-    return r.json.result ?? {};
+    return (r.json.result ?? {}) as R;
   };
   /** A refusal: not a 200, and the words say why. */
   const refused = async (fn: string, body: Record<string, unknown>, words: string | RegExp, as = 'admin') => {
@@ -81,10 +106,10 @@ describe('TWO-003 slice 3 — what the admin sets, and a buyer’s checkout', ()
     if (r.status !== 200) throw new Error(`sign-in ${name}: ${r.status} ${JSON.stringify(r.json)}`);
     who[name] = { 'x-parse-session-token': r.json.sessionToken };
   };
-  const rows = async (collection: string, where: Row = {}, order = 'createdAt') =>
-    (await req<{ results: Row[] }>('GET', `/classes/${collection}?where=${encodeURIComponent(JSON.stringify(where))}&order=${order}&limit=1000`)).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(collection: string, where: Row = {}, order = 'createdAt') =>
+    (await req<{ results: T[] }>('GET', `/classes/${collection}?where=${encodeURIComponent(JSON.stringify(where))}&order=${order}&limit=1000`)).json.results;
   const row = async (collection: string, objectId: string) => (await req<Row>('GET', `/classes/${collection}/${objectId}`)).json;
-  const historyOf = async (collection: string, field: string, objectId: string) => rows(`${collection}History`, { [field]: ptr(collection, objectId) }, 'at');
+  const historyOf = async (collection: string, field: string, objectId: string) => rows<History>(`${collection}History`, { [field]: ptr(collection, objectId) }, 'at');
   /** The countries a way to pay is on in, by name, read through the relation itself. */
   const onIn = async (wayId: string) =>
     (await rows('Country', { $relatedTo: { object: ptr('WayToPay', wayId), key: 'country' } })).map((c) => c.name).sort();
@@ -264,7 +289,7 @@ describe('TWO-003 slice 3 — what the admin sets, and a buyer’s checkout', ()
     });
 
     it('🔴 places one order from two sellers in two countries: a part each, every line at the price the product has now', async () => {
-      const r = await ok(
+      const r = await ok<{ order: Placed }>(
         'placeOrder',
         {
           order: {
@@ -287,7 +312,7 @@ describe('TWO-003 slice 3 — what the admin sets, and a buyer’s checkout', ()
       const year = new Date().getUTCFullYear();
       expect(first.number).toBe(`MK-${year}-00001`);
       expect(first.followToken).toMatch(/^[0-9a-f]{48}$/);
-      const [o] = await rows('Order', { number: first.number });
+      const [o] = await rows<OrderRow>('Order', { number: first.number });
       expect([o.buyerName, o.phone, o.address, o.currency, o.total, o.followToken, o.country.objectId, o.email ?? null]).toEqual([
         'Abena Owusu',
         '+233 20 555 0187',
@@ -298,12 +323,12 @@ describe('TWO-003 slice 3 — what the admin sets, and a buyer’s checkout', ()
         id.gh,
         null
       ]);
-      const parts = await rows('OrderPart', { order: ptr('Order', o.objectId) });
+      const parts = await rows<OrderPart>('OrderPart', { order: ptr('Order', o.objectId) });
       expect(parts.map((p) => [p.seller.objectId, p.status, p.subtotal, p.wayToPay.objectId])).toEqual([
         [id.kofi, 'new', 2 * 45 + 38, id.wa],
         [id.ada, 'new', 6800, id.bank]
       ]);
-      const lines = await rows('OrderLine', { orderPart: { $in: parts.map((p) => ptr('OrderPart', p.objectId)) } });
+      const lines = await rows<OrderLine>('OrderLine', { orderPart: { $in: parts.map((p) => ptr('OrderPart', p.objectId)) } });
       expect(lines.map((l) => [l.productName, l.quantity, l.price, l.orderPart.objectId])).toEqual([
         ['Shito pepper sauce, 500 g', 2, 45, parts[0].objectId],
         ['Gari, 2 kg', 1, 38, parts[0].objectId],
@@ -313,7 +338,7 @@ describe('TWO-003 slice 3 — what the admin sets, and a buyer’s checkout', ()
     });
 
     it('the next order takes the next number; the same product twice is one line', async () => {
-      const r = await ok('placeOrder', { order: { ...buyer, buyerName: 'Kwame', country: id.gh, lines: [{ productId: id.shito, quantity: 1 }, { productId: id.shito, quantity: 2 }], pay: { [id.gh]: id.cod } } }, 'stranger');
+      const r = await ok<{ order: Placed }>('placeOrder', { order: { ...buyer, buyerName: 'Kwame', country: id.gh, lines: [{ productId: id.shito, quantity: 1 }, { productId: id.shito, quantity: 2 }], pay: { [id.gh]: id.cod } } }, 'stranger');
       expect(r.order.number).toBe(`MK-${new Date().getUTCFullYear()}-00002`);
       const [o] = await rows('Order', { number: r.order.number });
       const [part] = await rows('OrderPart', { order: ptr('Order', o.objectId) });
@@ -361,10 +386,10 @@ describe('TWO-003 slice 3 — what the admin sets, and a buyer’s checkout', ()
     });
 
     it('the private link opens the order: every part, its seller, its way to pay, its lines', async () => {
-      const r = await ok('followOrder', { follow: { token: first.followToken } }, 'stranger');
+      const r = await ok<{ order: Followed }>('followOrder', { follow: { token: first.followToken } }, 'stranger');
       const o = r.order;
       expect([o.number, o.buyerName, o.address, o.country, o.currency]).toEqual([first.number, 'Abena Owusu', 'House 14, Osu, Accra', 'Ghana', 'GHS']);
-      expect(o.parts.map((p: Row) => [p.seller, p.country, p.currency, p.status, p.subtotal, p.way.method, p.whatsapp])).toEqual([
+      expect(o.parts.map((p) => [p.seller, p.country, p.currency, p.status, p.subtotal, p.way.method, p.whatsapp])).toEqual([
         ['Kofi’s Kitchen', 'Ghana', 'GHS', 'new', 128, 'whatsapp', '233245550100'],
         ['Ada’s Farm Drinks', 'Nigeria', 'NGN', 'new', 6800, 'bank-transfer', '']
       ]);
@@ -381,14 +406,14 @@ describe('TWO-003 slice 3 — what the admin sets, and a buyer’s checkout', ()
         await refused('followOrder', { follow: { token } }, 'no order at this link', 'stranger');
       }
       // A link opens its own order, never the other one.
-      expect((await ok('followOrder', { follow: { token: second.followToken } }, 'stranger')).order.number).toBe(second.number);
+      expect((await ok<{ order: Placed }>('followOrder', { follow: { token: second.followToken } }, 'stranger')).order.number).toBe(second.number);
       // Read directly, as a stranger: the policy shows no order at all.
       const direct = await req<{ results: Row[] }>('GET', '/classes/Order', undefined, {});
       expect([direct.status === 200 ? direct.json.results.length : 0]).toEqual([0]);
     });
 
     it('🔴 rule 3: a seller’s staff see their own part and its lines, not the other seller’s, and never the link', async () => {
-      const parts = await req<{ results: Row[] }>('GET', '/classes/OrderPart', undefined, who.kofi);
+      const parts = await req<{ results: OrderPart[] }>('GET', '/classes/OrderPart', undefined, who.kofi);
       expect(parts.json.results.every((p) => p.seller.objectId === id.kofi)).toBe(true);
       expect(parts.json.results.length).toBe(2);
       const orders = await req<{ results: Row[] }>('GET', '/classes/Order', undefined, who.kofi);

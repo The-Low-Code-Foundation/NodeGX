@@ -25,7 +25,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 
 jest.setTimeout(90000);
 
@@ -49,12 +49,28 @@ const FUNCTIONS = [
   'movePart'
 ];
 
-interface Answer {
-  result?: Record<string, any>;
+interface Answer<R = Record<string, unknown>> {
+  result?: R;
   error?: unknown;
   code?: unknown;
 }
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** An order as placeOrder answers it. */
+interface Placed {
+  number: string;
+  followToken: string;
+}
+/** The rows this spec reads into. A history row's `changed` names each field that moved; its first row has no `who`. */
+interface OrderPart extends ParseRecord {
+  seller: ParsePointer;
+}
+interface OrderPartHistory extends ParseRecord {
+  changed: Record<string, { from?: unknown; to?: unknown }>;
+  who?: ParsePointer;
+}
+interface Person extends ParseRecord {
+  login: ParsePointer;
+}
 
 describe('TWO-003 slice 4 — each seller moves their own part, the buyer sees both move', () => {
   let service: BackendService;
@@ -65,11 +81,12 @@ describe('TWO-003 slice 4 — each seller moves their own part, the buyer sees b
   const who: Record<string, Record<string, string>> = { stranger: {} };
   const id: Record<string, string> = {};
 
-  const call = (fn: string, body: Record<string, unknown>, as: string) => req<Answer>('POST', `/functions/${fn}`, body, who[as]);
-  const ok = async (fn: string, body: Record<string, unknown>, as = 'admin') => {
-    const r = await call(fn, body, as);
+  const call = <R = Record<string, unknown>>(fn: string, body: Record<string, unknown>, as: string) => req<Answer<R>>('POST', `/functions/${fn}`, body, who[as]);
+  /** A function's answer, as the caller names its shape; an answer with no result reads as an empty one. */
+  const ok = async <R = Record<string, unknown>>(fn: string, body: Record<string, unknown>, as = 'admin'): Promise<R> => {
+    const r = await call<R>(fn, body, as);
     if (r.status !== 200) throw new Error(`${fn} refused: ${r.status} ${JSON.stringify(r.json)}`);
-    return r.json.result ?? {};
+    return (r.json.result ?? {}) as R;
   };
   const refused = async (fn: string, body: Record<string, unknown>, words: string | RegExp, as = 'admin') => {
     const r = await call(fn, body, as);
@@ -80,15 +97,15 @@ describe('TWO-003 slice 4 — each seller moves their own part, the buyer sees b
     if (r.status !== 200) throw new Error(`sign-in ${name}: ${r.status} ${JSON.stringify(r.json)}`);
     who[name] = { 'x-parse-session-token': r.json.sessionToken };
   };
-  const rows = async (collection: string, where: Row = {}, order = 'createdAt') =>
-    (await req<{ results: Row[] }>('GET', `/classes/${collection}?where=${encodeURIComponent(JSON.stringify(where))}&order=${order}&limit=1000`)).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(collection: string, where: Row = {}, order = 'createdAt') =>
+    (await req<{ results: T[] }>('GET', `/classes/${collection}?where=${encodeURIComponent(JSON.stringify(where))}&order=${order}&limit=1000`)).json.results;
   const row = async (collection: string, objectId: string) => (await req<Row>('GET', `/classes/${collection}/${objectId}`)).json;
-  const historyOf = async (objectId: string) => rows('OrderPartHistory', { orderPart: ptr('OrderPart', objectId) }, 'at');
+  const historyOf = async (objectId: string) => rows<OrderPartHistory>('OrderPartHistory', { orderPart: ptr('OrderPart', objectId) }, 'at');
   const move = (partId: string, to: string, extra: Row = {}) => ({ move: { partId, to, ...extra } });
   const statusOf = async (partId: string) => (await row('OrderPart', partId)).status;
   /** The order as its buyer's private link shows it: each seller's part and where it is. */
   const followed = async (token: string) => {
-    const o = (await ok('followOrder', { follow: { token } }, 'stranger')).order;
+    const o = (await ok<{ order: { parts: Row[] } }>('followOrder', { follow: { token } }, 'stranger')).order;
     return Object.fromEntries((o.parts as Row[]).map((p) => [p.seller, p]));
   };
 
@@ -132,7 +149,7 @@ describe('TWO-003 slice 4 — each seller moves their own part, the buyer sees b
 
     // A buyer in Accra orders from both: pay on delivery in Ghana, bank transfer in Nigeria.
     order = (
-      await ok(
+      await ok<{ order: Placed }>(
         'placeOrder',
         {
           order: {
@@ -152,7 +169,7 @@ describe('TWO-003 slice 4 — each seller moves their own part, the buyer sees b
       )
     ).order;
     const [o] = await rows('Order', { number: order.number });
-    for (const p of await rows('OrderPart', { order: ptr('Order', o.objectId) })) id[p.seller.objectId === id.kofi ? 'kofiPart' : 'adaPart'] = p.objectId;
+    for (const p of await rows<OrderPart>('OrderPart', { order: ptr('Order', o.objectId) })) id[p.seller.objectId === id.kofi ? 'kofiPart' : 'adaPart'] = p.objectId;
   });
 
   afterAll(async () => {
@@ -238,7 +255,7 @@ describe('TWO-003 slice 4 — each seller moves their own part, the buyer sees b
         { from: 'sent', to: 'delivered' }
       ]);
       expect([h[1].changed.deliveryCost, h[1].changed.deliveryNote]).toEqual([{ from: null, to: 20 }, { from: null, to: 'Thursday' }]);
-      const kofiLogin = (await rows('Person', { seller: ptr('Seller', id.kofi) }))[0].login.objectId;
+      const kofiLogin = (await rows<Person>('Person', { seller: ptr('Seller', id.kofi) }))[0].login.objectId;
       expect(h.slice(1).every((x) => x.who?.objectId === kofiLogin)).toBe(true);
       expect((await historyOf(id.adaPart)).map((x) => x.changed.status.to)).toEqual(['new', 'confirmed', 'paid', 'packed', 'sent', 'delivered']);
     });
@@ -248,14 +265,14 @@ describe('TWO-003 slice 4 — each seller moves their own part, the buyer sees b
     let second: { number: string; followToken: string };
     beforeAll(async () => {
       second = (
-        await ok(
+        await ok<{ order: Placed }>(
           'placeOrder',
           { order: { buyerName: 'Kwame Boateng', phone: '+233 24 000 0043', address: 'Tema', country: id.gh, lines: [{ productId: id.shito, quantity: 1 }, { productId: id.zobo, quantity: 2 }], pay: { [id.gh]: id.cod, [id.ng]: id.cod } } },
           'stranger'
         )
       ).order;
       const [o] = await rows('Order', { number: second.number });
-      for (const p of await rows('OrderPart', { order: ptr('Order', o.objectId) })) id[p.seller.objectId === id.kofi ? 'kofiPart2' : 'adaPart2'] = p.objectId;
+      for (const p of await rows<OrderPart>('OrderPart', { order: ptr('Order', o.objectId) })) id[p.seller.objectId === id.kofi ? 'kofiPart2' : 'adaPart2'] = p.objectId;
     });
 
     it('🔴 a cancel needs why; with it, the part is cancelled for good and the buyer reads why', async () => {
@@ -273,8 +290,8 @@ describe('TWO-003 slice 4 — each seller moves their own part, the buyer sees b
     it('the admin moves any seller’s part, and the history says the admin did', async () => {
       await ok('movePart', move(id.adaPart2, 'confirmed', { deliveryCost: 0 }), 'admin');
       await ok('movePart', move(id.adaPart2, 'packed'), 'admin');
-      const adminLogin = (await rows('Person', { role: 'admin' }))[0].login.objectId;
-      expect([await statusOf(id.adaPart2), (await historyOf(id.adaPart2)).slice(1).map((x) => x.who.objectId)]).toEqual(['packed', [adminLogin, adminLogin]]);
+      const adminLogin = (await rows<Person>('Person', { role: 'admin' }))[0].login.objectId;
+      expect([await statusOf(id.adaPart2), (await historyOf(id.adaPart2)).slice(1).map((x) => x.who!.objectId)]).toEqual(['packed', [adminLogin, adminLogin]]);
     });
   });
 });

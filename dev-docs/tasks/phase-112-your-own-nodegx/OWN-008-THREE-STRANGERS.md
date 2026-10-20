@@ -319,3 +319,44 @@ round" says what it built:
 
 **Richard, on round 4 (`:8606`):** *"The new star wars editor is really cool, job done"*. The map is finished. No
 round 5 is owed.
+
+### s8 (2026-10-19, Opus 5.5): the map is public at nodegx.io/map/, beside a refreshed Orbit
+
+Richard: *"push the Star Wars editor to our nexus-1 server … to get it displayed on the NodeGX homepage next to the
+orbit editor"*. The editor's `server.mjs` can't go on a public box as it is: `/api/open` opens any folder on the
+machine and `/api/project` returns every text file in it. So `own-008/map/static/build.mjs` makes a static folder.
+The stranger's `editor/public` and `core` are copied unchanged, except that root-absolute URLs become relative and
+the Open… button is hidden. `api.js` (`static/api-entry.mjs`) answers the same `/api/*` calls in the page, on
+`templates/todo-list` held in memory, through the same `core/commit.mjs` the server and the suite adapter use. A
+visitor's Save stays in their tab. The ports and the type list come from the repo's node-spec source (125 types,
+against 108 in the npm 0.1.0 the stranger built with).
+
+- **Graded locally, then on `https://nodegx.io/map/`**, with `verify-map-round4.mjs`: 80 ships, all with hulls, and
+  the same class split as round 4. Fighters (22–24), kills rising, 80 hulls before and after, Battle off clears it,
+  no page errors. Save drive (scratchpad `drive-map-save.mjs`): `set_parameter` on `Todo/Header` `hdTitle`, then
+  Save. The toast says *"Saved 1 component into this browser tab (nothing is uploaded). The kit's validator reads
+  every file clean."*, and `api/project` reads back 28. `api/open` answers 400.
+- **The homepage `#your-own-editor`** now has two cards, Orbit and *Space map* (nodegx-web, the existing `.demos` /
+  `.demo.big` grid). The card copy passed the content-authoring skill's offline `written`, `closer` and `opener` checks.
+- **Orbit was stale on the site:** live `specs.js` held 108 specs and there was no `drawn.js` (OWN-012's drawn pose,
+  missing). It was rebuilt with `prototype/real/build.sh`, a fresh production runtime and `serve.mjs --out`. Its
+  `check.mjs --site https://nodegx.io/orbit/` passes 46/46, including the drawn-phone checks.
+- 🔴 **`ops/deploy.sh` re-renders `/changelog/` from `CHANGELOG.md`**, which already held the unpublished 0.4.2
+  section. Deployed with `NODEGX_CHANGELOG=<a copy without 0.4.2>`; the built changelog was byte-identical to the
+  live one before the push. Lane 1's S7 publishes 0.4.2's section with a plain deploy.
+
+### s9 (2026-10-19, Fable 5.1): the map's fifth round — fly an X-wing
+
+Richard: *"Any chance for the 'todo list' Star Wars editor that we can make an 'Xwing' from 1993 game style view
+where you can fly one of the Xwings and dog fight with the tie fighters? To give builders a fun break when they get
+bored."* Built directly by this session in `own-008/map/editor/` (not relayed to the stranger: it is scenery over the
+battle, and exercises nothing of the kit). `public/pilot.mjs` is the cockpit: the **Fly an X-wing** button (or X)
+saves the map's camera and seats you in a Rebel fighter over the same battle; the mouse (pointer lock) or the arrows
+fly, A/D roll, W/S throttle, Space fires the four cannons as the battle's own bolts with a per-step hit test against
+every TIE and hull; the TIEs take you as a target by distance and their hits drain your shields; "SHIP LOST" and a
+new ship 2.8 s later; a HUD with the reticle, the target bracket and lead diamond, fore/aft scopes, gauges and
+score; Esc flies the map's camera back to exactly where it was. The record is `map/REPORT.md` "Fifth round" and
+`editor/README.md` "Fly an X-wing"; `tests/pilot.json` is the drive (gated on an aimed shot at a TIE held 60 m
+ahead: `kills` 0 → 1; Esc back 0 m off; the app copy byte-identical), run on the editor's server and on the static
+build. The mouse stick is **unchecked**: headless Chrome grants no pointer lock, so only the arrows flew. The static
+folder was rebuilt with `static/build.mjs --kit ../editor` and pushed to nodegx.io/map/ (see the commit).

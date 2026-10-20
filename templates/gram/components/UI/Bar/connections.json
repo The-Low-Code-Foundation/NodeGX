@@ -4,6 +4,36 @@
   "version": 1,
   "connections": [
     {
+      "fromId": "brNameNow",
+      "fromProperty": "value",
+      "toId": "brWord",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "brRoot",
+      "fromProperty": "didMount",
+      "toId": "brNameLoad",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "brNameNow",
+      "fromProperty": "value",
+      "toId": "brNameLoad",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "brNameLoad",
+      "fromProperty": "out-name",
+      "toId": "brNameSet",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "brNameLoad",
+      "fromProperty": "out-set",
+      "toId": "brNameSet",
+      "toProperty": "do"
+    },
+    {
       "fromId": "brIn",
       "fromProperty": "band",
       "toId": "brBandWords",

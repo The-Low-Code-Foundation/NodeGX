@@ -101,8 +101,13 @@ export function CloudFunctionTrailStatus({ functionName, backendId, backendName 
         const ok = await CloudFunctionDeployer.pushToBackend(backendId, { force: true });
         if (ok) ToastLayer.showSuccess(`Deployed this project's cloud functions to ${backendName || 'the backend'}.`);
       } else {
-        await CloudFunctionDeployer.pushToAllRunning({ force: true });
-        ToastLayer.showSuccess("Deployed this project's cloud functions to every running backend.");
+        // P112-OWN021-PUSHTOALL: the project's own backend only, never every running one.
+        const pushed = await CloudFunctionDeployer.pushToProjectBackend({ force: true });
+        if (!pushed) {
+          ToastLayer.showError("This project's backend isn't running. Start it in Backend Services, then deploy.");
+        } else if (pushed.ok) {
+          ToastLayer.showSuccess("Deployed this project's cloud functions to its backend.");
+        }
       }
     } finally {
       setDeploying(false);

@@ -33,6 +33,7 @@ import { registerImportReportTool } from './tools/importReportTool';
 import { registerReadTools } from './tools/read';
 import { registerRenderTools } from './tools/renderTools';
 import { registerStyleReadTools, registerStyleWriteTools } from './tools/styleTools';
+import { registerElementStyleTools } from './tools/elementStyles';
 import { registerValidateTools } from './tools/validateTools';
 import { registerCreateProjectTools } from './tools/createProject';
 import { registerOpenProjectTools } from './tools/openProject';
@@ -267,6 +268,7 @@ export function createServer(options: ServerOptions): CreatedServer {
     registerAuthorTools(rec, binding, planRegistry, exampleBudget, renderLedger, disclosure);
     registerPlanTools(rec, binding, planRegistry, exampleBudget, renderLedger, disclosure);
     registerStyleWriteTools(rec, binding);
+    registerElementStyleTools(rec, binding);
     registerDocsWriteTools(rec, binding);
     registerScriptWriteTools(rec, binding);
     registerBackendWriteTools(rec, binding);

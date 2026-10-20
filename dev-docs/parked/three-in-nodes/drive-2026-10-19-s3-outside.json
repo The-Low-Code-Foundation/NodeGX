@@ -1,0 +1,24 @@
+{
+ "results": [
+  {
+   "name": "OUTSIDE the ball outside the Scene: exactly one console error, naming Mesh \"ball\"; Mesh Count 11; no ball in the scene",
+   "ok": true,
+   "saw": {
+    "meshes": 11,
+    "ball": null,
+    "consoleErrors": [
+     "three-kit: Mesh \"ball\" is not inside a Scene, so it draws nothing. Move it under a three-kit Scene (or under a 3D Group or a For Each that is inside one)."
+    ]
+   }
+  }
+ ],
+ "readings": {
+  "outside": {
+   "meshes": 11,
+   "ball": null,
+   "consoleErrors": [
+    "three-kit: Mesh \"ball\" is not inside a Scene, so it draws nothing. Move it under a three-kit Scene (or under a 3D Group or a For Each that is inside one)."
+   ]
+  }
+ }
+}

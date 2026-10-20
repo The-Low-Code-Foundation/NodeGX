@@ -38,6 +38,8 @@ const setUses = (source: ExportIR, page: string, id: string, value: string) => {
   fnNode(source, page, id).parameters.find((p) => p.name === 'uses')!.value = { kind: 'literal', value };
 };
 const pageFile = (files: Record<string, string>, name: string) => files[Object.keys(files).find((f) => f.endsWith(`/${name}.tsx`))!];
+/** P18-S122-TPLBUILD (Richard's ruling, 2026-10-19): a page's Function wrapper is in a file of its own, which imports the registry. */
+const fnFile = (files: Record<string, string>, page: string, fnName: string): string | undefined => files[`src/functions/pages/${page}/${fnName}.ts`];
 
 /**
  * Runs emitted modules in plain Node: each `.ts` file is transpiled to CommonJS, and a relative
@@ -61,11 +63,12 @@ function runEmitted(files: Record<string, string>) {
   return load;
 }
 
-/** A page's re-hosted wrapper, cut out of its module and run against the emitted registry. */
+/** A page's re-hosted wrapper, cut out of its own module and run against the emitted registry. */
 function wrapperOf(files: Record<string, string>, page: string, fnName: string): (inputs: Record<string, unknown>) => Record<string, unknown> {
-  const tsx = pageFile(files, page);
-  const start = tsx.indexOf(`function ${fnName}(`);
-  expect(start).toBeGreaterThanOrEqual(0);
+  const tsx = fnFile(files, page, fnName) ?? '';
+  const start = tsx.indexOf(`export function ${fnName}(`) + 'export '.length;
+  expect(pageFile(files, page)).toContain(`import { ${fnName} } from '../functions/pages/${page}/${fnName}';`);
+  expect(start).toBeGreaterThanOrEqual('export '.length);
   const end = tsx.indexOf('\n}\n', start) + 2;
   const js = ts.transpileModule(tsx.slice(start, end), { compilerOptions: { target: ts.ScriptTarget.ES2020 } }).outputText;
   const registry = runEmitted(files)('src/lib/projectScriptFiles.ts');
@@ -93,15 +96,17 @@ describe('ISL-005 AC7 — one copy, imported by both wrappers', () => {
     const holders = Object.entries(app.files).filter(([, text]) => text.includes("exports.hello = function (name)"));
     expect(holders.map(([f]) => f)).toEqual(['src/project-scripts/engine/greet.ts']);
     // Known-firing beside the absence: the file's own module does hold it (above), and the page does exist.
-    expect(pageFile(app.files, 'Home')).toContain('function greetOlive(');
+    expect(fnFile(app.files, 'Home', 'greetOlive')).toContain('export function greetOlive(');
   });
 
   test('both pages import the one registry and bind Scripts to exactly the files their Function lists', () => {
-    for (const page of ['Home', 'About']) {
-      expect(pageFile(app.files, page)).toContain("import { projectScripts } from '../lib/projectScriptFiles';");
+    for (const [page, fnName] of [['Home', 'greetOlive'], ['About', 'greetRobot']]) {
+      expect(fnFile(app.files, page, fnName)).toContain("import { projectScripts } from '../../../lib/projectScriptFiles';");
+      // The page itself no longer binds Scripts: its Function's own file does.
+      expect(pageFile(app.files, page)).not.toContain('projectScriptFiles');
     }
-    expect(pageFile(app.files, 'Home')).toContain('const Scripts = { greet: projectScripts.load("engine/greet.js") };');
-    expect(pageFile(app.files, 'About')).toContain(
+    expect(fnFile(app.files, 'Home', 'greetOlive')).toContain('const Scripts = { greet: projectScripts.load("engine/greet.js") };');
+    expect(fnFile(app.files, 'About', 'greetRobot')).toContain(
       'const Scripts = { greet: projectScripts.load("engine/greet.js"), words: projectScripts.load("engine/words.js") };'
     );
   });
@@ -146,7 +151,8 @@ describe('ISL-005 AC7 — what the emitted code does (the person sentence, expor
 describe('ISL-005 AC7 — what cannot be carried is refused by name, never inlined', () => {
   const refusalOf = (source: ExportIR) => {
     const result = emitApp(source, catalog);
-    return { notes: result.notes.join('\n'), home: pageFile(result.files, 'Home'), result };
+    // The Function's wrapper (its own file) and the page, read together: a refused Function has no file, and its page keeps the comment.
+    return { notes: result.notes.join('\n'), home: `${pageFile(result.files, 'Home')}\n${fnFile(result.files, 'Home', 'greetOlive') ?? ''}`, result };
   };
 
   test('a Uses entry naming no file', () => {
@@ -199,8 +205,8 @@ describe('ISL-005 AC7 — what cannot be carried is refused by name, never inlin
   test('control: with the gate’s own refusal present, a Function without Uses is untouched', () => {
     const noUses = cloneIr();
     setUses(noUses, 'Pages/Home', 'greetOlive', '');
-    const home = pageFile(emitApp(noUses, catalog).files, 'Home');
-    expect(home).toContain('function greetOlive(');
+    const home = fnFile(emitApp(noUses, catalog).files, 'Home', 'greetOlive');
+    expect(home).toContain('export function greetOlive(');
     expect(home).not.toContain('const Scripts');
   });
 });

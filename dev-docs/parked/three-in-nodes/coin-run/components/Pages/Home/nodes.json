@@ -1,0 +1,521 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "visualRoots": [
+    "page"
+  ],
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Coin Run"
+      },
+      "children": [
+        "score-2",
+        "3d-scene"
+      ]
+    },
+    {
+      "id": "3d-scene",
+      "type": "three-kit.Scene",
+      "label": "3D scene",
+      "parameters": {
+        "height": {
+          "value": 420,
+          "unit": "px"
+        }
+      },
+      "parent": "page",
+      "children": [
+        "sky",
+        "sun",
+        "floor",
+        "player",
+        "camera",
+        "coin",
+        "coin-2",
+        "coin-3",
+        "coin-4",
+        "coin-5"
+      ]
+    },
+    {
+      "id": "sky",
+      "type": "three-kit.Light",
+      "label": "Sky",
+      "parameters": {
+        "kind": "sky",
+        "intensity": 0.7
+      },
+      "parent": "3d-scene"
+    },
+    {
+      "id": "sun",
+      "type": "three-kit.Light",
+      "label": "Sun",
+      "parameters": {
+        "kind": "sun",
+        "intensity": 1.2,
+        "x": 5,
+        "y": 10,
+        "z": 5
+      },
+      "parent": "3d-scene"
+    },
+    {
+      "id": "floor",
+      "type": "three-kit.Body",
+      "label": "Floor",
+      "parameters": {
+        "body": "fixed",
+        "y": -0.25,
+        "x": 0,
+        "z": 0,
+        "name": "floor"
+      },
+      "parent": "3d-scene",
+      "children": [
+        "box"
+      ]
+    },
+    {
+      "id": "box",
+      "type": "three-kit.Mesh",
+      "label": "Box",
+      "parameters": {
+        "shape": "box",
+        "width": 12,
+        "height": 0.5,
+        "depth": 12,
+        "colour": "#3a4a5c"
+      },
+      "parent": "floor"
+    },
+    {
+      "id": "player",
+      "type": "three-kit.Body",
+      "label": "Player",
+      "parameters": {
+        "body": "moves",
+        "y": 1,
+        "x": 0,
+        "z": 0,
+        "name": "player"
+      },
+      "parent": "3d-scene",
+      "children": [
+        "ball"
+      ]
+    },
+    {
+      "id": "ball",
+      "type": "three-kit.Mesh",
+      "label": "Ball",
+      "parameters": {
+        "shape": "sphere",
+        "width": 0.9,
+        "height": 0.9,
+        "depth": 0.9,
+        "colour": "#e5484d"
+      },
+      "parent": "player"
+    },
+    {
+      "id": "arrow-keys",
+      "type": "three-kit.Keys",
+      "label": "Arrow keys",
+      "parameters": {},
+      "metadata": {
+        "scene": {
+          "role": "keys"
+        }
+      },
+      "x": 900,
+      "y": 100
+    },
+    {
+      "id": "camera",
+      "type": "three-kit.Camera",
+      "label": "Camera",
+      "parameters": {
+        "distance": 8,
+        "height": 6,
+        "smoothing": 0.3,
+        "follow": "player"
+      },
+      "parent": "3d-scene"
+    },
+    {
+      "id": "coin",
+      "type": "three-kit.Body",
+      "label": "Coin",
+      "parameters": {
+        "body": "ghost",
+        "y": 0.6,
+        "x": 3,
+        "z": -3,
+        "name": "coin"
+      },
+      "parent": "3d-scene",
+      "children": [
+        "ring"
+      ]
+    },
+    {
+      "id": "ring",
+      "type": "three-kit.Mesh",
+      "label": "Ring",
+      "parameters": {
+        "shape": "torus",
+        "width": 0.8,
+        "height": 0.8,
+        "depth": 0.8,
+        "spin": true,
+        "spinSpeed": 120,
+        "colour": "#e8a317"
+      },
+      "parent": "coin"
+    },
+    {
+      "id": "score",
+      "type": "Counter",
+      "label": "Score",
+      "parameters": {
+        "startValue": 0
+      },
+      "metadata": {
+        "scene": {
+          "role": "score"
+        }
+      },
+      "x": 900,
+      "y": 160
+    },
+    {
+      "id": "score-text",
+      "type": "Expression",
+      "label": "Score text",
+      "parameters": {
+        "expression": "'Score ' + score"
+      },
+      "metadata": {
+        "scene": {
+          "role": "score-text"
+        }
+      },
+      "x": 1120,
+      "y": 160
+    },
+    {
+      "id": "score-2",
+      "type": "Text",
+      "label": "Score",
+      "parameters": {
+        "text": "Score 0"
+      },
+      "metadata": {
+        "scene": {
+          "role": "score-label"
+        }
+      },
+      "parent": "page"
+    },
+    {
+      "id": "coin-new-x",
+      "type": "Expression",
+      "label": "Coin new X",
+      "parameters": {
+        "expression": "round((random() * 2 - 1) * 9) / 2",
+        "evaluateAtLoad": false
+      },
+      "metadata": {
+        "scene": {
+          "role": "spot-x",
+          "for": "coin"
+        }
+      },
+      "x": 900,
+      "y": 220
+    },
+    {
+      "id": "coin-new-z",
+      "type": "Expression",
+      "label": "Coin new Z",
+      "parameters": {
+        "expression": "round((random() * 2 - 1) * 9) / 2",
+        "evaluateAtLoad": false
+      },
+      "metadata": {
+        "scene": {
+          "role": "spot-z",
+          "for": "coin"
+        }
+      },
+      "x": 900,
+      "y": 280
+    },
+    {
+      "id": "coin-2",
+      "type": "three-kit.Body",
+      "label": "Coin 2",
+      "parameters": {
+        "body": "ghost",
+        "y": 0.6,
+        "x": -3,
+        "z": -3,
+        "name": "coin-2"
+      },
+      "parent": "3d-scene",
+      "children": [
+        "ring-2"
+      ]
+    },
+    {
+      "id": "ring-2",
+      "type": "three-kit.Mesh",
+      "label": "Ring",
+      "parameters": {
+        "shape": "torus",
+        "width": 0.8,
+        "height": 0.8,
+        "depth": 0.8,
+        "spin": true,
+        "spinSpeed": 120,
+        "colour": "#e8a317"
+      },
+      "parent": "coin-2"
+    },
+    {
+      "id": "coin-new-x-2",
+      "type": "Expression",
+      "label": "Coin new X",
+      "parameters": {
+        "expression": "round((random() * 2 - 1) * 9) / 2",
+        "evaluateAtLoad": false
+      },
+      "metadata": {
+        "scene": {
+          "role": "spot-x",
+          "for": "coin-2"
+        }
+      },
+      "x": 900,
+      "y": 260
+    },
+    {
+      "id": "coin-new-z-2",
+      "type": "Expression",
+      "label": "Coin new Z",
+      "parameters": {
+        "expression": "round((random() * 2 - 1) * 9) / 2",
+        "evaluateAtLoad": false
+      },
+      "metadata": {
+        "scene": {
+          "role": "spot-z",
+          "for": "coin-2"
+        }
+      },
+      "x": 900,
+      "y": 320
+    },
+    {
+      "id": "coin-3",
+      "type": "three-kit.Body",
+      "label": "Coin 3",
+      "parameters": {
+        "body": "ghost",
+        "y": 0.6,
+        "x": -3,
+        "z": 3,
+        "name": "coin-3"
+      },
+      "parent": "3d-scene",
+      "children": [
+        "ring-2-2"
+      ]
+    },
+    {
+      "id": "ring-2-2",
+      "type": "three-kit.Mesh",
+      "label": "Ring",
+      "parameters": {
+        "shape": "torus",
+        "width": 0.8,
+        "height": 0.8,
+        "depth": 0.8,
+        "spin": true,
+        "spinSpeed": 120,
+        "colour": "#e8a317"
+      },
+      "parent": "coin-3"
+    },
+    {
+      "id": "coin-new-x-2-2",
+      "type": "Expression",
+      "label": "Coin new X",
+      "parameters": {
+        "expression": "round((random() * 2 - 1) * 9) / 2",
+        "evaluateAtLoad": false
+      },
+      "metadata": {
+        "scene": {
+          "role": "spot-x",
+          "for": "coin-3"
+        }
+      },
+      "x": 900,
+      "y": 300
+    },
+    {
+      "id": "coin-new-z-2-2",
+      "type": "Expression",
+      "label": "Coin new Z",
+      "parameters": {
+        "expression": "round((random() * 2 - 1) * 9) / 2",
+        "evaluateAtLoad": false
+      },
+      "metadata": {
+        "scene": {
+          "role": "spot-z",
+          "for": "coin-3"
+        }
+      },
+      "x": 900,
+      "y": 360
+    },
+    {
+      "id": "coin-4",
+      "type": "three-kit.Body",
+      "label": "Coin 4",
+      "parameters": {
+        "body": "ghost",
+        "y": 0.6,
+        "x": 3,
+        "z": 3,
+        "name": "coin-4"
+      },
+      "parent": "3d-scene",
+      "children": [
+        "ring-2-2-2"
+      ]
+    },
+    {
+      "id": "ring-2-2-2",
+      "type": "three-kit.Mesh",
+      "label": "Ring",
+      "parameters": {
+        "shape": "torus",
+        "width": 0.8,
+        "height": 0.8,
+        "depth": 0.8,
+        "spin": true,
+        "spinSpeed": 120,
+        "colour": "#e8a317"
+      },
+      "parent": "coin-4"
+    },
+    {
+      "id": "coin-new-x-2-2-2",
+      "type": "Expression",
+      "label": "Coin new X",
+      "parameters": {
+        "expression": "round((random() * 2 - 1) * 9) / 2",
+        "evaluateAtLoad": false
+      },
+      "metadata": {
+        "scene": {
+          "role": "spot-x",
+          "for": "coin-4"
+        }
+      },
+      "x": 900,
+      "y": 340
+    },
+    {
+      "id": "coin-new-z-2-2-2",
+      "type": "Expression",
+      "label": "Coin new Z",
+      "parameters": {
+        "expression": "round((random() * 2 - 1) * 9) / 2",
+        "evaluateAtLoad": false
+      },
+      "metadata": {
+        "scene": {
+          "role": "spot-z",
+          "for": "coin-4"
+        }
+      },
+      "x": 900,
+      "y": 400
+    },
+    {
+      "id": "coin-5",
+      "type": "three-kit.Body",
+      "label": "Coin 5",
+      "parameters": {
+        "body": "ghost",
+        "y": 0.6,
+        "x": 0,
+        "z": -4.5,
+        "name": "coin-5"
+      },
+      "parent": "3d-scene",
+      "children": [
+        "ring-2-2-2-2"
+      ]
+    },
+    {
+      "id": "ring-2-2-2-2",
+      "type": "three-kit.Mesh",
+      "label": "Ring",
+      "parameters": {
+        "shape": "torus",
+        "width": 0.8,
+        "height": 0.8,
+        "depth": 0.8,
+        "spin": true,
+        "spinSpeed": 120,
+        "colour": "#e8a317"
+      },
+      "parent": "coin-5"
+    },
+    {
+      "id": "coin-new-x-2-2-2-2",
+      "type": "Expression",
+      "label": "Coin new X",
+      "parameters": {
+        "expression": "round((random() * 2 - 1) * 9) / 2",
+        "evaluateAtLoad": false
+      },
+      "metadata": {
+        "scene": {
+          "role": "spot-x",
+          "for": "coin-5"
+        }
+      },
+      "x": 900,
+      "y": 380
+    },
+    {
+      "id": "coin-new-z-2-2-2-2",
+      "type": "Expression",
+      "label": "Coin new Z",
+      "parameters": {
+        "expression": "round((random() * 2 - 1) * 9) / 2",
+        "evaluateAtLoad": false
+      },
+      "metadata": {
+        "scene": {
+          "role": "spot-z",
+          "for": "coin-5"
+        }
+      },
+      "x": 900,
+      "y": 440
+    }
+  ]
+}

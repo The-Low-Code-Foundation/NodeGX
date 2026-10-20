@@ -12,7 +12,12 @@ import { assertPrerequisites, get, scratchCopy, startPreview, type RunningPrevie
 beforeAll(() => assertPrerequisites());
 
 const MARKER = 'window.projectData = ';
-const parseProjectData = (indexJs: string): TSFixme => JSON.parse(indexJs.slice(indexJs.indexOf(MARKER) + MARKER.length).replace(/;\s*$/, ''));
+/** The part of the exported `window.projectData` this spec reads. */
+interface ProjectData {
+  variants: Array<{ typename: string; name: string }>;
+  componentIndex: Record<string, unknown>;
+}
+const parseProjectData = (indexJs: string): ProjectData => JSON.parse(indexJs.slice(indexJs.indexOf(MARKER) + MARKER.length).replace(/;\s*$/, ''));
 
 describe('P123-S2-VARIANTLOST', () => {
   let dir: string;
@@ -26,7 +31,7 @@ describe('P123-S2-VARIANTLOST', () => {
     );
     const nodesPath = path.join(dir, 'components/__page__/Home/nodes.json');
     const nodes = JSON.parse(fs.readFileSync(nodesPath, 'utf8'));
-    nodes.nodes.find((n: TSFixme) => n.id === 'greeting').variant = 'Big';
+    nodes.nodes.find((n: { id: string }) => n.id === 'greeting').variant = 'Big';
     fs.writeFileSync(nodesPath, JSON.stringify(nodes, null, 2));
     preview = await startPreview(dir, ['--no-watch']);
   });
@@ -38,10 +43,10 @@ describe('P123-S2-VARIANTLOST', () => {
   it('a node wearing a variant from nodegx.styles.json is exported with its name', async () => {
     const data = parseProjectData((await get(preview.port, '/index.js')).body);
     // the project's variants always exported; the node's own name is what was lost
-    expect(data.variants.map((v: TSFixme) => [v.typename, v.name])).toEqual([['Text', 'Big']]);
+    expect(data.variants.map((v) => [v.typename, v.name])).toEqual([['Text', 'Big']]);
     const [bundleId] = Object.keys(data.componentIndex);
     const components = JSON.parse((await get(preview.port, `/noodl_bundles/${bundleId}.json`)).body);
-    const home = components.find((c: TSFixme) => c.name === '/#__page__/Home');
+    const home = components.find((c: { name: string }) => c.name === '/#__page__/Home');
     const greeting = home.nodes[0].children[0];
     expect(greeting.id).toBe('greeting');
     expect(greeting.variant).toBe('Big');

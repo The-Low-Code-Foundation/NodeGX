@@ -9,6 +9,8 @@ const test = require('node:test');
 
 const {
   AGENT_NOTE,
+  CLINE_SERVER_FLAGS,
+  CLINE_TIMEOUT_SECONDS,
   MCP_PACKAGE,
   MCP_VERSION,
   OPENCODE_CONFIG,
@@ -16,6 +18,8 @@ const {
   VIBE_ALLOWED_TOOLS,
   VIBE_CONFIG,
   VIBE_SERVER_FLAGS,
+  clineMcpSettingsPath,
+  clineServerEntry,
   coreSkillFiles,
   renderOpenCodeConfig,
   renderVibeConfig,
@@ -75,6 +79,21 @@ test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, na
   // Every other agent is pointed at the same file from the agent notes.
   assert.match(AGENT_NOTE, /`nodegx-your-own-editor` \(`\.claude\/skills\/nodegx-your-own-editor\/SKILL\.md`\)/);
   assert.match(run.stdout, /Wrote \.claude\/skills\/nodegx-your-own-editor\/SKILL\.md/);
+});
+
+test('P112 OWN-012 AC4 (R4, teach both equally): the brief teaches the real app and the drawn screen side by side, each with its cost', () => {
+  const text = fs.readFileSync(path.join(__dirname, '..', 'profiles', 'core', 'skills', 'nodegx-your-own-editor', 'SKILL.md'), 'utf8');
+  const section = text.split('\n### The screen: show it or draw it\n')[1]?.split('\n### ')[0];
+  assert.ok(section, 'the brief has a section "The screen: show it or draw it"');
+  // both ways, each with what it costs, in one table
+  assert.match(section, /\| \| show the real app \| draw it from the descriptions \|/);
+  assert.match(section, /\| what it loads \| about 3\.6 MB of scripts .* \| 12\.5 KB gzipped \|/);
+  // the drawer's import, the version that has it, and the limits it names
+  assert.match(section, /from '@nodegx\/node-spec\/draw'/);
+  assert.match(section, /0\.1\.0 has no drawer/);
+  for (const limit of ['wraps', 'cssClassName', 'tabular numerals', 'automatic minimum', 'For Each']) assert.ok(section.includes(limit), limit);
+  // the old one-way instruction is gone
+  assert.doesNotMatch(text, /It doesn't draw the screen\./);
 });
 
 test("P112 OWN-007: a person's own skill file is never replaced", () => {
@@ -391,4 +410,139 @@ test('P112 OWN-019 (R29): `npm create nodegx-vibe` is create-nodegx --vibe, pinn
   assert.deepEqual(files(dir), files(direct));
   for (const f of files(dir)) if (fs.statSync(path.join(dir, f)).isFile()) assert.equal(fs.readFileSync(path.join(dir, f), 'utf8'), fs.readFileSync(path.join(direct, f), 'utf8'), f);
   assert.match(run.stdout, /vibe --legacy-harness/);
+});
+
+/** A run of the kit with its own empty home and none of the person's CLINE_* settings. */
+const clineEnv = (home, extra = {}) => {
+  const env = { ...process.env, HOME: home, USERPROFILE: home, ...extra };
+  for (const k of Object.keys(env)) if (k.startsWith('CLINE_') && !(k in extra)) delete env[k];
+  return env;
+};
+const CLINE_FILE = (home) => path.join(home, '.cline', 'data', 'settings', 'cline_mcp_settings.json');
+
+test('P112 OWN-020 (R42): the Cline kit writes AGENTS.md and the skill in the folder, and one "nodegx" entry in Cline\'s MCP file — nothing else in the home', () => {
+  const home = tmp();
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [BIN, dir, '--cline'], { encoding: 'utf8', env: clineEnv(home) });
+  assert.equal(run.status, 0, run.stderr);
+  // R29: the profile drops what only suits other agents. Cline reads AGENTS.md, and lists .claude/skills/ as project skills.
+  assert.deepEqual(fs.readdirSync(dir).sort(), ['.claude', 'AGENTS.md']);
+  assert.equal(fs.readFileSync(path.join(dir, 'AGENTS.md'), 'utf8'), AGENT_NOTE);
+  assert.ok(fs.existsSync(path.join(dir, '.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')));
+  // The one write outside the folder, where cline 3.0.71 / 3.0.73 read it with no CLINE_* variables set.
+  assert.deepEqual(fs.readdirSync(home, { recursive: true }).sort(), ['.cline', path.join('.cline', 'data'), path.join('.cline', 'data', 'settings'), path.join('.cline', 'data', 'settings', 'cline_mcp_settings.json')]);
+  assert.deepEqual(read(CLINE_FILE(home)), { mcpServers: { nodegx: clineServerEntry() } });
+  assert.match(run.stdout, new RegExp(`Wrote ${CLINE_FILE(home).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}: Cline's MCP servers`));
+  assert.match(run.stdout, /cd .*my-apps && cline\n/);
+  assert.match(run.stdout, /cline -P cline-pass -m cline-pass\/deepseek-v4\.1-flash/);
+});
+
+test('P112 OWN-020: the Cline entry is the server every OWN-020 round ran — pinned, screenshots to files — with a timeout a cold npx fits in', () => {
+  const entry = clineServerEntry();
+  const core = serverEntry();
+  assert.equal(entry.command, core.command);
+  assert.deepEqual(entry.args, [...core.args, '--screenshots-to-files']);
+  assert.ok(entry.args.includes(`${MCP_PACKAGE}@${MCP_VERSION}`));
+  // Cline's connect timeout is 10 s without one; a first npx took 27.8 s (P112-OWN023-COLDSERVER). Cline clamps 1–3600.
+  assert.equal(entry.timeout, CLINE_TIMEOUT_SECONDS);
+  assert.ok(CLINE_TIMEOUT_SECONDS >= 60 && CLINE_TIMEOUT_SECONDS <= 3600);
+  assert.deepEqual(entry.metadata, { writtenBy: 'create-nodegx' });
+  assert.deepEqual(clineServerEntry('win32').args.slice(0, 3), ['/c', 'npx', '-y']);
+  assert.deepEqual(CLINE_SERVER_FLAGS, ['--screenshots-to-files']);
+});
+
+test('P112 OWN-020: the Cline MCP file is found the way Cline finds it', () => {
+  const home = '/h';
+  assert.equal(clineMcpSettingsPath({}, home), path.join('/h', '.cline', 'data', 'settings', 'cline_mcp_settings.json'));
+  assert.equal(clineMcpSettingsPath({ CLINE_DIR: '/c' }, home), path.join('/c', 'data', 'settings', 'cline_mcp_settings.json'));
+  assert.equal(clineMcpSettingsPath({ CLINE_DIR: '/c', CLINE_DATA_DIR: '/d' }, home), path.join('/d', 'settings', 'cline_mcp_settings.json'));
+  assert.equal(clineMcpSettingsPath({ CLINE_DATA_DIR: '/d', CLINE_MCP_SETTINGS_PATH: '/m.json' }, home), '/m.json');
+  assert.equal(clineMcpSettingsPath({ CLINE_MCP_SETTINGS_PATH: '  ' }, home), path.join('/h', '.cline', 'data', 'settings', 'cline_mcp_settings.json'));
+  // And the kit writes where the variable says (the OWN-020 lab sets it).
+  const file = path.join(tmp(), 'lab', 'mcp.json');
+  const home2 = tmp();
+  const run = spawnSync(process.execPath, [BIN, path.join(tmp(), 'apps'), '--cline'], { encoding: 'utf8', env: clineEnv(home2, { CLINE_MCP_SETTINGS_PATH: file }) });
+  assert.equal(run.status, 0, run.stderr);
+  assert.deepEqual(read(file).mcpServers.nodegx, clineServerEntry());
+  assert.deepEqual(fs.readdirSync(home2), []);
+});
+
+test("P112 OWN-020 (R42): the person's other Cline servers and settings are kept, and their own \"nodegx\" is never replaced", () => {
+  const home = tmp();
+  const file = CLINE_FILE(home);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  // The nested shape `cline mcp add` writes (3.0.71), and a top-level key the kit doesn't know.
+  const other = { transport: { type: 'stdio', command: 'node', args: ['x.js'] } };
+  fs.writeFileSync(file, JSON.stringify({ mcpServers: { other }, extra: 1 }, null, 2));
+  let run = spawnSync(process.execPath, [BIN, path.join(tmp(), 'a'), '--cline'], { encoding: 'utf8', env: clineEnv(home) });
+  assert.equal(run.status, 0, run.stderr);
+  assert.deepEqual(read(file), { mcpServers: { other, nodegx: clineServerEntry() }, extra: 1 });
+  assert.match(run.stdout, /Added the NodeGX server to Cline .* Your other servers there are as they were/);
+  // Run again: the same entry, nothing changes.
+  run = spawnSync(process.execPath, [BIN, path.join(tmp(), 'b'), '--cline'], { encoding: 'utf8', env: clineEnv(home) });
+  assert.equal(run.status, 0, run.stderr);
+  assert.match(run.stdout, /Cline already has this release's NodeGX server/);
+  // The person's own "nodegx" (no kit mark) is left as it is, and they are told what it is.
+  const mine = { transport: { type: 'stdio', command: 'my-own-nodegx', args: ['--x'] } };
+  fs.writeFileSync(file, JSON.stringify({ mcpServers: { nodegx: mine } }));
+  run = spawnSync(process.execPath, [BIN, path.join(tmp(), 'c'), '--cline'], { encoding: 'utf8', env: clineEnv(home) });
+  assert.equal(run.status, 0, run.stderr);
+  assert.deepEqual(read(file), { mcpServers: { nodegx: mine } });
+  assert.match(run.stdout, /already has a "nodegx" server of your own/);
+});
+
+test("P112 OWN-020: the kit's own Cline entry from another release is moved to this release's server", () => {
+  const home = tmp();
+  const file = CLINE_FILE(home);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const old = { ...clineServerEntry(), args: ['-y', `${MCP_PACKAGE}@0.0.1`, '--allow-writes', '--screenshots-to-files'] };
+  fs.writeFileSync(file, JSON.stringify({ mcpServers: { a: { command: 'a' }, nodegx: old } }));
+  const run = spawnSync(process.execPath, [BIN, path.join(tmp(), 'apps'), '--cline'], { encoding: 'utf8', env: clineEnv(home) });
+  assert.equal(run.status, 0, run.stderr);
+  assert.deepEqual(read(file), { mcpServers: { a: { command: 'a' }, nodegx: clineServerEntry() } });
+  assert.match(run.stdout, /Moved the "nodegx" server this kit wrote earlier/);
+});
+
+test("P112 OWN-020: a Cline MCP file that isn't JSON is refused before anything is written", () => {
+  const home = tmp();
+  const file = CLINE_FILE(home);
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, '{ not json');
+  const dir = path.join(tmp(), 'apps');
+  const run = spawnSync(process.execPath, [BIN, dir, '--cline'], { encoding: 'utf8', env: clineEnv(home) });
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /Cline's MCP servers\) is not valid JSON .* nothing was written/);
+  assert.equal(fs.readFileSync(file, 'utf8'), '{ not json');
+  assert.deepEqual(fs.readdirSync(dir), []);
+  assert.deepEqual(fs.readdirSync(path.dirname(file)), ['cline_mcp_settings.json']);
+});
+
+test('P112 OWN-020: one kit at a time', () => {
+  const run = spawnSync(process.execPath, [BIN, path.join(tmp(), 'apps'), '--vibe', '--cline'], { encoding: 'utf8', env: clineEnv(tmp()) });
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /one kit at a time/);
+});
+
+test('P112 OWN-020 (R41): `npm create nodegx-cline` is create-nodegx --cline, pinned to the same version', () => {
+  const wrapper = path.join(__dirname, '..', 'cline');
+  const pkg = read(path.join(wrapper, 'package.json'));
+  const core = read(path.join(__dirname, '..', 'package.json'));
+  assert.equal(pkg.name, 'create-nodegx-cline');
+  assert.equal(pkg.version, core.version);
+  assert.deepEqual(pkg.dependencies, { 'create-nodegx': core.version });
+  assert.equal(pkg.license, core.license);
+  assert.ok(!core.files.includes('cline'));
+  assert.ok(fs.existsSync(path.join(wrapper, 'LICENSE')));
+  const home = tmp();
+  const dir = path.join(tmp(), 'my-apps');
+  const run = spawnSync(process.execPath, [path.join(wrapper, pkg.bin['create-nodegx-cline']), dir], { encoding: 'utf8', env: clineEnv(home) });
+  assert.equal(run.status, 0, run.stderr);
+  const directHome = tmp();
+  const direct = path.join(tmp(), 'my-apps');
+  assert.equal(spawnSync(process.execPath, [BIN, direct, '--cline'], { encoding: 'utf8', env: clineEnv(directHome) }).status, 0);
+  const files = (d) => fs.readdirSync(d, { recursive: true }).sort();
+  assert.deepEqual(files(dir), files(direct));
+  for (const f of files(dir)) if (fs.statSync(path.join(dir, f)).isFile()) assert.equal(fs.readFileSync(path.join(dir, f), 'utf8'), fs.readFileSync(path.join(direct, f), 'utf8'), f);
+  assert.deepEqual(read(CLINE_FILE(home)), read(CLINE_FILE(directHome)));
+  assert.match(run.stdout, /&& cline\n/);
 });

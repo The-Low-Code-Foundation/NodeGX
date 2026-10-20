@@ -217,7 +217,8 @@ describe('EXP-011 §10 — an untyped Variable is coerced at its sink, not dropp
         connect(notes, read.id, 'value', 'notesHeading', 'mounted');
       });
       expectParses(app);
-      expect(notesFile(app)).toContain('!!quote &&');
+      // P18 session 126 (EXP-011 §93): authored Mounted true, so the runtime keeps it drawn while the value is undefined.
+      expect(notesFile(app)).toContain('(quote === undefined || !!quote) &&');
       expect(notesFile(app)).not.toContain('String(quote');
     });
 

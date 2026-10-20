@@ -53,6 +53,7 @@ import {
   type ToolGroupId
 } from '../toolGroups';
 import type { FindToolsResponse } from './responses';
+import { unknownArgumentKeys, unknownArgumentsRefusal } from './unknownArguments';
 import { errorResult, guarded, jsonResult } from './util';
 
 /** A node as it arrives at a write door: only its `type` matters here. */
@@ -627,6 +628,14 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
         }
         let parsed: unknown = undefined;
         if (schema) {
+          // P112-OWN020-CALLTOOLSTRIP — the parse below strips a key the tool does not have, so the guard a direct
+          // `tools/call` gets (P109-S12, `refuseUnknownArguments`) runs here too, in the same words. DeepSeek sent
+          // `update_component` its wires as a top-level `connections` beside `set`: `updated`, 0 errors, no wires.
+          const unknown = unknownArgumentKeys(schema, args.arguments ?? {});
+          if (unknown.length > 0) {
+            const { error } = unknownArgumentsRefusal(args.name, schema, unknown);
+            throw new ToolError(error.code, error.message, error.details);
+          }
           const result = await safeParseAsync(schema as Parameters<typeof safeParseAsync>[0], args.arguments ?? {});
           if (!result.success) {
             throw new ToolError(

@@ -67,6 +67,28 @@ Click the map first if you've been typing in the app's preview, so the keys come
 | M, or **♪** | the music on / off (it starts on your first click or key: browsers wait for one) |
 | **Fly to a component…** | jump to one by name |
 
+## Fly an X-wing
+
+**Fly an X-wing** (or X) puts you in the cockpit of one of the Rebel fighters, in the 1993 game's
+view: a reticle, a bracket on your target with a diamond where to lead it, the fore and aft scopes,
+shields and lasers on the console, the kills. You are one more fighter in the same battle: the TIEs
+come for you as they come for the others, your four cannons put real bolts into it, and a kill is the
+same fireball. Your shields take a TIE's bolt; at zero the ship goes up, and another arrives a moment
+later. It is a break, not a mission: nothing you do in the cockpit touches the app.
+
+| | |
+|---|---|
+| click the view | takes the stick: the mouse flies (the page holds the pointer; Esc gives it back) |
+| ↑ ↓ ← → | pitch and yaw, if you would rather not use the mouse |
+| A / D | roll |
+| W / S, or the wheel | throttle |
+| Space, or the button held | fire |
+| T | the next TIE |
+| Esc, or **Back to the map** | out of the cockpit; the map's camera flies back to where it was |
+
+The running app's box hides while you fly and comes back after. In the console, `__map.pilot.assist(true)`
+lets R2 fly and shoot for you; the tests use it.
+
 ## Change the app
 
 Select a card. The panel on the right is where you change it:
@@ -111,7 +133,7 @@ The kit's own `editor-suite-node.js` uses `require()`, which can't load an `.mjs
 Node 22.
 
 `tests/fleet.json`, `tests/rebels.json` and `tests/battle.json` check the fleet, the ships and the
-battle. `tests/hover.json` checks wires and hovering. `tests/edit-session.json` is a session in the page itself (rewire, cut, rename, set, drag, add,
+battle; `tests/pilot.json` the cockpit. `tests/hover.json` checks wires and hovering. `tests/edit-session.json` is a session in the page itself (rewire, cut, rename, set, drag, add,
 save), run by `node --experimental-websocket tools/drive.mjs <the page's URL> tests/edit-session.json <shots-dir>`
 against an editor started on a copy of the app.
 
@@ -126,6 +148,7 @@ against an editor started on a copy of the app.
 | `public/ships.mjs` | the capital ships and fighters, and their shared plated materials |
 | `public/space.mjs` | the stars, a faint nebula, the battle station, the forest moon, the streaming space dust |
 | `public/battle.mjs` | turbolaser fire, hull hits, the fighters' dogfight, hyperspace arrivals, explosions |
+| `public/pilot.mjs` | the cockpit: your X-wing, its controls and cannons, the TIEs' hits on your shields, the HUD |
 | `public/sfx.mjs` | the blaster, turbolaser and explosion sounds (Web Audio) |
 | `public/crawl.mjs` | the opening crawl, written from the project's own numbers |
 | `public/music.mjs` | the chiptune march (Web Audio), or your own track from `music/` |

@@ -28,7 +28,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 
 jest.setTimeout(90000);
 
@@ -43,7 +43,15 @@ interface Answer {
   error?: unknown;
   code?: unknown;
 }
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** A Member row and a MemberHistory row, as far as this spec reads them: `changed` names each field that moved. */
+interface Member extends ParseRecord {
+  login: ParsePointer;
+}
+interface MemberHistory extends ParseRecord {
+  who: ParsePointer;
+  changed: Record<string, { from?: unknown; to?: unknown }>;
+}
 
 describe('TWO-005 slice 1 — joining and being let in, through the template’s functions', () => {
   let service: BackendService;
@@ -55,10 +63,10 @@ describe('TWO-005 slice 1 — joining and being let in, through the template’s
 
   const who: Record<string, Record<string, string>> = { stranger: {} };
   const call = (fn: string, body: Record<string, unknown>, as: string) => req<Answer>('POST', `/functions/${fn}`, body, who[as]);
-  const rows = async (cls: string, where: Row = {}, headers: Record<string, string> = master) =>
-    req<{ results: Row[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
-  const memberByEmail = async (email: string) => (await rows('Member', { email })).json.results;
-  const historyOf = async (memberId: string) => (await rows('MemberHistory', { member: ptr('Member', memberId) })).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}, headers: Record<string, string> = master) =>
+    req<{ results: T[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
+  const memberByEmail = async (email: string) => (await rows<Member>('Member', { email })).json.results;
+  const historyOf = async (memberId: string) => (await rows<MemberHistory>('MemberHistory', { member: ptr('Member', memberId) })).json.results;
 
   /** The whole path a member takes: ask for the link, open the mail, press it, and the app exchanges the code. */
   async function linkSignIn(name: string, email: string): Promise<string> {
@@ -121,6 +129,11 @@ describe('TWO-005 slice 1 — joining and being let in, through the template’s
     expect((await call('setUpCommunity', { setup: { ...setup, setupToken: 'wrong' } }, 'stranger')).status).toBe(400);
     const refused = await call('setUpCommunity', { setup: { ...setup, password: 'short' } }, 'stranger');
     expect(JSON.stringify(refused.json)).toContain('8 characters');
+    // P112-OWN021-SAMEEMAIL: the backend admin app's own account, made with the builder's email first, is refused in words.
+    expect((await req('POST', '/users', { username: 'builder@example.com', email: 'builder@example.com', password: 'admin-app-pw' })).status).toBe(201);
+    const taken = await call('setUpCommunity', { setup: { ...setup, email: 'builder@example.com' } }, 'stranger');
+    expect([taken.status, JSON.stringify(taken.json)]).toEqual([400, expect.stringContaining('This backend already has an account with that email.')]);
+    expect((await rows('Community')).json.results).toEqual([]);
     const made = await call('setUpCommunity', { setup }, 'stranger');
     expect(made.status).toBe(200);
     id.ama = String(made.json.result?.memberId);

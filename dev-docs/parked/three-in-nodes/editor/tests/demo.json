@@ -1,0 +1,19 @@
+[
+ { "waitFor": "document.getElementById('open-demo')", "timeout": 30000 },
+ { "shot": "o1-open.png" },
+ { "clickSel": "#open-demo" },
+ { "waitFor": "window.__scene?.state.ready && __scene.vp.engine()", "timeout": 90000 },
+ { "wait": 1000 },
+ { "label": "the demo opened in a temp copy, the scene on its stage, filling the view", "eval": "JSON.stringify({ dir: __scene.state.project.dir, kit: __scene.state.project.kit.installed, meshes: __scene.vp.engine().census().meshes, focused: !!__scene.vp.sceneEl()?.hasAttribute('data-tk-focus'), emptyHidden: document.getElementById('empty').hidden })", "expect": "r => r.kit === true && r.meshes === 12 && r.focused === true && r.emptyHidden === true" },
+ { "label": "hover the robot's head: the tooltip names it", "hoverAt": "__scene.vp.screenOf('robotHead')" },
+ { "wait": 400 },
+ { "eval": "JSON.stringify({ tip: document.querySelector('.vp-tip').hidden ? null : document.querySelector('.vp-tip').textContent })", "expect": "r => r.tip === 'Head'", "label": "hovering the head names it" },
+ { "label": "select the sun in the outline; Lamp from the palette lands in the scene with a marker", "eval": "__scene.addTile('lamp'); 'ok'" },
+ { "waitFor": "__scene.vp.lights.some(l => l.node.startsWith('lamp'))", "timeout": 30000 },
+ { "eval": "JSON.stringify({ sel: __scene.state.sel, lights: __scene.vp.lights.map(l => [l.node, Math.round(l.x), Math.round(l.y)]), sections: [...document.querySelectorAll('.sect h4')].map(e => e.textContent) })", "expect": "r => r.sel.id === 'lamp' && r.lights.some((l) => l[0] === 'lamp') && r.sections.join() === 'Light,Place'", "label": "the lamp is selected with a marker" },
+ { "label": "drag the lamp's marker 150 px left", "eval": "window.__l0 = { ...__scene.model.node(__scene.state.scene.key, __scene.state.sel.id).parameters }; JSON.stringify(__l0)" },
+ { "dragAt": "(() => { const l = __scene.vp.lights.find(l => l.node === __scene.state.sel.id); const r = document.getElementById('stage').getBoundingClientRect(); return { x: Math.round(r.left + l.x), y: Math.round(r.top + l.y) }; })()", "by": [-150, 0], "stepMs": 60 },
+ { "wait": 600 },
+ { "eval": "JSON.stringify({ before: [__l0.x, __l0.z], after: (p => [p.x, p.z])(__scene.model.node(__scene.state.scene.key, __scene.state.sel.id).parameters) })", "expect": "r => r.before[0] === 0 && r.after[0] === -2.5", "label": "the lamp moved x 0 → −2.5" },
+ { "shot": "o2-lamp.png" }
+]

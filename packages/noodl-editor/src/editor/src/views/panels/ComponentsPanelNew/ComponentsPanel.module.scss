@@ -122,6 +122,108 @@
   }
 }
 
+/* -----------------------------------------------------------------------------
+ * P111 SEE-001 — the honesty number.
+ *
+ * The header says the project's number in the meta voice (`67% known`), as a button: hover for the
+ * counts and what the number is not, click for the components holding the most script. A row holding
+ * script carries its own number after its meta, behind the script mark. The mark is a bar in the
+ * function category's ink, the same bar the canvas paints down a script node's card
+ * (`SCRIPT_MARK_TOKEN` in `honestyView.ts`; graded in `tests-unit/see-001`).
+ * -------------------------------------------------------------------------- */
+.HeaderHonesty {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  height: var(--spacing-5);
+  padding: 0 var(--spacing-1);
+  margin-right: var(--spacing-1);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--radius-default);
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--theme-color-fg-default);
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--theme-color-border-default);
+    color: var(--theme-color-fg-highlight);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+.HonestyMark {
+  flex: 0 0 auto;
+  display: inline-block;
+  width: var(--spacing-0-5);
+  height: var(--spacing-2-5);
+  border-radius: var(--radius-sm);
+  background-color: var(--theme-color-node-category-function);
+}
+
+/* The row's number: the meta's size and colour, so it never competes with the name. Always the same
+   width, so the numbers line up down the tree. */
+.HonestyMeta,
+.HonestySlot {
+  flex: 0 0 auto;
+  min-width: var(--spacing-10);
+  margin-left: var(--spacing-1-5);
+}
+
+.HonestyMeta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-1);
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--theme-color-fg-muted);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--theme-color-fg-highlight);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--theme-color-primary);
+    outline-offset: 1px;
+  }
+}
+
+.TreeItem.Selected .HonestyMeta {
+  color: var(--theme-color-fg-default);
+}
+
+/* The first line of the header's popover: the line-weighted figure and what the bar means. */
+.HonestyNote {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-2);
+  max-width: 100%;
+  padding: var(--spacing-1) var(--spacing-3) var(--spacing-2);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  white-space: normal;
+  color: var(--theme-color-fg-default-shy);
+
+  .HonestyMark {
+    margin-top: var(--spacing-0-5);
+  }
+}
+
 .FilterBar {
   flex: 0 0 auto;
   padding: 0 var(--tree-inset, 10px) var(--spacing-2);

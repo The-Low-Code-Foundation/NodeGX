@@ -23,7 +23,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 
 jest.setTimeout(90000);
 
@@ -40,12 +40,16 @@ const PNG = Buffer.from(
 );
 const PDF = Buffer.from('%PDF-1.4\n%a note\n%%EOF', 'ascii');
 
-interface Answer {
-  result?: Record<string, any>;
+interface Answer<R = Record<string, unknown>> {
+  result?: R;
   error?: unknown;
   code?: unknown;
 }
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** A Heart row, as far as this spec reads one. */
+interface Heart extends ParseRecord {
+  doneBy: ParsePointer;
+}
 interface Photo {
   name: string;
   url: string;
@@ -62,9 +66,9 @@ describe('TWO-005 slice 2 â€” posts, hearts and comments, through the templateâ€
   const who: Record<string, Record<string, string>> = { stranger: {} };
   const userId: Record<string, string> = {};
   const memberId: Record<string, string> = {};
-  const call = (fn: string, body: Record<string, unknown>, as: string) => req<Answer>('POST', `/functions/${fn}`, body, who[as]);
-  const rows = async (cls: string, where: Row = {}, headers: Record<string, string> = master) =>
-    req<{ results: Row[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
+  const call = <R = Record<string, unknown>>(fn: string, body: Record<string, unknown>, as: string) => req<Answer<R>>('POST', `/functions/${fn}`, body, who[as]);
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}, headers: Record<string, string> = master) =>
+    req<{ results: T[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
   const reason = (a: { json: Answer }) => String(a.json.error ?? '');
 
   /** A photo as the posting page sends it: the bytes, with the member's session and who may read it. */
@@ -198,8 +202,8 @@ describe('TWO-005 slice 2 â€” posts, hearts and comments, through the templateâ€
   });
 
   describe('hearts', () => {
-    const heart = (as: string, on: boolean, postId = id.ann) => call('heartPost', { heart: { postId, on } }, as);
-    const heartsOn = async (postId: string) => (await rows('Heart', { post: ptr('Post', postId) })).json.results;
+    const heart = (as: string, on: boolean, postId = id.ann) => call<{ hearts: { hearted: boolean; count: number } }>('heartPost', { heart: { postId, on } }, as);
+    const heartsOn = async (postId: string) => (await rows<Heart>('Heart', { post: ptr('Post', postId) })).json.results;
 
     it('on once, on again changes nothing, another memberâ€™s adds one, off takes one away; the count is by person', async () => {
       expect((await heart('bob', true)).json.result?.hearts).toEqual({ hearted: true, count: 1 });

@@ -1,5 +1,5 @@
 /**
- * WFA-001 — pushes the project's cloud functions to the running local backends.
+ * WFA-001 — pushes the project's cloud functions to its running local backend.
  *
  * This is the fourth cut the phase-27 scoping found: `backend:update-workflow`
  * has existed and worked since WF-004 and **had no caller**, so a backend
@@ -22,23 +22,28 @@
  * and a failure raises a toast) rather than by making the push manual. Silence
  * was the problem, not the automation.
  *
- * A backend is *not* asked which projects it serves: `BackendManager` writes
- * `projectIds: []` at creation and nothing ever adds to it, so "the project's
- * backends" is, today, every running local backend.
+ * **Where it pushes: the project's own backend** — the local one its endpoint
+ * points at, if it is running (`cloudDeployTarget.ts`). Until 0.4.3 a save
+ * pushed to every running local backend, and a second app's functions landed in
+ * the first app's backend (P112-OWN021-PUSHTOALL). A backend started from the
+ * panel still gets a push at start (`onBackendStarted`), whichever it is.
  *
  * @module noodl-editor/services/CloudFunctionDeployer
  */
 
 import { ipcInvoke } from '@noodl-utils/ipc';
 import { ProjectModel } from '@noodl-models/projectmodel';
+import { getCloudServices } from '@noodl-models/projectmodel.editor';
 
 import { EventDispatcher } from '../../../shared/utils/EventDispatcher';
+
 import { deployCloudFunctions, namedFailure, type CloudDeployTransport } from '../utils/exporter/cloudDeploy';
 import {
   CloudComponentClassification,
   classifyCloudComponents,
   getCloudFunctionNames
 } from '../utils/exporter/cloudFunctions';
+import { pushToProjectBackend } from './cloudDeployTarget';
 import { ToastLayer } from '../views/ToastLayer/ToastLayer';
 
 /** Emitted whenever {@link CloudFunctionDeployer.getState} changes. */
@@ -83,7 +88,7 @@ class CloudFunctionDeployerImpl {
       () => {
         // Fire-and-forget: a save must not wait on a backend, and a push
         // failure is reported through the state rather than thrown at the save.
-        this.pushToAllRunning({ reason: 'save' }).catch(() => undefined);
+        this.pushToProjectBackend({ reason: 'save' }).catch(() => undefined);
       },
       this
     );
@@ -182,37 +187,27 @@ class CloudFunctionDeployerImpl {
     return false;
   }
 
-  /** Push to every running local backend. */
-  public async pushToAllRunning(options: { force?: boolean; reason?: string } = {}): Promise<void> {
-    if (!ProjectModel.instance) return;
+  /**
+   * Push to the project's own running backend (P112-OWN021-PUSHTOALL), never to another project's.
+   * @returns the backend pushed to and whether it took, or undefined when the project has none running.
+   */
+  public async pushToProjectBackend(
+    options: { force?: boolean; reason?: string } = {}
+  ): Promise<{ backendId: string; ok: boolean } | undefined> {
+    const project = ProjectModel.instance;
+    if (!project) return undefined;
 
-    let backends: { id: string }[];
-    try {
-      backends = (await invokeIPC<{ id: string }[]>('backend:list')) || [];
-    } catch {
-      // No backend subsystem (or none configured) is not an error worth a toast
-      // on every save.
-      return;
-    }
-
-    for (const backend of backends) {
-      let running = false;
-      try {
-        const status = await invokeIPC<{ running?: boolean }>('backend:status', backend.id);
-        running = Boolean(status && status.running);
-      } catch {
-        running = false;
-      }
-
-      if (!running) continue;
-
-      // An autosave-driven push is quiet on failure only for backends that were
+    return pushToProjectBackend({
+      endpoint: getCloudServices(project),
+      invoke: invokeIPC,
+      // An autosave-driven push is quiet on failure only for a backend that was
       // already failing; the first failure still tells the user.
-      await this.pushToBackend(backend.id, {
-        force: options.force,
-        quiet: options.reason === 'save' && Boolean(this.lastError[backend.id])
-      });
-    }
+      push: (backendId) =>
+        this.pushToBackend(backendId, {
+          force: options.force,
+          quiet: options.reason === 'save' && Boolean(this.lastError[backendId])
+        })
+    });
   }
 
   /**

@@ -143,6 +143,16 @@ project is a message on screen rather than a spawn failure in your terminal.
 
 Every tool accepts either form; responses carry both.
 
+## The honesty number
+
+The honesty number is the share of an app's nodes whose behaviour is specced and graded (known) against the nodes that hold code nobody has checked: Function, Script, Expression and Visual Function nodes, and kit nodes with no spec (script). It is known ÷ (known + script), counted by node instance; component instances are counted inside their component, and a shipped node still waiting for its spec is reported apart as unspecced. It is not a quality score: a Function written on purpose is still script. It says how much of the app can be explained without reading code, and the script list says which parts cannot.
+
+Every project carries it, however low (P111 SEE-001): `get_project_info` returns `honesty` (the number, its counts, the
+same figure weighed by script lines, the script node types and the components with the most script), `get_component`
+returns the component's number and its script nodes by id, every `create_component` / `update_component` result says
+the component's number and the project's after the write, and `render_report` adds a `HONESTY —` section. The rule is
+defined once, in `@nodegx/node-spec`'s `src/honesty.ts`; this paragraph is its `HONESTY_SENTENCE`, word for word.
+
 ## Tools
 
 ### Read (always available)

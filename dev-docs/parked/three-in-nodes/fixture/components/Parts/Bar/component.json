@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c_bar",
+  "name": "Bar",
+  "path": "/Parts/Bar",
+  "type": "visual",
+  "description": "The For Each template: one Mesh, its Height wired to the row's value."
+}

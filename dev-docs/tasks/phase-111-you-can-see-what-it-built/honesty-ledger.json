@@ -1,0 +1,101 @@
+{
+  "$comment": "P111 SEE-001 — the honesty number per template, ratcheted by scripts/see/honesty-ledger.js --check (a fall fails; a rise fails until this file is raised in the same commit). Rewrite with --write, never by hand.",
+  "templates": {
+    "bot-garden": {
+      "percent": 88.5,
+      "known": 804,
+      "script": 104,
+      "unspecced": 6
+    },
+    "digital-bricks-training": {
+      "percent": 67,
+      "known": 578,
+      "script": 285,
+      "unspecced": 20
+    },
+    "digital-bricks-training-demo": {
+      "percent": 67.7,
+      "known": 275,
+      "script": 131,
+      "unspecced": 13
+    },
+    "gram": {
+      "percent": 87.8,
+      "known": 602,
+      "script": 84,
+      "unspecced": 16
+    },
+    "landing-pages": {
+      "percent": 95.7,
+      "known": 397,
+      "script": 18,
+      "unspecced": 3
+    },
+    "learn-with-simple-rick": {
+      "percent": 100,
+      "known": 2,
+      "script": 0,
+      "unspecced": 1
+    },
+    "marketplace": {
+      "percent": 89.6,
+      "known": 849,
+      "script": 99,
+      "unspecced": 20
+    },
+    "members-area": {
+      "percent": 90.5,
+      "known": 478,
+      "script": 50,
+      "unspecced": 13
+    },
+    "pixel-game": {
+      "percent": 82.1,
+      "known": 64,
+      "script": 14,
+      "unspecced": 1
+    },
+    "planning": {
+      "percent": 89.7,
+      "known": 810,
+      "script": 93,
+      "unspecced": 2
+    },
+    "planning-demo": {
+      "percent": 85.1,
+      "known": 742,
+      "script": 130,
+      "unspecced": 1
+    },
+    "rocket-school": {
+      "percent": 77.9,
+      "known": 762,
+      "script": 216,
+      "unspecced": 9
+    },
+    "star-class": {
+      "percent": 77.8,
+      "known": 764,
+      "script": 218,
+      "unspecced": 9
+    },
+    "story-engine": {
+      "percent": 92.5,
+      "known": 74,
+      "script": 6,
+      "unspecced": 2
+    },
+    "todo-list": {
+      "percent": 87.9,
+      "known": 690,
+      "script": 95,
+      "unspecced": 2
+    },
+    "todo-list-demo": {
+      "percent": 84.7,
+      "known": 640,
+      "script": 116,
+      "unspecced": 1
+    }
+  }
+}

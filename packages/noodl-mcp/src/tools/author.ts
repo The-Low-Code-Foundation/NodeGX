@@ -42,6 +42,7 @@ import type { ProjectBinding } from '../project/ProjectBinding';
 import type { RenderLedger } from '../renderVerdict';
 import { drawsSomething } from '../visualRoots';
 import { completionPayload } from './completion';
+import { writeHonestyPayload } from '../honesty';
 import type { ProjectStore } from '../project/ProjectStore';
 import type { ExampleBudget } from './attachments';
 import { examplesBlock } from './attachments';
@@ -611,7 +612,9 @@ export function registerAuthorTools(
           // it yet. Said on every visual write rather than only on pages: a
           // section component is what the page is made of, and "I only changed
           // a card" is how a page stops being the thing anybody renders.
-          ...(drawsSomething(candidate) ? completionPayload(ledger.state(store.projectDir)) : {})
+          ...(drawsSomething(candidate) ? completionPayload(ledger.state(store.projectDir)) : {}),
+          // P111 SEE-001 — the component's number with its script named, and the project's after this write
+          ...writeHonestyPayload(store, legacyName)
         };
         return jsonResult(payload);
       }
@@ -754,7 +757,9 @@ export function registerAuthorTools(
           ...backendRevealPayload(disclosure?.revealForNodes(candidate.nodes.nodes) ?? []),
           ...(unchanged ? {} : cloudDeployPayload([stored.legacyName], store, disclosure)),
           ...visualRootsPayload(candidate, args.set?.visual_roots),
-          ...(drawsSomething(candidate) ? completionPayload(ledger.state(store.projectDir)) : {})
+          ...(drawsSomething(candidate) ? completionPayload(ledger.state(store.projectDir)) : {}),
+          // P111 SEE-001 — the component's number with its script named, and the project's after this write
+          ...writeHonestyPayload(store, stored.legacyName)
         };
         return jsonResult(payload);
       }

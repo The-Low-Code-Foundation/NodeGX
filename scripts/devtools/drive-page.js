@@ -221,6 +221,11 @@ async function main() {
         '--no-default-browser-check',
         '--hide-scrollbars',
         '--disable-gpu',
+        // PARKED-THREE-S3-NOWEBGL: `--disable-gpu` alone leaves no WebGL, so a three.js scene (three-kit, garden-3d-kit)
+        // drew its "No WebGL here" fallback to the agent. Software GL brings WebGL back with no GPU (measured 2026-10-19 in
+        // this harness: gl false → true, the three-kit fixture's 12 meshes drawn); a page with no WebGL never touches it.
+        '--use-angle=swiftshader',
+        '--enable-unsafe-swiftshader',
         url || 'about:blank'
       ],
       { stdio: 'ignore', detached: true }

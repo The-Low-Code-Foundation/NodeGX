@@ -21,6 +21,7 @@
 const path = require('path');
 const esbuild = require('esbuild');
 const { buildAdminApp } = require('./build-admin-app');
+const { stageSharp } = require('./stage-sharp');
 
 const pkgRoot = path.resolve(__dirname, '..');
 const packagesRoot = path.resolve(pkgRoot, '..');
@@ -52,6 +53,10 @@ const shared = {
   loader: { '.html': 'text', '.css': 'text', '.txt': 'text' }
 };
 
+// P112-OWN021-NOSHARP: `sharp` and this platform's prebuild, staged as the `node_modules` the packaged editor ships
+// beside cli.js (packages/noodl-editor/package.json `extraResources`). The bundle never inlines it (transform.ts).
+const SHARP_RUNTIME_DIR = 'sharp-runtime';
+
 async function main() {
   // The browser half first: the service bundle inlines what this writes.
   await buildAdminApp();
@@ -65,11 +70,13 @@ async function main() {
     entryPoints: [path.join(pkgRoot, 'src', 'index.ts')],
     outfile: path.join(pkgRoot, 'dist', 'index.js')
   });
+  const staged = stageSharp({ outDir: path.join(pkgRoot, 'dist', SHARP_RUNTIME_DIR) });
+  console.log(`[build] sharp for ${staged.target}: ${staged.packages.length} packages → dist/${SHARP_RUNTIME_DIR}`);
 }
 
 // P109 ISL-042: the config is exported so a spec can bundle to a temp path and scan what would ship,
 // without writing over the dist/ a running editor or peer may be using.
-module.exports = { shared };
+module.exports = { shared, SHARP_RUNTIME_DIR };
 
 if (require.main === module) {
   main().catch((e) => {

@@ -23,7 +23,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 
 jest.setTimeout(90000);
 
@@ -41,11 +41,20 @@ const PNG = Buffer.from(
 const PDF = Buffer.from('%PDF-1.4\n%a note\n%%EOF', 'ascii');
 
 interface Answer {
-  result?: Record<string, any>;
+  result?: Record<string, unknown>;
   error?: unknown;
   code?: unknown;
 }
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** A Member row and a MemberHistory row, as far as this spec reads them. */
+interface Member extends ParseRecord {
+  name: string;
+  bio: string;
+  photo?: { name: string };
+}
+interface MemberHistory extends ParseRecord {
+  who: ParsePointer;
+}
 interface Photo {
   name: string;
   url: string;
@@ -63,10 +72,10 @@ describe('TWO-005 slice 3 — a member’s profile, through the template’s fun
   const userId: Record<string, string> = {};
   const memberId: Record<string, string> = {};
   const edit = (profile: unknown, as: string) => req<Answer>('POST', '/functions/editProfile', { profile }, who[as]);
-  const rows = async (cls: string, where: Row = {}, headers: Record<string, string> = master) =>
-    req<{ results: Row[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
-  const memberOf = async (name: string, headers: Record<string, string> = master) => (await rows('Member', { objectId: memberId[name] }, headers)).json.results[0];
-  const historyOf = async (name: string) => (await rows('MemberHistory', { member: ptr('Member', memberId[name]) })).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}, headers: Record<string, string> = master) =>
+    req<{ results: T[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
+  const memberOf = async (name: string, headers: Record<string, string> = master) => (await rows<Member>('Member', { objectId: memberId[name] }, headers)).json.results[0];
+  const historyOf = async (name: string) => (await rows<MemberHistory>('MemberHistory', { member: ptr('Member', memberId[name]) })).json.results;
   const reason = (a: { json: Answer }) => String(a.json.error ?? '');
 
   async function upload(as: string, bytes = PNG, readers: string | null = MEMBERS, name = 'me.png'): Promise<Photo> {

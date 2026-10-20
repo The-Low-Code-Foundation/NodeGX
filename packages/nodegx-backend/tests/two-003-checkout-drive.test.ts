@@ -22,7 +22,7 @@ import sharp from 'sharp';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 import { clickButton, clickButtonInRow, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
 
@@ -127,14 +127,19 @@ describe('TWO-003 slice 3 — the basket and the checkout, driven in the rendere
   const ids: Record<string, string> = {};
   const placed: string[] = [];
 
-  type Row = Record<string, any>;
+  type Row = Record<string, unknown>;
+  /** An OrderPart row, as far as this drive reads one. */
+  interface OrderPart extends ParseRecord {
+    seller: ParsePointer;
+    wayToPay: ParsePointer;
+  }
   const fnCall = async (fn: string, body: Record<string, unknown>, headers: Record<string, string> = admin) => {
     const r = await request<{ result?: Row }>(base, 'POST', `/functions/${fn}`, { body, headers });
     if (r.status !== 200) throw new Error(`${fn}: ${r.status} ${r.text}`);
     return r.json.result ?? {};
   };
-  const rows = async (cls: string, where: Row = {}) =>
-    (await request<{ results: Row[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`, { headers: master })).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}) =>
+    (await request<{ results: T[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`, { headers: master })).json.results;
   const upload = async (name: string, hue: string) => {
     const bytes = await sharp({ create: { width: 1200, height: 900, channels: 3, background: hue } }).jpeg({ quality: 80 }).toBuffer();
     const r = await request<{ name: string; url: string }>(base, 'POST', `/files/${name}`, { body: bytes, headers: { ...master, 'content-type': 'image/jpeg' }, raw: true });
@@ -370,7 +375,7 @@ describe('TWO-003 slice 3 — the basket and the checkout, driven in the rendere
         // What the store holds: one order, one part per seller, each with its country's way, each line at its price.
         const [order] = await rows('Order', { number });
         expect([order.buyerName, order.address, order.currency, (await path_(page)).slice('/order/'.length)]).toEqual(['Abena Owusu', 'House 14, Osu, Accra', 'GHS', order.followToken]);
-        const parts = await rows('OrderPart', { order: ptr('Order', order.objectId) });
+        const parts = await rows<OrderPart>('OrderPart', { order: ptr('Order', order.objectId) });
         expect(parts.map((p) => [p.seller.objectId, p.status, p.subtotal, p.wayToPay.objectId])).toEqual([
           [ids.kofi, 'new', 90, first ? way.whatsapp.objectId : way['on-delivery'].objectId],
           [ids.ada, 'new', 6800, way['bank-transfer'].objectId]

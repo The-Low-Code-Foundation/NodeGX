@@ -131,20 +131,25 @@ describe('the purity gate over bodies (EXP-003 §3.1–§3.4)', () => {
 
 describe('the fixture translation (EXP-003 §4 A1 — asserted piecewise; the byte golden lives in stores-events)', () => {
   const home = app.files['src/pages/Home.tsx'];
+  // P18-S122-TPLBUILD (Richard's ruling, 2026-10-19): a Function's wrapper is in a file of its own, as a Script's code is.
+  const formatShoutFile = app.files['src/functions/pages/Home/formatShout.ts'];
 
-  test('the Function body is re-hosted verbatim in a typed wrapper above the component', () => {
+  test('the Function body is re-hosted verbatim in a typed wrapper, in its own file the component imports', () => {
     // HLS-004. `name` is wire-fed, so the property always arrives and the value may still be
     // undefined; the body then reads it through the runtime's own untyped scope, which is what
     // lets an author's arithmetic compile (issue #24). The three input classes and the reason
     // they type differently are `hls004-an-export-that-builds.test.ts`.
-    expect(home).toContain('function formatShout(__inputs: { name: string | undefined }): { text?: any } {');
-    expect(home).toContain('const Inputs = __inputs as { [K in keyof typeof __inputs]: any };');
-    expect(home).toContain("const name = Inputs.name || 'friend';\nOutputs.text = name.toUpperCase() + '!';");
-    expect(home).toContain('return Outputs;');
+    expect(formatShoutFile).toContain('export function formatShout(__inputs: { name: string | undefined }): { text?: any } {');
+    expect(formatShoutFile).toContain('const Inputs = __inputs as { [K in keyof typeof __inputs]: any };');
+    expect(formatShoutFile).toContain("const name = Inputs.name || 'friend';\nOutputs.text = name.toUpperCase() + '!';");
+    expect(formatShoutFile).toContain('return Outputs;');
+    expect(formatShoutFile.startsWith('// @ts-nocheck\n')).toBe(true);
+    expect(home).toContain("import { formatShout } from '../functions/pages/Home/formatShout';");
+    expect(home).not.toContain('function formatShout(');
   });
 
   test('the wrapper catches like the runtime catches — a throw publishes what was written', () => {
-    expect(home).toContain("console.error('Function node formatShout threw:', e);");
+    expect(formatShoutFile).toContain("console.error('Function node formatShout threw:', e);");
     expect(home).toContain("console.error('Expression node hasLongName threw:', e);\n    return 0;");
   });
 
@@ -243,9 +248,9 @@ describe('the graph-side gate (EXP-003 §3.5–§3.7), each a named defer', () =
       source: "const name = Inputs.name || 'friend';\nOutputs.text = name.toUpperCase() + '!';\nOutputs.done();"
     });
     const result = emitApp(mutated, catalog);
-    const home = result.files['src/pages/Home.tsx'];
-    expect(home).toContain('{ text?: any; done: () => void }');
-    expect(home).toContain('const Outputs: { text?: any; done: () => void } = { done: () => {} };');
+    const wrapper = result.files['src/functions/pages/Home/formatShout.ts'];
+    expect(wrapper).toContain('{ text?: any; done: () => void }');
+    expect(wrapper).toContain('const Outputs: { text?: any; done: () => void } = { done: () => {} };');
   });
 
   test('done with Run unwired never pulses — the wire drops with the note', () => {

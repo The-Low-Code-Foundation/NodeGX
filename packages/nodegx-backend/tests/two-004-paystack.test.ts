@@ -29,7 +29,7 @@ import { BackendService } from '../src/service';
 import { signWebhookHmac512 } from '../src/triggers/webhook';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
 import { FakePaystack, startFakePaystack } from './helpers/fake-paystack';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 
 jest.setTimeout(90000);
 
@@ -58,12 +58,27 @@ const FUNCTIONS = [
 ];
 const REF = /^MK-\d{4}-\d{5}-(GHS|NGN)-[0-9a-f]{12}$/;
 
-interface Answer {
-  result?: Record<string, any>;
+interface Answer<R = Record<string, unknown>> {
+  result?: R;
   error?: unknown;
   code?: unknown;
 }
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** What placeOrder, startPayment, checkPayment and followOrder answer, as far as this spec reads them. */
+type Placed = { order: { number: string; followToken: string } };
+type Started = { payment: { reference: string; url: string } };
+type Checked = { result: { outcome: string; [field: string]: unknown } };
+type Followed = { order: { payments: Row[]; parts: Row[] } };
+/** The rows this spec reads into. */
+interface OrderPart extends ParseRecord {
+  seller: ParsePointer;
+}
+interface Payment extends ParseRecord {
+  order: ParsePointer;
+}
+interface OrderPartHistory extends ParseRecord {
+  changed?: { status?: { to?: string }; [field: string]: unknown };
+}
 
 describe('TWO-004 — a country’s sellers paid through Paystack, split, and paid only on Paystack’s word', () => {
   let service: BackendService;
@@ -80,28 +95,29 @@ describe('TWO-004 — a country’s sellers paid through Paystack, split, and pa
   const who: Record<string, Record<string, string>> = { stranger: {} };
   const id: Record<string, string> = {};
 
-  const call = (fn: string, body: Record<string, unknown>, as: string) => req<Answer>('POST', `/functions/${fn}`, body, who[as]);
-  const ok = async (fn: string, body: Record<string, unknown>, as = 'admin') => {
-    const r = await call(fn, body, as);
+  const call = <R = Record<string, unknown>>(fn: string, body: Record<string, unknown>, as: string) => req<Answer<R>>('POST', `/functions/${fn}`, body, who[as]);
+  /** A function's answer, as the caller names its shape; an answer with no result reads as an empty one. */
+  const ok = async <R = Record<string, unknown>>(fn: string, body: Record<string, unknown>, as = 'admin'): Promise<R> => {
+    const r = await call<R>(fn, body, as);
     if (r.status !== 200) throw new Error(`${fn} refused: ${r.status} ${JSON.stringify(r.json)}`);
-    return r.json.result ?? {};
+    return (r.json.result ?? {}) as R;
   };
   const refused = async (fn: string, body: Record<string, unknown>, words: string | RegExp, as = 'admin') => {
     const r = await call(fn, body, as);
     expect([fn, r.status === 200, JSON.stringify(r.json)]).toEqual([fn, false, expect.stringMatching(words)]);
   };
-  const rows = async (collection: string, where: Row = {}) => {
-    const r = await req<{ results: Row[] }>('GET', `/classes/${collection}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`);
+  const rows = async <T extends ParseRecord = ParseRecord>(collection: string, where: Row = {}) => {
+    const r = await req<{ results: T[] }>('GET', `/classes/${collection}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`);
     return r.status === 200 ? r.json.results : [];
   };
   const partsOf = async (orderId: string) => {
-    const parts = await rows('OrderPart', { order: ptr('Order', orderId) });
+    const parts = await rows<OrderPart>('OrderPart', { order: ptr('Order', orderId) });
     return Object.fromEntries(parts.map((p) => [Object.keys(id).find((k) => id[k] === p.seller.objectId) ?? p.seller.objectId, p]));
   };
   const orderOf = async (token: string) => (await rows('Order', { followToken: token }))[0];
   const back = (token: string) => `https://shop.example.com/order/${token}`;
   const place = async (lines: Array<[string, number]>, pay: Record<string, string>, extra: Row = {}) =>
-    ok(
+    ok<Placed>(
       'placeOrder',
       {
         order: {
@@ -207,7 +223,7 @@ describe('TWO-004 — a country’s sellers paid through Paystack, split, and pa
     await refused('startPayment', start('gh', { returnUrl: 'https://evil.example.com/steal' }), 'its own link', 'stranger');
     expect(fake.initialized).toEqual([]);
 
-    const started = (await ok('startPayment', start('gh'), 'stranger')).payment;
+    const started = (await ok<Started>('startPayment', start('gh'), 'stranger')).payment;
     expect(started.reference).toMatch(REF);
     expect(started.reference.startsWith(`${placed.number}-GHS-`)).toBe(true);
     expect(started.url).toBe(`${fake.url}/checkout/${started.reference}`);
@@ -239,19 +255,19 @@ describe('TWO-004 — a country’s sellers paid through Paystack, split, and pa
   });
 
   it('🔴 paid only on Paystack’s word: waiting writes nothing; success writes one payment and moves the parts, once', async () => {
-    expect((await ok('checkPayment', { check: { reference: id.ghRef } }, 'stranger')).result).toEqual({ outcome: 'waiting', reference: id.ghRef });
+    expect((await ok<Checked>('checkPayment', { check: { reference: id.ghRef } }, 'stranger')).result).toEqual({ outcome: 'waiting', reference: id.ghRef });
     expect(await rows('Payment')).toEqual([]);
     fake.settle(id.ghRef, 'success');
-    expect((await ok('checkPayment', { check: { reference: id.ghRef } }, 'stranger')).result).toEqual({ outcome: 'paid', reference: id.ghRef, wrongAmount: false });
+    expect((await ok<Checked>('checkPayment', { check: { reference: id.ghRef } }, 'stranger')).result).toEqual({ outcome: 'paid', reference: id.ghRef, wrongAmount: false });
     const asked = fake.verifies(id.ghRef);
-    expect((await ok('checkPayment', { check: { reference: id.ghRef } }, 'stranger')).result).toEqual({ outcome: 'paid', reference: id.ghRef });
+    expect((await ok<Checked>('checkPayment', { check: { reference: id.ghRef } }, 'stranger')).result).toEqual({ outcome: 'paid', reference: id.ghRef });
     // Asked again, it answers from the row it kept, without asking Paystack (which may be down, or its key gone).
     expect(fake.verifies(id.ghRef)).toBe(asked);
-    const payments = await rows('Payment');
+    const payments = await rows<Payment>('Payment');
     expect(payments.map((p) => [p.order.objectId, p.provider, p.reference, p.currency, p.country, p.amount, p.outcome])).toEqual([[id.order, 'paystack', id.ghRef, 'GHS', 'Ghana', 201.5, 'paid']]);
     const parts = await partsOf(id.order);
     expect([parts.kofi.status, parts.ama.status, parts.ada.status]).toEqual(['paid', 'paid', 'new']);
-    const history = await rows('OrderPartHistory', { orderPart: ptr('OrderPart', parts.kofi.objectId) });
+    const history = await rows<OrderPartHistory>('OrderPartHistory', { orderPart: ptr('OrderPart', parts.kofi.objectId) });
     expect(history[history.length - 1].changed).toEqual({ status: { from: 'confirmed', to: 'paid' }, paidBy: { from: null, to: id.ghRef } });
     await refused('startPayment', { pay: { token: id.token, country: id.gh, returnUrl: back(id.token) } }, 'paid already', 'stranger');
   });
@@ -259,25 +275,25 @@ describe('TWO-004 — a country’s sellers paid through Paystack, split, and pa
   it('🔴 any other amount is a failed payment and moves nothing; the next try pays', async () => {
     const parts = await partsOf(id.order);
     await confirm(parts.ada.objectId, 500);
-    const first = (await ok('startPayment', { pay: { token: id.token, country: id.ng, returnUrl: back(id.token) } }, 'stranger')).payment;
+    const first = (await ok<Started>('startPayment', { pay: { token: id.token, country: id.ng, returnUrl: back(id.token) } }, 'stranger')).payment;
     expect([fake.initialized[1].key, fake.initialized[1].body.amount, fake.initialized[1].body.currency]).toEqual([KEY_NG, 300000, 'NGN']);
     fake.settle(first.reference, 'success', 1000);
-    expect((await ok('checkPayment', { check: { reference: first.reference } }, 'stranger')).result).toEqual({ outcome: 'failed', reference: first.reference, wrongAmount: true });
+    expect((await ok<Checked>('checkPayment', { check: { reference: first.reference } }, 'stranger')).result).toEqual({ outcome: 'failed', reference: first.reference, wrongAmount: true });
     expect((await partsOf(id.order)).ada.status).toBe('confirmed');
 
-    const second = (await ok('startPayment', { pay: { token: id.token, country: id.ng, returnUrl: back(id.token) } }, 'stranger')).payment;
+    const second = (await ok<Started>('startPayment', { pay: { token: id.token, country: id.ng, returnUrl: back(id.token) } }, 'stranger')).payment;
     expect(second.reference).not.toBe(first.reference);
     fake.settle(second.reference, 'failed');
-    const inDollars = (await ok('startPayment', { pay: { token: id.token, country: id.ng, returnUrl: back(id.token) } }, 'stranger')).payment;
+    const inDollars = (await ok<Started>('startPayment', { pay: { token: id.token, country: id.ng, returnUrl: back(id.token) } }, 'stranger')).payment;
     fake.settle(inDollars.reference, 'success', 300000, 'USD');
-    expect((await ok('checkPayment', { check: { reference: inDollars.reference } }, 'stranger')).result.outcome).toBe('failed');
+    expect((await ok<Checked>('checkPayment', { check: { reference: inDollars.reference } }, 'stranger')).result.outcome).toBe('failed');
     expect((await partsOf(id.order)).ada.status).toBe('confirmed');
-    expect((await ok('checkPayment', { check: { reference: second.reference } }, 'stranger')).result).toEqual({ outcome: 'failed', reference: second.reference, wrongAmount: false });
+    expect((await ok<Checked>('checkPayment', { check: { reference: second.reference } }, 'stranger')).result).toEqual({ outcome: 'failed', reference: second.reference, wrongAmount: false });
     expect((await partsOf(id.order)).ada.status).toBe('confirmed');
 
-    const third = (await ok('startPayment', { pay: { token: id.token, country: id.ng, returnUrl: back(id.token) } }, 'stranger')).payment;
+    const third = (await ok<Started>('startPayment', { pay: { token: id.token, country: id.ng, returnUrl: back(id.token) } }, 'stranger')).payment;
     fake.settle(third.reference, 'success');
-    expect((await ok('checkPayment', { check: { reference: third.reference } }, 'stranger')).result.outcome).toBe('paid');
+    expect((await ok<Checked>('checkPayment', { check: { reference: third.reference } }, 'stranger')).result.outcome).toBe('paid');
     expect((await partsOf(id.order)).ada.status).toBe('paid');
     expect((await rows('Payment', { reference: inDollars.reference }))[0]).toMatchObject({ currency: 'USD', amount: 3000, outcome: 'failed' });
     const payments = await rows('Payment', { currency: 'NGN' });
@@ -289,7 +305,7 @@ describe('TWO-004 — a country’s sellers paid through Paystack, split, and pa
   });
 
   it('the buyer’s link shows each payment, and each part’s country', async () => {
-    const o = (await ok('followOrder', { follow: { token: id.token } }, 'stranger')).order;
+    const o = (await ok<Followed>('followOrder', { follow: { token: id.token } }, 'stranger')).order;
     expect(o.payments.map((p: Row) => [p.country, p.currency, p.amount, p.outcome])).toEqual([
       ['Ghana', 'GHS', 201.5, 'paid'],
       ['Nigeria', 'NGN', 10, 'failed'],
@@ -314,11 +330,11 @@ describe('TWO-004 — a country’s sellers paid through Paystack, split, and pa
     await ok('saveSeller', { seller: { id: id.kofi, name: 'Kofi’s Kitchen', country: id.gh, phone: '+000', payoutAccount: '' } });
     await refused('startPayment', start, 'Kofi’s Kitchen can’t be paid by card yet', 'stranger');
     await ok('saveSeller', { seller: { id: id.kofi, name: 'Kofi’s Kitchen', country: id.gh, phone: '+000', payoutAccount: 'ACCT_kofi4hl4xenw' } });
-    const started = (await ok('startPayment', start, 'stranger')).payment;
+    const started = (await ok<Started>('startPayment', start, 'stranger')).payment;
     const sent = fake.initialized[fake.initialized.length - 1].body;
     expect([sent.amount, sent.split.subaccounts]).toEqual([5500, [{ subaccount: 'ACCT_kofi4hl4xenw', share: 5500 }]]);
     fake.settle(started.reference, 'success');
-    expect((await ok('checkPayment', { check: { reference: started.reference } }, 'stranger')).result.outcome).toBe('paid');
+    expect((await ok<Checked>('checkPayment', { check: { reference: started.reference } }, 'stranger')).result.outcome).toBe('paid');
     const after = await partsOf(orderId);
     expect([after.kofi.status, after.ama.status]).toEqual(['paid', 'cancelled']);
 
@@ -355,13 +371,13 @@ describe('TWO-004 — a country’s sellers paid through Paystack, split, and pa
     const placed = (await place([[id.shito, 1]], { [id.gh]: id.card })).order;
     const orderId = (await orderOf(placed.followToken)).objectId;
     await confirm((await partsOf(orderId)).kofi.objectId, 5);
-    const started = (await ok('startPayment', { pay: { token: placed.followToken, country: id.gh, returnUrl: back(placed.followToken) } }, 'stranger')).payment;
+    const started = (await ok<Started>('startPayment', { pay: { token: placed.followToken, country: id.gh, returnUrl: back(placed.followToken) } }, 'stranger')).payment;
     if (status) fake.settle(started.reference, status);
     return { reference: String(started.reference), orderId };
   };
   const paidHistory = async (orderId: string) => {
     const part = (await partsOf(orderId)).kofi;
-    const history = await rows('OrderPartHistory', { orderPart: ptr('OrderPart', part.objectId) });
+    const history = await rows<OrderPartHistory>('OrderPartHistory', { orderPart: ptr('OrderPart', part.objectId) });
     return { status: part.status, paidRows: history.filter((h) => h.changed?.status?.to === 'paid').length };
   };
 
@@ -400,7 +416,7 @@ describe('TWO-004 — a country’s sellers paid through Paystack, split, and pa
     expect(await rows('Payment', { reference })).toHaveLength(1);
     expect(fake.verifies(reference)).toBe(asked);
     // And the buyer's page, back from Paystack after it, reads the same row.
-    expect((await ok('checkPayment', { check: { reference } }, 'stranger')).result).toEqual({ outcome: 'paid', reference });
+    expect((await ok<Checked>('checkPayment', { check: { reference } }, 'stranger')).result).toEqual({ outcome: 'paid', reference });
   });
 
   it('the webhook answers, and leaves alone, every event that isn’t a charge for an order here', async () => {
@@ -426,7 +442,7 @@ describe('TWO-004 — a country’s sellers paid through Paystack, split, and pa
   };
   const answeredPaid = async ({ page, webhook }: { page: Promise<{ status: number; json: Answer }>; webhook: Promise<{ status: number; text: string }> }) => {
     const [p, w] = await Promise.all([page, webhook]);
-    return [p.status, (p.json.result as Row | undefined)?.result?.outcome, w.status, JSON.parse(w.text).result?.result?.outcome];
+    return [p.status, (p.json.result as { result?: { outcome?: string } } | undefined)?.result?.outcome, w.status, JSON.parse(w.text).result?.result?.outcome];
   };
 
   it('🔴 one of the page and the webhook finishing while the other asks Paystack: the other writes nothing', async () => {

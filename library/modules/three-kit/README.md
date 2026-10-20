@@ -1,0 +1,74 @@
+# three-kit — three.js as NodeGX nodes (a prototype)
+
+**Status: a prototype, being grown into a kit (Richard, 2026-10-19: nodes first, on npm too).** The idea, the rulings
+and the readings are in [`dev-docs/parked/THREE-IN-NODES.md`](../../../dev-docs/parked/THREE-IN-NODES.md). A project
+that has it in `noodl_modules/` gets its nodes in the MCP's catalog through the project overlay, the way every kit does
+(`packages/noodl-mcp/tests/three-kit-catalog.test.ts`). No node-spec entries yet.
+
+## Install it from npm
+
+```
+npx @nodegx/three-kit add            # inside a NodeGX project, or pass its folder
+```
+
+It copies the kit into the project's `noodl_modules/three-kit/`, where the editor, the preview, `nodegx deploy` and the
+MCP read every kit, and records where it came from in `noodl_modules/kit-provenance.json`. Run it again after an
+upgrade; a copy with edits in it is kept unless you pass `--force`. (Published with NodeGX's next npm release.)
+
+## The nodes
+
+| node | what | under |
+|---|---|---|
+| `Scene` | a WebGL canvas; Width, Height, Background, Floor Grid, Camera Distance / Height / Angle, Field Of View, Orbit (drag turns, wheel zooms); out Ready, Supported, Mesh Count, Tapped Name, Tapped | any visual parent |
+| `Mesh` | one primitive: Shape (box, sphere, cylinder, cone, torus, plane), Name, Colour, Wireframe, X Y Z, Width Height Depth, Rotation Y, Sit On Floor, Spin, Spin Speed; out Tapped | a Scene, a 3D Group, or a For Each under one |
+| `Light` | Sun, Lamp or Sky; Colour, Ground, Intensity, X Y Z | a Scene or a 3D Group |
+| `3D Group` (`three-kit.Group`) | Name, X Y Z, Rotation Y, Scale, Spin, Spin Speed; out Tapped (a tap on any mesh inside it). What is under it moves, turns and scales with it; a mesh with no Name is reported by the group's | a Scene, a 3D Group, or a For Each under one |
+| `Body` (s5) | a 3D Group the Scene moves. Kind (Moves: falls, rolls, bounces; Fixed: a floor or a wall; Ghost: touched, never solid), Name, X Y Z (the start; a change teleports), Push X / Z (−1…1), Speed, Bounce, Reset, Jump To X / Z (a move that leaves the start alone); out Hit + Hit Name (when a touch starts), Fell (10 below the floor), Now X Y Z, Tapped. Its shape is the meshes inside it: a ball when all are spheres, a box otherwise | straight under a Scene |
+| `Camera` (s5) | Follow (a Name), Distance, Height, Angle, Smoothing, Field Of View. While it is there the Scene's camera inputs and orbit are not used | straight under a Scene |
+| `Keys` (s5, a logic node) | Enabled; out Left Right Up Down Space (arrows or W A S D held), X and Z (−1…1, for Push X / Z), Last Key, Pressed. Keys typed into a text field are left alone. No on-screen arrows yet: desktop only | the canvas, anywhere |
+
+**Movement is the built-in Animate To Value**, not a kit node: wire its Current Value into a Mesh's or a 3D Group's X,
+and a new Target Value glides it there (the fixture's robot; the drive's ANIM clause).
+
+A Mesh, a Light or a 3D Group draws nothing itself. It tells the Scene above it what it is through a React context, and the Scene
+keeps one three.js object per mounted child. That is why a `For Each` under a Scene makes one mesh per row: the viewer
+renders a row's component under the Scene exactly as it renders one under a Group.
+
+🔴 **A child's identity is per mounted instance, never the node id.** Under a For Each every row's Mesh is the same node
+rendered many times; keying by `noodlNode.id` collapsed eight rows into one object on the prototype's first drive.
+
+🔴 **A child speaks before its parent.** React runs a child's effects before its parent's, so a Mesh inside a 3D Group
+reaches the engine before the group does. The engine parks it in the scene and the group adopts it when it arrives.
+
+🔴 **A Body is the one thing the Scene moves by itself.** Everything else is where the graph puts it; a Body falls and
+bounces, because a game cannot be a graph signal per frame. The graph still starts it, pushes it and hears it. While a
+Body moves or a Camera follows, the Scene draws every frame; the engine's `pause(true)` (an editor's Edit mode) holds
+every Body at its start. A Body inside a 3D Group says so in the console: it moves in the Scene's own space.
+
+🔴 **A wired input never reads the value typed into it.** A Body's X wired from an Expression that has not run yet is 0,
+not where it was placed (PARKED-THREE-S5-WIREDSTART): to move a placed thing somewhere new, wire **Jump To X / Z**.
+
+🔴 **A Mesh outside a Scene draws nothing, and says so in the console** (PARKED-THREE-S2-MESHOUTSIDE): one error naming
+it, which `render_report` hands an agent as a `console-error` finding. Validation still says nothing.
+
+## Build, assemble, deploy, drive
+
+```
+node library/modules/three-kit/build.mjs
+node scripts/devtools/drive-three-kit.js assemble /tmp/three-app
+node node_modules/.bin/nodegx deploy /tmp/three-app /tmp/three-site --allow-development-engine
+node scripts/devtools/drive-three-kit.js /tmp/three-site --shots /tmp/shots --json /tmp/drive.json
+# the game half (s5): fixture-game, 7 clauses
+node scripts/devtools/drive-three-kit.js assemble /tmp/game-app --game
+node node_modules/.bin/nodegx deploy /tmp/game-app /tmp/game-site --allow-development-engine
+node scripts/devtools/drive-three-kit.js /tmp/game-site --game
+```
+
+The fixture is `dev-docs/parked/three-in-nodes/fixture/`: a Scene 520 px tall, two Lights, a spinning ball whose Y is a
+Variable, a For Each over a Static Data of eight rows whose template is one Mesh with Height wired to the row's value,
+and a robot (a 3D Group of three unnamed meshes) whose X comes out of an Animate To Value. The
+drive runs headless Chrome on software GL (`--use-angle=swiftshader`) and reads the ports through Variables and the
+scene graph through the Scene root; the screenshot is a look check, not the gate.
+
+three.js 0.158.0 is vendored beside the kit as `three.min.js` (MIT, `LICENSE.txt`), the garden-3d-kit way: listed in
+`manifest.json` `dependencies`, loaded before `index.js`, read as the `THREE` global at mount.

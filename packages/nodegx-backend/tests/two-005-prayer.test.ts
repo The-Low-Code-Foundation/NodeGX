@@ -21,7 +21,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParseDate, type ParsePointer, type ParseRecord } from './helpers/http';
 
 jest.setTimeout(90000);
 
@@ -36,11 +36,17 @@ const PNG = Buffer.from(
 );
 
 interface Answer {
-  result?: Record<string, any>;
+  result?: Record<string, unknown>;
   error?: unknown;
   code?: unknown;
 }
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** A Prayed row, as far as this spec reads one. */
+interface Prayed extends ParseRecord {
+  post: ParsePointer;
+  doneBy: ParsePointer;
+  at?: ParseDate;
+}
 
 describe('TWO-005 slice 4 — prayer requests, through the template’s functions', () => {
   let service: BackendService;
@@ -55,10 +61,10 @@ describe('TWO-005 slice 4 — prayer requests, through the template’s function
   const memberId: Record<string, string> = {};
   const share = (post: unknown, as: string) => req<Answer>('POST', '/functions/sharePost', { post }, who[as]);
   const pray = (postId: string, on: unknown, as: string) => req<Answer>('POST', '/functions/prayFor', { prayer: { postId, on } }, who[as]);
-  const rows = async (cls: string, where: Row = {}, headers: Record<string, string> = master) =>
-    req<{ results: Row[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}, headers: Record<string, string> = master) =>
+    req<{ results: T[] }>('GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, undefined, headers);
   const postRow = async (id: string) => (await rows('Post', { objectId: id })).json.results[0];
-  const prayedOn = async (id: string, headers: Record<string, string> = master) => (await rows('Prayed', { post: ptr('Post', id) }, headers)).json.results;
+  const prayedOn = async (id: string, headers: Record<string, string> = master) => (await rows<Prayed>('Prayed', { post: ptr('Post', id) }, headers)).json.results;
   const reason = (a: { json: Answer }) => String(a.json.error ?? '');
 
   beforeAll(async () => {
@@ -185,7 +191,7 @@ describe('TWO-005 slice 4 — prayer requests, through the template’s function
     expect((await prayedOn(anns, who.dee)).map((p) => p.doneBy.objectId)).toEqual([userId.dee]);
     expect(await prayedOn(anns, who.bob)).toEqual([]);
     // As the feed asks: every request at once. Bob reads his own on Ann's (none) and every row on his own request.
-    const feed = await rows('Prayed', { post: { $in: [ptr('Post', anns), ptr('Post', bobs)] } }, who.bob);
+    const feed = await rows<Prayed>('Prayed', { post: { $in: [ptr('Post', anns), ptr('Post', bobs)] } }, who.bob);
     expect(feed.status).toBe(200);
     expect(feed.json.results.map((p) => [p.post.objectId, p.doneBy.objectId])).toEqual([[bobs, userId.ann]]);
     expect((await prayedOn(anns, who.ama)).length).toBe(3);

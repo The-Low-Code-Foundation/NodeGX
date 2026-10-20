@@ -28,6 +28,7 @@ import {
 import { ToolError } from '../errors';
 import { readIconSets, renderIconSets } from '../iconSets';
 import { readImagery, renderImagery } from '../imagery';
+import { readElementStyles } from './elementStyles';
 import { applyPresetFonts } from '../presetFontFiles';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
@@ -151,12 +152,15 @@ export function registerStyleReadTools(server: McpServer, binding: ProjectBindin
       // what is installed is a fact about a directory, not about the product.
       const imagery = readImagery(store.projectDir);
 
+      // P112-OWN020-OFFSYSTEM — the project's element styles: the look every node of a type wears unless it sets the
+      // parameter itself. Reported here so an agent sees the layer before it styles a node by hand.
+      const elementStyles = readElementStyles(store);
       if (args.detail === 'prompt') {
         return jsonResult({
-          vocabulary: `${renderStyleVocabulary(vocab)}\n\n${renderIconSets(icons)}\n\n${renderImagery(imagery)}\n\nLAYOUT: ${LAYOUT_RULES_SHORT}`
+          vocabulary: `${renderStyleVocabulary(vocab)}\n\n${renderElementStyles(elementStyles)}\n\n${renderIconSets(icons)}\n\n${renderImagery(imagery)}\n\nLAYOUT: ${LAYOUT_RULES_SHORT}`
         });
       }
-      return jsonResult({ ...vocab, icons, imagery, layout: LAYOUT_RULES });
+      return jsonResult({ ...vocab, elementStyles, elementStylesNote: ELEMENT_STYLES_NOTE, icons, imagery, layout: LAYOUT_RULES });
     })
   );
 }
@@ -183,7 +187,8 @@ function readProjectLooks(store: ProjectStore): VocabProjectLook[] | undefined {
 
   const variants = Array.isArray(styles.variants) ? styles.variants : [];
   return variants
-    .filter((v) => typeof v?.name === 'string' && typeof v?.typename === 'string')
+    // A Look is a NAMED variant; a nameless one is an element style (`readElementStyles`), reported on its own.
+    .filter((v): v is typeof v & { name: string } => typeof v?.name === 'string' && typeof v?.typename === 'string')
     .map((v) => {
       const states = Object.keys(
         (v.stateParameters as Record<string, unknown> | undefined) ??
@@ -197,6 +202,26 @@ function readProjectLooks(store: ProjectStore): VocabProjectLook[] | undefined {
         ...(states.length > 0 ? { states } : {})
       };
     });
+}
+
+/** A result field, so it costs no resident tokens (see the budget gate in tests/toolDisclosure.test.ts). */
+export const ELEMENT_STYLES_NOTE =
+  'Element styles dress every node of a type that does not set the parameter itself, so leave a control\'s look ' +
+  'to its element style and set only what is particular to one node. Change a type\'s look for the whole app with ' +
+  'set_element_style (find_tools({ group: "theme" })).';
+
+function renderElementStyles(styles: Record<string, { parameters: Record<string, unknown> }>): string {
+  const types = Object.keys(styles);
+  if (types.length === 0) {
+    return 'ELEMENT STYLES: none — every control you place draws the runtime\'s own look until its type has one: call set_element_style for each control type you use.';
+  }
+  const lines = types.map((t) => {
+    const params = Object.entries(styles[t].parameters)
+      .map(([k, v]) => `${k} ${String(v)}`)
+      .join(', ');
+    return `  ${t.replace('net.noodl.controls.', '')}: ${params}`;
+  });
+  return `ELEMENT STYLES (every node of the type wears these unless it sets the parameter itself):\n${lines.join('\n')}\n${ELEMENT_STYLES_NOTE}`;
 }
 
 /** Write tools — only when --allow-writes. */

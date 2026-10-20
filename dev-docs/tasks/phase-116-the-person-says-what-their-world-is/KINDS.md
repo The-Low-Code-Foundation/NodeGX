@@ -1,6 +1,6 @@
 # The relation kinds, read off the apps on this machine
 
-**Counts are about these 11 sources and no others** (ONT-000 §5): `template:gram`, `template:learn-with-simple-rick`, `template:marketplace`, `template:members-area`, `template:nightbook`, `template:planning`, `template:todo-list`, `lessons`, `acme`, `tirion`, `sentinel`. Generated 2026-10-16 by `scripts/ontology/census.js` — do not edit by hand; edit `kinds.hand.json` and regenerate. Every source was present.
+**Counts are about these 11 sources and no others** (ONT-000 §5): `template:gram`, `template:learn-with-simple-rick`, `template:marketplace`, `template:members-area`, `template:nightbook`, `template:planning`, `template:todo-list`, `lessons`, `acme`, `tirion`, `sentinel`. Generated 2026-10-20 by `scripts/ontology/census.js` — do not edit by hand; edit `kinds.hand.json` and regenerate. Every source was present.
 
 A kind enters this list only with an evidence row that names a file and a line, or a document and a heading; a kind with one row is marked **(1)**; a kind with none makes the script fail. A row is one (collection, field) pair, so a junction contributes one row per end and a relation seen in several places is one row with its sightings counted. The private sources' rows (the membership business and the two prototypes) are held outside the repository (README R6); only their counts are here. The sentence is written per kind and read per row with the row's names in it.
 
@@ -540,7 +540,7 @@ Not kinds. Four things a Frappe DocType says about a kind of record, looked for 
 
 Not kinds, not Frappe's: a rule over a set of records ("a cohort holds at most twenty"). Found in the apps' **code** — a row count compared with a limit near a create, a sum compared with a total, two date ranges compared — and in a field that holds a limit; each candidate classified by meaning, as above. The same code pass adds **read-aloud** candidates where an app hands out a number itself (a sequence, a counter formatted into text, the highest plus one): ONT-015's warrant, counted under *facts*. Each detector is run on a line it must catch and a near-miss it must not before any source is read (`ACROSS_CONTROLS`), so a zero below is a measured zero. Never read: tests, fixtures, seeds, sandboxes, data generators, vendored code. 
 
-**The code read, in lines:** `gram` 26924, `learn-with-simple-rick` 111, `marketplace` 35273, `members-area` 17085, `nightbook` 42334, `planning` 59744, `todo-list` 44757, `acme` 56119, `tirion` 38104, `sentinel` 7506. A template's lines are the scripts inside its components' node parameters; acme's `src` and `scripts`; tirion's `api`, `pipelines`, `ui/src` and `db`; sentinel's `backend`.
+**The code read, in lines:** `gram` 27023, `learn-with-simple-rick` 111, `marketplace` 35302, `members-area` 17085, `nightbook` 42334, `planning` 59744, `todo-list` 44757, `acme` 56119, `tirion` 38104, `sentinel` 7506. A template's lines are the scripts inside its components' node parameters; acme's `src` and `scripts`; tirion's `api`, `pipelines`, `ui/src` and `db`; sentinel's `backend`.
 
 | rule | a person's sentence | rows kept | `gram` | `learn-with-simple-rick` | `marketplace` | `members-area` | `nightbook` | `planning` | `todo-list` | `lessons` | `acme` | `tirion` | `sentinel` |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|

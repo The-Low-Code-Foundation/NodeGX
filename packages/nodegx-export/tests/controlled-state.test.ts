@@ -90,7 +90,7 @@ function joinClasses(...classes: Array<string | false | undefined>) {
 }
 
 export interface CheerMeterProps {
-  onDraftChanged?: (value: string) => void;
+  onDraftChanged?: (value: string | undefined) => void;
 }
 
 /** Cheer meter. */
@@ -335,13 +335,17 @@ describe("the sync effect runs §1's coercion table, per control (§4c)", () => 
     expect(meter).not.toContain('Graph-path sync');
   });
 
-  test("clear is a state-set to the field's empty value (FB-026)", () => {
+  // P18-S127-CLEAROUT (EXP-011 §97): the empty text goes on to what the field's text feeds, as the runtime's `clear()`
+  // calls `setText('')`. This pinned `onClick={() => setDraft('')}` alone, the export's old divergence.
+  test("clear is a state-set to the field's empty value (FB-026), and the empty text goes on", () => {
     const mutated = cloneIr();
     addChild(mutated, METER, 'meterRoot', { id: 'clearBtn', type: 'net.noodl.controls.button' });
     setParam(nodeOf(mutated, METER, 'clearBtn'), 'label', lit('Clear'));
     wire(mutated, METER, 'clearBtn', 'onClick', 'meterInput', 'clear', 'signal');
     const result = emitApp(mutated, catalog);
-    expect(result.files['src/components/CheerMeter.tsx']).toContain("onClick={() => setDraft('')}");
+    expect(result.files['src/components/CheerMeter.tsx']).toContain(
+      ['        onClick={() => {', "          setDraft('');", "          draftCopy.set('');", '        }}'].join('\n')
+    );
   });
 
   test('checkbox check/uncheck are state writes; a consumed outcome defers', () => {
@@ -394,13 +398,13 @@ describe('the visibility sinks (§4b)', () => {
     );
   });
 
-  test('a mounted wire into the component root defers — a router concern', () => {
+  test('a mounted wire into the component root binds: the component returns null while it says not to', () => {
+    // P18 session 126 (EXP-011 §93): it was "a router concern" from every source; only a Page's root is the router's now.
     const mutated = cloneIr();
     wire(mutated, METER, 'showDetails', 'state', 'meterRoot', 'mounted');
     const result = emitApp(mutated, catalog);
-    expect(result.notes.join('\n')).toContain(
-      'a mounted wire into the component root is a router concern'
-    );
+    expect(result.notes.join('\n')).not.toContain('a mounted wire into the component root is a router concern');
+    expect(result.files['src/components/CheerMeter.tsx']).toMatch(/\n {2}if \(!.*\) return null;\n {2}return \(\n/);
   });
 
   test('a non-boolean mounted source is coerced — a number 0 can never render itself', () => {
@@ -409,7 +413,8 @@ describe('the visibility sinks (§4b)', () => {
     setParam(nodeOf(mutated, HOME, 'maybe'), 'text', lit('Maybe'));
     wire(mutated, HOME, 'visitorVar', 'value', 'maybe', 'mounted');
     const result = emitApp(mutated, catalog);
-    expect(result.files['src/pages/Home.tsx']).toContain('{!!name && (');
+    // P18 session 126 (EXP-011 §93): authored Mounted true, so while the Variable has no value the runtime keeps it drawn.
+    expect(result.files['src/pages/Home.tsx']).toContain('{(name === undefined || !!name) && (');
   });
 });
 

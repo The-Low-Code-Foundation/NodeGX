@@ -20,7 +20,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 import { clickButton, clickButtonInRow, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
 import { pickDate } from './helpers/todo-drive';
@@ -38,7 +38,11 @@ const BREAKFAST = 'Men’s breakfast at the church hall. Bring a friend, and an 
 const VIGIL = 'Prayer vigil in the chapel, until midnight.';
 const KINDS = ['Post', 'Prayer request', 'Testimony', 'Event'];
 
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** A Post row, as far as this drive reads one. */
+interface Post extends ParseRecord {
+  member: ParsePointer;
+}
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const bodyText = async (page: RenderedPage) => String(await page.evaluate('document.body ? document.body.innerText : ""'));
 async function until(page: RenderedPage, what: string, ok: (text: string) => boolean, ms = 15000): Promise<string> {
@@ -56,12 +60,12 @@ async function until(page: RenderedPage, what: string, ok: (text: string) => boo
   throw new Error(`${what}: never happened. The page said:\n${text.slice(0, 2500)}\nIts last console errors: ${JSON.stringify(page.consoleErrors.slice(-3))}`);
 }
 const where = async (page: RenderedPage) => String(await page.evaluate('location.pathname + location.search'));
-const cdp = (page: RenderedPage) => (page as unknown as { client: { send(m: string, p?: unknown): Promise<any> } }).client;
+const cdp = (page: RenderedPage) => (page as unknown as { client: { send<T = unknown>(m: string, p?: unknown): Promise<T> } }).client;
 
 async function shot(page: RenderedPage, name: string): Promise<void> {
   if (process.env.TWO003_SHOTS === '0') return;
   fs.mkdirSync(SHOTS, { recursive: true });
-  const r = await cdp(page).send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+  const r = await cdp(page).send<{ data: string }>('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
   fs.writeFileSync(path.join(SHOTS, `two005-kinds-${name}.png`), Buffer.from(r.data, 'base64'));
 }
 /** On the card holding these words: are they drawn above its heart, or under it? */
@@ -127,8 +131,8 @@ describe('TWO-005 slice 4b — testimonies and events, driven in two browsers', 
   const overflow: Array<[string, number]> = [];
   const memberId: Record<string, string> = {};
   const ptr = (className: string, objectId: string) => ({ __type: 'Pointer', className, objectId });
-  const rows = async (cls: string, where: Row = {}, headers: Record<string, string> = master) =>
-    (await request<{ results: Row[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, { headers })).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}, headers: Record<string, string> = master) =>
+    (await request<{ results: T[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, { headers })).json.results;
 
   beforeAll(async () => {
     const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'two005-kinds-drive-data-'));
@@ -223,7 +227,7 @@ describe('TWO-005 slice 4b — testimonies and events, driven in two browsers', 
         await clickButton(ann, 'Share your testimony');
         await until(ann, 'the feed, with the testimony', (t) => t.includes(TESTIMONY) && t.includes('Testimony · just now'));
         expect(await where(ann)).toBe('/feed');
-        const [told] = await rows('Post', { kind: 'testimony' });
+        const [told] = await rows<Post>('Post', { kind: 'testimony' });
         expect([told.caption, told.photos, told.member.objectId, told.eventOn ?? null]).toEqual([TESTIMONY, [], anns, null]);
         // Its words above its heart, as the picture draws a testimony.
         expect(await wordsOrHeart(ann, TESTIMONY)).toBe('words first');
@@ -254,7 +258,7 @@ describe('TWO-005 slice 4b — testimonies and events, driven in two browsers', 
         // 9:00 in Lagos is 8:00 UTC: the stored instant.
         await until(ann, 'the feed, with the event', (t) => t.includes(BREAKFAST) && t.includes(saidOn(day, '9:00')));
         expect(await where(ann)).toBe('/feed');
-        const [breakfast] = await rows('Post', { kind: 'event' });
+        const [breakfast] = await rows<Post>('Post', { kind: 'event' });
         expect([breakfast.caption, breakfast.eventOn, breakfast.member.objectId]).toEqual([BREAKFAST, { __type: 'Date', iso: `${day}T08:00:00.000Z` }, anns]);
         // With no photo, its words lead its card (the shots: they sat under "No hearts yet").
         expect(await wordsOrHeart(ann, BREAKFAST)).toBe('words first');

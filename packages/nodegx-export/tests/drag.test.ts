@@ -847,8 +847,9 @@ describe('§C the refused shapes, by mutation — each sentence exact', () => {
     addNode(component, { id: 'shown', type: 'Variable2', parameters: [{ name: 'name', value: { kind: 'literal', value: 'shown' } }] });
     connect(component, 'shown', 'value', 'drag', 'mounted', 'value');
     const page = home(emitApp(ir, catalog));
-    // An untyped Variable at a truthiness sink coerces `!!` — the rule every rendered node's mounted takes.
-    expect(page).toContain(`{!!shownValue && (\n          ${WRAPPER}`);
+    // An untyped Variable at a truthiness sink coerces `!!` — the rule every rendered node's mounted takes; authored Mounted
+    // true, so while the Variable has no value the runtime keeps it drawn (P18 session 126, EXP-011 §93).
+    expect(page).toContain(`{(shownValue === undefined || !!shownValue) && (\n          ${WRAPPER}`);
   });
 
   test('C14 a Drag X read into a signal port: the attach pass\'s sentence, the node kept', () => {

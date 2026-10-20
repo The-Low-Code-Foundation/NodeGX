@@ -87,7 +87,7 @@ describe('TWO-005 slice 1 — joining and being let in, driven', () => {
   const seen: string[] = [];
   const overflow: Array<[string, number]> = [];
   const member = async (email: string) =>
-    (await request<{ results: Array<Record<string, any>> }>(base, 'GET', `/classes/Member?where=${encodeURIComponent(JSON.stringify({ email }))}`, { headers: master })).json.results[0];
+    (await request<{ results: Array<Record<string, unknown>> }>(base, 'GET', `/classes/Member?where=${encodeURIComponent(JSON.stringify({ email }))}`, { headers: master })).json.results[0];
 
   beforeAll(async () => {
     const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'two005-drive-data-'));
@@ -181,6 +181,9 @@ describe('TWO-005 slice 1 — joining and being let in, driven', () => {
       const empty = await until(page, 'the empty queue', (t) => t.includes('Nobody is waiting'));
       expect(empty).toContain('New members (0)');
       expect(await member('ama@example.com')).toMatchObject({ status: 'approved', role: 'admin' });
+      // P112-OWN021-GRAMWORDMARK: the bar's wordmark is the community's name, read from its row, not "gram".
+      const barred = await until(page, 'the bar reads the community’s name', (t) => t.trim().split('\n')[0].trim() === 'Grace Chapel');
+      expect(barred).not.toMatch(/\bgram\b/);
       await shot(page, 'phone-3-queue-empty');
       overflow.push(['phone queue', await overflowX(page)]);
       await signOut();

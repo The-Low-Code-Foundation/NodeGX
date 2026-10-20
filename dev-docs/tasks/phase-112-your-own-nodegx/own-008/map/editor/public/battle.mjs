@@ -34,6 +34,7 @@ export class Battle {
     this.shotDebt = 0;
     this.time = 0;
     this.onSound = null;
+    this.player = null; // the pilot in the cockpit (pilot.mjs), as one more Rebel fighter the TIEs can go for
     this.unitBox = new THREE.BoxGeometry(1, 1, 1);
     this.ringGeo = new THREE.RingGeometry(0.82, 1, 64);
     this.mats = {};
@@ -54,6 +55,11 @@ export class Battle {
     for (const s of ships) this.bounds.union(s.hull);
   }
 
+  /** The pilot in the cockpit: { obj, side, kind, vel, speed, alive, onHit }, or null. */
+  setPlayer(p) {
+    this.player = p;
+  }
+
   setEnabled(on) {
     this.enabled = on;
     this.group.visible = on;
@@ -72,7 +78,7 @@ export class Battle {
   // --- bolts and explosions -------------------------------------------------------------------
 
   /** A bolt from `from` to `to`: a white-hot core in a coloured glow. On arrival `onHit` runs. */
-  fire(side, from, to, { speed = 700, len = 9, width = 0.45, onHit = null, sound = 'turbolaser' } = {}) {
+  fire(side, from, to, { speed = 700, len = 9, width = 0.45, onHit = null, sound = 'turbolaser', hits = null } = {}) {
     if (this.bolts.length > 260) return;
     const dir = to.clone().sub(from);
     const dist = dir.length();
@@ -86,7 +92,7 @@ export class Battle {
     obj.position.copy(from);
     obj.lookAt(from.clone().add(dir));
     this.group.add(obj);
-    this.bolts.push({ obj, from: from.clone(), dir, dist, speed, t: 0, onHit });
+    this.bolts.push({ obj, from: from.clone(), dir, dist, speed, t: 0, onHit, hits, prev: from.clone() }); // hits(at, from): a test each step, true when the bolt is spent
     if (sound) this.onSound?.(sound, from, side);
   }
 
@@ -246,6 +252,12 @@ export class Battle {
         const enemies = this.fighters.filter((e) => e.side !== f.side && e.alive);
         enemies.sort((a, b) => a.obj.position.distanceTo(f.obj.position) - b.obj.position.distanceTo(f.obj.position));
         f.target = enemies[Math.floor(Math.random() * Math.min(2, enemies.length))] ?? null;
+        // The pilot in the cockpit is one more enemy to a TIE: the nearer you are, the more of them come for you.
+        const p = this.player;
+        if (p?.alive && p.side !== f.side) {
+          const d = p.obj.position.distanceTo(f.obj.position);
+          if (d < 700 && Math.random() < (d < 250 ? 0.4 : 0.2)) f.target = p;
+        }
         f.retarget = 2 + Math.random() * 2;
       }
       const p = f.obj.position;
@@ -276,16 +288,18 @@ export class Battle {
           f.cooldown = 0.32 + Math.random() * 0.25;
           const victim = f.target;
           const hit = Math.random() < 0.18;
+          // A hit is aimed where the victim will be when the bolt gets there.
+          const lead = victim.obj.position.clone().addScaledVector(victim.vel ?? new THREE.Vector3(), ((victim.speed ?? 0) * d) / 340);
           const pair = f.kind === 'tie' ? [0, 1] : f.gun++ % 2 ? [0, 3] : [1, 2];
           pair.forEach((gi, n) => {
             const g = f.guns[gi] ?? new THREE.Vector3();
             const muzzle = f.obj.localToWorld(g.clone());
             const sound = n === 0 ? (f.kind === 'tie' ? 'tie' : 'xwing') : null;
             if (hit && n === 0) {
-              this.fire(f.side, muzzle, victim.obj.position.clone(), { speed: 340, len: 3.6, width: 0.24, sound, onHit: () => this.kill(victim) });
+              this.fire(f.side, muzzle, lead.clone(), { speed: 340, len: 3.6, width: 0.24, sound, onHit: () => this.kill(victim) });
             } else {
               const miss = muzzle.clone().addScaledVector(f.vel, 240).add(new THREE.Vector3((Math.random() - 0.5) * 24, (Math.random() - 0.5) * 24, (Math.random() - 0.5) * 24));
-              this.fire(f.side, muzzle, hit ? victim.obj.position.clone() : miss, { speed: 340, len: 3.6, width: 0.24, sound });
+              this.fire(f.side, muzzle, hit ? lead.clone() : miss, { speed: 340, len: 3.6, width: 0.24, sound });
             }
           });
         }
@@ -294,6 +308,7 @@ export class Battle {
   }
 
   kill(f) {
+    if (f === this.player) return f.onHit?.(); // the pilot's shields take it
     if (!f.alive) return;
     f.alive = false;
     this.explode(f.obj.position.clone(), 18, { ring: true, debris: 16 });
@@ -316,12 +331,17 @@ export class Battle {
     this.bolts = this.bolts.filter((b) => {
       b.t += dt;
       const travelled = b.t * b.speed;
+      b.prev.copy(b.obj.position);
+      b.obj.position.copy(b.from).addScaledVector(b.dir, Math.min(travelled, b.dist));
+      if (b.hits?.(b.obj.position, b.prev)) {
+        this.group.remove(b.obj);
+        return false;
+      }
       if (travelled >= b.dist) {
         this.group.remove(b.obj);
         b.onHit?.();
         return false;
       }
-      b.obj.position.copy(b.from).addScaledVector(b.dir, travelled);
       return true;
     });
     this.effects = this.effects.filter((e) => {

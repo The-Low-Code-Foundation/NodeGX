@@ -1,0 +1,8 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c_home",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "description": "A floor (a Fixed Body), a ball (a Body that Moves) the arrow keys push, a ring (a Ghost Body) that counts and jumps to the other side when touched, and a Camera that follows the ball."
+}

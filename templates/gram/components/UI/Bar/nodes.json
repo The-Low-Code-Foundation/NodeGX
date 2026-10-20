@@ -70,10 +70,10 @@
     {
       "id": "brWord",
       "type": "Text",
-      "label": "The wordmark",
+      "label": "The wordmark: the community’s name",
       "parent": "brTop",
       "parameters": {
-        "text": "gram",
+        "text": "",
         "fontSize": "var(--text-2xl)",
         "fontWeight": "var(--font-semibold)",
         "color": "var(--foreground)",
@@ -223,6 +223,59 @@
       },
       "x": 410,
       "y": 760
+    },
+    {
+      "id": "brNameLoad",
+      "type": "JavaScriptFunction",
+      "label": "The community’s name, read",
+      "parameters": {
+        "functionScript": "var rows = [];\ntry { rows = await Noodl.Records.query('Community', {}, { plain: true, limit: 1 }); } catch (e) { return; }\nvar name = rows[0] && rows[0].name ? String(rows[0].name) : '';\nif (name === String(Inputs.current || '')) return;\nOutputs.name = name;\nOutputs.set();",
+        "runOnChange-in-current": false
+      },
+      "ports": [
+        {
+          "name": "out-set",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-current",
+          "displayName": "current",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "brNameNow",
+      "type": "Variable2",
+      "label": "The community’s name",
+      "parameters": {
+        "name": "communityName"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "brNameSet",
+      "type": "Set Variable",
+      "label": "The community’s name, as read",
+      "parameters": {
+        "name": "communityName",
+        "setWith": "string"
+      },
+      "x": 410,
+      "y": 880
     }
   ],
   "visualRoots": [

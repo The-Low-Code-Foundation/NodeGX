@@ -29,4 +29,6 @@ export * from './draw';
 export * from './draw-full';
 export * from './draw-canvas';
 export * from './settings-diagnostics';
+// P111 SEE-001 — the honesty number, the one definition every surface imports
+export * from './honesty';
 export { sha256, sha384, sha512 } from './sha2';

@@ -41,6 +41,9 @@ const RESERVED_WORDS = new Set([
   'true', 'try', 'typeof', 'var', 'void', 'while', 'with', 'yield'
 ]);
 
+/** Props React withholds from a function component: `key` names the element, and the component never sees it. */
+const REACT_WITHHELD_PROPS = new Set(['key']);
+
 /**
  * Whether a bindable-looking identifier is in fact reserved (EXP-011 §45). The state allocator
  * asks it: a checkbox labelled "Private" minted `const [private, setPrivate]`, which is a syntax
@@ -55,6 +58,9 @@ export const isReservedWord = (name: string): boolean => RESERVED_WORDS.has(name
  * the author's vocabulary wherever it legally can be.
  */
 export function propIdentifier(name: string): string {
+  // P18-S122-TPLBUILD (TS17001). React keeps `key` for itself and never hands it to the component, so an input port
+  // called "key" (a repeater row's, in the planning and todo-list templates) binds as `keyProp`, as `do` binds `doProp`.
+  if (REACT_WITHHELD_PROPS.has(name)) return `${name}Prop`;
   if (TS_IDENTIFIER.test(name) && !RESERVED_WORDS.has(name)) return name;
   const words = name.split(/[^A-Za-z0-9_$]+/).filter((w) => w.length > 0);
   const joined = words.map((w, i) => (i === 0 ? w : w.charAt(0).toUpperCase() + w.slice(1))).join('');

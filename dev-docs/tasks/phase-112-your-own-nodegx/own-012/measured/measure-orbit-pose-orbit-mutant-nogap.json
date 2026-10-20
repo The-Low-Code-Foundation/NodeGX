@@ -1,0 +1,403 @@
+{
+ "project": "orbit",
+ "viewport": {
+  "width": 380,
+  "height": 680
+ },
+ "mutant": "nogap",
+ "rootPath": "/App",
+ "pages": {},
+ "rows": [
+  {
+   "path": "screen",
+   "id": "screen",
+   "type": "Group",
+   "label": "Screen",
+   "drawn": {
+    "x": 0,
+    "y": 0,
+    "width": 380,
+    "height": 680
+   },
+   "real": {
+    "x": 0,
+    "y": 0,
+    "width": 380,
+    "height": 680
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0,
+   "dh": 0,
+   "within": true,
+   "sizeOk": true,
+   "posOk": true,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "within 2 px"
+  },
+  {
+   "path": "phaseTxt",
+   "id": "phaseTxt",
+   "type": "Text",
+   "label": "Phase label",
+   "parent": "screen",
+   "drawn": {
+    "x": 137.6923828125,
+    "y": 212,
+    "width": 104.615234375,
+    "height": 26
+   },
+   "real": {
+    "x": 137.6875,
+    "y": 180,
+    "width": 104.625,
+    "height": 26
+   },
+   "dx": 0.0048828125,
+   "dy": 32,
+   "dw": -0.009765625,
+   "dh": 0,
+   "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": [],
+   "verdict": "OFF"
+  },
+  {
+   "path": "timeTxt",
+   "id": "timeTxt",
+   "type": "Text",
+   "label": "Time",
+   "parent": "screen",
+   "drawn": {
+    "x": 60.990234375,
+    "y": 238,
+    "width": 258.01953125,
+    "height": 123
+   },
+   "real": {
+    "x": 55.453125,
+    "y": 222,
+    "width": 269.09375,
+    "height": 123
+   },
+   "dx": 5.537109375,
+   "dy": 16,
+   "dw": -11.07421875,
+   "dh": 0,
+   "within": false,
+   "sizeOk": false,
+   "posOk": false,
+   "own": [
+    "Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting)"
+   ],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": [
+    "Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting)"
+   ],
+   "verdict": "named: Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting); follows phaseTxt"
+  },
+  {
+   "path": "track",
+   "id": "track",
+   "type": "Group",
+   "label": "Track",
+   "parent": "screen",
+   "drawn": {
+    "x": 36,
+    "y": 361,
+    "width": 308,
+    "height": 8
+   },
+   "real": {
+    "x": 36,
+    "y": 361,
+    "width": 308,
+    "height": 8
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0,
+   "dh": 0,
+   "within": true,
+   "sizeOk": true,
+   "posOk": true,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "within 2 px"
+  },
+  {
+   "path": "bar",
+   "id": "bar",
+   "type": "Group",
+   "label": "Progress bar",
+   "parent": "track",
+   "drawn": {
+    "x": 36,
+    "y": 361,
+    "width": 17.453333333333333,
+    "height": 8
+   },
+   "real": {
+    "x": 36,
+    "y": 361,
+    "width": 17.453125,
+    "height": 8
+   },
+   "dx": 0,
+   "dy": 0,
+   "dw": 0.00020833333333314386,
+   "dh": 0,
+   "within": true,
+   "sizeOk": true,
+   "posOk": true,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "within 2 px"
+  },
+  {
+   "path": "footTxt",
+   "id": "footTxt",
+   "type": "Text",
+   "label": "Footer",
+   "parent": "screen",
+   "drawn": {
+    "x": 57.03125,
+    "y": 369,
+    "width": 265.9375,
+    "height": 23
+   },
+   "real": {
+    "x": 57.03125,
+    "y": 385,
+    "width": 265.9375,
+    "height": 23
+   },
+   "dx": 0,
+   "dy": -16,
+   "dw": 0,
+   "dh": 0,
+   "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [
+    "Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+    "the text measured by a canvas in the font the system resolves, not by the model"
+   ],
+   "limits": [],
+   "verdict": "named: follows phaseTxt, timeTxt"
+  },
+  {
+   "path": "btnRow",
+   "id": "btnRow",
+   "type": "Group",
+   "label": "Buttons",
+   "parent": "screen",
+   "drawn": {
+    "x": 70,
+    "y": 416,
+    "width": 240,
+    "height": 52
+   },
+   "real": {
+    "x": 56,
+    "y": 448,
+    "width": 268,
+    "height": 52
+   },
+   "dx": 14,
+   "dy": -32,
+   "dw": -28,
+   "dh": 0,
+   "within": false,
+   "sizeOk": false,
+   "posOk": false,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "named: holds pauseBtn, skipBtn; follows phaseTxt, timeTxt, footTxt"
+  },
+  {
+   "path": "pauseBtn",
+   "id": "pauseBtn",
+   "type": "net.noodl.controls.button",
+   "label": "Pause button",
+   "parent": "btnRow",
+   "drawn": {
+    "x": 70,
+    "y": 416,
+    "width": 120,
+    "height": 52
+   },
+   "real": {
+    "x": 56,
+    "y": 448,
+    "width": 120,
+    "height": 52
+   },
+   "dx": 14,
+   "dy": -32,
+   "dw": 0,
+   "dh": 0,
+   "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "named: follows btnRow"
+  },
+  {
+   "path": "skipBtn",
+   "id": "skipBtn",
+   "type": "net.noodl.controls.button",
+   "label": "Skip button",
+   "parent": "btnRow",
+   "drawn": {
+    "x": 190,
+    "y": 416,
+    "width": 120,
+    "height": 52
+   },
+   "real": {
+    "x": 204,
+    "y": 448,
+    "width": 120,
+    "height": 52
+   },
+   "dx": -14,
+   "dy": -32,
+   "dw": 0,
+   "dh": 0,
+   "within": false,
+   "sizeOk": true,
+   "posOk": false,
+   "own": [],
+   "present": true,
+   "outside": [],
+   "needs": [],
+   "limits": [],
+   "verdict": "named: follows btnRow, pauseBtn"
+  }
+ ],
+ "needs": [
+  "the root's parent: the app's root element, the viewport's size, stacked down (no node, no spec says so)",
+  "the values on the wires: a trace or a graph runner (a drawn screen cannot run the graph)",
+  "phaseTxt: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "phaseTxt: the text measured by a canvas in the font the system resolves, not by the model",
+  "timeTxt: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "timeTxt: the text measured by a canvas in the font the system resolves, not by the model",
+  "timeTxt: LIMIT Numerals is tabular-nums: a canvas measures proportional digits (no font-feature setting)",
+  "footTxt: Line Height Auto is the font's own (its ascent + descent, read from the font by the canvas)",
+  "footTxt: the text measured by a canvas in the font the system resolves, not by the model"
+ ],
+ "values": {
+  "phase": {
+   "value-Focus-length": 1500,
+   "value-Break-length": 300
+  },
+  "pauseBtn": {
+   "label": "Start"
+  },
+  "btnLabel": {
+   "input": false
+  },
+  "zero": {
+   "value": 1415
+  },
+  "toMs": {
+   "inputValue": 1415
+  },
+  "finished": {
+   "condition": false
+  },
+  "remaining": {
+   "maxInputValue": 1500,
+   "minOutputValue": 1500,
+   "inputValue": 85
+  },
+  "progress": {
+   "maxInputValue": 1500,
+   "inputValue": 85
+  },
+  "phaseTxt": {
+   "color": "#ff5a36",
+   "text": "Focus"
+  },
+  "bar": {
+   "backgroundColor": "#ff5a36",
+   "width": 5.666666666666666
+  },
+  "hud": {
+   "phase": "Focus",
+   "time": "23:35"
+  },
+  "skyIdx": {
+   "inputValue": 0.056666666666666664
+  },
+  "smooth": {
+   "targetValue": 0.056666666666666664
+  },
+  "sky": {
+   "blendValue": 0.11333333333333333
+  },
+  "screen": {
+   "backgroundColor": "#10112e"
+  },
+  "clockface": {
+   "input": 1415000
+  },
+  "timeTxt": {
+   "text": "23:35"
+  },
+  "barPct": {
+   "inputValue": 0.056666666666666664
+  },
+  "footTxt": {
+   "text": "Round 0 · Focus ends in 23:35"
+  }
+ },
+ "visualCount": 9,
+ "status": {
+  "status": "ok",
+  "warnings": [],
+  "exportMs": 8.200000047683716,
+  "frameMs": 126.40000009536743
+ },
+ "page": "orbit",
+ "stilled": true,
+ "pageErrors": [],
+ "window": [
+  1440,
+  900
+ ]
+}

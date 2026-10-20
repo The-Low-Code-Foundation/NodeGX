@@ -17,9 +17,24 @@
 import * as crypto from 'crypto';
 import * as http from 'http';
 
+/**
+ * An initialize body as the marketplace's `startPayment` sends it (TWO-004 §7), parsed off the wire: the fields the
+ * stand-in and the specs read, and whatever else was sent.
+ */
+export interface InitializeBody {
+  reference: string;
+  amount: number;
+  currency: string;
+  email: string;
+  callback_url: string;
+  metadata: unknown;
+  split: { name: string; type: string; currency: string; bearer_type: string; subaccounts: Array<{ subaccount: string; share: number }> };
+  [field: string]: unknown;
+}
+
 export interface FakeTx {
   key: string;
-  body: Record<string, any>;
+  body: InitializeBody;
   status: string;
   /** What the buyer actually paid, and in what, when a test wants it to differ from what was asked. */
   paid?: number;
@@ -31,7 +46,7 @@ export interface FakePaystack {
   keys: string[];
   txs: Map<string, FakeTx>;
   /** Every initialize the functions sent, in order, with the key they sent it with. */
-  initialized: Array<{ key: string; body: Record<string, any> }>;
+  initialized: Array<{ key: string; body: InitializeBody }>;
   settle(reference: string, status: string, paid?: number, currency?: string): void;
   /**
    * Paystack's webhook: once a buyer pays at the checkout page, a `charge.success` signed with the key that started
@@ -103,7 +118,7 @@ export async function startFakePaystack(keys: string[]): Promise<FakePaystack> {
       }
       if (!keys.includes(key)) return answer(res, 401, { status: false, message: 'Invalid key' });
       if (req.method === 'POST' && url.pathname === '/transaction/initialize') {
-        let body: Record<string, any> = {};
+        let body: InitializeBody;
         try {
           body = JSON.parse(raw || '{}');
         } catch {

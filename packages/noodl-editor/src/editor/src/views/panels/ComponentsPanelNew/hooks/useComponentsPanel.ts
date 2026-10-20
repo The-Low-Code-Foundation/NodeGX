@@ -12,6 +12,9 @@ import { buildKindIndex, ComponentKind, ComponentKindIndex } from '../componentK
 import { CLOUD_PATH_PREFIX, pageGroups, SECTION_LABEL, SECTION_ORDER, sectionFor, SectionId } from '../componentSections';
 import { buildUsageIndex, RouterPages, RowMeta, rowMetaFor, UsageIndex } from '../componentUsage';
 import { folderSegmentLabel } from '../folderDisplay';
+import { readProjectHonesty } from '../honestyView';
+import { honestyShown } from '../honestyShown';
+import { shippedTypeNames } from '../../../nodegrapheditor/canvas/scriptMark';
 import { TreeNode } from '../types';
 
 /**
@@ -181,6 +184,20 @@ export function useComponentsPanel() {
   }, [updateCounter]);
 
   /**
+   * P111 SEE-001 — the honesty number, the project's and each component's, from a fresh walk on the same counter: a
+   * node added or removed anywhere moves it, and so does a kit arriving (a library event). `@nodegx/node-spec`'s rule;
+   * `honestyView.ts` only walks the graphs into it.
+   */
+  const honesty = useMemo(
+    // A release build shows none of it, and walks nothing (`honestyShown`).
+    () =>
+      honestyShown() && ProjectModel.instance
+        ? readProjectHonesty(ProjectModel.instance.getComponents(), shippedTypeNames())
+        : null,
+    [updateCounter]
+  );
+
+  /**
    * TVW-001 (e) — there is one view now.
    *
    * Slice 2 built the sectioned tree for the unfiltered view and left the old folder tree drawing
@@ -245,6 +262,7 @@ export function useComponentsPanel() {
     activeComponentName,
     toggleFolder,
     handleItemClick,
+    honesty
   };
 }
 

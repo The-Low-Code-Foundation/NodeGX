@@ -1,0 +1,173 @@
+{
+  "url": "http://localhost:5102/",
+  "at": "2026-10-19T20:19:49.902Z",
+  "routesReached": 11,
+  "console": {
+    "routesWithErrors": 1,
+    "notFavicon": 0,
+    "errors": [
+      {
+        "route": 0,
+        "kind": "log.network",
+        "text": "Failed to load resource: the server responded with a status of 404 (Not Found) http://localhost:5102/favicon.ico"
+      }
+    ]
+  },
+  "overflow390": {
+    "routesScrollingSideways": []
+  },
+  "like": {
+    "result": "not reached",
+    "why": "not tried (--no-press)"
+  },
+  "routes": [
+    {
+      "n": 0,
+      "url": "http://localhost:5102/",
+      "finalUrl": "http://localhost:5102/",
+      "title": "OpenWave · Discover AI-made music",
+      "errors": [
+        {
+          "kind": "log.network",
+          "text": "Failed to load resource: the server responded with a status of 404 (Not Found) http://localhost:5102/favicon.ico"
+        }
+      ],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 1,
+      "url": "http://localhost:5102/home",
+      "finalUrl": "http://localhost:5102/home",
+      "title": "OpenWave · Discover AI-made music",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 2,
+      "url": "http://localhost:5102/search",
+      "finalUrl": "http://localhost:5102/search",
+      "title": "Search · OpenWave",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 3,
+      "url": "http://localhost:5102/library",
+      "finalUrl": "http://localhost:5102/library",
+      "title": "Your library · OpenWave",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 4,
+      "url": "http://localhost:5102/signin",
+      "finalUrl": "http://localhost:5102/signin",
+      "title": "Sign in · OpenWave",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 5,
+      "url": "http://localhost:5102/upload",
+      "finalUrl": "http://localhost:5102/upload",
+      "title": "Upload · OpenWave",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 6,
+      "url": "http://localhost:5102/track/099b9422-a4bc-4408-9522-037c5b3b7fe0",
+      "finalUrl": "http://localhost:5102/track/099b9422-a4bc-4408-9522-037c5b3b7fe0",
+      "title": "Kettle Song · Juniper Vale · OpenWave",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 7,
+      "url": "http://localhost:5102/artist/0add823c-233a-4e92-b8fe-0b56a4f80705",
+      "finalUrl": "http://localhost:5102/artist/0add823c-233a-4e92-b8fe-0b56a4f80705",
+      "title": "Juniper Vale · OpenWave",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 8,
+      "url": "http://localhost:5102/album/1340ff63-65f0-4257-90df-3c9c64037135",
+      "finalUrl": "http://localhost:5102/album/1340ff63-65f0-4257-90df-3c9c64037135",
+      "title": "Inbox Zero · MC Paperclip · OpenWave",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 9,
+      "url": "http://localhost:5102/playlist/0dd1c08d-4fe6-430f-95da-30747e55de87",
+      "finalUrl": "http://localhost:5102/playlist/0dd1c08d-4fe6-430f-95da-30747e55de87",
+      "title": "Late night drive · OpenWave",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    },
+    {
+      "n": 10,
+      "url": "http://localhost:5102/creator/07604333-4185-444c-b62d-faffe188f573",
+      "finalUrl": "http://localhost:5102/creator/07604333-4185-444c-b62d-faffe188f573",
+      "title": "@listener · OpenWave",
+      "errors": [],
+      "overflow": {
+        "viewport": 390,
+        "docWidth": 390,
+        "scrollsSideways": false,
+        "offenders": []
+      }
+    }
+  ]
+}

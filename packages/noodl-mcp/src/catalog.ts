@@ -168,6 +168,17 @@ function byType(): Map<string, EnrichedCatalogNode> {
   return cachedByType;
 }
 
+/**
+ * P111 SEE-001 — the SHIPPED catalog's type names, without the project's kit overlay. The honesty number reads a type
+ * outside this set (and not a component) as a kit type, which is script until it has a spec; the merged catalog would
+ * make every kit node look shipped.
+ */
+let cachedShipped: ReadonlySet<string> | undefined;
+export function shippedTypeNames(): ReadonlySet<string> {
+  if (!cachedShipped) cachedShipped = new Set(shippedCatalog.nodes.map((n) => n.typeName));
+  return cachedShipped;
+}
+
 export function allExamples(): CatalogExample[] {
   return shippedCatalog.examples ?? [];
 }

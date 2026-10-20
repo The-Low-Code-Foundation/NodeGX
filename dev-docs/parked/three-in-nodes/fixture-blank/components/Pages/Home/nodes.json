@@ -1,0 +1,18 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "visualRoots": [
+    "page"
+  ],
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Coin Run"
+      }
+    }
+  ]
+}

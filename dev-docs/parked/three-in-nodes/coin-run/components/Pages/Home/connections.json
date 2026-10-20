@@ -1,0 +1,187 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "arrow-keys",
+      "fromProperty": "x",
+      "toId": "player",
+      "toProperty": "pushX"
+    },
+    {
+      "fromId": "arrow-keys",
+      "fromProperty": "z",
+      "toId": "player",
+      "toProperty": "pushZ"
+    },
+    {
+      "fromId": "player",
+      "fromProperty": "onFell",
+      "toId": "player",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "score",
+      "fromProperty": "currentCount",
+      "toId": "score-text",
+      "toProperty": "score"
+    },
+    {
+      "fromId": "score-text",
+      "fromProperty": "result",
+      "toId": "score-2",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "coin",
+      "fromProperty": "onHit",
+      "toId": "score",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "coin-new-x",
+      "fromProperty": "result",
+      "toId": "coin",
+      "toProperty": "jumpX"
+    },
+    {
+      "fromId": "coin-new-z",
+      "fromProperty": "result",
+      "toId": "coin",
+      "toProperty": "jumpZ"
+    },
+    {
+      "fromId": "coin",
+      "fromProperty": "onHit",
+      "toId": "coin-new-x",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coin",
+      "fromProperty": "onHit",
+      "toId": "coin-new-z",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coin-2",
+      "fromProperty": "onHit",
+      "toId": "score",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "coin-new-x-2",
+      "fromProperty": "result",
+      "toId": "coin-2",
+      "toProperty": "jumpX"
+    },
+    {
+      "fromId": "coin-new-z-2",
+      "fromProperty": "result",
+      "toId": "coin-2",
+      "toProperty": "jumpZ"
+    },
+    {
+      "fromId": "coin-2",
+      "fromProperty": "onHit",
+      "toId": "coin-new-x-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coin-2",
+      "fromProperty": "onHit",
+      "toId": "coin-new-z-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coin-3",
+      "fromProperty": "onHit",
+      "toId": "score",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "coin-new-x-2-2",
+      "fromProperty": "result",
+      "toId": "coin-3",
+      "toProperty": "jumpX"
+    },
+    {
+      "fromId": "coin-new-z-2-2",
+      "fromProperty": "result",
+      "toId": "coin-3",
+      "toProperty": "jumpZ"
+    },
+    {
+      "fromId": "coin-3",
+      "fromProperty": "onHit",
+      "toId": "coin-new-x-2-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coin-3",
+      "fromProperty": "onHit",
+      "toId": "coin-new-z-2-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coin-4",
+      "fromProperty": "onHit",
+      "toId": "score",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "coin-new-x-2-2-2",
+      "fromProperty": "result",
+      "toId": "coin-4",
+      "toProperty": "jumpX"
+    },
+    {
+      "fromId": "coin-new-z-2-2-2",
+      "fromProperty": "result",
+      "toId": "coin-4",
+      "toProperty": "jumpZ"
+    },
+    {
+      "fromId": "coin-4",
+      "fromProperty": "onHit",
+      "toId": "coin-new-x-2-2-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coin-4",
+      "fromProperty": "onHit",
+      "toId": "coin-new-z-2-2-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coin-5",
+      "fromProperty": "onHit",
+      "toId": "score",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "coin-new-x-2-2-2-2",
+      "fromProperty": "result",
+      "toId": "coin-5",
+      "toProperty": "jumpX"
+    },
+    {
+      "fromId": "coin-new-z-2-2-2-2",
+      "fromProperty": "result",
+      "toId": "coin-5",
+      "toProperty": "jumpZ"
+    },
+    {
+      "fromId": "coin-5",
+      "fromProperty": "onHit",
+      "toId": "coin-new-x-2-2-2-2",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "coin-5",
+      "fromProperty": "onHit",
+      "toId": "coin-new-z-2-2-2-2",
+      "toProperty": "run"
+    }
+  ]
+}

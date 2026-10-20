@@ -2,11 +2,12 @@
 
 **Opened 2026-10-10 (s4), from R4's ruling: *teach both equally*** (README §8). **Depends on OWN-004** (the real app
 beside it, `preview.elementsOf`, the trace) **and P107 NSP-016 AC4** (the layout model).
-**Status: 🟡 steps 1–3 done (s2, 2026-10-18, Fable 5.1): the drawer lives in `@nodegx/node-spec` (`src/draw.ts`, 20 unit tests top-down over the 24 recorded fixtures, 316 boxes matched, 6 KNOWN rows all the one automatic-minimum limit, two mutant arms red); a drawer-only entry is 12.1 KB gzipped against 308 KB for the full table; the todo template's first page (its sign-in page, which the app shows with no backend) is drawn and graded at both viewports: 17 boxes, 0 defects of the layout model, 2 named root causes (a text that wraps, a stylesheet class), 1 spec gap filed (P112-OWN012-FONTDEFAULT). Step 4 and AC4 next.**
+**Status: 🟢 BUILT — all four steps and all four ACs (s3, 2026-10-19, Opus 5.5).** Step 4: Orbit's third pose draws the screen on the 3D phone from the descriptions (a WebGL texture painted with the drawer), the real app one press away; graded the way steps 1–3 were, 8 of 9 boxes at 0 px and the clock named, the no-gap mutant exits 1. AC3: the drawer is used by `orbit.html` and adds 21 KB gzipped to it. AC4: the brief teaches both ways in one table with what each costs. **Not published:** `@nodegx/node-spec/draw` (the drawer has never been on npm; node-spec is 0.1.0 there) and the brief ride lane 1's next npm cut (§6 s3, "For the cut"). Steps 1–3 (s1–s2, 2026-10-18): the drawer in `@nodegx/node-spec`, 316 fixture boxes matched, the todo template's sign-in page graded with 0 layout-model defects, P112-OWN012-FONTDEFAULT filed.
 **Model:** **Opus** for step 1 (a measurement with a clear finish line); **Fable** for steps 2–3, a drawer graded
 box by box against a browser, where a wrong reading of the layout model becomes every editor's wrong screen. At the
 start of a session on this task, and again if the work changes kind, say which model you are running on and whether
-this line says Richard should switch (README §0.2).
+this line says Richard should switch (README §0.2). **s3 ran on Opus 5.5:** step 4 put a finished drawer on a texture and AC4 was a
+brief change, both with a gate already written; Opus was the right model and no switch was needed.
 
 ## 1. The person sentence
 
@@ -253,3 +254,107 @@ session, none of them this one's.
 (`/Pages/Todo`) is not drawn: it needs a session. A width-aware text measurer would turn the wrap limit into a
 measurement (the drawer would hand the measurer the width the box got, a second pass), and is the next thing a
 drawer of real pages wants.
+
+### s3 (2026-10-19, Opus 5.5): step 4 — the drawn phone in Orbit — and AC4, the brief
+
+Lane 2, worktree `l2-own012` from `cline-dev` `e7e3e77db`. Re-measured first: s2's grade reproduced exactly on this
+checkout (Orbit 8 within 2 px and 1 named at both viewports; the todo sign-in page 3 within, 1 absent, 13 named, 0 OFF,
+exit 0 each), with the runtime taken from the primary checkout (`measure.mjs --runtime`, new: a worktree has no
+gitignored build output).
+
+**Step 4, what was built.** `prototype/real/orbit.html` has a third pose beside *App in the scene* and *App in a
+window*: **Drawn from the descriptions** (`?pose=drawn`). The phone in the scene is a WebGL plane, a child of the same
+object the real app is posed with, whose texture the page paints itself: the drawer (`drawn.js`, the drawer-only entry)
+turns the project's files and the values the running app's trace sends into boxes, and `draw-page.mjs` paints them in
+each node's own colours (background, corner radius, the track's clip, text, button labels) inside an 8 px bezel. The
+real app keeps running behind it at opacity 0, unpressable, because it is where the values come from (and which page a
+Router shows). One press on *App in the scene* puts it back. In the drawn pose the leader lines point at the drawn
+boxes, not the real elements, and pointing at the drawn phone lights the card of the box under the pointer (a raycast
+into the drawing, no DOM). Every edit is picked up: the drawing re-reads the files whenever the app is rebuilt from them.
+
+The page's half of the drawer moved out of `drawn.html` into `prototype/real/draw-page.mjs`, which both pages import:
+`projectParts` (the files as the drawer takes them), `drawProject`, `realElements` (read to grade and to follow the
+Router, never to draw), `gradeDrawing` (s2's verdicts, unchanged) and `paintDrawing`. **Control:** `drawn.html` on it
+gives the same grade as before, every row, verdict, drawn box, real box and need equal to the baseline at both viewports
+for Orbit and the todo page (`measure.mjs` exit 0 both).
+
+**The grade** (`own-012/measure.mjs --page orbit`, new): orbit.html opens in Orbit with the drawn pose in a 1440×900
+window. The phone's screen is the app's own size there, 380×680, so that is the viewport. The page presses Orbit's
+Pause in the real app and waits for a still trace (s1's trap). `__orbit.drawn.grade()` then draws once and reads the
+real boxes at the same instant, through the same verdicts (`measured/measure-orbit-pose-orbit.json`):
+
+| node | drawn (380×680) | real | Δ x,y w×h | verdict |
+|---|---|---|---|---|
+| screen | 0,0 380×680 | 0,0 380×680 | 0 | within 2 px |
+| phaseTxt | 137.7,180 104.6×26 | the same | 0 | within 2 px |
+| timeTxt | 60.2,222 259.6×123 | 55.5,222 269.1×123 | 4.7,0 −9.4×0 | **named**: tabular-nums, which a canvas can't measure (s1's limit; "23:45" here) |
+| track | 36,361 308×8 | the same | 0 | within 2 px |
+| bar | 36,361 15.4×8 | the same | 0 | within 2 px |
+| footTxt | 56.8,385 266.3×23 | the same | 0 | within 2 px |
+| btnRow | 56,448 268×52 | the same | 0 | within 2 px |
+| pauseBtn | 56,448 120×52 | the same | 0 | within 2 px |
+| skipBtn | 204,448 120×52 | the same | 0 | within 2 px |
+
+**8 of 9 at 0 px, the clock named, 0 OFF, exit 0.** The bar's wired width (5 %, at the paused moment) drew 15.4 px of
+308 as the app does. **Mutant:** `--mutant nogap` (the drawer alone loses every gap) reads `phaseTxt` OFF at +32 px at
+its source, five rows named as its consequences, and exits 1 (`measure-orbit-pose-orbit-mutant-nogap.json`).
+
+**The picture for Richard's read:** `own-012/measured/orbit-drawn-orbit.png` (the drawn phone in Orbit) beside
+`own-012/measured/orbit-real-orbit.png` (the same moment, one press later, the real app on the phone). They are hard to
+tell apart; the clock's digits are the tell.
+
+**Richard's read, 2026-10-19:** asked whether the drawn phone reads as the app, he said *"Yep"*.
+
+**Orbit's own gate** (`prototype/real/check.mjs`) gained a drawn block: the phone is drawn (9 boxes), a real mouse press
+on the drawn Pause lands on the picture and not the app, one press on *App in the scene* brings the real app back, and a
+press on Pause reaches it. **It found a defect in the new pose on its first run:** the press on the drawn Pause reached
+the app (`hit IFRAME; the app received ["Pause@116,474"]`), because three.js's `CSS3DObject` sets `pointer-events: auto`
+inline on the element, which beat the pose's class rule. With `!important` the row is green: 46 ok, PASS, exit 0
+(`check.mjs --site` against a `serve.mjs --runtime` of this worktree). The red run is the row's mutant.
+
+**AC3, what the drawer adds to orbit.html:** `drawn.js` 103,129 B minified (15,563 B gzipped: the drawer, the measurer,
+the layout model, the generated table and the default tokens) and `draw-page.mjs` 14,343 B (5,347 B gzipped): **about
+21 KB gzipped**, against the page's existing `specs.js` at 321 KB gzipped. `serve.mjs --out` copies both, so a static
+copy (nodegx.io/orbit/) carries the pose once it is rebuilt. `prototype/real/build.sh` now builds `drawn.js` too.
+
+**`@nodegx/node-spec/draw`** (`bdbb88602`): the brief tells a stranger to import the drawer, so the drawer-only entry is
+a subpath in the exports map, ESM and CJS, built by `build.mjs` from `src/draw-only.ts`. It imports nothing by bare
+name (0 references to `fast-xml-parser` in its bundle, unlike the main entry: NODESPECBARE). `scripts/draw-size.mjs`
+today: draw-only 85,646 B minified, **12,778 B gzipped** (s2 measured 12,385 on an older base); the whole browser entry
+370,375 B gzipped. `tests/draw-specs.test.ts` holds the map to what `build.mjs` writes and the entry to what a page
+needs; renaming the CJS outfile in `build.mjs` turns it red. Not built here (`dist/` is the primary checkout's).
+
+**AC4, the brief** (`cebab5481`, `packages/create-nodegx/profiles/core/skills/nodegx-your-own-editor/SKILL.md`). The
+Screen row of the six questions names both ways. The node-spec paragraph no longer says "It doesn't draw the screen …
+Show the real app"; it says a visual spec gives each layout port's role, and to show the real app or draw it with the
+kit's drawer. A new section, **"The screen: show it or draw it"**, opens with "NodeGX teaches both ways equally" and a
+table: what you get, where it can go, what it loads (**about 3.6 MB** of scripts for the real app, from the published
+`@nodegx/preview` 0.2.2: in-page bundle 1,704,069 B, engine 1,747,974 B, React 142,586 B; **12.5 KB gzipped** for the
+drawer), whether it runs the graph, how exact, whose look. Then when to pick which (Orbit does both), the drawer's call
+with the trace as its values, where the tokens come from, the version that has it ("0.1.0 has no drawer"), and what to
+know: a drawing can't run the graph and lags one trace batch; every box carries its `needs` and `limits`, to be shown;
+the five named limits with their measured sizes; and how to check a drawing against the app (2 px, a reason for every
+difference). "What your editor must not do" gains "Show a drawn screen as if it were the app." The prose went through
+the content-authoring offline checks (`written`, `closer`, `opener`, `figures`) until `written` flagged nothing; every
+figure is from this file. The brief grew from 22,054 to 27,480 bytes; it has no size budget or test of one.
+`create-nodegx/test/create.test.js` gained a row for AC4 (the section, the two-way table and its cost row, the import,
+the version line, the five limits, the old sentence gone): 26 of 26 pass, exit 0; renaming the table's cost row turns
+it red.
+
+**Gates run (s3):** `measure.mjs --page orbit` exit 0; the same with `--mutant nogap` exit 1 (as it must);
+`measure.mjs --project orbit` and `--project todo-list-copy` exit 0 (rows equal to the baseline); `check.mjs` exit 1
+(the pointer-events defect), then exit 0 (46 ok); `jest --runInBand tests/draw-specs.test.ts tests/draw.test.ts` exit 0
+(22 passed; the new entry row red under its mutant); `tsc -p tsconfig.json --noEmit` exit 0; `gen-draw-specs.mjs
+--check` exit 0; `draw-size.mjs` exit 0; `create-nodegx` `node --test` exit 0 (26 passed; the AC4 row red under its
+mutant). Not run: `test:main` / `test:ci` (nothing the editor imports changed).
+
+**For the cut (lane 1's next npm release):** `@nodegx/node-spec` has never shipped the drawer (npm has 0.1.0). The next
+release carries `src/draw*.ts` (s2) and the `./draw` export (`bdbb88602`). `create-nodegx` carries the brief
+(`cebab5481`), whose drawer section says "after 0.1.0", so the two should go out together. The public Orbit
+(nodegx.io/orbit/) gets the drawn pose when it is rebuilt with `serve.mjs --out` after `build.sh`.
+
+**Not done, and next:** a stranger who builds an editor whose screen has to go where a frame can't, from the published
+kit after the cut, would grade AC4 the way OWN-008 graded the brief. A width-aware text measurer (the drawer hands the
+measurer the width a box got, in a second pass) would turn the wrap limit into a measurement. The todo template's own
+Todo page needs a backend and a session to draw.
+

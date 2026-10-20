@@ -394,6 +394,270 @@
       "connectionCount": 22,
       "modified": "2026-10-01T19:00:00.000Z",
       "created": "2026-10-01T19:00:00.000Z"
+    },
+    "__cloud__/acceptPrivacy": {
+      "path": "__cloud__/acceptPrivacy",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 7,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/addLearner": {
+      "path": "__cloud__/addLearner",
+      "type": "cloud",
+      "nodeCount": 8,
+      "connectionCount": 23,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/authoringGuide": {
+      "path": "__cloud__/authoringGuide",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 6,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/capture": {
+      "path": "__cloud__/capture",
+      "type": "cloud",
+      "nodeCount": 7,
+      "connectionCount": 14,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/conceptList": {
+      "path": "__cloud__/conceptList",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 4,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/copyLesson": {
+      "path": "__cloud__/copyLesson",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 13,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/course": {
+      "path": "__cloud__/course",
+      "type": "cloud",
+      "nodeCount": 7,
+      "connectionCount": 9,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/deleteMine": {
+      "path": "__cloud__/deleteMine",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 12,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/emailPreference": {
+      "path": "__cloud__/emailPreference",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 4,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/exportMine": {
+      "path": "__cloud__/exportMine",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 9,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/finishStep": {
+      "path": "__cloud__/finishStep",
+      "type": "cloud",
+      "nodeCount": 7,
+      "connectionCount": 11,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/learnerProgramme": {
+      "path": "__cloud__/learnerProgramme",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 10,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/learnersForLessons": {
+      "path": "__cloud__/learnersForLessons",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 6,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/lesson": {
+      "path": "__cloud__/lesson",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 7,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/lessonContext": {
+      "path": "__cloud__/lessonContext",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 8,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/openThread": {
+      "path": "__cloud__/openThread",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 11,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/openThreadAsCoach": {
+      "path": "__cloud__/openThreadAsCoach",
+      "type": "cloud",
+      "nodeCount": 5,
+      "connectionCount": 7,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/previewLesson": {
+      "path": "__cloud__/previewLesson",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 9,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/publishLesson": {
+      "path": "__cloud__/publishLesson",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 10,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/readLesson": {
+      "path": "__cloud__/readLesson",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 14,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/replyAsCoach": {
+      "path": "__cloud__/replyAsCoach",
+      "type": "cloud",
+      "nodeCount": 8,
+      "connectionCount": 17,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/roster": {
+      "path": "__cloud__/roster",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 4,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/saveLessonDraft": {
+      "path": "__cloud__/saveLessonDraft",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 12,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/sendMessage": {
+      "path": "__cloud__/sendMessage",
+      "type": "cloud",
+      "nodeCount": 9,
+      "connectionCount": 21,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/setEmailPreference": {
+      "path": "__cloud__/setEmailPreference",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 5,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/setLearnerPath": {
+      "path": "__cloud__/setLearnerPath",
+      "type": "cloud",
+      "nodeCount": 4,
+      "connectionCount": 7,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/shared/Caller learner": {
+      "path": "__cloud__/shared/Caller learner",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 5,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/shared/Message mail": {
+      "path": "__cloud__/shared/Message mail",
+      "type": "cloud",
+      "nodeCount": 7,
+      "connectionCount": 15,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/shared/Notice": {
+      "path": "__cloud__/shared/Notice",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 6,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/shared/Programme": {
+      "path": "__cloud__/shared/Programme",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 5,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/shared/Rows about": {
+      "path": "__cloud__/shared/Rows about",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 7,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/shared/Thread": {
+      "path": "__cloud__/shared/Thread",
+      "type": "cloud",
+      "nodeCount": 3,
+      "connectionCount": 10,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
+    },
+    "__cloud__/unsubscribe": {
+      "path": "__cloud__/unsubscribe",
+      "type": "cloud",
+      "nodeCount": 7,
+      "connectionCount": 13,
+      "modified": "2026-10-19T00:00:00.000Z",
+      "created": "2026-10-19T00:00:00.000Z"
     }
   },
   "stats": {

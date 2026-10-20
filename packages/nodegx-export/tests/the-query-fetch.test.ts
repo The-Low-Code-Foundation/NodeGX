@@ -29,7 +29,10 @@ const QUERY = 'puppyQuery';
 const catalog: Catalog = loadCatalog();
 const baseIr = parseProject(PUPPY, catalog);
 
-type AnyModule = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+/** The emitted client's `filterValue`, the one export §C reads. */
+interface FilterClient {
+  filterValue(value: unknown, dateColumn?: boolean): unknown;
+}
 
 const componentOf = (ir: ExportIR, p: string): ComponentIR => ir.components.find((c) => c.path === p)!;
 const nodeOf = (ir: ExportIR, id: string): NodeIR => componentOf(ir, LANDING).nodes.find((n) => n.id === id)!;
@@ -216,13 +219,13 @@ describe('§B what is emitted', () => {
 
 // ---- §C ------------------------------------------------------------------------------------------------------------
 
-const loadClient = (source: string): AnyModule => {
+const loadClient = (source: string): FilterClient => {
   const plain = source.replace(/import\.meta\.env\.VITE_NODEGX_\w+/g, 'undefined');
   const js = ts.transpileModule(plain, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
-  const module = { exports: {} as AnyModule };
+  const module: { exports: unknown } = { exports: {} };
   // eslint-disable-next-line no-new-func
   new Function('require', 'module', 'exports', 'fetch', js)(() => ({}), module, module.exports, undefined);
-  return module.exports;
+  return module.exports as FilterClient;
 };
 
 const decode = (value: Wire): unknown =>
@@ -240,7 +243,7 @@ describe('§C the where the Fetch builds at the pulse, against the runtime node�
   const app = BOX_APPS[6];
   const page = pageOf(app);
   const match = /onClick=\{\(\) => void fetchPuppies\(\{ where: (.*) \}\)\.then\(setPuppies\)\}/.exec(page);
-  const readings = runtimeArm<{ asked: AnyModule }>(VALUES.map((v) => ({ parameters: nodeOf(ir, QUERY).parameters, collections: ir.project.collections, values: { breed: v } })));
+  const readings = runtimeArm<{ asked: { where?: unknown } }>(VALUES.map((v) => ({ parameters: nodeOf(ir, QUERY).parameters, collections: ir.project.collections, values: { breed: v } })));
 
   test('the handler reads the variable as it is at the pulse, not as render saw it', () => {
     expect(match).not.toBeNull();

@@ -66,7 +66,8 @@ if (out) {
   mkdirSync(join(out, 'project'), { recursive: true });
   mkdirSync(join(out, 'runtime'));
   copyFileSync(join(here, 'orbit.html'), join(out, 'index.html'));
-  for (const file of ['look.js', 'specs.js']) copyFileSync(join(here, file), join(out, file));
+  // drawn.js and draw-page.mjs: the drawer and the page's half of it, for the drawn phone (OWN-012 step 4; own-012/build.sh builds drawn.js)
+  for (const file of ['look.js', 'specs.js', 'drawn.js', 'draw-page.mjs']) copyFileSync(join(here, file), join(out, file));
   copyFileSync(bundle, join(out, 'preview.js'));
   // what the preview reads: the template and its index.js, and the three scripts the template names
   for (const file of ['index.html', 'index.js', 'noodl.deploy.js', 'react.production.min.js', 'react-dom.production.min.js']) copyFileSync(join(runtimeDir, file), join(out, 'runtime', file));

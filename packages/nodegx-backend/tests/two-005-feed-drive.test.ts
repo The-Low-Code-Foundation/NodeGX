@@ -22,7 +22,7 @@ import sharp from 'sharp';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 import { clickButton, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
 
@@ -35,7 +35,11 @@ const FUNCTIONS = ['whoAmI', 'sharePost', 'heartPost', 'commentOn'];
 const PHONE = { width: 390, height: 800, mobile: true };
 const TABLET = { width: 1024, height: 640, mobile: false };
 
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** A Heart row, as far as this drive reads one. */
+interface Heart extends ParseRecord {
+  doneBy: ParsePointer;
+}
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const bodyText = async (page: RenderedPage) => String(await page.evaluate('document.body ? document.body.innerText : ""'));
 async function until(page: RenderedPage, what: string, ok: (text: string) => boolean, ms = 15000): Promise<string> {
@@ -116,8 +120,8 @@ describe('TWO-005 slice 2 — posts, hearts and comments, driven in two browsers
   const seen: string[] = [];
   const overflow: Array<[string, number]> = [];
   const ptr = (className: string, objectId: string) => ({ __type: 'Pointer', className, objectId });
-  const rows = async (cls: string, where: Row = {}) =>
-    (await request<{ results: Row[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, { headers: master })).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}) =>
+    (await request<{ results: T[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, { headers: master })).json.results;
 
   beforeAll(async () => {
     const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'two005-feed-drive-data-'));
@@ -245,7 +249,7 @@ describe('TWO-005 slice 2 — posts, hearts and comments, driven in two browsers
         await clickButton(bob, '♥ Hearted');
         await until(bob, 'Bob’s heart off', (t) => t.includes('♡ Heart') && t.includes('1 heart · Ann'));
         await until(ann, 'Bob’s heart off on Ann’s phone', (t) => t.includes('1 heart · you'), 15000);
-        expect((await rows('Heart')).map((h) => h.doneBy.objectId).length).toBe(1);
+        expect((await rows<Heart>('Heart')).map((h) => h.doneBy.objectId).length).toBe(1);
 
         // ── Bob comments on the post's page; Ann's card says so ──
         await clickButton(bob, 'Comment');

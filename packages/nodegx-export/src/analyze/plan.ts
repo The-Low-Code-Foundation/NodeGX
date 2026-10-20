@@ -1186,7 +1186,14 @@ export const RUN_TASKS_CONTRACT = {
   error: { parameter: 'taskErrorOutput', default: 'Error' }
 } as const;
 
+/**
+ * P18-S127-SETDONE (EXP-011 §95). A Set Variable's chains: its compile runs them after the write (`withSetDone`); a wire it
+ * could not run is named by the sweep after the attach pass. Not Failure: with a literal Name it never fires.
+ */
+const SET_VARIABLE_CHAIN_OUTPUTS = ['done', 'completed'] as const;
 const OWN_CHAIN_OUTPUTS: Record<string, readonly string[]> = {
+  // P18-S127-SETDONE (EXP-011 §95).
+  'Set Variable': SET_VARIABLE_CHAIN_OUTPUTS,
   [RUN_TASKS_TYPE]: RUN_TASKS_OUTPUTS,
   // EXP-011 §54. The boundary's Error is its listener, compiled by its own registration.
   [ON_APP_ERROR_TYPE]: ['error'],
@@ -1850,6 +1857,14 @@ export type ValueExpr =
    */
   | { kind: 'state-get'; name: string; maybeUndefined?: boolean }
   /**
+   * EXP-011 §100. A repeater's relayed row value (`itemOutput-<output>`) read inside a chain one of its rows' relayed
+   * signals runs: the firing row's own value, which the runtime copies onto the repeater before it sends the signal
+   * (`foreach.tsx` `itemOutputSignalTriggered`). Minted only while such a chain is compiled (`rowChainScopes`), valid only
+   * in that repeater's row callbacks, and printed there as what the row is handed for `input` (the row's input the output
+   * passes straight through). `tsType` is the row template's declared output type.
+   */
+  | { kind: 'row-relay'; repeaterId: string; output: string; input: string; tsType: string }
+  /**
    * The user-path value inside a control's own onChange (CONTROLLED-STATE-TARGET §4c) — the
    * `input-text` context rule generalized per control role: `event.target.checked` for a
    * checkbox, `Number(event.target.value)` for a range, `event.target.value` for a dropdown.
@@ -2432,8 +2447,13 @@ export type HandlerAction =
    * (measured: `exp-011-s96-a-literal-under-a-wire.test.ts`), so the handler prints `expr ?? fallback`. Absent when
    * nothing is typed in, or when the wire's source always carries a value (the typed-in value is then never written,
    * in the runtime or here — a note says so).
+   *
+   * P18-S127-SETDONE (EXP-011 §95). `then`: the Set's Done chain, then its Completed chain, as following statements
+   * (`expandActions`), present only when something hangs off them. The runtime writes, notifies every Variable reading
+   * the name, then sends Done and Completed (`setvariablenode.ts` `scheduleStore`), and a Done's target is updated before
+   * the click's next wire (it is flagged dirty with its sender and pulls it first): depth first, as printed.
    */
-  | { kind: 'store-set'; variableName: string; expr: ValueExpr; fallback?: string | number | boolean }
+  | { kind: 'store-set'; variableName: string; expr: ValueExpr; fallback?: string | number | boolean; then?: HandlerAction[] }
   | { kind: 'globalstore-set'; storeName: string; key: string; expr: ValueExpr; fallback?: string | number | boolean }
   /**
    * `Set Object Properties` on a named Object (EXP-011 §47): one patch over every wired property
@@ -2530,7 +2550,13 @@ export type HandlerAction =
    * (`setX(v => !v)`) — immune to closure staleness, which is why Switch's `flip` and
    * Counter's arithmetic use it, never `expr`.
    */
-  | { kind: 'state-set'; name: string; expr?: ValueExpr; op?: 'toggle' | 'inc' | 'dec' }
+  | { kind: 'state-set'; name: string; expr?: ValueExpr; op?: 'toggle' | 'inc' | 'dec'; field?: FieldWrite }
+  /**
+   * P18-S128-FIELDSET (EXP-011 §97). A text field's Focus or Blur: `focus()` / `blur()` on the exported `<input>` through a
+   * ref, as the runtime's focus tracker calls them on the viewer's own (`_focus`, `_blur`). A field that is not on the page
+   * takes nothing, and the Focus is not held (GAM-012 R13): the ref is `null` then.
+   */
+  | { kind: 'field-focus'; inputId: string; focus: boolean }
   /**
    * An awaited call into an api stub (RECORD-VERBS-TARGET §4, USER-FAMILY-TARGET §4e): the
    * vocabulary's asynchronous action. The emitted handler becomes `async`, the call is awaited,
@@ -3195,6 +3221,39 @@ export interface JsFunctionPlan {
   loadGate?: { unset: string[]; atLoad: 'evaluate' | 'wait' };
 }
 
+/**
+ * P18-S126-INSIGNAL (EXP-011 §94). A signal input's chain: the actions the Component Inputs port's wires describe, in wire
+ * order, run from an effect keyed on the pulse count the parent passes (`InstancePulsePlan`).
+ */
+export interface InputPulsePlan {
+  port: string;
+  actions: HandlerAction[];
+}
+
+/**
+ * P18-S126-INSIGNAL. A placed component's signal input the parent pulses: the count (`stateName`, a state row) and the
+ * count the child has acted on (`takenLocal`, a ref the parent keeps, so it outlives the child's unmount). Passed as one
+ * prop, `{ sent, taken }`: the child runs its chain when `sent` passes `taken`, at a mount too (the runtime's instance exists
+ * while it is not drawn and takes the pulse then), and never twice for one pulse (StrictMode's second mount included).
+ */
+export interface InstancePulsePlan {
+  nodeId: string;
+  port: string;
+  stateName: string;
+  takenLocal: string;
+  /**
+   * P18-S127-SIBLINGVALUE (EXP-011 §96). Set when the placed component also reads an input the parent lifts from another
+   * placed component: the count it is handed (`sent`) is a second row that follows the count from the parent's own
+   * effect, one commit later. A lifted value reaches the parent from the child's push effect, which runs in the commit the
+   * pulse lands in; the parent's effects run after its children's, so the delivered count and the lifted value arrive in
+   * the same render, and the chain inside reads the value sent with the pulse, as the runtime's does.
+   */
+  delivered?: { name: string; setterName: string };
+}
+
+/** P18-S126-INSIGNAL. The TypeScript type of a signal input's prop, the pair the parent passes. */
+export const INPUT_PULSE_TS_TYPE = '{ sent: number; taken: { current: number } }';
+
 export interface ReceiverPlan {
   nodeId: string;
   channelName: string;
@@ -3268,7 +3327,9 @@ export interface StateVarPlan {
     /** EXP-011 §61 — a pusher's back-results row (`Record<string, unknown>`, boots `{}`). */
     | 'stack-back'
     /** EXP-011 §87 — a Mounted or Visible written by the Evaluate of the unticked Conditions wired into it. */
-    | 'condition';
+    | 'condition'
+    /** EXP-011 §99 — a repeater's relayed row value, written in the rows' relayed-signal callbacks. */
+    | 'relay';
   /** The provenance comment above the row. */
   comment: string;
 }
@@ -3305,6 +3366,12 @@ export interface SyncEffectPlan {
 export interface PushEffectPlan {
   prop: string;
   expr: ValueExpr;
+  /**
+   * P18-S122-TPLBUILD (TS2345). The port's declared type, when the pushed value's static type is not it (an untyped
+   * Variable is `unknown`, an Expression's answer keeps `null` for a NaN at load): the push says the port's type, as a
+   * cast. The runtime's Component Outputs hands the value on as it is, and so does the cast; it changes no value.
+   */
+  castTo?: string;
 }
 
 /**
@@ -3677,6 +3744,11 @@ export interface AnimationPlan {
   target: ValueExpr;
   duration: ValueExpr;
   delay: ValueExpr;
+  /**
+   * P18-S122-TPLBUILD (TS2322). The inputs whose wired value is not statically a number (an untyped Variable is `unknown`):
+   * the runtime's Duration setter stores the value as it is, and the hook's option says `number`, so the option is a cast.
+   */
+  castToNumber?: Array<'duration' | 'delay'>;
   ease: AnimateEaseName;
   /** The At Target Value chain, when wired. */
   arrive?: HandlerAction[];
@@ -3962,7 +4034,33 @@ export interface FieldMountPlan {
    * mount, so the field announces it: `undefined` is never delivered (the start value stands), `null` clears.
    */
   source?: ValueExpr;
+  /**
+   * P18 session 126 (EXP-011 §93). The field and the elements above it whose Mounted a value decides: the field is not there
+   * as the component mounts, so it announces the first time those values all say mounted (its later mounts announce only a
+   * real change, GAM-009 R10, and the field keeps what it holds). Absent or empty, it announces as the component mounts.
+   */
+  gates?: string[];
   comment: string;
+}
+
+/**
+ * P18-S128-FIELDSET and P18-S127-CLEAROUT (EXP-011 §97). A text field's Set or Clear, carried on the `state-set` of the
+ * field's own row, so every walker that reads a state write reads this one; the emitter prints the rest.
+ *
+ * The runtime (`text-input.ts`, `TextInput.tsx`): **Set** writes `_internal.text`, the Value as last delivered (`undefined`
+ * is never delivered, `null` is `''`) or `''` once a Clear has run, and **nothing while the field has focus**; **Clear**
+ * writes `''`, focused or not. Both then call the field's own `setText`, which sends the text to every sink of the Value and
+ * fires Value Changed, changed or not. So the exported write is followed by the field's own change chain, with the text
+ * written where the chain reads the field, as the mount announcement prints it (P18-S116-FIELDMOUNT).
+ *
+ * On a Set, `expr` is the Value's source as a handler reads it (a literal where nothing is wired), and `start` the text a
+ * Value never delivered leaves (the typed-in Value, or `''`); the emitter writes `start` for `undefined`, `''` for `null`,
+ * else `String(value)`. On a Clear, `expr` is the literal `''`.
+ */
+export interface FieldWrite {
+  inputId: string;
+  port: 'set' | 'clear';
+  start?: string;
 }
 
 /** The seed as the action it prints — one patch, read off the plan so the import sweep and the emitter cannot disagree. */
@@ -4025,6 +4123,14 @@ export interface RepeaterPlan {
    * takes the `collection` treatment instead — derived type, `allowedFields`, a real key.
    */
   itemsStaticId?: string;
+}
+
+/** EXP-011 §99. One relayed row value: the repeater, the row's output, the row's input it passes through, its state row. */
+export interface RowRelayPlan {
+  repeaterId: string;
+  output: string;
+  input: string;
+  stateName: string;
 }
 
 /**
@@ -4200,6 +4306,10 @@ export interface ComponentPlan {
   changeHandlers: Record<string, HandlerAction[]>;
   /** Event Receivers this component hosts as useSignal subscriptions. */
   receivers: ReceiverPlan[];
+  /** P18-S126-INSIGNAL. One effect per signal input whose wires run a chain. */
+  inputPulses: InputPulsePlan[];
+  /** P18-S126-INSIGNAL. One count per placed component's signal input a sender here attached to. */
+  instancePulses: InstancePulsePlan[];
   /** Popup slots this component renders, registration order — earned by attachment (§2). */
   popups: PopupSlotPlan[];
   /** True when a translated Close Popup attached — the component declares `onClose` (§4). */
@@ -4253,6 +4363,12 @@ export interface ComponentPlan {
   syncEffects: SyncEffectPlan[];
   /** Push effects (§3.5), registration order — the lifted value outputs' child side. */
   pushEffects: PushEffectPlan[];
+  /**
+   * EXP-011 §99. A repeater's relayed row values (`itemOutput-<output>`) this component lifts: a state row per value,
+   * written in every row's relayed-signal callback from what the parent hands that row for its input `input`, before
+   * the signal's chain, as the runtime's `itemOutputSignalTriggered` copies the row's outputs and then sends the signal.
+   */
+  rowRelays: RowRelayPlan[];
   /** Reactive Conditions (LOGIC-TARGET §10), compile order — one useEffect each. */
   branchEffects: BranchEffectPlan[];
   /** Value Changed effects (EXP-011 §39), compile order — one useEffect + one useRef each. */
@@ -4329,6 +4445,8 @@ export interface ComponentPlan {
     port: string;
     toNodeId: string;
     toProperty: string;
+    /** P18-S127-SIBLINGVALUE. The sink is another placed component's input: a lift that fails is named on its marker. */
+    intoInstance?: true;
   }>;
   dispositions: Record<string, Disposition>;
   /** Dropped wires, unhandled constructs — EXP-004's report feed. Nothing silently dropped. */
@@ -4429,44 +4547,58 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
   };
   for (const component of ir.components) visit(`/${component.path}`, []);
   const plannedByLegacy = new Map<string, ComponentPlan>();
-  for (const legacy of order) {
+  /**
+   * P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. What a component's second plan refuses up front, and the names its first
+   * plan took from the project-wide sets: a re-plan gives them back first, so it allocates the same names again.
+   */
+  const exclusionsOf = new Map<string, PlanExclusions>();
+  const namesTakenBy = new Map<string, Array<{ set: Set<string>; names: string[] }>>();
+  const nameSets = [usedPageNames, usedComponentNames, usedHttpNames];
+  const planOne = (legacy: string): ComponentPlan => {
+    for (const taken of namesTakenBy.get(legacy) ?? []) for (const name of taken.names) taken.set.delete(name);
+    const before = nameSets.map((set) => new Set(set));
     const component = ir.components.find((c) => `/${c.path}` === legacy)!;
-    plannedByLegacy.set(
-      legacy,
-      planComponent(
-        component,
-        ir,
-        catalog,
-        registry,
-        pageByLegacy,
-        pageFileByPath,
-        usedPageNames,
-        usedComponentNames,
-        kits,
-        usedHttpNames,
-        plannedByLegacy,
-        templateCycle
-      )
+    const planned = planComponent(
+      component,
+      ir,
+      catalog,
+      registry,
+      pageByLegacy,
+      pageFileByPath,
+      usedPageNames,
+      usedComponentNames,
+      kits,
+      usedHttpNames,
+      plannedByLegacy,
+      templateCycle,
+      exclusionsOf.get(legacy)
     );
-  }
-  // The plans keep the project's own component order, whatever order they were computed in.
-  const plans = ir.components.map((component) => plannedByLegacy.get(`/${component.path}`)!);
-
-  const byLegacyPath = new Map(plans.map((p) => [p.legacyPath, p]));
+    namesTakenBy.set(
+      legacy,
+      nameSets.map((set, i) => ({ set, names: [...set].filter((name) => !before[i].has(name)) }))
+    );
+    plannedByLegacy.set(legacy, planned);
+    return planned;
+  };
+  for (const legacy of order) planOne(legacy);
 
   // Second phase (CONTROLLED-STATE-TARGET §4d, parent side): a consumed instance value output
   // binds only after the child's plan exists — the child lifts the port (prop + push effect)
   // or it does not, and a parent passing `onXChanged` to a child whose emitted interface lacks
   // it would fail the emitted app's own typecheck (the popups closable lesson).
-  for (const plan of plans) {
+  const byLegacyNow = (legacy: string) => plannedByLegacy.get(legacy);
+  const liftInto = (plan: ComponentPlan) => {
     const liftedVarByKey = new Map<string, string>();
     for (const pending of plan.pendingLifted) {
-      const child = byLegacyPath.get(pending.targetLegacy);
+      const child = byLegacyNow(pending.targetLegacy);
       const lifted = child?.liftedOutputProps.find((l) => l.port === pending.port);
       if (!lifted) {
-        plan.notes.push(
-          `wire ${pending.connectionKey} dropped: instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`
-        );
+        const reason = `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`;
+        plan.notes.push(`wire ${pending.connectionKey} dropped: ${reason}`);
+        // P18-S127-SIBLINGVALUE. Into another placed component, the wire was named on its marker before; it still is.
+        if (pending.intoInstance === true) {
+          plan.droppedWires.push({ key: pending.connectionKey, fromId: pending.instanceId, fromProperty: pending.port, toId: pending.toNodeId, toProperty: pending.toProperty, reason });
+        }
         continue;
       }
       const varKey = `${pending.instanceId}:${pending.port}`;
@@ -4496,9 +4628,93 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
         kind: 'computed',
         expr: { kind: 'state-get', name, maybeUndefined: true }
       };
+      // P18-S127-SIBLINGVALUE (EXP-011 §96). A placed component that reads a lifted value and is pulsed: its pulses are
+      // delivered after the lifted values that go with them.
+      for (const pulse of plan.instancePulses) {
+        if (pulse.nodeId !== pending.toNodeId || pulse.delivered !== undefined) continue;
+        const taken = takenNamesOf(plan);
+        const base = `${pulse.stateName.replace(/Pulses$/, '')}Delivered`;
+        let delivered = base;
+        for (let n = 2; taken.has(delivered) || taken.has(setterNameOf(delivered)); n++) delivered = `${base}${n}`;
+        plan.stateVars.push({
+          name: delivered,
+          setterName: setterNameOf(delivered),
+          tsType: 'number',
+          boot: 0,
+          originNodeId: pulse.nodeId,
+          origin: 'counter',
+          comment: `"${pulse.port}" as the placed component is handed it: the count, one commit after it is sent, so the values lifted with it have landed (P18-S127-SIBLINGVALUE).`
+        });
+        pulse.delivered = { name: delivered, setterName: setterNameOf(delivered) };
+      }
     }
     plan.pendingLifted = [];
+  };
+  for (const legacy of order) liftInto(plannedByLegacy.get(legacy)!);
+
+  /**
+   * P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. Decided after the render, attach and lift passes, because only then is it
+   * known which elements the export draws (a Mounted bound by the parent's lift is decided in the phase above) and
+   * which chains it prints. A component with a chain on an element it never draws, a Did Mount it does not run, or a
+   * Function row nothing it prints writes, is planned again with those refused by name up front — so every pass that
+   * earns by attachment (api stubs, rows, the readers' bindings) decides with them gone, as the first plan would have.
+   * Refusing can only reach further (a Mounted bound to a refused row is no longer bound), so the loop goes until a
+   * round finds nothing new.
+   */
+  for (let round = 0; round < 8; round++) {
+    const again: string[] = [];
+    for (const legacy of order) {
+      const planned = plannedByLegacy.get(legacy)!;
+      const component = ir.components.find((c) => `/${c.path}` === legacy)!;
+      const found = unreachedTriggersOf(planned, component);
+      const known = exclusionsOf.get(legacy) ?? { owners: new Map(), mounts: new Map(), rows: new Map() };
+      let fresh = false;
+      for (const key of ['owners', 'mounts', 'rows'] as const) {
+        for (const [id, reason] of found[key]) {
+          if (known[key].has(id)) continue;
+          known[key].set(id, reason);
+          fresh = true;
+        }
+      }
+      if (!fresh) continue;
+      exclusionsOf.set(legacy, known);
+      again.push(legacy);
+    }
+    if (again.length === 0) break;
+    // A Run Tasks host reads facts off its template's plan, so a template planned again takes its hosts with it.
+    for (const legacy of [...again]) {
+      for (const [host, templates] of templatesOf) if (templates.includes(legacy) && !again.includes(host)) again.push(host);
+    }
+    const liftedBefore = new Map(again.map((legacy) => [legacy, JSON.stringify(plannedByLegacy.get(legacy)!.liftedOutputProps)]));
+    for (const legacy of order) if (again.includes(legacy)) planOne(legacy);
+    // A child whose lifted outputs changed would leave its parents passing a prop it no longer declares.
+    for (const [legacy, before] of liftedBefore) {
+      if (JSON.stringify(plannedByLegacy.get(legacy)!.liftedOutputProps) === before) continue;
+      for (const component of ir.components) {
+        const parent = `/${component.path}`;
+        if (again.includes(parent) || !component.nodes.some((n) => n.type === legacy)) continue;
+        again.push(parent);
+        planOne(parent);
+      }
+    }
+    for (const legacy of again) liftInto(plannedByLegacy.get(legacy)!);
   }
+
+  // P18-S122-DEADROW. A dead row's readers that are not drawn elements keep reading it (see PlanExclusions); each is said.
+  for (const [legacy, known] of exclusionsOf) {
+    const planned = plannedByLegacy.get(legacy)!;
+    for (const [fnId, reason] of known.rows) {
+      const row = planned.stateVars.find((v) => v.origin === 'jsfun' && v.originNodeId === fnId);
+      if (row === undefined) continue;
+      const text = JSON.stringify({ ...planned, stateVars: undefined, dispositions: undefined, notes: undefined });
+      if (!text.includes(`"viaState":"${row.name}"`)) continue;
+      planned.notes.push(`node ${fnId}: a handler or a node that is not drawn still reads its outputs, and reads nothing — ${reason.replace(/^it reads /, '')}`);
+    }
+  }
+
+  // The plans keep the project's own component order, whatever order they were computed in.
+  const plans = ir.components.map((component) => plannedByLegacy.get(`/${component.path}`)!);
+  const byLegacyPath = new Map(plans.map((p) => [p.legacyPath, p]));
 
   const stubCollections: string[] = [];
   for (const plan of plans) {
@@ -4518,6 +4734,175 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
     reachability: componentReachability(ir),
     kitDuplicates
   };
+}
+
+/**
+ * P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. What a component's next plan refuses before it attaches anything: chains on
+ * an element the export never draws (`owners`), Did Mount chains on an element a value mounts (`mounts`, which the
+ * emitter does not run), and the render reads of a Function's row that nothing the export runs ever writes (`rows`, by
+ * the Function's id). Each maps a node id to the sentence the refusal says.
+ *
+ * 🔴 **A row's other readers are kept, and said.** A Function input or a Set Variable that reads a dead row reads what
+ * HEAD's export read (nothing yet); refusing the reader would take a chain that works for every other input with it
+ * (the older Site Builder copies' "The slug to show" reads the URL's slug, and the never-written home slug only as a
+ * fallback). They are named in a note instead.
+ */
+/** P18 session 126 (EXP-011 §93). The words a refusal under a page's own wired Group starts with; the emitter says the same. */
+export const UNCARRIED_PAGE_GROUP = "the page's own Group,";
+
+export interface PlanExclusions {
+  owners: Map<string, string>;
+  mounts: Map<string, string>;
+  rows: Map<string, string>;
+}
+
+/**
+ * Why an element of a planned component is never drawn, or `null` when it may be. The emitter's own rule (`render` in
+ * `component.ts`): an element, or an element above it, whose Mounted is bound to a statically false value, or not bound
+ * and authored false, is removed from the tree. A Mounted bound to anything else draws it when that value says.
+ */
+export function undrawnReasonOf(plan: ComponentPlan, component: ComponentIR, id: string): string | null {
+  const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
+  const labelOf = (nodeId: string) => {
+    const node = nodeById.get(nodeId);
+    return node?.authoredLabel ? `"${node.authoredLabel}" (${nodeId})` : `${node?.type ?? 'a node'} ${nodeId}`;
+  };
+  for (let at: string | undefined = id; at !== undefined; at = nodeById.get(at)?.parent) {
+    const whose = at === id ? 'it is' : `an element above it, ${labelOf(at)}, is`;
+    const bound = plan.bindings[at]?.['mounted'];
+    if (bound !== undefined) {
+      if (bound.kind === 'computed' && (bound.expr.kind === 'undefined' || (bound.expr.kind === 'literal' && !bound.expr.value))) {
+        return `${whose} mounted from a statically false source`;
+      }
+    } else if (nodeById.get(at)?.parameters.find((p) => p.name === 'mounted')?.value.kind === 'literal' &&
+      (nodeById.get(at)!.parameters.find((p) => p.name === 'mounted')!.value as { value: unknown }).value === false) {
+      const wire = component.connections.find((c) => c.toId === at && c.toProperty === 'mounted');
+      if (wire === undefined) return `${whose} authored Mounted false, and nothing mounts it`;
+      const prefix = `wire ${wire.key} dropped: `;
+      const dropped = plan.droppedWires.find((w) => w.key === wire.key)?.reason ?? plan.notes.find((n) => n.startsWith(prefix))?.slice(prefix.length);
+      const from = nodeById.get(wire.fromId);
+      const fromRefused = plan.dispositions[wire.fromId];
+      const because =
+        dropped !== undefined
+          ? ` (${dropped})`
+          : fromRefused?.kind === 'deferred'
+            ? ` (the node it comes from is not exported: ${fromRefused.reason})`
+            : '';
+      return `${whose} authored Mounted false, and the wire into its Mounted from ${from?.authoredLabel ? `"${from.authoredLabel}"` : (from?.type ?? wire.fromId)}.${wire.fromProperty} is not exported${because}`;
+    }
+    if (at === plan.rootId) break;
+  }
+  return null;
+}
+
+/**
+ * EXP-011 §99, P18-S131-ROWLESSTRIGGER. Why a repeater draws no rows in the export, or null when it draws them: its items
+ * have no feed the export reads (a query, a named array, an expression, Static Data), or its rows are mapped by a script
+ * (the emitter's `renderRepeater` draws a TODO marker for both). Decided after the list passes.
+ */
+export function rowlessReasonOf(plan: ComponentPlan, repeaterId: string): string | null {
+  const repeater = plan.repeaters[repeaterId];
+  if (repeater === undefined || repeater.templatePath === null) return 'it draws no rows in the export (it has no template component)';
+  const fed =
+    plan.queries.some((q) => q.nodeId === repeater.itemsQueryId) ||
+    repeater.itemsCollectionName != null ||
+    repeater.itemsExpr !== undefined ||
+    plan.staticData.some((sd) => sd.nodeId === repeater.itemsStaticId);
+  if (!fed) return 'it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)';
+  if (repeater.mapping === null) return 'it draws no rows in the export (its rows are mapped by a script, which is not a static map)';
+  return null;
+}
+
+/**
+ * The triggers of one planned component that the emitted app never runs (see {@link PlanExclusions}). Read off the
+ * finished plan: its handlers, its bindings after the lift phase, and every action list it carries.
+ */
+export function unreachedTriggersOf(plan: ComponentPlan, component: ComponentIR): PlanExclusions {
+  const found: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map() };
+  if (plan.file === null) return found;
+  const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
+  const labelOf = (nodeId: string) => {
+    const node = nodeById.get(nodeId);
+    return node?.authoredLabel ? `"${node.authoredLabel}" (${nodeId})` : `${node?.type ?? 'a node'} ${nodeId}`;
+  };
+  // The owners: an element with an attached chain that is never drawn.
+  const whyUndrawn = new Map<string, string>();
+  const owners = new Set([...Object.keys(plan.handlers), ...Object.keys(plan.changeHandlers), ...plan.drags.map((d) => d.nodeId)]);
+  for (const owner of owners) {
+    if (plan.roleOf[owner] === undefined) continue;
+    // P18-S131-ROWLESSTRIGGER. A repeater that draws no rows prints no row callback, so none of its chains runs.
+    const why = undrawnReasonOf(plan, component, owner) ?? (nodeById.get(owner)?.type === 'For Each' ? rowlessReasonOf(plan, owner) : null);
+    if (why === null) continue;
+    whyUndrawn.set(owner, why);
+    found.owners.set(owner, `its trigger, ${labelOf(owner)}, is not drawn: ${why}`);
+  }
+  /*
+   * The Did Mounts the emitter does not run. Since session 126 (EXP-011 §93) there are none to find here: a Did Mount on an
+   * element a value mounts runs when that value mounts it (`mountChains` in component.ts, keyed on the gate), once per
+   * mount, as the viewer sends it from `componentDidMount`. An element never drawn is an owner above.
+   */
+  const whyUnmounted = new Map<string, string>();
+  // The one exception: a Did Mount in a page's own Group whose Mounted is wired, which the emitter does not carry.
+  for (const [owner, byPort] of Object.entries(plan.handlers)) {
+    if (byPort['didMount'] === undefined || whyUndrawn.has(owner) || plan.collapsedGroupId === undefined) continue;
+    const bound = plan.bindings[plan.collapsedGroupId]?.['mounted'];
+    if (bound === undefined || (bound.kind === 'computed' && bound.expr.kind === 'literal')) continue;
+    let inside = false;
+    for (let at: string | undefined = owner; at !== undefined; at = nodeById.get(at)?.parent) if (at === plan.collapsedGroupId) inside = true;
+    if (!inside) continue;
+    const why = `${UNCARRIED_PAGE_GROUP} ${labelOf(plan.collapsedGroupId)} is mounted by a value the export does not carry (it draws the page), so when it mounts is not known here`;
+    whyUnmounted.set(owner, why);
+    found.mounts.set(owner, `its trigger, the Did Mount of ${labelOf(owner)}, is not run: ${why}`);
+  }
+  // The rows: every list the plan carries writes a row, except the lists of the owners above.
+  const writers = new Map<string, string[]>();
+  const walk = (value: unknown, owner: string | undefined): void => {
+    if (Array.isArray(value)) {
+      for (const item of value) walk(item, owner);
+      return;
+    }
+    if (value === null || typeof value !== 'object') return;
+    const record = value as Record<string, unknown>;
+    if (record.kind === 'jsfun-run' && typeof record.materialize === 'string') {
+      const list = writers.get(record.materialize) ?? [];
+      list.push(owner ?? '');
+      writers.set(record.materialize, list);
+    }
+    for (const child of Object.values(record)) walk(child, owner);
+  };
+  for (const [key, value] of Object.entries(plan)) {
+    if (key === 'handlers') {
+      for (const [owner, byPort] of Object.entries(plan.handlers)) {
+        for (const [port, actions] of Object.entries(byPort)) {
+          walk(actions, whyUndrawn.has(owner) || (port === 'didMount' && whyUnmounted.has(owner)) ? owner : undefined);
+        }
+      }
+    } else if (key === 'changeHandlers') {
+      for (const [owner, actions] of Object.entries(plan.changeHandlers)) walk(actions, whyUndrawn.has(owner) ? owner : undefined);
+    } else if (key !== 'stateVars' && key !== 'dispositions' && key !== 'notes') {
+      walk(value, undefined);
+    }
+  }
+  const planText = JSON.stringify({ ...plan, stateVars: undefined, dispositions: undefined, notes: undefined });
+  for (const row of plan.stateVars) {
+    if (row.origin !== 'jsfun') continue;
+    const fnId = row.originNodeId;
+    const written = writers.get(row.name) ?? [];
+    if (written.some((owner) => owner === '')) continue;
+    if (!planText.includes(`"viaState":"${row.name}"`)) continue;
+    const disposition = plan.dispositions[fnId];
+    const owner = written[0];
+    const why =
+      owner === undefined
+        ? disposition?.kind === 'deferred'
+          ? disposition.reason
+          : 'nothing the export runs sends its Run'
+        : whyUndrawn.has(owner)
+          ? `its Run is sent only from ${labelOf(owner)}, which is not drawn: ${whyUndrawn.get(owner)}`
+          : `its Run is sent only from the Did Mount of ${labelOf(owner)}, which is not run: ${whyUnmounted.get(owner)}`;
+    found.rows.set(fnId, `it reads ${labelOf(fnId)}, which the export never runs, so its outputs are never written: ${why}`);
+  }
+  return found;
 }
 
 function planComponent(
@@ -4540,7 +4925,9 @@ function planComponent(
   /** EXP-011 §53. The plans computed so far — every template this component names is already here. */
   plannedByLegacy: ReadonlyMap<string, ComponentPlan>,
   /** EXP-011 §53. The components on a template cycle (a task that runs itself). */
-  templateCycle: ReadonlySet<string>
+  templateCycle: ReadonlySet<string>,
+  /** P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. The triggers a first plan of this component found never run. */
+  excluded: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map() }
 ): ComponentPlan {
   const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
   const dispositions: Record<string, Disposition> = {};
@@ -4588,6 +4975,8 @@ function planComponent(
     handlers: {},
     changeHandlers: {},
     receivers: [],
+    inputPulses: [],
+    instancePulses: [],
     popups: [],
     closesPopup: false,
     queries: [],
@@ -4605,6 +4994,7 @@ function planComponent(
     stateVars: [],
     syncEffects: [],
     pushEffects: [],
+    rowRelays: [],
     branchEffects: [],
     recordEffects: [],
     variableSeeds: [],
@@ -4965,6 +5355,16 @@ function planComponent(
   if (roots.length > 1) {
     notes.push(`component has ${roots.length} visual roots; only the first renders in step 4`);
   }
+  /**
+   * P18 session 126 (EXP-011 §93). A wire into the root's Mounted is the router's concern only when the root is a Page: the
+   * Router mounts a page. Any other component's root mounts as every element does in the runtime (`wantsToBeMounted`, and a
+   * root tells the instance's visual parent to draw again), so the wire binds as it would on any element, and the
+   * component returns `null` while it says not to (`component.ts`). It was refused from every source, so a root authored
+   * Mounted false was never drawn (todo-list's Note dialog, gram's Nav, bot-garden's Form) and one authored true always was
+   * (planning's sheets, rocket-school's Choice row), whatever the input said.
+   */
+  const routerMounted = (toNode: NodeIR, toProperty: string): boolean =>
+    toProperty === 'mounted' && toNode.id === plan.rootId && toNode.type === 'Page';
   const root: NodeIR | undefined = roots[0];
   if (root !== undefined) {
     plan.rootId = root.id;
@@ -6459,8 +6859,27 @@ function planComponent(
   // ---- the controlled-state slice (CONTROLLED-STATE-TARGET §3–§4): allocation ------------
 
   const usedStateVarNames = new Set<string>();
+  /**
+   * P18-S128-FIELDSET (EXP-011 §97). The stores this component's own Variable and Set Variable nodes name: the file imports
+   * them under their export names, so a state row may not take one. Found by marketplace's search box, the first field a
+   * Set minted a row for whose label ("The search") is its Variable's name.
+   */
+  let componentStoreNames: Set<string> | undefined;
+  const storeNameTaken = (name: string): boolean => {
+    componentStoreNames ??= new Set(
+      component.nodes
+        .filter((n) => n.type === 'Variable2' || n.type === 'Set Variable')
+        .map((n) => {
+          const variable = literalParam(n, 'name');
+          return typeof variable === 'string' ? registry.variables.get(variable)?.exportName : undefined;
+        })
+        .filter((n): n is string => n !== undefined)
+    );
+    return componentStoreNames.has(name);
+  };
   const stateNameTaken = (name: string): boolean =>
     usedStateVarNames.has(name) ||
+    storeNameTaken(name) ||
     usedJsFnNames.has(name) ||
     plan.props.some((p) => p.name === name) ||
     plan.outputProps.some((o) => o.prop === name) ||
@@ -6606,7 +7025,17 @@ function planComponent(
    * arm runs where no answer arrived.
    */
   const httpChainScope = new Map<string, 'done' | 'failure'>();
-  const httpNames = new Map<string, { fnName: string; typeName: string; answerLocal: string; messageLocal: string }>();
+  /**
+   * EXP-011 §100. The repeaters whose row signal's chain is being compiled, innermost last (the attach pass pushes one
+   * around the compile of a wire out of `itemOutputSignal-<name>`). Inside, a read of that repeater's relayed value is the
+   * firing row's (`row-relay`); outside, it is refused by name. `relayTouches` is one set per open `compiledOf`: the
+   * repeaters whose relayed value the compile read (or refused), so a compile whose meaning depends on the scope is
+   * cached per scope (`relayTouchedKeys`: the plain key, and every scope it was compiled under; `null` is outside).
+   */
+  const rowChainScopes: string[] = [];
+  const relayTouches: Array<Set<string>> = [];
+  const relayTouchedKeys = new Map<string, Set<string | null>>();
+  const httpNames =new Map<string, { fnName: string; typeName: string; answerLocal: string; messageLocal: string }>();
   /**
    * The four names one HTTP node contributes, minted together so the module, the component and
    * the chain locals cannot disagree. `fnName`/`typeName` are project-unique (one `api/http.ts`);
@@ -8088,7 +8517,8 @@ function planComponent(
   /** Action ports whose translation needs local control state (§4c: check/uncheck, clear). */
   const CONTROL_ACTION_PORTS: Partial<Record<RenderRole, string[]>> = {
     checkbox: ['check', 'uncheck'],
-    input: ['clear']
+    // P18-S128-FIELDSET. A Set writes the field's text as a Clear does, so it earns the row too.
+    input: ['clear', 'set']
   };
 
   /**
@@ -8866,8 +9296,69 @@ function planComponent(
     return cases;
   };
 
+  /**
+   * EXP-011 §99 and §100. What a repeater's relayed row value `itemOutput-<output>` is statically: the row template's input
+   * passed straight through to that output (its Component Inputs port wired into its Component Outputs port), which the
+   * parent hands each row from its item; or why it is not.
+   */
+  const relayedInputOf = (forEach: NodeIR, output: string): { input: string; templatePath: string; declared: string } | { defer: string } => {
+    const repeater = plan.repeaters[forEach.id];
+    const templatePath = repeater?.templatePath ?? null;
+    const template = templatePath === null ? undefined : ir.components.find((tc) => `/${tc.path}` === templatePath);
+    if (repeater === undefined || templatePath === null || template === undefined) return { defer: `the repeater relaying "${output}" has no template component` };
+    if (repeater.mapping === null) return { defer: `the repeater relaying "${output}" maps its rows with a script, which is not a static map` };
+    const tById = new Map(template.nodes.map((n) => [n.id, n]));
+    const feeds = template.connections.filter((c) => c.toProperty === output && tById.get(c.toId)?.type === 'Component Outputs');
+    if (feeds.length !== 1) {
+      return {
+        defer:
+          feeds.length === 0
+            ? `nothing in ${templatePath} feeds the row output "${output}" that the repeater relays`
+            : `${feeds.length} wires feed ${templatePath}'s row output "${output}" — last-writer-wins is not statically ordered`
+      };
+    }
+    const feeder = tById.get(feeds[0].fromId);
+    if (feeder?.type !== 'Component Inputs') {
+      return {
+        defer: `${templatePath}'s row output "${output}" is computed inside the row (by ${feeder?.type ?? 'a missing node'}.${feeds[0].fromProperty}) — only a row input passed straight through is relayed in this slice`
+      };
+    }
+    const input = feeds[0].fromProperty;
+    if (repeater.mapping !== 'template-inputs' && !repeater.mapping.some((m) => m.input === input)) {
+      return { defer: `the repeater maps nothing into ${templatePath}'s input "${input}", which its row output "${output}" passes through` };
+    }
+    const declared = componentOutputInterface(template).valueProps.find((v) => v.port === output)?.tsType ?? 'unknown';
+    return { input, templatePath, declared };
+  };
+
   const resolveExpr = (fromNode: NodeIR | undefined, fromProperty: string, ctx: ResolveCtx): ValueExpr | null => {
     if (!fromNode) return null;
+    /**
+     * EXP-011 §100. A repeater's relayed row value. Inside a chain one of its rows' relayed signals runs (the attach pass
+     * holds the scope while it compiles one), the firing row's own value: the runtime copies that row's relayed outputs
+     * onto the repeater, then sends the signal, so every node down the chain reads them. Anywhere else it is the value of
+     * whichever row fired last, `undefined` before any, which no row's closure holds: refused by name. Either way the
+     * open compile is told it read one, so its result is cached per scope.
+     */
+    if (fromNode.type === 'For Each' && fromProperty.startsWith(ITEM_OUTPUT_VALUE)) {
+      const output = fromProperty.slice(ITEM_OUTPUT_VALUE.length);
+      relayTouches[relayTouches.length - 1]?.add(fromNode.id);
+      // A Function's or an Expression's inputs are its own, resolved once for every run (`jsResolving`), not per chain.
+      if (jsResolving.size > 0) {
+        ctx.defer = `it reads the repeater ${fromNode.id}'s relayed row value "${output}" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own`;
+        return null;
+      }
+      if (rowChainScopes[rowChainScopes.length - 1] !== fromNode.id) {
+        ctx.defer = `it reads the repeater ${fromNode.id}'s relayed row value "${output}" in a chain no row's relayed signal of that repeater starts in the export — there it is the value of whichever row fired last, which the export does not hold (in a row's chain it is the firing row's own)`;
+        return null;
+      }
+      const relayed = relayedInputOf(fromNode, output);
+      if ('defer' in relayed) {
+        ctx.defer = relayed.defer;
+        return null;
+      }
+      return { kind: 'row-relay', repeaterId: fromNode.id, output, input: relayed.input, tsType: relayed.declared };
+    }
     if (LIST_PRODUCERS.has(fromNode.type) && fromProperty === 'items') return listReadOf(fromNode, ctx);
     // EXP-011 §56. A transform's Count is its derived list's length — current whenever the list is.
     if (LIST_PRODUCERS.has(fromNode.type) && fromProperty === 'count') {
@@ -10107,6 +10598,9 @@ function planComponent(
         return expr.viaState !== undefined && expr.seeded !== true;
       case 'state-get':
         return expr.maybeUndefined === true;
+      // EXP-011 §100. The row's field: a row whose item lacks it is handed nothing. Must agree with component.ts maybeUndefined.
+      case 'row-relay':
+        return true;
       // FLD-015. A hoisted Static Data constant is a frozen module-scope literal: it exists from
       // module load and nothing writes it, so it is never undefined for a stronger reason than
       // the named arrays below — there is no boot value to be before.
@@ -10285,7 +10779,7 @@ function planComponent(
           reason = `its ${w.fromProperty} feeds ${sink?.type ?? 'a missing node'}.${w.toProperty} — a snapshot of the last Evaluate lands only in a Mounted or a Visible in this slice`;
         } else if (!sink || !rendered.has(sink.id)) {
           reason = `its ${w.fromProperty} feeds an element that is not drawn — a snapshot lands only in a drawn element's Mounted or Visible in this slice`;
-        } else if (w.toProperty === 'mounted' && sink.id === plan.rootId) {
+        } else if (routerMounted(sink, w.toProperty)) {
           reason = 'a mounted wire into the component root is a router concern — not translated in this slice';
         }
         if (reason !== null) break;
@@ -10535,6 +11029,9 @@ function planComponent(
         return 'unknown';
       case 'state-get':
         return plan.stateVars.find((v) => v.name === expr.name)?.tsType.replace(' | undefined', '') ?? 'unknown';
+      // EXP-011 §100. The row template's declared output type.
+      case 'row-relay':
+        return expr.tsType;
       case 'control-event':
         return expr.form === 'checked' ? 'boolean' : expr.form === 'number' ? 'number' : 'string';
       case 'logical':
@@ -10649,7 +11146,8 @@ function planComponent(
     (jsNodeKindOf(type) !== null && toProperty === 'run') ||
     (isLatchType(type) && (LATCH_TRIGGERS[type] ?? []).includes(toProperty)) ||
     ((type === 'net.noodl.controls.checkbox' || type === 'Checkbox') && (toProperty === 'check' || toProperty === 'uncheck')) ||
-    (isTextInputType(type) && toProperty === 'clear') ||
+    // P18-S128-FIELDSET. A text field's four actions: Clear, Set, Focus, Blur.
+    (isTextInputType(type) && (toProperty === 'clear' || toProperty === 'set' || toProperty === 'focus' || toProperty === 'blur')) ||
     // EXP-011 §39. A Delay's Start/Restart/Stop — one node, three action ports.
     (type === TIMER_TYPE && isTimerTrigger(toProperty)) ||
     // EXP-011 §49. A States' Toggle and its `to-<state>` family.
@@ -10671,13 +11169,30 @@ function planComponent(
   const isTriggerInto = (node: NodeIR, toProperty: string): boolean =>
     isTriggerWire(node.type, toProperty) ||
     (node.type === SCRIPT_TYPE && scriptPortsOf(node).signalInputs.includes(toProperty)) ||
-    kitSignalInputOf(node, toProperty) !== undefined;
+    kitSignalInputOf(node, toProperty) !== undefined ||
+    instanceSignalInputOf(node, toProperty);
 
   /** P88 GAM-017 — a kit node's declared signal input (`inputProps` or `inputs`), or undefined. */
   const kitSignalInputOf = (node: NodeIR, port: string) =>
     plan.roleOf[node.id] === 'custom'
       ? plan.customNodes[node.id]?.def.inputs.find((input) => input.name === port && input.type === 'signal')
       : undefined;
+
+  /**
+   * P18-S126-INSIGNAL. A placed component's input its Component Inputs declares a signal (the target's own interface), on a
+   * target that exports a component (a visual root, as a popup's target must have). A logic component's instance draws
+   * nothing and has no file to run the chain in: its inputs stay what they were.
+   */
+  const instanceSignalInputOf = (node: NodeIR, port: string): boolean => {
+    if (plan.roleOf[node.id] !== 'instance') return false;
+    const target = ir.components.find((c) => `/${c.path}` === node.type);
+    if (target === undefined || !signalInputPortsOf(target).has(port)) return false;
+    return target.nodes.some((n) => {
+      if (n.parent !== undefined) return false;
+      const role = renderRole(n, catalog, kits);
+      return role !== null && role !== 'unsupported' && role !== 'radio';
+    });
+  };
 
   // Which components open as popups anywhere in the project — the close side translates only
   // inside one; elsewhere the runtime resolves an enclosing popup by ancestor walk, which a
@@ -11036,10 +11551,11 @@ function planComponent(
     if ('defer' in record) return { defer: record.defer };
     const ticked = tickedWatchOf(node, record.def);
     if ('defer' in ticked) return { defer: ticked.defer };
-    // §3.6 over the run path: success co-fires with done, failure/unchanged/error report the
-    // run itself, isTrueEv/isFalseEv pulse per evaluation — any of them consumed defers.
+    // §3.6 over the run path: failure/unchanged/error report the run itself, isTrueEv/isFalseEv pulse per evaluation —
+    // any of them consumed defers. A Function's Success is a chain of its own since P18-S129-FNSUCCESS (below).
     for (const c of component.connections) {
       if (c.fromId !== node.id || c.fromProperty === 'done' || isJsValueOutput(node, c.fromProperty)) continue;
+      if (node.type === JS_FUNCTION && c.fromProperty === 'success') continue;
       if (node.type === JS_FUNCTION && !c.fromProperty.startsWith('out-')) {
         const builtIn = ['success', 'failure', 'unchanged', 'completed', 'error'].includes(c.fromProperty);
         if (!builtIn) continue; // a dead bare-name wire — the pre-pass noted and consumed it
@@ -11059,21 +11575,31 @@ function planComponent(
     }
     const done = doneChainOf(node);
     if ('defer' in done) return done;
+    /**
+     * P18-S129-FNSUCCESS (EXP-011 §98). A Function's Success as a chain. The runtime sends it after the body's await, on
+     * every run that finishes (`simplejavascript.ts` `runScript`: `sendSignalOnOutput('success')`, then
+     * `reportOutcomes(tokens, 'done')`): on a Run before Done, and on a ticked input's run, which has no Done. A throw sends
+     * Failure and neither. A chain it cannot run refuses the run, as Done's does (the base refused any Success wire).
+     */
+    const success = node.type === JS_FUNCTION ? doneChainOf(node, 'success') : { then: [], consumes: [], collapses: [], subscribes: [] };
+    if ('defer' in success) return success;
     const pulsed = pulseChainsOf(node, record.def);
     if ('defer' in pulsed) pulseRefusals.set(node.id, pulsed.defer);
     const pulses: DoneChain = 'defer' in pulsed ? { then: [], consumes: [], collapses: [], subscribes: [] } : pulsed;
-    // P18-S119-TICKEDRUN. A ticked arrival runs the signals' chains from an effect, where no handler's values exist.
-    if (ticked.watch.length > 0 && !actionsValidIn([{ kind: 'jsfun-run', nodeId: node.id, then: pulses.then }], { kind: 'render' })) {
+    // P18-S119-TICKEDRUN. A ticked arrival runs the signals' chains and Success's from an effect, where no handler's values exist.
+    const tickedThen = [...pulses.then, ...success.then];
+    if (ticked.watch.length > 0 && !actionsValidIn([{ kind: 'jsfun-run', nodeId: node.id, then: tickedThen }], { kind: 'render' })) {
       return {
         defer: 'a ticked input runs it again from no handler, and its signals\' chains read values that exist only inside a handler'
       };
     }
-    // The pulses run before Done, as the runtime's targets act in the drain and Done is sent after the run's await.
+    // The pulses run before Success and Done, as the runtime's targets act in the drain and both are sent after the run's
+    // await, Success first.
     const chain = {
-      then: [...pulses.then, ...done.then],
-      consumes: [...pulses.consumes, ...done.consumes],
-      collapses: [...pulses.collapses, ...done.collapses],
-      subscribes: [...pulses.subscribes, ...done.subscribes]
+      then: [...pulses.then, ...success.then, ...done.then],
+      consumes: [...pulses.consumes, ...success.consumes, ...done.consumes],
+      collapses: [...pulses.collapses, ...success.collapses, ...done.collapses],
+      subscribes: [...pulses.subscribes, ...success.subscribes, ...done.subscribes]
     };
     const strays = component.connections.filter(
       (c) => c.fromId === node.id && isJsValueOutput(node, c.fromProperty) && !chain.consumes.includes(c.key)
@@ -11186,10 +11712,11 @@ function planComponent(
     // keeps its outputs across them (a run that returns early writes nothing). So it keeps a node, as a pulsed run does.
     if (pulses.then.length > 0 || (materialize !== undefined && record.def.kind === 'function')) record.def.pulsed = true;
     // P18-S119-TICKEDRUN. Done is the Run's alone; a ticked run that sends nothing and writes nothing is unobservable.
-    if (ticked.watch.length > 0 && (pulses.then.length > 0 || materialize !== undefined)) {
+    // P18-S129-FNSUCCESS: it sends Success.
+    if (ticked.watch.length > 0 && (tickedThen.length > 0 || materialize !== undefined)) {
       tickedRunPieces.set(node.id, {
         watch: ticked.watch,
-        action: { kind: 'jsfun-run', nodeId: node.id, then: pulses.then, ...(materialize !== undefined ? { materialize } : {}), ticked: true }
+        action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true }
       });
     }
     return {
@@ -11260,6 +11787,41 @@ function planComponent(
     return { action: { kind: 'state-set', name: stateVar.name, op: 'inc' }, consumes: [] };
   };
 
+  /**
+   * P18-S126-INSIGNAL (EXP-011 §94). A signal into a placed component's signal input, as a pulse count: GAM-017's idiom one
+   * node type over. The runtime sets the instance's input and its Component Inputs sends the pulse on (componentinstance.ts
+   * `registerComponentInputPort`), so the chain inside runs once per pulse. Here the parent keeps one count per wired port of
+   * the instance, every sender adds one (a functional update: two pulses in one handler are two), and a ref beside it holds
+   * the count the child has acted on; the two are the prop (`InstancePulsePlan`). The child runs its chain from an effect
+   * when the count sent passes the count taken (`plan.inputPulses`): once per move, at a mount too (a pulse sent with the
+   * click that draws the child, or while the parent does not draw it), never again for a pulse already taken.
+   */
+  const instancePulseVars = new Map<string, StateVarPlan>();
+  const compileInstanceSignal = (node: NodeIR, port: string): CompiledSink => {
+    const key = `${node.id}\u0000${port}`;
+    let stateVar = instancePulseVars.get(key);
+    if (stateVar === undefined) {
+      stateVar = allocStateVar(
+        `${node.authoredLabel ?? 'instance'} ${port} pulses`,
+        `${port}Pulses`,
+        'number',
+        0,
+        node.id,
+        'counter',
+        `How many times "${port}" on the placed ${node.type} ${node.id} has been signalled — the count it reads (P18-S126-INSIGNAL).`
+      );
+      instancePulseVars.set(key, stateVar);
+      const base = `${stateVar.name.replace(/Pulses$/, '')}Taken`;
+      let takenLocal = base;
+      for (let n = 2; stateNameTaken(takenLocal); n++) takenLocal = `${base}${n}`;
+      usedStateVarNames.add(takenLocal);
+      plan.instancePulses.push({ nodeId: node.id, port, stateName: stateVar.name, takenLocal });
+      plan.bindings[node.id] = plan.bindings[node.id] ?? {};
+      plan.bindings[node.id][port] = { kind: 'computed', expr: { kind: 'state-get', name: stateVar.name } };
+    }
+    return { action: { kind: 'state-set', name: stateVar.name, op: 'inc' }, consumes: [] };
+  };
+
   /** Checkbox check/uncheck and Text Input clear as state writes on a stateful control (§4c). */
   const compileControlAction = (node: NodeIR, port: string): CompiledSink => {
     const consumedOutcome = component.connections.find(
@@ -11274,14 +11836,61 @@ function planComponent(
     if (stateVar === undefined) {
       return { defer: `its ${port} action writes control state nothing else observes — no state row is minted` };
     }
+    if (port === 'set') return compileFieldSet(node, stateVar);
     const action: HandlerAction =
       port === 'check'
         ? { kind: 'state-set', name: stateVar.name, expr: { kind: 'literal', value: true } }
         : port === 'uncheck'
           ? { kind: 'state-set', name: stateVar.name, expr: { kind: 'literal', value: false } }
-          : // clear → the field type's empty value, projected onto the DOM string (FB-026).
-            { kind: 'state-set', name: stateVar.name, expr: { kind: 'literal', value: '' } };
+          : // clear → the field type's empty value, projected onto the DOM string (FB-026); P18-S127-CLEAROUT: then the
+            // field's change chain, with the empty text (the runtime's `clear()` calls `setText('')`).
+            { kind: 'state-set', name: stateVar.name, expr: { kind: 'literal', value: '' }, field: { inputId: node.id, port: 'clear' } };
     return { action, consumes: [] };
+  };
+
+  /**
+   * P18-S128-FIELDSET (EXP-011 §97). A text field's Set: the Value as the runtime's `_internal.text` holds it, read where the
+   * handler is (a wire's source, or the typed-in Value), written into the field's row, and the field's change chain after it
+   * (the emitter prints both, behind the focus test: a focused field takes no Set).
+   */
+  const compileFieldSet = (node: NodeIR, stateVar: StateVarPlan): CompiledSink => {
+    const type = literalParam(node, 'type');
+    if (wiredPorts.has(`${node.id}:type`) || (type !== undefined && typeof type !== 'string')) {
+      return { defer: 'its Type is wired, so whether its Set writes text or a number is not known here' };
+    }
+    if (type === 'number') {
+      return { defer: 'a Number field\'s Set sends a number or null, and the exported field carries text (P18-S118-NUMBERFIELD)' };
+    }
+    const authored = literalParam(node, 'startValue');
+    const start = authored === undefined || authored === null ? '' : typeof authored === 'object' ? undefined : String(authored);
+    if (start === undefined) return { defer: 'its typed-in Value is not text, a number or a boolean' };
+    const field: FieldWrite = { inputId: node.id, port: 'set', start };
+    const wires = component.connections.filter((c) => c.toId === node.id && c.toProperty === 'startValue');
+    if (wires.length > 1) return { defer: 'two wires feed its Value — which one its Set writes is not statically ordered' };
+    if (wires.length === 0) {
+      return { action: { kind: 'state-set', name: stateVar.name, expr: { kind: 'literal', value: start }, field }, consumes: [] };
+    }
+    const ctx = newCtx();
+    const expr = resolveExpr(nodeById.get(wires[0].fromId), wires[0].fromProperty, ctx);
+    if (expr === null) return { defer: ctx.defer ?? 'its Value wire has no statically known source, and its Set writes that Value' };
+    if (isBooleanExpr(expr)) return { defer: 'its Value wire carries a logic truth value, and its Set writes it as text' };
+    return {
+      action: { kind: 'state-set', name: stateVar.name, expr, field },
+      consumes: [...ctx.consumes],
+      collapses: ctx.logicNodeIds,
+      subscribes: ctx.subscriberIds
+    };
+  };
+
+  /** P18-S128-FIELDSET. A drawn field's Focus or Blur: a call on its element. Its outcomes are not translated. */
+  const compileFieldFocus = (node: NodeIR, port: 'focus' | 'blur'): CompiledSink => {
+    const consumedOutcome = component.connections.find(
+      (c) => c.fromId === node.id && (c.fromProperty === 'done' || c.fromProperty === 'unchanged')
+    );
+    if (consumedOutcome) {
+      return { defer: `its ${consumedOutcome.fromProperty} outcome is consumed — change-conditional pulses are not translated in this slice` };
+    }
+    return { action: { kind: 'field-focus', inputId: node.id, focus: port === 'focus' }, consumes: [] };
   };
 
   /**
@@ -14808,12 +15417,14 @@ function planComponent(
       if (!Array.isArray(snapped)) return refuse(snapped.defer);
       arrive = snapped;
     }
+    const castToNumber = (['duration', 'delay'] as const).filter((input) => exprTsType(input === 'duration' ? duration : delay) !== 'number');
     const registered: AnimationPlan = {
       nodeId: node.id,
       local: mintLocal(animateLocals, node, 'Animated', ''),
       target,
       duration,
       delay,
+      ...(castToNumber.length > 0 ? { castToNumber: [...castToNumber] } : {}),
       ease: easeParam as AnimateEaseName,
       ...(arrive !== undefined ? { arrive } : {}),
       comment: `${node.authoredLabel ?? 'Animate To Value'} — moves towards its Target Value over Duration after Delay (animate-to-value.ts); the first target is adopted outright.`
@@ -15142,9 +15753,12 @@ function planComponent(
     if (jsNodeKindOf(node.type) !== null && port === 'run') return compileJsRun(node);
     if (isLatchType(node.type)) return compileLatch(node, port);
     if (kitSignalInputOf(node, port) !== undefined) return compileKitSignal(node, port);
+    if (instanceSignalInputOf(node, port)) return compileInstanceSignal(node, port);
     if ((plan.roleOf[node.id] === 'checkbox' || plan.roleOf[node.id] === 'input') && (CONTROL_ACTION_PORTS[plan.roleOf[node.id]] ?? []).includes(port)) {
       return compileControlAction(node, port);
     }
+    // P18-S128-FIELDSET. A drawn text field's Focus and Blur.
+    if (plan.roleOf[node.id] === 'input' && (port === 'focus' || port === 'blur')) return compileFieldFocus(node, port);
     if (node.type === EXTERNAL_LINK_TYPE) return compileExternalLink(node);
     if (node.type === LOG_TYPE) return compileLog(node);
     if (node.type === TIMER_TYPE && isTimerTrigger(port)) return compileDelay(node, port);
@@ -15325,6 +15939,42 @@ function planComponent(
      * a switch that stops compiling, a fall-through that answers plausibly.
      */
     // Set Variable
+    return withSetDone(node, compileSetVariableWrite(node));
+  };
+
+  /**
+   * P18-S127-SETDONE (EXP-011 §95). A Set Variable's Done and Completed chains, after its write. The runtime writes, every
+   * Variable reading the name is notified, then Done and Completed are sent (`setvariablenode.ts` `scheduleStore`); a
+   * Done's target is flagged dirty with its sender and pulls it first, so the chain runs before the click's next wire
+   * (measured, `s128-setdone/EXPECTED.md`): the chain is following statements, as an Object's Set prints its Done.
+   *
+   * A chain the export cannot run does not take the write with it: the Set kept its write when nothing read its Done, and
+   * keeps it now. The port's wires stay unconsumed and are named by the sweep after the attach pass, with this refusal
+   * (`setDoneRefusals`). Failure is not this chain's: with a literal Name it never fires.
+   */
+  const withSetDone = (node: NodeIR, write: CompiledSink): CompiledSink => {
+    if ('defer' in write || write.action.kind !== 'store-set') return write;
+    const then: HandlerAction[] = [];
+    const consumes = [...write.consumes];
+    const collapses = [...(write.collapses ?? [])];
+    const subscribes = [...(write.subscribes ?? [])];
+    for (const port of SET_VARIABLE_CHAIN_OUTPUTS) {
+      if (!component.connections.some((c) => c.fromId === node.id && c.fromProperty === port)) continue;
+      const chain = doneChainOf(node, port);
+      if ('defer' in chain) {
+        setDoneRefusals.set(`${node.id}:${port}`, chain.defer);
+        continue;
+      }
+      then.push(...chain.then);
+      consumes.push(...chain.consumes);
+      collapses.push(...chain.collapses);
+      subscribes.push(...chain.subscribes);
+    }
+    if (then.length === 0) return { ...write, consumes, collapses, subscribes };
+    return { action: { ...write.action, then }, consumes, collapses, subscribes };
+  };
+
+  const compileSetVariableWrite = (node: NodeIR): CompiledSink => {
     const variableName = variableNameOf(node);
     if (variableName === undefined) return { defer: 'variable name is not a literal' };
     /**
@@ -15727,6 +16377,8 @@ function planComponent(
 
   /** Keyed `${nodeId}:${port}` — the popup nodes compile per trigger port (`closeAction-*`). */
   const compiledSinks = new Map<string, CompiledSink>();
+  /** P18-S127-SETDONE. A Set Variable's chain the export could not run, by `<id>:<port>`: the sweep names its wires with it. */
+  const setDoneRefusals = new Map<string, string>();
   /**
    * Why a reactive Condition (LOGIC-TARGET §10) did not become an effect, by node id. The Condition sweep
    * prefers this over the `:eval` sink's reason: for a ticked node that sink only ever says
@@ -15736,10 +16388,33 @@ function planComponent(
   /** EXP-011 §43. Why a Record with `Fetch` unwired could not become an Id effect. */
   const recordEffectDefers = new Map<string, string>();
   const compiling = new Set<string>();
+  /**
+   * EXP-011 §100. A sink whose compile read a repeater's relayed row value means one thing inside that repeater's row
+   * chain and another outside it, so from then on it is one compile per scope, under `@row:<scope>` (`none` outside). The
+   * plain key keeps the first compile, as it did for every sink before (the readers that look a sink up by `<id>:<port>`
+   * read that one; the pre-pass compiles every sink outside any row's chain first). A compile that read none is one
+   * compile, as before. A cached result tells the compile that asked for it what it read, so the scope-dependence climbs
+   * the chain.
+   */
   const compiledOf = (node: NodeIR, port: string): CompiledSink => {
     // EXP-011 §90. A Set with several Value wires compiles per wire it reads, which depends on the chain it is in.
     const valueWires = (node.type === 'Set Variable' || node.type === GLOBAL_STORE_SET) && valueWiresInto(node).length > 1;
-    const plainKey = `${node.id}:${port}${valueWires ? `@value:${lastValueWireOf(node)?.key ?? 'none'}` : ''}`;
+    const basePlain = `${node.id}:${port}${valueWires ? `@value:${lastValueWireOf(node)?.key ?? 'none'}` : ''}`;
+    const rowScope = rowChainScopes[rowChainScopes.length - 1] ?? null;
+    const scopedKey = `${basePlain}@row:${rowScope ?? 'none'}`;
+    const scopes = relayTouchedKeys.get(basePlain);
+    const key = scopes !== undefined ? scopedKey : basePlain;
+    relayTouches.push(new Set());
+    const result = compiledOfKeyed(node, port, key);
+    const touched = relayTouches.pop()!;
+    if (touched.size > 0) {
+      relayTouchedKeys.set(basePlain, new Set([...(scopes ?? []), rowScope]));
+      if (key === basePlain) compiledSinks.set(scopedKey, result);
+    }
+    if (touched.size > 0 || relayTouchedKeys.has(basePlain)) relayTouches[relayTouches.length - 1]?.add(rowScope ?? 'none');
+    return result;
+  };
+  const compiledOfKeyed = (node: NodeIR, port: string, plainKey: string): CompiledSink => {
     /**
      * EXP-011 §90. Inside a verb's Failure chain a read of its Error is the catch's local, outside it the row; one sink
      * that two chains run would carry whichever was compiled first into the other (planning's Sign in: Sign Up's catch
@@ -15843,6 +16518,9 @@ function planComponent(
         );
       case 'input-text':
         return context.kind === 'dom' && context.nodeId === expr.inputId;
+      // EXP-011 §100. Only in that repeater's row callbacks, which close over the firing row's item.
+      case 'row-relay':
+        return context.kind === 'dom' && context.nodeId === expr.repeaterId && (context.port?.startsWith(ITEM_OUTPUT_SIGNAL) ?? false);
       case 'control-event':
         return context.kind === 'dom' && context.nodeId === expr.controlId;
       case 'payload':
@@ -15974,7 +16652,9 @@ function planComponent(
             context.port.startsWith(ITEM_OUTPUT_SIGNAL) &&
             actionsValidIn(action.then, context, invokedScope)
           );
+        // P18-S127-SETDONE. The value, then the Done chain.
         case 'store-set':
+          return exprValidIn(action.expr, context, invokedScope) && actionsValidIn(action.then ?? [], context, invokedScope);
         case 'globalstore-set':
           return exprValidIn(action.expr, context, invokedScope);
         // EXP-011 §47. Every value in the patch, then the chain.
@@ -16184,6 +16864,9 @@ function planComponent(
           return true;
         // EXP-011 §63. A call on the handle; the Done listener is validated where it compiles (the render context).
         case 'drag-snap':
+          return true;
+        // P18-S128-FIELDSET. A call on the field's element, reading nothing.
+        case 'field-focus':
           return true;
         // EXP-011 §52. A call on the handle; the node's listeners are validated where they compile.
         case 'script-signal':
@@ -16449,10 +17132,17 @@ function planComponent(
     const wires = component.connections.filter((c) => c.toId === node.id && c.toProperty === spec.statePort);
     if (wires.length === 0) continue;
     if (spec.coerce === 'textinput' && literalParam(node, 'runOnChange-startValue') === false) {
+      // P18-S128-FIELDSET. A wired Set reads this wire where it runs (`compileFieldSet`); the note says so either way.
+      const viaSet = wiredPorts.has(`${node.id}:set`);
       for (const w of wires) {
         consumed.add(w.key);
         notes.push(
-          wireNote(w, `Value is unticked under Run On Value Change — arrivals wait for a Set pulse, which is not translated in this slice`)
+          wireNote(
+            w,
+            viaSet
+              ? 'Value is unticked under Run On Value Change — it reaches the field only when its Set is sent (P18-S128-FIELDSET)'
+              : 'Value is unticked under Run On Value Change — arrivals wait for a Set pulse, and nothing sends this field one'
+          )
         );
       }
       continue;
@@ -16528,6 +17218,48 @@ function planComponent(
     }
   }
 
+  /**
+   * EXP-011 §99, the repeater's row relay. `itemOutput-<name>` is the value the row whose relayed signal fired last held on
+   * its output `<name>`: the runtime's `itemOutputSignalTriggered` (`foreach.tsx`) copies every relayed output of that row,
+   * then sends the signal, and nothing else ever writes it (so it is `undefined` until a row signal fires). Here each row
+   * is its own element, and its signal callback closes over its own item: the callback writes the value into a state row,
+   * then runs the signal's chain. Statically known where the row's output is one of its inputs passed straight through
+   * (its Component Inputs port wired into its Component Outputs port), which the parent hands each row from its item.
+   */
+  const rowRelays = new Map<string, StateVarPlan>();
+  /** The relayed signals of a repeater, for the comment: "open" or "open, close". */
+  const relayedSignalsOf = (forEach: NodeIR): string =>
+    [
+      ...new Set(
+        component.connections.filter((c) => c.fromId === forEach.id && c.fromProperty.startsWith(ITEM_OUTPUT_SIGNAL)).map((c) => c.fromProperty.slice(ITEM_OUTPUT_SIGNAL.length))
+      )
+    ].join(', ') || 'relayed signal';
+  const rowRelayOf = (forEach: NodeIR, fromProperty: string): { stateName: string } | { defer: string } => {
+    if (!fromProperty.startsWith(ITEM_OUTPUT_VALUE)) {
+      return { defer: `a repeater's "${fromProperty}" is not a row's relayed value — those register as "${ITEM_OUTPUT_VALUE}<name>"` };
+    }
+    const output = fromProperty.slice(ITEM_OUTPUT_VALUE.length);
+    const key = `${forEach.id}\u0000${output}`;
+    const known = rowRelays.get(key);
+    if (known !== undefined) return { stateName: known.name };
+    const relayed = relayedInputOf(forEach, output);
+    if ('defer' in relayed) return relayed;
+    const { input, declared } = relayed;
+    const tsType = declared === 'unknown' || declared === 'any' ? declared : `${declared} | undefined`;
+    const stateVar = allocStateVar(
+      `relayed ${output}`,
+      'relayed',
+      tsType,
+      null,
+      forEach.id,
+      'relay',
+      `What the row whose "${relayedSignalsOf(forEach)}" fired last holds on its "${output}" — undefined until one fires (foreach.tsx itemOutputSignalTriggered, EXP-011 §99).`
+    );
+    rowRelays.set(key, stateVar);
+    plan.rowRelays.push({ repeaterId: forEach.id, output, input, stateName: stateVar.name });
+    return { stateName: stateVar.name };
+  };
+
   // §4d child side: a Component Outputs value port fed by the vocabulary lifts — an optional
   // callback prop plus a push effect. A port whose feed does not resolve fails alone (the
   // mixed-outputs rule); the node's verdict names the first failure while good ports keep
@@ -16572,15 +17304,17 @@ function planComponent(
        * the case §32.4 declined on its own census. If a real project ever lands here, split it
        * the way §31.2 split its sibling, and do not inherit the sentence.
        */
+      let relayExpr: ValueExpr | undefined;
       if (from?.type === 'For Each') {
-        fail(
-          wire.key,
-          `a repeater relays its rows' outputs into "${port}" — which row fired is not statically expressible in this slice`
-        );
-        continue;
+        const relay = rowRelayOf(from, wire.fromProperty);
+        if ('defer' in relay) {
+          fail(wire.key, relay.defer);
+          continue;
+        }
+        relayExpr = { kind: 'state-get', name: relay.stateName };
       }
       const ctx = newCtx();
-      const expr = from === undefined ? null : resolveExpr(from, wire.fromProperty, ctx);
+      const expr = relayExpr ?? (from === undefined ? null : resolveExpr(from, wire.fromProperty, ctx));
       if (expr === null) {
         fail(
           wire.key,
@@ -16600,7 +17334,8 @@ function planComponent(
       }
       consumed.add(wire.key);
       stateLandedKeys.add(wire.key);
-      plan.pushEffects.push({ prop: vp.prop, expr });
+      const pushedType = exprTsType(expr);
+      plan.pushEffects.push({ prop: vp.prop, expr, ...(vp.tsType !== 'any' && pushedType !== vp.tsType ? { castTo: vp.tsType } : {}) });
       plan.liftedOutputProps.push({ port, prop: vp.prop, tsType: vp.tsType });
       for (const k of ctx.consumes) consumed.add(k);
       for (const s of ctx.subscriberIds) boundSubscribers.add(s);
@@ -16618,6 +17353,18 @@ function planComponent(
     }
   }
 
+  /**
+   * P18-S127-SIBLINGVALUE (EXP-011 §96). Another placed component's declared value input: the parent's lifted row, passed
+   * as that prop (`liftInto`), as a rendered sink reads it.
+   */
+  const siblingValueInputOf = (toNode: NodeIR, port: string): boolean => {
+    if (plan.roleOf[toNode.id] !== 'instance') return false;
+    const target = ir.components.find((tc) => `/${tc.path}` === toNode.type);
+    return (
+      target !== undefined &&
+      target.nodes.some((n) => n.type === 'Component Inputs' && n.declaredPorts.some((p) => p.plug === 'output' && p.name === port && p.kind !== 'signal'))
+    );
+  };
   // §4d parent side: consumed instance value outputs are recorded pending and resolved after
   // every plan exists (planProject's second phase) — binding requires the child to have
   // actually lifted the port, or the parent would pass a prop the child does not declare.
@@ -16645,7 +17392,8 @@ function planComponent(
       contentRole === 'attr-not:disabled' ||
       (contentRole !== undefined && contentRole.startsWith('attr:')) ||
       // EXP-011 §49. A wired style parameter the emitter prints inline.
-      styleSinkOf(toNode, c.toProperty) !== undefined;
+      styleSinkOf(toNode, c.toProperty) !== undefined ||
+      siblingValueInputOf(toNode, c.toProperty);
     if (!bindable) {
       consumed.add(c.key);
       notes.push(
@@ -16653,7 +17401,7 @@ function planComponent(
       );
       continue;
     }
-    if (c.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, c.toProperty)) {
       consumed.add(c.key);
       notes.push(wireNote(c, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
@@ -16665,7 +17413,8 @@ function planComponent(
       targetLegacy: fromNode.type,
       port: c.fromProperty,
       toNodeId: toNode.id,
-      toProperty: c.toProperty
+      toProperty: c.toProperty,
+      ...(siblingValueInputOf(toNode, c.toProperty) ? { intoInstance: true as const } : {})
     });
   }
 
@@ -16709,7 +17458,7 @@ function planComponent(
       notes.push(wireNote(c, `custom node output "${c.fromProperty}" ${bindable}`));
       continue;
     }
-    if (c.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, c.toProperty)) {
       consumed.add(c.key);
       notes.push(wireNote(c, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
@@ -16971,13 +17720,24 @@ function planComponent(
         if (action.expr !== undefined) {
           const e = snapExpr(action.expr, snap);
           if ('defer' in e) return e;
-          snap.set(action.name, e);
+          // P18-S128-FIELDSET. A Set is not written into a focused field, and writes the Value as text: what a later read of
+          // the field sees is not one expression, so a read after it is refused by name (a Clear always writes '').
+          snap.set(action.name, action.field?.port === 'set' ? 'op' : e);
           return { ...action, expr: e };
         }
         snap.set(action.name, 'op');
         return action;
       }
-      case 'store-set':
+      // P18-S127-SETDONE. The value is read where the handler is; the Done chain follows, one arm always taken, so it
+      // carries the map onward (an Object's Set's treatment).
+      case 'store-set': {
+        const e = snapExpr(action.expr, snap);
+        if ('defer' in e) return e;
+        if (action.then === undefined) return { ...action, expr: e };
+        const then = snapActionList(action.then, snap);
+        if (!Array.isArray(then)) return then;
+        return { ...action, expr: e, then };
+      }
       case 'globalstore-set': {
         const e = snapExpr(action.expr, snap);
         if ('defer' in e) return e;
@@ -17720,6 +18480,38 @@ function planComponent(
   }
 
   const receiverActions = new Map<string, HandlerAction[]>();
+  /** P18-S126-INSIGNAL. Each signal input's chain, in wire order: one effect per port (`plan.inputPulses`). */
+  const inputPulseActions = new Map<string, HandlerAction[]>();
+  /**
+   * P18-S123-UNDRAWNTRIGGER. A chain on an element the export never draws, or a Did Mount it does not run (a first plan
+   * found them: `unreachedTriggersOf`), is refused by name, its nodes with it — unless another trigger runs them, which
+   * collapses them as before (a later attach overwrites; an earlier one is kept). A Component Outputs port keeps its
+   * interface: the callback is never called, which is the absent behaviour a refused port has.
+   */
+  const unreachedOwnerOf = (connection: ConnectionIR): string | undefined =>
+    excluded.owners.get(connection.fromId) ?? (connection.fromProperty === 'didMount' ? excluded.mounts.get(connection.fromId) : undefined);
+  const refuseUnreached = (connection: ConnectionIR, toNode: NodeIR, compiled: Exclude<CompiledSink, { defer: string }>, reason: string, outputsSink: boolean) => {
+    notes.push(wireNote(connection, reason));
+    for (const key of compiled.consumes) consumed.add(key);
+    if (outputsSink) return;
+    if (dispositions[toNode.id] === undefined) dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason };
+    for (const id of compiled.collapses ?? []) {
+      if (dispositions[id] === undefined) dispositions[id] = { kind: 'deferred', to: 'EXP-003', reason };
+    }
+  };
+  /*
+   * P18-S126-INSIGNAL. A placed component's signal input is a trigger port now, and the refusals below write their
+   * sentence on the sink. A placed component is drawn whatever one of its senders does: the wire is dropped and named, the
+   * instance keeps what it had before this pass (restored after it).
+   */
+  const instanceBeforeAttach = new Map<string, Disposition | undefined>();
+  /** P18-S129-FNSUCCESS. A wire out of a Run-wired Function's Success: its Run chain's, not a trigger of its own. */
+  const isRunSuccessWire = (connection: ConnectionIR): boolean =>
+    connection.fromProperty === 'success' && nodeById.get(connection.fromId)?.type === JS_FUNCTION && wiredPorts.has(`${connection.fromId}:run`);
+  // P18-S128-FIELDSET. A drawn text field is the same: a Set, Clear, Focus or Blur it cannot take is the wire's, not the field's.
+  for (const node of component.nodes) {
+    if (plan.roleOf[node.id] === 'instance' || plan.roleOf[node.id] === 'input') instanceBeforeAttach.set(node.id, dispositions[node.id]);
+  }
   for (const connection of component.connections) {
     if (consumed.has(connection.key)) continue;
     const toNode = nodeById.get(connection.toId);
@@ -17752,6 +18544,9 @@ function planComponent(
     if (fromNode !== undefined && jsNodeKindOf(fromNode.type) !== null && connection.fromProperty === 'done') {
       continue;
     }
+    // P18-S129-FNSUCCESS. A Run-wired Function's Success wires are its Run chain too; the sweep below names those its
+    // compile did not take. Unwired, Success is a reactive run's pulse and keeps this pass's sentence.
+    if (isRunSuccessWire(connection)) continue;
     consumed.add(connection.key);
     /**
      * 🔴 **The prefix was taken as a fact, and it is a claim about the template.**
@@ -17810,7 +18605,14 @@ function planComponent(
       }
       compiled = sink;
     } else {
-      compiled = compiledOf(toNode, connection.toProperty);
+      // EXP-011 §100. A row's relayed signal: the chain it runs reads that row's relayed values.
+      const rowScope = fromNode?.type === 'For Each' && connection.fromProperty.startsWith(ITEM_OUTPUT_SIGNAL) ? fromNode.id : undefined;
+      if (rowScope !== undefined) rowChainScopes.push(rowScope);
+      try {
+        compiled = compiledOf(toNode, connection.toProperty);
+      } finally {
+        if (rowScope !== undefined) rowChainScopes.pop();
+      }
     }
     if ('defer' in compiled) {
       if (outputsSink) {
@@ -17830,6 +18632,11 @@ function planComponent(
       isTextInputType(fromNode.type) &&
       connection.fromProperty === 'textChanged'
     ) {
+      const unreached = unreachedOwnerOf(connection);
+      if (unreached !== undefined) {
+        refuseUnreached(connection, toNode, compiled, unreached, outputsSink);
+        continue;
+      }
       if (!actionsValidIn([compiled.action], { kind: 'dom', nodeId: fromNode.id, port: 'textChanged' })) {
         const reason = 'the action reads values that only exist in another handler';
         if (outputsSink) {
@@ -17898,6 +18705,11 @@ function planComponent(
       rendered.has(fromNode.id) &&
       (connection.kind === 'signal' || instanceSignal || customSignal || repeaterRowSignal)
     ) {
+      const unreached = unreachedOwnerOf(connection);
+      if (unreached !== undefined) {
+        refuseUnreached(connection, toNode, compiled, unreached, outputsSink);
+        continue;
+      }
       if (!actionsValidIn([compiled.action], { kind: 'dom', nodeId: fromNode.id, port: connection.fromProperty })) {
         const reason = 'the action reads values that only exist in another handler';
         if (outputsSink) {
@@ -17935,6 +18747,46 @@ function planComponent(
       const list = (plan.handlers[fromNode.id][connection.fromProperty] =
         plan.handlers[fromNode.id][connection.fromProperty] ?? []);
       list.push(snapped);
+      if (!outputsSink) dispositions[toNode.id] = { kind: 'collapsed', into: fromNode.id };
+      for (const id of compiled.collapses ?? []) dispositions[id] = { kind: 'collapsed', into: fromNode.id };
+      for (const key of compiled.consumes) consumed.add(key);
+      for (const id of compiled.subscribes ?? []) boundSubscribers.add(id);
+      continue;
+    }
+    /**
+     * P18-S126-INSIGNAL (EXP-011 §94). A signal the parent sends in: the chain runs from an effect on the pulse count, so in
+     * render context, snapped as an effect's chain is. A signal input passed straight on into a placed component's signal
+     * input is a chain like any other here (its action adds one to that instance's own count), so one port can both run a
+     * chain and pass the pulse on, and a port fed from inside and from outside needs no sum.
+     */
+    if (fromNode?.type === 'Component Inputs' && signalInputPortsOf(component).has(connection.fromProperty)) {
+      const refuse = (reason: string) => {
+        if (outputsSink) {
+          if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, reason);
+        } else {
+          dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason };
+        }
+        notes.push(wireNote(connection, reason));
+      };
+      if (!plan.file) {
+        refuse('the component emits no file to host the effect a signal input runs');
+        continue;
+      }
+      if (!actionsValidIn([compiled.action], { kind: 'render' })) {
+        refuse('the action reads values that only exist inside a handler');
+        continue;
+      }
+      const snappedIn = snapAction(compiled.action, chainSnapshotFor(`input:${connection.fromProperty}`));
+      const lateInWrite = 'defer' in snappedIn ? undefined : lateQueryFetchWrite([...(inputPulseActions.get(connection.fromProperty) ?? []), snappedIn]);
+      if (lateInWrite !== undefined) {
+        refuse(lateInWrite);
+        continue;
+      }
+      if ('defer' in snappedIn) {
+        refuse(snappedIn.defer);
+        continue;
+      }
+      inputPulseActions.set(connection.fromProperty, [...(inputPulseActions.get(connection.fromProperty) ?? []), snappedIn]);
       if (!outputsSink) dispositions[toNode.id] = { kind: 'collapsed', into: fromNode.id };
       for (const id of compiled.collapses ?? []) dispositions[id] = { kind: 'collapsed', into: fromNode.id };
       for (const key of compiled.consumes) consumed.add(key);
@@ -18002,6 +18854,118 @@ function planComponent(
     notes.push(wireNote(connection, pulseRefusal ?? `the trigger is not a rendered element event or a receiver`));
   }
 
+  /**
+   * EXP-011 §100. A sweep that names a chain wire the compile did not take compiles its sink again to ask for the sink's
+   * own refusal; it asks in the row scope the sender's own compile was made in (`relayTouchedKeys`), so a read of a row's
+   * relayed value down that chain gives the reason it gave there, not the sentence a read outside a row's chain gets.
+   */
+  const inSenderRowScope = <T>(senderId: string, port: string, fn: () => T): T => {
+    const scopes = [...relayTouchedKeys].find(([key]) => key === `${senderId}:${port}` || key.startsWith(`${senderId}:${port}@`))?.[1];
+    const scope = [...(scopes ?? [])].find((s): s is string => s !== null) ?? null;
+    if (scope !== null) rowChainScopes.push(scope);
+    try {
+      return fn();
+    } finally {
+      if (scope !== null) rowChainScopes.pop();
+    }
+  };
+
+  /**
+   * P18-S127-SETDONE (EXP-011 §95). A Set Variable's Done or Completed wire its compile did not take: the chain it could
+   * not run (`setDoneRefusals`), the Set itself refused, or a Set no exported trigger runs. Named by that, after every
+   * wire has spoken (the attach pass skips these wires, `ownsChainOutput`, so the answer does not depend on wire order).
+   * A sink another trigger has ruled keeps its ruling (s124's rule); a placed component is restored below, as any.
+   */
+  for (const connection of component.connections) {
+    if (consumed.has(connection.key)) continue;
+    const fromNode = nodeById.get(connection.fromId);
+    if (fromNode?.type !== 'Set Variable' || !(SET_VARIABLE_CHAIN_OUTPUTS as readonly string[]).includes(connection.fromProperty)) continue;
+    const toNode = nodeById.get(connection.toId);
+    if (!toNode) continue;
+    const outputsSink = toNode.type === 'Component Outputs';
+    if (!outputsSink && !isTriggerInto(toNode, connection.toProperty)) continue;
+    // Named here, so not again by the sweep of wires nothing translated (the attach pass consumed it at the base).
+    consumed.add(connection.key);
+    // The sink's own refusal first, as the attach pass rules every trigger wire: a sink that cannot compile says why.
+    // EXP-011 §100: compiled in the row scope the Set itself was compiled in, so a row's read says its own reason.
+    const sink = outputsSink
+      ? outputSinkOf(connection.toProperty, fromNode, connection.fromProperty)
+      : inSenderRowScope(fromNode.id, 'do', () => compiledOf(toNode, connection.toProperty));
+    if ('drop' in sink) {
+      notes.push(wireNote(connection, sink.drop));
+      continue;
+    }
+    if ('defer' in sink) {
+      if (outputsSink) {
+        if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, sink.defer);
+      } else if (dispositions[toNode.id]?.kind !== 'collapsed' && dispositions[toNode.id]?.kind !== 'static') {
+        dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason: sink.defer };
+      }
+      notes.push(wireNote(connection, sink.defer));
+      continue;
+    }
+    const trigger = `trigger ${connection.fromId}.${connection.fromProperty}`;
+    const chainRefusal = setDoneRefusals.get(`${connection.fromId}:${connection.fromProperty}`);
+    const own = dispositions[fromNode.id];
+    const compiled = [...compiledSinks].find(([key]) => key === `${fromNode.id}:do` || key.startsWith(`${fromNode.id}:do@`))?.[1];
+    const reason =
+      chainRefusal !== undefined
+        ? `${trigger}: the Set Variable's ${connection.fromProperty === 'done' ? 'Done' : 'Completed'} chain is not exported — ${chainRefusal}`
+        : own?.kind === 'deferred'
+          ? `${trigger}: the Set Variable that sends it is not exported — ${own.reason}`
+          : compiled !== undefined && 'defer' in compiled
+            ? `${trigger}: the Set Variable that sends it is not exported — ${compiled.defer}`
+            : `${trigger}: the Set Variable that sends it is never run by an exported trigger`;
+    if (outputsSink) {
+      if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, reason);
+    } else if (dispositions[toNode.id] === undefined) {
+      dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason };
+    }
+    notes.push(wireNote(connection, reason));
+  }
+
+  /**
+   * P18-S129-FNSUCCESS (EXP-011 §98). A Run-wired Function's Success wire its compile did not take (the attach pass skips
+   * them, as it skips Done, so the answer does not depend on wire order): the sink's own refusal first, as the attach
+   * pass rules every trigger wire; else the Function's own refusal; else a Function no exported trigger runs.
+   */
+  for (const connection of component.connections) {
+    if (consumed.has(connection.key) || !isRunSuccessWire(connection)) continue;
+    const fromNode = nodeById.get(connection.fromId)!;
+    const toNode = nodeById.get(connection.toId);
+    if (!toNode) continue;
+    const outputsSink = toNode.type === 'Component Outputs';
+    if (!outputsSink && !isTriggerInto(toNode, connection.toProperty)) continue;
+    consumed.add(connection.key);
+    const sink = outputsSink
+      ? outputSinkOf(connection.toProperty, fromNode, connection.fromProperty)
+      : inSenderRowScope(fromNode.id, 'run', () => compiledOf(toNode, connection.toProperty));
+    if ('drop' in sink) {
+      notes.push(wireNote(connection, sink.drop));
+      continue;
+    }
+    const run = compiledSinks.get(`${fromNode.id}:run`);
+    const trigger = `trigger ${connection.fromId}.success`;
+    const reason =
+      'defer' in sink
+        ? sink.defer
+        : run !== undefined && 'defer' in run
+          ? `${trigger}: the Function that sends it is not exported — ${run.defer}`
+          : `${trigger}: the Function that sends it is never run by an exported trigger`;
+    if (outputsSink) {
+      if (!failedOutputsNodes.has(toNode.id)) failedOutputsNodes.set(toNode.id, reason);
+    } else if (dispositions[toNode.id] === undefined || ('defer' in sink && dispositions[toNode.id]?.kind !== 'collapsed' && dispositions[toNode.id]?.kind !== 'static')) {
+      dispositions[toNode.id] = { kind: 'deferred', to: 'EXP-003', reason };
+    }
+    notes.push(wireNote(connection, reason));
+  }
+
+  for (const [id, before] of instanceBeforeAttach) {
+    if (dispositions[id]?.kind !== 'deferred' || before?.kind === 'deferred') continue;
+    if (before === undefined) delete dispositions[id];
+    else dispositions[id] = before;
+  }
+
   // Component Outputs nodes rule once, after every wire has spoken: the interface declaration
   // is static (Component Inputs' own disposition) unless some fed port failed — then the node
   // defers with that first failure, while the ports that did translate keep their behaviour
@@ -18042,6 +19006,9 @@ function planComponent(
     plan.receivers.push({ nodeId: node.id, channelName: channelNameOf(node)!, actions });
     dispositions[node.id] = { kind: 'collapsed', into: `src/${plan.file.dir}/${plan.file.fileBase}.tsx` };
   }
+
+  // P18-S126-INSIGNAL. Each signal input that runs a chain: an effect on its count, in wire order.
+  for (const [port, actions] of inputPulseActions) plan.inputPulses.push({ port, actions });
 
   // Popup slots and the close prop are earned by attachment (POPUPS-TARGET §2, §4): a compiled
   // popup action whose trigger never attached must leave no state, render, or prop behind.
@@ -18140,6 +19107,9 @@ function planComponent(
           // EXP-011 §39. The chain is walked, which is what earns the popups, mutations and
           // channels inside it.
           scanActions(action.then);
+        } else if (action.kind === 'store-set') {
+          // P18-S127-SETDONE. A Set Variable's Done chain, the same.
+          scanActions(action.then ?? []);
         } else if (action.kind === 'delay') {
           // EXP-011 §39. All four chains — a popup opened from a Delay's Finished is the shape
           // this node exists for.
@@ -18185,6 +19155,7 @@ function planComponent(
     for (const byPort of Object.values(plan.handlers)) for (const actions of Object.values(byPort)) scanActions(actions);
     for (const actions of Object.values(plan.changeHandlers)) scanActions(actions);
     for (const receiver of plan.receivers) scanActions(receiver.actions);
+    for (const pulse of plan.inputPulses) scanActions(pulse.actions);
     // EXP-011 §53. A Run Tasks' listener chains and a template's start chain attach exactly as a handler's
     // chains do — a Cloud Function called only from a task's start chain earns its export and its rows here.
     for (const run of plan.runTasks) for (const chain of Object.values(run.listeners)) if (chain !== undefined) scanActions(chain);
@@ -18698,7 +19669,7 @@ function planComponent(
       notes.push(wireNote(connection, VARIABLE_FROZEN));
       continue;
     }
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, connection.toProperty)) {
       notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
     }
@@ -18735,7 +19706,7 @@ function planComponent(
       notes.push(wireNote(connection, `${read.defer}`));
       continue;
     }
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, connection.toProperty)) {
       notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
     }
@@ -18820,7 +19791,7 @@ function planComponent(
       );
       continue;
     }
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, connection.toProperty)) {
       notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
     }
@@ -18857,7 +19828,7 @@ function planComponent(
       // EXP-011 §49. A wired style parameter the emitter prints inline.
       styleSinkOf(toNode, connection.toProperty) !== undefined;
     if (!bindable) continue; // the sweep names the reason
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) continue; // the sweep names the reason
+    if (routerMounted(toNode, connection.toProperty)) continue; // the sweep names the reason
     const ctx = newCtx();
     const expr = resolveExpr(fromNode, connection.fromProperty, ctx);
     if (expr === null) continue; // the sweep defers the node with this reason
@@ -18905,7 +19876,14 @@ function planComponent(
       // EXP-011 §49. A wired style parameter the emitter prints inline.
       styleSinkOf(toNode, connection.toProperty) !== undefined;
     if (!bindable) continue; // the sweep names the reason
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) continue; // the sweep names the reason
+    if (routerMounted(toNode, connection.toProperty)) continue; // the sweep names the reason
+    // P18-S122-DEADROW. A drawn element reading a row nothing the export runs writes would show nothing, forever, unsaid.
+    const deadRow = excluded.rows.get(fromNode.id);
+    if (deadRow !== undefined) {
+      consumed.add(connection.key);
+      notes.push(wireNote(connection, deadRow));
+      continue;
+    }
     const ctx = newCtx();
     const expr = resolveExpr(fromNode, connection.fromProperty, ctx);
     if (expr === null) continue; // the sweep defers the node with this reason
@@ -19208,7 +20186,7 @@ function planComponent(
       );
       continue;
     }
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
+    if (routerMounted(toNode, connection.toProperty)) {
       consumed.add(connection.key);
       notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
       continue;
@@ -19286,7 +20264,7 @@ function planComponent(
       // EXP-011 §49. A wired style parameter the emitter prints inline.
       styleSinkOf(toNode, connection.toProperty) !== undefined;
     if (!bindable) continue;
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) continue;
+    if (routerMounted(toNode, connection.toProperty)) continue;
     // EXP-011 §47. A named Object's read is a store-key binding — Pass 4b's shape in the widened
     // (binding) mode, so an `unknown` key binds and is coerced at the sink rather than dropped.
     const objectStore = objectStoreNodes.get(fromNode.id);
@@ -19345,7 +20323,7 @@ function planComponent(
       // EXP-011 §49. A wired style parameter the emitter prints inline.
       styleSinkOf(toNode, connection.toProperty) !== undefined;
     if (!bindable) continue;
-    if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) continue;
+    if (routerMounted(toNode, connection.toProperty)) continue;
     const ctx = newCtx();
     const expr = resolveExpr(fromNode, connection.fromProperty, ctx);
     if (expr === null) {
@@ -19413,7 +20391,7 @@ function planComponent(
       continue;
     }
     if (fromNode?.type === 'Component Inputs' && toNode && rendered.has(toNode.id)) {
-      if (connection.toProperty === 'mounted' && toNode.id === plan.rootId) {
+      if (routerMounted(toNode, connection.toProperty)) {
         consumed.add(connection.key);
         notes.push(wireNote(connection, `a mounted wire into the component root is a router concern — not translated in this slice`));
         continue;
@@ -20010,6 +20988,9 @@ function planComponent(
           // EXP-011 §63. Nothing to read; the options and listeners are walked off the plan below.
           case 'drag-snap':
             break;
+          // P18-S128-FIELDSET. Nothing to read.
+          case 'field-focus':
+            break;
           // EXP-011 §52. The same: the inputs and listeners are walked off the plan below.
           case 'script-signal':
             break;
@@ -20050,6 +21031,10 @@ function planComponent(
           case 'state-set':
             if (action.expr !== undefined) walkExpr(action.expr);
             break;
+          // P18-S127-SETDONE. A Set Variable's Done chain (its own value is not walked here, as before).
+          case 'store-set':
+            walkActions(action.then ?? []);
+            break;
           default:
             break;
         }
@@ -20061,6 +21046,7 @@ function planComponent(
     for (const byPort of Object.values(plan.handlers)) for (const actions of Object.values(byPort)) walkActions(actions);
     for (const actions of Object.values(plan.changeHandlers)) walkActions(actions);
     for (const receiver of plan.receivers) walkActions(receiver.actions);
+    for (const pulse of plan.inputPulses) walkActions(pulse.actions);
     // A reactive Condition's own test is the commonest session read there is (the auth-gate
     // idiom), and it lives in neither a binding nor a handler. Without this the `User` node
     // reads as unread: no `useSession` in `src/api/session.ts`, and the page imports a symbol
@@ -20145,6 +21131,34 @@ function planComponent(
     for (const id of wiring.subscribes) boundSubscribers.add(id);
   }
 
+  /**
+   * EXP-011 §99. A relay whose repeater draws no rows in the export (its items have no feed the export reads) is never
+   * written: no row callback exists to write it. Its lift is taken back, so the parent binds nothing, and the value output
+   * says why (the feed is known only now, after the list passes).
+   */
+  for (const relay of [...plan.rowRelays]) {
+    const repeater = plan.repeaters[relay.repeaterId];
+    const fed =
+      repeater !== undefined &&
+      (plan.queries.some((q) => q.nodeId === repeater.itemsQueryId) ||
+        repeater.itemsCollectionName != null ||
+        repeater.itemsExpr !== undefined ||
+        plan.staticData.some((sd) => sd.nodeId === repeater.itemsStaticId));
+    if (fed) continue;
+    const reason = `the repeater relaying "${relay.output}" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it`;
+    plan.rowRelays.splice(plan.rowRelays.indexOf(relay), 1);
+    plan.stateVars = plan.stateVars.filter((v) => v.name !== relay.stateName);
+    plan.pushEffects = plan.pushEffects.filter((e) => !(e.expr.kind === 'state-get' && e.expr.name === relay.stateName));
+    for (const wire of component.connections) {
+      if (wire.fromId !== relay.repeaterId || wire.fromProperty !== `${ITEM_OUTPUT_VALUE}${relay.output}`) continue;
+      const outputs = nodeById.get(wire.toId);
+      if (outputs?.type !== 'Component Outputs') continue;
+      plan.liftedOutputProps = plan.liftedOutputProps.filter((l) => l.port !== wire.toProperty);
+      notes.push(wireNote(wire, reason));
+      if (dispositions[outputs.id]?.kind !== 'deferred') dispositions[outputs.id] = { kind: 'deferred', to: 'EXP-003', reason };
+    }
+  }
+
   // Pass 6: report every wire nothing translated.
   for (const connection of component.connections) {
     if (consumed.has(connection.key)) continue;
@@ -20204,19 +21218,23 @@ function planComponent(
       const label = node.authoredLabel ? `"${node.authoredLabel}"` : 'The text input';
       const refuse = (why: string) =>
         notes.push(`node ${node.id} (${node.type}): its Value at mount is not announced — ${why}; typing still runs its chain (P18-S116-FIELDMOUNT)`);
-      // The field and every ancestor up to the root: a Mounted that is false or wired means the field is not there at mount.
-      let away: 'never' | 'later' | undefined;
+      // The field and every ancestor up to the root: a Mounted that is false means the field is never there; one a value
+      // decides (P18 session 126) means it is there, and announces, the first time that value says true.
+      let away: 'never' | 'uncarried' | undefined;
+      const gates: string[] = [];
       for (let id: string | undefined = node.id; id !== undefined; id = parentOf.get(id)) {
         const bound = plan.bindings[id]?.['mounted'];
         if (bound !== undefined) {
           const literal = bound.kind === 'computed' && (bound.expr.kind === 'literal' || bound.expr.kind === 'undefined');
-          if (!literal) away = away ?? 'later';
+          // A page's sole Group renders as the page div, whose Mounted the emitter does not carry (it draws the page).
+          if (!literal && id === plan.collapsedGroupId) away = 'uncarried';
+          else if (!literal) gates.push(id);
           else if (bound.expr.kind === 'undefined' || !(bound.expr as { value: unknown }).value) away = 'never';
         } else if (literalParam(nodeById.get(id)!, 'mounted') === false) away = 'never';
       }
       if (away === 'never') continue;
-      if (away === 'later') {
-        refuse('it or a group it sits in mounts from a wire, so it announces when that wire first says true, not as the component mounts');
+      if (away === 'uncarried') {
+        refuse("it sits in the page's own Group, whose Mounted is wired and not carried (the page is drawn), so when it appears is not known here");
         continue;
       }
       const type = literalParam(node, 'type');
@@ -20245,7 +21263,11 @@ function planComponent(
         inputId: node.id,
         start: raw === undefined ? '' : String(raw),
         ...(sync !== undefined ? { source: sync.source } : {}),
-        comment: `${label} announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).`
+        ...(gates.length > 0 ? { gates } : {}),
+        comment:
+          gates.length > 0
+            ? `${label} announces its Value the first time it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)); it mounts when a value says.`
+            : `${label} announces its Value as it mounts, and its chain runs with it (TextInput.tsx componentDidMount → setText(startValue)).`
       });
     }
   }
@@ -20579,6 +21601,8 @@ function planComponent(
           // EXP-011 §63. Nothing nested; the listeners are filled off the plan below.
           case 'drag-snap':
             break;
+          case 'field-focus':
+            break;
           case 'script-signal':
             break;
           // EXP-011 §53. Nothing nested on the action; the listeners are filled off the plan below.
@@ -20718,6 +21742,10 @@ function planComponent(
             fillMaterialize(action.then);
             fillMaterialize(action.failThen);
             break;
+          // P18-S127-SETDONE. A Set Variable's Done chain.
+          case 'store-set':
+            fillMaterialize(action.then ?? []);
+            break;
           default:
             break;
         }
@@ -20726,6 +21754,7 @@ function planComponent(
     for (const byPort of Object.values(plan.handlers)) for (const actions of Object.values(byPort)) fillMaterialize(actions);
     for (const actions of Object.values(plan.changeHandlers)) fillMaterialize(actions);
     for (const receiver of plan.receivers) fillMaterialize(receiver.actions);
+    for (const pulse of plan.inputPulses) fillMaterialize(pulse.actions);
     for (const effect of plan.branchEffects) fillMaterialize([effect.action]);
     for (const effect of plan.valueChangedEffects) fillMaterialize(effect.actions);
     for (const ticked of plan.tickedRuns) fillMaterialize([ticked.action]);
@@ -20867,6 +21896,31 @@ function planComponent(
     if (node === undefined || !component.connections.some((c) => c.toId === id && isTriggerInto(node, c.toProperty))) continue;
     dispositions[id] = { kind: 'static' };
   }
+  /*
+   * P18-S126-INSIGNAL. A pulse count is earned by attachment, as a popup's slot is: the sink is compiled before its sender
+   * is ruled on, so a placed component whose every sender was refused (a logic component's Done, a Set Variable's Done)
+   * would keep a count nothing adds to. Its row and its prop go; the wires keep their refusals.
+   */
+  if (instancePulseVars.size > 0) {
+    const pulsed = new Set<string>();
+    const seen = new Set<unknown>();
+    const visit = (value: unknown): void => {
+      if (value === null || typeof value !== 'object' || seen.has(value)) return;
+      seen.add(value);
+      if (Array.isArray(value)) return value.forEach(visit);
+      const v = value as { kind?: unknown; name?: unknown; op?: unknown };
+      if (v.kind === 'state-set' && v.op === 'inc' && typeof v.name === 'string') pulsed.add(v.name);
+      for (const child of Object.values(value)) visit(child);
+    };
+    for (const [key, value] of Object.entries(plan)) if (key !== 'stateVars' && key !== 'bindings') visit(value);
+    for (const [key, stateVar] of instancePulseVars) {
+      if (pulsed.has(stateVar.name)) continue;
+      const [nodeId, port] = key.split('\u0000');
+      plan.stateVars = plan.stateVars.filter((v) => v !== stateVar);
+      plan.instancePulses = plan.instancePulses.filter((p) => p.stateName !== stateVar.name);
+      if (plan.bindings[nodeId] !== undefined) delete plan.bindings[nodeId][port];
+    }
+  }
   sweepRefusedScripts();
   sweepUnreportedDeferrals();
   collectRefusals();
@@ -20895,6 +21949,22 @@ export interface OutputInterface {
    * off the ComponentIR alone, so the child's plan and every parent's plan agree.
    */
   valueProps: Array<{ port: string; prop: string; tsType: string }>;
+}
+
+/** P18-S126-INSIGNAL. The ports a component's Component Inputs declare signals: the inputs a parent pulses. */
+const signalInputPortsCache = new WeakMap<ComponentIR, Set<string>>();
+export function signalInputPortsOf(component: ComponentIR | undefined): Set<string> {
+  if (component === undefined) return new Set();
+  let ports = signalInputPortsCache.get(component);
+  if (ports === undefined) {
+    ports = new Set();
+    for (const node of component.nodes) {
+      if (node.type !== 'Component Inputs') continue;
+      for (const port of node.declaredPorts) if (port.plug === 'output' && port.kind === 'signal') ports.add(port.name);
+    }
+    signalInputPortsCache.set(component, ports);
+  }
+  return ports;
 }
 
 export function componentOutputInterface(component: ComponentIR): OutputInterface {
@@ -21664,7 +22734,9 @@ export function indexPageStacks(ir: ExportIR, catalog: CatalogIndex, kits: KitIn
 }
 
 function tsTypeOf(portType: string | undefined, kind: 'value' | 'signal'): string {
-  if (kind === 'signal') return '() => void';
+  // P18-S126-INSIGNAL. A signal input is the pair the parent passes (`compileInstanceSignal`, `InstancePulsePlan`): the child
+  // runs its chain when the count sent passes the count taken. It was typed as a callback the child never called.
+  if (kind === 'signal') return INPUT_PULSE_TS_TYPE;
   switch (portType) {
     case 'boolean':
       return 'boolean';

@@ -5,7 +5,7 @@
   "author": "The Low Code Foundation <contact@thelowcodefoundation.com>",
   "homepage": "https://thelowcodefoundation.com",
   "license": "GPL-3.0-only",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "main": "src/main/main.bundle.js",
   "scripts": {
     "build": "npx ts-node -P ./tsconfig.build.json ./scripts/build.ts",
@@ -20,8 +20,8 @@
   },
   "build": {
     "appId": "com.nodegx.app",
-    "afterPack": "./build/check-packaged-modules.js",
-    "afterSign": "./build/macos-notarize.js",
+    "afterPack": "./build/after-pack.js",
+    "afterSign": "./build/after-sign.js",
     "mac": {
       "target": [
         "dmg",
@@ -119,6 +119,13 @@
       {
         "from": "../nodegx-backend/dist/cli.js",
         "to": "nodegx-backend/cli.js"
+      },
+      {
+        "from": "../nodegx-backend/dist/sharp-runtime",
+        "to": "nodegx-backend/node_modules",
+        "filter": [
+          "**/*"
+        ]
       },
       {
         "from": "../noodl-mcp/dist/noodl-mcp.cjs",

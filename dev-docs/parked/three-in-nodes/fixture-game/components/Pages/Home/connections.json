@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "keys",
+      "fromProperty": "x",
+      "toId": "ball",
+      "toProperty": "pushX"
+    },
+    {
+      "fromId": "keys",
+      "fromProperty": "z",
+      "toId": "ball",
+      "toProperty": "pushZ"
+    },
+    {
+      "fromId": "keys",
+      "fromProperty": "x",
+      "toId": "vKeysX",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ball",
+      "fromProperty": "onNowX",
+      "toId": "vBallX",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ball",
+      "fromProperty": "onNowY",
+      "toId": "vBallY",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ball",
+      "fromProperty": "onNowZ",
+      "toId": "vBallZ",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ball",
+      "fromProperty": "onHitName",
+      "toId": "vBallHit",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ball",
+      "fromProperty": "onFell",
+      "toId": "ball",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "ball",
+      "fromProperty": "onFell",
+      "toId": "fallCount",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "fallCount",
+      "fromProperty": "currentCount",
+      "toId": "vFalls",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ring",
+      "fromProperty": "onHit",
+      "toId": "ringCount",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "ringCount",
+      "fromProperty": "currentCount",
+      "toId": "vRings",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ring",
+      "fromProperty": "onHitName",
+      "toId": "vRingHit",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ringCount",
+      "fromProperty": "currentCount",
+      "toId": "ringNext",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "ringNext",
+      "fromProperty": "result",
+      "toId": "ring",
+      "toProperty": "jumpX"
+    }
+  ]
+}

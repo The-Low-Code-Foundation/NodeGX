@@ -21,3 +21,13 @@ Three shapes, each measured on the runtime's own Function, Variable and Set Vari
 
 Reach not measured. The ticked effect (EXP-011 §88) reproduces the common order (a write, then a Run, which coalesces
 through `tickedArrival`); these are the orders it does not.
+
+## A fourth shape, measured in P18 session 130 (EXP-011 §98)
+
+4. **A Run's chains against the click's later wires.** A click whose first wire sends a Function's Run and whose second
+   wire sets a Variable that the Function's Success (or Done) chain also sets: the runtime runs the Function after the
+   update (`scheduleAfterInputsHaveUpdated`) and sends Success and Done after the body's `await`, so the chain writes
+   last; the export prints the run and its chains where the Run's wire is, so the click's second wire writes last.
+   Measured on the Success Desk (`s130-fnsuccess/probe.ts`, the variant with Say's second wire): runtime "success",
+   export "second", and the same with the base's Done chain (`EDIT=` every Success wire made a Done wire). Pinned in
+   `tests/the-function-succeeds.test.ts` A9. Reach not measured.

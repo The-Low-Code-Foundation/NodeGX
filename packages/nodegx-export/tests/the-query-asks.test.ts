@@ -33,7 +33,8 @@ const catalog: Catalog = loadCatalog();
 const baseIr = parseProject(PUPPY, catalog);
 const baseApp = emitApp(baseIr, catalog);
 
-type AnyModule = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+/** What the runtime node asked its adapter, and the body the adapter put on the wire, both as JSON. */
+type Asked = Record<string, unknown>;
 
 const componentOf = (ir: ExportIR, p: string): ComponentIR => ir.components.find((c) => c.path === p)!;
 const queryNode = (ir: ExportIR): NodeIR => componentOf(ir, LANDING).nodes.find((n) => n.id === QUERY)!;
@@ -54,7 +55,7 @@ const wire = (ir: ExportIR, toProperty: string) => {
 
 // ---- the runtime arm ---------------------------------------------------------------------------------------------
 
-type RuntimeReading = { failed: string } | { asked: AnyModule; body: AnyModule };
+type RuntimeReading = { failed: string } | { asked: Asked; body: Asked };
 
 /** Every case's runtime reading in one child process (`helpers/runtime-query-arm.js` says why a child, and how). */
 const runtimeReadings = (irs: ExportIR[]): RuntimeReading[] =>
@@ -240,13 +241,13 @@ describe('§C what it cannot ask the same way is refused by name, and says so in
 
 // ---- §D ------------------------------------------------------------------------------------------------------------
 
-const loadClient = (source: string, fetch: unknown): AnyModule => {
+const loadClient = (source: string, fetch: unknown): { query(className: string, params: unknown): Promise<unknown> } => {
   const plain = source.replace(/import\.meta\.env\.VITE_NODEGX_\w+/g, 'undefined');
   const js = ts.transpileModule(plain, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
-  const module = { exports: {} as AnyModule };
+  const module: { exports: unknown } = { exports: {} };
   // eslint-disable-next-line no-new-func
   new Function('require', 'module', 'exports', 'fetch', js)(() => ({}), module, module.exports, fetch);
-  return module.exports;
+  return module.exports as { query(className: string, params: unknown): Promise<unknown> };
 };
 
 describe('§D the body on the wire, against ParseWireAdapter.query’s', () => {
@@ -255,7 +256,7 @@ describe('§D the body on the wire, against ParseWireAdapter.query’s', () => {
     if ('failed' in reading) throw new Error(`the runtime failed: ${reading.failed}`);
     const ir = caseIrs[i];
     const settings = exportAsks(ir);
-    let exportBody: AnyModule | undefined;
+    let exportBody: Asked | undefined;
     const client = loadClient(emitApp(ir, catalog).files['src/api/client.ts'], async (_url: string, init: { body: string }) => {
       exportBody = JSON.parse(init.body);
       return { ok: true, status: 200, text: async () => JSON.stringify({ results: [] }) };

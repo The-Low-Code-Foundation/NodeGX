@@ -23,6 +23,7 @@ import { EventDispatcher } from '../../../../../shared/utils/EventDispatcher';
 import { benchTargetLabel } from '../../VisualCanvas/previewScope';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
 import { ComponentTree } from './components/ComponentTree';
+import { HeaderHonestyLabel, HonestyRowsContext } from './components/HonestyLabels';
 import { ScriptsSection } from './components/ScriptsSection';
 import { LayersTree } from './components/LayersTree';
 import { useLayersDrag, type PlacedFromHeader } from './hooks/useLayersDrag';
@@ -35,6 +36,7 @@ import { buildCreateMenuItems, CreateContext, createMenuTitle } from './createMe
 import { useComponentActions } from './hooks/useComponentActions';
 import { useComponentFilter } from './hooks/useComponentFilter';
 import { useComponentsPanel } from './hooks/useComponentsPanel';
+import { headerHonesty, rowHonestyIndex } from './honestyView';
 import { isCloudNode, useDragDrop } from './hooks/useDragDrop';
 import { useRenameMode } from './hooks/useRenameMode';
 
@@ -43,7 +45,11 @@ import { useRenameMode } from './hooks/useRenameMode';
  * allowing users to navigate, create, rename, and organize components.
  */
 export function ComponentsPanel() {
-  const { treeData, expandedFolders, activeComponentName, toggleFolder, handleItemClick } = useComponentsPanel();
+  const { treeData, expandedFolders, activeComponentName, toggleFolder, handleItemClick, honesty } = useComponentsPanel();
+
+  /** P111 SEE-001 — the project's number in the header, each component's on its row (through the context below). */
+  const honestyHeader = useMemo(() => (honesty ? headerHonesty(honesty) : null), [honesty]);
+  const honestyRows = useMemo(() => ({ rows: honesty ? rowHonestyIndex(honesty) : new Map() }), [honesty]);
 
   const {
     handleMakeHome,
@@ -408,6 +414,9 @@ export function ComponentsPanel() {
       UNSAFE_content_style={{ paddingInline: 0, paddingTop: 0 }}
       headerSlot={
         <>
+          {/* P111 SEE-001: the project's honesty number, quiet until hovered or clicked. Before the create
+              button, so the one control the header had stays where it was. */}
+          <HeaderHonestyLabel header={honestyHeader} />
           {/* SPR-005: the create affordance, visible without a right-click. Its
               tooltip names the destination, so where a new component lands is
               legible before the menu is even open. */}
@@ -562,6 +571,7 @@ export function ComponentsPanel() {
         onMouseUp={handleTreeMouseUp}
       >
         {filtered.nodes.length > 0 ? (
+          <HonestyRowsContext.Provider value={honestyRows}>
           <ComponentTree
             nodes={filtered.nodes}
             expandedFolders={filtered.expandedFolders}
@@ -586,6 +596,7 @@ export function ComponentsPanel() {
             onRenameCancel={cancelRename}
             onDoubleClick={handleRename}
           />
+          </HonestyRowsContext.Provider>
         ) : filtered.isFiltering ? (
           /* An empty *result* is a different fact from an empty project, and
              saying the wrong one is how a filter convinces someone their work

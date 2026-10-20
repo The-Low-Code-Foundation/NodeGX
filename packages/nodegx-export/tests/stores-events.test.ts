@@ -98,6 +98,29 @@ export function CheerBanner() {
 }
 `;
 
+const GOLDEN_FORMAT_SHOUT = `// @ts-nocheck
+// @nodegx:generated (function node — provenance markers complete in EXP-007)
+//
+// The Function node "formatShout" (node formatShout) of Pages/Home, in a file of its own.
+// Type checking is off for this one file, as for a Script node's: the body is the author's JavaScript, not
+// TypeScript. The signature is typed, and every call to it is checked in the component that makes it.
+
+// From the Function node "formatShout" — the body is preserved verbatim (EXP-003 §4).
+export function formatShout(__inputs: { name: string | undefined }): { text?: any } {
+  const Inputs = __inputs as { [K in keyof typeof __inputs]: any };
+  const Outputs: { text?: any } = {};
+  try {
+    (() => {
+const name = Inputs.name || 'friend';
+Outputs.text = name.toUpperCase() + '!';
+    })();
+  } catch (e) {
+    console.error('Function node formatShout threw:', e);
+  }
+  return Outputs;
+}
+`;
+
 const GOLDEN_HOME = `// @nodegx:generated (visual — provenance markers complete in EXP-007)
 import { createPortal } from 'react-dom';
 import { useEffect, useRef, useState } from 'react';
@@ -111,24 +134,10 @@ import { FarewellCard } from '../components/FarewellCard';
 import { GreetingBadge } from '../components/GreetingBadge';
 import { GreetingCard } from '../components/GreetingCard';
 import { celebrate } from '../events';
+import { formatShout } from '../functions/pages/Home/formatShout';
 import { PopupDialog } from '../lib/popupDialog';
 import { visitorName } from '../stores/variables';
 import styles from './Home.module.css';
-
-// From the Function node "formatShout" — the body is preserved verbatim (EXP-003 §4).
-function formatShout(__inputs: { name: string | undefined }): { text?: any } {
-  const Inputs = __inputs as { [K in keyof typeof __inputs]: any };
-  const Outputs: { text?: any } = {};
-  try {
-    (() => {
-const name = Inputs.name || 'friend';
-Outputs.text = name.toUpperCase() + '!';
-    })();
-  } catch (e) {
-    console.error('Function node formatShout threw:', e);
-  }
-  return Outputs;
-}
 
 // From the Expression node "hasLongName" — the expression is preserved verbatim (EXP-003 §4).
 function hasLongName(__inputs: { name: string | undefined }) {
@@ -343,6 +352,14 @@ describe('a receiver is useSignal; a Set Variable is a statement (STEP5-TARGET �
 describe('writes without subscriptions (STEP5-TARGET §5)', () => {
   test('Home.tsx matches the hand-written target', () => {
     expect(app.files['src/pages/Home.tsx']).toBe(GOLDEN_HOME);
+  });
+
+  /**
+   * P18-S122-TPLBUILD (Richard's ruling, 2026-10-19). The Function's wrapper, moved out of the page into a file of its
+   * own, as a Script's code is: the same lines, exported, under a header that turns this one file's checking off.
+   */
+  test("formatShout's own file matches the hand-written target", () => {
+    expect(app.files['src/functions/pages/Home/formatShout.ts']).toBe(GOLDEN_FORMAT_SHOUT);
   });
 
   test('the wired input stays uncontrolled: onChange only, no value, no state of its own', () => {

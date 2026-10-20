@@ -1,0 +1,51 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_bar",
+  "version": 1,
+  "visualRoots": [
+    "mesh"
+  ],
+  "nodes": [
+    {
+      "id": "in",
+      "type": "Component Inputs",
+      "label": "The row",
+      "ports": [
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "x",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "colour",
+          "plug": "output",
+          "type": "color"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mesh",
+      "type": "three-kit.Mesh",
+      "label": "Bar",
+      "parameters": {
+        "shape": "box",
+        "width": 0.8,
+        "depth": 0.8,
+        "sitOnFloor": true,
+        "z": 2
+      }
+    }
+  ]
+}

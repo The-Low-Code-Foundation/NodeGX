@@ -216,7 +216,8 @@ describe('EXP-011 §10.5 — an untyped store key is coerced at its sink, not dr
         connect(mood, read.id, 'value', 'themeText', 'mounted');
       });
       expectParses(app);
-      expect(moodFile(app)).toContain('!!quote &&');
+      // P18 session 126 (EXP-011 §93): authored Mounted true, so the runtime keeps it drawn while the value is undefined.
+      expect(moodFile(app)).toContain('(quote === undefined || !!quote) &&');
       expect(moodFile(app)).not.toContain('String(quote');
     });
   });

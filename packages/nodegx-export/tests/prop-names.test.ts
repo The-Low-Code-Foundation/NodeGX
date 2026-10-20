@@ -87,6 +87,14 @@ describe('the name → identifier mapping', () => {
     // look risky.
     expect(propIdentifier('className')).toBe('className');
   });
+
+  test('a prop React withholds from the component is renamed: an input port called "key" binds as keyProp (P18-S122-TPLBUILD)', () => {
+    // `<Row key={index} key={item.key} />` was TS17001 in the planning and todo-list exports, and at run time React took
+    // the second as the element's key, so the row's own "key" input never arrived.
+    expect(propIdentifier('key')).toBe('keyProp');
+    // `ref` is a prop a React 19 function component does receive, and stays.
+    expect(propIdentifier('ref')).toBe('ref');
+  });
 });
 
 describe('collisions inside one component', () => {

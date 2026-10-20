@@ -16,7 +16,7 @@
     "componentsDir": "components",
     "assetsDir": "assets"
   },
-  "rootNodeId": "ecbe1abf-f593-4c0d-96ea-1e206566b658",
+  "rootNodeId": "app_root",
   "metadata": {
     "designTokens": {
       "version": 1,

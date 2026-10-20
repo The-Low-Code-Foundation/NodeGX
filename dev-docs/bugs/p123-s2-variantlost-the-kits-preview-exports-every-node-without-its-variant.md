@@ -30,3 +30,15 @@ Look at all without this.
 before. Graded by the Open Bubble gate (the Sign in button keeps `rgb(138, 169, 242)` after wearing the style it was
 saved as; the Create account button that picks the style goes from transparent to the same) and by the regression
 test named above, which fetches the served export and reads the node's `variant`.
+
+**Not released yet (NodeGX Studio s13, 2026-10-20).** npm's `@nodegx/preview` 0.2.2 and `@nodegx/mcp` 0.2.2 were
+published on 2026-10-15, the day before this fix, and are the latest there: their in-page bundle reads
+`.variant?this.variant.name:void 0` with no fallback to `variantName`. Measured: NodeGX Studio on the npm 0.2.2
+in-page bundle fails its style check (`check:editor` 169/170: the Sign in button goes from `rgb(138, 169, 242)` to
+`rgb(0, 0, 0)` once it wears its style). So anyone on the published packages (`npx @nodegx/preview`, `nodegx-deploy`,
+the MCP's `render_report`) still draws every node without its Look. Studio builds the in-page bundle from a commit
+until a release carries it (`nodegx-studio/scripts/vendor.mjs`, `PREVIEW_FIXED_IN`).
+
+**Released in `@nodegx/preview` 0.2.3 (published 2026-10-20 15:26).** Its in-page bundle and its `nodegx-deploy.cjs`
+both carry the fallback (`node.variantName || void 0`); NodeGX Studio pins 0.2.3 and stopped building its own bundle.
+`@nodegx/mcp` is still 0.2.2 on npm, so the published MCP's `render_report` should still lack it (read, not measured).

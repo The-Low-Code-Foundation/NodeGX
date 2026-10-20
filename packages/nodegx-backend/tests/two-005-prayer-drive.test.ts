@@ -22,7 +22,7 @@ import * as path from 'path';
 
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 import { clickButton, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
 
@@ -36,7 +36,14 @@ const PHONE = { width: 390, height: 800, mobile: true };
 const TABLET = { width: 1024, height: 640, mobile: false };
 const ASK = 'Please pray for my mother, who goes into surgery on Friday morning.';
 
-type Row = Record<string, any>;
+type Row = Record<string, unknown>;
+/** A Post row and a Prayed row, as far as this drive reads them. */
+interface Post extends ParseRecord {
+  member: ParsePointer;
+}
+interface Prayed extends ParseRecord {
+  doneBy: ParsePointer;
+}
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const bodyText = async (page: RenderedPage) => String(await page.evaluate('document.body ? document.body.innerText : ""'));
 async function until(page: RenderedPage, what: string, ok: (text: string) => boolean, ms = 15000): Promise<string> {
@@ -131,8 +138,8 @@ describe('TWO-005 slice 4 — prayer requests, driven in two browsers', () => {
   const memberId: Record<string, string> = {};
   const userId: Record<string, string> = {};
   const ptr = (className: string, objectId: string) => ({ __type: 'Pointer', className, objectId });
-  const rows = async (cls: string, where: Row = {}, headers: Record<string, string> = master) =>
-    (await request<{ results: Row[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, { headers })).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}, headers: Record<string, string> = master) =>
+    (await request<{ results: T[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt`, { headers })).json.results;
 
   beforeAll(async () => {
     const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'two005-prayer-drive-data-'));
@@ -239,7 +246,7 @@ describe('TWO-005 slice 4 — prayer requests, driven in two browsers', () => {
         await clickButton(ann, 'Ask the members to pray');
         await until(ann, 'Prayer, with Ann’s request', (t) => t.includes(ASK) && t.includes('Nobody has prayed yet. Only you will see who does.'));
         expect(await where(ann)).toBe('/prayer');
-        const [asked] = await rows('Post', { kind: 'prayer' });
+        const [asked] = await rows<Post>('Post', { kind: 'prayer' });
         expect([asked.caption, asked.prayedCount, asked.photos, asked.member.objectId]).toEqual([ASK, 0, [], ann_]);
         expect((await prayButton(ann))?.words).toBe('🙏 I prayed');
         // The card is the picture's bordered card, with its pill.
@@ -283,7 +290,7 @@ describe('TWO-005 slice 4 — prayer requests, driven in two browsers', () => {
         await clickButton(bob, '🙏 I prayed');
         await until(bob, 'Bob prayed', (t) => t.includes('🙏 You prayed · 1'));
         expect(await prayButton(bob)).toMatchObject({ words: '🙏 You prayed · 1', fill: PLUM, ink: WHITE });
-        const prayed = await rows('Prayed', { post: ptr('Post', asked.objectId) });
+        const prayed = await rows<Prayed>('Prayed', { post: ptr('Post', asked.objectId) });
         expect(prayed.map((p) => p.doneBy.objectId)).toEqual([userId['bob@example.com']]);
         expect((await rows('Post', { objectId: asked.objectId }))[0].prayedCount).toBe(1);
         // 🔴 W4: Bob is told who sees it, and is named nowhere on his own screen.

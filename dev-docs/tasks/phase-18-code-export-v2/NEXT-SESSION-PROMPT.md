@@ -1,3 +1,472 @@
+# Next session — session 131 (2026-10-19, BOARD lane 6) built **a relayed row value read inside its holder**: in a chain a row's relayed signal runs (directly, down a Done chain, in a Condition's arm) a read of that repeater's relayed value is the firing row's own item field; anywhere else it is refused by name. On the way it fixed **P18-S131-ROWLESSTRIGGER**: a repeater that draws no rows runs none of its rows' chains (13 template nodes were counted collapsed into rows nobody draws). Graded against the runtime's own nodes, the viewer's own For Each among them, rendered by real React. Templates 4 gained, 11 that never ran taken back; rocket-school's Question box answers. The parent's read of a lifted output (§101) was measured, not built.
+
+## ✅ Session 131: the row is read where it fires
+
+Read EXP-011 §100 and §101. In short:
+
+| what | where |
+|---|---|
+| Measured first: 40 relayed value wires into a logic node in their holder (Set Value 20, Function input 12, Expression 6, Condition 1, Cloud Function 1); 30 sinks run directly by the same repeater's row signal; all refused | `s131-rowread/census.ts` |
+| The runtime, read then measured on the Read Desk (`EXPECTED.md` first, every cell held): every node a row's signal runs reads that row's values; anything else the last row's | `s131-rowread/EXPECTED.md`, `probe.ts` |
+| `row-relay`: minted only while a row's chain compiles (`rowChainScopes`), printed as the row's item field (`rowRelayCode`); outside, refused "as a standing input" or "in a chain no row's relayed signal … starts"; a compile that read one cached per scope; the sweeps ask in the sender's scope | `src/analyze/plan.ts`, `src/emit/component.ts` |
+| P18-S131-ROWLESSTRIGGER: `rowlessReasonOf` makes a repeater with no feed the export reads an owner the export never draws (`unreachedTriggersOf`) | `plan.ts` |
+| Spec, 27 rows: the Read Desk (pick and its Done chain, a Condition's arm, the Lists Editor's edit path), wires reversed, a lifted relay beside, an Again button both orders (pinned), plan rows; 9 mutant arms, 8 kill rows, D survives (a guard no path reaches, said so) | `tests/the-row-is-read-where-it-fires.test.ts`, `tests/helpers/read-desk.ts`, `s131-rowread/mutants.py` |
+| Measured, not built: 733 wires from a placed component's value output into a parent's logic node, 80 lifted, 32 run by the same instance's signal (todo-list's `tdSelectFromList` and six siblings, planning's Week) | `s131-rowread/census-parent.ts`, EXP-011 §101 |
+
+- 🔴 **The reach first read "12 gained, 0 lost", and 8 of the 12 never ran.** Reading the emitted diff found no handler:
+  their repeaters are `TODO(export)` markers (fed by a logic component). `undrawn.ts` then found 13 such nodes at the base.
+  Read the emitted code of every gained node, every session: the count cannot see a callback that is never printed.
+- 🔴 **rocket-school's edit path is still blocked, by the list, not the relay**: `lsEach` is fed by `/Logic/List question
+  sets` (Tier B), so no row and no Edit button exist; then `sets` (`/Logic/Active profile`) and Save (`/Logic/Save
+  question set`), Tier B too.
+- 🔴 **A sweep re-compiles a sink to ask its refusal**, and asked outside the row's scope: the row's reason came out as the
+  outside sentence (C5). The compile pre-pass compiles every sink outside any scope first: a cache not kept per scope
+  reuses that refusal for every row (mutant C, 19 rows).
+- 🔴 **One sentence, two populations** (§31's lesson): the first outside sentence said "outside a chain its rows' relayed
+  signals run" for a Function a row's signal runs. A Function's input is resolved once for every run; it has its own
+  sentence now ("as a standing input").
+- 🔴 **A mutant survived and the code went**: a promotion of a row's compile over the plain key's refusal graded nothing
+  (F); taken out.
+
+Readings: the spec 27 / 27 (9 arms, each typechecked; 8 kill rows); neighbours 34 suites, 855 rows, green; hls001
+unchanged (predicted 0: all 63 fixtures identical, base against tree); the templates' typecheck gate 3 / 3, every row 0;
+all 19 (`tplbuild.ts`) 1 error in 1 (nightbook STYLENULL, as before). Package `tsc --noEmit` 0; the ratchet holds. Whole
+package (`nice -n 19 --runInBand`, 22:30): **149 / 149 suites, 5,107 passed, 0 failed, 3 skipped.**
+
+Reach (`dispdiff.ts`, `7e49bc805` against the tree): **templates 4 gained** (Question box `qbSetPicked`, Moon Adopt
+`maSetSp`, rocket-school and star-class), **11 taken back that never ran** (each under a `TODO(export)` marker), 2 moved
+to their other trigger, 30 re-worded; **corpus 1 gained, 0 lost**, 17 re-worded.
+
+Filed: **P18-S131-ROWLESSTRIGGER** (fixed), **P18-S131-RELAYOUTSIDE** (low).
+
+**Next (BOARD lane 6):**
+1. **A lifted instance output read by a logic sink in the parent** (§101: 32 wires run by the same instance's signal;
+   todo-list's selection from its lists). Two pieces: a replan round so the parent's compile knows the lifted row, and the
+   chain run from an effect on a count delivered one commit late (§96's `InstancePulsePlan.delivered`).
+2. P18-S130-THROWCHAIN; P18-S129-VALUEARRIVAL (medium); P18-S131-RELAYOUTSIDE and the low ones (P18-S130-UNDEFTEXT,
+   P18-S129-SEEDANNOUNCE, RUNONCHANGEMARK, and session 128's list).
+3. The repeaters a logic component feeds (rocket-school's list of lists, bot-garden's Shop, nightbook's Book): EXP-003 Tier B.
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
+# Next session — session 130 (2026-10-19, BOARD lane 6) fixed **P18-S129-FNSUCCESS** and built **the repeater's row relay**: a Function's Success runs its chain (after the body's own signals and before Done on a Run, alone on a ticked input's run), and a repeater's relayed row value reaches its component's value output (each row's relayed signal writes what that row passes through, before the signal's chain). Graded against the runtime's own nodes, the viewer's own For Each among them, rendered by real React. Templates 10 + 23 nodes gained, 0 lost; the Lists Editor's New fills, todo-list's Dialog flow is handed the task a person picks.
+
+## ✅ Session 130: the Function succeeds; the row relays its values
+
+Read EXP-011 §98 and §99. In short:
+
+| what | where |
+|---|---|
+| Measured first: 189 wires out of a Function's Success, 11 in visual components, 4 refused for the Success itself (the two Lists Editors' `leFill`, pixel-game's `plTakeCoin`) | `s130-fnsuccess/census.ts` |
+| The runtime, read then measured: after the body's await, Success then Done (Done only on a Run); a ticked run sends Success alone; a throw sends neither; the run finishes after the click's later wires | `s130-fnsuccess/EXPECTED.md`, `probe.ts` |
+| `compileJsRun` compiles the Success chain (pulses, Success, Done); the ticked half carries it; the attach pass leaves Success wires to the Function and a sweep names those it did not take; a Run of a Function a ticked input also runs records its read even unpulsed | `src/analyze/plan.ts`, `src/emit/component.ts` |
+| Spec, 26 rows: the Success Desk (a pulsed run, a ticked run counted by a Counter, the Lists Editor's shape in a placed Editor), the wires reversed, the control, the box unticked; 12 mutant arms each killing rows | `tests/the-function-succeeds.test.ts`, `tests/helpers/success-desk.ts`, `s130-fnsuccess/mutants.py` |
+| Measured first: 263 relayed row value wires, 150 into a value output, 144 refused "which row fired"; 167 of the 263 pass a row input straight through | `s130-relay/census.ts` |
+| `rowRelayOf`: a state row per relayed value, lifted as any §4d value; refused by name where the row computes it, nothing or two wires feed it, or the repeater draws no rows (taken back after the list passes); `rowSignalAttrs` writes every relayed value in every relayed row callback before the chain | `plan.ts`, `component.ts` |
+| Spec, 20 rows: the Relay Desk (two signals, an output named apart from its input) against the viewer's own For Each, which the runtime arm now draws; 8 mutant arms each killing rows | `tests/the-row-relays-its-values.test.ts`, `tests/helpers/relay-desk.ts`, `tests/helpers/runtime-mounted-arm.js`, `s130-relay/mutants.py` |
+
+- 🔴 **The bug's ticked-run claim was measured false**: `leFill`'s two boxes are written `false` in both templates; it runs on
+  `fill` alone. The ticked path is built and graded on the desk anyway (the runtime sends Success on a ticked run).
+- 🔴 **The run count came from reading the emitted code, not from the first desk.** A Run of a Function neither pulsed nor
+  materialized printed no statement, so it never recorded its ticked read: a click that writes the value and sends Run
+  ran it twice. No such run had a ticked half before; a Success chain gives it one. A Counter on Success made it visible.
+- 🔴 **The first relay build lifted rows nothing ever writes**: five holders whose repeater the export does not draw. The
+  reach read "27 gained, 0 lost"; reading the emitted holders (state rows with no write) found it. Taken back: 23 gained.
+- 🔴 **The runtime arm was run on the Relay Desk before its EXPECTED.md** (it had to be made to draw a For Each first). Said
+  so in the file; the variants were predicted before they ran.
+- 🔴 **Two divergences found that are not these bugs**, filed or recorded: a throwing Function runs its Done and Success
+  chains in the export (P18-S130-THROWCHAIN, medium); a Text whose value becomes `undefined` prints nothing where the
+  runtime keeps its text (P18-S130-UNDEFTEXT, low); a Run's chains finish after the click's later wires in the runtime
+  (P18-S121-ONEUPDATE's fourth shape).
+- The viewer's For Each reads `NoodlRuntime.instance.getProjectSettings()`; the arm lends `{}` when nothing set it.
+
+Readings: the FNSUCCESS spec 26 / 26 (12 arms), the relay spec 20 / 20 (8 arms; RH survived the first 19 rows, C5 added);
+neighbours green (EXP-011 §98.5, 20 suites, 518 rows; §99.5, 15 suites, 266 rows); hls001 unchanged (predicted 0 for both:
+all 63 fixtures identical, base against tree); the templates' typecheck gate 3 / 3, every row 0; all 19 (`tplbuild.ts`)
+1 error in 1 (nightbook STYLENULL, as before). Package `tsc --noEmit` 0; the ratchet holds. Whole package
+(`nice -n 19 --runInBand`): JSON 21:32, after both changes: **148 / 148 suites, 5,080 passed, 0 failed, 3 pending** (session 129: 146, 5,034; this session adds two suites of 26 and 20).
+
+Reach (`dispdiff.ts`): **FNSUCCESS** (`72f013fec` against `391ba0370`): templates **10 gained, 0 lost**, 2 re-worded;
+corpus 0 / 0, 20 re-worded. **Relay** (`391ba0370` against the tree): templates **23 gained, 0 lost**, 14 re-worded;
+corpus **7 gained, 0 lost**, 1 re-worded; sibling wires bound 8 → 24. In the emitted apps: rocket-school's and
+star-class's Lists page New empties the drafts and both fields; todo-list's (and its demo's) Dialog flow is handed the
+task, today's row and the next action a person picked.
+
+Filed: **P18-S130-THROWCHAIN** (medium), **P18-S130-UNDEFTEXT** (low); ONEUPDATE's fourth shape recorded. Fixed:
+P18-S129-FNSUCCESS.
+
+**Next (BOARD lane 6):**
+1. **A relayed value read inside the holder** (§99.6.1): in a row signal's chain the value is that row's (a Set Variable's
+   Value 20, a Function's input 12 in the templates). The Lists Editor's edit path (`lsSetEditId`) is one.
+2. **A lifted instance output read by a logic sink in the parent** (§99.6.2: `tdSelectFromList` reads the Task list's
+   `taskId` on its `open`): todo-list's selection from the list. Measure the timing first (the value lands one render
+   after the click's handler).
+3. P18-S130-THROWCHAIN; P18-S129-VALUEARRIVAL (medium); then the low ones (P18-S130-UNDEFTEXT, P18-S129-SEEDANNOUNCE,
+   RUNONCHANGEMARK, and session 128's list).
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
+# Next session — session 129 (2026-10-19, BOARD lane 6) fixed **P18-S128-FIELDSET** and **P18-S127-CLEAROUT**: a text field's Set, Clear, Focus and Blur run from a chain, as the runtime runs them: the Set writes the Value as the field holds it and nothing into a focused field, a Clear sends the empty text on, Focus and Blur reach the element, and a field's Enter is its Enter key. Graded against the runtime's own Text Input and the viewer's own focus tracker, rendered by real React. Templates 78 nodes gained, 0 lost; the Lists Editor still does not fill, for a reason measured this session (P18-S129-FNSUCCESS).
+
+## ✅ Session 129: the field does what it is told
+
+Read EXP-011 §97. In short:
+
+| what | where |
+|---|---|
+| Measured first: 165 wires into a field's action input (Clear 97, Set 35, Blur 26, Focus 7; the bug said 34 Focus and Blur, counted 33); only Clear was a trigger | `s129-fieldset/census.ts` |
+| The runtime, read then measured on its own nodes: a Set writes `_internal.text` (the Value as last delivered, `''` after a Clear), nothing while focused; a Clear writes `''` focused or not; both send the text on and fire Value Changed | `s129-fieldset/EXPECTED.md`, `probe.ts` |
+| A Set and a Clear are the `state-set` of the field's row with `field: { port }`, so every walker reads them; the emitter prints the focus test, the write, and the field's own change chain with the text (`fieldWriteCode`); a Cleared mark lifted by every write of the Variable the Value reads (`draft.subscribe`) | `src/analyze/plan.ts` `compileFieldSet`, `src/emit/component.ts` |
+| Focus and Blur are `field-focus`, a call on the `<input>`'s ref; a field's On Enter is `onKeyDown` Enter; a drawn field keeps its disposition when such a wire is refused; a row does not take its component's store names | `plan.ts`, `component.ts` |
+| Spec, 34 rows: the Field Desk against the runtime's own Text Input and focus tracker, real React under StrictMode, step by step; the unticked desk, the control, a typed-in Value under an unwritten wire; 14 mutant arms each killing rows | `tests/the-field-does-what-it-is-told.test.ts`, `tests/helpers/field-desk.ts`, `s129-fieldset/mutants.py` |
+| Both arms gained `fields: true` (each field's text by placeholder, then the focused one) and the steps `type:<placeholder>:<text>` and `enter:<placeholder>`; the runtime arm puts the viewer's own `FocusTracker` behind Focus and Blur | `tests/helpers/runtime-mounted-arm.js`, `tests/helpers/export-react-arm.js` |
+
+- 🔴 **The bug's blocker was measured false.** The Lists Editor's `fill` runs a Function whose **Success** starts the
+  chain, and the export refuses a Run whose Success is wired ("only done continues a Run chain"): P18-S129-FNSUCCESS,
+  filed, medium. The field's Set is carried behind it now. Moon Adopt's Set is sent from a logic component's Done.
+- 🔴 **A prediction was wrong, and the mark's design came from it.** A Set after a Clear, with the Variable written again
+  with the same value, writes the value in the runtime (the Set Variable's `forceChange` delivers it again), not `''`. An
+  effect keyed on the value would be the predicted rule; the store's `subscribe` (every `set` calls every listener) is
+  the measured one. Mutant E is the prediction.
+- 🔴 **The first reach read 7 fields lost** (static → deferred): a refused Set wrote its sentence on a field that is drawn
+  whatever a sender does. Restored after the attach pass, as a placed component is; then 78 fields that refused Clears had
+  always marked deferred came back too (planning 70, todo-list 8).
+- 🔴 **Reading the emitted diff found a name clash**: the marketplace's search box, the first field a Set minted a row
+  for, named its row `search`, the store its own Variable imports. `stateNameTaken` asks the component's stores now
+  (C8, mutant K). Found by reading, before the gate ran.
+- 🔴 **Two mutant arms survived the first spec**: the ticked desk's focused Set came after a Clear (`''` over `''`), and no
+  field had a typed-in Value under a wire. A7 moved to the unticked desk, A14 added.
+- 🔴 **The first drafts read three things that are not this bug's**: a format-4 field with a wired Set and an unstated box
+  is unticked to the export's settle and ticked to the runtime arm (the desk states the box); a page-seeded Variable is
+  announced before its seed lands (P18-S129-SEEDANNOUNCE); a ticked Value arriving is not sent on and is written over a
+  focused field (P18-S129-VALUEARRIVAL, medium). So the Set alone is graded on the unticked desk.
+- 🔴 A package copy inside `packages/` with the same name stops `npx` resolving ("multiple workspaces with the same name"):
+  use `../../node_modules/.bin/jest` while a mutant copy exists, and remove it before the whole suite.
+
+Readings: the spec 34 / 34 (14 mutant arms, each killing rows); re-pinned `controlled-state`'s Clear row (it pinned
+CLEAROUT's divergence); neighbours green (EXP-011 §97.5, 15 suites, 358 rows); hls001 unchanged (predicted 0: all 63
+fixtures identical, base against tree); the templates' typecheck gate 3 / 3, every row 0; all 19 (`tplbuild.ts`) 1 error
+in 1 (nightbook STYLENULL, as before). Package `tsc --noEmit` 0; the ratchet holds. Whole package (`nice -n 19
+--runInBand`, JSON 20:15): **146 / 146 suites, 5,034 passed, 0 failed, 3 pending.**
+
+Reach (`dispdiff.ts`, `1d4adc615` against the tree): **templates 78 gained, 0 lost**, 6 re-worded (the Lists Editors'
+Sets, now named from `leFill.success`); **corpus 49 gained, 0 lost**, 22 re-worded. The catch-all 8,753 → 8,689, "no DOM
+event equivalent" 7 → 1. Carried: Set 3 of 35, Focus 7 of 7, Blur 6 of 26. In the emitted apps: todo-list's dialogs
+put the cursor in their field, its rows' titles let go on Enter and run their Blurred, both Sign ins log in on Enter,
+nightbook's Field takes Focus, the New player form's `fill` puts the name back, the marketplace's search box shows the
+saved search.
+
+Filed: **P18-S129-FNSUCCESS** (medium: a Function's Success continues no chain; the Lists Editor), **P18-S129-VALUEARRIVAL**
+(medium), **P18-S129-SEEDANNOUNCE**, **P18-S129-RUNONCHANGEMARK** (low). Fixed: P18-S128-FIELDSET, P18-S127-CLEAROUT.
+
+**Next (BOARD lane 6):**
+1. **P18-S129-FNSUCCESS**: a Function's Success as a chain, on the Run path and on the ticked-run path (the Lists Editor
+   refills when its sets or id change, in the runtime). Small to medium; the Lists Editor fills once it is in (its
+   field's Set is carried behind it).
+2. **The repeater's row relay** (§96.5.1, not started this session): the next blocker of todo-list's Dialog flow (16
+   sibling wires). The runtime arm has no For Each yet (`MODULES` in `runtime-mounted-arm.js`).
+3. P18-S129-VALUEARRIVAL (the sync effect sends the text on and leaves a focused field alone; the printer is
+   `fieldWriteCode`); then the low ones as listed in session 128.
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
+# Next session — session 128 (2026-10-19, BOARD lane 6) fixed **P18-S127-SETDONE** and **P18-S127-SIBLINGVALUE**: a Set Variable's Done runs its chain (the write, then Done, then Completed), and another placed component's lifted value reaches a sibling's input in time for the chain a pulse runs there. Graded against the runtime's own nodes rendered by real React. Templates 55 nodes gained, 0 lost; rocket-school's game and race start, and take the Setup's choices.
+
+## ✅ Session 128: the Set runs its Done chain; the sibling's value arrives
+
+Read EXP-011 §95 and §96. In short:
+
+| what | where |
+|---|---|
+| Measured first: 54 template nodes refused with a Set's output as their trigger; 231 wires out of 117 Sets' Done (a Set 79, a Function 35, a placed component's signal input 40, a Component Outputs signal 19, …) | `s128-setdone/census.ts` |
+| The runtime's order, measured: the Done chain runs **before the click's next wire** (a Done's target is flagged dirty with its sender and pulls it first). Predicted the other way from the update loop alone | `s128-setdone/EXPECTED.md` |
+| `store-set.then` (`withSetDone`): Done, then Completed, after the write, as following statements; a chain it cannot run keeps the write; `OWN_CHAIN_OUTPUTS['Set Variable']` (wire order); a sweep after the attach pass names a wire the compile did not take, the sink's own refusal first, and consumes it | `src/analyze/plan.ts`, `src/emit/component.ts` `expandActions` and five walkers |
+| Spec, 28 rows: the Set Desk (temp folder) against the runtime's own nodes, real React under StrictMode, press by press; the wires reversed, a Condition, a control, a field cleared then read in the chain; the mutant arms | `tests/the-set-runs-its-done-chain.test.ts`, `tests/helpers/set-desk.ts` |
+| SIBLINGVALUE: a placed component's declared value input binds to the parent's lifted row (`siblingValueInputOf`); a pulsed component that reads one is handed its count one commit late, from the parent's own effect (`InstancePulsePlan.delivered`), so the lifted value lands first | `plan.ts` `liftInto`, `component.ts` `instanceAttrs` |
+| Spec, 14 rows: the Sibling Desk; the first build (the row alone) read the value one pulse late, measured | `tests/the-sibling-value-arrives.test.ts`, `tests/helpers/sibling-desk.ts`, `s128-setdone/sibling-probe.ts`, `siblings.ts` |
+
+- 🔴 **The runtime's order was predicted wrong, and the export was right by accident of how it prints.** Reading
+  `updateDirtyNodes` alone says a Done's chain waits for the click's other wires; `flagDependeesDirty` and
+  `_updateDependencies` make it depth first. Measure the order on the runtime's own nodes before deciding one.
+- 🔴 **A sink's own refusal is the truer sentence.** The first sweep wrote "the Set Variable's Done chain is not exported"
+  over 21 nodes whose own compile refuses them for their own reason (the base's attach pass compiled the sink first). The
+  reach read "0 lost" all along; the re-worded rows are what showed it. Read the deferred → deferred rows, not only the
+  gained and lost.
+- 🔴 **The first sweep named a wire and left it unconsumed**, so the catch-all named it again (+78 notes). Count the notes'
+  sentences both ways, not only the dispositions.
+- 🔴 **Binding a sibling's input to the lifted row alone reads one pulse late.** A child pushes a lifted value from its
+  effect; the sibling's pulse effect runs in the same commit. Predicted from the effect order, measured, then fixed by
+  delivering the count from the parent's effect (a parent's effects run after its children's).
+- 🔴 **The first drafts of the desk read three bugs that are not these**, each filed: a Variable seeded inside a component
+  the click mounts and pulses is reseeded over the pulse's write under StrictMode (P18-S121-SEEDTWICE; and
+  P18-S128-SEEDREMOUNT: the runtime seeds once per instance); a ticked Condition with Evaluate wired runs its arm at load in
+  the runtime only (P18-S128-CONDLOAD); a wired Text with no value reads "Text" in the runtime only (P18-S122-TEXTDEFAULT).
+- 🔴 **Two mutant arms survived the first spec**: the attach scan and the snapshot over the chain were ungraded. A Now in
+  the chain (earned by the scan) and a field cleared on the click's first wire, read in the chain (the snapshot), grade them.
+
+Readings: the SETDONE spec 28 / 28 (13 mutant arms, each killing rows), the SIBLINGVALUE spec 14 / 14 (4 arms); re-pinned
+`the-signal-arrives-in-the-component` C3; neighbours green (EXP-011 §95.5); hls001 4 / 4 unchanged (predicted 0, both
+changes); the templates' typecheck gate 3 / 3, every row 0; all 19 (`tplbuild.ts`) 1 error in 1 (nightbook STYLENULL, as
+before); `parameter-coverage` green. Package `tsc --noEmit` 0; the ratchet holds. Whole package (`nice -n 19 --runInBand`,
+JSON 19:17): **145 / 145 suites, 5,000 passed, 0 failed, 3 pending.**
+
+Reach: **SETDONE** (`dispdiff.ts`, `8b5382a17` against `ffd3d7179`): templates 55 gained, 0 lost, 22 re-worded (each from
+"trigger … is not a rendered element event or a receiver"); corpus 104 gained, 0 lost, 17 re-worded. `census.ts` 54 → 20.
+The notes: the trigger-drop sentence 529 → 371, the catch-all 8,785 → 8,753. **SIBLINGVALUE** (`siblings.ts`): of the 90
+wires, 8 bind (rocket-school's and star-class's Monster and Race Setup → Play), 82 are named by their real blocker, the
+child not lifting the output (a logic component 32, a repeater's row relay 18, a kit 4, a nested instance 2, nightbook 26
+not read); 0 dispositions moved.
+
+Filed: **P18-S128-FIELDSET** (medium: a text field's Set, Focus or Blur from a chain; 35 + 34 template wires; the Lists
+Editor's `fill`), **P18-S128-CONDLOAD**, **P18-S128-SEEDREMOUNT** (low). Fixed: P18-S127-SETDONE, P18-S127-SIBLINGVALUE.
+
+**Next (BOARD lane 6):**
+1. **P18-S128-FIELDSET**: a field's Set (and Focus, Blur) from a chain. Small to medium; rocket-school's Lists Editor fills
+   once it is in. Grade with `runtime-mounted-arm.js` (it has the viewer's Text Input).
+2. **The repeater's row relay** (§31, "which row fired is not statically expressible"): the next blocker of todo-list's
+   Dialog flow (16 sibling wires), now that the sibling binding exists.
+3. P18-S127-CLEAROUT; the Mounted feeders (EXP-011 §93.6) and the logic components behind the Feedback banner (Tier B);
+   P18-S128-CONDLOAD, SEEDREMOUNT, P18-S126-PROPUNDEF, PAGEGROUP, UNDEFCOMPUTED, P18-S125-STYLENULL, P18-S124-RUNINPUTS,
+   LATEMARKER (small).
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
+# Next session — session 127 (2026-10-19, BOARD lane 6) fixed **P18-S126-INSIGNAL**: a signal a parent sends into a placed component runs the chain inside. The parent counts its pulses and keeps the count the child has taken; the child runs the chain when one passes the other. Graded against the runtime's own component instances rendered by real React. Templates 101 nodes gained, 0 lost.
+
+## ✅ Session 127: the signal arrives in the component
+
+Read EXP-011 §94. In short:
+
+| what | where |
+|---|---|
+| Measured first: 87 template nodes refused with a Component Inputs trigger, 115 wires (a Set Variable 48, a Function's Run 20, a field's Clear/Set/Focus 18, States 6, Delay, kit, Counter 4 each); 859 wires into a placed component's signal input with no sentence of their own; the prop typed `() => void` | `s127-insignal/census.ts` |
+| `instanceSignalInputOf`: a placed component's signal input (target with a visual root) is a trigger port; `compileInstanceSignal`: a count per wired port (`op: 'inc'`) and a ref of the count taken, passed as `{ sent, taken }` (`INPUT_PULSE_TS_TYPE`) | `src/analyze/plan.ts`, `src/emit/component.ts` `instanceAttrs` |
+| Inside: a Component Inputs signal port is a trigger in the attach pass; one effect per port, `if (x === undefined \|\| x.taken.current === x.sent) return; x.taken.current = x.sent; …`, keyed on `x?.sent` (`plan.inputPulses`) | `plan.ts`, `component.ts` |
+| A pass-through is the child's own pulse to its child; a count with no attached sender is pruned; a refused sender does not defer the placed component (restored after the attach pass) | `plan.ts` |
+| Spec, 19 rows: the Signal Desk (temp folder) against the runtime's component instances, States, Counter, Condition, real React under StrictMode, press by press; a Condition variant; a control; 9 mutant arms each killing rows. The export arm gained `settled: true` (async act; the States library drains in a microtask) | `tests/the-signal-arrives-in-the-component.test.ts`, `tests/helpers/signal-desk.ts`, `s127-insignal/mutants.py` |
+
+- 🔴 **The first build lost a pulse sent with the click that draws the component.** It booted the child's ref with the count
+  at mount. 14 of the 29 pulsed placements in the templates sit under a condition in their parent (`condpulse.py`): the
+  choosers, the player form, the Round. The count taken lives in the parent now. Mutant D is the first build (A6, A7).
+- 🔴 **The probe found two other bugs in the fixture's first draft**, filed instead of built: a Set Variable's Done is not
+  carried at all (P18-S127-SETDONE, 54 template nodes; rocket-school's game and race `start`), a Clear does not send the
+  empty text on (P18-S127-CLEAROUT).
+- 🔴 **The first reach read 127 gained and 56 lost.** The 56 were placed components (and one Expression reading one)
+  deferred because a sender into them was refused: the attach pass writes its sentence on the sink, and a placed
+  component is drawn whatever a sender does. Restored after the pass: 127 gained, 0 lost. Then 26 of the 127 were in chains
+  that pulse a logic component, which draws nothing and has no file: a target must have a visual root, 101 gained.
+  Then the emitted diff showed counts nothing adds to (every sender refused, the compile runs before the sender is ruled
+  on): pruned. Each is a mutant (G, I, H).
+- 🔴 **Reading the diff found a chain that runs on inputs it is not given**: todo-list's Dialog flow writes from
+  `listTaskId` and its siblings, which the page drops (another placed component's output into an input, 90 template
+  wires): P18-S127-SIBLINGVALUE.
+- The States library schedules in a microtask: the synchronous export arm read the Banner closed. `settled: true` presses in
+  an async act (and lends jsdom a `MessageChannel`, and exits explicitly, or the process hangs).
+
+Readings: the spec 19 / 19 (9 mutant arms, each killing rows); neighbours green (EXP-011 §94.5); `run-tasks` re-pinned
+(a Run Tasks template's `Do` is typed as the pulse pair); hls001 one key, predicted (batch-desk's `Notify.tsx`), regenerated;
+the templates' typecheck gate 3 / 3, every row 0; all 19 (`tplbuild.ts`) 1 error in 1 (nightbook STYLENULL, as before);
+`parameter-coverage` 9. Package `tsc --noEmit` 0; the ratchet holds. Whole package (`nice -n 19 --runInBand`, JSON 17:08):
+**143 / 143 suites, 4,958 passed, 0 failed, 3 pending.**
+
+Reach (`dispdiff.ts`, base `a59d3e4d5` against the tree): **templates 101 gained, 0 lost; corpus 69 gained, 0 lost.**
+`census.ts` 87 → 0 (115 → 0 wires). rocket-school's Feedback banner still never opens: its `show` comes from `/Logic/Grade
+answer`'s Done, a logic component (named on its marker now).
+
+Filed: **P18-S127-SETDONE** (medium), **P18-S127-SIBLINGVALUE** (medium), **P18-S127-CLEAROUT** (low). Fixed: P18-S126-INSIGNAL.
+
+**Next (BOARD lane 6):**
+1. **P18-S127-SETDONE**: a Set Variable's Done (54 template nodes; rocket-school's game and race start). Small, and the
+   Signal Desk's first draft is its fixture.
+2. **P18-S127-SIBLINGVALUE**: another placed component's value output into an input (90 template wires).
+3. The Mounted feeders left (EXP-011 §93.6), and the logic components behind the Feedback banner (Tier B).
+4. P18-S127-CLEAROUT, P18-S126-PROPUNDEF, PAGEGROUP, UNDEFCOMPUTED, P18-S125-STYLENULL, P18-S124-RUNINPUTS, LATEMARKER
+   (small); the §87 Conditions; the low ones as listed in session 126.
+5. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
+# Next session — session 126 (2026-10-19, BOARD lane 6) carried **the Mounted wires of component roots**: a root's Mounted binds as any element's (only a Page's is the router's), a Did Mount under a value-mounted element runs on every mount, a field there announces the first time. Graded against the runtime's own nodes rendered by real React. Templates 54 nodes gained, 0 lost.
+
+## ✅ Session 126: the root is mounted when it says
+
+Read EXP-011 §93. In short:
+
+| what | where |
+|---|---|
+| Measured first, by feeder: 157 template nodes refused for an unreached trigger; a Function reading the Noodl API 64 (needs EXP-003 Tier B), a source the export cannot read 33, members-area's Standing 26, a value-mounted Did Mount 16, a root mounted from an input 7. And **72 wires into a component root's Mounted, all refused as "a router concern"**: 24 roots never drawn, 48 always drawn | `s126-mounted/census.ts`, `roots.ts` |
+| `routerMounted`: only a Page's root is the router's (12 sites) | `src/analyze/plan.ts` |
+| The root guard `if (!cond) return null;` after every hook | `src/emit/component.ts` |
+| `mountedCondOf`: an element authored Mounted true keeps it while a read source (prop, store, row field) is undefined, `(x === undefined \|\| x)`; the runtime never delivers `undefined` | `component.ts` |
+| A Did Mount under a value-mounted element: an effect keyed on the gates, its ref reset when they say unmounted (s124 refused it); a field there announces the first time (`FieldMountPlan.gates`; it was refused) | `component.ts`, `plan.ts` |
+| A page's sole Group's Mounted is still dropped: a Did Mount or field under it is refused by name in plan and emitter alike | `UNCARRIED_PAGE_GROUP` |
+| Spec, 19 rows: the Root Desk built in a temp folder; real React under StrictMode against the viewer's own Group, Text, Button, Text Input and the runtime's component instances (a new arm), press by press; a control; 11 mutant arms each killing rows | `tests/the-root-is-mounted-when-it-says.test.ts`, `tests/helpers/root-desk.ts`, `tests/helpers/runtime-mounted-arm.js`, `s126-mounted/mutants.py` |
+
+- 🔴 **The viewer's own nodes render in jsdom.** `runtime-mounted-arm.js` renders the corpus graph's root with real React:
+  a visual node re-renders on the frame's END (`forceUpdate` waits for `frameEnd`, so `graph.frame()`, not `settle()`),
+  and React commits, and the viewer sends Did Mount, as an `act` scope closes: the frames run again in a new scope until a
+  reading repeats. The next mount-shaped question can use it instead of stand-ins.
+- 🔴 **Reading the emitted diff found a field lost.** The first build gated the Did Mount and not the field: rocket-school's
+  Editor lost its two fields' mount announcements (HEAD announced them; the value-mounted rule refused them). The count
+  said 54 gained, 0 lost all along: the field mount is not a disposition. Read the code, every session.
+- 🔴 **The undefined arm is for a read only.** Around a Date Compare's call it printed (and ran) the call twice
+  (deadline-desk, the one hls001 key the predictor did not foresee); around an Expression's answer it is noise. A read
+  only now; the golden did not move.
+- 🔴 **A mutant arm can crash the file instead of failing rows**: A's export arm threw at load on a button the base never
+  draws ("0 total"). The arms now return the error as a reading. G broke a narrowing and did not compile: reshaped.
+- The parent still coerces a boolean input with `!!` (P18-S126-PROPUNDEF): the one divergence left in the arms' 24
+  readings (base 18).
+
+Readings: the spec 19 / 19; re-pinned `the-ticked-input-runs-it-again`, `controlled-state` (2), `the-undrawn-trigger-is-refused`
+B1, `the-field-announces-at-mount` (2), `drag` C13, `untyped-store-key`, `untyped-variable`; neighbours green (EXP-011 §93.5); hls001 4 / 4, unchanged (predicted 0); the
+templates' typecheck gate 3 / 3, every row 0, all 19 1 error in 1 (nightbook STYLENULL, as before). Package `tsc --noEmit`
+0; the ratchet holds. Whole package (`nice -n 19 --runInBand`, JSON 14:55): **139 / 142 suites, 4,936 passed, 3 failed, 3
+skipped**: `drag` C13, `untyped-store-key`, `untyped-variable` pinned the base's `{!!x && (` for an authored-true Mounted
+fed by an untyped store (fixtures mutated in memory, so hls001 never saw them); re-pinned, 84 / 84 alone. 🔴 The
+neighbour list missed them: a print change reaches every spec that mutates a fixture, so grep the specs for the old
+print before the whole run.
+
+Reach (`dispdiff.ts`, base `3476642d6` against the tree): **templates 54 gained, 0 lost; corpus 14 gained, 0 lost.**
+`census.ts` 157 → 132. In the emitted apps: 22 roots authored false now drawn when their input says (gram's Nav, todo-list's
+Note dialog and Money sheet, bot-garden's Form, rocket-school's Result), 46 authored true now hidden when it says
+(planning's sheets, rocket-school's screens), 208 elements kept drawn while their source has no value.
+
+Filed: **P18-S126-INSIGNAL** (medium: a signal sent into a component runs nothing, 87 template nodes; the Feedback banners
+never open), **P18-S126-PROPUNDEF**, **P18-S126-PAGEGROUP**, **P18-S126-UNDEFCOMPUTED** (low).
+
+**Next (BOARD lane 6):**
+1. **P18-S126-INSIGNAL**: a signal into a component (87 template nodes, 115 wires; todo-list 26, rocket-school and
+   star-class 14 each). Grade it with `runtime-mounted-arm.js`'s real component instances.
+2. The Mounted feeders left (EXP-011 §93.6): members-area's `/Members/Standing` logic component (26 through the Chrome),
+   nightbook's kit-fed Expressions (33), and, largest and Tier B, the Functions reading the Noodl API (64).
+3. The §87 Conditions still waiting; P18-S126-PROPUNDEF, P18-S126-PAGEGROUP, P18-S126-UNDEFCOMPUTED, P18-S125-STYLENULL,
+   P18-S124-RUNINPUTS, P18-S124-LATEMARKER (small); P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE,
+   P18-S113-LISTLIVE, P18-S115-DYNPROBE; STUBORDER, TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
+# Next session — session 125 (2026-10-19, BOARD lane 6) fixed **P18-S122-TPLBUILD**: every tracked template's export passes its own `tsc -b` (189 → 0 type errors in the 16; all 19 shipped templates 203 → 1). A Function's wrapper is in its own file, as Richard ruled.
+
+## ✅ Session 125: the templates' exports build
+
+Read EXP-011 §92. In short:
+
+| class | count | fix | where |
+|---|---|---|---|
+| TS2554 | 42 | an Expression with no inputs is called with none (`False()`) | `component.ts` `jsArgsObject` |
+| TS2345 | 35 | a lifted push of an untyped value is cast to the port's type (`castTo`, decided by `exprTsType`) | `plan.ts` `PushEffectPlan`, `component.ts` |
+| TS2786 | 39 | a component whose root is removed returns `null` (it returned `{}`, which React throws on) | `component.ts`, the return |
+| TS2448 + TS2454 | 44 | a render local that reads a hook prints after it (it was read in the hook's dead zone, a ReferenceError) | `component.ts`, the render locals |
+| TS7006 + TS7053 | 7 | **the ruling**: each Function wrapper is `src/functions/<dir>/<fileBase>/<fnName>.ts`, one-file `// @ts-nocheck`, the signature typed | `component.ts` `functionFileSource` |
+| TS17001 | 12 | an input called `key` binds as `keyProp` (React withholds `key`) | `naming.ts` `propIdentifier` |
+| TS2440, TS2322 | 4 + 7 | a kit import named as its component is aliased; a kit `object` input takes an array; an untyped animation option is cast to number | `component.ts`, `kits.ts`, `plan.ts` `castToNumber` |
+
+- 🔴 **Two classes were crashes, not types.** A component returning `{}` throws at render ("Objects are not valid as a
+  React child"): gram's Nav on four pages, bot-garden's Pad and WinCard, rocket-school's Result. A render local read above
+  its hook's `const` is a ReferenceError: rocket-school's Round and Adopt, todo-list's ProjectEditor. Those pages render now.
+- 🔴 **The `key` fix changes what arrives**: 22 components' "key" input was `undefined` in the export and arrives now, as in
+  the runtime; planning's MoneySheet no longer remounts its editors when their key changes.
+- 🔴 **A type error can hide another.** The RaceTrack's four TS2322 were checking `burstA` against the wrong `RaceTrack`
+  (the name conflict); with the alias they left and one dbt row behind its own conflict surfaced (10 → 3, not 10 → 6).
+- 🔴 **A spec row passed with its subject gone.** `the-function-sends-its-signals` §A cut the wrapper out of the page with
+  `indexOf`, got an empty slice once the wrapper moved, and still passed. It fails now if the wrapper is not found.
+- The move hides exactly the 7 body errors, measured with the directive taken off: no body reads a name from the
+  component's scope (no TS2304).
+
+Readings: the gate 3 / 3, every row 0; hls001 0 keys for six classes, the Function move 19 moved, 9 added, 0 removed
+(predicted, exactly those); `dispdiff.ts` templates 19 projects 13,432 nodes **0 changed**, corpus 226 projects 27,789 nodes
+**0 changed**; 10 mutant arms, each red on the gate. Neighbours green (EXP-011 §92.4). `parameter-coverage` fixed: the
+three Upload File ports are `gap`s named by P121-TWO001-EXPORTREADERS and P121-TWO003-EXPORTSHRINK (9 / 9).
+Re-pinned to the Function's own file: `stores-events`, `jsfun`, `the-function-sends-its-signals`, `isl-005-script-files`,
+`in-code-markers`, `on-app-error`. Whole package (`nice -n 19 --runInBand`, JSON written 13:35): **141 / 141 suites, 4,920
+passed, 0 failed, 3 skipped**; package `tsc --noEmit` 0. Tooling: `s125-tplbuild/`. Commits on `l6-tplbuild` from
+`a2c4fc09c`, one per class.
+
+Filed: **P18-S125-STYLENULL** (low: nightbook's last row, an Expression's `null` into a style colour). Fixed:
+P18-S122-TPLBUILD.
+
+**Next (BOARD lane 6):**
+1. **The Mounted wires the export does not carry**, the named blockers of 166 template nodes (EXP-011 §91.5): a Function
+   reading the Noodl API (gram's and the marketplace's refusal pages), an instance output its component does not lift
+   (members-area's `/Members/Standing`, the Chrome's menu, nightbook's Tonight panels), an Inverter of a maybe-undefined
+   operand. Rank by those counts. The gate now also holds every template edit to 0.
+2. The §87 Conditions still waiting (members-area's Post, Unsubscribe; landing-pages' contact; the Site Builder's Setup).
+3. P18-S125-STYLENULL, P18-S124-RUNINPUTS, P18-S124-LATEMARKER (small); P18-S120-TEXTAREA, P18-S118-NUMBERFIELD,
+   P18-S121-ONEUPDATE, P18-S113-LISTLIVE, P18-S115-DYNPROBE; STUBORDER, TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).
+4. Not this lane's, for Richard: P18-S119-TOKENCLAIM and the ruling P18-S119-FIRSTWRITE asks.
+
+---
+
+# Next session — session 124 (2026-10-19, BOARD lane 6) fixed **P18-S123-UNDRAWNTRIGGER and P18-S122-DEADROW**: a trigger the export never runs (an element it never draws, a Did Mount it does not run, a Function row nothing it runs writes) is refused by name instead of counted exported. Then **P18-S122-TPLBUILD's gate**: the tracked templates' exports typecheck, by count, and the largest class is fixed (311 → 189 errors).
+
+## ✅ Session 124: a trigger the export never runs is refused
+
+Read EXP-011 §91. In short:
+
+| what | where |
+|---|---|
+| Measured first: **151** template nodes collapsed into an element never drawn (the bugs named 10), 186 such elements, 5 value-mounted Did Mounts; 19 printed rows, 11 never written. Every undrawn element has a Mounted wire the export does not carry | `s124-deadrow/census.ts`, `../s122-holdtheid/deadrow.py` |
+| Decided after render, attach **and the lift phase** (a Mounted the parent's lift binds is known only there): `planProject` plans, lifts, asks `unreachedTriggersOf`, and plans a component again with its unreached triggers refused up front (names given back first), until nothing new | `src/analyze/plan.ts` |
+| `undrawnReasonOf` (the emitter's own rule, as a sentence); Pass 2 refuses a wire from an undrawn owner or a gated Did Mount, keeping any node another trigger claims; Pass 4e drops a drawn read of a dead row with the Function's sentence; a handler's read is kept and noted | `plan.ts` |
+| An undrawn element's marker says "is not drawn (why)", not "renders" | `src/emit/component.ts` |
+| Spec, 16 rows: a built fixture (temp folder, the corpus golden does not move), four unreached triggers each beside a shared node, the lifted variant, a control; 11 mutant arms each killing rows | `tests/the-undrawn-trigger-is-refused.test.ts`, `s124-deadrow/mutants.py` |
+| TPLBUILD gate: every tracked template emitted and typechecked, count per template, a ratchet both ways (rise names the errors, fall asks for the row) | `tests/the-templates-typecheck.test.ts`, `s124-deadrow/tplbuild.ts` |
+| TPLBUILD class 1: a lifted output's callback is `(value: T \| undefined) => void` (the push sends undefined before its source has a value): 122 TS2345 gone, none added | `component.ts`; hls001 regenerated (CheerMeter, BenchEmitter: predicted, exactly those) |
+
+- 🔴 **The bug files said 10; the census said 151, and 166 once the readers' consequences counted.** The rest had been
+  counted exported for as long as their pages existed. Measure the artefact, not the bug's own number.
+- 🔴 **The first rule refused the dead row's Function, and with it a chain that worked** (5 older Site Builder copies,
+  "The slug to show", reads the URL's slug and the dead home slug only as a fallback: 15 corpus nodes). Only drawn reads
+  are refused now. Found by classifying every corpus loss, not the templates' (the templates had none of it).
+- 🔴 **A decision inside `planComponent` would have been wrong**: members-area's moderator tools are mounted by an
+  instance output the lift phase decides. Mutant H (findings before the lift) kills A5/A6.
+- 🔴 **Two pre-existing holes surfaced once the dead-row reads were gone**, both filed, not fixed: a Page Inputs read
+  only in a Function's run says "nothing reads" (P18-S124-RUNINPUTS), and a refusal filed after an element's marker
+  printed never reaches the file (P18-S124-LATEMARKER).
+- 🔴 **Scratch copies of the package inside `packages/` turn `hls006-every-listener` red** (each copy's `serve.ts` is a
+  socket nobody enrolled). Remove `packages/.nx-ctl-*` and `packages/nx-mut-*` before the whole suite, or read that
+  failure as yours.
+
+Readings: the spec 16 / 16; the gate 3 / 3; re-pinned `the-ticked-input-runs-it-again` (the Did Mount note is the plan's
+now), `controlled-state` (CheerMeter's callback type). Neighbours green (`the-failure-runs-its-chain` 23, `the-id-is-held`
+22, `the-function-sends-its-signals` 38, `jsfun` 47, `the-condition-remembers-its-answer` 40, `export-report` 30,
+`custom-nodes` 34, `typecheck-emitted` 67, `hls001` 4). `parameter-coverage`: the same 2 failures as on HEAD (measured on
+a HEAD copy): the committed catalog's three Upload File ports are not in the ledger; reaching 1,236 = the floor.
+Whole package (`nice -n 19 --runInBand`, JSON written 11:16, after the
+TPLBUILD commit): **140 / 141 suites, 4,916 passed, 2 failed (those two), 3 skipped**; package `tsc --noEmit` 0. (The run
+after the first commit read 138 / 140 with `hls006-every-listener` red for this session's scratch copies; alone after
+removing them, 4 / 4.) Commits `f342b3df2`, `9bb16f905`, `c31409e27`.
+
+Reach (`dispdiff.ts`, HEAD `e7e3e77db` against the tree): **templates 166 nodes leave the exported count, none join,
+8 re-pointed to a drawn trigger; corpus 73 leave, none join, 5 re-pointed.** Printed rows never written: 11 → 0.
+Template exports' type errors (`tplbuild.ts`, tracked templates): 311 in 11 of 16 → 189 in 9 of 16. All 19 (nightbook and the two materialized): 337 in 13 → 203 in 12.
+
+Filed: **P18-S124-RUNINPUTS** (low), **P18-S124-LATEMARKER** (low). Fixed: P18-S123-UNDRAWNTRIGGER, P18-S122-DEADROW.
+P18-S122-TPLBUILD stays open (the gate and class 1 done).
+
+**Next (BOARD lane 6):**
+1. **P18-S122-TPLBUILD, the next classes** (tracked templates, 188 errors): a Function Expression called with an
+   argument it does not take (`monsterWalking.set(False({}))`, TS2554, 42, rocket-school and star-class), a component
+   whose body returns `{}` used as JSX (TS2786, 39), a render local used before the States hook that declares it
+   (TS2448/TS2454, 44: rocket-school's Adopt `foldedOrOpen`), the last lifted pushes of `unknown` or `null` (TS2345, 35),
+   a repeater's `key` printed twice (TS17001, 12), a kit wrapper and a component with one name (TS2440, 4). Lower the
+   gate's rows as each lands. The body class (TS7006, an author's untyped parameter, 6) waits for Richard's ruling.
+2. **The Mounted wires the export does not carry**, now the named blockers of 166 template nodes: a Function reading the
+   Noodl API (gram's and the marketplace's refusal pages), an instance output its component does not lift
+   (members-area's `/Members/Standing`, the Chrome's menu, nightbook's Tonight panels), an Inverter of a maybe-undefined
+   operand. Rank by the counts in EXP-011 §91.5.
+3. The §87 Conditions still waiting (members-area's Post, Unsubscribe; landing-pages' contact; the Site Builder's Setup).
+4. P18-S124-RUNINPUTS, P18-S124-LATEMARKER (small); P18-S120-TEXTAREA, P18-S118-NUMBERFIELD, P18-S121-ONEUPDATE,
+   P18-S113-LISTLIVE, P18-S115-DYNPROBE; STUBORDER, TEXTDEFAULT, BUTTONLOOK, INPUTLOOK (low).
+5. Not this lane's, for Richard: P18-S119-TOKENCLAIM, the ruling P18-S119-FIRSTWRITE asks, and the TPLBUILD body class.
+
+---
+
 # Next session — session 123 (2026-10-17, BOARD lane 6) built **the Failure chain**: a record or user verb's Failure runs its chain in the export, and a click's later wires run before the request answers. The Sign-in pages of members-area, todo-list, the Site Builder and the planner show their refusal now; nightbook's Me toggles work.
 
 ## ✅ Session 123: the failure runs its chain

@@ -297,6 +297,9 @@ const WAYS_TO_PAY: PageComponent = {
     wire('wpGather', 'out-go', 'wpCall', 'call'),
     wire('wpCall', 'error', 'wpAddError', 'text'),
     wire('wpCall', 'done', 'wpStamp', 'run'),
+    // P112-OWN021-ADDKEEPS: added, the fields empty, so the list is the only place the new country is.
+    wire('wpCall', 'done', 'wpName', 'clear'),
+    wire('wpCall', 'done', 'wpCurrency', 'clear'),
     wire('wpStamp', 'out-at', 'wpSetChanged', 'value'),
     wire('wpStamp', 'out-go', 'wpSetChanged', 'do')
   ]
@@ -543,6 +546,8 @@ const SHELVES: PageComponent = {
     wire('svGather', 'out-go', 'svCall', 'call'),
     wire('svCall', 'error', 'svError', 'text'),
     wire('svCall', 'done', 'svStamp', 'run'),
+    // P112-OWN021-ADDKEEPS: added, the field empties.
+    wire('svCall', 'done', 'svName', 'clear'),
     wire('svStamp', 'out-at', 'svSetChanged', 'value'),
     wire('svStamp', 'out-go', 'svSetChanged', 'do')
   ]

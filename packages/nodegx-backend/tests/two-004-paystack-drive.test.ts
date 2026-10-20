@@ -22,7 +22,7 @@ import * as path from 'path';
 import { BackendService } from '../src/service';
 import { bundleAuthoredComponents } from './helpers/authored-bundle';
 import { FakePaystack, startFakePaystack } from './helpers/fake-paystack';
-import { request } from './helpers/http';
+import { request, type ParsePointer, type ParseRecord } from './helpers/http';
 import { clickButton, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
 
@@ -133,19 +133,26 @@ describe('TWO-004 — a buyer pays a country’s sellers through Paystack and co
   const overflow: Array<[string, number]> = [];
   const ids: Record<string, string> = {};
 
-  type Row = Record<string, any>;
+  type Row = Record<string, unknown>;
+  /** An OrderPart row and an OrderPartHistory row, as far as this drive reads them. */
+  interface OrderPart extends ParseRecord {
+    seller: ParsePointer;
+  }
+  interface OrderPartHistory extends ParseRecord {
+    changed?: { status?: { to?: string } };
+  }
   const fnCall = async (fn: string, body: Record<string, unknown>, headers: Record<string, string> = admin) => {
     const r = await request<{ result?: Row }>(base, 'POST', `/functions/${fn}`, { body, headers });
     if (r.status !== 200) throw new Error(`${fn}: ${r.status} ${r.text}`);
     return r.json.result ?? {};
   };
-  const rows = async (cls: string, where: Row = {}) =>
-    (await request<{ results: Row[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`, { headers: master })).json.results;
+  const rows = async <T extends ParseRecord = ParseRecord>(cls: string, where: Row = {}) =>
+    (await request<{ results: T[] }>(base, 'GET', `/classes/${cls}?where=${encodeURIComponent(JSON.stringify(where))}&order=createdAt&limit=1000`, { headers: master })).json.results;
   const ptr = (className: string, objectId: string) => ({ __type: 'Pointer', className, objectId });
   const partsOf = async (number: string) => {
     const [o] = await rows('Order', { number });
     const name: Record<string, string> = { [ids.kofi]: 'kofi', [ids.ama]: 'ama', [ids.ada]: 'ada' };
-    return Object.fromEntries((await rows('OrderPart', { order: ptr('Order', o.objectId) })).map((p) => [name[p.seller.objectId], p]));
+    return Object.fromEntries((await rows<OrderPart>('OrderPart', { order: ptr('Order', o.objectId) })).map((p) => [name[p.seller.objectId], p]));
   };
 
   beforeAll(async () => {
@@ -346,7 +353,7 @@ describe('TWO-004 — a buyer pays a country’s sellers through Paystack and co
         expect(fake.webhooksSent.map((w) => w.status)).toEqual(first ? [200] : [200, 200]);
         const payments = await rows('Payment', { order: ptr('Order', o.objectId) });
         expect(payments.map((p) => [p.currency, p.amount, p.outcome])).toEqual(first ? [['GHS', 150, 'failed'], ['GHS', 150, 'paid']] : [['GHS', 150, 'paid']]);
-        const history = await rows('OrderPartHistory', { orderPart: ptr('OrderPart', parts.kofi.objectId) });
+        const history = await rows<OrderPartHistory>('OrderPartHistory', { orderPart: ptr('OrderPart', parts.kofi.objectId) });
         expect(history.filter((h) => h.changed?.status?.to === 'paid')).toHaveLength(1);
 
         // ── tablet: Nigeria next, its own payment, its own key

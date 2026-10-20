@@ -1,0 +1,316 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "visualRoots": [
+    "page"
+  ],
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Home"
+      },
+      "children": [
+        "layout"
+      ]
+    },
+    {
+      "id": "layout",
+      "type": "Group",
+      "label": "Layout",
+      "parent": "page",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "children": [
+        "marker",
+        "scene"
+      ]
+    },
+    {
+      "id": "marker",
+      "type": "Text",
+      "label": "Marker",
+      "parent": "layout",
+      "parameters": {
+        "text": "three-in-nodes page drew"
+      }
+    },
+    {
+      "id": "scene",
+      "type": "three-kit.Scene",
+      "label": "Scene",
+      "parent": "layout",
+      "parameters": {
+        "cameraDistance": 22,
+        "cameraHeight": 9,
+        "cameraAngle": 28,
+        "height": {
+          "value": 520,
+          "unit": "px"
+        }
+      },
+      "children": [
+        "sky",
+        "sun",
+        "ball",
+        "bars",
+        "robot"
+      ]
+    },
+    {
+      "id": "sky",
+      "type": "three-kit.Light",
+      "label": "Sky",
+      "parent": "scene",
+      "parameters": {
+        "kind": "sky",
+        "intensity": 0.8
+      }
+    },
+    {
+      "id": "sun",
+      "type": "three-kit.Light",
+      "label": "Sun",
+      "parent": "scene",
+      "parameters": {
+        "kind": "sun",
+        "intensity": 1.2,
+        "x": 6,
+        "y": 12,
+        "z": 4
+      }
+    },
+    {
+      "id": "ball",
+      "type": "three-kit.Mesh",
+      "label": "Ball",
+      "parent": "scene",
+      "parameters": {
+        "shape": "sphere",
+        "name": "ball",
+        "colour": "#ff4757",
+        "x": -5,
+        "z": -3,
+        "width": 2,
+        "height": 2,
+        "depth": 2,
+        "spin": true,
+        "spinSpeed": 90
+      }
+    },
+    {
+      "id": "bars",
+      "type": "For Each",
+      "label": "One box per row",
+      "parent": "scene",
+      "parameters": {
+        "template": "/Parts/Bar",
+        "templateType": "explicit"
+      }
+    },
+    {
+      "id": "data",
+      "type": "Static Data",
+      "label": "The week",
+      "parameters": {
+        "type": "json",
+        "json": "[\n {\n  \"name\": \"mon\",\n  \"value\": 3,\n  \"x\": -4.9,\n  \"colour\": \"#4f8cff\"\n },\n {\n  \"name\": \"tue\",\n  \"value\": 5,\n  \"x\": -3.5000000000000004,\n  \"colour\": \"#4f8cff\"\n },\n {\n  \"name\": \"wed\",\n  \"value\": 2,\n  \"x\": -2.1000000000000005,\n  \"colour\": \"#4f8cff\"\n },\n {\n  \"name\": \"thu\",\n  \"value\": 6,\n  \"x\": -0.7000000000000011,\n  \"colour\": \"#ff9f43\"\n },\n {\n  \"name\": \"fri\",\n  \"value\": 4,\n  \"x\": 0.6999999999999993,\n  \"colour\": \"#4f8cff\"\n },\n {\n  \"name\": \"sat\",\n  \"value\": 7,\n  \"x\": 2.0999999999999996,\n  \"colour\": \"#2ed573\"\n },\n {\n  \"name\": \"sun\",\n  \"value\": 1,\n  \"x\": 3.4999999999999982,\n  \"colour\": \"#4f8cff\"\n },\n {\n  \"name\": \"avg\",\n  \"value\": 4,\n  \"x\": 4.899999999999999,\n  \"colour\": \"#a55eea\"\n }\n]"
+      },
+      "x": 420,
+      "y": 200
+    },
+    {
+      "id": "vBallY",
+      "type": "Variable2",
+      "label": "ballY",
+      "parameters": {
+        "name": "ballY"
+      },
+      "x": 420,
+      "y": 120
+    },
+    {
+      "id": "vTapped",
+      "type": "Variable2",
+      "label": "tappedName",
+      "parameters": {
+        "name": "tappedName"
+      },
+      "x": 420,
+      "y": 320
+    },
+    {
+      "id": "vMeshes",
+      "type": "Variable2",
+      "label": "meshes",
+      "parameters": {
+        "name": "meshes"
+      },
+      "x": 420,
+      "y": 380
+    },
+    {
+      "id": "vSupported",
+      "type": "Variable2",
+      "label": "supported",
+      "parameters": {
+        "name": "supported"
+      },
+      "x": 420,
+      "y": 440
+    },
+    {
+      "id": "tapCounter",
+      "type": "Counter",
+      "label": "taps",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 420,
+      "y": 500
+    },
+    {
+      "id": "vTaps",
+      "type": "Variable2",
+      "label": "taps",
+      "parameters": {
+        "name": "taps"
+      },
+      "x": 600,
+      "y": 500
+    },
+    {
+      "id": "readyCounter",
+      "type": "Counter",
+      "label": "ready",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 420,
+      "y": 560
+    },
+    {
+      "id": "vReady",
+      "type": "Variable2",
+      "label": "ready",
+      "parameters": {
+        "name": "ready"
+      },
+      "x": 600,
+      "y": 560
+    },
+    {
+      "id": "robot",
+      "type": "three-kit.Group",
+      "label": "Robot",
+      "parent": "scene",
+      "parameters": {
+        "name": "robot",
+        "z": 4,
+        "rotationY": 30
+      },
+      "children": [
+        "robotBody",
+        "robotHead",
+        "robotEye"
+      ]
+    },
+    {
+      "id": "robotBody",
+      "type": "three-kit.Mesh",
+      "label": "Body",
+      "parent": "robot",
+      "parameters": {
+        "shape": "box",
+        "colour": "#ffa502",
+        "width": 1.2,
+        "height": 1.6,
+        "depth": 0.8,
+        "sitOnFloor": true
+      }
+    },
+    {
+      "id": "robotHead",
+      "type": "three-kit.Mesh",
+      "label": "Head",
+      "parent": "robot",
+      "parameters": {
+        "shape": "box",
+        "colour": "#eccc68",
+        "width": 0.9,
+        "height": 0.8,
+        "depth": 0.8,
+        "y": 1.7,
+        "sitOnFloor": true
+      }
+    },
+    {
+      "id": "robotEye",
+      "type": "three-kit.Mesh",
+      "label": "Eye",
+      "parent": "robot",
+      "parameters": {
+        "shape": "sphere",
+        "colour": "#2f3542",
+        "width": 0.3,
+        "height": 0.3,
+        "depth": 0.3,
+        "y": 2.1,
+        "z": 0.42
+      }
+    },
+    {
+      "id": "vRobotX",
+      "type": "Variable2",
+      "label": "robotX",
+      "parameters": {
+        "name": "robotX",
+        "value": -6
+      },
+      "x": 420,
+      "y": 740
+    },
+    {
+      "id": "robotGlide",
+      "type": "net.noodl.animatetovalue",
+      "label": "Robot glides",
+      "parameters": {
+        "duration": 800
+      },
+      "x": 640,
+      "y": 740
+    },
+    {
+      "id": "robotTapCounter",
+      "type": "Counter",
+      "label": "robot taps",
+      "parameters": {
+        "startValue": 0
+      },
+      "x": 420,
+      "y": 860
+    },
+    {
+      "id": "vRobotTaps",
+      "type": "Variable2",
+      "label": "robotTaps",
+      "parameters": {
+        "name": "robotTaps"
+      },
+      "x": 640,
+      "y": 860
+    }
+  ]
+}
