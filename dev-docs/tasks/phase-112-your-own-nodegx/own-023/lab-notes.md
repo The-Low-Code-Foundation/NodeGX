@@ -96,3 +96,22 @@ that down." Those lines are marked **pull**.
   the published artefact and stays.
 - Hats have no terminal: C can't run the export, B can't `npm install`; the apps run for them as F2 left them (M via
   its own panel's `npm start`). The NodeGX editor's inspector is not reachable for any hat.
+
+## 2026-10-20 s1, ~15:30 — stop and check (Richard; session moved to Fable 5.1)
+
+- Richard, after seeing the three F2 apps: *"What's fucked up is I deffo prefer M, it's the cleanest and most polished
+  app-looking app out of the three. The Claude only one looks good and can definitely compete, which makes me wonder
+  WTF was wrong with the 'instruction file' served in R that turned it into the runt of the group?? But yeah if M
+  actually LOOKS the best out of all of them, why did NodeGX have anything to do with that or was it just a random
+  accident?"* — kept here as NOTES while the verdict is open, not as the verdict. Earlier: *"I dunno, it sounds like
+  we're cooked"* (same status).
+- Measured for his question: R's CLAUDE.md has no line about the look (the harness brief we wrote asked only for
+  checkability — a weakness in how arm A+ was set up, not just R's luck); K installed Playwright itself and read 11
+  screenshots of its own app; B fetched an 18 KB design vocabulary, set its own token palette (×2), 4 renders, 21
+  page drives. One build per arm cannot separate prompt / framework / chance.
+- Richard: *"before we run any more experiments, we have to do a stop and check … no confirmation bias. Pure
+  investigative work."* → `STOP-AND-CHECK.md`: ~25 searches, 10 primaries; a catalogue of what persists past a
+  follow-up prompt; per failure, NodeGX's theory beside this study's own counter-evidence; seven tests ranked by what
+  could refute NodeGX; the control arm for any new test is A++ (stranger CLAUDE.md + stranger hooks), because testing
+  enforcement against an advisory harness would favour NodeGX.
+- The message review stays unread until Richard rules on next steps.
