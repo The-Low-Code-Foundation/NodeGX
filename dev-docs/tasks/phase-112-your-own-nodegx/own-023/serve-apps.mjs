@@ -1,7 +1,7 @@
 // OWN-023 §5 / C5: the three apps under letters (K, M, R), each run the way its own folder says, on a fixed port, from
 // a COPY (apps/<letter>) so grading and playing never touch the build as built (rounds/<arm>/work/music). The map is
 // arms.json in the gallery folder; this script reads it and prints letters and URLs only.
-//   node serve-apps.mjs serve | stop | list
+//   node serve-apps.mjs serve [--fresh] [--stage F1|F2] | stop | list
 // Gallery: ~/vscode_projects/NodeGX test projects/OWN-023 apps/  (apps/<L>, homes/<L>, logs/, pids.json)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -29,13 +29,16 @@ fs.mkdirSync(path.join(G, 'logs'), { recursive: true });
 const pids = [];
 const nodeDir = path.dirname(process.execPath); // Node 22 (A's README asks ≥ 22.13; the agents' shell had 20.11)
 for (const [L, arm] of Object.entries(map)) {
-  const src = path.join(G, 'rounds', arm, 'work', 'music');
+  // `--stage F1|F2`: serve the app as that follow-up left it (followups/<arm>-<F>), for the re-grade (§4.3).
+  const stage = process.argv.includes('--stage') ? process.argv[process.argv.indexOf('--stage') + 1] : null;
+  const base = stage ? path.join(G, 'followups', `${arm}-${stage}`) : path.join(G, 'rounds', arm);
+  const src = path.join(base, 'work', 'music');
   const app = path.join(G, 'apps', L);
   const home = path.join(G, 'homes', L);
   if (!fs.existsSync(app)) {
     fs.cpSync(src, app, { recursive: true, verbatimSymlinks: true });
     fs.mkdirSync(home, { recursive: true });
-    const backends = path.join(G, 'rounds', arm, 'home', '.noodl');
+    const backends = path.join(base, 'home', '.noodl');
     if (fs.existsSync(backends)) fs.cpSync(backends, path.join(home, '.noodl'), { recursive: true });
   }
   const env = { ...process.env, HOME: home, PORT: String(PORTS[L]), PATH: `${nodeDir}:${process.env.PATH}`, BROWSER: 'none', npm_config_cache: path.join(G, '.npm') };
