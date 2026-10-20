@@ -190,6 +190,15 @@ export class V2ProjectStore {
     return this.readJson<StylesV2File>(STYLES_FILE);
   }
 
+  /**
+   * P112-OWN020-OFFSYSTEM — the styles file had a reader and no writer, so the one layer that dresses every node of
+   * a type (a variant with no `name`) could not be written by anything that writes through the format. The whole
+   * file is replaced: a caller reads it, changes what it owns, and writes it back.
+   */
+  writeStyles(styles: StylesV2File): void {
+    this.writeJson(STYLES_FILE, styles);
+  }
+
   readRegistry(): RegistryV2File {
     const registry = this.readJson<RegistryV2File>(REGISTRY_FILE);
     if (!registry) throw new FormatRefusal('io-error', 'missing-registry', 'Missing components/_registry.json.');

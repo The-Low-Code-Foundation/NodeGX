@@ -20,8 +20,9 @@ A NodeGX app is a folder of JSON files. Nothing else holds the app: no database,
 
 | file | what it holds |
 |---|---|
-| `nodegx.project.json` | the project's name, its id, the format version (`5`) |
-| `nodegx.routes.json`, `nodegx.styles.json` | the pages a router lists, the design tokens |
+| `nodegx.project.json` | the project's name, its id, the format version (`5`), its design tokens (`metadata.designTokens`) |
+| `nodegx.routes.json` | the pages a router lists |
+| `nodegx.styles.json` | colour and text styles, and `variants`: a named one is a Look a node picks with `variant`; one with no `name` is the type's element style, which every node of that type wears under its own `parameters` |
 | `components/_registry.json` | every component by path, with the three files below |
 | `components/<path>/component.json` | the component's own settings |
 | `components/<path>/nodes.json` | a flat list of nodes: `id`, `type`, `parameters`, `children` (ids) |

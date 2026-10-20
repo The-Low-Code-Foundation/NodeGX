@@ -193,6 +193,34 @@ function readScriptFiles() {
   return scripts;
 }
 
+/**
+ * P112-OWN020-OFFSYSTEM — the project's variants (named Looks and nameless element styles) from `nodegx.styles.json`,
+ * in the shape the editor's exporter hands the runtime (`exportVariant`). Without them this render drew every control
+ * at the runtime's own defaults while the real preview of the same files drew the project's look: measured on
+ * OpenTune, a Radio Button 32px here and 16px in `@nodegx/preview`. The v2 file spells `stateParameters`; a legacy
+ * file `stateParamaters` (sic), read too.
+ */
+function readVariants() {
+  const file = path.join(PROJECT, 'nodegx.styles.json');
+  if (!fs.existsSync(file)) return [];
+  let styles;
+  try {
+    styles = readJSON(file);
+  } catch {
+    return [];
+  }
+  return (Array.isArray(styles.variants) ? styles.variants : [])
+    .filter((v) => v && typeof v.typename === 'string')
+    .map((v) => ({
+      ...(typeof v.name === 'string' && v.name !== '' ? { name: v.name } : {}),
+      typename: v.typename,
+      parameters: v.parameters || {},
+      stateParameters: v.stateParameters || v.stateParamaters || {},
+      stateTransitions: v.stateTransitions || {},
+      defaultStateTransitions: v.defaultStateTransitions || {}
+    }));
+}
+
 function buildProjectData() {
   const project = readJSON(path.join(PROJECT, 'nodegx.project.json'));
   const componentsDir = path.join(PROJECT, project.structure?.componentsDir || 'components');
@@ -339,7 +367,8 @@ function buildProjectData() {
     componentIndex: {},
     rootComponent,
     routerIndex: { routers, pages },
-    scripts: readScriptFiles()
+    scripts: readScriptFiles(),
+    variants: readVariants()
   };
 }
 

@@ -524,7 +524,7 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
     // looks — so the one instruction the design doctrine gives most often led to
     // an empty answer.
     keywords: ['theme', 'colour', 'color', 'palette', 'styling', 'style guide', 'branding', 'appearance', 'dark mode'],
-    tools: ['set_project_tokens', 'set_style_preset'],
+    tools: ['set_project_tokens', 'set_style_preset', 'set_element_style'],
     resident: false
   }
 ]);
@@ -619,6 +619,8 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'set_project_settings',
   'set_project_tokens',
   'set_style_preset',
+  // P112-OWN020-OFFSYSTEM — writes nodegx.styles.json.
+  'set_element_style',
   // P109 ISL-005.
   'write_script_file',
   'edit_script_file',

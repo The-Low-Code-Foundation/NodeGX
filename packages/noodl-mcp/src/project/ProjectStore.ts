@@ -369,6 +369,11 @@ export class ProjectStore {
     return this.viaFormat(() => this.format.readStyles());
   }
 
+  /** P112-OWN020-OFFSYSTEM — element styles (nameless variants) are written here; see `tools/elementStyles.ts`. */
+  writeStyles(styles: StylesV2File): void {
+    this.viaFormat(() => this.format.writeStyles(styles));
+  }
+
   private get componentsDir(): string {
     return path.join(this.projectDir, 'components');
   }

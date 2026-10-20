@@ -100,6 +100,13 @@ Two things are settled BEFORE the first component exists, and in this order:
    choice into the project rather than carrying it in your head — \`set_style_preset\` adopts a whole
    coherent identity, \`set_project_tokens\` overrides individual values. Both sit in the deferred
    \`theme\` group: call \`find_tools({group:"theme"})\` and they arrive in your next tool list.
+   **Controls are styled once, for the whole app.** An ELEMENT STYLE is the look every node of a type
+   wears unless it sets the parameter itself (\`get_style_vocabulary\` → \`elementStyles\`). A control
+   type with none draws the runtime's own look, which matches no page. So before you place the first
+   Radio Button, Checkbox, Text Input, Dropdown, Slider or Button, call
+   \`set_element_style({ type, starter: true })\` for that type (also in \`theme\`), and change it there
+   to change every one. Style a single node only for what is particular to it: a control styled by
+   hand, one node at a time, is the one that drifts.
 2. **The screens.** Name every page the app has and say, in one sentence each, what a person does on
    it. That list is what the component tree is a decomposition OF.
 

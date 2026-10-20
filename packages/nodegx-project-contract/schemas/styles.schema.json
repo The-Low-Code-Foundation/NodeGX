@@ -57,13 +57,13 @@
     },
     "variant": {
       "type": "object",
-      "required": ["name", "typename"],
+      "required": ["typename"],
       "additionalProperties": true,
       "properties": {
         "name": {
           "type": "string",
           "minLength": 1,
-          "description": "Variant name"
+          "description": "Variant name. Absent: the element style, which dresses every node of this type that names no variant (the node's own parameters still win)"
         },
         "typename": {
           "type": "string",

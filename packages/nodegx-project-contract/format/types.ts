@@ -238,7 +238,11 @@ export interface StylesV2File {
   colors?: Record<string, string>;
   textStyles?: Record<string, Record<string, unknown>>;
   variants?: Array<{
-    name: string;
+    /**
+     * Absent = the type's element style: the runtime's `getVariant` compares `v.name === node.variant`, so a variant
+     * with no name dresses every node of `typename` that names no variant (a node's own parameters still win).
+     */
+    name?: string;
     typename: string;
     parameters?: Record<string, unknown>;
     stateParameters?: Record<string, Record<string, unknown>>;

@@ -1,0 +1,80 @@
+# OWN-020 option 4, parked 2026-10-20 (Richard, on the measured plan in OWN-020-THREE-HARNESSES.md §12).
+# The automatic element-style stamp as it was built on 2026-10-19: create_project writes every starter into a new
+# project, set_style_preset fills the missing ones. Reverse of the commit that parked it; apply with
+#   git apply dev-docs/tasks/phase-112-your-own-nodegx/own-020/option4-stamp.patch
+# only inside "adopt, keeping what is there" (the plan), never alone: every template is built through create_project.
+
+--- a/packages/noodl-mcp/src/tools/createProject.ts
++++ b/packages/noodl-mcp/src/tools/createProject.ts
+@@ -75,6 +75,7 @@
+ import { stableComponentId } from '../project/writeClock';
+ import { installStarterAssets } from '../starterAssetFiles';
+ import type { ToolDisclosure } from './disclosure';
++import { ELEMENT_STYLE_STARTERS, STYLES_SCHEMA } from './elementStyles';
+ import { guarded, jsonResult } from './util';
+ 
+ // eslint-disable-next-line @typescript-eslint/no-var-requires
+@@ -321,6 +322,19 @@
+   put('components/Pages/Home/nodes.json', homeNodes);
+   put('components/Pages/Home/connections.json', homeConnections);
+   put('components/_registry.json', registry);
++
++  // P112-OWN020-OFFSYSTEM — every control starts on-system: one element style per control type (a variant with no
++  // name dresses every node of its type that does not set the parameter itself). Look only, all token references.
++  const styles = {
++    $schema: STYLES_SCHEMA,
++    variants: Object.entries(ELEMENT_STYLE_STARTERS).map(([typename, s]) => ({
++      typename,
++      parameters: s.parameters,
++      ...(s.stateParameters ? { stateParameters: s.stateParameters } : {})
++    }))
++  };
++  assertValid(SCHEMA_IDS.STYLES, styles, 'nodegx.styles.json');
++  put('nodegx.styles.json', styles);
+ 
+   return { files, rootNodeId: routerId };
+ }
+--- a/packages/noodl-mcp/src/tools/styleTools.ts
++++ b/packages/noodl-mcp/src/tools/styleTools.ts
+@@ -28,7 +28,7 @@
+ import { ToolError } from '../errors';
+ import { readIconSets, renderIconSets } from '../iconSets';
+ import { readImagery, renderImagery } from '../imagery';
+-import { readElementStyles } from './elementStyles';
++import { addStarterElementStyles, readElementStyles } from './elementStyles';
+ import { applyPresetFonts } from '../presetFontFiles';
+ import type { ProjectBinding } from '../project/ProjectBinding';
+ import type { ProjectStore } from '../project/ProjectStore';
+@@ -213,7 +213,7 @@
+ function renderElementStyles(styles: Record<string, { parameters: Record<string, unknown> }>): string {
+   const types = Object.keys(styles);
+   if (types.length === 0) {
+-    return 'ELEMENT STYLES: none — every control you place draws the runtime\'s own look until its type has one: call set_element_style for each control type you use.';
++    return 'ELEMENT STYLES: none — every control you place draws the runtime\'s own look until it has one (set_style_preset adds them; set_element_style sets one).';
+   }
+   const lines = types.map((t) => {
+     const params = Object.entries(styles[t].parameters)
+@@ -287,9 +287,12 @@
+       const fonts = applyPresetFonts(store.projectDir, preset.id);
+       // Modern = the defaults, so its override map is empty; clear overrides to
+       // return to defaults rather than write an empty block.
++      // P112-OWN020-OFFSYSTEM — a preset is a look for the whole app, so every control gets an on-system element
++      // style if it has none (the tokens it references are the preset's). An element style the project has is kept.
++      const elementStyles = addStarterElementStyles(store);
+       if (entries.length === 0) {
+         store.writeDesignTokens(TOKEN_METADATA_KEY, null);
+-        return jsonResult({ ok: true, preset: preset.id, customTokenCount: 0, fonts });
++        return jsonResult({ ok: true, preset: preset.id, customTokenCount: 0, fonts, elementStyles });
+       }
+       const customTokens = upsertTokens(store, entries);
+       return jsonResult({
+@@ -297,7 +300,8 @@
+         preset: preset.id,
+         updated: entries.map((e) => e.name),
+         customTokenCount: customTokens.length,
+-        fonts
++        fonts,
++        elementStyles
+       });
+     })
+   );
