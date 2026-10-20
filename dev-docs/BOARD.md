@@ -40,7 +40,7 @@ depends on no other lane, so 0.4.6 lands close behind 0.4.5. A release is cut wh
 | **0.4.4** full stack on your own VM | lane 3: OWN-015's rest (AC4, R11, AC1 from the registry), P116 ONT-004 onward, P104's rows as kit pieces; lane 4: OWN-016 AC2 and AC5, the deploy as a tool the agent calls, a second VM provider, the runbook | 12–18 | ~28 |
 | **0.4.5** cheaper models, measured | lane 5: OWN-020 AC5 (DeepSeek on the Cline kit, direct vs tapped), OWN-023's three arms, LOC-002, the price table with verified prices, ISL-010; P109's six (ISL-008, 022, 024, 025, 037, 046) | 12–16 | ~44 |
 | **0.4.6** code export you can claim | lane 6 short of Tier B: EXP-011 §101 and the named P18 rows in its "now" and "then" | 18–27 | ~71 |
-| **0.5.0** the framework | lane 6's EXP-003 Tier B (logic components in the export); lane 7: SEE-011, SEE-012, SEE-010 (the control), SEE-009 last, since it binds nodegx.io's words to the gates the others build | 17–26 | **~66–97** |
+| **0.5.0** the framework | lane 6's EXP-003 Tier B (logic components in the export); lane 7: SEE-011, SEE-010 (the control), SEE-009 last, since it binds nodegx.io's words to the gates the others build. SEE-012 is built but not landed: `0fc2b00fc` on branch `l7-security`, measured 2026-10-20 not on HEAD, waiting on a peer's uncommitted `packages/noodl-mcp/src/toolGroups.ts`; it lands as a plain fast-forward once that file is committed, then Richard's AC4 read | 14–22 | **~63–93** |
 
 The order: nothing reaches a stranger until the npm side works, so 0.4.3 is first; SEE-009 grades the site's claims
 against gates, so it is last. A session that closes a row's last task moves the next release's row up in the lane table
