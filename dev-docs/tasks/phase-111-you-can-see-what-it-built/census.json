@@ -3327,22 +3327,22 @@
     {
       "name": "gram",
       "format": "v2",
-      "bytes": 765068,
+      "bytes": 767481,
       "files": 136,
       "components": 45,
-      "handObjects": 765,
+      "handObjects": 769,
       "componentRecords": 45,
-      "connections": 835,
-      "nodes": 720,
-      "known": 599,
-      "script": 83,
+      "connections": 840,
+      "nodes": 724,
+      "known": 602,
+      "script": 84,
       "unspecced": 16,
       "instance": 21,
       "exempt": 1,
-      "scriptLines": 3839,
-      "scriptWeight": 3839,
-      "functions": 83,
-      "functionLines": 3839,
+      "scriptLines": 3845,
+      "scriptWeight": 3845,
+      "functions": 84,
+      "functionLines": 3845,
       "kitNodes": 0,
       "percent": 87.8,
       "percentByLines": 13.5,
@@ -3357,7 +3357,7 @@
         },
         {
           "type": "JavaScriptFunction",
-          "count": 83
+          "count": 84
         },
         {
           "type": "net.noodl.controls.button",
@@ -3369,7 +3369,7 @@
         }
       ],
       "scriptByType": {
-        "JavaScriptFunction": 83
+        "JavaScriptFunction": 84
       },
       "unspeccedByType": {
         "Page": 16
@@ -3517,15 +3517,15 @@
         },
         {
           "name": "/#__cloud__/setUpCommunity",
-          "nodes": 9,
+          "nodes": 10,
           "connections": 27,
-          "known": 7,
+          "known": 8,
           "script": 2,
           "unspecced": 0,
           "instance": 0,
           "exempt": 0,
           "scriptLines": 108,
-          "percent": 77.8
+          "percent": 80
         },
         {
           "name": "/#__cloud__/sharePost",
@@ -3901,15 +3901,15 @@
         },
         {
           "name": "/UI/Bar",
-          "nodes": 10,
-          "connections": 7,
-          "known": 9,
-          "script": 1,
+          "nodes": 13,
+          "connections": 12,
+          "known": 11,
+          "script": 2,
           "unspecced": 0,
           "instance": 0,
           "exempt": 0,
-          "scriptLines": 2,
-          "percent": 90
+          "scriptLines": 8,
+          "percent": 84.6
         },
         {
           "name": "/UI/DatePicker",
@@ -4418,14 +4418,14 @@
     {
       "name": "marketplace",
       "format": "v2",
-      "bytes": 1004004,
+      "bytes": 1004734,
       "files": 217,
       "components": 72,
-      "handObjects": 1087,
+      "handObjects": 1088,
       "componentRecords": 72,
-      "connections": 1046,
-      "nodes": 1015,
-      "known": 848,
+      "connections": 1049,
+      "nodes": 1016,
+      "known": 849,
       "script": 99,
       "unspecced": 20,
       "instance": 47,
@@ -4435,7 +4435,7 @@
       "functions": 98,
       "functionLines": 3968,
       "kitNodes": 0,
-      "percent": 89.5,
+      "percent": 89.6,
       "percentByLines": 17.6,
       "topTypes": [
         {
@@ -4681,15 +4681,15 @@
         },
         {
           "name": "/#__cloud__/setUpMarketplace",
-          "nodes": 10,
+          "nodes": 11,
           "connections": 30,
-          "known": 7,
+          "known": 8,
           "script": 3,
           "unspecced": 0,
           "instance": 0,
           "exempt": 0,
           "scriptLines": 122,
-          "percent": 70
+          "percent": 72.7
         },
         {
           "name": "/#__cloud__/startPayment",
@@ -4886,7 +4886,7 @@
         {
           "name": "/Pages/Admin/Shelves",
           "nodes": 27,
-          "connections": 16,
+          "connections": 17,
           "known": 20,
           "script": 3,
           "unspecced": 1,
@@ -4910,7 +4910,7 @@
         {
           "name": "/Pages/Admin/WaysToPay",
           "nodes": 31,
-          "connections": 18,
+          "connections": 20,
           "known": 24,
           "script": 3,
           "unspecced": 1,
