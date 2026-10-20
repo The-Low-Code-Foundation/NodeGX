@@ -21,3 +21,5 @@ lands, e.g. "Members pray for each other and share what God is doing." `npm run 
 The Admins page made the same promise ("…block members and write devotionals"), dropped too. The spec reads every Text
 and Button in the generated app (known-firing: it sees the Welcome line). `templates/gram/docs/WORLD.md` keeps the
 devotional: it is the world the app is growing towards (TWO-006), not a page.
+
+**Driven on 0.4.3 (OWN-024 §6).**

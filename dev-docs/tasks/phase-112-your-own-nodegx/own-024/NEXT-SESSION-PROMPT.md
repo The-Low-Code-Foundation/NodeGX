@@ -1,3 +1,13 @@
+> **Update, end of s1 (2026-10-20 ~21:00 CEST):** #53 merged (`e0bd5309e`), `v0.4.3` tagged; the Release run built
+> darwin-x64 (signed, notarised), win32-x64 and linux-x64, each passing the new thumbnail smoke; **darwin-arm64 never got
+> a GitHub runner** (three times; a background loop re-queued it). Not published. S8 re-driven on the Intel artefact:
+> every check ✅ (OWN-024 §6). **The zips are made and in `nodegx-private/builder-briefs/`.** What's left, in order:
+> (1) the arm64 leg — `gh run rerun 39466894582 --failed` until it gets a runner; read its log for the two
+> `[check-packaged-backend]` lines; (2) the draft: 16 assets, `latest-mac.yml` with both arches (re-run *merge mac update
+> feed* after arm64), the body from `GITHUB-RELEASE-0.4.3.md`; (3) **Publish** (Richard gave his go for it); (4) the
+> feed post, the CHANGELOG date, nodegx.io (OWN-021 §11's way). The library job stays red on the parked Three Kit:
+> Richard's call. Step 2.4 below is done.
+
 # The 0.4.3 cut, from the PR on: push `release/0.4.3`, the six checks, merge, tag, Publish, then the two zips
 
 **Written 2026-10-20 by Opus 5.5 (session opennoodl-8a, OWN-024 s1), at `cline-dev` `2a7e4df71`.** Read first:

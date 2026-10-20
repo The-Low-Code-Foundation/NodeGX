@@ -66,3 +66,5 @@ is all it needs, and the lockfile already lists every platform's `@img/*` prebui
 
 Still owed: the four CI legs green on the new hooks (a nightly dispatch on the branch shows three platforms unsigned),
 and the S8 photo path re-driven on the 0.4.3 build. Sibling, not fixed here: P112-OWN024-DEPLOYNOSHARP.
+
+**Driven on 0.4.3 (OWN-024 §6):** every marketplace image loads from `?thumb=` at both sizes on the released Intel build; the smoke passed on darwin-x64 (signed), win32-x64 and linux-x64 in the Release run. arm64 waits on a runner.

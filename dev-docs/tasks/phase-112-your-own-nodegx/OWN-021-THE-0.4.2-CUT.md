@@ -347,3 +347,7 @@ that putting either app on the internet isn't covered yet (TWO-011).
 **Not driven:** the marketplace's enquiry, card payment (stand-in only, §5), the admin's other tabs beyond setup;
 the community app's comments, prayer, profiles, moderation, events (all driven from source in P121 s12–s16); Windows,
 Linux and Intel Mac builds.
+
+**The zips (OWN-024 s1, 2026-10-20).** Made from `v0.4.3` after the S8 path was re-driven on its Intel artefact (photos
+load, OWN-024 §6), R1-clean, in `nodegx-private/builder-briefs/`. AC4's zip half is met; the email and the sending are
+Richard's.
