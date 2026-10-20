@@ -129,6 +129,11 @@ describe('TWO-005 slice 1 — joining and being let in, through the template’s
     expect((await call('setUpCommunity', { setup: { ...setup, setupToken: 'wrong' } }, 'stranger')).status).toBe(400);
     const refused = await call('setUpCommunity', { setup: { ...setup, password: 'short' } }, 'stranger');
     expect(JSON.stringify(refused.json)).toContain('8 characters');
+    // P112-OWN021-SAMEEMAIL: the backend admin app's own account, made with the builder's email first, is refused in words.
+    expect((await req('POST', '/users', { username: 'builder@example.com', email: 'builder@example.com', password: 'admin-app-pw' })).status).toBe(201);
+    const taken = await call('setUpCommunity', { setup: { ...setup, email: 'builder@example.com' } }, 'stranger');
+    expect([taken.status, JSON.stringify(taken.json)]).toEqual([400, expect.stringContaining('This backend already has an account with that email.')]);
+    expect((await rows('Community')).json.results).toEqual([]);
     const made = await call('setUpCommunity', { setup }, 'stranger');
     expect(made.status).toBe(200);
     id.ama = String(made.json.result?.memberId);

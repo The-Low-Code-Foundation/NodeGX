@@ -156,6 +156,21 @@ Outputs.member();`;
 
 // ── /UI/Bar ────────────────────────────────────────────────────────────────────────────────────────────────────────
 
+/** The variable the bar shows the community's name from: read on every page, on screen at once on the next. */
+export const GRAM_NAME_VARIABLE = 'communityName';
+
+/**
+ * P112-OWN021-GRAMWORDMARK: the bar said "gram", the template's working name, on every page. The name is the one
+ * `Community` row's, named at set-up, as the marketplace's R13. Anyone may read it (the Welcome page does, for a
+ * stranger). Written to the shared variable only when it differs. Before set-up there is no row and the bar is empty.
+ */
+export const GRAM_NAME_LOAD = `var rows = [];
+try { rows = await Noodl.Records.query('Community', {}, { plain: true, limit: 1 }); } catch (e) { return; }
+var name = rows[0] && rows[0].name ? String(rows[0].name) : '';
+if (name === String(Inputs.current || '')) return;
+Outputs.name = name;
+Outputs.set();`;
+
 /** Sign out is offered only to someone signed in: a stranger on the welcome page has nothing to sign out of. */
 export const BAR_WHO = `Outputs.signedIn = !!Noodl.Users.Current;
 Outputs.hasBand = !!Inputs.band;`;
@@ -166,16 +181,24 @@ const BAR: PageComponent = {
   nodes: [
     group('brRoot', 'Bar', undefined, column({})),
     group('brTop', 'Wordmark and Sign out', 'brRoot', rowOf({ backgroundColor: 'var(--surface)', borderStyle: 'solid', borderColor: 'var(--border)', borderBottomWidth: px(1), borderTopWidth: px(0), borderLeftWidth: px(0), borderRightWidth: px(0), paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-3)' })),
-    text('brWord', 'The wordmark', 'brTop', 'gram', { fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-semibold)', color: 'var(--foreground)', cssClassName: 'gm-read gm-grow' }),
+    text('brWord', 'The wordmark: the community’s name', 'brTop', '', { fontSize: 'var(--text-2xl)', fontWeight: 'var(--font-semibold)', color: 'var(--foreground)', cssClassName: 'gm-read gm-grow' }),
     button('brOut', 'Sign out', 'brTop', 'Sign out', { ...GM_LINE_SMALL, mounted: false }),
     group('brBand', 'The role band', 'brRoot', { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--primary)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', paddingTop: px(5), paddingBottom: px(5), mounted: false }),
     text('brBandWords', 'Who', 'brBand', '', { fontSize: 'var(--text-xs)', fontWeight: 'var(--font-extrabold)', textTransform: 'uppercase', letterSpacing: 'var(--tracking-wider)', color: 'var(--primary-foreground)' }),
     { id: 'brIn', type: 'Component Inputs', label: 'Inputs', ports: [{ name: 'band', type: 'string', plug: 'output' }] },
     fn('brWho', 'Signed in? A band?', BAR_WHO, []),
     { id: 'brLogOut', type: 'net.noodl.user.LogOut', label: 'Sign out' },
-    go('brToWelcome', 'To the start', GRAM_PAGES.welcome)
+    go('brToWelcome', 'To the start', GRAM_PAGES.welcome),
+    fn('brNameLoad', 'The community’s name, read', GRAM_NAME_LOAD, ['set'], ['current']),
+    { id: 'brNameNow', type: 'Variable2', label: 'The community’s name', parameters: { name: GRAM_NAME_VARIABLE } },
+    { id: 'brNameSet', type: 'Set Variable', label: 'The community’s name, as read', parameters: { name: GRAM_NAME_VARIABLE, setWith: 'string' } }
   ],
   connections: [
+    wire('brNameNow', 'value', 'brWord', 'text'),
+    wire('brRoot', 'didMount', 'brNameLoad', 'run'),
+    wire('brNameNow', 'value', 'brNameLoad', 'in-current'),
+    wire('brNameLoad', 'out-name', 'brNameSet', 'value'),
+    wire('brNameLoad', 'out-set', 'brNameSet', 'do'),
     wire('brIn', 'band', 'brBandWords', 'text'),
     wire('brIn', 'band', 'brWho', 'in-band'),
     wire('brRoot', 'didMount', 'brWho', 'run'),
@@ -214,7 +237,7 @@ const WELCOME: PageComponent = {
     ...gramShell('wc', 'Welcome', '', null, 480),
     group('wcContent', 'Welcome', 'wcBody', column({ rowGap: 'var(--space-4)', paddingTop: 'var(--space-8)', mounted: false })),
     text('wcName', 'The community’s name', 'wcContent', '', GM_TITLE),
-    text('wcLead', 'What it is', 'wcContent', 'Members read the day’s devotional, pray for each other and share what God is doing. Only members who’ve been let in see posts. Nothing is public.', { ...GM_FINE, fontSize: 'var(--text-base)' }),
+    text('wcLead', 'What it is', 'wcContent', 'Members pray for each other and share what God is doing. Only members who’ve been let in see posts. Nothing is public.', { ...GM_FINE, fontSize: 'var(--text-base)' }),
     group('wcOpen', 'Ask to join, or sign in', 'wcContent', column({ rowGap: 'var(--space-3)', mounted: false })),
     button('wcJoin', 'Ask to join', 'wcOpen', 'Ask to join', GM_MAIN),
     button('wcSignIn', 'Sign in', 'wcOpen', 'Sign in', { ...GM_LINE, sizeMode: 'contentHeight', width: pct(100) }),
@@ -580,7 +603,7 @@ const ADMINS: PageComponent = {
     group('adContent', 'Admins', 'adBody', column({ rowGap: 'var(--space-4)', mounted: false })),
     button('adBack', 'Back', 'adContent', '← Waiting for you', GM_LINK),
     text('adTitle', 'Heading', 'adContent', 'Admins', GM_TITLE),
-    text('adLead', 'What an admin does', 'adContent', 'Admins let people in, hide posts and comments, block members and write devotionals. Make a member you trust an admin.', GM_FINE),
+    text('adLead', 'What an admin does', 'adContent', 'Admins let people in, hide posts and comments and block members. Make a member you trust an admin.', GM_FINE),
     group('adList', 'Everyone who is in', 'adContent', column({ cssClassName: 'gm-list' })),
     { id: 'adEach', type: 'For Each', label: 'One row per member', parent: 'adList', parameters: { template: GRAM_COMPONENTS.adminRow } },
     ...refusedBox('ad'),

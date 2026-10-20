@@ -152,7 +152,7 @@
       "label": "What an admin does",
       "parent": "adContent",
       "parameters": {
-        "text": "Admins let people in, hide posts and comments, block members and write devotionals. Make a member you trust an admin.",
+        "text": "Admins let people in, hide posts and comments and block members. Make a member you trust an admin.",
         "fontSize": "var(--text-sm)",
         "color": "var(--muted-foreground)",
         "lineHeight": "var(--leading-relaxed)",

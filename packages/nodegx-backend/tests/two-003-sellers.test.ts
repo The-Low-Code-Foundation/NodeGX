@@ -116,6 +116,16 @@ describe('TWO-003 slice 1 — sellers and the admin, through the template’s fu
       expect((await req('POST', '/login', { username: 'admin@example.com', password: 'longenough' }, {})).status).not.toBe(200);
     });
 
+    it('P112-OWN021-SAMEEMAIL: an email that already has an account (the admin app’s) is refused, saying so, and makes nothing', async () => {
+      // The backend admin app's first account, made with the builder's own email before they set the app up.
+      expect((await req('POST', '/users', { username: 'builder@example.com', email: 'builder@example.com', password: 'admin-app-pw' })).status).toBe(201);
+      const r = await call('setUpMarketplace', { setup: { setupToken: SETUP_TOKEN, marketplace: 'Market Square', name: 'Builder', email: 'Builder@Example.com', password: 'longenough' } }, 'stranger');
+      expect(refusal(r)).toEqual([400, expect.stringContaining('This backend already has an account with that email.')]);
+      expect((await req<{ results: unknown[] }>('GET', '/classes/Person')).json.results).toEqual([]);
+      expect((await req<{ results: unknown[] }>('GET', '/classes/Marketplace')).json.results).toEqual([]);
+      expect((await req('POST', '/login', { username: 'builder@example.com', password: 'longenough' }, {})).status).not.toBe(200);
+    });
+
     it('the right token makes the admin: a sign-in, role:admin, a Person row and its history', async () => {
       const r = await call('setUpMarketplace', { setup: { setupToken: SETUP_TOKEN, marketplace: 'Market Square', name: 'Admin', email: 'Admin@Example.com', password: 'longenough' } }, 'stranger');
       expect(refusal(r)).toEqual([200, expect.stringContaining('personId')]);

@@ -66,7 +66,7 @@
     {
       "fromId": "create",
       "fromProperty": "unchanged",
-      "toId": "no-2",
+      "toId": "taken",
       "toProperty": "send"
     },
     {

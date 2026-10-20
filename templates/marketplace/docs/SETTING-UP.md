@@ -12,7 +12,8 @@ Open **Backend Services** in the left-hand bar and press **+**. Choose **Built-i
 Give the backend a name, press **Create**, then **Start backend**. The shop's home page then reads "Nothing is on sale
 yet".
 
-Run one app's backend at a time. If another NodeGX app's backend is running, stop it before you open the marketplace.
+On NodeGX 0.4.2, run one app's backend at a time. If another app's backend is running, stop it before you open the
+marketplace.
 
 ## 2. Open the admin app
 

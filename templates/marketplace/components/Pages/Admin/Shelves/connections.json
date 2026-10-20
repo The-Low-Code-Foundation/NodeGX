@@ -88,6 +88,12 @@
       "toProperty": "run"
     },
     {
+      "fromId": "svCall",
+      "fromProperty": "done",
+      "toId": "svName",
+      "toProperty": "clear"
+    },
+    {
       "fromId": "svStamp",
       "fromProperty": "out-at",
       "toId": "svSetChanged",

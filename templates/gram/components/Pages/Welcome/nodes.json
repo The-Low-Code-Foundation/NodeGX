@@ -129,7 +129,7 @@
       "label": "What it is",
       "parent": "wcContent",
       "parameters": {
-        "text": "Members read the day’s devotional, pray for each other and share what God is doing. Only members who’ve been let in see posts. Nothing is public.",
+        "text": "Members pray for each other and share what God is doing. Only members who’ve been let in see posts. Nothing is public.",
         "fontSize": "var(--text-base)",
         "color": "var(--muted-foreground)",
         "lineHeight": "var(--leading-relaxed)",

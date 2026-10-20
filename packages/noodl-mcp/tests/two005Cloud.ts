@@ -152,6 +152,7 @@ const SET_UP_COMMUNITY: CloudComponent = {
     { id: 'first', type: 'JavaScriptFunction', label: 'The admin’s member and the community, with their histories', ports: signals('done', 'refused'), parameters: { functionScript: FIRST_ADMIN_SCRIPT, ...quiet('loginId', 'name', 'email', 'community') } },
     { id: 'ok', type: 'noodl.cloud.response', label: 'Set up', parameters: { params: 'memberId' } },
     { id: 'no', type: 'noodl.cloud.response', label: 'Refused', parameters: { status: 'failure', errorMessage: 'This community couldn’t be set up with that.' } },
+    { id: 'taken', type: 'noodl.cloud.response', label: 'Refused: the email has an account', parameters: { status: 'failure', errorMessage: 'This backend already has an account with that email. The admin app’s account may be using it. Use a different email.' } },
     { id: 'why', type: 'noodl.cloud.response', label: 'Refused, with why', parameters: { status: 'failure' } }
   ],
   connections: [
@@ -165,8 +166,10 @@ const SET_UP_COMMUNITY: CloudComponent = {
     wire('gate', 'out-ok', 'create', 'create'),
     wire('create', 'userId', 'grant', 'userId'),
     wire('create', 'done', 'grant', 'add'),
-    // An account with this email already exists: refused, never granted (it may be somebody else's).
-    wire('create', 'unchanged', 'no', 'send'),
+    // An account with this email already exists: refused, never granted (it may be somebody else's). The token has
+    // matched, so this is the builder, and saying the email is taken tells nobody else anything
+    // (P112-OWN021-SAMEEMAIL: the backend admin app's own account was the usual one).
+    wire('create', 'unchanged', 'taken', 'send'),
     wire('create', 'userId', 'first', 'in-loginId'),
     wire('gate', 'out-name', 'first', 'in-name'),
     wire('gate', 'out-email', 'first', 'in-email'),

@@ -14,7 +14,7 @@
     "__cloud__/setUpCommunity": {
       "path": "__cloud__/setUpCommunity",
       "type": "cloud",
-      "nodeCount": 9,
+      "nodeCount": 10,
       "connectionCount": 27,
       "modified": "2026-10-14T00:00:00.000Z",
       "created": "2026-10-14T00:00:00.000Z"
@@ -134,8 +134,8 @@
     "UI/Bar": {
       "path": "UI/Bar",
       "type": "visual",
-      "nodeCount": 10,
-      "connectionCount": 7,
+      "nodeCount": 13,
+      "connectionCount": 12,
       "modified": "2026-10-14T00:00:00.000Z",
       "created": "2026-10-14T00:00:00.000Z"
     },
@@ -366,7 +366,7 @@
   },
   "stats": {
     "totalComponents": 45,
-    "totalNodes": 720,
-    "totalConnections": 835
+    "totalNodes": 724,
+    "totalConnections": 840
   }
 }

@@ -12,7 +12,8 @@ Open **Backend Services** in the left-hand bar and press **+**. Choose **Built-i
 Give the backend the community's name: members see it in the email that signs them in. Press **Create**, then **Start
 backend**.
 
-Run one app's backend at a time. If another NodeGX app's backend is running, stop it before you open the community app.
+On NodeGX 0.4.2, run one app's backend at a time. If another app's backend is running, stop it before you open the
+community app.
 
 On the backend's card, press **Manage data & settings**. The backend's admin app opens in your browser. The first time,
 it asks you to create your admin account for the backend. Use a different email for the community's first admin in
@@ -58,8 +59,7 @@ community's name, your name, your email and a password of 8 characters or more.
 
 You're now the first admin. You sign in with that password.
 
-The bar at the top of every page says "gram". To change it, open the `UI/Bar` component in NodeGX and change the text
-of its wordmark.
+The bar at the top of every page shows the community's name.
 
 ## 5. Letting people in
 

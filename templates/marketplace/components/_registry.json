@@ -6,7 +6,7 @@
     "__cloud__/setUpMarketplace": {
       "path": "__cloud__/setUpMarketplace",
       "type": "cloud",
-      "nodeCount": 10,
+      "nodeCount": 11,
       "connectionCount": 30,
       "modified": "2026-10-14T00:00:00.000Z",
       "created": "2026-10-14T00:00:00.000Z"
@@ -543,7 +543,7 @@
       "path": "Pages/Admin/WaysToPay",
       "type": "page",
       "nodeCount": 31,
-      "connectionCount": 18,
+      "connectionCount": 20,
       "modified": "2026-10-14T00:00:00.000Z",
       "created": "2026-10-14T00:00:00.000Z"
     },
@@ -559,7 +559,7 @@
       "path": "Pages/Admin/Shelves",
       "type": "page",
       "nodeCount": 27,
-      "connectionCount": 16,
+      "connectionCount": 17,
       "modified": "2026-10-14T00:00:00.000Z",
       "created": "2026-10-14T00:00:00.000Z"
     },
@@ -582,7 +582,7 @@
   },
   "stats": {
     "totalComponents": 72,
-    "totalNodes": 1015,
-    "totalConnections": 1046
+    "totalNodes": 1016,
+    "totalConnections": 1049
   }
 }
