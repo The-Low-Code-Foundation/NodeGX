@@ -35,7 +35,7 @@ depends on no other lane, so 0.4.6 lands close behind 0.4.5. A release is cut wh
 
 | release | what is in it | sessions | running |
 |---|---|---|---|
-| **0.4.2** | Built. Richard merges PR #52, tags `v0.4.2`, runs the Release and Publish; publishes npm 0.2.3 (2FA). Measured 2026-10-20: `main` still on 0.4.1, no `v0.4.2` tag, npm on 0.2.2 | 0 (two jobs, Richard's) | 0 |
+| **0.4.2** | ✅ **Published 2026-10-20 08:18 UTC** (OWN-021 §11): PR #52 merged, `v0.4.2` tagged, nodegx.io and the feed post on it. Left: npm 0.2.3's four (preview, mcp, create-nodegx, create-nodegx-vibe) not on the registry at 08:50 UTC, then the site's npm section; S8, both templates driven on the release | 0 | 0 |
 | **0.4.3** a stranger starts from npm | npm 0.2.4 with the Cline kit (OWN-020 AC2); P112-OWN023-COLDSERVER (the server misses Claude Code's 30 s start limit on a first run) and P112-OWN020-CALLTOOLSTRIP fixed; lane 1: the stranger's app from the registry, OWN-014 AC4; lane 2: the stranger round on the drawer; the tests-only `any` raise paid back | 7–10 | ~10 |
 | **0.4.4** full stack on your own VM | lane 3: OWN-015's rest (AC4, R11, AC1 from the registry), P116 ONT-004 onward, P104's rows as kit pieces; lane 4: OWN-016 AC2 and AC5, the deploy as a tool the agent calls, a second VM provider, the runbook | 12–18 | ~28 |
 | **0.4.5** cheaper models, measured | lane 5: OWN-020 AC5 (DeepSeek on the Cline kit, direct vs tapped), OWN-023's three arms, LOC-002, the price table with verified prices, ISL-010; P109's six (ISL-008, 022, 024, 025, 037, 046) | 12–16 | ~44 |

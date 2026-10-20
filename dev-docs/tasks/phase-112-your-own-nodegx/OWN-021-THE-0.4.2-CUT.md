@@ -4,7 +4,7 @@
 dude to get his templates". Lane 1, after OWN-013 (the 0.4.0 / 0.4.1 cuts). The runbook is OWN-013's (§3–§4,
 UPG-008's shape); this file says what 0.4.2 must carry and how we know it does.
 
-**Status: 🟡 s2 (2026-10-19): S1–S5 ✅, AC1 ✅; PR #52 green on the six required checks (§9). S6 (the Mac staple) and S7 (merge, tag, Publish) are Richard's.** **s3 (2026-10-19): the npm 0.2.3 cut is packed and tested (§10); Richard publishes it with one command.** P121's product changes are six commits, one per bug
+**Status: 🟢 s4 (2026-10-20): 0.4.2 PUBLISHED 08:18:31 UTC, nodegx.io on 0.4.2, feed post live (§11); npm 0.2.3 half out; S8 and AC4 left.** Before: 🟡 s2 (2026-10-19): S1–S5 ✅, AC1 ✅; PR #52 green on the six required checks (§9). S6 (the Mac staple) and S7 (merge, tag, Publish) are Richard's.** **s3 (2026-10-19): the npm 0.2.3 cut is packed and tested (§10); Richard publishes it with one command.** P121's product changes are six commits, one per bug
 (MEMBERSPHOTO and UPLOADSHRINK share one, as both edit `uploadfile.ts` and its spec), each bug `fixed` with its
 commit; the two templates, their generators and specs are `9168a171d`, on Richard's go (R1 re-checked against the
 private brief: none of its names in the 452 files). Next: S3, the cut point (§7).
@@ -250,3 +250,25 @@ It publishes node-spec, project-contract, preview, mcp, create-nodegx, create-no
 canvas-look (no tarball) and anything already up, and waits for each to be live with the tested shasum before the next.
 Then: `npm view create-nodegx@0.2.3 dist.shasum` etc. against the table; nodegx.io's changelog follows a nodegx-web
 deploy; change the CHANGELOG's date if the publish lands on another day.
+
+## 11. s4 (2026-10-20, Opus 5.5, session opennoodl-8a): S6–S7, shipped
+
+- **S7.** On Richard's go ("You have my permission to PR without review"), PR #52 merged as a merge commit
+  (`250a36804`, its tree equal to the tested `a9b9af9ad`); `v0.4.2` tagged on it (annotated) and pushed. Release run
+  `39388115343`: all four platforms, *merge mac update feed* and *verify draft release is complete* green; **the Intel
+  staple did not fail this time**, so S6 needed nothing. The draft: 16 assets, `latest-mac.yml` version 0.4.2 with
+  both arches. The arm64 DMG: `codesign --verify --deep --strict` ok, stapler validates, Gatekeeper "accepted,
+  Notarized Developer ID", `CFBundleShortVersionString` 0.4.2; launched in an isolated profile, the launcher drew 432
+  elements and `require('fast-xml-parser')` loaded; torn down by its own pid. The draft's body was empty: set from
+  `GITHUB-RELEASE-0.4.2.md`. **Published as Latest 2026-10-20T08:18:31Z.**
+- **The feed post** pushed (nodegx-content `8d51aa03d`, `date_modified` = the publish moment), written with plain
+  `<p>` leads and no `<strong>` / `<em>`, so 0.4.0 and older installs (NEWSWHITE, fixed only from 0.4.1) can read it.
+  0.4.1 had never had a post; the feed's one item was 0.4.0's.
+- **CHANGELOG** 0.4.2 and npm 0.2.3 dated 2026-10-20 (`1262e5e73`).
+- **nodegx.io** deployed (nodegx-web `9ee1fbf`): homepage eyebrow, button, release block (date, a new note through the
+  offline copy checks, the six downloads, all 206 on a range request), changelog `#v0-4-2`. Neighbours 200 before and after.
+  **npm 0.2.3 is held off the site's changelog**: at 08:50 UTC only node-spec 0.2.0 and project-contract 0.2.0 were on the
+  registry (shasums equal §10's); preview, mcp, create-nodegx and create-nodegx-vibe were not. When they are, re-run
+  `ops/deploy.sh 49.12.102.195` with no `NODEGX_CHANGELOG` (it reads this repo's CHANGELOG, which has the section) and commit.
+- **Left:** the four npm packages (Richard's terminal), the site's npm section after them, S8 (both templates driven on
+  the released build), AC4.
