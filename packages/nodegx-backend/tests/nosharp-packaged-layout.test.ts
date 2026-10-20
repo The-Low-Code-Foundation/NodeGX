@@ -19,7 +19,7 @@ const esbuild = require('esbuild');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { shared, SHARP_RUNTIME_DIR } = require('../scripts/build.js');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { stageSharp } = require('../scripts/stage-sharp.js');
+const { stageSharp, targetPackages } = require('../scripts/stage-sharp.js');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { thumbSmoke } = require('../scripts/thumb-smoke.js');
 
@@ -72,6 +72,26 @@ describe('P112-OWN021-NOSHARP — a packaged backend answers ?thumb=', () => {
 
   afterAll(() => {
     fs.rmSync(work, { recursive: true, force: true });
+  });
+
+  it('each release target stages the packages sharp lists for it: libvips on its own, except on Windows', () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const manifest = require('sharp/package.json');
+    expect(
+      Object.fromEntries(
+        ['darwin-arm64', 'darwin-x64', 'win32-x64', 'linux-x64'].map((t) => [
+          t,
+          targetPackages(manifest, ...t.split('-'))
+        ])
+      )
+    ).toEqual({
+      'darwin-arm64': ['@img/sharp-darwin-arm64', '@img/sharp-libvips-darwin-arm64'],
+      'darwin-x64': ['@img/sharp-darwin-x64', '@img/sharp-libvips-darwin-x64'],
+      // libvips-42.dll ships inside @img/sharp-win32-x64 (measured on the registry, 0.33.5)
+      'win32-x64': ['@img/sharp-win32-x64'],
+      'linux-x64': ['@img/sharp-linux-x64', '@img/sharp-libvips-linux-x64']
+    });
+    expect(() => targetPackages(manifest, 'freebsd', 'x64')).toThrow(/no prebuild for freebsd-x64/);
   });
 
   it('known-firing: cli.js alone — 0.4.2 as shipped — answers 501 naming sharp', async () => {

@@ -11,11 +11,11 @@
  * runner's prebuild):
  *   - `sharp` and what it `dependencies` on, transitively, at the same relative paths they have under `node_modules`
  *     (so `sharp/node_modules/semver` stays nested and resolution is unchanged);
- *   - of the `optionalDependencies`, only the target's two: `@img/sharp-<platform>-<arch>` (the `.node`) and
- *     `@img/sharp-libvips-<platform>-<arch>` (libvips, found by the `.node` through a relative rpath — which is why the
- *     layout must be kept and not flattened).
+ *   - of the `optionalDependencies`, only the target's: `@img/sharp-<platform>-<arch>` (the `.node`) and, on macOS and
+ *     Linux, `@img/sharp-libvips-<platform>-<arch>` (libvips, found by the `.node` through a relative rpath — which is
+ *     why the layout must be kept and not flattened). On Windows the `.node` package carries its DLLs itself.
  *
- * The target's two are required: a staging that would ship without them throws, naming them, instead of producing a
+ * The target's packages are required: a staging that would ship without them throws, naming them, instead of producing a
  * tree that loads `sharp` and then fails on its binding.
  *
  * Linux means glibc here (`linux-x64`), which is what the AppImage, .deb and .rpm run on.
@@ -29,10 +29,22 @@ const path = require('path');
 
 const pkgRoot = path.resolve(__dirname, '..');
 
-/** The two optional packages a `<platform>-<arch>` target needs. */
-function targetPackages(platform, arch) {
-  return [`@img/sharp-${platform}-${arch}`, `@img/sharp-libvips-${platform}-${arch}`];
+/**
+ * The optional packages a `<platform>-<arch>` target needs, as sharp's own manifest lists them: the `.node` package,
+ * and libvips where it is a package of its own. Windows has none: `@img/sharp-win32-x64` carries its DLLs itself.
+ */
+function targetPackages(sharpManifest, platform, arch) {
+  const listed = sharpManifest.optionalDependencies || {};
+  const binding = `@img/sharp-${platform}-${arch}`;
+  if (!(binding in listed)) {
+    throw new Error(
+      `[stage-sharp] sharp ${sharpManifest.version} has no prebuild for ${platform}-${arch} (no ${binding})`
+    );
+  }
+  return [binding, `@img/sharp-libvips-${platform}-${arch}`].filter((name) => name in listed);
 }
+
+const readManifest = (dir) => JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
 
 /** Node's lookup, by hand: the nearest `node_modules/<name>` from `fromDir` up. `exports` maps don't apply to a dir. */
 function findPackageDir(name, fromDir) {
@@ -59,7 +71,9 @@ function layoutPath(packageDir) {
  * @returns {{ target: string, packages: string[] }} the layout paths written, sorted
  */
 function stageSharp({ outDir, platform = process.platform, arch = process.arch, fromDir = pkgRoot }) {
-  const wanted = new Set(targetPackages(platform, arch));
+  const sharpDir = findPackageDir('sharp', fromDir);
+  if (!sharpDir) throw new Error(`[stage-sharp] cannot find sharp from ${fromDir}. Run npm ci at the repo root.`);
+  const wanted = new Set(targetPackages(readManifest(sharpDir), platform, arch));
   const staged = new Map(); // layout path → source dir
   const queue = [{ name: 'sharp', fromDir }];
 
@@ -75,7 +89,7 @@ function stageSharp({ outDir, platform = process.platform, arch = process.arch, 
       continue;
     }
     staged.set(rel, dir);
-    const manifest = JSON.parse(fs.readFileSync(path.join(dir, 'package.json'), 'utf8'));
+    const manifest = readManifest(dir);
     for (const dep of Object.keys(manifest.dependencies || {})) queue.push({ name: dep, fromDir: dir });
     for (const dep of Object.keys(manifest.optionalDependencies || {})) {
       if (wanted.has(dep)) queue.push({ name: dep, fromDir: dir, optional: true });

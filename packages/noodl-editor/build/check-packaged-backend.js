@@ -6,7 +6,8 @@
 //
 // Two checks on the packed app, both failing the build before the installer is made or uploaded:
 //
-//   1. the target's own prebuild is in `nodegx-backend/node_modules` — `@img/sharp-<platform>-<arch>` and its libvips.
+//   1. the target's own prebuild is in `nodegx-backend/node_modules` — `@img/sharp-<platform>-<arch>`, and its libvips
+//      package where sharp lists one (not on Windows).
 //      The tree is staged on the build machine (packages/nodegx-backend/scripts/stage-sharp.js), so an app packaged
 //      for another arch carries the wrong one; this names it.
 //   2. the live smoke (packages/nodegx-backend/scripts/thumb-smoke.js): start the packed `cli.js` with the app's own
@@ -25,6 +26,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { targetPackages } = require('../../nodegx-backend/scripts/stage-sharp');
 const { thumbSmoke } = require('../../nodegx-backend/scripts/thumb-smoke');
 
 // electron-builder's `Arch` enum (builder-util), by value.
@@ -43,12 +45,16 @@ function layoutFor(context) {
   return { resourcesDir: path.join(appOutDir, 'resources'), executable: path.join(appOutDir, name) };
 }
 
-/** Check 1. @returns {string[]} the missing packages, empty when the target's prebuild is there */
+/**
+ * Check 1. The target's packages are the ones the packed sharp's own manifest lists for it (Windows has no separate
+ * libvips package). @returns {string[]} what is missing, empty when the target's prebuild is there
+ */
 function missingPrebuild(resourcesDir, platform, arch) {
   const modules = path.join(resourcesDir, 'nodegx-backend', 'node_modules');
-  return ['sharp', `@img/sharp-${platform}-${arch}`, `@img/sharp-libvips-${platform}-${arch}`].filter(
-    (name) => !fs.existsSync(path.join(modules, name, 'package.json'))
-  );
+  const manifest = path.join(modules, 'sharp', 'package.json');
+  if (!fs.existsSync(manifest)) return ['sharp'];
+  const wanted = targetPackages(JSON.parse(fs.readFileSync(manifest, 'utf8')), platform, arch);
+  return wanted.filter((name) => !fs.existsSync(path.join(modules, name, 'package.json')));
 }
 
 async function checkPackagedBackend(context, hook) {

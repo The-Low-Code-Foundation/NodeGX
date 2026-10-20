@@ -151,7 +151,13 @@ async function thumbSmoke({ resourcesDir, executable = process.execPath, timeout
         ? resolve()
         : backend.child.once('exit', resolve)
     );
-    fs.rmSync(dataDir, { recursive: true, force: true });
+    // Best effort: on Windows the killed backend's database can hold its files a moment longer, and a temp folder
+    // left behind must not fail a smoke that passed.
+    try {
+      fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    } catch {
+      /* left in the temp folder */
+    }
   }
 }
 
