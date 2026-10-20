@@ -25,6 +25,27 @@ below. Each lane names the phase and tasks that already exist for it; no lane ne
 session picks up today; **then** is what follows it. A lane's task files are the source of truth for its acceptance
 criteria; this table only orders them.
 
+### 2a. The road to 0.5.0
+
+Set 2026-10-20 with Richard ("it's a good split"). The lanes ship in five point releases, then 0.5.0. Session counts are
+estimates from the board's own pace (lane 6 ran s119–s131, thirteen sessions in four days, about one named row each),
+not counts of open acceptance criteria; lanes 3 and 7 are the least certain. Richard's evenings (§3) are not in them and
+block no release except where a task waits on his read. **Lane 6 runs in a second session the whole way**, as it
+depends on no other lane, so 0.4.6 lands close behind 0.4.5. A release is cut when its row is done, not on a date.
+
+| release | what is in it | sessions | running |
+|---|---|---|---|
+| **0.4.2** | Built. Richard merges PR #52, tags `v0.4.2`, runs the Release and Publish; publishes npm 0.2.3 (2FA). Measured 2026-10-20: `main` still on 0.4.1, no `v0.4.2` tag, npm on 0.2.2 | 0 (two jobs, Richard's) | 0 |
+| **0.4.3** a stranger starts from npm | npm 0.2.4 with the Cline kit (OWN-020 AC2); P112-OWN023-COLDSERVER (the server misses Claude Code's 30 s start limit on a first run) and P112-OWN020-CALLTOOLSTRIP fixed; lane 1: the stranger's app from the registry, OWN-014 AC4; lane 2: the stranger round on the drawer; the tests-only `any` raise paid back | 7–10 | ~10 |
+| **0.4.4** full stack on your own VM | lane 3: OWN-015's rest (AC4, R11, AC1 from the registry), P116 ONT-004 onward, P104's rows as kit pieces; lane 4: OWN-016 AC2 and AC5, the deploy as a tool the agent calls, a second VM provider, the runbook | 12–18 | ~28 |
+| **0.4.5** cheaper models, measured | lane 5: OWN-020 AC5 (DeepSeek on the Cline kit, direct vs tapped), OWN-023's three arms, LOC-002, the price table with verified prices, ISL-010; P109's six (ISL-008, 022, 024, 025, 037, 046) | 12–16 | ~44 |
+| **0.4.6** code export you can claim | lane 6 short of Tier B: EXP-011 §101 and the named P18 rows in its "now" and "then" | 18–27 | ~71 |
+| **0.5.0** the framework | lane 6's EXP-003 Tier B (logic components in the export); lane 7: SEE-011, SEE-012, SEE-010 (the control), SEE-009 last, since it binds nodegx.io's words to the gates the others build | 17–26 | **~66–97** |
+
+The order: nothing reaches a stranger until the npm side works, so 0.4.3 is first; SEE-009 grades the site's claims
+against gates, so it is last. A session that closes a row's last task moves the next release's row up in the lane table
+below, as rule 5 says.
+
 | # | lane | phase / tasks | now | then |
 |---|---|---|---|---|
 | 1 | **Apps with npm.** One install, the agent builds, the preview and `render_report` run from npm. | P112 [OWN-011](tasks/phase-112-your-own-nodegx/OWN-011-ONE-INSTALL.md), [OWN-013](tasks/phase-112-your-own-nodegx/OWN-013-THE-0.4.0-CUT.md), [OWN-014](tasks/phase-112-your-own-nodegx/OWN-014-THE-AGENT-SEES-ITS-APP.md), [OWN-007](tasks/phase-112-your-own-nodegx/OWN-007-THE-BRIEF.md), [OWN-021](tasks/phase-112-your-own-nodegx/OWN-021-THE-0.4.2-CUT.md) | **[OWN-021](tasks/phase-112-your-own-nodegx/OWN-021-THE-0.4.2-CUT.md), the 0.4.2 cut.** S1–S4 ✅ s1 (2026-10-19). **S5 ✅ s2 (2026-10-19)**: `release/0.4.2` pushed on Richard's go, **PR #52** green on the six required checks (Test (editor) 3017 / 0, read in the log) after a tests-only tsfixme raise on Richard's word (R19's route, `a9b9af9ad`: TSFixme +5, `any` +84 in 20 test files, `src` unchanged; **owed back down on `cline-dev`**). **Now: Richard merges PR #52** (the auto-mode classifier refuses an agent's merge as "Merge Without Review", 2026-10-19, even with his go), then tag `v0.4.2`, the Release run and Publish. The Mac staple fix (`"notarize": false`) was refused again as "Security Weaken"; the fallback is 0.4.0's: re-run a failed staple leg. The tests-only raise is paid back on `cline-dev` (`df3fcec02`: tests `any` 1913 → 1892). **The npm cut is packed and tested** (OWN-021 §10, 2026-10-19): mcp, preview, create-nodegx, create-nodegx-vibe 0.2.3; node-spec and project-contract 0.2.0 (the drawer, NPXPREVIEW, FILESONLY, ESMADAPTER, FORMAT4PIN), packed from `5c8ae8142`, pushed, each tarball tested from an empty folder. **Richard runs** `scripts/own/publish-npm.sh /Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.3-tarballs` (2FA); then the language app built by a stranger from the registry (WAVTWICE's proof; WAVTWICE fixed `135244dc0`), then OWN-014 AC4 with it. Shipped 2026-10-14: editor 0.4.1 and npm 0.2.1, nodegx.io on 0.4.1; OWN-011 AC2 ✅ on the release | Richard's in-place 0.3.0 → 0.4.0 update click (OWN-013 G8, his half) and G10's drives; OWN-014 AC4 with OWN-015's app. Shipped 2026-10-14: editor 0.4.0, npm 0.2.0 (`create-nodegx` carries OWN-007's skill), OWN-014 AC3; G8's agent half and AC2's re-drive found two editor bugs, fixed for the next release (OWN-013 §13) |
