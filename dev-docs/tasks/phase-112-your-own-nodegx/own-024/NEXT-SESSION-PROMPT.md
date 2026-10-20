@@ -12,7 +12,8 @@
 - **Committed on `cline-dev`:** NOSHARP `6b2515d4a` + its Windows fix `2b6317913`; PUSHTOALL `45d1a453f`; the four
   template fixes `6cba197ad`; the ratchet `13890a372`; the release commit `2a7e4df71` (CHANGELOG `## 0.4.3`, editor
   0.4.3, `GITHUB-RELEASE-0.4.3.md`, `whats-new-0.4.3.READY-TO-PUSH.json`, OWN-024, the board).
-- **`release/0.4.3` is made LOCALLY, NOT PUSHED: re-make it from the current `cline-dev` before pushing** (a docs commit moves the cut). The cut with `origin/main` (`250a36804`) merged in; one
+- **`release/0.4.3` PUSHED (`4efbce226`, cut `65f936bcb`) and PR #53 open to `main`** (Richard's go, s1). A later
+  `cline-dev` commit does NOT reach it: only push more to the branch for a fix CI asks for, and say so on the PR. The cut with `origin/main` (`250a36804`) merged in; one
   conflict (`.tsfixme-baseline.json`) resolved to the cut; its tree equals the cut's. Both ratchets hold on its clean tree.
   If `cline-dev` moved since, re-make it the same way (OWN-024 §5) from the new cut and re-run `git merge-tree`.
 - **What only CI can measure:** the new afterPack smoke on Windows and Linux (nightly or release legs), and the
@@ -24,7 +25,7 @@
 0. **The box** (`ListAgents`, `ps`, `uptime`); one heavy job at a time.
 1. **Richard ruled in s1 (OWN-024 §5, end):** check in with the other sessions before pushing (done: all clear); no
    nightly dispatch; the honesty number gated to source builds (done). **The push and the PR still need his explicit
-   go** — s1 asked again after the check-in.
+   go** — given in s1; the PR is #53.
 2. **The PR** → `main`: the six required checks green, Test (editor) count and seed read in the job log (OWN-021 §9).
    Not-required reds were red on #51/#52 too: say which, don't fix them here.
 3. **Merge, tag `v0.4.3`, the Release run** (Richard's go for each). On a red leg: read its log first; a NOSHARP hook

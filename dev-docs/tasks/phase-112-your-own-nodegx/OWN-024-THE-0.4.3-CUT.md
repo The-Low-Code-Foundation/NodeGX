@@ -6,8 +6,8 @@ Lane 1, after [OWN-021](OWN-021-THE-0.4.2-CUT.md) (0.4.2). The runbook is [OWN-0
 OWN-021 §7–§11 last ran it. **This file owns the editor half of the board's 0.4.3 row. The npm half (0.2.4 with the
 Cline kit) is OWN-020's** ([OWN-020](OWN-020-THREE-HARNESSES.md) AC2).
 
-**Status: 🟡 s1 (2026-10-20): S1–S4 ✅ committed on `cline-dev` (NOSHARP, PUSHTOALL, the four template fixes, the
-ratchet). S5's cut point measured; CHANGELOG and release drafts next. S6–S8 wait on Richard's go for each outward step.**
+**Status: 🟡 s1 (2026-10-20): S1–S5 ✅; S6 under way — `release/0.4.3` pushed (`4efbce226`, cut `65f936bcb`) on
+Richard's go and PR #53 open to `main`. Merge, tag and Publish wait on his go.**
 
 ## 1. The person sentence
 
@@ -111,3 +111,7 @@ out of the notes: `honestyShown()` (`process.env.devMode === 'yes'`, set by `mai
 walk and the canvas's script mark; a packaged app walks nothing and draws none of it. Spec
 `tests-unit/see-001/honestyShown.test.ts`. The sibling `honestyView.test.ts` is 3 red at HEAD without it (fixture
 drift, P111-SEE001-HONESTYFIXTUREDRIFT, filed); its fourth case anchored on the painter's old line and is re-anchored.
+
+**S6 (s1, ~17:00 CEST).** On Richard's go after the check-in, `release/0.4.3` pushed (`4efbce226`, cut `65f936bcb`,
+its tree the cut's) and **PR #53** opened to `main`. opennoodl-92 (OWN-020) told the branch exists, and told to run
+`npm run tsfixme` before committing its 0.2.4 cut (the baseline on `cline-dev` is lower than `main`'s).
