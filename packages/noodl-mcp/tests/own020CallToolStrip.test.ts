@@ -15,19 +15,36 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 
 import { createServer } from '../src/server';
 
-async function callTool(client: Client, name: string, args?: Record<string, unknown>): Promise<{ isError: boolean; text: string; data: any }> {
+/** What `call_tool` answers, as far as these specs read it. */
+interface ToolAnswer {
+  ok?: boolean;
+  name?: string;
+  inputSchema: { properties: Record<string, unknown> };
+  error: { code: string; message: string; details: { unknownArguments?: string[]; didYouMean?: Record<string, string> } };
+}
+
+/** The answer's JSON. Read only where a spec reads it: an answer that isn't JSON fails that spec, saying what it was. */
+function answerOf(text: string): ToolAnswer {
+  try {
+    return JSON.parse(text) as ToolAnswer;
+  } catch {
+    throw new Error(`call_tool answered text that isn't JSON: ${text.slice(0, 200)}`);
+  }
+}
+
+async function callTool(client: Client, name: string, args?: Record<string, unknown>): Promise<{ isError: boolean; text: string; readonly data: ToolAnswer }> {
   const res = (await client.callTool({ name: 'call_tool', arguments: { name, ...(args ? { arguments: args } : {}) } })) as {
     isError?: boolean;
     content: Array<{ type: string; text: string }>;
   };
   const text = res.content?.[0]?.text ?? '';
-  let data: any = null;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    data = null;
-  }
-  return { isError: !!res.isError, text, data };
+  return {
+    isError: !!res.isError,
+    text,
+    get data() {
+      return answerOf(text);
+    }
+  };
 }
 
 const NODES = [
