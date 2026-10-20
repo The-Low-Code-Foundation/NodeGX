@@ -485,6 +485,130 @@ What §5 becomes under this reading: items 1 and 2 are the hygiene that makes th
 item 0 (the five interviews) is the recruiting conversation for the play test, not a gate of its own; items 3, 4 and
 6 wait until the play test says whether anyone but Richard looks through the window.
 
+## 9. Digging into the feelings (Richard's choice of piste, same evening: *"I think they're the best piste à suivre we have right now"*)
+
+Richard, rejecting the play test as the next step:
+
+> I'd rather try to dig into what it is that makes me want to use NodeGX instead of just Claude Coding. I'm even
+> really excited about the NodeGX Studio concept and getting back to Bubble style editing, I loved it before. It made
+> me feel like I was really useful and in control of what I was building for myself and clients, like I could answer
+> any question that came up, there was nothing where I'd have to say 'oh no I'm not a coder I can't answer that' and
+> have to delegate to someone else. Feeling useful and valueable.
+
+### 9.1 Round 3, verbatim
+
+**Q9. In your Bubble days, which questions did clients actually ask you, the ones you could always answer?**
+Ticked all four: *where is the data and who can see it; why does it do X when I click Y; can you change or add this,
+and how long; is it secure, what if we grow.* Added:
+
+> What happens if I want to sell this or get an investor
+
+**Q10. With an app Claude Code built for you in plain code, which of those can you NOT answer today without asking
+Claude?** Ticked: *where is the data and who can see it; why does it do X when I click Y.* Then:
+
+> The 'can you change or add' something question is now 'probably in a couple of hours' so that's dead, and actually
+> hard to know what to bill a client because often it's 4 hours work where I'm active for like 30 mins of it. Also the
+> question of 'why did you chose this particular technology' or 'what happens if we want to move to a different
+> technology, launch a mobile app, etc.' aren't easy to answer with just claude code. Though rebuilding something from
+> scratch is most people's answer because it's so quick and easy today
+
+**Q11. When you open the NodeGX editor on a fresh build, what do you actually look at or do in there?**
+Ticked all four: *the preview, to click through; the data and backend; fix a visual thing myself; the component tree,
+to see what it built.* Then:
+
+> I do like looking through the structure, but it's pure curiosity rather than checking anything, the database schema
+> I could be interested in checking in case I disagree with any of it or I see something the client didn't ask for.
+> Privacy rules, worth testing loggin into the app and seeing if you can hack any user details, but it's something i
+> normally ask Claude to simulate for me in a headless browser. With headless browsing, a lot of the 'opening the
+> editor to check' actions have been offloaded to headless chrome and Claude screenshots as proof
+
+**Q12. You like the editor but you still ask Claude Code to make changes. Why not do them in the editor?**
+Ticked: *Claude is faster and I just say what I want.* Then:
+
+> Though if it's like changing a button label or changing the primary style colour, I'd probably open the editor IF
+> it was very quick and easy, which is where my idea of 'an editor inside claude code' came from, so you have the
+> preview right there and it's not tempting to just ask claude to do it when you can just click and edit what you
+> already see, like with Replit (though replit didn't have an editable preview back then)
+
+### 9.2 What round 3 says (the session's reading, to be corrected by him)
+
+- **The client's questions sort into two kinds.** Ones an agent answers ("can you change it": a couple of hours, dead)
+  and ones that need a picture of the system a person can hold: where the data is and who sees it; why it does X; why
+  this technology; what if we move, go mobile, sell, take an investor. Bubble gave him the second kind because every
+  Bubble app was the same known thing he understood once. Every Claude Code app is a different bespoke stack chosen
+  on the evening it was built.
+- **The editor's checking job is being taken by Claude's own verification.** His words: "offloaded to headless
+  chrome and Claude screenshots as proof." That is the §3 finding (Desktop auto-verify on by default) arriving in his
+  own habit. What is left in the editor for him: curiosity about the structure; the schema, for things the client did
+  not ask for; and the tiny visual edit, if it were instant.
+- **The instant visual edit is the Replit loop again** (Q5), and he names the shape he wants: the preview right there
+  in the Claude Code session, click and edit what you see. Studio and P123 are that; so is Claude Code Desktop's
+  browser pane for code (§2.3). The window is converging from both sides.
+- **The billing line is the feeling, in money.** Four hours of work, thirty minutes active, and not knowing what he
+  is selling. Bubble never posed the question because he was the builder. What he sold then was being the person who
+  understood the system and could vouch for it to the client. That is the thing Claude Code took, and it is the
+  thing the product would have to give back.
+
+### 9.3 Round 4, verbatim
+
+**Q13. When you bill a client four hours and were active for thirty minutes, what do you tell yourself you are
+selling them?** Ticked: *the result, however long it took; being reachable when it breaks.* Then:
+
+> It's the reassurance that somebody human is checking the output, any questions in the middle, quality testing the
+> end result
+
+**Q14. A client says: "we might sell this or bring in an investor, what do we tell them it's built on?" Which answer
+would you be comfortable giving?** No option ticked:
+
+> I'd not talk about NOdeGX, I'd say whatever framework I know the investor will like, then build the bridge between
+> NodeGX and that offramp, like we plan to do with the Swift experiment
+
+**Q15. The single moment in your Bubble years when you felt most useful and in control in front of a client?**
+Ticked: *catching something they hadn't thought of.* Then:
+
+> or building a feature fast and cheap that they'd been told would cost tens of thousands of euros by traditional
+> tech agencies. though now I'm the guy charges hundreds of euros for something they'll probably find can be built
+> with a 20 dollar subscription, so I'm the agencies I used to laugh at
+
+**Q16. If Claude Code keeps getting better at building, what do you want your job to be in two years?**
+Ticked: *the person who understands and vouches for the system; the teacher.* Then:
+
+> I think my plan is to keep having my hands in the dirt, being able to answer the question of 'does this really
+> work?' because I'm doing it every day, staying on the cutting edge of what's possible with AI so anyone who wants to
+> try it can get the latest possible methods and capabilities if they come to me for guidance. But in the end I'll
+> proabably do less and less of the actual build process and more of the high level conception and be the bridge
+> between the human who doesn't know how to tell Claude what they want because they don't even understand what they
+> want, and Claude
+
+### 9.4 What the feelings say, put together (the session's reading; his to correct)
+
+1. **What he sells is a human who checks.** Q13 in his words: reassurance that somebody human is checking the output,
+   answering questions in the middle, testing the end result. Not hours, not code. Bubble made that role visible: he
+   was the builder, so the checking was inside the building. Claude Code made it invisible: the agent builds and the
+   agent checks (headless Chrome, screenshots), and the human's part shrinks to thirty minutes nobody can see.
+2. **The best moment was catching what the client had not thought of** (Q15), and that is the one job the editor
+   still does for him that Claude's screenshots do not (Q11: the schema, "in case I disagree with any of it or I see
+   something the client didn't ask for"). A screenshot shows the surface. The schema and the graph show the decisions.
+   Catching lives in the decisions.
+3. **NodeGX is his workbench, not his brand.** Q14: to an investor he would name whatever framework they like and
+   build the bridge to it. So the offramp (P18's export, the Swift experiment) is the client-facing answer, and the
+   graph is the private place where he can still see, catch and vouch. That is the opposite of how the site presents
+   it (an open-source visual builder, above the fold) and the same as DIRECTION §1 (the editor optional, the format
+   the thing).
+4. **The feeling called "safer" (Q6) decomposes into: I can still catch things, I can still answer, and I could still
+   take it over.** The first is the editor's schema and structure. The second is the client's five questions (Q9),
+   two of which only a picture of the system answers. The third is the offramp. None of the three is "Claude can't
+   override it", which is the one part the kit does not do (§4.1), and it was the least important of the three to him.
+5. **The arbitrage is gone and no product brings it back.** Q15: he was the cheap fast alternative to agencies; now
+   he is the agency, at hundreds of euros against a $20 subscription. NodeGX cannot fix that. What survives is the
+   role in Q16: hands in the dirt daily so he can say "does this really work" from experience, and the bridge between
+   a person who does not know what they want and the agent. That is a consulting and teaching offer, and the
+   workbench is what keeps it honest.
+6. **So where NodeGX fits, for him:** the workbench of the person who vouches. Claude Code builds. NodeGX is where a
+   non-coder can see the decisions, catch what the client did not ask for, answer where the data is and why it does X,
+   and keep an exit to the stack the investor wants. Whether anyone but him is that person is §8's play test, with
+   the recruiting pool now named: people who sell "a human checked this".
+
 ## 7. Sources
 
 All read 2026-10-20 unless dated. Quality in brackets.
