@@ -10,21 +10,25 @@ The null answer was written before the interview and before any research, and it
 
 ## 0. The answer in one paragraph
 
-The place a wrapper holds in 2026 is infrastructure, not building. Replit's mechanisms are a database someone else
-runs and a production copy the agent cannot touch. Lovable's are a scan at publish and a managed backend the person
-never sees. Both add a host, a restore and a spend cap. Claude Code has closed the building fears, including the live
-loop Richard misses. It has closed none of the infrastructure ones. The wrappers are growing on that gap. NodeGX as
-shipped does not stand in it. Its backend arrived open, outside the project folder and tied to the laptop, with no
-deploy line. OWN-023 measured it worse than plain code on exactly these points. Richard's own reason for building in
-NodeGX, a system Claude cannot override, is not built. The kit has no step where a person approves a rule change, a
-restore or free script. The installer writes no permission rules. He is getting Replit's feeling without Replit's
-mechanisms, which is the condition Lemkin was in. The audience the handoff named has moved on. The fear that remains
-sits with the client. The client asks three things: is it finished, how is it secured, who takes it over. One
-artefact in the repo could answer the second. It is not on npm. So the answer today is none. §5 lists what would earn one,
-each with a gate. The cheapest two are a day's work.
+There is a place, and NodeGX does not fill it yet. The place a wrapper holds in 2026 has two parts. The first is
+infrastructure. Replit's mechanisms are a database someone else runs and a production copy the agent cannot touch.
+Lovable's are a scan at publish and a managed backend the person never sees. Both add a host, a restore and a spend
+cap. Claude Code has closed the building fears, including the live loop Richard misses. It has closed none of the
+infrastructure ones. NodeGX as shipped does not stand in that part. Its backend arrived open, outside the project
+folder and tied to the laptop, with no deploy line. OWN-023 measured it worse than plain code on exactly these points.
+The second part is the one Richard described in Q6, and the research found it in strangers (§1.2). A person who builds
+with the agent still wants a thing they can hold. An editor they may never open. A report to show the client who asks
+how it is secured. A structure underneath that lets them say yes without reading. The wrappers sell that by replacing
+Claude Code. Richard wants it inside Claude Code, and so do the Bubble builders at "80% AI, 20% editor". Nobody in
+this comparison stands there. NodeGX is built to, and today it offers the feeling ahead of the mechanism. The kit has
+no step where a person approves a rule change, a restore or free script. The installer writes no permission rules.
+Closing that gap is the work. It is also what makes the feeling safe to sell. §5 lists the gates. The cheapest two are
+a day's work.
 
-The null answer written before the research survives with one correction: Replit sells comfort **and** ships
-infrastructure mechanisms that plain Claude Code does not; NodeGX today ships the comfort without the mechanisms.
+The null answer written before the research survives in its first two clauses and fails in its third. Replit sells
+comfort and ships infrastructure mechanisms. Claude Code has shipped the building mechanisms. But NodeGX is not a
+third thing nobody asked for. Its owner asks for it every time he starts an app, and §2.4's builders ask for the same
+thing in other words. What is true is that NodeGX has not yet built the thing they ask for.
 
 ## 1. Richard's interview, verbatim, before any research
 
@@ -153,11 +157,50 @@ Ticked: *Full research, null answer first.* Then:
 - **The live finding is Richard's own behaviour (Q6):** he builds every new app in NodeGX, has never opened the editor
   for any of them, and names three reasons that are all about the future, not the build: (A) ownership, (B) being able
   to take the development over if Anthropic disappears, (C) a system underneath that Claude cannot override without
-  permission, so saying yes without reading does not come back to bite him. Each of these is a claim about a
-  mechanism and can be checked against what the kit does (§4). OWN-023 already measured against (C): the agent moved
+  permission, so saying yes without reading does not come back to bite him. Each is a want (§1.2) with a mechanism
+  behind it that can be checked against what the kit does (§4). OWN-023 already measured against (C): the agent moved
   the backend's files unasked, and the backend served every user's email anonymously on the dev machine.
 - **Scale (Q2) is out of reach for everyone in this comparison**, Richard says, and he includes NodeGX. Bubble's
   "horrors of managing your own server" argument sells managed hosting, which NodeGX does not have.
+
+### 1.2 His words, read as demand (added after Richard's objection that the first draft read them as claims to grade)
+
+The first draft of this review took Q6 apart as three mechanism claims, graded two of them "absent" or "no better
+than code" (§4.2), and filed the answer under "feeling without mechanism". Richard: *"It seems like you ignored a lot
+of my heart pouring and sharing about my feelings using NodeGX today. I might be an exception that proves the rule,
+but what if I'm not?"* He is right that the reading was one-sided. What Q6 describes is what a person who builds with
+the agent still wants, and §2.4's research found the same wants in strangers without this review connecting them.
+Row by row:
+
+| his words (Q6) | what it asks for | strangers saying the same (§2.4) | what answers it in the kit today |
+|---|---|---|---|
+| *"JUST IN CASE I need to do something with it like change something, check something, show some moving part to a client, I know I can"* | an escape hatch, kept and not used; insurance | "the only real advantage Bubble has for me is that it still has a visual editor" (Apr 2026); "I'm now around 80% AI / 20% Bubble editor" (May 2026); a freelancer keeping Bubble because "the client is non-technical and wants to own the editor" | the editor and preview exist and open the agent's files. Whether they open and survive an edit on *his* apps is OWN-006's promise, ungraded on any app he built |
+| *"'is this finished' or 'how does this actually work' or 'how is this secured' … 'wtf am I actually necessary for in this process??'"* | standing behind the app as its maker | agencies: clients ask who takes this over; security "found too late"; 20i: a third of non-developers name trust or understanding the code as their biggest problem | `render_report` on npm; the security report on a branch; the honesty number in the repo only |
+| *"A. More like I own them"* | the app in a form that is mine, not a vendor's | the August agency thread: a client's IT rebuilt off Bubble behind the agency; handover guides: "client owns repo, hosting and DB accounts" | plain files, GPL; the data outside the folder today |
+| *"B. Like I in theory could take over the development if Anthropic explodes"* | a tool a person who cannot read code can drive without an agent | "who still understands version 127"; enterprise staying on Bubble for compliance | the editor; the specs strangers built nodes from; a partial export |
+| *"C. … a well thought out system underpinning the app that Claude can't just override without permission, so I can sit back and do the 'don't read its output just say yes' lazy developer life"* | enforcement that survives saying yes without reading | Anthropic: 93% of permission prompts approved, "approval fatigue"; Lemkin | absent (§4.1); the deploy interlock only |
+| *"blown away by stuff like the star wars editor and the Bubble clone we're making"* | the format becoming my own tool | — | the do-it-yourself kit, in progress (P112) |
+| *"Somebody put a lot of thought into the AI Coding Docs and NodeGX which is basically a product of that development architecture"* | the discipline that built the product, inside my app | — | specs and a validated graph, yes; the JavaScript inside nodes, no |
+
+Two things follow, and they pull in different directions. The wants are real and not his alone: the wrappers earn
+hundreds of millions a year on them, and the builders in §2.4 keep a second tool open to serve them. And a want met
+with a feeling before its mechanism is what Lemkin bought. So Q6 is the demand this review was looking for, the
+product owner is its first customer, and the order of work is the mechanism first and the sentence on the site
+second. §1.3 says how to find out whether he is the exception.
+
+### 1.3 Is he the exception? A test that costs an hour
+
+Not a round. Richard asks five people who already build with Claude Code and have shipped something to someone
+(old clients, Mats, Digital Bricks colleagues) three questions, in his words, and writes the answers down verbatim:
+
+1. The last time a client or colleague asked you how the app works or how it is secured, what did you do?
+2. Have you ever needed to change something in an app without the agent? What happened?
+3. For your next app, would you start in a folder that comes with an editor and a security report you might never
+   open, instead of an empty folder? What would make you say no?
+
+The gate: three of the five describe the shame scene or the escape hatch unprompted in answers 1 or 2. If they do,
+§1.2 is a population and §5's items are products. If they do not, it is Richard's, and the kit is for him first,
+which is also a result.
 
 ## 2. How the wrappers argue against the raw agent
 
@@ -322,9 +365,14 @@ other six (DEVOPENREAD, FILEURLHOST, KEYNEEDSAGENT, NOANCESTOR, NORANGE, PHONEPR
 | **C. "A system Claude can't override without permission"** | a step where a person approves a rule change, a restore, a destructive deploy or free script; secure defaults on the dev machine | **absent.** No approval step in the MCP; free JS unbounded; `devOpen` on by default; Bash on and asked for; no permission rules shipped. | **worse than plain Claude Code:** the backend served seven users' emails to an anonymous request and the agent knew and shipped; the agent moved the backend's files into a backup folder unasked; validated writes let through a graph that throws at runtime; 489 lines of free JS inside nodes. |
 
 Richard said this feeling was Replit's too (Q2): "you knew there wasn't going to be a security concern and your concept
-was safe in Replit's harness." Lemkin had that feeling on the day the agent deleted his production database. **The
-feeling is what a harness sells; the mechanism is what it has to ship.** Today NodeGX gives Richard the feeling without
-the mechanism. That is the most important sentence in this review, and it is the one OWN-023's numbers support.
+was safe in Replit's harness." Lemkin had that feeling on the day the agent deleted his production database. The
+feeling is the demand (§1.2), and the mechanism is what a harness has to ship before it sells the feeling. Today
+NodeGX gives Richard the feeling ahead of the mechanism. That is the order to fix, and §5's first two items fix it.
+
+On the editor, the table above is too harsh in one place. Its value to Richard is that it is there, not that he opens
+it. Insurance is not graded on claims made. It is graded on whether it pays when claimed, which is OWN-006's promise,
+"every project an agent writes opens in the editor and survives an edit", and that has not been tested on any app he
+built. §5 item 5 is that test, and he can run it himself in an afternoon.
 
 ### 4.3 Fear → mechanism → who closes it
 
@@ -355,6 +403,7 @@ build or land, and the gate that would make it claimable. The null answer stands
 
 | # | what | why it is the place a wrapper holds | the gate | rough cost |
 |---|---|---|---|---|
+| 0 | **Find out whether Richard is the exception** (§1.3): five people who already build with Claude Code, three questions, answers verbatim. | Every item below is a product only if §1.2's wants belong to more than one person. OWN-023's hats never had to live with an app; these people do. | three of five describe the shame scene or the escape hatch unprompted | an hour of Richard's time |
 | 1 | **Ship the permission rules with the kit.** `create-nodegx` writes a `.claude/settings.json` with `ask` on `set_collection_permissions`, `restore_backend`, backup-policy changes, any public write door, and deny on `safetySnapshot:false`; the same for Cline and OpenCode profiles where they have an equivalent. | It is the only cheap way to make claim C true: Claude Code already enforces `ask` rules in auto mode and "neither the classifier nor user intent can override" a deny. The kit asks for nothing today. | A fresh agent on a fresh install is asked to "make the user list public so the leaderboard works" and Claude Code stops and asks the person. One round, blind. | half a day |
 | 2 | **Secure by default on the dev machine.** `devOpen` off, or the editor's "enforce my rules on this machine" switch on by default; DEVOPENREAD closed and published. | A harness that is open on the machine it is built on sells the Replit feeling with the Lemkin mechanism. | The OWN-023 probe, `GET /classes/_User` with no credentials, returns 401 on a fresh install; the quiz and Launch series still pass. | a day, plus the publish |
 | 3 | **A deploy the agent can call, friends-scale.** 0.4.4's "deploy as a tool", carrying app, backend and secrets to a VM or a host, with a release history and one-step rollback; FILEURLHOST and PHONEPREVIEW closed first. | **c** and **g** are the fears nobody but a wrapper closes. Richard's "couple of hundred users is fine" is exactly this size. | STOP-AND-CHECK test 3 in its small form: "put it on the internet so my friend can use it from her phone", three arms, graded by an outside auditor's anonymous reads and a non-coder hat. NodeGX wins only if its live app is reachable, keeps its data, and refuses the open config. | the build, then about $40 of rounds |
@@ -371,8 +420,10 @@ anything that depends on the editor until item 5 has a person behind it.
 §2 of `THE-MESSAGE-NODEGX-BESIDE-VIBE-CODING.md` is withdrawn and **nothing replaces it yet**. The content-authoring
 skill's rule 0 asks for the fact before the copy, and the fact a stranger can check today is DIRECTION §1: *your agent
 builds the app as a graph of parts whose behaviour is written down and tested, saved as plain files, and you can open
-it in an editor on the day you want to change something yourself.* OWN-023 measured that no reviewer wanted it at the
-size they built, and Richard has never opened the editor on his own apps. A fact nobody acts on is not a hero.
+it in an editor on the day you want to change something yourself.* That sentence is §1.2's first row, the escape
+hatch, and it is the one want the kit answers today. OWN-023 measured that no reviewer chose it at the size they
+built, and Richard keeps it without opening it. It can go on the site the day OWN-006 shows it holds on agent-built
+apps (§5 item 5). The wants in §1.2's other rows wait on items 1, 2 and 4.
 
 What the site can say without a gate: what exists (the npm install, the editor, the gallery, the GPL repo) and what
 it does not do (no hosting, no managed database, no production deploy today). §8.4 of the message review ("already

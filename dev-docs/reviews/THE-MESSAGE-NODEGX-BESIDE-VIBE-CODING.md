@@ -359,6 +359,8 @@ The control named in §0 and §3 has now run, with a third arm, and §2 as writt
   That session's handoff is `own-023/NEXT-SESSION-PROMPT.md`. Until it reports, the §7 plan is on hold and nothing on
   nodegx.io changes on the strength of §2.
 - **That session reported the same day:** `THE-PLACE-NODEGX-BESIDE-REPLIT.md`. Its §0: the place a wrapper holds is
-  infrastructure, which Claude Code has not closed and NodeGX as shipped does not hold either; the answer today is
-  none; §5 lists what would earn one with a gate each. Its §6 keeps this review's §2 withdrawn, keeps §8.4 and §6
+  infrastructure, which Claude Code has not closed and NodeGX as shipped does not hold either, and a thing a builder
+  can hold (an editor, a report, a structure), which Richard and the Bubble builders both want inside Claude Code and
+  which the kit offers today as a feeling ahead of its mechanism; there is a place, NodeGX does not fill it yet; §5
+  lists what would earn one with a gate each. Its §6 keeps this review's §2 withdrawn, keeps §8.4 and §6
   (Mats's card), and names the first sentence the site could earn.

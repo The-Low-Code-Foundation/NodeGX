@@ -283,7 +283,8 @@ the beginning of my AI coding journey because I was scared of doing pure Claude 
 though I'm an experienced low code builder."* → `own-023/NEXT-SESSION-PROMPT.md`.
 
 **Answered 2026-10-20** in `dev-docs/reviews/THE-PLACE-NODEGX-BESIDE-REPLIT.md` (Richard's interview verbatim in its
-§1; the answer "none, today" in §0; six gated things that would earn a place in §5). Rulings owed are in the
+§1; the answer "there is a place, and NodeGX does not fill it yet" in §0, revised from "none" after Richard objected
+that his Q6 had been read as claims to grade rather than as demand, now §1.2; seven gated things in §5). Rulings owed are in the
 rewritten `own-023/NEXT-SESSION-PROMPT.md`.
 
 ## 10. What this task is not

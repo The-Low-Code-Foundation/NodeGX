@@ -18,8 +18,14 @@ over has been answered. There is no lab work in this folder to pick up. Read `de
   "not closed" rows); the Bubble forum shows experienced low-code builders switching or mixing, with the fear moved to
   the client; and the kit, read file by line, has **no approval step anywhere in the MCP**, `devOpen: true` by
   default, free JS unbounded, Bash asked for, no permission rules shipped by the installer, no rollback.
-- **The answer (review §0): none, today.** NodeGX gives Richard Replit's feeling without Replit's mechanisms. The
-  null answer survived with one correction: the wrappers ship real infrastructure mechanisms, not only comfort.
+- **The answer (review §0, revised after Richard's objection): there is a place, and NodeGX does not fill it yet.**
+  The first draft said "none" and read his Q6 as mechanism claims to grade; he objected ("you ignored a lot of my
+  heart pouring … what if I'm not [the exception]?"). §1.2 now reads his words as demand beside the strangers in §2.4
+  who say the same (the "80% AI / 20% Bubble editor" builders, the agencies' clients, Lovable's revenue). The place:
+  a thing you can hold, inside Claude Code rather than instead of it. Today the kit offers the feeling ahead of the
+  mechanism; the order of work is the mechanism first, the site second. §1.3 is a one-hour test of whether he is the
+  exception (five Claude Code builders, three questions, three of five must describe the shame scene or the escape
+  hatch unprompted).
 - **§5 ranks six things that would earn a place, each with a gate.** The cheapest two (ship `ask`/deny permission
   rules with `create-nodegx`; `devOpen` off by default and DEVOPENREAD closed) are about a day's work and would make
   claim C true for the first time.
@@ -29,8 +35,8 @@ over has been answered. There is no lab work in this folder to pick up. Read `de
 
 ## Owed by Richard (rulings), listed apart from agent work
 
-1. Does any §5 item become a task? Recommendation in the review: items 1 and 2 (a day, closes claim C for real), then
-   item 5 (his own afternoon in the editor), before any round.
+1. Does any §5 item become a task? Recommendation in the review: item 0 (his hour of interviews, §1.3) and items 1
+   and 2 (a day, closes claim C for real), then item 5 (his own afternoon in the editor), before any round.
 2. Does nodegx.io change? Recommendation: not yet; the first sentence it could add is the one items 1–2 earn.
 3. The STOP-AND-CHECK tests stay declined (R11) unless item 3's friends-scale deploy test is wanted.
 4. AC6's page on nodegx.io: still his.
