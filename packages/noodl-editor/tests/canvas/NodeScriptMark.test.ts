@@ -100,10 +100,12 @@ describe('P111 SEE-001 the script mark on the canvas', () => {
     expect(same(instance, script)).toBe(false);
   });
 
-  it('a packaged app (no devMode) paints no mark: a Function node’s edge is a known node’s', () => {
+  // The titlebar is the node category's colour, so the unmarked edge is compared with the mark (the shown pixel, the
+  // function ink per the first case), not with another type's card.
+  it('a packaged app (no devMode) paints no mark on a Function node’s edge', () => {
     const shown = markPixel('JavaScriptFunction');
     delete process.env.devMode;
-    expect(same(markPixel('JavaScriptFunction'), shown)).toBe(false);
-    expect(same(markPixel('JavaScriptFunction'), markPixel('Group'))).toBe(true);
+    const hidden = markPixel('JavaScriptFunction');
+    expect(same(hidden, shown)).toBe(false);
   });
 });

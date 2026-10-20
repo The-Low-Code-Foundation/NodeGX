@@ -524,11 +524,12 @@ describe('SchemaValidator', () => {
       expect(result.valid).toBe(true);
     });
 
-    it('rejects a variant missing name', () => {
+    // P112 OWN-020 (3cb9eb745): a variant with no name is the element style — it dresses every node of its type.
+    it('accepts a variant with no name: the element style for its type', () => {
       const result = SchemaValidator.instance.validateStyles({
         variants: [{ typename: 'Button' }]
       });
-      expect(result.valid).toBe(false);
+      expect(result.valid).toBe(true);
     });
 
     it('rejects a variant missing typename', () => {
