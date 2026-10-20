@@ -21,8 +21,8 @@
     },
     "gram": {
       "percent": 87.8,
-      "known": 599,
-      "script": 83,
+      "known": 602,
+      "script": 84,
       "unspecced": 16
     },
     "landing-pages": {
@@ -38,8 +38,8 @@
       "unspecced": 1
     },
     "marketplace": {
-      "percent": 89.5,
-      "known": 848,
+      "percent": 89.6,
+      "known": 849,
       "script": 99,
       "unspecced": 20
     },
