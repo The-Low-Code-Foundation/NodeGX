@@ -61,8 +61,8 @@ design (`lock_gate` is a literal-`true` fan-out, by its own comment), not the ki
 
 ## Waits on Richard
 
-- **AC5 ruling:** does tgz35 → 0.2.4c count as one kit version for AC5, and does a pass through the retry tap count?
-  If no to either: CDQ5 / CDL3 on 0.2.4 (direct, or tapped as he rules), ASK first (allowance).
+- ~~AC5 ruling~~ **ruled R48 (2026-10-20): yes to both.** AC5 for Cline is met by DeepSeek V4.1 Flash; AC8's words
+  must say what the retry tap hides. OpenCode's half of AC5 is still open (no Launch round yet).
 - **His bars**: no before / after reading reached this session for CDQ2–CDQ4 + CDL2 (≈ 18.4M input, 90% cached).
 - **Raise it with Cline?** The in-band gateway error (bytes in `scratchpad/rounds/CDQ3-tap/resp-020.sse`) and Cline not
   retrying it are reportable; whether and how is his call.
