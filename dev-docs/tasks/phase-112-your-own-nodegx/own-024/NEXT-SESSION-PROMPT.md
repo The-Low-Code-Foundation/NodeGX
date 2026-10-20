@@ -12,7 +12,8 @@
 - **Committed on `cline-dev`:** NOSHARP `6b2515d4a` + its Windows fix `2b6317913`; PUSHTOALL `45d1a453f`; the four
   template fixes `6cba197ad`; the ratchet `13890a372`; the release commit `2a7e4df71` (CHANGELOG `## 0.4.3`, editor
   0.4.3, `GITHUB-RELEASE-0.4.3.md`, `whats-new-0.4.3.READY-TO-PUSH.json`, OWN-024, the board).
-- **`release/0.4.3` PUSHED (`4efbce226`, cut `65f936bcb`) and PR #53 open to `main`** (Richard's go, s1). A later
+- **`release/0.4.3` PUSHED, head `e55a37f86`, PR #53 to `main`: every required check green** (Test (editor) 3021 / 0,
+  seed 74287; OWN-024 §5 has both runs). Next is the merge, on Richard's go. A later
   `cline-dev` commit does NOT reach it: only push more to the branch for a fix CI asks for, and say so on the PR. The cut with `origin/main` (`250a36804`) merged in; one
   conflict (`.tsfixme-baseline.json`) resolved to the cut; its tree equals the cut's. Both ratchets hold on its clean tree.
   If `cline-dev` moved since, re-make it the same way (OWN-024 §5) from the new cut and re-run `git merge-tree`.

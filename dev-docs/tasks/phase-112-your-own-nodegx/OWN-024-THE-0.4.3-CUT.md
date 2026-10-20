@@ -7,7 +7,8 @@ OWN-021 §7–§11 last ran it. **This file owns the editor half of the board's 
 Cline kit) is OWN-020's** ([OWN-020](OWN-020-THREE-HARNESSES.md) AC2).
 
 **Status: 🟡 s1 (2026-10-20): S1–S5 ✅; S6 under way — `release/0.4.3` pushed (`4efbce226`, cut `65f936bcb`) on
-Richard's go and PR #53 open to `main`. Merge, tag and Publish wait on his go.**
+Richard's go and PR #53 open to `main`, its required checks green at `e55a37f86` (Test (editor) 3021 / 0, seed
+74287). Merge, tag and Publish wait on his go.**
 
 ## 1. The person sentence
 
@@ -115,3 +116,18 @@ drift, P111-SEE001-HONESTYFIXTUREDRIFT, filed); its fourth case anchored on the 
 **S6 (s1, ~17:00 CEST).** On Richard's go after the check-in, `release/0.4.3` pushed (`4efbce226`, cut `65f936bcb`,
 its tree the cut's) and **PR #53** opened to `main`. opennoodl-92 (OWN-020) told the branch exists, and told to run
 `npm run tsfixme` before committing its 0.2.4 cut (the baseline on `cline-dev` is lower than `main`'s).
+
+**S6, CI.** First run on `4efbce226`: Test (editor) 3021 specs, **2 failures** (seed 24383), both spec-side: the
+schema spec still refused a nameless variant (OWN-020's `3cb9eb745` made it the element style), and my packaged-app
+script-mark case compared with a Group card's edge (titlebars are the category's colour). Fixed in `61e6714d7`, the two
+test files alone. The package job had **three new reds, mine**: SEE-000/001's committed `census.json` and
+`honesty-ledger.json` held the gram and marketplace counts from before `6cba197ad`. Regenerated on a clean copy of the
+release tree (`e55a37f86`; on `cline-dev` `238f28246`), only those two rows moved, both `--check` gates exit 0.
+🔴 **A template change owes `node scripts/see/census.js` and `scripts/see/honesty-ledger.js --write`**, on a tree with
+no peer's uncommitted template in it. `cline-dev` had meanwhile taken OWN-020's npm 0.2.4 cut (`dce0e876a`); it was
+kept out of `release/0.4.3`, which took only these fixes.
+
+**Second run, on `e55a37f86`: every required check green, `mergeStateStatus` UNSTABLE / MERGEABLE.** Test (editor)
+**3021 specs, 0 failures, seed 74287** (read in the job log). Red and not required, as on #51/#52: Docs site builds,
+Lesson bundles, Renderer errors, and the package job's five filed rows (kit-types drift, GAM-014, OWN019-BACKENDSESSION,
+verbs, listPortCoverage). **Next: S7, merge, tag `v0.4.3`, the Release run, Publish: Richard's go for each.**
