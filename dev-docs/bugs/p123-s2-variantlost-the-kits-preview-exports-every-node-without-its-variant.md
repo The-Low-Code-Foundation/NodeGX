@@ -38,3 +38,7 @@ in-page bundle fails its style check (`check:editor` 169/170: the Sign in button
 `rgb(0, 0, 0)` once it wears its style). So anyone on the published packages (`npx @nodegx/preview`, `nodegx-deploy`,
 the MCP's `render_report`) still draws every node without its Look. Studio builds the in-page bundle from a commit
 until a release carries it (`nodegx-studio/scripts/vendor.mjs`, `PREVIEW_FIXED_IN`).
+
+**Released in `@nodegx/preview` 0.2.3 (published 2026-10-20 15:26).** Its in-page bundle and its `nodegx-deploy.cjs`
+both carry the fallback (`node.variantName || void 0`); NodeGX Studio pins 0.2.3 and stopped building its own bundle.
+`@nodegx/mcp` is still 0.2.2 on npm, so the published MCP's `render_report` should still lack it (read, not measured).
