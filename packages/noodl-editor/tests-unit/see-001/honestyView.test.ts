@@ -267,7 +267,7 @@ describe('SEE-001 editor — the canvas marks exactly the script parts', () => {
     expect(theme).toMatch(new RegExp(`categoryJavascript: \\{ css: '${SCRIPT_MARK_TOKEN}'`));
 
     const painter = fs.readFileSync(path.join(EDITOR_SRC, 'views', 'nodegrapheditor', 'NodeGraphEditorNodePainter.ts'), 'utf8');
-    const block = painter.slice(painter.indexOf('if (isScriptNodeType('));
+    const block = painter.slice(painter.indexOf('isScriptNodeType(node.model.typename)'));
     expect(block.slice(0, 400)).toContain('theme.categoryJavascript');
   });
 });

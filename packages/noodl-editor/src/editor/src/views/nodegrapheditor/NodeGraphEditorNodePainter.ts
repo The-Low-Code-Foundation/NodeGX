@@ -1,6 +1,7 @@
 import _ from 'underscore';
 
 import { NodeLibrary } from '../../models/nodelibrary';
+import { honestyShown } from '../panels/ComponentsPanelNew/honestyShown';
 import { CanvasFonts, CanvasTheme } from './canvas/CanvasTheme';
 import { currentEyebrowPlacement } from './canvas/eyebrowPlacement';
 import { instanceCountOf } from './canvas/instanceCounts';
@@ -495,7 +496,8 @@ export function paintNode(node: NodeGraphEditorNode, ctx: CanvasRenderingContext
     // panel draws the same bar, in the same token (`SCRIPT_MARK_TOKEN`, the function category's ink), on the number of
     // every component that holds one, and lists these nodes by name. Inside the clip and keyed off `titlebarHeight`, so
     // it takes no width from the title and moves no port anchor.
-    if (isScriptNodeType(node.model.typename)) {
+    // Source builds only, as the panel's number (`honestyShown`).
+    if (honestyShown() && isScriptNodeType(node.model.typename)) {
       ctx.save();
       ctx.fillStyle = theme.categoryJavascript;
       const markWidth = commentStripeWidth(ctx);

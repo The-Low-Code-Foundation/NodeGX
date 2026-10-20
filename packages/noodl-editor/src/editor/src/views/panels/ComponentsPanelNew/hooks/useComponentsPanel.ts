@@ -13,6 +13,7 @@ import { CLOUD_PATH_PREFIX, pageGroups, SECTION_LABEL, SECTION_ORDER, sectionFor
 import { buildUsageIndex, RouterPages, RowMeta, rowMetaFor, UsageIndex } from '../componentUsage';
 import { folderSegmentLabel } from '../folderDisplay';
 import { readProjectHonesty } from '../honestyView';
+import { honestyShown } from '../honestyShown';
 import { shippedTypeNames } from '../../../nodegrapheditor/canvas/scriptMark';
 import { TreeNode } from '../types';
 
@@ -188,7 +189,11 @@ export function useComponentsPanel() {
    * `honestyView.ts` only walks the graphs into it.
    */
   const honesty = useMemo(
-    () => (ProjectModel.instance ? readProjectHonesty(ProjectModel.instance.getComponents(), shippedTypeNames()) : null),
+    // A release build shows none of it, and walks nothing (`honestyShown`).
+    () =>
+      honestyShown() && ProjectModel.instance
+        ? readProjectHonesty(ProjectModel.instance.getComponents(), shippedTypeNames())
+        : null,
     [updateCounter]
   );
 

@@ -100,3 +100,14 @@ unflagged, and SEE-001 says "built and driven; Richard's read owed". The CHANGEL
 for NEWSWHITE). Written to the content-authoring skill; the offline checks `written`, `contract`, `opener` clean
 after three rounds (`figures` flags only version numbers; `closer` did not fire on a planted closing line, so it
 grades nothing here). R1: no builder's or app's name in any of them.
+
+**Richard's rulings (2026-10-20, ~16:30).** (1) Before pushing, check in with the other sessions: all four OpenNoodl
+sessions answered "nothing" (opennoodl-92, OWN-020: npm 0.2.4 from `cline-dev` only after Richard's 0.2.3 finishes and
+after `release/0.4.3` exists; no version bump or lockfile on `cline-dev` before then). (2) No nightly dispatch: straight
+to the release. (3) **The honesty number stays out of releases** — "it's a bit creepy and 99% of people won't know wtf
+it's talking about. Keep it here locally for us to test and leave it out of releases until we've done as much work as
+we can on our side to make sure it's going to be as close to 100% on each component". So it is gated, not just left
+out of the notes: `honestyShown()` (`process.env.devMode === 'yes'`, set by `main.js` from `--dev`) before the panel's
+walk and the canvas's script mark; a packaged app walks nothing and draws none of it. Spec
+`tests-unit/see-001/honestyShown.test.ts`. The sibling `honestyView.test.ts` is 3 red at HEAD without it (fixture
+drift, P111-SEE001-HONESTYFIXTUREDRIFT, filed); its fourth case anchored on the painter's old line and is re-anchored.

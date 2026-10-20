@@ -22,9 +22,9 @@
 ## 2. What to do, in order
 
 0. **The box** (`ListAgents`, `ps`, `uptime`); one heavy job at a time.
-1. **Ask Richard what s1 asked, if he hasn't answered:** (a) the go to push `release/0.4.3` and open its PR; (b) a
-   nightly dispatch on the branch first, to see afterPack on three platforms unsigned; (c) **the honesty number**
-   (SEE-001, `d75977deb`) ships unflagged in 0.4.3: does the CHANGELOG name it, or does it wait for his read?
+1. **Richard ruled in s1 (OWN-024 §5, end):** check in with the other sessions before pushing (done: all clear); no
+   nightly dispatch; the honesty number gated to source builds (done). **The push and the PR still need his explicit
+   go** — s1 asked again after the check-in.
 2. **The PR** → `main`: the six required checks green, Test (editor) count and seed read in the job log (OWN-021 §9).
    Not-required reds were red on #51/#52 too: say which, don't fix them here.
 3. **Merge, tag `v0.4.3`, the Release run** (Richard's go for each). On a red leg: read its log first; a NOSHARP hook
