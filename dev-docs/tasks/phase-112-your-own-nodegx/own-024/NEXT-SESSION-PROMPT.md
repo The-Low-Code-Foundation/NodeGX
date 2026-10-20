@@ -12,7 +12,7 @@
 - **Committed on `cline-dev`:** NOSHARP `6b2515d4a` + its Windows fix `2b6317913`; PUSHTOALL `45d1a453f`; the four
   template fixes `6cba197ad`; the ratchet `13890a372`; the release commit `2a7e4df71` (CHANGELOG `## 0.4.3`, editor
   0.4.3, `GITHUB-RELEASE-0.4.3.md`, `whats-new-0.4.3.READY-TO-PUSH.json`, OWN-024, the board).
-- **`release/0.4.3` = `2186d3a71`, LOCAL, NOT PUSHED.** The cut with `origin/main` (`250a36804`) merged in; one
+- **`release/0.4.3` is made LOCALLY, NOT PUSHED: re-make it from the current `cline-dev` before pushing** (a docs commit moves the cut). The cut with `origin/main` (`250a36804`) merged in; one
   conflict (`.tsfixme-baseline.json`) resolved to the cut; its tree equals the cut's. Both ratchets hold on its clean tree.
   If `cline-dev` moved since, re-make it the same way (OWN-024 §5) from the new cut and re-run `git merge-tree`.
 - **What only CI can measure:** the new afterPack smoke on Windows and Linux (nightly or release legs), and the
