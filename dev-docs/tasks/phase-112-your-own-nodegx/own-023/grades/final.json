@@ -1,0 +1,1954 @@
+{
+  "built": {
+    "K": {
+      "shared": 19,
+      "oneList": 19,
+      "fails": [
+        "O3",
+        "O12",
+        "O22"
+      ],
+      "lines": [
+        {
+          "line": "G1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O3",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O12",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O20",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O21",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O22",
+          "verdict": "fail",
+          "by": "Richard"
+        }
+      ]
+    },
+    "M": {
+      "shared": 19,
+      "oneList": 21,
+      "fails": [
+        "O12"
+      ],
+      "lines": [
+        {
+          "line": "G1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O12",
+          "verdict": "fail",
+          "by": "Richard"
+        },
+        {
+          "line": "O13",
+          "verdict": "pass",
+          "by": "Richard (favicon rule)"
+        },
+        {
+          "line": "O14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O20",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O21",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O22",
+          "verdict": "pass",
+          "by": "both graders"
+        }
+      ]
+    },
+    "R": {
+      "shared": 19,
+      "oneList": 19,
+      "fails": [
+        "O3",
+        "O4",
+        "O21"
+      ],
+      "lines": [
+        {
+          "line": "G1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O3",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O4",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O12",
+          "verdict": "pass",
+          "by": "Richard"
+        },
+        {
+          "line": "O13",
+          "verdict": "pass",
+          "by": "Richard (favicon rule)"
+        },
+        {
+          "line": "O14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O19",
+          "verdict": "pass",
+          "by": "Richard"
+        },
+        {
+          "line": "O20",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O21",
+          "verdict": "fail",
+          "by": "Richard"
+        },
+        {
+          "line": "O22",
+          "verdict": "pass",
+          "by": "both graders"
+        }
+      ]
+    }
+  },
+  "afterF1": {
+    "K": {
+      "shared": 19,
+      "oneList": 18,
+      "fails": [
+        "O3",
+        "O8",
+        "O12",
+        "O22"
+      ],
+      "lines": [
+        {
+          "line": "G1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O3",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O8",
+          "verdict": "fail",
+          "by": "Richard"
+        },
+        {
+          "line": "O9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O12",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O20",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O21",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O22",
+          "verdict": "fail",
+          "by": "both graders"
+        }
+      ]
+    },
+    "M": {
+      "shared": 18,
+      "oneList": 17,
+      "fails": [
+        "G11",
+        "O12",
+        "O13",
+        "O18",
+        "O19",
+        "O20"
+      ],
+      "lines": [
+        {
+          "line": "G1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G11",
+          "verdict": "fail",
+          "by": "Richard"
+        },
+        {
+          "line": "G12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O12",
+          "verdict": "fail",
+          "by": "Richard"
+        },
+        {
+          "line": "O13",
+          "verdict": "fail",
+          "by": "Richard (favicon rule)"
+        },
+        {
+          "line": "O14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O18",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O19",
+          "verdict": "fail",
+          "by": "Richard"
+        },
+        {
+          "line": "O20",
+          "verdict": "fail",
+          "by": "Richard"
+        },
+        {
+          "line": "O21",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O22",
+          "verdict": "pass",
+          "by": "both graders"
+        }
+      ]
+    },
+    "R": {
+      "shared": 19,
+      "oneList": 20,
+      "fails": [
+        "O3",
+        "O4"
+      ],
+      "lines": [
+        {
+          "line": "G1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O3",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O4",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O13",
+          "verdict": "pass",
+          "by": "Richard (favicon rule)"
+        },
+        {
+          "line": "O14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O20",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O21",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O22",
+          "verdict": "pass",
+          "by": "both graders"
+        }
+      ]
+    }
+  },
+  "afterF2": {
+    "K": {
+      "shared": 19,
+      "oneList": 19,
+      "fails": [
+        "O3",
+        "O12",
+        "O22"
+      ],
+      "lines": [
+        {
+          "line": "G1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O3",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O12",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O15",
+          "verdict": "pass",
+          "by": "Richard"
+        },
+        {
+          "line": "O16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O20",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O21",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O22",
+          "verdict": "fail",
+          "by": "both graders"
+        }
+      ]
+    },
+    "M": {
+      "shared": 19,
+      "oneList": 18,
+      "fails": [
+        "O13",
+        "O19",
+        "O20",
+        "O22"
+      ],
+      "lines": [
+        {
+          "line": "G1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O13",
+          "verdict": "fail",
+          "by": "Richard (favicon rule)"
+        },
+        {
+          "line": "O14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O19",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O20",
+          "verdict": "fail",
+          "by": "Richard"
+        },
+        {
+          "line": "O21",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O22",
+          "verdict": "fail",
+          "by": "Richard"
+        }
+      ]
+    },
+    "R": {
+      "shared": 19,
+      "oneList": 19,
+      "fails": [
+        "O3",
+        "O4",
+        "O12"
+      ],
+      "lines": [
+        {
+          "line": "G1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G3",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G4",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G12",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G13",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "G19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O1",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O2",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O3",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O4",
+          "verdict": "fail",
+          "by": "both graders"
+        },
+        {
+          "line": "O5",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O6",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O7",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O8",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O9",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O10",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O11",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O12",
+          "verdict": "fail",
+          "by": "Richard"
+        },
+        {
+          "line": "O13",
+          "verdict": "pass",
+          "by": "Richard (favicon rule)"
+        },
+        {
+          "line": "O14",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O15",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O16",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O17",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O18",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O19",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O20",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O21",
+          "verdict": "pass",
+          "by": "both graders"
+        },
+        {
+          "line": "O22",
+          "verdict": "pass",
+          "by": "both graders"
+        }
+      ]
+    }
+  }
+}

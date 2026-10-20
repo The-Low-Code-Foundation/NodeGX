@@ -1,0 +1,82 @@
+# OWN-023 — the table
+
+Assembled by the running session (s1, 2026-10-20) from the artefacts. Numbers only (C1, C7): no verdict sentence here.
+Every row is "does A+ or B give the person something A didn't". The §7 prediction written before the run sits beside
+each result. Letters were blind to graders and hats: **K = A (bare), M = B (NodeGX), R = A+ (harness)** (`arms.json`,
+shown after the hats wrote). $ is API-equivalent (the subscription paid nothing extra); "to answer" is the time to the
+agent's first answer. Everything: Opus 5.5, Claude Code 2.1.301, one evening and the next morning (R8), kit 0.2.2.
+
+## 1. The build
+
+| row | A bare (K) | A+ harness (R) | B NodeGX (M) | §7 prediction |
+|---|---|---|---|---|
+| cost | $9.25 | $8.56 | $16.48 | P1: A cheapest — **no** (A+ 7% cheaper). P4: B costs more — **yes, 1.8–1.9×** |
+| time to answer | 28.8 min | 33.6 min | 31.0 min | P1: A fastest — **yes, by 2–5 min** |
+| turns · sittings · continues | 76 · 1 · 0 | 150 · 1 · 0 | 210 · 1 · 0 | (R3's N = 5 never used in a build) |
+| instructions in the folder before the brief | none | `CLAUDE.md` 8,805 B, a stranger's (§4.2) | `CLAUDE.md` 1,420 B + `AGENTS.md` 1,420 B + skill 17,007 B + the MCP server's own instructions (not measured) | C9: B's prompt has ~35 tarballs of tuning; A+'s is one attempt |
+| what it built | Express + `node:sqlite` + plain HTML/JS; 19 code files, 5,727 lines | Next.js + Prisma/SQLite; 86 code files, 6,079 lines | NodeGX graph: 37 components, 743 nodes; 69 code blocks in nodes (489 lines) + 49-line script | — |
+| tests in the folder | 1 test file (node:test) | 10 test files (Vitest + Playwright), `npm run check` incl. a leak check | none in the folder (the kit's server validates writes; `drive_page`/`render_report` checks run in the transcript) | P2: A+ gets tests — **yes** |
+| a person's documents | README (run; no deploy) | README (run, deploy to Render, what each part is), SPEC, REPORT, DECISIONS, verification/ screenshots | kit CLAUDE.md/AGENTS.md; `openwave/docs/` ARCHITECTURE, BRIEF, CONVENTIONS, 1 decision; no README; no deploy line | — |
+| where the data lives | `data/hum.db` + `data/uploads/` inside the folder | `prisma/dev.db` + `uploads/` inside the folder | a local NodeGX backend under `~/.noodl/backends/` — **outside the app folder** | P3 (line 20): "B has a backend by default; A and A+ choose their own, which may be as good" — all three passed G18/O10 (second device) |
+| opens on a phone on the same Wi-Fi | yes, as is | yes, as is (its README says how) | **no**: the preview binds 127.0.0.1; with `--host` the page still calls its backend on 127.0.0.1 (P112-OWN023-PHONEPREVIEW) | P4 (B costs) |
+
+## 2. The blind grade (two graders per app per stage; disagreements ruled by Richard; `grades/final.md`)
+
+| stage | A bare (K) | A+ harness (R) | B NodeGX (M) |
+|---|---|---|---|
+| as built: shared 19 · one-list 22 | **19 · 19** (fail O3, O12, O22) | **19 · 19** (fail O3, O4, O21) | **19 · 21** (fail O12) |
+| after F1 (the key), on its own copy | 19 · 18 (+O8) | 19 · 20 | **18** · 17 (G11, O12, O13, O18, O19, O20) |
+| after F2 (settings), on its own copy | 19 · 19 | 19 · 19 (+O12) | 19 · 18 (O13, O19, O20, O22) |
+| scripted (as built): console errors not favicon · pages scrolling sideways at 390 | 0 · 0 (25 routes) | 0 · 0 (25 routes) | 0 · 0 (11 routes, from its project: no `<a>` links to crawl) |
+
+Prediction 5: "the row that answers the question is not the build grade … it would show in F1/F2 (a stranger changes it and
+lines 1–23 still pass)". Measured: each stage had its own pair of graders, so a moving line can be the change or the graders
+(`final.md`'s note). B's after-F1 fails include G11 (the most-liked song not first in the default ranking) and O19/O20 (find a
+person; taste suggestions empty for one grader); B's as-built graders passed those lines.
+
+Richard's lines before any number (task §9.2): K "good effort … black font on black background … play bar probably the best";
+R "rough and basic … wouldn't show this to real users without another style pass"; M "most like an app, most faithful to
+Spotify … play bar has childish icons".
+
+## 3. The follow-ups (each a fresh stranger on a copy of the build; `followups/runs.json`)
+
+| row | A bare (K) | A+ harness (R) | B NodeGX (M) | §7 prediction |
+|---|---|---|---|---|
+| F1 the key: cost · to answer | $0.93 · 2.7 min | $3.01 · 18.3 min | $2.73 · 4.8 min to answer ($3.43 with 5 judge-sent continues, no file written after) | — |
+| F1: where the person is told to put the key | `.env` in the folder; restart | `.env.local`; restart; Settings shows set/not set | `openwave/.env`, then **"tell me. I'll then load it into the backend"** — the person can't switch it on alone | P3: "F1's key … Opus follows harness lines well" |
+| F1 key search (canary where the agent said, "More like this" pressed, every response + direct paths; control in a served file) | 0 hits / 68 responses; control found | 0 / 33; control found | 0 / 95; control found | **no difference** on the leak itself |
+| F1 extra | its own test checks the key isn't sent to the browser | tests + the leak check extended to the key | the command it gives to see the app (`npx @nodegx/preview openwave --open`) **fails on 0.2.2** (P112-OWN008-NPXPREVIEW, unpublished fix) | P4 |
+| F2 settings: cost · to answer | $2.40 · 7.3 min | $2.65 · 22.8 min | $5.47 · 16.1 min (+$7.22 of lab-fault sittings, no file written) | — |
+| F2: what was built | a settings screen in the app | `/settings` in the app (admin), stored in the DB | a separate panel (`openwave-settings`, `npm start`): form beside the live app, writes the project files, built on the kit's editor library and suite | P3: "B had an editor on day one; whether a person would open it is hat A's and B's call" — hats |
+| F3 "where does that number come from": cost · to answer | $0.22 · 0.6 min | $0.27 · 0.8 min | $0.73 · 1.0 min | P3: B has an inspector; "the person may not care" — hats A, C |
+| F4 "check it line by line": cost · to answer | $3.46 · 19.3 min | $1.60 · 9.4 min | $3.30 · 10.0 min | P2: A+'s report as honest as B's; C9 applies (B's checklist step is tuned prompt) — hats compare with the graders |
+
+## 4. Kit defects B met (C3: each a cost in B's row; filed, not fixed during the study)
+
+| defect | where it bit | ledger |
+|---|---|---|
+| the NodeGX server misses Claude Code's 30 s start on a first run (cold `npx` 25.8–27.8 s) | B's first conversation would have had no NodeGX tools; the lab warmed it (R9) | P112-OWN023-COLDSERVER (fixed in the repo `b09ed2b7f` by a peer on 2026-10-20; not published) |
+| the app can't be opened from a phone on the same Wi-Fi | §1 row | P112-OWN023-PHONEPREVIEW |
+| `npx @nodegx/preview` can't choose a command | F1's "to see the app" line; the kit's own create output | P112-OWN008-NPXPREVIEW (open since 0.2.0; fix unpublished) |
+| the key in `openwave/.env` doesn't reach the backend without an agent | F1 | P112-OWN023-KEYNEEDSAGENT |
+| a `[noodl]` runtime error in the console after F2 (`ParentComponentObject (/Shared/Track Row): No ancestor component has a Component Object node`) | after-F2 grader 1, O13 | P112-OWN023-NOANCESTOR |
+
+Not the kit: B's build agent alone tried to write a Claude Code auto-memory file under the person's `~/.claude` (refused by the
+lab's fence).
+
+## 5. Lab faults (all arms' numbers corrected; `lab-notes.md`)
+
+- Resumed sittings' `total_cost_usd` is cumulative: B-F1 first read $18.74 (true $3.43). Fixed; every $ above is true.
+- A sitting outlived the agent's answer when it left background servers (B-F2, 9.5 h, judge read the servers' exit notices).
+  Fixed; B-F2 reported at its first answer.
+- The judge sent B-F1 five continues on an answer that said "built, can't try it without your key" (A's and A+'s similar
+  answers read DONE). Kept, reported (C10).
+- The runner named costs and letters in messages to Richard before his lines (he had not read them).
+- The agents' shells carried `USER=richardosborne`; B's build named a test user `richard_test`. Neutralised in the hats'
+  copy; next round should set a neutral USER.
+- Not measured: the honesty number (B), the NodeGX editor's inspector (no hat can open an Electron app), a real phone.
+
+## 6. Owed
+
+Hats' verdicts (`verdicts/`), F3 scored twice (agent / alone) and F4 against the graders by the hats, the write-up by a
+stranger, Richard's verdict beside his lines.

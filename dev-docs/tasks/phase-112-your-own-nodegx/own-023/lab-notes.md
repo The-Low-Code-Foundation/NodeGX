@@ -83,3 +83,16 @@ that down." Those lines are marked **pull**.
 - Neither B round's ARTEFACT was changed by the extra sittings, so neither is re-run; both are reported at the first
   answer with the extra sittings as the lab's cost beside them. A and A+ rounds had one answer each: unaffected.
 - **pull:** wanted to re-run B-F2 "to be fair to B". Not needed: its folder is as at its first answer.
+
+## 2026-10-20 s1, afternoon
+
+- All 12 follow-ups, 12 re-grades (F1, F2 copies), the key search (0 canary hits in all three, control found in all
+  three) and Richard's 10 rulings on the re-grades (incl. "favicon only → pass", applied everywhere it was the only
+  error) are in `grades/final.md` and `TABLE.md`.
+- Hats' material (`prepare-hats.mjs`): the transcripts and one backend log carried the lab's paths (repo name, my
+  name, arm labels) — scrubbed, checked by two greps. **The agents' shells carried `USER=richardosborne`**: B's build
+  named a test user `richard_test`. Neutralised in the hats' copy and the served copy. Next study: set USER/LOGNAME
+  to something neutral in round-arm's env. The kit's own SKILL.md mentions "Richard's monitor" and OWN-0xx ids; that is
+  the published artefact and stays.
+- Hats have no terminal: C can't run the export, B can't `npm install`; the apps run for them as F2 left them (M via
+  its own panel's `npm start`). The NodeGX editor's inspector is not reachable for any hat.

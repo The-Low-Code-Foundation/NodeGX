@@ -1,7 +1,7 @@
 // OWN-023 §5 / C5: the three apps under letters (K, M, R), each run the way its own folder says, on a fixed port, from
 // a COPY (apps/<letter>) so grading and playing never touch the build as built (rounds/<arm>/work/music). The map is
 // arms.json in the gallery folder; this script reads it and prints letters and URLs only.
-//   node serve-apps.mjs serve [--fresh] [--stage F1|F2] | stop | list
+//   node serve-apps.mjs serve [--fresh] [--stage F1|F2] [--panel L:subdir] | stop | list
 // Gallery: ~/vscode_projects/NodeGX test projects/OWN-023 apps/  (apps/<L>, homes/<L>, logs/, pids.json)
 import fs from 'node:fs';
 import path from 'node:path';
@@ -44,8 +44,14 @@ for (const [L, arm] of Object.entries(map)) {
   const env = { ...process.env, HOME: home, PORT: String(PORTS[L]), PATH: `${nodeDir}:${process.env.PATH}`, BROWSER: 'none', npm_config_cache: path.join(G, '.npm') };
   for (const k of Object.keys(env)) if (/^(NODEGX_|NOODL_|CLAUDE)/.test(k) || /KEY|TOKEN|SECRET/.test(k)) delete env[k];
   let command, args, cwd = app;
+  // `--panel <L>:<subdir>`: that letter runs the way its settings follow-up says (B-F2: `cd openwave-settings && npm
+  // start`, which starts the panel, the app's preview and its backend) instead of a preview of its own.
+  const panelArg = process.argv.includes('--panel') ? process.argv[process.argv.indexOf('--panel') + 1] : '';
+  const [panelL, panelDir] = panelArg.split(':');
   const proj = fs.readdirSync(app).find((d) => fs.existsSync(path.join(app, d, 'nodegx.project.json')));
-  if (proj) {
+  if (panelL === L) {
+    command = 'npm'; args = ['start']; cwd = path.join(app, panelDir);
+  } else if (proj) {
     command = 'npx'; args = ['-y', '--package=@nodegx/preview@0.2.2', 'noodl-preview', path.join(app, proj), '--port', String(PORTS[L]), '--no-watch', '--host', '0.0.0.0'];
     // --host: so it opens on a phone on the same Wi-Fi like the other two (the folder's own docs don't say how —
     // a row, not a lab fix). Off loopback the preview mints a token; the URL with it is in logs/<L>.log.
