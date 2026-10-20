@@ -33,6 +33,12 @@ not counts of open acceptance criteria; lanes 3 and 7 are the least certain. Ric
 block no release except where a task waits on his read. **Lane 6 runs in a second session the whole way**, as it
 depends on no other lane, so 0.4.6 lands close behind 0.4.5. A release is cut when its row is done, not on a date.
 
+**🔴 First, before any row below (Richard, 2026-10-20: "testing those two templates so I can send them"):** OWN-021 S8
+and AC4. Drive P121's marketplace and community app on the *released* 0.4.2 (a separate install, never his 0.3.0 in
+`/Applications`), make the two zips from `v0.4.2`, write the marketplace's setup page, then hand Richard what to
+send. The steps: [own-021/NEXT-SESSION-PROMPT](tasks/phase-112-your-own-nodegx/own-021/NEXT-SESSION-PROMPT.md).
+P121 stays parked otherwise; this is the 0.4.2 row's leftover, not a new lane.
+
 | release | what is in it | sessions | running |
 |---|---|---|---|
 | **0.4.2** | ✅ **Published 2026-10-20 08:18 UTC** (OWN-021 §11): PR #52 merged, `v0.4.2` tagged, nodegx.io and the feed post on it. Left: npm 0.2.3's four (preview, mcp, create-nodegx, create-nodegx-vibe) not on the registry at 08:50 UTC, then the site's npm section; S8, both templates driven on the release | 0 | 0 |
