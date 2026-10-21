@@ -1,21 +1,47 @@
 {
-  "name": "backend-map",
+  "name": "@nodegx/backend-map",
   "version": "0.1.0",
-  "private": true,
-  "description": "A map of a NodeGX app's backend: tables, functions, who may see what, and what just ran.",
+  "description": "Your NodeGX app's backend as a map: its screens, cloud functions and tables, and who can reach which rows, measured by running its functions as each person.",
+  "license": "GPL-3.0-only",
+  "homepage": "https://nodegx.io/backend-map/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
+    "directory": "dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor"
+  },
   "type": "module",
-  "license": "GPL-3.0",
+  "bin": {
+    "backend-map": "./bin/backend-map.js"
+  },
+  "main": "./server.mjs",
+  "exports": {
+    ".": "./server.mjs",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "bin",
+    "server.mjs",
+    "lib",
+    "public",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "start": "node server.mjs ../training",
+    "start": "node server.mjs",
     "test": "node test/run-all.mjs"
   },
   "dependencies": {
     "@nodegx/canvas-look": "^0.1.0",
-    "@nodegx/node-spec": "^0.2.0",
-    "@nodegx/preview": "^0.2.4",
     "@nodegx/project-contract": "^0.2.1"
   },
   "devDependencies": {
+    "@nodegx/preview": "^0.2.4",
     "puppeteer-core": "^25.15.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

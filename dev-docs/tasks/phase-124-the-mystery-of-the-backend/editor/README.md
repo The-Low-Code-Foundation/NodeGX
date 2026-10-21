@@ -6,16 +6,21 @@ each with its shield), the wires between them, and **what just ran**, live.
 
 ## Open it
 
+Inside a NodeGX project whose backend is running:
+
 ```
-cd editor
-npm start
+npx @nodegx/backend-map
 ```
 
-It opens `../training` and the running backend (its address in `../BACKEND-URL`, the admin key in
-`../ADMIN-TOKEN`), and opens the map in your browser at http://127.0.0.1:5190/. The admin key stays in
-the editor's own server; the page never sees it.
+It finds the backend the project is linked to on this computer (the project's `nodegx.project.json` names it;
+NodeGX keeps its address and admin key in `~/.noodl/backends/<id>/`), serves the map on http://127.0.0.1:5190/ and
+opens it. The admin key stays in this process; the page never sees it. Another folder: `npx @nodegx/backend-map
+<folder>`. A backend elsewhere: `--backend <url> --token-file <file>`. `--port <n>`, `--no-open`, `--help`.
 
-Another app or backend: `node server.mjs <app folder> --backend <url> --token-file <file>`.
+In NodeGX Studio it is the **Backend map** tab: Studio's own server mounts it (`handler()` from this package) on the
+project's backend.
+
+See it without a backend: https://nodegx.io/backend-map/ (a recording).
 
 ## What you can do
 

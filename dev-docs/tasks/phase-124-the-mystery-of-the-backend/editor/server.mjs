@@ -2,10 +2,10 @@
 // The backend map's own server. It opens the app's folder (read through the NodeGX kit), talks to
 // the running backend with the admin credential (which never reaches the page), and serves the map.
 //
-//   node server.mjs [app folder] [--backend <url>] [--token-file <file>] [--port <n>] [--no-open]
+//   backend-map [project folder] [--backend <url> --token-file <file>] [--port <n>] [--no-open]
 //
-// With no flags it reads ../training, and the backend's address and credential from BACKEND-URL and
-// ADMIN-TOKEN in the folder above the app.
+// With no folder it opens the current one. With no --backend it finds the backend the project is linked
+// to on this computer (lib/discover.mjs). BACKEND-URL and ADMIN-TOKEN beside the project still work.
 
 import http from 'node:http';
 import fs from 'node:fs';
@@ -18,31 +18,39 @@ import { backend, BackendError } from './lib/backend.mjs';
 import { setTableRule, entryFor, readSecurityFile, dryRuns, Refusal, SECURITY_FILE } from './lib/rules.mjs';
 import { makeViews } from './lib/views.mjs';
 import { KEY_SUFFIX, asPerson, learnerIds } from './lib/asperson.mjs';
+import { projectBackend } from './lib/discover.mjs';
 import { loadWorld, personReach, anonymousReach } from './lib/reach.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
-export function parseArgs(argv) {
-  const o = { project: null, backend: null, tokenFile: null, port: 5190, open: true };
+export function parseArgs(argv, cwd = process.cwd()) {
+  const o = { project: null, backend: null, tokenFile: null, token: null, port: 5190, open: true };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--backend') o.backend = argv[++i];
     else if (a === '--token-file') o.tokenFile = argv[++i];
     else if (a === '--port') o.port = Number(argv[++i]);
     else if (a === '--no-open') o.open = false;
+    else if (a === '--help' || a === '-h') o.help = true;
     else if (!a.startsWith('--')) o.project = a;
   }
-  o.project = path.resolve(o.project ?? path.join(here, '..', 'training'));
-  const beside = path.dirname(o.project);
+  if (o.help) return o;
+  o.project = path.resolve(cwd, o.project ?? '.');
   const firstLine = (f) => fs.readFileSync(f, 'utf8').split(/\r?\n/)[0].trim();
-  if (!o.backend) {
-    const f = path.join(beside, 'BACKEND-URL');
-    if (!fs.existsSync(f)) throw new Error(`No backend address: pass --backend <url>, or put it in ${f}.`);
-    o.backend = firstLine(f);
+  const beside = path.dirname(o.project);
+  if (!o.backend && fs.existsSync(path.join(beside, 'BACKEND-URL'))) {
+    o.backend = firstLine(path.join(beside, 'BACKEND-URL'));
+    o.tokenFile ??= path.join(beside, 'ADMIN-TOKEN');
   }
-  o.tokenFile = path.resolve(o.tokenFile ?? path.join(beside, 'ADMIN-TOKEN'));
-  if (!fs.existsSync(o.tokenFile)) throw new Error(`No admin credential: pass --token-file <file>, or put it in ${o.tokenFile}.`);
-  o.token = firstLine(o.tokenFile);
+  if (o.backend) {
+    if (!o.tokenFile || !fs.existsSync(path.resolve(cwd, o.tokenFile))) throw new Error('With --backend, pass --token-file <file>: a file holding the backend’s admin credential.');
+    o.token = firstLine(path.resolve(cwd, o.tokenFile));
+    return o;
+  }
+  const found = projectBackend(o.project);
+  o.backend = found.url;
+  o.token = found.token;
+  o.backendName = found.name;
   return o;
 }
 
@@ -223,7 +231,11 @@ export function createEditor(opts) {
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png' };
 
-export function serve(editor, port) {
+/**
+ * The map's requests as a plain handler, so another server can mount it under a path (NodeGX Studio does,
+ * at /backend-map/). `pathname` is the request's path with that mount taken off.
+ */
+export function handler(editor) {
   const pub = path.join(here, 'public');
   const send = (res, status, data) => {
     res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
@@ -233,8 +245,9 @@ export function serve(editor, port) {
     const refusal = e instanceof Refusal;
     send(res, refusal ? 409 : e instanceof BackendError ? 502 : 500, { error: e.message, refused: refusal });
   };
-  const server = http.createServer(async (req, res) => {
+  return async (req, res, pathname) => {
     const url = new URL(req.url, 'http://x');
+    if (pathname !== undefined) url.pathname = pathname;
     try {
       if (url.pathname === '/api/map' && req.method === 'GET') return send(res, 200, await editor.buildMap());
       if (url.pathname === '/api/runs' && req.method === 'GET') return send(res, 200, await editor.runs(url.searchParams.get('since')));
@@ -280,7 +293,12 @@ export function serve(editor, port) {
     } catch (e) {
       fail(res, e);
     }
-  });
+  };
+}
+
+export function serve(editor, port) {
+  const handle = handler(editor);
+  const server = http.createServer((req, res) => handle(req, res));
   return new Promise((resolve, reject) => {
     server.once('error', (e) => {
       // the usual port is taken (a second map open?): take any free one
@@ -301,15 +319,31 @@ function openBrowser(url) {
   }
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+const HELP = `backend-map: your NodeGX app's backend as a map — who can reach which rows.
+
+  backend-map [project folder] [--port <n>] [--no-open]
+  backend-map [project folder] --backend <url> --token-file <file>
+
+Run it inside a NodeGX project whose backend is running. It finds the backend the project is linked
+to, serves the map on http://127.0.0.1:5190/ and opens it. The admin credential stays in this process.`;
+
+export async function main(argv = process.argv.slice(2)) {
   let opts;
   try {
-    opts = parseArgs(process.argv.slice(2));
+    opts = parseArgs(argv);
   } catch (e) {
     console.error(e.message);
     process.exit(1);
   }
+  if (opts.help) {
+    console.log(HELP);
+    return;
+  }
   const editor = createEditor(opts);
+  if (!(await editor.be.health())) {
+    console.error(`The backend at ${opts.backend} isn’t answering. Start it from NodeGX (Backend Services), then run this again.`);
+    process.exit(1);
+  }
   // Keys this map makes live for one question each. Any left over (a crash) go now, and on the way out.
   await editor.views.sweep();
   for (const sig of ['SIGINT', 'SIGTERM']) {
@@ -321,7 +355,9 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   const server = await serve(editor, opts.port);
   const url = `http://127.0.0.1:${server.address().port}/`;
   console.log(`Backend map for ${opts.project}`);
-  console.log(`  backend: ${opts.backend}`);
+  console.log(`  backend: ${opts.backendName ? `${opts.backendName} (${opts.backend})` : opts.backend}`);
   console.log(`  open:    ${url}`);
   if (opts.open) openBrowser(url);
 }
+
+if (process.argv[1] && fs.realpathSync(path.resolve(process.argv[1])) === fileURLToPath(import.meta.url)) await main();

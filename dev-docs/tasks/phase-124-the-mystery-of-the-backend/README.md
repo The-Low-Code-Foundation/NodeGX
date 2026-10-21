@@ -223,6 +223,20 @@ project folder is otherwise byte-identical. Every assertion reads the backend or
 
 ## 8. Sessions
 
+- **s3, later the same day:** Richard: *"Holy shit that's cool. Can we make it a page of its own with npm AND a NodeGX
+  Studio view? Can we push it live to the NodeGX homepage already as a demo?"* So §7.1 is ruled: **both**. Done:
+  the homepage carries it as a demo ("Who can see whose data?", nodegx-web `6d6b36b`, deployed); `editor/` is now
+  the package **`@nodegx/backend-map` 0.1.0** (`npx @nodegx/backend-map` in a project finds its linked backend in
+  `~/.noodl/backends/<id>/`; `handler()` exported for mounting; the page's API paths relative), packed (72 kB, 17
+  files), installed outside the checkout and driven; **not on npm yet: the publish needs Richard's OTP**. Kept in
+  `editor/`, not `packages/`: a new workspace there needs a `package-lock.json` entry and that file holds a peer's
+  uncommitted edit (CI runs `npm ci`). NodeGX Studio has a **Backend map** tab (nodegx-studio `editor/serve.mjs`
+  mounts the package at `/backend-map/` on Studio's own backend and admin key; `studio.html` a fifth rail tab),
+  driven on a Studio-started backend seeded with the training app (Marie 37 of 289, the same ranking); Studio's
+  `check:editor` 170/170, `check:app` 45/45; the map's Chrome test 34/34 after the refactor. Studio imports the
+  package dynamically and says in words when it isn't installed; its `package.json` gets the dependency after the
+  publish. Filed `P124-S3-PUBLISHABLECONTRACT` (the publish check's false refusal).
+
 - **s3 (2026-10-21, Opus 5.5, by hand):** Richard on round 2, verbatim in BRIEF.md §s3: the row reach is "a
   dazzler", but every person lit every table ("That would freak people the fuck out"); wants a data explorer in the
   table view with *who can access this*, the reach reversed to *what can this person access*, then nodegx.io. The

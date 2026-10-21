@@ -18,6 +18,19 @@
   `templates/digital-bricks-training`). The other tests in `npm test` were not run in s3.
 - **Richard has not seen round 3 yet.** That is the next thing.
 
+## Later on 2026-10-21: Richard ruled §7.1 — BOTH (npm AND a Studio view), and the homepage demo is live
+
+- Homepage: https://nodegx.io/#backend-map ("Who can see whose data?"), deployed, nodegx-web `6d6b36b`.
+- **`@nodegx/backend-map` 0.1.0 is built, packed and driven, NOT published.** The publish needs Richard's npm OTP.
+  His one command, from the repo root:
+  `cd dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm publish --access public`
+  Then: `npm view @nodegx/backend-map version` → 0.1.0; `npx @nodegx/backend-map --help` from a scratch folder; add
+  `"@nodegx/backend-map": "0.1.0"` to nodegx-studio's `dependencies` (exact pin, like its others) and `npm install`
+  there; add a CHANGELOG.md section ONLY when deploying the site after the publish (the deploy renders it live).
+- Studio's **Backend map** tab is committed in nodegx-studio (serve.mjs mounts it; studio.html tab). Until the
+  dependency lands it says "The backend map isn't installed in this copy of Studio".
+- Moving the package to `packages/` needs a `package-lock.json` workspace entry; that file has a peer's open edit.
+
 ## What to do first: show him round 3, live or public
 
 Public: https://nodegx.io/backend-map/ (no backend needed). Live, on this laptop, if s3's copy is still running:

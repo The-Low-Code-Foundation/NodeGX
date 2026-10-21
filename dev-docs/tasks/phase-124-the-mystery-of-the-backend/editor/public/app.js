@@ -97,7 +97,7 @@ async function stream(path, body, onEvent) {
 
 async function load(keepView) {
   try {
-    state.map = await api('/api/map');
+    state.map = await api('api/map');
   } catch (e) {
     $('backendLine').innerHTML = `<span class="bad">●</span> ${esc(e.message)}`;
     $('livePulse').classList.add('off');
@@ -106,7 +106,7 @@ async function load(keepView) {
   }
   if (!state.people.length) {
     try {
-      state.people = (await api('/api/people')).people;
+      state.people = (await api('api/people')).people;
       $('personPick').innerHTML =
         '<option value="">A real person…</option>' +
         state.people.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}${p.roles.length ? ` (${esc(p.roles.join(', '))})` : ''}</option>`).join('');
@@ -1009,7 +1009,7 @@ async function setPerson(id) {
   if (id) renderPanel();
   else $('panel').classList.add('hidden');
   try {
-    await stream('/api/as/everything', { person: id }, (e) => {
+    await stream('api/as/everything', { person: id }, (e) => {
       if (state.reach !== R_) return;
       state.reachQueue.push(e);
       pump();
@@ -1099,7 +1099,7 @@ async function compareEveryone() {
   fit();
   renderPanel();
   try {
-    await stream('/api/everyone', {}, (e) => {
+    await stream('api/everyone', {}, (e) => {
       if (state.everyone !== ev) return;
       if (e.type === 'person') {
         ev.list.push(e);
@@ -1126,7 +1126,7 @@ async function followPathway(screen) {
   state.pathway = { screen, loading: true };
   computeOverlay();
   try {
-    const data = await api('/api/as/screen', { person: P.id, screen });
+    const data = await api('api/as/screen', { person: P.id, screen });
     if (state.pathway?.screen !== screen || state.person?.id !== P.id) return;
     state.pathway = { screen, data };
     for (const c of [...data.calls, ...data.extra]) if (c.status === 'ran' || c.status === 'refused') state.flashes[`f:${c.fn}`] = { at: performance.now(), ok: c.status === 'ran' };
@@ -1139,7 +1139,7 @@ async function followPathway(screen) {
 
 async function loadRows(table) {
   try {
-    state.rows[table] = (await api(`/api/rows?table=${encodeURIComponent(table)}`)).rows;
+    state.rows[table] = (await api(`api/rows?table=${encodeURIComponent(table)}`)).rows;
   } catch (e) {
     state.rows[table] = { error: e.message };
   }
@@ -1159,7 +1159,7 @@ async function findReach() {
   rec.loading = true;
   renderPanel();
   try {
-    rec.data = await api('/api/record-reach', { table: rec.table, objectId: rec.objectId });
+    rec.data = await api('api/record-reach', { table: rec.table, objectId: rec.objectId });
   } catch (e) {
     rec.error = e.message;
   }
@@ -1623,7 +1623,7 @@ function wireTableControls(n) {
   if ($('resetRule')) $('resetRule').onclick = () => saveRule(n, true);
   $('askBackend').onclick = async () => {
     try {
-      const { checks } = await api(`/api/check?table=${encodeURIComponent(n.key)}`);
+      const { checks } = await api(`api/check?table=${encodeURIComponent(n.key)}`);
       state.lastResult = { checks, onlyChecks: true };
       wireTableControls(n);
     } catch (err) {
@@ -1649,7 +1649,7 @@ async function saveRule(n, reset) {
   const btn = $('applyRule') ?? $('resetRule');
   if (btn) btn.disabled = true;
   try {
-    const r = await api('/api/table-rule', {
+    const r = await api('api/table-rule', {
       table: n.key,
       reset,
       read: e.read,
@@ -1721,7 +1721,7 @@ let newest = 0;
 async function poll(first) {
   try {
     // ask again for the last ten seconds too: a run the map made may only be known as the map's a moment later
-    const { runs, total } = await api(`/api/runs${newest ? `?since=${newest - 10000}` : ''}`);
+    const { runs, total } = await api(`api/runs${newest ? `?since=${newest - 10000}` : ''}`);
     $('livePulse').classList.remove('off');
     let changed = false;
     for (const r of runs) {
