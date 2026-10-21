@@ -82,3 +82,21 @@ for ever.
 the prediction did not write: the runtime shows the chime's Text as **"Text"** before its wire delivers (a Text with no
 authored text shows the node's default) where the export shows nothing: P18-S132-AUTHOREDTEXT's shape, pinned by name in
 the spec, not a new defect.
+
+## The promise — a `.then` callback (predicted before either arm ran it)
+
+Census (s133): of the 163 asynchronous template bodies, 12 free of the Noodl API never `await` at their top level (11
+`.then` callbacks, 1 inner `async function`); they return at once and write later, which `FunctionNode.late` now carries.
+Only a top-level `await` (4 free, 127 behind the Noodl API) needs the run awaited (slice 1b proper). Added to the Bell
+variant: **The promise** (no Run, no inputs: `Promise.resolve('kept').then(function (v) { Outputs.promised = 'promise ' +
+v; Outputs.kept(); });`, `kept` increases a Counter "Keeps"). Two Texts after the chime's: promised, keeps.
+
+| after | promised | keeps |
+|---|---|---|
+| load | promise kept | 1 |
+| Chime | · | · |
+
+**Measured:** both arms read `promise kept` / `1` at load, as predicted. On the way, the export arm's "settled" press was
+found to wait no timer (the chime read `''` after its press in one run and `chimed` in another): `export-react-arm.js`
+gained `ticks` (a few tasks inside an act after the mount and every step, as the runtime arm lets frames run); this spec
+reads with `ticks: 3`, every other spec reads as before.

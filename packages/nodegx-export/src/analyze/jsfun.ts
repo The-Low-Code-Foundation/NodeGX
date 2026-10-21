@@ -181,10 +181,41 @@ const HOST_TRAIT_REASONS: ReadonlySet<string> = new Set(
   MARKER_GATES.filter((g) => /^(keeps state on `this`|reads the clock|draws randomness|reaches the network|schedules timers|touches the browser environment)/.test(g.reason)).map((g) => g.reason)
 );
 
+/** The asynchrony gate's reason: still a gate for an Expression, a script file, and a Function that awaits at its top level. */
+const ASYNC_GATE_REASON = MARKER_GATES.find((g) => g.reason.startsWith('is asynchronous'))!.reason;
+
+/**
+ * EXP-019 (session 133) — whether a Function body `await`s **at its top level**: it compiles as the runtime compiles it
+ * (`AsyncFunction`) and not as a plain function. Such a body's run is a promise the runtime awaits before Success and Done
+ * (`runScript`), which the export's run does not model yet (slice 1b). Any other asynchrony — a `.then(…)`, an inner
+ * `async function` — returns at once and writes later, which is a call back (`jsCallsBackOf`, `FunctionNode.late`).
+ */
+export function jsAwaitsAtTopLevel(body: string): boolean {
+  const AsyncFunction = Object.getPrototypeOf(async function () {
+    /* prototype probe */
+  }).constructor as new (...args: string[]) => unknown;
+  try {
+    new AsyncFunction('Inputs', 'Outputs', 'Noodl', 'Component', body);
+  } catch {
+    return false;
+  }
+  try {
+    // eslint-disable-next-line no-new-func
+    new Function('Inputs', 'Outputs', 'Noodl', 'Component', body);
+    return false;
+  } catch {
+    return true;
+  }
+}
+
 /** The host traits a Function body carries, as short phrases ("reads the clock (Date)"), in gate order; `[]` for a pure body. */
 export function jsHostTraitsOf(body: string): string[] {
   const scanned = strippedForScan(body);
-  return MARKER_GATES.filter((g) => HOST_TRAIT_REASONS.has(g.reason) && g.pattern.test(scanned)).map((g) => g.reason.split(' — ')[0]);
+  const traits = MARKER_GATES.filter((g) => HOST_TRAIT_REASONS.has(g.reason) && g.pattern.test(scanned)).map((g) => g.reason.split(' — ')[0]);
+  // EXP-019 (session 133): asynchrony that is not a top-level `await` calls back, after the run has returned.
+  const asyncGate = MARKER_GATES.find((g) => g.reason === ASYNC_GATE_REASON)!;
+  if (asyncGate.pattern.test(scanned) && !jsAwaitsAtTopLevel(body)) traits.push('is asynchronous (it calls back)');
+  return traits;
 }
 
 /**
@@ -200,7 +231,7 @@ export function jsHostTraitsOf(body: string): string[] {
  */
 export function jsCallsBackOf(body: string): boolean {
   const traits = jsHostTraitsOf(body);
-  if (!traits.some((t) => /^(schedules timers|touches the browser environment|reaches the network)/.test(t))) return false;
+  if (!traits.some((t) => /^(schedules timers|touches the browser environment|reaches the network|is asynchronous)/.test(t))) return false;
   const scanned = strippedForScan(body);
   const opener = /\bfunction\b[^{]*\{|=>\s*/g;
   let match: RegExpExecArray | null;
@@ -309,6 +340,13 @@ export function jsPurityDefer(kind: JsNodeKind, body: string): string | null {
   for (const gate of MARKER_GATES) {
     // EXP-019: a Function carries its host traits (`jsHostTraitsOf`); an Expression is still held to every gate.
     if (kind === 'function' && HOST_TRAIT_REASONS.has(gate.reason)) continue;
+    // EXP-019 (session 133): for a Function only a top-level `await` keeps the gate, and says what waits on it.
+    if (kind === 'function' && gate.reason === ASYNC_GATE_REASON) {
+      if (gate.pattern.test(scanned) && jsAwaitsAtTopLevel(body)) {
+        return 'is asynchronous — it awaits at its top level, and a run the export awaits before Success and Done is EXP-019 slice 1b';
+      }
+      continue;
+    }
     if (gate.pattern.test(scanned)) return gate.reason;
   }
   return null;

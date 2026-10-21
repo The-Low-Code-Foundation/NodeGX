@@ -14387,12 +14387,12 @@ arms at every render. Graded on the **Bell variant** (an arrival run and a Run-w
 
 ### §103.3 Graded
 
-- `tests/the-script-runs-on-arrival.test.ts`, **24 rows**: the Arrival Desk against the runtime arm, step by step (load,
+- `tests/the-script-runs-on-arrival.test.ts`, **25 rows** (with §103.5's E6): the Arrival Desk against the runtime arm, step by step (load,
   Bump, Set Bo, Set Bo, Bump, type, Clear), the export equal except the field-fed echo it refuses by name; the Bell variant
   (`rung object` / `1` at load, `chimed` after the press, in both arms; the chime's Text before its wire delivers is
   P18-S132-AUTHOREDTEXT, pinned); what is emitted; the plan (C1–C8); every app typechecks. Slice 1's spec C4 moved with the
   rule (an unwired Tally now runs on arrival); 17 / 17.
-- **14 mutant arms** (`s133-arrival/mutants.py`), 13 killing rows by name; **C survived**, said so: the load run's guard
+- **16 mutant arms** (`s133-arrival/mutants.py`, with §103.5's O and P), 15 killing rows by name; **C survived**, said so: the load run's guard
   against a re-run with no arrival is unreachable on the desk, because no source the export carries can take a watched
   value away (a Set Variable with no Value is refused by name; the runtime sends no `undefined`).
 - **Reach** (`dispdiff`, 17 templates, HEAD's `src` against the tree): **66 gained, 0 lost, 57 re-worded**. The emitted code
@@ -14405,7 +14405,9 @@ arms at every render. Graded on the **Bell variant** (an arrival run and a Run-w
   scrolls the tab into view). Generic notes across the templates 8,384 → 8,289.
 - `tplbuild` all 17 at the floor (1 in 1); package `tsc --noEmit` 0; hls001: predicted 4 paths (`src/lib/functionRun.ts` in
   held-desk, host-desk, pulse-desk, ticked-desk; 0 corpus dispositions moved), read 4, regenerated. Whole package
-  **151 / 151 suites, 5,168 passed, 0 failed, 3 skipped** (predicted 5,144 + 24).
+  **151 / 151 suites, 5,168 passed, 0 failed, 3 skipped** (predicted 5,144 + 24); with §103.5, **5,169** (+E6), 0 failed.
+  🔴 Two arms first "survived" by not compiling (`if (true) continue`, `false &&`: "0 total"); `mutants.py` now says
+  DID NOT COMPILE and counts it as a survivor until made reachable.
 
 ### §103.4 What this leaves
 
@@ -14413,3 +14415,19 @@ Slice 1b (asynchrony, 163 bodies; the late path is half of it: a write after an 
 awaited). The 57 re-worded: JS-node chains 24 (a Function fed by a Function), a kit Options value 8, a Group's own element
 6, logic components 12 (EXP-021). A field read only by an arrival run (2 template nodes) and the runtime's second load run
 for a field-fed Function: unbuilt, recorded.
+
+### §103.5 Then: asynchrony that is a callback
+
+The late path made most of slice 1b's census a callback question. Of the 163 asynchronous template bodies, 127 await at
+their top level and also read the Noodl API, 4 await and are free of it, 20 are `.then` callbacks behind the Noodl API, and
+**12 are free callbacks** (11 `.then`, 1 inner `async function`). A callback body's run returns at once in the runtime too
+(`runScript` awaits a promise that is already settled), and its later writes and signals are what `FunctionNode.late`
+delivers. `jsAwaitsAtTopLevel` splits the gate: a body that compiles as `AsyncFunction` and not as `Function` keeps it
+("… it awaits at its top level, and a run the export awaits before Success and Done is EXP-019 slice 1b"); any other is
+the host trait "is asynchronous (it calls back)". Graded on the Bell variant's **promise** (both arms `promise kept` / `1`
+at load); two more mutant arms (O, P) killed rows. The export arm's settled press waited no timer — the chime read `''` in
+one run and `chimed` in the next — so `export-react-arm.js` gained `ticks` (tasks inside an act after the mount and each
+step, opt-in; no other spec changes). Reach: **76 gained, 0 lost, 77 re-worded** over the 17 templates (the callbacks add
+nightbook's Me page — "Make a copy now" fetches and says whether it went, the copies listed, the restore toggle — and the
+two "Which keyboard she has", with their Set Variables); corpus 0 moved; hls001 unchanged; `tplbuild` at the floor.
+Slice 1b proper (a top-level `await`) is 4 free bodies and 127 behind the Noodl API: it belongs beside EXP-020.

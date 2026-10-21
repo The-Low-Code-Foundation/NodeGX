@@ -5,9 +5,10 @@ import * as path from 'path';
 
 import { Catalog, CatalogIndex, loadCatalog } from '../src/catalog';
 import { ComponentPlan, planProject } from '../src/analyze/plan';
+import { jsAwaitsAtTopLevel, jsCallsBackOf, jsHostTraitsOf, jsPurityDefer } from '../src/analyze/jsfun';
 import { emitApp, EmittedApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
-import { BELL_SCRIPT, CHIME_SCRIPT, CLOCK_SCRIPT, ECHO_SCRIPT, STAMP_SCRIPT, TALLY_SCRIPT, WATCH_SCRIPT, addBell, writeArrivalDesk } from './helpers/arrival-desk';
+import { BELL_SCRIPT, CHIME_SCRIPT, CLOCK_SCRIPT, PROMISE_SCRIPT, ECHO_SCRIPT, STAMP_SCRIPT, TALLY_SCRIPT, WATCH_SCRIPT, addBell, writeArrivalDesk } from './helpers/arrival-desk';
 import { typecheckEmittedApp } from './helpers/typecheckApp';
 
 /**
@@ -32,7 +33,7 @@ const catalog: Catalog = loadCatalog();
 type Readings = string[][];
 
 /** One arm in a child process; an arm that throws reads as one reading per scenario holding the error, so rows fail by name. */
-const childArm = (helper: string, input: Array<{ dir: string; scenarios: string[][]; settled?: boolean; fields?: boolean }>): Readings[][] => {
+const childArm = (helper: string, input: Array<{ dir: string; scenarios: string[][]; settled?: boolean; fields?: boolean; ticks?: number }>): Readings[][] => {
   try {
     return JSON.parse(
       execFileSync(process.execPath, [path.join(__dirname, 'helpers', helper)], {
@@ -80,7 +81,8 @@ const BASE: Readings = [L0, bump1, bo, boAgain, bump2, typed, cleared];
 const desk = writeArrivalDesk();
 const app = emitDir(desk.dir);
 const runtime = childArm('runtime-mounted-arm.js', [{ dir: desk.dir, scenarios: [STEPS], fields: true }]);
-const exported = childArm('export-react-arm.js', [{ dir: writeApp(app), scenarios: [STEPS], settled: true, fields: true }]);
+// `ticks`: a zero timer the page started has fired before each reading, as the runtime arm lets frames run.
+const exported = childArm('export-react-arm.js', [{ dir: writeApp(app), scenarios: [STEPS], settled: true, fields: true, ticks: 3 }]);
 
 describe('§A the emitted app runs what the runtime runs, step by step', () => {
   it('A1 the desk: the runtime reads what EXPECTED.md says (the arm grades the runtime first)', () => {
@@ -248,21 +250,21 @@ describe('§C the plan', () => {
 const bellDesk = writeArrivalDesk(addBell);
 const bellApp = emitDir(bellDesk.dir);
 const bellRuntime = childArm('runtime-mounted-arm.js', [{ dir: bellDesk.dir, scenarios: [['Chime']] }]);
-const bellExported = childArm('export-react-arm.js', [{ dir: writeApp(bellApp), scenarios: [['Chime']], settled: true }]);
-const BELL = 9; // bell · rings · chimed, after the nine desk Texts
+const bellExported = childArm('export-react-arm.js', [{ dir: writeApp(bellApp), scenarios: [['Chime']], settled: true, ticks: 3 }]);
+const BELL = 9; // bell · rings · chimed · promised · keeps, after the nine desk Texts
 
 describe('§E a write after the run has returned', () => {
-  it('E1 the runtime: the bell rang at load, the chime writes after its press', () => {
+  it('E1 the runtime: the bell rang and the promise was kept at load, the chime writes after its press', () => {
     expect(bellRuntime[0][0].map((r) => r.slice(BELL))).toEqual([
-      ['rung object', '1', 'Text'],
-      ['rung object', '1', 'chimed']
+      ['rung object', '1', 'Text', 'promise kept', '1'],
+      ['rung object', '1', 'chimed', 'promise kept', '1']
     ]);
   });
 
   it('E2 the export reads the same, except the chime\'s Text before its wire delivers (P18-S132-AUTHOREDTEXT, pinned)', () => {
     expect(bellExported[0][0].map((r) => r.slice(BELL))).toEqual([
-      ['rung object', '1', ''],
-      ['rung object', '1', 'chimed']
+      ['rung object', '1', '', 'promise kept', '1'],
+      ['rung object', '1', 'chimed', 'promise kept', '1']
     ]);
   });
 
@@ -270,15 +272,29 @@ describe('§E a write after the run has returned', () => {
     const home = Object.entries(bellApp.files).find(([f]) => /pages\/Home\.tsx$/.test(f))![1];
     expect(home).toMatch(/theBellNode\.late = \(theBellRun\) => \{\s*setTheBellOut\(\{ \.\.\.theBellRun\.outputs \}\);\s*for \(const theBellPulse of theBellRun\.pulses\)/);
     expect(home).toMatch(/theChimeNode\.late = \(theChimeRun\) => \{\s*setTheChimeOut\(\{ \.\.\.theChimeRun\.outputs \}\);\s*\};/);
+    expect(home).toMatch(/thePromiseNode\.late = \(thePromiseRun\) => \{\s*setThePromiseOut\(\{ \.\.\.thePromiseRun\.outputs \}\);\s*for \(const thePromisePulse of thePromiseRun\.pulses\)/);
     // The desk's other bodies do not call back, and print no handler.
     expect(home).not.toContain('theStampNode.late');
     expect(BELL_SCRIPT + CHIME_SCRIPT).toContain('setTimeout');
+    expect(PROMISE_SCRIPT).toContain('.then(');
   });
 
   it('E4 the plan marks the bodies that may call back, and only those', () => {
     const plan = planOf(bellDesk.dir, '/Pages/Home');
     const late = Object.values(plan.jsFunctions).filter((f) => f.late === true).map((f) => f.fnName).sort();
-    expect(late).toEqual(['The_bell', 'The_chime']);
+    expect(late).toEqual(['The_bell', 'The_chime', 'The_promise']);
+  });
+
+  it('E6 asynchrony that is not a top-level await is a host trait that calls back; a top-level await keeps the gate (slice 1b)', () => {
+    expect(jsHostTraitsOf(PROMISE_SCRIPT)).toEqual(['is asynchronous (it calls back)']);
+    expect(jsCallsBackOf(PROMISE_SCRIPT)).toBe(true);
+    expect(jsAwaitsAtTopLevel(PROMISE_SCRIPT)).toBe(false);
+    expect(jsAwaitsAtTopLevel('async function go() { await fetch("/x"); } go();')).toBe(false);
+    expect(jsAwaitsAtTopLevel('Outputs.n = await fetch("/x");')).toBe(true);
+    expect(jsPurityDefer('function', 'Outputs.n = await fetch("/x");')).toBe(
+      'is asynchronous — it awaits at its top level, and a run the export awaits before Success and Done is EXP-019 slice 1b'
+    );
+    expect(jsPurityDefer('expression', 'x.then(1)')).toContain('is asynchronous');
   });
 
   it('E5 the Bell app passes its own tsc', () => {

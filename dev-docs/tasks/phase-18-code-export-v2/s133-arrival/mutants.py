@@ -52,8 +52,8 @@ ARMS = [
      'C4'),
     ('H plan: the attach pass drops an arrival run\'s signal wire',
      'src/analyze/plan.ts',
-     "isArrivalRun(fromNode) && !jsArrivalRefusals.has(fromNode.id)) continue;",
-     "isArrivalRun(fromNode) && !jsArrivalRefusals.has(fromNode.id) && false) continue;",
+     "      isArrivalRun(fromNode) &&\n      !jsArrivalRefusals.has(fromNode.id) &&\n",
+     "      isArrivalRun(fromNode) && fromNode.id === '' &&\n      !jsArrivalRefusals.has(fromNode.id) &&\n",
      'C6 (a note says the wire is dropped)'),
     ('I plan: an arrival run is refused again (the slice-2 sentence)',
      'src/analyze/plan.ts',
@@ -85,12 +85,25 @@ ARMS = [
      "const readers = arrival ? strays.filter((c) => !isSignalWire(c)) :",
      "const readers = arrival ? strays :",
      'C8 (a row minted; TS2345)'),
+    ('O classifier: a callback\'s asynchrony is not a trait (the promise refused)',
+     'src/analyze/jsfun.ts',
+     "  if (asyncGate.pattern.test(scanned) && !jsAwaitsAtTopLevel(body)) traits.push('is asynchronous (it calls back)');",
+     "",
+     'E1/E2 (promise empty), E3, E4, E6'),
+    ('P classifier: every asynchronous Function keeps the gate',
+     'src/analyze/jsfun.ts',
+     "      if (gate.pattern.test(scanned) && jsAwaitsAtTopLevel(body)) {",
+     "      if (gate.pattern.test(scanned)) {",
+     'E2, E3, E4'),
 ]
 
 
 def run_spec() -> str:
     p = subprocess.run(['nice', '-n', '19', 'npx', 'jest', '--runInBand', SPEC], capture_output=True, text=True)
     out = p.stdout + p.stderr
+    # A mutant that does not compile runs no row: say so, never "survived" (s133, arms K and H).
+    if re.search(r'Tests:\s+0 total', out) or not re.search(r'Tests:', out):
+        return 'DID NOT COMPILE — graded nothing'
     failed = re.findall(r'✕ (\S+)', out)
     total = re.search(r'Tests:\s+(.*)', out)
     return f"{total.group(1) if total else 'no total (compile error?)'} — failed rows: {', '.join(failed) or 'NONE (survived)'}"
@@ -111,7 +124,7 @@ def main() -> int:
         finally:
             path.write_bytes(original)
         print(f'[{name}] expected to kill: {kills}\n    {result}', flush=True)
-        if 'NONE (survived)' in result:
+        if 'NONE (survived)' in result or 'DID NOT COMPILE' in result:
             survived += 1
     print(f'\n{len(ARMS)} arms, {survived} survived')
     return 1 if survived else 0

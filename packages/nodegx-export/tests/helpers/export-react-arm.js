@@ -45,6 +45,14 @@ w.__pressSettled = async (label: string) => {
     button.click();
   });
 };
+// P18 session 133. A few tasks, each inside an act: a zero timer the page started (a load run, a body's own timer) has run.
+w.__ticks = async (n: number) => {
+  for (let i = 0; i < n; i++) {
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+  }
+};
 w.__mountSettled = async () => {
   const root = createRoot(document.getElementById('root')!);
   await act(async () => {
@@ -104,9 +112,11 @@ function bundle(dir) {
 
 /**
  * `settled: true` (P18 session 127) mounts and presses in async acts (`__mountSettled`, `__pressSettled`); without it, the
- * synchronous acts every earlier spec was graded with.
+ * synchronous acts every earlier spec was graded with. `ticks: n` (P18 session 133, with `settled`) then lets n tasks run,
+ * each inside an act, after the mount and after every step, as the runtime arm lets frames run: a zero timer the page
+ * started has fired before the reading.
  */
-async function runSettled({ dir, scenarios, fields }) {
+async function runSettled({ dir, scenarios, fields, ticks }) {
   const code = bundle(dir);
   const out = [];
   for (const presses of scenarios) {
@@ -119,12 +129,14 @@ async function runSettled({ dir, scenarios, fields }) {
     w.MessageChannel = globalThis.MessageChannel;
     w.eval(code);
     await w.__mountSettled();
+    if (ticks) await w.__ticks(ticks);
     const read = () => [...w.__read(), ...(fields ? w.__fields() : [])];
     const readings = [read()];
     for (const label of presses) {
       const step = STEP.exec(label);
       if (step) await w.__stepSettled(step[1], step[2], step[3] ?? '');
       else await w.__pressSettled(label);
+      if (ticks) await w.__ticks(ticks);
       readings.push(read());
     }
     if (errors.length > 0) throw new Error(`the page logged errors: ${errors.join(' | ').slice(0, 600)}`);

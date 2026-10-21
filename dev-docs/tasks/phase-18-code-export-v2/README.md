@@ -1,6 +1,6 @@
 # Phase 18: Code Export v2
 
-**Status:** 🟡 In progress — **re-ordered 2026-10-21 (session 132) by Richard's ruling: the off-ramp ships from npm, React then Swift** — [EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md) → [EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md) → [EXP-021](EXP-021-A-LOGIC-COMPONENT-IS-A-HOOK.md) → [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md), [EXP-023](EXP-023-THE-OFF-RAMP-IS-ON-NPM.md) with the kit's next cut. EXP-019 slices 1 (s132) and 2 (s133: a script with no Run wire runs on its inputs' arrival; a write after its run returns arrives) built; 1b (async) next. Earlier: re-scoped 2026-08-28 (session 32) after twelve sessions built the
+**Status:** 🟡 In progress — **re-ordered 2026-10-21 (session 132) by Richard's ruling: the off-ramp ships from npm, React then Swift** — [EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md) → [EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md) → [EXP-021](EXP-021-A-LOGIC-COMPONENT-IS-A-HOOK.md) → [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md), [EXP-023](EXP-023-THE-OFF-RAMP-IS-ON-NPM.md) with the kit's next cut. EXP-019 slices 1 (s132) and 2 (s133: a script with no Run wire runs on its inputs' arrival; a write after its run returns arrives) built, and a callback's asynchrony with them; next EXP-020 with 1b (a top-level await) beside it. Earlier: re-scoped 2026-08-28 (session 32) after twelve sessions built the
 wrong thing well. Read [§ What went wrong](#what-went-wrong-and-the-mechanism-that-caused-it)
 before picking any work.
 

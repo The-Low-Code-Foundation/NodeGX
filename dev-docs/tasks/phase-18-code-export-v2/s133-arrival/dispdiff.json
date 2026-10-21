@@ -447,6 +447,357 @@
  },
  {
   "project": "nightbook",
+  "component": "Pages/Forgot",
+  "node": "fgStep2",
+  "type": "Set Variable",
+  "label": "Step 2",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"right\" signal is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"right\" signal is not exported: input \"rescueV\" is fed by /Data/Profile — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Forgot",
+  "node": "fgTry",
+  "type": "JavaScriptFunction",
+  "label": "Is it hers?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"rescueV\" is fed by /Data/Profile — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Forgot",
+  "node": "fgNew",
+  "type": "JavaScriptFunction",
+  "label": "The new code, checked",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Forgot",
+  "node": "fgSaveCall",
+  "type": "CloudFunction2",
+  "label": "Keep the new code",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Forgot",
+  "node": "fgProblemClear",
+  "type": "Set Variable",
+  "label": "Nothing to say",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"right\" signal is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"right\" signal is not exported: input \"rescueV\" is fed by /Data/Profile — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meRestoreToggle",
+  "type": "JavaScriptFunction",
+  "label": "Open or close: restore",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"me.restore\" (meRestore), is not drawn: an element above it, \"Save a copy\" (meCopyBox), is authored Mounted false, and the wire into its Mounted from \"Inside the Nightbook app?\".result is not exported (the node it comes from is not exported: input \"v\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "meRestore"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meCodeCheck",
+  "type": "JavaScriptFunction",
+  "label": "Her code now, then the new one",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meQCheck",
+  "type": "JavaScriptFunction",
+  "label": "Her code now, then the new question",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"question\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meNoteSet",
+  "type": "Set Variable",
+  "label": "Say it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meNoteSet2",
+  "type": "Set Variable",
+  "label": "Say it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"question\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meCopies",
+  "type": "JavaScriptFunction",
+  "label": "The copies there are",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "meCopy"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meMakeCopy",
+  "type": "JavaScriptFunction",
+  "label": "Make a copy now",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "meCopy"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meRestoreGo",
+  "type": "JavaScriptFunction",
+  "label": "Bring that copy back",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"name\" is fed by For Each — it reads the repeater meCopyEach's relayed row value \"name\" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meCopyNoteSet",
+  "type": "Set Variable",
+  "label": "Say it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "meCopy"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meCopyNoteSet2",
+  "type": "Set Variable",
+  "label": "Say it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"name\" is fed by For Each — it reads the repeater meCopyEach's relayed row value \"name\" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meCopyNoteSaving",
+  "type": "Set Variable",
+  "label": "Making it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"me.saveCopy\" (meCopy), is not drawn: an element above it, \"Save a copy\" (meCopyBox), is authored Mounted false, and the wire into its Mounted from \"Inside the Nightbook app?\".result is not exported (the node it comes from is not exported: input \"v\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "meCopy"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meShellYes",
+  "type": "Expression",
+  "label": "Inside the Nightbook app?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"v\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Me.tsx"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meLockAfter",
+  "type": "Set Variable",
+  "label": "Closed, to open again",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"back\" signal is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"back\" signal is not exported: input \"name\" is fed by For Each — it reads the repeater meCopyEach's relayed row value \"name\" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Me",
+  "node": "meToUnlock",
+  "type": "RouterNavigate",
+  "label": "Her code, to open the book that came back",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger meLockAfter.done: the Set Variable that sends it is not exported — the Function that sends its \"back\" signal is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger meLockAfter.done: the Set Variable that sends it is not exported — the Function that sends its \"back\" signal is not exported: input \"name\" is fed by For Each — it reads the repeater meCopyEach's relayed row value \"name\" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Setup",
+  "node": "suStart",
+  "type": "JavaScriptFunction",
+  "label": "Check it all, then the three verifiers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Setup",
+  "node": "suSave",
+  "type": "CloudFunction2",
+  "label": "Start the book (the backend makes it once)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
   "component": "Pages/Tonight",
   "node": "tnDateNow",
   "type": "JavaScriptFunction",
@@ -476,6 +827,155 @@
    "kind": "deferred",
    "to": "EXP-003",
    "reason": "input \"month\" is fed by Translation — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Tonight",
+  "node": "tnKbd",
+  "type": "JavaScriptFunction",
+  "label": "Which keyboard she has",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "tnRoot"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Tonight",
+  "node": "tnKbdSet",
+  "type": "Set Variable",
+  "label": "Her keyboard",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "tnRoot"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Unlock",
+  "node": "ulGoodnightOff",
+  "type": "Set Variable",
+  "label": "Not any more",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger ulOpenSet.done: the Set Variable that sends it is not exported — the Function that sends its \"open\" signal is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger ulOpenSet.done: the Set Variable that sends it is not exported — the Function that sends its \"open\" signal is not exported: input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Unlock",
+  "node": "ulCheck",
+  "type": "JavaScriptFunction",
+  "label": "Is it her code?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Unlock",
+  "node": "ulOpenSet",
+  "type": "Set Variable",
+  "label": "The book is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"open\" signal is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"open\" signal is not exported: input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Unlock",
+  "node": "ulToTonight",
+  "type": "RouterNavigate",
+  "label": "To tonight’s page",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger ulGoodnightOff.done: the Set Variable that sends it is not exported — trigger ulOpenSet.done: the Set Variable that sends it is not exported — the Function that sends its \"open\" signal is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger ulGoodnightOff.done: the Set Variable that sends it is not exported — trigger ulOpenSet.done: the Set Variable that sends it is not exported — the Function that sends its \"open\" signal is not exported: input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Unlock",
+  "node": "ulWrongSet",
+  "type": "Set Variable",
+  "label": "Say it isn’t it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"wrong\" signal is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"wrong\" signal is not exported: input \"code\" is fed by /UI/Field — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Warmup",
+  "node": "wuKbd",
+  "type": "JavaScriptFunction",
+  "label": "Which keyboard she has",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wuRoot"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Warmup",
+  "node": "wuKbdSet",
+  "type": "Set Variable",
+  "label": "Her keyboard",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wuRoot"
   }
  },
  {

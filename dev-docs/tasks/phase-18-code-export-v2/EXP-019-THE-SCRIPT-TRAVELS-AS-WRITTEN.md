@@ -1,7 +1,7 @@
 # EXP-019 — The script travels as written
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), from Richard's ruling of the same day.
-**Status: 🟡 s133 — slices 1 and 2 built and graded (§6, §7); next slice 1b (async).** **Owner of the order:** [BOARD](../../BOARD.md) §2 lane 6.
+**Status: 🟡 s133 — slices 1 and 2 built and graded (§6, §7), and asynchrony that is a callback; next slice 1b (a top-level `await`, 4 free bodies + 127 behind the Noodl API: beside EXP-020).** **Owner of the order:** [BOARD](../../BOARD.md) §2 lane 6.
 
 > "If you add code export and deployment as npm things, such that nobody would ever have to use the original Noodl /
 > NodeGX editor, I say make it so. I want that offramp promise fulfilled in React and Swift." — Richard, 2026-10-21
@@ -50,7 +50,8 @@ never *whether it travels*.**
 | is pure | inlined at each read site (reactive) or run in its handler (invoked) | unchanged |
 | reads the clock, draws randomness, touches the browser, schedules timers, reaches the network | refused | **runs once per trigger with a kept node**; its outputs are read from the node's record (`materialize`), never recomputed at a read site |
 | keeps state on `this` | refused | the kept node carries `self`; the body runs as `body.call(node.self, Inputs, Outputs)` |
-| is asynchronous | refused | the wrapper is `async`; the run is awaited where the runtime awaits it (`runScript`'s `await`), Success and Done after it (EXP-011 §98), the click's later wires not held (§90 `detached`) |
+| is asynchronous, a callback (`.then`, an inner `async function`; no top-level `await`) | refused | **a host trait (s133)**: the run returns at once and the callback's writes and signals arrive later through `FunctionNode.late`, as the runtime's do |
+| is asynchronous, a top-level `await` | refused | the wrapper is `async`; the run is awaited where the runtime awaits it (`runScript`'s `await`), Success and Done after it (EXP-011 §98), the click's later wires not held (§90 `detached`) |
 | has no Run wire and is impure (reactive mode) | refused | runs from an effect on its inputs' arrival and once at load, as the runtime's `scheduleRun` from the script's setter and an input change; **slice 2, built s133 (§7)** |
 | writes or signals after its run returned (a timer, a listener) | lost (slice 1) | the kept node hands the write or signal to the component (`FunctionNode.late`); **s133 (§7)** |
 | reads `Noodl.*` | refused | EXP-020 |
@@ -112,9 +113,19 @@ The wrapper keeps the body verbatim (EXP-003 §4 still holds). What changes is a
 | measured first | `census.ts`: 167 traited Functions with no Run wire in the templates, 73 refused by the slice-2 sentence (the rest are in logic components, EXP-021, or behind the Noodl API, EXP-020); their inputs 138 Component Inputs, 25 another Function, 21 a kit control, 13 a Variable; 36 send a signal; 8 have no input at all. 96 dispositions carried the sentence on HEAD |
 | the runtime, read then measured | a Function with no Run wire runs once at load (the `functionScript` setter's `scheduleRun`), coalesced with whatever arrives in its creation's update, then once per ticked input whose value changed; one `this` per node; a re-render runs nothing. The Arrival Desk predicted every cell but one: a text field's Text reaches the Function after the field mounts (`componentDidMount` → `setText`), so the runtime runs it **twice** at load |
 | built | `isArrivalRun`; `compileJsRun`'s arrival branch (no Done: refused by name if wired; every value output read from the row; signal wires never reads; its ticked half placed always, `atLoad`); arrival runs compile after every other sink, every Function upstream of one compiled first; the attach pass leaves an arrival run's compiled signal wires to it; the emitter's load run, one task late when nothing has arrived (`setTimeout`, cleared by an arrival). `FunctionNode.late` + `jsCallsBackOf` + `JsFunctionPlan.late`: a write or signal after the run returned reaches the row and the chain (P18-S133-LATEWRITE, fixed) |
-| graded | `tests/the-script-runs-on-arrival.test.ts`, 24 rows: the Arrival Desk (Tally twice fed a Variable and a literal, a stamp, a clock with no inputs, a watch with a signal, a field-fed echo, Bump, Set Bo twice, Clear) and the Bell variant (an arrival run and a Run-wired run writing from a zero timer), each against the runtime arm; 14 mutant arms, 13 killed rows by name, 1 survived and said why (C: the load run's guard; no desk source can take a watched value away in the export) |
+| graded | `tests/the-script-runs-on-arrival.test.ts`, 25 rows: the Arrival Desk (Tally twice fed a Variable and a literal, a stamp, a clock with no inputs, a watch with a signal, a field-fed echo, Bump, Set Bo twice, Clear) and the Bell variant (an arrival run and a Run-wired run writing from a zero timer), each against the runtime arm; 16 mutant arms, 15 killed rows by name, 1 survived and said why (C: the load run's guard; no desk source can take a watched value away in the export) |
 | reach | `dispdiff` (HEAD's `src`, unchanged since `e31d2929d`, against the tree, 17 templates): **66 gained, 0 lost, 57 re-worded** (Function 40, kit checkbox 22, Set Variable 2, Switch 1, Request Magic Link 1; planning 20 + demo 20, digital-bricks 6 + 2, todo-list 6 + demo 6, members-area 3, nightbook 2, marketplace 1). A first build lost 6 (members-area's Announcement and Meeting: the date compiled from its Text before "Hold the id", the Record's Fetch kept refused): fixed by the upstream compile. Corpus: 0 dispositions moved |
 | AC4 | ✅ on the desk: one run per arrival, none per render (A3, A4); `Date.now()` read in the stamp |
 | AC5 | the slice-2 sentence reads 0 (it was on 96 dispositions); `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL; a first build read 7, planning's TS2345 from a refused signal's wires minting a row, fixed); 0 lost. The count against §2's per-gate numbers waits on 1b |
 | not built | a field's Text as an arrival where the field is not otherwise read in render (refused by name: it exists only inside the field's handler; 2 template nodes); the runtime's second load run for a field-fed Function where the field is read (an export that watches a field's state runs it once at load: unmeasured, no counting body has that shape in the templates) |
 | what stands in front of the 57 re-worded | JS-node chains 24, a kit Options value 8, a Group's own element (`this`) 6, logic components (`/Logic/…`) 12, the Noodl API 3, a Record or Cloud Function never fired 3 |
+
+**Then, in the same session: asynchrony that is a callback.** Of the 163 asynchronous template bodies, 12 free of the
+Noodl API never `await` at their top level (11 `.then`, 1 inner `async function`): the runtime's run of such a body returns
+at once, and the callback writes later, which is exactly what `FunctionNode.late` now carries. So `jsAwaitsAtTopLevel`
+(the body compiles as `AsyncFunction` and not as `Function`) splits the gate: a top-level `await` keeps it, named for slice
+1b; any other asynchrony is the host trait "is asynchronous (it calls back)" and calls back. Graded on the Bell variant
+(The promise: `Promise.resolve('kept').then(…)` writes and signals, both arms `promise kept` / `1`); the export arm gained
+`ticks` (its settled press waited no timer). Reach with it: **76 gained, 0 lost, 77 re-worded** (nightbook's Me page makes
+a copy and says so, its two keyboards are chosen). Slice 1b proper is now 4 free bodies and 127 behind the Noodl API: it
+belongs beside EXP-020.

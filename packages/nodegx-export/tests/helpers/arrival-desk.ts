@@ -104,23 +104,29 @@ const tallyGraph = (): Graph => ({
 
 export const BELL_SCRIPT = "setTimeout(function () {\n  Outputs.rung = 'rung ' + typeof window;\n  Outputs.rang();\n}, 0);";
 export const CHIME_SCRIPT = "setTimeout(() => {\n  Outputs.chimed = 'chimed';\n}, 0);";
+export const PROMISE_SCRIPT = "Promise.resolve('kept').then(function (v) {\n  Outputs.promised = 'promise ' + v;\n  Outputs.kept();\n});";
 
 /**
  * The Bell variant (s133, after reading the gained nodes' emitted code): two bodies that write after their run has
  * returned. **The bell** (no Run, no inputs) writes `rung` and sends `rang` from a zero timer; `rang` increases a Counter
  * "Rings". **The chime** (Run from a button "Chime") writes `chimed` from a zero timer. Three Texts after the field: bell,
- * rings, chimed.
+ * rings, chimed. **The promise** (no Run, no inputs) writes `promised` and sends `kept` from a `.then` callback; `kept`
+ * increases a Counter "Keeps". Two Texts after: promised, keeps.
  */
 export const addBell = (d: Desk): void => {
   const home = d.components['Pages/Home'];
   const shell = home.nodes.find((n) => n.id === 'shell')!;
-  shell.children = [...(shell.children ?? []), 'chimeBtn', 'bellText', 'ringsText', 'chimedText'];
+  shell.children = [...(shell.children ?? []), 'chimeBtn', 'bellText', 'ringsText', 'chimedText', 'promisedText', 'keepsText'];
   home.nodes.push(
     ...placeAll([
       button('chimeBtn', 'Chime'),
       text('bellText', 'Bell'),
       text('ringsText', 'Rings text'),
       text('chimedText', 'Chimed'),
+      text('promisedText', 'Promised'),
+      text('keepsText', 'Keeps text'),
+      { id: 'keeps', type: 'Counter', label: 'Keeps', parameters: {} },
+      fnNode('promise', 'The promise', PROMISE_SCRIPT, { inputs: [], outputs: ['promised'], signals: ['kept'] }),
       { id: 'rings', type: 'Counter', label: 'Rings', parameters: {} },
       fnNode('bell', 'The bell', BELL_SCRIPT, { inputs: [], outputs: ['rung'], signals: ['rang'] }),
       fnNode('chime', 'The chime', CHIME_SCRIPT, { inputs: [], outputs: ['chimed'] })
@@ -131,7 +137,10 @@ export const addBell = (d: Desk): void => {
     { fromId: 'bell', fromProperty: 'out-rang', toId: 'rings', toProperty: 'increase' },
     { fromId: 'rings', fromProperty: 'currentCount', toId: 'ringsText', toProperty: 'text' },
     { fromId: 'chimeBtn', fromProperty: 'onClick', toId: 'chime', toProperty: 'run' },
-    { fromId: 'chime', fromProperty: 'out-chimed', toId: 'chimedText', toProperty: 'text' }
+    { fromId: 'chime', fromProperty: 'out-chimed', toId: 'chimedText', toProperty: 'text' },
+    { fromId: 'promise', fromProperty: 'out-promised', toId: 'promisedText', toProperty: 'text' },
+    { fromId: 'promise', fromProperty: 'out-kept', toId: 'keeps', toProperty: 'increase' },
+    { fromId: 'keeps', fromProperty: 'currentCount', toId: 'keepsText', toProperty: 'text' }
   );
 };
 
