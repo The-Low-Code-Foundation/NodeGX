@@ -4,6 +4,7 @@
 //   node round-arm.mjs <root> <brief-file> --harness <CLAUDE.md>
 //   node round-arm.mjs <root> <brief-file> --nodegx 0.2.2            (npm create nodegx@<version>, from the registry)
 //     [--continues 5] [--cap 60] [--model claude-opus-5-5] [--deny <other round root>]…
+//     [--app music] [--seed <dir>[=<sub-folder>]]…   (round 2: the folder's name, and files copied in after it is made)
 //
 // The seal (R2: Bash is on in every arm, so OWN-018's "Bash denied" can't hold):
 // - A round root of its own: <root>/work/music is the folder the person opens, <root>/home the HOME every shell
@@ -49,7 +50,7 @@ const root = fs.realpathSync(rootArg);
 if (root.startsWith('/Users/') || root.startsWith('/Applications/')) throw new Error('a round root sits outside /Users and /Applications, which the rules deny');
 const HOME = path.join(root, 'home');
 const WORK = path.join(root, 'work');
-const APP = path.join(WORK, 'music');
+const APP = path.join(WORK, opt('--app', 'music'));
 const SITS = path.join(root, 'sittings');
 for (const d of [path.join(HOME, 'tmp'), WORK, SITS]) fs.mkdirSync(d, { recursive: true });
 const deny = all('--deny').map((d) => path.resolve(d));
@@ -73,7 +74,7 @@ let mcpArgs = [];
 // lives there), as the person's machine was left; the build itself stays as built. Same seal, relay and cap.
 const from = opt('--from', null);
 if (from) {
-  fs.cpSync(path.join(path.resolve(from), 'work', 'music'), APP, { recursive: true, verbatimSymlinks: true });
+  fs.cpSync(path.join(path.resolve(from), 'work', path.basename(APP)), APP, { recursive: true, verbatimSymlinks: true });
   const noodl = path.join(path.resolve(from), 'home', '.noodl');
   if (fs.existsSync(noodl)) fs.cpSync(noodl, path.join(HOME, '.noodl'), { recursive: true });
   setup.from = path.resolve(from);
@@ -89,7 +90,7 @@ if (mode === 'nodegx') {
   const version = opt('--nodegx');
   const created = from ? { status: 0, stdout: `copied from ${from}`, stderr: '' } : process.env.MOCK_CREATE
     ? (fs.mkdirSync(APP), fs.writeFileSync(path.join(APP, '.mcp.json'), JSON.stringify({ mcpServers: { nodegx: { type: 'stdio', command: 'npx', args: ['-y', `@nodegx/mcp@${version}`, '--allow-writes'] } } })), { status: 0, stdout: 'mock', stderr: '' })
-    : spawnSync('npm', ['create', '-y', `nodegx@${version}`, 'music'], { cwd: WORK, env: { ...env, ...roundEnv }, encoding: 'utf8' });
+    : spawnSync('npm', ['create', '-y', `nodegx@${version}`, path.basename(APP)], { cwd: WORK, env: { ...env, ...roundEnv }, encoding: 'utf8' });
   fs.writeFileSync(path.join(root, 'create.log'), created.stdout + created.stderr);
   if (created.status !== 0) throw new Error(`npm create nodegx@${version} exited ${created.status}; see create.log`);
   const mcp = JSON.parse(fs.readFileSync(path.join(APP, '.mcp.json'), 'utf8'));
@@ -103,6 +104,14 @@ if (mode === 'nodegx') {
   // R9 (Richard, 2026-10-19): the server is started once before the build, as a person who retried would have —
   // cold it misses Claude Code's 30 s limit (P112-OWN023-COLDSERVER). The cost stays in B's row; this is its measure.
   if (rest.includes('--warm-server') && !process.env.MOCK_CREATE) setup.warm = await warmServer(server, version);
+}
+
+// round 2 (--seed): the arm's starting files, copied in after the folder exists (the kit's own files are never replaced)
+if (!from) for (const sd of all('--seed')) {
+  const [src, sub = ''] = sd.split('='), to = path.join(APP, sub);
+  for (const f of fs.readdirSync(src)) { if (fs.existsSync(path.join(to, f))) throw new Error(`--seed would replace ${path.join(sub, f)}`); }
+  fs.cpSync(path.resolve(src), to, { recursive: true });
+  (setup.seeds ||= []).push({ src: path.resolve(src), into: sub || '.', files: walk(to).length });
 }
 
 function warmServer(server, version) {

@@ -1,0 +1,38 @@
+[
+  {
+    "k": 1,
+    "prompt": "brief",
+    "code": 0,
+    "signal": null,
+    "endedAtFirstAnswer": true,
+    "seconds": 4204,
+    "load": {
+      "before": [
+        1.6,
+        2,
+        2.2
+      ],
+      "after": [
+        15.7,
+        18.4,
+        16.2
+      ]
+    },
+    "session": "9e804663-cdf3-4a34-9436-9fd7ba770380",
+    "week": 0.59,
+    "subtype": "success",
+    "isError": false,
+    "turns": 282,
+    "activeSeconds": 4202,
+    "cum": 34.89975679999998,
+    "results": 1,
+    "last": "The game is rebuilt as a NodeGX app in `app/`, and the grown-ups' settings are added. I drove it in the headless browser, starting from the start page each time: every tab, a rehearsal, a try-out, gala night (30 → 126 ⭐ and a notebook entry), buying a costume, placing furniture by tapping the 3D floor, season 2 with its car-park tab, and English. The last runs showed no console errors. The project validator reports 0 errors; 9 of its 12 style warnings are still there and don't affect how it works. The gala-rules tests pass (19/19).\n\n**Do this first:** open the grown-ups' page (⚙︎ in the top bar) and create the grown-ups' account before the kids find it. The first account made there becomes the grown-ups' account, and every account after it is refused. A second account I created as a test was turned away, and the editor never appeared for it.\n\nTo play: `npx @nodegx/preview app --open`. It starts the game's backend too.\n\n**The grown-ups' settings**\n- Grown-ups can rename a step or change its difficulty, change prices and costume times, rename dances, set a new school's starting stars, and add a new step or costume.\n- Changes are kept on the game's backend, not in the browser. A fresh browser opened a school with the grown-ups' 80 stars, and the renamed \"Plié royal\" and the new \"Pirate\" costume appeared in the game.\n- Changes take effect the next time the game opens. A school already being played keeps its own stars; \"Recommencer\" in the Carnet starts a new one with the grown-ups' stars.\n- **\"On another computer\" only works if that computer can reach the same backend.** Right now it runs on this machine at `127.0.0.1`, so it's reachable only from here until it's hosted somewhere others can reach.\n\n**Kid safety**\n- Every change goes through a check on the server. It accepts only known tables and fields, keeps numbers within ranges, and allows names only as short, plain text that passes a French/English rude-word filter. \"M3RDE\", HTML and 100 000 stars were all refused over HTTP.\n- The browser runs the same check again before applying any change, and the school name a child types is checked the same way.\n- One thing I got wrong and fixed: the backend started in a development mode that didn't enforce its permissions. A child's account could write 9 999 stars straight into the database. I switched enforcement on (rules in `app/nodegx.security.json`), and that same write is now refused.\n\n**Nodes and code**\n- Every screen, tab, list, button, dialog, the words and the game's state are nodes: 54 components and 762 nodes, of which 33 are Function nodes.\n- What stays code (3,369 lines in project scripts):\n  - copies made by small generators in `tools/`: gala-rules (with only the import/export lines rewritten, checked to play identical evenings), the 3D and music modules from `reference/`, and the safety checker;\n  - about 1,250 hand-written lines that turn the save into the rows the lists show and a button press into a new save.\n- Nothing from `reference/`'s page or screen modules is loaded. The only page element any code places is the 3D canvas itself.\n\n**What changed or was lost**\n- Gone: bold words inside sentences, dragging the programme cards (the ▲▼ buttons remain), the ruler and the enlarged stage plan, auto-scrolling to the step being danced in a try-out, and the bottom-sheet layout on narrow screens.\n- The browser's confirm and prompt pop-ups became boxes inside the sheet.\n- In the test browser, which has no graphics card, each tap takes 3–7 s to settle. JavaScript is only about 5 ms per frame; the rest is the 3D scene drawn in software, which the original game would suffer the same way. I couldn't measure it on real hardware.\n\nMy test changes are removed from the backend and the three test accounts can no longer sign in, but they couldn't be deleted from here. `CONVERSION.md` has the full log, written as I went.",
+    "rateLimited": false,
+    "resetsAt": 1792596000,
+    "usd": 34.89975679999998,
+    "judge": {
+      "verdict": "DONE",
+      "said": "DONE"
+    }
+  }
+]

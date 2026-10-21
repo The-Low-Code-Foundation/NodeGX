@@ -16,3 +16,10 @@ process there, and possibly any web page open in their browser, reads the user t
 signing in. The deploy interlock is the reason it is not (by code) an internet leak. What a person meets either way:
 the access rules the agent wrote are not what the running app enforces, and nothing in the app's folder says so.
 Carried in OWN-023 arm B's row (C3); not fixed during the study.
+
+**Seen again, twice more (OWN-023 round 2, 2026-10-21).** Arm B (the gala, kit 0.2.4): "its first backend didn't enforce
+its own permission rules, so I replaced it" (B's words). Arm B2 (round 2b, the gala converted): its `CONVERSION.md` §7,
+"the backend starts in *dev-open* mode, where permission rules are reported but not enforced — my 'nobody may write'
+rule let a child's account write 9 999 stars straight into the collection"; it caught it only because it tried the
+direct write over HTTP, then wrote `devOpen: false` into `app/nodegx.security.json`, installed it and restarted. Three
+of three NodeGX arms that wrote access rules met this; one shipped it (round 1 B), two found it by testing.

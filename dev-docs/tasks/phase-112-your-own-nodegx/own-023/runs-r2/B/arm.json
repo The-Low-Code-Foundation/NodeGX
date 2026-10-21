@@ -1,0 +1,44 @@
+{
+  "mode": "nodegx",
+  "setup": {
+    "mode": "nodegx",
+    "kit": {
+      "version": "0.2.4",
+      "files": {
+        ".claude/skills/nodegx-your-own-editor/SKILL.md": 27745,
+        ".mcp.json": 187,
+        ".vibe/config.toml": 1206,
+        "AGENTS.md": 1420,
+        "CLAUDE.md": 1420,
+        "opencode.json": 480
+      }
+    },
+    "warm": {
+      "answered": true,
+      "seconds": 3.2,
+      "package": "@nodegx/mcp@0.2.4"
+    },
+    "seeds": [
+      {
+        "src": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/aaabb464-173f-479e-9b50-d6a3c77f3d3d/scratchpad/own023-r2/seeds/B",
+        "into": ".",
+        "files": 37
+      }
+    ]
+  },
+  "model": "claude-opus-5-5",
+  "cap": 100,
+  "n": 5,
+  "stop": "judge: DONE",
+  "continues": 0,
+  "rateLimitResumes": 0,
+  "sittings": 1,
+  "usd": 17.3846,
+  "seconds": 1856,
+  "turns": 208,
+  "week": {
+    "first": 0.54,
+    "last": 0.54
+  },
+  "leaks": 32
+}

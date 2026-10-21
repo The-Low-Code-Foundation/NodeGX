@@ -1,0 +1,32 @@
+{
+  "mode": "harness",
+  "setup": {
+    "mode": "harness",
+    "harness": {
+      "file": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/aaabb464-173f-479e-9b50-d6a3c77f3d3d/scratchpad/own023-r2/harness/gala/CLAUDE.md",
+      "bytes": 8607
+    },
+    "seeds": [
+      {
+        "src": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/aaabb464-173f-479e-9b50-d6a3c77f3d3d/scratchpad/own023-r2/seeds/Aplus",
+        "into": ".",
+        "files": 23
+      }
+    ]
+  },
+  "model": "claude-opus-5-5",
+  "cap": 100,
+  "n": 5,
+  "stop": "judge: DONE",
+  "continues": 0,
+  "rateLimitResumes": 0,
+  "sittings": 1,
+  "usd": 7.7306,
+  "seconds": 3065,
+  "turns": 115,
+  "week": {
+    "first": 0.53,
+    "last": 0.53
+  },
+  "leaks": 14
+}
