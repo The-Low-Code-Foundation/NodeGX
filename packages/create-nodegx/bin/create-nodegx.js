@@ -48,6 +48,9 @@ const AGENT_NOTE = [
   `To read an app before changing it: \`npx -y ${MCP_PACKAGE}@${MCP_VERSION} <the app's folder> --graph\` prints the`,
   'whole app as text on one page — every component, node, parameter, function and wire — and writes nothing.',
   "Read that rather than the JSON under `components/` (with the server open, the tool `read_graph` is the same page).",
+  // P112-OWN023-READONLYOPEN: on a read-only task, Opus refused `open_project` three times "so as not to write
+  // anything". It writes nothing; the kit says so where the agent reads first.
+  "Opening an app with the server (`open_project`) writes nothing into its folder either; it only binds the server.",
   '',
   // P112-OWN018-LISTCHANGED / OWN-018 round 1: Mistral Large 4 (in Mistral Vibe) created the app, then could not see
   // the tools that build it, and wrote one 17-component batch whose every refusal it then had to untangle at once.

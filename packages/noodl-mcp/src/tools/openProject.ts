@@ -176,9 +176,10 @@ export function registerOpenProjectTools(server: McpServer, bind: CreateProjectB
         'Point this server at a NodeGX project that already exists on disk, and get the reading and authoring ' +
         'tools in this same conversation — no second registration and no restart. Call this after list_projects ' +
         'when the user means a project they already have; it is what makes editing the real app possible instead ' +
-        'of building a second one beside it. Takes the `directory` from a list_projects row. A server binds ' +
-        'once: if one is already bound this reports where and changes nothing. Legacy projects must be migrated ' +
-        'in the NodeGX editor first.',
+        'of building a second one beside it. Takes the `directory` from a list_projects row. Opening writes ' +
+        'nothing into the project folder, so it is safe on a read-only task. A server binds once: if one is ' +
+        'already bound this reports where and changes nothing. Legacy projects must be migrated in the NodeGX ' +
+        'editor first.',
       inputSchema: openProjectSchema
     },
     guarded((args: OpenProjectArgs) => {

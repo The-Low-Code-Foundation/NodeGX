@@ -134,7 +134,9 @@ export interface AgentConfigHost {
 const GITIGNORE_BLOCK = [
   '',
   '# Machine-specific MCP registration: absolute paths to this install of NodeGX.',
-  '# Each developer gets their own, written when the project is created or opened.',
+  // P112-OWN023-READONLYOPEN: "created or opened" read as "the MCP server writes on open" to a careful agent, which
+  // then refused open_project on a read-only task. The editor writes it on open; the server never does.
+  '# Each developer gets their own, written when the project is created or opened in the NodeGX editor.',
   '.mcp.json',
   ''
 ].join('\n');
