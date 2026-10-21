@@ -243,7 +243,9 @@ describe('§C the plan', () => {
     expect(plan.stateVars.map((v) => v.name)).not.toContain('pickerFillPulses');
   });
 
-  it('C4 a logic component\'s signal input is not pulsed: it draws nothing and has no file to run a chain in', () => {
+  it('C4 a logic component\'s signal input is pulsed too: it is a hook since EXP-021 slice 1 (session 136), with a file to run the chain in', () => {
+    // Until session 136 it was not ("it draws nothing and has no file to run a chain in"); graded on the Hook Desk
+    // (`a-logic-component-is-a-hook.test.ts`, Tally's `go`) against the runtime's own instances.
     const dir = writeSignalDesk((d) => {
       d.components['Components/Quiet'] = {
         nodes: [
@@ -258,8 +260,15 @@ describe('§C the plan', () => {
       home.connections.push({ fromId: 'showBtn', fromProperty: 'onClick', toId: 'quiet', toProperty: 'go' });
     }).dir;
     const plan = planOf(dir, '/Pages/Home');
-    expect(plan.instancePulses.map((p) => p.nodeId)).not.toContain('quiet');
-    expect(plan.handlers['showBtn']?.['onClick']).toEqual([{ kind: 'state-set', name: 'bannerShowPulses', op: 'inc' }]);
+    expect(plan.instancePulses.map((p) => p.nodeId)).toContain('quiet');
+    expect(plan.hookCalls).toEqual(['quiet']);
+    expect(plan.handlers['showBtn']?.['onClick']).toEqual([
+      { kind: 'state-set', name: 'bannerShowPulses', op: 'inc' },
+      { kind: 'state-set', name: plan.instancePulses.find((p) => p.nodeId === 'quiet')!.stateName, op: 'inc' }
+    ]);
+    const quiet = planOf(dir, '/Components/Quiet');
+    expect(quiet.hook).toBe(true);
+    expect(quiet.dispositions['qtSet']).toMatchObject({ kind: 'collapsed' });
   });
 });
 

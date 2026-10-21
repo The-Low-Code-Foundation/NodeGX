@@ -1,3 +1,35 @@
+# Next session — session 136 (2026-10-21, BOARD lane 6) built **EXP-021 slice 1, a logic component is a hook**: a component with no node that draws, placed by another, exports as `use<Name>(props)` — the props interface a visual component has (values, §94 pulses, signal-out callbacks, §4d lifted values) — and the parent calls it where the graph places it, drawing nothing. Graded on the Hook Desk against the runtime's own instances, predicted first and read exactly. Templates 1,571 gained, 0 lost; their refusals 3,790 → 2,219.
+
+## ✅ Session 136: a logic component is a hook
+
+Read EXP-011 §106, EXP-021 §6 and `s136-hooks/README.md`. In short:
+
+| what | where |
+|---|---|
+| Measured first: s135's next two items reached **0** template refusals (the scope's members live in a library prefab; gram's Feed is no longer refused); bare "logic node (…)" rows were **1,962 of 3,790**. 332 logic components, placed 649×, 223 = Component Inputs → one Function → Component Outputs | `s136-hooks/census.cts`, `logic.cts`, `wires.cts` |
+| `isLogicComponent` (recursive: a placement of another logic component counts), `plan.hook`, `placesLogic`, `callAsHook`, `plan.hookCalls`; a logic placement never roots and never joins the JSX; it is an instance in the rendered set, so every instance pass applies | `src/analyze/plan.ts` |
+| A Component Outputs value reads a Run-wired Function's row (s122's refusal predates §96; the desk's Echo grades the order); the lift pass compiles that run first; Pass 4e binds a Function's value into a placed component's input | `plan.ts` (`isRowReader`, the lift pass, Pass 4e) |
+| The hook: the body, no JSX, no return, `<Name>Props = {}`; the parent's `use<Name>({ … })` after its state rows, refs, render locals; a known-typed source asserted to a typed prop | `src/emit/component.ts` (`hookCallLines`, `hookEntryOf`, `knownSourceTsType`) |
+| Spec, 22 rows (the desk on both arms; emitted text; plan; tsc; §E the templates where reading the code found defects); two P18-S126-PAGEGROUP rows moved; 17 mutant arms, 0 survived | `tests/a-logic-component-is-a-hook.test.ts`, `tests/helpers/hook-desk.ts`, `s136-hooks/EXPECTED.md`, `mutants.py`, `mutants.out` |
+
+- 🔴 **Rank by what the templates refuse now, not by the handoff's list**: two of three "next" items had reach 0 when measured.
+- 🔴 **"1,520 gained, 0 lost" hid 26 lost and 253 type errors.** The loss was a NEIGHBOUR rule given reach (P18-S126-PAGEGROUP, open at reach 0: a Page whose only other child became a hook call folded its Group into the page div). The type errors were five shapes (a hook called with nothing, `<useX />` as a root, a nested list type, a chain-local watch, typed props). Then reading todo-list's Todo data found P18-S136-QUERYPUSH (high): a lifted query result pushed once. Count, then tplbuild, then READ.
+- 🔴 **The runtime arm does not migrate NDA-017's boxes**: a Run-wired Function's unset run-on-change box reads ticked there and unticked in the editor and the export. Write the boxes out on a desk (s121's lesson; the first runtime run "missed" at load because of it).
+- 🔴 **A mutant harness over several specs reads no per-row `✕`** (jest prints them only for one suite): the first pass said "17 survived". `--verbose`, and a describe-time lookup that throws fails the suite and grades no row by name — make it read `''` (s120's lesson again).
+- 🔴 I wrote an unmeasured number on the BOARD ("232 → 0") and caught it before committing. Measure, then write.
+- Filed: **P18-S136-QUERYPUSH** (high, fixed), **-NESTEDROWS** (low, fixed), **-CHAINWATCH** (low, open: refused by name; the faithful watch reads the answer's row). **P18-S126-PAGEGROUP** fixed another way (the fold leaves a Group whose Mounted is wired).
+
+Readings: the spec 22 / 22; 17 mutants, 0 survived; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0; hls001 unmoved. Reach (`dispdiff`, HEAD's `src` against the tree): **templates 1,571 gained, 0 lost**; **corpus 850 gained, 0 lost**. Whole package (`nice -n 19 --runInBand`, JSON 23:47): **154 suites, 5,242 passed, 1 failed, 3 skipped** (predicted 5,221 + 22 = 5,243 run; read 5,243). The one red was a row I should have predicted: §94's C4 pinned "a logic component's signal input is not pulsed", the rule this slice reverses; moved with it, 19 / 19 in its own run (the whole package not re-run after).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-021 AC1, driven**: todo-list on the local backend, both arms (the hook path reads right: `useTodoData` fetches on `refresh`, which the page sends from its Did Mount when signed in; its six lists push when they answer).
+2. **EXP-021 AC4**: rocket-school's list editing (`lsEach` fed by `/Logic/List question sets`). Measure what still refuses it first.
+3. **§101 with hooks**: a parent's logic node reading a hook's output (≈360 template wires; todo-list's "Which project is the selected task part of?"). A hook that RETURNS its values (`const d = useTodoData(…)`, read in the same render) is the likely answer to §101's timing question; predict on a desk first.
+4. A hook call whose every pulse was refused runs nothing (todo-list's Add task: its Create Record refused for an Id read outside its chain): counted among the gains. Measure how many before claiming more.
+5. Not this lane's next: P18-S136-CHAINWATCH, P18-S134-PULSEHOLD, P18-S135-HIDDENINSTANCE; EXP-022 AC1 in a parallel session; EXP-023's cut is Richard's terminal.
+
+---
+
 # Next session — session 135 (2026-10-21, BOARD lane 6) built **EXP-020 slice 2, the component's record**: a Function that reads `Component.Object` travels — its component instance's record, the runtime's Model transcribed (`src/lib/componentScope.ts`), one per mount, shared by the instance's Functions, handed to the body as the runtime hands it the fourth parameter. The rest of the scope is refused by its name, and so is a body beside a Component Object family node. Graded on the Component Desk against the runtime's own nodes, predicted first and read exactly. Templates 51 gained, 0 lost: gram's ten page loaders and what they feed, marketplace's photos and basket.
 
 ## ✅ Session 135: the component's record travels

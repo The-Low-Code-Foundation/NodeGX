@@ -4492,6 +4492,15 @@ export interface ComponentPlan {
    */
   shell?: true;
   /**
+   * EXP-021 slice 1 (P18 session 136). Set when this is a logic component — no node in it draws, and a component places
+   * it — exported as a hook, `use<Name>(props)`, with the props interface a visual component has: the placement's inputs,
+   * its signal inputs' pulses, its signal outputs' callbacks, its lifted value outputs. Its placements are called, not drawn
+   * (`hookCalls`). The runtime keeps a component instance whether or not anything draws it, as a hook call does.
+   */
+  hook?: true;
+  /** EXP-021 slice 1. The placements of logic components in this component, in source order: one hook call each. */
+  hookCalls: string[];
+  /**
    * Value output ports this component lifts (§4d child side) — the parent side consults this
    * list off the target's plan, so parent and child agree by construction (the s10 rule).
    */
@@ -4907,7 +4916,8 @@ export function unreachedTriggersOf(plan: ComponentPlan, component: ComponentIR)
    * mount, as the viewer sends it from `componentDidMount`. An element never drawn is an owner above.
    */
   const whyUnmounted = new Map<string, string>();
-  // The one exception: a Did Mount in a page's own Group whose Mounted is wired, which the emitter does not carry.
+  // The one exception: a Did Mount in a page's own Group whose Mounted is wired, which the emitter does not carry. The planner
+  // no longer folds such a Group into the page (P18-S126-PAGEGROUP, session 136); kept as the guard for the fold's rule.
   for (const [owner, byPort] of Object.entries(plan.handlers)) {
     if (byPort['didMount'] === undefined || whyUndrawn.has(owner) || plan.collapsedGroupId === undefined) continue;
     const bound = plan.bindings[plan.collapsedGroupId]?.['mounted'];
@@ -5081,6 +5091,7 @@ function planComponent(
     mintedArrays: [],
     liftedOutputProps: [],
     instanceLifted: {},
+    hookCalls: [],
     pendingLifted: [],
     dispositions,
     notes
@@ -5359,8 +5370,15 @@ function planComponent(
   // disagreed about roots[0], so the emitted tree is unchanged — what changes is that the answer
   // is now derived from the field that decides it rather than from source order happening to
   // put the real root first.
+  /** EXP-021 slice 1. Whether this node places a logic component (`isLogicComponent`): one the export calls as a hook. */
+  const placesLogic = (node: NodeIR): boolean => {
+    if (!node.type.startsWith('/')) return false;
+    const target = ir.components.find((c) => `/${c.path}` === node.type);
+    return target !== undefined && !pageFileByPath.has(target.path) && isLogicComponent(target, ir, catalog, kits);
+  };
+  // EXP-021 slice 1. A logic placement is called, never drawn, so it roots nothing (todo-list's AddAction).
   const rootable = (n: NodeIR) =>
-    roleOf(n) !== null && roleOf(n) !== 'unsupported' && roleOf(n) !== 'radio' && roleOf(n) !== 'slot';
+    roleOf(n) !== null && roleOf(n) !== 'unsupported' && roleOf(n) !== 'radio' && roleOf(n) !== 'slot' && !placesLogic(n);
   const declaredRoots = component.visualRoots
     ?.map((id) => nodeById.get(id))
     .filter((n): n is NodeIR => n !== undefined);
@@ -5411,7 +5429,12 @@ function planComponent(
     return plan;
   };
   if (roots.length === 0 && taskHosts.length === 0 && plan.shell !== true) {
-    return bailAsLogicOnly('no visual root — logic-only components defer to EXP-003');
+    // EXP-021 slice 1. A component nothing in which draws, placed by another: a hook, planned as the shell is (no root).
+    if (!pageFileByPath.has(component.path) && isLogicComponent(component, ir, catalog, kits) && isPlaced(ir, plan.legacyPath)) {
+      plan.hook = true;
+    } else {
+      return bailAsLogicOnly('no visual root — logic-only components defer to EXP-003');
+    }
   }
   if (roots.length === 0 && taskStarts.size > 1) {
     plan.taskRefusal = `it is named by Run Tasks nodes with different Start Inputs (${[...taskStarts].map((s) => `"${s}"`).join(', ')}) — one template has one start`;
@@ -5434,6 +5457,8 @@ function planComponent(
   if (root !== undefined) {
     plan.rootId = root.id;
     if (root.authoredLabel) plan.docComment = root.authoredLabel;
+  } else if (plan.hook === true) {
+    plan.docComment = `${component.path} — a logic component: it draws nothing, and every component that places it calls it`;
   } else if (plan.shell === true) {
     // EXP-011 §54. The router shell: no root, a file all the same (assigned below), nothing to render.
     plan.docComment = `${component.path} — the logic beside the Router, hosted for the app's life (src/App.tsx renders it inside the router)`;
@@ -5462,6 +5487,10 @@ function planComponent(
     const fileBase = routed?.fileBase ?? dedupe(pascalCase(lastSegment(component.path)), usedPageNames);
     plan.file = { dir: 'pages', fileBase, symbol: routed?.symbol ?? `${fileBase}Page` };
     if (!routed) notes.push('page is not listed by any router — exported without a route');
+  } else if (plan.hook === true) {
+    // EXP-021 slice 1. The file keeps the component's name; the function is the hook's.
+    const fileBase = dedupe(pascalCase(lastSegment(component.path)), usedComponentNames);
+    plan.file = { dir: 'components', fileBase, symbol: `use${fileBase}` };
   } else {
     const fileBase = dedupe(pascalCase(lastSegment(component.path)), usedComponentNames);
     plan.file = { dir: 'components', fileBase, symbol: fileBase };
@@ -5521,6 +5550,12 @@ function planComponent(
       }
     };
     below(child.id);
+  };
+  const callAsHook = (node: NodeIR): void => {
+    rendered.add(node.id);
+    plan.roleOf[node.id] = 'instance';
+    dispositions[node.id] = { kind: 'static' };
+    plan.hookCalls.push(node.id);
   };
   // EXP-011 §51. Decided once, before the walk, by the runtime's rule (chooseChildSlot).
   const slot = chooseChildSlot(component);
@@ -5611,11 +5646,25 @@ function planComponent(
         markDroppedChild(node.id, child, reason);
         continue;
       }
+      // EXP-021 slice 1. A logic component placed in the tree draws nothing there: it is called, as one placed beside it is.
+      if (childRole === 'instance' && placesLogic(child)) {
+        callAsHook(child);
+        continue;
+      }
       plan.childrenOf[node.id].push(child.id);
       walk(child, childInGroup);
     }
   };
   if (root !== undefined) walk(root, false);
+  /**
+   * EXP-021 slice 1 (P18 session 136). A placement of a logic component is called, not drawn: it joins the rendered set as
+   * an instance, so every pass that binds a placed component's inputs, pulses its signal inputs, runs its signal outputs'
+   * chains and lifts its value outputs treats it as it treats a drawn one; the emitter prints a hook call for it.
+   */
+  for (const node of component.nodes) {
+    if (node.parent !== undefined || dispositions[node.id] !== undefined || !placesLogic(node)) continue;
+    callAsHook(node);
+  }
 
   // Everything hanging off a root the runtime discards. `componentinstance.ts:326` renders
   // `roots[0]` alone, and the editor already tells the author so — graph-warnings.ts sends
@@ -5679,7 +5728,16 @@ function planComponent(
       ...(description !== undefined ? { description: String(description) } : {})
     };
     const rootChildren = plan.childrenOf[root.id];
-    if (rootChildren.length === 1 && plan.roleOf[rootChildren[0]] === 'group') {
+    /*
+     * P18-S126-PAGEGROUP (fixed, session 136). Not a Group whose Mounted is wired: the page div cannot carry it, and a Group
+     * can (§93: its gate, its Did Mounts run when it mounts). Reach came with EXP-021: nightbook's pages place a logic
+     * component beside their shell Group, and a placement that is called rather than drawn left the Group alone.
+     */
+    if (
+      rootChildren.length === 1 &&
+      plan.roleOf[rootChildren[0]] === 'group' &&
+      !component.connections.some((c) => c.toId === rootChildren[0] && c.toProperty === 'mounted')
+    ) {
       const groupId = rootChildren[0];
       plan.collapsedGroupId = groupId;
       plan.childrenOf[root.id] = plan.childrenOf[groupId];
@@ -8220,7 +8278,8 @@ function planComponent(
       // An empty array has no element to inspect; a mixed one has no single element type.
       const elemTypes = [...new Set(value.map((v) => staticTsType(v, typeBase, nested)))];
       if (elemTypes.length !== 1) return 'readonly unknown[]';
-      return `readonly ${elemTypes[0]}[]`;
+      // P18-S136-NESTEDROWS. A list of lists: `readonly readonly number[][]` is TS1354; the element type is parenthesised.
+      return /^[A-Za-z_$][A-Za-z0-9_$]*$/.test(elemTypes[0]) ? `readonly ${elemTypes[0]}[]` : `readonly (${elemTypes[0]})[]`;
     }
     if (typeof value === 'object') {
       const rows = [value as Record<string, unknown>];
@@ -11314,6 +11373,8 @@ function planComponent(
     if (plan.roleOf[node.id] !== 'instance') return false;
     const target = ir.components.find((c) => `/${c.path}` === node.type);
     if (target === undefined || !signalInputPortsOf(target).has(port)) return false;
+    // EXP-021 slice 1. A logic component is a hook now: its file runs the chain the pulse starts.
+    if (!pageFileByPath.has(target.path) && isLogicComponent(target, ir, catalog, kits)) return true;
     return target.nodes.some((n) => {
       if (n.parent !== undefined) return false;
       const role = renderRole(n, catalog, kits);
@@ -11651,6 +11712,17 @@ function planComponent(
           defer: `its "${input.name}" input is ticked under Run On Value Change, so a new value runs it again, and that value exists only inside a handler — the export cannot watch it`
         };
       }
+      /*
+       * P18-S136-CHAINWATCH. A call's answer read inside that call's chain is the chain's local (`exprValidIn` admits it: the
+       * local cannot leave the action it is minted in), but the inputs are resolved once, there, and the effect that watches
+       * them is outside it. Measured on members-area's Standing, once a logic component planned: TS2304. The faithful watch
+       * reads the answer's row; until then, refused by name.
+       */
+      if (readsChainAnswer(input.expr)) {
+        return {
+          defer: `its "${input.name}" input is ticked under Run On Value Change and is read from a call's answer inside that call's chain — the export watches what a render reads, and the answer is the chain's (P18-S136-CHAINWATCH)`
+        };
+      }
       watch.push(input.expr);
     }
     return { watch };
@@ -11660,8 +11732,14 @@ function planComponent(
    * trigger (a Function's Run, a Set Variable's Do, a record verb's Do, a Cloud Function's Call, a Record's Fetch), or, a
    * Query's parameter, asks again when it changes. Measured on `fixtures/held-desk` against the runtime's own nodes, and
    * on the shipped templates' "Hold the id"s (members-area's Announcement and Meeting, the Site Builder's PageEditor).
+   *
+   * EXP-021 slice 1 (P18 session 136). A Component Outputs value too: the parent reads it where it lands, in a drawn sink
+   * or a placed component's input, and a pulse sent with it reaches that component one commit after it (§96,
+   * P18-S127-SIBLINGVALUE) — the order the runtime keeps (a Component Outputs value is flagged before its signal). s122
+   * left it out because todo-list's lists sent `add` before `title` landed; §96 came after. The Hook Desk's Echo grades it.
    */
   const isRowReader = (reader: NodeIR, port: string): boolean =>
+    reader.type === 'Component Outputs' ||
     (reader.type === JS_FUNCTION && port.startsWith('in-')) ||
     (reader.type === 'Set Variable' && port === 'value') ||
     (reader.type === 'DbModel2' && port === 'modelId') ||
@@ -11788,8 +11866,9 @@ function planComponent(
     /**
      * An unrendered reader reads the node's own values in a handler (`delivered`, current within the click that ran it),
      * so only a Function, which keeps a node, has them; an Expression or a Visual Function keeps the old refusal. And only
-     * a reader that reads its input at its own trigger, or asks again when it changes (`ROW_READERS`). 🔴 Not a Component
-     * Outputs value: todo-list's lists send `add` with the title the parent never got, where HEAD refused the button.
+     * a reader that reads its input at its own trigger, or asks again when it changes (`ROW_READERS`). A Component Outputs
+     * value since EXP-021 slice 1 (s122 refused it: todo-list's lists sent `add` with the title the parent never got, before
+     * §96 ordered the pulse after the value).
      */
     // HEAD's rule where it materialized: the first stray drawn, the rest read the row as they could. Kept, so no export
     // HEAD made is lost (todo-list's Project editor); the rules below decide only what HEAD refused.
@@ -17494,6 +17573,23 @@ function planComponent(
         }
         relayExpr = { kind: 'state-get', name: relay.stateName };
       }
+      /**
+       * EXP-021 slice 1 (P18 session 136). A Run-wired Function's value: its run compiles first, so the read finds the row
+       * the run writes — the sink loop's `compileFunctionFeedersOf`, here, where no chain is open either. Only a run something
+       * attaches (a drawn element's event, a Did Mount, this component's own signal input, §94): a row nothing writes is
+       * P18-S122-DEADROW.
+       */
+      if (
+        from !== undefined &&
+        relayExpr === undefined &&
+        jsNodeKindOf(from.type) === 'function' &&
+        wiredPorts.has(`${from.id}:run`) &&
+        component.connections
+          .filter((w) => w.toId === from.id && w.toProperty === 'run')
+          .every((w) => w.fromProperty === 'didMount' || rendered.has(w.fromId) || nodeById.get(w.fromId)?.type === 'Component Inputs')
+      ) {
+        compiledOf(from, 'run');
+      }
       const ctx = newCtx();
       const expr = relayExpr ?? (from === undefined ? null : resolveExpr(from, wire.fromProperty, ctx));
       if (expr === null) {
@@ -20107,7 +20203,10 @@ function planComponent(
       contentRole === 'attr-not:disabled' ||
       (contentRole !== undefined && contentRole.startsWith('attr:')) ||
       // EXP-011 §49. A wired style parameter the emitter prints inline.
-      styleSinkOf(toNode, connection.toProperty) !== undefined;
+      styleSinkOf(toNode, connection.toProperty) !== undefined ||
+      // EXP-021 slice 1 (P18 session 136). A placed component's declared value input: a prop, read at render as a Text's
+      // text is — the hooks' commonest feed (a Function's value into a logic component), and a drawn placement's too.
+      siblingValueInputOf(toNode, connection.toProperty);
     if (!bindable) continue; // the sweep names the reason
     if (routerMounted(toNode, connection.toProperty)) continue; // the sweep names the reason
     // P18-S122-DEADROW. A drawn element reading a row nothing the export runs writes would show nothing, forever, unsaid.
@@ -21459,7 +21558,8 @@ function planComponent(
         const bound = plan.bindings[id]?.['mounted'];
         if (bound !== undefined) {
           const literal = bound.kind === 'computed' && (bound.expr.kind === 'literal' || bound.expr.kind === 'undefined');
-          // A page's sole Group renders as the page div, whose Mounted the emitter does not carry (it draws the page).
+          // A page's sole Group renders as the page div, whose Mounted the emitter does not carry (it draws the page). Not
+          // reached since P18-S126-PAGEGROUP's fix (session 136): the fold leaves a Group whose Mounted is wired.
           if (!literal && id === plan.collapsedGroupId) away = 'uncarried';
           else if (!literal) gates.push(id);
           else if (bound.expr.kind === 'undefined' || !(bound.expr as { value: unknown }).value) away = 'never';
@@ -22357,6 +22457,43 @@ export function indexKitNodes(modules: ModuleIR[]): { index: KitIndex; duplicate
     }
   }
   return { index, duplicates };
+}
+
+/** P18-S136-CHAINWATCH. Whether an expression reads a call's answer in its chain-local form (no row behind it). */
+function readsChainAnswer(expr: unknown): boolean {
+  if (expr === null || typeof expr !== 'object') return false;
+  if (Array.isArray(expr)) return expr.some(readsChainAnswer);
+  const e = expr as { kind?: unknown; viaState?: unknown };
+  if ((e.kind === 'http-out' || e.kind === 'cloud-out' || e.kind === 'record-out' || e.kind === 'file-out') && e.viaState === undefined) return true;
+  return Object.values(e).some(readsChainAnswer);
+}
+
+/**
+ * EXP-021 slice 1 (P18 session 136). A logic component: nothing in it draws — every node's render role is null (a
+ * Function, a Variable, a record verb, a kit's logic node), or it places another logic component (todo-list's AddAction
+ * is one placement of Write history, its only root). A component that places itself, at any depth, is not one.
+ */
+function isLogicComponent(
+  component: ComponentIR,
+  ir: ExportIR,
+  catalog: CatalogIndex,
+  kits: KitIndex,
+  seen: Set<string> = new Set()
+): boolean {
+  if (component.nodes.length === 0 || component.role === 'page' || seen.has(component.path)) return false;
+  const inner = new Set([...seen, component.path]);
+  return component.nodes.every((n) => {
+    const role = renderRole(n, catalog, kits);
+    if (role === null) return true;
+    if (role !== 'instance' || (n.children ?? []).length > 0) return false;
+    const target = ir.components.find((c) => `/${c.path}` === n.type);
+    return target !== undefined && isLogicComponent(target, ir, catalog, kits, inner);
+  });
+}
+
+/** EXP-021 slice 1. Whether any component in the project places this one (an unplaced logic component has nobody to call it). */
+function isPlaced(ir: ExportIR, legacyPath: string): boolean {
+  return ir.components.some((c) => c.nodes.some((n) => n.type === legacyPath));
 }
 
 function renderRole(node: NodeIR, catalog: CatalogIndex, kits: KitIndex): RenderRole | 'unsupported' | null {

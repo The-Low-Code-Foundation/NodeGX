@@ -404,7 +404,8 @@ export function emitComponent(
 ): EmittedComponent | null {
   // EXP-011 §53. A Run Tasks template has a file and no root — it renders null and runs its start chain on mount.
   // EXP-011 §54. The router shell kept for its boundary has a file and no root too — it renders null and hosts the hook.
-  if (!plan.file || (!plan.rootId && plan.task === undefined && plan.shell !== true)) return null;
+  // EXP-021 slice 1. A logic component has a file and no root too — a hook, called where it is placed.
+  if (!plan.file || (!plan.rootId && plan.task === undefined && plan.shell !== true && plan.hook !== true)) return null;
   const component = ir.components.find((c) => c.path === plan.path)!;
   const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
   /**
@@ -675,7 +676,8 @@ export function emitComponent(
         const whose = at === id ? 'it is' : `an element above it (${at}) is`;
         if (never) return { never: `${whose} never mounted, so its Did Mount never fires` };
         // A page's sole Group renders as the page div, whose Mounted is not carried: the page is drawn, so when it mounts is
-        // not known here (the plan refuses the chain with the same words).
+        // not known here (the plan refuses the chain with the same words). Since P18-S126-PAGEGROUP's fix the planner folds
+        // no Group whose Mounted is wired, so this is the guard for the fold's rule, not a path a project takes.
         if (bound !== undefined && !(bound.kind === 'computed' && bound.expr.kind === 'literal') && at === plan.collapsedGroupId) {
           return { never: `${UNCARRIED_PAGE_GROUP} ${at}, is mounted by a value the export does not carry (it draws the page), so when it mounts is not known here` };
         }
@@ -2587,6 +2589,23 @@ export function emitComponent(
         case 'date-call':
         case 'util-call':
           e.args.forEach(walk);
+          break;
+        /*
+         * P18-S136-QUERYPUSH. A query's rows, a named array's, and a list derived from either: the row (or the hook's
+         * local) is the dependency. Without these a Component Outputs value fed by a query was pushed once, at mount, with
+         * the empty list it boots with, and never again (todo-list's Todo data, its six lists).
+         */
+        case 'query-get':
+          add(e.stateName);
+          break;
+        case 'collection-get':
+          add(exprCode(e, 'render'));
+          break;
+        case 'list-map':
+        case 'list-count':
+        case 'list-filter':
+        case 'record-filter':
+          walk(e.source);
           break;
         case 'jsfun-out': {
           // "Hold the id": the field read is the dependency, never the row, which is a fresh copy every run
@@ -6500,6 +6519,20 @@ export function emitComponent(
     return element(kitLocal, attrs, blocks.length > 0 ? blocks : null, indent, blocks.length > 0);
   };
 
+  /** EXP-021 slice 1. A binding source's TypeScript type, where the plan states it: a Function's output, a state row. */
+  const knownSourceTsType = (source: BindingSource): string | undefined => {
+    if (source.kind !== 'computed') return undefined;
+    const expr = source.expr;
+    if (expr.kind === 'jsfun-out' && expr.fold === undefined) {
+      if (expr.viaState !== undefined) return undefined;
+      const def = jsFunByNode[expr.nodeId];
+      // An Expression's wrapper returns what TypeScript infers from its text (`null` before its inputs arrive among it).
+      if (def?.kind === 'expression') return 'inferred';
+      return def?.outputs.find((o) => o.name === expr.output)?.tsType;
+    }
+    if (expr.kind === 'state-get') return plan.stateVars.find((v) => v.name === expr.name)?.tsType;
+    return undefined;
+  };
   const instanceAttrs = (node: NodeIR): string[] => {
     const attrs: string[] = [];
     for (const param of node.parameters) {
@@ -6551,7 +6584,18 @@ export function emitComponent(
         defer(node.id, `the wire into "${toProperty}"`, `is not declared as a component input on ${node.type}`, source);
         continue;
       }
-      attrs.push(`${attr}={${expr}}`);
+      /*
+       * EXP-021 slice 1 (P18 session 136). The runtime hands a component input the value as it is — no coercion at the
+       * boundary; the nodes inside coerce. Where the source's type is known and is not the input's declared one (a Function
+       * output's analysed type, a lifted row typed by another component's output), the value is passed as it is and said
+       * to be the input's type, the push effect's idiom.
+       */
+      const propType = targetPropTsType(node.type, toProperty);
+      const sourceType = knownSourceTsType(source);
+      const bare = (t: string) => t.replace(/\s*\|\s*undefined/g, '').trim();
+      const cast =
+        propType !== undefined && sourceType !== undefined && !['any', 'unknown'].includes(bare(sourceType)) && !['any', 'unknown'].includes(bare(propType)) && bare(sourceType) !== bare(propType);
+      attrs.push(`${attr}={${cast ? `${SIMPLE_REF.test(expr) ? expr : `(${expr})`} as ${bare(propType!)} | undefined` : expr}}`);
     }
     // The lifted callbacks (§4d parent side): `onXChanged={setX}` writes the parent state var.
     for (const lifted of plan.instanceLifted[node.id] ?? []) {
@@ -7023,6 +7067,22 @@ export function emitComponent(
         ? ['    <>', ...runTasksJsx(6).flat(), '    </>']
         : ['    null'];
   /**
+   * EXP-021 slice 1 (P18 session 136). One call per placed logic component, built from the attributes a drawn placement
+   * takes (its inputs, its pulses, its signal outputs' handlers, its lifted callbacks) as the hook's one argument. Built
+   * here, beside the JSX, because building the attributes claims the bindings the cardinality check below counts.
+   */
+  const hookCallLines = plan.hookCalls.flatMap((id) => {
+    const node = nodeById.get(id)!;
+    const target = requireInstance(node.type, `the logic component ${id}`);
+    if (!target) return [`  // TODO(export): logic component ${id} (${node.type}) — it exports no hook`];
+    const entries = [...instanceAttrs(node), ...instanceHandlerAttrs(node, 4)].map(hookEntryOf);
+    const said = `  // ${commentSafe(node.authoredLabel ?? id)} (${commentSafe(node.type)}): a logic component, called where the graph places it.`;
+    if (entries.length === 0) return [said, `  ${target.symbol}();`];
+    const inline = `  ${target.symbol}({ ${entries.join(', ')} });`;
+    if (inline.length <= PRINT_WIDTH && !inline.includes('\n')) return [said, inline];
+    return [said, `  ${target.symbol}({`, ...entries.map((e, i) => `    ${e}${i < entries.length - 1 ? ',' : ''}`), '  });'];
+  });
+  /**
    * HLS-005 — the cardinality assertion: every binding the plan recorded, against every binding
    * the emitter took.
    *
@@ -7089,6 +7149,8 @@ export function emitComponent(
 
   // ---- the module ------------------------------------------------------------------------
   const symbol = plan.file.symbol;
+  // EXP-021 slice 1. A hook's interface keeps the component's name (`TallyProps` for `useTally`).
+  const propsType = plan.hook === true ? `${plan.file.fileBase}Props` : `${symbol}Props`;
   const hasCss = classNames.length > 0 || popupLayerClass !== undefined || hiddenKeepSpaceClass !== undefined;
   if (hasCss) {
     internalImports.set(`./${plan.file.fileBase}.module.css`, `import styles from './${plan.file.fileBase}.module.css';`);
@@ -7225,7 +7287,7 @@ export function emitComponent(
   if (printsRecord) body.push(`/** ${plan.componentObject!.label} — the keys this component's Component Object carries. */`, ...recordTypeLines(plan.componentObject!.typeName, plan.componentObject!.keys));
   if (printsParent) body.push(`/** The keys this component reads or writes on its nearest ancestor's Component Object. */`, ...recordTypeLines(plan.parentObject!.typeName, plan.parentObject!.keys));
   if (allPropNames.length > 0 || plan.childSlot !== undefined) {
-    body.push(`export interface ${symbol}Props {`);
+    body.push(`export interface ${propsType} {`);
     // The port name rides along as a doc comment wherever the identifier had to differ — the
     // graph's own vocabulary is what the author will search for.
     for (const prop of plan.props) {
@@ -7251,9 +7313,9 @@ export function emitComponent(
   }
   const signature =
     allPropNames.length > 0
-      ? `export function ${symbol}({ ${allPropNames.join(', ')} }: ${symbol}Props) {`
+      ? `export function ${symbol}({ ${allPropNames.join(', ')} }: ${propsType}${plan.hook === true ? ' = {}' : ''}) {`
       : plan.childSlot !== undefined
-        ? `export function ${symbol}(_props: ${symbol}Props) {`
+        ? `export function ${symbol}(_props: ${propsType}) {`
         : `export function ${symbol}() {`;
   body.push(signature);
   // P109-S21-EXPORTBLENDNAN. A Color Blend's memory (the blend it last received, the colour it last showed), first:
@@ -7507,6 +7569,9 @@ export function emitComponent(
   }
   // P18-S122-TPLBUILD. The render locals that read a hook above, in their own order (each after any it reads).
   for (const { local, line } of renderLocalLines) if (afterHooks.has(local)) body.push(line);
+  // EXP-021 slice 1. The placed logic components: after every row, ref and local their arguments may read. The effects
+  // below follow them; §96's delivered count, above, lands in the same commit as the values a hook pushes (the Echo row).
+  if (hookCallLines.length > 0) body.push(...(body[body.length - 1] === '' ? [] : ['']), ...hookCallLines);
   // EXP-011 §53. A task template's start chain: once, on mount — startTask pulses the start input right after
   // createNode, and never again for that task. The ref guards StrictMode's second mount in development.
   if (plan.task !== undefined) {
@@ -8186,7 +8251,9 @@ export function emitComponent(
           '    </ParentComponentObjectContext.Provider>'
         ]
       : jsxLines;
-  if (jsxLines.length === 1 && jsxLines[0] === '    null') body.push(...preReturnComment, '  return null;', '}');
+  // EXP-021 slice 1. A hook returns nothing: what it gives back leaves through its callbacks.
+  if (plan.hook === true) body.push(...preReturnComment, '}');
+  else if (jsxLines.length === 1 && jsxLines[0] === '    null') body.push(...preReturnComment, '  return null;', '}');
   else if (removedRoot !== null) body.push(...preReturnComment, `  // ${removedRoot[1]}`, '  return null;', '}');
   else if (rootMountedCond !== null) {
     const guard = negatedCode(rootMountedCond);
@@ -8534,6 +8601,20 @@ function wrapText(text: string, indent: number): string[] {
   }
   if (current.trim().length > 0) lines.push(current);
   return lines;
+}
+
+/**
+ * EXP-021 slice 1. A placement's JSX attribute as an entry of the hook's argument: `name={expr}` is `name: expr`, a string
+ * attribute its value (a JSX attribute string is the characters as written), a bare name `true`.
+ */
+function hookEntryOf(attr: string): string {
+  const eq = attr.indexOf('=');
+  if (eq < 0) return `${attr}: true`;
+  const name = attr.slice(0, eq);
+  const value = attr.slice(eq + 1);
+  if (value.startsWith('"')) return `${name}: ${JSON.stringify(value.slice(1, -1))}`;
+  const expr = value.slice(1, -1);
+  return expr === name ? name : `${name}: ${expr}`;
 }
 
 function jsxAttr(name: string, value: string | number | boolean): string {

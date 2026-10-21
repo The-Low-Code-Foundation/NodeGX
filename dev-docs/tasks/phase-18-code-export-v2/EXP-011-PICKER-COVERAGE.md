@@ -14569,3 +14569,67 @@ third place is `_self` where the body keeps nothing on `this`; the Function file
 EXP-020 §7.4: the scope's other members (the Filters prefab's shared functions), then `Noodl.Events` / `Noodl.Object.create`
 in the same bodies, `Component.RepeaterObject`, the record beside a Component Object node. gram's next: For Each fed by a
 Function output; the Upload File pulse. P18-S135-HIDDENINSTANCE.
+
+## §106 A logic component is a hook (session 136, 2026-10-21): EXP-021 slice 1, and P18-S126-PAGEGROUP
+
+[EXP-021 §6](EXP-021-A-LOGIC-COMPONENT-IS-A-HOOK.md) is the task's record; `s136-hooks/` the measurements.
+
+### §106.0 What was measured first
+
+Session 135's next two items, counted on the templates' refusals (`s136-hooks/census.cts`): the Component scope's other
+members **0** (they live in a library prefab and its corpus copies), For Each fed by a Function **0** (gram's Feed is no
+longer refused). The bare "logic node (…)" rows: **1,962 of 3,790**, 15 of 17 templates — logic components, EXP-021, the
+ruling's next task. 332 of them (no node that draws), placed 649 times; 223 are Component Inputs → one Function → Component
+Outputs; their parents feed their outputs into drawn sinks (≈2,000 wires), into each other (813), into logic nodes (≈360,
+§101).
+
+### §106.1 What the runtime does (the Hook Desk, `tests/helpers/hook-desk.ts`, predicted in `s136-hooks/EXPECTED.md`)
+
+A logic component's Function with no Run runs at load and on its inputs (Double, Label: "0", "y is 0", then "2", "y is 2");
+a signal input runs it once per pulse, its signal output runs the parent's chain (Tally, dones); two placements keep two
+`this`es; a Component Outputs value is flagged before the signal sent with it, so another component pulsed by that signal
+reads the new value (Echo: "echo total 2" after the second Go A — todo-list's lists' shape, s122). The first runtime run
+missed at load: the desk left Tally's run-on-change box unset, which the editor's load and the exporter's parse migrate to
+unticked where Run is wired (NDA-017) and the runtime arm does not; boxes written out, it read the table exactly.
+
+### §106.2 What is built
+
+| piece | what it is |
+|---|---|
+| `isLogicComponent`, `isPlaced` (`plan.ts`) | every node's render role null, or a placement of another logic component (cycle-guarded); placed by someone |
+| `plan.hook`, the rootless plan | planned as the router shell is (no root, a file): `components/<Name>.tsx`, symbol `use<Name>` |
+| `placesLogic`, `callAsHook`, `plan.hookCalls` | a logic placement never roots a component (`rootable`) and never joins the JSX (the walk's child loop); it joins the rendered set as an instance, so every instance pass applies: bindings, §94's pulses (`instanceSignalInputOf` admits a logic target), handlers, §4d lifts, §96 delivered counts |
+| `isRowReader` | a Component Outputs value reads a Run-wired Function's row (s122's refusal predates §96) |
+| the lift pass | compiles a Run-wired feeder's run first (the sink loop's `compileFunctionFeedersOf`, where no chain is open) |
+| Pass 4e | a Function's value into a placed component's declared input (`siblingValueInputOf`) |
+| the page fold | **P18-S126-PAGEGROUP fixed**: a Group whose Mounted is wired is not folded into the page div; §93 carries its gate |
+| `readsChainAnswer` | **P18-S136-CHAINWATCH** (filed): a ticked input read from a call's answer inside its chain is refused by name |
+| `staticTsType` | **P18-S136-NESTEDROWS** fixed: `readonly (readonly number[])[]` |
+| `component.ts` | the hook: the body, no JSX, no return, `<Name>Props = {}`; the parent's `use<Name>({ … })` from the placement's attributes (`hookEntryOf`), after state rows, refs and render locals; a typed prop takes a known-typed source asserted to its type (`knownSourceTsType`: a Function output, a state row, an Expression's inferred type) |
+| `effectDeps` | **P18-S136-QUERYPUSH** fixed: a query's rows, a named array, a list transform's source |
+
+### §106.3 Graded
+
+- `tests/a-logic-component-is-a-hook.test.ts`, **22 rows**: §A the Hook Desk on both arms (the runtime read first, A1; the
+  export equals it at every step but the word "Text", A2), §B emitted text, §C the plan (an unplaced one keeps the old
+  refusal; one placed inside the tree is called; one with a drawing node is not one; the Run-wired lift), §D tsc, §E the
+  templates where reading the code found defects (todo-list's Todo data and AddAction, members-area's Standing,
+  bot-garden's Requests and Play, rocket-school's Editor and Play4).
+- Two rows moved with P18-S126-PAGEGROUP's fix: the-root-is-mounted's C5, the-field-announces' page-group row.
+- **17 mutant arms**, **0 survived** (`s136-hooks/mutants.out`). The harness's first pass read "17 survived": with three
+  specs jest prints no per-row marks and the parser saw none; and arm A failed the spec at load (a describe-time file
+  lookup threw), grading no row by name. Fixed both (`--verbose`; a missing file reads `''`), rerun.
+- **Reading the emitted code** found what the count did not: a first count of 1,520 gained / 0 lost hid nightbook's 26 lost
+  Did Mounts (PAGEGROUP), and `tplbuild` read 253 errors in 11 of 17 (hooks called with nothing, `<useX />` as a root, the
+  nested-rows type, a chain-local watch, typed props); then todo-list's six lists pushed once (QUERYPUSH).
+- **Reach** (`dispdiff`, HEAD's `src` against the tree): templates **1,571 gained, 0 lost**; corpus **850 gained, 0 lost**.
+  The templates' refusals 3,790 → 2,219; bare "logic node (…)" rows 1,962 → 102 (`census-after.json`; mostly the 16 logic
+  components nobody places).
+  `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL). hls001 unmoved.
+- Whole package (`nice -n 19 --runInBand`, JSON 23:47): **154 suites, 5,242 passed, 1 failed, 3 skipped** (predicted 5,221 + 22 = 5,243 run; read 5,243). The one red was a row I should have predicted: §94's C4 pinned "a logic component's signal input is not pulsed", the rule this slice reverses; moved with it, 19 / 19 in its own run (the whole package not re-run after).
+
+### §106.4 What this leaves
+
+AC1's drive (todo-list against the local backend), AC4 (rocket-school's list editing), §101 (a parent's logic reading a
+hook's output; with hooks the returned-value shape answers its timing), P18-S136-CHAINWATCH, and the hook call whose every
+pulse was refused (it stays, as a drawn placement does, and runs nothing: todo-list's Add task).

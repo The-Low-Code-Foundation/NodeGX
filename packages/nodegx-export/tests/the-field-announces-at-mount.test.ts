@@ -234,15 +234,15 @@ describe('§C refused by name, and never announced where the runtime would not',
     expect(app.files[HOME_FILE]).toMatch(/announces its Value the first time it mounts.*\n {2}const (\w+) = useRef\(false\);\n {2}useEffect\(\(\) => \{\n {4}if \(\1\.current\) return;\n {4}if \(!\(\w+ === undefined \|\| !!\w+\)\) return;\n/);
   });
 
-  test('the page\'s own Group mounted from a wire: refused by name (the export draws the page, so when it appears is not known)', () => {
-    // P18 session 126 (EXP-011 §93). `shell` is the page's sole Group, which renders as the page div, and that Mounted
-    // wire is not carried (dropped, reported). Any other group a value mounts gates the announcement: the row above.
+  test('the page\'s own Group mounted from a wire: it announces the first time that wire draws it (P18-S126-PAGEGROUP, fixed)', () => {
+    // P18 session 126 (EXP-011 §93) refused it by name: `shell`, the page's sole Group, was folded into the page div, which
+    // cannot carry a Mounted. Since session 136 a Group whose Mounted is wired is not folded, and gates as the row above.
     const app = emitApp(searchWith({}, (ir) => {
       addVariable(ir, HOME, 'showVar', 'show');
       wire(ir, HOME, 'showVar', 'value', 'shell', 'mounted');
     }), catalog);
-    expect(mountEffects(app.files[HOME_FILE])).toEqual([]);
-    expect(refusal(app)).toEqual([expect.stringContaining("it sits in the page's own Group, whose Mounted is wired and not carried")]);
+    expect(refusal(app)).toEqual([]);
+    expect(app.files[HOME_FILE]).toMatch(/announces its Value the first time it mounts.*\n {2}const (\w+) = useRef\(false\);\n {2}useEffect\(\(\) => \{\n {4}if \(\1\.current\) return;\n {4}if \(!\(\w+ === undefined \|\| !!\w+\)\) return;\n/);
   });
 
   test('authored Mounted false: never on the page, so nothing announced and nothing to refuse', () => {
