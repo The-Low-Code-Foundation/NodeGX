@@ -2,6 +2,8 @@
 
 Welcome to the OpenNoodl development docs. This folder contains everything needed for AI-assisted development with Cline and human contributors alike.
 
+**Where NodeGX is heading:** [DIRECTION.md](DIRECTION.md), set by Richard on 2026-10-05 and revised 2026-10-21 (§0: why we do any of this — the blueprint, the knowledge, the off-ramp). Read it before scoping a phase.
+
 ## ⚡ About OpenNoodl
 
 **OpenNoodl is an Electron desktop application** for visual low-code development.
