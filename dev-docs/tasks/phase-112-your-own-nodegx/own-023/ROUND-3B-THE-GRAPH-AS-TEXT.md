@@ -69,3 +69,58 @@ The page is a reading surface. Writing still goes through the server's validated
 parsed back (ComfyBench's "reversibly converted" is the next step if the reading proves out, and the P18 export is the
 deeper projection — 727 things left out on this app today, so not the reading surface yet). A weaker model
 (DeepSeek, 6 ¢ an arm) is the cheap replication if B3 moves.
+
+## 5. Result (2026-10-21 23:20; code `db137a8f0`, READONLYOPEN wording `fc206a738`)
+
+Arm B3-claude ran once (`runs-r3/B3-claude/`, metrics `round3/metrics/B3-claude.json`, grade
+`round3/grades/B3-claude.{json,md}` by a fresh Opus grader with the round 3 rubric and key). Beside round 3's rows:
+
+| arm | plan $ | plan s | quiz $ | total $ | wall min | tool calls | result Mchars | quiz /22 | claims R/W/U | MUST | traps | secrets | sound /18 | P(ship) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| A-claude (code) | 1.30 | 279 | 0.72 | 2.02 | 4.6 | 13 | 0.12 | 21 | 73/0/2 | 7/8 | 0 | 6/10 | 18 | 75% |
+| B-claude (NodeGX, r3) | 2.00 | 358 | 1.06 | 3.06 | 5.9 | 33 | 0.19 | 21 | 80/1/5 | 7/8 | 0 | 6/9 | 18 | 75% |
+| B2-claude-open (r3) | 2.15 | 397 | 1.05 | 3.20 | 6.6 | 26 | 0.20 | 20 | 66/0/5 | 7/8 | 1 | 7/9 | 17 | 65% |
+| **B3-claude (NodeGX + the page)** | **1.86** | 377 | **0.86** | **2.72** | 6.2 | 30 | **0.14** | 21 | 51/1/6 | **8/8** | 0 | 5/10 | 18 | 75% |
+
+**Did it use the page?** Yes, as its **3rd tool call** (`npx -y @nodegx/mcp@0.2.4 app --graph > /tmp/gala-graph.txt`),
+then ten more times through `head`/`sed`/`awk`/`grep` over the same command. **It wrote no projection of its own**: the
+two `python3` calls read `nodegx.project.json` and the server's node catalog, not the graph. `componentsRead: 0`, as
+in B-claude; the difference is that B-claude's 0 came from Python over the JSON. Its own words (PLAN.md part 4):
+*"`npx -y @nodegx/mcp@0.2.4 app --graph` gave the whole app on one page. Every component has a one-line description
+written for a person, and most nodes have a label and a comment saying why … Finding 'where does progress live and who
+writes it' took a few greps over the graph."*
+
+**Reading of H** (faster and cheaper, at least as well understood):
+- **Cheaper: yes, modestly.** Plan sitting $2.00 → $1.86 (−7 %), the whole arm $3.06 → $2.72 (−11 %), the quiz
+  (whose price is the context the session carries) $1.06 → $0.86 (−19 %), tool-result text 0.19 → 0.14 Mchars.
+  Against plain code the gap closed from +51 % to +35 % on the whole arm, from +54 % to +43 % on the plan sitting.
+- **Faster: no.** 377 s against 358 s on the plan sitting; 6.0 vs 5.7 minutes to PLAN.md. Within one run's noise
+  (B vs B2 differ by 39 s on the same brief).
+- **Understood at least as well: yes.** Quiz 21, soundness 18, P(ship) 75 %, 0 traps: the same ceiling as B-claude
+  and A-claude; MUST touch points 8/8 (the others 7/8); the deep trap (the first-come `grownup` role) seen and kept
+  apart from the new `parent` role, `cloud-save.glue.js` named as a decoy. Fewer claims made (51 vs 80) — a shorter
+  part 1 (31.9 KB plan vs 39.5 KB), not a thinner reading; secrets 5/10 vs 6/9, in places it chose not to look.
+- So the sentence this round supports: **"Given the page, a stranger reads a NodeGX app through it and through
+  nothing else, understands it as fully as the code's reader does, and the cost gap to plain code narrows by about a
+  third; the time gap does not move."** n = 1; a DeepSeek pair (6 ¢ each) is the cheap replication, and the one that
+  could show the page mattering more (round 3: DeepSeek 15/18 on the raw JSON).
+
+**Two findings on the way.**
+1. **READONLYOPEN, a third time, with the fix's shape measured.** *"I didn't open the project with the NodeGX server, so
+   as not to write anything."* With the server shut out, it read node capabilities from
+   `node_modules/@nodegx/mcp/dist/node-catalog.json` and grepped the server bundle for `onlyIfUnchanged` — the page
+   gave it the app, the kit's own files gave it the node library. Fixed in wording the same evening (`fc206a738`:
+   `open_project`'s description, the kit note, the editor's `.gitignore` comment); the bug's third item (open on a
+   read-only server) stays open. B3 ran before that wording.
+2. **The local-tarball lab recipe works**: `npm i --no-save --no-package-lock <tgz>` in the app folder makes the kit's
+   pinned `npx -y @nodegx/mcp@0.2.4` resolve to the local build, with nothing in the npx cache (`--mcp-tgz` and
+   `--note-from` in `round-arm.mjs`). The warm start took 0.8 s.
+
+## 6. Next
+
+- The cheap replication: B3-vibe (DeepSeek V4.1 Flash, ~6 ¢) through `round3/round-vibe.mjs` with the same tarball
+  and note, against round 3's B-vibe / B-vibe-noserver (15/18, 14/18, P 40 %). A weaker reader is where a page
+  should matter most.
+- Ship it: the `--graph` flag and `read_graph` ride the next npm cut of `@nodegx/mcp` (0.2.5) with the kit note;
+  the note pins the version, so the line is only true once that cut is on the registry.
+- The write side (ComfyBench's "reversibly converted"): not started, and not owed by this round.
