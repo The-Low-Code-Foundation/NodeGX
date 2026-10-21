@@ -14431,3 +14431,79 @@ step, opt-in; no other spec changes). Reach: **76 gained, 0 lost, 77 re-worded**
 nightbook's Me page — "Make a copy now" fetches and says whether it went, the copies listed, the restore toggle — and the
 two "Which keyboard she has", with their Set Variables); corpus 0 moved; hls001 unchanged; `tplbuild` at the floor.
 Slice 1b proper (a top-level `await`) is 4 free bodies and 127 behind the Noodl API: it belongs beside EXP-020.
+
+## §104 The Noodl API travels, and a run that awaits is awaited (session 134, 2026-10-21): EXP-020 slice 1 with EXP-019 slice 1b
+
+### §104.0 What was measured first
+
+`s134-noodlapi/bodies.py` (python over the templates' `nodes.json`): 183 Function bodies read `Noodl.*`, but **71 are cloud
+functions** (`__cloud__`, server side, not in the React app). `census.ts` (the exporter's own parse and plan): **112
+front-end Functions**; 79 refused at the Noodl gate itself, 32 behind "logic node" (EXP-021), 1 beside the router shell. Of
+the 79: 42 await at their top level; every query asks for `{ plain: true }` (52 of 52); filters `equalTo` / `containedIn`;
+Cloud Functions mostly `whoAmI`; 22 read only `Noodl.Variables`; 12 also read `Component.*`. A probe with both gates opened
+in a scratch copy (`census-gates-open.json`): **35 export directly**, 33 of them marketplace's and gram's backend bodies.
+16 of the 17 templates declare no backend in their files (one is bound when a person installs the template).
+
+### §104.1 The runtime, read
+
+`records.js` `query`: `convertFilterOp` (the backend contract's `toParseWhere`, the `nodegx` capability table, which gates
+nothing) then the store's query, the rows `plain` (`_plainFromJSON`: `objectId` kept, a pointer as its id, a date as its ISO
+text, an included record plain); a refusal `Error(<backend's words> || 'Failed to query.')`; a refused filter rejects with
+the translator's words **as a string**. The viewer's `CloudFunctions.run` rejects with the backend's error **body**;
+`Users.Current` one shared object re-filled from the session on each read; `Files.sign` `{ url, kind: 'signed', … }` or
+the envelope with its status. `simplejavascript.ts` `runScript`: `await func.apply(…)`, then Success, then Done, for every
+run. With no backend: a query rejects `Error(NO_BACKEND_CONFIGURED)`, a Cloud Function the string "No cloud services
+defined in this project.", nobody is signed in.
+
+### §104.2 The rule, built
+
+- **The classifier** (`jsfun.ts`): `jsNoodlUseOf` reads the members off the body; the export carries `Records.query`
+  (plain), `CloudFunctions.run`, `Users.Current` (its fields), `Files.sign`, `Variables.<name>`. The first other reference
+  is the refusal, by name ("reads \`Noodl.Events.emit\` — …", a computed name, the object handed on as a value, the user's
+  methods, a query without `plain: true`). A top-level `await` is the host trait "is asynchronous (it awaits)"; the Noodl
+  API is "reads the Noodl API"; a body that awaits and touches `Outputs` calls back (its writes after the first `await`
+  are late). An Expression keeps every gate.
+- **The plan**: `JsFunctionPlan.awaits`, `.noodl`; the run action carries `awaitsAt` (where Success and Done start in its
+  chain) and counts as awaited, so §90's `detached` frees the click's later wires. A body's `Noodl.Variables.x` mints the
+  app's variable as a Visual Function's does (`appState.ts`).
+- **The emitter**: the wrapper `async function`, the body inside `await (async () => { … })()`, `const Noodl = noodl` (or a
+  facade over the app's variable stores), imports in the Function's own file; the run printed whole (`runFunction`, its row,
+  the pre-`await` signals' loop, `await <run>.settled`, Success, Done); a late handler whose chains await is `async`.
+  `runFunction` keeps the body's promise (`FunctionRun.settled`). `src/lib/noodl.ts` (`noodlLib.ts`): the translator, the
+  plain rows, the four members, the project's Date and Pointer columns; `client.ts` gains `noodlRequest` only where it is
+  earned. With no backend the same library fails as the running app does, before anything is sent (the exporter's stub
+  rule for every backend node).
+
+### §104.3 Graded
+
+- `tests/the-noodl-api-travels.test.ts`, **35 rows**. §A the **Noodl Desk** (`helpers/noodl-desk.ts`, predicted in
+  `s134-noodlapi/EXPECTED.md`; two columns, doneN and again, added after the first run and said so) against the runtime's
+  own nodes and the running app's own `Noodl` on one fake Parse backend (`helpers/fake-parse-backend.js`), signed in and
+  out: every reading equal but P18-S122-TEXTDEFAULT (pinned), and the same 11 requests in order with the same bodies but
+  two the runtime alone sends (its session check; the query after a refused filter, P18-S134-REFUSEDFILTERSENDS, pinned).
+  §B the members one call at a time (`helpers/noodl-member-arm.js`): **71 calls** signed in, 71 signed out, 17 with no
+  backend — every outcome equal (value, `Error` with the same words, the string, the body), every request equal but the 12
+  refused filters' empty queries. §C emitted text, §D classifier and plan, §E both desk apps typecheck.
+- **17 mutant arms** (`s134-noodlapi/mutants.py`), **0 survived**, each killing rows by name (`mutants.out`).
+- **Reading the emitted code** of every gained family found one defect, fixed before the count: a late signal's chain can
+  start an awaiting run (gram's Welcome: `check`, sent after an `await`, runs "Where they belong"), and the late handler was
+  a plain arrow (TS1308). And it found **P18-S134-PULSEHOLD** (low, filed): an awaited action at the end of a signal's arm
+  is awaited inside the pulse loop and holds the run's later chains; no final reading can see it.
+- **Reach** (`dispdiff`, HEAD's `src` against the tree): templates **139 gained, 0 lost, 92 re-worded** (marketplace 95,
+  gram 36, digital-bricks-training 4 + demo 2 + their Page Inputs, nightbook 3: the admin pages read their sellers and
+  orders, the sign-in sends a person where they belong, the Bar names the community, the Close and Escape of the dossier
+  clear their Variable). Corpus **0 gained, 0 lost, 341 re-worded**: every one now names its member — `Noodl.Events` 132,
+  `Noodl.Object` 50, `Noodl` handed on 47, `Noodl.Array` 22, `Noodl.Objects` 2.
+- hls001: predicted the 4 `src/lib/functionRun.ts` paths (held-, host-, pulse-, ticked-desk) and nothing else; read
+  exactly those 4; regenerated. `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL). Package `tsc --noEmit` 0.
+- Whole package (`nice -n 19 --runInBand`): a first run read 10 red in 7 suites (five specs that held the old gate
+  sentences or used a Noodl body as a refused stand-in, moved with the rule; `hls006-every-listener` scanning the
+  measurement copy `packages/.s134-base`, removed); then **152 / 152 suites, 5,203 passed, 0 failed, 3 skipped**.
+
+### §104.4 What this leaves
+
+EXP-020's next members, ranked by the corpus's re-worded rows: `Noodl.Events` (132), `Noodl.Object` / `Noodl.Objects`
+(52), `Noodl.Array` (22), and the object handed on as a value (`var R = Noodl.Records`, 47 in the corpus, 26 in todo-list's
+logic components). `Records.create` / `save` / `delete` with the runtime's Model records waits on the bodies that use them,
+all in logic components (EXP-021). The 92 template re-worded: `Component.*` 15 (+ 9 behind it), a For Each-fed input 10,
+kit Options values 8, logic components. P18-S134-PULSEHOLD and P18-S134-REFUSEDFILTERSENDS (low).

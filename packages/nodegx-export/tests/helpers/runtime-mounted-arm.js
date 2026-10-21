@@ -19,6 +19,13 @@
  * element that holds focus. Two steps that are not button labels: `type:<placeholder>:<text>` focuses that field, writes
  * the text as a keystroke does (the value setter, then an `input` event, which React's onChange reads) and blurs it, as a
  * person types and leaves; `enter:<placeholder>` presses Enter in it (a `keydown`).
+ *
+ * P18 session 134 (EXP-020). `backend: { spec, appId, endpoint, session? }` answers the runtime's `XMLHttpRequest` from
+ * `fake-parse-backend.js`, fresh per scenario, gives the Function node the running app's own `Noodl` (`window.Noodl`, as
+ * `noodl-js-api.ts` installs it: `Records` from `noodl-runtime/src/api/records.js`, the viewer's `CloudFunctions`, `Users`
+ * and `Files`, `Variables` the global variables record), the project's `cloudservices`, and `session` where the running
+ * app keeps it. Needs `RUNTIME_ARM_URL` in the environment (jsdom keeps no localStorage without an origin), and one
+ * session per process (the viewer's UserService is a singleton). The output is then `{ readings, requests }`.
  */
 
 const fs = require('fs');
@@ -26,11 +33,15 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '..', '..', '..', '..');
 const { JSDOM } = require(require.resolve('jsdom', { paths: [ROOT] }));
-const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { pretendToBeVisual: true });
+const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', {
+  pretendToBeVisual: true,
+  ...(process.env.RUNTIME_ARM_URL ? { url: process.env.RUNTIME_ARM_URL } : {})
+});
 const g = globalThis;
 g.window = dom.window;
 g.document = dom.window.document;
 g.navigator = dom.window.navigator;
+if (process.env.RUNTIME_ARM_URL) g.localStorage = dom.window.localStorage;
 for (const name of ['HTMLElement', 'Element', 'Node', 'Event', 'MouseEvent', 'KeyboardEvent', 'FocusEvent', 'getComputedStyle', 'ResizeObserver', 'MutationObserver']) {
   if (dom.window[name] !== undefined && g[name] === undefined) g[name] = dom.window[name];
 }
@@ -157,7 +168,37 @@ function stepInField(container, verb, placeholder, text) {
   el.blur();
 }
 
-async function run({ dir, scenarios, fields }) {
+/**
+ * P18 session 134. The running app's `Noodl` and its backend, for one scenario: a fresh fake backend behind
+ * `XMLHttpRequest`, the project's `cloudservices`, the session stored, and `window.Noodl` as `noodl-js-api.ts` builds it.
+ */
+function installBackend(backend) {
+  const { createFakeBackend } = require('./fake-parse-backend');
+  const fake = createFakeBackend(backend.spec);
+  g.XMLHttpRequest = fake.FakeXMLHttpRequest;
+  dom.window.XMLHttpRequest = fake.FakeXMLHttpRequest;
+  const runtimeModule = require(require.resolve('@noodl/runtime', { paths: [path.join(ROOT, 'packages', 'noodl-viewer-react')] }));
+  const NoodlRuntime = runtimeModule && runtimeModule.default ? runtimeModule.default : runtimeModule;
+  const cloudservices = { endpoint: backend.endpoint, appId: backend.appId };
+  NoodlRuntime.instance = {
+    getProjectSettings: () => ({}),
+    getMetaData: (key) => (key === 'cloudservices' ? cloudservices : key === 'dbCollections' ? [] : undefined)
+  };
+  const key = `Parse/${backend.appId}/currentUser`;
+  if (backend.session) dom.window.localStorage.setItem(key, JSON.stringify(backend.session));
+  else dom.window.localStorage.removeItem(key);
+  const api = {
+    Records: require(path.join(LIB, 'api', 'records'))(),
+    CloudFunctions: def(require(path.join(VIEWER, 'api', 'cloudfunctions'))),
+    Users: def(require(path.join(VIEWER, 'api', 'users'))),
+    Files: def(require(path.join(VIEWER, 'api', 'files')))
+  };
+  Object.defineProperty(api, 'Variables', { get: () => Model.get('--ndl--global-variables'), enumerable: true });
+  dom.window.Noodl = api;
+  return fake;
+}
+
+async function run({ dir, scenarios, fields, backend }) {
   const components = componentsOf(dir);
   const home = components.find((c) => c.name === '/Pages/Home');
   // The Home page's Page node is the router's; the arm draws the Page's one child, the page's Group.
@@ -165,8 +206,10 @@ async function run({ dir, scenarios, fields }) {
   home.nodes = [...home.nodes.filter((n) => n !== pageNode), ...pageNode.children];
   home.roots = pageNode.children.map((c) => c.id);
   const out = [];
+  const requests = [];
   for (const presses of scenarios) {
     delete Model._models['--ndl--global-variables'];
+    if (backend !== undefined) requests.push(installBackend(backend).log);
     const graph = await createCorpusGraph({ modules: MODULES, data: { components }, rootComponent: '/Pages/Home' });
     graph.context.styles = { getTextStyle: () => ({}), resolveColor: (c) => c };
     if (fields) {
@@ -231,7 +274,7 @@ async function run({ dir, scenarios, fields }) {
     if (errors.length > 0) throw new Error(`the page logged errors: ${errors.join(' | ').slice(0, 600)}`);
     out.push(readings);
   }
-  return out;
+  return backend !== undefined ? { readings: out, requests } : out;
 }
 
 let input = '';

@@ -16,6 +16,7 @@
 
 import { ComponentIR, ExportIR, NodeIR } from '../ir/types';
 import { camelCase, lowerFirst, pascalCase } from '../emit/naming';
+import { jsBodyOf, jsNoodlUseOf, JS_FUNCTION } from './jsfun';
 import { censusOf, LOGIC_BUILDER, workspaceOf } from './logicbuilder';
 
 export interface VariableWriter {
@@ -559,6 +560,19 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
         for (const name of census.variableReads) ensureVariable(name);
         for (const name of census.variableWrites) {
           ensureVariable(name).writers.push(writerRef(component, node));
+        }
+      }
+      /**
+       * EXP-020 (session 134). A Function body's `Noodl.Variables.<name>`, read off the body by name (`jsNoodlUseOf`), the
+       * same app-wide variable as a Variable node's: minted where no Variable node declares it, as a Visual Function's is.
+       * Only a body whose every Noodl reference the export carries mints: a refused one prints no wrapper to bind it.
+       */
+      if (node.type === JS_FUNCTION) {
+        const body = jsBodyOf(node, 'function');
+        const use = body === undefined ? undefined : jsNoodlUseOf(body);
+        if (use !== undefined && use.refusal === undefined) {
+          for (const name of use.variables) ensureVariable(name);
+          for (const name of use.variableWrites) ensureVariable(name).writers.push(writerRef(component, node));
         }
       }
       if (node.type === 'Event Sender' || node.type === 'Event Receiver') {

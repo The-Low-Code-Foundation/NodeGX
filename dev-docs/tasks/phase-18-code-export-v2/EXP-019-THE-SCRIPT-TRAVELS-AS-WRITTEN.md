@@ -1,7 +1,7 @@
 # EXP-019 — The script travels as written
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), from Richard's ruling of the same day.
-**Status: 🟡 s133 — slices 1 and 2 built and graded (§6, §7), and asynchrony that is a callback; next slice 1b (a top-level `await`, 4 free bodies + 127 behind the Noodl API: beside EXP-020).** **Owner of the order:** [BOARD](../../BOARD.md) §2 lane 6.
+**Status: 🟡 s134 — slices 1, 2 and 1b built and graded (§6, §7, §8); what remains is AC5's count against §2 and AC6 (ISL-043's frozen clock).** **Owner of the order:** [BOARD](../../BOARD.md) §2 lane 6.
 
 > "If you add code export and deployment as npm things, such that nobody would ever have to use the original Noodl /
 > NodeGX editor, I say make it so. I want that offramp promise fulfilled in React and Swift." — Richard, 2026-10-21
@@ -51,7 +51,7 @@ never *whether it travels*.**
 | reads the clock, draws randomness, touches the browser, schedules timers, reaches the network | refused | **runs once per trigger with a kept node**; its outputs are read from the node's record (`materialize`), never recomputed at a read site |
 | keeps state on `this` | refused | the kept node carries `self`; the body runs as `body.call(node.self, Inputs, Outputs)` |
 | is asynchronous, a callback (`.then`, an inner `async function`; no top-level `await`) | refused | **a host trait (s133)**: the run returns at once and the callback's writes and signals arrive later through `FunctionNode.late`, as the runtime's do |
-| is asynchronous, a top-level `await` | refused | the wrapper is `async`; the run is awaited where the runtime awaits it (`runScript`'s `await`), Success and Done after it (EXP-011 §98), the click's later wires not held (§90 `detached`) |
+| is asynchronous, a top-level `await` | refused (built s134, §8) | the wrapper is `async`; the run is awaited where the runtime awaits it (`runScript`'s `await`), Success and Done after it (EXP-011 §98), the click's later wires not held (§90 `detached`) |
 | has no Run wire and is impure (reactive mode) | refused | runs from an effect on its inputs' arrival and once at load, as the runtime's `scheduleRun` from the script's setter and an input change; **slice 2, built s133 (§7)** |
 | writes or signals after its run returned (a timer, a listener) | lost (slice 1) | the kept node hands the write or signal to the component (`FunctionNode.late`); **s133 (§7)** |
 | reads `Noodl.*` | refused | EXP-020 |
@@ -129,3 +129,16 @@ at once, and the callback writes later, which is exactly what `FunctionNode.late
 `ticks` (its settled press waited no timer). Reach with it: **76 gained, 0 lost, 77 re-worded** (nightbook's Me page makes
 a copy and says so, its two keyboards are chosen). Slice 1b proper is now 4 free bodies and 127 behind the Noodl API: it
 belongs beside EXP-020.
+
+## 8. Session 134 (2026-10-21): slice 1b — a run that awaits is awaited, beside EXP-020
+
+[EXP-011 §104](EXP-011-PICKER-COVERAGE.md) is the ledger entry; `s134-noodlapi/` holds the measurements. Built with
+[EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md)'s first slice because 127 of the 131 bodies that await read the Noodl API.
+
+| | |
+|---|---|
+| the rule | a body that awaits at its top level is the host trait "is asynchronous (it awaits)"; its wrapper is `async`, the body inside `await (async () => { … })()`; `runFunction` hands back `settled`; the run's action carries `awaitsAt`, prints whole (the run, its row, the loop over the signals sent before the first `await`, `await <run>.settled`, Success, Done) and counts as awaited, so §90's `detached` lets the click's later wires run before it settles; what the body writes and sends after its first `await` arrives through `FunctionNode.late` (s133); a late handler whose chains await is `async` |
+| AC3 | ✅ on the Noodl Desk: the click's later Set Variable runs before the run finishes (`seen` reads `clicked` in both arms), and the Done chain reads the count written after the `await` (`doneN`); a mutant that holds the later wire, one that prints the chain flat, and one whose `settled` resolves at once are each killed |
+| graded | `tests/the-noodl-api-travels.test.ts` (35 rows, 17 mutant arms, 0 survived) |
+| reach | with EXP-020: templates 139 gained, 0 lost |
+| found | the late handler awaited in a plain arrow (gram's Welcome, TS1308; fixed before the count); P18-S134-PULSEHOLD (low, filed) |

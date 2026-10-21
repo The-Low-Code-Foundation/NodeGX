@@ -122,7 +122,11 @@ export function parseProject(projectDir: string, catalog: Catalog): ExportIR {
     designTokens: effectiveTokens(projectFile.metadata?.designTokens?.customTokens ?? []),
     collections: (projectFile.metadata?.dbCollections ?? []).map((c: any) => ({
       name: c.name,
-      columns: (c.columns ?? []).map((col: any) => ({ name: col.name, type: col.type }))
+      columns: (c.columns ?? []).map((col: any) => ({
+        name: col.name,
+        type: col.type,
+        ...(typeof col.targetClass === 'string' ? { targetClass: col.targetClass } : {})
+      }))
     })),
     routers: collectRouters(components),
     cloudComponents,

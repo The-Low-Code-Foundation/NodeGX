@@ -293,7 +293,8 @@ describe('§C the plan', () => {
 
   it('C4 a Success into a sink the export refuses refuses the run with the sink\'s own sentence; its sibling wires name the run', () => {
     const plan = planOf(refusedDesk(), '/Pages/Home');
-    const own = 'reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)';
+    // Session 134 (EXP-020): the refusal names the member.
+    const own = "reads `Noodl.Events.emit` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)";
     expect(plan.dispositions['greet']).toMatchObject({ kind: 'deferred' });
     expect((plan.dispositions['greet'] as { reason: string }).reason).toContain(own);
     // The sink's own sentence, not the run's.

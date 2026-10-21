@@ -170,7 +170,8 @@ describe('§B what is emitted', () => {
     const lib = app.files[FUNCTION_RUN_LIB_PATH];
     expect(lib).toContain('self: Record<string, unknown>;');
     expect(lib).toContain('return { signals, outputs: {}, delivered: {}, self: {} };');
-    expect(lib).toContain('body(inputs, outputs as unknown as O, node.self);');
+    // Session 134 (EXP-019 slice 1b): the run keeps what the body returns, its promise where it awaits.
+    expect(lib).toContain('const finished = body(inputs, outputs as unknown as O, node.self);');
   });
 });
 
@@ -182,11 +183,13 @@ describe('§C the plan and the classifier', () => {
     expect(jsPurityDefer('function', STAMP_SCRIPT)).toBeNull();
   });
 
-  it('C2 the gates still hold for an Expression, for the Noodl API, and for asynchrony (slice 1b)', () => {
+  it('C2 the gates still hold for an Expression, and for a Noodl member the export does not carry (EXP-020, session 134)', () => {
     expect(jsPurityDefer('expression', 'random() * 2')).toBe('draws randomness (random) — not deterministic');
     expect(jsPurityDefer('expression', 'Date.now()')).toBe('reads the clock (Date) — not deterministic');
-    expect(jsPurityDefer('function', 'Outputs.n = Noodl.Events.emit("x");')).toContain('reads the Noodl API');
-    expect(jsPurityDefer('function', 'Outputs.n = await fetch("/x");')).toContain('is asynchronous');
+    expect(jsPurityDefer('function', 'Outputs.n = Noodl.Events.emit("x");')).toContain('reads `Noodl.Events.emit`');
+    // Slice 1b (session 134): a top-level await travels now.
+    expect(jsPurityDefer('function', 'Outputs.n = await fetch("/x");')).toBeNull();
+    expect(jsPurityDefer('expression', 'x.then(1)')).toContain('is asynchronous');
     expect(jsHostTraitsOf('Outputs.n = Inputs.a + 1;')).toEqual([]);
   });
 

@@ -285,15 +285,15 @@ describe('§E a write after the run has returned', () => {
     expect(late).toEqual(['The_bell', 'The_chime', 'The_promise']);
   });
 
-  it('E6 asynchrony that is not a top-level await is a host trait that calls back; a top-level await keeps the gate (slice 1b)', () => {
+  it('E6 asynchrony that is not a top-level await is a host trait that calls back; a top-level await is one too since slice 1b (session 134)', () => {
     expect(jsHostTraitsOf(PROMISE_SCRIPT)).toEqual(['is asynchronous (it calls back)']);
     expect(jsCallsBackOf(PROMISE_SCRIPT)).toBe(true);
     expect(jsAwaitsAtTopLevel(PROMISE_SCRIPT)).toBe(false);
     expect(jsAwaitsAtTopLevel('async function go() { await fetch("/x"); } go();')).toBe(false);
     expect(jsAwaitsAtTopLevel('Outputs.n = await fetch("/x");')).toBe(true);
-    expect(jsPurityDefer('function', 'Outputs.n = await fetch("/x");')).toBe(
-      'is asynchronous — it awaits at its top level, and a run the export awaits before Success and Done is EXP-019 slice 1b'
-    );
+    // Session 134 (EXP-019 slice 1b, the-noodl-api-travels.test.ts): the gate opened; the body awaits and calls back.
+    expect(jsPurityDefer('function', 'Outputs.n = await fetch("/x");')).toBeNull();
+    expect(jsHostTraitsOf('Outputs.n = await fetch("/x");')).toEqual(['reaches the network', 'is asynchronous (it awaits)']);
     expect(jsPurityDefer('expression', 'x.then(1)')).toContain('is asynchronous');
   });
 

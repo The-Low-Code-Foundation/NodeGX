@@ -73,6 +73,7 @@ import { HISTORY_LIB_PATH } from './historyLib';
 import { SIGN_IN_LIB_PATH } from './signInLib';
 import { SCRIPT_CODE_PREFIX } from '../analyze/script';
 import { FUNCTION_RUN_LIB_PATH } from './functionRunLib';
+import { NOODL_LIB_PATH } from './noodlLib';
 import { ID_HELPERS_BY_FN, ID_LIB_PATH, IdHelper } from './idLib';
 import { CRYPTO_LIB_PATH, CryptoHelper } from './cryptoLib';
 import { PATTERN_LIB_PATH, PatternHelper, isPatternHelper } from './patternLib';
@@ -336,6 +337,8 @@ export interface EmittedComponent {
   timerHelpers: Set<string>;
   /** EXP-011 §86. Whether this component runs a Function whose signals have chains (`src/lib/functionRun.ts`). */
   functionRunLib: boolean;
+  /** EXP-020. `src/lib/noodl.ts`, earned by a printed Function that reads a backend member of the Noodl API. */
+  noodlLib: boolean;
   /** EXP-011 §49. Whether this component imports `src/lib/animate.ts` / `src/lib/states.ts`. */
   animateLib: boolean;
   statesLib: boolean;
@@ -2637,8 +2640,11 @@ export function emitComponent(
           // output record (CONTROLLED-STATE §4f), which is one setter statement before the chain.
           // P18-S129-FNSUCCESS: or a Run of a Function a ticked input also runs, which records what it read first.
           // EXP-019: or a run whose body carries a host trait, which is one `runFunction` statement before the chain.
+          // EXP-019 slice 1b (session 134): a run whose body awaits holds its own chain after the await, printed whole.
           a.kind === 'jsfun-run'
-          ? a.materialize !== undefined || runIsPulsed(a) || runIsHosted(a.nodeId) || (a.ticked !== true && tickedRunIds.has(a.nodeId))
+          ? a.awaitsAt !== undefined
+            ? [a]
+            : a.materialize !== undefined || runIsPulsed(a) || runIsHosted(a.nodeId) || (a.ticked !== true && tickedRunIds.has(a.nodeId))
             ? [{ ...a, then: [] }, ...expandActions(a.then)]
             : expandActions(a.then)
           : // P18-S116-QUERYFETCH. A Fetch into a query the export does not keep (nothing it renders reads the rows) asks
@@ -2953,7 +2959,9 @@ export function emitComponent(
   const actionCode = (action: HandlerAction, indent = 0): string => {
     // EXP-011 §90. A call a later action of its list follows runs on its own: started here, not waited for.
     if ('detached' in action && action.detached === true) {
-      return `void (async () => {\n${pad(indent + 2)}${actionCode({ ...action, detached: undefined }, indent + 2)}\n${pad(indent)}})()`;
+      const inner = { ...action, detached: undefined } as HandlerAction;
+      // EXP-019 slice 1b: an awaited run is the one detached action that is not a block, and takes its terminator here.
+      return `void (async () => {\n${pad(indent + 2)}${actionCode(inner, indent + 2)}${actionTakesNoTerminator(inner) ? '' : ';'}\n${pad(indent)}})()`;
     }
     switch (action.kind) {
       /**
@@ -3439,6 +3447,23 @@ export function emitComponent(
          */
         // P18-S119-TICKEDRUN. A Run records what it read on the ticked inputs, so the effect does not run it again for them.
         const record = action.ticked !== true && tickedRunIds.has(action.nodeId) ? `tickedArrival(${tickedRecordArgs(action.nodeId)});\n${pad(indent)}` : '';
+        /**
+         * EXP-019 slice 1b (session 134). A body that awaits: the run returns at its first `await` (what it wrote and sent
+         * until then is the run's, and its signals' chains act on it), the rest of the body arrives `late`, and Success then
+         * Done run once the body has finished, as the runtime's `runScript` awaits the body before sending them.
+         */
+        if (action.awaitsAt !== undefined) {
+          const names = pulseNamesOf(def);
+          const at = pad(indent);
+          const lines = [`${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler')}, ${names.node});`];
+          if (action.materialize !== undefined) lines.push(`${at}${stateSetterOf(action.materialize)}({ ...${names.run}.outputs });`);
+          lines.push(...blockBody(expandActions(action.then.slice(0, action.awaitsAt)), indent));
+          const after = blockBody(expandActions(action.then.slice(action.awaitsAt)), indent);
+          // The last statement takes its terminator where it is printed, as every action's does.
+          if (after.length === 0) lines.push(`${at}await ${names.run}.settled`);
+          else lines.push(`${at}await ${names.run}.settled;`, ...after.slice(0, -1), after[after.length - 1].replace(/;$/, ''));
+          return lines.join('\n');
+        }
         if (pulsedRunIds.has(action.nodeId) && action.then.length === 0) {
           const names = pulseNamesOf(def);
           const run = `${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler')}, ${names.node})`;
@@ -4491,7 +4516,9 @@ export function emitComponent(
         a.kind === 'file-upload' ||
         a.kind === 'file-sign' ||
         // EXP-011 §59. `crypto.subtle.digest` is a promise; `getRandomValues` is not.
-        (a.kind === 'crypto-call' && a.async)
+        (a.kind === 'crypto-call' && a.async) ||
+        // EXP-019 slice 1b (session 134). A run whose body awaits.
+        (a.kind === 'jsfun-run' && a.awaitsAt !== undefined)
     );
   }
   /**
@@ -6699,9 +6726,31 @@ export function emitComponent(
       const keepsThis = def.host !== undefined && def.host.some((t) => t.startsWith('keeps state on'));
       const selfParam = keepsThis ? ', self: Record<string, any> = {}' : '';
       if (keepsThis) lines.push(`// It keeps state on \`this\` across runs: the body runs bound to the node's own \`self\`.`);
-      lines.push(`function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}${outputsParam}${selfParam}): ${outputsType} {`);
+      /**
+       * EXP-019 slice 1b (session 134). A body that awaits at its top level runs as the runtime compiles it, in an `async`
+       * function, and the wrapper hands back its promise: the run's chain after Success waits on it (`FunctionRun.settled`).
+       */
+      const awaits = def.awaits === true;
+      if (awaits) lines.push('// It awaits: the run returns at its first `await`, and Success and Done wait for it to finish.');
+      lines.push(
+        `${awaits ? 'async ' : ''}function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}${outputsParam}${selfParam}): ${awaits ? `Promise<${outputsType}>` : outputsType} {`
+      );
       if (hasInputs) lines.push(`  const Inputs = ${scopeCast(INPUTS_PARAM)};`);
       if (!def.pulsed) lines.push(`  const Outputs: ${outputsType} = ${seedRecord};`);
+      /**
+       * EXP-020 (session 134). The Noodl API the body reads, as the runtime hands it the third parameter: the members the
+       * export carries (`src/lib/noodl.ts`), and each Variable it names, over the app's own variable (the facade a Visual
+       * Function binds, LOGIC-BUILDER-TARGET §3.4).
+       */
+      if (def.noodl !== undefined) {
+        const backend = def.noodl.members.some((m) => m !== 'Variables');
+        const pairs = def.noodl.variables.map((name) => {
+          const store = variableByName.get(name)!;
+          return [`      get ${fieldKey(name)}(): any { return ${store.exportName}.get(); },`, `      set ${fieldKey(name)}(v: any) { ${store.exportName}.set(v); }`].join('\n');
+        });
+        if (pairs.length === 0) lines.push('  const Noodl = noodl;');
+        else lines.push('  const Noodl = {', ...(backend ? ['    ...noodl,'] : []), '    Variables: {', pairs.join(',\n'), '    }', '  };');
+      }
       lines.push('  try {');
       /*
        * P109 ISL-005 AC7. The files the Function lists under Uses, from the one registry — never pasted
@@ -6712,7 +6761,8 @@ export function emitComponent(
         const rows = def.scripts.map((u) => `${fieldKey(u.alias)}: ${PROJECT_SCRIPTS_SYMBOL}.load(${JSON.stringify(u.path)})`);
         lines.push(`    const Scripts = { ${rows.join(', ')} };`);
       }
-      lines.push(keepsThis ? '    (function (this: Record<string, any>) {' : '    (() => {');
+      const opener = keepsThis ? `(${awaits ? 'async ' : ''}function (this: Record<string, any>) {` : `(${awaits ? 'async ' : ''}() => {`;
+      lines.push(`    ${awaits ? 'await ' : ''}${opener}`);
       lines.push(...def.body.split('\n'));
       lines.push(keepsThis ? '    }).call(self);' : '    })();');
       lines.push('  } catch (e) {');
@@ -7871,7 +7921,9 @@ export function emitComponent(
     const names = pulseNamesOf(def);
     body.push(
       `  // ${commentSafe(nodeById.get(id)?.authoredLabel ?? def.fnName)} — what its body writes or sends after a run has returned (a timer, a listener) arrives as the running app's does.`,
-      `  ${names.node}.late = (${names.run}) => {`,
+      // EXP-019 slice 1b (session 134): a late signal's chain can start a run that awaits (gram's Welcome: `check`, sent after
+      // an `await`, runs "Where they belong"), so the handler is `async` where its chains await.
+      `  ${names.node}.late = ${pulses !== undefined && actionsAwait([pulses]) ? 'async ' : ''}(${names.run}) => {`,
       ...(materialize !== undefined ? [`    ${stateSetterOf(materialize)}({ ...${names.run}.outputs });`] : []),
       ...(pulses !== undefined ? [`    ${actionCode(pulses, 4)}`] : []),
       '  };',
@@ -8190,7 +8242,9 @@ export function emitComponent(
   // EXP-011 §52. One file per Script node: the author's code, verbatim, in the runtime's own wrapper.
   for (const script of plan.scripts) files[script.file] = scriptFileSource(script, plan.path, plan.legacyPath);
   // P18-S122-TPLBUILD. One file per printed Function wrapper, on the same rule.
-  for (const { def, file } of functionFiles) files[file] = functionFileSource(def, jsWrapperLines(def), plan.path);
+  for (const { def, file } of functionFiles) {
+    files[file] = functionFileSource(def, jsWrapperLines(def), plan.path, (name) => variableByName.get(name)!.exportName);
+  }
 
   return {
     files,
@@ -8201,6 +8255,8 @@ export function emitComponent(
     timerHelpers: usedTimerHelpers,
     // EXP-011 §86.
     functionRunLib: pulsedRunIds.size > 0 || tickedRunIds.size > 0,
+    // EXP-020 (session 134). A printed Function wrapper that reads a backend member of the Noodl API.
+    noodlLib: functionFiles.some(({ def }) => def.noodl?.members.some((m) => m !== 'Variables') === true),
     // EXP-011 §49. `states.ts` imports `animate.ts`, so a States alone earns both modules.
     animateLib: plan.animations.length > 0 || plan.statesMachines.length > 0,
     statesLib: plan.statesMachines.length > 0,
@@ -8341,9 +8397,11 @@ const GENERATED_FUNCTION_TS = '// @nodegx:generated (function node — provenanc
  * (its arguments, the outputs it reads, `Parameters<typeof fn>[1]` for a pulsed run) is still checked where it is made.
  * The path is `src/functions/<dir>/<fileBase>/<fnName>.ts`, three below `src/`, as a Script's is.
  */
-function functionFileSource(def: JsFunctionPlan, wrapper: string[], componentPath: string): string {
+function functionFileSource(def: JsFunctionPlan, wrapper: string[], componentPath: string, variableExport: (name: string) => string): string {
   const safe = (text: string): string => text.split('*/').join('* /');
   const signature = `function ${def.fnName}(`;
+  // EXP-019 slice 1b: an awaiting body's wrapper is an `async function`, exported the same way.
+  const asyncSignature = `async ${signature}`;
   const lines = [
     '// @ts-nocheck',
     GENERATED_FUNCTION_TS,
@@ -8354,8 +8412,15 @@ function functionFileSource(def: JsFunctionPlan, wrapper: string[], componentPat
     ...((def.scripts?.length ?? 0) > 0
       ? [`import { ${PROJECT_SCRIPTS_SYMBOL} } from '../../../${PROJECT_SCRIPT_FILES_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}';`]
       : []),
+    // EXP-020 (session 134). The Noodl API it reads, and the app's Variables it names.
+    ...(def.noodl?.members.some((m) => m !== 'Variables') === true
+      ? [`import { noodl } from '../../../${NOODL_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}';`]
+      : []),
+    ...((def.noodl?.variables.length ?? 0) > 0
+      ? [`import { ${[...new Set(def.noodl!.variables.map(variableExport))].sort().join(', ')} } from '../../../stores/variables';`]
+      : []),
     '',
-    ...wrapper.map((line) => (line.startsWith(signature) ? `export ${line}` : line)),
+    ...wrapper.map((line) => (line.startsWith(signature) || line.startsWith(asyncSignature) ? `export ${line}` : line)),
     ''
   ];
   return lines.join('\n');

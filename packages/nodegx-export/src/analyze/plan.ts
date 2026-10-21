@@ -55,7 +55,9 @@ import {
   jsBodyOf,
   jsNodeKindOf,
   jsHostTraitsOf,
+  jsAwaitsAtTopLevel,
   jsCallsBackOf,
+  jsNoodlUseOf,
   jsPurityDefer,
   JS_EXPRESSION,
   JS_FUNCTION
@@ -1692,7 +1694,9 @@ function isAwaitedAction(value: unknown): value is Extract<HandlerAction, { deta
     kind === 'file-pick' ||
     kind === 'file-upload' ||
     kind === 'file-sign' ||
-    (kind === 'crypto-call' && (value as { async?: unknown }).async === true)
+    (kind === 'crypto-call' && (value as { async?: unknown }).async === true) ||
+    // EXP-019 slice 1b (session 134): a run whose body awaits.
+    (kind === 'jsfun-run' && typeof (value as { awaitsAt?: unknown }).awaitsAt === 'number')
   );
 }
 
@@ -2538,7 +2542,22 @@ export type HandlerAction =
    * `ticked` (P18-S119-TICKEDRUN) marks the run a ticked input's new value starts (`TickedRunPlan`): it has no Done, and
    * its effect has already recorded the values it read.
    */
-  | { kind: 'jsfun-run'; nodeId: string; then: HandlerAction[]; materialize?: string; ticked?: true }
+  | {
+      kind: 'jsfun-run';
+      nodeId: string;
+      then: HandlerAction[];
+      materialize?: string;
+      ticked?: true;
+      /**
+       * EXP-019 slice 1b (session 134). The body awaits at its top level: where in `then` the chain the runtime sends after
+       * the run's promise settles begins (Success, then Done), after the chains of the signals the body sent before its
+       * first `await`. Printed whole (`runFunction`, the pulses, `await <run>.settled`, the rest) and awaited like a request,
+       * so §90's `detached` lets the click's later wires run before it settles.
+       */
+      awaitsAt?: number;
+      /** EXP-011 §90, as an api call's. */
+      detached?: true;
+    }
   /**
    * EXP-011 §86. The chains of a Function's own signals (`Outputs.go()`), first in its run's `then`: one loop over the
    * pulses the run sent, in the order it sent them, each arm (`jsfun-pulse`) the chain of one signal. Inside an arm the
@@ -3215,6 +3234,17 @@ export interface JsFunctionPlan {
    * which writes the row and runs the signal's chain, as the runtime's node delivers them when they happen.
    */
   late?: true;
+  /**
+   * EXP-019 slice 1b (session 134). Function only: the body awaits at its top level (`jsAwaitsAtTopLevel`). Its wrapper is
+   * `async`, its run hands back the promise (`FunctionRun.settled`), and Success and Done run after it settles, as the
+   * runtime's `runScript` awaits the body before sending them. What it writes after its first `await` arrives `late`.
+   */
+  awaits?: true;
+  /**
+   * EXP-020 (session 134). Function only: the Noodl API members the body reads (`jsNoodlUseOf`), and the Variables it
+   * reads or writes by name. The wrapper binds `Noodl` to `src/lib/noodl.ts`'s object, with a facade over each Variable.
+   */
+  noodl?: { members: string[]; variables: string[] };
   /**
    * EXP-011 §86. Function only, invoked only: a run of it sends a signal of its own that a chain consumes, or (P18-S121-
    * FRESHOUTPUTS) it materializes a row a reader reads between runs. The wrapper then takes its `Outputs` record as a
@@ -6569,6 +6599,12 @@ function planComponent(
         if (purity !== null) return { defer: `the ${word} ${purity}` };
       }
       /**
+       * EXP-020 (session 134). The Noodl API members a Function reads (`jsPurityDefer` refused any the export does not
+       * carry). In a project with no backend they export all the same, failing as the running app's do without one
+       * (`noodlLib.ts`), as every backend node's stub does (EXP-011 §41).
+       */
+      const noodl = kind === 'function' ? jsNoodlUseOf(body) : undefined;
+      /**
        * EXP-019. A Function's host traits travel with it — as a run once per trigger (`host` ⇒ `pulsed`, the run compile).
        * With no Run wire (slice 2) the node runs on its inputs' arrival and once at load (`scheduleRun` from the script's
        * setter and from each ticked input that changed): an arrival run, compiled as the run is (`compileJsRun`), printed as
@@ -6779,6 +6815,8 @@ function planComponent(
         mode,
         ...(host.length > 0 ? { host } : {}),
         ...(kind === 'function' && jsCallsBackOf(body) ? { late: true as const } : {}),
+        ...(kind === 'function' && jsAwaitsAtTopLevel(body) ? { awaits: true as const } : {}),
+        ...(noodl !== undefined && noodl.members.length > 0 ? { noodl: { members: noodl.members, variables: noodl.variables } } : {}),
         ...(loadGate !== undefined ? { loadGate } : {}),
         ...(scriptUses.length > 0 ? { scripts: scriptUses } : {}),
         ...(kind === 'visual'
@@ -11813,10 +11851,12 @@ function planComponent(
     if (pulses.then.length > 0 || (materialize !== undefined && record.def.kind === 'function') || hosted) record.def.pulsed = true;
     // P18-S119-TICKEDRUN. Done is the Run's alone; a ticked run that sends nothing and writes nothing is unobservable.
     // P18-S129-FNSUCCESS: it sends Success.
+    // EXP-019 slice 1b (session 134). An awaiting body's chain after the run's promise: Success (and Done, on a Run).
+    const awaitsAt = record.def.awaits === true ? { awaitsAt: pulses.then.length } : {};
     if (ticked.watch.length > 0 && (tickedThen.length > 0 || materialize !== undefined)) {
       tickedRunPieces.set(node.id, {
         watch: ticked.watch,
-        action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true }
+        action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true, ...awaitsAt }
       });
     }
     // EXP-019 slice 2. The arrival run is the ticked half alone, placed always (a body run for what it does to the browser,
@@ -11824,7 +11864,7 @@ function planComponent(
     if (arrival) {
       tickedRunPieces.set(node.id, {
         watch: ticked.watch,
-        action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true },
+        action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true, ...awaitsAt },
         arrival: { consumes: [...record.consumes, ...chain.consumes], collapses: [...record.logicNodeIds, ...chain.collapses], subscribes: [...record.subscriberIds, ...chain.subscribes] }
       });
     }
@@ -11833,7 +11873,8 @@ function planComponent(
         kind: 'jsfun-run',
         nodeId: node.id,
         then: chain.then,
-        ...(materialize !== undefined ? { materialize } : {})
+        ...(materialize !== undefined ? { materialize } : {}),
+        ...awaitsAt
       },
       consumes: chain.consumes,
       collapses: chain.collapses,

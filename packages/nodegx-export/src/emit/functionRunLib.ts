@@ -20,6 +20,9 @@
  *
  * - EXP-019 (session 133): a write or a signal after the body has returned (a timer, a listener) is handed to `node.late`,
  *   as the runtime's `Outputs` proxy flags an output whenever it is written.
+ * - EXP-019 slice 1b (session 134): `simplejavascript.ts` `runScript` — `await func.apply(…)`, then Success, then Done. A
+ *   body that awaits returns at its first `await`; `settled` is its promise, which the chain after Success waits on. What
+ *   it writes and sends after that `await` is `late`, as above.
  *
  * 🔴 **The first value, not the last.** `Outputs.a = ''; Outputs.a = 'x'; Outputs.go();` hands `go`'s target `''`, as the
  * runtime does today (P18-S119-FIRSTWRITE, needs a ruling). Change it here and in the runtime together, or not at all.
@@ -56,7 +59,7 @@ export interface FunctionNode<O> {
    * outputs as its chain reads them. The running app's node delivers those when they happen; a component whose body may
    * call back sets this to its own chains.
    */
-  late?: (run: FunctionRun<O>) => void;
+  late?: (run: Omit<FunctionRun<O>, 'settled'>) => void;
 }
 
 /** One signal the body sent, and the outputs as that pulse's chain reads them. */
@@ -70,6 +73,11 @@ export interface FunctionRun<O> {
   outputs: Partial<O>;
   /** Every signal the body sent, in the order it sent them. */
   pulses: Array<FunctionPulse<O>>;
+  /**
+   * When the body has finished: for a body that awaits, after its last \`await\` (what it wrote and sent since its first
+   * one arrived \`late\`); for any other, at once. Success and Done are sent after it, as the running app sends them.
+   */
+  settled: Promise<void>;
 }
 
 export function functionNode<O>(signals: readonly string[]): FunctionNode<O> {
@@ -117,7 +125,7 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<str
       return true;
     }
   });
-  body(inputs, outputs as unknown as O, node.self);
+  const finished = body(inputs, outputs as unknown as O, node.self);
   returned = true;
   const count: Record<string, number> = {};
   const pulses = sent.map((signal) => {
@@ -126,7 +134,7 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<str
     for (const name of Object.keys(published)) values[name] = published[name][Math.min(k, published[name].length) - 1];
     return { signal, values: values as Partial<O> };
   });
-  return { outputs: node.outputs, pulses };
+  return { outputs: node.outputs, pulses, settled: Promise.resolve(finished).then(() => undefined) };
 }
 
 /**

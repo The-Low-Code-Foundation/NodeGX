@@ -1,0 +1,3790 @@
+[
+ {
+  "project": "digital-bricks-training",
+  "component": "Lesson/Section row",
+  "node": "sr_ok",
+  "type": "JavaScriptFunction",
+  "label": "Saved: the kit may say so",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"field\" is fed by JavaScriptFunction — the Function that feeds it is not exported: input \"field\" is fed by dbt-lesson.Section — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Course",
+  "node": "cs_dos_open",
+  "type": "JavaScriptFunction",
+  "label": "Open this objective",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by For Each — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Course",
+  "node": "cs_dos_close",
+  "type": "JavaScriptFunction",
+  "label": "Close it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "cs_dos_reveal"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Learner",
+  "node": "lr_fresh",
+  "type": "JavaScriptFunction",
+  "label": "A fresh page",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Learner.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Learner",
+  "node": "lr_point",
+  "type": "JavaScriptFunction",
+  "label": "Point at a programme row",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"rows\" is fed by /Logic/Ordered timeline — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Learner",
+  "node": "lr_to_log_focus",
+  "type": "JavaScriptFunction",
+  "label": "Show in the activity log",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by For Each — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Learner",
+  "node": "lr_to_prog_focus",
+  "type": "JavaScriptFunction",
+  "label": "Show on their programme",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by For Each — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Lesson",
+  "node": "ls_url",
+  "type": "PageInputs",
+  "label": "Which lesson — ?concept=",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Lesson.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Lesson",
+  "node": "ls_captured_reset",
+  "type": "JavaScriptFunction",
+  "label": "A lesson opens with nothing saved since",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Lesson.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Settings",
+  "node": "st_gone",
+  "type": "JavaScriptFunction",
+  "label": "Forget the session here, then Home, saying it is done",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads `Noodl.Users` — the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Their path",
+  "node": "tp_seed",
+  "type": "JavaScriptFunction",
+  "label": "Start the draft from their current path",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/TheirPath.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Their path",
+  "node": "tp_rows",
+  "type": "JavaScriptFunction",
+  "label": "The two lists, from the draft",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"concepts\" is fed by CloudFunction2 — its Call is never fired by a translatable trigger"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Their path",
+  "node": "tp_up",
+  "type": "JavaScriptFunction",
+  "label": "Move a step up",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by For Each — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Their path",
+  "node": "tp_down",
+  "type": "JavaScriptFunction",
+  "label": "Move a step down",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by For Each — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Their path",
+  "node": "tp_remove",
+  "type": "JavaScriptFunction",
+  "label": "Take a step off",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by For Each — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Their path",
+  "node": "tp_add",
+  "type": "JavaScriptFunction",
+  "label": "Put a concept at the end",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by For Each — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Their path",
+  "node": "tp_save_call",
+  "type": "CloudFunction2",
+  "label": "setLearnerPath — staff only",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"concepts\" is fed by CloudFunction2 — its Call is never fired by a translatable trigger"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Their path",
+  "node": "tp_fail",
+  "type": "JavaScriptFunction",
+  "label": "Why not, as the server worded it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"error\" is fed by CloudFunction2 — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"error\" is fed by CloudFunction2 — input \"concepts\" is fed by CloudFunction2 — its Call is never fired by a translatable trigger"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Pages/Course",
+  "node": "cs_dos_open",
+  "type": "JavaScriptFunction",
+  "label": "Open this objective",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by For Each — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Pages/Course",
+  "node": "cs_dos_close",
+  "type": "JavaScriptFunction",
+  "label": "Close it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger cs_dos_reveal.onLessonOpened is not a rendered element event or a receiver"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Pages/Learner",
+  "node": "lr_fresh",
+  "type": "JavaScriptFunction",
+  "label": "A fresh page",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Learner.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Pages/Learner",
+  "node": "lr_point",
+  "type": "JavaScriptFunction",
+  "label": "Point at a programme row",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"rows\" is fed by /Logic/Ordered timeline — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Pages/Learner",
+  "node": "lr_to_log_focus",
+  "type": "JavaScriptFunction",
+  "label": "Show in the activity log",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by For Each — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Pages/Learner",
+  "node": "lr_to_prog_focus",
+  "type": "JavaScriptFunction",
+  "label": "Show on their programme",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by For Each — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Pages/Lesson",
+  "node": "ls_url",
+  "type": "PageInputs",
+  "label": "Which lesson — ?concept=",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Lesson.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "Pages/Lesson",
+  "node": "ls_captured_reset",
+  "type": "JavaScriptFunction",
+  "label": "A lesson opens with nothing saved since",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Lesson.tsx"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Admins",
+  "node": "adToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (adRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (adRefused), is authored Mounted false, and the wire into its Mounted from \"Everyone who is in, admins first\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "adRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Admins",
+  "node": "adLoad",
+  "type": "JavaScriptFunction",
+  "label": "Everyone who is in, admins first",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "adRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Admins",
+  "node": "adToQueue",
+  "type": "RouterNavigate",
+  "label": "To the admins’ queue",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Back\" (adBack), is not drawn: an element above it, \"Admins\" (adContent), is authored Mounted false, and the wire into its Mounted from \"Everyone who is in, admins first\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "adBack"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (lkRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (lkRefused), is authored Mounted false, and the wire into its Mounted from \"The post or the comment, its state and its reports\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (lkRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (lkRefused), is authored Mounted false, and the wire into its Mounted from \"The post or the comment, its state and its reports\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkLoad",
+  "type": "JavaScriptFunction",
+  "label": "The post or the comment, its state and its reports",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkHideGather",
+  "type": "JavaScriptFunction",
+  "label": "Hide it, with why",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"reason0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"reason0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkBackGather",
+  "type": "JavaScriptFunction",
+  "label": "Bring it back",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"kind\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"kind\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkToMember",
+  "type": "RouterNavigate",
+  "label": "To their profile",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Queue",
+  "node": "quToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (quRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (quRefused), is authored Mounted false, and the wire into its Mounted from \"Who is waiting\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "quRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Queue",
+  "node": "quLoad",
+  "type": "JavaScriptFunction",
+  "label": "Who is waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "quRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Queue",
+  "node": "quModLoad",
+  "type": "JavaScriptFunction",
+  "label": "What is reported, hidden and blocked",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Queue",
+  "node": "quToRules",
+  "type": "RouterNavigate",
+  "label": "To the rules",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Community rules\" (quRules), is not drawn: an element above it, \"Reported, hidden, blocked\" (quMod), is authored Mounted false, and the wire into its Mounted from \"What is reported, hidden and blocked\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Community rules\" (quRules), is not drawn: an element above it, \"Reported, hidden, blocked\" (quMod), is authored Mounted false, and the wire into its Mounted from \"What is reported, hidden and blocked\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Queue",
+  "node": "quToAdmins",
+  "type": "RouterNavigate",
+  "label": "To the admins",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Admins\" (quAdmins), is not drawn: an element above it, \"Reported, hidden, blocked\" (quMod), is authored Mounted false, and the wire into its Mounted from \"What is reported, hidden and blocked\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Admins\" (quAdmins), is not drawn: an element above it, \"Reported, hidden, blocked\" (quMod), is authored Mounted false, and the wire into its Mounted from \"What is reported, hidden and blocked\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Queue",
+  "node": "quToFeed",
+  "type": "RouterNavigate",
+  "label": "To the feed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"The feed\" (quFeed), is not drawn: an element above it, \"Reported, hidden, blocked\" (quMod), is authored Mounted false, and the wire into its Mounted from \"What is reported, hidden and blocked\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"The feed\" (quFeed), is not drawn: an element above it, \"Reported, hidden, blocked\" (quMod), is authored Mounted false, and the wire into its Mounted from \"What is reported, hidden and blocked\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (epRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (epRefused), is authored Mounted false, and the wire into its Mounted from \"Your profile as it is\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (epRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (epRefused), is authored Mounted false, and the wire into its Mounted from \"Your profile as it is\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epLoad",
+  "type": "JavaScriptFunction",
+  "label": "Your profile as it is",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epPhoto",
+  "type": "JavaScriptFunction",
+  "label": "The photo, while the page is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epRemoveStamp",
+  "type": "JavaScriptFunction",
+  "label": "Take the photo off",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Remove photo\" (epRemove), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The photo, while the page is open\".out-canRemove is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Remove photo\" (epRemove), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The photo, while the page is open\".out-canRemove is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epGather",
+  "type": "JavaScriptFunction",
+  "label": "The profile, as one save",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"name0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"name0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epCall",
+  "type": "CloudFunction2",
+  "label": "editProfile(profile)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"name0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"name0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epToProfile",
+  "type": "RouterNavigate",
+  "label": "To your profile",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Feed",
+  "node": "fdToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (fdRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (fdRefused), is authored Mounted false, and the wire into its Mounted from \"The newest posts, as cards\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (fdRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (fdRefused), is authored Mounted false, and the wire into its Mounted from \"The newest posts, as cards\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Feed",
+  "node": "fdLoad",
+  "type": "JavaScriptFunction",
+  "label": "The newest posts, as cards",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Feed",
+  "node": "fdToNew",
+  "type": "RouterNavigate",
+  "label": "To a new post",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"New post\" (fdNew), is not drawn: an element above it, \"The feed\" (fdContent), is authored Mounted false, and the wire into its Mounted from \"The newest posts, as cards\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"New post\" (fdNew), is not drawn: an element above it, \"The feed\" (fdContent), is authored Mounted false, and the wire into its Mounted from \"The newest posts, as cards\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Feed",
+  "node": "fdToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Feed",
+  "node": "fdToQueue",
+  "type": "RouterNavigate",
+  "label": "To the admins’ queue",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Waiting for you\" (fdQueue), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The newest posts, as cards\".out-isAdmin is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Waiting for you\" (fdQueue), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The newest posts, as cards\".out-isAdmin is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (mpRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (mpRefused), is authored Mounted false, and the wire into its Mounted from \"Their profile and posts\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (mpRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (mpRefused), is authored Mounted false, and the wire into its Mounted from \"Their profile and posts\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpLoad",
+  "type": "JavaScriptFunction",
+  "label": "Their profile and posts",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpBlockGather",
+  "type": "JavaScriptFunction",
+  "label": "Block them, with why",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Block\" (mpBlockGo), is not drawn: an element above it, \"Block (admins)\" (mpBlock), is authored Mounted false, and the wire into its Mounted from \"Their profile and posts\".out-canBlock is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Block\" (mpBlockGo), is not drawn: an element above it, \"Block (admins)\" (mpBlock), is authored Mounted false, and the wire into its Mounted from \"Their profile and posts\".out-canBlock is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpToEdit",
+  "type": "RouterNavigate",
+  "label": "To edit your profile",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Edit profile\" (mpEdit), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"Their profile and posts\".out-isMe is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Edit profile\" (mpEdit), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"Their profile and posts\".out-isMe is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/NewPost",
+  "node": "npToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (npRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (npRefused), is authored Mounted false, and the wire into its Mounted from \"Who is posting\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "npRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/NewPost",
+  "node": "npLoad",
+  "type": "JavaScriptFunction",
+  "label": "Who is posting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "npRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/NewPost",
+  "node": "npPhotos",
+  "type": "JavaScriptFunction",
+  "label": "The photos, while the page is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/NewPost",
+  "node": "npPickPost",
+  "type": "JavaScriptFunction",
+  "label": "Post pressed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Post\" (npKindPost), is not drawn: an element above it, \"New post\" (npContent), is authored Mounted false, and the wire into its Mounted from \"Who is posting\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "npKindPost"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/NewPost",
+  "node": "npPickPrayer",
+  "type": "JavaScriptFunction",
+  "label": "Prayer request pressed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Prayer request\" (npKindPrayer), is not drawn: an element above it, \"New post\" (npContent), is authored Mounted false, and the wire into its Mounted from \"Who is posting\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "npKindPrayer"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/NewPost",
+  "node": "npPickTestimony",
+  "type": "JavaScriptFunction",
+  "label": "Testimony pressed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Testimony\" (npKindTestimony), is not drawn: an element above it, \"New post\" (npContent), is authored Mounted false, and the wire into its Mounted from \"Who is posting\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "npKindTestimony"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/NewPost",
+  "node": "npPickEvent",
+  "type": "JavaScriptFunction",
+  "label": "Event pressed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Event\" (npKindEvent), is not drawn: an element above it, \"New post\" (npContent), is authored Mounted false, and the wire into its Mounted from \"Who is posting\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "npKindEvent"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/NewPost",
+  "node": "npToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "npRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poUrl",
+  "type": "PageInputs",
+  "label": "Which post",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Report this post\" (poReport), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canReport is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Report this post\" (poReport), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canReport is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (poRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (poRefused), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (poRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (poRefused), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poLoad",
+  "type": "JavaScriptFunction",
+  "label": "The post and its comments",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poGather",
+  "type": "JavaScriptFunction",
+  "label": "The comment",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poConfirmSw",
+  "type": "Switch",
+  "label": "Asked: take it down?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Take this post down\" (poTakeDown), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canTakeDown is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Take this post down\" (poTakeDown), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canTakeDown is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poDownGather",
+  "type": "JavaScriptFunction",
+  "label": "Take this post down",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poDownCall",
+  "type": "CloudFunction2",
+  "label": "hide(hide)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poDownStamp",
+  "type": "JavaScriptFunction",
+  "label": "Say the feed changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poDownSay",
+  "type": "Set Variable",
+  "label": "The feed changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poToReport",
+  "type": "RouterNavigate",
+  "label": "To report it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Report this post\" (poReport), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canReport is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Report this post\" (poReport), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canReport is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poToLook",
+  "type": "RouterNavigate",
+  "label": "To its reports (admins)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Its reports, and hiding it (admins)\" (poLook), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canLook is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Its reports, and hiding it (admins)\" (poLook), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canLook is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poCall",
+  "type": "CloudFunction2",
+  "label": "commentOn(comment)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poStamp",
+  "type": "JavaScriptFunction",
+  "label": "Say the feed changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poSay",
+  "type": "Set Variable",
+  "label": "The feed changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Prayer",
+  "node": "prToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (prRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (prRefused), is authored Mounted false, and the wire into its Mounted from \"The newest prayer requests, as cards\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (prRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (prRefused), is authored Mounted false, and the wire into its Mounted from \"The newest prayer requests, as cards\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Prayer",
+  "node": "prLoad",
+  "type": "JavaScriptFunction",
+  "label": "The newest prayer requests, as cards",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Prayer",
+  "node": "prToNew",
+  "type": "RouterNavigate",
+  "label": "To a new prayer request",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"New prayer request\" (prNew), is not drawn: an element above it, \"The prayer requests\" (prContent), is authored Mounted false, and the wire into its Mounted from \"The newest prayer requests, as cards\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"New prayer request\" (prNew), is not drawn: an element above it, \"The prayer requests\" (prContent), is authored Mounted false, and the wire into its Mounted from \"The newest prayer requests, as cards\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Prayer",
+  "node": "prToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Report",
+  "node": "rpToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (rpRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (rpRefused), is authored Mounted false, and the wire into its Mounted from \"What is reported, and its reasons\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (rpRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (rpRefused), is authored Mounted false, and the wire into its Mounted from \"What is reported, and its reasons\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Report",
+  "node": "rpLoad",
+  "type": "JavaScriptFunction",
+  "label": "What is reported, and its reasons",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Report",
+  "node": "rpToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Rules",
+  "node": "ruLoad",
+  "type": "JavaScriptFunction",
+  "label": "The rules, as the admins wrote them",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"changed\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Rules",
+  "node": "ruGather",
+  "type": "JavaScriptFunction",
+  "label": "The rules, as one save",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"rules0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"rules0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: input \"changed\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Rules",
+  "node": "ruCall",
+  "type": "CloudFunction2",
+  "label": "writeRules(rules)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"rules0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"rules0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: input \"changed\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/SignIn",
+  "node": "siLogIn",
+  "type": "net.noodl.user.LogIn",
+  "label": "Sign in with the password",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "siPassword"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/SignIn",
+  "node": "siRoute",
+  "type": "JavaScriptFunction",
+  "label": "Where they belong",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "siPassword"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/SignIn",
+  "node": "siToWaiting",
+  "type": "RouterNavigate",
+  "label": "To waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "siPassword"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/SignIn",
+  "node": "siToFeed",
+  "type": "RouterNavigate",
+  "label": "To the feed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"member\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "siPassword"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/SignIn",
+  "node": "siToQueue",
+  "type": "RouterNavigate",
+  "label": "To the admins’ queue",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"admin\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "siPassword"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Waiting",
+  "node": "wtToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (wtRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (wtRefused), is authored Mounted false, and the wire into its Mounted from \"Their name; in already?\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wtRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Waiting",
+  "node": "wtLoad",
+  "type": "JavaScriptFunction",
+  "label": "Their name; in already?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wtRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Waiting",
+  "node": "wtToRules",
+  "type": "RouterNavigate",
+  "label": "To the rules",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Read the community rules\" (wtRules), is not drawn: an element above it, \"On the list\" (wtContent), is authored Mounted false, and the wire into its Mounted from \"Their name; in already?\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wtRules"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Waiting",
+  "node": "wtToStart",
+  "type": "RouterNavigate",
+  "label": "In already: to the start, which sends them on",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"isIn\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wtRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Welcome",
+  "node": "wcLoad",
+  "type": "JavaScriptFunction",
+  "label": "The community’s name; someone signed in?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wcRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Welcome",
+  "node": "wcRoute",
+  "type": "JavaScriptFunction",
+  "label": "Where they belong",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wcRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Welcome",
+  "node": "wcToJoin",
+  "type": "RouterNavigate",
+  "label": "To ask to join",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Ask to join\" (wcJoin), is not drawn: an element above it, \"Ask to join, or sign in\" (wcOpen), is authored Mounted false, and the wire into its Mounted from \"The community’s name; someone signed in?\".out-isSetUp is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wcJoin"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Welcome",
+  "node": "wcToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (wcSignIn), is not drawn: an element above it, \"Ask to join, or sign in\" (wcOpen), is authored Mounted false, and the wire into its Mounted from \"The community’s name; someone signed in?\".out-isSetUp is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wcSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Welcome",
+  "node": "wcToSetUp",
+  "type": "RouterNavigate",
+  "label": "To set up",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Set it up\" (wcSetUp), is not drawn: an element above it, \"Not set up yet\" (wcNew), is authored Mounted false, and the wire into its Mounted from \"The community’s name; someone signed in?\".out-notSetUp is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wcSetUp"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Welcome",
+  "node": "wcToWaiting",
+  "type": "RouterNavigate",
+  "label": "To waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wcRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Welcome",
+  "node": "wcToFeed",
+  "type": "RouterNavigate",
+  "label": "To the feed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"member\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wcRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Welcome",
+  "node": "wcToQueue",
+  "type": "RouterNavigate",
+  "label": "To the admins’ queue",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"admin\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wcRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "UI/Bar",
+  "node": "brWho",
+  "type": "JavaScriptFunction",
+  "label": "Signed in? A band?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "brRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "UI/Bar",
+  "node": "brLogOut",
+  "type": "net.noodl.user.LogOut",
+  "label": "Sign out",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign out\" (brOut), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"Signed in? A band?\".out-signedIn is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "brOut"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "UI/Bar",
+  "node": "brToWelcome",
+  "type": "RouterNavigate",
+  "label": "To the start",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign out\" (brOut), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"Signed in? A band?\".out-signedIn is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "brOut"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "UI/Bar",
+  "node": "brNameLoad",
+  "type": "JavaScriptFunction",
+  "label": "The community’s name, read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "brRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "UI/Bar",
+  "node": "brNameSet",
+  "type": "Set Variable",
+  "label": "The community’s name, as read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "brRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/GiveLogin",
+  "node": "glUrl",
+  "type": "PageInputs",
+  "label": "Which seller",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Give the login\" (glSave), is not drawn: an element above it, \"The form\" (glContent), is authored Mounted false, and the wire into its Mounted from \"The seller\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/GiveLogin.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/GiveLogin",
+  "node": "glToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (glRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (glRefused), is authored Mounted false, and the wire into its Mounted from \"The seller\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "glRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/GiveLogin",
+  "node": "glLoad",
+  "type": "JavaScriptFunction",
+  "label": "The seller",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/GiveLogin.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/GiveLogin",
+  "node": "glGather",
+  "type": "JavaScriptFunction",
+  "label": "The form, as one login",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Give the login\" (glSave), is not drawn: an element above it, \"The form\" (glContent), is authored Mounted false, and the wire into its Mounted from \"The seller\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "glSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/GiveLogin",
+  "node": "glCall",
+  "type": "CloudFunction2",
+  "label": "giveLogin(login)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Give the login\" (glSave), is not drawn: an element above it, \"The form\" (glContent), is authored Mounted false, and the wire into its Mounted from \"The seller\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "glSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/GiveLogin",
+  "node": "glToSellers",
+  "type": "RouterNavigate",
+  "label": "Back to the sellers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Give the login\" (glSave), is not drawn: an element above it, \"The form\" (glContent), is authored Mounted false, and the wire into its Mounted from \"The seller\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "glBack"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Name",
+  "node": "nmToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (nmRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (nmRefused), is authored Mounted false, and the wire into its Mounted from \"The admin only\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "nmRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Name",
+  "node": "nmLoad",
+  "type": "JavaScriptFunction",
+  "label": "The admin only",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "nmRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Name",
+  "node": "nmGather",
+  "type": "JavaScriptFunction",
+  "label": "The new name",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Save\" (nmSave), is not drawn: an element above it, \"The name\" (nmContent), is authored Mounted false, and the wire into its Mounted from \"The admin only\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "nmSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Name",
+  "node": "nmCall",
+  "type": "CloudFunction2",
+  "label": "nameMarketplace(marketplace)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Save\" (nmSave), is not drawn: an element above it, \"The name\" (nmContent), is authored Mounted false, and the wire into its Mounted from \"The admin only\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "nmSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Name",
+  "node": "nmSet",
+  "type": "Set Variable",
+  "label": "The marketplace’s name, as saved",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Save\" (nmSave), is not drawn: an element above it, \"The name\" (nmContent), is authored Mounted false, and the wire into its Mounted from \"The admin only\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "nmSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Name",
+  "node": "nmShowSaved",
+  "type": "Switch",
+  "label": "Saved, just now",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Save\" (nmSave), is not drawn: an element above it, \"The name\" (nmContent), is authored Mounted false, and the wire into its Mounted from \"The admin only\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "nmSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Name",
+  "node": "nmShowError",
+  "type": "Switch",
+  "label": "Refused, just now",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Save\" (nmSave), is not drawn: an element above it, \"The name\" (nmContent), is authored Mounted false, and the wire into its Mounted from \"The admin only\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "nmSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Name",
+  "node": "nmToSellers",
+  "type": "RouterNavigate",
+  "label": "To the sellers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Back to the sellers\" (nmBack), is not drawn: an element above it, \"The name\" (nmContent), is authored Mounted false, and the wire into its Mounted from \"The admin only\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "nmBack"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Rates",
+  "node": "rtToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (rtRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (rtRefused), is authored Mounted false, and the wire into its Mounted from \"Every currency, its rate, and when it changed\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "rtRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Rates",
+  "node": "rtLoad",
+  "type": "JavaScriptFunction",
+  "label": "Every currency, its rate, and when it changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "rtRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Rates",
+  "node": "rtGather",
+  "type": "JavaScriptFunction",
+  "label": "Every rate, as one save",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"rows\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "rtSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Rates",
+  "node": "rtCall",
+  "type": "CloudFunction2",
+  "label": "saveRates(rates)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"rows\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "rtSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Rates",
+  "node": "rtStamp",
+  "type": "JavaScriptFunction",
+  "label": "Say the rates were saved",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "Run is never fired by a translatable trigger"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "rtSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Rates",
+  "node": "rtSetChanged",
+  "type": "Set Variable",
+  "label": "The rates were saved",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger rtStamp.out-go is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "rtSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Rates",
+  "node": "rtShowSaved",
+  "type": "Switch",
+  "label": "Saved, just now",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Save rates\" (rtSave), is not drawn: an element above it, \"Rates\" (rtContent), is authored Mounted false, and the wire into its Mounted from \"Every currency, its rate, and when it changed\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "rtSave"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/SellerForm",
+  "node": "sfUrl",
+  "type": "PageInputs",
+  "label": "Which seller",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/SellerForm.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/SellerForm",
+  "node": "sfLogoShown",
+  "type": "JavaScriptFunction",
+  "label": "The logo to show",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"uploaded\" is fed by Upload File — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/SellerForm",
+  "node": "sfToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (sfRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (sfRefused), is authored Mounted false, and the wire into its Mounted from \"The seller, and the countries\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "sfRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/SellerForm",
+  "node": "sfLoad",
+  "type": "JavaScriptFunction",
+  "label": "The seller, and the countries",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/SellerForm.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/SellerForm",
+  "node": "sfGather",
+  "type": "JavaScriptFunction",
+  "label": "The form, as one seller",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"name0\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"country\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/SellerForm",
+  "node": "sfCall",
+  "type": "CloudFunction2",
+  "label": "saveSeller(seller)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"name0\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"country\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/SellerForm",
+  "node": "sfToSellers",
+  "type": "RouterNavigate",
+  "label": "Back to the sellers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Back\" (sfBack), is not drawn: an element above it, \"The form\" (sfContent), is authored Mounted false, and the wire into its Mounted from \"The seller, and the countries\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "sfBack"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Sellers",
+  "node": "asToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (asRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (asRefused), is authored Mounted false, and the wire into its Mounted from \"Every seller, with its country and counts\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "asRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Sellers",
+  "node": "asLoad",
+  "type": "JavaScriptFunction",
+  "label": "Every seller, with its country and counts",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "asRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Sellers",
+  "node": "asToNew",
+  "type": "RouterNavigate",
+  "label": "To a new seller",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Add a seller\" (asAdd), is not drawn: an element above it, \"Sellers\" (asContent), is authored Mounted false, and the wire into its Mounted from \"Every seller, with its country and counts\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "asAdd"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Sellers",
+  "node": "asToName",
+  "type": "RouterNavigate",
+  "label": "To the marketplace’s name",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Rename the marketplace\" (asRename), is not drawn: an element above it, \"Sellers\" (asContent), is authored Mounted false, and the wire into its Mounted from \"Every seller, with its country and counts\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "asRename"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Shelves",
+  "node": "svToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (svRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (svRefused), is authored Mounted false, and the wire into its Mounted from \"Every shelf, and how many products are on it\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "svRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Shelves",
+  "node": "svLoad",
+  "type": "JavaScriptFunction",
+  "label": "Every shelf, and how many products are on it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "svRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Shelves",
+  "node": "svGather",
+  "type": "JavaScriptFunction",
+  "label": "The new shelf",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Add the shelf\" (svAddGo), is not drawn: an element above it, \"Shelves\" (svContent), is authored Mounted false, and the wire into its Mounted from \"Every shelf, and how many products are on it\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "svAddGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Shelves",
+  "node": "svCall",
+  "type": "CloudFunction2",
+  "label": "saveShelf(shelf)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Add the shelf\" (svAddGo), is not drawn: an element above it, \"Shelves\" (svContent), is authored Mounted false, and the wire into its Mounted from \"Every shelf, and how many products are on it\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "svAddGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Shelves",
+  "node": "svStamp",
+  "type": "JavaScriptFunction",
+  "label": "Say the shelves changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Add the shelf\" (svAddGo), is not drawn: an element above it, \"Shelves\" (svContent), is authored Mounted false, and the wire into its Mounted from \"Every shelf, and how many products are on it\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "svAddGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/Shelves",
+  "node": "svSetChanged",
+  "type": "Set Variable",
+  "label": "The shelves changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Add the shelf\" (svAddGo), is not drawn: an element above it, \"Shelves\" (svContent), is authored Mounted false, and the wire into its Mounted from \"Every shelf, and how many products are on it\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "svAddGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/StopSeller",
+  "node": "ssUrl",
+  "type": "PageInputs",
+  "label": "Which seller",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/StopSeller.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/StopSeller",
+  "node": "ssToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (ssRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (ssRefused), is authored Mounted false, and the wire into its Mounted from \"The seller\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "ssRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/StopSeller",
+  "node": "ssLoad",
+  "type": "JavaScriptFunction",
+  "label": "The seller",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/StopSeller.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/StopSeller",
+  "node": "ssWhyWords",
+  "type": "Expression",
+  "label": "“Stopped: <reason>”",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"reason\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/StopSeller.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/StopSeller",
+  "node": "ssToSellers",
+  "type": "RouterNavigate",
+  "label": "Back to the sellers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Back\" (ssBack), is not drawn: an element above it, \"The form\" (ssContent), is authored Mounted false, and the wire into its Mounted from \"The seller\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "ssBack"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/WaysToPay",
+  "node": "wpToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (wpRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (wpRefused), is authored Mounted false, and the wire into its Mounted from \"The countries and the ways to pay\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wpRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/WaysToPay",
+  "node": "wpLoad",
+  "type": "JavaScriptFunction",
+  "label": "The countries and the ways to pay",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wpRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/WaysToPay",
+  "node": "wpGather",
+  "type": "JavaScriptFunction",
+  "label": "The new country",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Add the country\" (wpAddGo), is not drawn: an element above it, \"Ways to pay\" (wpContent), is authored Mounted false, and the wire into its Mounted from \"The countries and the ways to pay\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wpAddGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/WaysToPay",
+  "node": "wpCall",
+  "type": "CloudFunction2",
+  "label": "saveCountry(country)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Add the country\" (wpAddGo), is not drawn: an element above it, \"Ways to pay\" (wpContent), is authored Mounted false, and the wire into its Mounted from \"The countries and the ways to pay\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wpAddGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/WaysToPay",
+  "node": "wpStamp",
+  "type": "JavaScriptFunction",
+  "label": "Say the ways changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Add the country\" (wpAddGo), is not drawn: an element above it, \"Ways to pay\" (wpContent), is authored Mounted false, and the wire into its Mounted from \"The countries and the ways to pay\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wpAddGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Admin/WaysToPay",
+  "node": "wpSetChanged",
+  "type": "Set Variable",
+  "label": "The countries changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Add the country\" (wpAddGo), is not drawn: an element above it, \"Ways to pay\" (wpContent), is authored Mounted false, and the wire into its Mounted from \"The countries and the ways to pay\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "wpAddGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Enquiries",
+  "node": "eqToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (eqRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (eqRefused), is authored Mounted false, and the wire into its Mounted from \"The enquiries this person may read\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "eqRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Enquiries",
+  "node": "eqLoad",
+  "type": "JavaScriptFunction",
+  "label": "The enquiries this person may read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "eqRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Orders",
+  "node": "orToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (orRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (orRefused), is authored Mounted false, and the wire into its Mounted from \"The order parts this person may see\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "orRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Orders",
+  "node": "orLoad",
+  "type": "JavaScriptFunction",
+  "label": "The order parts this person may see",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "orRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/ProductForm",
+  "node": "pfUrl",
+  "type": "PageInputs",
+  "label": "Which product",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Back\" (pfBack), is not drawn: an element above it, \"The form\" (pfContent), is authored Mounted false, and the wire into its Mounted from \"The product, the shelves, the seller’s currency\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/ProductForm.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/ProductForm",
+  "node": "pfPhotoList",
+  "type": "JavaScriptFunction",
+  "label": "The photos, while the form is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/ProductForm",
+  "node": "pfToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (pfRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (pfRefused), is authored Mounted false, and the wire into its Mounted from \"The product, the shelves, the seller’s currency\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "pfRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/ProductForm",
+  "node": "pfLoad",
+  "type": "JavaScriptFunction",
+  "label": "The product, the shelves, the seller’s currency",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/ProductForm.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/ProductForm",
+  "node": "pfGather",
+  "type": "JavaScriptFunction",
+  "label": "The form, as one product",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"sellerId\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"category\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/ProductForm",
+  "node": "pfCall",
+  "type": "CloudFunction2",
+  "label": "saveProduct(product)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"sellerId\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"category\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/ProductForm",
+  "node": "pfToProducts",
+  "type": "RouterNavigate",
+  "label": "Back to the products",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Back\" (pfBack), is not drawn: an element above it, \"The form\" (pfContent), is authored Mounted false, and the wire into its Mounted from \"The product, the shelves, the seller’s currency\".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "pfBack"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/Products",
+  "node": "spUrl",
+  "type": "PageInputs",
+  "label": "Whose products",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Products.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/Products",
+  "node": "spToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (spRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (spRefused), is authored Mounted false, and the wire into its Mounted from \"This seller’s products\".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "spRefusedSignIn"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/Products",
+  "node": "spLoad",
+  "type": "JavaScriptFunction",
+  "label": "This seller’s products",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "spRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/Products",
+  "node": "spToNew",
+  "type": "RouterNavigate",
+  "label": "To a new product",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "spAdd"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/Products",
+  "node": "spToSellers",
+  "type": "RouterNavigate",
+  "label": "Back to the sellers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Back to the sellers (admin)\" (spBack), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"This seller’s products\".out-isAdmin is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "spBack"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Basket",
+  "node": "bkLoad",
+  "type": "JavaScriptFunction",
+  "label": "The basket on this phone, and what is in it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Basket",
+  "node": "bkShape",
+  "type": "JavaScriptFunction",
+  "label": "The basket, by seller and by country",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"data\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Basket",
+  "node": "bkCleaned",
+  "type": "Set Variable",
+  "label": "The basket changed: something was taken out",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Basket",
+  "node": "bkToCheckout",
+  "type": "RouterNavigate",
+  "label": "To check out",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Check out\" (bkCheckout), is not drawn: an element above it, \"The sellers beside the totals (tablet), above them (phone)\" (bkContent), is authored Mounted false, and the wire into its Mounted from \"The basket, by seller and by country\".out-full is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Check out\" (bkCheckout), is not drawn: an element above it, \"The sellers beside the totals (tablet), above them (phone)\" (bkContent), is authored Mounted false, and the wire into its Mounted from \"The basket, by seller and by country\".out-full is not exported (the node it comes from is not exported: input \"data\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Checkout",
+  "node": "coLoad",
+  "type": "JavaScriptFunction",
+  "label": "The basket, the countries, the rates, the ways to pay",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "coRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Checkout",
+  "node": "coShape",
+  "type": "JavaScriptFunction",
+  "label": "One payment per seller country, and the ways on there",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Checkout.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Checkout",
+  "node": "coPlaced",
+  "type": "JavaScriptFunction",
+  "label": "Remember the order on this phone; empty the basket",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"placed\" is fed by CloudFunction2 — input \"country\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Checkout",
+  "node": "coEmptied",
+  "type": "Set Variable",
+  "label": "The basket, emptied",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"placed\" is fed by CloudFunction2 — input \"country\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Checkout",
+  "node": "coLastOrder",
+  "type": "Set Variable",
+  "label": "The order just placed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"placed\" is fed by CloudFunction2 — input \"country\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Checkout",
+  "node": "coToShop",
+  "type": "RouterNavigate",
+  "label": "To the shop",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"To the shop\" (coShop), is not drawn: an element above it, \"Nothing to check out\" (coEmpty), is authored Mounted false, and the wire into its Mounted from \"One payment per seller country, and the ways on there\".out-empty is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "coShop"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Checkout",
+  "node": "coToOrder",
+  "type": "RouterNavigate",
+  "label": "To the order",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"placed\" is fed by CloudFunction2 — input \"country\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Home",
+  "node": "hmLoad",
+  "type": "JavaScriptFunction",
+  "label": "Everything on the shelves, read once",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "hmRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Home",
+  "node": "hmShape",
+  "type": "JavaScriptFunction",
+  "label": "What is on sale, on the shelf picked, matching the search",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Home.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Order",
+  "node": "odUrl",
+  "type": "PageInputs",
+  "label": "Which order",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Order.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Order",
+  "node": "odLoad",
+  "type": "JavaScriptFunction",
+  "label": "The order this link opens",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Order.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Order",
+  "node": "odShape",
+  "type": "JavaScriptFunction",
+  "label": "The order, worded for its buyer",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"token\" is unticked under Run On Value Change — its changes would not re-run the script"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppUrl",
+  "type": "PageInputs",
+  "label": "Which product",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Product.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppLoad",
+  "type": "JavaScriptFunction",
+  "label": "The product, its seller, its price in the buyer’s currency",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Product.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppAddLabel",
+  "type": "JavaScriptFunction",
+  "label": "The Add button’s words",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"quantity\" is fed by Counter — its limits gate the mutations — clamped counting is not translated in this slice"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppAddIt",
+  "type": "JavaScriptFunction",
+  "label": "Put them in the basket on this phone",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"quantity\" is fed by Counter — its limits gate the mutations — clamped counting is not translated in this slice"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppSetBasket",
+  "type": "Set Variable",
+  "label": "The basket changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"quantity\" is fed by Counter — its limits gate the mutations — clamped counting is not translated in this slice"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppToBasket",
+  "type": "RouterNavigate",
+  "label": "To the basket",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"See your basket\" (ppSeeBasket), is not drawn: an element above it, \"In the basket now\" (ppAdded), is authored Mounted false, and the wire into its Mounted from \"Put them in the basket on this phone\".out-has is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"See your basket\" (ppSeeBasket), is not drawn: an element above it, \"In the basket now\" (ppAdded), is authored Mounted false, and the wire into its Mounted from \"Put them in the basket on this phone\".out-has is not exported (the node it comes from is not exported: input \"quantity\" is fed by Counter — its limits gate the mutations — clamped counting is not translated in this slice)"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppOpenWhatsapp",
+  "type": "net.noodl.externallink",
+  "label": "Open WhatsApp",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "ppWhatsapp"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppAskGather",
+  "type": "JavaScriptFunction",
+  "label": "The message, as one enquiry",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"productId\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "ppAskGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppAskCall",
+  "type": "CloudFunction2",
+  "label": "sendEnquiry(enquiry)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"productId\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "ppAskGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppAskFailed",
+  "type": "Switch",
+  "label": "The last send was refused",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its on trigger is never fired by a translatable source"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "ppAskGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppAskDone",
+  "type": "Switch",
+  "label": "Sent (a new product starts unsent)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger ppLoad.out-loaded is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "ppAskGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppAskSay",
+  "type": "JavaScriptFunction",
+  "label": "Who has it, and how they’ll reach you",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"seller\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "ppAskGo"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppToSeller",
+  "type": "RouterNavigate",
+  "label": "To the seller",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "ppSellerName"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Seller",
+  "node": "slUrl",
+  "type": "PageInputs",
+  "label": "Which seller",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Seller.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Seller",
+  "node": "slLoad",
+  "type": "JavaScriptFunction",
+  "label": "The seller and what it has on sale",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Seller.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/SignIn",
+  "node": "siLogIn",
+  "type": "net.noodl.user.LogIn",
+  "label": "Sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "siPassword"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/SignIn",
+  "node": "siRoute",
+  "type": "JavaScriptFunction",
+  "label": "Admin to sellers, staff to their orders",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "siPassword"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/SignIn",
+  "node": "siToSellers",
+  "type": "RouterNavigate",
+  "label": "To the sellers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"admin\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "siPassword"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/SignIn",
+  "node": "siToOrders",
+  "type": "RouterNavigate",
+  "label": "To my orders",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"seller\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "siPassword"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/BasketLine",
+  "node": "blDoLess",
+  "type": "JavaScriptFunction",
+  "label": "One fewer",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "blLess"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/BasketLine",
+  "node": "blDoMore",
+  "type": "JavaScriptFunction",
+  "label": "One more",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "blMore"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/BasketLine",
+  "node": "blDoRemove",
+  "type": "JavaScriptFunction",
+  "label": "Take it out",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "blRemove"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/BasketLine",
+  "node": "blSetLess",
+  "type": "Set Variable",
+  "label": "The basket changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "blLess"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/BasketLine",
+  "node": "blSetMore",
+  "type": "Set Variable",
+  "label": "The basket changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "blMore"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/BasketLine",
+  "node": "blSetRemove",
+  "type": "Set Variable",
+  "label": "The basket changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "blRemove"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/Nav",
+  "node": "nvLoad",
+  "type": "JavaScriptFunction",
+  "label": "How many in the basket; the last order on this phone",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "nvRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/Nav",
+  "node": "nvToOrder",
+  "type": "RouterNavigate",
+  "label": "To my order",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "nvOrder"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/PayBox",
+  "node": "pbGo",
+  "type": "JavaScriptFunction",
+  "label": "Open Paystack for this country",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "pbPay"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/Top",
+  "node": "tpLoad",
+  "type": "JavaScriptFunction",
+  "label": "The currencies there are rates for, and which one is shown",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its out-items output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/Top",
+  "node": "tpSetFirst",
+  "type": "Set Variable",
+  "label": "The currency to start with",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"set\" signal is not exported: its out-items output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/Top",
+  "node": "tpNameLoad",
+  "type": "JavaScriptFunction",
+  "label": "The marketplace’s name, read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "tpRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Shop/Top",
+  "node": "tpNameSet",
+  "type": "Set Variable",
+  "label": "The marketplace’s name, as read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "tpRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "UI/Brand",
+  "node": "brNameLoad",
+  "type": "JavaScriptFunction",
+  "label": "The marketplace’s name, read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "brRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "UI/Brand",
+  "node": "brNameSet",
+  "type": "Set Variable",
+  "label": "The marketplace’s name, as read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "brRoot"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Help",
+  "node": "hpBackGo",
+  "type": "JavaScriptFunction",
+  "label": "Back to where she was",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "hpBack"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Help",
+  "node": "hpToTonight",
+  "type": "RouterNavigate",
+  "label": "Tonight",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"tonight\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "hpBack"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Help",
+  "node": "hpToUnlock",
+  "type": "RouterNavigate",
+  "label": "The code",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"unlock\" signal is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "hpBack"
+  }
+ }
+]

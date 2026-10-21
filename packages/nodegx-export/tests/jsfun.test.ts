@@ -86,8 +86,10 @@ describe('the purity gate over bodies (EXP-003 §3.1–§3.4)', () => {
     expect(jsPurityDefer('function', 'var mask = 010;\nOutputs.x = mask;')).toContain('compiles only in sloppy mode');
   });
 
-  test('the Noodl API is the runtime-coupled tier', () => {
-    expect(jsPurityDefer('function', "Noodl.Events.emit('go');")).toContain('EXP-003 Tier B');
+  // EXP-020 (session 134): a Function's Noodl members travel where the export carries them; any other is refused by name.
+  test('a Noodl member the export does not carry is refused by its name', () => {
+    expect(jsPurityDefer('function', "Noodl.Events.emit('go');")).toContain('reads `Noodl.Events.emit`');
+    expect(jsPurityDefer('expression', 'Noodl.Variables.x')).toContain('EXP-003 Tier B');
   });
 
   test('the Component scope is the Filters family — per-component rewrites', () => {
@@ -118,9 +120,9 @@ describe('the purity gate over bodies (EXP-003 §3.1–§3.4)', () => {
 
   test.each([
     ['dynamic import', "import('lodash');", 'dynamically'],
-    ['async/await', 'await Promise.resolve();', 'asynchronous'],
     ['arguments', 'Outputs.n = arguments.length;', 'arguments']
-  ])('%s is a named defer (not a host trait: EXP-019 slice 1b for async; the wrapper\'s own `arguments`; a module question)', (_label, body, fragment) => {
+  ])('%s is a named defer (not a host trait: the wrapper\'s own `arguments`; a module question)', (_label, body, fragment) => {
+    // An `await` left this list in session 134 (EXP-019 slice 1b): a host trait, the-noodl-api-travels.test.ts D1.
     expect(jsPurityDefer('function', body)).toContain(fragment);
     expect(jsHostTraitsOf(body)).toEqual([]);
   });

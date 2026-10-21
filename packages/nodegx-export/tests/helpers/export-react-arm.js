@@ -11,6 +11,11 @@
  * P18 session 129 (EXP-011 §97). `fields: true` appends each field's text and the focused field to every reading, and the
  * steps `type:<placeholder>:<text>` and `enter:<placeholder>` act in a field, both exactly as `runtime-mounted-arm.js`
  * reads and does them.
+ *
+ * P18 session 134 (EXP-020). `backend: { spec, appId, session? }` (with `settled`) answers the app's `fetch` from
+ * `fake-parse-backend.js`, fresh per scenario, with `session` stored where the running app keeps it
+ * (`Parse/<appId>/currentUser`); `import.meta.env` is empty, so the client reads the project's own endpoint. The project's
+ * output is then `{ readings, requests }`: the readings as above, and per scenario every request the backend was sent.
  */
 
 const fs = require('fs');
@@ -20,6 +25,7 @@ const path = require('path');
 const ROOT = path.join(__dirname, '..', '..', '..', '..');
 const esbuild = require(require.resolve('esbuild', { paths: [ROOT] }));
 const { JSDOM } = require(require.resolve('jsdom', { paths: [ROOT] }));
+const { createFakeBackend } = require('./fake-parse-backend');
 console.log = (...args) => process.stderr.write(args.map(String).join(' ') + '\n');
 
 const HARNESS = `
@@ -91,7 +97,7 @@ w.__stepSettled = async (verb: string, placeholder: string, text: string) => {
 `;
 const STEP = /^(type|enter):([^:]*)(?::(.*))?$/;
 
-function bundle(dir) {
+function bundle(dir, env = false) {
   const entry = path.join(dir, '__harness.tsx');
   fs.writeFileSync(entry, HARNESS);
   const out = esbuild.buildSync({
@@ -103,7 +109,7 @@ function bundle(dir) {
     platform: 'browser',
     jsx: 'automatic',
     loader: { '.module.css': 'local-css', '.css': 'css' },
-    define: { 'process.env.NODE_ENV': '"development"' },
+    define: { 'process.env.NODE_ENV': '"development"', ...(env ? { 'import.meta.env': '{}' } : {}) },
     nodePaths: [path.join(ROOT, 'node_modules')],
     logLevel: 'silent'
   });
@@ -116,12 +122,23 @@ function bundle(dir) {
  * each inside an act, after the mount and after every step, as the runtime arm lets frames run: a zero timer the page
  * started has fired before the reading.
  */
-async function runSettled({ dir, scenarios, fields, ticks }) {
-  const code = bundle(dir);
+async function runSettled({ dir, scenarios, fields, ticks, backend }) {
+  const code = bundle(dir, backend !== undefined);
   const out = [];
+  const requests = [];
   for (const presses of scenarios) {
-    const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', { runScripts: 'outside-only', pretendToBeVisual: true });
+    const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', {
+      runScripts: 'outside-only',
+      pretendToBeVisual: true,
+      ...(backend !== undefined ? { url: 'http://localhost/' } : {})
+    });
     const w = dom.window;
+    if (backend !== undefined) {
+      const fake = createFakeBackend(backend.spec);
+      w.fetch = fake.fetch;
+      if (backend.session) w.localStorage.setItem(`Parse/${backend.appId}/currentUser`, JSON.stringify(backend.session));
+      requests.push(fake.log);
+    }
     w.IS_REACT_ACT_ENVIRONMENT = true;
     const errors = [];
     w.console.error = (...args) => errors.push(args.map(String).join(' '));
@@ -143,7 +160,7 @@ async function runSettled({ dir, scenarios, fields, ticks }) {
     w.close();
     out.push(readings);
   }
-  return out;
+  return backend !== undefined ? { readings: out, requests } : out;
 }
 
 function run({ dir, scenarios, fields }) {

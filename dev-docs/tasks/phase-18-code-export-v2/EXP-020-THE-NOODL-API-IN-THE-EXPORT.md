@@ -1,7 +1,7 @@
 # EXP-020 — The Noodl API in the export
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), under Richard's ruling of 2026-10-21 (see
-[EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md)). **Status: ⬜ scoped, not started.** Follows EXP-019.
+[EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md)). **Status: 🟡 s134 — slice 1 built and graded (§6): `Records.query` (plain), `CloudFunctions.run`, `Users.Current`, `Files.sign`, `Variables`; next the members the corpus ranks (`Events`, `Object`/`Objects`, `Array`).** Follows EXP-019.
 
 ## 1. The person sentence
 
@@ -48,3 +48,25 @@ A member outside the eight is a refusal by name ("reads `Noodl.Events` — not i
 ## 5. Not this task
 
 `Noodl.Events`, `Noodl.Objects` / `Noodl.Arrays` as live stores (the controlled-state slice), `Component.*` (EXP-021).
+
+## 6. Session 134 (2026-10-21): slice 1 — built, graded
+
+[EXP-011 §104](EXP-011-PICKER-COVERAGE.md) is the ledger entry; `s134-noodlapi/` holds the measurements (`bodies.py`,
+`census.ts` + `census.json`, `census-gates-open.json`, `EXPECTED.md`, `dispdiff.json`, `dispdiff-corpus.json`,
+`tplbuild.json`, `mutants.py` + `mutants.out`, `dd.py`).
+
+🔴 **§2's 183 was the wrong population for this task**: 71 of those bodies are cloud functions (`__cloud__`), which run
+on the backend and are not in the React app. The front end has 112; 79 stood at the Noodl gate; with it and the
+top-level-`await` gate opened in a scratch copy, 35 exported directly. Every front-end query reads rows `plain`, so the
+Model records are not this slice; `Records.create` / `save` / `delete` live only in logic components (EXP-021).
+
+| AC | |
+|---|---|
+| AC1 | ✅ on the Noodl Desk against a fake Parse backend both arms talk to: the same count, and one more after a Cloud Function stores a Task; the member arm: 71 calls, every outcome and request body equal but the runtime's query after a refused filter (P18-S134-REFUSEDFILTERSENDS, filed) |
+| AC2 | ✅ `Noodl.Variables.note` written in a Function is read by a Variable node's Text; a Variable a Set Variable wrote is read by the Function (`kept S1`, `kept S2`) |
+| AC3 | the templates: 0 of the front-end bodies refused for a member among those carried; the rest named by member (the corpus: `Noodl.Events` 132, `Noodl.Object` 50, `Noodl` handed on 47, `Noodl.Array` 22) |
+| AC4 | ✅ `Users.Current`: the user signed in, undefined signed out, in both arms (page and member) |
+| AC5 | ✅ a member outside the carried set refuses by its name; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL) |
+
+The members not carried are refused by name and ranked for the next slice. A project with no backend exports the same
+calls, failing as the running app does without one (the exporter's stub rule).

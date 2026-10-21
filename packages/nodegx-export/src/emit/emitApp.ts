@@ -24,6 +24,7 @@ import { DATE_LIB_PATH, dateLibSource } from './dateLib';
 import { UTIL_LIB_PATH, utilLibSource } from './utilLib';
 import { PARSE_DEPENDENCIES, PARSE_HELPERS_NEEDING_DEPENDENCY, PARSE_LIB_PATH, isParseHelper, parseLibSource } from './parseLib';
 import { FUNCTION_RUN_LIB_PATH, functionRunLibSource } from './functionRunLib';
+import { NOODL_LIB_PATH, noodlLibSource } from './noodlLib';
 import { ID_LIB_PATH, idLibSource } from './idLib';
 import { TIMER_LIB_PATH, timerLibSource } from './timerLib';
 import { ANIMATE_LIB_PATH, animateLibSource } from './animateLib';
@@ -177,6 +178,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   const timerHelpersUsed = new Set<string>();
   /** EXP-011 §86. `src/lib/functionRun.ts`, earned by a component that prints a Function's pulses. */
   let functionRunLibUsed = false;
+  /** EXP-020. `src/lib/noodl.ts`, earned by a printed Function that reads a backend member of the Noodl API. */
+  let noodlLibUsed = false;
   // EXP-011 §49. The animation pair's modules — earned by a component whose plan kept a node.
   let animateLibUsed = false;
   let statesLibUsed = false;
@@ -266,6 +269,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     for (const helper of emitted.utilHelpers) utilHelpersUsed.add(helper);
     for (const helper of emitted.idHelpers) idHelpersUsed.add(helper);
     if (emitted.functionRunLib) functionRunLibUsed = true;
+    if (emitted.noodlLib) noodlLibUsed = true;
     for (const helper of emitted.timerHelpers) timerHelpersUsed.add(helper);
     if (emitted.animateLib) animateLibUsed = true;
     if (emitted.statesLib) statesLibUsed = true;
@@ -327,6 +331,13 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   /** EXP-011 §86. `src/lib/functionRun.ts`, on the same rule as the modules above. */
   if (functionRunLibUsed) {
     files[FUNCTION_RUN_LIB_PATH] = GENERATED_MODULE_TS + functionRunLibSource();
+  }
+  /**
+   * EXP-020 (session 134). `src/lib/noodl.ts`, on the same rule: beside the real client (which then carries `noodlRequest`)
+   * where the project declares a backend, and failing as the running app fails without one where it does not.
+   */
+  if (noodlLibUsed) {
+    files[NOODL_LIB_PATH] = GENERATED_MODULE_TS + noodlLibSource(ir.project.collections, ir.project.cloudservices !== undefined);
   }
   /** `src/lib/timer.ts` (EXP-011 §39) — the fourth module, on the same rule as the other three. */
   if (timerHelpersUsed.size > 0) {
@@ -445,7 +456,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     files[RECORD_FILTER_LIB_PATH] = GENERATED_MODULE_TS + recordFilterLibSource();
   }
 
-  const api = apiModules(ir, project);
+  const api = apiModules(ir, project, noodlLibUsed);
   for (const [path, content] of api.files) {
     files[path] = content;
   }
@@ -576,7 +587,8 @@ function withDependencies(packageJson: string, deps: Readonly<Record<string, str
  */
 function apiModules(
   ir: ExportIR,
-  project: ProjectPlan
+  project: ProjectPlan,
+  noodlLibUsed = false
 ): {
   files: Array<[string, string]>;
   notes: string[];
@@ -674,7 +686,8 @@ function apiModules(
   const liveRecords = project.plans.some((plan) => plan.recordReads.some((read) => read.live || read.binds));
   // P18-S115-QUERYPARAMS. Some page builds a query's `where` from wired values, through `filterValue`.
   const wiredFilters = project.plans.some((plan) => plan.queries.some((query) => query.params?.wired !== undefined && query.wiredClient === true));
-  const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions || hasSignIns;
+  // EXP-020 (session 134): a script's Noodl API rides the client too.
+  const hasApi = byCollection.size > 0 || hasSessionCalls || hasCloudCalls || hasFileOps || hasSubscriptions || hasSignIns || noodlLibUsed;
   const notes: string[] = [];
   // No collection module can collide with `client.ts` (or `session.ts`): moduleBase is the
   // pluralized class name and every pluralize() result ends in "s"/"es"/"ies", while neither
@@ -869,7 +882,7 @@ function apiModules(
   if (files !== null) stubs.push(files);
 
   if (backend !== undefined && hasApi) {
-    stubs.push(['src/api/client.ts', clientModule(backend, hasReturnLeg, liveRecords, wiredFilters)]);
+    stubs.push(['src/api/client.ts', clientModule(backend, hasReturnLeg, liveRecords, wiredFilters, noodlLibUsed)]);
     stubs.push(['.env.example', envExample(backend)]);
     // ⚠️ `README.md` used to be pushed here too, and that was the defect EXP-004 closed: it made
     // the repository's front door conditional on the project having a backend to query. It is now
@@ -1750,7 +1763,38 @@ export function filterValue(value: unknown, dateColumn = false): unknown {
 }
 `;
 
-function clientModule(backend: CloudServicesIR, returnLeg: boolean, liveRecords: boolean, wiredFilters = false): string {
+/**
+ * EXP-020 (session 134). One request as the running app's Noodl API makes it (`ParseWireAdapter._makeRequest`, the viewer's
+ * `cloudfunctions.ts`), for `src/lib/noodl.ts`, which answers each member's outcome as the running app does — so this never
+ * throws: it hands back the status (0 where the backend could not be reached), the body when it is JSON, and its text.
+ */
+const NOODL_REQUEST_SOURCE = `
+/**
+ * One request as a script's Noodl API makes it: the app id, the session token when someone is signed in, the body as
+ * JSON. Never throws: the status (0 where the backend could not be reached), the body when it is JSON, and its text.
+ */
+export async function noodlRequest(path: string, method: string, body?: unknown): Promise<{ status: number; json: unknown; text: string }> {
+  const headers: Record<string, string> = { 'X-Parse-Application-Id': APP_ID, 'Content-Type': 'application/json' };
+  const sessionToken = readSession()?.sessionToken;
+  if (sessionToken !== undefined) headers['X-Parse-Session-Token'] = sessionToken;
+  let response: Response;
+  try {
+    response = await fetch(ENDPOINT + path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body) });
+  } catch {
+    return { status: 0, json: undefined, text: '' };
+  }
+  const text = await response.text();
+  let json: unknown;
+  try {
+    json = text.length > 0 ? JSON.parse(text) : undefined;
+  } catch {
+    json = undefined;
+  }
+  return { status: response.status, json, text };
+}
+`;
+
+function clientModule(backend: CloudServicesIR, returnLeg: boolean, liveRecords: boolean, wiredFilters = false, noodl = false): string {
   return (
     GENERATED_CLIENT_TS +
     `/**
@@ -2113,7 +2157,8 @@ export async function callFunction<T>(name: string, params: Record<string, unkno
   return (json?.result ?? {}) as T;
 }
 ` +
-    (returnLeg ? authReturnLegSource() : '')
+    (returnLeg ? authReturnLegSource() : '') +
+    (noodl ? NOODL_REQUEST_SOURCE : '')
   );
 }
 

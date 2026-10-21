@@ -1,0 +1,2610 @@
+{
+ "rows": [
+  {
+   "project": "digital-bricks-training",
+   "component": "App",
+   "node": "app_notice_gate",
+   "label": "THE NOTICE GATE — hold the page until the current notice is answered",
+   "members": [
+    "Users",
+    "Users.Current"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "node beside the router shell",
+   "compKinds": {
+    "deferred": 22,
+    "collapsed": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Lesson/Section row",
+   "node": "sr_ok",
+   "label": "Saved: the kit may say so",
+   "members": [
+    "Variables.dbtCapturedFacts"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 2,
+    "deferred": 5
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Logic/Feed filter",
+   "node": "ff_load",
+   "label": "Read the saved filter once",
+   "members": [
+    "Variables.dbtFeedFilter",
+    "Variables.dbtFeedFilterLoaded"
+   ],
+   "topAwait": false,
+   "traits": [
+    "touches the browser environment"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Logic/Feed filter",
+   "node": "ff_tog",
+   "label": "A chip was pressed",
+   "members": [
+    "Variables.dbtFeedFilter"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Logic/Feed filter",
+   "node": "ff_clr",
+   "label": "Show everything",
+   "members": [
+    "Variables.dbtFeedFilter"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Logic/Feed filter",
+   "node": "ff_row",
+   "label": "A row was opened or closed",
+   "members": [
+    "Variables.dbtFeedOpen"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Logic/Feed filter",
+   "node": "ff_pipe",
+   "label": "Chips, rows, and the jump",
+   "members": [
+    "Variables.dbtFeedFilter",
+    "Variables.dbtFeedOpen",
+    "Variables.dbtLogFocus"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Pages/Course",
+   "node": "cs_dos_open",
+   "label": "Open this objective",
+   "members": [
+    "Variables.dbtDossierOpen"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 31,
+    "collapsed": 2,
+    "deferred": 23
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Pages/Course",
+   "node": "cs_dos_close",
+   "label": "Close it",
+   "members": [
+    "Variables.dbtDossierOpen"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 31,
+    "collapsed": 2,
+    "deferred": 23
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Pages/Learner",
+   "node": "lr_fresh",
+   "label": "A fresh page",
+   "members": [
+    "Variables.dbtCoachSurface",
+    "Variables.dbtFeedOpen",
+    "Variables.dbtLogFocus",
+    "Variables.dbtProgrammeFocus",
+    "Variables.dbtProgrammeOpened"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 34,
+    "collapsed": 8,
+    "deferred": 16
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Pages/Learner",
+   "node": "lr_point",
+   "label": "Point at a programme row",
+   "members": [
+    "Variables.dbtProgrammeFocus",
+    "Variables.dbtProgrammeOpened"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 34,
+    "collapsed": 8,
+    "deferred": 16
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Pages/Learner",
+   "node": "lr_to_log_focus",
+   "label": "Show in the activity log",
+   "members": [
+    "Variables.dbtCoachSurface",
+    "Variables.dbtLogFocus"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 34,
+    "collapsed": 8,
+    "deferred": 16
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Pages/Learner",
+   "node": "lr_to_prog_focus",
+   "label": "Show on their programme",
+   "members": [
+    "Variables.dbtCoachSurface",
+    "Variables.dbtProgrammeFocus"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 34,
+    "collapsed": 8,
+    "deferred": 16
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Pages/Lesson",
+   "node": "ls_captured_reset",
+   "label": "A lesson opens with nothing saved since",
+   "members": [
+    "Variables.dbtCapturedFacts"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 15,
+    "collapsed": 3,
+    "deferred": 21
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "Pages/Settings",
+   "node": "st_gone",
+   "label": "Forget the session here, then Home, saying it is done",
+   "members": [
+    "Users",
+    "Users.Current"
+   ],
+   "topAwait": false,
+   "traits": [
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 31,
+    "collapsed": 11,
+    "deferred": 36
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "People/Their path",
+   "node": "tp_seed",
+   "label": "Start the draft from their current path",
+   "members": [
+    "Variables.dbtPathDraft",
+    "Variables.dbtPathTitles"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 16,
+    "deferred": 22,
+    "collapsed": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "People/Their path",
+   "node": "tp_rows",
+   "label": "The two lists, from the draft",
+   "members": [
+    "Variables.dbtPathTitles"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 16,
+    "deferred": 22,
+    "collapsed": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "People/Their path",
+   "node": "tp_up",
+   "label": "Move a step up",
+   "members": [
+    "Variables.dbtPathDraft"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 16,
+    "deferred": 22,
+    "collapsed": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "People/Their path",
+   "node": "tp_down",
+   "label": "Move a step down",
+   "members": [
+    "Variables.dbtPathDraft"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 16,
+    "deferred": 22,
+    "collapsed": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "People/Their path",
+   "node": "tp_remove",
+   "label": "Take a step off",
+   "members": [
+    "Variables.dbtPathDraft"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 16,
+    "deferred": 22,
+    "collapsed": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training",
+   "component": "People/Their path",
+   "node": "tp_add",
+   "label": "Put a concept at the end",
+   "members": [
+    "Variables.dbtPathDraft"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 16,
+    "deferred": 22,
+    "collapsed": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Lesson/Section row",
+   "node": "sr_ok",
+   "label": "Saved: the kit may say so",
+   "members": [
+    "Variables.dbtCapturedFacts"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 6,
+    "unknown-type": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Logic/Feed filter",
+   "node": "ff_load",
+   "label": "Read the saved filter once",
+   "members": [
+    "Variables.dbtFeedFilter",
+    "Variables.dbtFeedFilterLoaded"
+   ],
+   "topAwait": false,
+   "traits": [
+    "touches the browser environment"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Logic/Feed filter",
+   "node": "ff_tog",
+   "label": "A chip was pressed",
+   "members": [
+    "Variables.dbtFeedFilter"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Logic/Feed filter",
+   "node": "ff_clr",
+   "label": "Show everything",
+   "members": [
+    "Variables.dbtFeedFilter"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Logic/Feed filter",
+   "node": "ff_row",
+   "label": "A row was opened or closed",
+   "members": [
+    "Variables.dbtFeedOpen"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Logic/Feed filter",
+   "node": "ff_pipe",
+   "label": "Chips, rows, and the jump",
+   "members": [
+    "Variables.dbtFeedFilter",
+    "Variables.dbtFeedOpen",
+    "Variables.dbtLogFocus"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Pages/Course",
+   "node": "cs_dos_open",
+   "label": "Open this objective",
+   "members": [
+    "Variables.dbtDossierOpen"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 29,
+    "collapsed": 2,
+    "deferred": 17,
+    "unknown-type": 8
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Pages/Course",
+   "node": "cs_dos_close",
+   "label": "Close it",
+   "members": [
+    "Variables.dbtDossierOpen"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 29,
+    "collapsed": 2,
+    "deferred": 17,
+    "unknown-type": 8
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Pages/Learner",
+   "node": "lr_fresh",
+   "label": "A fresh page",
+   "members": [
+    "Variables.dbtCoachSurface",
+    "Variables.dbtFeedOpen",
+    "Variables.dbtLogFocus",
+    "Variables.dbtProgrammeFocus",
+    "Variables.dbtProgrammeOpened"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 32,
+    "collapsed": 8,
+    "deferred": 17
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Pages/Learner",
+   "node": "lr_point",
+   "label": "Point at a programme row",
+   "members": [
+    "Variables.dbtProgrammeFocus",
+    "Variables.dbtProgrammeOpened"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 32,
+    "collapsed": 8,
+    "deferred": 17
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Pages/Learner",
+   "node": "lr_to_log_focus",
+   "label": "Show in the activity log",
+   "members": [
+    "Variables.dbtCoachSurface",
+    "Variables.dbtLogFocus"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 32,
+    "collapsed": 8,
+    "deferred": 17
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Pages/Learner",
+   "node": "lr_to_prog_focus",
+   "label": "Show on their programme",
+   "members": [
+    "Variables.dbtCoachSurface",
+    "Variables.dbtProgrammeFocus"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 32,
+    "collapsed": 8,
+    "deferred": 17
+   },
+   "planKind": ""
+  },
+  {
+   "project": "digital-bricks-training-demo",
+   "component": "Pages/Lesson",
+   "node": "ls_captured_reset",
+   "label": "A lesson opens with nothing saved since",
+   "members": [
+    "Variables.dbtCapturedFacts"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 15,
+    "collapsed": 3,
+    "deferred": 15,
+    "unknown-type": 6
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Admin/Admins",
+   "node": "adLoad",
+   "label": "Everyone who is in, admins first",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 12,
+    "collapsed": 2,
+    "deferred": 2
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Admin/Look",
+   "node": "lkLoad",
+   "label": "The post or the comment, its state and its reports",
+   "members": [
+    "CloudFunctions.run",
+    "Files.sign",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "Component.*",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 31,
+    "collapsed": 3,
+    "deferred": 8
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Admin/Queue",
+   "node": "quLoad",
+   "label": "Who is waiting",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 34,
+    "collapsed": 4,
+    "deferred": 7
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Admin/Queue",
+   "node": "quModLoad",
+   "label": "What is reported, hidden and blocked",
+   "members": [
+    "CloudFunctions.run",
+    "Files.sign",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "Component.*",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 34,
+    "collapsed": 4,
+    "deferred": 7
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/EditProfile",
+   "node": "epLoad",
+   "label": "Your profile as it is",
+   "members": [
+    "CloudFunctions.run",
+    "Files.sign",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "Component.*",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 23,
+    "collapsed": 1,
+    "deferred": 10
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/EditProfile",
+   "node": "epPhoto",
+   "label": "The photo, while the page is open",
+   "members": [
+    "Files.sign"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "Component.*",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 23,
+    "collapsed": 1,
+    "deferred": 10
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Feed",
+   "node": "fdLoad",
+   "label": "The newest posts, as cards",
+   "members": [
+    "CloudFunctions.run",
+    "Files.sign",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "Component.*",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 16,
+    "collapsed": 2,
+    "deferred": 7
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Member",
+   "node": "mpLoad",
+   "label": "Their profile and posts",
+   "members": [
+    "CloudFunctions.run",
+    "Files.sign",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "Component.*",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 31,
+    "collapsed": 3,
+    "deferred": 9
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/NewPost",
+   "node": "npLoad",
+   "label": "Who is posting",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 30,
+    "collapsed": 2,
+    "deferred": 20
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/NewPost",
+   "node": "npPhotos",
+   "label": "The photos, while the page is open",
+   "members": [
+    "Files.sign"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "Component.*",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 30,
+    "collapsed": 2,
+    "deferred": 20
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Post",
+   "node": "poLoad",
+   "label": "The post and its comments",
+   "members": [
+    "CloudFunctions.run",
+    "Files.sign",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "Component.*",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 28,
+    "collapsed": 3,
+    "deferred": 17
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Prayer",
+   "node": "prLoad",
+   "label": "The newest prayer requests, as cards",
+   "members": [
+    "CloudFunctions.run",
+    "Files.sign",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "Component.*",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 15,
+    "collapsed": 2,
+    "deferred": 5
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Report",
+   "node": "rpLoad",
+   "label": "What is reported, and its reasons",
+   "members": [
+    "CloudFunctions.run",
+    "Files.sign",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "Component.*",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 21,
+    "collapsed": 2,
+    "deferred": 8
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Rules",
+   "node": "ruLoad",
+   "label": "The rules, as the admins wrote them",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 12,
+    "collapsed": 2,
+    "deferred": 4
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/SignIn",
+   "node": "siRoute",
+   "label": "Where they belong",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 15,
+    "collapsed": 2,
+    "deferred": 8
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Waiting",
+   "node": "wtLoad",
+   "label": "Their name; in already?",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 10,
+    "collapsed": 1,
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Welcome",
+   "node": "wcLoad",
+   "label": "The community’s name; someone signed in?",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)",
+    "schedules timers"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 14,
+    "collapsed": 1,
+    "deferred": 8
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "Pages/Welcome",
+   "node": "wcRoute",
+   "label": "Where they belong",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query",
+    "Users.Current"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 14,
+    "collapsed": 1,
+    "deferred": 8
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "UI/Bar",
+   "node": "brWho",
+   "label": "Signed in? A band?",
+   "members": [
+    "Users.Current"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 7,
+    "deferred": 4,
+    "collapsed": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "gram",
+   "component": "UI/Bar",
+   "node": "brNameLoad",
+   "label": "The community’s name, read",
+   "members": [
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 7,
+    "deferred": 4,
+    "collapsed": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Admin/GiveLogin",
+   "node": "glLoad",
+   "label": "The seller",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 18,
+    "collapsed": 1,
+    "deferred": 5
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Admin/Name",
+   "node": "nmLoad",
+   "label": "The admin only",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 16,
+    "collapsed": 2,
+    "deferred": 7
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Admin/Rates",
+   "node": "rtLoad",
+   "label": "Every currency, its rate, and when it changed",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 18,
+    "collapsed": 4,
+    "deferred": 6
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Admin/SellerForm",
+   "node": "sfLogoShown",
+   "label": "The logo to show",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 24,
+    "collapsed": 1,
+    "deferred": 10
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Admin/SellerForm",
+   "node": "sfLoad",
+   "label": "The seller, and the countries",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 24,
+    "collapsed": 1,
+    "deferred": 10
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Admin/Sellers",
+   "node": "asLoad",
+   "label": "Every seller, with its country and counts",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 17,
+    "collapsed": 1,
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Admin/Shelves",
+   "node": "svLoad",
+   "label": "Every shelf, and how many products are on it",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 19,
+    "collapsed": 2,
+    "deferred": 5
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Admin/StopSeller",
+   "node": "ssLoad",
+   "label": "The seller",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 19,
+    "collapsed": 1,
+    "deferred": 7
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Admin/WaysToPay",
+   "node": "wpLoad",
+   "label": "The countries and the ways to pay",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 23,
+    "collapsed": 2,
+    "deferred": 5
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Enquiries",
+   "node": "eqLoad",
+   "label": "The enquiries this person may read",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 18,
+    "collapsed": 2,
+    "deferred": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Orders",
+   "node": "orLoad",
+   "label": "The order parts this person may see",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 20,
+    "collapsed": 2,
+    "deferred": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Seller/ProductForm",
+   "node": "pfPhotoList",
+   "label": "The photos, while the form is open",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "Component.*",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 23,
+    "collapsed": 2,
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Seller/ProductForm",
+   "node": "pfLoad",
+   "label": "The product, the shelves, the seller’s currency",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 23,
+    "collapsed": 2,
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Seller/Products",
+   "node": "spLoad",
+   "label": "This seller’s products",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 19,
+    "collapsed": 2,
+    "deferred": 4
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Basket",
+   "node": "bkLoad",
+   "label": "The basket on this phone, and what is in it",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment"
+   ],
+   "component_": "Component.*",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 22,
+    "collapsed": 4,
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Basket",
+   "node": "bkShape",
+   "label": "The basket, by seller and by country",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 22,
+    "collapsed": 4,
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Checkout",
+   "node": "coLoad",
+   "label": "The basket, the countries, the rates, the ways to pay",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 22,
+    "collapsed": 5,
+    "deferred": 9
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Checkout",
+   "node": "coShape",
+   "label": "One payment per seller country, and the ways on there",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 22,
+    "collapsed": 5,
+    "deferred": 9
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Checkout",
+   "node": "coPlaced",
+   "label": "Remember the order on this phone; empty the basket",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 22,
+    "collapsed": 5,
+    "deferred": 9
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Home",
+   "node": "hmLoad",
+   "label": "Everything on the shelves, read once",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 26,
+    "collapsed": 7,
+    "deferred": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Home",
+   "node": "hmShape",
+   "label": "What is on sale, on the shelf picked, matching the search",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 26,
+    "collapsed": 7,
+    "deferred": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Order",
+   "node": "odLoad",
+   "label": "The order this link opens",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 19,
+    "collapsed": 2,
+    "deferred": 2
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Order",
+   "node": "odShape",
+   "label": "The order, worded for its buyer",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 19,
+    "collapsed": 2,
+    "deferred": 2
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Product",
+   "node": "ppLoad",
+   "label": "The product, its seller, its price in the buyer’s currency",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 53,
+    "collapsed": 5,
+    "deferred": 13
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Product",
+   "node": "ppAddLabel",
+   "label": "The Add button’s words",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 53,
+    "collapsed": 5,
+    "deferred": 13
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Product",
+   "node": "ppAddIt",
+   "label": "Put them in the basket on this phone",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 53,
+    "collapsed": 5,
+    "deferred": 13
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/Shop/Seller",
+   "node": "slLoad",
+   "label": "The seller and what it has on sale",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment"
+   ],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 21,
+    "collapsed": 4,
+    "deferred": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Pages/SignIn",
+   "node": "siRoute",
+   "label": "Admin to sellers, staff to their orders",
+   "members": [
+    "CloudFunctions.run"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 12,
+    "collapsed": 2,
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Shop/BasketLine",
+   "node": "blDoLess",
+   "label": "One fewer",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 13,
+    "deferred": 5
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Shop/BasketLine",
+   "node": "blDoMore",
+   "label": "One more",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 13,
+    "deferred": 5
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Shop/BasketLine",
+   "node": "blDoRemove",
+   "label": "Take it out",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 13,
+    "deferred": 5
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Shop/Nav",
+   "node": "nvLoad",
+   "label": "How many in the basket; the last order on this phone",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 5,
+    "collapsed": 4,
+    "deferred": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Shop/PayBox",
+   "node": "pbGo",
+   "label": "Open Paystack for this country",
+   "members": [
+    "CloudFunctions.run"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 6
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Shop/Top",
+   "node": "tpLoad",
+   "label": "The currencies there are rates for, and which one is shown",
+   "members": [
+    "CloudFunctions.run",
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [
+    "reads the clock (Date)",
+    "touches the browser environment"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 2,
+    "deferred": 6,
+    "collapsed": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "Shop/Top",
+   "node": "tpNameLoad",
+   "label": "The marketplace’s name, read",
+   "members": [
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 2,
+    "deferred": 6,
+    "collapsed": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "marketplace",
+   "component": "UI/Brand",
+   "node": "brNameLoad",
+   "label": "The marketplace’s name, read",
+   "members": [
+    "Records.query"
+   ],
+   "topAwait": true,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 2,
+    "collapsed": 1,
+    "deferred": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "nightbook",
+   "component": "Data/Gate",
+   "node": "gtCheck",
+   "label": "Is the book open?",
+   "members": [
+    "Variables.nbUnlocked"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": false,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 1
+   },
+   "planKind": ""
+  },
+  {
+   "project": "nightbook",
+   "component": "Pages/Help",
+   "node": "hpBackGo",
+   "label": "Back to where she was",
+   "members": [
+    "Variables.nbUnlocked"
+   ],
+   "topAwait": false,
+   "traits": [],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)",
+   "compKinds": {
+    "static": 24,
+    "collapsed": 2,
+    "deferred": 11
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Logic/Projects",
+   "node": "pjLoad",
+   "label": "Read the projects and the money",
+   "members": [
+    "Records.query"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 6
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Logic/Projects",
+   "node": "pjCarry",
+   "label": "Bring Planning’s moves over, once",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "keeps state on `this` across runs",
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 6
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Projects/Add project",
+   "node": "AddprojectWrite",
+   "label": "Write it",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Projects/End money item",
+   "node": "EndmoneyitWrite",
+   "label": "Write it",
+   "members": [
+    "Records.save"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Projects/Mark money",
+   "node": "MarkmoneyWrite",
+   "label": "Write it",
+   "members": [
+    "Records",
+    "Records.save"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Projects/Move project",
+   "node": "MoveprojecWrite",
+   "label": "Write it",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Projects/Record balance",
+   "node": "RecordbalaWrite",
+   "label": "Write it",
+   "members": [
+    "Records",
+    "Records.create"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Projects/Save money item",
+   "node": "SavemoneyiWrite",
+   "label": "Write it",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Projects/Save next move",
+   "node": "SavenextmoWrite",
+   "label": "Write it",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Projects/Save project",
+   "node": "SaveprojecWrite",
+   "label": "Write it",
+   "members": [
+    "Records.save"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list",
+   "component": "Projects/Set task project",
+   "node": "SettaskproWrite",
+   "label": "Write it",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list-demo",
+   "component": "Projects/Add project",
+   "node": "AddprojectWrite",
+   "label": "Write it",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list-demo",
+   "component": "Projects/End money item",
+   "node": "EndmoneyitWrite",
+   "label": "Write it",
+   "members": [
+    "Records.save"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list-demo",
+   "component": "Projects/Mark money",
+   "node": "MarkmoneyWrite",
+   "label": "Write it",
+   "members": [
+    "Records",
+    "Records.save"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list-demo",
+   "component": "Projects/Move project",
+   "node": "MoveprojecWrite",
+   "label": "Write it",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list-demo",
+   "component": "Projects/Record balance",
+   "node": "RecordbalaWrite",
+   "label": "Write it",
+   "members": [
+    "Records",
+    "Records.create"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list-demo",
+   "component": "Projects/Save money item",
+   "node": "SavemoneyiWrite",
+   "label": "Write it",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list-demo",
+   "component": "Projects/Save next move",
+   "node": "SavenextmoWrite",
+   "label": "Write it",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list-demo",
+   "component": "Projects/Save project",
+   "node": "SaveprojecWrite",
+   "label": "Write it",
+   "members": [
+    "Records.save"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  },
+  {
+   "project": "todo-list-demo",
+   "component": "Projects/Set task project",
+   "node": "SettaskproWrite",
+   "label": "Write it",
+   "members": [
+    "Records"
+   ],
+   "topAwait": false,
+   "traits": [
+    "reads the clock (Date)",
+    "is asynchronous (it calls back)"
+   ],
+   "component_": "",
+   "run": true,
+   "disp": "deferred",
+   "reason": "logic node (JavaScriptFunction)",
+   "compKinds": {
+    "deferred": 3
+   },
+   "planKind": ""
+  }
+ ],
+ "tally": {
+  "project": {
+   "digital-bricks-training": 21,
+   "digital-bricks-training-demo": 13,
+   "gram": 20,
+   "marketplace": 36,
+   "nightbook": 2,
+   "todo-list": 11,
+   "todo-list-demo": 9
+  },
+  "disp": {
+   "deferred: node beside the router shell": 1,
+   "deferred: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)": 79,
+   "deferred: logic node (JavaScriptFunction)": 32
+  },
+  "topAwait": {
+   "false": 70,
+   "true": 42
+  },
+  "run": {
+   "false": 30,
+   "true": 82
+  },
+  "member": {
+   "Users": 2,
+   "Users.Current": 19,
+   "Variables.dbtCapturedFacts": 4,
+   "Variables.dbtFeedFilter": 8,
+   "Variables.dbtFeedFilterLoaded": 2,
+   "Variables.dbtFeedOpen": 6,
+   "Variables.dbtLogFocus": 6,
+   "Variables.dbtDossierOpen": 4,
+   "Variables.dbtCoachSurface": 6,
+   "Variables.dbtProgrammeFocus": 6,
+   "Variables.dbtProgrammeOpened": 4,
+   "Variables.dbtPathDraft": 5,
+   "Variables.dbtPathTitles": 2,
+   "CloudFunctions.run": 50,
+   "Records.query": 52,
+   "Files.sign": 10,
+   "Variables.nbUnlocked": 2,
+   "Records": 15,
+   "Records.save": 6,
+   "Records.create": 2
+  }
+ }
+}

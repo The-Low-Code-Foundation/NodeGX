@@ -1,0 +1,36 @@
+[A plan: an awaited run is not an awaited action (never detached)] expected to kill: A5 (seen: not yet), C4
+    4 failed, 31 passed, 35 total — failed rows: A2, A2, A5, C4
+[B emitter: an awaited run printed flat (Success and Done before the body finishes)] expected to kill: A2 (doneN reads the count before it), A5, A6b, C4
+    12 failed, 23 passed, 35 total — failed rows: A2, A3, A2, A3, A4, A5, A6, A6b, A7, C4, E1, E2
+[C library: settled resolves at once] expected to kill: A2/A6b (doneN), C5
+    4 failed, 31 passed, 35 total — failed rows: A2, A2, A6b, C5
+[D classifier: a top-level await is not a late writer] expected to kill: A2 (n, first, who … never arrive)
+    6 failed, 29 passed, 35 total — failed rows: A2, A3, A2, A3, A6, A6b
+[E plan: the wrapper is not marked async] expected to kill: A2 (the app does not build), D5, E1
+    12 failed, 23 passed, 35 total — failed rows: A2, A3, A2, A3, A4, A5, A6, A6b, A7, C2, C4, D5
+[F library: a plain row keeps its pointer envelope] expected to kill: A2 (first), B1, B5
+    5 failed, 30 passed, 35 total — failed rows: A2, A2, B1, B1, B5
+[G library: a refused filter rejects with an Error, not the words] expected to kill: A2 (bad), B1, B3
+    5 failed, 30 passed, 35 total — failed rows: A2, A2, B1, B1, B1
+[H library: a Cloud Function refusal is an Error] expected to kill: A2 (locked), B1, B5
+    5 failed, 30 passed, 35 total — failed rows: A2, A2, B1, B1, B5
+[I library: the signed-in user's id is not the session's objectId] expected to kill: A2 (who), B1
+    2 failed, 33 passed, 35 total — failed rows: A2, B1
+[J classifier: a query without plain passes] expected to kill: D3
+    1 failed, 34 passed, 35 total — failed rows: D3
+[K emitter: no Variables facade (the library alone)] expected to kill: A2 (note), C3
+    10 failed, 25 passed, 35 total — failed rows: A2, A3, A2, A3, A4, A5, A6, A6b, A7, C3
+[L emitApp: the client carries no noodlRequest] expected to kill: A2/B1 (export arm cannot build), C1, E1
+    18 failed, 17 passed, 35 total — failed rows: A2, A3, A2, A3, A4, A5, A6, A6b, A7, B1, B2, B1, B2, B3, B4, B5, C1, E1
+[M emitter: the late handler is never async] expected to kill: A2 (again; the app does not build), E1
+    11 failed, 24 passed, 35 total — failed rows: A2, A3, A2, A3, A4, A5, A6, A6b, A7, E1, E2
+[N parse: a column's targetClass is dropped] expected to kill: B1 (pointsTo refused), B4, C1
+    6 failed, 29 passed, 35 total — failed rows: B1, B2, B1, B2, B4, C1
+[O library: text on a Date column goes as text] expected to kill: B1, B4
+    3 failed, 32 passed, 35 total — failed rows: B2, B2, B4
+[P library: the query sends no keys (select)] expected to kill: B2
+    2 failed, 33 passed, 35 total — failed rows: B2, B2
+[Q emitApp: no library emitted] expected to kill: everything that reads the backend
+    20 failed, 15 passed, 35 total — failed rows: A2, A3, A2, A3, A4, A5, A6, A6b, A7, B1, B2, B1, B2, B1, B2, B3, B4, B5, C1, C6
+
+17 arms, 0 survived

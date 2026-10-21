@@ -1,3 +1,40 @@
+# Next session — session 134 (2026-10-21, BOARD lane 6) built **EXP-020 slice 1 with EXP-019 slice 1b**: a Function that reads the Noodl API travels — `Records.query` (rows plain), `CloudFunctions.run`, `Users.Current`, `Files.sign`, `Variables.<name>` over `src/lib/noodl.ts`, any other member refused by its name — and a Function that awaits at its top level is awaited: an `async` wrapper, the run's `settled`, Success and Done after it, the click's later wires not held. Graded on the Noodl Desk against the runtime's own nodes and the running app's own `Noodl` on one fake Parse backend, readings and wire traffic, and one call at a time on the members. Templates 139 gained, 0 lost.
+
+## ✅ Session 134: the Noodl API travels; a run that awaits is awaited
+
+Read EXP-011 §104, EXP-020 §6 and EXP-019 §8. In short:
+
+| what | where |
+|---|---|
+| Measured first: 183 bodies read `Noodl.*`, 71 are cloud functions; 112 front-end Functions, 79 at the Noodl gate, 42 of those awaiting; every query `plain: true`; with both gates opened in a scratch copy 35 export directly | `s134-noodlapi/bodies.py`, `census.ts`, `census.json`, `census-gates-open.json` |
+| The runtime, read: `records.js` + the contract's `toParseWhere` + `_plainFromJSON`; the viewer's CloudFunctions / Users / Files; `runScript` awaits every body before Success and Done; the no-backend failures | EXP-011 §104.1 |
+| `jsNoodlUseOf` (members, Variables, refusal by name); traits "is asynchronous (it awaits)", "reads the Noodl API"; a top-level `await` with `Outputs` calls back | `src/analyze/jsfun.ts` |
+| `JsFunctionPlan.awaits` / `.noodl`; the run action's `awaitsAt`, counted by `isAwaitedAction`; Variables minted from a body (`appState.ts`); IR keeps a column's `targetClass` | `src/analyze/plan.ts`, `appState.ts`, `src/ir/types.ts`, `src/parse/parseProject.ts` |
+| The async wrapper, the `Noodl` binding and its imports (the Function's own file); the awaited run printed whole; `actionsAwait`; an `async` late handler where its chains await; the detached form's terminator | `src/emit/component.ts` |
+| `FunctionRun.settled`; `late` takes a run without it | `src/emit/functionRunLib.ts` |
+| `src/lib/noodl.ts` (translator, plain rows, four members, the schema table; the no-backend arm); `client.ts`'s `noodlRequest`, only where earned | `src/emit/noodlLib.ts`, `src/emit/emitApp.ts` |
+| Spec, 35 rows: the Noodl Desk signed in and out (readings + requests), the member arm (71 + 71 + 17 calls), emitted text, classifier and plan, typecheck; 17 mutant arms, 0 survived | `tests/the-noodl-api-travels.test.ts`, `tests/helpers/noodl-desk.ts`, `fake-parse-backend.js`, `noodl-member-arm.js`, `s134-noodlapi/EXPECTED.md`, `mutants.py` |
+| Both arms gained an opt-in `backend` (fresh fake backend per scenario, the session stored, the request log returned); the runtime arm needs `RUNTIME_ARM_URL` for localStorage | `tests/helpers/export-react-arm.js`, `runtime-mounted-arm.js` |
+
+- 🔴 **The census's first number was the wrong population**: 71 of EXP-020's 183 bodies are cloud functions. Count what the React app contains before scoping a member list.
+- 🔴 **Mechanism first**: the first build refused a backend member in a project with no backend, and the reach read 11. The exporter already has a rule for that case (a stub that fails as the running app fails); following it, 139. 16 of 17 templates declare no backend in their files.
+- 🔴 **Reading the emitted code found a TS1308**: a late signal's chain started an awaiting run inside the s133 late handler, a plain arrow (gram's Welcome). And it found P18-S134-PULSEHOLD (filed). Read every gained family's code; the count saw neither.
+- 🔴 **A predicate shaped like "the runtime's extra request" (an empty `where`) also matched a legitimate empty query** both arms send (`Locked`). Narrowed to what was predicted.
+- 🔴 **Two desk columns added after the first run** (doneN, again), because nothing on the first desk could see a `settled` that resolved early or a late chain that awaits. Said so in EXPECTED.md; both mutants are killed now.
+- The runtime's Text shows the word "Text" before its wire delivers (P18-S122-TEXTDEFAULT); pinned in A4, masked in A1.
+
+Readings: the spec 35 / 35; 17 mutants, 0 survived; package `tsc --noEmit` 0; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL; a first build read gram TS1308, the late handler, fixed); hls001 predicted 4 paths (`src/lib/functionRun.ts` × 4 desks), read 4, regenerated. Reach (`dispdiff`, `018ac1d77`'s `src` against the tree): **templates 139 gained, 0 lost, 92 re-worded**; **corpus 0 gained, 0 lost, 341 re-worded** (each names its member). Whole package (`nice -n 19 --runInBand`): a first run read 10 red in 7 suites — five specs holding the old gate sentences or using a Noodl body as their "refused" stand-in (moved with the rule: `Noodl.Events` / `Noodl.Object` / `Noodl.Objects` now stand in), and `hls006-every-listener` finding the measurement copy `packages/.s134-base` (removed); then JSON 20:46, **152 / 152 suites, 5,203 passed, 0 failed, 3 skipped** (predicted 5,169 + 35 = 5,204, less the one `async/await` row that left `jsfun.test.ts`'s gate list).
+
+Filed: **P18-S134-REFUSEDFILTERSENDS** (low, runtime: a refused filter rejects and still sends an empty query), **P18-S134-PULSEHOLD** (low, export).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-020 slice 2**, the members the corpus ranks: `Noodl.Events` (132 re-worded: an emit is the export's channel `emit`, a listener its subscribe), `Noodl.Object` / `Objects` (52: the export's object store), `Noodl.Array` (22), and `Noodl` handed on as a value (47; todo-list's `var R = Noodl.Records`, behind EXP-021 anyway). Census them on the corpus first (`s134-noodlapi/dd.py` over a fresh `dispdiff`).
+2. **EXP-021** (logic components; the todo-list record bodies and their Model records wait on it).
+3. P18-S134-PULSEHOLD (the §90 pass: the last awaited action of a signal's arm is detached too; fixtures move).
+4. Not this lane's next: EXP-022 AC1 in a parallel session; EXP-023's cut is Richard's terminal; P18-S134-REFUSEDFILTERSENDS is a runtime fix (four methods in `records.js`).
+
+---
+
 # Next session — session 133 (2026-10-21, BOARD lane 6) built **EXP-019 slice 2**: a Function whose script carries a host trait and whose Run is not wired runs on its inputs' arrival and once at load, from an effect with a kept node, as the runtime runs it. Reading the gained nodes' emitted code found **P18-S133-LATEWRITE** (a write or signal a body makes after its run returned, from a timer or a listener, was lost — slice 1 too), fixed: the kept node hands it on. With that, asynchrony that is a callback (`.then`, an inner `async function`) became a host trait too; only a top-level `await` stays a gate (slice 1b proper). 76 template nodes gained, 0 lost.
 
 ## ✅ Session 133: the script runs on its inputs' arrival (slice 2)
