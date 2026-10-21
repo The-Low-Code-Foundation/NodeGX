@@ -4,6 +4,15 @@
 > is its README §3, the brief is BRIEF.md, the first stranger ran from `stranger/`. The §6 rulings are its README §7.
 > This page is the record of where it came from.
 
+> **Round 3b, 2026-10-21 night (Fable 5.1), on Richard's "do what you need to do, whatever it takes": the graph as
+> text.** `noodl-mcp <project> --graph` / `read_graph` / the kit note (`db137a8f0`), READONLYOPEN wording (`fc206a738`),
+> arm B3-claude run and graded (`464b2d3c2`): the stranger reads the app through the page and nothing else, understands
+> it as fully (quiz 21, soundness 18, MUST 8/8, P 75 %), the whole arm $3.06 → $2.72, the time unchanged. Read
+> `ROUND-3B-THE-GRAPH-AS-TEXT.md` §5–§6. **Next there:** the DeepSeek replication (B3-vibe, ~6 ¢) and the npm cut that
+> carries the flag (the kit note pins `@nodegx/mcp@0.2.4`, which on the registry has no `--graph` until 0.2.5 ships).
+> Loose on the checkout when that session ended: round 3's own files (`ROUND-3-THE-READING.md`, `round3/`, the
+> round-arm.mjs lab fixes, `tpl013Edition.*`) were still uncommitted by the session that made them.
+
 **Written 2026-10-20 by the positioning session (Fable 5.1), at the end of a four-round interview with Richard.** Say
 which model you are in your first message. This is a **think-and-prototype session**, not a lab round and not a
 positioning session. Read first: `dev-docs/reviews/THE-PLACE-NODEGX-BESIDE-REPLIT.md` §9.4 and §10 (where this comes
