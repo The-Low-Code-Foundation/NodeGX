@@ -6,7 +6,7 @@ severity: low
 area: export / Static Data's row types (`staticTsType`, `src/analyze/plan.ts`)
 found: P18 session 136, 2026-10-21, tplbuild after EXP-021 slice 1 (bot-garden's `Requests`: `among: [[…], […]]`)
 fixed: P18 session 136, 2026-10-21; EXP-011 §106
-commit: PENDING
+commit: 7abdb4257
 evidence: tests/a-logic-component-is-a-hook.test.ts E4; mutant arm J
 regression: packages/nodegx-export/tests/a-logic-component-is-a-hook.test.ts
 ---

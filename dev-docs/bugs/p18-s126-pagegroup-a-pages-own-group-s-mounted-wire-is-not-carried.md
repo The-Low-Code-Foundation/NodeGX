@@ -7,7 +7,7 @@ area: export / a page's sole Group, rendered as the page div (`src/analyze/plan.
 found: P18 session 126, 2026-10-19, re-pinning the-field-announces-at-mount
 evidence: tests/the-root-is-mounted-when-it-says.test.ts C5; tests/the-field-announces-at-mount.test.ts (the page's own Group row)
 fixed: P18 session 136, 2026-10-21; EXP-011 §106 (reach came with EXP-021 slice 1: nightbook's seven pages, 26 nodes)
-commit: PENDING
+commit: 7abdb4257
 regression: packages/nodegx-export/tests/the-root-is-mounted-when-it-says.test.ts
 ---
 

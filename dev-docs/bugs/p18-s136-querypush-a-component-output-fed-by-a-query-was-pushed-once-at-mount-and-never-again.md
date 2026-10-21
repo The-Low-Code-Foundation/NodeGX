@@ -6,7 +6,7 @@ severity: high
 area: export / the push effect's dependencies (`effectDeps`, `src/emit/component.ts`)
 found: P18 session 136, 2026-10-21, reading the emitted code of the nodes EXP-021 slice 1 gained (todo-list's `Logic/Todo data`)
 fixed: P18 session 136, 2026-10-21; EXP-011 §106, EXP-021 §6
-commit: PENDING
+commit: 7abdb4257
 evidence: dev-docs/tasks/phase-18-code-export-v2/s136-hooks/README.md; tests/a-logic-component-is-a-hook.test.ts E1; mutant arm H
 regression: packages/nodegx-export/tests/a-logic-component-is-a-hook.test.ts
 ---
