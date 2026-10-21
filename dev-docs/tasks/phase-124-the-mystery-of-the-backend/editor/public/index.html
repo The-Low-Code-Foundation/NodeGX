@@ -19,9 +19,8 @@
       <span class="lens-label">Look at it as</span>
       <button data-lens="all" class="on">Everyone</button>
       <button data-lens="anon">Someone not signed in</button>
-      <button data-lens="learner">A signed-in learner</button>
-      <button data-lens="staff">Staff</button>
       <select id="personPick" aria-label="Look at it as a real person"><option value="">A real person…</option></select>
+      <button id="compareBtn" class="compare" title="Measure every person, for real, and rank them by how many rows they can reach">Who sees how much?</button>
     </div>
     <input id="search" type="search" placeholder="Find a table, function or screen" title="Drag the map to move it, scroll to zoom, click anything to see its story" autocomplete="off">
   </header>
@@ -39,7 +38,7 @@
         <span class="legend-row"><span class="ln writes"></span>adds, changes, deletes</span>
         <span class="legend-row"><span class="ln mentions"></span>names it in its code</span>
         <span class="legend-row"><span class="ln links"></span>rows point at rows</span>
-        <span class="legend-row"><span class="ln" style="border-color:#f776c4"></span>a real person’s pathway</span>
+        <span class="legend-row"><span class="ln" style="border-color:#f776c4"></span>rows that reached a real person</span>
         <span class="legend-row"><span class="lk" style="color:#4da3ff">■</span>signed in</span>
         <span class="legend-row"><span class="lk" style="color:#a78bfa">■</span>staff only</span>
         <span class="legend-row"><span class="lk" style="color:#f97066">■</span>anyone at all</span>

@@ -223,6 +223,17 @@ project folder is otherwise byte-identical. Every assertion reads the backend or
 
 ## 8. Sessions
 
+- **s3 (2026-10-21, Opus 5.5, by hand):** Richard on round 2, verbatim in BRIEF.md §s3: the row reach is "a
+  dazzler", but every person lit every table ("That would freak people the fuck out"); wants a data explorer in the
+  table view with *who can access this*, the reach reversed to *what can this person access*, then nodegx.io. The
+  cause, filed and fixed as `P124-S3-LENSBYNAMING`: the lens lit tables a function NAMES. Built in `editor/` (LOOK.md
+  §s3): `lib/reach.mjs` measures a person's reach row by row (runs as them, follows what they were shown, finds every
+  row in the answers), streamed and played out on the map; *Who sees how much?* ranks everyone (staff 261 of 289 →
+  Jo 2 → not signed in 0); the table panel leads with its rows, theirs lit, and *Who can access this?*. Chrome test
+  34/34 on a fresh copy. Published as a recording at **nodegx.io/backend-map/** (`static/`), with a card on /demos/
+  and the section on /your-own-editor/ rewritten (nodegx-web `592786b`, deployed). §7.3 was answered by doing: round 3
+  was hand-built, not a stranger, because the fault was in the measurement, not the shape.
+
 - **s2 (2026-10-20, late, Fable 5.1, the same evening):** Richard's verdict on the first screens, verbatim in
   PLAYTEST.md and BRIEF.md §s2: *"It looks so cool … very psychadelic, in a good way"*, and three asks: view as a
   real person from the database with their pathways lit; follow a pathway to a page and see EXACTLY what they get;

@@ -10,7 +10,9 @@ import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 export const CLI = path.join(here, '..', 'node_modules', '@nodegx', 'preview', 'dist', 'backend', 'cli.js');
-export const REAL_APP = path.resolve(here, '..', '..', 'training');
+// The stranger's lab kept the app beside the editor; in the repo it is the training template.
+const BESIDE = path.resolve(here, '..', '..', 'training');
+export const REAL_APP = fs.existsSync(BESIDE) ? BESIDE : path.resolve(here, '..', '..', '..', '..', '..', 'templates', 'digital-bricks-training');
 
 export function hashTree(dir) {
   const out = {};

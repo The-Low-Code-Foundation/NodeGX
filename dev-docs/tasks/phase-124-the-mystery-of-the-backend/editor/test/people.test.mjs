@@ -49,14 +49,56 @@ try {
   const jo = await page.evaluate(() => window.__map.people.find((p) => p.name === 'Jo Whitfield').id);
   const staff = await page.evaluate(() => window.__map.people.find((p) => p.roles.includes('staff')).id);
 
-  // 1. Look as Marie
+  // 1. Round 3: what Marie can reach, row by row. A table lights only when rows of it come back to her.
+  const reachDone = () => page.waitForFunction(() => window.__map.reach && !window.__map.reach.loading && window.__map.reachQueue.length === 0, { timeout: 90000 });
+  const reachOf = () => page.evaluate(() => { const r = window.__map.reach; return { tables: r.tables, tools: [...r.tools], lit: [...(window.__map.lit ?? [])], overlay: window.__map.overlay.map((o) => [o.from, o.to]) }; });
+  const rowsOf = (r) => Object.values(r.tables).reduce((n, t) => n + t.reached, 0);
   await page.select('#personPick', marie);
-  await page.waitForFunction(() => window.__map.person?.reach, { timeout: 30000 });
+  await reachDone();
+  const m = await reachOf();
   const note = await page.$eval('#lensNote', (e) => e.innerText);
-  ok(/As Marie Dubois: the backend lets them run 12 of 27 functions and open 0 tables directly/.test(note), `the lens says, from the backend: “${note.slice(0, 110)}…”`);
-  const lit = await page.evaluate(() => window.__map.overlay.length);
-  ok(lit === 12, `12 pink pathways light up, one to each function the backend offers her (${lit})`);
+  const total = Object.values(m.tables).reduce((n, t) => n + t.total, 0);
+  const litTables = Object.entries(m.tables).filter(([, t]) => t.reached).map(([n]) => n);
+  ok(new RegExp(`Marie Dubois can reach ${rowsOf(m)} of ${total} rows, in ${litTables.length} of 27 tables`).test(note), `the lens says, measured: “${note.slice(0, 90)}…”`);
+  ok(rowsOf(m) > 0 && rowsOf(m) < total / 4, `Marie reaches a little: ${rowsOf(m)} of ${total} rows`);
+  ok(litTables.length < 20 && m.tools.includes('course'), `not every table lights up: ${litTables.length} of 27, though course names 23 of them in its code`);
+  ok(m.tables.Conversation.reached === 1 && m.tables.Conversation.total === 2, 'Conversation: her one, not Sam’s (1 of 2)');
+  ok(!m.tools.includes('learnerProgramme') && !m.tables.CoachNote.reached, 'no staff function, and no coach note, reaches her');
+  const toDark = m.overlay.filter(([, to]) => to.startsWith('t:') && !m.tables[to.slice(2)].reached);
+  ok(toDark.length === 0, `no pink wire runs to a table nothing of hers came back from (${toDark.length})`);
+  const dark = Object.entries(m.tables).filter(([, t]) => !t.reached).map(([n]) => `t:${n}`);
+  ok(dark.every((id) => !m.lit.includes(id)), 'every table with none of her rows stays dark');
+  await page.screenshot({ path: path.join(shots, 'people-0-marie-reach.png') });
   ok((await keysNow()) === 0, 'no working key is left behind after looking (deleted keys are revoked)');
+
+  // the table explorer, as Marie: her rows lit, the rest dim
+  await page.evaluate(() => { location.hash = ''; });
+  const pos0 = await page.evaluate(() => { const s = window.__map, n = s.byId['t:Progress']; return [n.x * s.cam.z + s.cam.x + 30, (n.y + n.h / 2) * s.cam.z + s.cam.y]; });
+  await page.mouse.click(pos0[0], pos0[1]);
+  await page.waitForSelector('tr.r', { timeout: 15000 });
+  const lit = await page.evaluate(() => ({ theirs: document.querySelectorAll('tr.r.theirs').length, not: document.querySelectorAll('tr.r.not-theirs').length }));
+  ok(lit.theirs === m.tables.Progress.reached && lit.theirs + lit.not === m.tables.Progress.total, `the Progress rows: ${lit.theirs} hers lit, ${lit.not} dim`);
+
+  // the staff member reaches much more; someone not signed in, nothing
+  await page.select('#personPick', staff);
+  await reachDone();
+  const st = await reachOf();
+  ok(rowsOf(st) > 3 * rowsOf(m), `the staff member reaches much more: ${rowsOf(st)} rows against Marie’s ${rowsOf(m)}`);
+  await page.click('.lens button[data-lens="anon"]');
+  await reachDone();
+  const an = await reachOf();
+  ok(rowsOf(an) === 0, 'someone not signed in reaches no row at all');
+
+  // who sees how much: everyone, ranked
+  await page.click('#compareBtn');
+  await page.waitForFunction(() => window.__map.everyone && !window.__map.everyone.loading, { timeout: 180000 });
+  const ranked = await page.evaluate(() => [...window.__map.everyone.list].sort((a, b) => b.reachedRows - a.reachedRows).map((e) => [e.person.name, e.reachedRows]));
+  ok(ranked.length === 13 && ranked[0][0] === 'Richard Osborne' && ranked[ranked.length - 1][1] === 0, `ranked: ${ranked.map(([n, r]) => `${n} ${r}`).join(', ')}`);
+  await page.screenshot({ path: path.join(shots, 'people-0-everyone.png') });
+
+  // back to Marie for the pathway
+  await page.select('#personPick', marie);
+  await reachDone();
 
   // 2. Follow the Course pathway
   const clickBlock = async (id) => {
@@ -91,11 +133,11 @@ try {
   // 3. One Conversation row's reach
   await page.click('.lens button[data-lens="all"]');
   await clickBlock('t:Conversation');
-  await page.waitForSelector('[data-row]', { timeout: 15000 });
+  await page.waitForSelector('tr.r[data-row]', { timeout: 15000 });
   const rowId = await page.evaluate(() => window.__map.rows.Conversation.find((r) => r.key === 'conv-l-marie').objectId);
   await page.click(`[data-row="${rowId}"]`);
   await page.click('#findReach');
-  await page.waitForFunction(() => window.__map.record?.data, { timeout: 120000 });
+  await page.waitForFunction(() => window.__map.record?.data && window.__map.record.shown >= window.__map.record.data.people.length, { timeout: 120000 });
   const reach = await page.$eval('#panelBody', (e) => e.innerText);
   ok(/2 of 12 people can reach this row/.test(reach), `“${reach.match(/\d+ of \d+ people can reach this row[^.]*/)?.[0]}”`);
   ok(/Marie Dubois[^\n]*gets it through course and exportMine/.test(reach), 'Marie gets it through course and exportMine');

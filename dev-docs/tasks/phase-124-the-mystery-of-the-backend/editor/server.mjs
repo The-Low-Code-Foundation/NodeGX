@@ -17,7 +17,8 @@ import { openProject, analyseProject, tableLinks } from './lib/project.mjs';
 import { backend, BackendError } from './lib/backend.mjs';
 import { setTableRule, entryFor, readSecurityFile, dryRuns, Refusal, SECURITY_FILE } from './lib/rules.mjs';
 import { makeViews } from './lib/views.mjs';
-import { KEY_SUFFIX } from './lib/asperson.mjs';
+import { KEY_SUFFIX, asPerson, learnerIds } from './lib/asperson.mjs';
+import { loadWorld, personReach, anonymousReach } from './lib/reach.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 
@@ -147,20 +148,67 @@ export function createEditor(opts) {
     };
   }
 
-  /** A table's rows, each with a short label in words, for choosing one. */
+  /** A table's rows, each with a short label in words and its plain values, for the explorer. */
   async function rows(table) {
     const schema = await be.get('/admin/schema');
     const t = schema.tables.find((x) => x.name === table);
     if (!t) throw new Refusal('No such table.');
-    const { results } = await be.get(`/api/${encodeURIComponent(table)}?limit=50`);
+    const results = table === '_User' ? (await be.get('/admin/users?limit=500')).users : (await be.get(`/api/${encodeURIComponent(table)}?limit=500`)).results;
     const keys = (t.indexes ?? []).filter((i) => i.unique && i.fields.length === 1).map((i) => i.fields[0]);
     const words = ['subject', 'title', 'name', 'projectName', 'label', 'email', 'username', 'body', 'content'];
     return results.map((r) => {
       const w = words.map((k) => r[k]).find((v) => typeof v === 'string' && v.trim());
-      const key = keys.map((k) => r[k]).find((v) => typeof v === 'string');
+      // a row told apart only by several columns together reads as those values: "l-marie · what-the-web-is"
+      const multi = (t.indexes ?? []).find((i) => i.unique && i.fields.length > 1);
+      const key = keys.map((k) => r[k]).find((v) => typeof v === 'string') ?? (multi ? multi.fields.map((f) => r[f]).filter((v) => v !== null && v !== undefined).join(' · ') : undefined);
       const owner = ['learnerId', 'userId', 'authorUserId'].map((k) => r[k]).find(Boolean);
-      return { objectId: r.objectId, label: w ? w.slice(0, 80) : key ?? r.objectId, key: key ?? null, owner: owner ?? null };
+      const cells = {};
+      for (const c of t.columns) {
+        const v = r[c.name];
+        if (c.name === 'ACL' || /password|token|secret/i.test(c.name)) continue;
+        cells[c.name] = v === null || v === undefined ? null : typeof v === 'object' ? JSON.stringify(v).slice(0, 120) : String(v).slice(0, 160);
+      }
+      return { objectId: r.objectId, label: w ? w.slice(0, 80) : key ?? r.objectId, key: key ?? null, owner: owner ?? null, cells };
     });
+  }
+
+  // Round 3: what one person can reach, row by row (lib/reach.mjs). The world (every row) is read once
+  // a quarter of a minute: the backend limits admin requests.
+  const ap = asPerson(be, { mine });
+  let worldCache = null;
+  async function reachWorld() {
+    if (worldCache && Date.now() - worldCache.at < 15_000) return worldCache;
+    const world = await loadWorld(be);
+    const app = analyseProject(project, world.schema.tables.map((t) => t.name));
+    const [lids, perms] = await Promise.all([learnerIds(be), be.get('/admin/permissions')]);
+    worldCache = { at: Date.now(), world, app, lids, config: perms.config };
+    return worldCache;
+  }
+  async function reachOf(personId, emit) {
+    const w = await reachWorld();
+    if (!personId) {
+      const summary = await anonymousReach({ be, app: w.app, world: w.world, config: w.config });
+      emit({ type: 'start', person: summary.person, tools: summary.tools, notAllowed: w.app.functions.map((f) => f.name).filter((f) => !summary.tools.includes(f)), readers: [], direct: [] });
+      for (const c of summary.changers) emit({ type: 'skip', ...c, writes: w.app.functions.find((f) => f.name === c.fn)?.touches.filter((t) => t.hows.some((h) => h !== 'reads' && h !== 'mentions')).map((t) => t.table) ?? [] });
+      emit({ type: 'done', summary });
+      return summary;
+    }
+    const user = w.world.rowsByTable._User.find((u) => u.objectId === personId);
+    if (!user) throw new Refusal('No such person in the backend.');
+    return personReach({ be, ap, app: w.app, world: w.world, config: w.config, user, lids: w.lids, emit });
+  }
+  async function everyone(emit) {
+    const w = await reachWorld();
+    const out = [];
+    const people = [null, ...w.world.rowsByTable._User.map((u) => u.objectId)];
+    for (const id of people) {
+      const s = await reachOf(id, () => {});
+      const brief = { person: s.person, reachedRows: s.reachedRows, totalRows: s.totalRows, tables: s.tables, tools: s.tools.length, readers: s.readers.length };
+      out.push(brief);
+      emit({ type: 'person', ...brief });
+    }
+    emit({ type: 'done' });
+    return out;
   }
 
   async function changeRule(body) {
@@ -170,7 +218,7 @@ export function createEditor(opts) {
     return setTableRule(ctx, table, entry, { etag, fileStamp });
   }
 
-  return { buildMap, runs, rows, changeRule, check: (table) => dryRuns(be, table), views, project, be };
+  return { buildMap, runs, rows, changeRule, check: (table) => dryRuns(be, table), views, project, be, reachOf, everyone };
 }
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png' };
@@ -205,6 +253,19 @@ export function serve(editor, port) {
       if (url.pathname === '/api/as/screen' && req.method === 'POST') {
         const b = await body();
         return send(res, 200, await editor.views.screen(b.person, b.screen));
+      }
+      // Round 3: a stream, one line of JSON per thing that happened, so the map lights up as it runs.
+      if ((url.pathname === '/api/as/everything' || url.pathname === '/api/everyone') && req.method === 'POST') {
+        const b = await body();
+        res.writeHead(200, { 'Content-Type': 'application/x-ndjson; charset=utf-8', 'Cache-Control': 'no-store' });
+        const emit = (e) => res.write(JSON.stringify(e) + '\n');
+        try {
+          if (url.pathname === '/api/everyone') await editor.everyone(emit);
+          else await editor.reachOf(b.person ?? null, emit);
+        } catch (e) {
+          emit({ type: 'error', error: e.message });
+        }
+        return res.end();
       }
       if (url.pathname === '/api/record-reach' && req.method === 'POST') {
         const b = await body();

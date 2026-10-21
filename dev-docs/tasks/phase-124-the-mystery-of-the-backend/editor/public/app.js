@@ -55,7 +55,11 @@ const state = {
   rows: {}, // table → rows to choose from
   overlay: [], // wires drawn on top: a person's pathways
   lit: null, // node ids lit by the overlay
-  tags: {} // node id → { text, color }: a word above a block
+  tags: {}, // node id → { text, color }: a word above a block
+  // round 3: what one person can reach, row by row, played out as it is measured
+  reach: null, // { id, name, loading, tools: Set, notAllowed, readers, changers, fns, tables, rowIds, summary, runs }
+  reachQueue: [],
+  everyone: null // { loading, list: [ { person, reachedRows, totalRows, tables } ] }
 };
 
 // ───────────────────────────── loading ─────────────────────────────
@@ -65,6 +69,30 @@ async function api(path, body) {
   const json = await res.json().catch(() => ({ error: 'The editor’s server gave an answer the map couldn’t read.' }));
   if (!res.ok) throw Object.assign(new Error(json.error || 'Something went wrong.'), { refused: json.refused });
   return json;
+}
+
+/** A POST whose answer is one line of JSON per thing that happened, read as it arrives. */
+async function stream(path, body, onEvent) {
+  const res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body ?? {}) });
+  if (!res.ok || !res.body) {
+    const json = await res.json().catch(() => ({}));
+    throw new Error(json.error || 'Something went wrong.');
+  }
+  const reader = res.body.getReader();
+  const dec = new TextDecoder();
+  let buf = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.indexOf('\n')) >= 0) {
+      const line = buf.slice(0, i).trim();
+      buf = buf.slice(i + 1);
+      if (line) onEvent(JSON.parse(line));
+    }
+  }
+  if (buf.trim()) onEvent(JSON.parse(buf));
 }
 
 async function load(keepView) {
@@ -89,7 +117,9 @@ async function load(keepView) {
   const m = state.map;
   $('appName').textContent = `${m.app.name} — backend map`;
   $('backendLine').innerHTML =
-    `<span class="${m.backend.enforced && !m.backend.devOpen ? 'ok' : 'bad'}">●</span> ${esc(m.backend.name)} is running · ` +
+    (m.backend.recordedAt
+      ? `<span class="ok">●</span> A recording, made ${esc(new Date(m.backend.recordedAt).toLocaleDateString(undefined, { dateStyle: 'medium' }))} · `
+      : `<span class="${m.backend.enforced && !m.backend.devOpen ? 'ok' : 'bad'}">●</span> ${esc(m.backend.name)} is running · `) +
     `${m.tables.length} tables · ${m.functions.length} functions · ${m.people} people`;
   layout();
   if (!keepView) fit();
@@ -226,16 +256,16 @@ function directRead(table) {
 /** For the lens: what this kind of person (or this real person) can do with each node. */
 function lensOf(node) {
   if (state.lens === 'person') {
-    const r = state.person?.reach;
-    if (!r) return null;
-    if (node.kind === 'person') return { can: node.key === state.person.id };
-    if (node.kind === 'fn') return { can: r.tools.some((t) => t.name === node.key) };
+    // what they can reach is what came back to them, row by row: never what a function's code names
+    const R_ = state.reach;
+    if (!R_) return null;
+    if (node.kind === 'person') return { can: node.key === R_.id };
+    if (node.kind === 'fn') return { can: R_.tools.has(node.key) };
     if (node.kind === 'table') {
-      const d = r.direct[node.key];
-      const direct = !!(d && (d.find.allowed || d.create.allowed));
-      const via = state.map.functions.filter((f) => r.tools.some((t) => t.name === f.name) && f.touches.some((t) => t.table === node.key));
-      return { can: direct || via.length > 0, direct, via };
+      const t = R_.tables[node.key];
+      return { can: !!t?.reached, direct: !!t?.directly, via: Object.keys(t?.via ?? {}) };
     }
+    if (node.kind === 'screen') return { can: state.map.calls.some((c) => c.screen === node.key && R_.tools.has(c.fn)) };
     return { can: true };
   }
   const p = person();
@@ -406,7 +436,7 @@ function draw(now) {
   }
 
   // A person's pathway (state.lit) is the highlight while it's shown; otherwise what's selected or hovered.
-  const focus = state.selected ?? state.hover;
+  const focus = (state.byId[state.selected] ? state.selected : null) ?? state.hover;
   const rel = state.lit ? null : focus ? related(focus) : null;
 
   // wires, under the blocks
@@ -492,9 +522,17 @@ function draw(now) {
   for (const pt of state.particles) {
     const t = (now - pt.start - pt.delay) / pt.dur;
     if (t < 0) continue;
-    const e = state.edges.find((x) => x.id === pt.edge);
-    if (!e) continue;
-    const p = edgePoints(e);
+    let p;
+    if (pt.from) {
+      // a spark between any two blocks: a person's rows on their way
+      const a = state.byId[pt.from], b = state.byId[pt.to];
+      if (!a || !b) continue;
+      p = overlayPoints(a, b);
+    } else {
+      const e = state.edges.find((x) => x.id === pt.edge);
+      if (!e) continue;
+      p = edgePoints(e);
+    }
     for (let k = 0; k < 6; k++) {
       const tt = t - k * 0.03;
       if (tt < 0 || tt > 1) continue;
@@ -535,10 +573,10 @@ function drawNode(n, now, rel) {
   if (fl) {
     const t = (now - fl.at) / 1600;
     if (t > 1) delete state.flashes[n.id];
-    else {
+    else if (t >= 0) {
       ctx.save();
       ctx.globalAlpha = (1 - t) * 0.9;
-      ctx.strokeStyle = fl.ok ? '#45d08a' : '#f97066';
+      ctx.strokeStyle = fl.color ?? (fl.ok ? '#45d08a' : '#f97066');
       ctx.lineWidth = 3;
       const grow = t * 36;
       ctx.beginPath();
@@ -620,6 +658,35 @@ function drawNode(n, now, rel) {
     ctx.fillText(tag.text, n.x + 44, n.y - 6);
   }
 
+  // round 3: how much of this table reached the person, as a bar along its foot
+  const R_ = state.lens === 'person' ? state.reach : null;
+  if (R_ && n.kind === 'table') {
+    const t = R_.tables[n.key];
+    if (t && t.total) {
+      ctx.save();
+      roundRect(n.x, n.y, n.w, n.h, 10);
+      ctx.clip();
+      ctx.fillStyle = 'rgba(255,255,255,0.06)';
+      ctx.fillRect(n.x + 6, n.y + n.h - 5, n.w - 6, 5);
+      ctx.fillStyle = t.directly ? '#f97066' : COLORS.person;
+      ctx.shadowColor = COLORS.person;
+      ctx.shadowBlur = t.reached ? 8 : 0;
+      ctx.fillRect(n.x + 6, n.y + n.h - 5, ((n.w - 6) * t.reached) / t.total, 5);
+      ctx.restore();
+    }
+  }
+  const ev = n.kind === 'person' && state.everyone?.byId?.[n.key];
+  if (ev && ev.totalRows) {
+    ctx.save();
+    roundRect(n.x, n.y, n.w, n.h, 10);
+    ctx.clip();
+    ctx.fillStyle = 'rgba(255,255,255,0.06)';
+    ctx.fillRect(n.x + 6, n.y + n.h - 4, n.w - 6, 4);
+    ctx.fillStyle = ev.person.roles?.length ? COLORS.role : COLORS.person;
+    ctx.fillRect(n.x + 6, n.y + n.h - 4, ((n.w - 6) * ev.reachedRows) / ev.totalRows, 4);
+    ctx.restore();
+  }
+
   // badges on the right
   if (n.kind === 'fn') drawLock(n.x + n.w - 26, n.y + n.h / 2, color, callKind(n.fn.call), lens && !lens.can);
   if (n.kind === 'table') {
@@ -681,6 +748,9 @@ function subtitle(n) {
   const m = state.map;
   if (n.kind === 'person') {
     const p = n.person;
+    const ev = state.everyone?.byId?.[p.id];
+    if (ev) return `reaches ${ev.reachedRows} of ${ev.totalRows} rows`;
+    if (state.reach?.id === p.id && state.reach.summary) return `reaches ${state.reach.summary.reachedRows} of ${state.reach.summary.totalRows} rows`;
     return p.roles.length ? `the ${p.roles.join(', ')} group` : p.learnerId ? `learner · ${p.learnerId}` : 'no learner profile';
   }
   if (n.kind === 'screen') {
@@ -760,16 +830,17 @@ function renderSecure() {
 
 function renderLensNote() {
   const el = $('lensNote');
-  if (state.lens === 'person' && state.person) {
+  if (state.lens === 'person' && state.reach) {
     el.classList.remove('hidden');
-    const P = state.person;
-    if (P.loading) return (el.innerHTML = `<span class="spinner"></span>Asking the backend what <b>${esc(P.name)}</b> may do…`);
-    if (P.error) return (el.innerHTML = `Couldn’t look as <b>${esc(P.name)}</b>: ${esc(P.error)}`);
-    const tools = P.reach.tools;
-    const direct = Object.entries(P.reach.direct).filter(([, d]) => d.find.allowed || d.create.allowed);
-    el.innerHTML =
-      `As <b>${esc(P.name)}</b>: the backend lets them run <b>${tools.length}</b> of ${state.map.functions.length} functions and open <b>${direct.length}</b> table${direct.length === 1 ? '' : 's'} directly` +
-      `${direct.length ? ` (${direct.map(([t]) => esc(W.tableWords(t))).join(', ')})` : ''}. Pink wires are theirs. <b>Click a screen</b> to see exactly what they get there, or a table to check one row.`;
+    const R_ = state.reach;
+    if (R_.error) return (el.innerHTML = `Couldn’t look as <b>${esc(R_.name)}</b>: ${esc(R_.error)}`);
+    const tables = Object.values(R_.tables);
+    const got = tables.reduce((n, t) => n + t.reached, 0);
+    const total = tables.reduce((n, t) => n + (t.total ?? 0), 0);
+    const lit = tables.filter((t) => t.reached).length;
+    el.innerHTML = R_.loading
+      ? `<span class="spinner"></span>Running the backend’s functions as <b>${esc(R_.name)}</b>… <b>${got}</b> rows have reached them so far.`
+      : `<b>${esc(R_.name)}</b> can reach <b>${got}</b> of ${total} rows, in <b>${lit}</b> of ${tables.length} tables. Dark tables: nothing of them reaches ${R_.id ? 'them' : 'anyone not signed in'}.${R_.id ? ' <b>Click a table</b> to see which rows.' : ''}`;
     return;
   }
   const p = person();
@@ -814,17 +885,31 @@ function select(id) {
     if (n?.kind !== 'screen') state.pathway = null;
     if (n?.kind !== 'table') state.record = null;
   }
-  if (n?.kind === 'person') return setPerson(n.key);
-  if (n?.kind === 'screen' && state.lens === 'person' && state.person?.reach) followPathway(n.key);
+  if (n?.kind === 'person') {
+    if (state.reach?.id === n.key && !state.reach.error) {
+      computeOverlay();
+      return renderPanel();
+    }
+    return setPerson(n.key);
+  }
+  if (n?.kind === 'screen' && state.lens === 'person' && state.person?.id && state.person?.reach) followPathway(n.key);
   computeOverlay();
   state.lastResult = null;
   renderPanel();
 }
 
 function renderPanel() {
+  if (state.selected === 'everyone' && state.everyone) {
+    $('panel').classList.remove('hidden', 'wide');
+    $('panelBody').innerHTML = everyonePanel();
+    for (const b of $('panelBody').querySelectorAll('[data-as]')) b.onclick = () => setPerson(b.dataset.as);
+    for (const b of $('panelBody').querySelectorAll('[data-anon]')) b.onclick = () => setPerson(null);
+    return;
+  }
   const n = state.byId[state.selected];
   if (!n) return select(null);
   $('panel').classList.remove('hidden');
+  $('panel').classList.toggle('wide', n.kind === 'table');
   const html =
     n.kind === 'person'
       ? personPanel(n)
@@ -837,7 +922,16 @@ function renderPanel() {
       : state.pathway?.screen === n.key
       ? pathwayPanel(n)
       : screenPanel(n);
+  const keep = $('panel').scrollTop;
+  const grid = $('panelBody').querySelector('.rowgrid-wrap')?.scrollTop ?? 0;
+  const sameNode = $('panelBody').dataset.node === state.selected;
   $('panelBody').innerHTML = html;
+  $('panelBody').dataset.node = state.selected;
+  if (sameNode) {
+    $('panel').scrollTop = keep;
+    const g = $('panelBody').querySelector('.rowgrid-wrap');
+    if (g) g.scrollTop = grid;
+  }
   for (const a of $('panelBody').querySelectorAll('[data-go]')) a.onclick = () => focusOn(a.dataset.go);
   for (const b of $('panelBody').querySelectorAll('[data-row]')) b.onclick = () => openRecord(n.key, b.dataset.row);
   for (const b of $('panelBody').querySelectorAll('[data-as]')) b.onclick = () => setPerson(b.dataset.as);
@@ -848,6 +942,13 @@ function renderPanel() {
     renderPanel();
   };
   if ($('stopPerson')) $('stopPerson').onclick = () => setLens('all');
+  if ($('compareHere')) $('compareHere').onclick = () => compareEveryone();
+  if ($('rowFilter')) {
+    $('rowFilter').oninput = (ev) => {
+      const q = ev.target.value.trim().toLowerCase();
+      for (const tr of $('panelBody').querySelectorAll('tr.r')) tr.style.display = !q || tr.textContent.toLowerCase().includes(q) ? '' : 'none';
+    };
+  }
   if (n.kind === 'table' && $('ruleEditor')) wireTableControls(n);
 }
 
@@ -858,11 +959,13 @@ const firstName = (p) => p.name.split(' ')[0];
 
 function setLens(lens) {
   state.lens = lens;
-  for (const o of document.querySelectorAll('.lens button')) o.classList.toggle('on', o.dataset.lens === lens);
-  $('personPick').classList.toggle('on', lens === 'person');
+  for (const o of document.querySelectorAll('.lens button[data-lens]')) o.classList.toggle('on', o.dataset.lens === lens || (lens === 'person' && o.dataset.lens === 'anon' && state.reach && !state.reach.id));
+  $('personPick').classList.toggle('on', lens === 'person' && !!state.reach?.id);
   if (lens !== 'person') {
     state.person = null;
     state.pathway = null;
+    state.reach = null;
+    state.reachQueue = [];
     $('personPick').value = '';
   }
   computeOverlay();
@@ -870,27 +973,151 @@ function setLens(lens) {
   if (state.selected) renderPanel();
 }
 
-/** 1. Look at it as one real person: the backend's own list of what they may run, and its rule checks. */
+/**
+ * 1. Look at it as one real person (or as someone not signed in: id null). The map runs, as them, every
+ * function they may run that only reads, follows what came back, and finds every row of every table in
+ * the answers. The map lights up as the answers arrive: a table lights only when rows of it reach them.
+ */
 async function setPerson(id) {
-  const p = personById(id);
+  const p = id ? personById(id) : { id: null, name: 'Someone not signed in' };
   if (!p) return;
-  state.person = { id, name: p.name, loading: true };
+  const R_ = {
+    id,
+    name: p.name,
+    loading: true,
+    tools: new Set(),
+    notAllowed: [],
+    readers: [],
+    changers: [],
+    fns: {},
+    tables: Object.fromEntries(state.map.tables.map((t) => [t.name, { reached: 0, total: t.rows ?? 0, directly: false, via: {} }])),
+    rowIds: {},
+    runs: 0,
+    refused: 0,
+    summary: null
+  };
+  state.reach = R_;
+  state.reachQueue = [];
+  state.person = { id, name: p.name, reach: { tools: [], direct: {} } };
   state.pathway = null;
   state.record = null;
-  $('personPick').value = id;
+  $('personPick').value = id ?? '';
   setLens('person');
-  state.selected = `p:${id}`;
-  renderPanel();
+  if (id) state.selected = `p:${id}`;
+  else state.selected = null;
+  fit();
+  if (id) renderPanel();
+  else $('panel').classList.add('hidden');
   try {
-    const reach = await api('/api/as/reach', { person: id });
-    if (state.person?.id !== id) return;
-    state.person = { id, name: p.name, reach };
+    await stream('/api/as/everything', { person: id }, (e) => {
+      if (state.reach !== R_) return;
+      state.reachQueue.push(e);
+      pump();
+    });
   } catch (e) {
-    if (state.person?.id === id) state.person = { id, name: p.name, error: e.message };
+    if (state.reach === R_) state.reachQueue.push({ type: 'error', error: e.message }), pump();
+  }
+}
+
+/** Plays the measurement out at a pace a person can follow: one run at a time, each one a spark. */
+let pumping = null;
+function pump() {
+  if (pumping) return;
+  const step = () => {
+    const R_ = state.reach;
+    const e = state.reachQueue.shift();
+    if (!R_ || !e) return (pumping = null);
+    applyReach(R_, e);
+    // quick when there is a lot to show (staff), slower when a person only gets a little
+    const left = state.reachQueue.length;
+    const ms = e.type === 'run' ? (left > 40 ? 45 : left > 15 ? 80 : 150) : 20;
+    pumping = setTimeout(step, ms);
+  };
+  pumping = setTimeout(step, 0);
+}
+
+function applyReach(R_, e) {
+  const now = performance.now();
+  const pid = R_.id ? `p:${R_.id}` : null;
+  if (e.type === 'start') {
+    R_.tools = new Set(e.tools);
+    R_.notAllowed = e.notAllowed;
+    R_.readers = e.readers;
+    for (const t of e.direct ?? []) if (R_.tables[t]) R_.tables[t].directly = true;
+    state.person.reach = { tools: e.tools.map((name) => ({ name, required: [], description: '' })), direct: Object.fromEntries((e.direct ?? []).map((t) => [t, { find: { allowed: true }, create: { allowed: false } }])) };
+  } else if (e.type === 'skip') {
+    R_.changers.push(e);
+  } else if (e.type === 'run') {
+    const f = (R_.fns[e.fn] ??= { runs: 0, refused: 0, rows: {}, newRows: 0 });
+    if (e.status === 'ran') {
+      f.runs++;
+      R_.runs++;
+    } else {
+      f.refused++;
+      R_.refused++;
+    }
+    const fid = `f:${e.fn}`;
+    state.flashes[fid] = { at: now, ok: e.status === 'ran' };
+    if (pid) state.particles.push({ from: pid, to: fid, start: now, delay: 0, dur: 420, color: COLORS.person });
+    for (const [t, n] of Object.entries(e.rows ?? {})) f.rows[t] = Math.max(f.rows[t] ?? 0, n);
+    for (const [t, ids] of Object.entries(e.newRows ?? {})) {
+      const set = (R_.rowIds[t] ??= new Set());
+      for (const id of ids) set.add(id);
+      f.newRows += ids.length;
+      const T = R_.tables[t];
+      if (T) {
+        T.reached = set.size;
+        T.via[e.fn] = (T.via[e.fn] ?? 0) + ids.length;
+      }
+      state.particles.push({ from: fid, to: `t:${t}`, start: now, delay: 300, dur: 520, color: COLORS.person });
+      state.flashes[`t:${t}`] = { at: now + 500, ok: true, color: COLORS.person };
+    }
+  } else if (e.type === 'done') {
+    R_.loading = false;
+    R_.summary = e.summary;
+    for (const [t, v] of Object.entries(e.summary.tables)) if (R_.tables[t]) Object.assign(R_.tables[t], v);
+    for (const [t, rows] of Object.entries(e.summary.rows ?? {})) R_.rowIds[t] = new Set(rows.map((r) => r.id));
+    R_.changers = e.summary.changers.map((c) => ({ ...c, writes: R_.changers.find((x) => x.fn === c.fn)?.writes ?? c.writes ?? [] }));
+    if (pid) state.flashes[pid] = { at: now, ok: true, color: COLORS.person };
+  } else if (e.type === 'error') {
+    R_.loading = false;
+    R_.error = e.error;
   }
   computeOverlay();
   renderLensNote();
-  if (state.selected) renderPanel();
+  const sel = state.byId[state.selected];
+  if (sel && (sel.kind === 'person' || sel.kind === 'table') && (e.type !== 'run' || state.reachQueue.length % 4 === 0)) renderPanel();
+}
+
+/** Every person, measured the same way, ranked: the one picture of who sees how much. */
+async function compareEveryone() {
+  const ev = { loading: true, list: [], byId: {} };
+  state.everyone = ev;
+  setLens('all');
+  $('compareBtn').classList.add('on');
+  state.selected = 'everyone';
+  fit();
+  renderPanel();
+  try {
+    await stream('/api/everyone', {}, (e) => {
+      if (state.everyone !== ev) return;
+      if (e.type === 'person') {
+        ev.list.push(e);
+        if (e.person.id) {
+          ev.byId[e.person.id] = e;
+          state.flashes[`p:${e.person.id}`] = { at: performance.now(), ok: true, color: COLORS.person };
+        }
+      }
+      if (e.type === 'error') ev.error = e.error;
+      if (e.type === 'done') ev.loading = false;
+      if (state.selected === 'everyone') renderPanel();
+    });
+  } catch (err) {
+    ev.error = err.message;
+  }
+  ev.loading = false;
+  $('compareBtn').classList.remove('on');
+  if (state.selected === 'everyone') renderPanel();
 }
 
 /** 2. One screen, as that person: its functions run as them, and the real answers. */
@@ -938,7 +1165,23 @@ async function findReach() {
   }
   rec.loading = false;
   if (state.record !== rec) return;
-  computeOverlay();
+  // play it out one person at a time, so each pathway can be seen arriving
+  rec.shown = 0;
+  const people = rec.data?.people ?? [];
+  const tick = () => {
+    if (state.record !== rec || rec.shown >= people.length) return;
+    const p = people[rec.shown++];
+    const now = performance.now();
+    state.flashes[`p:${p.person.id}`] = { at: now, ok: p.reaches, color: p.reaches ? COLORS.person : '#7d8a98' };
+    for (const fn of p.via) {
+      state.particles.push({ from: `p:${p.person.id}`, to: `f:${fn}`, start: now, delay: 0, dur: 450, color: COLORS.person });
+      state.particles.push({ from: `f:${fn}`, to: `t:${rec.table}`, start: now, delay: 380, dur: 500, color: COLORS.person });
+    }
+    if (p.reaches) state.flashes[`t:${rec.table}`] = { at: now + 800, ok: true, color: COLORS.person };
+    computeOverlay();
+    setTimeout(tick, p.reaches ? 420 : 160);
+  };
+  tick();
   renderPanel();
 }
 
@@ -954,7 +1197,7 @@ function computeOverlay() {
     lit.add(tid);
     tags[tid] = { text: 'THIS ROW', color: pink };
     if (rec.data) {
-      rec.data.people.forEach((p, i) => {
+      rec.data.people.slice(0, rec.shown ?? Infinity).forEach((p, i) => {
         const pid = `p:${p.person.id}`;
         const directly = p.direct.get.allowed || p.direct.find.allowed;
         if (p.reaches) {
@@ -972,8 +1215,10 @@ function computeOverlay() {
     }
   } else if (state.lens === 'person' && state.person?.reach) {
     const pid = `p:${state.person.id}`;
-    lit.add(pid);
-    tags[pid] = { text: 'LOOKING AS', color: pink };
+    if (state.person.id) {
+      lit.add(pid);
+      tags[pid] = { text: 'LOOKING AS', color: pink };
+    }
     const pw = state.pathway;
     if (pw) {
       const sid = `s:${pw.screen}`;
@@ -995,23 +1240,42 @@ function computeOverlay() {
         }
       }
       if (!pw.data) for (const c of state.map.calls.filter((x) => x.screen === pw.screen)) lit.add(`f:${c.fn}`);
-    } else {
-      for (const t of state.person.reach.tools) {
-        out.push({ from: pid, to: `f:${t.name}`, color: pink, width: 1.4, flow: false });
-        lit.add(`f:${t.name}`);
+    } else if (state.reach) {
+      // what came back to them: a pink wire only where rows of a table reached them through a function
+      const R_ = state.reach;
+      for (const s_ of state.map.screens) if (state.map.calls.some((c) => c.screen === s_ && R_.tools.has(c.fn))) lit.add(`s:${s_}`);
+      for (const [fn, f] of Object.entries(R_.fns)) {
+        const fid = `f:${fn}`;
+        lit.add(fid);
+        const tables = Object.entries(R_.tables).filter(([, t]) => t.via[fn]);
+        tags[fid] = tables.length
+          ? { text: `HANDED THEM ${tables.reduce((n, [, t]) => n + t.via[fn], 0)} ROW${tables.reduce((n, [, t]) => n + t.via[fn], 0) === 1 ? '' : 'S'}`, color: pink }
+          : f.runs
+          ? { text: 'RAN · NOTHING NEW', color: '#7d8a98' }
+          : { text: 'REFUSED', color: '#f97066' };
+        if (state.person.id) out.push({ from: pid, to: fid, color: tables.length ? pink : '#7d8a98', width: tables.length ? 2 : 1.2, flow: tables.length > 0, dash: tables.length ? [] : [3, 5] });
+        for (const [t, v] of tables) out.push({ from: fid, to: `t:${t}`, color: pink, width: Math.min(4, 1.2 + Math.log2(1 + v.via[fn])), phase: (t.length % 7) / 7 });
       }
-      for (const [t, d] of Object.entries(state.person.reach.direct)) {
-        if (d.find.allowed || d.create.allowed) {
-          out.push({ from: pid, to: `t:${t}`, color: '#f97066', dash: [8, 6], label: 'directly' });
-          lit.add(`t:${t}`);
+      for (const c of R_.changers) {
+        const fid = `f:${c.fn}`;
+        lit.add(fid);
+        tags[fid] = { text: 'CAN CHANGE · NOT RUN', color: '#fdb022' };
+      }
+      for (const [t, v] of Object.entries(R_.tables)) {
+        const tid = `t:${t}`;
+        if (v.directly) {
+          if (state.person.id) out.push({ from: pid, to: tid, color: '#f97066', dash: [8, 6], label: 'directly' });
+          tags[tid] = { text: `OPENS ALL ${v.total} DIRECTLY`, color: '#f97066' };
+          lit.add(tid);
+        } else if (v.reached) {
+          tags[tid] = { text: `${v.reached} OF ${v.total} ROW${v.total === 1 ? '' : 'S'}`, color: pink };
+          lit.add(tid);
         }
       }
-      for (const s of state.map.screens) lit.add(`s:${s}`);
-      for (const f of state.map.functions) if (lit.has(`f:${f.name}`)) for (const t of f.touches) lit.add(`t:${t.table}`);
     }
   }
   state.overlay = out;
-  state.lit = out.length || rec ? lit : null;
+  state.lit = out.length || rec || (state.lens === 'person' && state.reach && !state.pathway) ? lit : null;
   state.tags = tags;
 }
 
@@ -1019,6 +1283,9 @@ const ORDER = { ran: 0, refused: 1, 'not-allowed': 2, 'not-run': 3 };
 const STATUS_WORDS = { ran: 'ran as them', refused: 'refused', 'not-allowed': 'not allowed', 'not-run': 'not run' };
 
 function mineNote(keyName, person, count) {
+  const at = state.map?.backend?.recordedAt;
+  if (at)
+    return `<div class="mine-note">These answers come from <b>real runs</b>${count ? ` (${count})` : ''}, made by this map as ${esc(person)} on a copy of the training app’s backend and recorded on ${esc(new Date(at).toLocaleDateString(undefined, { dateStyle: 'long' }))}. The map only runs a function that reads; one that changes anything is listed as not run. Nothing you do here reaches any backend.</div>`;
   return `<div class="mine-note">These are <b>real runs</b>${count ? ` (${count})` : ''}, made just now by this map as ${esc(person)}, through the backend’s MCP door with a key named <b>${esc(keyName)}</b>. The key was deleted straight after. Each run shows in “What just ran”, marked as the map’s. The map only runs a function that reads; one that changes anything is listed as not run.</div>`;
 }
 
@@ -1038,30 +1305,67 @@ function callCard(c, needles = []) {
   </div>`;
 }
 
+const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
+const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
+
 function personPanel(n) {
   const p = n.person;
-  const P = state.person?.id === p.id ? state.person : null;
-  const head = `<div class="kind">Person</div><h2>${esc(p.name)}</h2>
+  const R_ = state.reach?.id === p.id ? state.reach : null;
+  const head = `<div class="kind">Person · what they can reach</div><h2>${esc(p.name)}</h2>
     <p>${p.email ? esc(p.email) + ' · ' : ''}${p.roles.length ? `in the <b>${esc(p.roles.join(', '))}</b> group` : 'no group'}${p.learnerId ? ` · learner <b>${esc(p.learnerId)}</b>` : ''}</p>`;
-  if (!P || P.loading) return head + `<p><span class="spinner"></span>Asking the backend what ${esc(p.name)} may do…</p>`;
-  if (P.error) return head + `<div class="verdict bad">${esc(P.error)}</div>`;
-  const allowed = P.reach.tools.map((t) => t.name);
-  const notAllowed = state.map.functions.map((f) => f.name).filter((f) => !allowed.includes(f));
-  const direct = Object.entries(P.reach.direct).filter(([, d]) => d.find.allowed || d.create.allowed);
-  return `${head}
-    <div class="verdict ${direct.length ? 'warn' : 'good'}">${
-      direct.length
-        ? `<b>${esc(firstName(p))} can open ${direct.length} table${direct.length === 1 ? '' : 's'} directly:</b> ${direct.map(([t]) => go(`t:${t}`, W.tableWords(t))).join(', ')}.`
-        : `<b>${esc(firstName(p))} can’t open any table directly.</b> Everything they see comes through the functions below, which decide in their own code whose rows to hand back.`
-    }</div>
-    <p style="font-size:12.5px;color:#7d8a98">From the backend itself: its list of the functions this person may run (asked through its MCP door with a key bound to them, deleted straight after; listing runs nothing), and its own rule check for every table.</p>
-    <h4>What they may run (${allowed.length})</h4>
-    <ul>${allowed.map((f) => `<li>${go(`f:${f}`, f)}</li>`).join('')}</ul>
-    <h4>Turned away from (${notAllowed.length})</h4>
-    <p>${notAllowed.map((f) => go(`f:${f}`, f)).join(', ') || 'nothing'}</p>
+  if (!R_) return head + `<p><span class="spinner"></span>Starting…</p>`;
+  return head + reachBody(R_, firstName(p)) + `
     <h4>Next</h4>
-    <p><b>Click a screen</b> on the map to see exactly what ${esc(firstName(p))} gets there, for real. Or click a table, pick a row, and see who can reach it.</p>
+    <p><b>Click a screen</b> to see exactly what ${esc(firstName(p))} gets there. <b>Click a table</b> to see which of its rows are ${esc(firstName(p))}’s to see.</p>
+    <button class="go" id="compareHere">Who sees how much? Compare everyone</button>
     <button class="ghost" id="stopPerson">Stop looking as ${esc(firstName(p))}</button>`;
+}
+
+/** The count, the tables it came from, and how the map knows. Shared by a person and by "not signed in". */
+function reachBody(R_, who) {
+  const tables = Object.entries(R_.tables);
+  const reached = tables.filter(([, t]) => t.reached).sort((a, b) => b[1].reached - a[1].reached || a[0].localeCompare(b[0]));
+  const out = tables.filter(([, t]) => !t.reached);
+  const total = tables.reduce((s_, [, t]) => s_ + (t.total ?? 0), 0);
+  const got = reached.reduce((s_, [, t]) => s_ + t.reached, 0);
+  const capped = (R_.summary?.functions ?? []).filter((f) => f.capped);
+  const status = R_.error
+    ? `<div class="verdict bad">${esc(R_.error)}</div>`
+    : R_.loading
+    ? `<p><span class="spinner"></span>Running, as ${esc(who)}, every function they may run that only reads… <b>${R_.runs}</b> run${R_.runs === 1 ? '' : 's'} so far.</p>`
+    : '';
+  const bar = ([t, v]) => `<div class="bar-row" data-go="t:${esc(t)}"><span class="bar-name">${esc(W.tableWords(t))}</span><span class="bar-track"><span class="bar-fill" style="width:${pct(v.reached, v.total)}%"></span></span><span class="bar-n">${v.reached} of ${v.total}</span>
+    <span class="bar-via">${v.directly ? '<b style="color:#f97066">opens the whole table directly</b>' : `through ${Object.keys(v.via).map(esc).join(', ')}`}</span></div>`;
+  return `
+    ${status}
+    <div class="verdict pink"><div class="big-number">${got} <small>of ${total} rows (${pct(got, total)}%)</small></div>
+      ${esc(who)} can reach rows in <b>${reached.length}</b> of ${tables.length} tables${R_.loading ? ' so far' : ''}. ${
+        reached.length < tables.length ? `The other ${out.length} stay dark: nothing of theirs comes back to ${esc(who)}.` : ''
+      }</div>
+    ${reached.length ? `<h4>What reaches ${esc(who)}</h4><div class="bars">${reached.map(bar).join('')}</div>` : ''}
+    ${out.length ? `<h4>Out of reach (${out.length})</h4><p class="out-of-reach">${out.map(([t]) => go(`t:${t}`, W.tableWords(t))).join(', ')}</p>` : ''}
+    <h4>How the map knows</h4>
+    <p style="font-size:12.5px">It ran, as ${esc(who)}, every function the backend lets them run that only reads (${plural(R_.runs, 'real run')}${R_.refused ? `, ${R_.refused} refused` : ''}). When an answer showed them something they could click (a step, a learner), it asked again the way the app would. Then it looked for every row of every table in what came back, by its ids. A table lights up only if rows of it came back.</p>
+    ${capped.length ? `<p style="font-size:12.5px">${capped.map((f) => `<b>${esc(f.fn)}</b> could be asked ${f.possible} ways; the map asked ${f.runs + f.refused}`).join('; ')}. So this is <b>at least</b> what they reach.</p>` : ''}
+    ${(R_.summary?.functions ?? []).filter((f) => f.gaveUp).map((f) => `<p style="font-size:12.5px"><b>${esc(f.fn)}</b> turned the map away ${f.refused} times in a row, so it stopped asking.</p>`).join('')}
+    ${R_.changers.length ? `<h4>What they can change (never run here)</h4><ul>${R_.changers.map((c) => `<li>${go(`f:${c.fn}`, c.fn)}${c.writes?.length ? ` changes ${c.writes.map((t) => esc(W.tableWords(t))).join(', ')}` : ''}</li>`).join('')}</ul><p style="font-size:12px;color:#7d8a98">A function that changes data is never run by the map, so what it would hand back isn’t counted.</p>` : ''}
+    ${R_.notAllowed?.length ? `<h4>Turned away from (${R_.notAllowed.length})</h4><p class="out-of-reach">${R_.notAllowed.map((f) => go(`f:${f}`, f)).join(', ')}</p>` : ''}
+    ${R_.summary?.keyName ? mineNote(R_.summary.keyName, R_.name, R_.runs + R_.refused) : ''}`;
+}
+
+function everyonePanel() {
+  const ev = state.everyone;
+  const list = [...ev.list].sort((a, b) => b.reachedRows - a.reachedRows);
+  const max = list[0]?.totalRows ?? 0;
+  const row = (e) => `<div class="bar-row" ${e.person.id ? `data-as="${esc(e.person.id)}"` : 'data-anon="1"'}><span class="bar-name"><b>${esc(e.person.name)}</b>${e.person.roles?.length ? ` · ${esc(e.person.roles.join(', '))}` : ''}</span>
+    <span class="bar-track"><span class="bar-fill ${e.person.roles?.length ? 'staff' : e.reachedRows ? '' : 'none'}" style="width:${pct(e.reachedRows, e.totalRows)}%"></span></span><span class="bar-n">${e.reachedRows}</span>
+    <span class="bar-via">${Object.values(e.tables).filter((t) => t.reached).length} of ${Object.keys(e.tables).length} tables</span></div>`;
+  return `<div class="kind">Everyone, measured</div><h2>Who sees how much</h2>
+    <p>Each person, for real: every function they may run that only reads, run as them, and every row that came back, counted. Out of <b>${max}</b> rows in the backend.</p>
+    ${ev.error ? `<div class="verdict bad">${esc(ev.error)}</div>` : ''}
+    ${ev.loading ? `<p><span class="spinner"></span>Measuring… ${ev.list.length} of ${state.people.length + 1} so far.</p>` : ''}
+    <div class="bars">${list.map(row).join('')}</div>
+    <p style="font-size:12.5px;color:#7d8a98">Click anyone to watch their rows reach them on the map. Purple is the staff group.</p>`;
 }
 
 function pathwayPanel(n) {
@@ -1081,23 +1385,49 @@ function pathwayPanel(n) {
     ${[...d.calls].sort((a, b) => ORDER[a.status] - ORDER[b.status]).map((c) => callCard(c)).join('')}`;
 }
 
+const SKIP_COLS = new Set(['objectId', 'createdAt', 'updatedAt', 'ACL', 'emailVerified', 'authData', 'sessionToken']);
+
+/** The table's rows, as a table you can read and filter. Looking as someone: their rows lit, the rest dim. */
 function rowsSection(n) {
   const rows = state.rows[n.key];
+  const R_ = state.lens === 'person' ? state.reach : null;
+  const theirs = R_?.rowIds?.[n.key] ?? new Set();
+  const who = R_ ? (R_.id ? firstName({ name: R_.name }) : 'someone not signed in') : null;
   let body;
   if (!rows) body = '<p><span class="spinner"></span>Reading its rows…</p>';
   else if (rows.error) body = `<p>${esc(rows.error)}</p>`;
   else if (!rows.length) body = '<p>It has no rows.</p>';
-  else
-    body =
-      rows
-        .slice(0, 25)
-        .map((r) => `<button class="rowpick" data-row="${esc(r.objectId)}"><b>${esc(r.label)}</b>${r.key && r.key !== r.label ? ` · ${esc(r.key)}` : ''}${r.owner ? ` · ${esc(r.owner)}` : ''}</button>`)
-        .join('') + (rows.length > 25 ? `<p class="ans-none">and ${rows.length - 25} more</p>` : '');
-  return `<h4>One row’s reach</h4><p>Pick a row to see who could reach it, and through which pathway.</p>${body}`;
+  else {
+    const cols = [];
+    const sample = rows[0].cells ?? {};
+    const prefer = ['learnerId', 'conceptId', 'status', 'kind', 'email', 'title', 'name', 'subject', 'position', 'attempt', 'state'];
+    for (const c of prefer) if (c in sample && !cols.includes(c)) cols.push(c);
+    for (const c of Object.keys(sample)) if (cols.length < 4 && !SKIP_COLS.has(c) && !cols.includes(c) && !/Id$/.test(c)) cols.push(c);
+    const shown = cols.slice(0, 4);
+    const sorted = R_ ? [...rows].sort((a, b) => theirs.has(b.objectId) - theirs.has(a.objectId)) : rows;
+    const tr = (r) => {
+      const mine = theirs.has(r.objectId);
+      return `<tr class="r ${R_ ? (mine ? 'theirs' : 'not-theirs') : ''}" data-row="${esc(r.objectId)}"><td class="mark">${mine ? '●' : ''}</td><td><b>${esc(r.label)}</b></td>${shown.map((c) => `<td title="${esc(r.cells?.[c] ?? '')}">${esc(r.cells?.[c] ?? '')}</td>`).join('')}</tr>`;
+    };
+    body = `${R_ && !R_.loading ? `<div class="verdict pink"><b>${theirs.size} of these ${rows.length} rows reach ${esc(who)}</b>${theirs.size ? `, lit below${R_.tables[n.key]?.via ? `, through ${Object.keys(R_.tables[n.key].via).map(esc).join(' and ')}` : ''}` : ''}. ${theirs.size < rows.length ? `The other ${rows.length - theirs.size} never come back to them.` : ''}</div>` : ''}
+      <input class="filter" id="rowFilter" placeholder="Find a row" autocomplete="off">
+      <div class="rowgrid-wrap"><table class="rowgrid"><thead><tr><th></th><th>Row</th>${shown.map((c) => `<th>${esc(R.words(c))}</th>`).join('')}</tr></thead><tbody>${sorted.map(tr).join('')}</tbody></table></div>
+      <p style="font-size:12px;color:#7d8a98">Click any row, then <b>Who can access this?</b> to watch who it reaches.</p>`;
+  }
+  return `<h4>Its rows${Array.isArray(rows) ? ` (${rows.length})` : ''}</h4>${body}`;
+}
+
+function theirLine(R_, rec) {
+  const hit = R_.summary?.rows?.[rec.table]?.find((r) => r.id === rec.objectId);
+  const who = esc(R_.name);
+  if (!hit && !R_.rowIds?.[rec.table]?.has(rec.objectId)) return `This row never comes back to <b>${who}</b>.`;
+  const ways = (hit?.hits ?? []).map((h) => `${esc(h.fn)}${h.args && Object.keys(h.args).length ? ` (asked with ${Object.entries(h.args).map(([k, v]) => `${esc(k)} = ${esc(v)}`).join(', ')})` : ''}`);
+  return `<b>${who}</b> gets this row${ways.length ? ` through ${ways.join(' and ')}` : ''}.`;
 }
 
 function recordPanel(n) {
   const rec = state.record;
+  const R_ = state.lens === 'person' && state.reach && !state.reach.loading ? state.reach : null;
   const head = `<div class="kind">One row of ${esc(n.title)}</div><h2>${esc(rec.label)}</h2><p><a id="backToTable">← back to the table</a></p>`;
   if (rec.error) return head + `<div class="verdict bad">${esc(rec.error)}</div>`;
   if (!rec.data) {
@@ -1108,8 +1438,9 @@ function recordPanel(n) {
         <li><b>directly</b>: the backend’s own rule check, for this row;</li>
         <li><b>through a function</b>: it runs, as each person, every function that touches ${esc(n.title)} and only reads (${fns.length} touch it), and looks for this row in what comes back.</li>
       </ul>
-      <p style="font-size:12.5px;color:#7d8a98">These are real runs (read-only), up to ${state.people.length} people × a few functions, each marked as the map’s in “What just ran”. A few seconds.</p>
-      <button class="go" id="findReach" ${rec.loading ? 'disabled' : ''}>${rec.loading ? '<span class="spinner"></span>Asking, as each person…' : 'Find who can reach it'}</button>`;
+      <p style="font-size:12.5px;color:#7d8a98">${state.map.backend.recordedAt ? `In this recording, the answer is read off each person’s recorded reach: the same real runs, seen from this row’s side.` : `These are real runs (read-only), up to ${state.people.length} people × a few functions, each marked as the map’s in “What just ran”. A few seconds.`}</p>
+      ${R_ ? `<div class="verdict pink">${theirLine(R_, rec)}</div>` : ''}
+      <button class="go" id="findReach" ${rec.loading ? 'disabled' : ''}>${rec.loading ? '<span class="spinner"></span>Asking, as each person…' : 'Who can access this?'}</button>`;
   }
   const d = rec.data;
   const reachers = d.people.filter((p) => p.reaches);
@@ -1130,7 +1461,7 @@ function recordPanel(n) {
         : `can’t reach it. ${ran.length ? `${ran.map((r) => esc(r.fn)).join(' and ')} answered without it` : 'No function that reads it is open to them'}; the backend’s rule check says no to opening it directly.`
     }</span></div>`;
   };
-  const excerpt = reachers.flatMap((p) => p.results.filter((r) => r.found).map((r) => ({ p, r })))[0];
+  const excerpt = reachers.flatMap((p) => p.results.filter((r) => r.found && r.value).map((r) => ({ p, r })))[0];
   return `${head}
     ${R.row(d.row)}
     <div class="verdict ${reachers.some((p) => p.direct.get.allowed || p.direct.find.allowed) || anonDirect ? 'bad' : 'good'}">
@@ -1138,7 +1469,7 @@ function recordPanel(n) {
       ${anonDirect ? ' <b>Someone not signed in can open it directly.</b>' : ' Someone not signed in can’t.'}
       ${reachers.some((p) => p.direct.get.allowed || p.direct.find.allowed) ? '' : ' Nobody can open it directly: every pathway goes through a function.'}
     </div>
-    ${mineNote('view-as-<each person>' + '-by-backend-map', 'each person in turn', runs)}
+    ${mineNote('view-as-<each person>' + '-by-backend-map', 'each person in turn', d.recorded ? 0 : runs)}
     <h4>Who reaches it, and how</h4>
     ${reachers.map(whoLine).join('') || '<p>Nobody.</p>'}
     <h4>Who can’t</h4>
@@ -1206,11 +1537,12 @@ function tablePanel(n) {
     <h2>${esc(n.title)}</h2>
     <p><b>${t.rows ?? '?'}</b> row${t.rows === 1 ? '' : 's'} now · ${t.columns.length} things in each row${d.rule.own ? '' : ' · uses the app’s standard rule'}</p>
     ${verdict}
+    ${rowsSection(n)}
     <h4>Who may open it directly</h4>
     <div id="ruleEditor"></div>
-    <h4>Who reaches it through functions</h4>
+    <h4>Which functions name it in their code</h4>
     ${users.length ? `<ul>${readers.map(fnLine).join('')}${users.filter((f) => !readers.includes(f)).map(fnLine).join('')}</ul>` : '<p>No function uses it.</p>'}
-    ${rowsSection(n)}
+    ${users.length ? '<p style="font-size:12px;color:#7d8a98">Naming a table is not handing its rows to everyone who may run the function: the function’s own code chooses whose rows come back. Look as a real person to see which rows do.</p>' : ''}
     <h4>What’s in a row</h4>
     <div class="chips">${t.columns.map((c) => `<span class="chip ${keys.has(c.name) ? 'key' : ''}" title="${esc(typeWords(c.type))}">${esc(c.name)} · ${esc(typeWords(c.type))}</span>`).join('')}</div>
     <p style="font-size:12px;color:#7d8a98">Green: no two rows may share it.</p>
@@ -1445,7 +1777,7 @@ function renderRuns(freshCount) {
           r.byMap ? `<div class="by">run by this map, as ${esc(r.byMap.person ?? 'someone')}</div>` : r.byKey ? `<div class="by">run with the key “${esc(r.byKey)}”</div>` : ''
         }<div class="when">${esc(W.ago(r.startedAt))}${r.durationMs != null ? ` · took ${r.durationMs} ms` : ''}</div></div>`
     )
-    .join('') || '<span style="color:#7d8a98">Nothing has run yet. Use the app and watch.</span>';
+    .join('') || `<span style="color:#7d8a98">${state.map?.backend?.recordedAt ? 'Pick a person and their runs play here.' : 'Nothing has run yet. Use the app and watch.'}</span>`;
   for (const el of $('runs').querySelectorAll('.run')) el.onclick = () => focusOn(`f:${el.dataset.fn}`);
 }
 setInterval(() => renderRuns(0), 30000);
@@ -1522,7 +1854,7 @@ canvas.addEventListener(
 );
 
 function tipFor(n) {
-  if (n.kind === 'person') return `<b>${esc(n.title)}</b><br>Click to look at the whole map as ${esc(firstName(n.person))}: what the backend lets them run and open.`;
+  if (n.kind === 'person') return `<b>${esc(n.title)}</b><br>Click to see what ${esc(firstName(n.person))} can reach: the backend’s functions run as them, for real, and every row that comes back.`;
   if (n.kind === 'screen' && state.lens === 'person' && state.person?.reach) return `<b>${esc(n.title)}</b><br>Click to see exactly what ${esc(state.person.name)} gets here: its functions, run as them, for real.`;
   if (n.kind === 'fn') {
     const f = n.fn;
@@ -1536,8 +1868,9 @@ function tipFor(n) {
   return `<b>${esc(n.title)}</b><br>Asks ${[...fns].map(esc).join(', ')}.`;
 }
 
-for (const b of document.querySelectorAll('.lens button')) b.onclick = () => setLens(b.dataset.lens);
+for (const b of document.querySelectorAll('.lens button[data-lens]')) b.onclick = () => (b.dataset.lens === 'anon' ? setPerson(null) : setLens(b.dataset.lens));
 $('personPick').onchange = (e) => (e.target.value ? setPerson(e.target.value) : setLens('all'));
+$('compareBtn').onclick = () => compareEveryone();
 $('search').addEventListener('input', (e) => (state.search = e.target.value.trim()));
 $('search').addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;

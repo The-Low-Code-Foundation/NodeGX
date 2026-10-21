@@ -147,3 +147,78 @@ so "no key left" has to mean "no usable key"; the run record does not name the k
 a function needs is read from the tool's description and the row; the staff member reaches every learner's
 conversation through `learnerProgramme` because that function takes the learner id from its caller: by design for
 a coach, and now on screen.
+
+## s3 (2026-10-21, Opus 5.5, by hand): what one person can reach, row by row; the table explorer; who sees how much; public
+
+**Why the round-2 lens lied** (bug `P124-S3-LENSBYNAMING`, fixed): it lit a table when the person may run any function
+whose code *names* it. `course` is open to every signed-in learner and names 23 of the 27 tables, so every learner lit
+23 tables. Naming a table says nothing about whose rows come back.
+
+**The measurement** (`editor/lib/reach.mjs`): as the person (a key bound to them on the MCP door, as round 2), run every
+function they may run that only reads; follow what came back the way the app's next click would (an object holding a
+function's arguments is one ask: the staff roster's learner ids → `learnerProgramme(learnerId)` for each; a course's
+step → `lesson(conceptId)`), up to 3 rounds and 16 asks a function; then find every row of every table in the answers:
+by objectId, by one-column unique keys (the token inside `message:msg-l-marie-1` counts), by several-column keys read
+with the values of the objects around them, a `session` object's `id` read as `sessionId`, and a table with one row per
+person reached through that person's id (≥ 3 rows, `learnerId`/`userId` only: s3 first tried any unique column and a
+concept with one Signal row by chance made every learner "reach" Sam's signals; caught, narrowed, re-measured).
+A table whose rule says nobody is a "no" without asking (the backend limits admin requests; 12 people × 27 checks hit
+429 and took 5 s each before).
+
+**Measured on a fresh copy of the training backend** (289 rows, 27 tables), the same in the live map, the recording and
+the public copy:
+
+| who | rows reached | tables |
+| --- | ---: | ---: |
+| Richard Osborne (staff) | 261 | 23 |
+| Sam Okafor | 115 | 24 |
+| Tom Reyes | 46 | 11 |
+| Marie Dubois | 37 | 13 |
+| l-invoice | 31 | 8 |
+| J. Hughes | 29 | 11 |
+| Ade Bello, Priya | 27 | 9, 11 |
+| Dana K. | 25 | 7 |
+| Eleni K. | 24 | 7 |
+| Noor A. | 3 | 3 |
+| Jo Whitfield | 2 | 2 |
+| someone not signed in | 0 | 0 |
+
+Marie: Conversation 1 of 2 (hers, not Sam's), Progress 4 of 33, no coach note, no staff function. Sam reaches more
+tables than staff (24 vs 23) because staff's functions hand back Lesson and Session-prep content without the ids the
+map can match: a measurement floor, said on screen as "at least" where a function was capped. `readLesson` refuses
+staff 15 times out of 16 (no drafts exist; LessonDraft has 0 rows), so the map stops asking a function after 3
+refusals and says so.
+
+**What the page does now** (`editor/public/app.js`):
+
+- **Pick a person** (People column, *A real person…*, or *Someone not signed in*): the map streams the runs
+  (`POST /api/as/everything`, one JSON line per run) and plays them at a followable pace: a pink spark person →
+  function, then function → each table that rows came from; the table flashes, its tag counts up (`4 OF 33 ROWS`) and
+  a pink bar fills along its foot. Tables nothing came back from stay dark. Functions: `HANDED THEM 37 ROWS`,
+  `RAN · NOTHING NEW`, `CAN CHANGE · NOT RUN` (amber, never run), the rest dim. The panel: the big number, a bar per
+  table with the functions it came through, *Out of reach*, *How the map knows*, what they can change (not run).
+- **Who sees how much?** (top bar): every person measured the same way and ranked (`POST /api/everyone`); each
+  person's card on the map gets a bar.
+- **The table explorer:** click a table and its rows come first, as a filterable grid. Looking as someone, their
+  rows are lit and sorted first (*"4 of these 33 rows reach Marie, … through course and exportMine"*); click any row →
+  **Who can access this?** → the round-2 reach, now played out person by person.
+- The static touches are kept, renamed *Which functions name it in their code*, with a line saying naming is not
+  handing over.
+
+**Graded:** `editor/test/people.test.mjs` on a fresh copy and backend of its own: **34/34** (the round-2 checks
+plus: Marie 37 of 289 in 13 of 27, not every table lit, Conversation 1 of 2, no pink wire to a dark table, the
+Progress grid 4 lit 29 dim, staff > 3× Marie, not signed in 0, the ranking staff first and 0 last), no page errors,
+copies unchanged.
+
+**Public:** https://nodegx.io/backend-map/ (deployed 2026-10-21 ~16:00 CEST). `static/record.mjs` records every answer
+the map asks for from a running copy (the map, people, rows, dry runs, 13 reaches, the ranking, 108 screens as each
+person); `static/build.mjs` copies the page and `static/recorded.js`, which answers `/api/*` in the page (one row's
+reach is read off the 13 recorded reaches; a rule change is refused in words). The build refuses a secret, a local
+path or a local address. 1.47 MB. Cards: nodegx.io/demos/ (*Backend map*) and nodegx.io/your-own-editor/#backend (a
+new paragraph, the *Who sees how much* figure, *Open the backend map*; the false "drag a person onto a table" line
+replaced). Copy linted clean (`written`, `closer`, `opener`, `contract`). nodegx-web `592786b`; the deploy shipped
+only those two pages, two pictures and `backend-map/` (rsync dry run first; the npm 0.2.3 changelog still held back).
+Graded on the public URL: the row reach (*2 of 12: Marie Dubois, Richard Osborne*), the Course pathway, the ticker,
+the refusal.
+
+Screens: `look/s3-*.png`.

@@ -54,10 +54,30 @@ How: a key bound to the person (BACKEND-2.md), used through the backend's MCP do
 question and deleted straight after, and its secret is never shown or saved. Every run it makes shows in
 "What just ran" as **run by this map, as <name>**.
 
+## What one person can reach (round 3)
+
+- **Pick a person** and the map measures, for real, which rows reach them: it runs as them every function they may
+  run that only reads, follows what came back the way the app would (a learner id in the roster → that learner's
+  programme), and finds every row of every table in the answers. The runs play out on the map: a table lights up,
+  counts up and fills its pink bar only when rows of it come back. Tables nothing came back from stay dark.
+  `lib/reach.mjs`; `POST /api/as/everything` streams one JSON line per run. `{ "person": null }` is someone not
+  signed in.
+- **Who sees how much?** measures everyone the same way and ranks them (`POST /api/everyone`).
+- **A table's rows** come first in its panel; looking as someone, their rows are lit. Click a row, then **Who can
+  access this?**.
+- A function that changes data is never run, and one with many possible arguments is asked at most 16 ways: the
+  panel says when, and that the count is then "at least".
+
+## The public copy
+
+`../static/`: `record.mjs` records every answer this server gives from a running copy; `build.mjs` copies `public/`
+with `recorded.js`, which answers `/api/*` in the page from the recording. That is nodegx.io/backend-map/. This
+server is never public: it holds the backend's admin credential.
+
 ## What it can't tell you
 
-- Which **rows** a function hands back: that is decided in the function's own code. The map shows which
-  tables each function reaches.
+- Which rows a function hands back is decided in its own code, so the map finds out by running it as a person
+  (above), never by reading the code.
 - Links between tables are read from the column names (a `conceptId` points at the table whose key is
   `conceptId`); the backend doesn't declare them.
 - Where a function names a table but passes it around in its code, the map says "names it" rather than

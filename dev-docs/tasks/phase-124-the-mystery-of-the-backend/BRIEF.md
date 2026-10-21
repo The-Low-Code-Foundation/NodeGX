@@ -59,6 +59,26 @@ reach it and from where. The honest mechanism for "exactly" is to run the functi
 code: the backend's keys that act as a person (FED-005 `actsAsUserId`) make that real. These go to the same stranger
 as round 2, verbatim, with the mechanism measured first (README §s2).
 
+## s3 — Richard on round 2, and what was missing (2026-10-21)
+
+> That 'Backend map' thing is starting to look very cooL. Just one thing missing from my previous spec I think. The
+> 'find who can reach it' feature is a dazzler. I kind of imagined that would be an easy thing to do in the table
+> views, like clicking a table would show a data explorer and you could click any record and select 'who can access
+> this' and see the amazing live animation. that's pretty much the show stopper. Clicking each user is a bit of a let
+> down because no matter who you click, the app's screens all light up, the functions partially light up which is
+> cool and expected, but the tables all light up. Surely every user doesn't have access to every table? That would
+> freak people the fuck out. The concept was to show them 'see, a staff member can see lots of shit, but not as much
+> as an admin, and a learner can only see a little bit of the shit' but right now it looks like everyone can see
+> everything, because you're not digging into the functions that are highlighted to see what exactly they give this
+> person access to or not. So maybe take that dazzling 'who has access concept' and reverse it to 'what does this
+> person have access to' using the same amazing animations and concepts.
+>
+> Then when you're done I reckon we need to publish this sucker to the new NodeGX 'demos' and 'editor' pages
+
+Two asks and a publish: **a data explorer in the table view** (click a table, see its rows, click one, *who can access
+this*, the live animation); **reverse the reach**: a person's lit tables must be what the functions actually hand
+*them*, so a learner sees a little, staff a lot; then **publish** on nodegx.io's Demos and Your-own-editor pages.
+
 ## What the session assumed, for Richard to overturn
 
 - **The audience is the vouching person, not the operator.** The canvas draws what a client asks about; keys, email,
