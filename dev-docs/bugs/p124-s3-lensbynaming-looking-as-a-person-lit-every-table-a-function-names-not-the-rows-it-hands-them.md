@@ -5,6 +5,7 @@ status: fixed
 severity: high
 area: P124 backend map (prototype editor) / the person lens
 found: P124 s3, 2026-10-21, by Richard using the s2 map ("no matter who you click … the tables all light up. Surely every user doesn't have access to every table? That would freak people the fuck out")
+commit: 5cd2def70 (the measured reach, lib/reach.mjs and the lens)
 evidence: dev-docs/tasks/phase-124-the-mystery-of-the-backend/LOOK.md §s3; editor/test/people.test.mjs (34/34 on a fresh copy, 2026-10-21)
 ---
 
