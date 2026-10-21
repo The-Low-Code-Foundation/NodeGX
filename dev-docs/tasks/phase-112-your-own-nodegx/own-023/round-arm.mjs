@@ -101,6 +101,28 @@ if (mode === 'nodegx') {
   fs.writeFileSync(mcpFile, JSON.stringify(mcp, null, 2) + '\n');
   mcpArgs = ['--mcp-config', mcpFile];
   setup.kit = { version, files: Object.fromEntries(walk(APP).map((f) => [f, fs.statSync(path.join(APP, f)).size])) };
+  // round 3b (2026-10-21, the graph as text): the server under test is a LOCAL tarball of @nodegx/mcp at the same
+  // version the kit pins. Installed into the app folder's node_modules (no package.json, no lock), so that
+  // `npx -y @nodegx/mcp@<version>` — the kit's .mcp.json and the kit's note alike — resolves to it instead of the
+  // registry's (measured 2026-10-21: the local install wins and nothing lands in the npx cache). The agent notes come
+  // from the checkout's create-nodegx (--note-from <bin/create-nodegx.js>), the ones that ship with that server.
+  const mcpTgz = opt('--mcp-tgz', null);
+  if (mcpTgz && !from) {
+    const tgz = path.resolve(mcpTgz);
+    const r = spawnSync('npm', ['i', '--no-save', '--no-package-lock', '--no-audit', '--no-fund', tgz], { cwd: APP, env: { ...env, ...roundEnv }, encoding: 'utf8' });
+    fs.appendFileSync(path.join(root, 'create.log'), `\n== npm i ${tgz}\n` + r.stdout + r.stderr);
+    if (r.status !== 0) throw new Error(`npm i ${tgz} exited ${r.status}; see create.log`);
+    const installed = JSON.parse(fs.readFileSync(path.join(APP, 'node_modules', '@nodegx', 'mcp', 'package.json'), 'utf8'));
+    if (installed.version !== version) throw new Error(`--mcp-tgz is ${installed.name}@${installed.version}, the kit pins ${version}: npx would fetch the registry's`);
+    setup.mcpTgz = { file: tgz, bytes: fs.statSync(tgz).size, version: installed.version };
+  }
+  const noteFrom = opt('--note-from', null);
+  if (noteFrom && !from) {
+    const kit = (await import(path.resolve(noteFrom))).default;
+    if (kit.MCP_VERSION !== version) throw new Error(`--note-from pins @nodegx/mcp@${kit.MCP_VERSION}, the round runs ${version}`);
+    for (const name of kit.AGENT_FILES) fs.writeFileSync(path.join(APP, name), kit.AGENT_NOTE);
+    setup.noteFrom = { file: path.resolve(noteFrom), files: kit.AGENT_FILES, bytes: kit.AGENT_NOTE.length };
+  }
   // R9 (Richard, 2026-10-19): the server is started once before the build, as a person who retried would have —
   // cold it misses Claude Code's 30 s limit (P112-OWN023-COLDSERVER). The cost stays in B's row; this is its measure.
   if (rest.includes('--warm-server') && !process.env.MOCK_CREATE) setup.warm = await warmServer(server, version);

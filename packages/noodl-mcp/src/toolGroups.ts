@@ -333,6 +333,9 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
     tools: [
       'search_project',
       'explain_component',
+      // P112 OWN-023 round 3 — the whole graph as text. Appended on the same measurement as the rows above:
+      // "8 tools" and "9 tools" are the same length, so it costs 0 resident tokens.
+      'read_graph',
       'list_examples',
       'list_library',
       'get_library_entry',

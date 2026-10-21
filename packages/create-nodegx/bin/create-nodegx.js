@@ -43,6 +43,12 @@ const AGENT_NOTE = [
   `To see an app: \`npx ${PREVIEW_PACKAGE} <the app's folder> --open\` — it starts the app's own backend too, when it`,
   'has one on this computer, so it is also how the app opens again another day.',
   '',
+  // P112 OWN-023 round 3: two strangers handed an app with no docs each wrote Python over the component JSON to
+  // list nodes and wires before reading anything. The page they wrote for themselves ships; read it, not the JSON.
+  `To read an app before changing it: \`npx -y ${MCP_PACKAGE}@${MCP_VERSION} <the app's folder> --graph\` prints the`,
+  'whole app as text on one page — every component, node, parameter, function and wire — and writes nothing.',
+  "Read that rather than the JSON under `components/` (with the server open, the tool `read_graph` is the same page).",
+  '',
   // P112-OWN018-LISTCHANGED / OWN-018 round 1: Mistral Large 4 (in Mistral Vibe) created the app, then could not see
   // the tools that build it, and wrote one 17-component batch whose every refusal it then had to untangle at once.
   "Some agents never refresh their tool list once a project is open. If a `nodegx` tool you're told about isn't in",

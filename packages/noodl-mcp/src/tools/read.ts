@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { callHint, clientProfile } from '../clientProfile';
 import { swapAll } from '../instructions';
 import { describeComponent } from '../describe';
+import { projectGraphText } from '../graphText';
 import {
   AUTHORING_TRAPS,
   BACKEND_DOCTRINE_MD,
@@ -485,6 +486,28 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
       const stored = store.readComponent(args.path);
       const payload: ExplainComponentResponse = describeComponent(stored.key, stored.files);
       return jsonResult(payload);
+    })
+  );
+
+  // P112 OWN-023 round 3 — the stranger that opened the project got `get_project_info` (53k characters) and read
+  // less of the app than the one that wrote Python over the JSON. This is the page both were missing: the same
+  // text `noodl-mcp --graph` prints, so a reader with the server and a reader with a shell read the same thing.
+  server.registerTool(
+    'read_graph',
+    {
+      title: 'Read the graph as text',
+      description:
+        'The whole app on one page, as text rather than JSON: a map of every component (type, counts, description, ' +
+        'what it places), then each component\'s nodes with every parameter, function code as code, and every wire. ' +
+        'Pass `prefix` ("Pages/" or "Pages/Home") to limit the sections; the map is always the whole app. ' +
+        'The same page as `noodl-mcp <project> --graph` on the command line. Prefer it to reading component files.',
+      inputSchema: {
+        prefix: z.string().optional().describe('Only the sections of components whose path starts with this')
+      }
+    },
+    guarded((args: { prefix?: string }) => {
+      const store = binding.require();
+      return { content: [{ type: 'text', text: projectGraphText(store, args.prefix ? { prefix: args.prefix } : {}) }] };
     })
   );
 }

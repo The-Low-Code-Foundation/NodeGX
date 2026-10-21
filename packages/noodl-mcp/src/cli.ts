@@ -15,6 +15,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { reapOrphanedBackends } from './backend/reaper';
 import { CLIENT_PROFILES, isClientProfileName } from './clientProfile';
 import { ToolError } from './errors';
+import { runGraphCli } from './graphText';
 import { parseReproducibleFlag, type ReproducibleOutput } from './project/writeClock';
 import { createServer } from './server';
 import { BOOTSTRAP_ADVERTISED } from './toolGroups';
@@ -57,6 +58,12 @@ Options:
                    start, so every other tool is named as a call_tool call,
                    and images cost its prompt cache, so screenshots go to files
                    (implies --screenshots-to-files). Default: "default".
+  --graph[=<path prefix>]
+                   Print the project as text and exit: a map of every component,
+                   then each component's nodes, parameters, function code and
+                   wires, on one page a reader can grep. With a prefix ("Pages/"
+                   or "Pages/Home"), only those components' sections; the map is
+                   always the whole app. Nothing is served and nothing is written.
   --version        Print version and exit.
   --help           Show this help.
 
@@ -109,6 +116,18 @@ async function main(): Promise<void> {
     }
   }
   const positional = argv.filter((a, i) => !a.startsWith('--') && i !== reproducibleValueAt && i !== profileValueAt);
+  // P112 OWN-023 round 3 — `--graph`: the project as text, to stdout, and out. Before the orphan sweep on purpose:
+  // a read that kills a running backend is not a read. stdout is free here because no protocol is spoken.
+  const graphExit = runGraphCli(
+    argv,
+    positional,
+    (t) => process.stdout.write(t),
+    (t) => process.stderr.write(t)
+  );
+  if (graphExit !== undefined) {
+    process.exitCode = graphExit;
+    return;
+  }
   // BST-001 — zero is bootstrap mode, one is a served project, two is still a
   // mistake. `createServer` refuses zero-without---allow-writes with a message
   // naming the flag, rather than this branch printing the whole usage at
