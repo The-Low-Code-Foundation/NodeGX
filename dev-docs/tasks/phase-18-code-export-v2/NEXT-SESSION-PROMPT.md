@@ -1,3 +1,33 @@
+# Next session — session 135 (2026-10-21, BOARD lane 6) built **EXP-020 slice 2, the component's record**: a Function that reads `Component.Object` travels — its component instance's record, the runtime's Model transcribed (`src/lib/componentScope.ts`), one per mount, shared by the instance's Functions, handed to the body as the runtime hands it the fourth parameter. The rest of the scope is refused by its name, and so is a body beside a Component Object family node. Graded on the Component Desk against the runtime's own nodes, predicted first and read exactly. Templates 51 gained, 0 lost: gram's ten page loaders and what they feed, marketplace's photos and basket.
+
+## ✅ Session 135: the component's record travels
+
+Read EXP-011 §105, EXP-020 §7 and `s135-componentrecord/README.md`. In short:
+
+| what | where |
+|---|---|
+| Measured first: the handoff's ranking (`Noodl.Events` 132 …) counted ROWS; by distinct body 6/4/3/1, one prefab-laden project copied ~22×; every front-end prefab Events body also reads `Component.*`. The templates' #1 Function refusal was `Component.Object` (gram 10, marketplace 2), owned by nobody (EXP-020 §5 ↔ EXP-021 §5) | `s135-componentrecord/README.md`, `bodies.ts`, `bodies.json` |
+| `jsComponentUseOf` (a host trait; other members, computed names, the scope handed on, a member assigned: refused by name) | `src/analyze/jsfun.ts` |
+| `JsFunctionPlan.component`; refused beside a Component Object / Component State / Set Component Object Properties node | `src/analyze/plan.ts` (`COMPONENT_RECORD_FAMILY`) |
+| `src/lib/componentScope.ts`: the Model's methods and proxy transcribed; `useState(createComponentScope)` per component; `functionNode(signals, componentScope)`; `runFunction` passes `node.component` fourth; the wrapper's `_self` placeholder | `src/emit/componentScopeLib.ts`, `component.ts`, `functionRunLib.ts`, `emitApp.ts` |
+| Spec, 18 rows: the Component Desk (both arms, 13 readings), emitted text, classifier and plan, typecheck; 10 mutant arms, 0 survived | `tests/the-component-record-travels.test.ts`, `tests/helpers/component-desk.ts`, `s135-componentrecord/EXPECTED.md`, `mutants.py`, `mutants.out` |
+
+- 🔴 **Rank by distinct body and by the templates, never by corpus rows**: the corpus is copies of a handful of projects.
+- 🔴 **A gate two tasks each send to the other is nobody's**: read the "Not this task" lines of the neighbours.
+- 🔴 The first mutant H did not COMPILE (`family === null` against `NodeIR | undefined` is TS2367 under ts-jest) and graded nothing; G (the trait removed) was seen only by plan rows, because the desk's bodies are kept anyway (their outputs are read between runs, P18-S121-FRESHOUTPUTS) — C6, an unwired body, added and said so.
+- 🔴 The measurement base cannot sit under `node_modules` (ts-node refuses to compile there); `packages/.s135-base` needs `coverage-ledger.json` and `parameter-ledger.json` beside its `src/`, and is deleted before the package suite (hls006).
+- Filed **P18-S135-HIDDENINSTANCE** (low, template reach 0): a placement under a Mounted condition is unmounted by the export, so its kept nodes, their outputs and its record start over; the runtime keeps the instance. Pinned on the desk (A6).
+
+Readings: the spec 18 / 18; 10 mutants, 0 survived; package `tsc --noEmit` 0; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); hls001 predicted the 4 `src/lib/functionRun.ts` paths, read 4, regenerated. Reach (`dispdiff`, HEAD's `src` against the tree): **templates 51 gained, 0 lost, 7 re-worded** (gram 48, marketplace 3); **corpus 0 gained, 0 lost, 160 re-worded** (the Filters prefab, each naming its member). Whole package (`nice -n 19 --runInBand`): JSON 22:43, **153 / 153 suites, 5,221 passed, 0 failed, 3 skipped** (predicted 5,203 + 18, read on the first run).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **The scope's other members** (EXP-020 §7.4): the Filters prefab shares functions on the scope (`Component.UpdateCondition` 88 rows, `UpdateValue` 44, `UpdateFilter` 22) — the scope is per instance now, so a member one Function sets and another calls is small; then `Noodl.Events` and `Noodl.Object.create` in the same bodies; then `Component.RepeaterObject` and the record beside a Component Object node (one record with `useComponentObject`). Census on the prefabs *installed* (they are legacy `project.json` until installed; the corpus copies are what an install looks like).
+2. **For Each fed by a Function's output** ("items are fed by a source not statically typed as a list"): gram's Feed draws its chrome now, not its cards. Count the templates' rows first.
+3. **EXP-021** (logic components; todo-list's record bodies wait on it).
+4. Not this lane's next: P18-S134-PULSEHOLD, P18-S135-HIDDENINSTANCE (the parent keeps the instance's state, EXP-011 §94's shape), EXP-022 AC1 in a parallel session; EXP-023's cut is Richard's terminal.
+
+---
+
 # Next session — session 134 (2026-10-21, BOARD lane 6) built **EXP-020 slice 1 with EXP-019 slice 1b**: a Function that reads the Noodl API travels — `Records.query` (rows plain), `CloudFunctions.run`, `Users.Current`, `Files.sign`, `Variables.<name>` over `src/lib/noodl.ts`, any other member refused by its name — and a Function that awaits at its top level is awaited: an `async` wrapper, the run's `settled`, Success and Done after it, the click's later wires not held. Graded on the Noodl Desk against the runtime's own nodes and the running app's own `Noodl` on one fake Parse backend, readings and wire traffic, and one call at a time on the members. Templates 139 gained, 0 lost.
 
 ## ✅ Session 134: the Noodl API travels; a run that awaits is awaited

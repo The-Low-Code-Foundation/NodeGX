@@ -73,6 +73,7 @@ import { HISTORY_LIB_PATH } from './historyLib';
 import { SIGN_IN_LIB_PATH } from './signInLib';
 import { SCRIPT_CODE_PREFIX } from '../analyze/script';
 import { FUNCTION_RUN_LIB_PATH } from './functionRunLib';
+import { COMPONENT_SCOPE_LIB_PATH } from './componentScopeLib';
 import { NOODL_LIB_PATH } from './noodlLib';
 import { ID_HELPERS_BY_FN, ID_LIB_PATH, IdHelper } from './idLib';
 import { CRYPTO_LIB_PATH, CryptoHelper } from './cryptoLib';
@@ -339,6 +340,8 @@ export interface EmittedComponent {
   functionRunLib: boolean;
   /** EXP-020. `src/lib/noodl.ts`, earned by a printed Function that reads a backend member of the Noodl API. */
   noodlLib: boolean;
+  /** EXP-020 slice 2: `src/lib/componentScope.ts`, the `Component` a Function's body reads. */
+  componentScopeLib: boolean;
   /** EXP-011 §49. Whether this component imports `src/lib/animate.ts` / `src/lib/states.ts`. */
   animateLib: boolean;
   statesLib: boolean;
@@ -4630,10 +4633,13 @@ export function emitComponent(
     externalImports.push(`import { ${coreHooks.sort().join(', ')} } from '@nodegx/core/react';`);
   }
   const reactImports: string[] = [];
+  // EXP-020 slice 2 (session 135). A kept Function node that reads its component's record: the component keeps the scope.
+  const readsComponentScope = [...pulsedRunIds].some((id) => jsFunByNode[id]?.component === true);
   // P18-S116-QUERYFETCH. A query that only its Fetch runs holds its rows in state and asks from a handler: no effect.
   if (plan.queries.length > 0) reactImports.push(...(plan.queries.some((q) => queryHasEffect(q)) ? ['useEffect'] : []), 'useState');
   if (plan.popups.length > 0 && !reactImports.includes('useState')) reactImports.push('useState');
   if (referencedStateVars.length > 0 && !reactImports.includes('useState')) reactImports.push('useState');
+  if (readsComponentScope && !reactImports.includes('useState')) reactImports.push('useState');
   if (
     (plan.syncEffects.length > 0 ||
       plan.pushEffects.length > 0 ||
@@ -4961,6 +4967,10 @@ export function emitComponent(
     const specifier = `${relRoot}/${FUNCTION_RUN_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     const helpers = [...(pulsedRunIds.size > 0 ? ['functionNode', 'runFunction'] : []), ...(tickedRunIds.size > 0 ? ['tickedArrival'] : [])];
     internalImports.set(specifier, `import { ${helpers.join(', ')} } from '${specifier}';`);
+  }
+  if (readsComponentScope) {
+    const specifier = `${relRoot}/${COMPONENT_SCOPE_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { createComponentScope } from '${specifier}';`);
   }
   if (usedVariableNames.size > 0) {
     const specifier = `${relRoot}/stores/variables`;
@@ -6727,13 +6737,19 @@ export function emitComponent(
       const selfParam = keepsThis ? ', self: Record<string, any> = {}' : '';
       if (keepsThis) lines.push(`// It keeps state on \`this\` across runs: the body runs bound to the node's own \`self\`.`);
       /**
+       * EXP-020 slice 2 (session 135). A body that reads `Component.Object` takes its component instance's scope as the
+       * fourth parameter, after `self` (named `_self` where the body keeps nothing on `this`), as `runFunction` hands it.
+       */
+      const componentParam = def.component === true ? `${keepsThis ? '' : ', _self: Record<string, any> = {}'}, Component?: ComponentScope` : '';
+      if (def.component === true) lines.push("// It reads its component's record: `Component` is this component instance's scope, shared by its Functions.");
+      /**
        * EXP-019 slice 1b (session 134). A body that awaits at its top level runs as the runtime compiles it, in an `async`
        * function, and the wrapper hands back its promise: the run's chain after Success waits on it (`FunctionRun.settled`).
        */
       const awaits = def.awaits === true;
       if (awaits) lines.push('// It awaits: the run returns at its first `await`, and Success and Done wait for it to finish.');
       lines.push(
-        `${awaits ? 'async ' : ''}function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}${outputsParam}${selfParam}): ${awaits ? `Promise<${outputsType}>` : outputsType} {`
+        `${awaits ? 'async ' : ''}function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}${outputsParam}${selfParam}${componentParam}): ${awaits ? `Promise<${outputsType}>` : outputsType} {`
       );
       if (hasInputs) lines.push(`  const Inputs = ${scopeCast(INPUTS_PARAM)};`);
       if (!def.pulsed) lines.push(`  const Outputs: ${outputsType} = ${seedRecord};`);
@@ -7338,10 +7354,13 @@ export function emitComponent(
       `  }, [${pulse.stateName}]);`
     );
   }
+  // EXP-020 slice 2 (session 135). The instance's \`Component\`, one per mount, shared by the Functions that read it.
+  if (readsComponentScope) body.push(`  const [${COMPONENT_SCOPE_LOCAL}] = useState(createComponentScope);`);
   // EXP-011 §86. The Function node's values across runs, one per instance, as the running app's node keeps them.
   for (const id of pulsedRunIds) {
     const def = jsFunByNode[id]!;
-    body.push(`  const ${pulseNamesOf(def).node} = useRef(functionNode<NonNullable<Parameters<typeof ${def.fnName}>[1]>>([${def.signals.map(tsLiteral).join(', ')}])).current;`);
+    const scope = def.component === true ? `, ${COMPONENT_SCOPE_LOCAL}` : '';
+    body.push(`  const ${pulseNamesOf(def).node} = useRef(functionNode<NonNullable<Parameters<typeof ${def.fnName}>[1]>>([${def.signals.map(tsLiteral).join(', ')}]${scope})).current;`);
   }
   // P18-S119-TICKEDRUN. What each ticked input of a Run-wired Function holds, one per instance, as the node's inputs do.
   for (const ticked of plan.tickedRuns) body.push(`  const ${pulseNamesOf(jsFunByNode[ticked.nodeId]!).held} = useRef<unknown[]>([]).current;`);
@@ -8255,6 +8274,8 @@ export function emitComponent(
     timerHelpers: usedTimerHelpers,
     // EXP-011 §86.
     functionRunLib: pulsedRunIds.size > 0 || tickedRunIds.size > 0,
+    // EXP-020 slice 2 (session 135). A kept Function node that reads its component's record.
+    componentScopeLib: readsComponentScope,
     // EXP-020 (session 134). A printed Function wrapper that reads a backend member of the Noodl API.
     noodlLib: functionFiles.some(({ def }) => def.noodl?.members.some((m) => m !== 'Variables') === true),
     // EXP-011 §49. `states.ts` imports `animate.ts`, so a States alone earns both modules.
@@ -8412,6 +8433,8 @@ function functionFileSource(def: JsFunctionPlan, wrapper: string[], componentPat
     ...((def.scripts?.length ?? 0) > 0
       ? [`import { ${PROJECT_SCRIPTS_SYMBOL} } from '../../../${PROJECT_SCRIPT_FILES_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}';`]
       : []),
+    // EXP-020 slice 2 (session 135). The type of the component's scope it is handed.
+    ...(def.component === true ? [`import type { ComponentScope } from '../../../${COMPONENT_SCOPE_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}';`] : []),
     // EXP-020 (session 134). The Noodl API it reads, and the app's Variables it names.
     ...(def.noodl?.members.some((m) => m !== 'Variables') === true
       ? [`import { noodl } from '../../../${NOODL_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}';`]
@@ -8620,6 +8643,9 @@ function filledArcPath(x: number, y: number, radius: number, startAngle: number,
 function runIsPulsed(action: Extract<HandlerAction, { kind: 'jsfun-run' }>): boolean {
   return action.then.some((a) => a.kind === 'jsfun-pulses');
 }
+
+/** EXP-020 slice 2 (session 135). The component's `Component` scope, kept once per mount. */
+const COMPONENT_SCOPE_LOCAL = 'componentScope';
 
 /** EXP-011 §86. The three locals a pulsed run prints, off the wrapper's name: `holdThePageId` → `holdThePageIdRun`. */
 function pulseNamesOf(def: JsFunctionPlan): { run: string; node: string; pulse: string; held: string } {

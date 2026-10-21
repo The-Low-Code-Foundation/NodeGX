@@ -331,7 +331,7 @@ describe('§C what is emitted', () => {
 
   it('C5 the run library hands back the body\'s promise; a late write carries no promise', () => {
     const lib = app.files[FUNCTION_RUN_LIB_PATH];
-    expect(lib).toContain('const finished = body(inputs, outputs as unknown as O, node.self);');
+    expect(lib).toContain('const finished = body(inputs, outputs as unknown as O, node.self, node.component);');
     expect(lib).toContain('return { outputs: node.outputs, pulses, settled: Promise.resolve(finished).then(() => undefined) };');
     expect(lib).toContain("late?: (run: Omit<FunctionRun<O>, 'settled'>) => void;");
   });

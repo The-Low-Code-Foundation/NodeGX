@@ -184,6 +184,9 @@ const HOST_TRAIT_REASONS: ReadonlySet<string> = new Set(
 /** The asynchrony gate's reason: still a gate for an Expression and a script file. */
 const ASYNC_GATE_REASON = MARKER_GATES.find((g) => g.reason.startsWith('is asynchronous'))!.reason;
 
+/** The Component scope gate's reason: still a gate for an Expression, which the runtime hands no `Component`. */
+const COMPONENT_GATE_REASON = MARKER_GATES.find((g) => g.reason.startsWith('reads the Component scope'))!.reason;
+
 /**
  * EXP-019 (session 133) — whether a Function body `await`s **at its top level**: it compiles as the runtime compiles it
  * (`AsyncFunction`) and not as a plain function. Such a body's run is a promise the runtime awaits before Success and Done
@@ -219,7 +222,53 @@ export function jsHostTraitsOf(body: string): string[] {
   // EXP-020 (session 134): a body that reads the Noodl API reads the backend, the session or the app's Variables, and
   // runs once per trigger as the runtime runs it.
   if (NOODL_REFERENCE.test(scanned)) traits.push('reads the Noodl API');
+  // EXP-020 slice 2 (session 135): a body that reads its component's record keeps what it wrote there across runs.
+  if (jsComponentUseOf(body).reads) traits.push("reads its component's record (Component.Object)");
   return traits;
+}
+
+export interface JsComponentUse {
+  /** Whether the body reads `Component.Object`, the component instance's record. */
+  reads: boolean;
+  /** The first reference to the Component scope the export does not carry, as a refusal ("reads `Component.RepeaterObject` — …"). */
+  refusal?: string;
+}
+
+/**
+ * EXP-020 slice 2 (session 135) — what a Function body reads of the `Component` the runtime hands it
+ * (`javascriptnodeparser.js` `getComponentScopeForNode`): `Object` (the instance's `componentState<instanceId>` record),
+ * `ParentObject` (the nearest ancestor's) and `RepeaterObject` (the repeater row's item). The export carries `Object`
+ * (`src/lib/componentScope.ts`, the runtime's record transcribed), read and written in any way the record is, handed on
+ * as a value included. Any other reference is the refusal, by name: another member, a computed one (`Component[k]`),
+ * the scope itself handed on, or a member the body assigns (`Component.UpdateFilter = function …`).
+ */
+export function jsComponentUseOf(body: string): JsComponentUse {
+  const scanned = strippedForScan(body);
+  let reads = false;
+  let refusal: string | undefined;
+  const refuse = (what: string) => {
+    refusal ??= `reads \`${what}\` — the export's Component scope carries Component.Object, this component's record (EXP-020)`;
+  };
+  const reference = /\bComponent\b/g;
+  let match: RegExpExecArray | null;
+  while ((match = reference.exec(scanned)) !== null) {
+    // `x.Component` is a property of something else.
+    if (match.index > 0 && /\.\s*$/.test(scanned.slice(0, match.index))) continue;
+    const rest = scanned.slice(match.index + match[0].length);
+    const member = /^\s*\.\s*([A-Za-z_$][\w$]*)/.exec(rest);
+    if (member === null) {
+      refuse(/^\s*\[/.test(rest) ? 'Component[…]' : 'Component');
+      continue;
+    }
+    // The scope's own members are the runtime's to set: a body that assigns one (the Filters prefab's
+    // `Component.UpdateCondition = function …`) shares it with the component's other Functions.
+    if (member[1] !== 'Object' || /^\s*(=(?!=)|[-+*/%&|^]=|\*\*=|<<=|>>>?=|\?\?=|&&=|\|\|=)/.test(rest.slice(member[0].length))) {
+      refuse(`Component.${member[1]}`);
+      continue;
+    }
+    reads = true;
+  }
+  return { reads, ...(refusal !== undefined ? { refusal } : {}) };
 }
 
 /** Any reference to the Noodl API object, by member, by index or as a value. */
@@ -454,6 +503,9 @@ export function jsPurityDefer(kind: JsNodeKind, body: string): string | null {
   if (kind === 'function') {
     const noodl = jsNoodlUseOf(body);
     if (noodl.refusal !== undefined) return noodl.refusal;
+    // EXP-020 slice 2 (session 135): a Function's `Component.Object` travels; the rest of the scope is refused by name.
+    const component = jsComponentUseOf(body);
+    if (component.refusal !== undefined) return component.refusal;
   } else if (/\bNoodl\s*[.\[]/.test(scanned)) {
     return 'reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)';
   }
@@ -471,6 +523,8 @@ export function jsPurityDefer(kind: JsNodeKind, body: string): string | null {
     if (kind === 'function' && HOST_TRAIT_REASONS.has(gate.reason)) continue;
     // EXP-019: for a Function asynchrony is a host trait (a call back, session 133; a top-level `await`, session 134).
     if (kind === 'function' && gate.reason === ASYNC_GATE_REASON) continue;
+    // EXP-020 slice 2: for a Function the Component scope was read above (`jsComponentUseOf`).
+    if (kind === 'function' && gate.reason === COMPONENT_GATE_REASON) continue;
     if (gate.pattern.test(scanned)) return gate.reason;
   }
   return null;

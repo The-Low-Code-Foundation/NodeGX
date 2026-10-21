@@ -24,6 +24,7 @@ import { DATE_LIB_PATH, dateLibSource } from './dateLib';
 import { UTIL_LIB_PATH, utilLibSource } from './utilLib';
 import { PARSE_DEPENDENCIES, PARSE_HELPERS_NEEDING_DEPENDENCY, PARSE_LIB_PATH, isParseHelper, parseLibSource } from './parseLib';
 import { FUNCTION_RUN_LIB_PATH, functionRunLibSource } from './functionRunLib';
+import { COMPONENT_SCOPE_LIB_PATH, componentScopeLibSource } from './componentScopeLib';
 import { NOODL_LIB_PATH, noodlLibSource } from './noodlLib';
 import { ID_LIB_PATH, idLibSource } from './idLib';
 import { TIMER_LIB_PATH, timerLibSource } from './timerLib';
@@ -180,6 +181,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   let functionRunLibUsed = false;
   /** EXP-020. `src/lib/noodl.ts`, earned by a printed Function that reads a backend member of the Noodl API. */
   let noodlLibUsed = false;
+  let componentScopeLibUsed = false;
   // EXP-011 §49. The animation pair's modules — earned by a component whose plan kept a node.
   let animateLibUsed = false;
   let statesLibUsed = false;
@@ -270,6 +272,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     for (const helper of emitted.idHelpers) idHelpersUsed.add(helper);
     if (emitted.functionRunLib) functionRunLibUsed = true;
     if (emitted.noodlLib) noodlLibUsed = true;
+    if (emitted.componentScopeLib) componentScopeLibUsed = true;
     for (const helper of emitted.timerHelpers) timerHelpersUsed.add(helper);
     if (emitted.animateLib) animateLibUsed = true;
     if (emitted.statesLib) statesLibUsed = true;
@@ -338,6 +341,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
    */
   if (noodlLibUsed) {
     files[NOODL_LIB_PATH] = GENERATED_MODULE_TS + noodlLibSource(ir.project.collections, ir.project.cloudservices !== undefined);
+  }
+  /** EXP-020 slice 2 (session 135). `src/lib/componentScope.ts`, on the same rule: earned by a Function that reads `Component.Object`. */
+  if (componentScopeLibUsed) {
+    files[COMPONENT_SCOPE_LIB_PATH] = GENERATED_MODULE_TS + componentScopeLibSource();
   }
   /** `src/lib/timer.ts` (EXP-011 §39) — the fourth module, on the same rule as the other three. */
   if (timerHelpersUsed.size > 0) {

@@ -14507,3 +14507,65 @@ EXP-020's next members, ranked by the corpus's re-worded rows: `Noodl.Events` (1
 logic components). `Records.create` / `save` / `delete` with the runtime's Model records waits on the bodies that use them,
 all in logic components (EXP-021). The 92 template re-worded: `Component.*` 15 (+ 9 behind it), a For Each-fed input 10,
 kit Options values 8, logic components. P18-S134-PULSEHOLD and P18-S134-REFUSEDFILTERSENDS (low).
+
+## §105 The component's record travels (session 135, 2026-10-21): EXP-020 slice 2
+
+### §105.0 What was measured first
+
+§104.4 ranked the next members by the corpus's re-worded rows (`Noodl.Events` 132, `Noodl.Object` 50, `Noodl` handed on
+47, `Noodl.Array` 22). By distinct body (`s135-componentrecord/bodies.ts`, sha1 of the body): 6, 4, 3 and 1 — the Filters
+and Multi Select prefabs installed in one project copied about 22 times, the Site Builder template, one scratch body. The
+prefabs scanned as text: every front-end body that reads `Noodl.Events` (13 of 13) also reads `Component.*`. The
+templates: one body refused for a Noodl member (`Noodl.Users`); the first Function refusal was the Component scope, **gram's
+ten page loaders and marketplace's two, refused for `Component.Object` alone**, each the instance's private record (literal
+keys, `get` / `set`, through `var keep = Component.Object`), in a component with no Component Object node. EXP-020 §5 sent
+`Component.*` to EXP-021 and EXP-021 §5 sent `Component.Object` on: nobody's.
+
+### §105.1 The runtime, read
+
+`javascriptnodeparser.js` `getComponentScopeForNode`: one scope per instance, `Object` = `Model.get('componentState' +
+instanceId)` (booting empty), `ParentObject`, `RepeaterObject` (a getter). `model.ts`: the record's methods and
+`_modelProxyHandler` (methods bound, own fields as themselves, any other name `get(name)`, a write `set`, `id` read-only
+with a warning). `componentwalk.ts`: a Parent pair reaches only an ancestor owning a Component Object / Component State
+node. `componentinstance.ts`: `'__$ndl_componentInstaceId' + n`. `router.tsx`: a page is deleted on leaving unless Keep
+When Leaving.
+
+### §105.2 The rule, built
+
+`jsComponentUseOf` (`jsfun.ts`): `Component.Object` in any use, handed on included; every other reference to the scope
+refused by name. A host trait for a Function ("reads its component's record (Component.Object)"), a gate for an
+Expression. `JsFunctionPlan.component`; refused beside a Component Object / Component State / Set Component Object
+Properties node (`COMPONENT_RECORD_FAMILY`; that record is `useComponentObject`'s, §60). `src/lib/componentScope.ts`
+(`componentScopeLib.ts`): the Model transcribed, its id spelled as the runtime spells it. `useState(createComponentScope)`
+once per component; `functionNode(signals, componentScope)`; `runFunction` hands `node.component` fourth; the wrapper's
+third place is `_self` where the body keeps nothing on `this`; the Function file imports the type.
+
+### §105.3 Graded
+
+- `tests/the-component-record-travels.test.ts`, **18 rows**. §A the **Component Desk** (`helpers/component-desk.ts`,
+  predicted in `s135-componentrecord/EXPECTED.md` before either arm ran; both read exactly the prediction): the record
+  boots empty, `id` read-only and the component state's, Read (which awaits) reads what Add wrote every way the record
+  answers, two placements two records; rows 10–12 diverge as predicted — **P18-S135-HIDDENINSTANCE** (filed, low, template
+  reach 0), pinned by name. §B emitted text, §C classifier and plan (C6: an unwired body is kept by the trait alone), §D tsc.
+- **10 mutant arms** (`s135-componentrecord/mutants.py`), **0 survived** (`mutants.out`). The first H did not compile
+  (TS2367) and graded nothing, rewritten; G (no trait) was seen only by plan rows, because the desk's bodies are pulsed by
+  P18-S121-FRESHOUTPUTS anyway — C6 added.
+- **Reading the emitted code** of gram's Feed and EditProfile and marketplace's Basket: the loaders run at Did Mount and on
+  their ticked Variable, each through one kept node carrying the page's scope; `keep` caches signed links across runs as
+  the body says. Feed draws its chrome, its refused and admin branches; its cards wait on For Each fed by a Function output.
+- **Reach** (`dispdiff`, HEAD's `src` against the tree): templates **51 gained, 0 lost, 7 re-worded** (gram 48:
+  RouterNavigate 24, Functions 14, Page Inputs 4, Cloud Functions 2, Set Variables 2, a Switch; marketplace 3); corpus
+  **0 gained, 0 lost, 160 re-worded** (the Filters prefab: `Component.UpdateCondition` 88, `UpdateValue` 44, `UpdateFilter`
+  22, a Component Object beside the body 6).
+- hls001: predicted the 4 `src/lib/functionRun.ts` paths (held-, host-, pulse-, ticked-desk) and nothing else (no fixture's
+  disposition moved); read exactly those 4; regenerated. `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL).
+  Package `tsc --noEmit` 0. Three rows moved with the rule (`jsfun.test.ts`'s Component sentence; the two pinned
+  `functionRun.ts` lines in the Host Desk and Noodl specs).
+- Whole package (`nice -n 19 --runInBand`, JSON 22:43): **153 / 153 suites, 5,221 passed, 0 failed, 3 skipped**
+  (predicted 5,203 + 18).
+
+### §105.4 What this leaves
+
+EXP-020 §7.4: the scope's other members (the Filters prefab's shared functions), then `Noodl.Events` / `Noodl.Object.create`
+in the same bodies, `Component.RepeaterObject`, the record beside a Component Object node. gram's next: For Each fed by a
+Function output; the Upload File pulse. P18-S135-HIDDENINSTANCE.

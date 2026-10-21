@@ -54,4 +54,4 @@ an instance exists whether or not it is drawn.
 ## 5. Not this task
 
 A logic component placed inside a repeater row (its hook would be per row: a row component, EXP-011 §99's shape; measured
-when AC1 lands), `Component.Object` bodies (the controlled-state slice).
+when AC1 lands), `Component.Object` bodies (built in EXP-020 slice 2, s135: EXP-020 §7).

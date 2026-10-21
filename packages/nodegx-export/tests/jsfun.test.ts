@@ -92,8 +92,12 @@ describe('the purity gate over bodies (EXP-003 §3.1–§3.4)', () => {
     expect(jsPurityDefer('expression', 'Noodl.Variables.x')).toContain('EXP-003 Tier B');
   });
 
-  test('the Component scope is the Filters family — per-component rewrites', () => {
-    expect(jsPurityDefer('function', 'Component.UpdateCondition();')).toContain('controlled-state slice');
+  // EXP-020 slice 2 (session 135): a Function's `Component.Object` travels (`the-component-record-travels.test.ts`); the
+  // rest of the scope — the Filters prefab's shared `Component.UpdateCondition` among it — is refused by its name.
+  test('the Component scope beyond Component.Object is refused by its name', () => {
+    expect(jsPurityDefer('function', 'Component.UpdateCondition();')).toContain('reads `Component.UpdateCondition`');
+    expect(jsPurityDefer('function', "Component.Object.set('x', 1);")).toBeNull();
+    expect(jsPurityDefer('expression', 'Component.Object')).toContain('reads the Component scope');
   });
 
   // EXP-019 (s132, Richard's ruling of 2026-10-21): these six are HOST TRAITS for a Function body now — it travels as

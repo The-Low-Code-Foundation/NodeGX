@@ -54,6 +54,8 @@ export interface FunctionNode<O> {
   delivered: Partial<O>;
   /** What the body keeps on \`this\` across runs, as the running app's node keeps it (one object per node, never reset). */
   self: Record<string, unknown>;
+  /** The \`Component\` the body is handed: its component instance's scope, one per mount, shared by the instance's Functions. */
+  component?: unknown;
   /**
    * What the body does after its run has returned, from a timer or a listener it set up: one write, or one signal with the
    * outputs as its chain reads them. The running app's node delivers those when they happen; a component whose body may
@@ -80,11 +82,13 @@ export interface FunctionRun<O> {
   settled: Promise<void>;
 }
 
-export function functionNode<O>(signals: readonly string[]): FunctionNode<O> {
-  return { signals, outputs: {}, delivered: {}, self: {} };
+export function functionNode<O>(signals: readonly string[], component?: unknown): FunctionNode<O> {
+  return { signals, outputs: {}, delivered: {}, self: {}, ...(component !== undefined ? { component } : {}) };
 }
 
-export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<string, unknown>) => unknown, inputs: I, node: FunctionNode<O>): FunctionRun<O> {
+// The fourth parameter is typed by the body that reads it (\`Component\`), so it is \`any\` here.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<string, unknown>, component: any) => unknown, inputs: I, node: FunctionNode<O>): FunctionRun<O> {
   const current = node.outputs as Record<string, unknown>;
   const delivered = node.delivered as Record<string, unknown>;
   const before: Record<string, unknown> = { ...delivered };
@@ -125,7 +129,7 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<str
       return true;
     }
   });
-  const finished = body(inputs, outputs as unknown as O, node.self);
+  const finished = body(inputs, outputs as unknown as O, node.self, node.component);
   returned = true;
   const count: Record<string, number> = {};
   const pulses = sent.map((signal) => {

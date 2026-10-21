@@ -1,0 +1,967 @@
+[
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkUrl",
+  "type": "PageInputs",
+  "label": "What to look at",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Look.tsx"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (lkRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (lkRefused), is authored Mounted false, and the wire into its Mounted from \"The post or the comment, its state and its reports\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "lkRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkLoad",
+  "type": "JavaScriptFunction",
+  "label": "The post or the comment, its state and its reports",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "lkRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkHideGather",
+  "type": "JavaScriptFunction",
+  "label": "Hide it, with why",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"reason0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "lkHide"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkBackGather",
+  "type": "JavaScriptFunction",
+  "label": "Bring it back",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"kind\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its out-hide output feeds CloudFunction2.in-hide, which its \"go\" signal runs, and that chain is not exported: two wires feed in-hide — last-writer-wins is not statically ordered"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Look",
+  "node": "lkToMember",
+  "type": "RouterNavigate",
+  "label": "To their profile",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "lkProfile"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Queue",
+  "node": "quModLoad",
+  "type": "JavaScriptFunction",
+  "label": "What is reported, hidden and blocked",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "quRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Queue",
+  "node": "quToRules",
+  "type": "RouterNavigate",
+  "label": "To the rules",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Community rules\" (quRules), is not drawn: an element above it, \"Reported, hidden, blocked\" (quMod), is authored Mounted false, and the wire into its Mounted from \"What is reported, hidden and blocked\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "quRules"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Queue",
+  "node": "quToAdmins",
+  "type": "RouterNavigate",
+  "label": "To the admins",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Admins\" (quAdmins), is not drawn: an element above it, \"Reported, hidden, blocked\" (quMod), is authored Mounted false, and the wire into its Mounted from \"What is reported, hidden and blocked\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "quAdmins"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Admin/Queue",
+  "node": "quToFeed",
+  "type": "RouterNavigate",
+  "label": "To the feed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"The feed\" (quFeed), is not drawn: an element above it, \"Reported, hidden, blocked\" (quMod), is authored Mounted false, and the wire into its Mounted from \"What is reported, hidden and blocked\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "quFeed"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (epRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (epRefused), is authored Mounted false, and the wire into its Mounted from \"Your profile as it is\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "epRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epLoad",
+  "type": "JavaScriptFunction",
+  "label": "Your profile as it is",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "epRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epPhoto",
+  "type": "JavaScriptFunction",
+  "label": "The photo, while the page is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"added\" is fed by Upload File — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epRemoveStamp",
+  "type": "JavaScriptFunction",
+  "label": "Take the photo off",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Remove photo\" (epRemove), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The photo, while the page is open\".out-canRemove is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Remove photo\" (epRemove), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The photo, while the page is open\".out-canRemove is not exported (the node it comes from is not exported: input \"added\" is fed by Upload File — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join)"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epGather",
+  "type": "JavaScriptFunction",
+  "label": "The profile, as one save",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"name0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"choice\" is fed by JavaScriptFunction — the Function that feeds it is not exported: input \"added\" is fed by Upload File — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epCall",
+  "type": "CloudFunction2",
+  "label": "editProfile(profile)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"name0\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"choice\" is fed by JavaScriptFunction — the Function that feeds it is not exported: input \"added\" is fed by Upload File — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epToProfile",
+  "type": "RouterNavigate",
+  "label": "To your profile",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "epBack"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/EditProfile",
+  "node": "epToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "epRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Feed",
+  "node": "fdToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (fdRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (fdRefused), is authored Mounted false, and the wire into its Mounted from \"The newest posts, as cards\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "fdRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Feed",
+  "node": "fdLoad",
+  "type": "JavaScriptFunction",
+  "label": "The newest posts, as cards",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "fdRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Feed",
+  "node": "fdToNew",
+  "type": "RouterNavigate",
+  "label": "To a new post",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"New post\" (fdNew), is not drawn: an element above it, \"The feed\" (fdContent), is authored Mounted false, and the wire into its Mounted from \"The newest posts, as cards\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "fdNew"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Feed",
+  "node": "fdToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "fdRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Feed",
+  "node": "fdToQueue",
+  "type": "RouterNavigate",
+  "label": "To the admins’ queue",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Waiting for you\" (fdQueue), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The newest posts, as cards\".out-isAdmin is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "fdQueue"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpUrl",
+  "type": "PageInputs",
+  "label": "Whose profile",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Member.tsx"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (mpRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (mpRefused), is authored Mounted false, and the wire into its Mounted from \"Their profile and posts\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "mpRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpLoad",
+  "type": "JavaScriptFunction",
+  "label": "Their profile and posts",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "mpRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpBlockGather",
+  "type": "JavaScriptFunction",
+  "label": "Block them, with why",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Block\" (mpBlockGo), is not drawn: an element above it, \"Block (admins)\" (mpBlock), is authored Mounted false, and the wire into its Mounted from \"Their profile and posts\".out-canBlock is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "mpBlockGo"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpToEdit",
+  "type": "RouterNavigate",
+  "label": "To edit your profile",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Edit profile\" (mpEdit), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"Their profile and posts\".out-isMe is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "mpEdit"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Member",
+  "node": "mpToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "mpRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/NewPost",
+  "node": "npPhotos",
+  "type": "JavaScriptFunction",
+  "label": "The photos, while the page is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"added\" is fed by Upload File — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poUrl",
+  "type": "PageInputs",
+  "label": "Which post",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Report this post\" (poReport), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canReport is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Post.tsx"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (poRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (poRefused), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poLoad",
+  "type": "JavaScriptFunction",
+  "label": "The post and its comments",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poGather",
+  "type": "JavaScriptFunction",
+  "label": "The comment",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poSend"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poConfirmSw",
+  "type": "Switch",
+  "label": "Asked: take it down?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Take this post down\" (poTakeDown), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canTakeDown is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poKeep"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poDownGather",
+  "type": "JavaScriptFunction",
+  "label": "Take this post down",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poDown"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poDownCall",
+  "type": "CloudFunction2",
+  "label": "hide(hide)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poDown"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poDownStamp",
+  "type": "JavaScriptFunction",
+  "label": "Say the feed changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poDown"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poDownSay",
+  "type": "Set Variable",
+  "label": "The feed changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Yes, take it down\" (poDown), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poDown"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poToReport",
+  "type": "RouterNavigate",
+  "label": "To report it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Report this post\" (poReport), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canReport is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poReport"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poToLook",
+  "type": "RouterNavigate",
+  "label": "To its reports (admins)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Its reports, and hiding it (admins)\" (poLook), is not drawn: it is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-canLook is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poLook"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poCall",
+  "type": "CloudFunction2",
+  "label": "commentOn(comment)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poSend"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poStamp",
+  "type": "JavaScriptFunction",
+  "label": "Say the feed changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poSend"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poSay",
+  "type": "Set Variable",
+  "label": "The feed changed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Comment\" (poSend), is not drawn: an element above it, \"The post and its comments\" (poContent), is authored Mounted false, and the wire into its Mounted from \"The post and its comments\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poSend"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poToFeed",
+  "type": "RouterNavigate",
+  "label": "To the feed",
+  "before": {
+   "kind": "collapsed",
+   "into": "poBack"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poDown"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Post",
+  "node": "poToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "poRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Prayer",
+  "node": "prToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (prRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (prRefused), is authored Mounted false, and the wire into its Mounted from \"The newest prayer requests, as cards\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "prRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Prayer",
+  "node": "prLoad",
+  "type": "JavaScriptFunction",
+  "label": "The newest prayer requests, as cards",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "prRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Prayer",
+  "node": "prToNew",
+  "type": "RouterNavigate",
+  "label": "To a new prayer request",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"New prayer request\" (prNew), is not drawn: an element above it, \"The prayer requests\" (prContent), is authored Mounted false, and the wire into its Mounted from \"The newest prayer requests, as cards\".out-ok is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "prNew"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Prayer",
+  "node": "prToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "prRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Report",
+  "node": "rpUrl",
+  "type": "PageInputs",
+  "label": "What is reported",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "nothing reads any of its parameters, so it contributes no value to the page"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Report.tsx"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Report",
+  "node": "rpToSignIn",
+  "type": "RouterNavigate",
+  "label": "To sign in",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Sign in\" (rpRefusedSignIn), is not drawn: an element above it, \"Refused: why, and sign in\" (rpRefused), is authored Mounted false, and the wire into its Mounted from \"What is reported, and its reasons\".out-refused is not exported (the node it comes from is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "rpRefusedSignIn"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Report",
+  "node": "rpLoad",
+  "type": "JavaScriptFunction",
+  "label": "What is reported, and its reasons",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "rpRoot"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "Pages/Report",
+  "node": "rpToWaiting",
+  "type": "RouterNavigate",
+  "label": "Not let in yet: to waiting",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the Function that sends its \"waiting\" signal is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "rpRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Seller/ProductForm",
+  "node": "pfPhotoList",
+  "type": "JavaScriptFunction",
+  "label": "The photos, while the form is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"added\" is fed by Upload File — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Basket",
+  "node": "bkLoad",
+  "type": "JavaScriptFunction",
+  "label": "The basket on this phone, and what is in it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "bkRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Basket",
+  "node": "bkShape",
+  "type": "JavaScriptFunction",
+  "label": "The basket, by seller and by country",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"data\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Basket.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Basket",
+  "node": "bkCleaned",
+  "type": "Set Variable",
+  "label": "The basket changed: something was taken out",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "bkRoot"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Basket",
+  "node": "bkToShop",
+  "type": "RouterNavigate",
+  "label": "To the shop",
+  "before": {
+   "kind": "collapsed",
+   "into": "bkBack"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "bkShop"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Basket",
+  "node": "bkToCheckout",
+  "type": "RouterNavigate",
+  "label": "To check out",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"Check out\" (bkCheckout), is not drawn: an element above it, \"The sellers beside the totals (tablet), above them (phone)\" (bkContent), is authored Mounted false, and the wire into its Mounted from \"The basket, by seller and by country\".out-full is not exported (the node it comes from is not exported: input \"data\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B))"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "bkCheckout"
+  }
+ }
+]

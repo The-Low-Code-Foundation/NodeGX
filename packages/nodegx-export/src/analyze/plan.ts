@@ -57,6 +57,7 @@ import {
   jsHostTraitsOf,
   jsAwaitsAtTopLevel,
   jsCallsBackOf,
+  jsComponentUseOf,
   jsNoodlUseOf,
   jsPurityDefer,
   JS_EXPRESSION,
@@ -1179,6 +1180,12 @@ export const REPEATER_ITEM_TYPE = 'For Each Actions';
 export const SET_COMPONENT_OBJECT_TYPE = 'net.noodl.SetComponentObjectProperties';
 export const PARENT_COMPONENT_OBJECT_TYPE = 'net.noodl.ParentComponentObject';
 export const SET_PARENT_COMPONENT_OBJECT_TYPE = 'net.noodl.SetParentComponentObjectProperties';
+/**
+ * EXP-020 slice 2. The nodes in a component that read or write its own `componentState<instanceId>` record: the Component
+ * Object (and its deprecated Component State) and the Set. A Parent pair reaches only an ancestor that owns one of the
+ * first two (`componentwalk.ts` `COMPONENT_OBJECT_TYPES`; a named target without one is a miss that writes nothing).
+ */
+const COMPONENT_RECORD_FAMILY: ReadonlySet<string> = new Set([COMPONENT_OBJECT, 'Component State', SET_COMPONENT_OBJECT_TYPE]);
 /** EXP-011 §60. The message setparentcomponentobjectproperties.ts raises on a miss — verbatim (the lib exports the same constant). */
 export const NO_ANCESTOR_WRITE_MESSAGE = 'No ancestor component has a Component Object node — nothing was written';
 export const RUN_TASKS_OUTPUTS: readonly string[] = ['done', 'failure', 'unchanged', 'completed', 'aborted'];
@@ -3245,6 +3252,12 @@ export interface JsFunctionPlan {
    * reads or writes by name. The wrapper binds `Noodl` to `src/lib/noodl.ts`'s object, with a facade over each Variable.
    */
   noodl?: { members: string[]; variables: string[] };
+  /**
+   * EXP-020 slice 2 (session 135). Function only: the body reads `Component.Object`, its component instance's record. The
+   * component keeps one scope per mount (`src/lib/componentScope.ts`), its kept nodes carry it, and `runFunction` hands it
+   * to the body as the runtime hands it the fourth parameter. Always `pulsed` (it is a host trait).
+   */
+  component?: true;
   /**
    * EXP-011 §86. Function only, invoked only: a run of it sends a signal of its own that a chain consumes, or (P18-S121-
    * FRESHOUTPUTS) it materializes a row a reader reads between runs. The wrapper then takes its `Outputs` record as a
@@ -6605,6 +6618,21 @@ function planComponent(
        */
       const noodl = kind === 'function' ? jsNoodlUseOf(body) : undefined;
       /**
+       * EXP-020 slice 2 (session 135). A Function that reads `Component.Object` reads the instance's record, which the
+       * runtime shares with the component's Component Object family (`componentState<instanceId>`). The export carries
+       * the record where only the component's Functions read it; beside a family node, whose record is
+       * `useComponentObject`'s (EXP-011 §60), the two are not yet one, and the body is refused.
+       */
+      const readsComponent = kind === 'function' && jsComponentUseOf(body).reads;
+      if (readsComponent) {
+        const family = component.nodes.find((n) => COMPONENT_RECORD_FAMILY.has(n.type));
+        if (family !== undefined) {
+          return {
+            defer: `the ${word} reads \`Component.Object\` in a component with a ${family.type} node — the export's record for that node is not yet the script's (EXP-020)`
+          };
+        }
+      }
+      /**
        * EXP-019. A Function's host traits travel with it — as a run once per trigger (`host` ⇒ `pulsed`, the run compile).
        * With no Run wire (slice 2) the node runs on its inputs' arrival and once at load (`scheduleRun` from the script's
        * setter and from each ticked input that changed): an arrival run, compiled as the run is (`compileJsRun`), printed as
@@ -6817,6 +6845,7 @@ function planComponent(
         ...(kind === 'function' && jsCallsBackOf(body) ? { late: true as const } : {}),
         ...(kind === 'function' && jsAwaitsAtTopLevel(body) ? { awaits: true as const } : {}),
         ...(noodl !== undefined && noodl.members.length > 0 ? { noodl: { members: noodl.members, variables: noodl.variables } } : {}),
+        ...(readsComponent ? { component: true as const } : {}),
         ...(loadGate !== undefined ? { loadGate } : {}),
         ...(scriptUses.length > 0 ? { scripts: scriptUses } : {}),
         ...(kind === 'visual'

@@ -1,7 +1,7 @@
 # EXP-020 — The Noodl API in the export
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), under Richard's ruling of 2026-10-21 (see
-[EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md)). **Status: 🟡 s134 — slice 1 built and graded (§6): `Records.query` (plain), `CloudFunctions.run`, `Users.Current`, `Files.sign`, `Variables`; next the members the corpus ranks (`Events`, `Object`/`Objects`, `Array`).** Follows EXP-019.
+[EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md)). **Status: 🟡 s135 — slice 1 built and graded (§6): `Records.query` (plain), `CloudFunctions.run`, `Users.Current`, `Files.sign`, `Variables`; slice 2 built and graded (§7): `Component.Object`, the component's record. Next: the scope's other members, then `Events` / `Object` behind them (§7.4).** Follows EXP-019.
 
 ## 1. The person sentence
 
@@ -48,6 +48,7 @@ A member outside the eight is a refusal by name ("reads `Noodl.Events` — not i
 ## 5. Not this task
 
 `Noodl.Events`, `Noodl.Objects` / `Noodl.Arrays` as live stores (the controlled-state slice), `Component.*` (EXP-021).
+**s135: `Component.Object` came back here** (§7): EXP-021 §5 sent it on to the controlled-state slice, so nobody owned it.
 
 ## 6. Session 134 (2026-10-21): slice 1 — built, graded
 
@@ -70,3 +71,62 @@ Model records are not this slice; `Records.create` / `save` / `delete` live only
 
 The members not carried are refused by name and ranked for the next slice. A project with no backend exports the same
 calls, failing as the running app does without one (the exporter's stub rule).
+
+## 7. Session 135 (2026-10-21): slice 2 — the component's record — built, graded
+
+[EXP-011 §105](EXP-011-PICKER-COVERAGE.md) is the ledger entry; `s135-componentrecord/` holds the measurements (its
+README says how the slice was chosen).
+
+### 7.1 Measured first: the corpus ranked copies
+
+§6's ranking (`Noodl.Events` 132, `Object` 50, `Noodl` handed on 47, `Array` 22) counted rows. By distinct body: 6, 4,
+3 and 1, from the Filters and Multi Select prefabs installed in one project copied about 22 times, the Site Builder
+template, and one scratch body. Every front-end prefab body that reads `Noodl.Events` (13 of 13) also reads `Component.*`,
+so `Events` alone gains nothing. The templates had one body refused for a Noodl member (`Noodl.Users`); what ranked first
+there was the Component scope: **gram's ten page loaders and marketplace's two, refused for `Component.Object` alone**,
+every one the instance's private record (`var keep = Component.Object; … keep.get('links') … keep.set('links', links)`),
+in a component with no Component Object node.
+
+### 7.2 The runtime, read
+
+`javascriptnodeparser.js` `getComponentScopeForNode`: one scope per component instance (cached by its instance id),
+handed to every Function in it; `Object` is `Model.get('componentState' + instanceId)`, booting empty; `ParentObject` the
+nearest ancestor's record; `RepeaterObject` a getter for the row's item. `model.ts`: the record behind `_modelProxyHandler`
+(a method reads bound; `id`, `data`, `listeners` read as themselves; any other name reads `get(name)`; a write is
+`set(name, value)`, but `id`, read-only, which warns). A Parent pair reaches only an ancestor that owns a Component Object
+or Component State node (`componentwalk.ts`; a named target without one is a miss that writes nothing). A page is deleted
+on leaving and built fresh unless its Page node ticks Keep When Leaving (`router.tsx`).
+
+### 7.3 The rule, built
+
+- `jsComponentUseOf` (`jsfun.ts`): `Component.Object` read any way the record is, handed on included; any other member,
+  a computed one, the scope handed on, or an assignment to a member of the scope is refused by name ("reads
+  \`Component.RepeaterObject\` — the export's Component scope carries Component.Object, this component's record (EXP-020)").
+  A host trait for a Function ("reads its component's record (Component.Object)"), so the body is kept; still a gate for an
+  Expression.
+- The plan: `JsFunctionPlan.component`; refused beside a Component Object, Component State or Set Component Object
+  Properties node in the same component (that record is `useComponentObject`'s, EXP-011 §60, not yet the script's).
+- `src/lib/componentScope.ts` (`componentScopeLib.ts`): the Model's methods and proxy, transcribed; the id spelled
+  `componentState__$ndl_componentInstaceId<n>` as the runtime spells it. The component keeps one scope per mount
+  (`useState(createComponentScope)`), each kept node carries it (`functionNode(signals, componentScope)`), `runFunction`
+  hands it to the body fourth (`_self` holds the third place where the body keeps nothing on `this`).
+
+| AC (this slice) | |
+|---|---|
+| the record | ✅ the Component Desk on both arms: boots empty, `id` read-only, Read reads what Add wrote (`get`, a property read, a property written, its keys), two placements two records, through an `await` |
+| reach | ✅ templates **51 gained, 0 lost** (gram 48: its pages' loaders, their navigations, Page Inputs, Cloud Functions; marketplace 3); corpus 0 / 0 / 160 re-worded, each naming its member |
+| refusal by name | ✅ the scope's other members; a family node beside the body; an Expression keeps its gate |
+| builds | ✅ `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL) |
+
+### 7.4 What this leaves
+
+- **P18-S135-HIDDENINSTANCE** (filed, low, template reach 0): a placement under a Mounted condition is unmounted by the
+  export; its kept nodes, their outputs and now its record start over when it is shown again. The runtime keeps the
+  instance. Pinned by name on the desk (A6).
+- The scope's other members, which the Filters prefab shares across its Functions (`Component.UpdateCondition` 88 rows,
+  `UpdateValue` 44, `UpdateFilter` 22): the scope is per instance now, so a member set by one Function and called by
+  another is the next small step; then `Noodl.Events` and `Noodl.Object.create` (the same bodies), then
+  `Component.RepeaterObject` (the row's item) and the record beside a Component Object node (one record with
+  `useComponentObject`).
+- gram's next blocker after the record: For Each fed by a Function's output ("items are fed by a source not statically
+  typed as a list"), the Feed's cards among them; and the Upload File pulse (3 bodies).

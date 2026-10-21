@@ -1,0 +1,808 @@
+[
+ {
+  "h": "667f8601",
+  "reason": "the script reads `Noodl.Object.create` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "CMG Drive Looks :: Filters :: ",
+   "CMG Drive Looks B :: Filters :: ",
+   "CMG Drive Looks C :: Filters :: ",
+   "CMG Drive Looks D :: Filters :: ",
+   "CMG Drive Looks E :: Filters :: ",
+   "CMG Drive Looks F :: Filters :: ",
+   "CMG Drive Looks G :: Filters :: ",
+   "CMG Drive Looks H :: Filters :: ",
+   "CMG Drive Looks I :: Filters :: ",
+   "CMG Drive Looks J :: Filters :: ",
+   "CMG Drive Looks K :: Filters :: ",
+   "CMP-001 Composer Drive :: Filters :: ",
+   "CMP-001 Composer Drive.before-0.3 :: Filters :: ",
+   "STY-005 Panel Drive :: Filters :: ",
+   "cn019-drive :: Filters :: ",
+   "cn027-drive :: Filters :: ",
+   "cn029-drive :: Filters :: ",
+   "fix003-drive :: Filters :: ",
+   "fix007-c4-drive :: Filters :: ",
+   "fix016-msg6-drive :: Filters :: ",
+   "fix016-s50-drive :: Filters :: ",
+   "leg003-drive :: Filters :: "
+  ],
+  "body_head": "const filterValues = Inputs.FilterValues||{};\nComponent.Object.FilterValues = filterValues;\n\n// Create the filter items array (all form controls)\nComponent.Object.FilterItems = (Inputs.Filters||[]).map(c => {\n\n    const filterItem = {\n        id:Component.Object.id + '-' + c.Name,\n        Value:filt"
+ },
+ {
+  "h": "9b147858",
+  "reason": "the script reads `Noodl.Events.emit` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "CMG Drive Looks :: Filters/Checkbox :: Emit Changed",
+   "CMG Drive Looks B :: Filters/Checkbox :: Emit Changed",
+   "CMG Drive Looks C :: Filters/Checkbox :: Emit Changed",
+   "CMG Drive Looks D :: Filters/Checkbox :: Emit Changed",
+   "CMG Drive Looks E :: Filters/Checkbox :: Emit Changed",
+   "CMG Drive Looks F :: Filters/Checkbox :: Emit Changed",
+   "CMG Drive Looks G :: Filters/Checkbox :: Emit Changed",
+   "CMG Drive Looks H :: Filters/Checkbox :: Emit Changed",
+   "CMG Drive Looks I :: Filters/Checkbox :: Emit Changed",
+   "CMG Drive Looks J :: Filters/Checkbox :: Emit Changed",
+   "CMG Drive Looks K :: Filters/Checkbox :: Emit Changed",
+   "CMP-001 Composer Drive :: Filters/Checkbox :: Emit Changed",
+   "CMP-001 Composer Drive.before-0.3 :: Filters/Checkbox :: Emit Changed",
+   "STY-005 Panel Drive :: Filters/Checkbox :: Emit Changed",
+   "cn019-drive :: Filters/Checkbox :: Emit Changed",
+   "cn027-drive :: Filters/Checkbox :: Emit Changed",
+   "cn029-drive :: Filters/Checkbox :: Emit Changed",
+   "fix003-drive :: Filters/Checkbox :: Emit Changed",
+   "fix007-c4-drive :: Filters/Checkbox :: Emit Changed",
+   "fix016-msg6-drive :: Filters/Checkbox :: Emit Changed",
+   "fix016-s50-drive :: Filters/Checkbox :: Emit Changed",
+   "leg003-drive :: Filters/Checkbox :: Emit Changed"
+  ],
+  "body_head": "// Update the value and the condition\nComponent.Object.Value = Inputs.Value;\nComponent.UpdateCondition();\n\nconst filterItem = Component.RepeaterObject;\n\n// Emit an event that the condition has been updated\nNoodl.Events.emit(filterItem.id.split('-')[0] + '-Filters.Changed',{\n    Value:Component.Objec"
+ },
+ {
+  "h": "2831b52a",
+  "reason": "the script reads `Noodl.Events.emit` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "CMG Drive Looks :: Filters/Date Filter :: Emit Changed",
+   "CMG Drive Looks B :: Filters/Date Filter :: Emit Changed",
+   "CMG Drive Looks C :: Filters/Date Filter :: Emit Changed",
+   "CMG Drive Looks D :: Filters/Date Filter :: Emit Changed",
+   "CMG Drive Looks E :: Filters/Date Filter :: Emit Changed",
+   "CMG Drive Looks F :: Filters/Date Filter :: Emit Changed",
+   "CMG Drive Looks G :: Filters/Date Filter :: Emit Changed",
+   "CMG Drive Looks H :: Filters/Date Filter :: Emit Changed",
+   "CMG Drive Looks I :: Filters/Date Filter :: Emit Changed",
+   "CMG Drive Looks J :: Filters/Date Filter :: Emit Changed",
+   "CMG Drive Looks K :: Filters/Date Filter :: Emit Changed",
+   "CMP-001 Composer Drive :: Filters/Date Filter :: Emit Changed",
+   "CMP-001 Composer Drive.before-0.3 :: Filters/Date Filter :: Emit Changed",
+   "STY-005 Panel Drive :: Filters/Date Filter :: Emit Changed",
+   "cn019-drive :: Filters/Date Filter :: Emit Changed",
+   "cn027-drive :: Filters/Date Filter :: Emit Changed",
+   "cn029-drive :: Filters/Date Filter :: Emit Changed",
+   "fix003-drive :: Filters/Date Filter :: Emit Changed",
+   "fix007-c4-drive :: Filters/Date Filter :: Emit Changed",
+   "fix016-msg6-drive :: Filters/Date Filter :: Emit Changed",
+   "fix016-s50-drive :: Filters/Date Filter :: Emit Changed",
+   "leg003-drive :: Filters/Date Filter :: Emit Changed"
+  ],
+  "body_head": "// Update the value and the condition\nComponent.UpdateCondition();\n\nconst filterItem = Component.RepeaterObject;\n\n// Emit an event that the condition has been updated\nNoodl.Events.emit(filterItem.id.split('-')[0] + '-Filters.Changed',{\n    Value:Component.Object.Date,\n    Name:filterItem.Name,\n    C"
+ },
+ {
+  "h": "8976dac4",
+  "reason": "the script reads `Noodl.Object.create` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "CMG Drive Looks :: Filters/Multi Choice :: Initialize",
+   "CMG Drive Looks B :: Filters/Multi Choice :: Initialize",
+   "CMG Drive Looks C :: Filters/Multi Choice :: Initialize",
+   "CMG Drive Looks D :: Filters/Multi Choice :: Initialize",
+   "CMG Drive Looks E :: Filters/Multi Choice :: Initialize",
+   "CMG Drive Looks F :: Filters/Multi Choice :: Initialize",
+   "CMG Drive Looks G :: Filters/Multi Choice :: Initialize",
+   "CMG Drive Looks H :: Filters/Multi Choice :: Initialize",
+   "CMG Drive Looks I :: Filters/Multi Choice :: Initialize",
+   "CMG Drive Looks J :: Filters/Multi Choice :: Initialize",
+   "CMG Drive Looks K :: Filters/Multi Choice :: Initialize",
+   "CMP-001 Composer Drive :: Filters/Multi Choice :: Initialize",
+   "CMP-001 Composer Drive.before-0.3 :: Filters/Multi Choice :: Initialize",
+   "STY-005 Panel Drive :: Filters/Multi Choice :: Initialize",
+   "cn019-drive :: Filters/Multi Choice :: Initialize",
+   "cn027-drive :: Filters/Multi Choice :: Initialize",
+   "cn029-drive :: Filters/Multi Choice :: Initialize",
+   "fix003-drive :: Filters/Multi Choice :: Initialize",
+   "fix007-c4-drive :: Filters/Multi Choice :: Initialize",
+   "fix016-msg6-drive :: Filters/Multi Choice :: Initialize",
+   "fix016-s50-drive :: Filters/Multi Choice :: Initialize",
+   "leg003-drive :: Filters/Multi Choice :: Initialize"
+  ],
+  "body_head": "\n\nComponent.Object.Checkboxes = (Inputs.Options||[]).map((o,idx) => Noodl.Object.create({\n    id:Component.Object.id+'-'+o,\n    Value:o,\n    Label:Inputs.Labels!==undefined?Inputs.Labels[idx]:o,\n    Checked:(Inputs.Value!==undefined&&Inputs.Value!==null) && Inputs.Value.indexOf(o) !== -1\n}))\n\nCompon"
+ },
+ {
+  "h": "0344bb0c",
+  "reason": "the row template declares \"Selection Changed\" as a value, so the runtime registers \"itemOutput-Selection Changed\" and never \"itemOutputSignal-Selection Changed\" \u2014 this wire names a port that does not exist, and never fires in the editor either; re-draw it from the row output you meant",
+  "where": [
+   "CMG Drive Looks :: Filters/Multi Choice :: Emit change",
+   "CMG Drive Looks B :: Filters/Multi Choice :: Emit change",
+   "CMG Drive Looks C :: Filters/Multi Choice :: Emit change",
+   "CMG Drive Looks D :: Filters/Multi Choice :: Emit change",
+   "CMG Drive Looks E :: Filters/Multi Choice :: Emit change",
+   "CMG Drive Looks F :: Filters/Multi Choice :: Emit change",
+   "CMG Drive Looks G :: Filters/Multi Choice :: Emit change",
+   "CMG Drive Looks H :: Filters/Multi Choice :: Emit change",
+   "CMG Drive Looks I :: Filters/Multi Choice :: Emit change",
+   "CMG Drive Looks J :: Filters/Multi Choice :: Emit change",
+   "CMG Drive Looks K :: Filters/Multi Choice :: Emit change",
+   "CMP-001 Composer Drive :: Filters/Multi Choice :: Emit change",
+   "CMP-001 Composer Drive.before-0.3 :: Filters/Multi Choice :: Emit change",
+   "STY-005 Panel Drive :: Filters/Multi Choice :: Emit change",
+   "cn019-drive :: Filters/Multi Choice :: Emit change",
+   "cn027-drive :: Filters/Multi Choice :: Emit change",
+   "cn029-drive :: Filters/Multi Choice :: Emit change",
+   "fix003-drive :: Filters/Multi Choice :: Emit change",
+   "fix007-c4-drive :: Filters/Multi Choice :: Emit change",
+   "fix016-msg6-drive :: Filters/Multi Choice :: Emit change",
+   "fix016-s50-drive :: Filters/Multi Choice :: Emit change",
+   "leg003-drive :: Filters/Multi Choice :: Emit change"
+  ],
+  "body_head": "Component.Object.Value = Component.Object.Checkboxes.filter(o => o.Checked).map(o => o.Value);\n\nconst filterItem = Component.RepeaterObject;\n\nComponent.UpdateCondition();\n\n// Emit an event that the condition has been updated\nNoodl.Events.emit(filterItem.id.split('-')[0] + '-Filters.Changed',{\n    Va"
+ },
+ {
+  "h": "8a6c854b",
+  "reason": "the script reads `Noodl.Events.emit` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "CMG Drive Looks :: Filters/Range :: Push value and condition",
+   "CMG Drive Looks B :: Filters/Range :: Push value and condition",
+   "CMG Drive Looks C :: Filters/Range :: Push value and condition",
+   "CMG Drive Looks D :: Filters/Range :: Push value and condition",
+   "CMG Drive Looks E :: Filters/Range :: Push value and condition",
+   "CMG Drive Looks F :: Filters/Range :: Push value and condition",
+   "CMG Drive Looks G :: Filters/Range :: Push value and condition",
+   "CMG Drive Looks H :: Filters/Range :: Push value and condition",
+   "CMG Drive Looks I :: Filters/Range :: Push value and condition",
+   "CMG Drive Looks J :: Filters/Range :: Push value and condition",
+   "CMG Drive Looks K :: Filters/Range :: Push value and condition",
+   "CMP-001 Composer Drive :: Filters/Range :: Push value and condition",
+   "CMP-001 Composer Drive.before-0.3 :: Filters/Range :: Push value and condition",
+   "STY-005 Panel Drive :: Filters/Range :: Push value and condition",
+   "cn019-drive :: Filters/Range :: Push value and condition",
+   "cn027-drive :: Filters/Range :: Push value and condition",
+   "cn029-drive :: Filters/Range :: Push value and condition",
+   "fix003-drive :: Filters/Range :: Push value and condition",
+   "fix007-c4-drive :: Filters/Range :: Push value and condition",
+   "fix016-msg6-drive :: Filters/Range :: Push value and condition",
+   "fix016-s50-drive :: Filters/Range :: Push value and condition",
+   "leg003-drive :: Filters/Range :: Push value and condition"
+  ],
+  "body_head": "if(!Inputs.FirstPressed && !Inputs.SecondPressed) return;\n\n// Update the value and the condition\nComponent.UpdateValue([Inputs.FirstValue,Inputs.SecondValue]);\nComponent.UpdateCondition();\n\nconst filterItem = Component.RepeaterObject;\n\n// Emit an event that the condition has been updated\nNoodl.Event"
+ },
+ {
+  "h": "0901805e",
+  "reason": "the script reads `Noodl.Events.emit` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "CMG Drive Looks :: Filters/Single Choice :: Emit change",
+   "CMG Drive Looks B :: Filters/Single Choice :: Emit change",
+   "CMG Drive Looks C :: Filters/Single Choice :: Emit change",
+   "CMG Drive Looks D :: Filters/Single Choice :: Emit change",
+   "CMG Drive Looks E :: Filters/Single Choice :: Emit change",
+   "CMG Drive Looks F :: Filters/Single Choice :: Emit change",
+   "CMG Drive Looks G :: Filters/Single Choice :: Emit change",
+   "CMG Drive Looks H :: Filters/Single Choice :: Emit change",
+   "CMG Drive Looks I :: Filters/Single Choice :: Emit change",
+   "CMG Drive Looks J :: Filters/Single Choice :: Emit change",
+   "CMG Drive Looks K :: Filters/Single Choice :: Emit change",
+   "CMP-001 Composer Drive :: Filters/Single Choice :: Emit change",
+   "CMP-001 Composer Drive.before-0.3 :: Filters/Single Choice :: Emit change",
+   "STY-005 Panel Drive :: Filters/Single Choice :: Emit change",
+   "cn019-drive :: Filters/Single Choice :: Emit change",
+   "cn027-drive :: Filters/Single Choice :: Emit change",
+   "cn029-drive :: Filters/Single Choice :: Emit change",
+   "fix003-drive :: Filters/Single Choice :: Emit change",
+   "fix007-c4-drive :: Filters/Single Choice :: Emit change",
+   "fix016-msg6-drive :: Filters/Single Choice :: Emit change",
+   "fix016-s50-drive :: Filters/Single Choice :: Emit change",
+   "leg003-drive :: Filters/Single Choice :: Emit change"
+  ],
+  "body_head": "Component.Object.Value = Inputs.Value;\n\nconst filterItem = Component.RepeaterObject;\n\nComponent.UpdateCondition();\n\n// Emit an event that the condition has been updated\nNoodl.Events.emit(filterItem.id.split('-')[0] + '-Filters.Changed',{\n    Value:Component.Object.Value,\n    Name:filterItem.Name,\n  "
+ },
+ {
+  "h": "5f16740f",
+  "reason": "the script reads `Noodl.Events.emit` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "CMG Drive Looks :: Filters/Slider :: Emit changed",
+   "CMG Drive Looks B :: Filters/Slider :: Emit changed",
+   "CMG Drive Looks C :: Filters/Slider :: Emit changed",
+   "CMG Drive Looks D :: Filters/Slider :: Emit changed",
+   "CMG Drive Looks E :: Filters/Slider :: Emit changed",
+   "CMG Drive Looks F :: Filters/Slider :: Emit changed",
+   "CMG Drive Looks G :: Filters/Slider :: Emit changed",
+   "CMG Drive Looks H :: Filters/Slider :: Emit changed",
+   "CMG Drive Looks I :: Filters/Slider :: Emit changed",
+   "CMG Drive Looks J :: Filters/Slider :: Emit changed",
+   "CMG Drive Looks K :: Filters/Slider :: Emit changed",
+   "CMP-001 Composer Drive :: Filters/Slider :: Emit changed",
+   "CMP-001 Composer Drive.before-0.3 :: Filters/Slider :: Emit changed",
+   "STY-005 Panel Drive :: Filters/Slider :: Emit changed",
+   "cn019-drive :: Filters/Slider :: Emit changed",
+   "cn027-drive :: Filters/Slider :: Emit changed",
+   "cn029-drive :: Filters/Slider :: Emit changed",
+   "fix003-drive :: Filters/Slider :: Emit changed",
+   "fix007-c4-drive :: Filters/Slider :: Emit changed",
+   "fix016-msg6-drive :: Filters/Slider :: Emit changed",
+   "fix016-s50-drive :: Filters/Slider :: Emit changed",
+   "leg003-drive :: Filters/Slider :: Emit changed"
+  ],
+  "body_head": "if(!Inputs.Pressed) return;\n\n// Update the value and the condition\nComponent.UpdateValue(Inputs.Value);\nComponent.UpdateCondition();\n\nconst filterItem = Component.RepeaterObject;\n\n// Emit an event that the condition has been updated\nNoodl.Events.emit(filterItem.id.split('-')[0] + '-Filters.Changed',"
+ },
+ {
+  "h": "11d47856",
+  "reason": "the script reads `Noodl.Events.emit` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "CMG Drive Looks :: Filters/Text Search :: Emit Changed",
+   "CMG Drive Looks B :: Filters/Text Search :: Emit Changed",
+   "CMG Drive Looks C :: Filters/Text Search :: Emit Changed",
+   "CMG Drive Looks D :: Filters/Text Search :: Emit Changed",
+   "CMG Drive Looks E :: Filters/Text Search :: Emit Changed",
+   "CMG Drive Looks F :: Filters/Text Search :: Emit Changed",
+   "CMG Drive Looks G :: Filters/Text Search :: Emit Changed",
+   "CMG Drive Looks H :: Filters/Text Search :: Emit Changed",
+   "CMG Drive Looks I :: Filters/Text Search :: Emit Changed",
+   "CMG Drive Looks J :: Filters/Text Search :: Emit Changed",
+   "CMG Drive Looks K :: Filters/Text Search :: Emit Changed",
+   "CMP-001 Composer Drive :: Filters/Text Search :: Emit Changed",
+   "CMP-001 Composer Drive.before-0.3 :: Filters/Text Search :: Emit Changed",
+   "STY-005 Panel Drive :: Filters/Text Search :: Emit Changed",
+   "cn019-drive :: Filters/Text Search :: Emit Changed",
+   "cn027-drive :: Filters/Text Search :: Emit Changed",
+   "cn029-drive :: Filters/Text Search :: Emit Changed",
+   "fix003-drive :: Filters/Text Search :: Emit Changed",
+   "fix007-c4-drive :: Filters/Text Search :: Emit Changed",
+   "fix016-msg6-drive :: Filters/Text Search :: Emit Changed",
+   "fix016-s50-drive :: Filters/Text Search :: Emit Changed",
+   "leg003-drive :: Filters/Text Search :: Emit Changed"
+  ],
+  "body_head": "if(!Inputs.Focused) return;\n\n// Update the value and the condition\nComponent.Object.Value = Inputs.Value;\nComponent.UpdateCondition();\n\nconst filterItem = Component.RepeaterObject;\n\n// Emit an event that the condition has been updated\nNoodl.Events.emit(filterItem.id.split('-')[0] + '-Filters.Changed"
+ },
+ {
+  "h": "d846a04c",
+  "reason": "the script reads `Noodl.Array.foo` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "CMG Drive Looks :: Pages/Home :: ",
+   "CMG Drive Looks B :: Pages/Home :: ",
+   "CMG Drive Looks C :: Pages/Home :: ",
+   "CMG Drive Looks D :: Pages/Home :: ",
+   "CMG Drive Looks E :: Pages/Home :: ",
+   "CMG Drive Looks F :: Pages/Home :: ",
+   "CMG Drive Looks G :: Pages/Home :: ",
+   "CMG Drive Looks H :: Pages/Home :: ",
+   "CMG Drive Looks I :: Pages/Home :: ",
+   "CMG Drive Looks J :: Pages/Home :: ",
+   "CMG Drive Looks K :: Pages/Home :: ",
+   "CMP-001 Composer Drive :: Pages/Home :: ",
+   "CMP-001 Composer Drive.before-0.3 :: Pages/Home :: ",
+   "STY-005 Panel Drive :: Pages/Home :: ",
+   "cn019-drive :: Pages/Home :: ",
+   "cn027-drive :: Pages/Home :: ",
+   "cn029-drive :: Pages/Home :: ",
+   "fix003-drive :: Pages/Home :: ",
+   "fix007-c4-drive :: Pages/Home :: ",
+   "fix016-msg6-drive :: Pages/Home :: ",
+   "fix016-s50-drive :: Pages/Home :: ",
+   "leg003-drive :: Pages/Home :: "
+  ],
+  "body_head": "// The ports come from this code: rename Value or Result and the node follows.\nOutputs.test = Inputs.test;\n\nInputs.test2 = \"foo\";\nOutputs.test2 = \"bar\";\n\nNoodl.Array.foo = [\n  {\n    \"some\": \"object\"\n  }\n];\n"
+ },
+ {
+  "h": "5f4f6b7b",
+  "reason": "the script reads `Noodl` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "DEF-015 Card Drive :: Pages/Site :: The document title",
+   "SBR AC4 Drive :: Pages/Site :: The document title",
+   "SBR AC4 Drive 2 :: Pages/Site :: The document title",
+   "SBR Drive Site :: Pages/Site :: The document title",
+   "SBR Setup Drive :: Pages/Site :: The document title",
+   "SBR-004 AC1AC2 Drive :: Pages/Site :: The document title",
+   "SBR-004 Mounted Drive :: Pages/Site :: The document title",
+   "SBR-004 Theme Drive :: Pages/Site :: The document title",
+   "SBR-006 Admin Drive :: Pages/Site :: The document title",
+   "SBR-007 Page Editor Drive :: Pages/Site :: The document title",
+   "SBR-015 AC1 Drive :: Pages/Site :: The document title",
+   "SBR-015 AC1 Refusal :: Pages/Site :: The document title",
+   "SBR-015 Zero Section Drive :: Pages/Site :: The document title",
+   "SBR-016 Arrive Drive :: Pages/Site :: The document title",
+   "SBR-017 Sign In Drive :: Pages/Site :: The document title",
+   "Test site builder :: Pages/Site :: The document title",
+   "d40-wizard-drive :: Pages/Site :: The document title",
+   "def007-drive :: Pages/Site :: The document title",
+   "sbr014-drive :: Pages/Site :: The document title"
+  ],
+  "body_head": "if (!Inputs.title) return;\nif (!Noodl || !Noodl.SEO) return;\nNoodl.SEO.setTitle(Inputs.title);"
+ },
+ {
+  "h": "66168042",
+  "reason": "the script reads `Noodl` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "DEF-015 Card Drive :: Site/NavLink :: Is this the page being read",
+   "SBR-004 AC1AC2 Drive :: Site/NavLink :: Is this the page being read",
+   "SBR-004 Mounted Drive :: Site/NavLink :: Is this the page being read",
+   "SBR-004 Theme Drive :: Site/NavLink :: Is this the page being read",
+   "SBR-006 Admin Drive :: Site/NavLink :: Is this the page being read",
+   "SBR-007 Page Editor Drive :: Site/NavLink :: Is this the page being read",
+   "SBR-015 AC1 Drive :: Site/NavLink :: Is this the page being read",
+   "SBR-015 AC1 Refusal :: Site/NavLink :: Is this the page being read",
+   "SBR-015 Zero Section Drive :: Site/NavLink :: Is this the page being read",
+   "SBR-016 Arrive Drive :: Site/NavLink :: Is this the page being read",
+   "SBR-017 Sign In Drive :: Site/NavLink :: Is this the page being read",
+   "d40-wizard-drive :: Site/NavLink :: Is this the page being read",
+   "def007-drive :: Site/NavLink :: Is this the page being read",
+   "sbr014-drive :: Site/NavLink :: Is this the page being read"
+  ],
+  "body_head": "if (Inputs.slug === undefined) return;\nlet current = Inputs.current;\nif (current === undefined && Noodl && Noodl.Variables) {\n  current = Noodl.Variables[\"siteCurrentSlug\"];\n}\nconst isCurrent = current !== undefined && current !== null && current !== '' && String(current) === String(Inputs.slug);\nOu"
+ },
+ {
+  "h": "2b50cd56",
+  "reason": "the script reads `Noodl` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "DEF-015 Card Drive :: Pages/Site :: The slug to show",
+   "SBR-004 AC1AC2 Drive :: Pages/Site :: The slug to show",
+   "SBR-004 Mounted Drive :: Pages/Site :: The slug to show",
+   "SBR-004 Theme Drive :: Pages/Site :: The slug to show",
+   "SBR-006 Admin Drive :: Pages/Site :: The slug to show",
+   "SBR-007 Page Editor Drive :: Pages/Site :: The slug to show",
+   "SBR-015 AC1 Drive :: Pages/Site :: The slug to show",
+   "SBR-015 AC1 Refusal :: Pages/Site :: The slug to show",
+   "SBR-015 Zero Section Drive :: Pages/Site :: The slug to show",
+   "SBR-016 Arrive Drive :: Pages/Site :: The slug to show",
+   "SBR-017 Sign In Drive :: Pages/Site :: The slug to show",
+   "d40-wizard-drive :: Pages/Site :: The slug to show",
+   "def007-drive :: Pages/Site :: The slug to show",
+   "sbr014-drive :: Pages/Site :: The slug to show"
+  ],
+  "body_head": "if (Inputs.homeSlug === undefined) return;\nconst fromUrl = Inputs.slug === undefined || Inputs.slug === null ? '' : String(Inputs.slug);\nconst slug = fromUrl === '' ? Inputs.homeSlug : fromUrl;\nif (slug === '') return;\nOutputs.slug = slug;\nif (Noodl && Noodl.Variables) {\n  Noodl.Variables[\"siteCurre"
+ },
+ {
+  "h": "45ac68ad",
+  "reason": "the script reads `Noodl.Object.create` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "UPG-001 Variant Drive :: Multi Select/List :: Initialize",
+   "UPG-001 Variant Drive :: Multi Select/Pills :: Initialize",
+   "test112 :: Multi Select/List :: Initialize",
+   "test112 :: Multi Select/Pills :: Initialize"
+  ],
+  "body_head": "if(!Inputs.Options) return // No options, no fun\n\nComponent.Object.Checkboxes = Inputs.Options.map((o,idx) => Noodl.Object.create({\n    id:Component.Object.id+'-'+o,\n    Value:o,\n    Label:Inputs.Labels!==undefined?Inputs.Labels[idx]:o,\n    Checked:Inputs.Selection!==undefined && Inputs.Selection.in"
+ },
+ {
+  "h": "f2b64d44",
+  "reason": "the script reads `Noodl.Object.create` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "UPG-001 Variant Drive :: Multi Select/Dropdown :: Initialize",
+   "test112 :: Multi Select/Dropdown :: Initialize"
+  ],
+  "body_head": "if(!Inputs.Options) return // No options, no fun\n\n// Create objects for all possible options that we will show in the\n// dropdown. Use the Selection input to create a Checked property for each.\n// Make sure we set id explicitly so it's not rerendered every time\nComponent.Object.AllOptions = Inputs.O"
+ },
+ {
+  "h": "135202c7",
+  "reason": "the script reads `Noodl.Objects` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "UPG-001 Variant Drive :: Multi Select/Dropdown :: Reset",
+   "test112 :: Multi Select/Dropdown :: Reset"
+  ],
+  "body_head": "Component.Object.CheckedOptions = []\nComponent.Object.Selection = []\nif(!Component.Object.AllOptions) return // Not initialized yet\nComponent.Object.AllOptions.forEach(option => {\n    Noodl.Objects[option.id] = {...Noodl.Objects[option.id], Checked: false}\n})\n"
+ },
+ {
+  "h": "b02be99b",
+  "reason": "input \"field\" is fed by JavaScriptFunction \u2014 the Function that feeds it is not exported: input \"field\" is fed by dbt-lesson.Section \u2014 no statically known source in the emit vocabulary",
+  "where": [
+   "digital-bricks-training :: Lesson/Section row :: Saved: the kit may say so",
+   "digital-bricks-training-demo :: Lesson/Section row :: Saved: the kit may say so"
+  ],
+  "body_head": "/*\n * THE BACKEND HAS IT (TASK-L177). Now, and only now, the kit may say \u2713 Saved.\n * The fact also goes into `dbtCapturedFacts`, which the lesson page lays over\n * the facts it loaded, so moving to another step and back still shows it \u2014 the\n * page reads the learner's facts once, when it opens.\n */\n"
+ },
+ {
+  "h": "cf3b4a50",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "digital-bricks-training :: Logic/Feed filter :: Read the saved filter once",
+   "digital-bricks-training-demo :: Logic/Feed filter :: Read the saved filter once"
+  ],
+  "body_head": "/*\n * THE SAVED FILTER, READ (TASK-L165 \u00a74). PORTED: timeline-filter-store.ts.\n *\n * ONE OWNER OF THE KEY: this node reads it and `Save it` beside it writes it,\n * and nothing else in the template names it. ONE KEY FOR EVERY LEARNER: the\n * preference is about how the COACH works, not about the pers"
+ },
+ {
+  "h": "c3fc16c1",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "digital-bricks-training :: Logic/Feed filter :: A chip was pressed",
+   "digital-bricks-training-demo :: Logic/Feed filter :: A chip was pressed"
+  ],
+  "body_head": "/* A chip adds its kind or takes it away. `[]` is \"everything\" \u2014 there is one\n   representation of unfiltered and no third state to get wrong. */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typ"
+ },
+ {
+  "h": "5f525cba",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "digital-bricks-training :: Logic/Feed filter :: Show everything",
+   "digital-bricks-training-demo :: Logic/Feed filter :: Show everything"
+  ],
+  "body_head": "Noodl.Variables.dbtFeedFilter = [];\n"
+ },
+ {
+  "h": "9c7ceaf3",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "digital-bricks-training :: Logic/Feed filter :: A row was opened or closed",
+   "digital-bricks-training-demo :: Logic/Feed filter :: A row was opened or closed"
+  ],
+  "body_head": "/* Which rows are open is page state, NEVER saved: a log that remembered would\n   come back as a wall one expansion at a time (L130). */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get"
+ },
+ {
+  "h": "c5160e58",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "digital-bricks-training :: Logic/Feed filter :: Chips, rows, and the jump",
+   "digital-bricks-training-demo :: Logic/Feed filter :: Chips, rows, and the jump"
+  ],
+  "body_head": "/*\n * THE ACTIVITY LOG (TASK-L165 \u00a74). PORTED: TimelineFeed.tsx.\n *\n * It ASSEMBLES NOTHING and ORDERS NOTHING: the rows arrive from\n * Logic/Ordered timeline in the model's order, already previewed. What this\n * decides is only what a log decides \u2014 which kinds are chips, which rows are\n * showing, "
+ },
+ {
+  "h": "113197e0",
+  "reason": "input \"id\" is fed by For Each \u2014 no statically known source in the emit vocabulary",
+  "where": [
+   "digital-bricks-training :: Pages/Course :: Open this objective",
+   "digital-bricks-training-demo :: Pages/Course :: Open this objective"
+  ],
+  "body_head": "/* A segment was pressed. The repeater hands back the ROW's id, which\n   Logic/Dossier keys by the objective's slug. */\nconst id = String(Inputs.id || '');\nif (!id) return;\nNoodl.Variables.dbtDossierOpen = id;\n"
+ },
+ {
+  "h": "efe3d261",
+  "reason": "input \"rows\" is fed by /Logic/Ordered timeline \u2014 no statically known source in the emit vocabulary",
+  "where": [
+   "digital-bricks-training :: Pages/Learner :: Point at a programme row",
+   "digital-bricks-training-demo :: Pages/Learner :: Point at a programme row"
+  ],
+  "body_head": "/*\n * THE LOG POINTS AT THE PROGRAMME (TASK-L165 \u00a74, L135 \u00a73). The shell owns both\n * directions of \"which row is being pointed at\" (L138), and this is one of them.\n *\n * A pointed-at row OPENS by being handed `collapsed: false`. The kit row keys\n * its open state on its id AND that value, so a chan"
+ },
+ {
+  "h": "96d4e223",
+  "reason": "input \"id\" is fed by For Each \u2014 no statically known source in the emit vocabulary",
+  "where": [
+   "digital-bricks-training :: Pages/Learner :: Show in the activity log",
+   "digital-bricks-training-demo :: Pages/Learner :: Show in the activity log"
+  ],
+  "body_head": "/* A programme card asked to be shown in the log. The log is told WHICH row\n   and the surface changes; Logic/Feed filter does the rest \u2014 clearing a\n   filter that hides it, opening it \u2014 because it owns the log. */\nconst id = String(Inputs.id || '');\nif (!id) return;\nNoodl.Variables.dbtLogFocus = id"
+ },
+ {
+  "h": "b67b16c9",
+  "reason": "input \"id\" is fed by For Each \u2014 no statically known source in the emit vocabulary",
+  "where": [
+   "digital-bricks-training :: Pages/Learner :: Show on their programme",
+   "digital-bricks-training-demo :: Pages/Learner :: Show on their programme"
+  ],
+  "body_head": "/* A log row asked to be shown on the programme. The ROW's id is what the\n   repeater hands back; what it POINTS AT is on the row (a signal points at its\n   lesson, a note at what it is about), resolved once, by Logic/Ordered timeline. */\nfunction plain(x) {\n  if (x === null || x === undefined) retu"
+ },
+ {
+  "h": "85a6588c",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Projects/Add project :: Write it",
+   "todo-list-demo :: Projects/Add project :: Write it"
+  ],
+  "body_head": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',"
+ },
+ {
+  "h": "cdcf3271",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Projects/End money item :: Write it",
+   "todo-list-demo :: Projects/End money item :: Write it"
+  ],
+  "body_head": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',"
+ },
+ {
+  "h": "3f487a1b",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Projects/Mark money :: Write it",
+   "todo-list-demo :: Projects/Mark money :: Write it"
+  ],
+  "body_head": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',"
+ },
+ {
+  "h": "1ba5cc46",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Projects/Move project :: Write it",
+   "todo-list-demo :: Projects/Move project :: Write it"
+  ],
+  "body_head": "var rows = Inputs.rows || [], id = String(Inputs.rowId || ''), to = Number(Inputs.toIndex);\nvar from = -1;\nfor (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].id === id) from = i;\nif (from < 0 || !isFinite(to) || to < 0 || to >= rows.length || to === from) return;\nvar order = rows.slice();\n"
+ },
+ {
+  "h": "030e0b75",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Projects/Record balance :: Write it",
+   "todo-list-demo :: Projects/Record balance :: Write it"
+  ],
+  "body_head": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',"
+ },
+ {
+  "h": "baff1b1a",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Projects/Save money item :: Write it",
+   "todo-list-demo :: Projects/Save money item :: Write it"
+  ],
+  "body_head": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',"
+ },
+ {
+  "h": "dd23ffc3",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Projects/Save next move :: Write it",
+   "todo-list-demo :: Projects/Save next move :: Write it"
+  ],
+  "body_head": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',"
+ },
+ {
+  "h": "2865e52e",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Projects/Save project :: Write it",
+   "todo-list-demo :: Projects/Save project :: Write it"
+  ],
+  "body_head": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',"
+ },
+ {
+  "h": "1d47442e",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Projects/Set task project :: Write it",
+   "todo-list-demo :: Projects/Set task project :: Write it"
+  ],
+  "body_head": "var taskId = String(Inputs.taskId || ''), pid = String(Inputs.projectId || '');\nif (pid === 'none') pid = '';\nvar current = String(Inputs.current || '');\nif (current === 'none') current = '';\nif (taskId === '' || pid === current) return;\nvar names = Inputs.projectNames || {};\nvar R = Noodl.Records;\n"
+ },
+ {
+  "h": "67372369",
+  "reason": "its out-items output is consumed outside the Run chain by an unrendered sink \u2014 the last run's value is not statically expressible there",
+  "where": [
+   "marketplace :: Shop/Top :: The currencies there are rates for, and which one is shown"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 10"
+ },
+ {
+  "h": "bf7f9771",
+  "reason": "node beside the router shell",
+  "where": [
+   "digital-bricks-training :: App :: THE NOTICE GATE \u2014 hold the page until the current notice is answered"
+  ],
+  "body_head": "/*\n * THE NOTICE GATE (TASK-L185 \u00a72), beside the sign-in gate and deliberately not\n * folded into it: that one decides WHERE a person may go, this one decides\n * WHETHER the page they are on may be drawn yet.\n *\n * Signed in and not on the CURRENT notice \u2192 the page is HELD (hidden, still\n * mounted)"
+ },
+ {
+  "h": "0ac89e67",
+  "reason": "the script reads `Noodl.Users` \u2014 the export's Noodl object carries Records.query, CloudFunctions.run, Users.Current, Files.sign and Variables (EXP-020)",
+  "where": [
+   "digital-bricks-training :: Pages/Settings :: Forget the session here, then Home, saying it is done"
+  ],
+  "body_head": "/*\n * THE ACCOUNT IS GONE: FORGET IT HERE TOO, THEN SAY SO ON HOME (TASK-L185 \u00a74).\n *\n * deleteMine removed the account's sessions on the server, so the ordinary\n * Log Out node FAILS here (measured: \"Invalid session token\") and leaves the\n * stored session in the browser. Home then still believes s"
+ },
+ {
+  "h": "7a8197dc",
+  "reason": "input \"concepts\" is fed by CloudFunction2 \u2014 its Call is never fired by a translatable trigger",
+  "where": [
+   "digital-bricks-training :: People/Their path :: The two lists, from the draft"
+  ],
+  "body_head": "/*\n * THE TWO LISTS (TASK-L184 \u00a73): what is on the path, in order, with what each can\n * do; and every other concept in the course, to add. A concept the course no longer\n * lists keeps its stored title rather than vanishing from a path somebody chose.\n */\nfunction plain(x) { if (x && typeof x === '"
+ },
+ {
+  "h": "85b4154a",
+  "reason": "input \"id\" is fed by For Each \u2014 no statically known source in the emit vocabulary",
+  "where": [
+   "digital-bricks-training :: People/Their path :: Move a step up"
+  ],
+  "body_head": "const d = (Noodl.Variables.dbtPathDraft || []).slice();\nconst i = d.indexOf(String(Inputs.id));\nif (i > 0) { [d[i - 1], d[i]] = [d[i], d[i - 1]]; Noodl.Variables.dbtPathDraft = d; }\n"
+ },
+ {
+  "h": "ca8afc7a",
+  "reason": "input \"id\" is fed by For Each \u2014 no statically known source in the emit vocabulary",
+  "where": [
+   "digital-bricks-training :: People/Their path :: Move a step down"
+  ],
+  "body_head": "const d = (Noodl.Variables.dbtPathDraft || []).slice();\nconst i = d.indexOf(String(Inputs.id));\nif (i > -1 && i < d.length - 1) { [d[i + 1], d[i]] = [d[i], d[i + 1]]; Noodl.Variables.dbtPathDraft = d; }\n"
+ },
+ {
+  "h": "ee00a5b2",
+  "reason": "input \"id\" is fed by For Each \u2014 no statically known source in the emit vocabulary",
+  "where": [
+   "digital-bricks-training :: People/Their path :: Take a step off"
+  ],
+  "body_head": "const id = String(Inputs.id);\nNoodl.Variables.dbtPathDraft = (Noodl.Variables.dbtPathDraft || []).filter((x) => x !== id);\n"
+ },
+ {
+  "h": "fd2f6126",
+  "reason": "input \"id\" is fed by For Each \u2014 no statically known source in the emit vocabulary",
+  "where": [
+   "digital-bricks-training :: People/Their path :: Put a concept at the end"
+  ],
+  "body_head": "const id = String(Inputs.id);\nconst d = (Noodl.Variables.dbtPathDraft || []).slice();\nif (id && d.indexOf(id) === -1) { d.push(id); Noodl.Variables.dbtPathDraft = d; }\n"
+ },
+ {
+  "h": "afc28bcf",
+  "reason": "trigger cs_dos_reveal.onLessonOpened is not a rendered element event or a receiver",
+  "where": [
+   "digital-bricks-training-demo :: Pages/Course :: Close it"
+  ],
+  "body_head": "/* Escape, the overlay, Close \u2014 or the learner followed the one link out to\n   the lesson. Cleared either way: the Variable outlives the page, and a\n   reveal left set would reopen on the way back. */\nNoodl.Variables.dbtDossierOpen = '';\n"
+ },
+ {
+  "h": "e12fcd3c",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "gram :: Pages/Admin/Look :: The post or the comment, its state and its reports"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (aw"
+ },
+ {
+  "h": "fd09a021",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "gram :: Pages/Admin/Queue :: What is reported, hidden and blocked"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (aw"
+ },
+ {
+  "h": "bc628842",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "gram :: Pages/EditProfile :: Your profile as it is"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (aw"
+ },
+ {
+  "h": "1c4ca659",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "gram :: Pages/EditProfile :: The photo, while the page is open"
+  ],
+  "body_head": "var keep = Component.Object;\nvar up = Inputs.added;\nif (up && up !== keep.get('addedFrom')) {\n  keep.set('addedFrom', up);\n  if (typeof up.getName === 'function' && up.getName()) {\n    var shown = '';\n    try { shown = (await Noodl.Files.sign(up)).url; } catch (e) { shown = ''; }\n    keep.set('choic"
+ },
+ {
+  "h": "743d2f82",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "gram :: Pages/Feed :: The newest posts, as cards"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (aw"
+ },
+ {
+  "h": "c3f6f4b7",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "gram :: Pages/Member :: Their profile and posts"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (aw"
+ },
+ {
+  "h": "0e89e98f",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "gram :: Pages/NewPost :: The photos, while the page is open"
+  ],
+  "body_head": "var keep = Component.Object;\nvar photos = keep.get('photos') || [];\nvar up = Inputs.added;\nif (up && up !== keep.get('addedFrom')) {\n  keep.set('addedFrom', up);\n  if (typeof up.getName === 'function' && up.getName()) {\n    var shown = '';\n    try { shown = (await Noodl.Files.sign(up)).url; } catch "
+ },
+ {
+  "h": "f7473ba9",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "gram :: Pages/Post :: The post and its comments"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (aw"
+ },
+ {
+  "h": "a019e910",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "gram :: Pages/Prayer :: The newest prayer requests, as cards"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (aw"
+ },
+ {
+  "h": "d33fb541",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "gram :: Pages/Report :: What is reported, and its reasons"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (aw"
+ },
+ {
+  "h": "db1a1a54",
+  "reason": "input \"changed\" is fed by JavaScriptFunction \u2014 it is fed by another Function/Expression node \u2014 JS-node chains are not translated in this slice",
+  "where": [
+   "gram :: Pages/Rules :: The rules, as the admins wrote them"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 1000 }); }\nasync function me() {\n  if (!Noodl.Users.Current) return null;\n  try { return (aw"
+ },
+ {
+  "h": "5d83a3a8",
+  "reason": "input \"uploaded\" is fed by Upload File \u2014 its Completed output is consumed \u2014 that pulse fires once however the action ended, and this slice emits the arms rather than their join",
+  "where": [
+   "marketplace :: Pages/Admin/SellerForm :: The logo to show"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 10"
+ },
+ {
+  "h": "9f0f023b",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "marketplace :: Pages/Seller/ProductForm :: The photos, while the form is open"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 10"
+ },
+ {
+  "h": "8924c978",
+  "reason": "the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "marketplace :: Pages/Shop/Basket :: The basket on this phone, and what is in it"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 10"
+ },
+ {
+  "h": "71f38d84",
+  "reason": "input \"data\" is fed by JavaScriptFunction \u2014 the Function that feeds it is not exported: the script reads the Component scope \u2014 the component-record tier (controlled-state slice + EXP-003 Tier B)",
+  "where": [
+   "marketplace :: Pages/Shop/Basket :: The basket, by seller and by country"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 10"
+ },
+ {
+  "h": "dd220762",
+  "reason": "input \"placed\" is fed by CloudFunction2 \u2014 input \"country\" is fed by net.noodl.controls.options \u2014 no statically known source in the emit vocabulary",
+  "where": [
+   "marketplace :: Pages/Shop/Checkout :: Remember the order on this phone; empty the basket"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 10"
+ },
+ {
+  "h": "61a1652e",
+  "reason": "input \"token\" is unticked under Run On Value Change \u2014 its changes would not re-run the script",
+  "where": [
+   "marketplace :: Pages/Shop/Order :: The order, worded for its buyer"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 10"
+ },
+ {
+  "h": "7deac5d9",
+  "reason": "input \"quantity\" is fed by Counter \u2014 its limits gate the mutations \u2014 clamped counting is not translated in this slice",
+  "where": [
+   "marketplace :: Pages/Shop/Product :: The Add button\u2019s words"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 10"
+ },
+ {
+  "h": "7d8d7a56",
+  "reason": "input \"quantity\" is fed by Counter \u2014 its limits gate the mutations \u2014 clamped counting is not translated in this slice",
+  "where": [
+   "marketplace :: Pages/Shop/Product :: Put them in the basket on this phone"
+  ],
+  "body_head": "function idOf(v) { return v && typeof v === 'object' ? String(v.objectId || v.id || '') : v ? String(v) : ''; }\nfunction ptr(c, id) { return { __type: 'Pointer', className: c, objectId: String(id) }; }\nasync function all(c, where) { return Noodl.Records.query(c, where || {}, { plain: true, limit: 10"
+ },
+ {
+  "h": "c6d4036c",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "nightbook :: Data/Gate :: Is the book open?"
+  ],
+  "body_head": "if (Noodl.Variables.nbUnlocked !== true) Outputs.locked();"
+ },
+ {
+  "h": "7f001ea9",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Logic/Projects :: Read the projects and the money"
+  ],
+  "body_head": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',"
+ },
+ {
+  "h": "1d6ee9db",
+  "reason": "logic node (JavaScriptFunction)",
+  "where": [
+   "todo-list :: Logic/Projects :: Bring Planning\u2019s moves over, once"
+  ],
+  "body_head": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct',"
+ }
+]
