@@ -18,6 +18,9 @@
  *   ticked under Run On Value Change runs the node when a new value arrives, Run wired or not (P18-S119-TICKEDRUN).
  *   `tickedArrival` is that test over the ticked inputs, the node holding what each last received.
  *
+ * - EXP-019 (session 133): a write or a signal after the body has returned (a timer, a listener) is handed to `node.late`,
+ *   as the runtime's `Outputs` proxy flags an output whenever it is written.
+ *
  * 🔴 **The first value, not the last.** `Outputs.a = ''; Outputs.a = 'x'; Outputs.go();` hands `go`'s target `''`, as the
  * runtime does today (P18-S119-FIRSTWRITE, needs a ruling). Change it here and in the runtime together, or not at all.
  */
@@ -48,6 +51,12 @@ export interface FunctionNode<O> {
   delivered: Partial<O>;
   /** What the body keeps on \`this\` across runs, as the running app's node keeps it (one object per node, never reset). */
   self: Record<string, unknown>;
+  /**
+   * What the body does after its run has returned, from a timer or a listener it set up: one write, or one signal with the
+   * outputs as its chain reads them. The running app's node delivers those when they happen; a component whose body may
+   * call back sets this to its own chains.
+   */
+  late?: (run: FunctionRun<O>) => void;
 }
 
 /** One signal the body sent, and the outputs as that pulse's chain reads them. */
@@ -74,6 +83,7 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<str
   const published: Record<string, unknown[]> = {};
   const held = new Set<string>();
   const sent: string[] = [];
+  let returned = false;
   const publish = (name: string, value: unknown) => {
     if (value === undefined) return;
     (published[name] = published[name] ?? []).push(value);
@@ -84,6 +94,10 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<str
     const send = () => {
       held.forEach((name) => publish(name, current[name]));
       held.clear();
+      if (returned) {
+        node.late?.({ outputs: node.outputs, pulses: [{ signal, values: { ...delivered } as Partial<O> }] });
+        return;
+      }
       sent.push(signal);
     };
     signals[signal] = Object.assign(send, { send });
@@ -96,6 +110,7 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<str
         current[key] = value;
         held.delete(key);
         publish(key, value);
+        if (returned && value !== undefined) node.late?.({ outputs: node.outputs, pulses: [] });
       } else {
         held.add(key);
       }
@@ -103,6 +118,7 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<str
     }
   });
   body(inputs, outputs as unknown as O, node.self);
+  returned = true;
   const count: Record<string, number> = {};
   const pulses = sent.map((signal) => {
     const k = (count[signal] = (count[signal] ?? 0) + 1);

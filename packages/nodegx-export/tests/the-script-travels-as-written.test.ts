@@ -23,8 +23,8 @@ import { typecheckEmittedApp } from './helpers/typecheckApp';
  *
  * Now a Run-wired Function carries those traits (`jsHostTraitsOf`) and runs **once per Run with a kept node**: `host` ⇒
  * `pulsed`, so the body never runs at a read site, and a `this` body runs bound to the node's `self`
- * (`runFunction(body, inputs, node)` hands `node.self`). With no Run wire it is still refused, by the trait's name, until
- * slice 2 (a run on its inputs' arrival). An Expression is held to every gate as before.
+ * (`runFunction(body, inputs, node)` hands `node.self`). With no Run wire it runs on its inputs' arrival and at load (slice 2,
+ * session 133: `the-script-runs-on-arrival.test.ts`; C4 here). An Expression is held to every gate as before.
  *
  * §A the emitted app rendered by real React under StrictMode (`helpers/export-react-arm.js`, settled) against the
  * runtime's own Function, Variable, Set Variable, Button and component instance rendered by real React
@@ -204,13 +204,14 @@ describe('§C the plan and the classifier', () => {
     expect(Object.values(home.jsFunctions).find((f) => f.fnName === 'The_greeting')!.host).toBeUndefined();
   });
 
-  it('C4 with no Run wire a traited body is refused by its trait\'s name (slice 2)', () => {
+  it('C4 with no Run wire a traited body runs on its inputs\' arrival and at load (slice 2, `the-script-runs-on-arrival.test.ts`)', () => {
     const { dir } = writeHostDesk(unwireRun);
     const tally = planOf(dir, '/Components/Tally');
-    expect(tally.dispositions['tally']).toMatchObject({ kind: 'deferred' });
-    expect((tally.dispositions['tally'] as { reason: string }).reason).toBe(
-      "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
-    );
+    expect(tally.dispositions['tally']).toMatchObject({ kind: 'collapsed' });
+    const def = Object.values(tally.jsFunctions).find((f) => f.fnName === 'The_tally')!;
+    expect(def.mode).toBe('reactive');
+    expect(def.pulsed).toBe(true);
+    expect(tally.tickedRuns).toEqual([expect.objectContaining({ nodeId: 'tally', atLoad: true, watch: [] })]);
   });
 });
 

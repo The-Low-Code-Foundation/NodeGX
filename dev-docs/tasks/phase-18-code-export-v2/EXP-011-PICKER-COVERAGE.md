@@ -14348,3 +14348,68 @@ a gate (slice 1b: an `await` changes when the chain after the run continues, whi
 Slice 2: the reactive traited body (81 nodes) as a run from an effect on its inputs' arrival. Slice 1b: asynchrony (163
 bodies; `runFunction` awaited, the run marked awaited so §90's `detached` holds the chain and frees the click). Then
 EXP-020 (the `Noodl` object, 183 bodies, eight members) and EXP-021 (logic components, 182 + 48 + 124 "no rule").
+
+## §103 The script runs on its inputs' arrival (session 133, 2026-10-21): EXP-019 slice 2, and P18-S133-LATEWRITE
+
+### §103.1 Measured first
+
+`s133-arrival/census.ts` (the exporter's own parse and plan over the templates): 167 Functions carry a host trait and no
+Run wire; 73 stood behind slice 1's sentence ("… and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"),
+96 dispositions with the nodes behind them; the rest sit in logic components (EXP-021) or behind the Noodl API (EXP-020).
+Shapes: inputs from Component Inputs 138, another Function 25, a kit control 21, a Variable 13; 36 send a signal of their
+own; 8 have no input at all (todo-list's minute clock, the device choice, nightbook's Tonight).
+
+The runtime, read (`simplejavascript.ts`) then measured on the **Arrival Desk** (`tests/helpers/arrival-desk.ts`,
+predicted in `s133-arrival/EXPECTED.md` before either arm ran): a Function with no Run wire runs **once at load** (the
+`functionScript` setter's `scheduleRun`, coalesced with what arrives in the same creation update), then once per ticked
+input whose value changed (DEF-046's compare), never on a re-render; two placements keep two `this`; an author signal runs
+its chain; no Done. One cell came out as the alternative the prediction named: a field's Text arrives after the field
+mounts, so a field-fed Function runs **twice** at load.
+
+### §103.2 The rule, built
+
+An **arrival run**: `isArrivalRun` (a Function, a host trait, Run not wired) compiles as a run (`compileJsRun`): a kept
+node, the body `.call(self)` for `this`, its signals' and Success's chains, every value output read from its row (a read
+with no row is refused by name; a refused signal's wires are never reads). A Done wired on it is refused by name ("with no
+Run wire nothing sends it"). Nothing attaches it: it compiles after every other sink, every Function upstream of it first
+(a first build compiled members-area's date from its Text before "Hold the id", kept the Record's Fetch refused and lost
+the Record: 6 nodes, caught by `dispdiff`), and is placed with the ticked runs (`TickedRunPlan.atLoad`), collapsing its
+node there. The emitter prints the ticked effect with a **load run**: an arrival runs at once; with nothing arrived the load
+run waits one task (`setTimeout`, cleared when an arrival comes first), because a parent's Variable seed reaches a placed
+component's input after the child's effects (measured: run at once, Tally A read "Ann 2" where the runtime reads "Ann 1").
+
+**P18-S133-LATEWRITE (found reading the gained nodes' emitted code, fixed):** the kept node recorded only what a body did
+before it returned. todo-list's minute clock writes `now` from `setInterval` and sends `wake` from a `visibilitychange`
+listener; planning's "Escape closes what is over the week" (slice 1) sends its signal from a `keydown` listener — both
+counted exported, both dead after the first run. Now `runFunction` hands a later write or signal to `FunctionNode.late`,
+and a component whose body may call back (`jsCallsBackOf`, `JsFunctionPlan.late`) sets it to the run's row write and pulse
+arms at every render. Graded on the **Bell variant** (an arrival run and a Run-wired run writing from a zero timer).
+
+### §103.3 Graded
+
+- `tests/the-script-runs-on-arrival.test.ts`, **24 rows**: the Arrival Desk against the runtime arm, step by step (load,
+  Bump, Set Bo, Set Bo, Bump, type, Clear), the export equal except the field-fed echo it refuses by name; the Bell variant
+  (`rung object` / `1` at load, `chimed` after the press, in both arms; the chime's Text before its wire delivers is
+  P18-S132-AUTHOREDTEXT, pinned); what is emitted; the plan (C1–C8); every app typechecks. Slice 1's spec C4 moved with the
+  rule (an unwired Tally now runs on arrival); 17 / 17.
+- **14 mutant arms** (`s133-arrival/mutants.py`), 13 killing rows by name; **C survived**, said so: the load run's guard
+  against a re-run with no arrival is unreachable on the desk, because no source the export carries can take a watched
+  value away (a Set Variable with no Value is refused by name; the runtime sends no `undefined`).
+- **Reach** (`dispdiff`, 17 templates, HEAD's `src` against the tree): **66 gained, 0 lost, 57 re-worded**. The emitted code
+  of the families read: planning's sheets (a closed sheet clears its fields and sets its boxes; the reset to a Number field
+  stays refused, P18-S118-NUMBERFIELD, now said on the wire), members-area's row dates, digital-bricks' Add a learner (the
+  magic link reads the kept node's delivered address at the click), todo-list's device choice (`go` sets the Variable) and
+  View (`goTo` the remembered state), the minute clock (late writes, above). Three gained Functions write rows nothing
+  reads yet (marketplace's tab classes into a kit Button's class, nightbook's Tonight into a placed component and a
+  Translation): their readers keep the generic note they had on HEAD; the Functions run for what they do (marketplace's
+  scrolls the tab into view). Generic notes across the templates 8,384 → 8,289.
+- `tplbuild` all 17 at the floor (1 in 1); package `tsc --noEmit` 0; hls001: predicted 4 paths (`src/lib/functionRun.ts` in
+  held-desk, host-desk, pulse-desk, ticked-desk; 0 corpus dispositions moved), read 4, regenerated. Whole package
+  **151 / 151 suites, 5,168 passed, 0 failed, 3 skipped** (predicted 5,144 + 24).
+
+### §103.4 What this leaves
+
+Slice 1b (asynchrony, 163 bodies; the late path is half of it: a write after an `await` is a late write until the run is
+awaited). The 57 re-worded: JS-node chains 24 (a Function fed by a Function), a kit Options value 8, a Group's own element
+6, logic components 12 (EXP-021). A field read only by an arrival run (2 template nodes) and the runtime's second load run
+for a field-fed Function: unbuilt, recorded.

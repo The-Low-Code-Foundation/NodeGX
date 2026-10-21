@@ -1,3 +1,36 @@
+# Next session — session 133 (2026-10-21, BOARD lane 6) built **EXP-019 slice 2**: a Function whose script carries a host trait and whose Run is not wired runs on its inputs' arrival and once at load, from an effect with a kept node, as the runtime runs it. Reading the gained nodes' emitted code found **P18-S133-LATEWRITE** (a write or signal a body makes after its run returned, from a timer or a listener, was lost — slice 1 too), fixed: the kept node hands it on. 66 template nodes gained, 0 lost.
+
+## ✅ Session 133: the script runs on its inputs' arrival (slice 2)
+
+Read EXP-011 §103 and EXP-019 §7. In short:
+
+| what | where |
+|---|---|
+| Measured first: 167 traited Functions with no Run wire, 73 behind the slice-2 sentence (96 dispositions); their shapes (inputs, signals, readers) | `s133-arrival/census.ts`, `census.json` |
+| The runtime, predicted then measured on the Arrival Desk: one run at load (the script setter), one per changed ticked input, none per render, a `this` per node; a field-fed Function runs twice at load (the field announces on mount) | `s133-arrival/EXPECTED.md`, `tests/helpers/arrival-desk.ts` |
+| `isArrivalRun`; `compileJsRun`'s arrival branch (no Done, row reads, signal wires never reads); arrival runs compile after every sink, upstream Functions first (`compileUpstreamOf`); placed as a ticked run with `atLoad`; the attach pass leaves its compiled signal wires to it | `src/analyze/plan.ts` |
+| The load run: at once on an arrival, else one task late (`setTimeout`, cleared by an arrival) — a parent's Variable seed reaches a child's input after the child's effects | `src/emit/component.ts` (the ticked-run loop) |
+| P18-S133-LATEWRITE: `FunctionNode.late` (the library), `jsCallsBackOf` (`jsfun.ts`), `JsFunctionPlan.late`, the component's late handler (row + pulse arms) | `functionRunLib.ts`, `jsfun.ts`, `plan.ts`, `component.ts` |
+| Spec, 24 rows (the desk, the Bell variant, the plan, typecheck); slice 1's C4 moved; 14 mutant arms, 13 killed, C survived (said why) | `tests/the-script-runs-on-arrival.test.ts`, `s133-arrival/mutants.py` |
+
+- 🔴 **The first reach read 6 lost** (members-area's Announcement and Meeting): compiling the arrival run from its reader Text, before the loop reached "Hold the id", resolved the Record's Fetch while another Function was resolving and the refusal was cached. Moving the compile after the loop did NOT fix it (the reader still pulled it early); compiling every Function upstream of the arrival run first did. Read `dispdiff`'s lost rows before anything else.
+- 🔴 **Read the emitted code of every gained family**: the count said 66 gained; the code said the minute clock's later writes were dead, and so were slice 1's Escape listener's (P18-S133-LATEWRITE). And `tplbuild` said 7 (planning's TS2345: a refused signal's wires minted a row) where the floor is 1.
+- 🔴 **A mutant arm that does not compile reads "0 total"** — the script printed it as SURVIVED (arm K, `if (true) continue` is unreachable code under ts-jest). Make an arm reachable (`|| def.fnName.length > 0`).
+- 🔴 **The real index was stale twice**: session 132's temp-index commit and three peer commits since left their paths staged as reversals (78 files, then BOARD, DIRECTION, two READMEs). Refreshed by proving each entry equal to the pre-commit blob first; OWN-025/026 and `parked/README.md` were staged on purpose by someone, left alone.
+- Three gained Functions write rows nothing reads yet (marketplace's tab classes into a kit Button's class; nightbook's Tonight into a placed component, a Translation, a Function): their readers keep HEAD's generic note.
+
+Readings: the spec 24 / 24; slice 1's 17 / 17; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0; hls001 predicted 4 paths (`src/lib/functionRun.ts` × 4 desks), read 4, regenerated. Reach (`dispdiff`, HEAD `src` against the tree): **templates 66 gained, 0 lost, 57 re-worded** (Function 40, kit checkbox 22, Set Variable 2, Switch 1, Request Magic Link 1); **corpus 0 moved**. Whole package (`nice -n 19 --runInBand`, JSON 18:47): **151 / 151 suites, 5,168 passed, 0 failed, 3 skipped** (predicted: 150 + 1 suites, 5,144 + 24).
+
+Filed: **P18-S133-LATEWRITE** (medium, fixed).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-019 slice 1b — asynchrony** (163 bodies): the wrapper `async`, a `runFunctionAsync` awaited, the `jsfun-run` action marked awaited in `isAwaitedAction` / `actionsAwait` so §90's `detached` frees the click's later wires; Success/Done after the await (§98). `FunctionNode.late` is half of it: a write after an `await` lands after the run returned unless the run is awaited. AC3's desk row: a Set Variable wired after the Run runs before the awaited chain.
+2. **EXP-020** (the `Noodl` object over `src/api`; 183 bodies), then **EXP-021** (logic components; 12 of slice 2's re-worded wait on it).
+3. The slice-2 leftovers, measured: JS-node chains (a Function fed by a Function, 24 re-worded), a kit Options value as an input (8), a Group's own element (6).
+4. Not this lane's next: EXP-022 AC1 in a parallel session; EXP-023's cut is Richard's terminal; P18-S132-AUTHOREDTEXT when a Text session comes.
+
+---
+
 # Next session — session 132 (2026-10-21, BOARD lane 6) took **Richard's ruling** ("code export and deployment as npm things, such that nobody would ever have to use the original Noodl / NodeGX editor … I want that offramp promise fulfilled in React and Swift … make it so"), re-ordered the lane ([EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md) → [EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md) → [EXP-021](EXP-021-A-LOGIC-COMPONENT-IS-A-HOOK.md) → [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md), [EXP-023](EXP-023-THE-OFF-RAMP-IS-ON-NPM.md) with the kit cut) and built **EXP-019 slice 1**: a Run-wired Function whose script keeps `this`, reads the clock, draws randomness, schedules a timer, touches the browser or reaches the network is no longer refused; it runs once per Run with a kept node. Graded on the Host Desk against the runtime arm; 135 template nodes gained, 0 lost.
 
 ## ✅ Session 132: the script travels as written (slice 1)

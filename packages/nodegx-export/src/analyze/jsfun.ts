@@ -188,6 +188,46 @@ export function jsHostTraitsOf(body: string): string[] {
 }
 
 /**
+ * EXP-019 (session 133) — whether a Function body may write its outputs or send a signal **after its run has returned**:
+ * it carries a trait that calls back later (a timer, a listener on the browser, a request) and it touches `Outputs` inside
+ * a function of its own (`function tick() { Outputs.now = Date.now(); }`, `() => Outputs.close()`). The runtime's node
+ * delivers such a write when it happens (its `Outputs` proxy flags the output whenever it is written); the export's kept
+ * node hands it to the component (`FunctionNode.late`). Measured: todo-list's minute clock (`setInterval`, a
+ * `visibilitychange` listener) and planning's "Escape closes what is over the week" (a `keydown` listener).
+ *
+ * Read off the text, so it can say yes for a nested function that only runs inside the run: the cost is a handler that
+ * never fires. A body that hands `Outputs` itself to a helper outside it is not seen.
+ */
+export function jsCallsBackOf(body: string): boolean {
+  const traits = jsHostTraitsOf(body);
+  if (!traits.some((t) => /^(schedules timers|touches the browser environment|reaches the network)/.test(t))) return false;
+  const scanned = strippedForScan(body);
+  const opener = /\bfunction\b[^{]*\{|=>\s*/g;
+  let match: RegExpExecArray | null;
+  while ((match = opener.exec(scanned)) !== null) {
+    let at = match.index + match[0].length;
+    let inner: string;
+    if (match[0].endsWith('{') || scanned[at] === '{') {
+      if (!match[0].endsWith('{')) at += 1;
+      let depth = 1;
+      let end = at;
+      while (end < scanned.length && depth > 0) {
+        if (scanned[end] === '{') depth += 1;
+        else if (scanned[end] === '}') depth -= 1;
+        end += 1;
+      }
+      inner = scanned.slice(at, end);
+    } else {
+      // An arrow with an expression body: up to the end of its statement.
+      const rest = scanned.slice(at);
+      inner = rest.slice(0, rest.search(/[;\n]|$/));
+    }
+    if (/\bOutputs\b/.test(inner)) return true;
+  }
+  return false;
+}
+
+/**
  * P109 ISL-005 — the marker gates a **script file** must pass, for a Function that uses it to re-host.
  *
  * A file's code runs inside the Function's call, so what makes a body unfit to re-host (the clock,

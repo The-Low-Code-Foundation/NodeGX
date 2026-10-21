@@ -55,6 +55,7 @@ import {
   jsBodyOf,
   jsNodeKindOf,
   jsHostTraitsOf,
+  jsCallsBackOf,
   jsPurityDefer,
   JS_EXPRESSION,
   JS_FUNCTION
@@ -3202,12 +3203,18 @@ export interface JsFunctionPlan {
    */
   mode: 'reactive' | 'invoked';
   /**
-   * EXP-019. Function only, invoked only: the host traits the body carries ("reads the clock (Date)", "keeps state on
-   * `this`", …, `jsHostTraitsOf`). Present ⇒ the run is `pulsed` (a kept node, one run per trigger, outputs read from the
-   * node's record), because a body with a trait must never run at a read site. A `this` trait binds the body to the
-   * node's `self`.
+   * EXP-019. Function only: the host traits the body carries ("reads the clock (Date)", "keeps state on `this`", …,
+   * `jsHostTraitsOf`). Present ⇒ the run is `pulsed` (a kept node, one run per trigger, outputs read from the node's
+   * record), because a body with a trait must never run at a read site. A `this` trait binds the body to the node's
+   * `self`. In `reactive` mode (no Run wire, slice 2) the trigger is its inputs' arrival and the load (`TickedRunPlan.atLoad`).
    */
   host?: string[];
+  /**
+   * EXP-019 (session 133). Function only: the body may write an output or send a signal after its run has returned, from a
+   * timer or a listener it sets up (`jsCallsBackOf`). Its kept node then hands those to the component (`FunctionNode.late`),
+   * which writes the row and runs the signal's chain, as the runtime's node delivers them when they happen.
+   */
+  late?: true;
   /**
    * EXP-011 §86. Function only, invoked only: a run of it sends a signal of its own that a chain consumes, or (P18-S121-
    * FRESHOUTPUTS) it materializes a row a reader reads between runs. The wrapper then takes its `Outputs` record as a
@@ -3436,6 +3443,13 @@ export interface TickedRunPlan {
   watch: ValueExpr[];
   /** The run without its Done: the body, its signals' chains, its §4f write. `ticked: true`. */
   action: Extract<HandlerAction, { kind: 'jsfun-run' }>;
+  /**
+   * EXP-019 slice 2. A Function with a host trait and no Run wire: the runtime's script setter also runs it once at load
+   * (`simplejavascript.ts`, `if (!this.isInputConnected('run')) this.scheduleRun()`), whatever has arrived, inputs or none.
+   * The effect then runs on its first pass even when no watched value arrived (a ref, so StrictMode's second mount does
+   * not run it twice).
+   */
+  atLoad?: true;
   comment: string;
 }
 
@@ -6556,13 +6570,11 @@ function planComponent(
       }
       /**
        * EXP-019. A Function's host traits travel with it — as a run once per trigger (`host` ⇒ `pulsed`, the run compile).
-       * With no Run wire the node runs on its inputs' arrival (`scheduleRun` on an input change), which is a run from an
-       * effect this slice does not print: refused by the trait's name until slice 2.
+       * With no Run wire (slice 2) the node runs on its inputs' arrival and once at load (`scheduleRun` from the script's
+       * setter and from each ticked input that changed): an arrival run, compiled as the run is (`compileJsRun`), printed as
+       * the ticked run's effect with a load run (`TickedRunPlan.atLoad`).
        */
       const host = kind === 'function' ? jsHostTraitsOf(body) : [];
-      if (host.length > 0 && !wiredPorts.has(`${node.id}:run`)) {
-        return { defer: `the ${word} ${host[0]} and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2` };
-      }
       // P109 ISL-005 AC7. The files a Function lists under Uses: bound as `Scripts`, or the named reason not.
       let scriptUses: ScriptUsePlan[] = [];
       if (kind === 'function') {
@@ -6766,6 +6778,7 @@ function planComponent(
         mathAliases: exprIds.mathAliases,
         mode,
         ...(host.length > 0 ? { host } : {}),
+        ...(kind === 'function' && jsCallsBackOf(body) ? { late: true as const } : {}),
         ...(loadGate !== undefined ? { loadGate } : {}),
         ...(scriptUses.length > 0 ? { scripts: scriptUses } : {}),
         ...(kind === 'visual'
@@ -6785,6 +6798,21 @@ function planComponent(
     if ('def' in result) plan.jsFunctions[result.def.nodeId] = result.def;
     return result;
   };
+
+  /**
+   * EXP-019 slice 2. A Function whose body carries a host trait and whose Run is not wired: it runs on its inputs' arrival
+   * and once at load, from an effect with a kept node (`compileJsRun`'s arrival branch), and every read of its outputs goes
+   * through the row that run writes. Read off the body alone, so asking it resolves nothing.
+   */
+  const isArrivalRun = (node: NodeIR): boolean => {
+    if (jsNodeKindOf(node.type) !== 'function' || wiredPorts.has(`${node.id}:run`)) return false;
+    const body = jsBodyOf(node, 'function');
+    return body !== undefined && body.trim().length > 0 && jsHostTraitsOf(body).length > 0;
+  };
+  /** EXP-019 slice 2. Arrival runs compiling now: a read of their outputs inside their own chains is the run's, not the row's. */
+  const arrivalCompiling = new Set<string>();
+  /** EXP-019 slice 2. Why an arrival run did not compile, by node id: what a reader of its row says. */
+  const jsArrivalRefusals = new Map<string, string>();
 
   /**
    * A JS node's output as an expression (§4). Value outputs resolve to `jsfun-out`; consumed
@@ -6819,7 +6847,9 @@ function planComponent(
      */
     if (jsResolving.size > 0) {
       const runKey = `${fromNode.id}:run`;
-      const materialized = kind === 'function' && wiredPorts.has(runKey) && !jsResolving.has(fromNode.id) && jsMaterializedVars.has(fromNode.id);
+      // EXP-019 slice 2: an arrival run's row too (its run compiles before its readers, `compileFunctionFeedersOf`).
+      const materialized =
+        kind === 'function' && (wiredPorts.has(runKey) || isArrivalRun(fromNode)) && !jsResolving.has(fromNode.id) && jsMaterializedVars.has(fromNode.id);
       if (!materialized) {
         const compiled = kind === 'function' ? compiledSinks.get(runKey) : undefined;
         ctx.defer =
@@ -6845,7 +6875,19 @@ function planComponent(
     ctx.subscriberIds.push(...record.subscriberIds);
     // An invoked node materialized by its Run chain (§4f): reads outside the chain go through
     // the state var. In-chain reads resolve before materialization exists and keep inlining.
-    const via = def.mode === 'invoked' ? jsMaterializedVars.get(fromNode.id) : undefined;
+    const via = def.mode === 'invoked' || def.host !== undefined ? jsMaterializedVars.get(fromNode.id) : undefined;
+    /**
+     * EXP-019 slice 2. An arrival run's outputs are read only from its row (or, inside its own chains, from the run): the
+     * body must never run at a read site. A read with no row is one the run did not compile for.
+     */
+    if (def.mode === 'reactive' && def.host !== undefined && via === undefined && !arrivalCompiling.has(fromNode.id)) {
+      const compiled = jsArrivalRefusals.get(fromNode.id);
+      ctx.defer =
+        compiled !== undefined
+          ? `the script runs on its inputs' arrival (it ${def.host[0]}), and that run is not exported: ${compiled}`
+          : `the script runs on its inputs' arrival (it ${def.host[0]}), and that run writes no row this read can reach`;
+      return null;
+    }
     const base: ValueExpr = {
       kind: 'jsfun-out',
       nodeId: fromNode.id,
@@ -11562,11 +11604,37 @@ function planComponent(
     (reader.type === CLOUD_FUNCTION_TYPE && port.startsWith('in-')) ||
     (reader.type === 'DbCollection2' && port.startsWith('qp-'));
   /** P18-S119-TICKEDRUN. A compiled run's ticked half, by node id: what the effect watches and runs. Read after the attach pass. */
-  const tickedRunPieces = new Map<string, { watch: ValueExpr[]; action: Extract<HandlerAction, { kind: 'jsfun-run' }> }>();
+  const tickedRunPieces = new Map<
+    string,
+    {
+      watch: ValueExpr[];
+      action: Extract<HandlerAction, { kind: 'jsfun-run' }>;
+      /** EXP-019 slice 2: an arrival run, which nothing attaches: what it consumes and collapses, applied where it is placed. */
+      arrival?: { consumes: string[]; collapses: string[]; subscribes: string[] };
+    }
+  >();
 
+  /**
+   * EXP-019 slice 2. The arrival run: a Function with a host trait and no Run wire. Compiled by the run compile below with
+   * no Done (nothing sends Run), every value output read from its row, and its ticked half always placed, with a load run.
+   * A refusal is kept for its readers (`jsArrivalRefusals`).
+   */
   const compileJsRun = (node: NodeIR): CompiledSink => {
+    if (!isArrivalRun(node)) return compileJsRunOnce(node);
+    arrivalCompiling.add(node.id);
+    try {
+      const compiled = compileJsRunOnce(node);
+      if ('defer' in compiled) jsArrivalRefusals.set(node.id, compiled.defer);
+      return compiled;
+    } finally {
+      arrivalCompiling.delete(node.id);
+    }
+  };
+
+  const compileJsRunOnce = (node: NodeIR): CompiledSink => {
     const record = jsFunDefOf(node);
     if ('defer' in record) return { defer: record.defer };
+    const arrival = isArrivalRun(node);
     const ticked = tickedWatchOf(node, record.def);
     if ('defer' in ticked) return { defer: ticked.defer };
     // §3.6 over the run path: failure/unchanged/error report the run itself, isTrueEv/isFalseEv pulse per evaluation —
@@ -11591,7 +11659,12 @@ function planComponent(
       }
       return { defer: `its ${c.fromProperty} output is consumed — only done continues a Run chain in this slice` };
     }
-    const done = doneChainOf(node);
+    // EXP-019 slice 2. With no Run wire nothing sends Done (it is an invocation's outcome, `reportOutcomes`): a wire on it
+    // is one the running app never fires either. Refused by name rather than dropped, so it is said (none in the templates).
+    if (arrival && component.connections.some((c) => c.fromId === node.id && c.fromProperty === 'done')) {
+      return { defer: "its Done is wired, and with no Run wire nothing sends it — the running app never runs that chain" };
+    }
+    const done = arrival ? { then: [], consumes: [], collapses: [], subscribes: [] } : doneChainOf(node);
     if ('defer' in done) return done;
     /**
      * P18-S129-FNSUCCESS (EXP-011 §98). A Function's Success as a chain. The runtime sends it after the body's await, on
@@ -11606,7 +11679,7 @@ function planComponent(
     const pulses: DoneChain = 'defer' in pulsed ? { then: [], consumes: [], collapses: [], subscribes: [] } : pulsed;
     // P18-S119-TICKEDRUN. A ticked arrival runs the signals' chains and Success's from an effect, where no handler's values exist.
     const tickedThen = [...pulses.then, ...success.then];
-    if (ticked.watch.length > 0 && !actionsValidIn([{ kind: 'jsfun-run', nodeId: node.id, then: tickedThen }], { kind: 'render' })) {
+    if ((ticked.watch.length > 0 || arrival) && !actionsValidIn([{ kind: 'jsfun-run', nodeId: node.id, then: tickedThen }], { kind: 'render' })) {
       return {
         defer: 'a ticked input runs it again from no handler, and its signals\' chains read values that exist only inside a handler'
       };
@@ -11653,7 +11726,9 @@ function planComponent(
      */
     // HEAD's rule where it materialized: the first stray drawn, the rest read the row as they could. Kept, so no export
     // HEAD made is lost (todo-list's Project editor); the rules below decide only what HEAD refused.
-    const headMaterialized = strays.length > 0 && rendered.has(strays[0].toId);
+    // EXP-019 slice 2. An arrival run's outputs are standing values, as a Variable's are: every reader reads the row, at its
+    // own time. No click runs it, so no reader's trigger can come before it.
+    const headMaterialized = strays.length > 0 && (arrival || rendered.has(strays[0].toId));
     const unreadable = headMaterialized
       ? undefined
       : strays.find(
@@ -11664,7 +11739,10 @@ function planComponent(
         defer: `its ${unreadable.fromProperty} output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there`
       };
     }
-    const readers = headMaterialized ? strays : strays.filter((c) => !ownSignalStray(c));
+    // EXP-019 slice 2. An arrival run's signal wires are not reads, even where their chain was refused and nothing consumed
+    // them (planning's "Put the boxes back": a refused `reset` minted a row for a body with no value output, TS2345).
+    const isSignalWire = (c: ConnectionIR) => record.def.kind === 'function' && record.def.signals.includes(c.fromProperty.slice('out-'.length));
+    const readers = arrival ? strays.filter((c) => !isSignalWire(c)) : headMaterialized ? strays : strays.filter((c) => !ownSignalStray(c));
     /**
      * 🔴 **The same event, the reader's wire first.** A Set Variable's Do fired by the click that also runs this Function
      * reads the run's new value in the runtime, whichever wire comes first: it waits until the update's inputs have
@@ -11673,7 +11751,7 @@ function planComponent(
      */
     const runWires = component.connections.filter((c) => c.toId === node.id && c.toProperty === 'run');
     for (const reader of readers) {
-      if (rendered.has(reader.toId)) continue;
+      if (rendered.has(reader.toId) || arrival) continue;
       const early = component.connections.find(
         (w, i) =>
           w.toId === reader.toId &&
@@ -11685,7 +11763,7 @@ function planComponent(
         };
       }
     }
-    if (readers.length === 0 && strays.length > 0 && chain.then.length === 0) {
+    if (!arrival && readers.length === 0 && strays.length > 0 && chain.then.length === 0) {
       const stray = strays[0];
       const signalWire = signalTargetOf(stray.toId)!;
       const refused = pulseRefusals.get(`${node.id}:${signalWire.fromProperty}`) ?? pulseRefusals.get(node.id);
@@ -11739,6 +11817,15 @@ function planComponent(
       tickedRunPieces.set(node.id, {
         watch: ticked.watch,
         action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true }
+      });
+    }
+    // EXP-019 slice 2. The arrival run is the ticked half alone, placed always (a body run for what it does to the browser,
+    // its timers, its `this`, as the runtime runs it), and once at load.
+    if (arrival) {
+      tickedRunPieces.set(node.id, {
+        watch: ticked.watch,
+        action: { kind: 'jsfun-run', nodeId: node.id, then: tickedThen, ...(materialize !== undefined ? { materialize } : {}), ticked: true },
+        arrival: { consumes: [...record.consumes, ...chain.consumes], collapses: [...record.logicNodeIds, ...chain.collapses], subscribes: [...record.subscriberIds, ...chain.subscribes] }
       });
     }
     return {
@@ -16556,6 +16643,8 @@ function planComponent(
         if (def === undefined) return false;
         if (expr.viaState !== undefined) return true;
         if (def.mode === 'invoked' && !(invokedScope?.has(expr.nodeId) ?? false)) return false;
+        // EXP-019 slice 2. An arrival run's output outside its own run is its row's, never a call at the read site.
+        if (def.host !== undefined && !(invokedScope?.has(expr.nodeId) ?? false)) return false;
         return def.inputs.every((i) => i.expr === undefined || exprValidIn(i.expr, context, invokedScope));
       }
       /**
@@ -18157,19 +18246,37 @@ function planComponent(
    * re-entered sinks already compiling (nightbook's three toggles share one Set Variable) and refused them as cyclic.
    */
   const feedersCompiled = new Set<string>();
+  const compileUpstreamOf = (node: NodeIR, seen: Set<string>): void => {
+    for (const c of component.connections) {
+      if (c.toId !== node.id || seen.has(c.fromId)) continue;
+      const from = nodeById.get(c.fromId);
+      if (!from) continue;
+      seen.add(from.id);
+      compileUpstreamOf(from, seen);
+      compileFunctionFeedersOf(from);
+    }
+  };
   const compileFunctionFeedersOf = (node: NodeIR): void => {
     if (feedersCompiled.has(node.id)) return;
     feedersCompiled.add(node.id);
     for (const c of component.connections) {
       if (c.toId !== node.id || !c.fromProperty.startsWith('out-')) continue;
       const from = nodeById.get(c.fromId);
-      if (!from || jsNodeKindOf(from.type) !== 'function' || !wiredPorts.has(`${from.id}:run`)) continue;
+      // EXP-019 slice 2: an arrival run's row is read the same way.
+      if (!from || jsNodeKindOf(from.type) !== 'function' || !(wiredPorts.has(`${from.id}:run`) || isArrivalRun(from))) continue;
       // 🔴 Only a run an element's event or a Did Mount sends: a row whose run never attaches is never written
       // (P18-S122-DEADROW, open), and a reader compiled after it would read nothing where HEAD refused it (the Site
       // Builder's Home link, its settings Function run by a refused Query's Fetched).
       const runs = component.connections.filter((w) => w.toId === from.id && w.toProperty === 'run');
       if (!runs.every((w) => w.fromProperty === 'didMount' || rendered.has(w.fromId))) continue;
       compileFunctionFeedersOf(from);
+      /**
+       * EXP-019 slice 2. An arrival run resolves its inputs as it compiles, and an input may read a node whose own read of a
+       * Function's row is not compiled yet: every Function upstream of it first, through any node. 🔴 Measured: members-area's
+       * Announcement date (fed by the Record whose Id "Hold the id" holds) compiled from its Text, before the loop reached
+       * "Hold the id"; the Record's Fetch compiled refused and was kept, and the Record was lost.
+       */
+      if (isArrivalRun(from)) compileUpstreamOf(from, new Set([from.id]));
       compiledOf(from, 'run');
     }
   };
@@ -18222,6 +18329,14 @@ function planComponent(
       appErrorPlanOf(node);
     }
   }
+
+  /**
+   * EXP-019 slice 2. Nothing attaches an arrival run, so it compiles after every other sink (a reader compiles it first,
+   * `compileFunctionFeedersOf`), and is placed with the ticked runs after the attach. 🔴 Not at its place in the loop above:
+   * resolving its inputs there read a Record whose Id a later "Hold the id" run had not yet materialized, and the Record's
+   * refusal was kept (members-area's Announcement and Meeting lost their record, measured by `dispdiff`, s133).
+   */
+  for (const node of component.nodes) if (isArrivalRun(node)) compiledOf(node, 'run');
 
   // Dead wires on JS nodes, before any pass can misread them (EXP-003 §1): a Function's ports
   // register as `in-<name>`/`out-<name>` — nodescope catches the failed connect on any other
@@ -18569,6 +18684,18 @@ function planComponent(
     // P18-S129-FNSUCCESS. A Run-wired Function's Success wires are its Run chain too; the sweep below names those its
     // compile did not take. Unwired, Success is a reactive run's pulse and keeps this pass's sentence.
     if (isRunSuccessWire(connection)) continue;
+    // EXP-019 slice 2. An arrival run's signals and Success are its own chains, compiled with it and placed with it after
+    // this pass; a refused run, or a signal whose chain was refused, keeps this pass's sentence (the pulse refusal below).
+    if (
+      fromNode !== undefined &&
+      (connection.fromProperty === 'success' || connection.fromProperty.startsWith('out-')) &&
+      isArrivalRun(fromNode) &&
+      !jsArrivalRefusals.has(fromNode.id) &&
+      !pulseRefusals.has(`${fromNode.id}:${connection.fromProperty}`) &&
+      !pulseRefusals.has(fromNode.id)
+    ) {
+      continue;
+    }
     consumed.add(connection.key);
     /**
      * 🔴 **The prefix was taken as a fact, and it is a claim about the template.**
@@ -19390,8 +19517,18 @@ function planComponent(
   // which must see its reads and its consumed wires.
   for (const node of component.nodes) {
     const pieces = tickedRunPieces.get(node.id);
-    if (pieces === undefined || dispositions[node.id]?.kind !== 'collapsed' || !plan.file) continue;
+    if (pieces === undefined || !plan.file) continue;
+    // EXP-019 slice 2. An arrival run is its own trigger: nothing attached it, so it is ruled here, unless a pass already has.
+    const arrivalUnruled = pieces.arrival !== undefined && dispositions[node.id] === undefined;
+    if (!arrivalUnruled && dispositions[node.id]?.kind !== 'collapsed') continue;
     const snapped = snapAction(pieces.action, chainSnapshotFor(`ticked:${node.id}`));
+    if (arrivalUnruled && !('defer' in snapped)) {
+      const into = `src/${plan.file.dir}/${plan.file.fileBase}.tsx`;
+      dispositions[node.id] = { kind: 'collapsed', into };
+      for (const key of pieces.arrival!.consumes) consumed.add(key);
+      for (const id of pieces.arrival!.collapses) dispositions[id] = { kind: 'collapsed', into };
+      for (const id of pieces.arrival!.subscribes) boundSubscribers.add(id);
+    }
     if ('defer' in snapped) {
       dispositions[node.id] = { kind: 'deferred', to: 'EXP-003', reason: `the run a ticked input starts: ${snapped.defer}` };
       notes.push(`node ${node.id} (${node.type}) deferred: the run a ticked input starts: ${snapped.defer}`);
@@ -19401,7 +19538,11 @@ function planComponent(
       nodeId: node.id,
       watch: pieces.watch,
       action: snapped as TickedRunPlan['action'],
-      comment: `${node.authoredLabel ?? node.type} — also runs when a ticked input gets a new value, sending its signals and never Done (NDA-017 §2).`
+      ...(pieces.arrival !== undefined ? { atLoad: true as const } : {}),
+      comment:
+        pieces.arrival !== undefined
+          ? `${node.authoredLabel ?? node.type} — runs once at load and again when a ticked input gets a new value; nothing sends its Run (EXP-019 slice 2).`
+          : `${node.authoredLabel ?? node.type} — also runs when a ticked input gets a new value, sending its signals and never Done (NDA-017 §2).`
     });
   }
 

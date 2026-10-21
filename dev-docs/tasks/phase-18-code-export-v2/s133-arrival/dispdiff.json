@@ -1,0 +1,2005 @@
+[
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Settings",
+  "node": "st_save",
+  "type": "JavaScriptFunction",
+  "label": "Hand the document to the browser as a file",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"document\" is fed by CloudFunction2 — its Call is never fired by a translatable trigger"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "Pages/Sign in",
+  "node": "si_redirect",
+  "type": "JavaScriptFunction",
+  "label": "Come back to this app",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/SignIn.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Add a learner",
+  "node": "al_sent_sw",
+  "type": "Switch",
+  "label": "Say the link went",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger al_link.done is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "al_link_btn"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Add a learner",
+  "node": "al_norm",
+  "type": "JavaScriptFunction",
+  "label": "The address as the account holds it, and where the link lands",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/AddALearner.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Add a learner",
+  "node": "al_link",
+  "type": "net.noodl.user.RequestMagicLink",
+  "label": "Ask the backend to email them a link",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "al_link_btn"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Head",
+  "node": "hd_fn",
+  "type": "JavaScriptFunction",
+  "label": "Where they are, what they just did, what is next",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/Head.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Programme scope",
+  "node": "ps_opts",
+  "type": "JavaScriptFunction",
+  "label": "What the select offers — never reads the select",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/ProgrammeScope.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Programme scope",
+  "node": "ps_fn",
+  "type": "JavaScriptFunction",
+  "label": "What is being read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"chosen\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training",
+  "component": "People/Programme scope",
+  "node": "ps_out",
+  "type": "Component Outputs",
+  "label": "What both surfaces read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"entries\" is fed by JavaScriptFunction — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"entries\" is fed by JavaScriptFunction — input \"chosen\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "People/Head",
+  "node": "hd_fn",
+  "type": "JavaScriptFunction",
+  "label": "Where they are, what they just did, what is next",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/Head.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "People/Programme scope",
+  "node": "ps_opts",
+  "type": "JavaScriptFunction",
+  "label": "What the select offers — never reads the select",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/ProgrammeScope.tsx"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "People/Programme scope",
+  "node": "ps_fn",
+  "type": "JavaScriptFunction",
+  "label": "What is being read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"chosen\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "digital-bricks-training-demo",
+  "component": "People/Programme scope",
+  "node": "ps_out",
+  "type": "Component Outputs",
+  "label": "What both surfaces read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"entries\" is fed by JavaScriptFunction — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"entries\" is fed by JavaScriptFunction — input \"chosen\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "UI/DatePicker",
+  "node": "gdpOut",
+  "type": "Component Outputs",
+  "label": "The date",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "gram",
+  "component": "UI/DatePicker",
+  "node": "gdpScript",
+  "type": "JavaScriptFunction",
+  "label": "Draw the field and calendar",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Admin/Tabs",
+  "node": "tbLook",
+  "type": "JavaScriptFunction",
+  "label": "Which tab is this page",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script schedules timers and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/Tabs.tsx"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppAskGather",
+  "type": "JavaScriptFunction",
+  "label": "The message, as one enquiry",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"productId\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"productId\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppAskCall",
+  "type": "CloudFunction2",
+  "label": "sendEnquiry(enquiry)",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"productId\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"productId\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "marketplace",
+  "component": "Pages/Shop/Product",
+  "node": "ppAskSay",
+  "type": "JavaScriptFunction",
+  "label": "Who has it, and how they’ll reach you",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"seller\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"seller\" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)"
+  }
+ },
+ {
+  "project": "members-area",
+  "component": "Members/AnnouncementRow",
+  "node": "when",
+  "type": "JavaScriptFunction",
+  "label": "The date, as a person writes it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/AnnouncementRow.tsx"
+  }
+ },
+ {
+  "project": "members-area",
+  "component": "Members/MeetingRow",
+  "node": "whenLabel",
+  "type": "JavaScriptFunction",
+  "label": "The date, as a person writes it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MeetingRow.tsx"
+  }
+ },
+ {
+  "project": "members-area",
+  "component": "Members/MemberRow",
+  "node": "describe",
+  "type": "JavaScriptFunction",
+  "label": "Say what they are, and since when, in English",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MemberRow.tsx"
+  }
+ },
+ {
+  "project": "members-area",
+  "component": "Pages/Announcement",
+  "node": "when-2",
+  "type": "JavaScriptFunction",
+  "label": "The date, as a person writes it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"postedAt\" is fed by DbModel2 — its Fetch is never fired by a translatable trigger"
+  }
+ },
+ {
+  "project": "members-area",
+  "component": "Pages/Meeting",
+  "node": "whenLabel-2",
+  "type": "JavaScriptFunction",
+  "label": "When and where, as a person writes it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"when\" is fed by DbModel2 — its Fetch is never fired by a translatable trigger"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Coming/Date picker",
+  "node": "cdpOut",
+  "type": "Component Outputs",
+  "label": "The date",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Coming/Date picker",
+  "node": "cdpScript",
+  "type": "JavaScriptFunction",
+  "label": "Draw the field and calendar",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Coming",
+  "node": "cmNext",
+  "type": "JavaScriptFunction",
+  "label": "The next fourteen days",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Coming.tsx"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Tonight",
+  "node": "tnDateNow",
+  "type": "JavaScriptFunction",
+  "label": "Tonight, in words",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Tonight.tsx"
+  }
+ },
+ {
+  "project": "nightbook",
+  "component": "Pages/Tonight",
+  "node": "tnDateText",
+  "type": "JavaScriptFunction",
+  "label": "Day and month",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"d\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"month\" is fed by Translation — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Pages/Week",
+  "node": "twSheetRow",
+  "type": "JavaScriptFunction",
+  "label": "What the block sheet is showing",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"blocks\" is fed by /Logic/Todo tasks — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Pages/Week",
+  "node": "twEditRow",
+  "type": "JavaScriptFunction",
+  "label": "What the project editor is showing",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by /Logic/Card rows — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Pages/Week",
+  "node": "twIsNewBlock",
+  "type": "Condition",
+  "label": "Is the sheet making a new block?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"blocks\" is fed by /Logic/Todo tasks — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Pages/Week",
+  "node": "twIsNewProject",
+  "type": "Condition",
+  "label": "Is the editor making a new project?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by /Logic/Card rows — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Pages/Week",
+  "node": "twIsNewSettings",
+  "type": "Condition",
+  "label": "Is this the first time the settings are saved?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"settings\" is fed by /Logic/Planning data — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Pages/Week",
+  "node": "twSettings",
+  "type": "JavaScriptFunction",
+  "label": "Your settings, unpacked",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"settings\" is fed by /Logic/Planning data — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Block sheet",
+  "node": "bsDone",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Done",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger bsOpened.out-doneOff is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Block sheet",
+  "node": "bsOpened",
+  "type": "JavaScriptFunction",
+  "label": "Clear the boxes on close; tick Done to match the block",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/BlockSheet.tsx"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Date picker",
+  "node": "wdpOut",
+  "type": "Component Outputs",
+  "label": "The date",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Date picker",
+  "node": "wdpScript",
+  "type": "JavaScriptFunction",
+  "label": "Draw the field and calendar",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Money balance",
+  "node": "mbClosing",
+  "type": "JavaScriptFunction",
+  "label": "Clear the box when it closes",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneyBalance.tsx"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Money editor",
+  "node": "edMonthEnd",
+  "type": "net.noodl.controls.checkbox",
+  "label": "On the last day of the month",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger edClosing.out-monthEndOff is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Money editor",
+  "node": "edFromHours",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Fill the amount from the hours",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger edClosing.out-fromHoursOff is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Money editor",
+  "node": "edShape",
+  "type": "JavaScriptFunction",
+  "label": "Which fields this item needs",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"repeat\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Money editor",
+  "node": "edClosing",
+  "type": "JavaScriptFunction",
+  "label": "Clear the boxes on close; tick the two boxes to match the item",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneyEditor.tsx"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Money editor",
+  "node": "edReset",
+  "type": "JavaScriptFunction",
+  "label": "Put the boxes back when the item changes",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneyEditor.tsx"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Money repeat",
+  "node": "rpReset",
+  "type": "JavaScriptFunction",
+  "label": "Put the boxes back when the repeat changes",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneyRepeat.tsx"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Money repeat",
+  "node": "rpClosing",
+  "type": "JavaScriptFunction",
+  "label": "Clear the boxes when the pane closes",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneyRepeat.tsx"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Project detail",
+  "node": "pdReset",
+  "type": "JavaScriptFunction",
+  "label": "Put the hours back when the project changes",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/ProjectDetail.tsx"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Project editor",
+  "node": "peShape",
+  "type": "JavaScriptFunction",
+  "label": "Which billing fields this project needs, and what saving does about its bill",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"kind\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Project editor",
+  "node": "peStop",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Fixes only",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger peOpened.out-moveStopOff is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Project editor",
+  "node": "peOpened",
+  "type": "JavaScriptFunction",
+  "label": "Clear the boxes on close; tick Fixes only to match the project",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/ProjectEditor.tsx"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Settings sheet",
+  "node": "stDay1",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Mon",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day1Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Settings sheet",
+  "node": "stDay2",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Tue",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day2Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Settings sheet",
+  "node": "stDay3",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Wed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day3Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Settings sheet",
+  "node": "stDay4",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Thu",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day4Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Settings sheet",
+  "node": "stDay5",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Fri",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day5Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Settings sheet",
+  "node": "stDay6",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Sat",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day6Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Settings sheet",
+  "node": "stDay0",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Sun",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day0Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Settings sheet",
+  "node": "stOpened",
+  "type": "JavaScriptFunction",
+  "label": "Clear the boxes on close; tick the days to match",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/SettingsSheet.tsx"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Pages/Week",
+  "node": "twSheetRow",
+  "type": "JavaScriptFunction",
+  "label": "What the block sheet is showing",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"blocks\" is fed by /Logic/Todo tasks — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Pages/Week",
+  "node": "twEditRow",
+  "type": "JavaScriptFunction",
+  "label": "What the project editor is showing",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by /Logic/Card rows — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Pages/Week",
+  "node": "twIsNewBlock",
+  "type": "Condition",
+  "label": "Is the sheet making a new block?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"blocks\" is fed by /Logic/Todo tasks — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Pages/Week",
+  "node": "twIsNewProject",
+  "type": "Condition",
+  "label": "Is the editor making a new project?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"id\" is fed by /Logic/Card rows — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Pages/Week",
+  "node": "twIsNewSettings",
+  "type": "Condition",
+  "label": "Is this the first time the settings are saved?",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"settings\" is fed by /Logic/Planning data — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Pages/Week",
+  "node": "twSettings",
+  "type": "JavaScriptFunction",
+  "label": "Your settings, unpacked",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"settings\" is fed by /Logic/Planning data — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Block sheet",
+  "node": "bsDone",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Done",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger bsOpened.out-doneOff is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Block sheet",
+  "node": "bsOpened",
+  "type": "JavaScriptFunction",
+  "label": "Clear the boxes on close; tick Done to match the block",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/BlockSheet.tsx"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Date picker",
+  "node": "wdpOut",
+  "type": "Component Outputs",
+  "label": "The date",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Date picker",
+  "node": "wdpScript",
+  "type": "JavaScriptFunction",
+  "label": "Draw the field and calendar",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Money balance",
+  "node": "mbClosing",
+  "type": "JavaScriptFunction",
+  "label": "Clear the box when it closes",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneyBalance.tsx"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Money editor",
+  "node": "edMonthEnd",
+  "type": "net.noodl.controls.checkbox",
+  "label": "On the last day of the month",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger edClosing.out-monthEndOff is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Money editor",
+  "node": "edFromHours",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Fill the amount from the hours",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger edClosing.out-fromHoursOff is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Money editor",
+  "node": "edShape",
+  "type": "JavaScriptFunction",
+  "label": "Which fields this item needs",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"repeat\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Money editor",
+  "node": "edClosing",
+  "type": "JavaScriptFunction",
+  "label": "Clear the boxes on close; tick the two boxes to match the item",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneyEditor.tsx"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Money editor",
+  "node": "edReset",
+  "type": "JavaScriptFunction",
+  "label": "Put the boxes back when the item changes",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneyEditor.tsx"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Money repeat",
+  "node": "rpReset",
+  "type": "JavaScriptFunction",
+  "label": "Put the boxes back when the repeat changes",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneyRepeat.tsx"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Money repeat",
+  "node": "rpClosing",
+  "type": "JavaScriptFunction",
+  "label": "Clear the boxes when the pane closes",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneyRepeat.tsx"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Project detail",
+  "node": "pdReset",
+  "type": "JavaScriptFunction",
+  "label": "Put the hours back when the project changes",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/ProjectDetail.tsx"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Project editor",
+  "node": "peShape",
+  "type": "JavaScriptFunction",
+  "label": "Which billing fields this project needs, and what saving does about its bill",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"kind\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Project editor",
+  "node": "peStop",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Fixes only",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger peOpened.out-moveStopOff is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Project editor",
+  "node": "peOpened",
+  "type": "JavaScriptFunction",
+  "label": "Clear the boxes on close; tick Fixes only to match the project",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/ProjectEditor.tsx"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Settings sheet",
+  "node": "stDay1",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Mon",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day1Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Settings sheet",
+  "node": "stDay2",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Tue",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day2Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Settings sheet",
+  "node": "stDay3",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Wed",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day3Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Settings sheet",
+  "node": "stDay4",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Thu",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day4Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Settings sheet",
+  "node": "stDay5",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Fri",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day5Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Settings sheet",
+  "node": "stDay6",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Sat",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day6Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Settings sheet",
+  "node": "stDay0",
+  "type": "net.noodl.controls.checkbox",
+  "label": "Sun",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger stOpened.out-day0Off is not a rendered element event or a receiver"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Settings sheet",
+  "node": "stOpened",
+  "type": "JavaScriptFunction",
+  "label": "Clear the boxes on close; tick the days to match",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/SettingsSheet.tsx"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Commands/Set deadline",
+  "node": "SetdeadlinOut",
+  "type": "Component Outputs",
+  "label": "Done",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Commands/Set deadline",
+  "node": "SetdeadlinSay",
+  "type": "JavaScriptFunction",
+  "label": "Say a refusal while its record is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Commands/Set routine dates",
+  "node": "SetroutineOut",
+  "type": "Component Outputs",
+  "label": "Done",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Commands/Set routine dates",
+  "node": "SetroutineSay",
+  "type": "JavaScriptFunction",
+  "label": "Say a refusal while its record is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Commands/Set schedule",
+  "node": "SetschedulOut",
+  "type": "Component Outputs",
+  "label": "Done",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Commands/Set schedule",
+  "node": "SetschedulSay",
+  "type": "JavaScriptFunction",
+  "label": "Say a refusal while its record is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Pages/Todo",
+  "node": "tdClock",
+  "type": "JavaScriptFunction",
+  "label": "A minute clock, and a wake when the app comes back into view",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Todo.tsx"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Pages/Todo",
+  "node": "tdFlagRead",
+  "type": "JavaScriptFunction",
+  "label": "What this device chose",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Todo.tsx"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Pages/Todo",
+  "node": "tdFlagLoad",
+  "type": "Set Variable",
+  "label": "Put the choice back",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Todo.tsx"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Pages/Todo",
+  "node": "tdFlagKeep",
+  "type": "JavaScriptFunction",
+  "label": "Remember the choice on this device",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Todo.tsx"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Projects/Money sheet",
+  "node": "msLook",
+  "type": "JavaScriptFunction",
+  "label": "What the popup shows",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneySheet.tsx"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Projects/Project list",
+  "node": "plDrag",
+  "type": "JavaScriptFunction",
+  "label": "Drag a row by its grip to move it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"host\" is fed by Group — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Projects/View",
+  "node": "pvOrderRead",
+  "type": "JavaScriptFunction",
+  "label": "What this device chose",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/View.tsx"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Todo/Date picker",
+  "node": "dpOut",
+  "type": "Component Outputs",
+  "label": "The date",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Todo/Date picker",
+  "node": "dpScript",
+  "type": "JavaScriptFunction",
+  "label": "Draw the field and calendar",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Todo/Next actions",
+  "node": "naDrag",
+  "type": "JavaScriptFunction",
+  "label": "Drag a row by its grip to move it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"host\" is fed by Group — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Todo/Task list",
+  "node": "tlDrag",
+  "type": "JavaScriptFunction",
+  "label": "Drag a row by its grip to move it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"host\" is fed by Group — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Commands/Set deadline",
+  "node": "SetdeadlinOut",
+  "type": "Component Outputs",
+  "label": "Done",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Commands/Set deadline",
+  "node": "SetdeadlinSay",
+  "type": "JavaScriptFunction",
+  "label": "Say a refusal while its record is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Commands/Set routine dates",
+  "node": "SetroutineOut",
+  "type": "Component Outputs",
+  "label": "Done",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Commands/Set routine dates",
+  "node": "SetroutineSay",
+  "type": "JavaScriptFunction",
+  "label": "Say a refusal while its record is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Commands/Set schedule",
+  "node": "SetschedulOut",
+  "type": "Component Outputs",
+  "label": "Done",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by JavaScriptFunction — input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Commands/Set schedule",
+  "node": "SetschedulSay",
+  "type": "JavaScriptFunction",
+  "label": "Say a refusal while its record is open",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"verdict\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Pages/Todo",
+  "node": "tdClock",
+  "type": "JavaScriptFunction",
+  "label": "A minute clock, and a wake when the app comes back into view",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Todo.tsx"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Pages/Todo",
+  "node": "tdFlagRead",
+  "type": "JavaScriptFunction",
+  "label": "What this device chose",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Todo.tsx"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Pages/Todo",
+  "node": "tdFlagLoad",
+  "type": "Set Variable",
+  "label": "Put the choice back",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Todo.tsx"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Pages/Todo",
+  "node": "tdFlagKeep",
+  "type": "JavaScriptFunction",
+  "label": "Remember the choice on this device",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/pages/Todo.tsx"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Projects/Money sheet",
+  "node": "msLook",
+  "type": "JavaScriptFunction",
+  "label": "What the popup shows",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/MoneySheet.tsx"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Projects/Project list",
+  "node": "plDrag",
+  "type": "JavaScriptFunction",
+  "label": "Drag a row by its grip to move it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"host\" is fed by Group — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Projects/View",
+  "node": "pvOrderRead",
+  "type": "JavaScriptFunction",
+  "label": "What this device chose",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/View.tsx"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Todo/Date picker",
+  "node": "dpOut",
+  "type": "Component Outputs",
+  "label": "The date",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"Value\" is fed by JavaScriptFunction — input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Todo/Date picker",
+  "node": "dpScript",
+  "type": "JavaScriptFunction",
+  "label": "Draw the field and calendar",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"mounted\" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Todo/Next actions",
+  "node": "naDrag",
+  "type": "JavaScriptFunction",
+  "label": "Drag a row by its grip to move it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"host\" is fed by Group — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Todo/Task list",
+  "node": "tlDrag",
+  "type": "JavaScriptFunction",
+  "label": "Drag a row by its grip to move it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "input \"host\" is fed by Group — no statically known source in the emit vocabulary"
+  }
+ }
+]

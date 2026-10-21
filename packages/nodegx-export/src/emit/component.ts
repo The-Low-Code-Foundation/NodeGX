@@ -7804,12 +7804,77 @@ export function emitComponent(
   // effect above has just stored arrives at load as the runtime's arrives at creation. After the mount effects above.
   for (const ticked of plan.tickedRuns) {
     const deps = [...new Set(ticked.watch.flatMap(effectDeps))].join(', ');
+    if (ticked.atLoad === true) {
+      /*
+       * EXP-019 slice 2. Nothing sends its Run: the runtime runs it once at load, after its creation's update has delivered
+       * what arrives with it, then once per arrival. Here a value that arrived runs it at once. With nothing arrived yet the
+       * load run waits one task, for the mount effects above this component (a parent's Variable seed, measured on the
+       * Arrival Desk: run at once, a placed Tally read "Ann 2" where the runtime reads "Ann 1"); an arrival in that time is
+       * the load run instead. The ref keeps StrictMode's second mount from a second run.
+       */
+      const names = pulseNamesOf(jsFunByNode[ticked.nodeId]!);
+      const loaded = dedupeLocal(`${names.run}Loaded`);
+      const run = dedupeLocal(`${names.run}Now`);
+      const timer = dedupeLocal(`${names.run}AtLoad`);
+      body.push(
+        `  // ${ticked.comment}`,
+        `  const ${loaded} = useRef(false);`,
+        '  useEffect(() => {',
+        `    const ${run} = () => {`,
+        `      ${loaded}.current = true;`,
+        ...effectBody([ticked.action], 6),
+        '    };',
+        `    if (tickedArrival(${tickedRecordArgs(ticked.nodeId)})) {`,
+        `      ${run}();`,
+        '      return;',
+        '    }',
+        `    if (${loaded}.current) return;`,
+        `    const ${timer} = setTimeout(() => {`,
+        `      if (!${loaded}.current) ${run}();`,
+        '    });',
+        `    return () => clearTimeout(${timer});`,
+        `  }, [${deps}]);`,
+        ''
+      );
+      continue;
+    }
     body.push(
       `  // ${ticked.comment}`,
       '  useEffect(() => {',
       `    if (!tickedArrival(${tickedRecordArgs(ticked.nodeId)})) return;`,
       ...effectBody([ticked.action], 4),
       `  }, [${deps}]);`,
+      ''
+    );
+  }
+  /*
+   * EXP-019 (session 133). A kept Function whose body may call back after its run has returned (a timer, a listener:
+   * `JsFunctionPlan.late`): what it writes then lands in its row, and a signal it sends then runs that signal's chain, as the
+   * running app's node delivers them when they happen. The run's own row write and pulse arms, found where the run is
+   * printed; never Done or Success (each is sent once, after the run). Set at every render, so the chain reads this render.
+   */
+  for (const id of pulsedRunIds) {
+    const def = jsFunByNode[id]!;
+    if (def.late !== true) continue;
+    let pulses: Extract<HandlerAction, { kind: 'jsfun-pulses' }> | undefined;
+    let materialize: string | undefined;
+    const visit = (value: unknown): void => {
+      if (value === null || typeof value !== 'object') return;
+      if (Array.isArray(value)) return value.forEach(visit);
+      const v = value as { kind?: unknown; nodeId?: unknown; materialize?: unknown };
+      if (v.nodeId === id && v.kind === 'jsfun-pulses' && pulses === undefined) pulses = value as Extract<HandlerAction, { kind: 'jsfun-pulses' }>;
+      if (v.nodeId === id && v.kind === 'jsfun-run' && typeof v.materialize === 'string' && materialize === undefined) materialize = v.materialize;
+      Object.values(value).forEach(visit);
+    };
+    visit(allActions);
+    if (pulses === undefined && materialize === undefined) continue;
+    const names = pulseNamesOf(def);
+    body.push(
+      `  // ${commentSafe(nodeById.get(id)?.authoredLabel ?? def.fnName)} — what its body writes or sends after a run has returned (a timer, a listener) arrives as the running app's does.`,
+      `  ${names.node}.late = (${names.run}) => {`,
+      ...(materialize !== undefined ? [`    ${stateSetterOf(materialize)}({ ...${names.run}.outputs });`] : []),
+      ...(pulses !== undefined ? [`    ${actionCode(pulses, 4)}`] : []),
+      '  };',
       ''
     );
   }
