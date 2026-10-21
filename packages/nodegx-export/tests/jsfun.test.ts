@@ -4,7 +4,7 @@ import * as path from 'path';
 import { Catalog, loadCatalog } from '../src/catalog';
 import { emitApp } from '../src/emit/emitApp';
 import { parseProject } from '../src/parse/parseProject';
-import { jsPurityDefer } from '../src/analyze/jsfun';
+import { jsHostTraitsOf, jsPurityDefer } from '../src/analyze/jsfun';
 import { ComponentIR, ExportIR, NodeIR, ParamValue } from '../src/ir/types';
 
 const FIXTURE = path.join(__dirname, 'fixtures', 'cheer');
@@ -94,21 +94,35 @@ describe('the purity gate over bodies (EXP-003 §3.1–§3.4)', () => {
     expect(jsPurityDefer('function', 'Component.UpdateCondition();')).toContain('controlled-state slice');
   });
 
-  test('`this` persists across runs — cross-run state defers', () => {
-    expect(jsPurityDefer('function', 'this.count = (this.count || 0) + 1;')).toContain('cross-run state');
+  // EXP-019 (s132, Richard's ruling of 2026-10-21): these six are HOST TRAITS for a Function body now — it travels as
+  // written and runs once per Run with a kept node (`the-script-travels-as-written.test.ts`). They stay gates for an
+  // Expression, which runs wherever it is read.
+  test.each([
+    ['`this`', 'this.count = (this.count || 0) + 1;', 'keeps state on `this` across runs'],
+    ['new Date()', 'Outputs.now = new Date().toISOString();', 'reads the clock (Date)'],
+    ['Math.random', 'Outputs.n = Math.random();', 'draws randomness (Math.random)'],
+    ['fetch', "fetch('/api');", 'reaches the network'],
+    ['setTimeout', 'setTimeout(() => {}, 100);', 'schedules timers'],
+    ['window', 'Outputs.w = window.innerWidth;', 'touches the browser environment']
+  ])('%s is a host trait of a Function body, not a defer', (_label, body, trait) => {
+    expect(jsPurityDefer('function', body)).toBeNull();
+    expect(jsHostTraitsOf(body)).toEqual([trait]);
   });
 
   test.each([
-    ['new Date()', 'Outputs.now = new Date().toISOString();', 'clock'],
-    ['Math.random', 'Outputs.n = Math.random();', 'randomness'],
-    ['fetch', "fetch('/api');", 'network'],
-    ['setTimeout', 'setTimeout(() => {}, 100);', 'timers'],
-    ['window', 'Outputs.w = window.innerWidth;', 'browser environment'],
+    ['new Date()', 'Date.now()', 'clock'],
+    ['random', 'random() * 2', 'randomness']
+  ])('%s is still a named defer for an Expression', (_label, body, fragment) => {
+    expect(jsPurityDefer('expression', body)).toContain(fragment);
+  });
+
+  test.each([
     ['dynamic import', "import('lodash');", 'dynamically'],
     ['async/await', 'await Promise.resolve();', 'asynchronous'],
     ['arguments', 'Outputs.n = arguments.length;', 'arguments']
-  ])('%s is a named nondeterminism/environment defer', (_label, body, fragment) => {
+  ])('%s is a named defer (not a host trait: EXP-019 slice 1b for async; the wrapper\'s own `arguments`; a module question)', (_label, body, fragment) => {
     expect(jsPurityDefer('function', body)).toContain(fragment);
+    expect(jsHostTraitsOf(body)).toEqual([]);
   });
 
   test('a marker inside a comment or a quoted string does not defer', () => {

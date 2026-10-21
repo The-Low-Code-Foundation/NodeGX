@@ -633,6 +633,8 @@ export function emitComponent(
   const referencedJsIds = new Set<string>();
   /** EXP-011 §86. Runs whose signals have chains: each keeps a `functionNode` ref and imports `src/lib/functionRun.ts`. */
   const pulsedRunIds = new Set<string>();
+  /** EXP-019. A run whose body carries a host trait keeps a node too: it runs once per Run, never at a read site. */
+  const runIsHosted = (nodeId: string): boolean => (jsFunByNode[nodeId]?.host?.length ?? 0) > 0;
   /** P18-S119-TICKEDRUN. Functions a ticked input also runs: their Runs record what they read (`tickedArrival`). */
   const tickedRunIds = new Set(plan.tickedRuns.map((t) => t.nodeId));
   /** P18-S119-TICKEDRUN. `held, [a, b]`: the node's held values and its ticked inputs read fresh, in input order. */
@@ -1037,7 +1039,8 @@ export function emitComponent(
       action.then.forEach(collectActionUse);
       // EXP-011 §86. A run that sends pulses keeps the node's last values and imports the run helper; so does a Function's
       // materialized run (P18-S121-FRESHOUTPUTS: the plan marks both `pulsed`).
-      if (runIsPulsed(action) || (action.materialize !== undefined && jsFunByNode[action.nodeId]?.pulsed === true)) pulsedRunIds.add(action.nodeId);
+      // EXP-019: and a run whose body carries a host trait.
+      if (runIsPulsed(action) || runIsHosted(action.nodeId) || (action.materialize !== undefined && jsFunByNode[action.nodeId]?.pulsed === true)) pulsedRunIds.add(action.nodeId);
       // Same as the expression side: the wrapper's Noodl.Variables facade earns the imports.
       for (const name of jsFunByNode[action.nodeId]?.variables ?? []) {
         if (variableByName.has(name)) usedVariableNames.add(name);
@@ -2633,8 +2636,9 @@ export function emitComponent(
           // at their sinks, so the run itself needs no statement — unless it materializes its
           // output record (CONTROLLED-STATE §4f), which is one setter statement before the chain.
           // P18-S129-FNSUCCESS: or a Run of a Function a ticked input also runs, which records what it read first.
+          // EXP-019: or a run whose body carries a host trait, which is one `runFunction` statement before the chain.
           a.kind === 'jsfun-run'
-          ? a.materialize !== undefined || runIsPulsed(a) || (a.ticked !== true && tickedRunIds.has(a.nodeId))
+          ? a.materialize !== undefined || runIsPulsed(a) || runIsHosted(a.nodeId) || (a.ticked !== true && tickedRunIds.has(a.nodeId))
             ? [{ ...a, then: [] }, ...expandActions(a.then)]
             : expandActions(a.then)
           : // P18-S116-QUERYFETCH. A Fetch into a query the export does not keep (nothing it renders reads the rows) asks
@@ -6687,7 +6691,15 @@ export function emitComponent(
       const seedRecord = `{${seeds.length > 0 ? ` ${seeds.join(', ')} ` : ''}}`;
       // EXP-011 §86. A run whose signals have chains hands the body `runFunction`'s recording record instead.
       const outputsParam = def.pulsed ? `, Outputs: ${outputsType} = ${seedRecord}` : '';
-      lines.push(`function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}${outputsParam}): ${outputsType} {`);
+      /**
+       * EXP-019. A body that keeps state on `this` runs bound to the node's `self`, the object `runFunction` hands it from
+       * the kept node — one per node, kept across runs, as the runtime's `_this`. Only such a body takes the parameter
+       * and the `.call` form: every other wrapper prints as it did.
+       */
+      const keepsThis = def.host !== undefined && def.host.some((t) => t.startsWith('keeps state on'));
+      const selfParam = keepsThis ? ', self: Record<string, any> = {}' : '';
+      if (keepsThis) lines.push(`// It keeps state on \`this\` across runs: the body runs bound to the node's own \`self\`.`);
+      lines.push(`function ${def.fnName}(${hasInputs ? INPUTS_PARAM : 'Inputs'}: ${inputsType}${outputsParam}${selfParam}): ${outputsType} {`);
       if (hasInputs) lines.push(`  const Inputs = ${scopeCast(INPUTS_PARAM)};`);
       if (!def.pulsed) lines.push(`  const Outputs: ${outputsType} = ${seedRecord};`);
       lines.push('  try {');
@@ -6700,9 +6712,9 @@ export function emitComponent(
         const rows = def.scripts.map((u) => `${fieldKey(u.alias)}: ${PROJECT_SCRIPTS_SYMBOL}.load(${JSON.stringify(u.path)})`);
         lines.push(`    const Scripts = { ${rows.join(', ')} };`);
       }
-      lines.push('    (() => {');
+      lines.push(keepsThis ? '    (function (this: Record<string, any>) {' : '    (() => {');
       lines.push(...def.body.split('\n'));
-      lines.push('    })();');
+      lines.push(keepsThis ? '    }).call(self);' : '    })();');
       lines.push('  } catch (e) {');
       lines.push(`    console.error('Function node ${def.fnName} threw:', e);`);
       lines.push('  }');

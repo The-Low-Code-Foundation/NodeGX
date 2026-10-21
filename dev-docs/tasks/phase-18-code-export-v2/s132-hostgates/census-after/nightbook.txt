@@ -1,0 +1,716 @@
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/nightbook as it is on disk — last saved 2026-09-28 07:54:37.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Nightbook
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **108 files** — 11 pages and 26 components, plus the app shell, styles and build config
+- **59 files copied across unchanged** from your kits — scripts, fonts and icon sets, byte for byte
+- **6 of the 37** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (1522)
+
+🔴 **This export would be missing a pathway, not a node: "Face: prev" (Function) in `Pages/Me`; "Face: next" (Function) in `Pages/Me`; "Face: roll" (Function) in `Pages/Me`; "Face: undo" (Function) in `Pages/Me`; "Face: wear" (Function) in `Pages/Me`; "Hair: hair-brown" (Function) in `Pages/Me`; "Hair: hair-blonde" (Function) in `Pages/Me`; "Hair: hair-auburn" (Function) in `Pages/Me`; "Hair: hair-black" (Function) in `Pages/Me`; "Hair: hair-pink" (Function) in `Pages/Me`; "Hair: hair-blue" (Function) in `Pages/Me`; "Hair: hair-green" (Function) in `Pages/Me`; "Hair: hair-purple" (Function) in `Pages/Me`; "Hair: hair-orange" (Function) in `Pages/Me`; "Hair: hair-silver" (Function) in `Pages/Me`; "Hair: hair-red" (Function) in `Pages/Me`; "Hair: hair-gold" (Function) in `Pages/Me`; "Send the evening, one call at a time" (Function) in `Data/Tonight`; "Inputs" (Component Inputs) in `Data/Recent`; "Inputs" (Component Inputs) in `Data/Tonight`; "The new code, checked" (Function) in `Pages/Forgot`; "Check it all, then the three verifiers" (Function) in `Pages/Setup`; "Inputs" (Component Inputs) in `Data/Day`; "Inputs" (Component Inputs) in `Data/Keep`; "Inputs" (Component Inputs) in `Data/Month`; "Better, same or harder, and what happened" (Function) in `Pages/Envelope`; "Her grown-ups" (Function) in `Pages/Me`; "Her code now, then the new one" (Function) in `Pages/Me`; "Her code now, then the new question" (Function) in `Pages/Me`; "Bringing it back" (Set Variable) in `Pages/Me`; "What to keep from the picked thing" (Function) in `Pages/Tonight`; "Is it her code?" (Function) in `Pages/Unlock`; "Inputs" (Component Inputs) in `Data/Envelopes`; "Inputs" (Component Inputs) in `Data/Profile`; "Is it all there?" (Function) in `Pages/Coming`; "Her language, in her profile" (Function) in `Pages/Me`; "Theme: dusk" (Function) in `Pages/Me`; "Theme: sea" (Function) in `Pages/Me`; "Theme: berry" (Function) in `Pages/Me`; "Theme: forest" (Function) in `Pages/Me`; "Theme: cocoa" (Function) in `Pages/Me`; "Pages: -1" (Function) in `Pages/Me`; "Pages: 0" (Function) in `Pages/Me`; "Pages: 1" (Function) in `Pages/Me`; "This background" (Function) in `Pages/Tonight`; "Keep the note (the backend decides if that day may take one)" (Cloud Function) in `Pages/Book`; "Back to where she was" (Function) in `Pages/Help`; "Is the book open?" (Function) in `Data/Gate`; "That one" (Function) in `Pages/Collection`; "France" (Function) in `Pages/Help`; "The UK" (Function) in `Pages/Help`. Without them, "That day’s page" (Query Records), "That day’s note" (Query Records), "Her envelopes" (Query Records), "To the code" (Navigate), "Everything she kept" (Query Records), "Her pages this month" (Query Records), "Her late notes this month" (Query Records), "This book’s profile" (Query Records), "Her pages this week" (Query Records), "Tonight’s page, if there is one" (Query Records), "Keep tonight’s page (the backend decides which day that is)" (Cloud Function), "Take it out" (Cloud Function), "Seal it (the backend decides if it may)" (Cloud Function), "Keep what happened (the backend checks its day has come)" (Cloud Function), "Keep the new code" (Cloud Function), "To tonight’s page" (Navigate), "Keep where she lives" (Cloud Function), "Tonight" (Navigate), "The code" (Navigate), "Keep what changed in her profile" (Cloud Function), "Keep the new code or question" (Cloud Function), "Keep her grown-ups" (Cloud Function), "Her code, to open the book that came back" (Navigate), "Start the book (the backend makes it once)" (Cloud Function), "To tonight’s page" (Navigate), "Keep it in her collection" (Cloud Function), "Keep its colour in her collection" (Cloud Function), "To tonight’s page" (Navigate) never run. Replace them or wait for a release that translates them.**
+
+**357 nodes the export has no rule for, and 145 more left out only because they fire them.**
+
+- "Tonight’s decorated page" (nightbook-kit.Page) in `Pages/Tonight` — the Function that sends its "go" signal is not exported: input "text" is fed by Translation — no statically known source in the emit vocabulary
+  …and 13 nodes are left out only because this one fires them: "What the picked thing wears" (Function), "Its letters" (Set Variable), "Its colour" (Set Variable), "Its effect" (Set Variable), "Words from the list?" (Function), "Asked about tonight" (Set Variable), "Open it" (Set Variable), "tonight.typeHere" (Translation), "tonight.pageLabel" (Translation), "tonight.typeLabel" (Translation), "tonight.removeLabel" (Translation), "tonight.turnLabel" (Translation), "tonight.resizeLabel" (Translation)
+- "Face: prev" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Face: next" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Face: roll" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Face: undo" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Face: wear" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-brown" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-blonde" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-auburn" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-black" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-pink" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-blue" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-green" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-purple" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-orange" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-silver" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-red" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Hair: hair-gold" (Function) in `Pages/Me` — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+  …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Send the evening, one call at a time" (Function) in `Data/Tonight` — the export has no rule for this node yet
+  …and 6 nodes are left out only because this one fires them: "Inputs" (Component Inputs), "Outputs" (Component Outputs), "Its items and background" (Function), "Keep tonight’s page (the backend decides which day that is)" (Cloud Function), "It came back kept" (Function), "It came back refused" (Function)
+- "Inputs" (Component Inputs) in `Data/Recent` — the export has no rule for this node yet
+  …and 5 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "The last seven days" (Function), "Her pages this week" (Query Records), "warmup.fallback" (Translation), "A line of her words" (Function)
+- "Inputs" (Component Inputs) in `Data/Tonight` — the export has no rule for this node yet
+  …and 5 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "What day is it?" (Function), "Tonight’s page, if there is one" (Query Records), "Its items and background" (Function), "Send the evening, one call at a time" (Function)
+- "The new code, checked" (Function) in `Pages/Forgot` — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+  …and 5 nodes are left out only because this one fires them: "Keep the new code" (Cloud Function), "Say it" (Set Variable), "Say it was not kept" (Set Variable), "The book is open" (Set Variable), "To tonight’s page" (Navigate)
+- "Check it all, then the three verifiers" (Function) in `Pages/Setup` — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+  …and 5 nodes are left out only because this one fires them: "Start the book (the backend makes it once)" (Cloud Function), "Say what is missing" (Set Variable), "Say it did not start" (Set Variable), "The book is open" (Set Variable), "To tonight’s page" (Navigate)
+- "Inputs" (Component Inputs) in `Data/Day` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "That day’s page" (Query Records), "That day’s note" (Query Records), "What that day is" (Function)
+- "Inputs" (Component Inputs) in `Data/Keep` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "Everything she kept" (Query Records), "collection.sample" (Translation), "Each thing, with its picture" (Function)
+- "Inputs" (Component Inputs) in `Data/Month` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Which days" (Function), "Her pages this month" (Query Records), "Her late notes this month" (Query Records), "The month, day by day" (Function)
+- "Better, same or harder, and what happened" (Function) in `Pages/Envelope` — input "now" is fed by /UI/Field — no statically known source in the emit vocabulary
+  …and 4 nodes are left out only because this one fires them: "Keep what happened (the backend checks its day has come)" (Cloud Function), "Say it" (Set Variable), "Say it was not kept" (Set Variable), "Kept" (Function)
+- "Her grown-ups" (Function) in `Pages/Me` — input "text" is fed by /UI/Field — no statically known source in the emit vocabulary
+  …and 4 nodes are left out only because this one fires them: "One more change" (Function), "The bar reads it again" (Set Variable), "Kept" (Set Variable), "Keep her grown-ups" (Cloud Function)
+- "Her code now, then the new one" (Function) in `Pages/Me` — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+  …and 4 nodes are left out only because this one fires them: "Keep the new code or question" (Cloud Function), "What was kept" (Function), "Say it" (Set Variable), "Say it" (Set Variable)
+- "Her code now, then the new question" (Function) in `Pages/Me` — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+  …and 4 nodes are left out only because this one fires them: "Keep the new code or question" (Cloud Function), "What was kept" (Function), "Say it" (Set Variable), "Say it" (Set Variable)
+- "Bringing it back" (Set Variable) in `Pages/Me` — its trigger, "One row per copy" (meCopyEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  …and 4 nodes are left out only because this one fires them: "Bring that copy back" (Function), "Say it" (Set Variable), "Closed, to open again" (Set Variable), "Her code, to open the book that came back" (Navigate)
+- "Use it tonight" (Function) in `Pages/Tonight` — input "kind" is fed by For Each — it reads the repeater tnMineEach's relayed row value "kind" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+  …and 4 nodes are left out only because this one fires them: "That colour" (Set Variable), "Those letters" (Set Variable), "That colour" (Set Variable), "That effect" (Set Variable)
+- "What to keep from the picked thing" (Function) in `Pages/Tonight` — input "item" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary
+  …and 4 nodes are left out only because this one fires them: "Keep it in her collection" (Cloud Function), "Keep its colour in her collection" (Cloud Function), "Kept" (Set Variable), "Not kept" (Set Variable)
+- "Is it her code?" (Function) in `Pages/Unlock` — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+  …and 4 nodes are left out only because this one fires them: "Not any more" (Set Variable), "The book is open" (Set Variable), "To tonight’s page" (Navigate), "Say it isn’t it" (Set Variable)
+- "Keep it" (Set Variable) in `App` — node beside the router shell
+  …and 3 nodes are left out only because this one fires them: "Languages" (i18next), "Her language, or the tablet’s" (Function), "The language" (Variable)
+- "Inputs" (Component Inputs) in `Data/Envelopes` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "Her envelopes" (Query Records), "Waiting, and ready" (Function)
+- "Inputs" (Component Inputs) in `Data/Profile` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "This book’s profile" (Query Records), "Its fields" (Function)
+- "Is it all there?" (Function) in `Pages/Coming` — input "what" is fed by /UI/Field — no statically known source in the emit vocabulary
+  …and 3 nodes are left out only because this one fires them: "Seal it (the backend decides if it may)" (Cloud Function), "Say what is missing" (Set Variable), "Say it was not sealed" (Set Variable)
+- "Her language, in her profile" (Function) in `Pages/Me` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Theme: dusk" (Function) in `Pages/Me` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Theme: sea" (Function) in `Pages/Me` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Theme: berry" (Function) in `Pages/Me` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Theme: forest" (Function) in `Pages/Me` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Theme: cocoa" (Function) in `Pages/Me` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Pages: -1" (Function) in `Pages/Me` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Pages: 0" (Function) in `Pages/Me` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "Pages: 1" (Function) in `Pages/Me` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+- "A name and an age?" (Function) in `Pages/Setup` — input "name" is fed by /UI/Field — no statically known source in the emit vocabulary
+  …and 3 nodes are left out only because this one fires them: "Step 3" (Set Variable), "Her rescue code, once" (Function), "Say what is missing" (Set Variable)
+- "The kept background, back into the three" (Function) in `Pages/Tonight` — input "background" is fed by /Data/Tonight — no statically known source in the emit vocabulary
+  …and 3 nodes are left out only because this one fires them: "Its pattern" (Set Variable), "Its paper" (Set Variable), "Its pattern colour" (Set Variable)
+- "Words from the list, before goodnight?" (Function) in `Pages/Tonight` — input "items" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary
+  …and 3 nodes are left out only because this one fires them: "Say goodnight" (Set Variable), "Asked about tonight" (Set Variable), "Open it" (Set Variable)
+- "This background" (Function) in `Pages/Tonight` — its out-thing output feeds CloudFunction2.in-thing, which its "go" signal runs, and that chain is not exported: two wires feed in-thing — last-writer-wins is not statically ordered
+  …and 3 nodes are left out only because this one fires them: "Keep it in her collection" (Cloud Function), "Kept" (Set Variable), "Not kept" (Set Variable)
+- "Keep the note (the backend decides if that day may take one)" (Cloud Function) in `Pages/Book` — in-text has no statically known source
+  …and 2 nodes are left out only because this one fires them: "Not writing" (Set Variable), "Say it was not kept" (Set Variable)
+- "Today’s envelope, back in the form" (Function) in `Pages/Coming` — input "id" is fed by For Each — it reads the repeater cmEach's relayed row value "id" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+  …and 2 nodes are left out only because this one fires them: "Changing this one" (Set Variable), "Its day" (Set Variable)
+- "Is it hers?" (Function) in `Pages/Forgot` — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+  …and 2 nodes are left out only because this one fires them: "Step 2" (Set Variable), "Say it" (Set Variable)
+- "Back to where she was" (Function) in `Pages/Help` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 2 nodes are left out only because this one fires them: "Tonight" (Navigate), "The code" (Navigate)
+- "Making it" (Set Variable) in `Pages/Me` — its trigger, "me.saveCopy" (meCopy), is not drawn: an element above it, "Save a copy" (meCopyBox), is authored Mounted false, and the wire into its Mounted from "Inside the Nightbook app?".result is not exported (the node it comes from is not exported: input "v" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists)
+  …and 2 nodes are left out only because this one fires them: "Make a copy now" (Function), "Say it" (Set Variable)
+- "The date" (Component Outputs) in `Coming/Date picker` — value output "Value" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Draw the field and calendar" (Function)
+- "Its date" (Function) in `Coming/Waiting` — input "month" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Its month" (Translation)
+- "Is the book open?" (Function) in `Data/Gate` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "To the code" (Navigate)
+- "Outputs" (Component Outputs) in `Data/Tonight` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Its items and background" (Function)
+- "On or off" (Function) in `Feelings/Grid` — two wires feed input "id" — last-writer-wins is not statically ordered
+  …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- "Strength 1" (Function) in `Feelings/Picked` — its out-strength output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- "Strength 2" (Function) in `Feelings/Picked` — its out-strength output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- "Strength 3" (Function) in `Feelings/Picked` — its out-strength output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- "Strength 4" (Function) in `Feelings/Picked` — its out-strength output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- "Strength 5" (Function) in `Feelings/Picked` — its out-strength output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- "Word 1: its strength" (Function) in `Feelings/Strengths` — input "w" is fed by /Feelings/Picked — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- "Word 2: its strength" (Function) in `Feelings/Strengths` — input "w" is fed by /Feelings/Picked — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- "Word 3: its strength" (Function) in `Feelings/Strengths` — input "w" is fed by /Feelings/Picked — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- "That day" (Set Variable) in `Pages/Book` — its trigger, "One cell per day" (bkEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  …and one node is left out only because this one fires it: "Not writing" (Set Variable)
+- "The date it was written" (Function) in `Pages/Book` — input "d" is fed by /Data/Day — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "The month it was written" (Translation)
+- "That one" (Function) in `Pages/Collection` — two wires feed input "id" — last-writer-wins is not statically ordered
+  …and one node is left out only because this one fires it: "Take it out" (Cloud Function)
+- "A day still to come?" (Function) in `Pages/Coming` — input "value" is fed by /Coming/Date picker — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "That day" (Set Variable)
+- "The day it was written" (Function) in `Pages/Envelope` — input "d" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "The month it was written" (Translation)
+- "The other way" (Function) in `Pages/Forgot` — its out-use output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+  …and one node is left out only because this one fires it: "Keep it" (Set Variable)
+- "France" (Function) in `Pages/Help` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and one node is left out only because this one fires it: "Keep where she lives" (Cloud Function)
+- "The UK" (Function) in `Pages/Help` — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+  …and one node is left out only because this one fires it: "Keep where she lives" (Cloud Function)
+- "Her kept face, as JSON" (Function) in `Pages/Me` — input "face" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Her kept face" (Set Variable)
+- "Day and month" (Function) in `Pages/Tonight` — input "d" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "The month" (Translation)
+- "A suggested one: count it" (Function) in `Pages/Tonight` — input "ch" is fed by For Each — it reads the repeater tnEmoSugEach's relayed row value "ch" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+  …and one node is left out only because this one fires it: "That emoji" (Set Variable)
+- "One from every emoji: count it" (Function) in `Pages/Tonight` — input "ch" is fed by For Each — it reads the repeater tnEmoAllEach's relayed row value "ch" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+  …and one node is left out only because this one fires it: "That emoji" (Set Variable)
+- "Open or close the background" (Function) in `Pages/Tonight` — its out-open output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+  …and one node is left out only because this one fires it: "The background card" (Set Variable)
+- "Open or close every emoji" (Function) in `Pages/Tonight` — its out-open output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+  …and one node is left out only because this one fires it: "Every emoji" (Set Variable)
+- "It is saved" (Function) in `Pages/Tonight` — its out-ok output feeds JavaScriptFunction.in-ok, which its "go" signal runs, and that chain is not exported: two wires feed input "ok" — last-writer-wins is not statically ordered
+  …and one node is left out only because this one fires it: "Saved, or not" (Function)
+- "It is not" (Function) in `Pages/Tonight` — its out-ok output feeds JavaScriptFunction.in-ok, which its "go" signal runs, and that chain is not exported: two wires feed input "ok" — last-writer-wins is not statically ordered
+  …and one node is left out only because this one fires it: "Saved, or not" (Function)
+- "Off for every book, for now (was: on for the 7–9 book)" (Function) in `Pages/Tonight` — its out-on output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+  …and one node is left out only because this one fires it: "On for the 7–9 book, off for the others" (Set Variable)
+- "Which keyboard she has" (Function) in `Pages/Tonight` — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+  …and one node is left out only because this one fires it: "Her keyboard" (Set Variable)
+- "Open or close the collection" (Function) in `Pages/Tonight` — its out-open output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+  …and one node is left out only because this one fires it: "The collection" (Set Variable)
+- "How big, from the kept page" (Function) in `Pages/Tonight` — input "feelings" is fed by /Data/Tonight — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "How big it was" (Set Variable)
+- "Read it to me" (Function) in `Pages/Tonight` — input "text" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "How do you feel tonight?, to read aloud" (Translation)
+- "Read the question to me" (Function) in `Pages/Tonight` — input "text" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "The question, to read aloud" (Translation)
+- "Starter s0, on the page" (Function) in `Pages/Tonight` — input "text" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Starter s0, as words" (Translation)
+- "Starter s1, on the page" (Function) in `Pages/Tonight` — input "text" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Starter s1, as words" (Translation)
+- "Starter s2, on the page" (Function) in `Pages/Tonight` — input "text" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Starter s2, as words" (Translation)
+- "Starter s3, on the page" (Function) in `Pages/Tonight` — input "text" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Starter s3, as words" (Translation)
+- "Show or hide" (Function) in `Pages/Unlock` — its out-show output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+  …and one node is left out only because this one fires it: "Keep it" (Set Variable)
+- "Which keyboard she has" (Function) in `Pages/Warmup` — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+  …and one node is left out only because this one fires it: "Her keyboard" (Set Variable)
+- "Nothing for no key" (Function) in `UI/Say` — input "words" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "The string" (Translation)
+- "Glyph or words" (Function) in `UI/Tool` — input "words" is fed by Translation — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "The label" (Translation)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Data/Day` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Inputs" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "That day’s page" (Query Records), "That day’s note" (Query Records), "What that day is" (Function)
+- `Data/Envelopes` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Inputs" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "Her envelopes" (Query Records), "Waiting, and ready" (Function)
+- `Data/Gate` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Is the book open?" (Function) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "To the code" (Navigate)
+- `Data/Keep` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Inputs" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "Everything she kept" (Query Records), "collection.sample" (Translation), "Each thing, with its picture" (Function)
+- `Data/Month` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Inputs" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Which days" (Function), "Her pages this month" (Query Records), "Her late notes this month" (Query Records), "The month, day by day" (Function)
+  - "Outputs" (Component Outputs) — the export has no rule for this node yet
+- `Data/Profile` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Inputs" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "This book’s profile" (Query Records), "Its fields" (Function)
+  - "Her book’s colours, on the whole app" (Function) — the export has no rule for this node yet
+- `Data/Recent` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Inputs" (Component Inputs) — the export has no rule for this node yet
+    …and 5 nodes are left out only because this one fires them: "Outputs" (Component Outputs), "The last seven days" (Function), "Her pages this week" (Query Records), "warmup.fallback" (Translation), "A line of her words" (Function)
+- `Data/Tonight` — **no file at all**: no visual root — logic-only components defer to EXP-003
+- `Pages/Tonight` — 543 refusals
+  - "Tonight, in words" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  - "Day and month" (Function) — input "d" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "The month" (Translation)
+  - "The question to show" (Function) — its out-key feeds /UI/Say.key, which has no static binding in this slice
+  - "No question tonight" (Function) — its trigger, "tonight.noQ" (tnQNone), is not drawn: an element above it, "No question: not in the 7–9 book" (tnQNoneBox), is authored Mounted false, and the wire into its Mounted from "No question: offered?".result is not exported (the node it comes from is not exported: input "b" is fed by /Data/Profile — no statically known source in the emit vocabulary)
+  - "Put it back" (Set Variable) — the value wire has no statically known source
+  - "One ready, for certain?" (Expression) — input "v" is fed by /Data/Envelopes — no statically known source in the emit vocabulary
+  - "Open the envelope" (Navigate) — its trigger, "env.open" (tnEnvOpen), is not drawn: an element above it, "An envelope is ready" (tnEnvBox), is authored Mounted false, and the wire into its Mounted from "One ready, for certain?".result is not exported (the node it comes from is not exported: input "v" is fed by /Data/Envelopes — no statically known source in the emit vocabulary)
+  - "Picked: words?" (Expression) — input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary
+  - "Picked: colour?" (Expression) — input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary
+  - "Picked: any?" (Expression) — input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary
+  - "Picked: none?" (Expression) — input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary
+  - "The kept background, back into the three" (Function) — input "background" is fed by /Data/Tonight — no statically known source in the emit vocabulary
+    …and 3 nodes are left out only because this one fires them: "Its pattern" (Set Variable), "Its paper" (Set Variable), "Its pattern colour" (Set Variable)
+  - "The page’s background" (Set Variable) — two wires feed its Value input — last-writer-wins is not statically ordered
+  - "Her most-picked emojis" (Function) — the Function that sends its "go" signal is not exported: input "ch" is fed by For Each — it reads the repeater tnEmoAllEach's relayed row value "ch" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+  - "This set’s emojis" (Function) — its out-rows feeds For Each.items, which has no static binding in this slice
+  - "A suggested one: count it" (Function) — input "ch" is fed by For Each — it reads the repeater tnEmoSugEach's relayed row value "ch" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+    …and one node is left out only because this one fires it: "That emoji" (Set Variable)
+  - "One from every emoji: count it" (Function) — input "ch" is fed by For Each — it reads the repeater tnEmoAllEach's relayed row value "ch" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+    …and one node is left out only because this one fires it: "That emoji" (Set Variable)
+  - "Open or close the background" (Function) — its out-open output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+    …and one node is left out only because this one fires it: "The background card" (Set Variable)
+  - "Open or close every emoji" (Function) — its out-open output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+    …and one node is left out only because this one fires it: "Every emoji" (Set Variable)
+  - "Close the background" (Set Variable) — setWith "boolean" conversion is not translated in step 5
+  - "Close every emoji" (Set Variable) — setWith "boolean" conversion is not translated in step 5
+  - "Tonight’s decorated page" (nightbook-kit.Page) — the Function that sends its "go" signal is not exported: input "text" is fed by Translation — no statically known source in the emit vocabulary
+    …and 13 nodes are left out only because this one fires them: "What the picked thing wears" (Function), "Its letters" (Set Variable), "Its colour" (Set Variable), "Its effect" (Set Variable), "Words from the list?" (Function), "Asked about tonight" (Set Variable), "Open it" (Set Variable), "tonight.typeHere" (Translation), "tonight.pageLabel" (Translation), "tonight.typeLabel" (Translation), "tonight.removeLabel" (Translation), "tonight.turnLabel" (Translation), "tonight.resizeLabel" (Translation)
+  - "Keep them" (Set Variable) — setWith "array" conversion is not translated in step 5
+  - "Put them back" (Set Variable) — setWith "array" conversion is not translated in step 5
+  - "Her French" (Set Variable) — the value wire has no statically known source
+  - "Words from the list, before goodnight?" (Function) — input "items" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary
+    …and 3 nodes are left out only because this one fires them: "Say goodnight" (Set Variable), "Asked about tonight" (Set Variable), "Open it" (Set Variable)
+  - "Put its background back" (Set Variable) — the value wire has no statically known source
+  - "It is saved" (Function) — its out-ok output feeds JavaScriptFunction.in-ok, which its "go" signal runs, and that chain is not exported: two wires feed input "ok" — last-writer-wins is not statically ordered
+    …and one node is left out only because this one fires it: "Saved, or not" (Function)
+  - "It is not" (Function) — its out-ok output feeds JavaScriptFunction.in-ok, which its "go" signal runs, and that chain is not exported: two wires feed input "ok" — last-writer-wins is not statically ordered
+    …and one node is left out only because this one fires it: "Saved, or not" (Function)
+  - "font: Chewy" (Set Variable) — its trigger, "font.chewy" (tn_font0), is not drawn: an element above it, "Letters" (tnFonts), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "font = Chewy?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "font = Chewy?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "font: Caveat" (Set Variable) — its trigger, "font.caveat" (tn_font1), is not drawn: an element above it, "Letters" (tnFonts), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "font = Caveat?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "font = Caveat?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "font: Bungee" (Set Variable) — its trigger, "font.bungee" (tn_font2), is not drawn: an element above it, "Letters" (tnFonts), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "font = Bungee?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "font = Bungee?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "font: Pacifico" (Set Variable) — its trigger, "font.pacifico" (tn_font3), is not drawn: an element above it, "Letters" (tnFonts), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "font = Pacifico?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "font = Pacifico?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "font: Cherry Bomb One" (Set Variable) — its trigger, "font.cherry" (tn_font4), is not drawn: an element above it, "Letters" (tnFonts), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "font = Cherry Bomb One?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "font = Cherry Bomb One?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "font: Rubik Doodle Shadow" (Set Variable) — its trigger, "font.rubik" (tn_font5), is not drawn: an element above it, "Letters" (tnFonts), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "font = Rubik Doodle Shadow?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "font = Rubik Doodle Shadow?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "effect: none" (Set Variable) — its trigger, "tonight.effect.none" (tn_effect0), is not drawn: an element above it, "Effects" (tnEffects), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "effect = none?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "effect = none?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "effect: rainbow" (Set Variable) — its trigger, "tonight.effect.rainbow" (tn_effect1), is not drawn: an element above it, "Effects" (tnEffects), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "effect = rainbow?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "effect = rainbow?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "effect: wavy" (Set Variable) — its trigger, "tonight.effect.wavy" (tn_effect2), is not drawn: an element above it, "Effects" (tnEffects), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "effect = wavy?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "effect = wavy?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "effect: outline" (Set Variable) — its trigger, "tonight.effect.outline" (tn_effect3), is not drawn: an element above it, "Effects" (tnEffects), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "effect = outline?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "effect = outline?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "effect: shadow" (Set Variable) — its trigger, "tonight.effect.shadow" (tn_effect4), is not drawn: an element above it, "Effects" (tnEffects), is authored Mounted false, and the wire into its Mounted from "Picked: words?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "effect = shadow?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "effect = shadow?" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "color: #7B3FC4" (Set Variable) — its trigger, "tonight.colour.purple" (tn_color0), is not drawn: an element above it, "Colours" (tnColours), is authored Mounted false, and the wire into its Mounted from "Picked: colour?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "color = #7B3FC4?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "color: #E0457B" (Set Variable) — its trigger, "tonight.colour.pink" (tn_color1), is not drawn: an element above it, "Colours" (tnColours), is authored Mounted false, and the wire into its Mounted from "Picked: colour?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "color = #E0457B?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "color: #1E88C8" (Set Variable) — its trigger, "tonight.colour.sea" (tn_color2), is not drawn: an element above it, "Colours" (tnColours), is authored Mounted false, and the wire into its Mounted from "Picked: colour?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "color = #1E88C8?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "color: #2FA56B" (Set Variable) — its trigger, "tonight.colour.mint" (tn_color3), is not drawn: an element above it, "Colours" (tnColours), is authored Mounted false, and the wire into its Mounted from "Picked: colour?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "color = #2FA56B?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "color: #E8B100" (Set Variable) — its trigger, "tonight.colour.sun" (tn_color4), is not drawn: an element above it, "Colours" (tnColours), is authored Mounted false, and the wire into its Mounted from "Picked: colour?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "color = #E8B100?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "color: #FF8A3D" (Set Variable) — its trigger, "tonight.colour.orange" (tn_color5), is not drawn: an element above it, "Colours" (tnColours), is authored Mounted false, and the wire into its Mounted from "Picked: colour?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "color = #FF8A3D?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "color: #26244A" (Set Variable) — its trigger, "tonight.colour.night" (tn_color6), is not drawn: an element above it, "Colours" (tnColours), is authored Mounted false, and the wire into its Mounted from "Picked: colour?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "color = #26244A?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "color: #FFFFFF" (Set Variable) — its trigger, "tonight.colour.white" (tn_color7), is not drawn: an element above it, "Colours" (tnColours), is authored Mounted false, and the wire into its Mounted from "Picked: colour?".result is not exported (the node it comes from is not exported: input "k" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary)
+  - "color = #FFFFFF?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPattern = plain?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPattern = dots?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPattern = lines?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPattern = stripes?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPattern = grid?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPattern = stars?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPaper = #FFFFFF?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPaper = #FFF8E8?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPaper = #FFE3EC?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPaper = #FFF6C8?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPaper = #DDF7EE?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPaper = #DCEBFF?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPaper = #EDE6FF?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgPaper = #26244A?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgInk = #7B3FC4?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgInk = #E0457B?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgInk = #1E88C8?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgInk = #2FA56B?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgInk = #E8B100?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgInk = #FF8A3D?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgInk = #26244A?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "bgInk = #FFFFFF?" (Expression) — its result feeds /UI/Tool.cls, which has no static binding in this slice
+  - "faces open?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "animals open?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "nature open?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "food open?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "fun open?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "things open?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "hearts open?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "The 7–9 book?" (Expression) — input "b" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Not the 7–9 book?" (Expression) — input "b" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Bigger buttons for the 7–9 book" (Expression) — input "b" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Off for every book, for now (was: on for the 7–9 book)" (Function) — its out-on output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+    …and one node is left out only because this one fires it: "On for the 7–9 book, off for the others" (Set Variable)
+  - "Which keyboard she has" (Function) — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+    …and one node is left out only because this one fires it: "Her keyboard" (Set Variable)
+  - "Kept things, to use tonight" (Function) — input "rows" is fed by /Data/Keep — no statically known source in the emit vocabulary
+  - "Nothing kept, for certain?" (Expression) — input "v" is fed by /Data/Keep — no statically known source in the emit vocabulary
+  - "Open or close the collection" (Function) — its out-open output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+    …and one node is left out only because this one fires it: "The collection" (Set Variable)
+  - "Use it tonight" (Function) — input "kind" is fed by For Each — it reads the repeater tnMineEach's relayed row value "kind" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+    …and 4 nodes are left out only because this one fires them: "That colour" (Set Variable), "Those letters" (Set Variable), "That colour" (Set Variable), "That effect" (Set Variable)
+  - "What to keep from the picked thing" (Function) — input "item" is fed by nightbook-kit.Page — no statically known source in the emit vocabulary
+    …and 4 nodes are left out only because this one fires them: "Keep it in her collection" (Cloud Function), "Keep its colour in her collection" (Cloud Function), "Kept" (Set Variable), "Not kept" (Set Variable)
+  - "This background" (Function) — its out-thing output feeds CloudFunction2.in-thing, which its "go" signal runs, and that chain is not exported: two wires feed in-thing — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "Keep it in her collection" (Cloud Function), "Kept" (Set Variable), "Not kept" (Set Variable)
+  - "A little" (Set Variable) — its trigger, "tonight.simple.aLittle" (tnLittle), is not drawn: an element above it, "How do you feel tonight? (faces)" (tnFaceCard), is authored Mounted false, and the wire into its Mounted from "The 7–9 book?".result is not exported (the node it comes from is not exported: input "b" is fed by /Data/Profile — no statically known source in the emit vocabulary)
+  - "Lit?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Lit?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "Ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "How big, from the kept page" (Function) — input "feelings" is fed by /Data/Tonight — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "How big it was" (Set Variable)
+  - "The picked face, this big" (Function) — its out-feelings output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "array" conversion is not translated in step 5
+  - "Read it to me" (Function) — input "text" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "How do you feel tonight?, to read aloud" (Translation)
+  - "Read the question to me" (Function) — input "text" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "The question, to read aloud" (Translation)
+  - "Feeling: y8" (Function) — its out-feelings output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "array" conversion is not translated in step 5
+  - "Feeling: y9" (Function) — its out-feelings output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "array" conversion is not translated in step 5
+  - "Feeling: g8" (Function) — its out-feelings output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "array" conversion is not translated in step 5
+  - "Feeling: g9" (Function) — its out-feelings output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "array" conversion is not translated in step 5
+  - "Feeling: b8" (Function) — its out-feelings output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "array" conversion is not translated in step 5
+  - "Feeling: b9" (Function) — its out-feelings output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "array" conversion is not translated in step 5
+  - "Feeling: r8" (Function) — its out-feelings output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "array" conversion is not translated in step 5
+  - "Feeling: r9" (Function) — its out-feelings output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "array" conversion is not translated in step 5
+  - "Which face she picked" (Function) — its out-lit0 feeds /Simple/Face.lit, which has no static binding in this slice
+  - "Starter s0, on the page" (Function) — input "text" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Starter s0, as words" (Translation)
+  - "Starter s1, on the page" (Function) — input "text" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Starter s1, as words" (Translation)
+  - "Starter s2, on the page" (Function) — input "text" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Starter s2, as words" (Translation)
+  - "Starter s3, on the page" (Function) — input "text" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Starter s3, as words" (Translation)
+  - "No question: offered?" (Expression) — input "b" is fed by /Data/Profile — no statically known source in the emit vocabulary
+- `Pages/Me` — 268 refusals
+  - "What fits this face" (Function) — its out-rows feeds For Each.items, which has no static binding in this slice
+  - "Her kept face, as JSON" (Function) — input "face" is fed by /Data/Profile — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Her kept face" (Set Variable)
+  - "Switch the language" (i18next) — custom logic node (i18next) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "Her language, in her profile" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "English?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "French?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Its ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "Its ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "None open" (Set Variable) — trigger meSecretSaid.out-go is not a rendered element event or a receiver
+  - "Open or close: restore" (Function) — its trigger, "me.restore" (meRestore), is not drawn: an element above it, "Save a copy" (meCopyBox), is authored Mounted false, and the wire into its Mounted from "Inside the Nightbook app?".result is not exported (the node it comes from is not exported: input "v" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists)
+  - "Her code now, then the new one" (Function) — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+    …and 4 nodes are left out only because this one fires them: "Keep the new code or question" (Cloud Function), "What was kept" (Function), "Say it" (Set Variable), "Say it" (Set Variable)
+  - "Her code now, then the new question" (Function) — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+    …and 4 nodes are left out only because this one fires them: "Keep the new code or question" (Cloud Function), "What was kept" (Function), "Say it" (Set Variable), "Say it" (Set Variable)
+  - "Her grown-ups" (Function) — input "text" is fed by /UI/Field — no statically known source in the emit vocabulary
+    …and 4 nodes are left out only because this one fires them: "One more change" (Function), "The bar reads it again" (Set Variable), "Kept" (Set Variable), "Keep her grown-ups" (Cloud Function)
+  - "The copies there are" (Function) — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+  - "Making it" (Set Variable) — its trigger, "me.saveCopy" (meCopy), is not drawn: an element above it, "Save a copy" (meCopyBox), is authored Mounted false, and the wire into its Mounted from "Inside the Nightbook app?".result is not exported (the node it comes from is not exported: input "v" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists)
+    …and 2 nodes are left out only because this one fires them: "Make a copy now" (Function), "Say it" (Set Variable)
+  - "Bringing it back" (Set Variable) — its trigger, "One row per copy" (meCopyEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+    …and 4 nodes are left out only because this one fires them: "Bring that copy back" (Function), "Say it" (Set Variable), "Closed, to open again" (Set Variable), "Her code, to open the book that came back" (Navigate)
+  - "Inside the Nightbook app?" (Expression) — input "v" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+  - "Face: prev" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "Face: next" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "Face: roll" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "Face: undo" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "Face: wear" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "Hair: hair-brown" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-brown?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-blonde" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-blonde?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-auburn" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-auburn?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-black" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-black?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-pink" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-pink?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-blue" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-blue?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-green" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-green?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-purple" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-purple?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-orange" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-orange?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-silver" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-silver?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-red" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-red?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Hair: hair-gold" (Function) — its out-what output feeds JavaScriptFunction.in-what, which its "go" signal runs, and that chain is not exported: two wires feed input "what" — last-writer-wins is not statically ordered
+    …and 7 nodes are left out only because this one fires them: "Change her face" (Function), "The changed face" (Set Variable), "Can she step back?" (Set Variable), "Keep her face" (Function), "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "hair-gold?" (Expression) — input "h" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Theme: dusk" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "dusk?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Theme: sea" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "sea?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Theme: berry" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "berry?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Theme: forest" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "forest?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Theme: cocoa" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "cocoa?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Pages: -1" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "Step -1?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Step -1: ink" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Pages: 0" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "Step 0?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Step 0: ink" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Pages: 1" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and 3 nodes are left out only because this one fires them: "Keep what changed in her profile" (Cloud Function), "One more change" (Function), "The bar reads it again" (Set Variable)
+  - "Step 1?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Step 1: ink" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+- `Pages/Book` — 89 refusals
+  - "Another month" (Set Variable) — the value wire has no statically known source
+  - "Another month" (Set Variable) — the value wire has no statically known source
+  - "That day" (Set Variable) — its trigger, "One cell per day" (bkEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+    …and one node is left out only because this one fires it: "Not writing" (Set Variable)
+  - "Write" (Set Variable) — its trigger, "book.lateBtn" (bkLateBtn), is not drawn: an element above it, "A missed day" (bk_missed), is authored Mounted false, and the wire into its Mounted from "A missed day?".result is not exported (the node it comes from is not exported: input "state" is fed by /Data/Day — no statically known source in the emit vocabulary)
+  - "Write again" (Set Variable) — its trigger, "book.lateBtn" (bkNoteAgain), is not drawn: an element above it, "Still open" (bkNoteAgainBox), is authored Mounted false, and the wire into its Mounted from "An open note?".result is not exported (the node it comes from is not exported: input "state" is fed by /Data/Day — no statically known source in the emit vocabulary)
+  - "A page day?" (Expression) — input "state" is fed by /Data/Day — no statically known source in the emit vocabulary
+  - "A today day?" (Expression) — input "state" is fed by /Data/Day — no statically known source in the emit vocabulary
+  - "A missed day?" (Expression) — input "state" is fed by /Data/Day — no statically known source in the emit vocabulary
+  - "A note day?" (Expression) — input "state" is fed by /Data/Day — no statically known source in the emit vocabulary
+  - "A future day?" (Expression) — input "state" is fed by /Data/Day — no statically known source in the emit vocabulary
+  - "A before day?" (Expression) — input "state" is fed by /Data/Day — no statically known source in the emit vocabulary
+  - "A closed note?" (Expression) — input "state" is fed by /Data/Day — no statically known source in the emit vocabulary
+  - "An open note?" (Expression) — input "state" is fed by /Data/Day — no statically known source in the emit vocabulary
+  - "Show the note box?" (Expression) — input "state" is fed by /Data/Day — no statically known source in the emit vocabulary
+  - "Next day, or its date" (Expression) — input "next" is fed by /Data/Day — no statically known source in the emit vocabulary
+  - "The date it was written" (Function) — input "d" is fed by /Data/Day — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "The month it was written" (Translation)
+  - "Keep the note (the backend decides if that day may take one)" (Cloud Function) — in-text has no statically known source
+    …and 2 nodes are left out only because this one fires them: "Not writing" (Set Variable), "Say it was not kept" (Set Variable)
+  - "Tonight’s page" (Navigate) — its trigger, "book.goTonight" (bkGoTonight), is not drawn: an element above it, "Today" (bk_today), is authored Mounted false, and the wire into its Mounted from "A today day?".result is not exported (the node it comes from is not exported: input "state" is fed by /Data/Day — no statically known source in the emit vocabulary)
+- `Pages/Coming` — 78 refusals
+  - "env.otherDay" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "A day still to come?" (Function) — input "value" is fed by /Coming/Date picker — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "That day" (Set Variable)
+  - "Her French" (Set Variable) — the value wire has no statically known source
+  - "The next fourteen days" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  - "That day" (Set Variable) — its trigger, "One chip per day" (cmDaysEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  - "Keep them" (Set Variable) — setWith "array" conversion is not translated in step 5
+  - "Keep them" (Set Variable) — setWith "array" conversion is not translated in step 5
+  - "Is it all there?" (Function) — input "what" is fed by /UI/Field — no statically known source in the emit vocabulary
+    …and 3 nodes are left out only because this one fires them: "Seal it (the backend decides if it may)" (Cloud Function), "Say what is missing" (Set Variable), "Say it was not sealed" (Set Variable)
+  - "A new one" (Set Variable) — setWith "array" conversion is not translated in step 5
+  - "No day yet" (Set Variable) — setWith "array" conversion is not translated in step 5
+  - "No feelings yet" (Set Variable) — setWith "array" conversion is not translated in step 5
+  - "Today’s envelope, back in the form" (Function) — input "id" is fed by For Each — it reads the repeater cmEach's relayed row value "id" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+    …and 2 nodes are left out only because this one fires them: "Changing this one" (Set Variable), "Its day" (Set Variable)
+  - "Nothing to say" (Set Variable) — setWith "array" conversion is not translated in step 5
+  - "None waiting?" (Expression) — input "w" is fed by /Data/Envelopes — no statically known source in the emit vocabulary
+  - "Seal, or keep changes" (Expression) — its result feeds /UI/Tool.key, which has no static binding in this slice
+- `Pages/Envelope` — 58 refusals
+  - "better: picked?" (Expression) — its result feeds /UI/Tool.edge, which has no static binding in this slice
+  - "same: picked?" (Expression) — its result feeds /UI/Tool.edge, which has no static binding in this slice
+  - "harder: picked?" (Expression) — its result feeds /UI/Tool.edge, which has no static binding in this slice
+  - "Her French" (Set Variable) — the value wire has no statically known source
+  - "The envelope, read" (Function) — input "ready" is fed by /Data/Envelopes — no statically known source in the emit vocabulary
+  - "The day it was written" (Function) — input "d" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "The month it was written" (Translation)
+  - "The kind reply" (Expression) — its result feeds /UI/Say.key, which has no static binding in this slice
+  - "Better, same or harder, and what happened" (Function) — input "now" is fed by /UI/Field — no statically known source in the emit vocabulary
+    …and 4 nodes are left out only because this one fires them: "Keep what happened (the backend checks its day has come)" (Cloud Function), "Say it" (Set Variable), "Say it was not kept" (Set Variable), "Kept" (Function)
+  - "Kept, for certain?" (Expression) — input "v" is fed by JavaScriptFunction — the Function that feeds it is not exported: its out-kept output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  - "Both halves, on tonight’s page" (Function) — input "items" is fed by /Data/Tonight — no statically known source in the emit vocabulary
+- `Feelings/Strengths` — 44 refusals
+  - "One slot per word" (Function) — its out-has0 feeds Expression.v, which has no static binding in this slice
+  - "Word 1, for certain?" (Expression) — input "v" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Word 1: its strength" (Function) — input "w" is fed by /Feelings/Picked — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+  - "Word 2, for certain?" (Expression) — input "v" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Word 2: its strength" (Function) — input "w" is fed by /Feelings/Picked — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+  - "Word 3, for certain?" (Expression) — input "v" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Word 3: its strength" (Function) — input "w" is fed by /Feelings/Picked — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- `Feelings/Picked` — 43 refusals
+  - "Dot 1" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Strength 1" (Function) — its out-strength output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+  - "Dot 2" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Strength 2" (Function) — its out-strength output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+  - "Dot 3" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Strength 3" (Function) — its out-strength output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+  - "Dot 4" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Strength 4" (Function) — its out-strength output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+  - "Dot 5" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Strength 5" (Function) — its out-strength output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+  - "Its string" (Expression) — its result feeds /UI/Say.key, which has no static binding in this slice
+  - "Its quadrant’s colour" (Expression) — its result feeds /UI/Tool.edge, which has no static binding in this slice
+- `Pages/Warmup` — 40 refusals
+  - "Which keyboard she has" (Function) — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+    …and one node is left out only because this one fires it: "Her keyboard" (Set Variable)
+  - "AZERTY?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "QWERTY?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "Ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "Her words, or the night’s" (Expression) — input "v" is fed by /Data/Recent — no statically known source in the emit vocabulary
+  - "Last time" (Function) — its out-has output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  - "This time, for next time" (Function) — input "letters" is fed by nightbook-kit.Warmup — no statically known source in the emit vocabulary
+  - "A last time?" (Expression) — input "v" is fed by JavaScriptFunction — the Function that feeds it is not exported: its out-has output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  - "Not yet" (Set Variable) — its "go" signal drives no translatable action
+  - "Last time, in words" (Expression) — input "v" is fed by JavaScriptFunction — the Function that feeds it is not exported: its out-has output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+- `Pages/Help` — 35 refusals
+  - "France" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and one node is left out only because this one fires it: "Keep where she lives" (Cloud Function)
+  - "The UK" (Function) — its out-profile output feeds CloudFunction2.in-profile, which its "go" signal runs, and that chain is not exported: two wires feed in-profile — last-writer-wins is not statically ordered
+    …and one node is left out only because this one fires it: "Keep where she lives" (Cloud Function)
+  - "People named?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Nobody named?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Her country, lit" (Expression) — input "c" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Her country, lit" (Expression) — input "c" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Night ink when lit" (Expression) — input "c" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Night ink when lit" (Expression) — input "c" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Back to where she was" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 2 nodes are left out only because this one fires them: "Tonight" (Navigate), "The code" (Navigate)
+- `Feelings/Grid` — 34 refusals
+  - "Quadrant r’s words" (Function) — its out-rows feeds For Each.items, which has no static binding in this slice
+  - "Quadrant y’s words" (Function) — its out-rows feeds For Each.items, which has no static binding in this slice
+  - "Quadrant b’s words" (Function) — its out-rows feeds For Each.items, which has no static binding in this slice
+  - "Quadrant g’s words" (Function) — its out-rows feeds For Each.items, which has no static binding in this slice
+  - "On or off" (Function) — two wires feed input "id" — last-writer-wins is not statically ordered
+    …and one node is left out only because this one fires it: "Outputs" (Component Outputs)
+- `Pages/Forgot` — 33 refusals
+  - "The other way" (Function) — its out-use output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+    …and one node is left out only because this one fires it: "Keep it" (Set Variable)
+  - "Answer or rescue code, in words" (Expression) — its result feeds /UI/Field.key, which has no static binding in this slice
+  - "The other way, in words" (Expression) — its result feeds /UI/Tool.key, which has no static binding in this slice
+  - "Is it hers?" (Function) — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+    …and 2 nodes are left out only because this one fires them: "Step 2" (Set Variable), "Say it" (Set Variable)
+  - "The new code, checked" (Function) — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+    …and 5 nodes are left out only because this one fires them: "Keep the new code" (Cloud Function), "Say it" (Set Variable), "Say it was not kept" (Set Variable), "The book is open" (Set Variable), "To tonight’s page" (Navigate)
+  - "Nothing to say" (Set Variable) — the Function that sends its "right" signal is not exported: the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+- `Pages/Setup` — 32 refusals
+  - "Step 2" (Set Variable) — trigger suLangSet.done: the Set Variable's Done chain is not exported — its done output drives no translatable action
+  - "Switch the language" (i18next) — custom logic node (i18next) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+  - "A name and an age?" (Function) — input "name" is fed by /UI/Field — no statically known source in the emit vocabulary
+    …and 3 nodes are left out only because this one fires them: "Step 3" (Set Variable), "Her rescue code, once" (Function), "Say what is missing" (Set Variable)
+  - "Check it all, then the three verifiers" (Function) — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+    …and 5 nodes are left out only because this one fires them: "Start the book (the backend makes it once)" (Cloud Function), "Say what is missing" (Set Variable), "Say it did not start" (Set Variable), "The book is open" (Set Variable), "To tonight’s page" (Navigate)
+  - "Nothing to say" (Set Variable) — the Function that sends its "next" signal is not exported: input "name" is fed by /UI/Field — no statically known source in the emit vocabulary
+- `UI/Sections` — 32 refusals
+  - "Read it again" (Function) — its signal output "go" is consumed — author-signal pulses are not translated in this slice
+  - "tonight: lit?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "book: lit?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "coming: lit?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "collection: lit?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "tonight: its ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "book: its ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "coming: its ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "collection: its ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+- `Pages/Unlock` — 31 refusals
+  - "A book, for certain?" (Expression) — input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary
+  - "Is it her code?" (Function) — the script is asynchronous — completion ordering joins the invocation tier when the trace harness exists
+    …and 4 nodes are left out only because this one fires them: "Not any more" (Set Variable), "The book is open" (Set Variable), "To tonight’s page" (Navigate), "Say it isn’t it" (Set Variable)
+  - "Show or hide" (Function) — its out-show output feeds Set Variable.value, which its "go" signal runs, and that chain is not exported: setWith "boolean" conversion is not translated in step 5
+    …and one node is left out only because this one fires it: "Keep it" (Set Variable)
+  - "Password or text" (Expression) — its result feeds /UI/Field.type, which has no static binding in this slice
+  - "Show or hide, in words" (Expression) — its result feeds /UI/Tool.key, which has no static binding in this slice
+  - "I forgot my code" (Navigate) — its trigger, "unlock.forgot" (ulForgot), is not drawn: an element above it, "The code" (ulCard), is authored Mounted false, and the wire into its Mounted from "A book, for certain?".result is not exported (the node it comes from is not exported: input "v" is fed by /Data/Profile — no statically known source in the emit vocabulary)
+- `Pages/Collection` — 25 refusals
+  - "Nothing kept, for certain?" (Expression) — input "v" is fed by /Data/Keep — no statically known source in the emit vocabulary
+  - "That one" (Function) — two wires feed input "id" — last-writer-wins is not statically ordered
+    …and one node is left out only because this one fires it: "Take it out" (Cloud Function)
+- `Coming/Date picker` — 23 refusals
+  - "The date" (Component Outputs) — value output "Value" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Draw the field and calendar" (Function)
+- `UI/Tool` — 21 refusals
+  - "Glyph or words" (Function) — input "words" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "The label" (Translation)
+- `UI/Say` — 14 refusals
+  - "Nothing for no key" (Function) — input "words" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "The string" (Translation)
+- `Feelings/Chip` — 13 refusals
+  - "Its string" (Expression) — its result feeds /UI/Tool.key, which has no static binding in this slice
+  - "Lit when picked" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Night ink when lit" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+  - "Its quadrant’s colour" (Expression) — its result feeds /UI/Tool.edge, which has no static binding in this slice
+- `UI/Field` — 7 refusals
+  - "The hint" (Translation) — custom logic node (Translation) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Book/Day` — 6 refusals
+  - "Its look" (Function) — its out-edge feeds Group.borderColor, which has no static binding in this slice
+  - "Number, and ✎ for a note" (Function) — input "mark" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Coming/Waiting` — 6 refusals
+  - "Its date" (Function) — input "month" is fed by Translation — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Its month" (Translation)
+- `Help/Lines` — 6 refusals
+  - "Her lines" (Function) — its out-lines feeds For Each.items, which has no static binding in this slice
+- `Keep/Section` — 6 refusals
+  - "Outputs" (Component Outputs) — the repeater relaying "id" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it
+  - "Each, to take out" (Function) — its out-rows feeds For Each.items, which has no static binding in this slice
+- `Me/Wear` — 6 refusals
+  - "Worn?" (Expression) — its result feeds /UI/Tool.fill, which has no static binding in this slice
+  - "Its ink" (Expression) — its result feeds /UI/Tool.ink, which has no static binding in this slice
+- `UI/Face` — 6 refusals
+  - "What the face wears" (Function) — its out-look feeds game-kit.Avatar.look, which has no static binding in this slice
+- `Coming/Day` — 3 refusals
+  - "Its edge" (Expression) — its result feeds Group.borderColor, which has no static binding in this slice
+- `Simple/Face` — 3 refusals
+  - "Picked?" (Expression) — its result feeds Group.cssClassName, which has no static binding in this slice
+- `UI/Checkin` — 3 refusals
+  - "Her grown-ups, if she named any" (Expression) — its result feeds /UI/Say.key, which has no static binding in this slice
+- `UI/Language` — 3 refusals
+  - "Switch the language" (i18next) — custom logic node (i18next) from the kit in noodl_modules/i18next-noodl — this export renders a kit's visual nodes and does not run its logic nodes
+- `Setup/Step` — 2 refusals
+  - "Its look" (Function) — its out-word feeds /UI/Say.color, which has no static binding in this slice
+- **1 thing** about the project as a whole
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

@@ -14284,3 +14284,67 @@ What stands in the way, read in the code, not built:
 
 Reach if built: up to 32 wires (14 Set Variables, 2 Conditions; the Functions behind their own refusals). Selecting a
 task from todo-list's lists sets the page's selection only once it is.
+
+## §102 The script travels as written (session 132, 2026-10-21): EXP-019 slice 1
+
+Richard's ruling of 2026-10-21 ("I want that offramp promise fulfilled in React and Swift … make it so") re-ordered the
+lane: [EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md) → [EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md) →
+[EXP-021](EXP-021-A-LOGIC-COMPONENT-IS-A-HOOK.md) → [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md), with
+[EXP-023](EXP-023-THE-OFF-RAMP-IS-ON-NPM.md) riding lane 1's next cut. §101 and the rows after it keep their place
+after EXP-021.
+
+### §102.1 Measured first
+
+Every template dry-run and every Function body read (`s132-hostgates/census-scripts.md`): 1,285 bodies, 602 pass every
+gate, **683 refused by at least one** — `Date` 437, browser 174, `Noodl.*` 183, async 163, `Math.random` 88, `this` 69,
+timers 27, `Component.*` 14, `fetch` 13. todo-list: 6 of 62 components with nothing left over; every record verb in the
+app behind a logic component's `When to load`. The gates in `jsfun.ts` were written for the grading method ("not
+deterministic", "when the trace harness exists"); the runtime hosts every one of those bodies.
+
+### §102.2 The rule, built
+
+A Run-wired Function carries its **host traits** (`jsHostTraitsOf`: `this`, the clock, randomness, timers, the browser,
+the network) and **runs once per Run with a kept node**: `JsFunctionPlan.host` ⇒ `pulsed` (the run compile), the emitter
+keys its kept-node set and the run/chain split on `host` too (`runIsHosted`), so the body never runs at a read site; a
+`this` body prints `(function (this: Record<string, any>) { … }).call(self)` with `self` the wrapper's third parameter,
+and `runFunction` hands it `node.self` (the emitted library's `FunctionNode` gained `self`). A traited run with nothing
+wired out still runs (it is its own effect). With **no Run wire** it is refused by the trait's name ("… and has no Run
+wire — a run on its inputs' arrival is EXP-019 slice 2"). An Expression is held to every gate as before; asynchrony stays
+a gate (slice 1b: an `await` changes when the chain after the run continues, which `runFunction` does not model).
+
+### §102.3 Graded
+
+- **The Host Desk** (`tests/helpers/host-desk.ts`, `tests/the-script-travels-as-written.test.ts`, 17 rows; predicted in
+  `s132-hostgates/EXPECTED.md` first): Tally placed twice (`this.n = (this.n || 0) + 1`), one body with four traits
+  (`new Date(0)`'s year, `Date.now()`, `Math.random()`, `setTimeout`, `typeof window`), a pure control. The runtime arm
+  read every row as predicted; the export reads every row from the first press on (3 and 3 after three presses, two
+  placements two counts, 1970 / yes / picked / set / window, hello Ann). 🔴 **Two things measured on the way:** the first
+  desk read the counts through Variables and both Tallies read "1" on the runtime arm — a NodeGX Variable is one value
+  app-wide by name, so a desk with two placements cannot use one; and at load the runtime shows a wired Text's authored
+  text until the wire delivers where the export shows nothing — **P18-S132-AUTHOREDTEXT** (low, 16 such Texts in the
+  templates), pinned by name in A2b, masked in A2.
+- **Six mutant arms** (`s132-hostgates/mutants.py`), each killing rows by name: the plan not forcing `pulsed` (A2 A5 C3
+  D1), the emitter keeping no node (B3: the stamp, whose Done chain has no render read, lost its `runFunction`; the Tally
+  survived that arm through `materialize`), the body bound to a fresh object (A3 A4 B1), the library not handing `self`
+  (A3 A4 B5), the reactive refusal gone (C4), the clock a gate again (A5 B2 C1 C3). 0 survived.
+- **Reach** (`dispdiff.ts`, `420619884` against the tree, 17 templates): **135 gained, 0 lost, 267 re-worded**. Gained
+  by type: Function 91, Set Variable 24, Cloud Function 11, Switch 4, Expression 2, Counter 2, Query 1; by template: gram
+  31, nightbook 21, marketplace 19, todo-list-demo 19, todo-list 16, planning 13, rocket-school 6, star-class 6. The
+  reason that fell: the clock 49, the browser 39, `this` 19. **What stands in front now** (the re-worded 267): the slice-2
+  shape — a traited body with no Run wire — 81 (`this` 40, the clock 30, the browser 11); JS-node chains 18 + 16 + 5;
+  "two wires feed" 5 + 17; asynchrony 11. The emitted code of gained nodes read: todo-list's `Count mounts` (a `this`
+  body under a Did Mount, kept node, `.call(self)`, materialized row) and `Is there anything to write?` (the clock, in
+  `CloseTask`'s Run chain, `runFunction` then the chain).
+- 🔴 **The preflight's headline is a capped listing, not the reach.** members-area's "What will not translate" read
+  228 → 275 with nodes "new" in its list that are in no `dispdiff` row: the heads that fell let others surface. Filed
+  P18-S132-PREFLIGHTCOUNT (low). Total across the templates 16,125 → 15,167; todo-list 6 → 12 of 62 clean, planning
+  9 → 16 of 43.
+- `tplbuild.ts` all 17 at the floor (1 error in 1, nightbook STYLENULL); package `tsc --noEmit` 0; the five neighbouring
+  Function specs 141 / 141; hls001 regenerated with the count predicted and read (3 paths moved by the library's text,
+  host-desk's 22 entries added, 63 → 64 fixtures); the whole package suite **150 / 150, 5,144 passed, 0 failed, 3 skipped**.
+
+### §102.4 What this leaves
+
+Slice 2: the reactive traited body (81 nodes) as a run from an effect on its inputs' arrival. Slice 1b: asynchrony (163
+bodies; `runFunction` awaited, the run marked awaited so §90's `detached` holds the chain and frees the click). Then
+EXP-020 (the `Noodl` object, 183 bodies, eight members) and EXP-021 (logic components, 182 + 48 + 124 "no rule").

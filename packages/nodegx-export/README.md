@@ -45,7 +45,12 @@ string. `app.notes` and `app.report` are what the export dropped or deferred.
   when it loads a project and this package reads the files as written. Where the two disagree, the
   export follows the file. Closing that gap is tracked as HLS-003.
 - **It emits an app that does not yet pass `npm run build` in every case.** See
-  [#24](https://github.com/The-Low-Code-Foundation/NodeGX/issues/24).
+  [#24](https://github.com/The-Low-Code-Foundation/NodeGX/issues/24). (Measured 2026-10-21: 16 of the 17 shipped
+  templates typecheck; the one error is a known row.)
+- **It does not yet carry every Function.** `nodegx export --dry-run` prints first, per node, what will and will not
+  translate and why; read that before anything else. A Function that keeps state on `this`, reads the clock, draws
+  randomness, schedules a timer or touches the browser travels as written when a Run wire drives it (2026-10-21); one that
+  awaits, reads `Noodl.*`, or sits in a logic component does not yet, and the preflight says so by name.
 
 Both of those are worth knowing before putting this in a pipeline, because in a pipeline there is
 nobody to notice.

@@ -1,0 +1,110 @@
+Warning: this nodegx command (/Users/richardosborne/vscode_projects/OpenNoodl/packages/nodegx-export/dist/cli.mjs) is older than its source (src/analyze/plan.ts changed after it was built), so a change in this checkout may
+not run. Rebuild it with:
+  npm run build --workspace @nodegx/export
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/landing-pages as it is on disk — last saved 2026-10-04 14:05:58.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Landing pages
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **64 files** — 3 pages and 22 components, plus the app shell, styles and build config
+- **6 of the 25** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (152)
+
+🔴 **This export would be missing a pathway, not a node: "Write the email" (Function) in `Site/Contact`. Without it, "Hand it to the mail app" (External Link) never runs. Replace it or wait for a release that translates it.**
+
+**34 nodes the export has no rule for, and 15 more left out only because they fire them.**
+
+- "Write the email" (Function) in `Site/Contact` — input "name" is fed by /Site/Field — no statically known source in the emit vocabulary
+  …and 5 nodes are left out only because this one fires them: "Hand it to the mail app" (External Link), "Say it went" (Condition), "Say something is empty" (Condition), "Put that away once it goes" (Condition), "Put "it went" away if the next try is empty" (Condition)
+- "Everything, at once" (And) in `Site/Contact` — logic output drives nothing statically translatable
+  …and 2 nodes are left out only because this one fires them: "Is there a name?" (Expression), "Is the message long enough?" (Expression)
+- "The verdict" (Component Outputs) in `Site/IsValidEmail` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The address" (Component Inputs), "Check the address" (Function)
+- "Where to go" (Component Inputs) in `Site/ScrollTo` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Find the section and scroll to it" (Function), "What happened" (Component Outputs)
+- "The glyph" (Icon) in `Site/Feature` — its iconIconSource arrives over a wire, so the rendered structure is not static
+  …and one node is left out only because this one fires it: "The glyph, from its name" (Function)
+- "Which quote is showing" (Counter) in `Site/QuoteCarousel` — its limits gate the mutations — clamped counting is not translated in this slice
+  …and one node is left out only because this one fires it: "The last valid index" (Expression)
+- "n of m" (String Format) in `Site/QuoteCarousel` — format output drives nothing statically translatable
+  …and one node is left out only because this one fires it: "Where a person would say they are" (Expression)
+- "The glyph" (Icon) in `Site/ServiceCard` — its iconIconSource arrives over a wire, so the rendered structure is not static
+  …and one node is left out only because this one fires it: "The glyph, from its name" (Function)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Site/IsValidEmail` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The verdict" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The address" (Component Inputs), "Check the address" (Function)
+- `Site/ScrollTo` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Where to go" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Find the section and scroll to it" (Function), "What happened" (Component Outputs)
+- `Site/Contact` — 34 refusals
+  - "Is the address one you could reply to?" (/Site/IsValidEmail) — the export has no rule for this node yet
+  - "Everything, at once" (And) — logic output drives nothing statically translatable
+    …and 2 nodes are left out only because this one fires them: "Is there a name?" (Expression), "Is the message long enough?" (Expression)
+  - "How much more is needed" (Expression) — input "m" is fed by /Site/Field — no statically known source in the emit vocabulary
+  - "The address box’s border" (Expression) — input "msg" is fed by /Site/IsValidEmail — no statically known source in the emit vocabulary
+  - "What the line under Send says" (Expression) — input "ok" is fed by And — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "EDIT — the address the form sends to" (String) — its savedValue read feeds JavaScriptFunction.in-to, which has no static binding in this slice
+  - "Write the email" (Function) — input "name" is fed by /Site/Field — no statically known source in the emit vocabulary
+    …and 5 nodes are left out only because this one fires them: "Hand it to the mail app" (External Link), "Say it went" (Condition), "Say something is empty" (Condition), "Put that away once it goes" (Condition), "Put "it went" away if the next try is empty" (Condition)
+- `Pages/Freelancer` — 23 refusals
+  - "To the form" (/Site/ScrollTo) — the export has no rule for this node yet
+  - "To the section the hero’s second button names" (/Site/ScrollTo) — the export has no rule for this node yet
+  - "Narrow to the selected kind" (Array Filter) — the export has no rule for this node yet
+  - "Showing n of m" (String Format) — format output drives nothing statically translatable
+  - "Did it match nothing?" (Expression) — input "shown" is fed by Filter Collection — its filterFilterValue-category setting is wired — the filter is not statically known
+  - "EDIT — what clients said — add a row for each one" (Static Array) — the authored rows are not consumed by a rendered repeater
+- `Site/QuoteCarousel` — 22 refusals
+  - "Which quote is showing" (Counter) — its limits gate the mutations — clamped counting is not translated in this slice
+    …and one node is left out only because this one fires it: "The last valid index" (Expression)
+  - "One quote, skipping to the current index" (Array Filter) — the export has no rule for this node yet
+  - "n of m" (String Format) — format output drives nothing statically translatable
+    …and one node is left out only because this one fires it: "Where a person would say they are" (Expression)
+  - "Is there one before this?" (Expression) — input "i" is fed by Counter — its limits gate the mutations — clamped counting is not translated in this slice
+  - "Is there one after this?" (Expression) — input "i" is fed by Counter — its limits gate the mutations — clamped counting is not translated in this slice
+- `Pages/Launch` — 15 refusals
+  - "To the form" (/Site/ScrollTo) — the export has no rule for this node yet
+  - "To the section the hero’s second button names" (/Site/ScrollTo) — the export has no rule for this node yet
+- `Pages/Business` — 11 refusals
+  - "To the form" (/Site/ScrollTo) — the export has no rule for this node yet
+  - "To the section the hero’s second button names" (/Site/ScrollTo) — the export has no rule for this node yet
+  - "EDIT — what regulars said — add a row for each one" (Static Array) — the authored rows are not consumed by a rendered repeater
+- `Site/Header` — 10 refusals
+  - "Nav link 1 — where it goes" (/Site/ScrollTo) — the export has no rule for this node yet
+  - "Nav link 2 — where it goes" (/Site/ScrollTo) — the export has no rule for this node yet
+  - "Nav link 3 — where it goes" (/Site/ScrollTo) — the export has no rule for this node yet
+  - "Get in touch — where it goes" (/Site/ScrollTo) — the export has no rule for this node yet
+- `Site/WorkCard` — 10 refusals
+  - "Open this story" (Show Popup) — popupParam-picture is wired — the runtime snapshots params at open; only literal params translate
+- `Site/ServiceCard` — 6 refusals
+  - "The glyph" (Icon) — its iconIconSource arrives over a wire, so the rendered structure is not static
+    …and one node is left out only because this one fires it: "The glyph, from its name" (Function)
+- `Site/Feature` — 4 refusals
+  - "The glyph" (Icon) — its iconIconSource arrives over a wire, so the rendered structure is not static
+    …and one node is left out only because this one fires it: "The glyph, from its name" (Function)
+- `Site/CaseStudy` — 3 refusals
+- `Site/FaqRow` — 2 refusals
+- `Site/Footer` — 2 refusals
+- `Site/PhotoCard` — 2 refusals
+- `Site/Check` — 1 refusal
+- `Site/Field` — 1 refusal
+- `Site/FilterPill` — 1 refusal
+- `Site/Plan` — 1 refusal
+- `Site/Quote` — 1 refusal
+- `Site/Switcher` — 1 refusal
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

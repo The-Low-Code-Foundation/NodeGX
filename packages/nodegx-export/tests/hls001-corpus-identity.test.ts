@@ -396,6 +396,13 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // fixture, and this row read 60: restored from git before the golden was taken.)
     // 61 → 62 on 2026-10-17 ("Hold the id", session 122): `held-desk`. Predicted before regenerating, by emitting every
     // fixture with HEAD's `src` and the tree's: only held-desk differs. Regenerated: 0 lines out, held-desk's 17 in.
+    // 63 → 64 on 2026-10-21 (EXP-019 slice 1, session 132, Richard's ruling of the same day): `host-desk`, the first
+    // project in the corpus whose Functions carry a host trait (`this` kept across runs, the clock, randomness, a timer,
+    // the browser) and are exported for it. Predicted before regenerating: exactly three paths move, `src/lib/functionRun.ts`
+    // in held-desk, pulse-desk and ticked-desk (the kept node gained `self`, so the library's text moved and nothing else
+    // did: a wrapper prints `.call(self)` only for a `this` body, and no fixture had one), plus host-desk's entries. The
+    // regenerated golden's diff counted the same: 3 lines out, those 3 back in with the new hash, and host-desk's 22-entry
+    // block (`git diff --numstat`: 27 in, 3 out).
     // 62 → 63 on 2026-10-17 (EXP-011 §90, session 123): `fail-desk`, the first project in the corpus where a record verb's
     // Failure runs a chain. Predicted before regenerating (`s123-failchain/after-await.ts` over the fixtures): fail-desk in,
     // and record-desk's Home.tsx changed (its Load sends two Record Fetches; the first is started, not waited for, as the
@@ -403,7 +410,7 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // Still 63 on 2026-10-19 (P18-S126-INSIGNAL, session 127): a signal input's prop is the pulse pair the parent passes.
     // Predicted by emitting every fixture with the base's `src` and the tree's: batch-desk's Notify.tsx alone (its `Do`
     // type). The red run named exactly that key; regenerated, that one hash moved.
-    expect(corpusProjects().length).toBe(63);
+    expect(corpusProjects().length).toBe(64);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

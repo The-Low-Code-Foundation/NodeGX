@@ -1,0 +1,225 @@
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/gram as it is on disk — last saved 2026-10-20 15:46:39.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — The gram
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **94 files** — 16 pages and 13 components, plus the app shell, styles and build config
+- **Data access** in `src/api/`, as **stubs** — reads answer empty and writes throw. This project declares no backend, so there is nothing to point them at
+- **Your `Cloud Function` calls** in `src/api/functions.ts` — no backend declared, so each fails as the app does
+- **7 of the 29** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (584)
+
+🔴 **This export would be missing a pathway, not a node: "The post and its comments" (Function) in `Pages/Post`; "The newest posts, as cards" (Function) in `Pages/Feed`; "Block them, with why" (Function) in `Pages/Member`; "Let them back" (Function) in `Pages/Member`; "The post, as one share" (Function) in `Pages/NewPost`; "Take this post down" (Function) in `Pages/Post`; "The comment" (Function) in `Pages/Post`; "The report" (Function) in `Pages/Report`; "Sign in with the password" (Log In) in `Pages/SignIn`; "The community’s name; someone signed in?" (Function) in `Pages/Welcome`; "Hide it, with why" (Function) in `Pages/Admin/Look`; "Bring it back" (Function) in `Pages/Admin/Look`; "The newest prayer requests, as cards" (Function) in `Pages/Prayer`; "Choose a photo" (Open File Picker) in `Pages/EditProfile`; "Their profile and posts" (Function) in `Pages/Member`; "Choose a photo" (Open File Picker) in `Pages/NewPost`; "Back to where it came from" (Function) in `Pages/NewPost`; "What is reported, and its reasons" (Function) in `Pages/Report`; "The rules, as one save" (Function) in `Pages/Rules`; "The profile, as one save" (Function) in `Pages/EditProfile`; "Your profile as it is" (Function) in `Pages/EditProfile`; "Who is posting" (Function) in `Pages/NewPost`; "To report it" (Navigate) in `Pages/Post`; "To its reports (admins)" (Navigate) in `Pages/Post`; "Ask the backend to email a link" (Request Magic Link) in `Pages/SignIn`; "Their name; in already?" (Function) in `Pages/Waiting`; "Sign out" (Log Out) in `UI/Bar`. Without them, "hide(hide)" (Cloud Function), "Send it, shrunk to 800 px, for the members only" (Upload File), "editProfile(profile)" (Cloud Function), "Not let in yet: to waiting" (Navigate), "Not let in yet: to waiting" (Navigate), "block(block)" (Cloud Function), "Not let in yet: to waiting" (Navigate), "Send it, shrunk to 1600 px, for the members only" (Upload File), "sharePost(post)" (Cloud Function), "To the feed" (Navigate), "To the prayer requests" (Navigate), "Not let in yet: to waiting" (Navigate), "hide(hide)" (Cloud Function), "commentOn(comment)" (Cloud Function), "Not let in yet: to waiting" (Navigate), "Not let in yet: to waiting" (Navigate), "report(report)" (Cloud Function), "Not let in yet: to waiting" (Navigate), "writeRules(rules)" (Cloud Function), "To waiting" (Navigate), "To the feed" (Navigate), "To the admins’ queue" (Navigate), "In already: to the start, which sends them on" (Navigate), "To waiting" (Navigate), "To the feed" (Navigate), "To the admins’ queue" (Navigate), "To the start" (Navigate) never run. Replace them or wait for a release that translates them.**
+
+**76 nodes the export has no rule for, and 64 more left out only because they fire them.**
+
+- "The post and its comments" (Function) in `Pages/Post` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 5 nodes are left out only because this one fires them: "Which post" (Page Inputs), "Hearts, as they change" (Subscribe To Changes), "Comments, as they change" (Subscribe To Changes), "Posts, as they change" (Subscribe To Changes), "Not let in yet: to waiting" (Navigate)
+- "The newest posts, as cards" (Function) in `Pages/Feed` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 4 nodes are left out only because this one fires them: "Hearts, as they change" (Subscribe To Changes), "Comments, as they change" (Subscribe To Changes), "Posts, as they change" (Subscribe To Changes), "Not let in yet: to waiting" (Navigate)
+- "Block them, with why" (Function) in `Pages/Member` — its trigger, "Block" (mpBlockGo), is not drawn: an element above it, "Block (admins)" (mpBlock), is authored Mounted false, and the wire into its Mounted from "Their profile and posts".out-canBlock is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  …and 4 nodes are left out only because this one fires them: "Whose profile" (Page Inputs), "block(block)" (Cloud Function), "Say the members changed" (Function), "The members changed" (Set Variable)
+- "Let them back" (Function) in `Pages/Member` — its out-block output feeds CloudFunction2.in-block, which its "go" signal runs, and that chain is not exported: two wires feed in-block — last-writer-wins is not statically ordered
+  …and 4 nodes are left out only because this one fires them: "Whose profile" (Page Inputs), "block(block)" (Cloud Function), "Say the members changed" (Function), "The members changed" (Set Variable)
+- "The post, as one share" (Function) in `Pages/NewPost` — input "kind" is fed by JavaScriptFunction — the Function that feeds it is not exported: two wires feed input "picked" — last-writer-wins is not statically ordered
+  …and 4 nodes are left out only because this one fires them: "The time it starts" (Dropdown), "sharePost(post)" (Cloud Function), "Say the feed changed" (Function), "The feed changed" (Set Variable)
+- "Take this post down" (Function) in `Pages/Post` — its trigger, "Yes, take it down" (poDown), is not drawn: an element above it, "The post and its comments" (poContent), is authored Mounted false, and the wire into its Mounted from "The post and its comments".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  …and 4 nodes are left out only because this one fires them: "Which post" (Page Inputs), "hide(hide)" (Cloud Function), "Say the feed changed" (Function), "The feed changed" (Set Variable)
+- "The comment" (Function) in `Pages/Post` — its trigger, "Comment" (poSend), is not drawn: an element above it, "The post and its comments" (poContent), is authored Mounted false, and the wire into its Mounted from "The post and its comments".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  …and 4 nodes are left out only because this one fires them: "Which post" (Page Inputs), "commentOn(comment)" (Cloud Function), "Say the feed changed" (Function), "The feed changed" (Set Variable)
+- "The report" (Function) in `Pages/Report` — input "reason" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+  …and 4 nodes are left out only because this one fires them: "Why" (Dropdown), "report(report)" (Cloud Function), "Sent" (Switch), "Not sent yet" (Switch)
+- "Sign in with the password" (Log In) in `Pages/SignIn` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 4 nodes are left out only because this one fires them: "Where they belong" (Function), "To waiting" (Navigate), "To the feed" (Navigate), "To the admins’ queue" (Navigate)
+- "The community’s name; someone signed in?" (Function) in `Pages/Welcome` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 4 nodes are left out only because this one fires them: "Where they belong" (Function), "To waiting" (Navigate), "To the feed" (Navigate), "To the admins’ queue" (Navigate)
+- "Hide it, with why" (Function) in `Pages/Admin/Look` — input "reason0" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 3 nodes are left out only because this one fires them: "hide(hide)" (Cloud Function), "Say the feed changed" (Function), "The feed changed" (Set Variable)
+- "Bring it back" (Function) in `Pages/Admin/Look` — input "kind" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 3 nodes are left out only because this one fires them: "hide(hide)" (Cloud Function), "Say the feed changed" (Function), "The feed changed" (Set Variable)
+- "The newest prayer requests, as cards" (Function) in `Pages/Prayer` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 3 nodes are left out only because this one fires them: "Comments, as they change" (Subscribe To Changes), "Posts, as they change" (Subscribe To Changes), "Not let in yet: to waiting" (Navigate)
+- "What is reported, hidden and blocked" (Function) in `Pages/Admin/Queue` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 2 nodes are left out only because this one fires them: "Reports, as they arrive" (Subscribe To Changes), "Reports on comments, as they arrive" (Subscribe To Changes)
+- "Choose a photo" (Open File Picker) in `Pages/EditProfile` — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join
+  …and 2 nodes are left out only because this one fires them: "Send it, shrunk to 800 px, for the members only" (Upload File), "Sending a photo" (Switch)
+- "Their profile and posts" (Function) in `Pages/Member` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 2 nodes are left out only because this one fires them: "Whose profile" (Page Inputs), "Not let in yet: to waiting" (Navigate)
+- "Choose a photo" (Open File Picker) in `Pages/NewPost` — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join
+  …and 2 nodes are left out only because this one fires them: "Send it, shrunk to 1600 px, for the members only" (Upload File), "Sending a photo" (Switch)
+- "Back to where it came from" (Function) in `Pages/NewPost` — input "kind" is fed by JavaScriptFunction — the Function that feeds it is not exported: two wires feed input "picked" — last-writer-wins is not statically ordered
+  …and 2 nodes are left out only because this one fires them: "To the feed" (Navigate), "To the prayer requests" (Navigate)
+- "What is reported, and its reasons" (Function) in `Pages/Report` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 2 nodes are left out only because this one fires them: "What is reported" (Page Inputs), "Not let in yet: to waiting" (Navigate)
+- "The rules, as one save" (Function) in `Pages/Rules` — input "rules0" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 2 nodes are left out only because this one fires them: "writeRules(rules)" (Cloud Function), "Read the rules again" (Function)
+- "The post or the comment, its state and its reports" (Function) in `Pages/Admin/Look` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "What to look at" (Page Inputs)
+- "The profile, as one save" (Function) in `Pages/EditProfile` — input "name0" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "editProfile(profile)" (Cloud Function)
+- "Your profile as it is" (Function) in `Pages/EditProfile` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "Not let in yet: to waiting" (Navigate)
+- "Which kind, and what the page says for it" (Function) in `Pages/NewPost` — two wires feed input "picked" — last-writer-wins is not statically ordered
+  …and one node is left out only because this one fires it: "Which kind to start on" (Page Inputs)
+- "Who is posting" (Function) in `Pages/NewPost` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "Not let in yet: to waiting" (Navigate)
+- "To report it" (Navigate) in `Pages/Post` — its trigger, "Report this post" (poReport), is not drawn: it is authored Mounted false, and the wire into its Mounted from "The post and its comments".out-canReport is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  …and one node is left out only because this one fires it: "Which post" (Page Inputs)
+- "To its reports (admins)" (Navigate) in `Pages/Post` — its trigger, "Its reports, and hiding it (admins)" (poLook), is not drawn: it is authored Mounted false, and the wire into its Mounted from "The post and its comments".out-canLook is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  …and one node is left out only because this one fires it: "Which post" (Page Inputs)
+- "Ask the backend to email a link" (Request Magic Link) in `Pages/SignIn` — the action reads values that only exist in another handler
+  …and one node is left out only because this one fires it: "The request was taken" (Switch)
+- "Their name; in already?" (Function) in `Pages/Waiting` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "In already: to the start, which sends them on" (Navigate)
+- "Sign out" (Log Out) in `UI/Bar` — its trigger, "Sign out" (brOut), is not drawn: it is authored Mounted false, and the wire into its Mounted from "Signed in? A band?".out-signedIn is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  …and one node is left out only because this one fires it: "To the start" (Navigate)
+- "The community’s name, read" (Function) in `UI/Bar` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "The community’s name, as read" (Set Variable)
+- "The date" (Component Outputs) in `UI/DatePicker` — value output "Value" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Draw the field and calendar" (Function)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Pages/NewPost` — 78 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (npRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (npRefused), is authored Mounted false, and the wire into its Mounted from "Who is posting".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "Who is posting" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "Not let in yet: to waiting" (Navigate)
+  - "Choose a photo" (Open File Picker) — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join
+    …and 2 nodes are left out only because this one fires them: "Send it, shrunk to 1600 px, for the members only" (Upload File), "Sending a photo" (Switch)
+  - "The photos, while the page is open" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Which kind, and what the page says for it" (Function) — two wires feed input "picked" — last-writer-wins is not statically ordered
+    …and one node is left out only because this one fires it: "Which kind to start on" (Page Inputs)
+  - "Post pressed" (Function) — its trigger, "Post" (npKindPost), is not drawn: an element above it, "New post" (npContent), is authored Mounted false, and the wire into its Mounted from "Who is posting".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "Prayer request pressed" (Function) — its trigger, "Prayer request" (npKindPrayer), is not drawn: an element above it, "New post" (npContent), is authored Mounted false, and the wire into its Mounted from "Who is posting".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "Testimony pressed" (Function) — its trigger, "Testimony" (npKindTestimony), is not drawn: an element above it, "New post" (npContent), is authored Mounted false, and the wire into its Mounted from "Who is posting".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "Event pressed" (Function) — its trigger, "Event" (npKindEvent), is not drawn: an element above it, "New post" (npContent), is authored Mounted false, and the wire into its Mounted from "Who is posting".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "The post, as one share" (Function) — input "kind" is fed by JavaScriptFunction — the Function that feeds it is not exported: two wires feed input "picked" — last-writer-wins is not statically ordered
+    …and 4 nodes are left out only because this one fires them: "The time it starts" (Dropdown), "sharePost(post)" (Cloud Function), "Say the feed changed" (Function), "The feed changed" (Set Variable)
+  - "Back to where it came from" (Function) — input "kind" is fed by JavaScriptFunction — the Function that feeds it is not exported: two wires feed input "picked" — last-writer-wins is not statically ordered
+    …and 2 nodes are left out only because this one fires them: "To the feed" (Navigate), "To the prayer requests" (Navigate)
+- `Pages/Member` — 59 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (mpRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (mpRefused), is authored Mounted false, and the wire into its Mounted from "Their profile and posts".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "Their profile and posts" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 2 nodes are left out only because this one fires them: "Whose profile" (Page Inputs), "Not let in yet: to waiting" (Navigate)
+  - "Block them, with why" (Function) — its trigger, "Block" (mpBlockGo), is not drawn: an element above it, "Block (admins)" (mpBlock), is authored Mounted false, and the wire into its Mounted from "Their profile and posts".out-canBlock is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+    …and 4 nodes are left out only because this one fires them: "Whose profile" (Page Inputs), "block(block)" (Cloud Function), "Say the members changed" (Function), "The members changed" (Set Variable)
+  - "Let them back" (Function) — its out-block output feeds CloudFunction2.in-block, which its "go" signal runs, and that chain is not exported: two wires feed in-block — last-writer-wins is not statically ordered
+    …and 4 nodes are left out only because this one fires them: "Whose profile" (Page Inputs), "block(block)" (Cloud Function), "Say the members changed" (Function), "The members changed" (Set Variable)
+  - "To edit your profile" (Navigate) — its trigger, "Edit profile" (mpEdit), is not drawn: it is authored Mounted false, and the wire into its Mounted from "Their profile and posts".out-isMe is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+- `Pages/Admin/Look` — 55 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (lkRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (lkRefused), is authored Mounted false, and the wire into its Mounted from "The post or the comment, its state and its reports".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "The post or the comment, its state and its reports" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "What to look at" (Page Inputs)
+  - "Hide it, with why" (Function) — input "reason0" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 3 nodes are left out only because this one fires them: "hide(hide)" (Cloud Function), "Say the feed changed" (Function), "The feed changed" (Set Variable)
+  - "Bring it back" (Function) — input "kind" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 3 nodes are left out only because this one fires them: "hide(hide)" (Cloud Function), "Say the feed changed" (Function), "The feed changed" (Set Variable)
+  - "To their profile" (Navigate) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Pages/EditProfile` — 55 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (epRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (epRefused), is authored Mounted false, and the wire into its Mounted from "Your profile as it is".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "Your profile as it is" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "Not let in yet: to waiting" (Navigate)
+  - "Choose a photo" (Open File Picker) — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join
+    …and 2 nodes are left out only because this one fires them: "Send it, shrunk to 800 px, for the members only" (Upload File), "Sending a photo" (Switch)
+  - "The photo, while the page is open" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Take the photo off" (Function) — its trigger, "Remove photo" (epRemove), is not drawn: it is authored Mounted false, and the wire into its Mounted from "The photo, while the page is open".out-canRemove is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "The profile, as one save" (Function) — input "name0" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "editProfile(profile)" (Cloud Function)
+  - "To your profile" (Navigate) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Pages/Post` — 48 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (poRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (poRefused), is authored Mounted false, and the wire into its Mounted from "The post and its comments".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "The post and its comments" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 5 nodes are left out only because this one fires them: "Which post" (Page Inputs), "Hearts, as they change" (Subscribe To Changes), "Comments, as they change" (Subscribe To Changes), "Posts, as they change" (Subscribe To Changes), "Not let in yet: to waiting" (Navigate)
+  - "The comment" (Function) — its trigger, "Comment" (poSend), is not drawn: an element above it, "The post and its comments" (poContent), is authored Mounted false, and the wire into its Mounted from "The post and its comments".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+    …and 4 nodes are left out only because this one fires them: "Which post" (Page Inputs), "commentOn(comment)" (Cloud Function), "Say the feed changed" (Function), "The feed changed" (Set Variable)
+  - "Asked: take it down?" (Switch) — its trigger, "Take this post down" (poTakeDown), is not drawn: it is authored Mounted false, and the wire into its Mounted from "The post and its comments".out-canTakeDown is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "Take this post down" (Function) — its trigger, "Yes, take it down" (poDown), is not drawn: an element above it, "The post and its comments" (poContent), is authored Mounted false, and the wire into its Mounted from "The post and its comments".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+    …and 4 nodes are left out only because this one fires them: "Which post" (Page Inputs), "hide(hide)" (Cloud Function), "Say the feed changed" (Function), "The feed changed" (Set Variable)
+  - "To report it" (Navigate) — its trigger, "Report this post" (poReport), is not drawn: it is authored Mounted false, and the wire into its Mounted from "The post and its comments".out-canReport is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+    …and one node is left out only because this one fires it: "Which post" (Page Inputs)
+  - "To its reports (admins)" (Navigate) — its trigger, "Its reports, and hiding it (admins)" (poLook), is not drawn: it is authored Mounted false, and the wire into its Mounted from "The post and its comments".out-canLook is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+    …and one node is left out only because this one fires it: "Which post" (Page Inputs)
+- `Pages/Report` — 40 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (rpRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (rpRefused), is authored Mounted false, and the wire into its Mounted from "What is reported, and its reasons".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "What is reported, and its reasons" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 2 nodes are left out only because this one fires them: "What is reported" (Page Inputs), "Not let in yet: to waiting" (Navigate)
+  - "The report" (Function) — input "reason" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+    …and 4 nodes are left out only because this one fires them: "Why" (Dropdown), "report(report)" (Cloud Function), "Sent" (Switch), "Not sent yet" (Switch)
+- `Pages/Admin/Queue` — 35 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (quRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (quRefused), is authored Mounted false, and the wire into its Mounted from "Who is waiting".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "Who is waiting" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "What is reported, hidden and blocked" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 2 nodes are left out only because this one fires them: "Reports, as they arrive" (Subscribe To Changes), "Reports on comments, as they arrive" (Subscribe To Changes)
+  - "To the rules" (Navigate) — its trigger, "Community rules" (quRules), is not drawn: an element above it, "Reported, hidden, blocked" (quMod), is authored Mounted false, and the wire into its Mounted from "What is reported, hidden and blocked".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "To the admins" (Navigate) — its trigger, "Admins" (quAdmins), is not drawn: an element above it, "Reported, hidden, blocked" (quMod), is authored Mounted false, and the wire into its Mounted from "What is reported, hidden and blocked".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "To the feed" (Navigate) — its trigger, "The feed" (quFeed), is not drawn: an element above it, "Reported, hidden, blocked" (quMod), is authored Mounted false, and the wire into its Mounted from "What is reported, hidden and blocked".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+- `Pages/SignIn` — 27 refusals
+  - "Come back to this app" (Function) — its out-redirect output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  - "Ask the backend to email a link" (Request Magic Link) — the action reads values that only exist in another handler
+    …and one node is left out only because this one fires it: "The request was taken" (Switch)
+  - "The request failed" (Switch) — trigger siRequest.failure is not a rendered element event or a receiver
+  - "Sign in with the password" (Log In) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 4 nodes are left out only because this one fires them: "Where they belong" (Function), "To waiting" (Navigate), "To the feed" (Navigate), "To the admins’ queue" (Navigate)
+- `Pages/SetUp` — 26 refusals
+- `Pages/Rules` — 24 refusals
+  - "The rules, as the admins wrote them" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The rules, as one save" (Function) — input "rules0" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 2 nodes are left out only because this one fires them: "writeRules(rules)" (Cloud Function), "Read the rules again" (Function)
+  - "Saved" (Switch) — trigger ruWrite.onTextChanged is not a rendered element event or a receiver
+- `UI/DatePicker` — 24 refusals
+  - "The date" (Component Outputs) — value output "Value" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Draw the field and calendar" (Function)
+- `Pages/Feed` — 23 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (fdRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (fdRefused), is authored Mounted false, and the wire into its Mounted from "The newest posts, as cards".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "The newest posts, as cards" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 4 nodes are left out only because this one fires them: "Hearts, as they change" (Subscribe To Changes), "Comments, as they change" (Subscribe To Changes), "Posts, as they change" (Subscribe To Changes), "Not let in yet: to waiting" (Navigate)
+  - "To a new post" (Navigate) — its trigger, "New post" (fdNew), is not drawn: an element above it, "The feed" (fdContent), is authored Mounted false, and the wire into its Mounted from "The newest posts, as cards".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "To the admins’ queue" (Navigate) — its trigger, "Waiting for you" (fdQueue), is not drawn: it is authored Mounted false, and the wire into its Mounted from "The newest posts, as cards".out-isAdmin is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+- `Pages/Prayer` — 19 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (prRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (prRefused), is authored Mounted false, and the wire into its Mounted from "The newest prayer requests, as cards".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "The newest prayer requests, as cards" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 3 nodes are left out only because this one fires them: "Comments, as they change" (Subscribe To Changes), "Posts, as they change" (Subscribe To Changes), "Not let in yet: to waiting" (Navigate)
+  - "To a new prayer request" (Navigate) — its trigger, "New prayer request" (prNew), is not drawn: an element above it, "The prayer requests" (prContent), is authored Mounted false, and the wire into its Mounted from "The newest prayer requests, as cards".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+- `Pages/Welcome` — 16 refusals
+  - "The community’s name; someone signed in?" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 4 nodes are left out only because this one fires them: "Where they belong" (Function), "To waiting" (Navigate), "To the feed" (Navigate), "To the admins’ queue" (Navigate)
+  - "Back from a sign-in link" (Sign In With) — the project declares no backend (metadata.cloudservices is absent) — there is no /oauth/<provider>/start to hand the browser over to
+  - "To ask to join" (Navigate) — its trigger, "Ask to join" (wcJoin), is not drawn: an element above it, "Ask to join, or sign in" (wcOpen), is authored Mounted false, and the wire into its Mounted from "The community’s name; someone signed in?".out-isSetUp is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "To sign in" (Navigate) — its trigger, "Sign in" (wcSignIn), is not drawn: an element above it, "Ask to join, or sign in" (wcOpen), is authored Mounted false, and the wire into its Mounted from "The community’s name; someone signed in?".out-isSetUp is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "To set up" (Navigate) — its trigger, "Set it up" (wcSetUp), is not drawn: an element above it, "Not set up yet" (wcNew), is authored Mounted false, and the wire into its Mounted from "The community’s name; someone signed in?".out-notSetUp is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+- `UI/Bar` — 13 refusals
+  - "Signed in? A band?" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Sign out" (Log Out) — its trigger, "Sign out" (brOut), is not drawn: it is authored Mounted false, and the wire into its Mounted from "Signed in? A band?".out-signedIn is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+    …and one node is left out only because this one fires it: "To the start" (Navigate)
+  - "The community’s name, read" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "The community’s name, as read" (Set Variable)
+- `Pages/Join` — 12 refusals
+- `Pages/Admin/Admins` — 10 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (adRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (adRefused), is authored Mounted false, and the wire into its Mounted from "Everyone who is in, admins first".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "Everyone who is in, admins first" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "To the admins’ queue" (Navigate) — its trigger, "Back" (adBack), is not drawn: an element above it, "Admins" (adContent), is authored Mounted false, and the wire into its Mounted from "Everyone who is in, admins first".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+- `Pages/Waiting` — 10 refusals
+  - "To sign in" (Navigate) — its trigger, "Sign in" (wtRefusedSignIn), is not drawn: an element above it, "Refused: why, and sign in" (wtRefused), is authored Mounted false, and the wire into its Mounted from "Their name; in already?".out-refused is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+  - "Their name; in already?" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "In already: to the start, which sends them on" (Navigate)
+  - "To the rules" (Navigate) — its trigger, "Read the community rules" (wtRules), is not drawn: an element above it, "On the list" (wtContent), is authored Mounted false, and the wire into its Mounted from "Their name; in already?".out-ok is not exported (the node it comes from is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B))
+- `UI/Nav` — 5 refusals
+  - "Which section is lit" (Function) — its out-feedWeight feeds net.noodl.controls.button.fontWeight, which has no static binding in this slice
+- `Admin/QueueRow` — 2 refusals
+- `Admin/ReportLine` — 1 refusal
+- `Feed/PostCard` — 1 refusal
+- **1 thing** about the project as a whole
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

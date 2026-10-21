@@ -1,0 +1,254 @@
+Warning: this nodegx command (/Users/richardosborne/vscode_projects/OpenNoodl/packages/nodegx-export/dist/cli.mjs) is older than its source (src/analyze/plan.ts changed after it was built), so a change in this checkout may
+not run. Rebuild it with:
+  npm run build --workspace @nodegx/export
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/marketplace as it is on disk — last saved 2026-10-20 15:46:27.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — The marketplace
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **114 files** — 20 pages and 29 components, plus the app shell, styles and build config
+- **Data access** in `src/api/`, as **stubs** — reads answer empty and writes throw. This project declares no backend, so there is nothing to point them at
+- **Your `Cloud Function` calls** in `src/api/functions.ts` — no backend declared, so each fails as the app does
+- **11 of the 49** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (724)
+
+🔴 **This export would be missing a pathway, not a node: "The form, as one order" (Function) in `Pages/Shop/Checkout`; "On in this country" (Checkbox) in `Admin/WayToggle`; "The message, as one enquiry" (Function) in `Pages/Shop/Product`; "Answered, or not yet" (Function) in `Seller/EnquiryCard`; "Confirm, with the cost and when" (Function) in `Seller/OrderCard`; "The next step" (Function) in `Seller/OrderCard`; "Cancel, with why" (Function) in `Seller/OrderCard`; "This shelf, renamed" (Function) in `Admin/ShelfRow`; "This way, with its words" (Function) in `Admin/WayCard`; "Every rate, as one save" (Function) in `Pages/Admin/Rates`; "The form, as one seller" (Function) in `Pages/Admin/SellerForm`; "The new shelf" (Function) in `Pages/Admin/Shelves`; "The new country" (Function) in `Pages/Admin/WaysToPay`; "The form, as one product" (Function) in `Pages/Seller/ProductForm`; "Sign in" (Log In) in `Pages/SignIn`; "Off sale or back on" (Function) in `Seller/ProductRow`; "Choose a photo" (Open File Picker) in `Pages/Admin/SellerForm`; "Stop, with the reason" (Function) in `Pages/Admin/StopSeller`; "Bring back" (Function) in `Pages/Admin/StopSeller`; "Choose a photo" (Open File Picker) in `Pages/Seller/ProductForm`. Without them, "saveShelf(shelf)" (Cloud Function), "saveWayToPay(way)" (Cloud Function), "saveWayToPay(way)" (Cloud Function), "saveRates(rates)" (Cloud Function), "Send it, shrunk to 512 px" (Upload File), "saveSeller(seller)" (Cloud Function), "saveShelf(shelf)" (Cloud Function), "stopSeller(stop)" (Cloud Function), "saveCountry(country)" (Cloud Function), "Send it, shrunk to 1600 px" (Upload File), "saveProduct(product)" (Cloud Function), "placeOrder(order)" (Cloud Function), "To the order" (Navigate), "sendEnquiry(enquiry)" (Cloud Function), "To the sellers" (Navigate), "To my orders" (Navigate), "answerEnquiry(answer)" (Cloud Function), "movePart(move)" (Cloud Function), "takeOffSale(sale)" (Cloud Function) never run. Replace them or wait for a release that translates them.**
+
+**67 nodes the export has no rule for, and 72 more left out only because they fire them.**
+
+- "The form, as one order" (Function) in `Pages/Shop/Checkout` — input "country" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+  …and 6 nodes are left out only because this one fires them: "The country it goes to" (Dropdown), "placeOrder(order)" (Cloud Function), "Remember the order on this phone; empty the basket" (Function), "The basket, emptied" (Set Variable), "The order just placed" (Set Variable), "To the order" (Navigate)
+- "On in this country" (Checkbox) in `Admin/WayToggle` — the export has no rule for this node yet
+  …and 5 nodes are left out only because this one fires them: "One country, for one way" (Component Inputs), "This way, with this country on or off" (Function), "saveWayToPay(way)" (Cloud Function), "Say the ways changed" (Function), "The ways to pay changed" (Set Variable)
+- "The message, as one enquiry" (Function) in `Pages/Shop/Product` — input "productId" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and 4 nodes are left out only because this one fires them: "sendEnquiry(enquiry)" (Cloud Function), "The last send was refused" (Switch), "Sent (a new product starts unsent)" (Switch), "Who has it, and how they’ll reach you" (Function)
+- "Answered, or not yet" (Function) in `Seller/EnquiryCard` — its out-answer output feeds CloudFunction2.in-answer, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+  …and 4 nodes are left out only because this one fires them: "answerEnquiry(answer)" (Cloud Function), "The last mark was refused" (Switch), "Say an enquiry changed" (Function), "An enquiry changed" (Set Variable)
+- "Confirm, with the cost and when" (Function) in `Seller/OrderCard` — its out-move output feeds CloudFunction2.in-move, which its "go" signal runs, and that chain is not exported: two wires feed in-move — last-writer-wins is not statically ordered
+  …and 4 nodes are left out only because this one fires them: "movePart(move)" (Cloud Function), "The last move was refused" (Switch), "Say an order part moved" (Function), "An order part moved" (Set Variable)
+- "The next step" (Function) in `Seller/OrderCard` — its out-move output feeds CloudFunction2.in-move, which its "go" signal runs, and that chain is not exported: two wires feed in-move — last-writer-wins is not statically ordered
+  …and 4 nodes are left out only because this one fires them: "movePart(move)" (Cloud Function), "The last move was refused" (Switch), "Say an order part moved" (Function), "An order part moved" (Set Variable)
+- "Cancel, with why" (Function) in `Seller/OrderCard` — its out-move output feeds CloudFunction2.in-move, which its "go" signal runs, and that chain is not exported: two wires feed in-move — last-writer-wins is not statically ordered
+  …and 4 nodes are left out only because this one fires them: "movePart(move)" (Cloud Function), "The last move was refused" (Switch), "Say an order part moved" (Function), "An order part moved" (Set Variable)
+- "This shelf, renamed" (Function) in `Admin/ShelfRow` — its out-shelf output feeds CloudFunction2.in-shelf, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+  …and 3 nodes are left out only because this one fires them: "saveShelf(shelf)" (Cloud Function), "Say the shelves changed" (Function), "The shelves changed" (Set Variable)
+- "This way, with its words" (Function) in `Admin/WayCard` — its out-way output feeds CloudFunction2.in-way, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+  …and 3 nodes are left out only because this one fires them: "saveWayToPay(way)" (Cloud Function), "Say the ways changed" (Function), "The ways to pay changed" (Set Variable)
+- "Every rate, as one save" (Function) in `Pages/Admin/Rates` — input "rows" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 3 nodes are left out only because this one fires them: "saveRates(rates)" (Cloud Function), "Say the rates were saved" (Function), "The rates were saved" (Set Variable)
+- "The form, as one seller" (Function) in `Pages/Admin/SellerForm` — input "name0" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and 3 nodes are left out only because this one fires them: "Which seller" (Page Inputs), "Country" (Dropdown), "saveSeller(seller)" (Cloud Function)
+- "The new shelf" (Function) in `Pages/Admin/Shelves` — its out-shelf output feeds CloudFunction2.in-shelf, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+  …and 3 nodes are left out only because this one fires them: "saveShelf(shelf)" (Cloud Function), "Say the shelves changed" (Function), "The shelves changed" (Set Variable)
+- "The new country" (Function) in `Pages/Admin/WaysToPay` — its out-country output feeds CloudFunction2.in-country, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+  …and 3 nodes are left out only because this one fires them: "saveCountry(country)" (Cloud Function), "Say the ways changed" (Function), "The countries changed" (Set Variable)
+- "The form, as one product" (Function) in `Pages/Seller/ProductForm` — input "sellerId" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and 3 nodes are left out only because this one fires them: "Shelf" (Dropdown), "How buyers get it" (Dropdown), "saveProduct(product)" (Cloud Function)
+- "Sign in" (Log In) in `Pages/SignIn` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 3 nodes are left out only because this one fires them: "Admin to sellers, staff to their orders" (Function), "To the sellers" (Navigate), "To my orders" (Navigate)
+- "Off sale or back on" (Function) in `Seller/ProductRow` — its out-sale output feeds CloudFunction2.in-sale, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+  …and 3 nodes are left out only because this one fires them: "takeOffSale(sale)" (Cloud Function), "Say a product changed" (Function), "A product changed" (Set Variable)
+- "Choose a photo" (Open File Picker) in `Pages/Admin/SellerForm` — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join
+  …and 2 nodes are left out only because this one fires them: "Send it, shrunk to 512 px" (Upload File), "Sending a photo" (Switch)
+- "Stop, with the reason" (Function) in `Pages/Admin/StopSeller` — its out-stop output feeds CloudFunction2.in-stop, which its "go" signal runs, and that chain is not exported: two wires feed in-stop — last-writer-wins is not statically ordered
+  …and 2 nodes are left out only because this one fires them: "Which seller" (Page Inputs), "stopSeller(stop)" (Cloud Function)
+- "Bring back" (Function) in `Pages/Admin/StopSeller` — its out-stop output feeds CloudFunction2.in-stop, which its "go" signal runs, and that chain is not exported: two wires feed in-stop — last-writer-wins is not statically ordered
+  …and 2 nodes are left out only because this one fires them: "Which seller" (Page Inputs), "stopSeller(stop)" (Cloud Function)
+- "Choose a photo" (Open File Picker) in `Pages/Seller/ProductForm` — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join
+  …and 2 nodes are left out only because this one fires them: "Send it, shrunk to 1600 px" (Upload File), "Sending a photo" (Switch)
+- "The product, its seller, its price in the buyer’s currency" (Function) in `Pages/Shop/Product` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and 2 nodes are left out only because this one fires them: "Which product" (Page Inputs), "Sent (a new product starts unsent)" (Switch)
+- "Prices in" (Dropdown) in `Shop/Top` — its items arrives over a wire, so the rendered structure is not static
+  …and 2 nodes are left out only because this one fires them: "A currency picked: remember it" (Function), "The currency picked" (Set Variable)
+- "Keep what was typed" (Function) in `Admin/RateRow` — a Function argument reads state written earlier in this chain — not translated in this slice
+  …and one node is left out only because this one fires it: "The rates typed so far" (Set Variable)
+- "The seller, and the countries" (Function) in `Pages/Admin/SellerForm` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "Which seller" (Page Inputs)
+- "The seller" (Function) in `Pages/Admin/StopSeller` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "Which seller" (Page Inputs)
+- "This seller’s products" (Function) in `Pages/Seller/Products` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "Whose products" (Page Inputs)
+- "The basket on this phone, and what is in it" (Function) in `Pages/Shop/Basket` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "The basket changed: something was taken out" (Set Variable)
+- "The order this link opens" (Function) in `Pages/Shop/Order` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "Which order" (Page Inputs)
+- "The order, worded for its buyer" (Function) in `Pages/Shop/Order` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "Which order" (Page Inputs)
+- "Put them in the basket on this phone" (Function) in `Pages/Shop/Product` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "The basket changed" (Set Variable)
+- "The seller and what it has on sale" (Function) in `Pages/Shop/Seller` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "Which seller" (Page Inputs)
+- "Say which photo goes" (Function) in `Seller/PhotoTile` — the script reads the clock (Date) — not deterministic
+  …and one node is left out only because this one fires it: "A photo was taken off" (Set Variable)
+- "One fewer" (Function) in `Shop/BasketLine` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "The basket changed" (Set Variable)
+- "One more" (Function) in `Shop/BasketLine` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "The basket changed" (Set Variable)
+- "Take it out" (Function) in `Shop/BasketLine` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "The basket changed" (Set Variable)
+- "The currencies there are rates for, and which one is shown" (Function) in `Shop/Top` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "The currency to start with" (Set Variable)
+- "The marketplace’s name, read" (Function) in `Shop/Top` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "The marketplace’s name, as read" (Set Variable)
+- "The marketplace’s name, read" (Function) in `UI/Brand` — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  …and one node is left out only because this one fires it: "The marketplace’s name, as read" (Set Variable)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Admin/WayToggle` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "On in this country" (Checkbox) — the export has no rule for this node yet
+    …and 5 nodes are left out only because this one fires them: "One country, for one way" (Component Inputs), "This way, with this country on or off" (Function), "saveWayToPay(way)" (Cloud Function), "Say the ways changed" (Function), "The ways to pay changed" (Set Variable)
+- `Pages/Shop/Product` — 87 refusals
+  - "The product, its seller, its price in the buyer’s currency" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 2 nodes are left out only because this one fires them: "Which product" (Page Inputs), "Sent (a new product starts unsent)" (Switch)
+  - "How many (1 to 99)" (Counter) — its limits gate the mutations — clamped counting is not translated in this slice
+  - "The Add button’s words" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Put them in the basket on this phone" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "The basket changed" (Set Variable)
+  - "Open WhatsApp" (External Link) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The message, as one enquiry" (Function) — input "productId" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and 4 nodes are left out only because this one fires them: "sendEnquiry(enquiry)" (Cloud Function), "The last send was refused" (Switch), "Sent (a new product starts unsent)" (Switch), "Who has it, and how they’ll reach you" (Function)
+  - "To the seller" (Navigate) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Pages/Admin/SellerForm` — 63 refusals
+  - "Choose a photo" (Open File Picker) — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join
+    …and 2 nodes are left out only because this one fires them: "Send it, shrunk to 512 px" (Upload File), "Sending a photo" (Switch)
+  - "The logo to show" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The seller, and the countries" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "Which seller" (Page Inputs)
+  - "The form, as one seller" (Function) — input "name0" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and 3 nodes are left out only because this one fires them: "Which seller" (Page Inputs), "Country" (Dropdown), "saveSeller(seller)" (Cloud Function)
+- `Pages/Seller/ProductForm` — 59 refusals
+  - "Choose a photo" (Open File Picker) — its Completed output is consumed — that pulse fires once however the action ended, and this slice emits the arms rather than their join
+    …and 2 nodes are left out only because this one fires them: "Send it, shrunk to 1600 px" (Upload File), "Sending a photo" (Switch)
+  - "The photos, while the form is open" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The product, the shelves, the seller’s currency" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The form, as one product" (Function) — input "sellerId" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and 3 nodes are left out only because this one fires them: "Shelf" (Dropdown), "How buyers get it" (Dropdown), "saveProduct(product)" (Cloud Function)
+- `Pages/Shop/Checkout` — 49 refusals
+  - "The basket, the countries, the rates, the ways to pay" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "One payment per seller country, and the ways on there" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The form, as one order" (Function) — input "country" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+    …and 6 nodes are left out only because this one fires them: "The country it goes to" (Dropdown), "placeOrder(order)" (Cloud Function), "Remember the order on this phone; empty the basket" (Function), "The basket, emptied" (Set Variable), "The order just placed" (Set Variable), "To the order" (Navigate)
+- `Seller/OrderCard` — 32 refusals
+  - "Confirm, with the cost and when" (Function) — its out-move output feeds CloudFunction2.in-move, which its "go" signal runs, and that chain is not exported: two wires feed in-move — last-writer-wins is not statically ordered
+    …and 4 nodes are left out only because this one fires them: "movePart(move)" (Cloud Function), "The last move was refused" (Switch), "Say an order part moved" (Function), "An order part moved" (Set Variable)
+  - "The next step" (Function) — its out-move output feeds CloudFunction2.in-move, which its "go" signal runs, and that chain is not exported: two wires feed in-move — last-writer-wins is not statically ordered
+    …and 4 nodes are left out only because this one fires them: "movePart(move)" (Cloud Function), "The last move was refused" (Switch), "Say an order part moved" (Function), "An order part moved" (Set Variable)
+  - "Cancel, with why" (Function) — its out-move output feeds CloudFunction2.in-move, which its "go" signal runs, and that chain is not exported: two wires feed in-move — last-writer-wins is not statically ordered
+    …and 4 nodes are left out only because this one fires them: "movePart(move)" (Cloud Function), "The last move was refused" (Switch), "Say an order part moved" (Function), "An order part moved" (Set Variable)
+- `Pages/Admin/StopSeller` — 27 refusals
+  - "The seller" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "Which seller" (Page Inputs)
+  - "“Stopped: <reason>”" (Expression) — input "reason" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Stop, with the reason" (Function) — its out-stop output feeds CloudFunction2.in-stop, which its "go" signal runs, and that chain is not exported: two wires feed in-stop — last-writer-wins is not statically ordered
+    …and 2 nodes are left out only because this one fires them: "Which seller" (Page Inputs), "stopSeller(stop)" (Cloud Function)
+  - "Bring back" (Function) — its out-stop output feeds CloudFunction2.in-stop, which its "go" signal runs, and that chain is not exported: two wires feed in-stop — last-writer-wins is not statically ordered
+    …and 2 nodes are left out only because this one fires them: "Which seller" (Page Inputs), "stopSeller(stop)" (Cloud Function)
+- `Pages/Shop/Home` — 27 refusals
+  - "Everything on the shelves, read once" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "What is on sale, on the shelf picked, matching the search" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Pages/Admin/WaysToPay` — 26 refusals
+  - "The countries and the ways to pay" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The new country" (Function) — its out-country output feeds CloudFunction2.in-country, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+    …and 3 nodes are left out only because this one fires them: "saveCountry(country)" (Cloud Function), "Say the ways changed" (Function), "The countries changed" (Set Variable)
+- `Pages/Admin/Rates` — 23 refusals
+  - "Every currency, its rate, and when it changed" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "Every rate, as one save" (Function) — input "rows" is fed by JavaScriptFunction — the Function that feeds it is not exported: the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 3 nodes are left out only because this one fires them: "saveRates(rates)" (Cloud Function), "Say the rates were saved" (Function), "The rates were saved" (Set Variable)
+- `Pages/Shop/Basket` — 23 refusals
+  - "The basket on this phone, and what is in it" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "The basket changed: something was taken out" (Set Variable)
+  - "The basket, by seller and by country" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Pages/Shop/Order` — 22 refusals
+  - "The order this link opens" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "Which order" (Page Inputs)
+  - "The order, worded for its buyer" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "Which order" (Page Inputs)
+- `Pages/Admin/Shelves` — 21 refusals
+  - "Every shelf, and how many products are on it" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "The new shelf" (Function) — its out-shelf output feeds CloudFunction2.in-shelf, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+    …and 3 nodes are left out only because this one fires them: "saveShelf(shelf)" (Cloud Function), "Say the shelves changed" (Function), "The shelves changed" (Set Variable)
+- `Pages/Shop/Seller` — 21 refusals
+  - "The seller and what it has on sale" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "Which seller" (Page Inputs)
+- `Pages/Seller/Products` — 20 refusals
+  - "This seller’s products" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "Whose products" (Page Inputs)
+  - "To a new product" (Navigate) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Pages/Orders` — 17 refusals
+  - "The order parts this person may see" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Admin/WayCard` — 16 refusals
+  - "This way, with its words" (Function) — its out-way output feeds CloudFunction2.in-way, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+    …and 3 nodes are left out only because this one fires them: "saveWayToPay(way)" (Cloud Function), "Say the ways changed" (Function), "The ways to pay changed" (Set Variable)
+- `Pages/Enquiries` — 16 refusals
+  - "The enquiries this person may read" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Shop/Top` — 16 refusals
+  - "Prices in" (Dropdown) — its items arrives over a wire, so the rendered structure is not static
+    …and 2 nodes are left out only because this one fires them: "A currency picked: remember it" (Function), "The currency picked" (Set Variable)
+  - "The currencies there are rates for, and which one is shown" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "The currency to start with" (Set Variable)
+  - "The marketplace’s name, read" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "The marketplace’s name, as read" (Set Variable)
+- `Pages/Admin/GiveLogin` — 15 refusals
+  - "The seller" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Shop/Nav` — 15 refusals
+  - "How many in the basket; the last order on this phone" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+  - "To my order" (Navigate) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Admin/ShelfRow` — 13 refusals
+  - "This shelf, renamed" (Function) — its out-shelf output feeds CloudFunction2.in-shelf, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+    …and 3 nodes are left out only because this one fires them: "saveShelf(shelf)" (Cloud Function), "Say the shelves changed" (Function), "The shelves changed" (Set Variable)
+- `Pages/SignIn` — 13 refusals
+  - "Sign in" (Log In) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and 3 nodes are left out only because this one fires them: "Admin to sellers, staff to their orders" (Function), "To the sellers" (Navigate), "To my orders" (Navigate)
+- `Seller/EnquiryCard` — 13 refusals
+  - "Answered, or not yet" (Function) — its out-answer output feeds CloudFunction2.in-answer, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+    …and 4 nodes are left out only because this one fires them: "answerEnquiry(answer)" (Cloud Function), "The last mark was refused" (Switch), "Say an enquiry changed" (Function), "An enquiry changed" (Set Variable)
+- `Shop/BasketLine` — 12 refusals
+  - "One fewer" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "The basket changed" (Set Variable)
+  - "One more" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "The basket changed" (Set Variable)
+  - "Take it out" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "The basket changed" (Set Variable)
+- `Pages/Admin/Name` — 11 refusals
+  - "The admin only" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Pages/SetUp` — 10 refusals
+- `Seller/ProductRow` — 10 refusals
+  - "Off sale or back on" (Function) — its out-sale output feeds CloudFunction2.in-sale, which its "go" signal runs, and that chain is not exported: the script reads the clock (Date) — not deterministic
+    …and 3 nodes are left out only because this one fires them: "takeOffSale(sale)" (Cloud Function), "Say a product changed" (Function), "A product changed" (Set Variable)
+- `Admin/Tabs` — 8 refusals
+  - "Which tab is this page" (Function) — the script schedules timers — invocation timing is real semantics
+- `Pages/Admin/Sellers` — 8 refusals
+  - "Every seller, with its country and counts" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `Admin/RateRow` — 7 refusals
+  - "Keep what was typed" (Function) — a Function argument reads state written earlier in this chain — not translated in this slice
+    …and one node is left out only because this one fires it: "The rates typed so far" (Set Variable)
+- `Seller/Tabs` — 5 refusals
+  - "Which tab is this page" (Function) — its out-orders feeds net.noodl.controls.button.cssClassName, which has no static binding in this slice
+- `Seller/PhotoTile` — 4 refusals
+  - "Say which photo goes" (Function) — the script reads the clock (Date) — not deterministic
+    …and one node is left out only because this one fires it: "A photo was taken off" (Set Variable)
+- `Shop/PayBox` — 4 refusals
+  - "Open Paystack for this country" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+- `UI/Brand` — 4 refusals
+  - "The marketplace’s name, read" (Function) — the script reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)
+    …and one node is left out only because this one fires it: "The marketplace’s name, as read" (Set Variable)
+- `Shop/PayOption` — 2 refusals
+- `Shop/ProductCard` — 1 refusal
+- `Shop/SellerChip` — 1 refusal
+- `Shop/ShelfChip` — 1 refusal
+- **1 thing** about the project as a whole
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

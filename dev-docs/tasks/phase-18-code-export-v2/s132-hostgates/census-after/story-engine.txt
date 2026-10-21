@@ -1,0 +1,64 @@
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/story-engine as it is on disk — last saved 2026-10-20 12:21:59.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Story engine
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **27 files** — 2 pages and 5 components, plus the app shell, styles and build config
+- **5 files copied across unchanged** from your kits — scripts, fonts and icon sets, byte for byte
+- **2 of the 7** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (64)
+
+**13 nodes the export has no rule for, and 12 more left out only because they fire them.**
+
+- "Take what that choice gives you" (Function) in `Pages/Read` — input "gift" is fed by For Each — it reads the repeater rdChoices's relayed row value "gives" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+  …and 3 nodes are left out only because this one fires them: "Was that something new?" (Condition), "You are carrying that now" (Set Variable), "You are in that passage now" (Set Variable)
+- "Which story is being read" (Function) in `Story/Source` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "EDIT — your story — every passage, in this one list" (Static Array), "A story somebody pasted on the Remix page" (Variable), "The story" (Component Outputs)
+- "The passage you are in" (Function) in `Pages/Read` — input "story" is fed by /Story/Source — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "Is there a passage with that id?" (Condition), "Is this an ending?" (Condition)
+- "Read what was pasted" (Function) in `Pages/Remix` — input "text" is fed by /Story/Paster — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "Is that a story?" (Condition), "That is the story now" (Set Variable)
+- "What you can see from here" (Function) in `Pages/Read` — input "choices" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Is there any way on from here?" (Condition)
+- "Put the reader at the beginning" (Set Variable) in `Pages/Read` — the value wire has no statically known source
+  …and one node is left out only because this one fires it: "Empty their hands" (Set Variable)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Story/Source` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "Which story is being read" (Function) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "EDIT — your story — every passage, in this one list" (Static Array), "A story somebody pasted on the Remix page" (Variable), "The story" (Component Outputs)
+- `Pages/Read` — 49 refusals
+  - "The story being read" (/Story/Source) — the export has no rule for this node yet
+  - "The passage you are in" (Function) — input "story" is fed by /Story/Source — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "Is there a passage with that id?" (Condition), "Is this an ending?" (Condition)
+  - "What you can see from here" (Function) — input "choices" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Is there any way on from here?" (Condition)
+  - "Take what that choice gives you" (Function) — input "gift" is fed by For Each — it reads the repeater rdChoices's relayed row value "gives" as a standing input, read whenever the node runs — there it is the value of whichever row fired last, which the export does not hold; it reads that value only in a chain a row's relayed signal runs, as the firing row's own
+    …and 3 nodes are left out only because this one fires them: "Was that something new?" (Condition), "You are carrying that now" (Set Variable), "You are in that passage now" (Set Variable)
+  - "Put the reader at the beginning" (Set Variable) — the value wire has no statically known source
+    …and one node is left out only because this one fires it: "Empty their hands" (Set Variable)
+  - "The id that is missing, in a sentence" (String Format) — format output drives nothing statically translatable
+  - "Are you carrying anything?" (Expression) — input "n" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+- `Pages/Remix` — 9 refusals
+  - "The story that is playing" (/Story/Source) — the export has no rule for this node yet
+  - "Read what was pasted" (Function) — input "text" is fed by /Story/Paster — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "Is that a story?" (Condition), "That is the story now" (Set Variable)
+- `Story/Sidebar` — 3 refusals
+  - "And when it is empty" (Inverter) — logic output drives nothing statically translatable
+- `Story/Passage` — 1 refusal
+- `Story/Paster` — 1 refusal
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

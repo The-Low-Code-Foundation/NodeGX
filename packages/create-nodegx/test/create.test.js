@@ -78,6 +78,9 @@ test('P112 OWN-007 (R3): the folder gets the editor brief as a project skill, na
   assert.deepEqual(coreSkillFiles().map((f) => f.to), [path.join('.claude', 'skills', 'nodegx-your-own-editor', 'SKILL.md')]);
   // Every other agent is pointed at the same file from the agent notes.
   assert.match(AGENT_NOTE, /`nodegx-your-own-editor` \(`\.claude\/skills\/nodegx-your-own-editor\/SKILL\.md`\)/);
+  // P18 EXP-023: the note says how the person leaves, and that the preflight comes first.
+  assert.match(AGENT_NOTE, /`npx @nodegx\/export export <the app's folder> --dry-run` says first what/);
+  assert.match(AGENT_NOTE, /`npx nodegx-deploy` \(from `@nodegx\/preview`\)/);
   assert.match(run.stdout, /Wrote \.claude\/skills\/nodegx-your-own-editor\/SKILL\.md/);
 });
 

@@ -1,6 +1,6 @@
 {
   "name": "@nodegx/export",
-  "version": "0.0.1",
+  "version": "0.2.5",
   "description": "Code export for NodeGX projects: v2 files → IR → analysis → generated React. EXP-002's pipeline; the IR is the shared contract with EXP-003/005 (dev-docs/tasks/phase-18-code-export-v2/EXP-002-IR-DESIGN.md).",
   "author": "The Low Code Foundation <contact@thelowcodefoundation.com>",
   "license": "GPL-3.0",

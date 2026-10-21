@@ -1,0 +1,421 @@
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/todo-list-demo as it is on disk — last saved 2026-10-11 16:00:03.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Todo list demo
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **159 files** — 1 page and 60 components, plus the app shell, styles and build config
+- **12 of the 61** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (1334)
+
+**121 nodes the export has no rule for, and 125 more left out only because they fire them.**
+
+- "Your list, kept in this browser" (/Logic/Todo data) in `Pages/Todo` — the export has no rule for this node yet
+  …and 17 nodes are left out only because this one fires them: "A minute clock, and a wake when the app comes back into view" (Function), "Was it a project’s task?" (Function), "Put the task in a project" (/Projects/Set task project), "Drag" (/Commands/Move task), "Top" (/Commands/Move task), "Close" (/Commands/Close task), "Reopen" (/Commands/Reopen task), "Rename" (/Commands/Rename task), "Tick" (/Commands/Tick action), "Untick" (/Commands/Untick action), "ActDrag" (/Commands/Move action), "RenameAct" (/Commands/Rename action), "Describe" (/Commands/Describe action), "RenameRoutine" (/Commands/Rename routine), "RemoveSlot" (/Commands/Set schedule), "Check" (/Commands/Tick routine), "Stop" (/Commands/Stop routine)
+- "The line" (Component Inputs) in `Logic/Write history` — the export has no rule for this node yet
+  …and 8 nodes are left out only because this one fires them: "Written" (Component Outputs), "The last line written" (Variable), "A new line, or extend the last one?" (Function), "Add the line, in this browser" (Function), "Extend the last line, in this browser" (Function), "Remember it, to extend next time" (Function), "Keep the last line" (Set Variable), "Say it did not save" (Set Variable)
+- "When to read" (Component Inputs) in `Logic/Todo data` — the export has no rule for this node yet
+  …and 5 nodes are left out only because this one fires them: "The selected task" (Variable), "Read the list from this browser" (Function), "Forget this browser’s list" (Function), "Forget the last history line" (Set Variable), "Say the list did not load" (Set Variable)
+- "What you did" (Component Outputs) in `Projects/View` — two wires feed value output "projectId" — last-writer-wins is not statically ordered
+  …and 5 nodes are left out only because this one fires them: "Save next move" (/Projects/Save next move), "Been paid" (/Projects/Mark money), "Sent" (/Projects/Mark money), "Save project" (/Projects/Save project), "Put a task in the project" (/Projects/Set task project)
+- "Is there anything to write?" (Function) in `Commands/Move action` — its out-hasSecond output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and 4 nodes are left out only because this one fires them: "Move it, in this browser" (Function), "Is there a neighbour to swap with?" (Condition), "Move the neighbour, in this browser" (Function), "Say it did not save" (Set Variable)
+- "Is there anything to write?" (Function) in `Commands/Move task` — its out-hasSecond output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and 4 nodes are left out only because this one fires them: "Move it, in this browser" (Function), "Is there a neighbour to swap with?" (Condition), "Move the neighbour, in this browser" (Function), "Say it did not save" (Set Variable)
+- "What you did in it" (Component Outputs) in `Projects/Money sheet` — two wires feed value output "itemKey" — last-writer-wins is not statically ordered
+  …and 4 nodes are left out only because this one fires them: "Save the item" (/Projects/Save money item), "End the item" (/Projects/End money item), "Paid" (/Projects/Mark money), "Untick" (/Projects/Mark money)
+- "What to write" (Component Inputs) in `Projects/Add project` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- "What to write" (Component Inputs) in `Projects/End money item` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- "What to write" (Component Inputs) in `Projects/Mark money` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- "What to write" (Component Inputs) in `Projects/Move project` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- "What to write" (Component Inputs) in `Projects/Record balance` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- "What to write" (Component Inputs) in `Projects/Save money item` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- "What to write" (Component Inputs) in `Projects/Save next move` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- "What to write" (Component Inputs) in `Projects/Save project` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- "What to write" (Component Inputs) in `Projects/Set task project` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- "The lines" (Component Outputs) in `Logic/Log rows` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The records" (Component Inputs), "Build the lines" (Function)
+- "The selected thing that repeats" (Component Outputs) in `Logic/Selected routine` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The records" (Component Inputs), "Read the selected thing that repeats" (Function)
+- "The selected task" (Component Outputs) in `Logic/Selected task` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The records" (Component Inputs), "Read the selected task" (Function)
+- "The rows" (Component Outputs) in `Logic/Task rows` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The records" (Component Inputs), "Build the rows" (Function)
+- "The rows" (Component Outputs) in `Logic/Today rows` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The records" (Component Inputs), "Build Today" (Function)
+- "Add the next action, in this browser" (Function) in `Commands/Add action` — input "taskId" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Add the thing that repeats, in this browser" (Function) in `Commands/Add routine` — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Add the task, in this browser" (Function) in `Commands/Add task` — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Close the task, in this browser" (Function) in `Commands/Close task` — input "status" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Save the description, in this browser" (Function) in `Commands/Describe action` — input "description" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Rename the next action, in this browser" (Function) in `Commands/Rename action` — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Rename it, in this browser" (Function) in `Commands/Rename routine` — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Rename the task, in this browser" (Function) in `Commands/Rename task` — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Reopen the task, in this browser" (Function) in `Commands/Reopen task` — input "status" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Set the deadline, in this browser" (Function) in `Commands/Set deadline` — input "deadline" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Done" (Component Outputs) in `Commands/Set deadline` — value output "error" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Say a refusal while its record is open" (Function)
+- "Save the dates, in this browser" (Function) in `Commands/Set routine dates` — input "startDate" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Done" (Component Outputs) in `Commands/Set routine dates` — value output "error" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Say a refusal while its record is open" (Function)
+- "Save the schedule, in this browser" (Function) in `Commands/Set schedule` — input "cadence" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Done" (Component Outputs) in `Commands/Set schedule` — value output "error" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Say a refusal while its record is open" (Function)
+- "Stop it, in this browser" (Function) in `Commands/Stop routine` — input "status" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Tick it off, in this browser" (Function) in `Commands/Tick action` — input "done" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Log it as done, in this browser" (Function) in `Commands/Tick routine` — input "routineId" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "Untick it, in this browser" (Function) in `Commands/Untick action` — input "done" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- "The projects" (Component Outputs) in `Logic/Projects` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "No projects in the demo" (Function)
+- "Today" (/Logic/Today rows) in `Pages/Todo` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "A minute clock, and a wake when the app comes back into view" (Function)
+- "The selected thing that repeats" (/Logic/Selected routine) in `Pages/Todo` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "A minute clock, and a wake when the app comes back into view" (Function)
+- "Your projects and money, from the backend" (/Logic/Projects) in `Pages/Todo` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "A minute clock, and a wake when the app comes back into view" (Function)
+- "One pane or two?" (Function) in `Pages/Todo` — input "found" is fed by /Logic/Selected task — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "How wide the screen is" (Screen Resolution)
+- "Open it, or close it again" (Function) in `Pages/Todo` — input "id" is fed by /Projects/View — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Open a project" (Set Variable)
+- "What this device chose" (Function) in `Pages/Todo` — the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Put the choice back" (Set Variable)
+- "AddRoutine" (/Commands/Add routine) in `Pages/Todo` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Open the one just added" (Set Variable)
+- "Pick or unpick a day" (Function) in `Pages/Todo` — input "key" is fed by /Todo/Routine summary — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Keep the days picked" (Set Variable)
+- "Was it a project’s task?" (Function) in `Pages/Todo` — input "taskId" is fed by /Todo/Dialog flow — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Close" (/Commands/Close task)
+- "What a row said" (Component Outputs) in `Projects/Kind group` — value output "projectId" is fed by /Projects/Project list — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Save the new order" (/Projects/Move project)
+- "Was one picked?" (Function) in `Projects/Link task form` — input "picked" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Which task" (Dropdown)
+- "Written, or opened" (Component Outputs) in `Projects/Money` — trigger cmdBalance.done is not a rendered element event or a receiver
+  …and one node is left out only because this one fires it: "Paid" (/Projects/Mark money)
+- "What the form says" (Function) in `Projects/Money editor` — input "pickedDate" is fed by /Todo/Date picker — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Which project, if any" (Dropdown)
+- "Answered" (Component Outputs) in `Projects/Next move prompt` — trigger npSaveMove.done is not a rendered element event or a receiver
+  …and one node is left out only because this one fires it: "Save the next move" (/Projects/Save next move)
+- "What a row said" (Component Outputs) in `Projects/Project list` — /Projects/Project row's row output "mode" is computed inside the row (by JavaScriptFunction.out-mode) — only a row input passed straight through is relayed in this slice
+  …and one node is left out only because this one fires it: "Drag a row by its grip to move it" (Function)
+- "A new item for this project" (Function) in `Projects/View` — two wires feed input "projectId" — last-writer-wins is not statically ordered
+  …and one node is left out only because this one fires it: "A new item, for a project" (Set Variable)
+- "The date" (Component Outputs) in `Todo/Date picker` — value output "Value" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Draw the field and calendar" (Function)
+- "Was it closing?" (Condition) in `Todo/Dialog flow` — its value "heading" has no authored value in state "none"
+  …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+- "Was it reopening?" (Condition) in `Todo/Dialog flow` — its value "heading" has no authored value in state "none"
+  …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+- "Was it ticking?" (Condition) in `Todo/Dialog flow` — its value "heading" has no authored value in state "none"
+  …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+- "Was it unticking?" (Condition) in `Todo/Dialog flow` — its value "heading" has no authored value in state "none"
+  …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+- "Was it ticking off a recurring item?" (Condition) in `Todo/Dialog flow` — its value "heading" has no authored value in state "none"
+  …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+- "Was it stopping one?" (Condition) in `Todo/Dialog flow` — its value "heading" has no authored value in state "none"
+  …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+- "The note, if one was typed" (Function) in `Todo/History` — its out-text output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and one node is left out only because this one fires it: "A note" (Component Outputs)
+- "The title, if one was typed" (Function) in `Todo/Next actions` — its out-text output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and one node is left out only because this one fires it: "What you did" (Component Outputs)
+- "What you did" (Component Outputs) in `Todo/Next actions` — value output "newTitle" reads values that only exist inside a handler
+  …and one node is left out only because this one fires it: "Drag a row by its grip to move it" (Function)
+- "The title, if one was typed" (Function) in `Todo/Routine list` — its out-text output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and one node is left out only because this one fires it: "What happened in the list" (Component Outputs)
+- "The title, if one was typed" (Function) in `Todo/Task list` — its out-text output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  …and one node is left out only because this one fires it: "What happened in the list" (Component Outputs)
+- "What happened in the list" (Component Outputs) in `Todo/Task list` — value output "newTitle" reads values that only exist inside a handler
+  …and one node is left out only because this one fires it: "Drag a row by its grip to move it" (Function)
+- "What you did" (Component Outputs) in `Todo/Task summary` — value output "pickedProject" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Which project" (Dropdown)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Logic/Log rows` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The lines" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The records" (Component Inputs), "Build the lines" (Function)
+- `Logic/Projects` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What it needs" (Component Inputs) — the export has no rule for this node yet
+  - "The projects" (Component Outputs) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "No projects in the demo" (Function)
+- `Logic/Selected routine` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The selected thing that repeats" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The records" (Component Inputs), "Read the selected thing that repeats" (Function)
+- `Logic/Selected task` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The selected task" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The records" (Component Inputs), "Read the selected task" (Function)
+- `Logic/Task rows` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The rows" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The records" (Component Inputs), "Build the rows" (Function)
+- `Logic/Today rows` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The rows" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The records" (Component Inputs), "Build Today" (Function)
+- `Logic/Todo data` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "When to read" (Component Inputs) — the export has no rule for this node yet
+    …and 5 nodes are left out only because this one fires them: "The selected task" (Variable), "Read the list from this browser" (Function), "Forget this browser’s list" (Function), "Forget the last history line" (Set Variable), "Say the list did not load" (Set Variable)
+  - "The records" (Component Outputs) — the export has no rule for this node yet
+- `Logic/Write history` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The line" (Component Inputs) — the export has no rule for this node yet
+    …and 8 nodes are left out only because this one fires them: "Written" (Component Outputs), "The last line written" (Variable), "A new line, or extend the last one?" (Function), "Add the line, in this browser" (Function), "Extend the last line, in this browser" (Function), "Remember it, to extend next time" (Function), "Keep the last line" (Set Variable), "Say it did not save" (Set Variable)
+- `Projects/Add project` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to write" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- `Projects/End money item` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to write" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- `Projects/Mark money` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to write" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- `Projects/Move project` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to write" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- `Projects/Record balance` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to write" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- `Projects/Save money item` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to write" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- `Projects/Save next move` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to write" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- `Projects/Save project` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to write" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- `Projects/Set task project` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to write" (Component Inputs) — the export has no rule for this node yet
+    …and 3 nodes are left out only because this one fires them: "Written" (Component Outputs), "Write it" (Function), "Say it did not save" (Set Variable)
+- `Pages/Todo` — 365 refusals
+  - "Your list, kept in this browser" (/Logic/Todo data) — the export has no rule for this node yet
+    …and 17 nodes are left out only because this one fires them: "A minute clock, and a wake when the app comes back into view" (Function), "Was it a project’s task?" (Function), "Put the task in a project" (/Projects/Set task project), "Drag" (/Commands/Move task), "Top" (/Commands/Move task), "Close" (/Commands/Close task), "Reopen" (/Commands/Reopen task), "Rename" (/Commands/Rename task), "Tick" (/Commands/Tick action), "Untick" (/Commands/Untick action), "ActDrag" (/Commands/Move action), "RenameAct" (/Commands/Rename action), "Describe" (/Commands/Describe action), "RenameRoutine" (/Commands/Rename routine), "RemoveSlot" (/Commands/Set schedule), "Check" (/Commands/Tick routine), "Stop" (/Commands/Stop routine)
+  - "The rows" (/Logic/Task rows) — the export has no rule for this node yet
+  - "The selected task" (/Logic/Selected task) — the export has no rule for this node yet
+  - "The log lines" (/Logic/Log rows) — the export has no rule for this node yet
+  - "Today" (/Logic/Today rows) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "A minute clock, and a wake when the app comes back into view" (Function)
+  - "The selected thing that repeats" (/Logic/Selected routine) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "A minute clock, and a wake when the app comes back into view" (Function)
+  - "One pane or two?" (Function) — input "found" is fed by /Logic/Selected task — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "How wide the screen is" (Screen Resolution)
+  - "Your projects and money, from the backend" (/Logic/Projects) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "A minute clock, and a wake when the app comes back into view" (Function)
+  - "Open it, or close it again" (Function) — input "id" is fed by /Projects/View — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Open a project" (Set Variable)
+  - "What this device chose" (Function) — the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Put the choice back" (Set Variable)
+  - "Switch the tab on" (Set Variable) — its trigger, "Projects and money" (tdProjectsOn), is not drawn: it is authored Mounted false, and the wire into its Mounted from "Your projects and money, from the backend".showTurnOn is not exported (the node it comes from is not exported: logic node (/Logic/Projects))
+  - "Remember the choice on this device" (Function) — the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  - "Select a project’s task" (Set Variable) — the value wire has no statically known source
+  - "Which project is the selected task part of?" (Function) — input "tasks" is fed by /Logic/Todo data — no statically known source in the emit vocabulary
+  - "Open the task’s project" (Set Variable) — input "tasks" is fed by /Logic/Todo data — no statically known source in the emit vocabulary
+  - "Select from the list" (Set Variable) — the value wire has no statically known source
+  - "Select from Done" (Set Variable) — the value wire has no statically known source
+  - "Select from the log" (Set Variable) — the value wire has no statically known source
+  - "Select from Today" (Set Variable) — the value wire has no statically known source
+  - "Select a thing that repeats" (Set Variable) — the value wire has no statically known source
+  - "Pick or unpick a day" (Function) — input "key" is fed by /Todo/Routine summary — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Keep the days picked" (Set Variable)
+  - "Open a description" (Set Variable) — the value wire has no statically known source
+  - "Add" (/Commands/Add task) — the export has no rule for this node yet
+  - "Deadline" (/Commands/Set deadline) — the export has no rule for this node yet
+  - "AddAction" (/Commands/Add action) — the export has no rule for this node yet
+  - "Note" (/Commands/Add note) — the export has no rule for this node yet
+  - "AddRoutine" (/Commands/Add routine) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Open the one just added" (Set Variable)
+  - "Daily" (/Commands/Set schedule) — the export has no rule for this node yet
+  - "Weekly" (/Commands/Set schedule) — the export has no rule for this node yet
+  - "Monthly" (/Commands/Set schedule) — the export has no rule for this node yet
+  - "AddTime" (/Commands/Set schedule) — the export has no rule for this node yet
+  - "Start" (/Commands/Set routine dates) — the export has no rule for this node yet
+  - "End" (/Commands/Set routine dates) — the export has no rule for this node yet
+  - "RoutineNote" (/Commands/Add note) — the export has no rule for this node yet
+- `Projects/View` — 186 refusals
+  - "What you did" (Component Outputs) — two wires feed value output "projectId" — last-writer-wins is not statically ordered
+    …and 5 nodes are left out only because this one fires them: "Save next move" (/Projects/Save next move), "Been paid" (/Projects/Mark money), "Sent" (/Projects/Mark money), "Save project" (/Projects/Save project), "Put a task in the project" (/Projects/Set task project)
+  - "Open, and on a form?" (Function) — its out-open feeds /Projects/Money sheet.open, which has no static binding in this slice
+  - "An item, from a line in the popup" (Set Variable) — the value wire has no statically known source
+  - "An item, from a project" (Set Variable) — two wires feed its Value input — last-writer-wins is not statically ordered
+  - "A new item for this project" (Function) — two wires feed input "projectId" — last-writer-wins is not statically ordered
+    …and one node is left out only because this one fires it: "A new item, for a project" (Set Variable)
+  - "Add project" (/Projects/Add project) — the export has no rule for this node yet
+  - "What this device chose" (Function) — the script touches the browser environment and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+- `Projects/Project row` — 61 refusals
+  - "What you did" (Component Outputs) — /Projects/Link task form's row output "taskId" is computed inside the row (by JavaScriptFunction.out-taskId) — only a row input passed straight through is relayed in this slice
+  - "Which form is open" (States) — the Function that sends its "go" signal is not exported: its out-mode output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+  - "Which form to draw" (Function) — its out-linkRows feeds For Each.items, which has no static binding in this slice
+  - "What kind of write it is" (Function) — its out-mode output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+- `Projects/Money sheet` — 53 refusals
+  - "What you did in it" (Component Outputs) — two wires feed value output "itemKey" — last-writer-wins is not statically ordered
+    …and 4 nodes are left out only because this one fires them: "Save the item" (/Projects/Save money item), "End the item" (/Projects/End money item), "Paid" (/Projects/Mark money), "Untick" (/Projects/Mark money)
+  - "What the popup shows" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+- `Projects/Money editor` — 48 refusals
+  - "The item as it should be" (Component Outputs) — value output "label" is fed by JavaScriptFunction — input "pickedDate" is fed by /Todo/Date picker — no statically known source in the emit vocabulary
+  - "Which date fields it needs" (Function) — its out-dateLabel feeds /Todo/Date picker.Label, which has no static binding in this slice
+  - "What the form says" (Function) — input "pickedDate" is fed by /Todo/Date picker — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Which project, if any" (Dropdown)
+- `Projects/Kind group` — 44 refusals
+  - "What a row said" (Component Outputs) — value output "projectId" is fed by /Projects/Project list — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Save the new order" (/Projects/Move project)
+- `Todo/Dialog flow` — 41 refusals
+  - "What the dialog is asking" (States) — its value "heading" has no authored value in state "none"
+  - "Was it closing?" (Condition) — its value "heading" has no authored value in state "none"
+    …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+  - "Was it reopening?" (Condition) — its value "heading" has no authored value in state "none"
+    …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+  - "Was it ticking?" (Condition) — its value "heading" has no authored value in state "none"
+    …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+  - "Was it unticking?" (Condition) — its value "heading" has no authored value in state "none"
+    …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+  - "Was it ticking off a recurring item?" (Condition) — its value "heading" has no authored value in state "none"
+    …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+  - "Was it stopping one?" (Condition) — its value "heading" has no authored value in state "none"
+    …and one node is left out only because this one fires it: "What was answered" (Component Outputs)
+- `Projects/Project list` — 38 refusals
+  - "What a row said" (Component Outputs) — /Projects/Project row's row output "mode" is computed inside the row (by JavaScriptFunction.out-mode) — only a row input passed straight through is relayed in this slice
+    …and one node is left out only because this one fires it: "Drag a row by its grip to move it" (Function)
+- `Commands/Set schedule` — 24 refusals
+  - "Done" (Component Outputs) — value output "error" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Say a refusal while its record is open" (Function)
+  - "Save the schedule, in this browser" (Function) — input "cadence" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Todo/Date picker` — 24 refusals
+  - "The date" (Component Outputs) — value output "Value" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Draw the field and calendar" (Function)
+- `Commands/Move task` — 22 refusals
+  - "Is there anything to write?" (Function) — its out-hasSecond output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and 4 nodes are left out only because this one fires them: "Move it, in this browser" (Function), "Is there a neighbour to swap with?" (Condition), "Move the neighbour, in this browser" (Function), "Say it did not save" (Set Variable)
+- `Commands/Set routine dates` — 22 refusals
+  - "Done" (Component Outputs) — value output "error" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Say a refusal while its record is open" (Function)
+  - "Save the dates, in this browser" (Function) — input "startDate" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Move action` — 21 refusals
+  - "Is there anything to write?" (Function) — its out-hasSecond output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and 4 nodes are left out only because this one fires them: "Move it, in this browser" (Function), "Is there a neighbour to swap with?" (Condition), "Move the neighbour, in this browser" (Function), "Say it did not save" (Set Variable)
+- `Projects/Money` — 20 refusals
+  - "Written, or opened" (Component Outputs) — trigger cmdBalance.done is not a rendered element event or a receiver
+    …and one node is left out only because this one fires it: "Paid" (/Projects/Mark money)
+  - "Record balance" (/Projects/Record balance) — the export has no rule for this node yet
+- `Projects/Move form` — 20 refusals
+  - "The move as it should be" (Component Outputs) — value output "title" is fed by JavaScriptFunction — input "pickedDeadline" is fed by /Todo/Date picker — no statically known source in the emit vocabulary
+  - "What the form says" (Function) — input "pickedDeadline" is fed by /Todo/Date picker — no statically known source in the emit vocabulary
+- `Todo/Next actions` — 20 refusals
+  - "The title, if one was typed" (Function) — its out-text output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and one node is left out only because this one fires it: "What you did" (Component Outputs)
+- `Commands/Set deadline` — 19 refusals
+  - "Done" (Component Outputs) — value output "error" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Say a refusal while its record is open" (Function)
+  - "Set the deadline, in this browser" (Function) — input "deadline" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Add routine` — 18 refusals
+  - "Done" (Component Outputs) — value output "id" is fed by JavaScriptFunction — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+  - "Add the thing that repeats, in this browser" (Function) — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Projects/Project editor` — 17 refusals
+  - "The project as it should be" (Component Outputs) — value output "name" reads values that only exist inside a handler
+- `Commands/Reopen task` — 16 refusals
+  - "Reopen the task, in this browser" (Function) — input "status" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Projects/Next move prompt` — 16 refusals
+  - "Answered" (Component Outputs) — trigger npSaveMove.done is not a rendered element event or a receiver
+    …and one node is left out only because this one fires it: "Save the next move" (/Projects/Save next move)
+  - "The question" (Function) — its out-formRows feeds For Each.items, which has no static binding in this slice
+- `Todo/Task list` — 16 refusals
+  - "The title, if one was typed" (Function) — its out-text output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and one node is left out only because this one fires it: "What happened in the list" (Component Outputs)
+- `Commands/Add action` — 15 refusals
+  - "Add the next action, in this browser" (Function) — input "taskId" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Add task` — 15 refusals
+  - "Add the task, in this browser" (Function) — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Tick routine` — 15 refusals
+  - "Log it as done, in this browser" (Function) — input "routineId" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Untick action` — 15 refusals
+  - "Untick it, in this browser" (Function) — input "done" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Close task` — 14 refusals
+  - "Close the task, in this browser" (Function) — input "status" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Stop routine` — 13 refusals
+  - "Stop it, in this browser" (Function) — input "status" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Tick action` — 13 refusals
+  - "Tick it off, in this browser" (Function) — input "done" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Describe action` — 12 refusals
+  - "Save the description, in this browser" (Function) — input "description" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Rename action` — 11 refusals
+  - "Rename the next action, in this browser" (Function) — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Rename routine` — 11 refusals
+  - "Rename it, in this browser" (Function) — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Commands/Rename task` — 11 refusals
+  - "Rename the task, in this browser" (Function) — input "title" is fed by JavaScriptFunction — it is fed by another Function/Expression node — JS-node chains are not translated in this slice
+    …and one node is left out only because this one fires it: "Say it did not save" (Set Variable)
+- `Projects/Link task form` — 11 refusals
+  - "The one picked" (Component Outputs) — value output "taskId" is fed by JavaScriptFunction — input "picked" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+  - "Was one picked?" (Function) — input "picked" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Which task" (Dropdown)
+- `Todo/Task summary` — 9 refusals
+  - "What you did" (Component Outputs) — value output "pickedProject" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Which project" (Dropdown)
+- `Commands/Add note` — 8 refusals
+  - "Say it did not save" (Set Variable) — the export has no rule for this node yet
+- `Todo/Routine summary` — 8 refusals
+  - "What you did" (Component Outputs) — value output "startText" is fed by /Todo/Date picker — no statically known source in the emit vocabulary
+- `Todo/Routine list` — 7 refusals
+  - "The title, if one was typed" (Function) — its out-text output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and one node is left out only because this one fires it: "What happened in the list" (Component Outputs)
+- `Todo/History` — 6 refusals
+  - "The note, if one was typed" (Function) — its out-text output is consumed outside the Run chain by an unrendered sink — the last run's value is not statically expressible there
+    …and one node is left out only because this one fires it: "A note" (Component Outputs)
+- `Projects/Project money` — 2 refusals
+- `Projects/Project task` — 2 refusals
+- `Projects/Income row` — 1 refusal
+- `Projects/Money bar` — 1 refusal
+- `Projects/Money line` — 1 refusal
+- `Todo/Action row` — 1 refusal
+- `Todo/Day chip` — 1 refusal
+- `Todo/Header` — 1 refusal
+- `Todo/Note dialog` — 1 refusal
+- `Todo/Task row` — 1 refusal
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

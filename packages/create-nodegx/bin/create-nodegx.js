@@ -59,6 +59,11 @@ const AGENT_NOTE = [
   // P112 OWN-007 (R3): the method for building an editor of one's own is a skill in this folder, not a server tool.
   'If I ask for an editor, a viewer or a tool of my own that reads or changes an app here, the guide is the skill',
   '`nodegx-your-own-editor` (`.claude/skills/nodegx-your-own-editor/SKILL.md`). Read it first; any agent can.',
+  '',
+  // P18 EXP-023 (Richard, 2026-10-21): the off-ramp is on npm, and the note says how to leave.
+  'If I want to leave NodeGX with the source: `npx @nodegx/export export <the app\'s folder> --dry-run` says first what',
+  'will and will not translate, and without `--dry-run <an empty folder>` writes a React + Vite app there. To put the',
+  'running app on a server as it is, `npx nodegx-deploy` (from `@nodegx/preview`) writes the folder to upload.',
   ''
 ].join('\n');
 

@@ -1,0 +1,409 @@
+Reading /Users/richardosborne/vscode_projects/OpenNoodl/templates/planning as it is on disk — last saved 2026-10-11 20:23:48.
+If the editor has this project open with unsaved changes, save it first: this reads files, not the editor.
+# Before you export — Planning
+
+This is what the export will produce. **Nothing has been written yet.**
+
+## What you will get
+
+- **112 files** — 2 pages and 41 components, plus the app shell, styles and build config
+- **Data access** in `src/api/`, as **stubs** — reads answer empty and writes throw. This project declares no backend, so there is nothing to point them at
+- **16 of the 43** come out with nothing left over
+- `App` — router shell — emitted as src/App.tsx by the scaffold
+
+## What will not translate (1378)
+
+🔴 **This export would be missing a pathway, not a node: "Is the window worked out?" (Condition) in `Logic/Planning data`; "When to load" (Component Inputs) in `Logic/Planning data`; "The next block to write" (Function) in `Commands/Add block`; "What to do" (Component Inputs) in `Commands/Add project`; "What to do" (Component Inputs) in `Commands/Edit project`; "What to do" (Component Inputs) in `Commands/Add time`; "What to do" (Component Inputs) in `Commands/Carry block`; "What to do" (Component Inputs) in `Commands/Drop block`; "What to do" (Component Inputs) in `Commands/Move block`; "What to do" (Component Inputs) in `Commands/Place move`; "What to do" (Component Inputs) in `Commands/Save block`; "What to send" (Component Inputs) in `Commands/Send to todo`; "The block that was saved" (Component Inputs) in `Commands/Tell todo`; "What to do" (Component Inputs) in `Commands/Add mark`; "What to do" (Component Inputs) in `Commands/Add money item`; "What to do" (Component Inputs) in `Commands/Add settings`; "What to do" (Component Inputs) in `Commands/Agree money item`; "What to do" (Component Inputs) in `Commands/Edit mark`; "What to do" (Component Inputs) in `Commands/Edit money item`; "What to do" (Component Inputs) in `Commands/Edit settings`; "What to do" (Component Inputs) in `Commands/End money item`; "What to do" (Component Inputs) in `Commands/Record balance`; "What to do" (Component Inputs) in `Commands/Set month plan`. Without them, "Put the block in the day" (Create Record), "Start its history" (Create Record), "Say so in the task’s history in the todo list" (Create Record), "Mark the repeat" (Create Record), "Add the money item" (Create Record), "Add the project" (Create Record), "Add the bill it was saved with" (Create Record), "Write what happened in the history" (Create Record), "Write the settings" (Create Record), "Log the time" (Update Record), "Write what happened in the history" (Create Record), "It is agreed" (Update Record), "Move it to tomorrow" (Update Record), "Write what happened in the history" (Create Record), "Drop it" (Delete Record), "Write what happened in the history" (Create Record), "Change the mark" (Update Record), "Change the money item" (Update Record), "Change the project" (Update Record), "Add the bill it was saved with" (Create Record), "Write what happened in the history" (Create Record), "Save the settings" (Update Record), "End the item" (Update Record), "Move it to that day" (Update Record), "Write what happened in the history" (Create Record), "Put the move in the week" (Create Record), "Write what happened in the history" (Create Record), "Record the balance" (Create Record), "Save what the block is" (Update Record), "Write what happened in the history" (Create Record), "Add the task to the todo list" (Create Record), "Write where it came from in its history" (Create Record), "Say so in the project’s history" (Create Record), "Write this month’s plan" (Create Record), "Tick the next action off in the todo list" (Update Record), "Say so in the task’s history" (Create Record), "Your projects" (Query Records), "The blocks in the weeks on screen" (Query Records), "The move blocks, from four weeks back" (Query Records), "This month’s plan" (Query Records), "Your money items" (Query Records), "The marks on them, from thirteen months back" (Query Records), "Your latest balance readings" (Query Records), "Your settings" (Query Records), "The latest of Planning’s history" (Query Records), "Your open tasks in the todo list" (Query Records), "Your next actions in the todo list" (Query Records), "The tasks Planning sent to the todo list" (Query Records) never run. Replace them or wait for a release that translates them.**
+
+**108 nodes the export has no rule for, and 210 more left out only because they fire them.**
+
+- "Is the window worked out?" (Condition) in `Logic/Planning data` — the export has no rule for this node yet
+  …and 18 nodes are left out only because this one fires them: "When to load" (Component Inputs), "The records" (Component Outputs), "The Monday on screen" (Variable), "The window to ask the backend for" (Function), "Your projects" (Query Records), "The blocks in the weeks on screen" (Query Records), "The move blocks, from four weeks back" (Query Records), "This month’s plan" (Query Records), "Your money items" (Query Records), "The marks on them, from thirteen months back" (Query Records), "Your latest balance readings" (Query Records), "Your settings" (Query Records), "The latest of Planning’s history" (Query Records), "Your open tasks in the todo list" (Query Records), "Your next actions in the todo list" (Query Records), "The tasks Planning sent to the todo list" (Query Records), "Is there a todo list to read?" (Function), "Say the week did not load" (Set Variable)
+- "Signed in?" (Condition) in `Pages/Week` — its ontrue wire drives no translatable action
+  …and 16 nodes are left out only because this one fires them: "Who is signed in" (User), "Your week, from the backend" (/Logic/Planning data), "Send the move to the todo list" (/Commands/Send to todo), "Tell the todo list the block is done" (/Commands/Tell todo), "Log the time on a block" (/Commands/Add time), "Carry a block to tomorrow" (/Commands/Carry block), "Drop a block" (/Commands/Drop block), "Put a move in the week on the day chosen" (/Commands/Place move), "Move the move to another day" (/Commands/Move block), "Take the move out of the week" (/Commands/Drop block), "Plan this month" (/Commands/Set month plan), "End a money item" (/Commands/End money item), "Hoped money is agreed" (/Commands/Agree money item), "Mark a repeat for the first time" (/Commands/Add mark), "Change the mark on a repeat" (/Commands/Edit mark), "Record the balance" (/Commands/Record balance)
+- "When to load" (Component Inputs) in `Logic/Planning data` — the export has no rule for this node yet
+  …and 9 nodes are left out only because this one fires them: "Start on this week" (Set Variable), "Which Monday is today in" (Function), "How many weeks from this one" (Counter), "Is the window worked out?" (Condition), "Your projects" (Query Records), "Your money items" (Query Records), "Your latest balance readings" (Query Records), "The latest of Planning’s history" (Query Records), "Say the week did not load" (Set Variable)
+- "The next block to write" (Function) in `Commands/Add block` — the export has no rule for this node yet
+  …and 8 nodes are left out only because this one fires them: "What to put in" (Component Inputs), "Done" (Component Outputs), "How many blocks are written" (Counter), "Put the block in the day" (Create Record), "Start its history" (Create Record), "Is it from a todo task?" (Function), "Say so in the task’s history in the todo list" (Create Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/Add project` — the export has no rule for this node yet
+  …and 8 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Add the project" (Create Record), "Say it did not save" (Set Variable), "Is there a MoneyItem to write as well?" (Function), "Add the bill it was saved with" (Create Record), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- "What to do" (Component Inputs) in `Commands/Edit project` — the export has no rule for this node yet
+  …and 8 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Change the project" (Update Record), "Say it did not save" (Set Variable), "Is there a MoneyItem to write as well?" (Function), "Add the bill it was saved with" (Create Record), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- "Clear the boxes on close; tick the days to match" (Function) in `Week/Settings sheet` — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and 7 nodes are left out only because this one fires them: "Mon" (Checkbox), "Tue" (Checkbox), "Wed" (Checkbox), "Thu" (Checkbox), "Fri" (Checkbox), "Sat" (Checkbox), "Sun" (Checkbox)
+- "What to do" (Component Inputs) in `Commands/Add time` — the export has no rule for this node yet
+  …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Log the time" (Update Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- "What to do" (Component Inputs) in `Commands/Carry block` — the export has no rule for this node yet
+  …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Move it to tomorrow" (Update Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- "What to do" (Component Inputs) in `Commands/Drop block` — the export has no rule for this node yet
+  …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Drop it" (Delete Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- "What to do" (Component Inputs) in `Commands/Move block` — the export has no rule for this node yet
+  …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Move it to that day" (Update Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- "What to do" (Component Inputs) in `Commands/Place move` — the export has no rule for this node yet
+  …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Put the move in the week" (Create Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- "What to do" (Component Inputs) in `Commands/Save block` — the export has no rule for this node yet
+  …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Save what the block is" (Update Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- "What to send" (Component Inputs) in `Commands/Send to todo` — the export has no rule for this node yet
+  …and 6 nodes are left out only because this one fires them: "Sent" (Component Outputs), "Is there anything to send?" (Function), "Add the task to the todo list" (Create Record), "Write where it came from in its history" (Create Record), "Say so in the project’s history" (Create Record), "Say it did not save" (Set Variable)
+- "The block that was saved" (Component Inputs) in `Commands/Tell todo` — the export has no rule for this node yet
+  …and 5 nodes are left out only because this one fires them: "Told" (Component Outputs), "Is there anything to tell the todo list?" (Function), "Tick the next action off in the todo list" (Update Record), "Say so in the task’s history" (Create Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/Add mark` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Mark the repeat" (Create Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/Add money item` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Add the money item" (Create Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/Add settings` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Write the settings" (Create Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/Agree money item` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "It is agreed" (Update Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/Edit mark` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Change the mark" (Update Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/Edit money item` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Change the money item" (Update Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/Edit settings` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Save the settings" (Update Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/End money item` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "End the item" (Update Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/Record balance` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Record the balance" (Create Record), "Say it did not save" (Set Variable)
+- "What to do" (Component Inputs) in `Commands/Set month plan` — the export has no rule for this node yet
+  …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Write this month’s plan" (Create Record), "Say it did not save" (Set Variable)
+- "Start on this week" (Set Variable) in `Logic/Planning data` — the export has no rule for this node yet
+  …and 3 nodes are left out only because this one fires them: "When to load" (Component Inputs), "Which Monday is today in" (Function), "The Monday that many weeks away" (Function)
+- "Is the editor making a new project?" (Condition) in `Pages/Week` — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and 3 nodes are left out only because this one fires them: "Show the project just made" (Set Variable), "Add a project" (/Commands/Add project), "Change a project" (/Commands/Edit project)
+- "The item as it should be" (Component Outputs) in `Week/Money editor` — value output "dir" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+  …and 3 nodes are left out only because this one fires them: "In or out" (Dropdown), "How often" (Dropdown), "Which project, if any" (Dropdown)
+- "Which fields this item needs" (Function) in `Week/Money editor` — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and 3 nodes are left out only because this one fires them: "In or out" (Dropdown), "How often" (Dropdown), "Which project, if any" (Dropdown)
+- "Which billing fields this project needs, and what saving does about its bill" (Function) in `Week/Project editor` — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and 3 nodes are left out only because this one fires them: "What kind of work" (Dropdown), "Hourly or fixed" (Dropdown), "When do you bill?" (Dropdown)
+- "The tiles" (Component Outputs) in `Logic/Budgets` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The month so far" (Component Inputs), "Work out every budget" (Function)
+- "The card" (Component Outputs) in `Logic/Card rows` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The projects" (Component Inputs), "Group them, then open one" (Function)
+- "The columns" (Component Outputs) in `Logic/Day columns` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The week" (Component Inputs), "Build the six columns" (Function)
+- "The press" (Component Inputs) in `Logic/Mark` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The mark" (Component Outputs), "Work out the mark" (Function)
+- "What to draw" (Component Outputs) in `Logic/Money` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The money" (Component Inputs), "Draw the money" (Function)
+- "What to show" (Component Outputs) in `Logic/Money pane` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "What is picked" (Component Inputs), "Fill the pane" (Function)
+- "The chips" (Component Outputs) in `Logic/Moves` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The projects" (Component Inputs), "Sort the moves by urgency" (Function)
+- "What to say" (Component Outputs) in `Logic/Shutdown` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "Tonight" (Component Inputs), "Work out what tonight says" (Function)
+- "The blocks, with the tasks in" (Component Outputs) in `Logic/Todo tasks` — the export has no rule for this node yet
+  …and 2 nodes are left out only because this one fires them: "The tasks and the blocks" (Component Inputs), "Put each task on its day" (Function)
+- "Is that move already in the week?" (Condition) in `Pages/Week` — the condition wire has no statically known source
+  …and 2 nodes are left out only because this one fires them: "Show the chip’s project" (Set Variable), "Put a move in the week" (/Commands/Place move)
+- "A line or an item?" (Function) in `Pages/Week` — input "key" is fed by /Week/Money sheet — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "Pick the line pressed in the list" (Set Variable), "The item pressed in Recurring" (Set Variable)
+- "Is the sheet making a new block?" (Condition) in `Pages/Week` — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and 2 nodes are left out only because this one fires them: "Put a block in a day" (/Commands/Add block), "Save what a block is" (/Commands/Save block)
+- "Close the sheet" (Set Variable) in `Pages/Week` — trigger cmdTellTodo.done is not a rendered element event or a receiver
+  …and 2 nodes are left out only because this one fires them: "Tell the todo list the block is done" (/Commands/Tell todo), "Log the time on a block" (/Commands/Add time)
+- "Is this the first time the settings are saved?" (Condition) in `Pages/Week` — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and 2 nodes are left out only because this one fires them: "Save the settings" (/Commands/Edit settings), "Write the settings for the first time" (/Commands/Add settings)
+- "Is it a new money item?" (Condition) in `Pages/Week` — the condition wire has no statically known source
+  …and 2 nodes are left out only because this one fires them: "Add a money item" (/Commands/Add money item), "Change a money item" (/Commands/Edit money item)
+- "The summary, or the line picked" (Set Variable) in `Pages/Week` — the Function that sends its "go" signal is not exported: input "key" is fed by /Week/Money sheet — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "End a money item" (/Commands/End money item), "Record the balance" (/Commands/Record balance)
+- "Clear the boxes on close; tick the two boxes to match the item" (Function) in `Week/Money editor` — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and 2 nodes are left out only because this one fires them: "On the last day of the month" (Checkbox), "Fill the amount from the hours" (Checkbox)
+- "The project as it should be" (Component Outputs) in `Week/Project editor` — value output "kind" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+  …and 2 nodes are left out only because this one fires them: "What kind of work" (Dropdown), "Hourly or fixed" (Dropdown)
+- "What to put in" (Component Inputs) in `Commands/Add block` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "How many times Put it in was pressed" (Counter)
+- "The six columns" (/Logic/Day columns) in `Pages/Week` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Your todo tasks, in the week" (/Logic/Todo tasks)
+- "What tonight says" (/Logic/Shutdown) in `Pages/Week` — the export has no rule for this node yet
+  …and one node is left out only because this one fires it: "Your todo tasks, in the week" (/Logic/Todo tasks)
+- "What the block sheet is showing" (Function) in `Pages/Week` — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Your todo tasks, in the week" (/Logic/Todo tasks)
+- "Tick it" (Function) in `Pages/Week` — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+  …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+- "Save this one" (Function) in `Pages/Week` — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+  …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+- "Back to the item" (Function) in `Pages/Week` — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+  …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+- "Skip this one" (Function) in `Pages/Week` — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+  …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+- "Mark as lost" (Function) in `Pages/Week` — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+  …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+- "Untick" (Function) in `Pages/Week` — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+  …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+- "Mark as sent" (Function) in `Pages/Week` — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+  …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+- "Not sent after all" (Function) in `Pages/Week` — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+  …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+- "It happened (Record balance)" (Function) in `Pages/Week` — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+  …and one node is left out only because this one fires it: "The mark an answer in Record balance writes" (/Logic/Mark)
+- "It is lost (Record balance)" (Function) in `Pages/Week` — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+  …and one node is left out only because this one fires it: "The mark an answer in Record balance writes" (/Logic/Mark)
+- "Tick or untick the action pressed" (Function) in `Pages/Week` — input "actionId" is fed by /Week/Block sheet — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Tick or untick one" (Set Variable)
+- "The box pressed, as a line" (Function) in `Pages/Week` — input "key" is fed by /Week/Cash strip — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Pick the box pressed under the week" (Set Variable)
+- "The late money, as a line" (Function) in `Pages/Week` — input "key" is fed by /Logic/Money — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Pick the late money the drawer raised" (Set Variable)
+- "The line answered Part of it" (Function) in `Pages/Week` — input "key" is fed by /Week/Money sheet — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Pick the line answered Part of it" (Set Variable)
+- "Pick nothing" (Set Variable) in `Pages/Week` — trigger cmdEndItem.done is not a rendered element event or a receiver
+  …and one node is left out only because this one fires it: "End a money item" (/Commands/End money item)
+- "What it should become" (Component Outputs) in `Week/Block sheet` — value output "projectId" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "Which project" (Dropdown)
+- "Clear the boxes on close; tick Done to match the block" (Function) in `Week/Block sheet` — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Done" (Checkbox)
+- "The date" (Component Outputs) in `Week/Date picker` — value output "Value" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Draw the field and calendar" (Function)
+- "Ended" (Component Outputs) in `Week/Money end` — value output "at" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "The last one that happens" (Dropdown)
+- "What to do with it" (Component Outputs) in `Week/Money repeat` — value output "tickOn" is fed by /Week/Date picker — no statically known source in the emit vocabulary
+  …and one node is left out only because this one fires it: "What the rest is" (Dropdown)
+- "Clear the boxes on close; tick Fixes only to match the project" (Function) in `Week/Project editor` — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  …and one node is left out only because this one fires it: "Fixes only" (Checkbox)
+
+Each one is a node, wire, parameter — or a whole component — that the export has no rule for. It will be **left out**, not translated wrongly, and the running app will be missing that behaviour until you write it.
+
+- `Commands/Add block` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The next block to write" (Function) — the export has no rule for this node yet
+    …and 8 nodes are left out only because this one fires them: "What to put in" (Component Inputs), "Done" (Component Outputs), "How many blocks are written" (Counter), "Put the block in the day" (Create Record), "Start its history" (Create Record), "Is it from a todo task?" (Function), "Say so in the task’s history in the todo list" (Create Record), "Say it did not save" (Set Variable)
+- `Commands/Add mark` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Mark the repeat" (Create Record), "Say it did not save" (Set Variable)
+- `Commands/Add money item` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Add the money item" (Create Record), "Say it did not save" (Set Variable)
+- `Commands/Add project` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 8 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Add the project" (Create Record), "Say it did not save" (Set Variable), "Is there a MoneyItem to write as well?" (Function), "Add the bill it was saved with" (Create Record), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- `Commands/Add settings` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Write the settings" (Create Record), "Say it did not save" (Set Variable)
+- `Commands/Add time` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Log the time" (Update Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- `Commands/Agree money item` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "It is agreed" (Update Record), "Say it did not save" (Set Variable)
+- `Commands/Carry block` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Move it to tomorrow" (Update Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- `Commands/Drop block` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Drop it" (Delete Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- `Commands/Edit mark` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Change the mark" (Update Record), "Say it did not save" (Set Variable)
+- `Commands/Edit money item` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Change the money item" (Update Record), "Say it did not save" (Set Variable)
+- `Commands/Edit project` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 8 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Change the project" (Update Record), "Say it did not save" (Set Variable), "Is there a MoneyItem to write as well?" (Function), "Add the bill it was saved with" (Create Record), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- `Commands/Edit settings` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Save the settings" (Update Record), "Say it did not save" (Set Variable)
+- `Commands/End money item` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "End the item" (Update Record), "Say it did not save" (Set Variable)
+- `Commands/Move block` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Move it to that day" (Update Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- `Commands/Place move` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Put the move in the week" (Create Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- `Commands/Record balance` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Record the balance" (Create Record), "Say it did not save" (Set Variable)
+- `Commands/Save block` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 6 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Save what the block is" (Update Record), "Say it did not save" (Set Variable), "Is there a line to write?" (Function), "Write what happened in the history" (Create Record)
+- `Commands/Send to todo` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to send" (Component Inputs) — the export has no rule for this node yet
+    …and 6 nodes are left out only because this one fires them: "Sent" (Component Outputs), "Is there anything to send?" (Function), "Add the task to the todo list" (Create Record), "Write where it came from in its history" (Create Record), "Say so in the project’s history" (Create Record), "Say it did not save" (Set Variable)
+- `Commands/Set month plan` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to do" (Component Inputs) — the export has no rule for this node yet
+    …and 4 nodes are left out only because this one fires them: "Done" (Component Outputs), "Is there anything to write?" (Function), "Write this month’s plan" (Create Record), "Say it did not save" (Set Variable)
+- `Commands/Tell todo` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The block that was saved" (Component Inputs) — the export has no rule for this node yet
+    …and 5 nodes are left out only because this one fires them: "Told" (Component Outputs), "Is there anything to tell the todo list?" (Function), "Tick the next action off in the todo list" (Update Record), "Say so in the task’s history" (Create Record), "Say it did not save" (Set Variable)
+- `Logic/Budgets` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The tiles" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The month so far" (Component Inputs), "Work out every budget" (Function)
+- `Logic/Card rows` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The card" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The projects" (Component Inputs), "Group them, then open one" (Function)
+- `Logic/Day columns` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The columns" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The week" (Component Inputs), "Build the six columns" (Function)
+- `Logic/Mark` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The press" (Component Inputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The mark" (Component Outputs), "Work out the mark" (Function)
+- `Logic/Money` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to draw" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The money" (Component Inputs), "Draw the money" (Function)
+- `Logic/Money pane` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to show" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "What is picked" (Component Inputs), "Fill the pane" (Function)
+- `Logic/Moves` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The chips" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The projects" (Component Inputs), "Sort the moves by urgency" (Function)
+- `Logic/Planning data` — **no file at all**: no visual root — logic-only components defer to EXP-003
+- `Logic/Shutdown` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "What to say" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "Tonight" (Component Inputs), "Work out what tonight says" (Function)
+- `Logic/Todo tasks` — **no file at all**: no visual root — logic-only components defer to EXP-003
+  - "The blocks, with the tasks in" (Component Outputs) — the export has no rule for this node yet
+    …and 2 nodes are left out only because this one fires them: "The tasks and the blocks" (Component Inputs), "Put each task on its day" (Function)
+- `Pages/Week` — 738 refusals
+  - "Signed in?" (Condition) — its ontrue wire drives no translatable action
+    …and 16 nodes are left out only because this one fires them: "Who is signed in" (User), "Your week, from the backend" (/Logic/Planning data), "Send the move to the todo list" (/Commands/Send to todo), "Tell the todo list the block is done" (/Commands/Tell todo), "Log the time on a block" (/Commands/Add time), "Carry a block to tomorrow" (/Commands/Carry block), "Drop a block" (/Commands/Drop block), "Put a move in the week on the day chosen" (/Commands/Place move), "Move the move to another day" (/Commands/Move block), "Take the move out of the week" (/Commands/Drop block), "Plan this month" (/Commands/Set month plan), "End a money item" (/Commands/End money item), "Hoped money is agreed" (/Commands/Agree money item), "Mark a repeat for the first time" (/Commands/Add mark), "Change the mark on a repeat" (/Commands/Edit mark), "Record the balance" (/Commands/Record balance)
+  - "The budgets" (/Logic/Budgets) — the export has no rule for this node yet
+  - "The six columns" (/Logic/Day columns) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Your todo tasks, in the week" (/Logic/Todo tasks)
+  - "The moves, by urgency" (/Logic/Moves) — the export has no rule for this node yet
+  - "The money, drawn" (/Logic/Money) — the export has no rule for this node yet
+  - "What the Money pane and the card’s Billing show" (/Logic/Money pane) — the export has no rule for this node yet
+  - "What tonight says" (/Logic/Shutdown) — the export has no rule for this node yet
+    …and one node is left out only because this one fires it: "Your todo tasks, in the week" (/Logic/Todo tasks)
+  - "The projects card" (/Logic/Card rows) — the export has no rule for this node yet
+  - "Show the block’s project" (Set Variable) — /Week/Day column's row output "projectId" is computed inside the row (by For Each.itemOutput-projectId) — only a row input passed straight through is relayed in this slice
+  - "Show the project picked in the list" (Set Variable) — the value wire has no statically known source
+  - "Is the card open?" (Function) — its out-shown feeds /Week/Project card.shown, which has no static binding in this slice
+  - "Close the drawer" (Set Variable) — the Function that sends its "go" signal is not exported: input "key" is fed by /Logic/Money — no statically known source in the emit vocabulary
+  - "Show that day on the phone" (Set Variable) — the value wire has no statically known source
+  - "Open the sheet on a block" (Set Variable) — /Week/Day column's row output "blockId" is computed inside the row (by For Each.itemOutput-id) — only a row input passed straight through is relayed in this slice
+  - "Close the sheet" (Set Variable) — trigger cmdTellTodo.done is not a rendered element event or a receiver
+    …and 2 nodes are left out only because this one fires them: "Tell the todo list the block is done" (/Commands/Tell todo), "Log the time on a block" (/Commands/Add time)
+  - "Opened by the tick" (Set Variable) — its trigger, "One column per day" (twDayEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  - "Opened by the words or the hours" (Set Variable) — its trigger, "One column per day" (twDayEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  - "Start a new block on a day" (Set Variable) — its trigger, "One column per day" (twDayEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)
+  - "Stop making a new block" (Set Variable) — trigger cmdAddBlock.done is not a rendered element event or a receiver
+  - "Tick or untick the action pressed" (Function) — input "actionId" is fed by /Week/Block sheet — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Tick or untick one" (Set Variable)
+  - "What the block sheet is showing" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Your todo tasks, in the week" (/Logic/Todo tasks)
+  - "What the project editor is showing" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  - "Is Money open?" (Function) — its out-shown feeds /Week/Money sheet.shown, which has no static binding in this slice
+  - "Pick the next bill of the project on the card" (Set Variable) — the value wire has no statically known source
+  - "Pick nothing" (Set Variable) — trigger cmdEndItem.done is not a rendered element event or a receiver
+    …and one node is left out only because this one fires it: "End a money item" (/Commands/End money item)
+  - "The summary, or the line picked" (Set Variable) — the Function that sends its "go" signal is not exported: input "key" is fed by /Week/Money sheet — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "End a money item" (/Commands/End money item), "Record the balance" (/Commands/Record balance)
+  - "The item the picked line comes from" (Set Variable) — the value wire has no statically known source
+  - "The project on the card" (Set Variable) — the value wire has no statically known source
+  - "Show the project you might earn from" (Set Variable) — the value wire has no statically known source
+  - "A line or an item?" (Function) — input "key" is fed by /Week/Money sheet — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "Pick the line pressed in the list" (Set Variable), "The item pressed in Recurring" (Set Variable)
+  - "The box pressed, as a line" (Function) — input "key" is fed by /Week/Cash strip — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Pick the box pressed under the week" (Set Variable)
+  - "The late money, as a line" (Function) — input "key" is fed by /Logic/Money — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Pick the late money the drawer raised" (Set Variable)
+  - "The line answered Part of it" (Function) — input "key" is fed by /Week/Money sheet — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Pick the line answered Part of it" (Set Variable)
+  - "Tick it" (Function) — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+    …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+  - "Save this one" (Function) — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+    …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+  - "Back to the item" (Function) — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+    …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+  - "Skip this one" (Function) — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+    …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+  - "Mark as lost" (Function) — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+    …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+  - "Untick" (Function) — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+    …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+  - "Mark as sent" (Function) — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+    …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+  - "Not sent after all" (Function) — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+    …and one node is left out only because this one fires it: "The mark a press in the pane writes" (/Logic/Mark)
+  - "It happened (Record balance)" (Function) — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+    …and one node is left out only because this one fires it: "The mark an answer in Record balance writes" (/Logic/Mark)
+  - "It is lost (Record balance)" (Function) — its out-action output feeds /Logic/Mark.action, which its "go" signal runs, and that chain is not exported: its "go" signal drives no translatable action
+    …and one node is left out only because this one fires it: "The mark an answer in Record balance writes" (/Logic/Mark)
+  - "Is it a new money item?" (Condition) — the condition wire has no statically known source
+    …and 2 nodes are left out only because this one fires them: "Add a money item" (/Commands/Add money item), "Change a money item" (/Commands/Edit money item)
+  - "Is the drawer open?" (Function) — its out-shown feeds /Week/Shutdown drawer.shown, which has no static binding in this slice
+  - "Is the settings sheet open?" (Function) — its out-shown feeds /Week/Settings sheet.shown, which has no static binding in this slice
+  - "Is that move already in the week?" (Condition) — the condition wire has no statically known source
+    …and 2 nodes are left out only because this one fires them: "Show the chip’s project" (Set Variable), "Put a move in the week" (/Commands/Place move)
+  - "Is the sheet making a new block?" (Condition) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and 2 nodes are left out only because this one fires them: "Put a block in a day" (/Commands/Add block), "Save what a block is" (/Commands/Save block)
+  - "Is the editor making a new project?" (Condition) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and 3 nodes are left out only because this one fires them: "Show the project just made" (Set Variable), "Add a project" (/Commands/Add project), "Change a project" (/Commands/Edit project)
+  - "Is it a new money event?" (Condition) — nothing statically known feeds condition
+  - "Is this the first time the settings are saved?" (Condition) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and 2 nodes are left out only because this one fires them: "Save the settings" (/Commands/Edit settings), "Write the settings for the first time" (/Commands/Add settings)
+  - "Your settings, unpacked" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  - "Use the recommended split" (Function) — input "recBuilding" is fed by /Logic/Budgets — no statically known source in the emit vocabulary
+- `Week/Project editor` — 110 refusals
+  - "The project as it should be" (Component Outputs) — value output "kind" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+    …and 2 nodes are left out only because this one fires them: "What kind of work" (Dropdown), "Hourly or fixed" (Dropdown)
+  - "Which billing fields this project needs, and what saving does about its bill" (Function) — the script reads the clock (Date) and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and 3 nodes are left out only because this one fires them: "What kind of work" (Dropdown), "Hourly or fixed" (Dropdown), "When do you bill?" (Dropdown)
+  - "Clear the boxes on close; tick Fixes only to match the project" (Function) — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Fixes only" (Checkbox)
+- `Week/Settings sheet` — 106 refusals
+  - "Clear the boxes on close; tick the days to match" (Function) — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and 7 nodes are left out only because this one fires them: "Mon" (Checkbox), "Tue" (Checkbox), "Wed" (Checkbox), "Thu" (Checkbox), "Fri" (Checkbox), "Sat" (Checkbox), "Sun" (Checkbox)
+- `Week/Money editor` — 95 refusals
+  - "The item as it should be" (Component Outputs) — value output "dir" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+    …and 3 nodes are left out only because this one fires them: "In or out" (Dropdown), "How often" (Dropdown), "Which project, if any" (Dropdown)
+  - "Which fields this item needs" (Function) — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and 3 nodes are left out only because this one fires them: "In or out" (Dropdown), "How often" (Dropdown), "Which project, if any" (Dropdown)
+  - "Clear the boxes on close; tick the two boxes to match the item" (Function) — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and 2 nodes are left out only because this one fires them: "On the last day of the month" (Checkbox), "Fill the amount from the hours" (Checkbox)
+  - "Put the boxes back when the item changes" (Function) — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+- `Week/Money sheet` — 63 refusals
+  - "What you did in it" (Component Outputs) — /Week/Money month's row output "key" is computed inside the row (by For Each.itemOutput-key) — only a row input passed straight through is relayed in this slice
+- `Week/Money repeat` — 54 refusals
+  - "What to do with it" (Component Outputs) — value output "tickOn" is fed by /Week/Date picker — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "What the rest is" (Dropdown)
+  - "Is it less than was due?" (Function) — its out-short feeds net.noodl.controls.options, which is itself deferred
+  - "Put the boxes back when the repeat changes" (Function) — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+  - "Clear the boxes when the pane closes" (Function) — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+- `Week/Project card` — 46 refusals
+  - "What you did in the card" (Component Outputs) — /Week/Project group's row output "id" is computed inside the row (by For Each.itemOutput-id) — only a row input passed straight through is relayed in this slice
+- `Week/Block sheet` — 43 refusals
+  - "What it should become" (Component Outputs) — value output "projectId" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "Which project" (Dropdown)
+  - "Clear the boxes on close; tick Done to match the block" (Function) — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Done" (Checkbox)
+- `Week/Date picker` — 24 refusals
+  - "The date" (Component Outputs) — value output "Value" is fed by JavaScriptFunction — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+    …and one node is left out only because this one fires it: "Draw the field and calendar" (Function)
+- `Week/Project detail` — 14 refusals
+  - "What you did" (Component Outputs) — value output "planDate" is fed by /Week/Date picker — no statically known source in the emit vocabulary
+  - "Put the hours back when the project changes" (Function) — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+- `Week/Money balance` — 11 refusals
+  - "Recorded" (Component Outputs) — value output "on" is fed by /Week/Date picker — no statically known source in the emit vocabulary
+  - "Clear the box when it closes" (Function) — the script keeps state on `this` across runs and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2
+- `Pages/Sign in` — 10 refusals
+- `Week/Money end` — 6 refusals
+  - "Ended" (Component Outputs) — value output "at" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary
+    …and one node is left out only because this one fires it: "The last one that happens" (Dropdown)
+- `Week/Block` — 3 refusals
+- `Week/Budget tile` — 3 refusals
+- `Week/Day header` — 3 refusals
+- `Week/Move chip` — 3 refusals
+- `Week/Shutdown drawer` — 3 refusals
+- `Week/Action pick` — 2 refusals
+- `Week/Money row` — 2 refusals
+- `Week/Project list row` — 2 refusals
+- `Week/App bar` — 1 refusal
+- `Week/Cash event` — 1 refusal
+- `Week/Day column` — 1 refusal
+- `Week/Day pick` — 1 refusal
+- `Week/Might link` — 1 refusal
+- `Week/Spark bar` — 1 refusal
+
+The reason for every one of them, in the exporter's own words, is written into the app as `EXPORT-REPORT.md` when you proceed.
+
+## What this export will claim, and what it will not
+
+Every line will be generated by rule, and **nothing will be run**. Where the exporter has a rule for a node it emits code from it; where it does not, it refuses and says so. It never guesses — and it never executes your graph, records its behaviour, or compares the generated code against it.
+
+The export is also **one-way**: the code will not sync back, and re-exporting overwrites whatever you changed in it.
+

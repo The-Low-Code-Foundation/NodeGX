@@ -1,0 +1,342 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b8d20e00-0000-4000-8000-000000001811",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Host Desk",
+        "urlPath": "home"
+      },
+      "children": [
+        "shell"
+      ],
+      "x": 100,
+      "y": 120
+    },
+    {
+      "id": "shell",
+      "type": "Group",
+      "label": "Shell",
+      "parent": "page",
+      "children": [
+        "tallyA",
+        "tallyB",
+        "stampBtn",
+        "sayBtn",
+        "yearText",
+        "laterText",
+        "pickedText",
+        "timerText",
+        "winText",
+        "saidText"
+      ],
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "x": 100,
+      "y": 200
+    },
+    {
+      "id": "tallyA",
+      "type": "/Components/Tally",
+      "label": "Tally A",
+      "parent": "shell",
+      "parameters": {
+        "label": "Count A"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "tallyB",
+      "type": "/Components/Tally",
+      "label": "Tally B",
+      "parent": "shell",
+      "parameters": {
+        "label": "Count B"
+      },
+      "x": 100,
+      "y": 360
+    },
+    {
+      "id": "stampBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Stamp",
+      "parent": "shell",
+      "parameters": {
+        "label": "Stamp"
+      },
+      "x": 100,
+      "y": 440
+    },
+    {
+      "id": "sayBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Say",
+      "parent": "shell",
+      "parameters": {
+        "label": "Say"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "yearText",
+      "type": "Text",
+      "label": "Year",
+      "parent": "shell",
+      "parameters": {},
+      "x": 100,
+      "y": 600
+    },
+    {
+      "id": "laterText",
+      "type": "Text",
+      "label": "Later",
+      "parent": "shell",
+      "parameters": {},
+      "x": 100,
+      "y": 680
+    },
+    {
+      "id": "pickedText",
+      "type": "Text",
+      "label": "Picked",
+      "parent": "shell",
+      "parameters": {},
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "timerText",
+      "type": "Text",
+      "label": "Timer",
+      "parent": "shell",
+      "parameters": {},
+      "x": 100,
+      "y": 840
+    },
+    {
+      "id": "winText",
+      "type": "Text",
+      "label": "Win",
+      "parent": "shell",
+      "parameters": {},
+      "x": 100,
+      "y": 920
+    },
+    {
+      "id": "saidText",
+      "type": "Text",
+      "label": "Said",
+      "parent": "shell",
+      "parameters": {},
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "yearVar",
+      "type": "Variable2",
+      "label": "year",
+      "parameters": {
+        "name": "year",
+        "value": "year nothing"
+      },
+      "x": 700,
+      "y": 1080
+    },
+    {
+      "id": "laterVar",
+      "type": "Variable2",
+      "label": "later",
+      "parameters": {
+        "name": "later",
+        "value": "later nothing"
+      },
+      "x": 700,
+      "y": 1160
+    },
+    {
+      "id": "pickedVar",
+      "type": "Variable2",
+      "label": "picked",
+      "parameters": {
+        "name": "picked",
+        "value": "picked nothing"
+      },
+      "x": 700,
+      "y": 1240
+    },
+    {
+      "id": "timerVar",
+      "type": "Variable2",
+      "label": "timer",
+      "parameters": {
+        "name": "timer",
+        "value": "timer nothing"
+      },
+      "x": 700,
+      "y": 1320
+    },
+    {
+      "id": "winVar",
+      "type": "Variable2",
+      "label": "win",
+      "parameters": {
+        "name": "win",
+        "value": "win nothing"
+      },
+      "x": 700,
+      "y": 1400
+    },
+    {
+      "id": "saidVar",
+      "type": "Variable2",
+      "label": "said",
+      "parameters": {
+        "name": "said",
+        "value": "said nothing"
+      },
+      "x": 700,
+      "y": 1480
+    },
+    {
+      "id": "whoVar",
+      "type": "Variable2",
+      "label": "who",
+      "parameters": {
+        "name": "who",
+        "value": "Ann"
+      },
+      "x": 700,
+      "y": 1560
+    },
+    {
+      "id": "stamp",
+      "type": "JavaScriptFunction",
+      "label": "The stamp",
+      "parameters": {
+        "functionScript": "const d = new Date(0);\nOutputs.year = String(d.getUTCFullYear());\nOutputs.later = Date.now() > 1 ? 'yes' : 'no';\nOutputs.picked = Math.random() < 2 ? 'picked' : 'none';\nsetTimeout(() => {}, 0);\nOutputs.timer = 'set';\nOutputs.win = typeof window === 'object' ? 'window' : 'none';"
+      },
+      "ports": [
+        {
+          "name": "out-year",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-later",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-picked",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-timer",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "out-win",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 700,
+      "y": 1640
+    },
+    {
+      "id": "greet",
+      "type": "JavaScriptFunction",
+      "label": "The greeting",
+      "parameters": {
+        "functionScript": "Outputs.word = 'hello ' + Inputs.who;",
+        "runOnChange-in-who": false
+      },
+      "ports": [
+        {
+          "name": "in-who",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "out-word",
+          "plug": "output",
+          "type": "*"
+        }
+      ],
+      "x": 700,
+      "y": 1720
+    },
+    {
+      "id": "sdYear",
+      "type": "Set Variable",
+      "label": "sdYear",
+      "parameters": {
+        "name": "year"
+      },
+      "x": 700,
+      "y": 1800
+    },
+    {
+      "id": "sdLater",
+      "type": "Set Variable",
+      "label": "sdLater",
+      "parameters": {
+        "name": "later"
+      },
+      "x": 700,
+      "y": 1880
+    },
+    {
+      "id": "sdPicked",
+      "type": "Set Variable",
+      "label": "sdPicked",
+      "parameters": {
+        "name": "picked"
+      },
+      "x": 700,
+      "y": 1960
+    },
+    {
+      "id": "sdTimer",
+      "type": "Set Variable",
+      "label": "sdTimer",
+      "parameters": {
+        "name": "timer"
+      },
+      "x": 700,
+      "y": 2040
+    },
+    {
+      "id": "sdWin",
+      "type": "Set Variable",
+      "label": "sdWin",
+      "parameters": {
+        "name": "win"
+      },
+      "x": 700,
+      "y": 2120
+    },
+    {
+      "id": "sdSaid",
+      "type": "Set Variable",
+      "label": "sdSaid",
+      "parameters": {
+        "name": "said"
+      },
+      "x": 700,
+      "y": 2200
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

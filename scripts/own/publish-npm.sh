@@ -13,7 +13,8 @@ dir="${1:?usage: publish-npm.sh <folder of .tgz files>}"
 # create-nodegx: create-nodegx sets folders up with the mcp version it pins; create-nodegx-vibe (OWN-019,
 # `npm create nodegx-vibe`) and create-nodegx-cline (OWN-020) last, because each pins create-nodegx. `<name>-[0-9]*` so
 # that create-nodegx never picks up create-nodegx-vibe-<v>.tgz. create-nodegx-cline needs a create-nodegx with
-# `--cline` (0.2.4 and later), so its first tarball comes with the 0.2.4 cut.
+# `--cline` (0.2.4 and later), so its first tarball comes with the 0.2.4 cut. @nodegx/export (P18 EXP-023, Richard's ruling of
+# 2026-10-21: the off-ramp is on npm) depends on nothing published and is cut at the kit's version from the 0.2.5 cut on.
 # 2026-10-20 (npm 0.2.4): `npm view <name>@<version>` answered "not there" for over an hour after @nodegx/mcp@0.2.4 went
 # live (its cache and the registry's abbreviated document lag), so a re-run after a partial publish tried mcp again and
 # stopped on E403 "cannot publish over the previously published versions". The full document is the registry's own
@@ -22,7 +23,7 @@ registry_shasum() { # <name> <version> → the published version's shasum, or no
   curl -fsS -H 'Cache-Control: no-cache' "https://registry.npmjs.org/$(printf %s "$1" | sed 's|/|%2f|')" 2>/dev/null |
     node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const v=(JSON.parse(s).versions||{})[process.argv[1]];if(v)process.stdout.write(v.dist.shasum)}catch(e){}})' "$2"
 }
-for name in nodegx-node-spec nodegx-project-contract nodegx-canvas-look nodegx-preview nodegx-mcp create-nodegx create-nodegx-vibe create-nodegx-cline; do
+for name in nodegx-node-spec nodegx-project-contract nodegx-canvas-look nodegx-preview nodegx-export nodegx-mcp create-nodegx create-nodegx-vibe create-nodegx-cline; do
   tgz=$(ls "$dir"/"$name"-[0-9]*.tgz 2>/dev/null | head -1 || true)
   [ -n "$tgz" ] || { echo "skip $name: no tarball in $dir"; continue; }
   pkg=$(tar -xzOf "$tgz" package/package.json | node -pe 'const p=JSON.parse(require("fs").readFileSync(0,"utf8")); p.name+"@"+p.version')

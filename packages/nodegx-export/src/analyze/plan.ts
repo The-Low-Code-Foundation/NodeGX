@@ -54,6 +54,7 @@ import {
   functionMinedPortsOf,
   jsBodyOf,
   jsNodeKindOf,
+  jsHostTraitsOf,
   jsPurityDefer,
   JS_EXPRESSION,
   JS_FUNCTION
@@ -3200,6 +3201,13 @@ export interface JsFunctionPlan {
    * invoked — `run` wired: calls inline inside its own handler chain only (grade I).
    */
   mode: 'reactive' | 'invoked';
+  /**
+   * EXP-019. Function only, invoked only: the host traits the body carries ("reads the clock (Date)", "keeps state on
+   * `this`", …, `jsHostTraitsOf`). Present ⇒ the run is `pulsed` (a kept node, one run per trigger, outputs read from the
+   * node's record), because a body with a trait must never run at a read site. A `this` trait binds the body to the
+   * node's `self`.
+   */
+  host?: string[];
   /**
    * EXP-011 §86. Function only, invoked only: a run of it sends a signal of its own that a chain consumes, or (P18-S121-
    * FRESHOUTPUTS) it materializes a row a reader reads between runs. The wrapper then takes its `Outputs` record as a
@@ -6546,6 +6554,15 @@ function planComponent(
         const purity = jsPurityDefer(kind, body);
         if (purity !== null) return { defer: `the ${word} ${purity}` };
       }
+      /**
+       * EXP-019. A Function's host traits travel with it — as a run once per trigger (`host` ⇒ `pulsed`, the run compile).
+       * With no Run wire the node runs on its inputs' arrival (`scheduleRun` on an input change), which is a run from an
+       * effect this slice does not print: refused by the trait's name until slice 2.
+       */
+      const host = kind === 'function' ? jsHostTraitsOf(body) : [];
+      if (host.length > 0 && !wiredPorts.has(`${node.id}:run`)) {
+        return { defer: `the ${word} ${host[0]} and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2` };
+      }
       // P109 ISL-005 AC7. The files a Function lists under Uses: bound as `Scripts`, or the named reason not.
       let scriptUses: ScriptUsePlan[] = [];
       if (kind === 'function') {
@@ -6748,6 +6765,7 @@ function planComponent(
         signals,
         mathAliases: exprIds.mathAliases,
         mode,
+        ...(host.length > 0 ? { host } : {}),
         ...(loadGate !== undefined ? { loadGate } : {}),
         ...(scriptUses.length > 0 ? { scripts: scriptUses } : {}),
         ...(kind === 'visual'
@@ -11704,13 +11722,17 @@ function planComponent(
       materialize = stateVar.name;
       jsMaterializedVars.set(node.id, stateVar);
     }
-    if (chain.then.length === 0 && materialize === undefined) {
+    // EXP-019. A run with a host trait is its own effect (it writes the browser, starts a timer, reaches the network): it
+    // runs whether or not anything reads it, as the runtime runs it.
+    const hosted = record.def.host !== undefined && record.def.host.length > 0;
+    if (chain.then.length === 0 && materialize === undefined && !hosted) {
       return { defer: 'its Run drives nothing this slice translates — no done-chain action consumes its work' };
     }
     // Only on a run that compiles: a refused one prints no wrapper change and keeps no node state.
     // P18-S121-FRESHOUTPUTS, for a materialized run: its row is what a reader reads between runs, and the runtime's node
     // keeps its outputs across them (a run that returns early writes nothing). So it keeps a node, as a pulsed run does.
-    if (pulses.then.length > 0 || (materialize !== undefined && record.def.kind === 'function')) record.def.pulsed = true;
+    // EXP-019: a hosted run keeps a node too, so the body runs once per trigger and never at a read site.
+    if (pulses.then.length > 0 || (materialize !== undefined && record.def.kind === 'function') || hosted) record.def.pulsed = true;
     // P18-S119-TICKEDRUN. Done is the Run's alone; a ticked run that sends nothing and writes nothing is unobservable.
     // P18-S129-FNSUCCESS: it sends Success.
     if (ticked.watch.length > 0 && (tickedThen.length > 0 || materialize !== undefined)) {

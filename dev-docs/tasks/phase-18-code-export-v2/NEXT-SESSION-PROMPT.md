@@ -1,3 +1,40 @@
+# Next session — session 132 (2026-10-21, BOARD lane 6) took **Richard's ruling** ("code export and deployment as npm things, such that nobody would ever have to use the original Noodl / NodeGX editor … I want that offramp promise fulfilled in React and Swift … make it so"), re-ordered the lane ([EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md) → [EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md) → [EXP-021](EXP-021-A-LOGIC-COMPONENT-IS-A-HOOK.md) → [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md), [EXP-023](EXP-023-THE-OFF-RAMP-IS-ON-NPM.md) with the kit cut) and built **EXP-019 slice 1**: a Run-wired Function whose script keeps `this`, reads the clock, draws randomness, schedules a timer, touches the browser or reaches the network is no longer refused; it runs once per Run with a kept node. Graded on the Host Desk against the runtime arm; 135 template nodes gained, 0 lost.
+
+## ✅ Session 132: the script travels as written (slice 1)
+
+Read EXP-011 §102 and EXP-019 §6. In short:
+
+| what | where |
+|---|---|
+| Measured first: every template's preflight (todo-list 6 of 62 clean), every Function body against the classifier's own patterns: 683 of 1,285 refused by a host gate (Date 437, browser 174, Noodl 183, async 163, random 88, `this` 69, timers 27); the "no rule" bucket is logic components (182 Component Inputs, 48 Outputs, 124 Functions) | `s132-hostgates/census-scripts.md`, `census/` |
+| `jsHostTraitsOf` + `HOST_TRAIT_REASONS`: six of the marker gates become traits for a Function body; an Expression and a script file keep every gate; async stays a gate | `src/analyze/jsfun.ts` |
+| `JsFunctionPlan.host`; a traited body with no Run wire refused by name ("… and has no Run wire — a run on its inputs' arrival is EXP-019 slice 2"); `hosted ⇒ pulsed`; a traited run with nothing wired out still runs | `src/analyze/plan.ts` (`jsFunDefOf`, the run compile) |
+| `runIsHosted` in the emitter's kept-node set AND in `expandActions`' run/chain split (🔴 the plan's `pulsed` alone is not what the emitter keys on); the `.call(self)` wrapper with `self` as the third parameter, for a `this` body only | `src/emit/component.ts` |
+| `FunctionNode.self`, handed to the body by `runFunction` | `src/emit/functionRunLib.ts` |
+| Spec, 17 rows: the Host Desk (Tally placed twice with `this.n`, one body with four traits, a pure control), predicted first; `host-desk` in the corpus (hls001 63 → 64, 3 paths moved by the library's text, counted); 6 mutant arms, 0 survived | `tests/the-script-travels-as-written.test.ts`, `tests/helpers/host-desk.ts`, `s132-hostgates/EXPECTED.md`, `mutants.py` |
+| npm (EXP-023 §5): `@nodegx/export` 0.2.5, in `publish-npm.sh` after preview, the scaffold's note's leaving line + its test | `packages/nodegx-export/package.json`, `scripts/own/publish-npm.sh`, `packages/create-nodegx/bin/create-nodegx.js` |
+
+- 🔴 **The gates were shaped like the grading method, not the product** ("not deterministic", "when the trace harness exists"). The runtime hosts every one of those bodies. Census a refusal list and ask whose need each reason serves before inheriting it.
+- 🔴 **A NodeGX Variable is one value app-wide by name**: the first desk read the counts through Variables and both Tallies read "1" on the runtime arm. Read the output directly.
+- 🔴 **The preflight's "What will not translate (N)" is a capped listing**: it rose for members-area (228 → 275) while no disposition moved (P18-S132-PREFLIGHTCOUNT). Reach is `dispdiff`.
+- 🔴 **A spec that used `Math.random` as its stand-in for "a refused sink"** (the-function-succeeds C4) moved to `Noodl.Events`.
+- 🔴 **`dispdiff.ts`'s base copy** must sit at `packages/<x>/src` depth with `dist/node-catalog.json` copied beside it (a scratchpad copy resolves no modules; one under `node_modules` is type-stripped by Node).
+- The emitted code of two gained nodes read (todo-list's `Count mounts` under a Did Mount: kept node, `.call(self)`, materialized row; `Is there anything to write?` in CloseTask's Run chain: `runFunction` then the chain).
+
+Readings: the spec 17 / 17 (6 arms, 0 survived); the five neighbouring Function specs 141 / 141; `tplbuild.ts` all 17 at the floor (1 error in 1, nightbook STYLENULL); package `tsc --noEmit` 0; `create-nodegx` 34 / 0. Reach (`dispdiff.ts`, `420619884` against the tree): **templates 135 gained, 0 lost, 267 re-worded** (the clock 49, the browser 39, `this` 19 fell; 81 now stand behind slice 2's sentence). Whole package (`nice -n 19 --runInBand`): **150 / 150 suites, 5,144 passed, 0 failed, 3 skipped** (a first run read 9 red: the classifier's own spec asserting the old gates, and the CLI spec holding `EXPORTER_VERSION` to the manifest — both moved with the change; and the trait regex had matched `arguments`' and `import()`'s reasons on the word "this", fixed to match by the reason's opening words, reach unchanged).
+
+Filed: **P18-S132-AUTHOREDTEXT** (low: a wired Text's authored text shows in the runtime until the wire delivers, nothing in the export; 16 Texts; pinned by name in A2b), **P18-S132-PREFLIGHTCOUNT** (low).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-019 slice 2 — the reactive traited body** (81 template nodes: `this` 40, the clock 30, the browser 11): a Function with no Run wire runs on its inputs' arrival (`scheduleRun` on an input change), as a run from an effect with a kept node; `tickedRunPieces` is the nearest machinery (an effect that watches inputs and records arrivals). Predict on a desk first (EXPECTED.md), then build.
+2. **EXP-019 slice 1b — asynchrony** (163 bodies): the wrapper `async`, a `runFunctionAsync` awaited, the `jsfun-run` action marked awaited in `isAwaitedAction` / `actionsAwait` so §90's `detached` frees the click's later wires; Success/Done after the await (§98). AC3's desk row: a Set Variable wired after the Run runs before the awaited chain.
+3. **EXP-020** (the `Noodl` object: eight members over `src/api`; 183 bodies), then **EXP-021** (a logic component is a hook; 182 + 48 + 124 "no rule"; todo-list's every record verb sits behind one).
+4. **EXP-022 AC1** can run in a parallel session once slice 1 is on HEAD: pixel-game or story-engine's visual tier to a Swift package that `swift build`s (Xcode 26.3 is on the box).
+5. **EXP-023**: the cut is Richard's terminal (2FA) with lane 1's 0.2.5; AC1 from the registry after.
+6. Fix P18-S132-AUTHOREDTEXT when a Text session comes (one line; fixtures with such a Text move).
+
+---
+
 # Next session — session 131 (2026-10-19, BOARD lane 6) built **a relayed row value read inside its holder**: in a chain a row's relayed signal runs (directly, down a Done chain, in a Condition's arm) a read of that repeater's relayed value is the firing row's own item field; anywhere else it is refused by name. On the way it fixed **P18-S131-ROWLESSTRIGGER**: a repeater that draws no rows runs none of its rows' chains (13 template nodes were counted collapsed into rows nobody draws). Graded against the runtime's own nodes, the viewer's own For Each among them, rendered by real React. Templates 4 gained, 11 that never ran taken back; rocket-school's Question box answers. The parent's read of a lifted output (§101) was measured, not built.
 
 ## ✅ Session 131: the row is read where it fires

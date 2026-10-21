@@ -234,12 +234,13 @@ describe('§B what is emitted', () => {
   });
 });
 
-/** The desk with Success into a Function the export refuses (it draws randomness), and a reactive Function (Run unwired). */
+/** The desk with Success into a Function the export refuses (it reads the Noodl API; s132: randomness travels now), and a reactive Function (Run unwired). */
 const refusedDesk = (): string =>
   writeSuccessDesk((d) => {
     const home = d.components['Pages/Home'];
     home.nodes.push(
-      { id: 'dice', type: 'JavaScriptFunction', label: 'Roll', parameters: { functionScript: 'Outputs.n = Math.random();' }, ports: [{ name: 'out-n', plug: 'output', type: '*' }], x: 700, y: 3000 },
+      // EXP-019 (s132): randomness travels now (a host trait), so the refused sink reads the Noodl API instead, which stays refused.
+      { id: 'dice', type: 'JavaScriptFunction', label: 'Roll', parameters: { functionScript: 'Outputs.n = Noodl.Events.emit("roll");' }, ports: [{ name: 'out-n', plug: 'output', type: '*' }], x: 700, y: 3000 },
       {
         id: 'react',
         type: 'JavaScriptFunction',
@@ -292,7 +293,7 @@ describe('§C the plan', () => {
 
   it('C4 a Success into a sink the export refuses refuses the run with the sink\'s own sentence; its sibling wires name the run', () => {
     const plan = planOf(refusedDesk(), '/Pages/Home');
-    const own = 'draws randomness (Math.random) — not deterministic';
+    const own = 'reads the Noodl API — the runtime-coupled tier (EXP-003 Tier B)';
     expect(plan.dispositions['greet']).toMatchObject({ kind: 'deferred' });
     expect((plan.dispositions['greet'] as { reason: string }).reason).toContain(own);
     // The sink's own sentence, not the run's.

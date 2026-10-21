@@ -165,6 +165,29 @@ const MARKER_GATES: ReadonlyArray<{ pattern: RegExp; reason: string; bodyOnly?: 
 ];
 
 /**
+ * EXP-019 (Richard's ruling of 2026-10-21: the off-ramp carries the author's script) — the **host traits**. A Function
+ * body that reads the clock, draws randomness, schedules timers, touches the browser, reaches the network or keeps state
+ * on `this` is no longer refused for it: the runtime hosts every one of those (`new AsyncFunction(...)`, a `_this` kept per
+ * node, the browser's own clock), and so does the export, **as a run once per trigger with a kept node** (plan.ts
+ * `jsFunDefOf` / the run compile: `host` forces `pulsed`, so the body never runs at a read site, where a pure body is
+ * inlined). The gates stay gates for an Expression (reactive by construction: it runs wherever it is read) and for a
+ * script file (`scriptFileMarkerDefer`). Asynchrony is not a host trait yet (EXP-019 slice 1b): an `await` changes when
+ * the chain after the run continues, which `runFunction` does not model.
+ */
+const HOST_TRAIT_REASONS: ReadonlySet<string> = new Set(
+  // By the reason's opening words: `arguments`' and `import()`'s reasons also contain the word "this" ("this wrapper",
+  // "this slice"), and neither is a host trait — the wrapper's IIFE has its own `arguments`, and a dynamic import is a
+  // module question, not a run-model one.
+  MARKER_GATES.filter((g) => /^(keeps state on `this`|reads the clock|draws randomness|reaches the network|schedules timers|touches the browser environment)/.test(g.reason)).map((g) => g.reason)
+);
+
+/** The host traits a Function body carries, as short phrases ("reads the clock (Date)"), in gate order; `[]` for a pure body. */
+export function jsHostTraitsOf(body: string): string[] {
+  const scanned = strippedForScan(body);
+  return MARKER_GATES.filter((g) => HOST_TRAIT_REASONS.has(g.reason) && g.pattern.test(scanned)).map((g) => g.reason.split(' — ')[0]);
+}
+
+/**
  * P109 ISL-005 — the marker gates a **script file** must pass, for a Function that uses it to re-host.
  *
  * A file's code runs inside the Function's call, so what makes a body unfit to re-host (the clock,
@@ -244,6 +267,8 @@ export function jsPurityDefer(kind: JsNodeKind, body: string): string | null {
     if (raw.has('random')) return 'draws randomness (random) — not deterministic';
   }
   for (const gate of MARKER_GATES) {
+    // EXP-019: a Function carries its host traits (`jsHostTraitsOf`); an Expression is still held to every gate.
+    if (kind === 'function' && HOST_TRAIT_REASONS.has(gate.reason)) continue;
     if (gate.pattern.test(scanned)) return gate.reason;
   }
   return null;

@@ -46,6 +46,8 @@ export interface FunctionNode<O> {
   outputs: Partial<O>;
   /** What each output last sent down its wire. \`undefined\` is never sent, so a reader keeps the value before it. */
   delivered: Partial<O>;
+  /** What the body keeps on \`this\` across runs, as the running app's node keeps it (one object per node, never reset). */
+  self: Record<string, unknown>;
 }
 
 /** One signal the body sent, and the outputs as that pulse's chain reads them. */
@@ -62,10 +64,10 @@ export interface FunctionRun<O> {
 }
 
 export function functionNode<O>(signals: readonly string[]): FunctionNode<O> {
-  return { signals, outputs: {}, delivered: {} };
+  return { signals, outputs: {}, delivered: {}, self: {} };
 }
 
-export function runFunction<I, O>(body: (inputs: I, outputs: O) => unknown, inputs: I, node: FunctionNode<O>): FunctionRun<O> {
+export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<string, unknown>) => unknown, inputs: I, node: FunctionNode<O>): FunctionRun<O> {
   const current = node.outputs as Record<string, unknown>;
   const delivered = node.delivered as Record<string, unknown>;
   const before: Record<string, unknown> = { ...delivered };
@@ -100,7 +102,7 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O) => unknown, inpu
       return true;
     }
   });
-  body(inputs, outputs as unknown as O);
+  body(inputs, outputs as unknown as O, node.self);
   const count: Record<string, number> = {};
   const pulses = sent.map((signal) => {
     const k = (count[signal] = (count[signal] ?? 0) + 1);
