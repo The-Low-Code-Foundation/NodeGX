@@ -1,0 +1,17 @@
+{
+  "name": "threadspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A space game prototype: pilot, walk your ship, launch a fighter, board a pirate corvette, trade and jump the threads. Standalone three.js; the HUD on the right is the NodeGX seam.",
+  "type": "module",
+  "license": "GPL-3.0",
+  "scripts": {
+    "prestart": "node tools/ensure-installed.mjs",
+    "start": "node server.mjs --open",
+    "serve": "node server.mjs",
+    "drive": "node tools/drive.mjs http://127.0.0.1:8787/ tests/smoke.json shots"
+  },
+  "dependencies": {
+    "three": "^0.186.1"
+  }
+}

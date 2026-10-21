@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Threadspace</title>
+    <link rel="stylesheet" href="/style.css" />
+    <script type="importmap">
+      { "imports": { "three": "/vendor/three/three.module.js", "three/addons/": "/vendor/three-addons/" } }
+    </script>
+  </head>
+  <body>
+    <main id="layout">
+      <section id="stage">
+        <canvas id="view"></canvas>
+        <canvas id="hud"></canvas>
+        <div id="prompt" hidden></div>
+        <div id="banner" hidden></div>
+        <div id="fade"></div>
+        <div id="title" class="screen">
+          <div class="card">
+            <h1>THREADSPACE</h1>
+            <p class="sub">You have a frigate, a fighter in its bay, two crew and a debt. The threads lead everywhere.</p>
+            <div class="row">
+              <button id="btn-continue" class="primary" hidden>Continue</button>
+              <button id="btn-new">New captain</button>
+            </div>
+            <p class="keys">
+              <b>walk</b> W A S D · <b>look</b> mouse · <b>use</b> E · <b>fly</b> mouse or arrows, A D roll, W S throttle · <b>fire</b> Space / click ·
+              <b>target</b> T · <b>leave a seat / stand up</b> E · <b>jump a thread</b> J near a gate · <b>tactical</b> Tab
+            </p>
+          </div>
+        </div>
+      </section>
+      <aside id="panel">
+        <header id="panel-head">
+          <div class="brand"><span class="dot"></span><span id="ship-name">KESTREL</span><span id="sector-name" class="muted">—</span></div>
+          <div id="credits" class="credits">0 cr</div>
+        </header>
+        <nav id="tabs"></nav>
+        <div id="panel-body"></div>
+        <footer id="panel-foot"><span id="phase-name"></span><span id="help-line" class="muted"></span></footer>
+      </aside>
+    </main>
+    <script type="module" src="/src/main.mjs"></script>
+  </body>
+</html>
