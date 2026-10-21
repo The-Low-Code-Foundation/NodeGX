@@ -6,7 +6,7 @@ severity: medium
 area: export / `runFunction` (`src/emit/functionRunLib.ts`), the kept Function node (EXP-019)
 found: P18 session 133, 2026-10-21, reading the emitted code of the nodes EXP-019 slice 2 gained (todo-list's "A minute clock, and a wake when the app comes back into view")
 fixed: P18 session 133, 2026-10-21; EXP-011 §103, EXP-019 §7
-commit: (this session's EXP-019 slice 2 commit)
+commit: 56187a8b9
 evidence: dev-docs/tasks/phase-18-code-export-v2/s133-arrival/EXPECTED.md ("The Bell variant"); tests/the-script-runs-on-arrival.test.ts §E; mutant arms J, K, L
 regression: packages/nodegx-export/tests/the-script-runs-on-arrival.test.ts
 ---
