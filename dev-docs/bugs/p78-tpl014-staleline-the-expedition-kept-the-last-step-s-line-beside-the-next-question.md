@@ -6,6 +6,7 @@ severity: medium
 area: Rocket School and Star Class / Trip/Play and School/Play (`packages/noodl-mcp/tests/tpl007Components.ts`)
 found: P78 TPL-014 M2–M5, 2026-10-22
 evidence: dev-docs/tasks/phase-78-the-templates/TPL-014-THE-MOON-GROWS.md §7, M2–M5
+commit: 43fe398cd
 ---
 
 Trip/Play first wired every act's Said straight to the line under the map. A Function output publishes only when its
