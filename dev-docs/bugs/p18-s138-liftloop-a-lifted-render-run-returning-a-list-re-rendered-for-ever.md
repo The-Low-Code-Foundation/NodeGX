@@ -6,6 +6,7 @@ severity: high
 area: export / render-run Functions (`src/emit/component.ts`, `renderLocalLines`, `memoJsIds`)
 found: P18 session 138, 2026-10-22, the Hook Desk's Shelf (a logic component returning a list into a For Each) hung the export arm
 fixed: P18 session 138, 2026-10-22; EXP-011 §108
+commit: 10dc1c990
 evidence: dev-docs/tasks/phase-18-code-export-v2/s138-lifted-list/README.md, hookprops.out (the 64 memoised runs)
 regression: packages/nodegx-export/tests/a-logic-component-is-a-hook.test.ts
 ---

@@ -6,6 +6,7 @@ severity: low
 area: export / the emitter's Variable hook locals (`src/emit/component.ts`, `hookLocals`)
 found: P18 session 138, 2026-10-22, by the template typecheck (`tplbuild`), once a hook's Variable-fed prop earned its local (P18-S138-HOOKPROPWALK)
 fixed: P18 session 138, 2026-10-22; EXP-011 §108
+commit: 10dc1c990
 evidence: dev-docs/tasks/phase-18-code-export-v2/s138-lifted-list/README.md
 regression: packages/nodegx-export/tests/a-logic-component-is-a-hook.test.ts
 ---

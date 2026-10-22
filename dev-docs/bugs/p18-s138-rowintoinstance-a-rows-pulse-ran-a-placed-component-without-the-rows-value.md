@@ -6,6 +6,7 @@ severity: high
 area: export / the repeater's row relay into a placed component's input (`src/analyze/plan.ts`, `compileInstanceSignal`, §99's `rowRelayOf`)
 found: P18 session 138, 2026-10-22, reading rocket-school's emitted Lists page after a logic component's list began to draw (EXP-011 §108)
 fixed: P18 session 138, 2026-10-22; EXP-011 §108
+commit: 10dc1c990
 evidence: dev-docs/tasks/phase-18-code-export-v2/s138-lifted-list/README.md, rowinto-head.out, rowinto-after.out
 regression: packages/nodegx-export/tests/a-logic-component-is-a-hook.test.ts
 ---
