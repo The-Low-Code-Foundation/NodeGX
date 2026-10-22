@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "faae6b38-a264-53e0-87d0-d3879906a6fb",
+  "name": "GoButton",
+  "path": "/UI/GoButton",
+  "type": "visual",
+  "created": "2026-10-21T13:01:29.328Z",
+  "modified": "2026-10-21T13:18:13.973Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A big button at the foot of the sheet: an outlined one (rehearse, speed, stop…) or the velvet one (gala night, next season). Wide ones take the whole row."
+}

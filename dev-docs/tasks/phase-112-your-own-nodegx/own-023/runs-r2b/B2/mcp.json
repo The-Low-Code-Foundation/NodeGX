@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "nodegx": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@nodegx/mcp@0.2.4",
+        "--allow-writes"
+      ],
+      "env": {
+        "HOME": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/9a20b9d4-b667-4608-b022-ebbacfd44fee/scratchpad/own023-r2b/rounds/B2/home",
+        "TMPDIR": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/9a20b9d4-b667-4608-b022-ebbacfd44fee/scratchpad/own023-r2b/rounds/B2/home/tmp",
+        "npm_config_cache": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/9a20b9d4-b667-4608-b022-ebbacfd44fee/scratchpad/own023-r2b/rounds/B2/home/.npm",
+        "BROWSER": "none"
+      }
+    }
+  }
+}

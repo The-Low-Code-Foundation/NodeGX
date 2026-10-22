@@ -1,0 +1,9 @@
+{
+  "name": "le-gala-de-danse",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node serve.mjs",
+    "test": "node --test tests/*.test.mjs"
+  }
+}

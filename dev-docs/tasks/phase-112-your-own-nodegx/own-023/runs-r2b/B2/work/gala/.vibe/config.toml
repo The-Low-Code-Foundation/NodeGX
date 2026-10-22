@@ -1,0 +1,50 @@
+# Mistral Vibe settings for this folder, written by `npm create nodegx`. Start Vibe here with:
+#
+#   vibe --legacy-harness
+#
+# Vibe's default harness hides a tool's error messages from the model, and NodeGX answers every refused change
+# with what to fix, so the legacy harness builds better apps. Edit anything below; it is never overwritten.
+
+active_model = "mistral-large-4"
+
+[[models]]
+name = "mistral-large-4"
+provider = "mistral"
+alias = "mistral-large-4"
+display_name = "Mistral Large 4"
+temperature = 1.0
+thinking = "high"
+thinking_levels = ["low", "high"]
+max_context_length = 1000000
+input_price = 1.36
+output_price = 4.18
+cached_input_price = 0.14
+
+[[mcp_servers]]
+name = "nodegx"
+transport = "stdio"
+command = "npx"
+args = ["-y", "@nodegx/mcp@0.2.4", "--allow-writes", "--profile", "vibe"]
+startup_timeout_sec = 240
+tool_timeout_sec = 600
+
+[tools.nodegx_list_projects]
+permission = "always"
+
+[tools.nodegx_open_project]
+permission = "always"
+
+[tools.nodegx_create_project]
+permission = "always"
+
+[tools.nodegx_list_examples]
+permission = "always"
+
+[tools.nodegx_get_example]
+permission = "always"
+
+[tools.nodegx_find_tools]
+permission = "always"
+
+[tools.nodegx_call_tool]
+permission = "always"

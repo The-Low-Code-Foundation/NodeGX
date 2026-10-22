@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "49123cbb-33c1-5e00-89b5-80782052f24b",
+  "name": "Verdict",
+  "path": "/UI/Verdict",
+  "type": "visual",
+  "created": "2026-10-21T13:02:22.954Z",
+  "modified": "2026-10-21T13:02:22.954Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A verdict card after an evening: 🌟 perfect or 🔧 to fix, what people said, and a \"Why?\" that opens the sum behind it, line by line."
+}

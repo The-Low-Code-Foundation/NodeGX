@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bb3457ec-8095-5182-81c8-c945e9d3193e",
+  "name": "Sheet",
+  "path": "/Game/Sheet",
+  "type": "visual",
+  "created": "2026-10-21T13:17:43.023Z",
+  "modified": "2026-10-21T13:25:17.862Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The side sheet: the tabs of the preparations, the tab's body (or the live evening, or the verdicts), and the big buttons at its foot. A bottom sheet on a narrow screen."
+}

@@ -1,0 +1,146 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "045bbda8-21df-5ab4-8ede-e65584c7e38f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "me_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "tone",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "me_root",
+      "type": "Group",
+      "children": [
+        "me_label",
+        "me_bar",
+        "me_val"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-2)",
+        "marginBottom": "var(--space-1)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "me_label",
+      "type": "Text",
+      "parent": "me_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "me_bar",
+      "type": "Group",
+      "parent": "me_root",
+      "children": [
+        "me_fill"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "explicit",
+        "height": {
+          "value": 8,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-full)",
+        "clip": true,
+        "flexDirection": "column"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "me_fill",
+      "type": "Group",
+      "parent": "me_bar",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 8,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)",
+        "width": {
+          "value": 50,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "me_val",
+      "type": "Text",
+      "parent": "me_root",
+      "parameters": {
+        "fontWeight": "var(--font-bold)",
+        "fontSize": "var(--text-sm)",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 28,
+          "unit": "px"
+        },
+        "textAlignX": "right"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "me_look",
+      "type": "States",
+      "label": "Tone colour",
+      "parameters": {
+        "states": "good,warn,bad",
+        "values": "fill",
+        "type-fill": "color",
+        "value-good-fill": "var(--success)",
+        "value-warn-fill": "var(--warning)",
+        "value-bad-fill": "var(--destructive)"
+      },
+      "x": 410,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "me_root"
+  ]
+}

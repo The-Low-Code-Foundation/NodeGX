@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "357a2215-9e60-5f59-8de6-592e423eb5c7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sr_in",
+      "fromProperty": "icon",
+      "toId": "sr_icon",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "name",
+      "toId": "sr_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "note",
+      "toId": "sr_note",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "note",
+      "toId": "sr_note",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "own",
+      "toId": "sr_own",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "own",
+      "toId": "sr_own",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "price",
+      "toId": "sr_buy",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "price",
+      "toId": "sr_buy",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "poor",
+      "toId": "sr_poorstate",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "sr_poorstate",
+      "fromProperty": "currentValue",
+      "toId": "sr_poor",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "sr_poor",
+      "fromProperty": "opacity",
+      "toId": "sr_buy",
+      "toProperty": "opacity"
+    },
+    {
+      "fromId": "sr_buy",
+      "fromProperty": "onClick",
+      "toId": "sr_out",
+      "toProperty": "buy"
+    }
+  ]
+}

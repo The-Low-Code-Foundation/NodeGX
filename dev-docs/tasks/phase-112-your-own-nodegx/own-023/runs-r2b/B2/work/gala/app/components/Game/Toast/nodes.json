@@ -1,0 +1,125 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f2ff18d2-b38d-5e86-8577-f784bf50964d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "to_root",
+      "type": "Group",
+      "label": "Toast",
+      "children": [
+        "to_text"
+      ],
+      "parameters": {
+        "position": "absolute",
+        "alignX": "center",
+        "alignY": "bottom",
+        "marginBottom": "var(--space-6)",
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 520,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--primary)",
+        "borderRadius": "var(--radius-xl)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "zIndex": 6,
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "to_text",
+      "type": "Text",
+      "parent": "to_root",
+      "parameters": {
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "to_sub",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "toast"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "to_fn",
+      "type": "JavaScriptFunction",
+      "label": "A new toast",
+      "parameters": {
+        "scriptOutputs": [
+          {
+            "id": "text",
+            "label": "text"
+          },
+          {
+            "id": "show",
+            "label": "show"
+          }
+        ],
+        "outtype-text": "string",
+        "outtype-show": "signal",
+        "functionScript": "const t = Inputs.toast;\nif (!t || !t.text) return;\nOutputs.text = t.text;\nOutputs.show();\n"
+      },
+      "x": 350,
+      "y": 160,
+      "ports": [
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-toast",
+          "displayName": "toast",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "to_on",
+      "type": "Switch",
+      "label": "Toast showing",
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "to_timer",
+      "type": "Timer",
+      "label": "2.6 seconds",
+      "parameters": {
+        "duration": 2600
+      },
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "to_root"
+  ]
+}
