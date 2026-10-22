@@ -31,7 +31,7 @@ Every phase in `dev-docs/tasks/` is shipped. Specifically the ones that matter h
 | [41 — Accessibility](../tasks-archive/phase-41-accessibility/README.md) | Accessible output by emission, ATAG A **and** B |
 | [40 — AI Authoring Quality](../tasks-archive/phase-40-ai-authoring-quality/README.md) | The agent sees its work, iterates, decomposes, and has a visual identity |
 | [18 — Code Export v2](../tasks/phase-18-code-export-v2/PROGRESS.md) | A project exports to a React 19 repo a React dev accepts |
-| [26 — Deployment](../tasks-archive/phase-26-deployment/README.md) | Full-stack deploy without being a sysadmin |
+| [26 — Deployment](../tasks/phase-26-deployment/README.md) | Full-stack deploy without being a sysadmin |
 
 **This is a thought experiment with a purpose**: it says what the roadmap is *for*, and — more
 usefully — it isolates what does **not** get fixed by any of it.

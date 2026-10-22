@@ -69,7 +69,7 @@ Two further problems live in the same seven lines:
 
 ## The immediate consumer
 
-Phase 15's [AIX-009](../../tasks/phase-15-ai-collaboration/AIX-009-PROJECT-CONTEXT-DOCS.md)
+Phase 15's [AIX-009](../phase-15-ai-collaboration/AIX-009-PROJECT-CONTEXT-DOCS.md)
 introduces a `docs/` folder at the project root holding the creator's scoping
 notes, rejected approaches, backend contracts and AI conventions — explicitly
 not for publication. It is deliberately **visible** rather than hidden under a
@@ -158,7 +158,7 @@ Headlines:
 ## References
 
 - [DEP-008-NOTES.md](./DEP-008-NOTES.md) — the decisions, deviations and verification record
-- [AIX-009 — Project context documents](../../tasks/phase-15-ai-collaboration/AIX-009-PROJECT-CONTEXT-DOCS.md) — the blocked consumer
-- [DEPLOY-HANDOFF-PROJECT-DOCS.md](../../tasks/phase-15-ai-collaboration/DEPLOY-HANDOFF-PROJECT-DOCS.md) — the original hand-off from the AI track
+- [AIX-009 — Project context documents](../phase-15-ai-collaboration/AIX-009-PROJECT-CONTEXT-DOCS.md) — the blocked consumer
+- [DEPLOY-HANDOFF-PROJECT-DOCS.md](../phase-15-ai-collaboration/DEPLOY-HANDOFF-PROJECT-DOCS.md) — the original hand-off from the AI track
 - `packages/noodl-editor/src/editor/src/utils/compilation/build/copy.ts`
 - `packages/noodl-editor/src/editor/src/utils/compilation/build/deployer.ts`

@@ -7,7 +7,7 @@ severity: medium
 area: deploy / deployToFolder target guard (editor Deploy and `nodegx deploy`)
 kit: preview
 found: P26 DEP-001 session, 2026-10-22
-evidence: dev-docs/tasks-archive/phase-26-deployment/PROGRESS.md D24
+evidence: dev-docs/tasks/phase-26-deployment/PROGRESS.md D24
 ---
 
 What a person sees: they pick their project's folder as the deploy destination (an easy slip when

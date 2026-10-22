@@ -48,7 +48,7 @@ model's knowledge has a cutoff, consoles move, and a fluent description of last 
 harmful than silence because a beginner cannot tell the difference. So the assistant is the guide, and
 **the check is the arbiter**. The model never declares success.
 
-This does not contradict [Phase 26's decision](../phase-26-deployment/README.md#L79-L88) that the AI is
+This does not contradict [Phase 26's decision](../../tasks/phase-26-deployment/README.md#L79-L88) that the AI is
 never load-bearing in a deploy. Deploying is deterministic and stays deterministic. *Explaining what a
 DNS record is to someone who has never made one* is the fuzzy work that decision explicitly reserved
 for the assistant. OPS-010 is the same boundary, applied wider.

@@ -43,11 +43,11 @@ needs both.
 ## 2. What is in, and what is not
 
 **In:**
-- **Five Phase 26 specs, revived:** [DEP-001](../phase-26-deployment/DEP-001-RUNTIME-BACKEND-CONFIG.md),
-  [DEP-002](../phase-26-deployment/DEP-002-LOCAL-FULLSTACK-BUNDLE.md),
-  [DEP-004](../phase-26-deployment/DEP-004-DEPLOY-TARGETS-AND-SECRETS.md),
-  [DEP-005](../phase-26-deployment/DEP-005-REMOTE-DEPLOY-SSH.md) and
-  [DEP-006](../phase-26-deployment/DEP-006-HETZNER-PROVISIONING.md). Their spec files stay where they are, and each is
+- **Five Phase 26 specs, revived:** [DEP-001](../../tasks/phase-26-deployment/DEP-001-RUNTIME-BACKEND-CONFIG.md),
+  [DEP-002](../../tasks/phase-26-deployment/DEP-002-LOCAL-FULLSTACK-BUNDLE.md),
+  [DEP-004](../../tasks/phase-26-deployment/DEP-004-DEPLOY-TARGETS-AND-SECRETS.md),
+  [DEP-005](../../tasks/phase-26-deployment/DEP-005-REMOTE-DEPLOY-SSH.md) and
+  [DEP-006](../../tasks/phase-26-deployment/DEP-006-HETZNER-PROVISIONING.md). Their spec files stay where they are, and each is
   the starting point for its BOX task file, not a substitute for one.
 - A second VM provider, a storage volume, and object storage.
 - Sign-in with a typed email code, sign-up limited to an allow-list, and per-device sessions.
@@ -63,7 +63,7 @@ needs both.
 ## 3. The ruling these three phases reopen
 
 Two earlier decisions closed this door:
-- [Phase 26's README](../phase-26-deployment/README.md): *"No mobile/desktop targets. Phase 5's Capacitor and Electron
+- [Phase 26's README](../../tasks/phase-26-deployment/README.md): *"No mobile/desktop targets. Phase 5's Capacitor and Electron
   targets stay parked."*
 - [The revival roadmap §5](../../reviews/NOODL-REVIVAL-ROADMAP.md): *"one good web deploy + export beats five mediocre
   wrappers."*

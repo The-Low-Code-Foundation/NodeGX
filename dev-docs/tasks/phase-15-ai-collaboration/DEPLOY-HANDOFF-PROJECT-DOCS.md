@@ -1,7 +1,7 @@
 # Hand-off to the deployment overhaul: private project files must not deploy
 
 **Filed by:** AIX-009, 2026-07-27
-**Status:** **accepted 2026-07-27** — owned by [DEP-008](../../tasks-archive/phase-26-deployment/DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md) (phase 26, tier 1). AIX-009 remains blocked until it lands.
+**Status:** **accepted 2026-07-27** — owned by [DEP-008](../../tasks/phase-26-deployment/DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md) (phase 26, tier 1). AIX-009 remains blocked until it lands.
 **Original purpose:** paste-ready hand-off to the deployment overhaul. Kept as the record of what was asked for; DEP-008 is now the live spec.
 
 ---

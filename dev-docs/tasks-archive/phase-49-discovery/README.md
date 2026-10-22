@@ -76,7 +76,7 @@ tenant scoping is *structurally impossible* because of ACLs. ACLs protect the da
 protect a response cache. Fixing this is therefore not only an SEO task.
 
 **Total: ~6–7 weeks** (was ~3.5 before DIS-004 was re-scoped). Could reasonably be folded into
-[phase 26 (Deployment)](../phase-26-deployment/README.md), which is also unstarted and adjacent; kept
+[phase 26 (Deployment)](../../tasks/phase-26-deployment/README.md), which is also unstarted and adjacent; kept
 separate here because phase 26 is about *reaching a host* and this is about *being found once you
 are there*.
 
