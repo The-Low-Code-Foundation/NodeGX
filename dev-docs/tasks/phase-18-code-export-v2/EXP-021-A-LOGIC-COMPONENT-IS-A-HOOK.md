@@ -175,3 +175,20 @@ control). After the fix the export's stored JSON equals the runtime's at every s
 | AC4 | ✅ driven: open, edit (name and lines), save, add, delete with its ask, reload; the export's page and store read as the runtime's at every step. Not part of the list editing and still refused: the Header's settings writes (its `app` has three feeds), the Editor's count line (§101), the page's ground (P18-S140-SHELLUNSAID) |
 | AC5 | ✅ `tplbuild` all 17 at the floor; hls001 65 moved, 0 added, 0 removed, predicted |
 
+
+## 11. Session 141 (2026-10-22): the Header writes the store
+
+[EXP-011 §111](EXP-011-PICKER-COVERAGE.md) is the ledger entry; `s141-header-app/` holds the census, the desk, the drive,
+their predictions and readings.
+
+The Header's `app` has three writers (two Update settings and a Delete profile). Each is now handed the Header's own
+callback, so the last to change is the last writer, as in the runtime, and the Header's `write` runs on every page
+that places it. Measuring it on a desk first found **P18-S141-PASSLATE**: s139's single pass-through arrived one commit
+after its own run's pulse, and wrote `undefined` over a persisted store. Driving rocket-school found
+**P18-S141-MOUNTEDIN**: the Edit player form never drew. Both fixed. In the built app, renaming and deleting the player
+through the Header store what the runtime stores, at every step.
+
+| AC | |
+|---|---|
+| AC4 | ✅ (session 140) list editing. Now also the Header: rename and delete-player driven, the store equal to the runtime's at every step. A setting still cannot be changed: the menu's Choice rows draw no choices (their `items` from a Static Data or a Function, refused) |
+| AC5 | ✅ `tplbuild` all 17 at the floor; 50 wires gained, 0 lost |

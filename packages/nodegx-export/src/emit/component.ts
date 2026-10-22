@@ -1679,13 +1679,25 @@ export function emitComponent(
    * feed): one stable callback writing both, so the child's push effect, which depends on it, runs only when the value
    * changes — an inline arrow would push on every render and make the last effect to run the last writer.
    */
-  const combinedLifted = new Map<string, { local: string; setters: string[]; tsType: string }>();
+  /*
+   * P18-S141-PASSLATE. A forward (this component's own output callback, handed to the placement) is one more writer: called
+   * `?.()`, cast where the output's type differs, and a dependency of the callback (a prop, not a setter). A lone forward
+   * with no cast is passed as it is.
+   */
+  const combinedLifted = new Map<string, { local: string; setters: string[]; calls: string[]; deps: string[]; tsType: string }>();
   for (const [instanceId, entries] of Object.entries(plan.instanceLifted)) {
     for (const prop of new Set(entries.map((e) => e.prop))) {
-      const setters = entries.filter((e) => e.prop === prop).map((e) => e.setterName);
-      if (setters.length < 2) continue;
-      const tsType = plan.stateVars.find((v) => v.setterName === setters[0])?.tsType ?? 'unknown';
-      combinedLifted.set(`${instanceId}\u0000${prop}`, { local: allocLocal(`${prop}${pascalCase(instanceId)}`), setters, tsType });
+      const writers = entries.filter((e) => e.prop === prop);
+      if (writers.length < 2 && writers[0].forward?.castTo === undefined) continue;
+      const setters = writers.map((e) => e.setterName);
+      const rowSetter = writers.find((e) => e.forward === undefined)?.setterName;
+      const tsType =
+        (rowSetter !== undefined ? plan.stateVars.find((v) => v.setterName === rowSetter)?.tsType : `${writers[0].forward!.tsType} | undefined`) ?? 'unknown';
+      const calls = writers.map((e) =>
+        e.forward === undefined ? `${e.setterName}(value);` : `${e.setterName}?.(${e.forward.castTo === undefined ? 'value' : `value as ${e.forward.castTo} | undefined`});`
+      );
+      const deps = writers.filter((e) => e.forward !== undefined).map((e) => e.setterName);
+      combinedLifted.set(`${instanceId}\u0000${prop}`, { local: allocLocal(`${prop}${pascalCase(instanceId)}`), setters, calls, deps, tsType });
     }
   }
   const popupState = plan.popups.length > 0 ? allocLocal('openPopup') : null;
@@ -6608,7 +6620,18 @@ export function emitComponent(
     for (const [toProperty, source] of Object.entries(plan.bindings[node.id] ?? {})) {
       claimBinding(node.id, toProperty);
       // mounted rides the render wrapper; visible has no class to toggle on an instance.
-      if (toProperty === 'mounted') continue;
+      if (toProperty === 'mounted') {
+        /*
+         * P18-S141-MOUNTEDIN. A component that declares `mounted` among its own inputs reads it too: the runtime hands the
+         * instance's Mounted to its Component Inputs port as to any other. rocket-school's New player form and Confirm gate
+         * their root on `m === true`, so the export, which spent the wire on the wrapper alone, drew them never (the Header's
+         * Edit player opened nothing). Handed on as well where it can be; where it cannot, left off, as before.
+         */
+        const mountedAttr = targetPropName(node.type, 'mounted');
+        const mountedExpr = mountedAttr === null ? null : bindingExpr(source, sinkOfTsType(targetPropTsType(node.type, 'mounted')));
+        if (mountedAttr !== null && mountedExpr !== null) attrs.push(`${mountedAttr}={${mountedExpr}}`);
+        continue;
+      }
       // P18-S126-INSIGNAL. A signal input the parent pulses: the count and the count taken, one prop.
       const pulse = plan.instancePulses.find((p) => p.nodeId === node.id && p.port === toProperty);
       if (pulse !== undefined) {
@@ -7461,9 +7484,10 @@ export function emitComponent(
   for (const effect of plan.valueChangedEffects) body.push(`  const ${effect.lastLocal} = useRef<unknown>(undefined);`);
   // P18-S126-INSIGNAL. The count each placed component has acted on, kept here so it outlives the child's unmount.
   for (const pulse of plan.instancePulses) body.push(`  const ${pulse.takenLocal} = useRef(0);`);
-  // Session 139. A lifted port with two rows to write: one stable callback (setters never change).
-  for (const { local, setters, tsType } of combinedLifted.values()) {
-    body.push(`  const ${local} = useCallback((value: ${tsType}) => { ${setters.map((setter) => `${setter}(value);`).join(' ')} }, []);`);
+  // Session 139. A lifted port with two rows to write: one stable callback (setters never change; a forwarded output
+  // callback is a prop, so it is a dependency — the parent's is a setter or a callback like this one, stable too).
+  for (const { local, calls, deps, tsType } of combinedLifted.values()) {
+    body.push(`  const ${local} = useCallback((value: ${tsType}) => { ${calls.join(' ')} }, [${deps.join(', ')}]);`);
   }
   /*
    * P18-S127-SIBLINGVALUE (EXP-011 §96). The count handed to a placed component that reads a lifted value follows the count

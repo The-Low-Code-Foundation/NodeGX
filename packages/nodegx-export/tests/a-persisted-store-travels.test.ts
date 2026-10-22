@@ -184,10 +184,12 @@ describe('§B what is emitted', () => {
     expect(home.match(/onAppChanged: setApp2,/g)).toHaveLength(2);
   });
 
-  it('B4 the Editor passes its Word\'s word on: a prop, a lifted row, a push effect', () => {
+  // P18-S141-PASSLATE (session 141): the pass-through forwards the Editor's own callback; s139's row and push effect
+  // reached the page one commit after a pulse the same run sends (the Header Desk's Solo wrote `undefined` over the store).
+  it('B4 the Editor passes its Word\'s word on: a prop, handed straight to the Word (no row, no push effect of its own)', () => {
     expect(editor).toContain('onWordChanged?: (value: string | undefined) => void;');
-    expect(editor).toContain('useWord({ n: countNextOut?.n, onWordChanged: setWord });');
-    expect(editor).toContain('onWordChanged?.(word);');
+    expect(editor).toContain('useWord({ n: countNextOut?.n, onWordChanged });');
+    expect(editor).not.toContain('onWordChanged?.(');
     expect(home).toContain('<Editor onWordChanged={setWord} onSave={() => setAddRunPulses((v) => v + 1)} />');
   });
 
@@ -298,8 +300,10 @@ describe('§E rocket-school', () => {
     expect(report).not.toContain('wire lsEditor:save->lsSave:run dropped');
   });
 
-  it('E4 the Header\'s write is refused on the 8 pages that place it, not run on a stale `app`: its own `app` has three feeds', () => {
-    expect(report.match(/wire \w+Header:write->\w+Store:write dropped: the placed component that sends it also hands this one its "app"/g)?.length).toBe(8);
+  // Session 141: the Header's three feeds are forwarded (`a-header-writes-the-store.test.ts`); s139 refused its write here.
+  it('E4 the Header\'s write is no longer refused on the 8 pages that place it: its `app` is handed on, so the pulse has its value', () => {
+    expect(report.match(/wire \w+Header:write->\w+Store:write dropped/g)).toBeNull();
+    expect(report).not.toContain('two wires feed value output "app"');
   });
 
   it('E5 the emitted app typechecks', () => {
@@ -309,7 +313,8 @@ describe('§E rocket-school', () => {
   it("E7 todo-list's project lists: each list's `projectId` writes the three rows five lists feed through one stable callback, and the app typechecks", () => {
     const todo = emitDir(path.join(__dirname, '..', '..', '..', 'templates', 'todo-list'));
     expect(fileOf(todo, /components\/View\.tsx$/)).toContain(
-      'const onProjectIdChangedPvList = useCallback((value: string | undefined) => { setProjectId(value); setProjectId2(value); setProjectId3(value); }, []);'
+      // Session 141: View's own `projectId` output (five feeds) is forwarded too, so the callback writes it first.
+      'const onProjectIdChangedPvList = useCallback((value: string | undefined) => { onProjectIdChanged?.(value); setProjectId(value); setProjectId2(value); setProjectId3(value); }, [onProjectIdChanged]);'
     );
     expect(typecheckEmittedApp(todo)).toEqual([]);
   });

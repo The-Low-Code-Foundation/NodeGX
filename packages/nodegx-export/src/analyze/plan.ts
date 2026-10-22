@@ -4512,7 +4512,19 @@ export interface ComponentPlan {
    */
   liftedOutputProps: Array<{ port: string; prop: string; tsType: string }>;
   /** Instance id → lifted callbacks the parent passes (`onXChanged={setX}`) (§4d parent side). */
-  instanceLifted: Record<string, Array<{ prop: string; setterName: string }>>;
+  instanceLifted: Record<
+    string,
+    Array<{
+      prop: string;
+      setterName: string;
+      /**
+       * P18-S141-PASSLATE. `setterName` is this component's own output callback, not a row's setter: the placement's value
+       * is handed straight on (`onAppChanged={onAppChanged}`), typed `tsType`, cast to `castTo` where the output's type
+       * differs (then through one stable callback).
+       */
+      forward?: { tsType: string; castTo?: string };
+    }>
+  >;
   /**
    * Parent-side lifted wires awaiting the target's plan (planProject's second phase): a
    * consumed instance value output binds only when the child actually lifted the port —
@@ -4698,18 +4710,34 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
     }
     /** Session 139. The row each multi-fed input reads, by sink. */
     const mergedVarBySink = new Map<string, string>();
+    /*
+     * P18 session 141. An output several placements feed is forwarded only if every one of them lifts its value: a writer
+     * the export leaves out would make another the last writer where the runtime's was the missing one.
+     */
+    const unliftedIntoOutput = new Map<string, string>();
     for (const pending of plan.pendingLifted) {
-      const lifted = liftedOf(pending);
+      if (pending.intoOutputs === undefined || liftedOf(pending) !== undefined || unliftedIntoOutput.has(sinkKeyOf(pending))) continue;
+      unliftedIntoOutput.set(sinkKeyOf(pending), `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`);
+    }
+    const outputsSaidUnlifted = new Set<string>();
+    for (const pending of plan.pendingLifted) {
+      const unliftedSibling = pending.intoOutputs !== undefined ? unliftedIntoOutput.get(sinkKeyOf(pending)) : undefined;
+      const lifted = unliftedSibling === undefined ? liftedOf(pending) : undefined;
       // EXP-011 §108. Into a repeater's items, a lifted value typed as something other than a list draws nothing.
       const notAList = pending.intoItems === true && lifted !== undefined && lifted.tsType !== 'any' && !lifted.tsType.endsWith('[]');
       if (!lifted || notAList) {
         const reason = notAList
           ? `items are fed by a source not statically typed as a list (${lifted!.tsType})`
-          : `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`;
+          : liftedOf(pending) !== undefined && unliftedSibling !== undefined
+            ? `another value into output "${pending.toProperty}" is not handed on (${unliftedSibling}), so the last writer is not one the export knows`
+            : `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`;
         plan.notes.push(`wire ${pending.connectionKey} dropped: ${reason}`);
         // Session 139. A pass-through that does not lift: the output is not lifted either, as a refused feed leaves it.
         if (pending.intoOutputs !== undefined) {
-          plan.notes.push(`output "${pending.toProperty}" is a value output with no statically-translatable feed — not lifted in this slice`);
+          if (!outputsSaidUnlifted.has(sinkKeyOf(pending))) {
+            outputsSaidUnlifted.add(sinkKeyOf(pending));
+            plan.notes.push(`output "${pending.toProperty}" is a value output with no statically-translatable feed — not lifted in this slice`);
+          }
           plan.droppedWires.push({ key: pending.connectionKey, fromId: pending.instanceId, fromProperty: pending.port, toId: pending.toNodeId, toProperty: pending.toProperty, reason });
           if (plan.dispositions[pending.toNodeId]?.kind !== 'deferred') {
             plan.dispositions[pending.toNodeId] = { kind: 'deferred', to: 'EXP-003', reason: `value output "${pending.toProperty}" is fed by ${pending.targetLegacy} — ${reason}` };
@@ -4758,6 +4786,23 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
         }
         continue;
       }
+      const callbacks = (plan.instanceLifted[pending.instanceId] = plan.instanceLifted[pending.instanceId] ?? []);
+      /*
+       * Session 139's pass-through, and P18-S141-PASSLATE. This component's output hands on what its placement lifts: the
+       * placement is given this component's own callback, no row between. 🔴 Measured on the Header Desk (Solo): a row
+       * here, pushed on by an effect of its own, reached the parent one commit after the pulse the same run sent, so the
+       * parent's Set wrote the value before — `undefined` over a persisted store on the first press. Forwarded, the value
+       * lands in the parent's row in the commit the pulse is counted in, as from any placed component.
+       */
+      if (pending.intoOutputs !== undefined) {
+        const out = pending.intoOutputs;
+        const castTo = out.tsType !== 'any' && lifted.tsType !== out.tsType ? out.tsType : undefined;
+        if (!callbacks.some((c) => c.prop === lifted.prop && c.setterName === out.prop)) {
+          callbacks.push({ prop: lifted.prop, setterName: out.prop, forward: { tsType: lifted.tsType, ...(castTo !== undefined ? { castTo } : {}) } });
+        }
+        if (!plan.liftedOutputProps.some((l) => l.port === pending.toProperty)) plan.liftedOutputProps.push({ port: pending.toProperty, prop: out.prop, tsType: out.tsType });
+        continue;
+      }
       const varKey = sourceKeyOf(pending);
       const merged = pending.intoItems !== true && (feedsOfSink.get(sinkKeyOf(pending))?.length ?? 1) > 1;
       const feeds = merged ? feedsOfSink.get(sinkKeyOf(pending))! : [pending];
@@ -4787,20 +4832,7 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
           allocRow(lifted.tsType, `Lifted from ${pending.targetLegacy}'s value output "${pending.port}" — undefined until the child's mount push (CONTROLLED-STATE-TARGET §4d).`);
         liftedVarByKey.set(varKey, name);
       }
-      const callbacks = (plan.instanceLifted[pending.instanceId] = plan.instanceLifted[pending.instanceId] ?? []);
       if (!callbacks.some((c) => c.prop === lifted.prop && c.setterName === setterNameOf(name))) callbacks.push({ prop: lifted.prop, setterName: setterNameOf(name) });
-      // Session 139. The pass-through: this component's output pushes the row its placed component lifted into it.
-      if (pending.intoOutputs !== undefined) {
-        const out = pending.intoOutputs;
-        const rowType = liftedOf(pending)!.tsType;
-        plan.pushEffects.push({
-          prop: out.prop,
-          expr: { kind: 'state-get', name, maybeUndefined: true },
-          ...(out.tsType !== 'any' && rowType !== out.tsType ? { castTo: out.tsType } : {})
-        });
-        plan.liftedOutputProps.push({ port: pending.toProperty, prop: out.prop, tsType: out.tsType });
-        continue;
-      }
       if (pending.intoItems === true) {
         // EXP-011 §108. §4e's untyped list: `(rows ?? []).map(…)`, `?? []` the runtime's "empty arrival clears the list".
         plan.repeaters[pending.toNodeId].itemsExpr = { kind: 'state-get', name, maybeUndefined: true };
@@ -17797,7 +17829,35 @@ function planComponent(
         notes.push(key !== null ? `wire ${key} dropped: ${reason}` : reason);
       };
       if (wires.length > 1) {
-        fail(null, `two wires feed value output "${port}" — last-writer-wins is not statically ordered`);
+        /*
+         * P18 session 141. Several placed components' values into one output (rocket-school's Header: two Update settings
+         * and a Delete profile into `app`): the runtime's Component Outputs hands on what arrived last, and each placement
+         * changes its value only when it runs. Each is forwarded to this component's own callback (`liftInto`), so each
+         * pushes when it changes — last-writer-wins, by when each changed, as an input fed by several is (session 139). A
+         * feed from anything but a drawn placement that lifts it stays refused: there the order is not one the export knows.
+         */
+        const lifts = wires.map((w) => {
+          const f = nodeById.get(w.fromId);
+          if (f === undefined || plan.roleOf[f.id] !== 'instance' || !rendered.has(f.id)) return null;
+          const fIR = ir.components.find((tc) => `/${tc.path}` === f.type);
+          return fIR !== undefined && componentOutputInterface(fIR).valueProps.some((v) => v.port === w.fromProperty) ? { wire: w, from: f } : null;
+        });
+        if (lifts.some((l) => l === null)) {
+          fail(null, `two wires feed value output "${port}" — last-writer-wins is not statically ordered`);
+          continue;
+        }
+        for (const { wire: w, from: f } of lifts as Array<{ wire: (typeof wires)[number]; from: NodeIR }>) {
+          consumed.add(w.key);
+          plan.pendingLifted.push({
+            connectionKey: w.key,
+            instanceId: f.id,
+            targetLegacy: f.type,
+            port: w.fromProperty,
+            toNodeId: w.toId,
+            toProperty: port,
+            intoOutputs: { prop: vp.prop, tsType: vp.tsType }
+          });
+        }
         continue;
       }
       const wire = wires[0];

@@ -14797,3 +14797,43 @@ Templates: 25 Text Area fields, 21 now `<textarea>` (were 0). hls001: 65 moved, 
 
 **P18-S140-SHELLUNSAID** (medium): everything beside the Router in the app shell (77 nodes in 16 templates, 15 whole CSS
 Definitions: the page ground, dark palettes, press and hover) is refused, and the report never names it.
+
+## §111 The Header writes the store (session 141, 2026-10-22): several placements into one output, P18-S141-PASSLATE, P18-S141-MOUNTEDIN
+
+`s141-header-app/README.md` is the record (the census, the desk, the drive, the mutants, the reach); EXP-021 §11 the
+task's view.
+
+### §111.0 Measured first, predicted first
+
+21 Component Outputs value ports have more than one feed in the templates, 17 of them fed only by placed components
+(rocket-school's and star-class's Header, Monster/Play, Race/Play, Moon/Care; bot-garden 5; todo-list's View ×2). The
+Header Desk (`tests/helpers/header-desk.ts`: three writers into one output, and Solo, a single pass-through with its own
+run's pulse) read as `EXPECTED.md` predicted on the runtime and on HEAD's export, every cell.
+
+### §111.1 Built
+
+Several placed components' values into one output are each handed the component's own callback, so each pushes when it
+changes: last-writer-wins, by when each changed, as the runtime's Component Outputs hands on what arrived last. If one
+writer does not lift, the output is refused whole, and each other writer is named.
+
+**P18-S141-PASSLATE** (high, live on HEAD, found on the desk): s139's pass-through (a row, then a push effect) reached the
+parent one commit after a pulse the same run sent, so the parent's Set wrote the value before: `undefined` over a
+persisted store on the first press. Every pass-through now forwards, with no row between.
+
+**P18-S141-MOUNTEDIN** (high, found by the drive): a placed component that declares `mounted` among its inputs was never
+handed it. rocket-school's New player form and Confirm mount their root on `m === true`, so neither was ever drawn
+(no edit-player form, no "are you sure?" before a purchase). The wired value is now handed in as the prop too.
+
+### §111.2 Graded
+
+The desk: the fixed export equals the runtime at all 13 cells. The drive (rocket-school built with its own
+`npm run build`): rename and delete the player through the Header; the fixed export's stored JSON equals the runtime's
+at all 9 steps; HEAD's never leaves the seed. `a-header-writes-the-store.test.ts` 18 / 18; 4 mutants killed. Reach: 50
+wires gained, 0 lost (26 more wires inside six still-refused Component Outputs are now named one by one). `tplbuild`
+all 17 at the floor.
+
+### §111.3 Left
+
+A setting still cannot be changed in the export: the Choice rows draw no choices (Static Data and a Function's list into
+a placed component's `items`, refused). The forward needs a stable callback from the parent; every emitted parent passes
+one. A hand-edited inline arrow would make every writer re-push (mutant M3 wipes the store).

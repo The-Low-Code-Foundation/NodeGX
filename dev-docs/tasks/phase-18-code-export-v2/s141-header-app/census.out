@@ -1,0 +1,212 @@
+bot-garden /Garden/Top bar "model" ×4 ALL-INSTANCES pulsed-by 0: instance /Logic/Update profile.model | instance /Logic/Update profile.model | instance /Logic/Update profile.model | instance /Logic/Update profile.model
+bot-garden /Island/Shop "model" ×2 ALL-INSTANCES pulsed-by 0: instance /Logic/Buy.model | instance /Logic/Use helper.model
+bot-garden /Island/World "model" ×4 ALL-INSTANCES pulsed-by 1: instance /Logic/Bring home.model | instance /Logic/Assign robot.model | instance /Logic/Island keep.model | instance /Logic/Land ghost.model
+bot-garden /Robot/Options "model" ×4 ALL-INSTANCES pulsed-by 4: instance /Logic/Update profile.model | instance /Logic/Update profile.model | instance /Logic/Update profile.model | instance /Logic/Update profile.model
+bot-garden /Workshop/Play "runWorld" ×2 ALL-INSTANCES pulsed-by 2: instance /Workshop/Runner.world | instance /Logic/Record step.world
+  single+pulse bot-garden /Workshop/Play "running" ← instance /Workshop/Runner.running
+  single+pulse bot-garden /Workshop/Play "cardsSeen" ← instance /Logic/Card seen.seen
+  single+pulse members-area /Members/Chrome "isMember" ← instance /Members/Standing.isMember
+  single+pulse members-area /Members/Chrome "isModerator" ← instance /Members/Standing.isModerator
+  single+pulse members-area /Members/Chrome "isPending" ← instance /Members/Standing.isPending
+  single+pulse members-area /Members/Chrome "isUnknown" ← instance /Members/Standing.isUnknown
+members-area /Members/Standing "standing" ×2  pulsed-by 2: JavaScriptFunction.out-standing | JavaScriptFunction.out-standing
+members-area /Members/Standing "isUnknown" ×2  pulsed-by 2: JavaScriptFunction.out-isUnknown | JavaScriptFunction.out-isUnknown
+  single+pulse planning /Week/Money sheet "rpTickOn" ← instance /Week/Money repeat.tickOn
+  single+pulse planning /Week/Money sheet "rpTickAmount" ← instance /Week/Money repeat.tickAmount
+  single+pulse planning /Week/Money sheet "rpTickRest" ← instance /Week/Money repeat.tickRest
+  single+pulse planning /Week/Money sheet "rpChDate" ← instance /Week/Money repeat.chDate
+  single+pulse planning /Week/Money sheet "rpChAmount" ← instance /Week/Money repeat.chAmount
+  single+pulse planning /Week/Money sheet "rpChNote" ← instance /Week/Money repeat.chNote
+  single+pulse planning /Week/Money sheet "rpSentOn" ← instance /Week/Money repeat.sentOn
+  single+pulse planning /Week/Money sheet "rpSentAmount" ← instance /Week/Money repeat.sentAmount
+  single+pulse planning /Week/Money sheet "endAt" ← instance /Week/Money end.at
+  single+pulse planning /Week/Money sheet "balOn" ← instance /Week/Money balance.on
+  single+pulse planning /Week/Money sheet "balAmount" ← instance /Week/Money balance.amount
+  single+pulse planning /Week/Money sheet "balKey" ← instance /Week/Money balance.key
+  single+pulse planning /Week/Money sheet "edLabel" ← instance /Week/Money editor.label
+  single+pulse planning /Week/Money sheet "edDir" ← instance /Week/Money editor.dir
+  single+pulse planning /Week/Money sheet "edAmount" ← instance /Week/Money editor.amount
+  single+pulse planning /Week/Money sheet "edRepeat" ← instance /Week/Money editor.repeat
+  single+pulse planning /Week/Money sheet "edDate" ← instance /Week/Money editor.date
+  single+pulse planning /Week/Money sheet "edUntil" ← instance /Week/Money editor.until
+  single+pulse planning /Week/Money sheet "edMonthEnd" ← instance /Week/Money editor.monthEnd
+  single+pulse planning /Week/Money sheet "edProjectId" ← instance /Week/Money editor.projectId
+  single+pulse planning /Week/Money sheet "edBillDate" ← instance /Week/Money editor.billDate
+  single+pulse planning /Week/Money sheet "edBillLeadDays" ← instance /Week/Money editor.billLeadDays
+  single+pulse planning /Week/Money sheet "edFromHours" ← instance /Week/Money editor.fromHours
+  single+pulse planning /Week/Money sheet "edLikelihood" ← instance /Week/Money editor.likelihood
+  single+pulse planning /Week/Money sheet "edNote" ← instance /Week/Money editor.note
+  single+pulse planning /Week/Project card "planDate" ← instance /Week/Project detail.planDate
+  single+pulse planning /Week/Project card "planHours" ← instance /Week/Project detail.planHours
+  single+pulse planning /Week/Project card "edName" ← instance /Week/Project editor.name
+  single+pulse planning /Week/Project card "edSub" ← instance /Week/Project editor.sub
+  single+pulse planning /Week/Project card "edKind" ← instance /Week/Project editor.kind
+  single+pulse planning /Week/Project card "edRate" ← instance /Week/Project editor.rate
+  single+pulse planning /Week/Project card "edMove" ← instance /Week/Project editor.move
+  single+pulse planning /Week/Project card "edMoveWorth" ← instance /Week/Project editor.moveWorth
+  single+pulse planning /Week/Project card "edMoveWhen" ← instance /Week/Project editor.moveWhen
+  single+pulse planning /Week/Project card "edMoveDue" ← instance /Week/Project editor.moveDue
+  single+pulse planning /Week/Project card "edMoveStop" ← instance /Week/Project editor.moveStop
+  single+pulse planning /Week/Project card "edSay" ← instance /Week/Project editor.say
+  single+pulse planning /Week/Project card "edBilling" ← instance /Week/Project editor.billing
+  single+pulse planning /Week/Project card "edTermsDays" ← instance /Week/Project editor.termsDays
+  single+pulse planning /Week/Project card "edAgreedHours" ← instance /Week/Project editor.agreedHours
+  single+pulse planning /Week/Project card "edBillWhen" ← instance /Week/Project editor.billWhen
+  single+pulse planning /Week/Project card "edBillAmount" ← instance /Week/Project editor.billAmount
+  single+pulse planning /Week/Project card "edBillDate" ← instance /Week/Project editor.billDate
+  single+pulse planning /Week/Project card "edBillUntil" ← instance /Week/Project editor.billUntil
+  single+pulse planning-demo /Week/Money sheet "rpTickOn" ← instance /Week/Money repeat.tickOn
+  single+pulse planning-demo /Week/Money sheet "rpTickAmount" ← instance /Week/Money repeat.tickAmount
+  single+pulse planning-demo /Week/Money sheet "rpTickRest" ← instance /Week/Money repeat.tickRest
+  single+pulse planning-demo /Week/Money sheet "rpChDate" ← instance /Week/Money repeat.chDate
+  single+pulse planning-demo /Week/Money sheet "rpChAmount" ← instance /Week/Money repeat.chAmount
+  single+pulse planning-demo /Week/Money sheet "rpChNote" ← instance /Week/Money repeat.chNote
+  single+pulse planning-demo /Week/Money sheet "rpSentOn" ← instance /Week/Money repeat.sentOn
+  single+pulse planning-demo /Week/Money sheet "rpSentAmount" ← instance /Week/Money repeat.sentAmount
+  single+pulse planning-demo /Week/Money sheet "endAt" ← instance /Week/Money end.at
+  single+pulse planning-demo /Week/Money sheet "balOn" ← instance /Week/Money balance.on
+  single+pulse planning-demo /Week/Money sheet "balAmount" ← instance /Week/Money balance.amount
+  single+pulse planning-demo /Week/Money sheet "balKey" ← instance /Week/Money balance.key
+  single+pulse planning-demo /Week/Money sheet "edLabel" ← instance /Week/Money editor.label
+  single+pulse planning-demo /Week/Money sheet "edDir" ← instance /Week/Money editor.dir
+  single+pulse planning-demo /Week/Money sheet "edAmount" ← instance /Week/Money editor.amount
+  single+pulse planning-demo /Week/Money sheet "edRepeat" ← instance /Week/Money editor.repeat
+  single+pulse planning-demo /Week/Money sheet "edDate" ← instance /Week/Money editor.date
+  single+pulse planning-demo /Week/Money sheet "edUntil" ← instance /Week/Money editor.until
+  single+pulse planning-demo /Week/Money sheet "edMonthEnd" ← instance /Week/Money editor.monthEnd
+  single+pulse planning-demo /Week/Money sheet "edProjectId" ← instance /Week/Money editor.projectId
+  single+pulse planning-demo /Week/Money sheet "edBillDate" ← instance /Week/Money editor.billDate
+  single+pulse planning-demo /Week/Money sheet "edBillLeadDays" ← instance /Week/Money editor.billLeadDays
+  single+pulse planning-demo /Week/Money sheet "edFromHours" ← instance /Week/Money editor.fromHours
+  single+pulse planning-demo /Week/Money sheet "edLikelihood" ← instance /Week/Money editor.likelihood
+  single+pulse planning-demo /Week/Money sheet "edNote" ← instance /Week/Money editor.note
+  single+pulse planning-demo /Week/Project card "planDate" ← instance /Week/Project detail.planDate
+  single+pulse planning-demo /Week/Project card "planHours" ← instance /Week/Project detail.planHours
+  single+pulse planning-demo /Week/Project card "edName" ← instance /Week/Project editor.name
+  single+pulse planning-demo /Week/Project card "edSub" ← instance /Week/Project editor.sub
+  single+pulse planning-demo /Week/Project card "edKind" ← instance /Week/Project editor.kind
+  single+pulse planning-demo /Week/Project card "edRate" ← instance /Week/Project editor.rate
+  single+pulse planning-demo /Week/Project card "edMove" ← instance /Week/Project editor.move
+  single+pulse planning-demo /Week/Project card "edMoveWorth" ← instance /Week/Project editor.moveWorth
+  single+pulse planning-demo /Week/Project card "edMoveWhen" ← instance /Week/Project editor.moveWhen
+  single+pulse planning-demo /Week/Project card "edMoveDue" ← instance /Week/Project editor.moveDue
+  single+pulse planning-demo /Week/Project card "edMoveStop" ← instance /Week/Project editor.moveStop
+  single+pulse planning-demo /Week/Project card "edSay" ← instance /Week/Project editor.say
+  single+pulse planning-demo /Week/Project card "edBilling" ← instance /Week/Project editor.billing
+  single+pulse planning-demo /Week/Project card "edTermsDays" ← instance /Week/Project editor.termsDays
+  single+pulse planning-demo /Week/Project card "edAgreedHours" ← instance /Week/Project editor.agreedHours
+  single+pulse planning-demo /Week/Project card "edBillWhen" ← instance /Week/Project editor.billWhen
+  single+pulse planning-demo /Week/Project card "edBillAmount" ← instance /Week/Project editor.billAmount
+  single+pulse planning-demo /Week/Project card "edBillDate" ← instance /Week/Project editor.billDate
+  single+pulse planning-demo /Week/Project card "edBillUntil" ← instance /Week/Project editor.billUntil
+rocket-school /Game/Header "app" ×3 ALL-INSTANCES pulsed-by 3: instance /Logic/Update settings.app | instance /Logic/Update settings.app | instance /Logic/Delete profile.app
+  single+pulse rocket-school /Hunt/Play "model" ← instance /Logic/Finish hunt.model
+  single+pulse rocket-school /Merge/Play "mergeMode" ← instance /Game/Choice row.value
+  single+pulse rocket-school /Merge/Play "model" ← instance /Logic/Finish merge.model
+rocket-school /Monster/Play "model" ×2 ALL-INSTANCES pulsed-by 2: instance /Race/Round.model | instance /Logic/Finish monster.model
+  single+pulse rocket-school /Monster/Setup "app" ← instance /Logic/Update settings.app
+  single+pulse rocket-school /Moon/Adopt "app" ← instance /Logic/Moon act.app
+  single+pulse rocket-school /Moon/Adopt "said" ← instance /Logic/Moon act.said
+  single+pulse rocket-school /Moon/Big things "app" ← instance /Logic/Moon act.app
+  single+pulse rocket-school /Moon/Big things "said" ← instance /Logic/Moon act.said
+rocket-school /Moon/Care "app" ×3 ALL-INSTANCES pulsed-by 3: instance /Logic/Moon act.app | instance /Logic/Moon act.app | instance /Logic/Moon act.app
+rocket-school /Race/Play "model" ×2 ALL-INSTANCES pulsed-by 2: instance /Race/Round.model | instance /Logic/Finish race.model
+  single+pulse rocket-school /Race/Play "layoutSeen" ← instance /Race/Round.layoutSeen
+  single+pulse rocket-school /Race/Play "layoutPick" ← instance /Race/Round.layoutPick
+  single+pulse rocket-school /Race/Play "teach" ← instance /Race/Round.teach
+  single+pulse rocket-school /Race/Round "slipPct" ← instance /Logic/Grade answer.slipPct
+  single+pulse rocket-school /Race/Round "chain" ← instance /Logic/Grade answer.chain
+  single+pulse rocket-school /Race/Round "chainOf" ← instance /Logic/Grade answer.chainOf
+  single+pulse rocket-school /Race/Round "chainReady" ← instance /Logic/Grade answer.chainReady
+  single+pulse rocket-school /Race/Round "turboUsed" ← instance /Logic/Grade answer.turboUsed
+  single+pulse rocket-school /Race/Round "behind" ← instance /Logic/Grade answer.behind
+  single+pulse rocket-school /Race/Round "layoutSeen" ← instance /Game/Question box.layoutSeen
+  single+pulse rocket-school /Race/Round "layoutPick" ← instance /Game/Keyboard.picked
+  single+pulse rocket-school /Race/Round "correct" ← instance /Logic/Grade answer.correct
+  single+pulse rocket-school /Race/Round "gain" ← instance /Logic/Grade answer.gain
+  single+pulse rocket-school /Race/Round "cpuGain" ← instance /Logic/Grade answer.cpuGain
+  single+pulse rocket-school /Race/Round "model" ← instance /Logic/Grade answer.model
+  single+pulse rocket-school /Race/Round "outcome" ← instance /Logic/Grade answer.outcome
+  single+pulse rocket-school /Race/Round "missCount" ← instance /Logic/Grade answer.missCount
+  single+pulse rocket-school /Race/Setup "app" ← instance /Logic/Update settings.app
+star-class /Game/Header "app" ×3 ALL-INSTANCES pulsed-by 3: instance /Logic/Update settings.app | instance /Logic/Update settings.app | instance /Logic/Delete profile.app
+  single+pulse star-class /Hunt/Play "model" ← instance /Logic/Finish hunt.model
+  single+pulse star-class /Merge/Play "mergeMode" ← instance /Game/Choice row.value
+  single+pulse star-class /Merge/Play "model" ← instance /Logic/Finish merge.model
+star-class /Monster/Play "model" ×2 ALL-INSTANCES pulsed-by 2: instance /Race/Round.model | instance /Logic/Finish monster.model
+  single+pulse star-class /Monster/Setup "app" ← instance /Logic/Update settings.app
+  single+pulse star-class /Moon/Adopt "app" ← instance /Logic/Moon act.app
+  single+pulse star-class /Moon/Adopt "said" ← instance /Logic/Moon act.said
+  single+pulse star-class /Moon/Big things "app" ← instance /Logic/Moon act.app
+  single+pulse star-class /Moon/Big things "said" ← instance /Logic/Moon act.said
+star-class /Moon/Care "app" ×3 ALL-INSTANCES pulsed-by 3: instance /Logic/Moon act.app | instance /Logic/Moon act.app | instance /Logic/Moon act.app
+star-class /Race/Play "model" ×2 ALL-INSTANCES pulsed-by 2: instance /Race/Round.model | instance /Logic/Finish race.model
+  single+pulse star-class /Race/Play "layoutSeen" ← instance /Race/Round.layoutSeen
+  single+pulse star-class /Race/Play "layoutPick" ← instance /Race/Round.layoutPick
+  single+pulse star-class /Race/Play "teach" ← instance /Race/Round.teach
+  single+pulse star-class /Race/Round "slipPct" ← instance /Logic/Grade answer.slipPct
+  single+pulse star-class /Race/Round "chain" ← instance /Logic/Grade answer.chain
+  single+pulse star-class /Race/Round "chainOf" ← instance /Logic/Grade answer.chainOf
+  single+pulse star-class /Race/Round "chainReady" ← instance /Logic/Grade answer.chainReady
+  single+pulse star-class /Race/Round "turboUsed" ← instance /Logic/Grade answer.turboUsed
+  single+pulse star-class /Race/Round "behind" ← instance /Logic/Grade answer.behind
+  single+pulse star-class /Race/Round "layoutSeen" ← instance /Game/Question box.layoutSeen
+  single+pulse star-class /Race/Round "layoutPick" ← instance /Game/Keyboard.picked
+  single+pulse star-class /Race/Round "correct" ← instance /Logic/Grade answer.correct
+  single+pulse star-class /Race/Round "gain" ← instance /Logic/Grade answer.gain
+  single+pulse star-class /Race/Round "cpuGain" ← instance /Logic/Grade answer.cpuGain
+  single+pulse star-class /Race/Round "model" ← instance /Logic/Grade answer.model
+  single+pulse star-class /Race/Round "outcome" ← instance /Logic/Grade answer.outcome
+  single+pulse star-class /Race/Round "missCount" ← instance /Logic/Grade answer.missCount
+  single+pulse star-class /Race/Setup "app" ← instance /Logic/Update settings.app
+  single+pulse todo-list /Projects/Kind group "projectId" ← instance /Projects/Project list.projectId
+  single+pulse todo-list /Projects/Kind group "projectName" ← instance /Projects/Project list.projectName
+  single+pulse todo-list /Projects/Kind group "taskId" ← instance /Projects/Project list.taskId
+  single+pulse todo-list /Projects/Kind group "mode" ← instance /Projects/Project list.mode
+  single+pulse todo-list /Projects/Kind group "title" ← instance /Projects/Project list.title
+  single+pulse todo-list /Projects/Kind group "waitingOn" ← instance /Projects/Project list.waitingOn
+  single+pulse todo-list /Projects/Kind group "deadline" ← instance /Projects/Project list.deadline
+  single+pulse todo-list /Projects/Kind group "billKey" ← instance /Projects/Project list.billKey
+  single+pulse todo-list /Projects/Kind group "sendKey" ← instance /Projects/Project list.sendKey
+  single+pulse todo-list /Projects/Kind group "openTaskId" ← instance /Projects/Project list.openTaskId
+  single+pulse todo-list /Projects/Kind group "moneyKey" ← instance /Projects/Project list.moneyKey
+  single+pulse todo-list /Projects/Kind group "pName" ← instance /Projects/Project list.pName
+  single+pulse todo-list /Projects/Kind group "pSub" ← instance /Projects/Project list.pSub
+  single+pulse todo-list /Projects/Kind group "pKind" ← instance /Projects/Project list.pKind
+  single+pulse todo-list /Projects/Kind group "pBilling" ← instance /Projects/Project list.pBilling
+  single+pulse todo-list /Projects/Kind group "pTerms" ← instance /Projects/Project list.pTerms
+  single+pulse todo-list /Projects/Kind group "pRate" ← instance /Projects/Project list.pRate
+  single+pulse todo-list /Projects/Kind group "pSay" ← instance /Projects/Project list.pSay
+  single+pulse todo-list /Projects/Kind group "linkTaskId" ← instance /Projects/Project list.linkTaskId
+todo-list /Projects/Money sheet "itemKey" ×3  pulsed-by 3: For Each.itemOutput-itemKey | For Each.itemOutput-itemKey | For Each.itemOutput-itemKey
+todo-list /Projects/View "projectId" ×5 ALL-INSTANCES pulsed-by 5: instance /Projects/Project list.projectId | instance /Projects/Kind group.projectId | instance /Projects/Kind group.projectId | instance /Projects/Kind group.projectId | instance /Projects/Kind group.projectId
+todo-list /Projects/View "openTaskId" ×5 ALL-INSTANCES pulsed-by 5: instance /Projects/Project list.openTaskId | instance /Projects/Kind group.openTaskId | instance /Projects/Kind group.openTaskId | instance /Projects/Kind group.openTaskId | instance /Projects/Kind group.openTaskId
+  single+pulse todo-list /Todo/Routine summary "startText" ← instance /Todo/Date picker.Value
+  single+pulse todo-list /Todo/Routine summary "endText" ← instance /Todo/Date picker.Value
+  single+pulse todo-list /Todo/Task summary "deadlineText" ← instance /Todo/Date picker.Value
+  single+pulse todo-list-demo /Projects/Kind group "projectId" ← instance /Projects/Project list.projectId
+  single+pulse todo-list-demo /Projects/Kind group "projectName" ← instance /Projects/Project list.projectName
+  single+pulse todo-list-demo /Projects/Kind group "taskId" ← instance /Projects/Project list.taskId
+  single+pulse todo-list-demo /Projects/Kind group "mode" ← instance /Projects/Project list.mode
+  single+pulse todo-list-demo /Projects/Kind group "title" ← instance /Projects/Project list.title
+  single+pulse todo-list-demo /Projects/Kind group "waitingOn" ← instance /Projects/Project list.waitingOn
+  single+pulse todo-list-demo /Projects/Kind group "deadline" ← instance /Projects/Project list.deadline
+  single+pulse todo-list-demo /Projects/Kind group "billKey" ← instance /Projects/Project list.billKey
+  single+pulse todo-list-demo /Projects/Kind group "sendKey" ← instance /Projects/Project list.sendKey
+  single+pulse todo-list-demo /Projects/Kind group "openTaskId" ← instance /Projects/Project list.openTaskId
+  single+pulse todo-list-demo /Projects/Kind group "moneyKey" ← instance /Projects/Project list.moneyKey
+  single+pulse todo-list-demo /Projects/Kind group "pName" ← instance /Projects/Project list.pName
+  single+pulse todo-list-demo /Projects/Kind group "pSub" ← instance /Projects/Project list.pSub
+  single+pulse todo-list-demo /Projects/Kind group "pKind" ← instance /Projects/Project list.pKind
+  single+pulse todo-list-demo /Projects/Kind group "pBilling" ← instance /Projects/Project list.pBilling
+  single+pulse todo-list-demo /Projects/Kind group "pTerms" ← instance /Projects/Project list.pTerms
+  single+pulse todo-list-demo /Projects/Kind group "pRate" ← instance /Projects/Project list.pRate
+  single+pulse todo-list-demo /Projects/Kind group "pSay" ← instance /Projects/Project list.pSay
+  single+pulse todo-list-demo /Projects/Kind group "linkTaskId" ← instance /Projects/Project list.linkTaskId
+todo-list-demo /Projects/Money sheet "itemKey" ×3  pulsed-by 3: For Each.itemOutput-itemKey | For Each.itemOutput-itemKey | For Each.itemOutput-itemKey
+todo-list-demo /Projects/View "projectId" ×5 ALL-INSTANCES pulsed-by 5: instance /Projects/Project list.projectId | instance /Projects/Kind group.projectId | instance /Projects/Kind group.projectId | instance /Projects/Kind group.projectId | instance /Projects/Kind group.projectId
+todo-list-demo /Projects/View "openTaskId" ×5 ALL-INSTANCES pulsed-by 5: instance /Projects/Project list.openTaskId | instance /Projects/Kind group.openTaskId | instance /Projects/Kind group.openTaskId | instance /Projects/Kind group.openTaskId | instance /Projects/Kind group.openTaskId
+  single+pulse todo-list-demo /Todo/Routine summary "startText" ← instance /Todo/Date picker.Value
+  single+pulse todo-list-demo /Todo/Routine summary "endText" ← instance /Todo/Date picker.Value
+  single+pulse todo-list-demo /Todo/Task summary "deadlineText" ← instance /Todo/Date picker.Value
+{"ports":21,"feeds":66,"allInstances":17,"refusedLines":21,"parentDrops":998,"single":271,"singleWithPulse":190}

@@ -20,7 +20,7 @@ import { Desk, Graph, RawNode, placeAll, writeDeskProject } from './root-desk';
 
 export const STORE_KEY = 'noodl_store_store-desk';
 
-const button = (id: string, label: string, parent: string): RawNode => ({ id, type: 'net.noodl.controls.button', label, parent, parameters: { label } });
+export const button = (id: string, label: string, parent: string): RawNode => ({ id, type: 'net.noodl.controls.button', label, parent, parameters: { label } });
 
 /** A Function, its run-on-change boxes written out as the editor's load leaves them (the Hook Desk's note, NDA-017). */
 const fn = (id: string, label: string, script: string, io: { inputs: string[]; outputs: string[]; signals?: string[]; runWired?: boolean }): RawNode => ({
@@ -46,7 +46,7 @@ export const BAD_A_SCRIPT = "Outputs.app = { items: ['badA'] };";
 export const BAD_B_SCRIPT = "Outputs.app = { items: ['bad'] };\nOutputs.done();";
 
 /** A logic component: Component Inputs → one Function → Component Outputs, every port wired straight through (the Hook Desk's). */
-const logicGraph = (prefix: string, script: string, ins: Array<{ name: string; type: string }>, outs: Array<{ name: string; type: string }>): Graph => {
+export const logicGraph = (prefix: string, script: string, ins: Array<{ name: string; type: string }>, outs: Array<{ name: string; type: string }>): Graph => {
   const valueIns = ins.filter((p) => p.type !== 'signal');
   const signalIns = ins.filter((p) => p.type === 'signal');
   const valueOuts = outs.filter((p) => p.type !== 'signal');
@@ -66,7 +66,7 @@ const logicGraph = (prefix: string, script: string, ins: Array<{ name: string; t
 };
 
 /** rocket-school's `/Logic/App store`, less the kit node and the outputs nothing here reads. */
-const storeGraph = (): Graph => ({
+export const storeGraph = (): Graph => ({
   nodes: placeAll([
     {
       id: 'stIn',

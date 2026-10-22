@@ -1,3 +1,48 @@
+# Next session — session 141 (2026-10-22, BOARD lane 6) made **rocket-school's Header write the store** (EXP-011 §111): its `app` has three writers (two Update settings, a Delete profile), and each is now handed the Header's own callback, the last to change the last writer, as in the runtime. Measuring it on a desk first found **P18-S141-PASSLATE** (high, live on HEAD): s139's pass-through reached the parent one commit after its own run's pulse and wrote `undefined` over a persisted store. Driving the built app found **P18-S141-MOUNTEDIN** (high): the Edit player form, and every Confirm, were never drawn. Both fixed. Rename and delete-player through the Header now store what the runtime stores at all 9 steps.
+
+## ✅ Session 141: the Header writes the store
+
+Read EXP-011 §111, EXP-021 §11 and `s141-header-app/README.md`. In short:
+
+| what | where |
+|---|---|
+| Measured first (HEAD's templates, `git archive`; a peer edits the tree's rocket-school): 21 multi-fed Component Outputs value ports, 17 fed only by placed components; 190 single pass-throughs whose placement also pulses the same Component Outputs | `s141-header-app/census.ts`, `census.out` |
+| The Header Desk: three writers into one output, and Solo (one pass-through with its own run's pulse); predicted from HEAD's emitted desk, read exactly on both arms. HEAD wrote `{}` over a stored `["kept"]` on one Solo press | `tests/helpers/header-desk.ts`, `s141-header-app/EXPECTED.md`, `arms.sh`, `readings-*.json` |
+| Several placements into one output: each pending as a pass-through; one that does not lift refuses the output whole, the others named | `src/analyze/plan.ts` (§4d child side, `liftInto`) |
+| **P18-S141-PASSLATE**: every pass-through **forwards** (the placement gets this component's own callback; `instanceLifted` entry `forward`); a forward that also writes a row or needs a cast goes through one stable `useCallback` | `plan.ts` `liftInto`, `src/emit/component.ts` `combinedLifted` |
+| **P18-S141-MOUNTEDIN**: a wired Mounted is handed in as `mounted` where the target declares it (24 components, 77 placements; `m === true` ones were never drawn) | `component.ts` `instanceAttrs`; `s141-header-app/mountedin.ts`, `mountedin.out` |
+| The drive: `build.sh head fixed`, `drive.cjs` (s140's, Ada and Bob seeded): Edit player → rename → Save, Edit player → Delete → Yes, reload | `s141-header-app/readings.json`, `shot-H*.png` |
+| Spec 18 rows (§A desk, §B text, §C plan, §D tsc, §E rocket-school, §F MOUNTEDIN on s126's Root Desk + Ask/Unless); 4 mutants; s139's B4, E4, E7 moved with the reason written | `tests/a-header-writes-the-store.test.ts`, `mutants.py`, `mutants.out` |
+
+- 🔴 **Measure the order on a desk before building it, and put a pulse from the same run beside the value.** s139's pass-through
+  desk (A6) set the value one press earlier, so it could not see that the value arrived one commit late. The desk's Solo
+  did, and HEAD's export wiped a stored copy on the first press.
+- 🔴 **The drive found the blocker reading missed, a third session running**: both export arms opened no form on Edit
+  player. The cause was not in the Header at all; the form gates itself on its own `mounted`.
+- 🔴 **A forward needs a stable parent callback** (mutant M3: a fresh arrow each render makes every writer re-push, and the
+  store reads `{}` from the first press). Every emitted parent passes a setter or `useCallback`; a hand-edited page would not.
+- 🔴 **My HEAD copy under `packages/` turned hls006 red** (it scans for sockets). Delete `packages/.s141-base` before the whole
+  package runs, or put the copy elsewhere.
+- "Lost" in `wires.ts` can be a re-keying: 26 wires inside six Component Outputs that were refused under HEAD and still are,
+  now named one by one. Check each lost wire's node disposition under both (`nodes-ab.ts`) before calling it a loss.
+
+Readings: spec 18 / 18; mutants 4 / 4 killed; the desk 13 / 13 cells equal; the drive's stored JSON equal at 9 / 9 steps;
+`tplbuild` all 17 at the floor; reach **50 wires gained, 0 lost**. Whole package (`nice -n 19 --runInBand`, JSON 14:00):
+**157 suites, 5,306 passed, 0 failed, 3 skipped** (predicted 5,288 + 18).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **The Header's settings** (and the form's skin and class): its Choice rows draw no choices. The Header's languages and
+   keyboards are Static Data into a placed component's `items` ("the authored rows are not consumed by a rendered
+   repeater"); sound and answers are a Function's list fed by Translate words (§101, "feeds an unrendered sink"). Count
+   the reach of each across templates first, then predict on a desk (a Static Data into a placed Choice-row-like component).
+2. **P18-S140-SHELLUNSAID**: the report names every refused shell node first (cheap), then the shell's CSS Definition and root
+   Group's style.
+3. The forward's stability (a ref-held relay where an output has several writers), App store's `written`, §101 proper, a
+   Function's own output into `items` (nightbook 16), P18-S137-HALFREFUSED, P18-S140-WIREDAREA. The profiles page's path
+   (`/` in the runtime, `/profiles` in the export) is an older routing difference, unfiled: check before filing.
+
+---
+
 # Next session — session 140 (2026-10-22, BOARD lane 6) **drove EXP-021 AC4**: rocket-school's lists are edited in the exported app (EXP-011 §110). The exported rocket-school, built with its own `npm run build`, opened a set, renamed it, gave it three lines, added a set, deleted one and kept the store across a reload, beside the runtime. Every step read as predicted. HEAD's export saved every list as ONE question (its lines field was `<input type="textArea">`, **P18-S120-TEXTAREA**, fixed). After the fix the exported app's stored JSON equals the runtime's at every step.
 
 ## ✅ Session 140: AC4 driven, and the Text Area keeps its lines

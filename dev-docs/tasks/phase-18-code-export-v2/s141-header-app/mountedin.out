@@ -1,0 +1,25 @@
+rocket-school /Game/Choice row: Game/Focus picker:fpSubject neither, Game/Focus picker:fpTopic wired, Game/Header:hdLang neither, Game/Header:hdKeys neither, Game/Header:hdSound neither, Game/Header:hdAnswers neither, Hangar/Shelf:hsTabs neither, Lists/Editor:leBoth neither, Merge/Play:mpMode neither, Monster/Setup:zsStyle neither, Monster/Setup:zsTimed neither, Moon/Adopt:maColours neither, Pages/Hangar:hgSkin neither, Profiles/New player form:nfLook neither, Profiles/New player form:nfSkin neither, Profiles/New player form:nfLevel neither, Profiles/New player form:nfLang neither, Race/Setup:rsPlayers neither, Race/Setup:rsTimed neither
+rocket-school /Game/Focus picker: Monster/Setup:zsPicker wired, Race/Setup:rsPicker wired
+rocket-school /Game/Teach card: Monster/Play:zpTeach wired, Race/Play:rpTeach wired
+rocket-school /Hangar/Confirm: Moon/Adopt:maConfirm wired, Moon/Big things:btConfirm wired, Moon/Care:mcConfirm wired, Pages/Hangar:hgConfirm wired
+rocket-school /Lists/Editor: Pages/Lists:lsEditor wired
+rocket-school /Monster/Play: Pages/Monster:zgPlay wired
+rocket-school /Monster/Setup: Pages/Monster:zgSetup wired
+rocket-school /Moon/Care: Pages/Moon:mnCare wired
+rocket-school /Profiles/New player form: Game/Header:hdForm wired, Pages/Profiles:pfForm wired
+rocket-school /Race/Play: Pages/Race:rcPlay wired
+rocket-school /Race/Result: Hunt/Play:hpResult wired, Merge/Play:mpResult wired, Monster/Play:zpResult wired, Race/Play:rpResult wired
+rocket-school /Race/Setup: Pages/Race:rcSetup wired
+star-class /Game/Choice row: Game/Focus picker:fpSubject neither, Game/Focus picker:fpTopic wired, Game/Header:hdLang neither, Game/Header:hdSound neither, Game/Header:hdAnswers neither, Hangar/Shelf:hsTabs neither, Lists/Editor:leBoth neither, Merge/Play:mpMode neither, Monster/Setup:zsStyle neither, Monster/Setup:zsTimed neither, Moon/Adopt:maColours neither, Pages/Hangar:hgSkin neither, Profiles/New player form:nfLook neither, Profiles/New player form:nfSkin neither, Profiles/New player form:nfLevel neither, Profiles/New player form:nfLang neither, Race/Setup:rsPlayers neither, Race/Setup:rsTimed neither
+star-class /Game/Focus picker: Monster/Setup:zsPicker wired, Race/Setup:rsPicker wired
+star-class /Game/Teach card: Monster/Play:zpTeach wired, Race/Play:rpTeach wired
+star-class /Hangar/Confirm: Moon/Adopt:maConfirm wired, Moon/Big things:btConfirm wired, Moon/Care:mcConfirm wired, Pages/Hangar:hgConfirm wired
+star-class /Lists/Editor: Pages/Lists:lsEditor wired
+star-class /Monster/Play: Pages/Monster:zgPlay wired
+star-class /Monster/Setup: Pages/Monster:zgSetup wired
+star-class /Moon/Care: Pages/Moon:mnCare wired
+star-class /Profiles/New player form: Game/Header:hdForm wired, Pages/Profiles:pfForm wired
+star-class /Race/Play: Pages/Race:rcPlay wired
+star-class /Race/Result: Hunt/Play:hpResult wired, Merge/Play:mpResult wired, Monster/Play:zpResult wired, Race/Play:rpResult wired
+star-class /Race/Setup: Pages/Race:rcSetup wired
+{"components":24,"placements":77,"wired":42,"authored":0,"neither":35}
