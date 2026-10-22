@@ -47,6 +47,7 @@ import { listRuntimeRecords, ownerIsLive } from '../backend/runtimeRecord';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { guarded, jsonResult } from './util';
+import { ENFORCED_RULES_NOTE, OPEN_RULES_NOTE } from '../backend/enforcedRulesNote';
 
 const collectionSchema = z.object({
   name: z.string().describe('Collection name, e.g. "Puppy"'),
@@ -155,6 +156,11 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
         adopted: result.adopted,
         collections: result.collections,
         warnings: result.warnings,
+        // P112 OWN-026 FIX-01: whether the users this app signs in are kept apart, and what that means for its queries.
+        rules: {
+          enforced: result.enforced,
+          note: result.enforced === false ? OPEN_RULES_NOTE : ENFORCED_RULES_NOTE
+        },
         // DSG-007 — the identity this backend is owned by, and whether this call
         // had to mint it. A caller that sees `minted` is looking at a project
         // that could never have reused a backend before now.

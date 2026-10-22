@@ -19,6 +19,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { BackendClient, listBackends, requireBackend } from '../backend/client';
+import { ENFORCED_RULES_NOTE, OPEN_RULES_NOTE } from '../backend/enforcedRulesNote';
 import { ensureEnvPlaceholder, readEnvSecret } from '../backend/envSecret';
 import { writeProposal } from '../backend/workflowProposals';
 import { ToolError } from '../errors';
@@ -612,6 +613,34 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         body
       );
       return jsonResult(json);
+    })
+  );
+
+  // P112 OWN-026 FIX-01 (P112-OWN023-NOENFORCETOOL): an agent that read `enforced: false` from
+  // get_backend_permissions had no way to turn the rules on, and built on an open backend.
+  server.registerTool(
+    'set_backend_enforcement',
+    {
+      title: 'Turn backend rules on or off',
+      description:
+        "Turn a local backend's permission rules on (enforced) or off (dev-open). Enforced, they hold on this " +
+        'machine as they do deployed.',
+      inputSchema: {
+        backendId: z.string().optional(),
+        enforced: z.boolean().describe('true: enforce the rules; false: dev-open')
+      }
+    },
+    guarded(async ({ backendId, enforced }) => {
+      const client = await requireBackend(backendId);
+      const { json } = await client.request('GET', '/admin/permissions');
+      const current = json as { config: Record<string, unknown> };
+      const put = await client.request('PUT', '/admin/permissions', { ...current.config, devOpen: !enforced });
+      const after = (await client.request('GET', '/admin/permissions')).json as { enforced?: boolean };
+      return jsonResult({
+        ...(put.json as object),
+        enforced: after.enforced === true,
+        note: after.enforced ? ENFORCED_RULES_NOTE : OPEN_RULES_NOTE
+      });
     })
   );
 

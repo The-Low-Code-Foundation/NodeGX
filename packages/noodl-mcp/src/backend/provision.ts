@@ -496,6 +496,10 @@ export async function startBackend(
   // restart or an adoption — is idempotent, and the flag is inert for the
   // projects (today, all of them) that ship no policy.
   if (options.projectDir) args.push('--project-dir', options.projectDir);
+  // P112 OWN-026 FIX-01: a backend with no rules yet mints the defaults ENFORCED (devOpen false), so an app
+  // built here keeps its users apart on this machine as it will deployed. Inert, like --project-dir, once the
+  // data dir has a security.json: a reused or adopted backend keeps whatever it has (see `rules` below).
+  args.push('--enforce-rules');
 
   const child = spawn(process.execPath, args, { stdio: ['ignore', 'pipe', 'pipe'], detached: false });
   const logRing: string[] = [];
@@ -787,6 +791,8 @@ export interface ProvisionResult {
   reuseVerdict: ReuseVerdict;
   /** Empty when there is nothing to explain (`reused`, or no namesake at all). */
   reuseNote: string;
+  /** P112 OWN-026 FIX-01 — whether the running backend enforces its rules, read back off it; null if it would not say. */
+  enforced: boolean | null;
 }
 
 /**
@@ -909,6 +915,18 @@ export async function provisionBackend(request: ProvisionRequest): Promise<Provi
     }
   }
 
+  // ── P112 OWN-026 FIX-01: are the rules enforced? Read back, not assumed: a reused or adopted backend keeps
+  // the security.json it already had, which on one made before this flag is dev-open.
+  let enforced: boolean | null = null;
+  try {
+    const { json } = await client.request('GET', '/admin/permissions');
+    if (json && typeof json === 'object' && typeof (json as { enforced?: unknown }).enforced === 'boolean') {
+      enforced = (json as { enforced: boolean }).enforced;
+    }
+  } catch {
+    /* an older backend without the route: reported as null */
+  }
+
   return {
     backendId: started.backendId,
     name: started.name,
@@ -917,6 +935,7 @@ export async function provisionBackend(request: ProvisionRequest): Promise<Provi
     pid: started.pid,
     reused,
     adopted,
+    enforced,
     collections: created,
     // A reuse that could not happen is a fact about this provision, so it rides
     // out with the warnings rather than only in a field a caller may not read.

@@ -1338,6 +1338,13 @@ class LocalSQLAdapter {
   increment(options: IncrementOptions): void {
     try {
       this._ensureTable(options.collection);
+      // P112 OWN-026 FIX-01: a counter nobody has set yet is a column the table does not have, and
+      // the UPDATE threw — answered as "Object not found". Added as a Number, the way save adds one.
+      if (this.options.autoCreateTables && this.schemaManager) {
+        for (const key of Object.keys(options.properties)) {
+          this.schemaManager.addColumn(options.collection, { name: key, type: 'Number' });
+        }
+      }
       this._guardAclSupport(options);
 
       const { sql, params } = QueryBuilder.buildIncrement({ ...options, lookup: this._pathLookup() });

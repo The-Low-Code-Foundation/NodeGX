@@ -86,6 +86,14 @@ describe('SB-002 — the backend doctrine reaches the agent', () => {
     expect(BACKEND_DOCTRINE_MD).toContain('do not do both');
     expect(BACKEND_DOCTRINE_MD).toContain('twice');
 
+    // P112 OWN-026 FIX-01 C: what a multi-user app needs, read where an agent reads before building.
+    // Fragments chosen within one line (the text is hard-wrapped).
+    expect(BACKEND_DOCTRINE_MD).toContain('The backend keeps users apart; the page does not.');
+    expect(BACKEND_DOCTRINE_MD).toContain('Change a shared value on the server, by the amount.');
+    expect(BACKEND_DOCTRINE_MD).toContain("await Noodl.Records.increment(id, { points: 1 }, { className: 'Score' })");
+    expect(BACKEND_DOCTRINE_MD).toContain('`onlyIfUnchanged`');
+    expect(BACKEND_DOCTRINE_MD).toContain('A press that saves is taken once.');
+
     // 4. `points to` widens instead of failing; the String fallback is named.
     expect(BACKEND_DOCTRINE_MD).toContain('points to');
     expect(BACKEND_DOCTRINE_MD).toContain('widens instead of failing');

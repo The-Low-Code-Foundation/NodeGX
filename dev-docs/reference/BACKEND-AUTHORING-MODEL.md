@@ -221,6 +221,16 @@ code is the bug.*
   membership was reachable only by pasting an objectId into the Permissions panel by hand. `Add User
   To Role` closes it; see §Roles above for why that node is cloud-only.
 
+**Enforced on the machine it is built on (P112 OWN-026 FIX-01, 2026-10-22).** A backend
+`provision_backend` creates is started with `--enforce-rules`: its first `security.json` is the
+default posture with `devOpen: false`, so the default `creatorOwns` keeps each user's records apart
+locally exactly as a deploy does, and a query needs no owner filter. A backend that already has a
+`security.json` keeps it; `set_backend_enforcement` turns an existing dev-open one on. The editor's
+own spawner does not pass the flag and still mints dev-open. A value several devices change is
+changed on the server by the amount (`Noodl.Records.increment`, Parse's `Increment` op, which
+starts a never-set field at the amount), or replaced only if unchanged (`onlyIfUnchanged`,
+HLT-016); `BACKEND_DOCTRINE_MD` §"Users, and values more than one device changes" teaches both.
+
 ## The endpoint gate has no defaults tier — the one thing a graph cannot say
 
 🔴 **`Allow Unauthenticated` has two values and the policy a real endpoint needs has

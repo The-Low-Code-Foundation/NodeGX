@@ -224,6 +224,8 @@ export interface SecurityDeps {
    * existing `secrets.json`; only the mint is refused.
    */
   requireSecrets?: boolean;
+  /** P112 OWN-026 FIX-01: a first start mints the default rules with `devOpen: false` (`--enforce-rules`). */
+  enforceRules?: boolean;
 }
 
 export class SecurityState {
@@ -269,6 +271,7 @@ export class SecurityState {
       this.migratedThisStart = false;
     } else {
       this.config = defaultSecurityConfig();
+      if (deps.enforceRules) this.config.devOpen = false;
       fs.mkdirSync(deps.dataDir, { recursive: true });
       atomicWriteJSON(configPath, this.config);
       this.migratedThisStart = true;

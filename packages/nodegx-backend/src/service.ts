@@ -255,6 +255,7 @@ export class BackendService {
       readonlyToken: this.options.readonlyToken,
       // PRD-005: never mint under the production stance.
       requireSecrets: this.options.requireSecrets,
+      enforceRules: this.options.enforceRules,
       deployedFunctions,
       facade: this.facade,
       // ISL-040: read per session, so the Sign-in page's number holds from the next request.
@@ -283,7 +284,15 @@ export class BackendService {
           'ephemeral mock mode, which cannot enforce row-level ACLs. Use a real SQLite engine or set devOpen: true.'
       );
     }
-    if (this.security.migratedThisStart) {
+    if (this.security.migratedThisStart && !this.security.config.devOpen) {
+      // P112 OWN-026 FIX-01: minted with --enforce-rules.
+      // eslint-disable-next-line no-console
+      console.warn(
+        '[nodegx-backend] SECURITY DEFAULTS APPLIED, ENFORCED: this backend had no security.json — one was created ' +
+          'with the default rules (collections require sign-in, each record readable and writable only by the user ' +
+          'who created it) and dev-open OFF, so they hold on this machine as they would deployed.'
+      );
+    } else if (this.security.migratedThisStart) {
       // eslint-disable-next-line no-console
       console.warn(
         '[nodegx-backend] SECURITY DEFAULTS APPLIED: this backend had no security.json — one was created with ' +

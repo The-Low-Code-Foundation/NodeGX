@@ -3,7 +3,7 @@
  *
  *   nodegx-backend serve  --data-dir <dir> --port <p> [--host <h>] [--token <t>]
  *                         [--backend-id <id>] [--backend-name <name>] [--ephemeral]
- *                         [--project-dir <dir>]
+ *                         [--project-dir <dir>] [--enforce-rules]
  *   nodegx-backend doctor --data-dir <dir> [--ephemeral]
  *
  * `serve`  starts the full HTTP service (BYOB + Parse-wire + admin) and stays up.
@@ -107,6 +107,10 @@ function parseArgs(argv: string[]): ParsedArgs {
       // on a first start that has none.
       case '--project-dir':
         options.projectDir = next();
+        break;
+      // P112 OWN-026 FIX-01: mint the default rules enforced (devOpen false) when there are none yet.
+      case '--enforce-rules':
+        options.enforceRules = true;
         break;
       // BAK-007 command flags
       case '--dest':

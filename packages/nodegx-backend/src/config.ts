@@ -84,6 +84,14 @@ export interface BackendServiceOptions {
    * `NODEGX_REQUIRE_SECRETS=1` turns it on for a container that cannot edit its command.
    */
   requireSecrets: boolean;
+  /**
+   * P112 OWN-026 FIX-01 — a backend with no `security.json` yet mints the default rules with
+   * `devOpen: false`, so they are enforced on this machine from the first record, the same rules a
+   * deploy enforces. Only the mint reads it: an existing `security.json`, or a project policy
+   * (`--project-dir`) installed before the mint, is never changed. `@nodegx/mcp`'s provision passes
+   * it; the editor's spawner does not, and keeps dev-open as its local default.
+   */
+  enforceRules: boolean;
 }
 
 /** Non-loopback bind => a token is mandatory. */
@@ -108,7 +116,8 @@ const DEFAULTS: BackendServiceOptions = {
   adminDashboard: true,
   readonlyToken: null,
   projectDir: null,
-  requireSecrets: false
+  requireSecrets: false,
+  enforceRules: false
 };
 
 /**

@@ -798,6 +798,9 @@ export class PostgresAdapter {
   increment(options: IncrementOptions): void {
     this._run('increment', options, async () => {
       await this._ready(options.collection);
+      // P112 OWN-026 FIX-01: see LocalSQLAdapter.increment — a counter nobody has set yet gets its column.
+      this._autoColumns(options.collection, options.properties);
+      await this._sm().barrier();
       const { sql, params } = QueryBuilder.buildIncrement({ ...options, lookup: this._pathLookup() }, 'postgres');
       const changed = await this._pool().run(sql, params);
       // P109 ISL-039: with or without an ACL (see save).

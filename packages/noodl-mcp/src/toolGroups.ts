@@ -227,6 +227,8 @@ const BACKEND_TOOLS = [
   // backendTools.ts — write
   'set_collection_permissions',
   'reset_collection_permissions',
+  // P112 OWN-026 FIX-01 (P112-OWN023-NOENFORCETOOL): turns a backend's rules on (devOpen off).
+  'set_backend_enforcement',
   'create_backend_role',
   'delete_backend_role',
   'assign_role_user',
@@ -573,6 +575,8 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'list_backend_processes',
   'set_collection_permissions',
   'reset_collection_permissions',
+  // P112 OWN-026 FIX-01 (P112-OWN023-NOENFORCETOOL): turns a backend's rules on (devOpen off).
+  'set_backend_enforcement',
   'create_backend_role',
   'delete_backend_role',
   'assign_role_user',

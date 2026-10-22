@@ -57,6 +57,23 @@ export const BACKEND_DOCTRINE_MD = `## The backend in one sentence
 
 A workflow orchestrates; a cloud function computes; a workflow calls cloud functions.
 
+## Users, and values more than one device changes
+
+- **The backend keeps users apart; the page does not.** A backend \`provision_backend\` makes enforces
+  its rules on this machine as deployed: a record a user creates is theirs (\`creatorOwns\`), so their
+  Query Records already returns only their rows. Never fetch everyone's rows and filter them in a
+  Function node: every row reaches every browser. Narrow further with the query's own server filter
+  (\`visualFilter\`). A collection everyone shares needs \`creatorOwns: false\`.
+- **Change a shared value on the server, by the amount.** A count, score, balance or progress that two
+  tabs or devices change is never read into the page, changed, and written back whole: the later
+  write erases the earlier. In a Function node,
+  \`await Noodl.Records.increment(id, { points: 1 }, { className: 'Score' })\` adds on the server and
+  updates the record to the server's total. To replace a whole value safely, Update Record's
+  \`onlyIfUnchanged\` refuses a write over a newer one (Failure fires: fetch again, then retry).
+- **A press that saves is taken once.** From the press until that save's Done or Failure, the control
+  ignores presses (disable it). Send the save the id of the item it was pressed for, and when the
+  answer arrives, apply it only if that item is still the one on screen.
+
 ## The runtime is the path
 
 A component under \`#__cloud__/\` runs in the cloud runtime; everything else runs in the browser.
