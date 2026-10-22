@@ -37,6 +37,9 @@ const sittings = JSON.parse(fs.readFileSync(path.join(round, 'sittings.json'), '
 const r = JSON.parse(fs.readFileSync(path.join(round, 'round.json'), 'utf8'));
 const request = fs.readFileSync(opt('--request', r.request), 'utf8').trim();
 const last = sittings.findLast((s) => s.last)?.last ?? '(the assistant ended without a message)';
+// The round's kit carried its own @nodegx/preview: the grader's `npx @nodegx/preview` runs it too (round.mjs, same shim).
+const kitDir = r.kit && typeof r.kit === 'object' ? r.kit.dir : null;
+const previewTgz = kitDir && r.kit.files.find((f) => /^nodegx-preview-.*\.tgz$/.test(f)) ? path.join(kitDir, r.kit.files.find((f) => /^nodegx-preview-.*\.tgz$/.test(f))) : null;
 
 const ancestors = (p) => { const out = []; for (let d = path.dirname(p); d !== '/'; d = path.dirname(d)) out.push(d); return out; };
 fs.writeFileSync(path.join(G, 'sandbox.sb'), [
@@ -48,15 +51,16 @@ fs.writeFileSync(path.join(G, 'sandbox.sb'), [
   `(deny file-read* file-write* (subpath "${LAB}"))`,
   `(allow file-read* (subpath "${KIT}"))`,
   `(allow file-read* (subpath "${path.join(LAB, 'bin')}"))`,
+  ...(kitDir ? [`(allow file-read* (subpath "${kitDir}"))`] : []),
   `(allow file-read* file-write* (subpath "${path.join(LAB, 'cache')}"))`,
   `(allow file-read* file-write* (subpath "${G}"))`,
-  ...[...new Set([G, KIT, NODE_DIR, path.join(LAB, 'bin', 'x'), path.join(LAB, 'cache', 'x')].flatMap(ancestors))].map((d) => `(allow file-read-metadata (literal "${d}"))`)
+  ...[...new Set([G, KIT, NODE_DIR, path.join(LAB, 'bin', 'x'), ...(kitDir ? [path.join(kitDir, 'x')] : []), path.join(LAB, 'cache', 'x')].flatMap(ancestors))].map((d) => `(allow file-read-metadata (literal "${d}"))`)
 ].join('\n') + '\n');
 fs.copyFileSync(path.join(HERE, 'checks.md'), path.join(G, 'checks.md'));
 const prefix = path.join(G, 'shell-prefix.sh');
 fs.writeFileSync(prefix, `#!/bin/sh
 # OWN-026 grader: every shell command gets the copy's HOME and runs inside the lab's sandbox.
-export HOME="${HOME}" TMPDIR="${HOME}/tmp" npm_config_cache="${path.join(LAB, 'cache', 'npm')}" PLAYWRIGHT_BROWSERS_PATH="${path.join(LAB, 'cache', 'ms-playwright')}" BROWSER=none CHROME_PATH="${path.join(LAB, 'bin', 'chrome')}" USER=grader PATH="${NODE_DIR}:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export HOME="${HOME}" TMPDIR="${HOME}/tmp" npm_config_cache="${path.join(LAB, 'cache', 'npm')}" PLAYWRIGHT_BROWSERS_PATH="${path.join(LAB, 'cache', 'ms-playwright')}" BROWSER=none CHROME_PATH="${path.join(LAB, 'bin', 'chrome')}" USER=grader${previewTgz ? ` NODEGX_LAB_PREVIEW_TGZ="${previewTgz}" NODEGX_LAB_REAL_NPX="${path.join(NODE_DIR, 'npx')}"` : ''} PATH="${previewTgz ? path.join(LAB, 'bin', 'kitnpx') + ':' : ''}${NODE_DIR}:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 exec /usr/bin/sandbox-exec -f "${path.join(G, 'sandbox.sb')}" /bin/zsh -c "$*"
 `, { mode: 0o755 });
 

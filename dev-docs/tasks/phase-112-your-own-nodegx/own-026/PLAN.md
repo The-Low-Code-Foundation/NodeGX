@@ -201,3 +201,18 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   empty record and writes it back; the kit's guidance is cut by Cline's ~8,000-character tool-result limit, so FIX-01
   C never reached the model; `update_component` given create arguments 11 times; 35 px default buttons). HOLD-nodegx
   set again; t1-code-3 and t1-harness-3 run meanwhile.
+- **2026-10-22 21:07 CEST, t1-code-3 died of the network (kept as `.infra-broken-dns`), re-run.** Turn 48 went
+  silent for 90 s, then every retry answered `getaddrinfo ENOTFOUND api.cline.bot` (the Mac lost DNS); Cline ended
+  `error` ("Response stream ended without a finish reason") at 2,011 s, half-built. Its grade was stopped before it
+  finished (a grade of a build the network cut tells nothing about the arm). Re-run as t1-code-3; the network answered
+  again at 21:24 (HTTP 200).
+- **2026-10-22 22:25 CEST — FIX-02 landed** (fixer `opennoodl-ac`: `f3d2a66e9` A, `328f1dd1d` B–D, `829b6cf08` Done;
+  kit `/Users/Shared/nodegx-lab/kits/FIX-02-328f1dd1d/`, which for the first time carries a rebuilt
+  `nodegx-preview-0.2.4.tgz`, because A, the Record reading an unheld record, lives in the runtime). **The graded app must
+  run what a person with this kit would run**, so the lab routes `npx @nodegx/preview …` (any version spec, as the
+  command or `-p`/`--package`) to the kit's tarball through `/Users/Shared/nodegx-lab/bin/kitnpx/npx`, first on the
+  PATH of the round's shell and of the grader's, when the kit has a preview tarball; every other npx call passes
+  through. Measured first: a preview installed globally in the round's HOME is **not** used (npx reuses the shared
+  cache's registry copy, `_npx/f673…`); with the shim both shells resolve `preview` to `_npx/ff4932…`, whose lock
+  names the kit's file. Mock round + grader prefix both proven. t1-code-3 21/22 (T6). t1-nodegx-3 runs on FIX-02
+  after t1-harness-3.

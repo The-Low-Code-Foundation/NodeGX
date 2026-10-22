@@ -21,7 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
-import { kitTarball } from '../own-018/kit-tarball.mjs';
+import { kitTarball, hasTarball } from '../own-018/kit-tarball.mjs';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const REPO = path.resolve(HERE, '../../../..');
@@ -91,6 +91,14 @@ Object.assign(env, {
   CLINE_HUB_PORT: '25999',
   CLINE_API_KEY: keyLine.slice('CLINE_PASS_API_KEY='.length).trim().replace(/^["']|["']$/g, ''),
   ...(tapPort ? { CLINE_API_BASE_URL: `http://127.0.0.1:${tapPort}/api/v1` } : {})
+});
+
+// A kit that carries its own @nodegx/preview (a runtime fix the registry's copy lacks): `npx @nodegx/preview …`, typed
+// by the agent as the kit tells a person to, runs that tarball (LAB/bin/kitnpx/npx; every other npx call untouched).
+if (KIT_DIR && hasTarball(KIT_DIR, 'nodegx-preview')) Object.assign(env, {
+  PATH: `${path.join(LAB, 'bin', 'kitnpx')}:${env.PATH}`,
+  NODEGX_LAB_PREVIEW_TGZ: kitTarball(KIT_DIR, 'nodegx-preview'),
+  NODEGX_LAB_REAL_NPX: path.join(NODE_DIR, 'npx')
 });
 
 // 0. The fence. Cline's own seal (OWN-020) for its file tools, and the OS sandbox for everything (the shell is on).
