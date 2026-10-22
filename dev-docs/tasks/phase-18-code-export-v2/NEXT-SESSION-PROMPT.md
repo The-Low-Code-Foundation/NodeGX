@@ -1,3 +1,40 @@
+# Next session — session 140 (2026-10-22, BOARD lane 6) **drove EXP-021 AC4**: rocket-school's lists are edited in the exported app (EXP-011 §110). The exported rocket-school, built with its own `npm run build`, opened a set, renamed it, gave it three lines, added a set, deleted one and kept the store across a reload, beside the runtime. Every step read as predicted. HEAD's export saved every list as ONE question (its lines field was `<input type="textArea">`, **P18-S120-TEXTAREA**, fixed). After the fix the exported app's stored JSON equals the runtime's at every step.
+
+## ✅ Session 140: AC4 driven, and the Text Area keeps its lines
+
+Read EXP-011 §110, EXP-021 §10 and `s140-lists-drive/README.md`. In short:
+
+| what | where |
+|---|---|
+| The drive: `build.sh head fixed` (s137's recipe; `emit.ts` now writes `app.copies` too, which a kit template needs), `drive.cjs` (one headless Chrome, one origin per arm, the store seeded before the app's first script), `show.cjs` | `s140-lists-drive/` |
+| Predicted first, read exactly: L0–L6 on runtime, export-head and export-fixed. HEAD: "1 questions" for three lines (Chrome turns a line break typed into a one-line field into a space) | `EXPECTED.md`, `readings.json` |
+| **P18-S120-TEXTAREA** fixed: an authored Type Text Area is a `<textarea>` (no `type`, ref `HTMLTextAreaElement`, `base.css` `resize: none`) | `src/emit/component.ts` (`isTextArea`), `src/emit/scaffold.ts` |
+| The desk: the Field Desk's `name` field as a Text Area, both arms in jsdom (it sanitizes an `<input>` as Chrome does), 8 / 8; 4 mutants killed; both arms' `type:` step takes a line break | `tests/a-text-area-keeps-its-lines.test.ts`, `mutants.py`, `mutants.out` |
+| Filed: **P18-S140-WIREDAREA** (low: a Type wired from a component input, nightbook's letter boxes ×3, landing-pages ×1), **P18-S140-SHELLUNSAID** (medium: 77 shell nodes, 15 of them whole CSS Definitions, refused and never named in the report; the page's ground is white in every exported template) | `dev-docs/bugs/` |
+
+- 🔴 **The drive found what reading the page did not.** I read the emitted Lists page and Editor before driving, and the
+  `<input type="textArea">` was there in plain sight. I recorded it as a known open bug and predicted its effect. Only the
+  drive showed it was the one thing between AC4 and done.
+- 🔴 **s137's "the report says so" was false.** A scaffolded component's refusals print nowhere. The check is the refusal
+  SENTENCE in the report, not a label: "App" matches every report for other reasons, and my first count read 53 named.
+- 🔴 hls001 moved 65 hashes for one CSS rule (`base.css` is in every corpus project). Predicted, counted with
+  `golden-diff` under ts-node, then regenerated under jest; the two runners agree on every hash.
+
+Readings: spec 8 / 8; `gam-011` 7 / 7; mutants 4 / 4; `tplbuild` all 17 at the floor (1 in 1); package `tsc --noEmit` 0;
+templates' Text Area fields 25: 21 `<textarea>` (were 0), 4 wired (WIREDAREA). Whole package (`nice -n 19 --runInBand`, JSON 12:53): **156 suites, 5,288 passed, 0 failed, 3 skipped**, as predicted (s139's 5,280 + the 8 new rows).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **The Header's `app`** (three wires into one Component Outputs port, refused, and with it its `write` on 8 pages:
+   settings, rename and delete-player do not save in the export). The runtime writes whichever arrived last (s139's Bad
+   desk read `badA`). Measure the order on a desk first, then decide: one push effect per source, each when it changes.
+2. **P18-S140-SHELLUNSAID**: first the honest floor (the report names every refused shell node, cheap); then the shell's
+   CSS Definition into `base.css`, its root Group's style onto `App.tsx`'s wrapper, a Function beside the Router as a
+   mounted run. Every exported template opens on the wrong ground today.
+3. App store's `written`, §101 proper (the Lists guard, the Editor's count line), a Function's own output into `items`
+   (nightbook 16), P18-S137-HALFREFUSED, P18-S140-WIREDAREA.
+
+---
+
 # Next session — session 139 (2026-10-22, BOARD lane 6) made **a persisted Global Store travel, and the write idiom over it** (EXP-011 §109): rocket-school's `/Logic/App store` is kept where the runtime keeps it, every page is handed `app`, and the Lists page's Save writes Save's value, not Delete's. Opening the store made four more things reachable, all built: an untyped store key lifts, several hooks' values into one input are one row (MULTIFEED), the Editor's `items` passes through to Save, and a pulse whose value the export does not deliver is refused by name (STALEPULSE, high).
 
 ## ✅ Session 139: the persisted store, and the write idiom over it

@@ -271,7 +271,8 @@ async function run({ dir, scenarios, fields, backend, storage }) {
     await settled();
     const readings = [read()];
     for (const label of presses) {
-      const typed = /^(type|enter):([^:]*)(?::(.*))?$/.exec(label);
+      // The text may hold line breaks (a Text Area's lines, P18 session 140), so it is `[\s\S]*`, not `.*`.
+      const typed = /^(type|enter):([^:]*)(?::([\s\S]*))?$/.exec(label);
       if (typed) {
         await act(async () => {
           stepInField(container, typed[1], typed[2], typed[3] ?? '');

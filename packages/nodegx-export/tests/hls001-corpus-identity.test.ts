@@ -244,6 +244,11 @@
  * the 6 projects with a printed Function wrapper move their page (7: scripts-desk has two), their `EXPORT-REPORT.md` and
  * `@report` (the file count and list), and gain one file per wrapper (9). **19 moved, 9 added, 0 removed**, exactly
  * those. The session's four earlier classes (TS2554, TS2345, TS2786, TS2448) were predicted at 0 keys each and moved 0.
+ *
+ * ✅ **Regenerated for P18-S120-TEXTAREA (P18 session 140, 2026-10-22), predicted and counted.** `base.css` gains
+ * `textarea { resize: none; }` (every project's), and a Text Input whose Type is Text Area is a `<textarea>`: the corpus
+ * has one, `puppy-test-3`'s Admin page. Predicted 64 + 1 before counting; `golden-diff` under ts-node read **65 moved
+ * (64 `src/styles/base.css` and `puppy-test-3/src/pages/Admin.tsx`), 0 added, 0 removed**.
  */
 import * as fs from 'fs';
 import * as path from 'path';

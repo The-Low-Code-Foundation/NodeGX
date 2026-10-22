@@ -284,6 +284,16 @@ export function authoredTag(
  * exporter has always emitted for a Text nobody gave a tag, and a node with no `as` staying
  * byte-identical is EXP-015's regression guard for the whole corpus.
  */
+/**
+ * P18-S120-TEXTAREA. A Text Input whose Type is Text Area: the running app draws a `<textarea>` (TextInput.tsx), so the
+ * export does, and prints no `type` — a browser knows no input type "textArea" and draws a one-line field, which drops
+ * every line break typed or delivered into it.
+ */
+function isTextArea(node: NodeIR | undefined): boolean {
+  const type = node?.parameters.find((p) => p.name === 'type')?.value;
+  return type?.kind === 'literal' && type.value === 'textArea';
+}
+
 const TAGS: Record<string, string> = {
   group: 'div',
   page: 'div',
@@ -5390,6 +5400,7 @@ export function emitComponent(
       if (!role?.startsWith('attr:')) continue;
       const attr = role.slice('attr:'.length);
       if (param.value.kind !== 'literal') continue;
+      if (attr === 'type' && isTextArea(node)) continue;
       // EXP-014 §14.5. A media URL is printed as the browser must be handed it — root-absolute for a
       // project-relative path, verbatim for anything already absolute, and NO attribute for an
       // empty one (`src=""` refetches the document) — the viewer's own port rule, resolved here at
@@ -5856,6 +5867,7 @@ export function emitComponent(
    * author is most likely to use for a landmark is the one that loses it.
    */
   const tagOf = (id: string, role: string): string => {
+    if (role === 'input' && isTextArea(nodeById.get(id))) return 'textarea';
     const fallback = TAGS[role];
     const nodes: NodeIR[] = [nodeById.get(id)!];
     if (id === plan.rootId && plan.collapsedGroupId) nodes.push(nodeById.get(plan.collapsedGroupId)!);
@@ -7430,7 +7442,9 @@ export function emitComponent(
   // EXP-011 §39. The refs: a Delay's timer handle, and a Value Changed's last value seen.
   for (const [, ref] of delayRefs) body.push(`  const ${ref} = useRef<DelayHandle | null>(null);`);
   // P18-S128-FIELDSET. A field's element, and whether it has been Cleared since its Value was last delivered.
-  for (const [, ref] of fieldRefs) body.push(`  const ${ref} = useRef<HTMLInputElement>(null);`);
+  for (const [inputId, ref] of fieldRefs) {
+    body.push(`  const ${ref} = useRef<${isTextArea(nodeById.get(inputId)) ? 'HTMLTextAreaElement' : 'HTMLInputElement'}>(null);`);
+  }
   for (const [inputId, local] of fieldClearedLocals) {
     const source = fieldSetSources.get(inputId)!;
     body.push(`  const ${local} = useRef(false);`);

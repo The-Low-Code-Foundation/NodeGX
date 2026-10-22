@@ -99,7 +99,8 @@ w.__stepSettled = async (verb: string, placeholder: string, text: string) => {
   });
 };
 `;
-const STEP = /^(type|enter):([^:]*)(?::(.*))?$/;
+// The text may hold line breaks (a Text Area's lines, P18 session 140), so it is `[\s\S]*`, not `.*`.
+const STEP = /^(type|enter):([^:]*)(?::([\s\S]*))?$/;
 
 function bundle(dir, env = false) {
   const entry = path.join(dir, '__harness.tsx');

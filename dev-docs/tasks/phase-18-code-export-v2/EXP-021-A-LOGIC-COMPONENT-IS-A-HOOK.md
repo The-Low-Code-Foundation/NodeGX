@@ -1,7 +1,7 @@
 # EXP-021 — A logic component is a hook
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), under Richard's ruling of 2026-10-21. This is **EXP-003 Tier B**
-("logic components in the export"), the row the BOARD's 0.5.0 line already names. **Status: 🟡 slice 1 built (session 136, §6); AC1 driven (session 137, §7); AC4's path translated (sessions 138–139, §8–§9), its drive and the parent's reads (§101) to come.**
+("logic components in the export"), the row the BOARD's 0.5.0 line already names. **Status: 🟡 slice 1 built (session 136, §6); AC1 driven (session 137, §7); AC4's path translated (sessions 138–139, §8–§9) and driven (session 140, §10); the parent's reads (§101) to come.**
 Follows [EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md) and [EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md),
 because most of a logic component's body is Functions those two carry.
 
@@ -158,4 +158,20 @@ lost (every loss a STALEPULSE refusal); nodes 32 gained, 0 lost.
 |---|---|
 | AC4 | 🟡 translated, not driven: the Lists page hands App store one `app` row, the Editor's `items` reaches Save, Save's and Delete's writes are kept and saved. The Header's settings writes are refused (its `app` has three feeds). Next: the drive |
 | AC5 | ✅ `tplbuild` all 17 at the floor; 0 nodes lost; the 115 wires lost are refusals of pulses HEAD ran on missing values |
+
+## 10. Session 140 (2026-10-22): AC4 driven — a set edited in the exported app
+
+[EXP-011 §110](EXP-011-PICKER-COVERAGE.md) is the ledger entry; `s140-lists-drive/` holds the drive, its predictions and
+its readings.
+
+The exported rocket-school, built with its own `npm run build`, beside the runtime in one headless Chrome, the store
+seeded in localStorage. A set opened, renamed and given three lines, a set added, a set deleted, the page reloaded.
+Predicted first; every step read as predicted. HEAD's export saved every set as one question: its lines field was
+`<input type="textArea">` (**P18-S120-TEXTAREA**, fixed here, graded on the Field Desk against the runtime's own
+control). After the fix the export's stored JSON equals the runtime's at every step.
+
+| AC | |
+|---|---|
+| AC4 | ✅ driven: open, edit (name and lines), save, add, delete with its ask, reload; the export's page and store read as the runtime's at every step. Not part of the list editing and still refused: the Header's settings writes (its `app` has three feeds), the Editor's count line (§101), the page's ground (P18-S140-SHELLUNSAID) |
+| AC5 | ✅ `tplbuild` all 17 at the floor; hls001 65 moved, 0 added, 0 removed, predicted |
 

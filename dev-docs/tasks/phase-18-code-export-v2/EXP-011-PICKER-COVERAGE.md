@@ -14769,3 +14769,31 @@ NSP-008's ledger line gains one t01 scenario (played 18, conforming 11), attribu
 AC4's drive (the exported rocket-school, a set edited). The Header's own `app` (three feeds into one output port, the
 order unknown statically), and with it its `write` on 8 pages. App store's `written`: a Set Global Store's Done chain
 shares its port with a kit node the export does not run. §101 proper.
+
+## §110 Rocket-school's lists are edited in the exported app (session 140, 2026-10-22): EXP-021 AC4 driven, and P18-S120-TEXTAREA
+
+`s140-lists-drive/README.md` is the record (the drive, the desk, the mutants, the reach); EXP-021 §10 the task's view.
+
+### §110.0 Driven first, predicted first
+
+The exported rocket-school, built with its own `npm run build`, and the runtime, one headless Chrome, the store seeded in
+localStorage: open the Lists page, edit a set (rename, three lines), add one, delete one, reload. Every step read as
+`EXPECTED.md` predicted on all three arms. HEAD's export does all of it, store and reload included, except the lines:
+its lines field was `<input type="textArea">`, a one-line field, so every set was saved as one question.
+
+### §110.1 Built
+
+**P18-S120-TEXTAREA** (open since s120, medium; here it blocked AC4): a Text Input whose authored Type is Text Area is a
+`<textarea>` (`component.ts` `isTextArea` in `tagOf`), with no `type`, its ref `HTMLTextAreaElement`; `base.css` turns
+resizing off as the control does. A Type wired from a component input is filed as P18-S140-WIREDAREA (2 fields, low).
+
+### §110.2 Graded
+
+The fixed export's stored JSON equals the runtime's at every drive step. The desk (`a-text-area-keeps-its-lines.test.ts`,
+the Field Desk's `name` field as a Text Area, both arms in jsdom): 8 / 8, HEAD's reading as predicted, 4 mutants killed.
+Templates: 25 Text Area fields, 21 now `<textarea>` (were 0). hls001: 65 moved, 0 added, 0 removed, predicted.
+
+### §110.3 Found beside it
+
+**P18-S140-SHELLUNSAID** (medium): everything beside the Router in the app shell (77 nodes in 16 templates, 15 whole CSS
+Definitions: the page ground, dark palettes, press and hover) is refused, and the report never names it.

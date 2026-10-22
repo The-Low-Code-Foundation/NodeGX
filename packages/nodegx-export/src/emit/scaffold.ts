@@ -459,6 +459,9 @@ function baseCss(): string {
   // (measured: `Arial`) while everything else landed on the wrong-but-deliberate `system-ui` — two
   // different wrong fonts on one page. A node's own class still wins: a class selector outranks
   // these element selectors whatever the sheet order.
+  //
+  // `resize: none` on the textarea is the running app's own (TextInput.tsx sets it on the only textarea it draws, a Text
+  // Input of Type Text Area — P18-S120-TEXTAREA): without it the export's box grows a drag handle the app never had.
   return (
     GENERATED_CSS +
     `*,
@@ -478,6 +481,10 @@ input,
 select,
 textarea {
   font: inherit;
+}
+
+textarea {
+  resize: none;
 }
 `
   );
