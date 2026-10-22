@@ -86,12 +86,15 @@ interface DbModelNodeInstance extends NodeInstance {
   };
   setCollectionID(id: string): void;
   setModelID(id: string): void;
-  setModel(model: ModelLike | undefined): void;
+  setModel(model: ModelLike | undefined, options?: { announce?: boolean }): void;
   bindToRepeaterItem(): void;
   scheduleOnce(type: string, cb: () => void): void;
   setError(err: string, tokens?: OutcomeToken[]): void;
   clearWarnings(): void;
   scheduleFetch(): void;
+  readOnBind(): void;
+  readFromBackend(): void;
+  setBindError(err: string): void;
   scheduleStore(): void;
 }
 
@@ -174,8 +177,10 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
       // off it and created a row per request from data that had not arrived. The twin
       // (`Model2`) already said "bound"; this one now says what it does too, and names the
       // port that means what this one promised.
+      // P112-OWN026-RECORDBYIDMEMORY — a bind of a record nothing in memory holds now reads it first, and fires this
+      // when the answer lands; a bind of a record already held fires it at once, as before.
       description:
-        'Fires when the Id binds a record, and again when a Fetch finishes reading it — a bind has read nothing, so use Done to act on data that is really there'
+        'Fires when the Id binds a record already in memory, when a record the Id names is first read from the backend, and when a Fetch finishes reading it; use Done to act on the answer to a Fetch'
     },
     changed: {
       type: 'signal',
@@ -313,11 +318,33 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
         return;
       }
 
-      const model = (this.nodeScope.modelScope || Model).get(id);
+      // P112-OWN026-RECORDBYIDMEMORY — `get` mints an empty record when nothing in memory has this id, and binding
+      // that one read nothing: a page reached by its own URL (a reload, a bookmark, a shared link) showed an empty
+      // record, `fetched` fired over it, and an Update Record fed from it wrote the emptiness back. Coming from a list
+      // worked only because the list's Query Records had already put the row in memory. So a record nothing has held
+      // yet is read from the backend here, and `fetched` waits for it; one already held binds at once, as before.
+      const scope = this.nodeScope.modelScope || Model;
+      const held = scope.exists(id);
+      const model = scope.get(id);
       // this._internal.modelIsNew = false;
-      this.setModel(model);
+      this.setModel(model, { announce: held });
+      if (!held) this.readOnBind();
     },
-    setModel: function (this: DbModelNodeInstance, model: ModelLike | undefined) {
+    /**
+     * P112-OWN026-RECORDBYIDMEMORY — the read a bind makes for a record nothing in memory holds. The same read as
+     * `Fetch` and the same `scheduleOnce` key, so a `Fetch` pulsed in the same pass makes one request, not two; but
+     * no outcome is minted: a bind is a value, not an invocation (ERG-001's corpus row pins the Id path as having no
+     * `Done`/`Failure`). A failed read is still said: on `Error`, and as a warning.
+     */
+    readOnBind: function (this: DbModelNodeInstance) {
+      this.scheduleOnce('Fetch', () => {
+        // No class chosen: there is nothing to read from, so the bind announces itself as it always did — unless a
+        // `Fetch` pulsed in the same pass is waiting on this callback (`scheduleOnce` ran this one, not its own).
+        if (!this._internal.collectionId && !this._internal.pendingFetch?.length) this.sendSignalOnOutput('fetched');
+        else this.readFromBackend();
+      });
+    },
+    setModel: function (this: DbModelNodeInstance, model: ModelLike | undefined, options?: { announce?: boolean }) {
       if (this._internal.model)
         // Remove old listener if existing
         this._internal.model.off('change', this._internal.onModelChangedCallback);
@@ -339,7 +366,8 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
       for (const key in model.data) {
         if (this.hasOutput('prop-' + key)) this.flagOutputDirty('prop-' + key);
       }
-      this.sendSignalOnOutput('fetched');
+      // Not for a record being read on bind (`setModelID`): nothing has been read yet, and the read's answer fires it.
+      if (options?.announce !== false) this.sendSignalOnOutput('fetched');
     },
     _onNodeDeleted: function (this: DbModelNodeInstance) {
       Node.prototype._onNodeDeleted.call(this);
@@ -392,7 +420,6 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
       }
     },
     scheduleFetch: function (this: DbModelNodeInstance) {
-      const _this = this;
       const internal = this._internal;
 
       // ERG-001. Minted here, in the only method the `Fetch` port reaches. Every other route
@@ -402,61 +429,78 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
       const pending = internal.pendingFetch || (internal.pendingFetch = []);
       pending.push(this.beginOutcome());
 
-      this.scheduleOnce('Fetch', function () {
-        // Taken into a local before any async work: a second `Fetch` arriving while this read
-        // is in flight owns its own batch rather than being settled by this request's answer.
-        const tokens = internal.pendingFetch || [];
-        internal.pendingFetch = [];
+      this.scheduleOnce('Fetch', () => this.readFromBackend());
+    },
+    /**
+     * The one read, for a `Fetch` and for a bind (`readOnBind`). It settles every `Fetch` that is pending when it
+     * runs; a bind adds none, so a read with no `Fetch` behind it reports no outcome.
+     */
+    readFromBackend: function (this: DbModelNodeInstance) {
+      const _this = this;
+      const internal = this._internal;
+      // Taken into a local before any async work: a second `Fetch` arriving while this read
+      // is in flight owns its own batch rather than being settled by this request's answer.
+      const tokens = internal.pendingFetch || [];
+      internal.pendingFetch = [];
+      // A read nobody pulsed `Fetch` for (a bind): its failure is said on `Error` and as a warning, with no outcome.
+      const fail = (err: string) => (tokens.length > 0 ? _this.setError(err, tokens) : _this.setBindError(err));
 
-        // Don't do fetch if no id. P107-D22 (ISL-029, ruled "Say 'Missing Id.'"): the binding's own empty test
-        // (`setModelID`) — a null Id, what a cleared wire carries, asked the backend for the record "null".
-        if (internal.modelId === undefined || internal.modelId === null || internal.modelId === '') {
-          _this.setError('Missing Id.', tokens);
-          return;
-        }
+      // Don't do fetch if no id. P107-D22 (ISL-029, ruled "Say 'Missing Id.'"): the binding's own empty test
+      // (`setModelID`) — a null Id, what a cleared wire carries, asked the backend for the record "null".
+      if (internal.modelId === undefined || internal.modelId === null || internal.modelId === '') {
+        fail('Missing Id.');
+        return;
+      }
 
-        // BCN-004 step 5: the store the `Backend` input names, not the singleton. With
-        // nothing selected this resolves to exactly the store `forScope` used to return.
-        const cloudstore = CloudStore.forBackend(_this.nodeScope.modelScope, internal.backendId as string | undefined);
-        if (!cloudstore) {
-          _this.setError(
-            `The backend this node is set to ("${internal.backendId}") is not configured in this project.`,
-            tokens
-          );
-          return;
-        }
+      // BCN-004 step 5: the store the `Backend` input names, not the singleton. With
+      // nothing selected this resolves to exactly the store `forScope` used to return.
+      const cloudstore = CloudStore.forBackend(_this.nodeScope.modelScope, internal.backendId as string | undefined);
+      if (!cloudstore) {
+        fail(`The backend this node is set to ("${internal.backendId}") is not configured in this project.`);
+        return;
+      }
 
-        cloudstore.fetch({
-          collection: internal.collectionId,
-          objectId: internal.modelId, // Get the objectId part of the model id
-          success: function (response: Record<string, unknown>) {
-            const model = cloudstore._fromJSON(response, internal.collectionId);
-            if (internal.model !== model) {
-              // Check if we need to change model
-              if (internal.model)
-                // Remove old listener if existing
-                internal.model.off('change', internal.onModelChangedCallback);
+      cloudstore.fetch({
+        collection: internal.collectionId,
+        objectId: internal.modelId, // Get the objectId part of the model id
+        success: function (response: Record<string, unknown>) {
+          const model = cloudstore._fromJSON(response, internal.collectionId);
+          if (internal.model !== model) {
+            // Check if we need to change model
+            if (internal.model)
+              // Remove old listener if existing
+              internal.model.off('change', internal.onModelChangedCallback);
 
-              internal.model = model;
-              model.on('change', internal.onModelChangedCallback);
-            }
-            _this.flagOutputDirty('id');
-
-            delete response.objectId;
-
-            for (const key in response) {
-              if (_this.hasOutput('prop-' + key)) _this.flagOutputDirty('prop-' + key);
-            }
-
-            // The value-level announcement first, then the invocation's outcome last.
-            _this.sendSignalOnOutput('fetched');
-            reportOutcomes(_this, tokens, 'done');
-          },
-          error: function (err: string) {
-            _this.setError(err || 'Failed to fetch.', tokens);
+            internal.model = model;
+            model.on('change', internal.onModelChangedCallback);
           }
-        });
+          _this.flagOutputDirty('id');
+
+          delete response.objectId;
+
+          for (const key in response) {
+            if (_this.hasOutput('prop-' + key)) _this.flagOutputDirty('prop-' + key);
+          }
+
+          // The value-level announcement first, then the invocation's outcome last.
+          _this.sendSignalOnOutput('fetched');
+          reportOutcomes(_this, tokens, 'done');
+        },
+        error: function (err: string) {
+          fail(err || 'Failed to fetch.');
+        }
       });
+    },
+    /** A bind's read failed: the reason on `Error` and on the editor's warning channel, and no outcome (see `readOnBind`). */
+    setBindError: function (this: DbModelNodeInstance, err: string) {
+      this._internal.error = err;
+      this.flagOutputDirty('error');
+      if (this.context.editorConnection) {
+        this.context.editorConnection.sendWarning(this.nodeScope.componentOwner.name, this.id, STORAGE_OP_ERROR_CODE, {
+          showGlobally: true,
+          message: err
+        });
+      }
     },
     // Dead: nothing calls this. `userInputSetter` — the only writer of `inputValues` — is
     // reached only through a `prop-` *input*, and `updatePorts` publishes the `prop-` ports

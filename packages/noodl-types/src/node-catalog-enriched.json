@@ -8540,7 +8540,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when the Id binds a record, and again when a Fetch finishes reading it — a bind has read nothing, so use Done to act on data that is really there"
+          "description": "Fires when the Id binds a record already in memory, when a record the Id names is first read from the backend, and when a Fetch finishes reading it; use Done to act on the answer to a Fetch"
         },
         {
           "name": "id",
@@ -8633,14 +8633,14 @@
       "enrichment": {
         "typeName": "DbModel2",
         "summary": "Record: binds to one cloud database record by id and exposes each of its properties as an output that follows the record.",
-        "description": "DbModel2 (Record) points at a single record of a cloud database class and exposes one value output per property of that class (registered as `prop-<property>`), plus a `changed-<property>` signal per property. Setting `modelId` binds the node to the record in the app's local record store — properties already known locally (for example from a Query Records result) appear immediately, and `fetched` fires. Triggering `fetch` (Fetch, signal) loads the record fresh from the server by id; while `fetch` is connected, local change events no longer drive the outputs, so updates arrive only when you fetch. `changed` fires whenever the bound record changes from anywhere in the app (a Update Record elsewhere, a live query update). `fetched` and `changed` are value-level announcements and fire on binding as well as on a fetch; `done`/`failure`/`completed` are the outcome of a `fetch` invocation specifically, so wire those to sequence a chain and `fetched` to react to the data.",
+        "description": "DbModel2 (Record) points at a single record of a cloud database class and exposes one value output per property of that class (registered as `prop-<property>`), plus a `changed-<property>` signal per property. Setting `modelId` binds the node to that record. A record already in memory (for example from a Query Records result on the page you came from) appears at once and `fetched` fires. A record nothing in memory holds yet (a page opened by its own URL: a reload, a bookmark, a shared link) is read from the backend first, and `fetched` fires when it arrives; until then the property outputs are empty. Triggering `fetch` (Fetch, signal) re-reads the record from the server by id. `changed` fires whenever the bound record changes from anywhere in the app (an Update Record elsewhere, a live query update). `fetched` and `changed` are value-level announcements; `done`/`failure`/`completed` are the outcome of a `fetch` invocation specifically, so wire those to sequence a chain and `fetched` to react to the data. A read the bind makes on its own reports a failure on `error`, not on `failure`.",
         "whenToUse": "Use it to read one record's properties — a detail page, or the current item inside a repeater (set `idSource` to 'From repeater'). It does not write: pair it with SetDbModelProperties to save edits. For lists of records use DbCollection2 (Query Records); for records from a non-cloud (BYOB) backend use noodl.byob.QueryData, whose results are plain objects, not records.",
         "ports": {
           "modelId": "Value input (connections only): the record id to bind to; a full record object is also accepted and dereferenced to its id.",
           "idSource": "Edit-only choice: 'Specify explicitly' uses `modelId`; 'From repeater' binds to the record driving the nearest enclosing For Each item.",
-          "fetch": "Signal; fetches the record from the server by the current `modelId`. Connecting it also switches the node to fetch-driven mode: outputs update on Fetch instead of on local record changes.",
-          "fetched": "Signal; fires after the record resolves — on bind when `fetch` is not connected, or after a server fetch completes.",
-          "changed": "Signal; fires when the bound record's data changes anywhere in the app (suppressed while `fetch` is connected).",
+          "fetch": "Signal; re-reads the record from the server by the current `modelId`, replacing the copy held in memory. Not needed for a page opened by its own URL: binding an id nothing in memory holds already reads it.",
+          "fetched": "Signal; fires when the record is there to read: on bind for a record already in memory, when the backend answers for one that was not, and after a Fetch completes.",
+          "changed": "Signal; fires when the bound record's data changes anywhere in the app.",
           "id": "String value; the id of the currently bound record."
         },
         "runtimeBehavior": "Property ports are runtime-determined from the cloud database class selected via the `collectionName` parameter (itself a runtime-registered enum of the project's classes plus _User and _Role): each schema property becomes a value output `prop-<name>` (typed from the schema) and a signal output `changed-<name>`. Relation properties get no ports. An authoring tool should set `collectionName` in parameters and may reference `prop-<name>`/`changed-<name>` for properties it knows exist in the class schema.",
@@ -8652,7 +8652,7 @@
           "`prop-<name>` → a Text Input's `startValue`, edited text → Update Record `prop-<name>`: prefill an edit form and save it back."
         ],
         "antiPatterns": [
-          "Connecting `fetch` just to 'refresh' — while `fetch` is connected the node stops following local record changes, so only do it when you explicitly want server-fetch-driven updates.",
+          "Reading the property outputs before `fetched` on a page that can be opened by its own URL — until the backend answers they are empty, and an Update Record fed from them then writes the empties back. Act on `fetched` (or a Fetch's `done`).",
           "Comparing a read-back Object field with `JSON.stringify` — an Object field does not keep the order of its names (a backend on PostgreSQL gives them back with shorter names first), so two equal objects can give different text. Compare them name by name, and sort the names yourself where a page shows them in an order."
         ],
         "relatedNodes": [

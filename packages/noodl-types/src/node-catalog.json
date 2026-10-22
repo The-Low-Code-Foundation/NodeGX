@@ -7803,7 +7803,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when the Id binds a record, and again when a Fetch finishes reading it — a bind has read nothing, so use Done to act on data that is really there"
+          "description": "Fires when the Id binds a record already in memory, when a record the Id names is first read from the backend, and when a Fetch finishes reading it; use Done to act on the answer to a Fetch"
         },
         {
           "name": "id",

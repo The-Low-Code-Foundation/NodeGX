@@ -463,7 +463,12 @@ const DECLARED: Readonly<Record<string, EquivalentMutant[]>> = {
   // example writes what the state already holds (`jobs: []` on an empty list; `bound: undefined` on an unbound node).
   DbModel2: [
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["jobs"],"emit":[]', why: 'the sibling writes `jobs: []` on a frame end whose job list is already empty' },
-    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["jobs"],"emit":[]', swappedWith: '"set":["bound","jobs"],"emit":[]', why: 'the sibling (an unbind) writes `bound: undefined` on a node already bound to nothing — the branch is that same unbind' }
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["jobs"],"emit":[]', swappedWith: '"set":["bound","jobs"],"emit":[]', why: 'the sibling (an unbind) writes `bound: undefined` on a node already bound to nothing — the branch is that same unbind' },
+    // v5 (P112-OWN026-RECORDBYIDMEMORY): the read on bind made a sibling that clears the Fetch key with nothing else to say (a read
+    // that failed with the Error already shown). `fetchScheduled` is true exactly while a `fetch` or `read` job is queued (the
+    // press, `setModelID` and the frame end set or clear the two together), so on a frame end with no such job it is already false.
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["fetchScheduled","jobs"],"emit":[]', why: 'the sibling writes `fetchScheduled: false, jobs: []` on a frame end whose job list is already empty, so whose Fetch key is already clear' },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["jobs"],"emit":[]', swappedWith: '"set":["fetchScheduled","jobs"],"emit":[]', why: 'the sibling also writes `fetchScheduled: false` on a frame end whose only job was a From-repeater bind, so whose Fetch key is already clear' }
   ],
   Model2: [
     {
