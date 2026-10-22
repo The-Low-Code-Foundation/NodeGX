@@ -170,3 +170,16 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   devOpen off (the defaults' `creatorOwns`) is a separate measurement, to be made on a copy and reported beside this
   grade, never in place of it. The other four (double press answers the next question too, two tabs overwrite each
   other, the "last 10" window freezes after 10 answers, small buttons) are the app's own graph.
+
+- **2026-10-22 ~17:15 CEST — Richard rules a learning loop (design change, from t1-nodegx-2 on).** His words:
+  *"after each test we can do a little stop and check, draft a fix prompt somewhere and I can open it in a new session
+  that keeps in touch with this one, so the next tests have a better chance of succeeding … I'm hoping if we keep
+  analysing the issues in the reasoning, we can perfect how the models read our shit and interact with NodeGX projects
+  to at least get them to the same level as Claude coded ones with good instructions … we can learn and hotfix on the
+  fly, and any big stuff can go in separate sessions and the tests can maybe wait for fixes before starting their
+  round."* So: the plain-code arms stay as pre-registered (the control, no fixes); **each later NodeGX round runs on the
+  kit as it stands after the fixes before it**, and its `round.json` names that kit. The question test 1 answers for
+  NodeGX becomes "how far do the fixes move it, round by round, towards the harness arm", not "0.2.5 against code".
+  t1-nodegx-1 (16/22) stays the 0.2.5 baseline. Mechanism: `fixes/README.md` (the loop), `fixes/FIX-NN.md` (one per
+  stop-and-check), `fixes/LEARNINGS.md`; the gate `HOLD-nodegx` + `KIT` in the lab folder (round.mjs waits before
+  making a folder; series.mjs runs the other arms meanwhile). FIX-01 written; HOLD-nodegx set.

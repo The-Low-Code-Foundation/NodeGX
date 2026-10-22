@@ -50,8 +50,23 @@ if (which === 't1') {
 
 const only = opt('--only', null);
 let port = 48900;
-for (const j of jobs) {
-  if (only && j.id !== only) continue;
+// The learning loop (PLAN §8, 2026-10-22): while HOLD-nodegx exists, NodeGX jobs wait and the others run; when nothing
+// else is left, the series waits for the hold to lift (round.mjs also waits, before it makes a folder).
+const HOLD = path.join(ROUNDS, 'HOLD-nodegx');
+const finished = (j) => fs.existsSync(path.join(ROUNDS, j.id, 'round.json')) && (rest.includes('--no-grade') || fs.existsSync(path.join(GRADES, j.id, 'meta.json')));
+let waitedLogged = false;
+for (;;) {
+  const pending = jobs.filter((j) => (!only || j.id === only) && !finished(j));
+  if (!pending.length) break;
+  // test 2 is a chain: only its first unfinished change can run
+  const runnable = which === 't2' ? pending.slice(0, 1) : pending;
+  const j = runnable.find((x) => x.arm !== 'nodegx' || !fs.existsSync(HOLD));
+  if (!j) {
+    if (!waitedLogged) { log(`waiting for the hold to lift (${pending.map((x) => x.id).join(', ')})`); waitedLogged = true; }
+    await new Promise((r) => setTimeout(r, 60000));
+    continue;
+  }
+  waitedLogged = false;
   const root = path.join(ROUNDS, j.id);
   if (!fs.existsSync(path.join(root, 'round.json'))) {
     if (fs.existsSync(root)) { log(`${j.id}: an unfinished root is there; move it aside by hand and re-run`); process.exit(1); }
@@ -75,5 +90,6 @@ for (const j of jobs) {
   await run('nice', ['-n', '10', 'node', path.join(HERE, 'grade.mjs'), root, g, '--ids', j.ids, '--request', j.gradeRequest ?? j.request], path.join(GRADES, `${j.id}.out`));
   const m = fs.existsSync(path.join(g, 'meta.json')) ? JSON.parse(fs.readFileSync(path.join(g, 'meta.json'), 'utf8')) : null;
   log(`${j.id}: grade end ${m ? `pass ${m.pass} fail ${m.fail} not reached ${m.notReached} · ${m.seconds}s $${m.usd} 7-day ${m.sevenDay}` : '(no meta.json)'}`);
+  if (!m) process.exit(1);
 }
 log('series done');

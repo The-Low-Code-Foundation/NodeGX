@@ -21,6 +21,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn, spawnSync } from 'node:child_process';
+import { kitTarball } from '../own-018/kit-tarball.mjs';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const REPO = path.resolve(HERE, '../../../..');
@@ -37,6 +38,19 @@ if (!rootArg || !requestFile || !['code', 'harness', 'nodegx'].includes(ARM)) th
 if (fs.existsSync(rootArg)) throw new Error(`${rootArg} exists; a round starts from an empty folder`);
 const MODEL = opt('--model', 'cline-pass/deepseek-v4.1-flash');
 const KIT_V = opt('--kit-version', '0.2.5');
+// The learning loop (Richard, 2026-10-22; PLAN §8): a NodeGX round waits while <lab>/own026/HOLD-nodegx exists (a fix is
+// being made for it), then runs on the kit named in <lab>/own026/KIT (a folder of packed tarballs: create-nodegx-*.tgz,
+// nodegx-mcp-*.tgz), or on the registry's create-nodegx@KIT_V when there is none. Waiting happens before the round's
+// folder exists, so a waiting round can be stopped with nothing to clean up.
+let KIT_DIR = opt('--kit-dir', null);
+if (ARM === 'nodegx' && !KIT_DIR) {
+  const hold = '/Users/Shared/nodegx-lab/own026/HOLD-nodegx';
+  if (fs.existsSync(hold)) console.log(`waiting: ${hold} exists (${fs.readFileSync(hold, 'utf8').trim().split('\n')[0]})`);
+  while (fs.existsSync(hold)) await new Promise((r) => setTimeout(r, 60000));
+  const kitFile = '/Users/Shared/nodegx-lab/own026/KIT';
+  if (fs.existsSync(kitFile)) KIT_DIR = fs.readFileSync(kitFile, 'utf8').trim() || null;
+}
+if (KIT_DIR) { KIT_DIR = path.resolve(KIT_DIR); kitTarball(KIT_DIR, 'create-nodegx'); kitTarball(KIT_DIR, 'nodegx-mcp'); }
 const N = Number(opt('--continues', 2));
 const seed = opt('--seed', null);
 const tapPort = opt('--tap', null);
@@ -112,7 +126,9 @@ if (seed) {
   fs.cpSync(path.join(s, 'home'), HOME, { recursive: true, verbatimSymlinks: true, filter: (p) => !p.startsWith(path.join(s, 'home', '.cline')) });
   fs.writeFileSync(path.join(root, 'seed.txt'), s + '\n');
 } else if (ARM === 'nodegx') {
-  const r = sh('npx', ['-y', `create-nodegx@${KIT_V}`, APPS, '--cline'], { cwd: path.dirname(APPS) });
+  const r = KIT_DIR
+    ? sh('npx', ['-y', `--package=${kitTarball(KIT_DIR, 'create-nodegx')}`, 'create-nodegx', APPS, '--cline'], { cwd: path.dirname(APPS) })
+    : sh('npx', ['-y', `create-nodegx@${KIT_V}`, APPS, '--cline'], { cwd: path.dirname(APPS) });
   fs.writeFileSync(path.join(root, 'create.log'), r.stdout + r.stderr);
   if (r.status !== 0) throw new Error(`create-nodegx exited ${r.status}; see create.log`);
 } else {
@@ -128,10 +144,14 @@ fs.mkdirSync(SETTINGS, { recursive: true });
 fs.writeFileSync(path.join(SETTINGS, 'global-settings.json'), JSON.stringify(globalSettings, null, 2) + '\n');
 writeSealPlugin(path.join(CLINE_DIR, 'plugins'), ALLOWED);
 if (ARM === 'nodegx') {
-  const entry = JSON.parse(fs.readFileSync(env.CLINE_MCP_SETTINGS_PATH, 'utf8')).mcpServers.nodegx;
-  if (!entry || !entry.args.includes(`@nodegx/mcp@${KIT_V}`)) throw new Error(`the kit wrote ${JSON.stringify(entry)}`);
+  const mcpFile = JSON.parse(fs.readFileSync(env.CLINE_MCP_SETTINGS_PATH, 'utf8'));
+  const entry = mcpFile.mcpServers.nodegx;
+  const at = entry ? entry.args.findIndex((a) => /^@nodegx\/mcp@/.test(a)) : -1;
+  if (at < 0 || (!KIT_DIR && entry.args[at] !== `@nodegx/mcp@${KIT_V}`)) throw new Error(`the kit wrote ${JSON.stringify(entry)}`);
+  // A local kit: the server the kit names, from its tarball (OWN-020's recipe); every flag the kit wrote is kept.
+  if (KIT_DIR) { entry.args.splice(at, 1, `--package=${kitTarball(KIT_DIR, 'nodegx-mcp')}`, 'noodl-mcp'); fs.writeFileSync(env.CLINE_MCP_SETTINGS_PATH, JSON.stringify(mcpFile, null, 2) + '\n'); }
   // Warm the server's npx install so the first connect doesn't race Cline's clock (OWN-020).
-  sh('npx', ['-y', `@nodegx/mcp@${KIT_V}`, '--version'], { cwd: APPS, timeout: 240000 });
+  sh('npx', [...entry.args.slice(0, KIT_DIR ? at + 2 : at + 1), '--version'], { cwd: APPS, timeout: 240000 });
 }
 
 // 2. Sittings.
@@ -152,7 +172,7 @@ for (let k = 1; k <= N + 1; k++) {
 }
 const teardown = reap();
 const usd = tokens.input * PRICE.input / 1e6 + tokens.cached * PRICE.cached / 1e6 + tokens.output * PRICE.output / 1e6;
-const round = { arm: ARM, model: MODEL, kit: ARM === 'nodegx' ? KIT_V : null, seed, request: path.resolve(requestFile),
+const round = { arm: ARM, model: MODEL, kit: ARM === 'nodegx' ? (KIT_DIR ? { dir: KIT_DIR, files: fs.readdirSync(KIT_DIR).filter((f) => f.endsWith('.tgz')) } : KIT_V) : null, seed, request: path.resolve(requestFile),
   sittings: sittings.length, finish: sittings.at(-1).finish, judge: sittings.at(-1).judge, seconds: Math.round((Date.now() - t0) / 1000),
   tokens, usdAtClinePassPrices: Number(usd.toFixed(3)), audit: audit(), teardown };
 fs.writeFileSync(path.join(root, 'round.json'), JSON.stringify(round, null, 2) + '\n');
