@@ -7,6 +7,7 @@ area: export / Text Input
 found: P18 session 120, 2026-10-16, reading the Site Builder's ContactForm as the export writes it (EXP-011 §87)
 evidence: packages/noodl-viewer-react/src/components/controls/TextInput/TextInput.tsx:223-247 (type 'textArea' renders a <textarea>); the export's ContactForm.tsx prints `<input className={styles.field} type="textArea" …>`
 fixed: P18 session 140, 2026-10-22, for an authored Type; a wired Type is P18-S140-WIREDAREA
+commit: 9e3cc0e26
 regression: packages/nodegx-export/tests/a-text-area-keeps-its-lines.test.ts
 ---
 
