@@ -10,6 +10,7 @@
   { "waitFor": "__game.phase === 'board'", "timeout": 15000, "label": "the airlock opens" },
   { "wait": 500 },
   { "eval": "JSON.stringify(__game.stats())", "label": "aboard with defenders up", "expect": "r => r.phase === 'board' && r.boarding.left === 4 && r.boarding.hp === 100" },
+  { "eval": "(() => { const b = __game.boarding; const w = b.walker; const V = Object.getPrototypeOf(w.pos).constructor; const zA = b.interior.spawn.z; const at = (x, z, yaw) => { w.moveTo(new V(x, b.interior.floorY, z), yaw); w.pitch = -1.25; const down = __game.debug.see().dist; w.pitch = 1.25; const up = __game.debug.see().dist; w.pitch = 0; return [down, up]; }; const r = { crew: at(2.25, zA - 14, -Math.PI / 2), hold: at(-2.25, zA - 26, Math.PI / 2) }; w.moveTo(b.interior.spawn.clone(), 0); return JSON.stringify(r); })()", "label": "between the Carrion's corridor and her side rooms there is a floor and a roof, not space (TS-S3-HOLES; no hit reads as null, and null < 3 is true, so the check asks for a number)", "expect": "r => Object.values(r).every((v) => v.every((d) => typeof d === 'number' && d < 3))" },
   { "shot": "b2-boarded.png" },
   { "keyDown": "KeyW", "vk": 87 },
   { "wait": 2500 },

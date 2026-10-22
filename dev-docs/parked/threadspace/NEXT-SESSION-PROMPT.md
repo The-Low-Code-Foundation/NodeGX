@@ -1,110 +1,87 @@
-# Threadspace — s2: Richard plays it, then the loop is tuned, then the NodeGX panel
+# Threadspace — s4: Richard plays s3, then the five undriven rows, cadet mode, the wire
 
-**Written 2026-10-21 by Fable 5.1, end of s1** (the session that built the prototype from nothing).
-Read, in order: this file; `README.md` (what is built, the controls, the architecture, the NodeGX and
-network plan). Say "Fable" in your first message. Verify a claim here by measuring it, not by trusting it.
+**Written 2026-10-22 at the end of s3.** Read, in order: this file; `README.md` (what is built, the controls, the
+architecture, the NodeGX and network plan). Verify a claim here by measuring it, not by trusting it.
 
 ## Where it stands
 
-Built in one session as `dev-docs/parked/threadspace/`, standalone three.js, ~4,500 lines, no bundler.
-Richard's ask (verbatim intent): *a prototype with the minimum features to make it fun and cool,
-standalone, with the plan to expand it in NodeGX later; the FTL / Gala layout — 3D view left, NodeGX
-HUD right; forget multiplayer but plan async multiplayer (own universe, shared factions/claims/news);
-FPS boarding "I really want that".* All of that is in, FPS included.
+s1 built the prototype (standalone three.js, no bundler). s2 fixed the spawn wall (TS-S2-SHELLFACE). **s3 took Richard's
+first real play** (2026-10-22: *"actually a really fucking cool game"*) and his ten points, all done:
 
-**Built vs. driven, per feature:** the table in `README.md` §"What is built" is the record. Count of
-built-but-undriven rows: **6** (Vex flying a set course; courier/capture/raid turn-in; shipyard
-upgrades + paint; hiring; claims; the Wren being lost). Each has a code path and a panel button but no
-drive step. That is the prototype's real debt.
+| # | Richard's point | s3 | evidence |
+|---|---|---|---|
+| M1 | inside, W is sometimes forwards, sometimes sideways | a sign error in the walk's rotation (TS-S3-WALKAXES) | smoke: 32 steps × headings, worst dot 1.0 (s2 code: −1) |
+| M2 | a third-person view behind the Wren | **V** toggles a chase view, the Wren and the helm | smoke: camera behind and above, body drawn; shots `08b-wren-chase`, `l3` below |
+| M3 | cargo only on a space walk? | the Kestrel always scooped within 45 m (nobody knew); now the Wren scoops what she flies through, and a **Tractor beam** upgrade (800 cr) pulls from 250 m with a visible beam; pods are courses Vex flies to; the Meridian core still needs hands | smoke: Wren scoop, core left; stock Kestrel leaves a pod at 200 m, tractor takes it in 2.6 s |
+| M4 | NPC approach slows forever | proportional throttle never arrives (TS-S3-CRAWL); braking curve | 700 m → dockable: 54.7 s → 15.3 s |
+| M5 | no shields / hull / danger on contacts | bars under every ship's bracket, a threat word vs what you are in, a target card, a Contacts list on the Nav tab | smoke: threat words on the Rooks; shot `l5` (Carrion: DEADLY in the Wren) |
+| M6 | can't target for the NPC gunner | Dag fires on **your target**, else the nearest threat; "DAG" over what he is shooting | smoke |
+| M7 | click things in 3D like Eve | with the mouse free, a click on a mark selects it (hostile → target, place → course); the captain's chair never takes the mouse (drag orbits); T aims at the crosshair first | smoke: a real pointer event in the chair |
+| G1 | "inside a cube" | the sky was a 2048×1024 picture on a sphere: texel lattice + pole fan (TS-S3-SKYGRID); now a nebula from direction, baked per sector to a cube map at infinity, 7,000 round stars, a sun | shots `03-tactical`, `l2` |
+| G2 | holes and gaps inside | side-room doorways opened onto 1.5–2 m of space; black ceilings; bare windows (TS-S3-HOLES). Passages, lit ribbed ceilings, framed glass, a 6 m concourse | smoke + boarding probes (s2 code: null) |
+| G3 | ships look shitty | lofted chamfered plated hulls (convex, see README), lit windows, plumes that grow with speed, a turning station ring, a segmented gate | shots `02b-turret`, `l3-helm-chase`, `l5-carrion` |
 
-**Readings (2026-10-21, uncommitted tree at the time of writing; see the commit this file lands in):**
+Shots are in `shots/` (gitignored: on this machine only; `l1`–`l6` are s3's look pass, re-shoot with a drive).
 
-| drive | how | reading |
-|---|---|---|
-| smoke | `node tools/drive.mjs http://127.0.0.1:8787/ tests/smoke.json shots` (server: `node server.mjs`) | **21 / 21** |
-| boarding | `… tests/boarding.json …` | **15 / 15** after the dt clamp went to 0.1 (was 13/15 at 0.05: software GL runs ~8 fps and a 2-s hold did not complete in 5.5 s real) |
-| eva | `… tests/eva.json …` | **11 / 11** |
-| all three | `sh tools/run-all.sh` | exit 0 |
+**Readings (2026-10-22, end of s3, each drive run alone at `nice 19` against `node server.mjs --port 8795`):**
 
-Gate on exit codes: the drive exits 1 on any FAIL or a timed-out waitFor.
+| drive | reading |
+|---|---|
+| `tests/smoke.json` | **36 / 36**, exit 0 |
+| `tests/boarding.json` | **16 / 16**, exit 0 |
+| `tests/eva.json` | **11 / 11**, exit 0 |
 
-**Not observed:** how it feels with a mouse and a real GPU (headless Chrome grants no pointer lock,
-so every drive flew on the arrows and keys); sound; the title screen's Continue; the helm view's prow
-and the Wren's nose after the last size change (the shots `02-helm.png`, `08-dogfight.png`,
-`b1-airlock.png` in `shots/` are from the run before it — re-shoot).
+`sh tools/run-all.sh` runs all three on :8793. The two new probes (WALKAXES, HOLES) were each run once against s2's
+`walk.mjs` / `interiors.mjs` in a scratch copy and **failed there**, then passed on s3's.
 
-## What s1 settled
+**Not observed (all of it needs Richard's screen):** how any of it feels with a mouse and a real GPU (the chase spring,
+V, the click radius of 22 px, the drag-orbit); the sky at its real-GPU bake size (1024 a face: headless bakes 128, so every
+shot's nebula is blurrier than his) and whether the nebula is now too bright or still too faint (gain 1.6–1.7); the bake's
+cost on a sector jump (six passes + PMREM, inside the 1.7 s fade); the threat words' calibration (a rough
+time-to-kill ratio, `game.threatOf`); sound.
 
-- **Entities, seats, controllers** is the architecture, and it held: every item on Richard's list
-  became "the player controller attaches to a different thing". Swapping with crew is swapping which
-  seat holds the player (`game.setPhase`, `placeCrew`).
-- **Interiors in the host's frame.** A room is a child of the ship; the camera is placed through the
-  ship's matrix each frame; exteriors are invisible from inside by back-face culling, so a canopy is a
-  gap. No physics engine: circle-vs-box sliding on one floor.
-- **Threads are the precision fix.** One sector loaded at a time; a jump is a fade.
-- 🔴 **Three visual defects only a screenshot showed:** the Wren's nose cone sat at eye level and
-  filled the cockpit (fixed: smaller, lower, eye at y 1.25; body/canopy/engine hidden in cockpit via
-  `userData.cockpitHidden`); a prow added "to see the ship from the helm" was 4 m wide at 4 m and filled
-  the view (fixed: low and thin); the Star Wars battle station from the copied `space.mjs` was in the
-  sky (replaced by a cinder star). **Look at every shot; `stats()` cannot see the view.**
-- 🔴 **s2 (2026-10-22): a fourth one, and it was the first thing Richard saw.** New captain → a flat grey wall:
-  the hull shell is overlapping boxes, and the bow box's aft face is a *front* face inside the corridor, 1.5 m
-  from the spawn. Back-face culling hides only the box you are in. Fix: the five shell meshes are on
-  `SHELL_LAYER` and the `walk` camera leaves it off (`ships.mjs`, `game.mjs` frame). The drive now reads the
-  view with `__game.debug.see()` (what the centre ray hits); use it for every "what do I see" check.
-  Ledger: `dev-docs/bugs/ts-s2-shellface-*.md`.
-- 🔴 **s2 (2026-10-22): a fourth one, and it was the first thing Richard saw.** New captain → a flat grey wall:
-  the hull shell is overlapping boxes, and the bow box's aft face is a *front* face inside the corridor, 1.5 m
-  from the spawn. Back-face culling hides only the box you are in. Fix: the five shell meshes are on
-  `SHELL_LAYER` and the `walk` camera leaves it off (`ships.mjs`, `game.mjs` frame). The drive now reads the
-  view with `__game.debug.see()` (what the centre ray hits); use it for every "what do I see" check.
-  Ledger: `dev-docs/bugs/ts-s2-shellface-*.md`.
-- 🔴 **A fighter with a minimum speed cannot hack an airlock.** `speed[0]` 25 → 0 for the Wren, hack
-  range 30 → 45 m, and the fighter *latches* to the hull once the hack starts.
-- 🔴 **The corvette's turrets killed the Kestrel in 14 s while the drive sat 400 m off** (30 dmg ×2 /
-  1.1 s). Now 14 dmg / 1.4 s, and a turret cannot fire at anything within 90 m: *get under her guns* is
-  the boarding approach, by design.
-- 🔴 **Software GL is ~8–10 fps; a dt clamp of 0.05 made game time run at half speed**, so held-key
-  drives walked half the distance and a timed hold never completed. Clamp is 0.1 now; checks still
-  allow for it.
-- Defenders could see the airlock through doorways as wide as the room: doorways are 2 m now; a
-  defender's own body is excluded from its sight ray (`cast(…, ignore)`).
-- The `tools/drive.mjs` is the NodeGX Scene editor's, unchanged but for the header; `clickCard` and
-  friends reference `__game.screenOf`, which does not exist — unused.
+## What s3 settled
+
+- 🔴 **A check that a probe "hit something within 3 m" passed on an empty view.** `debug.see()` reports a miss as
+  `Infinity`, JSON sends it as `null`, `null < 3` is true. Ask `typeof d === 'number'`. **Run every new check once against
+  the code it fixes**; it must fail there.
+- 🔴 **Placing the Kestrel with `debug.go` after an undock puts her straight below the dock** (she undocks 220 m above it),
+  and `lookAt` along a vertical line is degenerate: the autopilot check read 25.7 s, nearly all of it a turn. Start her
+  level, nose on (the check does).
+- 🔴 **A new window frame put two mullions and a console screen in the helm's view.** The helm's eye is now just behind the
+  glass (z −33.15). Any change to the bridge room: re-shoot the helm.
+- **Hulls are lofts kept convex**, so a camera inside one (the helm, a boarder) sees out through all of it; the Kestrel's
+  shell loft is still on `SHELL_LAYER` for the walking camera.
+- s1/s2, still true: entities + seats + controllers; interiors in the host's frame; threads are the float precision fix;
+  software GL runs ~8–10 fps (dt clamp 0.1); `stats()` cannot see the view — look at every shot and gate views on `see()`.
 
 ## Next, in order
 
-**Rulings owed by Richard (ask in one line each, at the start):**
-1. Did he play it, and what broke or bored him first? Fix that before anything below.
-2. The name. "Threadspace" is a working title.
-3. Where it lives: stays under `dev-docs/parked/`, or its own repo (it has no NodeGX dependency yet).
-4. NodeGX now or later: build the panel as a NodeGX app next (README §Growing it, step 1), or tune
-   the standalone loop first.
+**Rulings owed by Richard (one line each):**
+1. Played s3? Do the ten land, and what broke or bored him next? Fix that first.
+2. M7: clicking is in. Does he still want the panel as the main way to command, or more in the 3D view (orders on a
+   right-click, a radial menu)?
+3. The name ("Threadspace" is a working title); where it lives (`dev-docs/parked/` or its own repo); NodeGX now or later.
 
 **An agent can do alone:**
-1. **Re-shoot** `02-helm`, `08-dogfight`, `b1-airlock` and look at them (the last nose/prow change
-   is unobserved).
-2. **Drive the six undriven rows** (README table): Vex flying a course to the station and the dock
-   prompt arriving; courier turn-in at the Hollow with the cargo check; `buyUpgrade` + `applyUpgrades`
-   changing `ship.*` and the helm's `speedMax`; `setPaint` recolouring all three hulls; `hire('moss')`
-   and the marine shooting on a boarding; `canClaim` → `claimSector` → the map shows the captain.
-3. **Feel pass on a real GPU** (Richard's screen): mouse gains (`fly.manual` 0.0035, walk 0.0022,
-   turret 0.0025), the Wren's turn rate, the Kestrel's; HUD label clutter in the Drift.
-4. **Cadet mode** (README §For the girls): a flag in `freshState`, read by `spawnHunters`, `offers`,
-   raider damage.
-5. **The wire against a NodeGX backend**: implement `net.mjs`'s four calls over the backend's HTTP
-   API, keep `LocalNet` as the fallback when there is no backend.
-6. Music: `music.mjs` from the map editor is not copied; a track of Richard's in `public/music/`.
+1. **Drive the five rows still built-but-undriven** (README table): courier / capture / raid turn-in; `setPaint` recolouring
+   all three hulls (check it on the new `MeshStandardMaterial`s); `hire('moss')` and the marine on a boarding; `canClaim` →
+   `claimSector`; the Wren lost.
+2. **The panel's tabs overflow**: with a mission count, "WIRE" is cut off at 380 px (shot `07-drift`). Wrap or shorten.
+3. **HUD labels overlap** when contacts line up (shot `l4`: the hauler and the gate's labels on top of each other).
+4. **The Guild hauler's boarding rooms sit across its containers**, which are boxes that are not convex with the rooms; board
+   her and look (no drive boards the hauler).
+5. **Cadet mode** (README §For the girls); **the wire** against a NodeGX backend (`net.mjs`); music.
 
 ## How to run and drive
 
 ```
 cd dev-docs/parked/threadspace
 npm start                                   # :8787, opens the browser
-node server.mjs --port 8787 &               # for drives
-node tools/drive.mjs http://127.0.0.1:8787/ tests/smoke.json shots
+node server.mjs --port 8795 &               # for drives
+nice -n 19 node tools/drive.mjs http://127.0.0.1:8795/ tests/smoke.json shots
 sh tools/run-all.sh                         # all three on :8793, exit 1 on any FAIL
 ```
 
-`window.__game` is the game; `__game.debug.{use, phase, go, credits, killHostiles, assist, stats}` are
-the drive's shortcuts past the walking. Tear the server and Chrome down when a drive ends (shared box).
+`window.__game` is the game; `__game.debug.{use, phase, go, credits, killHostiles, assist, stats, see}` are the drive's
+shortcuts. Tear the server and Chrome down when a drive ends (shared box).

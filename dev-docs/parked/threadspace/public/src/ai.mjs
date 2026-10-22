@@ -155,20 +155,20 @@ export class AI {
     e.flight ??= new Flight(e, e.cls);
     const k = g.player.obj;
     const slot = new THREE.Vector3(e.slot === 1 ? 120 : -120, -20, 90).applyQuaternion(k.quaternion).add(k.position);
-    e.flight.toward(slot, dt, { stop: 20, slow: 300 });
+    e.flight.toward(slot, dt, { stop: 20, brake: 3 });
     if (e.obj.userData.turrets?.length) {
       const prey = this.preyFor(e);
       if (prey && prey.obj.position.distanceTo(e.obj.position) < 900) this.turrets(e, prey, dt, { every: 0.9, damage: 26, speed: 400, range: 900 });
     }
   }
 
-  /** Your own crew. Vex at the helm flies the nav target or holds; Dag at the turret shoots the nearest Rook. */
+  /** Your own crew. Vex at the helm flies the nav target or holds; Dag at the turret shoots your target, or the nearest Rook. */
   crew(dt) {
     const g = this.game;
     const k = g.player;
     const f = g.helmFlight;
     if (g.crewAt('helm') && g.phase !== 'helm') {
-      if (g.nav && g.nav.alive !== false) f.toward(g.navPoint(), dt, { stop: g.nav.kind === 'station' ? 160 : 120, slow: 700 });
+      if (g.nav && g.nav.alive !== false) f.toward(g.navPoint(), dt, { stop: g.navStop(g.nav) });
       else f.hold(dt);
     } else if (g.phase !== 'helm') {
       f.hold(dt); // nobody at the helm: she coasts to a stop
@@ -176,8 +176,12 @@ export class AI {
     if (g.crewAt('turret') && g.phase !== 'turret') {
       const t = k.obj.userData.turret;
       g.turretCool = (g.turretCool ?? 0) - dt;
-      const prey = this.preyFor(k);
-      if (prey && prey.obj.position.distanceTo(k.obj.position) < 800) {
+      // Your target first, when it is in her reach; the nearest threat otherwise.
+      const tg = g.target;
+      const mine = tg?.alive && g.hostile('player', tg.side) && tg.obj.position.distanceTo(k.obj.position) < 800 ? tg : null;
+      const prey = mine ?? this.preyFor(k);
+      g.gunnerOn = prey && prey.obj.position.distanceTo(k.obj.position) < 800 ? prey : null;
+      if (g.gunnerOn) {
         this.leadPoint(k.obj.position, prey, 460);
         aimTurret(t, k.obj, _lead, dt, 3);
         if (g.turretCool <= 0) {
@@ -185,7 +189,7 @@ export class AI {
           g.fireTurret(_lead);
         }
       }
-    }
+    } else g.gunnerOn = null;
   }
 }
 

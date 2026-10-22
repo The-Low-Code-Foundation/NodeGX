@@ -50,9 +50,11 @@ export class Walker {
     fz /= len;
     const s = (f.keys.has('ShiftLeft') ? 1.6 : 1) * this.speed * dt;
     const sin = Math.sin(this.yaw), cos = Math.cos(this.yaw);
-    // yaw 0 faces -z; turning left (positive yaw) swings the view toward -x.
-    const dx = (fx * cos - fz * sin) * s;
-    const dz = (fx * sin + fz * cos) * s;
+    // yaw 0 faces -z; turning left (positive yaw) swings the view toward -x. The view's forward is (-sin, -cos) on the
+    // floor and its right is (cos, -sin); a step is fx along right and -fz along forward. (s1 had both sines' signs
+    // flipped: right at 0 and 180 degrees, W walked backwards at 90 and sideways between — TS-S3-WALKAXES.)
+    const dx = (fx * cos + fz * sin) * s;
+    const dz = (-fx * sin + fz * cos) * s;
     this.slide(dx, 0);
     this.slide(0, dz);
     this.bob += s * 2.2;

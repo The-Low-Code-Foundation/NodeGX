@@ -67,12 +67,13 @@ export class Game {
     sun.position.set(0.6, 0.8, 0.3);
     this.scene.add(sun);
     this.sfx = new Sfx();
-    this.space = new Space(this.scene);
+    this.space = new Space(this.scene, this.renderer, sun);
     this.world = new World(this.scene);
     this.combat = new Combat(this.scene, this.world, this.sfx);
     this.ai = new AI(this);
     this.input = new Input(this.canvas);
     this.input.onAction = (code) => this.action(code);
+    this.input.onPress = (x, y) => this.press(x, y);
     this.hud = new Hud(document.getElementById('hud'));
     this.panel = new Panel(this);
     this.net = new LocalNet();
@@ -92,6 +93,8 @@ export class Game {
     this.claims = {};
     this.prompted = null;
     this.assist = false;
+    this.chase = { fighter: false, helm: false }; // V: behind the ship instead of in it
+    this.gunnerOn = null; // what Dag is shooting at, for the HUD
     this.turretSeat = new TurretSeat(this);
     this.eva = new Eva(this);
     this.boarding = new Boarding(this);
@@ -136,6 +139,7 @@ export class Game {
     this.parkedWren = M.fighter({ paint: this.state.paint, engine: this.state.engine });
     this.parkedWren.position.copy(this.interior.fighterPad);
     this.parkedWren.rotation.y = Math.PI;
+    M.setThrust(this.parkedWren, 0);
     this.interior.group.add(this.parkedWren);
     const fobj = M.fighter({ paint: this.state.paint, engine: this.state.engine });
     this.fighterEnt = new Entity('fighter', fobj, { side: 'player', hull: SHIPS.fighter.hull, shields: SHIPS.fighter.shields, radius: SHIPS.fighter.radius, half: SHIPS.fighter.half, name: 'WREN' });
@@ -154,7 +158,7 @@ export class Game {
   }
 
   applyUpgrades() {
-    const s = { hullMax: SHIPS.frigate.hull, shieldsMax: SHIPS.frigate.shields, speedMax: SHIPS.frigate.speed[1], turn: SHIPS.frigate.turn, turretEvery: 0.45, turretDamage: 24, cargoMax: SHIPS.frigate.cargo, fighterDamage: 25, rifleDamage: 25, armour: 1 };
+    const s = { hullMax: SHIPS.frigate.hull, shieldsMax: SHIPS.frigate.shields, speedMax: SHIPS.frigate.speed[1], turn: SHIPS.frigate.turn, turretEvery: 0.45, turretDamage: 24, cargoMax: SHIPS.frigate.cargo, fighterDamage: 25, rifleDamage: 25, armour: 1, tractor: 45 };
     for (const id of this.state.upgrades) UPGRADES.find((u) => u.id === id)?.apply(s);
     this.ship = s;
     const e = this.player;
@@ -272,7 +276,8 @@ export class Game {
     }
     if (p === 'helm' || p === 'turret' || p === 'walk') this.placeCrew();
     this.panel.refresh();
-    this.input.lockAllowed = p !== 'title';
+    this.input.lockAllowed = p !== 'title' && p !== 'tactical';
+    if (p === 'tactical') this.input.unlock();
   }
 
   /** A key that is an action, not a hold: E uses, J jumps or docks, Tab is the chair, T the next target, V the view. */
@@ -283,7 +288,12 @@ export class Game {
       else if (['walk', 'helm', 'turret'].includes(this.phase)) this.setPhase('tactical');
       return;
     }
-    if (code === 'KeyT' && ['helm', 'fighter', 'turret', 'tactical'].includes(this.phase)) return this.nextTarget();
+    if (code === 'KeyT' && ['helm', 'fighter', 'turret', 'tactical', 'walk'].includes(this.phase)) return this.nextTarget();
+    if (code === 'KeyV' && (this.phase === 'fighter' || this.phase === 'helm')) {
+      this.chase[this.phase] = !this.chase[this.phase];
+      this.chaseCam = null;
+      return this.toast(this.chase[this.phase] ? 'Chase view: V for the cockpit' : this.phase === 'fighter' ? 'Cockpit view' : 'Bridge view', 'good');
+    }
     if (code === 'KeyJ') return this.engage();
     if (code === 'KeyM') return this.panel.show('nav');
     if (code === 'KeyE') return this.use();
@@ -362,8 +372,24 @@ export class Game {
   helmCamera(c) {
     const k = this.player.obj;
     k.updateMatrixWorld();
-    c.position.copy(k.localToWorld(new THREE.Vector3(0, -0.5, -31.4)));
+    if (this.chase.helm) return this.chaseCamera(c, k, new THREE.Vector3(0, 22, 120), this.helmFlight.bank * 0.3);
+    // The helm's eye is just behind the bridge glass (z −33.5), so the window's frame and the helm console sit out of
+    // the view and the prow is ahead and below.
+    c.position.copy(k.localToWorld(new THREE.Vector3(0, 0, -33.15)));
     c.quaternion.copy(k.quaternion).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), this.helmFlight.bank * 0.5));
+  }
+
+  /** Behind and above `obj`, on a soft spring: the ship swings in the frame when she turns, then the camera catches up. */
+  chaseCamera(c, obj, offset, bank = 0) {
+    const want = obj.localToWorld(offset.clone());
+    const look = obj.quaternion.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.atan2(offset.y * 0.6, offset.z))).multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), bank));
+    const dt = this.lastDt ?? 0.016;
+    if (!this.chaseCam || this.chaseCam.obj !== obj) this.chaseCam = { obj, rel: want.clone().sub(obj.position), q: look.clone() };
+    // The spring holds the camera's place relative to the ship, so a fast ship does not leave it behind.
+    this.chaseCam.rel.lerp(want.sub(obj.position), 1 - Math.exp(-dt * 6));
+    this.chaseCam.q.slerp(look, 1 - Math.exp(-dt * 7));
+    c.position.copy(obj.position).add(this.chaseCam.rel);
+    c.quaternion.copy(this.chaseCam.q);
   }
 
   turretFrame(f, dt) {
@@ -384,6 +410,7 @@ export class Game {
     this.cannonCool = (this.cannonCool ?? 0) - dt;
     if (!this.hacking && (f.trigger || f.keys.has('Space'))) this.fireCannons();
     this.autoTarget(this.fighterEnt);
+    this.scoop(this.fighterEnt, 14);
     this.fighterEnt.shields = Math.min(this.fighterEnt.shieldsMax, this.fighterEnt.shields + 5 * dt);
     if (this.canLand()) this.prompt('Land in the Kestrel’s bay');
     else {
@@ -394,12 +421,20 @@ export class Game {
 
   fighterCamera(c) {
     const o = this.fighterEnt.obj;
-    if (!o.userData.cockpit) {
-      o.userData.cockpit = true;
-      o.traverse((m) => m.userData.cockpitHidden && (m.visible = false));
+    const inside = !this.chase.fighter;
+    if (o.userData.cockpit !== inside) {
+      o.userData.cockpit = inside;
+      o.traverse((m) => m.userData.cockpitHidden && (m.visible = !inside));
     }
+    if (!inside) return this.chaseCamera(c, o, new THREE.Vector3(0, 3.4, 17), this.fighterFlight.bank);
     c.position.copy(o.localToWorld(o.userData.eye.clone()));
     this.fighterFlight.cameraQuat(c.quaternion);
+  }
+
+  /** Where the guns meet, for the reticle in the chase view: 300 m down the nose. */
+  aimPoint() {
+    const body = this.phase === 'fighter' ? this.fighterEnt.obj : this.player.obj;
+    return body.position.clone().addScaledVector(forwardOf(body, _v), 300);
   }
 
   fireCannons() {
@@ -470,11 +505,59 @@ export class Game {
     this.target = best;
   }
 
+  /** T: the hostile nearest the middle of the view if one is close to it, else the next one out by distance. */
   nextTarget() {
     const body = this.playerBody();
     const list = this.hostiles().sort((a, b) => a.obj.position.distanceTo(body.obj.position) - b.obj.position.distanceTo(body.obj.position));
-    if (!list.length) return;
-    this.target = list[(list.indexOf(this.target) + 1) % list.length];
+    if (!list.length) return this.toast('Nothing hostile on the scope.', 'warn');
+    const fwd = this.camera.getWorldDirection(_v);
+    let aimed = null, best = 0.985; // within about 10 degrees of the crosshair
+    for (const e of list) {
+      const dot = _w.copy(e.obj.position).sub(this.camera.position).normalize().dot(fwd);
+      if (dot > best && e !== this.target) (best = dot), (aimed = e);
+    }
+    this.select(aimed ?? list[(list.indexOf(this.target) + 1) % list.length]);
+  }
+
+  /** Picks a thing: a hostile becomes the target (Dag shoots it), anything else you can fly to becomes the course. */
+  select(e) {
+    if (!e) return;
+    if (this.hostile('player', e.side) && e.hittable) {
+      this.target = e;
+      const gunner = this.crewAt('turret') && this.phase !== 'turret' ? 'Dag is on it.' : '';
+      this.toast(`Target: ${e.name} · ${this.threatOf(e).label}. ${gunner}`, 'warn');
+    } else if (this.navCandidates().some((c) => c.e === e)) {
+      this.setNav(e);
+      const helm = this.crewAt('helm') && this.phase !== 'helm' ? 'Vex is flying it.' : this.phase === 'helm' ? 'Fly it, or stand up and Vex will.' : 'Nobody at the helm.';
+      this.toast(`Course: ${e.name}. ${helm}`, 'good');
+    }
+    this.panel.refresh();
+  }
+
+  /** A click on the view with a free cursor: on a mark it selects that thing and is used up (true); anywhere else it
+   *  takes the stick, or in the captain's chair starts a drag. */
+  press(x, y) {
+    if (!['helm', 'fighter', 'turret', 'tactical', 'eva'].includes(this.phase)) return false;
+    const e = this.hud.pick(x, y);
+    if (!e) return false;
+    this.select(e);
+    return true;
+  }
+
+  /** How dangerous a contact is to the thing you are in: a word, a colour and a number to sort by. */
+  threatOf(e) {
+    const body = this.playerBody();
+    const armed = e.kind === 'pirate' ? (12 * 2) / 0.38 : e.obj.userData.turrets?.length ? (e.obj.userData.turrets.length * 14) / 1.4 : 0; // damage a second
+    if (!armed) return { label: 'UNARMED', color: '#8a93a3', n: 0 };
+    const yours = body.hull + body.shields;
+    const theirs = e.hull + e.shields;
+    // Seconds she needs to kill you against seconds you need to kill her, roughly.
+    const yourDps = body === this.fighterEnt ? ((this.ship.fighterDamage * 2) / 0.14) * 0.15 : this.ship.turretDamage / this.ship.turretEvery * 0.5;
+    const k = (theirs / yourDps) / (yours / armed);
+    if (k < 0.25) return { label: 'LOW', color: '#39d27a', n: 1 };
+    if (k < 0.8) return { label: 'MEDIUM', color: '#ffb347', n: 2 };
+    if (k < 2) return { label: 'HIGH', color: '#ff5540', n: 3 };
+    return { label: 'DEADLY', color: '#ff2a6d', n: 4 };
   }
 
   steerAssist() {
@@ -690,7 +773,7 @@ export class Game {
 
   // --- the sector: pods, deaths, hunters ---------------------------------------------------------
 
-  collectPod(pod) {
+  collectPod(pod, by = null) {
     const p = pod.pod;
     if (p.core) {
       this.state.flags.core = true;
@@ -698,12 +781,14 @@ export class Game {
     } else if (p.credits) {
       this.state.credits += p.credits;
       this.log(`A credit chip: ${p.credits} cr.`, 'good');
+      this.toast(`Credit chip: ${p.credits} cr`, 'good');
     } else {
       const room = this.ship.cargoMax - this.cargoUsed();
       const take = Math.min(p.qty, Math.floor(room / (GOODS[p.goods].size || 1)));
       if (take <= 0) return this.toast('The hold is full.', 'warn');
       this.state.cargo[p.goods] = (this.state.cargo[p.goods] ?? 0) + take;
       this.log(`Pod aboard: ${GOODS[p.goods].name} ×${take}.`, 'good');
+      this.toast(`Scooped${by ? ` by ${by}` : ''}: ${GOODS[p.goods].name} ×${take}`, 'good');
     }
     this.world.remove(pod);
     pod.alive = false;
@@ -712,10 +797,27 @@ export class Game {
     this.panel.refresh();
   }
 
-  tractor() {
-    for (const e of this.world.entities) {
-      if (e.kind !== 'pod' || !e.alive) continue;
-      if (e.obj.position.distanceTo(this.player.obj.position) < 45) this.collectPod(e);
+  /** The Kestrel takes in a pod within 45 m of her; with the tractor fitted she pulls one in from 250 m. The Meridian's
+   *  core is wedged in the wreck and needs hands: a space walk, never a scoop. */
+  tractor(dt) {
+    const k = this.player.obj.position;
+    this.beams = [];
+    for (const e of [...this.world.entities]) {
+      if (e.kind !== 'pod' || !e.alive || e.pod.core) continue;
+      const d = e.obj.position.distanceTo(k);
+      if (d < 45) this.collectPod(e);
+      else if (d < this.ship.tractor && !this.dockedAt) {
+        e.obj.position.addScaledVector(_v.copy(k).sub(e.obj.position).normalize(), Math.min(d, 60 * dt));
+        this.beams.push(e);
+      }
+    }
+    this.space.beams(this.player.obj, this.beams);
+  }
+
+  /** The Wren scoops a pod she flies through. */
+  scoop(body, reach) {
+    for (const e of [...this.world.entities]) {
+      if (e.kind === 'pod' && e.alive && !e.pod.core && e.obj.position.distanceTo(body.obj.position) < reach) this.collectPod(e, 'the Wren');
     }
   }
 
@@ -771,7 +873,7 @@ export class Game {
         const e = this.world.spawnPirate(k.clone().add(new THREE.Vector3(rand(-900, 900), rand(-200, 200), rand(-900, 900))));
         e.side = 'concord';
         e.name = 'CONCORD PATROL';
-        e.obj.userData.engMat.color.set('#58b0ff');
+        M.setEngineColor(e.obj, '#58b0ff');
         e.obj.userData.hullMat = null;
       }
       this.banner('CONCORD PATROL — WEAPONS HOT', 'bad');
@@ -785,7 +887,7 @@ export class Game {
     const list = [];
     for (const e of this.world.entities) {
       if (!e.alive) continue;
-      if (['station', 'gate', 'derelict', 'corvette', 'freighter', 'follower'].includes(e.kind) || (e.kind === 'pod' && e.pod.core)) list.push({ e, d: e.obj.position.distanceTo(k) });
+      if (['station', 'gate', 'derelict', 'corvette', 'freighter', 'follower', 'pod'].includes(e.kind)) list.push({ e, d: e.obj.position.distanceTo(k) });
     }
     return list.sort((a, b) => a.d - b.d);
   }
@@ -793,6 +895,11 @@ export class Game {
   setNav(e) {
     this.nav = e;
     this.panel.refresh();
+  }
+
+  /** How far short of a course Vex stops: inside the dock's window, on a pod (so she scoops it), off a big hull. */
+  navStop(e) {
+    return { station: 130, pod: e.pod?.core ? 60 : 10, gate: 50, derelict: 90, corvette: 260, freighter: 200, follower: 150 }[e.kind] ?? 120;
   }
 
   navPoint() {
@@ -839,6 +946,7 @@ export class Game {
     this.player.obj.position.copy(p);
     this.player.obj.quaternion.copy(st.obj.quaternion).multiply(new THREE.Quaternion().setFromAxisAngle(UP, Math.PI / 2));
     this.player.shields = this.player.shieldsMax;
+    this.space.beams(null, []);
     this.concourse?.dispose();
     this.concourse = concourseInterior(st.obj, { faction: st.station.faction });
     this.concourseWalker = new Walker(this.concourse);
@@ -894,6 +1002,7 @@ export class Game {
     this.nav = null;
     this.target = null;
     this.world.load(id, { keep: [this.player], captured: { corvette: this.state.flags.corvetteCaptured } });
+    this.space.setSector(id);
     if (!this.world.entities.includes(this.player)) this.world.add(this.player);
     this.state.sector = id;
     const k = this.player.obj;
@@ -1153,7 +1262,7 @@ export class Game {
 
   setEngine(c) {
     this.state.engine = c;
-    for (const o of [this.player.obj, this.parkedWren, this.fighterEnt.obj]) o.userData.engMat.color.set(c);
+    for (const o of [this.player.obj, this.parkedWren, this.fighterEnt.obj]) M.setEngineColor(o, c);
     this.panel.refresh();
   }
 
@@ -1245,7 +1354,9 @@ export class Game {
     const now = performance.now();
     const dt = Math.min(0.1, (now - this.lastT) / 1000); // a slow frame gets up to a tenth of a second, so game time keeps up with the clock down to 10 fps
     this.lastT = now;
+    this.lastDt = dt;
     this.clock += dt;
+    if (this.target && !this.target.alive) this.target = null;
     const f = this.input.frame();
     if (this.phase !== 'title' && this.phase !== 'dead') {
       this.space.frame(this.camera, dt);
@@ -1254,7 +1365,7 @@ export class Game {
         this.ai.crew(dt);
         if (this.phase === 'fighter' || this.phase === 'board' || this.phase === 'eva') this.player.shields = Math.min(this.player.shieldsMax, this.player.shields + 3 * dt);
         else this.player.shields = Math.min(this.player.shieldsMax, this.player.shields + 3 * dt);
-        this.tractor();
+        this.tractor(dt);
         this.hackFrame(dt);
       }
       this.controller.frame(f, dt);
@@ -1268,6 +1379,7 @@ export class Game {
       this.dockPrompt = this.canDock() ? `J — DOCK AT ${this.world.station.station.name.toUpperCase()}` : this.canJump() ? `J — JUMP THE THREAD TO ${SECTORS[this.canJump().to].name.toUpperCase()}` : '';
       // The fighter's parked twin and the hull lights breathe a little.
       this.controller.placeCamera(this.camera);
+      this.space.follow(this.camera);
       this.panel.tick(dt);
     }
     if (this.toastT > 0) {

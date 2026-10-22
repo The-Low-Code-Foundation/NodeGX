@@ -207,6 +207,8 @@ export class World {
         e.obj.position.addScaledVector(e.vel, dt);
       }
       if (e.kind === 'gate') e.obj.userData.disc.material.opacity = 0.22 + 0.1 * Math.sin(this.time * 2 + e.obj.position.x);
+      if (e.obj.userData.plumes) M.setThrust(e.obj, Math.min(1.2, e.speed / (e.cls?.speed?.[1] ?? 60)));
+      if (e.obj.userData.spinner) e.obj.userData.spinner.rotation.y += dt * 0.025;
       if (e.hitFlash > 0) e.hitFlash = Math.max(0, e.hitFlash - dt * 4);
     }
   }

@@ -48,6 +48,7 @@ export const UPGRADES = [
   { id: 'engine2', name: 'Drive tuning', cost: 1500, blurb: 'Frigate top speed 38 → 54, turns 40% faster.', apply: (s) => ((s.speedMax = 54), (s.turn = 0.4)) },
   { id: 'turret2', name: 'Twin turret', cost: 2200, blurb: 'The turret fires twice as fast and hits harder.', apply: (s) => ((s.turretEvery = 0.22), (s.turretDamage = 34)) },
   { id: 'cargo2', name: 'Cargo racks', cost: 900, blurb: 'Hold 24 → 40 units.', apply: (s) => (s.cargoMax = 40) },
+  { id: 'tractor', name: 'Tractor beam', cost: 800, blurb: 'The Kestrel pulls pods in from 250 m instead of scooping them at 45. (The Wren scoops any pod she flies through.)', apply: (s) => (s.tractor = 250) },
   { id: 'cannons2', name: 'Wren cannons II', cost: 1600, blurb: 'The fighter hits for 40 instead of 25.', apply: (s) => (s.fighterDamage = 40) },
   { id: 'hull2', name: 'Hull plating', cost: 2600, blurb: 'Frigate hull 600 → 900.', apply: (s) => (s.hullMax = 900) },
   { id: 'rifle2', name: 'Boarding rifle II', cost: 1200, blurb: 'Your rifle hits for 45 instead of 25.', apply: (s) => (s.rifleDamage = 45) },

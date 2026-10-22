@@ -8,9 +8,12 @@ import { box, cyl, at, mat, glow } from './util.mjs';
 
 const FLOOR = '#2b2f36';
 const WALL = '#3a4049';
-const CEIL = '#23272e';
 const CONSOLE = '#1e2a3a';
-const H = 3; // rooms are 3 m high
+const TRIM = '#262b33';
+const H = 3; // rooms are 3 m high unless they say otherwise
+// A ceiling faces down, away from the sky light, and read as a black hole in the roof: it glows a little of its own.
+const ceilMat = () => mat('#2c313a', { emissive: '#15181e' });
+const glass = new THREE.MeshBasicMaterial({ color: '#7fb0e0', transparent: true, opacity: 0.07, depthWrite: false, side: THREE.DoubleSide });
 
 export class Interior {
   constructor(host, floorY) {
@@ -36,12 +39,19 @@ export class Interior {
     return u;
   }
 
-  /** A room: floor, ceiling and four walls, each wall with optional gaps (doorways) given as [from, to] along it. */
-  room(cx, cz, w, d, { gaps = {}, floor = FLOOR, wall = WALL, open = {} } = {}) {
+  /** A room: floor, ceiling and four walls, each wall with optional gaps (doorways) given as [from, to] along it.
+   *  An `open` wall is a parapet that high with a framed window above it. */
+  room(cx, cz, w, d, { gaps = {}, floor = FLOOR, wall = WALL, open = {}, h = H } = {}) {
     const y = this.floorY;
     const g = this.group;
     g.add(at(box(w, 0.1, d, floor), cx, y - 0.05, cz));
-    g.add(at(box(w, 0.1, d, CEIL), cx, y + H + 0.05, cz));
+    g.add(at(box(w, 0.1, d, ceilMat()), cx, y + h + 0.05, cz));
+    // Ribs across the ceiling, so it reads as a roof and not as the dark.
+    const across = w < d;
+    const span = across ? d : w;
+    for (let t = -span / 2 + 1.5; t < span / 2 - 0.5; t += 3) {
+      g.add(across ? at(box(w, 0.14, 0.3, TRIM), cx, y + h - 0.07, cz + t) : at(box(0.3, 0.14, d, TRIM), cx + t, y + h - 0.07, cz));
+    }
     const x1 = cx - w / 2, x2 = cx + w / 2, z1 = cz - d / 2, z2 = cz + d / 2;
     // north (z1) and south (z2) walls run along x; west (x1) and east (x2) along z.
     const sides = [
@@ -57,14 +67,47 @@ export class Interior {
         if (sb - sa < 0.05) continue;
         const len = sb - sa;
         const mid = (sa + sb) / 2;
-        const height = open[name] ? open[name] : H; // an "open" wall is a low parapet: a window onto space
+        const height = open[name] ? open[name] : h; // an "open" wall is a low parapet: a window onto space
         const m = alongX ? at(box(len, height, 0.2, wall), mid, y + height / 2, c) : at(box(0.2, height, len, wall), c, y + height / 2, mid);
         g.add(m);
-        if (alongX) this.collider(sa, y, c - 0.1, sb, y + H, c + 0.1);
-        else this.collider(c - 0.1, y, sa, c + 0.1, y + H, sb);
+        // A dark skirting board along the foot of the wall.
+        g.add(alongX ? at(box(len, 0.16, 0.26, TRIM), mid, y + 0.08, c) : at(box(0.26, 0.16, len, TRIM), c, y + 0.08, mid));
+        if (open[name]) this.window(alongX, c, sa, sb, y + height, y + h);
+        if (alongX) this.collider(sa, y, c - 0.1, sb, y + h, c + 0.1);
+        else this.collider(c - 0.1, y, sa, c + 0.1, y + h, sb);
       }
     }
     return { x1, x2, z1, z2 };
+  }
+
+  /** A window from `y0` to `y1` along a wall line: a frame, mullions about every 3 m, and a faint pane of glass, so
+   *  it reads as a window and not as a hole in the ship. */
+  window(alongX, c, a, b, y0, y1) {
+    const g = this.group;
+    const len = b - a, mid = (a + b) / 2, hh = y1 - y0;
+    const frame = mat('#4a525e');
+    const piece = (l, h2, along, cross, y) => g.add(alongX ? at(box(l, h2, 0.24, frame), along, y, cross) : at(box(0.24, h2, l, frame), cross, y, along));
+    piece(len, 0.16, mid, c, y0 + 0.08); // sill
+    piece(len, 0.22, mid, c, y1 - 0.11); // head
+    const n = Math.max(1, Math.round(len / 3)) | 1; // odd, so no mullion stands in the middle of the helm's view
+    for (let i = 0; i <= n; i++) piece(0.16, hh, a + (len * i) / n, c, y0 + hh / 2);
+    g.add(alongX ? at(new THREE.Mesh(new THREE.PlaneGeometry(len, hh), glass), mid, y0 + hh / 2, c) : at(new THREE.Mesh(new THREE.PlaneGeometry(len, hh), glass), c, y0 + hh / 2, mid, 0, Math.PI / 2, 0));
+  }
+
+  /** A short passage joining two rooms' doorways across the gap between their walls: floor, roof and two side walls.
+   *  `along` is the axis you walk it on; (a1, a2) its run on that axis; (b1, b2) its width on the other. */
+  passage(along, a1, a2, b1, b2, { floor = FLOOR, wall = WALL, h = H } = {}) {
+    const y = this.floorY;
+    const g = this.group;
+    const [ca, la] = [(a1 + a2) / 2, Math.abs(a2 - a1) + 0.2];
+    const [cb, lb] = [(b1 + b2) / 2, Math.abs(b2 - b1)];
+    const flat = (hh, col, yy) => (along === 'x' ? at(box(la, hh, lb, col), ca, yy, cb) : at(box(lb, hh, la, col), cb, yy, ca));
+    g.add(flat(0.1, floor, y - 0.05), flat(0.1, ceilMat(), y + h + 0.05));
+    for (const b of [b1, b2]) {
+      g.add(along === 'x' ? at(box(la, h, 0.2, wall), ca, y + h / 2, b) : at(box(0.2, h, la, wall), b, y + h / 2, ca));
+      if (along === 'x') this.collider(Math.min(a1, a2), y, b - 0.1, Math.max(a1, a2), y + h, b + 0.1);
+      else this.collider(b - 0.1, y, Math.min(a1, a2), b + 0.1, y + h, Math.max(a1, a2));
+    }
   }
 
   light(x, z, color = '#ffe6c4', intensity = 18, dist = 14, y = null) {
@@ -163,18 +206,21 @@ export function frigateInterior(host) {
   I.prop(at(box(0.6, 2.9, 0.4, mat('#5a6270')), 0, 1.45, 0), 7.5, -10, { collide: false });
   I.console(7.2, -8.2, 1.6, -Math.PI / 2, '#ff5540');
   I.light(5.5, -10, '#ffd0c0', 10);
+  I.passage('x', 1.5, 3, -12.5, -7.5); // the corridor's east wall to the pod's west wall: 1.5 m that was open to space
   I.use('turret', 'Climb into the turret', 7.4, -10, 'turret');
   // Airlock, port: the outer door glows.
   I.room(-5.5, -6, 4, 4, { gaps: { e: [[-8, -4]] } });
   I.prop(at(box(0.3, 2.6, 2, mat('#5a6270')), 0, 1.3, 0), -7.4, -6, { collide: false });
   I.prop(at(box(0.1, 0.3, 1.6, glow('#ffb347')), 0, 2.75, 0), -7.3, -6, { collide: false });
   I.light(-5.5, -6, '#ffd0a0', 8);
+  I.passage('x', -3.5, -1.5, -8, -4);
   I.use('airlock', 'Cycle the airlock: space walk', -7, -6, 'eva');
   // Quarters, port aft.
   I.room(-5.5, 2, 5, 5, { gaps: { e: [[0, 4]] } });
   I.prop(box(1, 0.5, 2.2, mat('#5b4a8a')), -7, 1.4);
   I.prop(box(0.6, 1.9, 1.2, mat('#3a4049')), -7.5, 3.6);
   I.light(-5.5, 2, '#ffd6e0', 8);
+  I.passage('x', -3, -1.5, 0, 4);
   I.use('quarters', 'Your quarters: rest', -6.8, 1.6, 'rest');
   // Cargo hold.
   I.room(0, 12.5, 11, 13, { gaps: { n: [[-1.5, 1.5]], s: [[-2, 2]] } });
@@ -216,9 +262,11 @@ export function capitalInterior(host, { floorY = -3, len = 60 } = {}) {
   I.prop(box(1, 0.5, 2.2, mat('#5a3a3a')), 7, zA - 15.5);
   I.prop(box(1, 0.5, 2.2, mat('#5a3a3a')), 7, zA - 12.5);
   I.light(5.5, zA - 14, '#ffd0c0', 8);
+  I.passage('x', 1.5, 3, zA - 15, zA - 13, { wall, floor });
   I.room(-5.5, zA - 26, 5, 6, { gaps: { e: [[zA - 27, zA - 25]] }, wall, floor });
   for (const [x, z] of [[-7, zA - 28], [-7, zA - 26], [-5.8, zA - 28]]) I.prop(box(0.9, 0.9, 0.9, mat('#6b5a4a')), x, z, { y: 0.45 });
   I.light(-5.5, zA - 26, '#ffd0c0', 8);
+  I.passage('x', -3, -1.5, zA - 27, zA - 25, { wall, floor });
   // The bridge: the seat of the ship. Seize it at the console.
   I.room(0, zB, 9, 11, { gaps: { s: [[-1.5, 1.5]] }, wall, floor, open: { n: 1 } });
   I.console(0, zB - 5, 4, 0, '#ff5540');
@@ -243,10 +291,11 @@ export function concourseInterior(host, { faction = 'concord' } = {}) {
   const wall = rook ? '#3a2a2a' : '#3a4049';
   const floor = rook ? '#2a2222' : '#2b2f36';
   // The hall sits beside the dock at z = -40; its south wall is the window on the parked ship.
-  I.room(0, -42, 26, 30, { open: { s: 1 }, wall, floor });
-  for (const [x, z] of [[-8, -50], [8, -50], [-8, -36], [8, -36], [0, -43]]) I.light(x, z, rook ? '#ffb380' : '#dbe9ff', 40, 26);
+  const HALL = 6;
+  I.room(0, -42, 26, 30, { open: { s: 1 }, wall, floor, h: HALL });
+  for (const [x, z] of [[-8, -50], [8, -50], [-8, -36], [8, -36], [0, -43]]) I.light(x, z, rook ? '#ffb380' : '#dbe9ff', 60, 30, y + HALL - 0.3);
   // Pillars, a holo-table in the middle, floor stripes to the kiosks, benches and planters: a place, not a box.
-  for (const [x, z] of [[-6, -50], [6, -50], [-6, -34], [6, -34]]) I.prop(at(cyl(0.5, 0.6, 3, mat(rook ? '#4a3030' : '#4a525e'), 8), 0, 1.5, 0), x, z);
+  for (const [x, z] of [[-6, -50], [6, -50], [-6, -34], [6, -34]]) I.prop(at(cyl(0.5, 0.6, HALL, mat(rook ? '#4a3030' : '#4a525e'), 8), 0, HALL / 2, 0), x, z);
   const table = new THREE.Group();
   table.add(at(cyl(1.6, 1.9, 0.9, mat(rook ? '#3a2a2a' : '#2b3340'), 12), 0, 0.45, 0));
   table.add(at(cyl(1.3, 1.3, 0.05, glow(rook ? '#ff8c42' : '#58b0ff', 0.7), 12), 0, 0.93, 0));
@@ -263,8 +312,8 @@ export function concourseInterior(host, { faction = 'concord' } = {}) {
   I.prop(box(14, 0.08, 1, mat(rook ? '#5a3a2a' : '#3c4350')), 0, -56.8, { collide: false, y: 2.6 });
   I.prop(at(box(10, 1.2, 0.05, glow(rook ? '#ffb347' : '#9fd4ff', 0.9)), 0, 0, 0), 0, -56.85, { collide: false, y: 2.0 });
   // A hull round the hall, seen from outside, and the strut down to the arm.
-  const shell = box(28, 6, 32, mat(rook ? '#3a2a2a' : '#6f7782'));
-  shell.position.set(0, y + 2, -42);
+  const shell = box(28, HALL + 2, 32, mat(rook ? '#3a2a2a' : '#6f7782'));
+  shell.position.set(0, y + HALL / 2, -42);
   host.add(shell);
   const strut = box(6, 30, 6, mat('#3c4350'));
   strut.position.set(0, y - 14, -28);

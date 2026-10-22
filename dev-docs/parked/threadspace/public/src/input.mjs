@@ -16,6 +16,8 @@ export class Input {
     this.trigger = false;
     this.clicked = false;
     this.onAction = null;
+    this.onPress = null;
+    this.dragging = false;
     this.lockAllowed = true;
     const typing = () => ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName);
     window.addEventListener('keydown', (e) => {
@@ -39,17 +41,22 @@ export class Input {
     canvas.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       canvas.focus({ preventScroll: true });
+      // A free cursor on a mark selects it (onPress says so by returning true): no shot, no stick.
+      const r = canvas.getBoundingClientRect();
+      if (!this.locked && this.onPress?.(e.clientX - r.left, e.clientY - r.top) === true) return;
       if (e.button === 0) {
         this.trigger = true;
         this.clicked = true;
+        this.dragging = !this.locked;
       }
       this.lock();
     });
-    canvas.addEventListener('pointerup', (e) => {
-      if (e.button === 0) this.trigger = false;
+    window.addEventListener('pointerup', (e) => {
+      if (e.button === 0) this.trigger = this.dragging = false;
     });
     canvas.addEventListener('pointermove', (e) => {
-      if (!this.locked) return;
+      // Locked, the mouse is a stick; free, a held button drags (the captain's chair orbits that way).
+      if (!this.locked && !this.dragging) return;
       this.dx += e.movementX;
       this.dy += e.movementY;
     });

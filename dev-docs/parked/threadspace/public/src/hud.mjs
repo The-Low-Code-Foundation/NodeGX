@@ -1,5 +1,6 @@
-// The HUD: a 2D canvas over the view. Brackets on hostiles, diamonds on places, a lead point on the target,
-// bars for what you are in, air for a space walk, health for a boarding. Nothing here is clickable.
+// The HUD: a 2D canvas over the view. Brackets on hostiles (with their hull, shields and how dangerous they are),
+// diamonds on places, a lead point on the target, bars for what you are in, air for a space walk, health for a
+// boarding. The canvas takes no events; `pick` answers which mark a click on the view landed on.
 
 import * as THREE from 'three';
 import { clamp, fmtTime } from './util.mjs';
@@ -12,6 +13,17 @@ const _v = new THREE.Vector3();
 export class Hud {
   constructor(canvas) {
     this.canvas = canvas;
+    this.marks = [];
+  }
+
+  /** The thing whose mark is under (x, y) in the view's pixels, from the last frame drawn, or null. */
+  pick(x, y) {
+    let best = null, bd = Infinity;
+    for (const m of this.marks) {
+      const d = Math.hypot(m.x - x, m.y - y);
+      if (d < Math.max(m.r, 22) && d < bd) (bd = d), (best = m.e);
+    }
+    return best;
   }
 
   draw(game) {
@@ -31,6 +43,7 @@ export class Hud {
     this.g = g;
     this.W = W;
     this.H = H;
+    this.marks = [];
     const p = game.phase;
     if (game.flash > 0) {
       g.fillStyle = `rgba(255,50,24,${(game.flash * 0.4).toFixed(3)})`;
@@ -120,6 +133,14 @@ export class Hud {
     g.stroke();
   }
 
+  mini(x, y, w, k, color) {
+    const g = this.g;
+    g.fillStyle = 'rgba(10,12,16,0.7)';
+    g.fillRect(x, y, w, 3);
+    g.fillStyle = color;
+    g.fillRect(x, y, w * clamp(k, 0, 1), 3);
+  }
+
   arrow(x, y, a, color) {
     const g = this.g;
     g.fillStyle = color;
@@ -178,6 +199,7 @@ export class Hud {
         }
         continue;
       }
+      this.marks.push({ e: m.e, x: p.x, y: p.y, r: s + 8 });
       if (m.kind === 'bracket') this.bracket(p.x, p.y, s, m.color);
       else if (m.kind === 'diamond') this.diamond(p.x, p.y, s, m.color);
       else this.diamond(p.x, p.y, 4, m.color, true);
@@ -196,19 +218,34 @@ export class Hud {
         }
       }
       if (m.kind !== 'small' || m.d < 400 || isNav) this.label(p.x + s + 6, p.y + s, `${m.e.name}  ${m.d < 1000 ? Math.round(m.d) + ' m' : (m.d / 1000).toFixed(1) + ' km'}`, isTarget ? C.amber : m.color);
-    }
-    // The reticle where the guns point.
-    if (phase === 'fighter' || phase === 'turret') {
-      g.strokeStyle = C.green;
-      g.lineWidth = 1.5;
-      g.beginPath();
-      g.arc(W / 2, H / 2, 12, 0, Math.PI * 2);
-      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
-        g.moveTo(W / 2 + dx * 16, H / 2 + dy * 16);
-        g.lineTo(W / 2 + dx * 26, H / 2 + dy * 26);
+      // A ship: her shields and hull under the bracket, and how dangerous she is to what you are in.
+      if (m.kind === 'bracket' && m.e.hullMax && (isTarget || m.d < 2200)) {
+        const w = clamp(s * 2, 28, 64), x0 = p.x - w / 2, y0 = p.y + s + 5;
+        if (m.e.shieldsMax) this.mini(x0, y0, w, m.e.shields / m.e.shieldsMax, C.blue);
+        this.mini(x0, y0 + (m.e.shieldsMax ? 4 : 0), w, m.e.hull / m.e.hullMax, m.e.hull / m.e.hullMax < 0.3 ? C.red : C.green);
+        if (m.color === C.red) {
+          const t = game.threatOf(m.e);
+          this.label(p.x + s + 6, p.y + s + 13, t.label, t.color);
+        }
       }
-      g.stroke();
-    } else if (phase === 'helm' || phase === 'eva') {
+      if (game.gunnerOn === m.e && phase !== 'turret') this.label(p.x, p.y - s - (isNav ? 28 : 10), 'DAG', C.amber, 'center');
+    }
+    // The reticle where the guns point: the middle of the view, or in the chase view the point 300 m down the nose.
+    const chase = (phase === 'fighter' && game.chase.fighter) || (phase === 'helm' && game.chase.helm);
+    if (phase === 'fighter' || phase === 'turret') {
+      const r = chase ? this.project(game, game.aimPoint()) : { x: W / 2, y: H / 2, ahead: true };
+      if (r.ahead) {
+        g.strokeStyle = C.green;
+        g.lineWidth = 1.5;
+        g.beginPath();
+        g.arc(r.x, r.y, 12, 0, Math.PI * 2);
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          g.moveTo(r.x + dx * 16, r.y + dy * 16);
+          g.lineTo(r.x + dx * 26, r.y + dy * 26);
+        }
+        g.stroke();
+      }
+    } else if ((phase === 'helm' && !chase) || phase === 'eva') {
       g.strokeStyle = 'rgba(230,233,238,0.5)';
       g.lineWidth = 1;
       g.beginPath();
@@ -219,7 +256,7 @@ export class Hud {
       g.stroke();
     }
     // The Wren's canopy frame: struts from the corners.
-    if (phase === 'fighter') {
+    if (phase === 'fighter' && !chase) {
       g.fillStyle = '#0b0d11';
       g.beginPath();
       for (const [sx, sy] of [[0, 0], [1, 0], [0, 1], [1, 1]]) {
@@ -250,13 +287,41 @@ export class Hud {
       if (phase === 'fighter') this.bar(W / 2 - bw / 2, y, bw, 8, game.lasers / 100, C.red, 'CANNONS', `${Math.round(game.lasers)}`);
       if (phase === 'turret') this.bar(W / 2 - bw / 2, y, bw, 8, 1 - clamp(game.turretSeat.cool / game.ship.turretEvery, 0, 1), C.red, 'TURRET', 'READY');
     }
+    if (game.target?.alive) this.targetCard(game, game.target); // after the canopy struts, which would cover it
     // Words on the glass.
     g.textAlign = 'center';
     if (game.warn) this.label(W / 2, 26, game.warn, C.amber, 'center');
-    else if (!game.input.locked && phase !== 'tactical') this.label(W / 2, 26, 'CLICK THE VIEW TO TAKE THE STICK', C.dim, 'center');
-    const help = { helm: 'mouse or arrows steer · W S throttle · T target · E stand up · J jump at a gate · Tab tactical', fighter: 'mouse or arrows fly · A D roll · W S throttle · Space fire · T target · E land astern of the Kestrel', turret: 'mouse aims · click or Space fires · E climb down', eva: 'W S A D R F thrust · Shift burn · mouse look · E grab / airlock', tactical: 'drag orbits · wheel zooms · Tab or E back to the chair' }[phase];
+    else if (!game.input.locked && phase !== 'tactical') this.label(W / 2, 26, 'CLICK THE VIEW TO TAKE THE STICK · CLICK A MARK TO SELECT IT', C.dim, 'center');
+    if (game.beams?.length) this.label(W / 2, 64, `TRACTOR · ${game.beams.length} POD${game.beams.length > 1 ? 'S' : ''} COMING IN`, C.amber, 'center');
+    const help = { helm: 'mouse or arrows steer · W S throttle · T target · V view · E stand up · J jump at a gate · Tab tactical', fighter: 'mouse or arrows fly · A D roll · W S throttle · Space fire · T target · V view · fly through a pod to scoop it · E land astern', turret: 'mouse aims · click or Space fires · T target · E climb down', eva: 'W S A D R F thrust · Shift burn · mouse look · E grab / airlock', tactical: 'click a contact: target it (Dag fires) or set a course (Vex flies) · drag orbits · wheel zooms · T next target · Tab back' }[phase];
     if (help) this.label(W / 2, H - 10, help, C.dim, 'center');
     if (game.dockPrompt) this.label(W / 2, 46, game.dockPrompt, C.green, 'center');
+  }
+
+  /** The target's card, top right of the view: what she is, what she has left, how dangerous, who is shooting her. */
+  targetCard(game, e) {
+    const { g, W } = this;
+    const t = game.threatOf(e);
+    const x = W - 214, y = 14, w = 200;
+    g.fillStyle = C.panel;
+    g.fillRect(x, y, w, e.shieldsMax ? 76 : 62);
+    g.strokeStyle = t.color;
+    g.strokeRect(x + 0.5, y + 0.5, w, e.shieldsMax ? 76 : 62);
+    this.label(x + 10, y + 13, 'TARGET', C.dim);
+    this.label(x + w - 10, y + 13, t.label, t.color, 'right');
+    let name = `${e.name}${e.cls ? ' · ' + e.cls.cls : ''}`;
+    while (name.length > 4 && g.measureText(name).width > w - 20) name = name.slice(0, -2) + '…';
+    this.label(x + 10, y + 29, name, C.white);
+    let yy = y + 44;
+    if (e.shieldsMax) {
+      this.mini(x + 10, yy, w - 70, e.shields / e.shieldsMax, C.blue);
+      this.label(x + w - 10, yy + 1, `SH ${Math.round(e.shields)}`, C.blue, 'right');
+      yy += 12;
+    }
+    this.mini(x + 10, yy, w - 70, e.hull / e.hullMax, e.hull / e.hullMax < 0.3 ? C.red : C.green);
+    this.label(x + w - 10, yy + 1, `HULL ${Math.round(e.hull)}`, C.green, 'right');
+    const who = game.gunnerOn === e && game.phase !== 'turret' ? 'DAG IS FIRING ON HER' : `${Math.round(e.obj.position.distanceTo(game.playerBody().obj.position))} m`;
+    this.label(x + 10, yy + 13, who, C.amber);
   }
 
   boarding(game) {

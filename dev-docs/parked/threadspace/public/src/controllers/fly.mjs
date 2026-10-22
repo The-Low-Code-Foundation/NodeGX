@@ -65,15 +65,20 @@ export class Flight {
     e.obj.updateMatrixWorld();
   }
 
-  /** The autopilot: turn toward `to`, throttle by distance; stops within `stop` metres. Returns the distance. */
-  toward(to, dt, { stop = 150, slow = 600 } = {}) {
+  /** The autopilot: turn toward `to` and fly a braking curve to `stop` metres short of it. Returns the distance.
+   *  The speed is the most she can still shed over the gap left (v = √(2·brake·gap)), never under `crawl`, so she
+   *  arrives at full speed and brakes late. s1 slowed in proportion to the gap, which is an exponential that never
+   *  arrives: 14 s per e-fold, about a minute from 700 m to inside the dock's 10 m window. */
+  toward(to, dt, { stop = 150, brake = 5, crawl = 4 } = {}) {
     const e = this.ent;
     const d = e.obj.position.distanceTo(to);
-    if (d > stop) {
+    const gap = d - stop;
+    if (gap > 0) {
       const angle = turnToward(e.obj, to, this.turn * 0.8, dt);
-      const want = d > slow ? 1 : clamp((d - stop) / (slow - stop), 0, 1);
-      this.throttle += (want * (angle < 0.6 ? 1 : 0.3) - this.throttle) * Math.min(1, dt * 1.5);
-    } else this.throttle = Math.max(0, this.throttle - dt * 0.8);
+      const v = clamp(Math.max(crawl, Math.sqrt(2 * brake * gap)), this.speedMin, this.speedMax);
+      const want = ((v - this.speedMin) / Math.max(1e-6, this.speedMax - this.speedMin)) * (angle < 0.6 ? 1 : 0.3);
+      this.throttle += (want - this.throttle) * Math.min(1, dt * (want < this.throttle ? 4 : 1.5));
+    } else this.throttle = Math.max(0, this.throttle - dt * 2);
     this.bank *= Math.max(0, 1 - dt * 3);
     this.move(dt);
     return d;

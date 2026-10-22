@@ -22,13 +22,16 @@ npm start            # installs three.js on first run, serves on :8787, opens th
 ```
 
 Click **New captain**. Click the view to take the mouse (Esc gives it back; the **Release mouse**
-button on the Ship tab does too).
+button on the Ship tab does too). With the mouse free, a click on a mark in the view **selects** it instead: a hostile
+becomes the target (Dag, on the turret, fires on it), anything you can fly to becomes the course (Vex flies it). The
+captain's chair never takes the mouse: it is the click-to-command seat.
 
 | where | keys |
 |---|---|
 | walking | W A S D · mouse looks · **E** uses what you face · Tab is the captain's chair |
-| the helm / the Wren | mouse or arrows steer · A D roll · W S throttle (or the wheel) · Space / click fires (Wren) · T next target · E stands up / lands · **J** jumps a thread or docks when in range |
-| the turret | mouse aims · click or Space fires · E climbs down |
+| the helm / the Wren | mouse or arrows steer · A D roll · W S throttle (or the wheel) · Space / click fires (Wren) · T targets what is under the crosshair, else the next one · **V** chase view / cockpit · E stands up / lands · **J** jumps a thread or docks when in range · the Wren scoops any pod she flies through |
+| the turret | mouse aims · click or Space fires · T target · E climbs down |
+| the captain's chair (Tab) | click a contact: target it or set a course · drag orbits · wheel zooms · T next target · Tab or E back |
 | space walk | W S A D forward/back/sideways · R F up/down · Shift burns · mouse looks · E grabs a pod, goes back in at the Kestrel's airlock, or hacks another hull's airlock |
 | boarding | W A S D · mouse aims · click or Space fires · hold E at the bridge console to seize her · E at the airlock leaves |
 
@@ -45,7 +48,10 @@ Meridian's data core, dock back at Haven and turn it all in.
 | Frigate with a walkable interior: bridge, corridor, turret pod, airlock, quarters, hold (one crate per cargo unit), bay | `interiors.mjs` `frigateInterior` | driven |
 | Seats: helm, turret, captain's chair (orbit view), fighter, airlock (space walk) | `game.mjs` `setPhase`, `controllers/` | driven |
 | Flight model shared by the helm and the Wren; autopilot (`toward`, `hold`) | `controllers/fly.mjs` | driven |
-| Crew: Vex flies the course you set (or holds); Dag works the turret; you swap in and out by sitting | `ai.mjs` `crew`, `game.mjs` `setCrew` | driven (Vex's course: built, not driven) |
+| Crew: Vex flies the course you set (or holds) on a braking curve; Dag works the turret on your target, or the nearest threat; you swap in and out by sitting | `ai.mjs` `crew`, `game.mjs` `setCrew` `navStop` | driven (s3: Vex's course to the dock, 15 s from 700 m; Dag on your target) |
+| Contacts: hull and shield bars and a threat word (LOW · MEDIUM · HIGH · DEADLY, against what you are in) on every ship's bracket; a target card; the Nav tab's Contacts list with Target buttons; click a mark to select; T aims at the crosshair | `hud.mjs`, `game.mjs` `select` `press` `threatOf`, `panel.mjs` `contacts` | driven (s3) |
+| Chase view (V) for the Wren and the helm, on a soft spring | `game.mjs` `chaseCamera` | driven (s3, the Wren) |
+| Pods: the Kestrel scoops within 45 m, the Wren anything she flies through, the tractor beam (yard, 800 cr) pulls from 250 m; the Meridian's core needs a space walk | `game.mjs` `tractor` `scoop`, `space.mjs` `beams` | driven (s3) |
 | Rooks that hunt the thing you are in, break off close, lead their shots; the Carrion's turrets; the Guild hauler on its lane | `ai.mjs` | driven |
 | Bolts with a per-step hull test, bursts, shards | `combat.mjs` | driven |
 | Launch and land the Wren; the Wren lost → medbay, 300 cr | `game.mjs` `launch` `land` `wrenLost` | driven / built |
@@ -53,7 +59,7 @@ Meridian's data core, dock back at Haven and turn it all in.
 | Missions: bounty, courier ×2, salvage (space walk), capture (boarding), raid (the hauler) | `data.mjs` `MISSIONS`, `game.mjs` `offers`…`turnIn` | bounty + salvage driven; courier/capture/raid built |
 | Standing with Concord, Rooks, Guild; hunters jump in when a faction hates you; Concord confiscates contraband | `game.mjs` `hostile` `spawnHunters` `confiscate` | driven (hunters) / built |
 | Trade: 4 goods, prices per station, contraband only at the Hollow | `panel.mjs` `tab_trade` | driven |
-| Shipyard: repairs, 8 upgrades (shields, drive, turret, racks, cannons, hull, rifle, armour), hull paint, engine/cannon colour | `data.mjs` `UPGRADES` `PAINTS` | built |
+| Shipyard: repairs, 9 upgrades (shields, drive, turret, racks, tractor, cannons, hull, rifle, armour), hull paint, engine/cannon colour | `data.mjs` `UPGRADES` `PAINTS` | built (the tractor: driven) |
 | Hire: Ilse (gunner), Moss (marine who boards with you and shoots) | `data.mjs` `HIRE`, `board.mjs` `marineFrame` | built |
 | Boarding: hack bar at the airlock, the Wren latches to the hull, FPS inside with 4 defenders (line of sight by ray, strafe, hitscan), seize the bridge, keep or scuttle | `controllers/board.mjs`, `game.mjs` `board`…`scuttleShip` | driven |
 | Fleet: a kept ship follows and shoots; orders Follow / Hold / Patrol (2 min) / Trade run (3 min) with real-time timers that survive saves | `ai.mjs` `follower`, `game.mjs` `fleetOrder` `fleetJobs` | driven |
@@ -62,6 +68,7 @@ Meridian's data core, dock back at Haven and turn it all in.
 | Claims: lay claim to a cleared sector with a fleet ship present (2,000 cr) | `game.mjs` `claimSector`, `net.mjs` | built |
 | Save to localStorage on dock and jump; Continue on the title | `game.mjs` `save` `load` | driven |
 | Sound: synthesised blasters, turbolasers, booms, hits (from the X-wing demo) | `sfx.mjs` | built |
+| The look (s3): lofted, chamfered, plated hulls with lit windows and plumes that grow with speed; a nebula sky per sector baked to a cube map at infinity, 7,000 round stars, a sun; framed windows, passages between rooms, lit ceilings | `ships.mjs` `loft`, `space.mjs`, `interiors.mjs` | read from the shots |
 
 **Not built:** planetary landing (ruled out for now), multiplayer of any kind (see below), the second
 turret seat Ilse's blurb promises, quarters customisation beyond a bed, ship switching to a fleet ship
@@ -70,7 +77,7 @@ mid-job, music.
 ## Tests
 
 ```
-sh tools/run-all.sh        # smoke (24 checks), boarding (15), eva (11); exit 1 on any FAIL
+sh tools/run-all.sh        # smoke (36 checks), boarding (16), eva (11); exit 1 on any FAIL
 ```
 
 Each drive runs the real page in headless Chrome on software GL and gates on `__game.stats()` and, where
@@ -79,6 +86,10 @@ camera's own layers (distance, colour, geometry). Screenshots land in `shots/`; 
 `01-bridge.png` was a flat grey wall (the hull's own bow block in the corridor, TS-S2-SHELLFACE) and 21/21 passed. Software GL runs at ~8–10 fps, so held-key distances in a drive are
 shorter than on a real GPU; the checks allow for it. A drive does not test the mouse (headless Chrome
 grants no pointer lock), nor how it feels.
+
+🔴 **`see()` reports a miss as `dist: Infinity`, which JSON sends as `null`, and `null < 3` is true.** A check that
+asks "is something within 3 m" must ask `typeof d === 'number' && d < 3`, or it passes on an empty view (s3: the first
+TS-S3-HOLES check passed on the broken code). Every new check was run once against the code it fixes, and failed there.
 
 ## How it is put together
 
@@ -105,7 +116,12 @@ grants no pointer lock), nor how it feels.
 - **`data.mjs`** — factions, sectors and threads, goods and prices, ship classes, upgrades, paints,
   crew for hire, mission templates, fleet jobs.
 - **`net.mjs`** — the network seam (below). Local stand-in.
-- **`ships.mjs`**, **`space.mjs`**, **`sfx.mjs`** — hulls from boxes, the sky, synthesised sound.
+- **`ships.mjs`** — the hulls. Big shapes are `loft`s through chamfered octagons, kept **convex** (each step in width and
+  height smaller than the last toward the ends): a camera inside a convex hull sees every face from behind, so the helm's
+  eye inside the bow and a boarder inside the Carrion see out through her. A non-convex hull would put one of its own faces
+  in your view (that was TS-S2-SHELLFACE).
+- **`space.mjs`** — the sky: a nebula computed from direction and baked to a cube map per sector (`setSector`), stars,
+  the sun, planets, dust, the tractor's beams. **`sfx.mjs`** — synthesised sound.
 
 ## Growing it
 

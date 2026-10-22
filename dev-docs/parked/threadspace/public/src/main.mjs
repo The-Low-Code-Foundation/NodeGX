@@ -35,7 +35,8 @@ game.debug = {
     const dir = game.camera.getWorldDirection(new THREE.Vector3());
     const rc = new THREE.Raycaster(game.camera.getWorldPosition(new THREE.Vector3()), dir, 0, 1000);
     rc.layers.mask = game.camera.layers.mask;
-    const hit = rc.intersectObjects(game.scene.children, true).find((h) => h.object.visible && h.object.material && !(h.object.material.side === THREE.FrontSide && h.face && h.face.normal.clone().transformDirection(h.object.matrixWorld).dot(dir) > 0));
+    rc.camera = game.camera; // sprites (the engines' halos) need it
+    const hit = rc.intersectObjects(game.scene.children, true).find((h) => h.object.visible && h.object.material && !h.object.isSprite && !h.object.isPoints && !(h.object.material.side === THREE.FrontSide && h.face && h.face.normal.clone().transformDirection(h.object.matrixWorld).dot(dir) > 0));
     if (!hit) return { dist: Infinity, color: null, geo: null };
     const p = hit.object.geometry.parameters ?? {};
     return { dist: Math.round(hit.distance * 100) / 100, color: '#' + (hit.object.material.color?.getHexString() ?? ''), geo: hit.object.geometry.type, size: [p.width, p.height, p.depth].filter((v) => v !== undefined) };

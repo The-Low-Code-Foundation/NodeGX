@@ -115,6 +115,7 @@ export class Panel {
     const map = this.threadMap(claims);
     const here = g.world.sector;
     return [
+      this.contacts(),
       this.sec('The threads', here?.name, map, el('div', { class: 'hint', style: 'margin-top:6px' }, here?.blurb ?? '')),
       this.sec('Course', g.nav ? g.nav.name : 'none',
         el('div', { class: 'hint' }, g.crewAt('helm') ? `${CREW.find((c) => c.id === g.crewAt('helm')).name} has the helm: pick a course and she flies it.` : 'Nobody at the helm: she holds. Take the helm, or seat Vex there.'),
@@ -132,6 +133,29 @@ export class Panel {
         el('div', { class: 'a', style: 'margin-top:6px' }, el('button', { class: 'small', disabled: !g.canClaim(), onclick: () => g.claimSector() }, 'Lay claim · 2,000 cr'), el('span', { class: 'hint' }, g.canClaim() ? 'Clear of hostiles, a fleet ship present.' : 'Needs: no hostiles in the sector, a ship of your fleet here, 2,000 cr.'))
       )
     ];
+  }
+
+  /** Every armed or hostile ship on the scope: what she has left, how dangerous she is, and a button to target her. */
+  contacts() {
+    const g = this.game;
+    const body = g.playerBody();
+    const ships = g.world.entities
+      .filter((e) => e.alive && e.hittable && e.hullMax && e !== g.player && e !== g.fighterEnt && e.side !== 'player')
+      .map((e) => ({ e, d: e.obj.position.distanceTo(body.obj.position), t: g.threatOf(e), hostile: g.hostile('player', e.side) }))
+      .sort((a, b) => b.hostile - a.hostile || a.d - b.d);
+    const gunner = g.crewAt('turret') ? CREW.find((c) => c.id === g.crewAt('turret'))?.name ?? 'Your gunner' : null;
+    return this.sec('Contacts', `${ships.filter((c) => c.hostile).length} hostile`,
+      el('div', { class: 'hint' }, gunner ? `${gunner} has the turret: she fires on your target, or the nearest threat. Click a mark in the view, press T, or pick one here.` : 'Nobody on the turret. Seat Dag there on the Crew tab.'),
+      ...ships.map(({ e, d, t, hostile }) => el('div', { class: `card ${g.target === e ? 'on' : ''}` },
+        el('div', { class: 't' }, el('b', {}, e.name), el('span', { class: 'chip', style: `color:${t.color};border-color:${t.color}` }, hostile ? t.label : 'NEUTRAL'), el('span', { class: 'muted price' }, d < 1000 ? `${Math.round(d)} m` : `${(d / 1000).toFixed(1)} km`)),
+        e.shieldsMax ? el('div', { class: 'kv' }, el('span', {}, 'Shields'), el('span', {}, `${Math.round(e.shields)} / ${e.shieldsMax}`)) : null,
+        e.shieldsMax ? this.bar(e.shields / e.shieldsMax) : null,
+        el('div', { class: 'kv' }, el('span', {}, 'Hull'), el('span', {}, `${Math.round(e.hull)} / ${e.hullMax}`)),
+        this.bar(e.hull / e.hullMax, e.hull / e.hullMax < 0.3 ? 'bad' : 'good'),
+        hostile ? el('div', { class: 'a' }, el('button', { class: `small ${g.target === e ? 'primary' : ''}`, onclick: () => (g.target === e ? ((g.target = null), this.refresh()) : g.select(e)) }, g.target === e ? (g.gunnerOn === e ? `Targeted · ${gunner ?? 'nobody'} firing` : 'Targeted') : 'Target')) : null
+      )),
+      !ships.length ? el('div', { class: 'hint' }, 'Nothing on the scope.') : null
+    );
   }
 
   threadMap(claims) {
