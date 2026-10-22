@@ -7,6 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
+import net from 'node:net';
 
 const HERE = path.dirname(new URL(import.meta.url).pathname);
 const LAB = '/Users/Shared/nodegx-lab';
@@ -72,6 +73,9 @@ for (;;) {
     if (fs.existsSync(root)) { log(`${j.id}: an unfinished root is there; move it aside by hand and re-run`); process.exit(1); }
     const tapDir = path.join(ROUNDS, `${j.id}-tap`);
     fs.mkdirSync(tapDir, { recursive: true });
+    // a port nothing listens on: a tap orphaned by a killed series keeps its port (2026-10-22, t1-harness-3)
+    const free = (q) => new Promise((r) => { const srv = net.createServer().once('error', () => r(false)).once('listening', () => srv.close(() => r(true))).listen(q, '127.0.0.1'); });
+    while (!(await free(port))) port++;
     const p = port++;
     const tap = spawn('node', [path.join(HERE, '../own-020/stream-tap.mjs'), String(p), tapDir, '--mode', 'retry'], { stdio: 'ignore' });
     await new Promise((r) => setTimeout(r, 1000));

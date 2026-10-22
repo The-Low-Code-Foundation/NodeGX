@@ -35,3 +35,20 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
 - **One slip, eleven times.** `update_component` with `create_component`'s arguments for components that didn't exist
   yet; `didYouMean: null`; it never stopped. → FIX-02 C.
 - **Buttons 35 px** in both NodeGX rounds, 40+ in every code round (T9). → FIX-02 D.
+
+## #3 — t1-nodegx-3, kit FIX-02 (`328f1dd1d`), 18/22 (2026-10-23)
+
+- **FIX-02 arrived and worked.** `get_project_info` called 12 times, by `section`; `readFirst` read. T1/T2 (reload)
+  pass: the Record reads an unheld record. T9 passes (44 px). The update/create slip came back 3 times, each answered
+  by the new hint and fixed on the next call; refusals 22 of 228, mostly argument-name slips the `didYouMean` fixed.
+  Script fell to **4 Function nodes / 106 lines** (17 / 346 at 0.2.5). T7/T8 hold with no owner filter written at
+  all (the backend's enforced `creatorOwns`, as `cloud-query-own-rows` says).
+- **Delivered advice gets argued away.** It read the shared-value lesson and wrote: *"The doctrine explicitly warns
+  … contention is negligible … Simpler and defensible: compute the whole new state"* → one whole-record
+  `Noodl.Records.update` per answer → two tabs overwrite (T5). It read "a press that saves is taken once" and
+  wrote: *"double presses are a minor risk … the Check button is hidden"*, but Enter in the field still answers
+  twice → fuel +2 (T3; t1-nodegx-2 had passed it). The plain-code arms got both right unprompted: a server endpoint
+  per answer increments by itself. → FIX-03: make the safe path the shortest path in the graph, not a warning.
+- **T6** failed here for the first time in a NodeGX round (the unlocked page stays open after the parent's setup),
+  as in all six plain-code rounds; **F6** failed on the grader's doubt over the Moon, as in t1-harness-1 and
+  t1-nodegx-2. Neither is the kit's.

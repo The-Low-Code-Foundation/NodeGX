@@ -216,3 +216,28 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   cache's registry copy, `_npx/f673…`); with the shim both shells resolve `preview` to `_npx/ff4932…`, whose lock
   names the kit's file. Mock round + grader prefix both proven. t1-code-3 21/22 (T6). t1-nodegx-3 runs on FIX-02
   after t1-harness-3.
+- **2026-10-22 22:55 CEST, a tap mix-up (no effect on any agent).** A `stream-tap.mjs` orphaned when the series was
+  killed at 14:25 kept port 48901; the restarted series gave t1-harness-3 that port, its own tap failed to bind, and
+  the round's traffic went through the orphan: the same retry tap to the same gateway, so the round ran as every other,
+  but its log is in `t1-nodegx-1-tap/tap.log` after 19:56 UTC, not in `t1-harness-3-tap/`. series.mjs now takes the
+  first port nothing listens on; the orphan is stopped when t1-harness-3 ends.
+- **2026-10-22 23:07 CEST, t1-harness-3 ended `aborted` (1 sitting, 4,209 s, $0.426), Cline's loop guard again**
+  ("5 consecutive identical calls to `run_commands`") while the agent polled its own long `npm run check`. Two of
+  the harness arm's three rounds ended this way and none of the other arms': the harness asks for a full
+  typecheck + unit + Playwright run before "done", DeepSeek polls it with an identical `sleep; grep` command, and
+  Cline stops it. Graded as it stands (the rule above). The orphan tap (pid 82515) stopped.
+- **2026-10-23 00:31 CEST — test 1 complete.** F+T out of 22 (S0 passed in all nine):
+
+  | arm | round 1 | round 2 | round 3 | median | DeepSeek $ (3 rounds) |
+  |---|---|---|---|---|---|
+  | code | 21 (T6) | 21 (T6) | 21 (T6) | **21** | 0.17 + 0.23 + 0.13 |
+  | harness | 20 (F6, T6) | 21 (T6) · aborted by Cline's loop guard | 20 (T6, T13) · aborted | **20** | 0.26 + 0.31 + 0.43 |
+  | nodegx | 16 · kit 0.2.5 (F7, T3, T5, T7, T8, T9) | 17 · FIX-01 (F6, T1, T2, T5, T9) | 18 · FIX-02 (F6, T3, T5, T6) | — | 0.20 + 0.20 + 0.25 |
+
+  **Reading (PLAN §3's rule):** on the kit as shipped (0.2.5) NodeGX was below both code arms by more than either's
+  spread, so pillar 1 is **not supported** for 0.2.5 with DeepSeek in Cline; the harness did not beat plain code
+  (pillar 1's caveat moot: plain DeepSeek was already at 21). Under the fix loop the NodeGX arm rose one point per
+  round (16 → 17 → 18) and every gap it closed was a kit defect named in a FIX file; the two traps left (T3, T5) are
+  ones the lessons now reach and the model argued away (`fixes/LEARNINGS.md` #3). T6 is failed by 7 of 9 rounds
+  across all arms: a property of the request, not of an arm. Not significance; n = 3 per arm and the NodeGX arm's
+  kit changed between its rounds.
