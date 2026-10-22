@@ -66,7 +66,7 @@ const planOf = (dir: string, legacy: string): ComponentPlan =>
 /** A file the export did not write reads '' — at describe time a throw would fail the suite and grade no row by name (s120). */
 const fileOf = (app: EmittedApp, pattern: RegExp): string => Object.entries(app.files).find(([f]) => pattern.test(f))?.[1] ?? '';
 
-const STEPS = ['More', 'Go A', 'Go B', 'Go A', 'More'];
+const STEPS = ['More', 'Go A', 'Go B', 'Go A', 'More', 'pick b', 'pick a', 'More', 'pick c'];
 
 /** P18-S122-TEXTDEFAULT: a wired Text the wire has not reached shows the word "Text" in the runtime. */
 const T = 'Text';
@@ -80,8 +80,30 @@ const BASE: Readings = [
   ['2', 'y is 2', 'total 1', T, 'dones 1', 'echo total 1', 'rows 3'],
   ['2', 'y is 2', 'total 1', 'total 10', 'dones 2', 'echo total 1', 'rows 3'],
   ['2', 'y is 2', 'total 2', 'total 10', 'dones 3', 'echo total 2', 'rows 3'],
-  ['4', 'y is 4', 'total 2', 'total 10', 'dones 3', 'echo total 2', 'rows 6']
+  ['4', 'y is 4', 'total 2', 'total 10', 'dones 3', 'echo total 2', 'rows 6'],
+  ['4', 'y is 4', 'total 2', 'total 10', 'dones 3', 'echo total 2', 'rows 6'],
+  ['4', 'y is 4', 'total 2', 'total 10', 'dones 3', 'echo total 2', 'rows 6'],
+  ['6', 'y is 6', 'total 2', 'total 10', 'dones 3', 'echo total 2', 'rows 9'],
+  ['6', 'y is 6', 'total 2', 'total 10', 'dones 3', 'echo total 2', 'rows 9']
 ];
+/**
+ * EXP-011 §108 (s138), as `s138-lifted-list/EXPECTED.md` predicted it: Shelf's rows, one Text each, then picked. The list
+ * is a logic component's lifted value; a row's id reaches Picker with the row's signal.
+ */
+const ABC = ['pick a', 'pick b', 'pick c'];
+const SHELF: Readings = [
+  ['pick a', T],
+  ['pick a', 'pick b', T],
+  ['pick a', 'pick b', T],
+  ['pick a', 'pick b', T],
+  ['pick a', 'pick b', T],
+  [...ABC, T],
+  [...ABC, 'picked b'],
+  [...ABC, 'picked a'],
+  [...ABC, 'picked a'],
+  [...ABC, 'picked c']
+];
+const FULL: Readings = BASE.map((r, i) => [...r, ...SHELF[i]]);
 const withoutDefault = (rows: Readings): Readings => rows.map((r) => r.map((c) => (c === T ? '' : c)));
 
 const desk = writeHookDesk();
@@ -91,7 +113,7 @@ const exported = childArm('export-react-arm.js', [{ dir: writeApp(app), scenario
 
 describe('§A the emitted app does what the runtime does, step by step', () => {
   it('A1 the desk: the runtime reads what EXPECTED.md says (the arm grades the runtime first)', () => {
-    expect(runtime[0][0]).toEqual(BASE);
+    expect(runtime[0][0]).toEqual(FULL);
   });
 
   it('A2 the desk: the export reads exactly what the runtime reads, at every step, but the word "Text"', () => {
@@ -112,11 +134,19 @@ describe('§A the emitted app does what the runtime does, step by step', () => {
   });
 
   it('A6 a value and the signal sent with it reach another logic component in that order (todo-list\'s lists, s122)', () => {
-    expect(exported[0][0].map((r) => r[5])).toEqual(['', '', 'echo total 1', 'echo total 1', 'echo total 2', 'echo total 2']);
+    expect(exported[0][0].slice(0, 6).map((r) => r[5])).toEqual(['', '', 'echo total 1', 'echo total 1', 'echo total 2', 'echo total 2']);
   });
 
   it('A7 an arrival run\'s value reaches the page through Component Outputs, at load and on each arrival (todo-list\'s rows, s137)', () => {
-    expect(exported[0][0].map((r) => r[6])).toEqual(['rows 0', 'rows 3', 'rows 3', 'rows 3', 'rows 3', 'rows 6']);
+    expect(exported[0][0].slice(0, 6).map((r) => r[6])).toEqual(['rows 0', 'rows 3', 'rows 3', 'rows 3', 'rows 3', 'rows 6']);
+  });
+
+  it('A8 a logic component\'s list draws the repeater\'s rows, at load and as it grows (EXP-011 §108, s138)', () => {
+    expect(exported[0][0].map((r) => r.slice(7, -1))).toEqual(SHELF.map((r) => r.slice(0, -1)));
+  });
+
+  it('A9 a row\'s id reaches another logic component with the row\'s signal: the row pressed is the row picked', () => {
+    expect(exported[0][0].map((r) => r[r.length - 1])).toEqual(['', '', '', '', '', '', 'picked b', 'picked a', 'picked a', 'picked c']);
   });
 });
 
@@ -141,7 +171,8 @@ describe('§B what is emitted', () => {
     expect(tally).toContain('  onDone?: () => void;');
     expect(tally).toContain('  onTotalChanged?: (value: string | undefined) => void;');
     expect(tally).toContain('onDone?.();');
-    expect(double).toContain('const WorkOut = Work({ x });');
+    // P18-S138-LIFTLOOP. A render run whose value is lifted runs when its inputs change.
+    expect(double).toContain('const WorkOut = useMemo(() => Work({ x }), [x]);');
   });
 
   it('B3 the page calls each placement once, after its state rows and refs, with no early return above, and draws nothing for it', () => {
@@ -154,6 +185,13 @@ describe('§B what is emitted', () => {
     expect(firstCall).toBeGreaterThan(home.lastIndexOf('useRef('));
     expect(home.slice(0, firstCall)).not.toMatch(/^ {2}(if \([^\n]*\) )?return\b/m);
     expect(home).not.toMatch(/<use[A-Z]|<(Double|Label|Tally|Echo)\b/);
+  });
+
+  it('B4 the lifted list is the repeater\'s items, and the row\'s signal writes the row\'s id before it pulses (§108)', () => {
+    expect(home).toContain('  useShelf({ n: bumpOut?.n, onRowsChanged: setRows2 });');
+    expect(home).toContain('{((rows2 ?? []) as any[]).map((item, index) => (');
+    expect(home).toMatch(/usePicker\(\{\n {4}which: relayedId,\n {4}go: \{ sent: pickerGoPulses, taken: pickerGoTaken \},/);
+    expect(home).toMatch(/onPick=\{\(\) => \{ setRelayedId\(item\.id\); set\w+Pulses\(\(v\) => v \+ 1\); \}\}/);
   });
 });
 
@@ -169,7 +207,7 @@ describe('§C the plan', () => {
 
   it('C2 its placements are hook calls: instances in the rendered set, in source order, none refused', () => {
     const home = planOf(desk.dir, '/Pages/Home');
-    expect(home.hookCalls).toEqual(['double', 'label', 'tallyA', 'tallyB', 'echo', 'stamp']);
+    expect(home.hookCalls).toEqual(['double', 'label', 'tallyA', 'tallyB', 'echo', 'stamp', 'shelf', 'picker']);
     for (const id of home.hookCalls) {
       expect(home.roleOf[id]).toBe('instance');
       expect(home.dispositions[id]).toEqual({ kind: 'static' });
@@ -217,6 +255,36 @@ describe('§C the plan', () => {
     const stamp = planOf(desk.dir, '/Logic/Stamp');
     expect(stamp.liftedOutputProps).toEqual([{ port: 'rows', prop: 'onRowsChanged', tsType: 'string' }]);
     expect(stamp.pushEffects).toEqual([expect.objectContaining({ prop: 'onRowsChanged', expr: expect.objectContaining({ kind: 'jsfun-out', viaState: 'workOut' }) })]);
+  });
+
+  it('C8 the repeater is fed by the lifted row; a child that does not lift the list leaves it rowless, its pulse and relay taken back', () => {
+    const home = planOf(desk.dir, '/Pages/Home');
+    expect(home.repeaters['shelfEach'].itemsExpr).toEqual({ kind: 'state-get', name: 'rows2', maybeUndefined: true });
+    expect(home.repeaters['shelfEach'].itemsLifted).toBeUndefined();
+    const { dir } = writeHookDesk((d) => {
+      // Shelf's list now comes from a node the export refuses: the child lifts nothing.
+      d.components['Logic/Shelf'].nodes.find((n) => n.id === 'sfFn')!.parameters.functionScript = 'Outputs.rows = Noodl.Events.on;';
+    });
+    const plan = planOf(dir, '/Pages/Home');
+    expect(plan.repeaters['shelfEach'].itemsExpr).toBeUndefined();
+    expect(plan.notes).toContain('wire shelf:rows->shelfEach:items dropped: instance output "rows" is not lifted by /Logic/Shelf — its feed defers there');
+    expect(plan.rowRelays).toEqual([]);
+    expect(plan.bindings['picker']?.['which']).toBeUndefined();
+    expect(plan.notes.some((n) => n.startsWith('wire shelfEach:itemOutputSignal-pick->picker:go dropped: its trigger, "One row per letter" (shelfEach), is not drawn'))).toBe(true);
+  });
+
+  it('C9 a row value computed inside the row is not relayed, and the row\'s pulse into the component it feeds is refused with it (P18-S138-ROWINTOINSTANCE)', () => {
+    const { dir } = writeHookDesk((d) => {
+      // The row's id is now its name, computed by the row's own Expression (bot-garden's robot card's shape).
+      const row = d.components['Row/Item'];
+      row.nodes.push({ id: 'riExpr', type: 'Expression', label: 'Shout', parameters: { expression: 'name + "!"' }, x: 600, y: 600 });
+      row.connections = row.connections.filter((c) => !(c.toId === 'riOut' && c.toProperty === 'id'));
+      row.connections.push({ fromId: 'riIn', fromProperty: 'name', toId: 'riExpr', toProperty: 'name' }, { fromId: 'riExpr', fromProperty: 'result', toId: 'riOut', toProperty: 'id' });
+    });
+    const plan = planOf(dir, '/Pages/Home');
+    expect(plan.bindings['picker']?.['which']).toBeUndefined();
+    expect(plan.notes.find((n) => n.startsWith('wire shelfEach:itemOutputSignal-pick->picker:go dropped: the row hands /Logic/Picker its "which" with this signal, which the export does not carry:'))).toBeDefined();
+    expect(JSON.stringify(plan.handlers['shelfEach'] ?? {})).not.toContain('Pulses');
   });
 });
 
@@ -269,8 +337,24 @@ describe('§E the templates, where the code was read', () => {
     expect(requests).not.toContain('readonly readonly');
   });
 
-  it('E5 a placement that passes nothing calls the hook with nothing', () => {
-    expect(fileOf(tpl('bot-garden'), /components\/Play\.tsx$/)).toContain('  usePickThing();');
+  it('E8 rocket-school\'s lists draw from List question sets, and a row\'s Delete hands Delete question set the row\'s id (§108)', () => {
+    const lists = fileOf(tpl('rocket-school'), /pages\/Lists\.tsx$/);
+    expect(lists).toContain('{((sets ?? []) as any[]).map((item, index) => (');
+    expect(lists).toMatch(/useDeleteQuestionSet\(\{\n {4}setId: relayedId,/);
+    expect(lists).toMatch(/onDelete=\{\(\) => \{ setRelayedId\(item\.id\); setDeleteAListRunPulses\(\(v\) => v \+ 1\); \}\}/);
+  });
+
+  /**
+   * E5 pinned `usePickThing();` as "a placement that passes nothing" (s136). It was not: the graph wires the Variable
+   * `gardenWorld` into it, and the walk that earns a render read's hook never visited a hook call, so the prop was dropped
+   * unsaid (P18-S138-HOOKPROPWALK, found in s138 when a relayed row's state row went undeclared). Pinned the right way round.
+   */
+  it('E5 a hook\'s prop fed by a Variable is passed, and a local that would be a reserved word takes the long name', () => {
+    const play = fileOf(tpl('bot-garden'), /components\/Play\.tsx$/);
+    expect(play).toContain("  usePickThing({ world: String(world ?? '') });");
+    expect(play).toContain('  const gardenChallengeForValue = useValue(gardenChallengeFor);');
+    expect(play).toContain("    askedFor: String(gardenChallengeForValue ?? ''),");
+    expect(play).not.toMatch(/const for\b/);
   });
 
   it('E6 an Expression meets a typed prop as itself, said to be the prop\'s type (rocket-school\'s Editor and Play4)', () => {

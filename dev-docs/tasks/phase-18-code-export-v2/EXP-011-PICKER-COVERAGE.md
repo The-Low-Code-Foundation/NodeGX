@@ -14676,3 +14676,51 @@ are defined above the lift pass now. s136's Run-wired branch is unchanged beside
 The look of todo-list's export (dark theme, two columns, which icon shows) is `App`'s CSS Definition and theme Function,
 refused as "node beside the router shell" (77 template nodes, 15 of them CSS Definitions). P18-S137-HALFREFUSED. AC4
 (rocket-school's list editing), §101, the hook call whose every pulse was refused.
+
+## §108 A repeater fed by a placed component's list (session 138, 2026-10-22): the lift is the items, and a row's value travels with its signal
+
+`s138-lifted-list/README.md` is the record (measurements, mutants, reach); EXP-021 §8 the task's view.
+
+### §108.0 Measured first
+
+62 For Each in 8 templates take `items` from a placed component's value output. All 62 children are logic components
+(EXP-021's hooks), and all 62 map their rows by template inputs. The parent's §4d pass refused the wire ("instance output
+"sets" feeds For Each.items, which has no static binding in this slice"), so the repeater drew no rows, and its row
+signals and relays were refused behind it (P18-S131-ROWLESSTRIGGER): 121 "draws no rows" lines. 47 children lift the
+output (typed `any`); 15 do not, because their Function is refused upstream.
+
+### §108.1 Built
+
+- **The lift is the items.** An instance output into a planned repeater's `items` is a pending lift marked `intoItems`, and
+  the repeater is marked `itemsLifted`. That mark counts as fed in the first plan, whose §99 relay pass runs before the
+  child plans exist. `liftInto` makes the lifted row the repeater's `itemsExpr` (§4e's untyped list). If the child does
+  not lift the output, or lifts a type that is not a list, the wire is dropped by name and the relays are taken back
+  (`takeBackRowRelay`, factored out of the relay pass). The trigger pass then finds the repeater rowless, as it would have
+  on HEAD.
+- **The emitted list** is `((rows ?? []) as any[]).map(…)`: `any ?? []` is `any`, and the callback's parameters would be
+  implicitly `any` under the scaffold's strict options.
+- **P18-S138-ROWINTOINSTANCE.** A row's relayed value into another placed component's declared input is §99's relay, the
+  value of the row whose signal fired last, bound as that prop. Every row signal's callback writes it before its chain
+  runs (`foreach.tsx` copies the row's outputs, then sends the signal). A row signal's pulse into a component whose row
+  value cannot be relayed (computed inside the row) is refused by name in `compileInstanceSignal`, never run on
+  `undefined`.
+- **P18-S138-HOOKPROPWALK.** The walk that earns a render read's hook, store and state row visits the hook calls as well as
+  the drawn tree.
+- **P18-S138-RESERVEDLOCAL.** A Variable's local that would be a reserved word takes the long name.
+- **P18-S138-LIFTLOOP.** A render-run Function whose value a push effect hands the parent is `useMemo(() => Fn(args),
+  [args])`, run when its inputs change, as the runtime's is. Called on every render, a list it returned was a new array
+  each time, and the push effect, the parent's row and the hook went round for ever.
+
+### §108.2 Graded
+
+The Hook Desk gained Shelf (a logic component's list), a For Each of `/Row/Item`, and Picker (the row's id and its
+signal). The runtime arm read exactly what `s138-lifted-list/EXPECTED.md` predicted (A1). The export matches it at every
+step (A2): the rows at load and as the list grows (A8), and the row pressed is the row picked (A9).
+`a-logic-component-is-a-hook.test.ts` 31 / 31. Mutants, `tplbuild`, reach and the whole package: `s138-lifted-list/README.md`.
+
+### §108.3 What it leaves
+
+The 15 children that lift nothing. A Function's own output into `items` (nightbook 16, todo-list 4 + 4, rocket-school and
+star-class 2 each). A row output computed inside the row. EXP-021 AC4 (rocket-school's list editing) is now blocked by
+`/Logic/App store`, a persisted Global Store ("browser-storage rehydration is not translatable"), and by §101 (the
+Editor's list to save is a hook's output read by the parent's Save).

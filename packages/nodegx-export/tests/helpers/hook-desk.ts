@@ -20,6 +20,10 @@ import { Desk, Graph, RawNode, placeAll, writeDeskProject } from './root-desk';
  * - **Stamp** (`/Logic/Stamp`, x ← bump.n; P18 session 137): a Function with no Run that reads the clock, so it is an
  *   arrival run (EXP-019 slice 2), as todo-list's Task rows, Today rows and Log rows are; it says 'rows ' + x * 3. The
  *   page's rows reads it (`s137-todo-drive/EXPECTED.md`).
+ * - **Shelf** (`/Logic/Shelf`, n ← bump.n; P18 session 138, EXP-011 §108): a Function with no Run that returns a list, one
+ *   row per letter up to n + 1, into the page's For Each of `/Row/Item` (a Text and a Button showing the row's name; the
+ *   Button sends the row's `pick`, the row's `id` passes its input through). **Picker** (`/Logic/Picker`, `which` ← the
+ *   row's id, `go` ← the row's pick) says 'picked ' + which; the page's last Text reads it (`s138-lifted-list/EXPECTED.md`).
  *
  * The logic components are written as the templates write them: registry type `visual`, no visual root.
  */
@@ -51,6 +55,9 @@ export const LABEL_SCRIPT = "Outputs.text = 'y is ' + Inputs.y;";
 export const ECHO_SCRIPT = "Outputs.echo = 'echo ' + Inputs.said;";
 /** Reads the clock, so it runs on its inputs' arrival (a host trait); what it says does not depend on the time. */
 export const STAMP_SCRIPT = "var now = new Date();\nOutputs.rows = 'rows ' + (Number(Inputs.x) || 0) * 3 + (now.getTime() > 0 ? '' : '?');";
+export const SHELF_SCRIPT =
+  "Outputs.rows = ['a', 'b', 'c'].slice(0, (Number(Inputs.n) || 0) + 1).map(function (k) { return { id: k, name: 'pick ' + k }; });";
+export const PICKER_SCRIPT = "Outputs.picked = 'picked ' + Inputs.which;";
 export const TALLY_SCRIPT = [
   'this.total = (this.total || 0) + (Number(Inputs.step) || 0);',
   "Outputs.total = 'total ' + this.total;",
@@ -65,7 +72,7 @@ const homeGraph = (): Graph => ({
       type: 'Group',
       label: 'Shell',
       parent: 'page',
-      children: ['moreBtn', 'yText', 'labelText', 'goABtn', 'goBBtn', 'totalAText', 'totalBText', 'donesText', 'echoText', 'rowsText'],
+      children: ['moreBtn', 'yText', 'labelText', 'goABtn', 'goBBtn', 'totalAText', 'totalBText', 'donesText', 'echoText', 'rowsText', 'shelfEach', 'pickedText'],
       parameters: { flexDirection: 'column' }
     },
     button('moreBtn', 'More'),
@@ -78,6 +85,8 @@ const homeGraph = (): Graph => ({
     text('donesText', 'dones'),
     text('echoText', 'echo'),
     text('rowsText', 'rows'),
+    { id: 'shelfEach', type: 'For Each', label: 'One row per letter', parent: 'shell', parameters: { template: '/Row/Item' } },
+    text('pickedText', 'picked'),
     fn('bump', 'Bump', BUMP_SCRIPT, { inputs: [], outputs: ['n'] }),
     fn('dones', 'Count dones', DONES_SCRIPT, { inputs: [], outputs: ['k'] }),
     { id: 'double', type: '/Logic/Double', label: 'Double', parameters: {} },
@@ -85,7 +94,9 @@ const homeGraph = (): Graph => ({
     { id: 'tallyA', type: '/Logic/Tally', label: 'Tally A', parameters: { step: 1 } },
     { id: 'tallyB', type: '/Logic/Tally', label: 'Tally B', parameters: { step: 10 } },
     { id: 'echo', type: '/Logic/Echo', label: 'Echo', parameters: {} },
-    { id: 'stamp', type: '/Logic/Stamp', label: 'Stamp', parameters: {} }
+    { id: 'stamp', type: '/Logic/Stamp', label: 'Stamp', parameters: {} },
+    { id: 'shelf', type: '/Logic/Shelf', label: 'Shelf', parameters: {} },
+    { id: 'picker', type: '/Logic/Picker', label: 'Picker', parameters: {} }
   ]),
   connections: [
     { fromId: 'moreBtn', fromProperty: 'onClick', toId: 'bump', toProperty: 'run' },
@@ -106,7 +117,13 @@ const homeGraph = (): Graph => ({
     { fromId: 'echo', fromProperty: 'echo', toId: 'echoText', toProperty: 'text' },
     // todo-list's row builders' shape (s137): an arrival run's value, lifted to the page.
     { fromId: 'bump', fromProperty: 'out-n', toId: 'stamp', toProperty: 'x' },
-    { fromId: 'stamp', fromProperty: 'rows', toId: 'rowsText', toProperty: 'text' }
+    { fromId: 'stamp', fromProperty: 'rows', toId: 'rowsText', toProperty: 'text' },
+    // EXP-011 §108 (s138): a logic component's list into a repeater; a row's id and signal into another logic component.
+    { fromId: 'bump', fromProperty: 'out-n', toId: 'shelf', toProperty: 'n' },
+    { fromId: 'shelf', fromProperty: 'rows', toId: 'shelfEach', toProperty: 'items' },
+    { fromId: 'shelfEach', fromProperty: 'itemOutput-id', toId: 'picker', toProperty: 'which' },
+    { fromId: 'shelfEach', fromProperty: 'itemOutputSignal-pick', toId: 'picker', toProperty: 'go' },
+    { fromId: 'picker', fromProperty: 'picked', toId: 'pickedText', toProperty: 'text' }
   ]
 });
 
@@ -135,6 +152,41 @@ const logicGraph = (
   };
 };
 
+/** EXP-011 §108. The row: its name on a Text and on a Button; the Button sends `pick`; its `id` passes through. */
+const rowGraph = (): Graph => ({
+  nodes: placeAll([
+    { id: 'riRoot', type: 'Group', label: 'Row', children: ['riText', 'riPick'], parameters: {} },
+    { id: 'riText', type: 'Text', label: 'Name', parent: 'riRoot', parameters: {} },
+    { id: 'riPick', type: 'net.noodl.controls.button', label: 'Pick', parent: 'riRoot', parameters: { label: 'Pick' } },
+    {
+      id: 'riIn',
+      type: 'Component Inputs',
+      label: 'Inputs',
+      parameters: {},
+      ports: [
+        { name: 'id', plug: 'output', type: 'string' },
+        { name: 'name', plug: 'output', type: 'string' }
+      ]
+    },
+    {
+      id: 'riOut',
+      type: 'Component Outputs',
+      label: 'Outputs',
+      parameters: {},
+      ports: [
+        { name: 'pick', plug: 'input', type: 'signal' },
+        { name: 'id', plug: 'input', type: 'string' }
+      ]
+    }
+  ]),
+  connections: [
+    { fromId: 'riIn', fromProperty: 'name', toId: 'riText', toProperty: 'text' },
+    { fromId: 'riIn', fromProperty: 'name', toId: 'riPick', toProperty: 'label' },
+    { fromId: 'riPick', fromProperty: 'onClick', toId: 'riOut', toProperty: 'pick' },
+    { fromId: 'riIn', fromProperty: 'id', toId: 'riOut', toProperty: 'id' }
+  ]
+});
+
 /** The desk, before any variant's edit. */
 export const hookDesk = (): Desk => ({
   components: {
@@ -142,6 +194,17 @@ export const hookDesk = (): Desk => ({
     'Logic/Double': logicGraph('db', DOUBLE_SCRIPT, [{ name: 'x', type: 'number' }], [{ name: 'y', type: 'number' }]),
     'Logic/Label': logicGraph('lb', LABEL_SCRIPT, [{ name: 'y', type: 'number' }], [{ name: 'text', type: 'string' }]),
     'Logic/Stamp': logicGraph('st', STAMP_SCRIPT, [{ name: 'x', type: 'number' }], [{ name: 'rows', type: 'string' }]),
+    'Logic/Shelf': logicGraph('sf', SHELF_SCRIPT, [{ name: 'n', type: 'number' }], [{ name: 'rows', type: 'array' }]),
+    'Logic/Picker': logicGraph(
+      'pk',
+      PICKER_SCRIPT,
+      [
+        { name: 'which', type: 'string' },
+        { name: 'go', type: 'signal' }
+      ],
+      [{ name: 'picked', type: 'string' }]
+    ),
+    'Row/Item': rowGraph(),
     'Logic/Echo': logicGraph(
       'ec',
       ECHO_SCRIPT,

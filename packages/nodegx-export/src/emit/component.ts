@@ -49,7 +49,7 @@ import {
 } from '../analyze/plan';
 import { ExportIR, ITEM_OUTPUT_SIGNAL, NodeIR } from '../ir/types';
 import { KitBinding, tsTypeOf as kitPortTsType } from './kits';
-import { assignClassNames, ClassCandidate, lowerFirst, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
+import { assignClassNames, ClassCandidate, isReservedWord, lowerFirst, partitionMergeGroup, pascalCase, propIdentifier, propIdentifiers } from './naming';
 import { WiredWhere, wiredWhereCode } from '../analyze/querySettings';
 import { tsLiteral } from './state';
 import { UTIL_LIB_PATH, utilCallMayBeUndefined } from './utilLib';
@@ -1276,7 +1276,8 @@ export function emitComponent(
       jsArgExprs(expr.nodeId).forEach(hookExprSources);
     }
   };
-  for (const id of preOrder(plan)) {
+  // P18-S138-ROWINTOINSTANCE. A logic placement is called, not drawn (EXP-021): its props are render reads all the same.
+  for (const id of [...preOrder(plan), ...plan.hookCalls]) {
     for (const source of Object.values(plan.bindings[id] ?? {})) {
       if (source.kind === 'store' && !hookVariables.includes(source.variableName)) {
         hookVariables.push(source.variableName);
@@ -1674,7 +1675,8 @@ export function emitComponent(
     const exportName = variableByName.get(variableName)!.exportName;
     const words = exportName.split(/(?=[A-Z])/).filter((w) => w.length > 0);
     let candidate = words[words.length - 1].charAt(0).toLowerCase() + words[words.length - 1].slice(1);
-    if (reserved.has(candidate)) candidate = `${exportName}Value`;
+    // P18-S138-RESERVEDLOCAL. bot-garden's `gardenChallengeFor` would be `const for` (read once a hook's prop earned it).
+    if (reserved.has(candidate) || isReservedWord(candidate)) candidate = `${exportName}Value`;
     let counter = 2;
     while (reserved.has(candidate)) candidate = `${exportName}Value${counter++}`;
     reserved.add(candidate);
@@ -1744,6 +1746,22 @@ export function emitComponent(
   for (const id of renderJsIds) {
     const def = jsFunByNode[id];
     if (def) jsLocals.set(id, dedupeLocal(`${def.fnName}Out`));
+  }
+  /**
+   * P18-S138-LIFTLOOP. A render run whose outputs a push effect hands the parent runs when its inputs change, as the
+   * runtime's does, not on every render: called each render, a list it returns is a new array each time, the push effect
+   * fires, the parent's row is set, the parent renders the hook again, for ever (the Hook Desk's Shelf hung the arm).
+   */
+  const memoJsIds = new Set<string>();
+  {
+    const walk = (value: unknown): void => {
+      if (value === null || typeof value !== 'object') return;
+      if (Array.isArray(value)) return value.forEach(walk);
+      const v = value as { kind?: unknown; nodeId?: unknown; viaState?: unknown };
+      if (v.kind === 'jsfun-out' && typeof v.nodeId === 'string' && v.viaState === undefined && jsLocals.has(v.nodeId)) memoJsIds.add(v.nodeId);
+      for (const child of Object.values(value)) walk(child);
+    };
+    for (const push of plan.pushEffects) walk(push.expr);
   }
 
   // ---- expression + handler statement rendering ------------------------------------------
@@ -4691,6 +4709,7 @@ export function emitComponent(
     reactImports.push('useEffect');
   }
   if (radioNameLocals.size > 0) reactImports.push('useId');
+  if (memoJsIds.size > 0) reactImports.push('useMemo');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
   if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0 || plan.instancePulses.length > 0 || fieldRefs.size > 0) reactImports.push('useRef');
   // P18-S128-FIELDSET. A Cleared mark's reset is an effect.
@@ -6234,12 +6253,18 @@ export function emitComponent(
       // `?? []` is foreach.tsx's own "empty arrival clears the list". EXP-011 §55: a minted read is the hook
       // local, an array by construction (`?? noArray` is already in the hook line).
       // EXP-011 §56: a filterRecords(...) call answers an array by construction, like the hook local.
+      // EXP-011 §108. A placed component's lifted list is a row typed `any`: `any ?? []` is `any`, and its `.map` callback's
+      // parameters would be implicitly `any` (TS7006 under the scaffold's strict options), so the list says it is one.
+      const untypedRow =
+        itemsExpr.kind === 'state-get' && /^any\b/.test(plan.stateVars.find((v) => v.name === itemsExpr.name)?.tsType ?? '');
       const source =
         itemsExpr.kind === 'minted-array-get' || itemsExpr.kind === 'record-filter'
           ? srcCode
-          : SIMPLE_REF.test(srcCode)
-            ? `(${srcCode} ?? [])`
-            : `((${srcCode}) ?? [])`;
+          : untypedRow
+            ? `((${srcCode} ?? []) as any[])`
+            : SIMPLE_REF.test(srcCode)
+              ? `(${srcCode} ?? [])`
+              : `((${srcCode}) ?? [])`;
       return [`${pad(indent)}{${source}.map((${itemLocal}, ${indexLocal}) => (`, ...lines, `${pad(indent)}))}`];
     }
     // Restrict to fields the item type actually carries — the runtime feeds undefined outside
@@ -7448,7 +7473,11 @@ export function emitComponent(
     new RegExp(`(^|[^A-Za-z0-9_$.])${name.replace(/\$/g, '\\$')}(?![A-Za-z0-9_$])`).test(code);
   const renderLocalLines = [...jsLocals].map(([id, local]) => {
     const def = jsFunByNode[id]!;
-    return { local, line: `  const ${local} = ${def.fnName}(${jsArgsObject(def, 'render')});` };
+    const call = `${def.fnName}(${jsArgsObject(def, 'render')})`;
+    if (!memoJsIds.has(id)) return { local, line: `  const ${local} = ${call};` };
+    // P18-S138-LIFTLOOP. Its inputs are its dependencies.
+    const deps = [...new Set(jsArgExprs(id).map((e) => exprCode(e, 'render')))];
+    return { local, line: `  const ${local} = useMemo(() => ${call}, [${deps.join(', ')}]);` };
   });
   const afterHooks = new Set<string>();
   for (let grew = true; grew; ) {

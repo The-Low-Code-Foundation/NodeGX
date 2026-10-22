@@ -120,3 +120,18 @@ lists; HEAD's showed none.
 What the drive showed that is not AC1: the export's look (`App`'s CSS Definition and theme Function are "node beside the
 router shell"), Projects (refused by its `Noodl.Records` member), selecting a task (a lifted value into a Set Variable), and
 the report calling a Function left out that the export runs from its other trigger (**P18-S137-HALFREFUSED**, low, open).
+
+## 8. Session 138 (2026-10-22): a logic component's list draws a repeater's rows (AC4's first blocker)
+
+[EXP-011 §108](EXP-011-PICKER-COVERAGE.md) is the ledger entry; `s138-lifted-list/` holds the measurements.
+
+62 For Each in 8 templates take their items from a hook's lifted list; they drew no rows, and every row signal and relay
+behind them was refused. The lift is now the repeater's items. A row's value into another hook arrives with the row's
+signal (**P18-S138-ROWINTOINSTANCE**, high, fixed: on HEAD, 10 pulses ran their component with that value missing). A
+lifted render run is memoised (**P18-S138-LIFTLOOP**). A hook's Variable-fed props are passed
+(**P18-S138-HOOKPROPWALK**). Templates: repeaters drawing rows 114 → 161, 146 wires gained, 0 lost.
+
+| AC | |
+|---|---|
+| AC4 | ⬜ rocket-school's Lists page now draws its list, and Delete hands Delete question set the row's id. Editing a set waits on `/Logic/App store`, a persisted Global Store the export refuses (no hook on the page gets `app`, so the list is drawn from nothing), and on §101 (the Editor's `items` into Save) |
+| AC5 | ✅ `tplbuild` all 17 at the floor; 0 wires lost, 0 nodes lost |

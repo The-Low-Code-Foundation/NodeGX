@@ -1,0 +1,17 @@
+[
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Game/Choice row",
+  "node": "crOut",
+  "type": "Component Outputs",
+  "label": "What was chosen",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the repeater relaying \"value\" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it"
+  },
+  "after": {
+   "kind": "static"
+  }
+ }
+]

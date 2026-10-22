@@ -1,3 +1,32 @@
+# Next session — session 138 (2026-10-22, BOARD lane 6) made **a repeater fed by a placed component's list draw its rows** (EXP-011 §108): the hook's lifted list is the For Each's items, and a row's value reaches another hook with the row's signal. Reading the emitted code and `tplbuild` found three more, all fixed. Templates: repeaters drawing rows 114 → 161, 146 wires gained, 0 lost.
+
+## ✅ Session 138: a hook's list draws its rows
+
+Read EXP-011 §108, EXP-021 §8 and `s138-lifted-list/README.md`. In short:
+
+| what | where |
+|---|---|
+| Measured first: 62 For Each in 8 templates fed by a hook's output (all hooks, all template-input mapped; 47 children lift it, 15 do not) | `s138-lifted-list/fed.cts`, `fed-before.json` |
+| `intoItems` pending lift; `RepeaterPlan.itemsLifted` counts as fed in the first plan; `liftInto` sets `itemsExpr` or drops the wire by name and takes the relays back (`takeBackRowRelay`) | `src/analyze/plan.ts` |
+| P18-S138-ROWINTOINSTANCE: a row value into a placed component's input is §99's relay (`rowRelayOf`); a row pulse whose value is computed inside the row is refused in `compileInstanceSignal` | `plan.ts` |
+| `((rows ?? []) as any[])` (TS7006), the hook calls walked for render reads (HOOKPROPWALK), reserved-word Variable locals (RESERVEDLOCAL), lifted render runs `useMemo` (LIFTLOOP) | `src/emit/component.ts` |
+| Hook Desk + Shelf / `Row/Item` / Picker; A8, A9, B4, C8, C9, E8; E5 rewritten (it pinned HOOKPROPWALK's drop); 31 / 31; 9 mutants, all killed | `tests/a-logic-component-is-a-hook.test.ts`, `tests/helpers/hook-desk.ts`, `s138-lifted-list/EXPECTED.md`, `mutants.py`, `mutants.out` |
+| Reach: `wires.cts` (wire-level, HEAD's `src` against the tree; counts both "dropped:" and Pass 6's "has no deterministic translation" notes), `rowinto.cts`, `hookstore.cts`, `hookprops.cts` | `s138-lifted-list/` |
+
+- 🔴 **A drawn list made a hidden defect reachable.** Once rows drew, rocket-school's Delete ran with the row's id missing, and the same shape was already live on HEAD (todo-list's money keys, 10 pulses). When a gate opens, read what now runs behind it.
+- 🔴 **`dispdiff` (node dispositions) said 11 gained**; the change was wires and rows. I wrote `wires.cts`. Its first run said "37 lost", but those were Pass 6's generic sentence, which the parser did not read, now re-worded. The instrument was wrong, not the export.
+- 🔴 **A spec row pinned a defect as a rule**: s136's E5 `usePickThing();` ("passes nothing") was a dropped `world` prop.
+- 🔴 The export arm **hung** (no timeout in my manual run): a render loop. `perl -e 'alarm 240; exec @ARGV' node …` (macOS has no `timeout`). Kill your own arm by its pid, never by name.
+
+Readings: the spec 31 / 31 (A1 the runtime read EXPECTED.md exactly); mutants 9 / 9 killed; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0. Reach: templates repeaters 114 → 161, **146 wires gained, 0 lost**, nodes 11 / 0; corpus nodes 1 / 0. Whole package (`nice -n 19 --runInBand`, JSON 09:05): **154 suites, 5,252 passed, 0 failed, 3 skipped** (predicted 5,246 + 6).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-021 AC4, rocket-school's list editing**, blocked by **`/Logic/App store`**: a persisted Global Store (`net.noodl.GlobalStore` with persist, Subscribe, and a kit `game-kit.KeepStorage`), refused as "a declarer authors persist — browser-storage rehydration is not translatable". Every rocket-school/star-class page hands `app` from it, so the list draws from nothing. Read the runtime's persisted store first (rehydration order: does the first render see the stored value?), count its reach across templates (`reports.cts … "browser-storage rehydration"`), and predict on a desk.
+2. **§101**, a parent's logic reading a hook's output (the Editor's `items` into Save; ≈360 template wires; "instance output … feeds an unrendered sink"). A hook that RETURNS its values is still the likely answer.
+3. A Function's own output into `items` (nightbook 16, todo-list 4 + 4, rocket-school/star-class 2), then the 15 children that lift nothing, P18-S137-HALFREFUSED, "node beside the router shell".
+
+---
+
 # Next session — session 137 (2026-10-22, BOARD lane 6) drove **EXP-021 AC1**: todo-list signed in against one real backend running its own policy, the runtime against HEAD's export and the fixed export, each built as a person builds it. Reading the emitted page first found every list dropped (P18-S137-ARRIVALLIFT, fixed); after the fix the runtime and the export show the same lists, rows, order and lines. HEAD's showed none.
 
 ## ✅ Session 137: the todo list fills from its backend

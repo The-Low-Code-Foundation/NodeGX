@@ -4182,6 +4182,12 @@ export interface RepeaterPlan {
    */
   itemsExpr?: ValueExpr;
   /**
+   * P18 session 138 (EXP-011 §108). The items are a placed component's lifted value output: known only once the child's plan
+   * exists, so `liftInto` turns this into `itemsExpr` (the lifted row) or takes it back with the row relays. Until then the
+   * repeater counts as fed, so the first plan keeps its relays.
+   */
+  itemsLifted?: { connectionKey: string; instanceId: string; port: string };
+  /**
    * A Static Data node whose parsed rows are hoisted to a module constant (STATIC-DATA §3).
    * Deliberately not `itemsExpr`: that path's contract is "no statically-known item shape, so
    * fields read as `any` and every mapped input is kept". Static Data's shape *is* known, so it
@@ -4521,6 +4527,8 @@ export interface ComponentPlan {
     toProperty: string;
     /** P18-S127-SIBLINGVALUE. The sink is another placed component's input: a lift that fails is named on its marker. */
     intoInstance?: true;
+    /** EXP-011 §108. The sink is a For Each's items: the lifted row becomes its `itemsExpr`. */
+    intoItems?: true;
   }>;
   dispositions: Record<string, Disposition>;
   /** Dropped wires, unhandled constructs — EXP-004's report feed. Nothing silently dropped. */
@@ -4666,12 +4674,25 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
     for (const pending of plan.pendingLifted) {
       const child = byLegacyNow(pending.targetLegacy);
       const lifted = child?.liftedOutputProps.find((l) => l.port === pending.port);
-      if (!lifted) {
-        const reason = `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`;
+      // EXP-011 §108. Into a repeater's items, a lifted value typed as something other than a list draws nothing.
+      const notAList = pending.intoItems === true && lifted !== undefined && lifted.tsType !== 'any' && !lifted.tsType.endsWith('[]');
+      if (!lifted || notAList) {
+        const reason = notAList
+          ? `items are fed by a source not statically typed as a list (${lifted!.tsType})`
+          : `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`;
         plan.notes.push(`wire ${pending.connectionKey} dropped: ${reason}`);
         // P18-S127-SIBLINGVALUE. Into another placed component, the wire was named on its marker before; it still is.
-        if (pending.intoInstance === true) {
+        if (pending.intoInstance === true || pending.intoItems === true) {
           plan.droppedWires.push({ key: pending.connectionKey, fromId: pending.instanceId, fromProperty: pending.port, toId: pending.toNodeId, toProperty: pending.toProperty, reason });
+        }
+        // EXP-011 §108. The repeater draws no rows: what its rows relay is never written (its row signals go with the
+        // trigger pass below, which asks `rowlessReasonOf`).
+        if (pending.intoItems === true) {
+          delete plan.repeaters[pending.toNodeId].itemsLifted;
+          const component = ir.components.find((c) => `/${c.path}` === plan.legacyPath)!;
+          for (const relay of plan.rowRelays.filter((r) => r.repeaterId === pending.toNodeId)) {
+            takeBackRowRelay(plan, component, relay, `the repeater relaying "${relay.output}" draws no rows in the export (${reason}), so no row ever relays it`);
+          }
         }
         continue;
       }
@@ -4696,6 +4717,12 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
         });
         const list = (plan.instanceLifted[pending.instanceId] = plan.instanceLifted[pending.instanceId] ?? []);
         list.push({ prop: lifted.prop, setterName: setterNameOf(name) });
+      }
+      if (pending.intoItems === true) {
+        // EXP-011 §108. §4e's untyped list: `(rows ?? []).map(…)`, `?? []` the runtime's "empty arrival clears the list".
+        plan.repeaters[pending.toNodeId].itemsExpr = { kind: 'state-get', name, maybeUndefined: true };
+        delete plan.repeaters[pending.toNodeId].itemsLifted;
+        continue;
       }
       plan.bindings[pending.toNodeId] = plan.bindings[pending.toNodeId] ?? {};
       plan.bindings[pending.toNodeId][pending.toProperty] = {
@@ -4874,6 +4901,42 @@ export function undrawnReasonOf(plan: ComponentPlan, component: ComponentIR, id:
  * have no feed the export reads (a query, a named array, an expression, Static Data), or its rows are mapped by a script
  * (the emitter's `renderRepeater` draws a TODO marker for both). Decided after the list passes.
  */
+/**
+ * EXP-011 §99. A relay whose repeater draws no rows is never written: its row, its push and the lift of the value output it
+ * feeds are taken back, and the output says why. In the first plan (the feed known after the list passes) and in
+ * `liftInto` (§108: a lifted feed the child does not lift).
+ */
+function takeBackRowRelay(plan: ComponentPlan, component: ComponentIR, relay: RowRelayPlan, reason: string): void {
+  plan.rowRelays.splice(plan.rowRelays.indexOf(relay), 1);
+  plan.stateVars = plan.stateVars.filter((v) => v.name !== relay.stateName);
+  plan.pushEffects = plan.pushEffects.filter((e) => !(e.expr.kind === 'state-get' && e.expr.name === relay.stateName));
+  for (const wire of component.connections) {
+    if (wire.fromId !== relay.repeaterId || wire.fromProperty !== `${ITEM_OUTPUT_VALUE}${relay.output}`) continue;
+    const outputs = component.nodes.find((n) => n.id === wire.toId);
+    // P18-S138-ROWINTOINSTANCE. A placed component's input bound to the relay reads nothing now: the binding goes, said.
+    const bound = plan.bindings[wire.toId]?.[wire.toProperty];
+    if (bound?.kind === 'computed' && bound.expr.kind === 'state-get' && bound.expr.name === relay.stateName) {
+      delete plan.bindings[wire.toId][wire.toProperty];
+      plan.droppedWires.push({ key: wire.key, fromId: wire.fromId, fromProperty: wire.fromProperty, toId: wire.toId, toProperty: wire.toProperty, ...(wire.label !== undefined ? { label: wire.label } : {}), reason });
+      plan.notes.push(`wire ${wire.key} dropped: ${reason}`);
+      continue;
+    }
+    if (outputs?.type !== 'Component Outputs') continue;
+    plan.liftedOutputProps = plan.liftedOutputProps.filter((l) => l.port !== wire.toProperty);
+    plan.droppedWires.push({
+      key: wire.key,
+      fromId: wire.fromId,
+      fromProperty: wire.fromProperty,
+      toId: wire.toId,
+      toProperty: wire.toProperty,
+      ...(wire.label !== undefined ? { label: wire.label } : {}),
+      reason
+    });
+    plan.notes.push(`wire ${wire.key} dropped: ${reason}`);
+    if (plan.dispositions[outputs.id]?.kind !== 'deferred') plan.dispositions[outputs.id] = { kind: 'deferred', to: 'EXP-003', reason };
+  }
+}
+
 export function rowlessReasonOf(plan: ComponentPlan, repeaterId: string): string | null {
   const repeater = plan.repeaters[repeaterId];
   if (repeater === undefined || repeater.templatePath === null) return 'it draws no rows in the export (it has no template component)';
@@ -12056,6 +12119,22 @@ function planComponent(
    */
   const instancePulseVars = new Map<string, StateVarPlan>();
   const compileInstanceSignal = (node: NodeIR, port: string): CompiledSink => {
+    /**
+     * P18-S138-ROWINTOINSTANCE. In a row's chain, the runtime hands the placed component that row's relayed values before
+     * the signal (foreach.tsx `itemOutputSignalTriggered`). One the export cannot relay (a row output computed inside the
+     * row) would leave the component running on `undefined`: bot-garden's robot card's Name would write an empty name.
+     */
+    const row = rowChainScopes[rowChainScopes.length - 1];
+    if (row !== undefined) {
+      const repeater = nodeById.get(row);
+      for (const wire of component.connections) {
+        if (wire.fromId !== row || wire.toId !== node.id || !wire.fromProperty.startsWith(ITEM_OUTPUT_VALUE) || repeater === undefined) continue;
+        const relayed = relayedInputOf(repeater, wire.fromProperty.slice(ITEM_OUTPUT_VALUE.length));
+        if ('defer' in relayed) {
+          return { defer: `the row hands ${node.type} its "${wire.toProperty}" with this signal, which the export does not carry: ${relayed.defer}` };
+        }
+      }
+    }
     const key = `${node.id}\u0000${port}`;
     let stateVar = instancePulseVars.get(key);
     if (stateVar === undefined) {
@@ -17697,6 +17776,28 @@ function planComponent(
       target.nodes.some((n) => n.type === 'Component Inputs' && n.declaredPorts.some((p) => p.plug === 'output' && p.name === port && p.kind !== 'signal'))
     );
   };
+  /**
+   * P18-S138-ROWINTOINSTANCE (EXP-011 §108). A repeater's relayed row value into another placed component's declared input
+   * (rocket-school's list row's id into Delete question set, todo-list's money row's key into Mark money): §99's relay, the
+   * value of the row whose signal fired last, written by that signal's callback before its chain runs, so a pulse the same
+   * row sends the component arrives with it (both set in one handler, one commit). Before this the wire was refused at
+   * Pass 6 while the row's pulse still ran the component, with the input `undefined`.
+   */
+  for (const c of component.connections) {
+    if (consumed.has(c.key)) continue;
+    const fromNode = nodeById.get(c.fromId);
+    const toNode = nodeById.get(c.toId);
+    if (fromNode?.type !== 'For Each' || !c.fromProperty.startsWith(ITEM_OUTPUT_VALUE) || toNode === undefined) continue;
+    if (!rendered.has(toNode.id) || !siblingValueInputOf(toNode, c.toProperty)) continue;
+    const relay = rowRelayOf(fromNode, c.fromProperty);
+    consumed.add(c.key);
+    if ('defer' in relay) {
+      notes.push(wireNote(c, relay.defer));
+      continue;
+    }
+    plan.bindings[toNode.id] = plan.bindings[toNode.id] ?? {};
+    plan.bindings[toNode.id][c.toProperty] = { kind: 'computed', expr: { kind: 'state-get', name: relay.stateName } };
+  }
   // §4d parent side: consumed instance value outputs are recorded pending and resolved after
   // every plan exists (planProject's second phase) — binding requires the child to have
   // actually lifted the port, or the parent would pass a prop the child does not declare.
@@ -17714,6 +17815,21 @@ function planComponent(
       notes.push(
         wireNote(c, `instance output "${c.fromProperty}" feeds an unrendered sink — lifted values land only in rendered sinks in this slice`)
       );
+      continue;
+    }
+    // EXP-011 §108. A placed component's list into a repeater's items: the lifted row is its feed (§4e's untyped list).
+    if (toNode.type === 'For Each' && c.toProperty === 'items' && plan.repeaters[toNode.id] !== undefined) {
+      consumed.add(c.key);
+      plan.repeaters[toNode.id].itemsLifted = { connectionKey: c.key, instanceId: fromNode.id, port: c.fromProperty };
+      plan.pendingLifted.push({
+        connectionKey: c.key,
+        instanceId: fromNode.id,
+        targetLegacy: fromNode.type,
+        port: c.fromProperty,
+        toNodeId: toNode.id,
+        toProperty: c.toProperty,
+        intoItems: true
+      });
       continue;
     }
     const contentRole = (CONTENT_PARAMS[toNode.type] ?? {})[c.toProperty];
@@ -21489,20 +21605,11 @@ function planComponent(
       (plan.queries.some((q) => q.nodeId === repeater.itemsQueryId) ||
         repeater.itemsCollectionName != null ||
         repeater.itemsExpr !== undefined ||
+        // EXP-011 §108. A lifted feed is decided in `liftInto`, which takes the relays back if the child does not lift.
+        repeater.itemsLifted !== undefined ||
         plan.staticData.some((sd) => sd.nodeId === repeater.itemsStaticId));
     if (fed) continue;
-    const reason = `the repeater relaying "${relay.output}" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it`;
-    plan.rowRelays.splice(plan.rowRelays.indexOf(relay), 1);
-    plan.stateVars = plan.stateVars.filter((v) => v.name !== relay.stateName);
-    plan.pushEffects = plan.pushEffects.filter((e) => !(e.expr.kind === 'state-get' && e.expr.name === relay.stateName));
-    for (const wire of component.connections) {
-      if (wire.fromId !== relay.repeaterId || wire.fromProperty !== `${ITEM_OUTPUT_VALUE}${relay.output}`) continue;
-      const outputs = nodeById.get(wire.toId);
-      if (outputs?.type !== 'Component Outputs') continue;
-      plan.liftedOutputProps = plan.liftedOutputProps.filter((l) => l.port !== wire.toProperty);
-      notes.push(wireNote(wire, reason));
-      if (dispositions[outputs.id]?.kind !== 'deferred') dispositions[outputs.id] = { kind: 'deferred', to: 'EXP-003', reason };
-    }
+    takeBackRowRelay(plan, component, relay, `the repeater relaying "${relay.output}" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it`);
   }
 
   // Pass 6: report every wire nothing translated.

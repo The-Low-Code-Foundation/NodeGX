@@ -1,0 +1,175 @@
+[
+ {
+  "project": "bot-garden",
+  "component": "Workshop/Pad",
+  "node": "pdOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the repeater relaying \"op\" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Pages/Week",
+  "node": "twModeTick",
+  "type": "Set Variable",
+  "label": "Opened by the tick",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"One column per day\" (twDayEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "twDayEach"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Pages/Week",
+  "node": "twModeWords",
+  "type": "Set Variable",
+  "label": "Opened by the words or the hours",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"One column per day\" (twDayEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "twDayEach"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Pages/Week",
+  "node": "twSetNewDay",
+  "type": "Set Variable",
+  "label": "Start a new block on a day",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"One column per day\" (twDayEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "twDayEach"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Pages/Week",
+  "node": "twModeTick",
+  "type": "Set Variable",
+  "label": "Opened by the tick",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"One column per day\" (twDayEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "twDayEach"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Pages/Week",
+  "node": "twModeWords",
+  "type": "Set Variable",
+  "label": "Opened by the words or the hours",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"One column per day\" (twDayEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "twDayEach"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Pages/Week",
+  "node": "twSetNewDay",
+  "type": "Set Variable",
+  "label": "Start a new block on a day",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"One column per day\" (twDayEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "twDayEach"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Game/Choice row",
+  "node": "crOut",
+  "type": "Component Outputs",
+  "label": "What was chosen",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the repeater relaying \"value\" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Pages/Lists",
+  "node": "lsSetEditId",
+  "type": "Set Variable",
+  "label": "Edit this one",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"One row per list\" (lsEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "lsEach"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Game/Choice row",
+  "node": "crOut",
+  "type": "Component Outputs",
+  "label": "What was chosen",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "the repeater relaying \"value\" draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list), so no row ever relays it"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Pages/Lists",
+  "node": "lsSetEditId",
+  "type": "Set Variable",
+  "label": "Edit this one",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "its trigger, \"One row per list\" (lsEach), is not drawn: it draws no rows in the export (its items are not fed by a query, a named array, or a statically-known list)"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "lsEach"
+  }
+ }
+]
