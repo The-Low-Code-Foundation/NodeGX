@@ -6,7 +6,7 @@ severity: medium
 area: threadspace / the autopilot (`public/src/controllers/fly.mjs` `toward`, `ai.mjs` crew, `game.mjs` `navStop`)
 found: Threadspace s3, 2026-10-22, Richard: "the time it takes to progressively slow to a stop and be able to interact when an NPC is piloting is quite long"
 fixed: Threadspace s3, 2026-10-22
-commit: pending (threadspace s3)
+commit: a475b7fc0
 evidence: a simulation of both laws over the same approach (from rest, 700 m from the dock point, `canDock` = within 170 m and under 25 m/s): s1 54.7 s, arriving at 0.7 m/s; s3 15.3 s. Measured again in the page by dev-docs/parked/threadspace/tests/smoke.json: 15.3 s
 regression: dev-docs/parked/threadspace/tests/smoke.json "Vex flies 700 m to Haven's dock, nose on, and can dock in under 20 s of game time (s1: 55 s, TS-S3-CRAWL)"
 ---

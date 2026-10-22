@@ -6,7 +6,7 @@ severity: low
 area: threadspace / the sky (`public/src/space.mjs`)
 found: Threadspace s3, 2026-10-22, Richard: "You can tell you're inside a cube, you can see the corners and edges and distances"
 fixed: Threadspace s3, 2026-10-22
-commit: pending (threadspace s3)
+commit: a475b7fc0
 evidence: s2's dev-docs/parked/threadspace/shots/03-tactical.png, enlarged: a regular diagonal lattice over the whole sky, and curved lines converging below the Kestrel (the sphere's pole); s3's 03-tactical.png has neither
 regression: dev-docs/parked/threadspace/tests/smoke.json "the sky is a baked cube map, drawn at infinity" (a structural check; the look itself is read from the shots)
 ---

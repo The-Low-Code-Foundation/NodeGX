@@ -6,7 +6,7 @@ severity: high
 area: threadspace / the walk controller (`public/src/controllers/walk.mjs`), so the Kestrel's decks, the station concourse and boarding
 found: Threadspace s3, 2026-10-22, Richard played it: "sometimes W means forwards, sometimes sidewards, you have to keep trying different direction keys"
 fixed: Threadspace s3, 2026-10-22
-commit: pending (threadspace s3)
+commit: a475b7fc0
 evidence: dev-docs/parked/threadspace/tests/smoke.json "W A S D walk where the view faces at every heading": on s2's walk.mjs the worst step against the view's own axes is −1 (exactly backwards), on s3's +1
 regression: dev-docs/parked/threadspace/tests/smoke.json "W A S D walk where the view faces at every heading, not only 0 and 180 degrees (TS-S3-WALKAXES)"
 ---

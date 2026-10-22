@@ -6,7 +6,7 @@ severity: medium
 area: threadspace / interiors (`public/src/interiors.mjs`: `frigateInterior`, `capitalInterior`, `concourseInterior`, `Interior.room`)
 found: Threadspace s3, 2026-10-22, Richard: "Inside the ship has a lot of holes and gaps where you just see into space, space stations too"
 fixed: Threadspace s3, 2026-10-22
-commit: pending (threadspace s3)
+commit: a475b7fc0
 evidence: dev-docs/parked/threadspace/shots/b3-firefight.png at s2 showed the forest moon through the Carrion's starboard door; the probe `__game.debug.see()` straight down and straight up in the turret-pod, airlock and quarters doorways hit nothing on s2's interiors.mjs (null, null) and the passage floor and roof at 1.4–1.7 m on s3's
 regression: dev-docs/parked/threadspace/tests/smoke.json "between the corridor and each side room there is a floor and a roof, not space (TS-S3-HOLES…)"; tests/boarding.json "between the Carrion's corridor and her side rooms…"
 ---
