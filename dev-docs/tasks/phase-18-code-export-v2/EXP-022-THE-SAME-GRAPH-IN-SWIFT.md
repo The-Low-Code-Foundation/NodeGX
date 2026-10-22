@@ -1,7 +1,7 @@
 # EXP-022 — The same graph in Swift
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), from Richard's ruling of 2026-10-21: "I want that offramp promise
-fulfilled in React and Swift." **Status: 🔵 Swift session 5 of at most 12 done (2026-10-22, §9): S1 met AC1 on story-engine; S2 printed the plan's logic with the Functions in JavaScriptCore; S3 carried the backend through the React export's own client; S4 drove todo-list on the iPhone 17 simulator against a real backend, beside the running app and the React export: the Swift app reads and sends what the React export does at every step, and the two writes both exports cannot make (add, and every dialog) are the plan's, filed; S5 put AC4's line on P18's ledger beside React's (2 of 85 conform, 5 played, each with React's very trace; the 13 React plays and Swift does not are the `@nodegx/core` stores §7 cut) and wrote the cost: 5 sessions and 3,575 printer lines, nine decisions copied from the React printer. Next: AC5, the reveal (one project, web and phone, the numbers S4 and S5 measured), for Richard to read; whether a slack session carries the stores (as S3 carried the client) is his call. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
+fulfilled in React and Swift." **Status: 🔵 Swift session 6 of at most 12 done (2026-10-22, §9 S6): Richard ruled add & close fixed first, then the stores, then the reveal; S6 made adding a task and closing one work in both exports, all three arms equal at every step of S4's drive. Before that, S1–S5 (2026-10-22, §9): S1 met AC1 on story-engine; S2 printed the plan's logic with the Functions in JavaScriptCore; S3 carried the backend through the React export's own client; S4 drove todo-list on the iPhone 17 simulator against a real backend, beside the running app and the React export: the Swift app reads and sends what the React export does at every step, and the two writes both exports cannot make (add, and every dialog) are the plan's, filed; S5 put AC4's line on P18's ledger beside React's (2 of 85 conform, 5 played, each with React's very trace; the 13 React plays and Swift does not are the `@nodegx/core` stores §7 cut) and wrote the cost: 5 sessions and 3,575 printer lines, nine decisions copied from the React printer. Next: AC5, the reveal (one project, web and phone, the numbers S4 and S5 measured), for Richard to read; whether a slack session carries the stores (as S3 carried the client) is his call. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
 out of the parked table: its reveal sentence stands ("one graph, three homes"), its rulings R1–R7 carry, and **its route
 changes**: P110 §0 scoped *a NodeGX runtime written in Swift that loads the project as data*; this task is *an emitter
 that writes a SwiftUI app from the same IR the React export reads*. Same reveal, and the person leaves with Swift source
@@ -485,3 +485,55 @@ and a 395-line graph target. `plan.ts` and `component.ts` were read, not changed
 **Not done in S5:** the stores in JavaScriptCore, the 13. The React export's own client already runs there (S3), and the
 stores are JavaScript too; that is a measurement for a slack session if Richard wants the line wider. The runner's
 THROWDIVERGES fix (P107's).
+
+### S6 — Swift session 6 of at most 12 (2026-10-22, Opus 5.5)
+
+**Ruled first (Richard, 2026-10-22 21:30), asked in plain words with S4's `side-by-side.png` as the picture:**
+
+| asked | ruled |
+|---|---|
+| Neither export can add a task or close one (S4's bottom row: the running app has "Pick up the dry cleaning" added and "Write the release notes" closed; the web export and the phone show the old list). It is the shared plan both exports read, so one fix lands in both, and nobody had it scheduled. Closing: one States node leaves its heading empty in its no-dialog state and the plan refuses that (~5 lines). Adding: the new task's id has to reach the step that writes its history line (medium). What before the reveal? | **"Fix both, then reveal."** Counted in the Swift tally as shared planner work, named separately. |
+| The scorecard: React 11 of 85, Swift 2; the 9 between are the `@nodegx/core` stores, which todo-list does not use. Should Swift carry them? | **"Yes, after add & close."** The stores' own JavaScript in the `JSContext`, the way S3 carried the client. |
+| Where does the reveal live? | **"Private page first, then site."** An artifact for him to read; nodegx.io after he rules on its words. |
+
+Measured before asking: the running app reads an unauthored States text as `''` and an unauthored boolean as `false`
+(`states.ts` `typedStateValue`, P107-D19). Across every template only 2 States nodes leave a value unauthored, both
+texts. The other six refused Dialog flow nodes ("Was it closing?" …) are Conditions fed by the one refused States node.
+`Commands/Add task` hands Create's Id to `/Logic/Write history`'s `taskId` on Done; Write history hands its Create's and
+Update's Id to a Function on Done. Every consumer is inside the verb's own Done chain.
+
+**Result: adding a task and closing one now work in both exports, and at every step of S4's drive the running app, the
+React export and the Swift app read the same tabs and rows and send the same writes.** Evidence:
+[`exp-022/s6/`](exp-022/s6/README.md) and its `side-by-side.png`.
+
+| step | all three arms |
+|---|---|
+| add "Pick up the dry cleaning" | `List (4)`; `POST /classes/Task 201`, `POST /classes/Event 201`, the lists read again |
+| the release notes' ✓ | the note dialog over the dimmed list |
+| a note, then Close task | `PUT /classes/Task/<id> 200`, `POST /classes/Event 201`, the lists read again; `List (3)` `Done (2)` |
+| relaunch | `List (3)` `Done (2)` |
+
+**Three defects, not the two filed** (the plan and both printers; the shared work the ruling counts apart):
+
+- `P18-EXP022-S4-DIALOGREFUSED` (fixed): a States text or boolean a state leaves empty is the runtime's `''` / `false`;
+  and a States value into a placed component's input binds (Pass 4f), which the dialog needed to open at all.
+- `P18-EXP022-S4-ADDREFUSED` (fixed): a Create's or an Update's Id inside its Done chain is the answer's id (`verb-id`),
+  read by a Function at its run, by a placed component through a row written before the chain, and by a relation verb
+  (RECORD-VERBS-TARGET §4c's designed read, now built). Elsewhere the reader refuses by name. Set as Object over a
+  Function output only object literals write. Write history, placed by 19 commands, translates whole: every history
+  line both exports had been losing.
+- `P18-EXP022-S6-NOOVERLAY` (found by the drive, fixed): the dialog drew below the page in both exports. React reads a
+  CSS Style as the runtime does (`readStyleCss`); Swift prints the full-screen fixed scrim as a full-screen cover.
+
+todo-list's report: 857 notes at HEAD, 773 after. The Swift preflight leaves 96 things out (S4: 98).
+
+**Graded:** `tests/the-same-graph-in-swift-s6.test.ts`, 15 rows (§A the dialog, §B a record's Id, §C Set as Object, §D
+what still refuses by name, §E the overlay), and `animation-pair` B9b. Four older tests pinned the old Id refusal and
+now pin what replaced it (`record-verbs` 11, `relation-verbs` ×2, `relation-pair` E1); Swift S2's C2 counts 65 Function
+bodies (Write history's "Remember it" is carried now). The whole package (`nice -n 19 --runInBand`, 13:47): **163 of 163
+files, 5,361 passed, 28 skipped, 0 failed** (S5: 5,345).
+
+**Cost:** the Swift printer +45 / −8 lines; the plan +244 / −20 and the React printer +70 / −7, shared. `plan.ts` was
+changed this session, through the package's whole suite (the React lane's own).
+
+**Next (ruled):** the stores in JavaScriptCore (§7's 9 scenarios), then the reveal as a private page for Richard.

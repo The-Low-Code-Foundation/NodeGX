@@ -160,7 +160,10 @@ describe('§C todo-list, S2\'s work list', () => {
   it('C2 every logic component is printed, and every Function body travels, run or not', () => {
     expect(todo.preflight.logic).toHaveLength(36);
     const fns = Object.keys(todo.files).filter((f) => f.includes('/Scripts/functions/'));
-    expect(fns).toHaveLength(64);
+    // 65 since EXP-022 S6: Write history's "Remember it, to extend next time" was refused (two record Ids into one input,
+    // P18-EXP022-S4-ADDREFUSED) and is carried now, read at each run from the write whose Done runs it.
+    expect(fns).toHaveLength(65);
+    expect(fns).toContain('Sources/TodoListKit/Scripts/functions/Logic/Write history/Remember_it_to_extend_next_time.js');
     // S2 carried four and ran none of them; the two that run only in chains behind the session (the link's task and its
     // Today) run since S3, behind `session.read("authenticated")`, where the React export runs them.
     const home = todo.files['Sources/TodoListKit/Views/TodoPageView.swift'] ?? '';

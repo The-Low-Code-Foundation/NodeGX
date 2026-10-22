@@ -1,0 +1,340 @@
+{
+ "arm": "swift",
+ "seeded": {
+  "mot": "9a4b73b9-250f-4f29-8146-ea614968f4f3",
+  "vat": "3d6c332e-f173-46b3-9a9b-92406c892275",
+  "notes": "bd4d0b40-7238-4e7b-8d6a-e3e07f774125",
+  "domain": "da6776d2-e2b9-4d35-9dc5-441646fb8ad7",
+  "routine": "7bfd802d-8e3f-420e-a2de-2976700b52e1"
+ },
+ "startedAt": "2026-10-22T20:32:55.690Z",
+ "steps": [
+  {
+   "at": "2026-10-22T20:33:07.590Z",
+   "buttons": [
+    "☾",
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "step": "D0",
+   "texts": [
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one."
+   ],
+   "unhittable": [],
+   "requests": []
+  },
+  {
+   "at": "2026-10-22T20:33:15.524Z",
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "reachedTodo": true,
+   "savePasswordOffered": true,
+   "step": "D1",
+   "texts": [
+    "Todo list",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "3",
+    "Write the release notes",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "unhittable": [],
+   "requests": [
+    "POST /login 200",
+    "POST /classes/Task 200",
+    "POST /classes/Action 200",
+    "POST /classes/Event 200",
+    "POST /classes/Routine 200",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/MoneyItem 200",
+    "POST /classes/BalanceReading 200",
+    "POST /classes/Project 200",
+    "POST /classes/MoneyMark 200"
+   ]
+  },
+  {
+   "at": "2026-10-22T20:33:21.846Z",
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "savePasswordOfferedLate": false,
+   "step": "D2",
+   "texts": [
+    "Todo list",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "3",
+    "Write the release notes",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "unhittable": [],
+   "requests": []
+  },
+  {
+   "addFound": true,
+   "at": "2026-10-22T20:33:27.978Z",
+   "buttons": [
+    "List (4)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "✓",
+    "Add",
+    "shift",
+    "Emoji",
+    "return",
+    "Next keyboard",
+    "Dictate",
+    "Dictate"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #5)"
+   ],
+   "listFour": true,
+   "step": "D3",
+   "texts": [
+    "Todo list",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "3",
+    "Write the release notes",
+    "4",
+    "Pick up the dry cleaning",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "unhittable": [],
+   "requests": [
+    "POST /classes/Task 201",
+    "POST /classes/Event 201",
+    "POST /classes/Task 200",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/Routine 200",
+    "POST /classes/Action 200",
+    "POST /classes/Event 200"
+   ]
+  },
+  {
+   "at": "2026-10-22T20:33:31.903Z",
+   "buttons": [
+    "Cancel",
+    "Close task"
+   ],
+   "circles": 4,
+   "dialog": true,
+   "fields": [
+    "text::What happened?"
+   ],
+   "step": "D4dialog",
+   "texts": [
+    "Write the release notes",
+    "What happened?",
+    "Every task keeps a record. One line is enough, even “not needed, dropping it”."
+   ],
+   "titleFound": true,
+   "unhittable": [],
+   "requests": []
+  },
+  {
+   "at": "2026-10-22T20:33:36.792Z",
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (2)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add",
+    "shift",
+    "Emoji",
+    "return",
+    "Next keyboard",
+    "Dictate",
+    "Dictate"
+   ],
+   "doneTwo": true,
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "step": "D4",
+   "texts": [
+    "Todo list",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "3",
+    "Pick up the dry cleaning",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "unhittable": [],
+   "requests": [
+    "PUT /classes/Task/bd4d0b40-7238-4e7b-8d6a-e3e07f774125 200",
+    "POST /classes/Event 201",
+    "POST /classes/Task 200",
+    "POST /classes/Routine 200",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/Event 200",
+    "POST /classes/Action 200"
+   ]
+  },
+  {
+   "at": "2026-10-22T20:33:43.722Z",
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (2)",
+    "Log",
+    "Sign out",
+    "🔕",
+    "🔔",
+    "☾",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "signedIn": true,
+   "step": "D5",
+   "texts": [
+    "Todo list",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "3",
+    "Pick up the dry cleaning",
+    "Select a task, or something that repeats, to see its details."
+   ],
+   "unhittable": [],
+   "requests": [
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/Action 200",
+    "POST /classes/Event 200",
+    "POST /classes/Routine 200",
+    "POST /classes/Task 200",
+    "POST /classes/MoneyMark 200",
+    "POST /classes/BalanceReading 200",
+    "POST /classes/MoneyItem 200",
+    "POST /classes/Project 200"
+   ]
+  },
+  {
+   "at": "2026-10-22T20:33:45.261Z",
+   "buttons": [
+    "☾",
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "signInPage": true,
+   "step": "D6",
+   "texts": [
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one."
+   ],
+   "unhittable": [],
+   "requests": [
+    "POST /logout 200"
+   ]
+  },
+  {
+   "at": "2026-10-22T20:33:52.170Z",
+   "buttons": [
+    "☾",
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "signInPage": true,
+   "step": "D6relaunch",
+   "texts": [
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one."
+   ],
+   "unhittable": [],
+   "requests": []
+  }
+ ],
+ "xcodebuildExit": 0,
+ "failures": [],
+ "result": "** TEST EXECUTE SUCCEEDED **"
+}

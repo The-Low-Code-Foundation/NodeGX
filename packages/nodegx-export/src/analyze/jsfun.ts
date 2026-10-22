@@ -101,6 +101,21 @@ export function functionMinedPortsOf(body: string): FunctionMinedPorts {
 }
 
 /**
+ * P18-EXP022-S4-ADDREFUSED. Whether every mention of `Outputs.<name>` in the body is a write of an object or an array
+ * literal, so the value it sends is never a string (a Set Variable's Set as Object or Array converts only a string,
+ * `setvariablenode.ts` `scheduleStore`). Conservative: a read of the output, a computed `Outputs[…]`, or `Outputs` used as
+ * a whole answers false.
+ */
+export function functionOutputNeverStringOf(body: string, name: string): boolean {
+  if (!/^[A-Za-z0-9_]+$/.test(name)) return false;
+  const code = stripScriptComments(body);
+  if (/\bOutputs\s*\[/.test(code) || /\bOutputs\b(?!\s*\.)/.test(code)) return false;
+  const mentions = code.match(new RegExp(`\\bOutputs\\.${name}\\b`, 'g')) ?? [];
+  const literalWrites = code.match(new RegExp(`\\bOutputs\\.${name}\\s*=(?!=)\\s*[{[]`, 'g')) ?? [];
+  return mentions.length > 0 && mentions.length === literalWrites.length;
+}
+
+/**
  * expression.ts `functionPreamble`, verbatim — the compile checks must accept exactly what the
  * runtime's compile accepts (an expression shadowing `round` compiles there, so it must here).
  */

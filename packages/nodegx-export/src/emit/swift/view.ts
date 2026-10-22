@@ -219,11 +219,13 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
   // ---- values ---------------------------------------------------------------------------------------------------
 
   /** A Function's argument record, as a Swift dictionary literal. */
-  const jsArgs = (def: JsFunctionPlan, scope: Scope): string | undefined => {
+  const jsArgs = (def: JsFunctionPlan, scope: Scope, atRun?: Array<{ name: string; expr: ValueExpr }>): string | undefined => {
     const entries: string[] = [];
     for (const input of def.inputs) {
-      if (input.expr === undefined) continue;
-      const v = expr(input.expr, scope);
+      // P18-EXP022-S4-ADDREFUSED. An input a record's Id (or a running Function) feeds is read at the run, never off the plan.
+      const read = input.atRun === true ? atRun?.find((a) => a.name === input.name)?.expr : input.expr;
+      if (read === undefined) continue;
+      const v = expr(read, scope);
       if (v === undefined) return undefined;
       entries.push(`${swiftString(input.name)}: ${v}`);
     }
@@ -297,6 +299,10 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
         // EXP-011 §90. Inside the catch, the message local; elsewhere the node's Error row.
         if (e.viaState !== undefined) return stateByName.has(e.viaState) ? ident(e.viaState) : undefined;
         return /^\w+$/.test(e.local) ? e.local : undefined;
+      // P18-EXP022-S4-ADDREFUSED. A Create's Id row, or inside the Done chain the answer's id.
+      case 'verb-id':
+        if (e.viaState !== undefined) return stateByName.has(e.viaState) ? ident(e.viaState) : undefined;
+        return /^\w+$/.test(e.local) ? `JS.field(${e.local}, "id")` : undefined;
       case 'static-rows':
         return plan.staticData.some((d) => d.constName === e.constName) ? `Self.${e.constName}` : undefined;
       case 'row-relay':
@@ -468,7 +474,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
         if (!def || def.kind !== 'function') return lost(`a run of a ${def?.kind ?? 'missing'} node`);
         useFunction(def);
         const names = runNamesOf(def);
-        const args = jsArgs(def, scope);
+        const args = jsArgs(def, scope, a.inputsAtRun);
         if (args === undefined) return lost(`a run of ${def.fnName} whose inputs read a value this target does not print`);
         const lines: string[] = [];
         // A Run records what it read on the ticked inputs, so the arrival effect does not run it again for them.
@@ -566,9 +572,14 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
           body.push(`${inner}if !JS.truthy(${g.local}) { throw BackendError(message: ${swiftString(g.message)}) }`);
           args[g.index] = g.local;
         }
-        body.push(`${inner}_ = try await Scripts.shared.api(${swiftString(a.fnName)}, [${args.join(', ')}])`);
+        // P18-EXP022-S4-ADDREFUSED. Bound where the Done chain reads the record's Id, or a placed component's input reads its row.
+        body.push(`${inner}${a.recordLocal !== undefined ? `let ${a.recordLocal}` : '_'} = try await Scripts.shared.api(${swiftString(a.fnName)}, [${args.join(', ')}])`);
         const row = stateByName.has(a.errorState) ? ident(a.errorState) : undefined;
         if (a.clearErrorOnDone === true && row) body.push(`${inner}${row} = nil`);
+        if (a.idState !== undefined) {
+          if (!stateByName.has(a.idState) || a.recordLocal === undefined) return lost(`the Id row of ${a.fnName}`);
+          body.push(`${inner}${ident(a.idState)} = JS.field(${a.recordLocal}, "id")`);
+        }
         body.push(...statements(nodeId, a.then, inner, scope));
         const message = `${a.errorState}Message`;
         const lines = [
@@ -772,6 +783,8 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       }
       modifiers.push(...otherHandlers(id, pad, ['onClick']));
       out = mods(out, modifiers, pad);
+      // P18-EXP022-S6-NOOVERLAY. The full-screen scrim takes no room where it is placed; it covers the screen instead.
+      if (s.overlay) out = [`${pad}Color.clear.frame(width: 0, height: 0)`, `${pad}  .fixedOverlay {`, ...out.map((l) => `  ${l}`), `${pad}  }`];
     } else if (role === 'text') {
       const s = styleOf(id, role);
       const text = bound.text ? binding(id, 'text', bound.text) : undefined;

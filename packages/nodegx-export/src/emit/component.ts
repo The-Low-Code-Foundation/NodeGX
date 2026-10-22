@@ -814,7 +814,7 @@ export function emitComponent(
     // one is opt-in and does not error when it is missing — the row would be written by the
     // failure arm, read by the sink, and then dropped by the `referencedStateNames` filter as
     // unreferenced, which emits a component that does not compile.
-    if (expr.kind === 'outcome-error' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
+    if ((expr.kind === 'outcome-error' || expr.kind === 'verb-id') && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     if (expr.kind === 'jsfun-out') {
       if (expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
       referencedJsIds.add(expr.nodeId);
@@ -1248,7 +1248,7 @@ export function emitComponent(
     }
     // EXP-011 §24. A render read of an Error output is *always* the row form — the failure arm's
     // `const` exists only inside that arm — so this clause earns every row render can see.
-    if (expr.kind === 'outcome-error' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
+    if ((expr.kind === 'outcome-error' || expr.kind === 'verb-id') && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
     // EXP-011 Tier 1.3, the same clause twice more. A date call's arguments earn their hooks
     // through this walker, and a render read of `Now` earns the row it goes through — a render
     // read is *always* the row form, since the local exists only inside the Read chain.
@@ -1369,6 +1369,8 @@ export function emitComponent(
   // nothing reads it in the whole corpus (USER-FAMILY-TARGET §4b).
   for (const action of deepActions(allActions)) {
     if (action.kind === 'api-call') referencedStateNames.add(action.errorState);
+    // P18-EXP022-S4-ADDREFUSED. The Create's Id row the chain writes, read by a placed component's input.
+    if (action.kind === 'api-call' && action.idState !== undefined) referencedStateNames.add(action.idState);
     // EXP-011 Tier 1.2: both rows are written by the call itself. The Error row is the record
     // verbs' case exactly; the answer row is written only where something reads it, so it is
     // already earned — naming it here keeps the writer and the row inseparable either way.
@@ -1916,6 +1918,9 @@ export function emitComponent(
       case 'outcome-error':
         // EXP-011 §76. A seeded row (the extractor's) is never undefined in either form. Must agree with plan.ts.
         return expr.viaState !== undefined && expr.seeded !== true;
+      // P18-EXP022-S4-ADDREFUSED. Must agree with plan.ts.
+      case 'verb-id':
+        return expr.viaState !== undefined;
       case 'state-get':
         return expr.maybeUndefined === true;
       // FLD-015. A hoisted Static Data constant is a frozen module-scope literal — present from
@@ -2044,11 +2049,13 @@ export function emitComponent(
     return SIMPLE_REF.test(code) || /^[A-Za-z_$][\w$.]*\(\)$/.test(code) || code.endsWith(')') ? code : `(${code})`;
   };
   /** The wrapper call's argument record; shorthand where the arg code is the field name. */
-  const jsArgsObject = (def: JsFunctionPlan, mode: 'handler' | 'render'): string => {
+  const jsArgsObject = (def: JsFunctionPlan, mode: 'handler' | 'render', atRun?: Array<{ name: string; expr: ValueExpr }>): string => {
     // P18-S122-TPLBUILD (TS2554). An Expression with no inputs prints `function True()`: a call with `{}` passes an
     // argument it does not take. A Function's and a Visual Function's wrapper always takes its record.
     if (def.kind === 'expression' && def.inputs.length === 0) return '';
+    // P18-EXP022-S4-ADDREFUSED. An input a record's Id feeds is read at the run (`inputsAtRun`), never off the plan.
     const entries = def.inputs
+      .map((i) => (i.atRun === true ? { ...i, expr: atRun?.find((a) => a.name === i.name)?.expr } : i))
       .filter((i) => i.expr !== undefined)
       .map((i) => {
         const code = exprCode(i.expr!, mode);
@@ -2242,6 +2249,9 @@ export function emitComponent(
        */
       case 'outcome-error':
         return expr.viaState ?? expr.local;
+      // P18-EXP022-S4-ADDREFUSED. A Create's row, or the Done chain's answer's id.
+      case 'verb-id':
+        return expr.viaState ?? `${expr.local}.id`;
       /**
        * A `Unique Id`'s or `UUID`'s `Id` (EXP-011 §37) — the row anywhere, the Done chain's own
        * binding inside it. No optional chaining on either: the row is a string the sink guards
@@ -2587,6 +2597,7 @@ export function emitComponent(
         case 'file-out':
         // EXP-011 §24, the same clause and the same reason one construct over.
         case 'outcome-error':
+        case 'verb-id':
           if (e.viaState !== undefined) add(e.viaState);
           break;
         // EXP-011 §46. A member depends on whatever its column read depends on.
@@ -3534,7 +3545,7 @@ export function emitComponent(
         if (action.awaitsAt !== undefined) {
           const names = pulseNamesOf(def);
           const at = pad(indent);
-          const lines = [`${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler')}, ${names.node});`];
+          const lines = [`${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler', action.inputsAtRun)}, ${names.node});`];
           if (action.materialize !== undefined) lines.push(`${at}${stateSetterOf(action.materialize)}({ ...${names.run}.outputs });`);
           lines.push(...blockBody(expandActions(action.then.slice(0, action.awaitsAt)), indent));
           const after = blockBody(expandActions(action.then.slice(action.awaitsAt)), indent);
@@ -3545,14 +3556,14 @@ export function emitComponent(
         }
         if (pulsedRunIds.has(action.nodeId) && action.then.length === 0) {
           const names = pulseNamesOf(def);
-          const run = `${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler')}, ${names.node})`;
+          const run = `${record}const ${names.run} = runFunction(${def.fnName}, ${jsArgsObject(def, 'handler', action.inputsAtRun)}, ${names.node})`;
           if (action.materialize === undefined) return run;
           // P18-S121-SAMEOUTPUTS. A copy: the node's own record is the same object every run, and React keeps a state it is
           // handed again, so the render would show the first run's values until something else re-rendered.
           return `${run};\n${pad(indent)}${stateSetterOf(action.materialize)}({ ...${names.run}.outputs })`;
         }
         if (action.materialize !== undefined) {
-          return `${record}${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler')}))`;
+          return `${record}${stateSetterOf(action.materialize)}(${def.fnName}(${jsArgsObject(def, 'handler', action.inputsAtRun)}))`;
         }
         // P18-S129-FNSUCCESS. A Run of a run that is neither pulsed nor materialized is only its record: the chain after
         // it reads the outputs where they land, as before. (A Success chain gives such a run a ticked half.)
@@ -3634,10 +3645,13 @@ export function emitComponent(
             args[g.index] = g.local;
             return [bound, `${inner}if (!${g.local}) throw new Error(${tsLiteral(g.message)});`];
           }),
-          `${inner}await ${action.fnName}(${args.join(', ')});`,
+          // P18-EXP022-S4-ADDREFUSED. Bound where the Done chain reads the record's Id (`verb-id`).
+          `${inner}${action.recordLocal !== undefined ? `const ${action.recordLocal} = ` : ''}await ${action.fnName}(${args.join(', ')});`,
           // EXP-011 §44 — Request Magic Link clears its Error on success, before `done`
           // (`requestmagiclink.ts`); no other verb in either family does.
           ...(action.clearErrorOnDone === true ? [`${inner}${stateSetterOf(action.errorState)}(undefined);`] : []),
+          // P18-EXP022-S4-ADDREFUSED. The runtime sets the record (and its Id) before Done.
+          ...(action.idState !== undefined ? [`${inner}${stateSetterOf(action.idState)}(${action.recordLocal}.id);`] : []),
           ...expandActions(action.then).map((a) => `${inner}${actionCode(a, indent + 2)};`)
         ];
         return [

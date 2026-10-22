@@ -811,6 +811,23 @@ export function computeNodeStyle(
   if (textAlign !== undefined) decls.push({ prop: 'text-align', value: textAlign });
   consumed.add('textAlignX');
 
+  // P18-EXP022-S6-NOOVERLAY. The CSS Style port: the runtime's own reading (`updateAdvancedStyle`), applied after every
+  // port above, as the runtime's inline style overrides them. A text it cannot read applies nothing, there and here.
+  const styleCss = params.get('styleCss');
+  const authoredCss = styleCss?.kind === 'script' ? styleCss.source : styleCss?.kind === 'literal' && typeof styleCss.value === 'string' ? styleCss.value : undefined;
+  if (authoredCss !== undefined) {
+    const read = readStyleCss(authoredCss);
+    if ('error' in read) notes.push(`its CSS Style does not read (${read.error}) — the running app applies none of it, and neither does the export`);
+    else {
+      for (const d of read.decls) {
+        // The runtime sets an inline style, which nothing escapes; a stylesheet rule could be closed early by a brace.
+        if (/^-?[A-Za-z][A-Za-z0-9-]*$/.test(d.prop) && !/[{}<]/.test(d.value)) decls.push(d);
+        else notes.push(`its CSS Style declaration "${d.prop}: ${d.value}" is not a plain declaration — left out of the stylesheet`);
+      }
+    }
+    consumed.add('styleCss');
+  }
+
   for (const { name } of effective) {
     if (consumed.has(name) || CONSUMED.has(name)) continue;
     if (content[name] !== undefined) continue;
@@ -1169,6 +1186,38 @@ function shadowLength(value: unknown): string {
 
 function kebabCase(name: string): string {
   return name.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
+}
+
+/**
+ * P18-EXP022-S6-NOOVERLAY. A CSS Style text read exactly as the runtime reads it (`react-component-node.ts`
+ * `updateAdvancedStyle`): the first newline dropped, comments stripped, split on `;`, each part trimmed line by line; a
+ * part still holding a newline is a missing semicolon, and one that is not one `name: value` pair is a syntax error.
+ * Either error and the runtime applies none of it. The declarations keep the author's own property names.
+ */
+export function readStyleCss(text: string): { decls: Decl[] } | { error: string } {
+  let raw = text.replace('\n', '');
+  let css = '';
+  while (raw.length) {
+    let next = raw.indexOf('/*');
+    if (next === -1) next = raw.length;
+    css += raw.substring(0, next);
+    raw = raw.substring(next);
+    if (raw.length) {
+      let end = raw.indexOf('*/');
+      if (end === -1) end = raw.length;
+      raw = raw.substring(end + 2);
+    }
+  }
+  const trim = (s: string) => s.replace(/^\s+|\s+$/gm, '');
+  const decls: Decl[] = [];
+  let error = '';
+  for (const part of css.split(';').map(trim).filter((s) => s.length)) {
+    const pieces = part.split(':').map(trim);
+    if (part.indexOf('\n') !== -1) error += 'Missing semicolon: ' + part.split('\n')[0];
+    else if (pieces.length !== 2) error += 'Syntax error: ' + part;
+    else decls.push({ prop: pieces[0], value: pieces[1] });
+  }
+  return error ? { error } : { decls };
 }
 
 function orderDecls(decls: Decl[]): Decl[] {

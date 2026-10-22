@@ -41,6 +41,11 @@ export interface SwiftStyle {
   stack?: StackLayout;
   /** `prop: value` pairs the table does not carry, for the preflight. */
   unmapped: string[];
+  /**
+   * P18-EXP022-S6-NOOVERLAY. `position: fixed` at the top left, the whole width and height: the web's modal scrim, drawn
+   * over everything. The view prints it as a full-screen cover (`fixedOverlay`); the style here fills what it is given.
+   */
+  overlay?: true;
 }
 
 /**
@@ -211,10 +216,18 @@ export function swiftStyle(decls: Decl[], role: string, theme: Theme): SwiftStyl
     }
   }
 
+  // P18-EXP022-S6-NOOVERLAY. The full-screen scrim idiom, whole: fixed, at 0 0, 100% by 100% (a stacking order beside it
+  // has nothing to order on a cover). Any other fixed element stays a named loss.
+  const zero = (prop: string) => /^0(px)?$/.test(by.get(prop) ?? '');
+  const overlay = by.get('position') === 'fixed' && zero('top') && zero('left') && by.get('width') === '100%' && by.get('height') === '100%';
+  if (overlay) for (const prop of ['position', 'top', 'left', 'width', 'height', 'z-index']) take(prop);
+  // The frame below centres its content, which is what `justify-content: center` asks of the scrim's column.
+  if (overlay && by.get('justify-content') === 'center') take('justify-content');
+
   // Size. `width: 100%` fills the parent; `max-width` caps it; fixed sizes are fixed.
-  const widthRaw = take('width');
+  const widthRaw = overlay ? undefined : take('width');
   const maxWidth = num('max-width');
-  const height = num('height');
+  const height = overlay ? undefined : num('height');
   let fill = false;
   let fixedWidth: string | undefined;
   if (widthRaw === '100%') fill = true;
@@ -231,6 +244,7 @@ export function swiftStyle(decls: Decl[], role: string, theme: Theme): SwiftStyl
     box.push(`.frame(${args.join(', ')}, alignment: .topLeading)`);
   }
   if (fill || maxWidth !== undefined) box.push(`.frame(maxWidth: ${maxWidth ?? '.infinity'}, alignment: ${frameAlignment})`);
+  if (overlay) box.push('.frame(maxWidth: .infinity, maxHeight: .infinity)');
 
   // Background and border, sharing a corner radius.
   const radiusRaw = take('border-radius');
@@ -268,5 +282,5 @@ export function swiftStyle(decls: Decl[], role: string, theme: Theme): SwiftStyl
     if (NO_OP.has(`${d.prop}:${d.value}`)) continue;
     unmapped.push(`${d.prop}: ${d.value}`);
   }
-  return { modifiers: [...content, ...box], content, box, colorModifier, stack, unmapped };
+  return { modifiers: [...content, ...box], content, box, colorModifier, stack, unmapped, ...(overlay ? { overlay: true as const } : {}) };
 }

@@ -180,10 +180,20 @@ describe('§17 — Add Record Relation: the gates, in the order validateInputs r
    * that Create is **gate 11** — and the verb, compiled from the wire side, names the same wall from its own
    * side rather than being built on a refused chain. §4c's chain-local `created.id` is the increment that would move both.
    */
-  it("a well-formed relation fed a Create's Id names §4c's unbuilt chain-local read — the pre-flight passed", () => {
-    expect(reasonFor(wellFormedRelation(), ADMIN, 'linkInquiry')).toBe(
-      "its Id is the Id output of a record verb — that value exists only inside the verb's own done chain, and the chain-local read RECORD-VERBS-TARGET §4c designs is not built"
-    );
+  /** EXP-022 S6 built §4c's chain-local read (P18-EXP022-S4-ADDREFUSED): the relation is written on the answer's id. */
+  it("a well-formed relation fed a Create's Id, in the Create's Done chain, is written on the new record's id", () => {
+    const source = wellFormedRelation();
+    expect(reasonFor(source, ADMIN, 'linkInquiry')).toBeUndefined();
+    expect(reasonFor(source, ADMIN, 'createRecord')).toBeUndefined();
+    const admin = emitApp(source, catalog).files['src/pages/Admin.tsx'];
+    const lines = admin.split('\n').map((l) => l.trim());
+    const create = lines.findIndex((l) => l.startsWith('const createPuppyRecord = await createPuppy({'));
+    expect(create).toBeGreaterThan(-1);
+    expect(lines.slice(create + 1, create + 5).filter((l) => l !== 'try {')).toEqual([
+      'const recordError2RecordId = createPuppyRecord.id;',
+      "if (!recordError2RecordId) throw new Error('No record Id specified (the record that should get the relation)');",
+      "await addInquiryRelation(recordError2RecordId, 'puppy', 'seed-id', 'Puppy');"
+    ]);
   });
 
   /** Zero corpus instances, so this is target-output-only — and it must not be a hole. */
@@ -350,7 +360,9 @@ describe('§17 — the sweep replaces the catch-all and nothing else', () => {
    * sits immediately before the `logic node (…)` catch-all so it cannot pre-empt an earlier
    * pass, and these three verbs are dispositioned much earlier.
    */
-  it('the relation graph moves the Create to gate 11 and leaves Update and Delete untouched', () => {
+  // EXP-022 S6: the Create's Id no longer refuses it; its Done chain runs a relation the runtime refuses (no relation
+  // property), so the Create refuses with that relation's own pre-flight sentence.
+  it("the relation graph refuses the Create on its Done chain's relation, and leaves Update and Delete untouched", () => {
     const planOf = (source: ExportIR) => {
       const project = planProject(source, new CatalogIndex(catalog));
       return project.plans.find((p) => p.path === ADMIN)!;
@@ -360,7 +372,7 @@ describe('§17 — the sweep replaces the catch-all and nothing else', () => {
 
     expect(JSON.stringify(before.dispositions['createRecord'])).toBe('{"kind":"collapsed","into":"addBtn"}');
     expect(reasonFor(withRelationGraph(), ADMIN, 'createRecord')).toBe(
-      'its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need'
+      'no relation property is named, so the runtime answers Failure with "No relation property specified" and never calls the backend'
     );
 
     for (const id of ['updateRecord', 'deleteRecord']) {

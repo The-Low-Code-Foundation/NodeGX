@@ -315,6 +315,16 @@ extension View {
     self
     #endif
   }
+
+  /// The web's modal scrim (\`position: fixed\` over the whole page): on a phone a full-screen cover over everything,
+  /// shown while this view is in the tree and gone with it; on a Mac (the package's own tests) drawn over this view.
+  @ViewBuilder func fixedOverlay<Content: View>(@ViewBuilder _ content: @escaping () -> Content) -> some View {
+    #if os(iOS)
+    self.fullScreenCover(isPresented: .constant(true)) { content().presentationBackground(.clear) }
+    #else
+    self.overlay { content() }
+    #endif
+  }
 }
 
 #if os(macOS)

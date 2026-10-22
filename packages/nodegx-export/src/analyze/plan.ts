@@ -61,7 +61,8 @@ import {
   jsNoodlUseOf,
   jsPurityDefer,
   JS_EXPRESSION,
-  JS_FUNCTION
+  JS_FUNCTION,
+  functionOutputNeverStringOf
 } from './jsfun';
 import {
   SCRIPT_TYPE,
@@ -192,6 +193,9 @@ const RECORD_VERBS: Record<string, 'create' | 'update' | 'delete'> = {
   SetDbModelProperties: 'update',
   DeleteDbModelProperties: 'delete'
 };
+
+/** P18-EXP022-S4-ADDREFUSED. A record verb's Id read where this slice has no form of it (the sink cache matches it too). */
+const VERB_ID_OUTSIDE = "its Id is read outside its Done chain — this slice reads a record verb's Id only in the chain its answer runs";
 
 /** `HTTP Request` (EXP-011 Tier 1.2) — the one node that talks to something the project does not own. */
 const HTTP_TYPE = 'net.noodl.HTTP';
@@ -2117,6 +2121,15 @@ export type ValueExpr =
    */
   | { kind: 'outcome-error'; nodeId: string; local: string; viaState?: string; seeded?: true }
   /**
+   * P18-EXP022-S4-ADDREFUSED. A Create or Update Record's `Id`, read inside the node's own Done chain: `local` is the `const`
+   * the awaited call's answer is bound to, and the read is its `id`. The runtime sets the record (`setModel`, which flags
+   * `id`) before it sends Done, so a graph reading Id on Done reads the Id the backend gave a new record, or the one an
+   * update was handed. `viaState` is a Create's row form, read where a handler's local does not reach (a placed
+   * component's input, which its pulse reads after the commit): the row the answer writes before the Done chain, kept as
+   * the runtime keeps the record. Any other read refuses by name.
+   */
+  | { kind: 'verb-id'; nodeId: string; local: string; viaState?: string }
+  /**
    * EXP-011 §76. `seeded` marks an Error row that `initialize` wrote `''` into and every run rewrites — the
    * extractor's — so the row form is never undefined either. Absent for every other node, whose row reads
    * undefined until the first failure.
@@ -2564,6 +2577,11 @@ export type HandlerAction =
       awaitsAt?: number;
       /** EXP-011 §90, as an api call's. */
       detached?: true;
+      /**
+       * P18-EXP022-S4-ADDREFUSED. The inputs a record verb's Id feeds (`atRun` on the plan's input), read at this run: the
+       * Id of the verb whose Done chain runs it, which the runtime set just before that Done.
+       */
+      inputsAtRun?: Array<{ name: string; expr: ValueExpr }>;
     }
   /**
    * EXP-011 §86. The chains of a Function's own signals (`Outputs.go()`), first in its run's `then`: one loop over the
@@ -2654,6 +2672,16 @@ export type HandlerAction =
        * other `api-call` keeps the runtime's "never cleared" (RECORD-VERBS-TARGET §1).
        */
       clearErrorOnDone?: true;
+      /**
+       * P18-EXP022-S4-ADDREFUSED. Set where the Done chain reads this verb's Id (`verb-id`): the awaited answer is bound to
+       * this `const`, and the read is its `id`. Absent, the answer is dropped as before.
+       */
+      recordLocal?: string;
+      /**
+       * P18-EXP022-S4-ADDREFUSED. A Create's Id row, where a placed component's input reads it (`verb-id`'s row form): written
+       * from `recordLocal` before the Done chain, so a pulse the chain sends that component arrives in the same commit.
+       */
+      idState?: string;
       then: HandlerAction[];
       /**
        * EXP-011 §90. The `failure` chain, printed in the catch after the Error row and the raise: the runtime's
@@ -3200,7 +3228,7 @@ export interface JsFunctionPlan {
    * literal `in-*` parameters fold, mined-but-unfed inputs stay fields so the body's reads
    * typecheck (they read `undefined`, exactly as a never-delivered runtime input does).
    */
-  inputs: Array<{ name: string; tsType: string; expr?: ValueExpr }>;
+  inputs: Array<{ name: string; tsType: string; expr?: ValueExpr; atRun?: true }>;
   /** Function only: the Outputs record's value fields (mined + declared + consumed). */
   outputs: Array<{ name: string; tsType: string }>;
   /** Function only: signal outputs (mined call syntax / `outtype-*: signal`), seeded no-op. */
@@ -3359,6 +3387,8 @@ export interface StateVarPlan {
     | 'lifted'
     | 'jsfun'
     | 'record-error'
+    /** P18-EXP022-S4-ADDREFUSED — a Create's Id, where a placed component's input reads it. */
+    | 'record-id'
     | 'variable'
     | 'http'
     | 'http-error'
@@ -6861,6 +6891,27 @@ function planComponent(
     return name;
   };
 
+  /** P18-EXP022-S4-ADDREFUSED. A wire off a Create's or an Update's Id. */
+  const isVerbIdWire = (wire: ConnectionIR): boolean => {
+    const from = nodeById.get(wire.fromId);
+    const verb = from === undefined ? undefined : RECORD_VERBS[from.type];
+    return wire.fromProperty === 'id' && (verb === 'create' || verb === 'update');
+  };
+  /**
+   * P18-EXP022-S4-ADDREFUSED. A wire off a value output of a Run-wired Function whose own chain is being compiled now (a
+   * Function this one runs inside, through one of its signals): at that run the input holds what the sender's run wrote
+   * just before it pulsed, the read the sender's own arm makes (`jsfun-out`, no row). Read at the run, as a verb's Id is.
+   */
+  const isOpenRunWire = (wire: ConnectionIR): boolean => {
+    const from = nodeById.get(wire.fromId);
+    return (
+      from !== undefined &&
+      from.type === JS_FUNCTION &&
+      wiredPorts.has(`${from.id}:run`) &&
+      chainSenders.includes(from.id) &&
+      isJsValueOutput(from, wire.fromProperty)
+    );
+  };
   /**
    * The per-node half of the purity gate (§3) plus the wrapper definition: body checks from
    * jsfun.ts, then every statically-known input resolved through the emit vocabulary. Each
@@ -6979,6 +7030,15 @@ function planComponent(
         for (const name of inputNames) {
           const port = portNameOf(name);
           const wires = component.connections.filter((c) => c.toId === node.id && c.toProperty === port);
+          /**
+           * P18-EXP022-S4-ADDREFUSED. An input only record verbs' Ids feed is set when one of them answers, just before its
+           * Done: it is read at each run (`inputsAtRun`), from the verb whose Done chain runs it, never here. So is one a
+           * Function whose chain is open now feeds (`isOpenRunWire`).
+           */
+          if (wires.length > 0 && wires.every((w) => isVerbIdWire(w)) || (kind === 'function' && wires.length === 1 && isOpenRunWire(wires[0]))) {
+            inputs.push({ name, tsType: 'string', atRun: true });
+            continue;
+          }
           if (wires.length > 1) {
             return { defer: `two wires feed input "${name}" — last-writer-wins is not statically ordered` };
           }
@@ -7422,6 +7482,26 @@ function planComponent(
     }
     return stateVar;
   };
+  const verbIdVars = new Map<string, StateVarPlan>();
+  /** P18-EXP022-S4-ADDREFUSED. A Create's Id row: undefined until it answers, then the Id, kept as the runtime keeps its record. */
+  const verbIdStateOf = (node: NodeIR): StateVarPlan => {
+    let stateVar = verbIdVars.get(node.id);
+    if (stateVar === undefined) {
+      stateVar = allocStateVar(
+        node.authoredLabel === undefined ? undefined : `${node.authoredLabel} Id`,
+        'recordId',
+        'string | undefined',
+        null,
+        node.id,
+        'record-id',
+        `The Id output of ${node.authoredLabel ? `"${node.authoredLabel}"` : `the ${node.type}`} — the Id the backend gave the record it created, written before Done.`
+      );
+      verbIdVars.set(node.id, stateVar);
+    }
+    return stateVar;
+  };
+  /** P18-EXP022-S4-ADDREFUSED. The `const` a Create's or an Update's answer is bound to, where its Done chain reads its Id. */
+  const verbRecordLocalOf = (node: NodeIR): string => `${verbErrorStateOf(node).name.replace(/Error$/, '')}Record`;
 
   // ---- HTTP Request (EXP-011 Tier 1.2): names, state rows and the chain scope ---------------
 
@@ -10218,6 +10298,14 @@ function planComponent(
       }
       return { kind: 'state-get', name: verbErrorStateOf(fromNode).name, maybeUndefined: true };
     }
+    // P18-EXP022-S4-ADDREFUSED. A Create's or an Update's Id inside its own Done chain is the awaited answer's id.
+    if (RECORD_VERBS[fromNode.type] !== undefined && fromProperty === 'id') {
+      if (RECORD_VERBS[fromNode.type] !== 'delete' && verbChainScope.get(fromNode.id) === 'done') {
+        return { kind: 'verb-id', nodeId: fromNode.id, local: verbRecordLocalOf(fromNode) };
+      }
+      ctx.defer = VERB_ID_OUTSIDE;
+      return null;
+    }
     /**
      * `External Link`'s `Error` output (EXP-011 §14) — the record verbs' shape exactly: a
      * maybe-undefined row that folds at its sinks the way the runtime's unwritten getter does.
@@ -11007,6 +11095,9 @@ function planComponent(
       case 'outcome-error':
         // EXP-011 §76. A seeded row (the extractor's) is never undefined in either form.
         return expr.viaState !== undefined && expr.seeded !== true;
+      // P18-EXP022-S4-ADDREFUSED. The answer always carries its id; the row is undefined until the first one.
+      case 'verb-id':
+        return expr.viaState !== undefined;
       case 'state-get':
         return expr.maybeUndefined === true;
       // EXP-011 §100. The row's field: a row whose item lacks it is handed nothing. Must agree with component.ts maybeUndefined.
@@ -11421,6 +11512,8 @@ function planComponent(
        */
       case 'outcome-error':
         return 'string';
+      case 'verb-id':
+        return 'string';
       /** Both nodes publish a string id, in both forms (EXP-011 §37). */
       case 'id-out':
         return 'string';
@@ -11725,6 +11818,32 @@ function planComponent(
     // A sink two chains run is compiled once per Failure scope that reads its local (`compiledOf`), never shared.
     return chain;
   };
+  /**
+   * P18-EXP022-S4-ADDREFUSED. A Create's or an Update's `done` chain, with the scope that makes a read of its own Id inside
+   * it the awaited answer's id (`verb-id`). A sink that reads it is compiled under that scope's key (`compiledOfKeyed`).
+   */
+  const verbDoneChainOf = (node: NodeIR): DoneChain | { defer: string } => {
+    const outer = verbChainScope.get(node.id);
+    verbChainScope.set(node.id, 'done');
+    try {
+      return doneChainOf(node);
+    } finally {
+      if (outer === undefined) verbChainScope.delete(node.id);
+      else verbChainScope.set(node.id, outer);
+    }
+  };
+  /** Whether any expression anywhere inside `actions` (every arm, every nesting) matches `test`. */
+  const actionsRead = (actions: HandlerAction[], test: (e: { kind?: unknown; nodeId?: unknown }) => boolean): boolean => {
+    let found = false;
+    const visit = (value: unknown): void => {
+      if (found || value === null || typeof value !== 'object') return;
+      if (Array.isArray(value)) return value.forEach(visit);
+      if (test(value as { kind?: unknown; nodeId?: unknown })) found = true;
+      for (const child of Object.values(value)) visit(child);
+    };
+    visit(actions);
+    return found;
+  };
 
   /** Show Popup → the slot set + `done`-chain (POPUPS-TARGET §3). */
   const compileShowPopup = (node: NodeIR): CompiledSink => {
@@ -12007,6 +12126,36 @@ function planComponent(
     const arrival = isArrivalRun(node);
     const ticked = tickedWatchOf(node, record.def);
     if ('defer' in ticked) return { defer: ticked.defer };
+    /**
+     * P18-EXP022-S4-ADDREFUSED. An input only record verbs' Ids feed holds the Id of the one that answered last, set just
+     * before its Done (`setModel`, then the outcome). So a run in a verb's Done chain reads that verb's Id: the wire of the
+     * innermost sender whose chain runs this, as a Set's Value does (`lastValueWireOf`). Any other run has no such read.
+     */
+    const inputsAtRun: Array<{ name: string; expr: ValueExpr }> = [];
+    const atRunConsumes: string[] = [];
+    for (const input of record.def.inputs.filter((i) => i.atRun === true)) {
+      if (arrival || ticked.watch.length > 0) {
+        return { defer: `its input "${input.name}" is a record's Id, set when that record answers — a run on an input's arrival would read it, and this slice reads it only at a Run in that record's Done chain` };
+      }
+      const wires = component.connections.filter((c) => c.toId === node.id && c.toProperty === `in-${input.name}`);
+      let chosen: ConnectionIR | undefined;
+      for (const sender of [...chainSenders].reverse()) {
+        const own = wires.filter((c) => c.fromId === sender);
+        if (own.length > 1) return { defer: `two wires from one record feed its input "${input.name}"` };
+        if (own.length === 1) {
+          chosen = own[0];
+          break;
+        }
+      }
+      if (chosen === undefined) {
+        return { defer: `its input "${input.name}" is a record's Id, and this run is not in that record's Done chain — ${VERB_ID_OUTSIDE.replace(/^its /, 'the ')}` };
+      }
+      const ctx = newCtx();
+      const expr = resolveExpr(nodeById.get(chosen.fromId), chosen.fromProperty, ctx);
+      if (expr === null) return { defer: `input "${input.name}" — ${ctx.defer ?? VERB_ID_OUTSIDE}` };
+      inputsAtRun.push({ name: input.name, expr });
+      atRunConsumes.push(chosen.key, ...ctx.consumes);
+    }
     // §3.6 over the run path: failure/unchanged/error report the run itself, isTrueEv/isFalseEv pulse per evaluation —
     // any of them consumed defers. A Function's Success is a chain of its own since P18-S129-FNSUCCESS (below).
     for (const c of component.connections) {
@@ -12182,6 +12331,9 @@ function planComponent(
     // keeps its outputs across them (a run that returns early writes nothing). So it keeps a node, as a pulsed run does.
     // EXP-019: a hosted run keeps a node too, so the body runs once per trigger and never at a read site.
     if (pulses.then.length > 0 || (materialize !== undefined && record.def.kind === 'function') || hosted) record.def.pulsed = true;
+    // P18-EXP022-S4-ADDREFUSED. A run whose inputs are read at the run keeps its node: a read of its outputs is that run's,
+    // never a second call, which would have no run to take them from.
+    if (inputsAtRun.length > 0) record.def.pulsed = true;
     // P18-S119-TICKEDRUN. Done is the Run's alone; a ticked run that sends nothing and writes nothing is unobservable.
     // P18-S129-FNSUCCESS: it sends Success.
     // EXP-019 slice 1b (session 134). An awaiting body's chain after the run's promise: Success (and Done, on a Run).
@@ -12207,9 +12359,10 @@ function planComponent(
         nodeId: node.id,
         then: chain.then,
         ...(materialize !== undefined ? { materialize } : {}),
-        ...awaitsAt
+        ...awaitsAt,
+        ...(inputsAtRun.length > 0 ? { inputsAtRun } : {})
       },
-      consumes: chain.consumes,
+      consumes: [...atRunConsumes, ...chain.consumes],
       collapses: chain.collapses,
       subscribes: chain.subscribes
     };
@@ -12459,7 +12612,9 @@ function planComponent(
       if (wire.fromProperty === 'completed') {
         return { defer: `its ${wire.fromProperty} output is consumed — only the done and failure chains and the Error value are translated in this slice` };
       }
-      if (wire.fromProperty === 'id') {
+      // P18-EXP022-S4-ADDREFUSED. A Create's or an Update's Id is read where it is consumed: inside the Done chain it is the
+      // answer's id (`verb-id`), elsewhere that read refuses itself by name and the verb still writes.
+      if (wire.fromProperty === 'id' && verb === 'delete') {
         return { defer: 'its Id output is consumed — the record it names exists only inside the invoking chain, which the relation verbs would need' };
       }
     }
@@ -12521,10 +12676,18 @@ function planComponent(
       }
     }
 
-    const chain = doneChainOf(node);
+    const chain = verb === 'delete' ? doneChainOf(node) : verbDoneChainOf(node);
     if ('defer' in chain) return { defer: chain.defer };
     const failChain = verbFailChainOf(node);
     if ('defer' in failChain) return { defer: failChain.defer };
+    const readsId = actionsRead(chain.then, (e) => e.kind === 'verb-id' && e.nodeId === node.id);
+    // A Create's Id into a placed component's input is a row (bound in Pass 4e′), written here before the Done chain.
+    const idIntoInstance =
+      verb === 'create' &&
+      component.connections.some((c) => {
+        const to = c.fromId === node.id && c.fromProperty === 'id' ? nodeById.get(c.toId) : undefined;
+        return to !== undefined && siblingValueInputOf(to, c.toProperty);
+      });
 
     const { typeName, moduleBase } = collectionModuleNames(collectionName);
     const fnName = `${verb}${typeName}`;
@@ -12560,6 +12723,8 @@ function planComponent(
         // EXP-011 §72. An `unknown` id (an untyped Variable, a store key nothing types) into a `string` parameter.
         ...(idExpr !== undefined && idExpr.kind !== 'literal' && exprTsType(idExpr) === 'unknown' ? { coerceId: 'string' as const } : {}),
         errorState: verbErrorStateOf(node).name,
+        ...(readsId || idIntoInstance ? { recordLocal: verbRecordLocalOf(node) } : {}),
+        ...(idIntoInstance ? { idState: verbIdStateOf(node).name } : {}),
         then: chain.then,
         failThen: failChain.then
       },
@@ -12624,14 +12789,9 @@ function planComponent(
     if (idWires.length > 1) return { defer: 'two wires feed its Id — last-writer-wins is not statically ordered' };
     if (idWires.length === 1) {
       const idSource = nodeById.get(idWires[0].fromId);
-      // The corpus idiom (RECORD-VERBS-TARGET §2: `NewDbModelProperties.id → AddDbModelRelation.modelId`) —
-      // §4c designs the chain-local read and it is not built; the Create is gate 11 for the same wire.
-      if (idSource !== undefined && RECORD_VERBS[idSource.type] !== undefined && idWires[0].fromProperty === 'id') {
-        return {
-          defer:
-            "its Id is the Id output of a record verb — that value exists only inside the verb's own done chain, and the chain-local read RECORD-VERBS-TARGET §4c designs is not built"
-        };
-      }
+      // The corpus idiom (RECORD-VERBS-TARGET §2: `NewDbModelProperties.id → AddDbModelRelation.modelId`): §4c's
+      // chain-local read, built in P18-EXP022-S4-ADDREFUSED. Inside the Create's Done chain it is the answer's id
+      // (`verb-id`); anywhere else `resolveExpr` refuses it by name.
       const expr = resolveExpr(idSource, idWires[0].fromProperty, ctx);
       if (expr === null) return { defer: ctx.defer ?? 'its Id has no statically known source' };
       if (isBooleanExpr(expr)) return { defer: 'its Id is fed a logic truth value — only truthiness sinks take one in this slice' };
@@ -14957,7 +15117,10 @@ function planComponent(
       const byState: Record<string, string | number | boolean> = {};
       const transitions: Record<string, StatesCurve> = {};
       for (const state of states) {
-        const authored = literalParam(node, `value-${state}-${name}`);
+        // P18-EXP022-S4-DIALOGREFUSED. A text a state leaves empty is the empty text and a boolean is false, on both of
+        // the runtime's roads (states.ts `typedStateValue`, P107-D19; `jumpToState` and a move agree). A number or a
+        // colour left empty is 0 on a jump and undefined on a move, so it still refuses.
+        const authored = literalParam(node, `value-${state}-${name}`) ?? (type === 'string' ? '' : type === 'boolean' ? false : undefined);
         if (authored === undefined) return refuse(`its value "${name}" has no authored value in state "${state}"`);
         byState[state] = authored;
         const curve = curveParam(node, `transition-${state}-${name}`);
@@ -16489,7 +16652,10 @@ function planComponent(
     const setWith = literalParam(node, 'setWith');
     // EXP-011 §90. Where several wires feed Value, the one the runtime's Value holds at this Do (`lastValueWireOf`).
     const wire = lastValueWireOf(node);
-    if (setWith === 'object' || setWith === 'array') {
+    // P18-EXP022-S4-ADDREFUSED. Object and Array convert only a string (a store lookup by id); a wired value that is
+    // never a string is written untouched, below.
+    const convertsObject = setWith === 'object' || setWith === 'array';
+    if (convertsObject && wire === undefined) {
       return { defer: `setWith "${String(setWith)}" conversion is not translated in step 5` };
     }
     if (setWith === 'emptyString') {
@@ -16528,6 +16694,12 @@ function planComponent(
     if (expr === null) return { defer: ctx.defer ?? 'the value wire has no statically known source' };
     if (isBooleanExpr(expr)) {
       return { defer: 'the value wire carries a logic truth value — only truthiness sinks take one in this slice' };
+    }
+    if (convertsObject) {
+      const feeder = nodeById.get(wire.fromId);
+      const body = feeder?.type === JS_FUNCTION ? jsBodyOf(feeder, 'function') : undefined;
+      const neverString = expr.kind === 'jsfun-out' && body !== undefined && functionOutputNeverStringOf(body, expr.output);
+      if (!neverString) return { defer: `setWith "${String(setWith)}" conversion is not translated in step 5` };
     }
     return {
       action: { kind: 'store-set', variableName, expr, ...typedInUnderWire(node, 'value', wire, expr) },
@@ -16921,10 +17093,16 @@ function planComponent(
      * verb's local is kept under that scope's key only; inside a scope, a plain one that reads a scoped verb's row is not
      * reused. Everything else is one compile, as before.
      */
+    // P18-EXP022-S4-ADDREFUSED. A Create's or an Update's Done scope is the same shape: a read of its Id there is the
+    // answer's local (`verb-id`), and outside it the read refuses.
     const scoped = [...verbChainScope].filter(([, s]) => s === 'failure').map(([id]) => id);
-    const scopeKey = scoped.length > 0 ? `${plainKey}@failure:${[...scoped].sort().join(',')}` : undefined;
+    const doneScoped = [...verbChainScope].filter(([, s]) => s === 'done').map(([id]) => id);
+    const scopeKey =
+      scoped.length + doneScoped.length > 0
+        ? `${plainKey}${scoped.length > 0 ? `@failure:${[...scoped].sort().join(',')}` : ''}${doneScoped.length > 0 ? `@done:${[...doneScoped].sort().join(',')}` : ''}`
+        : undefined;
     const readsScoped = (result: CompiledSink, form: 'local' | 'row'): boolean => {
-      if ('defer' in result || scoped.length === 0) return false;
+      if ('defer' in result || scoped.length + doneScoped.length === 0) return false;
       const rows = form === 'row' ? new Set(scoped.map((id) => verbErrorVars.get(id)?.name).filter((n) => n !== undefined)) : undefined;
       let found = false;
       const visit = (value: unknown): void => {
@@ -16932,6 +17110,7 @@ function planComponent(
         if (Array.isArray(value)) return value.forEach(visit);
         const v = value as { kind?: unknown; nodeId?: unknown; viaState?: unknown; name?: unknown };
         if (form === 'local' && v.kind === 'outcome-error' && v.viaState === undefined && scoped.includes(v.nodeId as string)) found = true;
+        if (form === 'local' && v.kind === 'verb-id' && doneScoped.includes(v.nodeId as string)) found = true;
         if (form === 'row' && v.kind === 'state-get' && rows!.has(v.name as string)) found = true;
         for (const child of Object.values(value)) visit(child);
       };
@@ -16941,7 +17120,9 @@ function planComponent(
     const cachedScoped = scopeKey !== undefined ? compiledSinks.get(scopeKey) : undefined;
     if (cachedScoped !== undefined) return cachedScoped;
     const cached = compiledSinks.get(plainKey);
-    if (cached !== undefined && !readsScoped(cached, 'row')) return cached;
+    // An outside compile that refused on a verb's Id is compiled again inside that verb's Done chain, where the Id reads.
+    const refusedOnId = cached !== undefined && 'defer' in cached && doneScoped.length > 0 && cached.defer.includes(VERB_ID_OUTSIDE);
+    if (cached !== undefined && !refusedOnId && !readsScoped(cached, 'row')) return cached;
     // Inside a scope, a sink whose outside compile is still open (it reached this verb through the verb's Error) is a
     // second compile, not a cycle: the two read the Error differently.
     const key = scopeKey !== undefined && (cached !== undefined || compiling.has(plainKey)) ? scopeKey : plainKey;
@@ -17103,6 +17284,9 @@ function planComponent(
        */
       case 'outcome-error':
         return true;
+      // P18-EXP022-S4-ADDREFUSED. The row reads anywhere; the local only in a handler (it is minted inside the Done chain).
+      case 'verb-id':
+        return expr.viaState !== undefined || context.kind !== 'render';
       /**
        * A pure date call is valid wherever its arguments are — it reads nothing but them
        * (EXP-011 Tier 1.3). Recursing rather than answering `true` is the point: an argument may
@@ -20588,6 +20772,28 @@ function planComponent(
     }
   }
 
+  /**
+   * Pass 4e′ (P18-EXP022-S4-ADDREFUSED). A Create's Id into a placed component's value input: the row the verb writes from
+   * its answer before its Done chain (`idState`), so the pulse that chain sends the component arrives with it, in one
+   * commit, as the runtime's input holds the Id before Done. Only for a verb whose Do attached: a row nothing writes would
+   * be an invented value.
+   */
+  for (const connection of component.connections) {
+    if (consumed.has(connection.key) || connection.fromProperty !== 'id') continue;
+    const fromNode = nodeById.get(connection.fromId);
+    const toNode = nodeById.get(connection.toId);
+    if (!fromNode || RECORD_VERBS[fromNode.type] !== 'create' || !toNode || !rendered.has(toNode.id)) continue;
+    if (!siblingValueInputOf(toNode, connection.toProperty) || !attachedRecordVerbs.has(fromNode.id)) continue;
+    const row = verbIdVars.get(fromNode.id);
+    if (row === undefined) continue; // the verb compiled no row: the sweep names the wire
+    consumed.add(connection.key);
+    plan.bindings[toNode.id] = plan.bindings[toNode.id] ?? {};
+    plan.bindings[toNode.id][connection.toProperty] = {
+      kind: 'computed',
+      expr: { kind: 'verb-id', nodeId: fromNode.id, local: verbRecordLocalOf(fromNode), viaState: row.name }
+    };
+  }
+
   // Pass 4f: latch state and stateful-control value outputs into rendered sinks
   // (CONTROLLED-STATE-TARGET §4a, §4c) — `Switch.state → Group.visible`,
   // `range.value → Text.text`. Same bindable discipline as 4d/4e, plus the truthiness sinks.
@@ -20860,7 +21066,10 @@ function planComponent(
       contentRole === 'attr-not:disabled' ||
       (contentRole !== undefined && contentRole.startsWith('attr:')) ||
       // EXP-011 §49. A wired style parameter the emitter prints inline.
-      styleSinkOf(toNode, connection.toProperty) !== undefined;
+      styleSinkOf(toNode, connection.toProperty) !== undefined ||
+      // P18-EXP022-S4-DIALOGREFUSED. A States value into a placed component's declared value input: a prop, read at
+      // render, as Pass 4e binds a Function's (todo-list's Dialog flow hands its Note dialog open, heading, help, OK).
+      (isStatesRead && siblingValueInputOf(toNode, connection.toProperty));
     if (!bindable) continue; // the sweep names the reason
     // Three verbs sharing one status line is the corpus's own shape (the Puppy admin form). The
     // runtime shows whichever wrote last, which is not statically ordered — so the first wire
