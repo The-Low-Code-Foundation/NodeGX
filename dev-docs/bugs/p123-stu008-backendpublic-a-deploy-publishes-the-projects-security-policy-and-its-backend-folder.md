@@ -1,7 +1,8 @@
 ---
 id: P123-STU008-BACKENDPUBLIC
 title: "A deploy publishes the project's `nodegx.security.json` and its `backend/` folder (seed data, fixtures, proposed triggers) to the public site"
-status: open
+status: fixed
+commit: 490361c22
 severity: medium
 area: deploy / default ignore rules (`packages/noodl-editor/src/editor/src/utils/compilation/build/ignore.ts` `DEFAULT_IGNORE_ENTRIES`, shared by the editor's Deploy and the npm engine `@nodegx/preview/dist/nodegx-deploy.cjs`)
 kit: preview
