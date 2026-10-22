@@ -6,6 +6,7 @@ commit: 490361c22
 severity: medium
 area: deploy / default ignore rules (`packages/noodl-editor/src/editor/src/utils/compilation/build/ignore.ts` `DEFAULT_IGNORE_ENTRIES`, shared by the editor's Deploy and the npm engine `@nodegx/preview/dist/nodegx-deploy.cjs`)
 kit: preview
+regression: packages/noodl-editor/tests-unit/p123/deploy-ignores-backend-files.test.ts "excludes the access policy and backend/" (legacy and v2; root-only; the !/backend/ opt-in; and the control that index.html and assets still copy)
 found: P123 → NodeGX Studio STU-008 (Publish), 2026-10-20
 evidence: ~/vscode_projects/nodegx-studio docs/SCOPE.md "Done (STU-008)"
 ---
