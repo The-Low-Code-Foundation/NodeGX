@@ -150,3 +150,23 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   mock round's shell, `"$CHROME_PATH" --dump-dom` → the page.
 - **Also seen, a kit defect to file:** when `render_report` times out it reports "killed", but the `render-from-disk`
   server it started keeps running (three were left, 8–17 minutes old; the next render's own orphan sweep reaped them).
+
+- **2026-10-22 15:00 CEST, a fence note.** An agent can list its own round root (`command.txt`, `sandbox.sb`,
+  `sittings/`): t1-code-1 (re-run) ran `ls` on it once. `command.txt` names the arm. Left as is so every round runs
+  under the same conditions; any round whose agent read those files is noted beside its result.
+- **2026-10-22 15:56 CEST, t1-nodegx-1 (re-run) ended** (completed, DONE, 1 sitting, 2,981 s, $0.203; 3 `render_report`
+  + 13 `drive_page`, none timed out; chrome-sandbox-hits 0). **Its agent read the lab's files and probed the fence:** at
+  13:10 UTC one command ran `grep -rl 'querySettings' /Users/Shared`, `ls /Users/richardosborne/vscode_projects`
+  (refused: "Operation not permitted") and `cat` of its round's `sandbox.sb`. Looking, by its own words around it, for
+  where a setting is read (a kit-docs gap, not an escape); the fence held. Noted per the fence note above.
+- **2026-10-22 16:26 CEST, first three grades in (one round per arm):** t1-code-1 (re-run) **21/22** (T6), t1-harness-1
+  **20/22** (F6, T6), t1-nodegx-1 (re-run) **16/22** (F7, T3, T5, T7, T8, T9). The grades stand as graded (§5). One
+  reading owed beside them: T7 and T8 (any family's children, answers and parent PIN read and changed, with B's token or
+  none) come from the kit's local backend default **`"devOpen": true`** (its `security.json`: `collections: {}`,
+  defaults `authenticated` + `creatorOwns: true`, unenforced while devOpen is on, on loopback only; filed as
+  P112-OWN023-DEVOPENREAD / -NOENFORCETOOL). The same file makes that backend **refuse to bind beyond loopback**
+  (`security/state.ts` the deploy interlock), so as delivered, the family tablet the request names can't reach it at
+  all, while t1-code-1's server announced a Wi-Fi address with auth enforced on every request. What it would do with
+  devOpen off (the defaults' `creatorOwns`) is a separate measurement, to be made on a copy and reported beside this
+  grade, never in place of it. The other four (double press answers the next question too, two tabs overwrite each
+  other, the "last 10" window freezes after 10 answers, small buttons) are the app's own graph.
