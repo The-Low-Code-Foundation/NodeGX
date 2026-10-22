@@ -3,7 +3,7 @@
 **Status:** 🟢 **Route B built and driven (2026-08-28, session 34).** AC1–AC5 met and measured in a
 browser; AC6 settled as a decision (§8). Route A is not built and is not owed by this task — see §9.
 **Depends on:** EXP-002 (props, callback props and lifted outputs already exist)
-**Related:** phase 69 (`dev-docs/tasks/phase-69-the-node-you-write-yourself/`) — the authoring side
+**Related:** phase 69 (`dev-docs/tasks-archive/phase-69-the-node-you-write-yourself/`) — the authoring side
 
 ---
 

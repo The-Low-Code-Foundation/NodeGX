@@ -46,4 +46,4 @@ The original Phase 5 (multi-target deployment) proposed PWA, Capacitor, Electron
 - [`dev-docs/future-projects/PHASE-RUNTIME-REACT-19-MIGRATION.md`](../../future-projects/PHASE-RUNTIME-REACT-19-MIGRATION.md)
 - [`dev-docs/future-projects/SSR-SUPPORT.md`](../../future-projects/SSR-SUPPORT.md)
 - [`dev-docs/future-projects/NATIVE-BAAS-INTEGRATIONS.md`](../../future-projects/NATIVE-BAAS-INTEGRATIONS.md)
-- [`dev-docs/tasks/phase-6-uba-system/`](../phase-6-uba-system/) — UBA-001…009, already complete
+- [`dev-docs/tasks-archive/phase-6-uba-system/`](../../tasks-archive/phase-6-uba-system/) — UBA-001…009, already complete

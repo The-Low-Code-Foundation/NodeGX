@@ -339,7 +339,7 @@ well, and says in the file that it is **necessary and not sufficient**.
 - 🔴 **The column-less auto-created class** (§2.3a). `publishPage` is *correct* to refuse a query
   that errored; the defect is that a filter against a never-written column is a 500 rather than
   zero rows, and that the template therefore cannot publish its first page. **Owner: NONE** —
-  raised as a phase 80 row; see `../phase-80-the-defects-the-templates-found/TASKS.md`.
+  raised as a phase 80 row; see `../../tasks-archive/phase-80-the-defects-the-templates-found/TASKS.md`.
 - 🔴 **The admin page list never queries on load.** Arriving at `/admin/pages` cold renders the
   shell, the heading and `New page` and **nothing else**, while `GET /classes/Page` with the same
   session returns both rows. Measured, not inferred: `performance.getEntriesByType('resource')`

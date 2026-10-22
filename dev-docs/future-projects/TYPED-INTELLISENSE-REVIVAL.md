@@ -108,7 +108,7 @@ could not remove them. Retiring Monaco for good needed two follow-ups first —
 
 ## References
 
-- `dev-docs/tasks/phase-14.5-revival-debt/DEBT-011-MONACO-RETIREMENT.md` (this note's origin; see its CHANGELOG section for the full DEBT-011 account)
+- `dev-docs/tasks-archive/phase-14.5-revival-debt/DEBT-011-MONACO-RETIREMENT.md` (this note's origin; see its CHANGELOG section for the full DEBT-011 account)
 - `dev-docs/reviews/PRE-REVIVAL-SALVAGE-AUDIT.md` §5
 - PLAT-003 ("type the runtime") task docs, phase 14
 - `packages/noodl-core-ui/src/components/code-editor/` (the live CodeMirror editor)

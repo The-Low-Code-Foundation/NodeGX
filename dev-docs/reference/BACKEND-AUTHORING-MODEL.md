@@ -62,7 +62,7 @@ sketch, never as the list.
 **In, at the workflow level:** anything that *references, routes or reshapes* data without
 evaluating a string — paths, conditions, branching, iteration, merging, retry policy, waits, and the
 declarative data steps (see
-[CWF-004](../tasks/phase-42-first-hour/CWF-004-THE-TRANSFORM-STEP.md)): reshaping, validating,
+[CWF-004](../tasks-archive/phase-42-first-hour/CWF-004-THE-TRANSFORM-STEP.md)): reshaping, validating,
 filtering, ordering, de-duplicating and batching. Reshaping an awkward supplier payload before
 handing it to a function is workflow work: it is pure JSON plumbing, and doing it in the function
 would mean every function carries its caller's mess. Validating it before anything acts on it is the
@@ -92,7 +92,7 @@ and its Request node splits named keys into output ports.
 ⚠️ Two traps live at this join, both open tasks:
 - The step's `params` — the *mapping* that lets you pass `previous.result.total` as `amount` — is
   resolved by the engine but **declared by no catalog kind**, so no UI can author it
-  ([CWF-001](../tasks/phase-42-first-hour/CWF-001-CALL-FUNCTION-PARAMS.md)).
+  ([CWF-001](../tasks-archive/phase-42-first-hour/CWF-001-CALL-FUNCTION-PARAMS.md)).
 - A workflow invokes functions with **no session token**, so any function whose Request node has
   `Allow Unauthenticated` unticked — *the default* — fails the step. Note precisely where that
   refusal comes from: a step calls the function **in process**, so the backend's per-function `call`
@@ -205,7 +205,7 @@ The chain, verified end to end on 2026-08-06:
 
 So a record the caller has no read rule for is not returned by a query **and** its changes are not
 delivered over realtime. It is a permission boundary, not a display filter. The normative document
-is [`BAK-003-SECURITY-MODEL.md`](../tasks/phase-22-production-backend/BAK-003-SECURITY-MODEL.md),
+is [`BAK-003-SECURITY-MODEL.md`](../tasks-archive/phase-22-production-backend/BAK-003-SECURITY-MODEL.md),
 whose own header states the rule to keep: *if code and document disagree, the document wins and the
 code is the bug.*
 
@@ -382,7 +382,7 @@ turns on one of them, take the readiness from `items` and the answer from the ou
 
 "Cloud function" is a Noodl-era term; the wire URLs say Parse for compatibility reasons that have
 nothing to do with what the thing is; and neither word tells an author which canvas they are on.
-Whether these names survive is [phase 43](../tasks/phase-43-backend-authoring-clarity/README.md)'s
+Whether these names survive is [phase 43](../tasks-archive/phase-43-backend-authoring-clarity/README.md)'s
 to decide. Until it does, use "cloud function" and "workflow" consistently and never abbreviate
 either to "backend thing".
 

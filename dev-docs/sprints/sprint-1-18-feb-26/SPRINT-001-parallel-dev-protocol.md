@@ -68,11 +68,11 @@ Certain shared documents are high-risk for merge conflicts when both branches to
 Instead of both Clines writing to the same `PROGRESS.md`, each phase gets a companion update file:
 
 ```
-dev-docs/tasks/phase-9-styles-overhaul/
+dev-docs/tasks-archive/phase-9-styles-overhaul/
   PROGRESS.md                    ← read-only during sprint (not touched)
   PROGRESS-richard.md            ← Richard's Cline writes here only
   
-dev-docs/tasks/phase-10-ai-powered-development/
+dev-docs/tasks-archive/phase-10-ai-powered-development/
   PROGRESS.md                    ← read-only during sprint (not touched)
   PROGRESS-dishant.md            ← Dishant's Cline writes here only
 ```

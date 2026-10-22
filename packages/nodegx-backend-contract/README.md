@@ -6,7 +6,7 @@ descriptor that says what each backend can actually do.
 **Types and frozen data. No I/O, no adapter implementations, no node code.**
 Adapters arrive in BCN-002 onwards; this package is what they register against
 and what the editor gates ports on. Built for
-[phase 34 / BCN-001](../../dev-docs/tasks/phase-34-one-backend-contract/).
+[phase 34 / BCN-001](../../dev-docs/tasks-archive/phase-34-one-backend-contract/).
 
 ## Why it is a package and not a folder
 

@@ -23,7 +23,7 @@ was created (`gh release view v0.4.0` → not found), tag deleted on origin and 
 
 ## 3. The procedure is UPG-008's — read it first
 
-`dev-docs/tasks/phase-100-0.3.0-the-first-upgrade/UPG-008-THE-CUT.md` is the runbook 0.3.0 shipped by. Same shape:
+`dev-docs/tasks-archive/phase-100-0.3.0-the-first-upgrade/UPG-008-THE-CUT.md` is the runbook 0.3.0 shipped by. Same shape:
 
 | # | gate | owner | state |
 |---|---|---|---|

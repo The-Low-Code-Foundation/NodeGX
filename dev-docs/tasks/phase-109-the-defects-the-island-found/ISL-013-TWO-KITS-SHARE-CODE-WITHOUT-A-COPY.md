@@ -43,7 +43,7 @@ Read at HEAD `27d891bf3`, 2026-10-01, by the author of this file. Nothing was ru
 
 ## 4. Related work and collisions
 
-- **P88 [GAM-018](../phase-88-the-defects-the-games-found/GAM-018-A-KIT-REGISTERS-THE-SAME-WHATEVER-IS-INSTALLED-BESIDE-IT.md)**
+- **P88 [GAM-018](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-018-A-KIT-REGISTERS-THE-SAME-WHATEVER-IS-INSTALLED-BESIDE-IT.md)**
   (register **D41**, R2): a kit must register the same whatever is installed beside it. 🔴 **A declared dependency on
   another kit is the sanctioned form of exactly that hazard.** Any route here must keep R2 true for a kit that
   declares nothing, and must make a missing declared kit say so rather than half-register.
@@ -53,7 +53,7 @@ Read at HEAD `27d891bf3`, 2026-10-01, by the author of this file. Nothing was ru
   engine, interpolated into 17 Function copies. A shared data module that kits read could also be read by a Function
   through a page global. Coordinate so the two tasks do not build two sharing mechanisms.
 - **[ISL-017](ISL-017-THE-DOOR-INSTALLS-A-KIT.md)** (F19, four copies of each kit): a third module adds a fifth and sixth copy unless ISL-017 lands first.
-- **P69 [CN-016](../phase-69-the-node-you-write-yourself/CN-016-PUBLISH-A-KIT.md)** ✅ (publishing a kit) and the
+- **P69 [CN-016](../../tasks-archive/phase-69-the-node-you-write-yourself/CN-016-PUBLISH-A-KIT.md)** ✅ (publishing a kit) and the
   library's install path: a kit that needs another must install it, or refuse to install without it.
 - Owner grep: `grep -rnai --include='*.md' "__noodl_modules\|kit depends on\|depends on another kit\|peer kit\|kitDependencies\|requires another kit" dev-docs/tasks`
   → IG-007 (the borrow), D53 (a reading of the array), DEP-001 and ERG-002 (the bootstrap), and nine files whose

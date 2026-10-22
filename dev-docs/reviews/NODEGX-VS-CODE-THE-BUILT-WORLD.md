@@ -22,16 +22,16 @@ Every phase in `dev-docs/tasks/` is shipped. Specifically the ones that matter h
 
 | | What it gives us |
 |---|---|
-| [44 — Compute Ceiling](../tasks/phase-44-compute-ceiling/README.md) | Curated module kit, **danger mode**, project-local `lib/` shared code |
-| [45 — Streaming](../tasks/phase-45-streaming/README.md) | A cloud function can emit a stream the app renders |
-| [46 — Verification](../tasks/phase-46-verification/README.md) | Cases + a headless runner + trace replay + `nodegx test` in CI |
-| [47 — i18n](../tasks/phase-47-internationalisation/README.md) | Extraction-free multilingual apps, RTL, locale SSR |
-| [48 — Data Ceiling](../tasks/phase-48-data-ceiling/README.md) | Vector search, Query Views, schema history, Postgres |
-| [49 — Discovery](../tasks/phase-49-discovery/README.md) | Sitemap, robots, JSON-LD, ISR (SSR/SSG already shipped) |
-| [41 — Accessibility](../tasks/phase-41-accessibility/README.md) | Accessible output by emission, ATAG A **and** B |
-| [40 — AI Authoring Quality](../tasks/phase-40-ai-authoring-quality/README.md) | The agent sees its work, iterates, decomposes, and has a visual identity |
+| [44 — Compute Ceiling](../tasks-archive/phase-44-compute-ceiling/README.md) | Curated module kit, **danger mode**, project-local `lib/` shared code |
+| [45 — Streaming](../tasks-archive/phase-45-streaming/README.md) | A cloud function can emit a stream the app renders |
+| [46 — Verification](../tasks-archive/phase-46-verification/README.md) | Cases + a headless runner + trace replay + `nodegx test` in CI |
+| [47 — i18n](../tasks-archive/phase-47-internationalisation/README.md) | Extraction-free multilingual apps, RTL, locale SSR |
+| [48 — Data Ceiling](../tasks-archive/phase-48-data-ceiling/README.md) | Vector search, Query Views, schema history, Postgres |
+| [49 — Discovery](../tasks-archive/phase-49-discovery/README.md) | Sitemap, robots, JSON-LD, ISR (SSR/SSG already shipped) |
+| [41 — Accessibility](../tasks-archive/phase-41-accessibility/README.md) | Accessible output by emission, ATAG A **and** B |
+| [40 — AI Authoring Quality](../tasks-archive/phase-40-ai-authoring-quality/README.md) | The agent sees its work, iterates, decomposes, and has a visual identity |
 | [18 — Code Export v2](../tasks/phase-18-code-export-v2/PROGRESS.md) | A project exports to a React 19 repo a React dev accepts |
-| [26 — Deployment](../tasks/phase-26-deployment/README.md) | Full-stack deploy without being a sysadmin |
+| [26 — Deployment](../tasks-archive/phase-26-deployment/README.md) | Full-stack deploy without being a sysadmin |
 
 **This is a thought experiment with a purpose**: it says what the roadmap is *for*, and — more
 usefully — it isolates what does **not** get fixed by any of it.

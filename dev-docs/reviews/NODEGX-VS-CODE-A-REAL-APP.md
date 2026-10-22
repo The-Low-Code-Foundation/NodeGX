@@ -18,7 +18,7 @@ list is longer than the platform's own docs currently claim.
 > axis, in the spectrum document.
 
 > **Companion:** [NODEGX-VS-CODE-THE-BUILT-WORLD.md](NODEGX-VS-CODE-THE-BUILT-WORLD.md) reruns this
-> comparison assuming every phase in [POST-ALPHA-INDEX.md](../tasks/POST-ALPHA-INDEX.md) is shipped.
+> comparison assuming every phase in [POST-ALPHA-INDEX.md](../tasks-archive/POST-ALPHA-INDEX.md) is shipped.
 > This document is what is true today; that one is what the roadmap is for.
 
 > ### ⚠️ Correction, 2026-08-06 (same day)
@@ -135,7 +135,7 @@ buildable on the built-in stack today**.
 | CoCo streaming chat | 🔴 | A cloud function cannot stream to the app. CWF-007 is an **unowned design doc, explicitly scheduled after alpha**. The app-side nodes exist (SSE, WebSocket, Text Accumulator, JSON Stream Parser) — the server half does not. Calling Anthropic from the browser would expose the key. |
 | CoCo's 5 UI-driving tools | 🟡 | Action Dispatcher / Action Handler could carry them, but there is no equivalent of "the assistant fills field #3 on the current page" — you'd build a per-screen dispatch table by hand. |
 | NL→SQL analyst | 🔴 | There is no SQL surface at all, and no way to create a least-privileged database role. The feature's security model *is* a Postgres role; the platform has no Postgres and no roles below the ACL layer. |
-| SEO-indexed landing page + blog | 🟡 | **Corrected twice.** First 🔴 (wrong — SSR/SSG do ship, selectable at deploy). Then ✅ (also wrong). The *design* is good; the 887-line server template is not: it mutates `globalThis.location` per request inside an awaited settle loop (two concurrent requests render each other's routes), caches forever with no TTL keyed on path alone, renders **any** path via `app.get('*')` with no validation or rate limit, and pins React 18.3.1 while projects declare `react19`. Buildable after [phase 49](../tasks/phase-49-discovery/README.md) rewrites the server; not before. |
+| SEO-indexed landing page + blog | 🟡 | **Corrected twice.** First 🔴 (wrong — SSR/SSG do ship, selectable at deploy). Then ✅ (also wrong). The *design* is good; the 887-line server template is not: it mutates `globalThis.location` per request inside an awaited settle loop (two concurrent requests render each other's routes), caches forever with no TTL keyed on path alone, renders **any** path via `app.get('*')` with no validation or rate limit, and pins React 18.3.1 while projects declare `react19`. Buildable after [phase 49](../tasks-archive/phase-49-discovery/README.md) rewrites the server; not before. |
 | i18n (FR now; BE/CH/QC/Africa next) | 🔴 | Zero i18n in the catalog. Every string is a node parameter. No string table, no locale switch. A stated day-one requirement with no answer. |
 | 83 schema migrations over a year | 🟡 | Schema is managed through an admin surface, not reviewable up/down migrations in git. No data-backfill migrations. Governance gap on a 54-table app that evolves. |
 | 71,923 LOC of tests | 🔴 | **No test harness exists for an authored app.** Verified: no node, no phase doc, nothing. You test by clicking. |
@@ -484,17 +484,17 @@ stress test and a bad flagship.
 | Claim | Source |
 |---|---|
 | 172 catalog node types, by category | `packages/noodl-types/src/node-catalog.json` |
-| 48 cloud node types; no `require` in a Function node; 79 env vars readable | `dev-docs/tasks/phase-42-first-hour/TALK-007-WHAT-CLOUD-FUNCTIONS-SHOULD-HAVE.md` §1, §3.1 |
+| 48 cloud node types; no `require` in a Function node; 79 env vars readable | `dev-docs/tasks-archive/phase-42-first-hour/TALK-007-WHAT-CLOUD-FUNCTIONS-SHOULD-HAVE.md` §1, §3.1 |
 | 15 data-adapter methods; 31 filter operators | `packages/nodegx-backend-contract/src/data.ts`, `src/filter.ts` |
 | SQLite (`node:sqlite`), one file per backend | `packages/nodegx-backend/src/persistence/createAdapter.ts` |
 | Workflow runs do not resume after restart | `packages/nodegx-backend/src/workflow/WorkflowEngine.ts:311-325` |
-| Streaming is an unowned design doc, post-alpha | `dev-docs/tasks/phase-42-first-hour/CWF-007-STREAMING-RESPONSES.md` |
+| Streaming is an unowned design doc, post-alpha | `dev-docs/tasks-archive/phase-42-first-hour/CWF-007-STREAMING-RESPONSES.md` |
 | Code export 0/7 tasks, not started | `dev-docs/tasks/phase-18-code-export-v2/PROGRESS.md` |
 | No test node exists in the catalog | catalog query, 2026-08-06 — zero matches for test/assert/expect |
 | ACL + CLP + roles + read-only admin tier | `packages/nodegx-backend/src/security/model.ts` |
 | ~35 MCP tools incl. plans and provisioning | `packages/noodl-mcp/README.md` |
-| Runtime emits one aria attribute; 95.9% WCAG failure rate | `dev-docs/tasks/phase-41-accessibility/NORTH-STAR.md` |
-| *"basic shit creations…"* and the 12 findings | `dev-docs/tasks/phase-40-ai-authoring-quality/README.md` |
+| Runtime emits one aria attribute; 95.9% WCAG failure rate | `dev-docs/tasks-archive/phase-41-accessibility/NORTH-STAR.md` |
+| *"basic shit creations…"* and the 12 findings | `dev-docs/tasks-archive/phase-40-ai-authoring-quality/README.md` |
 | 54 tables, 83 migrations, 71,923 LOC of tests | `comcoi-v2` — `__tablename__` count, `alembic/versions/`, `wc -l backend/tests` |
 | Analyst security boundary is a Postgres role | `comcoi-v2/backend/app/services/analyst_sandbox.py` docstring |
 | `Decimal`, never float | `comcoi-v2/backend/app/calculations/social_charges.py` header |

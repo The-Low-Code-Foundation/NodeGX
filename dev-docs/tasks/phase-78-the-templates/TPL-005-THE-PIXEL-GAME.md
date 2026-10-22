@@ -24,12 +24,12 @@ anything. **Left: Richard's look, and the publish/demo page.**
 
 **P78's first task was *"find or re-make the list"*, and both prior searches concluded it was not in
 the repository** ([P78 README §"First task"](README.md), and
-[RICHARD-RULINGS-2026-08-28 §9](../phase-75-0.2.1-the-feedback/RICHARD-RULINGS-2026-08-28.md):
+[RICHARD-RULINGS-2026-08-28 §9](../../tasks-archive/phase-75-0.2.1-the-feedback/RICHARD-RULINGS-2026-08-28.md):
 *"I could not find 'the list we made'"*). **It was in the repository the whole time, in two places
 neither search reached:**
 
 - **The order**, ruled by Richard 2026-08-26 —
-  [`phase-76/README.md:13-15`](../phase-76-the-site-builder/README.md#L13-L15). It was written as a
+  [`phase-76/README.md:13-15`](../../tasks-archive/phase-76-the-site-builder/README.md#L13-L15). It was written as a
   parenthetical inside a sentence about *why the site builder goes first*, which is why a grep for
   "list" or "roster" never found it.
 - **All eight with their descriptions** —
@@ -62,7 +62,7 @@ What the repo *does* record is a sharper signal, and it points at exactly the th
 reaching for. P75 found that **three of the eight have no honest category** in the ruled vocabulary
 (`starter`, `data-app`, `dashboard`, `site`, `form`, `integration`): **`pixel-game`,
 `interactive-fiction` and `shared-canvas` are none of the six**
-([FB-005-SCOPE §"The second finding"](../phase-75-0.2.1-the-feedback/FB-005-SCOPE.md#L514)). They
+([FB-005-SCOPE §"The second finding"](../../tasks-archive/phase-75-0.2.1-the-feedback/FB-005-SCOPE.md#L514)). They
 broke the vocabulary **because they are the three that are not a website and not a CRUD app** — the
 vocabulary was written for business apps and these three are not business apps. That is the list he
 remembered, and it was legible only as a defect report.

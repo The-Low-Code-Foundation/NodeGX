@@ -1,7 +1,7 @@
 # The Diagnostics Contract
 
 **Status:** Normative. Written 2026-08-02 as scope item 1 of phase 36
-[`OBS-003`](../tasks/phase-36-runtime-observability/OBS-003-NODE-DIAGNOSTICS.md), **before** the
+[`OBS-003`](../tasks-archive/phase-36-runtime-observability/OBS-003-NODE-DIAGNOSTICS.md), **before** the
 second check was authored — because phase 30 and phase 35 both found the same failure and named it
 the same way:
 
@@ -212,7 +212,7 @@ Beyond the gate:
 Colocated with the node whose invariant they are — in the node's own definition file, in the setter
 of the port concerned. **Not** in a central registry, and **not** in the catalog.
 
-The catalog is the right long-term home for *declaring* invariants ([OBS-003 scope item 3](../tasks/phase-36-runtime-observability/OBS-003-NODE-DIAGNOSTICS.md)),
+The catalog is the right long-term home for *declaring* invariants ([OBS-003 scope item 3](../tasks-archive/phase-36-runtime-observability/OBS-003-NODE-DIAGNOSTICS.md)),
 and that remains a direction rather than a prerequisite. Hand-write until the pattern is visible in
 enough call sites to be worth extracting; designing the declaration format first is how the task
 stalls.

@@ -24,7 +24,7 @@ Read at HEAD `27d891bf3`, 2026-10-01, by the author of this file. Nothing was ru
 | **A dependency is a classic script.** For every browser module, each `manifest.dependencies` entry becomes `<script type="text/javascript" src="…">`. Tags are de-duplicated by exact string across kits. A relative path is prefixed with the module's own folder. Re-read at HEAD | `nodegx-module-inject/src/index.js:289-296`, `:466-475` |
 | All dependency tags go into `<%modules_dependencies%>`, which sits **before** `<%modules_main%>` in both page templates, so in a browser every kit's dependencies run before any kit's `main`. Re-read at HEAD | `noodl-viewer-react/static/deploy/index.html:77`, `:80`; `static/viewer/index.html:89`, `:107` |
 | Dependency failures are not attributed to a kit: the capture window covers a kit's own `main` only. Re-read at HEAD | `nodegx-module-inject/src/index.js:389-391` |
-| The SSR loader runs the same tags in order in Node, under a `window` shim installed once around the loop, *"because a UMD dependency tag publishes onto `window` for the kit that follows to read back"*. Re-read at HEAD | `noodl-viewer-react/static/ssr/kit-modules.js:57`, `:195-196`; P69 [RULINGS](../phase-69-the-node-you-write-yourself/RULINGS.md) 352-365 |
+| The SSR loader runs the same tags in order in Node, under a `window` shim installed once around the loop, *"because a UMD dependency tag publishes onto `window` for the kit that follows to read back"*. Re-read at HEAD | `noodl-viewer-react/static/ssr/kit-modules.js:57`, `:195-196`; P69 [RULINGS](../../tasks-archive/phase-69-the-node-you-write-yourself/RULINGS.md) 352-365 |
 | 🔴 **The catalog reader loads `main` and nothing else.** `entry.js` scans the manifests and calls `require(indexPath)` on each kit's `main`. `dependencies` is never read. Re-read at HEAD | `noodl-mcp/src/kitExtract/entry.js:110-140` |
 | **ES modules are refused by name today, on purpose.** The editor's verify-on-add and the export's kit reader both say *"It looks like an ES-module build — a kit is loaded by a plain `<script>` tag, so it needs a browser (UMD/IIFE) build."* That was P35 ERG-002's design. Re-read at HEAD | `noodl-editor/src/shared/utils/projectmodules.ts:369`, `:213`; `nodegx-export/src/parse/kitSource.ts:202` |
 | P16 RUN-001 considered `<script type="module">` with import maps for React itself, and declined it: it *"rewrites every index.html template, changes the module contract"*. It chose self-built global bundles instead: esbuild turns `import * as React from 'react'; window.React = React` into a classic script. **That is a recipe a kit author could follow for three.js today. It is written nowhere a kit author reads.** Re-read at HEAD | [RUN-001-ASSESSMENT](../phase-16-runtime-deploy-health/RUN-001-ASSESSMENT.md) lines 30-49 |
@@ -48,13 +48,13 @@ Read at HEAD `27d891bf3`, 2026-10-01, by the author of this file. Nothing was ru
 
 ## 4. Related work and collisions
 
-- **P35 [ERG-002](../phase-35-authoring-ergonomics/ERG-002-EXTERNAL-LIBRARIES.md)** ✅: verify-on-add refuses an
+- **P35 [ERG-002](../../tasks-archive/phase-35-authoring-ergonomics/ERG-002-EXTERNAL-LIBRARIES.md)** ✅: verify-on-add refuses an
   ES-module build with a named message. Ruling 1(a) below would reverse that stance for kits. It must be changed, not bypassed.
 - **P16 RUN-001**: the global-bundle recipe (above). It is the cheapest route, and it is already proven in this repo.
-- **P69 [CN-013](../phase-69-the-node-you-write-yourself/CN-013-CLOUD-AND-SSR.md)** ✅ and the SSR window shim: any new
+- **P69 [CN-013](../../tasks-archive/phase-69-the-node-you-write-yourself/CN-013-CLOUD-AND-SSR.md)** ✅ and the SSR window shim: any new
   dependency kind has to load under SSR too, or be skipped there with the existing *"appear only after hydration"* sentence.
 - **P69 CN-015** ✅: failures name the kit, but not a failing dependency (by design, `index.js:389-391`).
-- **P88 [GAM-018](../phase-88-the-defects-the-games-found/GAM-018-A-KIT-REGISTERS-THE-SAME-WHATEVER-IS-INSTALLED-BESIDE-IT.md)**
+- **P88 [GAM-018](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-018-A-KIT-REGISTERS-THE-SAME-WHATEVER-IS-INSTALLED-BESIDE-IT.md)**
   (D41, R2 *"fake it like a page"*): the extractor already fakes the page's `Noodl` object. Loading dependencies there
   would be the same rule applied one step further.
 - **[ISL-013](ISL-013-TWO-KITS-SHARE-CODE-WITHOUT-A-COPY.md)**: a shared module between kits would travel as a

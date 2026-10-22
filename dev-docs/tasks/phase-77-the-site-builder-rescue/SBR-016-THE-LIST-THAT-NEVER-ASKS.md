@@ -170,7 +170,7 @@ authors actually built, and under the old contract wiring `storageFetch` *did* s
 template minted this morning — the module says so itself: *"nothing is stamped into the project (the
 format has nowhere to put a marker — an open question §2 recorded and did not close)"*. So it fires
 on a project authored today and reverses its author's intent. That is **D11** in the register, and
-it is owned by **[DEF-007 §1.1](../phase-80-the-defects-the-templates-found/DEF-007-DISK-AND-LOAD-DISAGREE.md)**
+it is owned by **[DEF-007 §1.1](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-007-DISK-AND-LOAD-DISAGREE.md)**
 in phase 80 — reassigned from `NONE` the same day, by that task's owner.
 
 🔴 **There is no version guard in the pass and there cannot be one.** The conditions are only *"in a

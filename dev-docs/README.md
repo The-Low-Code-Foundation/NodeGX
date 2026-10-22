@@ -151,7 +151,7 @@ This section used to hardcode a task checklist — that's exactly the kind of
 second copy that goes stale while the real source of truth moves on (see
 REV-006 below). It now just points at the live status instead of duplicating it.
 
-**Live status:** [`phase-12-reanimation/PROGRESS.md`](tasks/phase-12-reanimation/PROGRESS.md)
+**Live status:** [`phase-12-reanimation/PROGRESS.md`](tasks-archive/phase-12-reanimation/PROGRESS.md)
 is the phase actually in flight and the one place to check for current task-by-task
 status. As of 2026-07-23 it's 80% done: green build, a working Electron test
 harness, a real CI pipeline, and dependency hygiene are all landed; this docs

@@ -10,7 +10,7 @@
 | **Difficulty** | 🟡 Medium — the code is small; the design decisions (what a doc is *for*, what the budget will carry) are the work |
 | **Prerequisites** | AIX-002 (landed), AIX-006 (landed — supplies the injection precedent) |
 | **Blocks** | AIX-010, AIX-011, AIX-012 |
-| **Blocked by** | [DEP-008](../phase-26-deployment/DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md) (phase 26) — see [Blocking point](#blocking-point-project-docs-currently-ship-to-production) |
+| **Blocked by** | [DEP-008](../../tasks-archive/phase-26-deployment/DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md) (phase 26) — see [Blocking point](#blocking-point-project-docs-currently-ship-to-production) |
 | **Recommended executor** | 🔵 Fable 5 — this task fixes a file format and a context contract, and both are expensive to change once projects carry them |
 | **Branch** | commit directly to `cline-dev` |
 
@@ -91,7 +91,7 @@ Three options were considered and two rejected:
   default set, which is deployment's problem, not AI's.
 
 **Owned as of 2026-07-27:** phase 26 (Deployment, Track K) has taken this as
-[DEP-008 — Artifact contents & the ignore mechanism](../phase-26-deployment/DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md),
+[DEP-008 — Artifact contents & the ignore mechanism](../../tasks-archive/phase-26-deployment/DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md),
 tier 1, alongside DEP-001. The original hand-off text is kept at
 [`DEPLOY-HANDOFF-PROJECT-DOCS.md`](./DEPLOY-HANDOFF-PROJECT-DOCS.md) as the
 record of what was asked for.
@@ -238,7 +238,7 @@ reviewed and where the AIX-010 recommendation surfaces — not as a text editor.
   new dependency), and the authoring loop reads docs through a boot-installed
   synchronous provider rather than through the panel. Acceptance 3, 5, 6 and 7
   are verified; 1, 2 and the live half of 4 need a provider; **8 remains open as
-  a cross-task interlock with [DEP-008](../phase-26-deployment/DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md)**
+  a cross-task interlock with [DEP-008](../../tasks-archive/phase-26-deployment/DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md)**
   — nothing here touches the deploy copy filter, by design.
 
 ## References

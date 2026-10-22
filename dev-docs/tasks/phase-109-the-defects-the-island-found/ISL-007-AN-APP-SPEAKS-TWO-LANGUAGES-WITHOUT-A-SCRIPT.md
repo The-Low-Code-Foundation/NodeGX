@@ -2,7 +2,7 @@
 
 **Status:** 🟡 **s11: AC6 ruled "Warn if app translates" and BUILT (`typed-word-not-translated`, §8 s11). Open: AC4 (→ IW-010).** Ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). s7: AC1 read (288 of 334 texts switch, 0 braces, the route costs 16 placements + 342 KB); the module's source recovered from its map. **s8: BUILT — module 1.1.0 rebuilt from its recovered sources (no install, root lock untouched); AC2, AC3, AC5 ✅ (spec 5/5, imported module 1/5; deployed drive 16/16, control 5/5); AC8 recorded in P47. Open: the "words for this page" clause, AC4 (the island moves), AC6 (the door). s9: AC7's catalog half ✅ (each node says what it does to an agent; was a dead URL).** Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F10](AUDIT-2026-10-01.md) · the island's 693-row word table and `Logic/Translate words` · the same need met by [TPL-007](../phase-78-the-templates/TPL-007-THE-MATHS-AND-TYPING-GAME.md) §2.6 (Static Data route) and [TPL-011](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md) (i18next route)
-**Side:** product (a translation primitive, or the shipped i18next module) — and a scope ruling against [P47](../phase-47-internationalisation/README.md)
+**Side:** product (a translation primitive, or the shipped i18next module) — and a scope ruling against [P47](../../tasks-archive/phase-47-internationalisation/README.md)
 
 Olive's Island is in French and English. Every word on screen is a row `{ key, en, fr }` in one Static Data table. A Function
 with 695 generated output lines turns the table into one output per word, and that Function is placed 16 times. NodeGX
@@ -27,8 +27,8 @@ HEAD `27d891bf3`, 2026-10-01. Every row was re-read by this task's author at HEA
 | It is **measured working** by TPL-011 s3: through the door, exported, in headless Chrome, French at load (*"contente", "1 pomme", "3 pommes"*), then English live after a switch. Its own caveats, recorded there: i18next v19 plurals are `key` / `key_plural`, a context needs its base key, and **interpolations escape HTML unless written `{{- x}}`**. Its placeholder syntax is `{{x}}`, not `{x}`. As recorded 2026-09-27; not re-driven here | [TPL-011 lines 276-283](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md); `packages/noodl-mcp/tests/tpl011I18nSpike.ts` |
 | Who uses it at HEAD: `templates/nightbook` (**22 `Translation`**, 2 `Language Bundle`, 4 `i18next` nodes, about 250 strings through a `UI/T` component) and `templates/digital-bricks-training` (English only). Re-counted at HEAD | `grep` over `templates/*/components` |
 | Its cost shape: **one `Translation` node per word on screen.** A page showing 40 words places 40 nodes (or 40 instances of a `UI/T` wrapper). Translate words was the opposite trade: one node, 695 outputs | read from the node definitions |
-| **Existing solution 2, specced, not started: [P47 Internationalisation](../phase-47-internationalisation/README.md)** (9 tasks, about 7 weeks, "Post-alpha"). INT-001: a `nodegx.strings.<locale>.json` string table keyed by component, node and port, never by the string. INT-002: translatable parameters at the `Ports.renderParams` seam. INT-005: a runtime locale, `<html lang>`, resolution order. INT-009: MCP `list_strings` / `set_translations`. Richard's words there: the old module's UX was poor ("you had to maintain your own JSON file") | P47 README lines 1-20, 62-80 |
-| P65 left *"the i18next-translation vs phase-47 check"* undone: *"nobody was assigned"*. Re-read at HEAD | [P65 TASKS.md lines 80, 145](../phase-65-the-library/TASKS.md) |
+| **Existing solution 2, specced, not started: [P47 Internationalisation](../../tasks-archive/phase-47-internationalisation/README.md)** (9 tasks, about 7 weeks, "Post-alpha"). INT-001: a `nodegx.strings.<locale>.json` string table keyed by component, node and port, never by the string. INT-002: translatable parameters at the `Ports.renderParams` seam. INT-005: a runtime locale, `<html lang>`, resolution order. INT-009: MCP `list_strings` / `set_translations`. Richard's words there: the old module's UX was poor ("you had to maintain your own JSON file") | P47 README lines 1-20, 62-80 |
+| P65 left *"the i18next-translation vs phase-47 check"* undone: *"nobody was assigned"*. Re-read at HEAD | [P65 TASKS.md lines 80, 145](../../tasks-archive/phase-65-the-library/TASKS.md) |
 | `intl-format` (Relative Time, Format Number and two more, all on `Intl.*`) covers formatting, not words. Re-read at HEAD | `library/modules/intl-format/README.md` |
 
 ## 3. Where it bites a person
@@ -42,15 +42,15 @@ HEAD `27d891bf3`, 2026-10-01. Every row was re-read by this task's author at HEA
 
 ## 4. Related work and collisions
 
-- **[P47](../phase-47-internationalisation/README.md)** owns the whole design (string table, translatable parameters, locale,
+- **[P47](../../tasks-archive/phase-47-internationalisation/README.md)** owns the whole design (string table, translatable parameters, locale,
   panel, agent contract). **This task must not build a rival to INT-001.** Ruling 1 decides whether P109 delivers a slice of
   P47 or adopts the shipped module.
-- **[P41 ACC-005](../phase-41-accessibility/README.md)** (the document shell's hardcoded `lang="en"`) meets INT-005. A language
+- **[P41 ACC-005](../../tasks-archive/phase-41-accessibility/README.md)** (the document shell's hardcoded `lang="en"`) meets INT-005. A language
   switch should set `<html lang>`.
 - **ISL-006** (F09): the 695-output Function exists only because ports come from text. If this task removes Translate words,
   ISL-006 loses its largest consumer. Sequence: this ruling first.
 - **ISL-005** (F08): the duplicated `fill` / `fillIn` helpers.
-- **P88 [GAM-018](../phase-88-the-defects-the-games-found/GAM-018-A-KIT-REGISTERS-THE-SAME-WHATEVER-IS-INSTALLED-BESIDE-IT.md)**:
+- **P88 [GAM-018](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-018-A-KIT-REGISTERS-THE-SAME-WHATEVER-IS-INSTALLED-BESIDE-IT.md)**:
   `i18next-noodl` is one of the 13 modules that assign `Noodl.defineNode=` unconditionally. Any adoption of the module inherits
   that finding.
 - **P93 vocabulary gate memory** ("WORDS: gate by CONTEXT"): a gate over visible strings must read context, not text.
@@ -191,7 +191,7 @@ typed; only interpolated VALUES were escaped.
 | AC5 | ✅ `Tom & <Jerry>` typed → `Hello Tom & <Jerry>` / `Bonjour Tom & <Jerry>`; the word `l'île & <mer>` / `the island & <sea>` as typed; `&amp;`/`&lt;` nowhere. |
 | control | The module AS IMPORTED (HEAD's `index.js` in a copy of the project): spec **1/5** (fallback green — the known-firing case), drive `--control` **5/5**: `Hello Tom &amp; &lt;Jerry&gt;` on the page, `<html lang>` stays `en` in French. |
 | AC7 | 🟡 The module's docs pages carry the new behaviour (`docs-site/imported-prose/modules/i18next/`, regenerated: only the two i18next pages moved, `docs:library:check` clean). ⚠️ A re-import of the prose (`docs:library:import`, pinned) would put the old text back. The node catalog's descriptions were not checked. |
-| AC8 | ✅ Recorded in the [P47 README](../../phase-47-internationalisation/README.md) status (nothing built as an INT task); P65's unassigned check answered. |
+| AC8 | ✅ Recorded in the [P47 README](../../../tasks-archive/phase-47-internationalisation/README.md) status (nothing built as an INT task); P65's unassigned check answered. |
 
 Gates: `library:check` i18next OK (the run's one FAIL is the peer's untracked `nightbook-kit`, no `library.json`);
 `tpl011Template.test.ts` 35/35 (the journal template copies this module). Templates that carry their OWN copy of 1.0.4

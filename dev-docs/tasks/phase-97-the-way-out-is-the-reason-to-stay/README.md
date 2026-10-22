@@ -272,7 +272,7 @@ FED-006).
    in the house style of `backup-roundtrip.test.ts` and `security-enforcement.test.ts`.
 6. **This phase touches no editor file** (pending R4), so it runs beside phases 94, 95 and 96.
    Commits use explicit pathspecs so a sibling's work is never swept.
-7. 🔴 **Read [phase 48](../phase-48-data-ceiling/README.md) before starting any task here.** The two
+7. 🔴 **Read [phase 48](../../tasks-archive/phase-48-data-ceiling/README.md) before starting any task here.** The two
    phases share a subject and neither is scheduled, so whichever moves first constrains the other.
    §10 lists every interaction, task by task. **A `BRG` session that has not read phase 48's task
    table has not finished scoping its task.**
@@ -321,7 +321,7 @@ at `schema-migrate.ts:165` rather than suspected.
 
 ## 10. Phase 48 is not optional reading
 
-[Phase 48 — The Data Ceiling](../phase-48-data-ceiling/README.md) is specced, unstarted, and covers
+[Phase 48 — The Data Ceiling](../../tasks-archive/phase-48-data-ceiling/README.md) is specced, unstarted, and covers
 the same subject from the other end: it raises what the data layer can *express*, this phase raises
 where it can *run*. Seven tasks, and **six of them touch this phase.** Neither phase is scheduled,
 so every one of these is a free decision today and an expensive one later.

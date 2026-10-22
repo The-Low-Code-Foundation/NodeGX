@@ -18,7 +18,7 @@ that several features consume, *not* as another panel that walks the live graph.
 ## Why the panel-first attempt failed
 
 The panel is documented in
-[VIEW-005/NOT-PRODUCTION-READY.md](../tasks/phase-4-canvas-visualisation-views/VIEW-005-data-lineage/NOT-PRODUCTION-READY.md).
+[VIEW-005/NOT-PRODUCTION-READY.md](../tasks-archive/phase-4-canvas-visualisation-views/VIEW-005-data-lineage/NOT-PRODUCTION-READY.md).
 The core defect was structural, not a tuning problem:
 
 - **It enumerated ports instead of following wires.** A simple 3-node chain
@@ -90,7 +90,7 @@ No `EventDispatcher`, no `NodeGraphContext`, no `setTimeout` selection races.
 
 ## References
 
-- [DEBT-012 — Data-Flow Tracker Salvage](../tasks/phase-14.5-revival-debt/DEBT-012-DATAFLOW-TRACKER-SALVAGE.md)
-- [VIEW-005 — NOT PRODUCTION READY](../tasks/phase-4-canvas-visualisation-views/VIEW-005-data-lineage/NOT-PRODUCTION-READY.md)
+- [DEBT-012 — Data-Flow Tracker Salvage](../tasks-archive/phase-14.5-revival-debt/DEBT-012-DATAFLOW-TRACKER-SALVAGE.md)
+- [VIEW-005 — NOT PRODUCTION READY](../tasks-archive/phase-4-canvas-visualisation-views/VIEW-005-data-lineage/NOT-PRODUCTION-READY.md)
 - [PRE-REVIVAL-SALVAGE-AUDIT.md §4](../reviews/PRE-REVIVAL-SALVAGE-AUDIT.md)
 - Related: SUB-004 (catalog), SUB-006 (validator), AIX-003 (graph-native review), AIX-004/005 (agent grounding, live pulse data)

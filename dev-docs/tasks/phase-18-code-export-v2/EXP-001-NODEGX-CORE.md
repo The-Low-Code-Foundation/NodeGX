@@ -195,7 +195,7 @@ With semantics verifiably matching the interpreted runtime, since EXP-003's trac
 
 ## References
 
-- [`dev-docs/tasks/phase-7-code-export/`](../phase-7-code-export/) — CODE-001 design and ADR-001
+- [`dev-docs/tasks-archive/phase-7-code-export/`](../../tasks-archive/phase-7-code-export/) — CODE-001 design and ADR-001
 - [`dev-docs/future-projects/CODE-EXPORT-STUDY.md`](../../future-projects/CODE-EXPORT-STUDY.md) — why naive export produces unreadable code
 - [Viability report — §4.3](../../reviews/NOODL-VIABILITY-REPORT.md)
 - Consumers: EXP-002, EXP-003, EXP-005

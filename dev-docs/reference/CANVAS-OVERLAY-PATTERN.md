@@ -175,5 +175,5 @@ container.style.transform = `scale(${scale}) translate(${pan.x}px, ${pan.y}px)`;
 ## Related Documentation
 
 - [CommentLayer Implementation Analysis](./LEARNINGS.md#canvas-overlay-pattern)
-- [Phase 4 Prerequisites](../tasks/phase-4-canvas-visualisation-views/PREREQ-003-canvas-overlay-pattern/)
+- [Phase 4 Prerequisites](../tasks-archive/phase-4-canvas-visualisation-views/PREREQ-003-canvas-overlay-pattern/)
 - [NodeGraphEditor Integration](./CODEBASE-MAP.md#node-graph-editor)

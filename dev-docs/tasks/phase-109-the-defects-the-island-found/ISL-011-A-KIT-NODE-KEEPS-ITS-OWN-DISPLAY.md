@@ -31,7 +31,7 @@ Read at HEAD `27d891bf3`, 2026-10-01, by the author of this file. Nothing was ru
 | **Census of shipped kit `defaultCss`:** game-kit 4 (`inline-block`, `block`, `inline-flex`, `flex`), nightbook-kit 2 (`block`), garden-kit 3 (`block` ×2, `grid`), garden-3d-kit 1 (`block`). Whether each kit's stylesheet also sets `display` on the same root was **not counted** (AC5). Re-read at HEAD | `grep -n defaultCss library/modules/*/src/*.js` |
 | **The workaround the kit carries at HEAD.** The world's style is built as `Object.assign({grid…}, props.style)`, then `display` is forced to `grid` unless it is `none`, and `defaultCss` is now `grid`. ⚠️ So a person who types `display: flex` into the node's CSS Style input sees it written on the DOM, then undone at the next render. Re-read at HEAD | `library/modules/garden-kit/src/kit.js:1932-1944`, `:1970` |
 | No product code writes `display: 'none'` to a node: `grep -rn "display: 'none'" packages/noodl-viewer-react/src` → 0. The kit's "keep the graph's `display:none`" branch serves only a CSS Style the person typed. Re-read at HEAD | as cited |
-| **The export does the opposite.** `nodegx-export`'s `parse/kitSource.ts` and `emit/kits.ts` contain neither `inputCss` nor `defaultCss` (grep → 0 in both). In an exported app a kit's `defaultCss` does not exist at all. P84 **P40**, owner **UNOWNED**. Re-read at HEAD | `nodegx-export/src/parse/kitSource.ts`, `src/emit/kits.ts`; [P84 register](../phase-84-the-defects-the-field-report-found/DEFECTS-THE-FIELD-REPORT-FOUND.md) line 175 |
+| **The export does the opposite.** `nodegx-export`'s `parse/kitSource.ts` and `emit/kits.ts` contain neither `inputCss` nor `defaultCss` (grep → 0 in both). In an exported app a kit's `defaultCss` does not exist at all. P84 **P40**, owner **UNOWNED**. Re-read at HEAD | `nodegx-export/src/parse/kitSource.ts`, `src/emit/kits.ts`; [P84 register](../../tasks-archive/phase-84-the-defects-the-field-report-found/DEFECTS-THE-FIELD-REPORT-FOUND.md) line 175 |
 | The drive's readings (48 cells, zero size, the robot the only thing on screen). **As recorded 2026-09-27, not re-driven** | CG-001 §7.1 item 1 |
 
 ## 3. Where it bites a person
@@ -46,14 +46,14 @@ Read at HEAD `27d891bf3`, 2026-10-01, by the author of this file. Nothing was ru
 
 ## 4. Related work and collisions
 
-- **P84 [P40](../phase-84-the-defects-the-field-report-found/DEFECTS-THE-FIELD-REPORT-FOUND.md)** (🔴 UNOWNED): the
+- **P84 [P40](../../tasks-archive/phase-84-the-defects-the-field-report-found/DEFECTS-THE-FIELD-REPORT-FOUND.md)** (🔴 UNOWNED): the
   export reads no `inputCss` or `defaultCss`. Any sentence this task writes about `defaultCss` is false in an exported
   app unless P40's `defaultCss` half is fixed or the sentence says so. 🔴 This task either takes that half or names it.
-- **P88 [GAM-017](../phase-88-the-defects-the-games-found/GAM-017-A-KIT-NODE-TAKES-A-SIGNAL-AND-A-SIZE-THE-WAY-A-BUILT-IN-DOES.md)** ✅:
+- **P88 [GAM-017](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-017-A-KIT-NODE-TAKES-A-SIGNAL-AND-A-SIZE-THE-WAY-A-BUILT-IN-DOES.md)** ✅:
   R17 ruled size by a wrapping Group (z3), not `frame`. It never touched `defaultCss` precedence.
-- **P88 [GAM-014](../phase-88-the-defects-the-games-found/GAM-014-A-KIT-NODE-DRAWS-WHEN-IT-IS-THE-WHOLE-COMPONENT.md)** ✅
+- **P88 [GAM-014](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-014-A-KIT-NODE-DRAWS-WHEN-IT-IS-THE-WHOLE-COMPONENT.md)** ✅
   (register **D53**): a kit node as a component's root. Different defect, same root element.
-- **P69 [CN-007](../phase-69-the-node-you-write-yourself/CN-007-THE-DOCS-PAGE-THAT-REPLACES-THE-BROKEN-ONE.md)** ✅: the
+- **P69 [CN-007](../../tasks-archive/phase-69-the-node-you-write-yourself/CN-007-THE-DOCS-PAGE-THAT-REPLACES-THE-BROKEN-ONE.md)** ✅: the
   docs page. Its gate `nodegx-node-kit-types/tests/docsamples.test.js` compiles every complete sample and **counts**
   the fragments. A new sample changes that count deliberately.
 - **P30 [NDA-016](../phase-30-node-library-audit/NDA-016-LAYOUT-SIZEMODE.md)**: built-in nodes (`group.ts`, `text.ts`,

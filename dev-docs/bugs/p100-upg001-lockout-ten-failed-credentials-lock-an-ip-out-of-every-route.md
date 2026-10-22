@@ -8,7 +8,7 @@ task: ISL-040
 severity: medium
 area: backend / auth rate limit
 found: P100 UPG-001 s3 (§3.6b), 2026-09-23 (on 0.2.4); re-read at HEAD 2026-10-01
-evidence: dev-docs/tasks/phase-100-0.3.0-the-first-upgrade/UPG-001-THE-BREAK-CENSUS.md §3.6b
+evidence: dev-docs/tasks-archive/phase-100-0.3.0-the-first-upgrade/UPG-001-THE-BREAK-CENSUS.md §3.6b
 regression: packages/nodegx-backend/tests/isl040-lockout.test.ts
 ---
 

@@ -119,7 +119,7 @@ marker set or `null`, plus:
 ## §4 — What this does *not* commit us to
 
 **Round-trip editing stays out of scope**, as the phase README states and as
-[phase-7's overview](../phase-7-code-export/CODE-EXPORT-overview.md) stated before it. This task does not
+[phase-7's overview](../../tasks-archive/phase-7-code-export/CODE-EXPORT-overview.md) stated before it. This task does not
 reopen it, and the markers are worth having whether or not it ever happens.
 
 What it does is preserve the *option* at near-zero cost. Identity plus a modification signal is the

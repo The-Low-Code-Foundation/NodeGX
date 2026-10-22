@@ -1,6 +1,6 @@
 # AAQ-011 F6 — what a streamed submission costs
 
-The register's row (`dev-docs/tasks/phase-40-ai-authoring-quality/AAQ-011-FOUND-ALONG-THE-WAY.md`)
+The register's row (`dev-docs/tasks-archive/phase-40-ai-authoring-quality/AAQ-011-FOUND-ALONG-THE-WAY.md`)
 said authoring a 55-node component cost **6m51s of editor main-thread time against a zero-latency
 provider**, per partial payload published, superlinear in node count — and named
 `AuthoringSession.publish` → the Build panel's re-render as the suspect. AAQ-007 was gated on fixing

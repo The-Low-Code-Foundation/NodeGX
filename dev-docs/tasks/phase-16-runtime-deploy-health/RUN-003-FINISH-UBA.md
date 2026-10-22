@@ -44,7 +44,7 @@ This is finishing work with a high value-to-effort ratio, and it is independent 
 
 ## Current State
 
-- `dev-docs/tasks/phase-6-uba-system/` — UBA-001…006 documented; per-developer progress notes record UBA-001…009 complete as of the 2026-02-18 sprint.
+- `dev-docs/tasks-archive/phase-6-uba-system/` — UBA-001…006 documented; per-developer progress notes record UBA-001…009 complete as of the 2026-02-18 sprint.
 - Delivered: UBA types, `SchemaParser`, eight field-type renderers, `ConfigPanel`, `UBAClient` (HTTP and server-sent events), `UBAPanel`, sidebar registration, backend health indicator, plus tests.
 - Remaining per the phase notes: **UBA-010 end-to-end test**, a **reference backend** (Directus is the documented candidate), and community/marketplace sharing of adapter configurations.
 - No adapter has been verified against a live backend.
@@ -121,7 +121,7 @@ Then build Directus as the reference: complete, documented, and treated as the e
 
 ## References
 
-- [`dev-docs/tasks/phase-6-uba-system/`](../phase-6-uba-system/) — UBA-001…009 (built) and remaining tasks
+- [`dev-docs/tasks-archive/phase-6-uba-system/`](../../tasks-archive/phase-6-uba-system/) — UBA-001…009 (built) and remaining tasks
 - [`dev-docs/future-projects/NATIVE-BAAS-INTEGRATIONS.md`](../../future-projects/NATIVE-BAAS-INTEGRATIONS.md)
 - [Viability report — §5 (UBA is further along than its tracker says)](../../reviews/NOODL-VIABILITY-REPORT.md)
 - Related: REV-006 (corrects the phase-6 progress record), ECO-002 (marketplace)

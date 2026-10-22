@@ -45,14 +45,14 @@ still remembers its own, and nothing they wrote had to carry it there by hand.**
 
 ## 4. Related work and collisions
 
-- **[GAM-005](../phase-88-the-defects-the-games-found/GAM-005-TWO-COPIES-OF-A-COMPONENT-KEEP-THEIR-OWN-STATE.md) / D57,
+- **[GAM-005](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-005-TWO-COPIES-OF-A-COMPONENT-KEEP-THEIR-OWN-STATE.md) / D57,
   ruled R6:** warning only, and *"Do not make Variables per-instance"* (§5). Ruling 2 below must say whether that still
   stands. GAM-005 **AC5 is still owed**: a browser drive of two banners built the doctrine's way, beside the Variable
   version. AC1(ii) below is the same drive. Do it once and record it in both files.
-- **[GAM-009](../phase-88-the-defects-the-games-found/GAM-009-WHAT-SOMEONE-TYPED-IS-STILL-THERE-WHEN-THE-FIELD-COMES-BACK.md)**
+- **[GAM-009](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-009-WHAT-SOMEONE-TYPED-IS-STILL-THERE-WHEN-THE-FIELD-COMES-BACK.md)**
   / D61 (🟢) made a remounted text field keep what was typed. It is the precedent for "a remount keeps a value", at the
   scale of one field.
-- **[GAM-013](../phase-88-the-defects-the-games-found/GAM-013-SOMETHING-CAN-HAPPEN-EVERY-SECOND-WITHOUT-A-SCRIPT.md)
+- **[GAM-013](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-013-SOMETHING-CAN-HAPPEN-EVERY-SECOND-WITHOUT-A-SCRIPT.md)
   R1:** a `Repeat` stops when its page is navigated away from. A kept-alive page (ruling 1(b)) has to decide whether
   that is still "navigated away from". Raise it with ruling 1, not after.
 - **P107 NSP-012** specs Variable and Set Variable as app-wide (34 of 147). A scope option (ruling 2(a)) changes their

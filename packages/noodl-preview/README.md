@@ -154,7 +154,7 @@ worth it only once the payoff is proven. Deliberately not built here.
 | `src/client.ts` | The injected browser script and diagnostics overlay |
 | `src/watcher.ts` | Debounced chokidar watch |
 
-Task spec: `dev-docs/tasks/phase-13-format-ai-substrate/SUB-009-LIVE-PREVIEW-HARNESS.md`
+Task spec: `dev-docs/tasks-archive/phase-13-format-ai-substrate/SUB-009-LIVE-PREVIEW-HARNESS.md`
 
 ## Licence
 

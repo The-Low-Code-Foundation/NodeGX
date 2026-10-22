@@ -6,7 +6,7 @@ error-routed, cancellable server execution, stored as
 service. This page documents the **step kinds** — the vocabulary you assemble a
 workflow out of.
 
-If you have not read [WF-001's semantics](../../dev-docs/tasks/phase-19-cloud-workflows/WF-001-SEMANTICS.md),
+If you have not read [WF-001's semantics](../../dev-docs/tasks-archive/phase-19-cloud-workflows/WF-001-SEMANTICS.md),
 read the two paragraphs under "Ordering" first. The one thing to internalise:
 
 > **On the server, only the steps you wire an edge to run, and they run in DAG
@@ -1244,6 +1244,6 @@ one to check against.
 
 ## Related
 
-- [WF-001 semantics](../../dev-docs/tasks/phase-19-cloud-workflows/WF-001-SEMANTICS.md) — ordering, cancellation, timeouts, durability, concurrency
+- [WF-001 semantics](../../dev-docs/tasks-archive/phase-19-cloud-workflows/WF-001-SEMANTICS.md) — ordering, cancellation, timeouts, durability, concurrency
 - [Triggers](./TRIGGERS.md) — what starts a workflow
 - [Backend services](./BACKEND-SERVICES.md) — the service these run in

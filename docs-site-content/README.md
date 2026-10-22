@@ -1,9 +1,9 @@
 # Staged docs content — not yet wired into anything
 
 This directory is **not a website**. It's the authored prose for
-[ALPHA-004](../dev-docs/tasks/phase-33-alpha-launch/ALPHA-004-USER-DOCS.md) §1, §2 and §4 —
+[ALPHA-004](../dev-docs/tasks-archive/phase-33-alpha-launch/ALPHA-004-USER-DOCS.md) §1, §2 and §4 —
 the concept set, the getting-started walkthrough, and the harvested troubleshooting entries —
-written ahead of [ALPHA-006](../dev-docs/tasks/phase-33-alpha-launch/ALPHA-006-DOCS-PLATFORM.md),
+written ahead of [ALPHA-006](../dev-docs/tasks-archive/phase-33-alpha-launch/ALPHA-006-DOCS-PLATFORM.md),
 which has not yet built the Docusaurus site (`docs-site/`) this content is meant to live in.
 
 Nothing in this directory is built, published, linted, or read by any tool today. It's staged
@@ -29,7 +29,7 @@ troubleshooting.md         authored, harvested known issues — not invented
 **The node reference** — per-node ports, defaults, and behavior — is out of scope for this
 content on purpose. ALPHA-004's governing rule is **"derive, never author twice"**: the node
 reference is generated from `docs/node-catalog/enrichment/` (`node-catalog-enriched.json`),
-per [ALPHA-006 §3](../dev-docs/tasks/phase-33-alpha-launch/ALPHA-006-DOCS-PLATFORM.md). If a
+per [ALPHA-006 §3](../dev-docs/tasks-archive/phase-33-alpha-launch/ALPHA-006-DOCS-PLATFORM.md). If a
 node's ports need better prose, the fix belongs in the enrichment data, per
 [`dev-docs/reference/PORT-DESCRIPTION-STYLE.md`](../dev-docs/reference/PORT-DESCRIPTION-STYLE.md)
 — not here.

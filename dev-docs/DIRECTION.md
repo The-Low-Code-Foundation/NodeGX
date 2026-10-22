@@ -164,4 +164,4 @@ Both ruled by Richard on 2026-10-06 as recommended ("D1: Ok. D2: ok").
 | [P111](tasks/phase-111-you-can-see-what-it-built/README.md) | The honesty number, the text form, the companion door for the agent, and the words on nodegx.io. SEE-009's reasons are now the four in §3. |
 | [P112](tasks/phase-112-your-own-nodegx/README.md) | The kit and the editor suite: the do-it-yourself reason, and the packages people install. |
 | [P18](tasks/phase-18-code-export-v2/README.md) | The off-ramp (§0 pillar 3): React source from npm, then Swift. Re-ordered 2026-10-21 (EXP-019 → 023). |
-| [P104](tasks/phase-104-the-backend-manager/README.md), [P53](tasks/phase-53-trust-and-compliance/README.md) | The permission model a security report would read, and the compliance work for regulated domains. |
+| [P104](tasks/phase-104-the-backend-manager/README.md), [P53](tasks-archive/phase-53-trust-and-compliance/README.md) | The permission model a security report would read, and the compliance work for regulated domains. |

@@ -28,7 +28,7 @@ HEAD `27d891bf3`, 2026-10-01. Every row was re-read by this task's author at HEA
 | The Router already calls `dom.scrollIntoView()` when body scroll is on (`scrollToTop`), so the runtime has a precedent for page-level scrolling. Re-read at HEAD | `router.tsx:420-430` |
 | CG-005's hook 2 dropped `[data-owl-row]` for `.bg-owl-say` *"(a node cannot write one)"*, and the gate pins the class instead. Re-read at HEAD | CG-005 line 166; CG-003 line 114 |
 | The drives' selectors across `scripts/devtools/drive-{cg,ig,iw}*.js` (18 files): 499 `querySelector(`, 299 `querySelectorAll(`, 170 distinct `.bg-*` / `.gd-*` class names, 25 `scrollIntoView` calls. Counted at HEAD | `grep -o` over the 18 drives |
-| Inline `<svg>` and `Icon` (also in F12) are **not** this task's. `Icon`'s silent empty glyph is owned by P75 [FB-019](../phase-75-0.2.1-the-feedback/FB-019-THE-NUMBER-THAT-WAS-SECRETLY-AN-OBJECT.md) (`be2921a5`: an icon port warns instead of drawing an empty span), P78 D77 and P92 CHR-010. Cross-reference only | `cg007Look.ts:16-18` |
+| Inline `<svg>` and `Icon` (also in F12) are **not** this task's. `Icon`'s silent empty glyph is owned by P75 [FB-019](../../tasks-archive/phase-75-0.2.1-the-feedback/FB-019-THE-NUMBER-THAT-WAS-SECRETLY-AN-OBJECT.md) (`be2921a5`: an icon port warns instead of drawing an empty span), P78 D77 and P92 CHR-010. Cross-reference only | `cg007Look.ts:16-18` |
 
 ## 3. Where it bites a person
 
@@ -40,7 +40,7 @@ HEAD `27d891bf3`, 2026-10-01. Every row was re-read by this task's author at HEA
 
 ## 4. Related work and collisions
 
-- **P41 [ACC-006](../phase-41-accessibility/README.md)** (specced): an *Accessibility* property group on every visual node
+- **P41 [ACC-006](../../tasks-archive/phase-41-accessibility/README.md)** (specced): an *Accessibility* property group on every visual node
   (`Label`, `Description`, `Role`, `Hidden`, `Tab index`), *"one shared mixin, applied through the node-definition layer"*. An
   attribute port belongs in the **same** mixin and the same panel area. Build one mixin, not two.
 - **P92 / P81 (look and variants):** a test name must not become a styling hook, or this task recreates the class problem.

@@ -4,7 +4,7 @@
 **Status: 🟡 BUILD DONE — session 7 (2026-10-01, on `cline-dev`): every buildable item of the phase is built and driven; what is left is Richard's (the children's sitting IW-009, the tablet, the FR read, the look beside IW-000, the prices). IW-001 ✅, IW-002 ✅, IW-005 ✅, IW-006 ✅, IW-007 ✅ (s7: robots rest at the finished spa, a helper's drops earn, a fed animal's present, name pills never cover each other, the touch path in 3D); IW-008 🟡 (more land ruled LATER; the tablet); IW-003 🟡 / IW-004 🟡 / IW-000 🟡 (Richard's reads, the tablet); IW-009 ⬜ READY (the Mac app, IW-009 §4–§5). Rulings R1–R6 (§3; R5 = a 400-tick run cap, s7); D1–D13. Next: Richard's sitting; then a session for what the children found. Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).**
 **Prefix: `IW`.** Parent: [Phase 106](../phase-106-the-island-grows/README.md) (the world, the robots, 3D, Olive reads).
 Grandparent: [Phase 105](../phase-105-the-coding-garden/README.md). Research: [TPL-012 briefing](../phase-78-the-templates/tpl-012-research-briefing.md),
-Rocket School's [rewards research](../phase-87-the-first-play-test/rkt-010-rewards-research.md), and §5 below (new, 2026-09-29).
+Rocket School's [rewards research](../../tasks-archive/phase-87-the-first-play-test/rkt-010-rewards-research.md), and §5 below (new, 2026-09-29).
 
 ## 0. Richard's words, 2026-09-29
 

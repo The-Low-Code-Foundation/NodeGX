@@ -401,7 +401,7 @@ generator writes today (the gate says so).
 
 ## 12. Next — in order
 
-> 🔴 **2026-09-13 — Richard played it, and [Phase 87](../phase-87-the-first-play-test/README.md) goes FIRST.**
+> 🔴 **2026-09-13 — Richard played it, and [Phase 87](../../tasks-archive/phase-87-the-first-play-test/README.md) goes FIRST.**
 > Ten findings (text that does not wrap, "Show me how" unwired, Shift for digits on AZERTY, the verdict
 > below the fold, no profile edit, no restart, a silent clock, one question type, the look, the language
 > toggle) became nine `RKT` tasks. Every one lives in a part Merge, Hunt and Monster reuse, so the list
@@ -452,7 +452,7 @@ Built over P87's template (RKT-001 to RKT-012, uncommitted), through the plan do
 - **Not built:** swipe on a touch screen (the arrow buttons are the tablet's way), sounds per join, the learner model hearing about joins
   (a join is not graded, so ratings do not move).
 - **The hangar** left Home's games for the player menu (first item, "🎁 Hangar", on every page but the hangar) and stays on Home's bar
-  to the next pick. Recorded in [RKT-011 §5](../phase-87-the-first-play-test/RKT-011-THE-HANGAR.md).
+  to the next pick. Recorded in [RKT-011 §5](../../tasks-archive/phase-87-the-first-play-test/RKT-011-THE-HANGAR.md).
 
 ### 13.2 Gates added
 

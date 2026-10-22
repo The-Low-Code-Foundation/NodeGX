@@ -78,7 +78,7 @@ Assuming §1 confirms the superset:
    Keeping it needs its own argument.
 3. Attempt the mechanical REST → HTTP Request rewrite — the DSL is structured, so it is plausibly
    within reach, and it is exactly the kind of conversion the legacy importer
-   ([LIB-006](../phase-21-library-and-import/LIB-006-LEGACY-IMPORT-ASSIST.md)) should own. Timebox
+   ([LIB-006](../../tasks-archive/phase-21-library-and-import/LIB-006-LEGACY-IMPORT-ASSIST.md)) should own. Timebox
    it; where it fails, emit a report entry rather than a shim.
 
 ## §3 — Clean up HTTP Request while you are here

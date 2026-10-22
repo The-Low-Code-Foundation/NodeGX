@@ -4,9 +4,9 @@ This is the tracked source for the Prefabs and Modules libraries shown in the
 editor's node picker. It replaces hand-maintained zips on the docs site: every
 entry here is a real, reviewable, diffable project directory plus a metadata
 file, with a build step and a CI-gated check. See
-[dev-docs/tasks/phase-21-library-and-import/LIB-001-LIBRARY-PIPELINE.md](../dev-docs/tasks/phase-21-library-and-import/LIB-001-LIBRARY-PIPELINE.md)
+[dev-docs/tasks-archive/phase-21-library-and-import/LIB-001-LIBRARY-PIPELINE.md](../dev-docs/tasks-archive/phase-21-library-and-import/LIB-001-LIBRARY-PIPELINE.md)
 for the full design, and
-[PROGRESS.md](../dev-docs/tasks/phase-21-library-and-import/PROGRESS.md) for
+[PROGRESS.md](../dev-docs/tasks-archive/phase-21-library-and-import/PROGRESS.md) for
 the hosting decision and its rationale.
 
 ## Layout
@@ -217,7 +217,7 @@ The workflow opens a pull request refreshing
 [`scripts/library/origin-baseline.json`](../scripts/library/origin-baseline.json)
 afterwards, because a publish moves the divergence that file records. Its
 `$comment` is still yours to write. Record the publish as a dated entry in
-[PROGRESS.md](../dev-docs/tasks/phase-21-library-and-import/PROGRESS.md) under
+[PROGRESS.md](../dev-docs/tasks-archive/phase-21-library-and-import/PROGRESS.md) under
 **Log**, naming the content-repo commit and which entries changed version.
 
 For local dev, `library:build`'s output can be served at the same path the

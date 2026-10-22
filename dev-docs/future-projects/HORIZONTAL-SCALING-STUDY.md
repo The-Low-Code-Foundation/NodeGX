@@ -2,7 +2,7 @@
 
 **Status:** study. Stage 1 and 2 are **not scoped** — no phase, no owner. The
 **production-hardening findings it turned up are scoped**, as
-[phase 98 — The potholes others hit](../tasks/phase-98-the-potholes-others-hit/README.md).
+[phase 98 — The potholes others hit](../tasks-archive/phase-98-the-potholes-others-hit/README.md).
 **Written:** 2026-09-19, from Richard's field report (below) and a measurement of
 the backend at HEAD `978d49da8` (immediately after phase 97's BRG-001 landed).
 **Named as out of scope by:** [phase 97](../tasks/phase-97-the-way-out-is-the-reason-to-stay/README.md) §6
@@ -359,7 +359,7 @@ discovered later:
 
 ### 3.6 🔴 Live defects found while checking incident #3 — now owned by phase 98
 
-> ✅ **Filed 2026-09-19 as [phase 98 — The potholes others hit](../tasks/phase-98-the-potholes-others-hit/README.md).**
+> ✅ **Filed 2026-09-19 as [phase 98 — The potholes others hit](../tasks-archive/phase-98-the-potholes-others-hit/README.md).**
 > HS-D1 → **PRD-D1** (PRD-001), HS-D2 → **PRD-D2** (PRD-002), plus two more the phase
 > found while scoping: pruning never reclaims disk (**PRD-D3**) and retention is
 > age-only (**PRD-D4**). The analysis below stays as the derivation; **the phase is
@@ -480,7 +480,7 @@ first two tests structurally cannot see:
 Reordered after the field report — **the two defects now come first**, because they
 are live today at one replica and they are what actually caused the outage.
 
-1. ✅ **Build [phase 98](../tasks/phase-98-the-potholes-others-hit/README.md) — PRD-001 → 003.**
+1. ✅ **Build [phase 98](../tasks-archive/phase-98-the-potholes-others-hit/README.md) — PRD-001 → 003.**
    The outage chain, closed. Cheap, self-contained, no Postgres and no interface,
    and it protects a single-process user who will never scale anything.
    **Highest value per hour in this document**, and it no longer lives here.

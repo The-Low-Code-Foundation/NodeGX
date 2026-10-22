@@ -53,7 +53,7 @@ Hence the explicit gating in the prerequisites. If Gate G2's signal is negative,
 
 ## Current State
 
-- `dev-docs/tasks/phase-3.5-realtime-agentic-ui/` — AGENT-001 through AGENT-007 specified, **0 of 7 built**, spec stubs only, no commits reference them. Read those specs before starting; this task implements them rather than redesigning them.
+- `dev-docs/tasks-archive/phase-3.5-realtime-agentic-ui/` — AGENT-001 through AGENT-007 specified, **0 of 7 built**, spec stubs only, no commits reference them. Read those specs before starting; this task implements them rather than redesigning them.
 - The runtime has a framework-neutral engine with a push/signal execution model that suits streaming well.
 - Existing data nodes cover request/response (REST, database queries) but not long-lived streams.
 - AIX-001 will have introduced streaming client work editor-side; the runtime equivalent is separate but can borrow patterns.
@@ -141,7 +141,7 @@ Make errors visible. A silent failed reconnection is the worst outcome for an ap
 
 ## References
 
-- `dev-docs/tasks/phase-3.5-realtime-agentic-ui/` — AGENT-001…007 specifications
+- `dev-docs/tasks-archive/phase-3.5-realtime-agentic-ui/` — AGENT-001…007 specifications
 - [Revival roadmap — Track C (C-05, explicitly deferred)](../../reviews/NOODL-REVIVAL-ROADMAP.md)
 - [Viability report — §5 (phase 3.5 triage)](../../reviews/NOODL-VIABILITY-REPORT.md)
 - Depends on: AIX-002 + Gate G2. Related: PLAT-003, SUB-004/005

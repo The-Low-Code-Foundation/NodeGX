@@ -1,7 +1,7 @@
 # AGENT-006 — State History & Time Travel (as built)
 
 Part of AIX-005 (Agentic UI Nodes). Implements
-`dev-docs/tasks/phase-3.5-realtime-agentic-ui/AGENT-006-state-history-task.md`, reviewed
+`dev-docs/tasks-archive/phase-3.5-realtime-agentic-ui/AGENT-006-state-history-task.md`, reviewed
 against current reality per AIX-005 step 1. Every departure from that spec is in §7.
 
 **This is wave 2**, built on AGENT-003's store. It codes against the §3 contract in

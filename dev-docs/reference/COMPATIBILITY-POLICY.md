@@ -14,7 +14,7 @@ live.** Read this before applying the policy to anything a person already has on
 **The premise.** *"Who actually has a project"* states *"NodeGX has never had a public release …
 **There are zero NodeGX projects in the wild** … Therefore the only projects that exist today are
 ours."* **True when written. False since `v0.2.2`.** Measured 2026-09-22: `v0.2.0`, `v0.2.2`,
-`v0.2.3` and `v0.2.4` are public tags, and [phase 84](../tasks/phase-84-the-defects-the-field-report-found/README.md)
+`v0.2.3` and `v0.2.4` are public tags, and [phase 84](../tasks-archive/phase-84-the-defects-the-field-report-found/README.md)
 is scoped from **15 confirmed community issues filed against the 0.2.2 AppImage** by named people on
 machines that are not ours.
 
@@ -46,7 +46,7 @@ per-project migration report on open; `views/migration/MigrationWizard.tsx` and
 `src/editor/src/models/migration/` were built for a different job. **Whether they are the right home
 is a measurement the first task under this amendment owes** — do not assume it either way.
 
-**Where this was decided:** [phase 100](../tasks/phase-100-0.3.0-the-first-upgrade/README.md) §6,
+**Where this was decided:** [phase 100](../tasks-archive/phase-100-0.3.0-the-first-upgrade/README.md) §6,
 ruling **R2**, opened to prepare the `0.3.0` release — the first release people **upgrade** into
 rather than install.
 
@@ -165,7 +165,7 @@ path to raise one.
 report is written to be consumed by an AI assistant with the node catalog (SUB-004/005), the
 semantic validator (SUB-006), and the authoring loop (AIX-002) already available to it. "The
 assistant will fix it" is only an acceptable answer because those four things exist. See
-[LIB-006](../tasks/phase-21-library-and-import/LIB-006-LEGACY-IMPORT-ASSIST.md), which owns this
+[LIB-006](../tasks-archive/phase-21-library-and-import/LIB-006-LEGACY-IMPORT-ASSIST.md), which owns this
 promise.
 
 **And "delete and rebuild" is an acceptable outcome.** For a small abandoned project, rebuilding
@@ -224,7 +224,7 @@ as described before acting — several are second-hand from spec prose, not re-r
 
 `.clinerules` · [`CLINE-INSTRUCTIONS.md`](../CLINE-INSTRUCTIONS.md) ·
 [`TASK-TEMPLATE.md`](../TASK-TEMPLATE.md) · [`dev-docs/README.md`](../README.md) ·
-[`REVIVAL-PHASES-INDEX.md`](../tasks/REVIVAL-PHASES-INDEX.md) · the phase-30 and phase-21 READMEs ·
+[`REVIVAL-PHASES-INDEX.md`](../tasks-archive/REVIVAL-PHASES-INDEX.md) · the phase-30 and phase-21 READMEs ·
 the individual specs listed in the table above.
 
 Those are pointers only. **This file is the single source; do not restate the policy elsewhere.**

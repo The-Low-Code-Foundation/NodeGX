@@ -5,9 +5,9 @@ a real record (size, sniffed content type, hash, owner), enforces limits, can
 serve on-the-fly thumbnails, supports private files behind BAK-003's access
 model, and stores blobs on local disk by default or in an S3-compatible bucket
 if you configure one. The full design record is
-[`dev-docs/tasks/phase-22-production-backend/BAK-006-FILE-STORAGE-V2.md`](../../dev-docs/tasks/phase-22-production-backend/BAK-006-FILE-STORAGE-V2.md);
+[`dev-docs/tasks-archive/phase-22-production-backend/BAK-006-FILE-STORAGE-V2.md`](../../dev-docs/tasks-archive/phase-22-production-backend/BAK-006-FILE-STORAGE-V2.md);
 decisions and how they were verified are in
-[`BAK-006-NOTES.md`](../../dev-docs/tasks/phase-22-production-backend/BAK-006-NOTES.md).
+[`BAK-006-NOTES.md`](../../dev-docs/tasks-archive/phase-22-production-backend/BAK-006-NOTES.md).
 
 This grows WF-004's raw `/files` upload/serve/delete — the wire contract
 (`POST /files/:name` → `{ url, name }`, `GET /files/:name`, `DELETE

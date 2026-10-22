@@ -46,11 +46,11 @@ was run through the door.
 
 - **P78 D9** (fixed in the generator, `pinRootNode`): this task moves that fix into the product. D9's own lesson stands:
   byte-identity is a drift check and cannot see a field both runs omit.
-- **P84 [FLD-009](../phase-84-the-defects-the-field-report-found/FLD-009-THE-EDITOR-DOES-NOT-OVERWRITE-WHAT-AN-AGENT-WROTE.md)**
+- **P84 [FLD-009](../../tasks-archive/phase-84-the-defects-the-field-report-found/FLD-009-THE-EDITOR-DOES-NOT-OVERWRITE-WHAT-AN-AGENT-WROTE.md)**
   (built, `fa227028`): the editor used to drop an agent's project-level write silently when it then changed `rootNodeId`
   itself (its arms B and C). Its guard now refuses that. A new tool writing `rootNodeId` while a person has the project open
   is exactly FLD-009's population: AC5 runs against that guard.
-- **P88 [GAM-021](../phase-88-the-defects-the-games-found/GAM-021-A-PLAN-IS-NOT-WARNED-ABOUT-THE-SCROLL-SETTING-IT-IS-ABOUT-TO-APPLY.md)**:
+- **P88 [GAM-021](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-021-A-PLAN-IS-NOT-WARNED-ABOUT-THE-SCROLL-SETTING-IT-IS-ABOUT-TO-APPLY.md)**:
   `projectSettingsAfterWrite` is the one merge for plan settings. A settings tool must use it, or a second merge drifts.
 - **P66 FIX-008** (`open_project`, bootstrap mode) and **P55's surface budget**: see §5's budget constraint.
 - **ISL-019** owns the `modified` timestamp this tool will write; **ISL-017** owns the other half of the skeleton problem

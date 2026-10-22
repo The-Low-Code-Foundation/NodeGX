@@ -39,7 +39,7 @@ node packages/noodl-editor/scripts/aaq40-live/wizard-replay.js \
 ## What it measured, 2026-08-05
 
 Three defects, all invisible to the suite, all fixed — see
-`dev-docs/tasks/phase-40-ai-authoring-quality/README.md`. Plus one number that turned out to be about
+`dev-docs/tasks-archive/phase-40-ai-authoring-quality/README.md`. Plus one number that turned out to be about
 this script rather than about the editor: authoring a 55-node component took **6m51s** against a
 zero-latency provider, filed as AAQ-011 F6 as "editor main-thread time".
 

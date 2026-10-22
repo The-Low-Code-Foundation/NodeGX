@@ -83,7 +83,7 @@ to run headless" trick RUN-002's SSR smoke harness used.
 
 ## The aggregate-capability probe (BCN-001)
 
-[BCN-001 §5.3](../../phase-34-one-backend-contract/BCN-001-CONTRACT.md) left two
+[BCN-001 §5.3](../../../tasks-archive/phase-34-one-backend-contract/BCN-001-CONTRACT.md) left two
 capability-descriptor cells unresolved because they are facts about other
 people's products, not about this repo: **can PocketBase aggregate, and can
 Supabase?** Docs were not enough — PostgREST's `db-aggregates-enabled` default
@@ -252,8 +252,8 @@ descriptor cells:
 
 ## The relation live pass (BCN-005)
 
-[BCN-005](../../phase-34-one-backend-contract/BCN-005-RELATIONS.md) closed the hole
-[BCN-004's notes](../../phase-34-one-backend-contract/BCN-004-NOTES-TRANSPORT.md) named in
+[BCN-005](../../../tasks-archive/phase-34-one-backend-contract/BCN-005-RELATIONS.md) closed the hole
+[BCN-004's notes](../../../tasks-archive/phase-34-one-backend-contract/BCN-004-NOTES-TRANSPORT.md) named in
 §3.4: *"no live check reads a related record back on any backend."*
 
 ```bash
@@ -278,7 +278,7 @@ It owns the `bcn005_*` collections and tables and rebuilds them on every run. It
 nothing else — in particular not `articles`, `authors`, `bcn004a` or `bcn004n`.
 
 Three findings worth knowing before touching this area again, all in
-[BCN-005-NOTES.md](../../phase-34-one-backend-contract/BCN-005-NOTES.md):
+[BCN-005-NOTES.md](../../../tasks-archive/phase-34-one-backend-contract/BCN-005-NOTES.md):
 
 - **Directus's many-to-many include is two hops.** `fields=*,tags.*` answers 200 with the
   *junction rows*; only `fields=*,tags.tag_id.*` gives the tags.

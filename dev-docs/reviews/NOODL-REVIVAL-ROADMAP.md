@@ -2,7 +2,7 @@
 
 **Companion to:** [NOODL-VIABILITY-REPORT.md](./NOODL-VIABILITY-REPORT.md) (read that first — this roadmap assumes its findings)
 **Premise:** Time and money are not constraints. Team capacity, sequencing discipline, and honesty about demand still are.
-**Task documentation:** Every item below is now written up as a full task in [`dev-docs/tasks/`](../tasks/) — see the [phase index](../tasks/REVIVAL-PHASES-INDEX.md).
+**Task documentation:** Every item below is now written up as a full task in [`dev-docs/tasks/`](../tasks/) — see the [phase index](../tasks-archive/REVIVAL-PHASES-INDEX.md).
 **Date:** 2026-07-22
 
 ---
@@ -23,7 +23,7 @@ It does *not* change three things:
 
 ## 1. Horizon 0 — Reanimation (Weeks 1–4, 2–3 engineers)
 
-→ **[Phase 12: Reanimation](../tasks/phase-12-reanimation/)** — REV-001…007
+→ **[Phase 12: Reanimation](../tasks-archive/phase-12-reanimation/)** — REV-001…007
 
 Everything else stacks on a green, shippable, current base. This horizon is deliberately boring.
 
@@ -45,7 +45,7 @@ Everything else stacks on a green, shippable, current base. This horizon is deli
 
 ### Track A — Format & AI Substrate *(the strategic spine — staff it best)*
 
-→ **[Phase 13: Format & AI Substrate](../tasks/phase-13-format-ai-substrate/)** — SUB-001…008
+→ **[Phase 13: Format & AI Substrate](../tasks-archive/phase-13-format-ai-substrate/)** — SUB-001…008
 
 The end state: **the project format is a language.** Decomposed, documented, diffable, validatable, and manipulable by any tool or AI — not just Noodl's own editor.
 
@@ -64,7 +64,7 @@ The end state: **the project format is a language.** Decomposed, documented, dif
 
 ### Track B — Editor Platform Health *(the "never again" track)*
 
-→ **[Phase 14: Editor Platform Health](../tasks/phase-14-editor-platform-health/)** — PLAT-001…005
+→ **[Phase 14: Editor Platform Health](../tasks-archive/phase-14-editor-platform-health/)** — PLAT-001…005
 
 | ID | Task | Notes | Est. |
 |---|---|---|---|
@@ -107,7 +107,7 @@ The end state: **the project format is a language.** Decomposed, documented, dif
 
 ### Track E — "Noodl Learn" *(pedagogy as a product, not a hope)*
 
-→ **[Phase 17: Noodl Learn](../tasks/phase-17-noodl-learn/)** — LEARN-001…006
+→ **[Phase 17: Noodl Learn](../tasks-archive/phase-17-noodl-learn/)** — LEARN-001…006
 
 The report's finding: pedagogy is the strongest reason to exist and the least-served user. With budget, treat it as a product line with its own team — not a feature.
 
@@ -138,7 +138,7 @@ Sequenced after Track A because generators and LLMs both consume per-component f
 
 ### Track G — Cloud & workflows *(bounded resurrection of Phase 11)*
 
-→ **[Phase 19: Cloud & Workflows](../tasks/phase-19-cloud-workflows/)** — WF-001…003
+→ **[Phase 19: Cloud & Workflows](../tasks-archive/phase-19-cloud-workflows/)** — WF-001…003
 
 Finish the workflow runtime (TASK-007C) → Series 1 workflow nodes → one managed deploy target done well (not Docker+Fly+Railway simultaneously). Execution history/overlay (CF11-006/007) already exist. Python/AI runtime stays parked until Horizon 3. Est. 8–10 wks for the bounded slice.
 
@@ -146,7 +146,7 @@ Finish the workflow runtime (TASK-007C) → Series 1 workflow nodes → one mana
 
 ## 4. Horizon 3 — Ecosystem (Year 1–2)
 
-→ **[Phase 20: Ecosystem](../tasks/phase-20-ecosystem/)** — ECO-001…005 (specifications only; gated on G3)
+→ **[Phase 20: Ecosystem](../tasks-archive/phase-20-ecosystem/)** — ECO-001…005 (specifications only; gated on G3)
 
 Only after the wedges hold. In rough priority order:
 

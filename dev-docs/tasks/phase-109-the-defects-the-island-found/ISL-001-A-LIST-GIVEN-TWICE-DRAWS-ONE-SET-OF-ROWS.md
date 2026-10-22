@@ -49,7 +49,7 @@ per item in the latest list, and never a row for an item that has gone.**
 - **D85** is taken here. It had no owner. P108 README `:166-170` says "Owner: the runtime (P99)", but P99's README has
   no For Each row: `grep -c -i "for each\|foreach\|repeater"` returns **0** (re-run at HEAD). This task's first commit
   writes "ISL-001" into D85's owner cell.
-- **[GAM-005](../phase-88-the-defects-the-games-found/GAM-005-TWO-COPIES-OF-A-COMPONENT-KEEP-THEIR-OWN-STATE.md) AC7**
+- **[GAM-005](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-005-TWO-COPIES-OF-A-COMPONENT-KEEP-THEIR-OWN-STATE.md) AC7**
   is still owed. It asks for id-less rows emitted twice into a For Each, with the rendered rows counted. D57's
   "doubled pills" note (register `:2598-2601`) is very likely this defect. Grade AC7 inside this task's AC1 and tell
   GAM-005 the result. Do not build it twice.

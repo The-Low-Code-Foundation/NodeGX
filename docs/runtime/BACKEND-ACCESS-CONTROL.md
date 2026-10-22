@@ -6,7 +6,7 @@ collection-level permissions and per-record access control. This page is the
 operator's guide: how to lock a backend down before it leaves your machine, and
 how the pieces fit. The full semantics — evaluation order, every default and
 why — live in the design record,
-[`dev-docs/tasks/phase-22-production-backend/BAK-003-SECURITY-MODEL.md`](../../dev-docs/tasks/phase-22-production-backend/BAK-003-SECURITY-MODEL.md).
+[`dev-docs/tasks-archive/phase-22-production-backend/BAK-003-SECURITY-MODEL.md`](../../dev-docs/tasks-archive/phase-22-production-backend/BAK-003-SECURITY-MODEL.md).
 
 ## The one thing you must know
 

@@ -62,7 +62,7 @@ were written against was never wired up: `StyleTokensInjector` is not constructe
 anywhere, and the tokens that *did* ship use a different vocabulary. `GroupConfig`
 is gone from the tree; `ImageConfig` stays recoverable from `d67ee72` if the wider
 question is ever settled. See
-[REV-009](../tasks/phase-12-reanimation/REV-009-STYLE-TOKENS-NEVER-WIRED.md).
+[REV-009](../tasks-archive/phase-12-reanimation/REV-009-STYLE-TOKENS-NEVER-WIRED.md).
 
 ## Other resolutions
 
@@ -124,4 +124,4 @@ automated coverage. REV-008 (2026-07-22) closed that:
 - **StyleTokens — does not work.** `StyleTokensInjector` is never constructed, so
   no tokens are ever injected, and the tokens that shipped use a different
   vocabulary from the one ElementConfigs references. Written up as
-  [REV-009](../tasks/phase-12-reanimation/REV-009-STYLE-TOKENS-NEVER-WIRED.md).
+  [REV-009](../tasks-archive/phase-12-reanimation/REV-009-STYLE-TOKENS-NEVER-WIRED.md).

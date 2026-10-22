@@ -67,7 +67,7 @@ today would remove the one capability with no mechanical conversion, and would d
 exists to convert the graphs that use it. The maintenance cost of keeping a hidden, uncreatable node
 is low and bounded; the cost of deleting a capability with no replacement path is not.
 
-**The conversion path is [LIB-006](../phase-21-library-and-import/LIB-006-LEGACY-IMPORT-ASSIST.md)'s,
+**The conversion path is [LIB-006](../../tasks-archive/phase-21-library-and-import/LIB-006-LEGACY-IMPORT-ASSIST.md)'s,
 as §2 step 3 says.** The declarative half converts cleanly — resource → url, method → method, and
 the `{name}` templates map straight onto `path-*` ports. The scripts do not, and should be reported
 rather than shimmed. **Revisit deletion once that report exists**: if the conversion finds that real

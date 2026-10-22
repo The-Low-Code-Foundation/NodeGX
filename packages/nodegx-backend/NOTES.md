@@ -64,7 +64,7 @@ happy path now essentially always persists.
 ### Compatibility test — real output
 
 Standalone, runnable with plain `node`:
-`dev-docs/tasks/phase-19-cloud-workflows/wf-004-engine-compat-test.js`
+`dev-docs/tasks-archive/phase-19-cloud-workflows/wf-004-engine-compat-test.js`
 
 It exercises (Part 1) every raw primitive the adapter/SchemaManager use, and
 (Part 2) the **real `LocalSQLAdapter`** end-to-end including a close+reopen to

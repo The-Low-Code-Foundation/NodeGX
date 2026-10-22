@@ -110,7 +110,7 @@ Structural:
 - [mocks/](./mocks/) — palette source of truth
 - `packages/noodl-core-ui/src/styles/custom-properties/colors.css` + editor duplicate — the files
 - Shared-SecretsStore convergence memory — why full values live in this spec's prose
-- [PLAT-004](../phase-14-editor-platform-health/) — precedent for guideline-doc + gate discipline
+- [PLAT-004](../../tasks-archive/phase-14-editor-platform-health/) — precedent for guideline-doc + gate discipline
 
 ## Checklist
 

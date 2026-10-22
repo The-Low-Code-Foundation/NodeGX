@@ -43,7 +43,7 @@ with `node`. The validator was not run; which arm fires where is derived from it
 
 ## 4. Related work and collisions
 
-- **P88 [GAM-022](../phase-88-the-defects-the-games-found/GAM-022-A-WRAPPED-ROW-OF-PILLS-IS-NOT-TOLD-TO-BECOME-COLUMNS.md)**
+- **P88 [GAM-022](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-022-A-WRAPPED-ROW-OF-PILLS-IS-NOT-TOLD-TO-BECOME-COLUMNS.md)**
   (✅): judged the item for arm B; this task changes which sized items it judges. Its decision to keep 132 px and 150 px items
   firing is ruling 1 below. Its AC5 census (16 → 13) is the baseline to re-run.
 - **P54 DSG-004** and its calibration (`responsiveArrangement.ts:31-80`): arm A's zero-false-positive claim was measured on

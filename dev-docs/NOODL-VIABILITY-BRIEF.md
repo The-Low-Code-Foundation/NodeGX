@@ -62,15 +62,15 @@ Orient using these before forming opinions. (Paths relative to repo root.)
 
 **Current state of play (where the stall happened)**
 - Latest branch is `cline-dev`, last commit ~2026-02-18. Multiple parallel dev branches exist (`cline-dev-richard`, `-dishant`, `-tara`, `feature/*`). Work was mid-flight across:
-  - Phase 10 STRUCT-001…004 done (schemas + export/import engines + format detection); STRUCT-005…009 (lazy loading, save logic, migration wizard) **not started** — see `dev-docs/tasks/phase-10-ai-powered-development/PROGRESS-dishant.md`.
-  - Phase 9 styles STYLE-005 left with pending wiring — `dev-docs/tasks/phase-9-styles-overhaul/PROGRESS-richard.md`.
-  - Phase 6 UBA through UBA-009 — `dev-docs/tasks/phase-6-uba-system/PROGRESS-richard.md`.
+  - Phase 10 STRUCT-001…004 done (schemas + export/import engines + format detection); STRUCT-005…009 (lazy loading, save logic, migration wizard) **not started** — see `dev-docs/tasks-archive/phase-10-ai-powered-development/PROGRESS-dishant.md`.
+  - Phase 9 styles STYLE-005 left with pending wiring — `dev-docs/tasks-archive/phase-9-styles-overhaul/PROGRESS-richard.md`.
+  - Phase 6 UBA through UBA-009 — `dev-docs/tasks-archive/phase-6-uba-system/PROGRESS-richard.md`.
   - Phase 11 cloud-functions through CF11-007.
 
 **The three make-or-break subsystems — study these hardest:**
 1. **The runtime/compile pipeline** (`packages/noodl-runtime`, `packages/noodl-viewer-react`) — how JSON becomes running React. This is the heart of the React-lock-in question.
 2. **The project format & decomposition work** (`packages/noodl-editor/src/editor/src/io/` — `ProjectExporter.ts`, `ProjectImporter.ts`, `ProjectFormatDetector.ts` — and `.../schemas/`). This is Phase 10's bet on AI-authorable, per-file project structure.
-3. **Code export** (`dev-docs/tasks/phase-7-code-export/` — `CODE-EXPORT-overview.md` and the CODE-00x tasks). Note whether any of it is implemented vs. purely planned.
+3. **Code export** (`dev-docs/tasks-archive/phase-7-code-export/` — `CODE-EXPORT-overview.md` and the CODE-00x tasks). Note whether any of it is implemented vs. purely planned.
 
 ---
 

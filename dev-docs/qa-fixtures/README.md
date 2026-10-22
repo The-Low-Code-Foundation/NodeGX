@@ -198,7 +198,7 @@ CDP and reads `ComponentModel.getPorts()` after every step.
 | `/App`, visual, with an instance of `/Probe` | the *outer* contract, read from the instance — a different code path from the model call, and the one an author actually sees |
 
 Results, and the four traps driving it cost, are in
-`dev-docs/tasks/phase-35-authoring-ergonomics/ERG-005-COMPONENT-INTERFACE.md` §0.
+`dev-docs/tasks-archive/phase-35-authoring-ergonomics/ERG-005-COMPONENT-INTERFACE.md` §0.
 
 ### ⚠️ Regenerate before every run
 

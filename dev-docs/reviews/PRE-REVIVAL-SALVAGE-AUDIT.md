@@ -123,7 +123,7 @@ No current task claims: the Data Lineage rewrite, the Topology re-wire, the Trig
 
 ## Disposition (2026-07-24, same day)
 
-Every unowned gap above now has an owning task. Note one deliberate departure from this audit's recommendations: **§7's "park cloud functions" verdict was overruled** — the backend gap was re-assessed as the remaining leg of the full-stack story and Phase 19 was re-scoped accordingly (see [BACKEND-GAP-ASSESSMENT.md](../tasks/phase-19-cloud-workflows/BACKEND-GAP-ASSESSMENT.md) for the argument; the "no integration library, ever" discipline and the Series 4/5 parking survive).
+Every unowned gap above now has an owning task. Note one deliberate departure from this audit's recommendations: **§7's "park cloud functions" verdict was overruled** — the backend gap was re-assessed as the remaining leg of the full-stack story and Phase 19 was re-scoped accordingly (see [BACKEND-GAP-ASSESSMENT.md](../tasks-archive/phase-19-cloud-workflows/BACKEND-GAP-ASSESSMENT.md) for the argument; the "no integration library, ever" discipline and the Series 4/5 parking survive).
 
 | Audit item | Owner |
 |---|---|

@@ -98,8 +98,8 @@ This phase feeds the roadmap's demand gate (roadmap §6, ~Month 9): the AIX-002 
 - `dev-docs/reviews/NOODL-VIABILITY-REPORT.md` — §2 (strategic case), §4.2 (format gaps), Appendix H (AiAssistant findings)
 - `dev-docs/reviews/NOODL-REVIVAL-ROADMAP.md` — Track C (C-01..C-05), §6 gates
 - `packages/noodl-editor/src/editor/src/models/AiAssistant/` — existing copilot code
-- `dev-docs/tasks/phase-3.5-realtime-agentic-ui/` — AGENT-001..007 specs (implemented by AIX-005)
-- `dev-docs/tasks/phase-13-format-ai-substrate/` — SUB-004/006/007 prerequisites (documented in parallel)
+- `dev-docs/tasks-archive/phase-3.5-realtime-agentic-ui/` — AGENT-001..007 specs (implemented by AIX-005)
+- `dev-docs/tasks-archive/phase-13-format-ai-substrate/` — SUB-004/006/007 prerequisites (documented in parallel)
 
 ---
 

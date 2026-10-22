@@ -1,7 +1,7 @@
 # AGENT-004 — Optimistic Update (as built)
 
 Part of AIX-005 (Agentic UI Nodes). Implements
-`dev-docs/tasks/phase-3.5-realtime-agentic-ui/AGENT-004-optimistic-updates-task.md`, reviewed
+`dev-docs/tasks-archive/phase-3.5-realtime-agentic-ui/AGENT-004-optimistic-updates-task.md`, reviewed
 against current reality per AIX-005 step 1. Every departure from that spec is recorded in §6
 with reasoning.
 

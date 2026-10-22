@@ -114,7 +114,7 @@ Be careful about one thing: verification of the *port* only demonstrates that th
 
 - [Viability report — §4.1, §4.3 (lock-in is shallower than it appears; rank the export options honestly)](../../reviews/NOODL-VIABILITY-REPORT.md)
 - [Revival roadmap — Track F (F-05)](../../reviews/NOODL-REVIVAL-ROADMAP.md)
-- `dev-docs/tasks/phase-7-code-export/` — ADR-001 on primitives enabling future renderers
+- `dev-docs/tasks-archive/phase-7-code-export/` — ADR-001 on primitives enabling future renderers
 - Depends on: EXP-002, EXP-003, EXP-004
 
 ## Checklist

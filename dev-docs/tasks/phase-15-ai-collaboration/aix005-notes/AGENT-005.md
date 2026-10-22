@@ -1,7 +1,7 @@
 # AGENT-005 — Action Dispatcher (as built)
 
 Part of AIX-005 (Agentic UI Nodes). Implements
-`dev-docs/tasks/phase-3.5-realtime-agentic-ui/AGENT-005-action-dispatcher-task.md`, reviewed
+`dev-docs/tasks-archive/phase-3.5-realtime-agentic-ui/AGENT-005-action-dispatcher-task.md`, reviewed
 against current reality per AIX-005 step 1. Every departure from that spec is recorded in §7
 with reasoning, and there are a lot of them, because the spec's design is a remote-control
 hole and could not be implemented as written.

@@ -106,7 +106,7 @@ Instead of creating a separate GitHubPanel, extend VersionControlPanel:
 **Location**:
 
 - Panel: `packages/noodl-editor/src/editor/src/views/panels/VersionControlPanel/`
-- Strategy: `dev-docs/tasks/phase-3-editor-ux-overhaul/TASK-002B-github-advanced-integration/GIT-INTEGRATION-STRATEGY.md`
+- Strategy: `dev-docs/tasks-archive/phase-3-editor-ux-overhaul/TASK-002B-github-advanced-integration/GIT-INTEGRATION-STRATEGY.md`
 
 **Keywords**: VersionControlPanel, React, GitHub integration, visual diff, DiffList, History, no jQuery, extend existing panel
 
@@ -949,7 +949,7 @@ grep -A 5 "valueChangedToTrue.*function" packages/noodl-runtime/src/nodes --incl
   - `packages/noodl-runtime/src/nodes/std-library/simplejavascript.js`
   - `packages/noodl-editor/src/editor/src/styles/popuplayer.css`
 - Task: Phase 3 TASK-008 Critical Runtime Bugs
-- CHANGELOG: `dev-docs/tasks/phase-3-editor-ux-overhaul/TASK-008-critical-runtime-bugs/CHANGELOG.md`
+- CHANGELOG: `dev-docs/tasks-archive/phase-3-editor-ux-overhaul/TASK-008-critical-runtime-bugs/CHANGELOG.md`
 
 **Keywords**: node structure, methods, prototypeExtensions, runtime nodes, this context, signal inputs, valueChangedToTrue, TypeError not a function, Noodl API, JavascriptNodeParser, backward compatibility, compiled functions, debug logging, colored emojis, flow tracing
 
@@ -1162,7 +1162,7 @@ useEventListener(editor, 'viewportChanged', (viewport) => {
 
 - Study file: `packages/noodl-editor/src/editor/src/views/nodegrapheditor/commentlayer.ts`
 - Documentation: `dev-docs/reference/CANVAS-OVERLAY-*.md` (5 files)
-- Task CHANGELOG: `dev-docs/tasks/phase-4-canvas-visualisation-views/PREREQ-003-canvas-overlay-pattern/CHANGELOG.md`
+- Task CHANGELOG: `dev-docs/tasks-archive/phase-4-canvas-visualisation-views/PREREQ-003-canvas-overlay-pattern/CHANGELOG.md`
 
 **Keywords**: canvas overlay, React over canvas, CSS transform, coordinate transformation, React 19, createRoot, EventDispatcher, mouse forwarding, pointer-events, two-layer system, CommentLayer, viewport, pan, zoom, scale
 
@@ -1272,7 +1272,7 @@ const getSheets = useCallback(() => {
 
 - Fixed in: `packages/noodl-editor/src/editor/src/views/panels/ComponentsPanelNew/hooks/useComponentsPanel.ts` (line 153)
 - Task: Phase 2 TASK-008 ComponentsPanel Menus and Sheets
-- CHANGELOG: `dev-docs/tasks/phase-2-react-migration/TASK-008-componentspanel-menus-and-sheets/CHANGELOG.md`
+- CHANGELOG: `dev-docs/tasks-archive/phase-2-react-migration/TASK-008-componentspanel-menus-and-sheets/CHANGELOG.md`
 
 **Keywords**: React, useMemo, reference equality, array reference, update counter, force re-render, shallow comparison, React optimization, derived state, memoization
 
@@ -1395,7 +1395,7 @@ if (sourceType === 'any' || targetType === 'any') return true;
 
 **Documentation**:
 
-- Failure documented in: `dev-docs/tasks/phase-3-editor-ux-overhaul/TASK-000-styles-overhaul/TASK-000I-node-graph-visual-improvements/CHANGELOG.md`
+- Failure documented in: `dev-docs/tasks-archive/phase-3-editor-ux-overhaul/TASK-000-styles-overhaul/TASK-000I-node-graph-visual-improvements/CHANGELOG.md`
 - Task marked as: ❌ REMOVED (FAILED)
 
 **Keywords**: port compatibility, hover preview, type checking, connection validation, node graph, canvas, visual feedback, failed feature, type system, dynamic ports
@@ -2032,7 +2032,7 @@ box-shadow: var(--shadow-md);
 
 - Fixed in: `packages/noodl-viewer-react/src/style-tokens-injector.ts` (lines 50-67, 105-130)
 - Task: Phase 9 STYLE-001 Token System Enhancement (MVP)
-- CHANGELOG: `dev-docs/tasks/phase-9-styles-overhaul/STYLE-001-token-system-enhancement/CHANGELOG-MVP.md`
+- CHANGELOG: `dev-docs/tasks-archive/phase-9-styles-overhaul/STYLE-001-token-system-enhancement/CHANGELOG-MVP.md`
 
 **Impact**: This was a P0 blocker for STYLE-001 MVP validation. Without this fix, the token system appeared to not work at all for existing users/projects, only for newly created projects.
 
@@ -2222,7 +2222,7 @@ ProjectModel.fromJSON(json)
 - Fixed in: `packages/noodl-editor/src/editor/src/utils/LocalProjectsModel.ts` (lines 288-321)
 - Error source: `packages/noodl-editor/src/editor/src/models/nodegraphmodel/NodeGraphModel.ts` (line 57)
 - Task: Phase 0 TASK-010 Project Creation Bug Fix
-- CHANGELOG: `dev-docs/tasks/phase-0-foundation-stabilisation/TASK-010-project-creation-bug-fix/CHANGELOG.md`
+- CHANGELOG: `dev-docs/tasks-archive/phase-0-foundation-stabilisation/TASK-010-project-creation-bug-fix/CHANGELOG.md`
 
 **Impact**: This was a P0 blocker preventing all new users from creating projects. The fix allows project creation to work correctly without requiring external templates.
 

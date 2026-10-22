@@ -174,7 +174,7 @@ by the MCP, covering the picker — see EXP-011 §2.
 ## References
 
 - `dev-docs/reviews/NOODL-REVIVAL-ROADMAP.md` §3 Track F
-- `dev-docs/tasks/phase-7-code-export/` — the 2025 design. Sound on generators; **its scoping
+- `dev-docs/tasks-archive/phase-7-code-export/` — the 2025 design. Sound on generators; **its scoping
   assumptions about the backend are superseded here.**
 - [EXP-002-RECORD-VERBS-TARGET-OUTPUT.md](./EXP-002-RECORD-VERBS-TARGET-OUTPUT.md) §20 — the
   session-31 measurement that forced this re-scope.

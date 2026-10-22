@@ -8,7 +8,7 @@ task: ISL-043
 severity: low
 area: export / report
 found: P100 UPG-001 s6 (§3.8), 2026-09-23; re-read at HEAD 2026-10-01
-evidence: dev-docs/tasks/phase-100-0.3.0-the-first-upgrade/UPG-001-THE-BREAK-CENSUS.md §3.8 (*members area Richard test*)
+evidence: dev-docs/tasks-archive/phase-100-0.3.0-the-first-upgrade/UPG-001-THE-BREAK-CENSUS.md §3.8 (*members area Richard test*)
 ---
 
 Exporting a project whose node still carries the old preset marker writes *"parameter _variant … has no

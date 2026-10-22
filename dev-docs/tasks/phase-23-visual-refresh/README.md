@@ -61,6 +61,6 @@ A first-time user launches NodeGX and sees: a card-based launcher with intact th
 - [mocks/](./mocks/) — the two target mockups (self-contained HTML, theme-aware)
 - `packages/noodl-core-ui/src/styles/custom-properties/colors.css` — the canonical token file (and its editor duplicate, to be collapsed by UIX-001)
 - `packages/noodl-runtime/src/nodelibraryexport.js` (~lines 161–220) — the canvas palette object
-- [PLAT-001](../phase-14-editor-platform-health/) — the canvas decomposition that makes UIX-005 tractable (stateless painter)
-- [PLAT-004](../phase-14-editor-platform-health/) — the ratchet pattern UIX-002 copies
+- [PLAT-001](../../tasks-archive/phase-14-editor-platform-health/) — the canvas decomposition that makes UIX-005 tractable (stateless painter)
+- [PLAT-004](../../tasks-archive/phase-14-editor-platform-health/) — the ratchet pattern UIX-002 copies
 - NOODL-VIABILITY-REPORT (dev-docs/reviews/) — adoption context for why first impressions matter

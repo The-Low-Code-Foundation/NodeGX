@@ -1162,7 +1162,7 @@ do with `noopener`:
 | A — the node's default | `"noopener,noreferrer"` | **NULL** | 3 → **4** |
 | B — without it | `""` | **a Window** | 4 → **5** |
 
-Filed as **[DEF-016](../phase-80-the-defects-the-templates-found/DEF-016-EXTERNAL-LINK-ALWAYS-REPORTS-FAILURE.md)**,
+Filed as **[DEF-016](../../tasks-archive/phase-80-the-defects-the-templates-found/DEF-016-EXTERNAL-LINK-ALWAYS-REPORTS-FAILURE.md)**,
 owner `NONE`. Phase 30's node audit graded row B2 ✅ naming both failure codes — it graded that they
 **exist**, never that either can **fire**. A port census asks a different question from a drive.
 

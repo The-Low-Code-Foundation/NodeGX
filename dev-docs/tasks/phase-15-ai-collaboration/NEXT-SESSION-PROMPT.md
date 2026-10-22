@@ -46,7 +46,7 @@ mid-session**, ~50 commits, while agents were running.
   rebase. The first trial merge was green against a stale base and meant nothing.
 - ⚠️ `packages/noodl-core-ui/.../json-editor/utils/listValueCodec.ts` and its test have been
   uncommitted in this tree since 2026-08-02 and belong to another session. **Do not touch, stash,
-  or commit them.** Same for the untracked `dev-docs/tasks/phase-37-project-tabs/`.
+  or commit them.** Same for the untracked `dev-docs/tasks-archive/phase-37-project-tabs/`.
 - **Never `git stash`, never `git add -A`.** The stash is shared across worktrees and races.
 - **`npm run test:ci` reports a verdict it has not earned in three ways** — see
   [[editor-suite-lies-three-ways]] in memory, and read only the `Jasmine: N specs, M failures`

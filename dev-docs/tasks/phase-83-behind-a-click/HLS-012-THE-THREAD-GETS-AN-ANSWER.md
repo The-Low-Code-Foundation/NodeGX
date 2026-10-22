@@ -15,7 +15,7 @@ Measured 2026-09-09, so the reply can be specific rather than apologetic:
 - The 2.9 `noodl build` CLI documented at `docs.noodl.net/2.9/cli/commands/build/` **was never part
   of the open-sourced code.** He is not blind. The only trace of a `noodl-cli` package in this repo
   is an abandoned plan in
-  [`TASK-002` CHECKLIST.md](../phase-1-dependency-updates/TASK-002-legacy-project-migration/CHECKLIST.md),
+  [`TASK-002` CHECKLIST.md](../../tasks-archive/phase-1-dependency-updates/TASK-002-legacy-project-migration/CHECKLIST.md),
   marked *"❌ replaced by GUI"*.
 - There are now **two** different "builds", and #11 and #36 are about different ones — say so, with
   the README's §3 distinction, so the thread stops being one conversation about two features.

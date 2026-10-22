@@ -119,10 +119,10 @@ Each phase keeps its README as the record of what it did. Memory stops carrying 
 | phase | verdict |
 |---|---|
 | [P107](tasks/phase-107-the-node-says-what-it-does/README.md) | **CLOSED** on R38 + R40 landing — [CLOSING.md](tasks/phase-107-the-node-says-what-it-does/CLOSING.md). The ratchet in CI is the phase from now on; a spec is touched when a node changes. Leftovers: the export half → lane 6; Router's labels → P112 OWN-006; "which runtimes" → P110 when it unparks |
-| [P76](tasks/phase-76-the-site-builder/README.md) | already CLOSED 2026-08-29; dropped from memory |
+| [P76](tasks-archive/phase-76-the-site-builder/README.md) | already CLOSED 2026-08-29; dropped from memory |
 | [P78](tasks/phase-78-the-templates/README.md) | the templates are the strangers' corpus and the defect bed, kept; **no new template opens as a phase**. Its uncommitted TPL-009 / TPL-011 pile is its owner's to commit |
 | [P81](tasks/phase-81-the-look-is-the-product/README.md) | **CLOSED.** Its open V-rows are read as ledger rows; whoever picks one files it in `dev-docs/bugs/` first |
-| [P84](tasks/phase-84-the-defects-the-field-report-found/README.md) | **CLOSED as a phase** at 3 of 17. The fourteen unbuilt items stay listed in its README as a bug list; a session that takes one logs it in `dev-docs/bugs/` and works it from there |
+| [P84](tasks-archive/phase-84-the-defects-the-field-report-found/README.md) | **CLOSED as a phase** at 3 of 17. The fourteen unbuilt items stay listed in its README as a bug list; a session that takes one logs it in `dev-docs/bugs/` and works it from there |
 | [P85](tasks/phase-85-the-component-is-the-backbone/README.md) | **CLOSED.** The component story is carried by P107's specs and P112's editor suite |
 | [P92](tasks/phase-92-dreamweaver-called/README.md) | **CLOSED** one task short; it reopens only if Richard asks for that task |
 | [P93](tasks/phase-93-three-views-of-one-app/README.md) | **FOLDED INTO** P111 SEE-007 (the entrance moves) |

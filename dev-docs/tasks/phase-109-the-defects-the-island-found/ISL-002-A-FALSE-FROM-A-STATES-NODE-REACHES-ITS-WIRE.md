@@ -40,7 +40,7 @@ carries exactly what that state says, `false` or `''`, from the moment the page 
 
 ## 4. Related work and collisions
 
-- **D49 / [GAM-006](../phase-88-the-defects-the-games-found/GAM-006-A-COLOUR-SWITCHED-BY-STATES-REACHES-THE-SCREEN.md)**
+- **D49 / [GAM-006](../../tasks-archive/phase-88-the-defects-the-games-found/GAM-006-A-COLOUR-SWITCHED-BY-STATES-REACHES-THE-SCREEN.md)**
   is a different line. It is colours through **transitions** (`onStart`'s parse, `states.ts:161-195`), and it is
   🟢 built. This defect is the first **jump**, with transitions on or off, and the template has `useTransitions: false`
   on every States node (`cg003Components.ts:185`). AC1 keeps them apart: transitions off in both arms.
@@ -53,7 +53,7 @@ carries exactly what that state says, `false` or `''`, from the moment the page 
   agree on the ruled answer.
 - **P18 EXP-011** owns `statesLib.ts`. The export fix is the same one line and its golden. It needs a
   `coverage-ledger.json` note only if the behaviour changes.
-- **P79 [DEFECTS-LESSON-6](../phase-79-the-syllabus/DEFECTS-LESSON-6-FOUND.md)** line 38 teaches that a States node
+- **P79 [DEFECTS-LESSON-6](../../tasks-archive/phase-79-the-syllabus/DEFECTS-LESSON-6-FOUND.md)** line 38 teaches that a States node
   starts in its first state. That is unchanged.
 - Owner grep: `grep -rln "jumpToState" dev-docs/tasks --include='*.md'` returns SYL-009, DEFECTS-LESSON-6 and GAM-006.
   None of them owns the first-jump coercion. `grep -rn -i "first state" dev-docs/tasks --include='*.md'` turns up no

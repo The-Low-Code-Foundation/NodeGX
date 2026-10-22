@@ -8,7 +8,7 @@
   task's criteria (SQLite-on-a-filesystem rules out ephemeral managed platforms;
   the education wedge's data-residency constraint is a hard exclusion, not a
   preference; no account and no card for a beginner). Reasoning recorded in
-  `dev-docs/tasks/phase-19-cloud-workflows/WF-003-NOTES.md`.
+  `dev-docs/tasks-archive/phase-19-cloud-workflows/WF-003-NOTES.md`.
 - **One origin**: nginx serves the exported app and forwards the backend's route
   families on a single published port; the backend publishes none. A NodeGX app
   has its backend endpoint baked in at export time with no post-deploy override,
