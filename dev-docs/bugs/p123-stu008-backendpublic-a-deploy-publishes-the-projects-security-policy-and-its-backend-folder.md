@@ -37,3 +37,17 @@ project, not by the app") and `backend/` ("the backend's own files: schema, seed
 `tests-unit/p112/deploy-ignores-agent-files.test.ts`. A project that does want one published can still say so in
 its `.noodlignore` (`!backend/x`). NodeGX Studio's Publish runs this engine and inherits the fix when `@nodegx/preview`
 is next published. Until then it reports these files to the person when the site carries them.
+
+**Fixed 2026-10-22** (P26 session, at Richard's go-ahead). `/nodegx.security.json` and `/backend/` are in
+`DEFAULT_IGNORE_ENTRIES` for every project, legacy and v2. They are **anchored to the project root**, so an
+asset folder that happens to be called `backend` deeper down still ships. Regression:
+`packages/noodl-editor/tests-unit/p123/deploy-ignores-backend-files.test.ts`.
+
+⚠️ The proposal's opt-in was wrong in one detail. `!backend/x` does **not** re-include a file: the dialect is
+gitignore's, and a negation cannot reach under an excluded folder. A project that wants them published writes
+`!/backend/` (and `!/nodegx.security.json`), and the test pins both readings.
+
+A folder deployed before this still holds the files. The next deploy into it reports them as excluded paths that
+already exist, because a deploy never deletes them; they have to be removed by hand, and from any host they were
+uploaded to.
+

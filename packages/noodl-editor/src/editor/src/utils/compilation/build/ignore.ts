@@ -125,6 +125,13 @@ export const DEFAULT_IGNORE_ENTRIES: readonly DefaultIgnoreEntry[] = [
   { pattern: '.env.*', reason: 'environment / credential file' },
   { pattern: '.npmrc', reason: 'environment / credential file' },
 
+  // The backend's own files (P123-STU008-BACKENDPUBLIC). The backend reads both from the project folder
+  // (`--project-dir`), never from the site, and the app reads neither — but a deploy published the whole access
+  // policy and the backend's schema, seed data, fixtures and proposed triggers. Anchored to the project root, so an
+  // asset folder that happens to be called `backend` deeper down still ships.
+  { pattern: '/nodegx.security.json', reason: "the backend's access policy: read by the backend, not the app" },
+  { pattern: '/backend/', reason: "the backend's own files: schema, seed data, fixtures, triggers" },
+
   // Legacy project source. Already excluded before DEP-008, kept by name.
   { pattern: 'project.json', reason: 'project source' },
 
