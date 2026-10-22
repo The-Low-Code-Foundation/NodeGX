@@ -110,9 +110,10 @@ const sb = [
   `(deny file-read* file-write* (subpath "${LAB}"))`,
   `(allow file-read* (subpath "${path.join(LAB, 'cline-3.0.71')}"))`,
   `(allow file-read* (subpath "${path.join(LAB, 'bin')}"))`,
+  ...(KIT_DIR ? [`(allow file-read* (subpath "${KIT_DIR}"))`] : []), // the fix loop's packed kit, read-only
   `(allow file-read* file-write* (subpath "${CACHE}"))`,
   `(allow file-read* file-write* (subpath "${root}"))`,
-  ...[...new Set([root, CACHE, NODE_DIR, path.join(LAB, 'cline-3.0.71'), path.join(LAB, 'bin', 'x'), '/private/tmp/claude-501/x'].flatMap(ancestors))].map((d) => `(allow file-read-metadata (literal "${d}"))`)
+  ...[...new Set([root, CACHE, NODE_DIR, path.join(LAB, 'cline-3.0.71'), path.join(LAB, 'bin', 'x'), ...(KIT_DIR ? [path.join(KIT_DIR, 'x')] : []), '/private/tmp/claude-501/x'].flatMap(ancestors))].map((d) => `(allow file-read-metadata (literal "${d}"))`)
 ].join('\n') + '\n';
 fs.writeFileSync(path.join(root, 'sandbox.sb'), sb);
 

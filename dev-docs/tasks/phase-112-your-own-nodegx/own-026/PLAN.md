@@ -183,3 +183,10 @@ AI changed last time and say whether it's right". Scoped in full after tests 1â€
   t1-nodegx-1 (16/22) stays the 0.2.5 baseline. Mechanism: `fixes/README.md` (the loop), `fixes/FIX-NN.md` (one per
   stop-and-check), `fixes/LEARNINGS.md`; the gate `HOLD-nodegx` + `KIT` in the lab folder (round.mjs waits before
   making a folder; series.mjs runs the other arms meanwhile). FIX-01 written; HOLD-nodegx set.
+- **2026-10-22 18:10 CEST â€” FIX-01 landed** (fixer `opennoodl-54`: `f2afd62b0`, `0b9becca8`, `ddd876378`; kit
+  `/Users/Shared/nodegx-lab/kits/FIX-01-ddd876378/`, its `Done` section in `fixes/FIX-01.md`). HOLD-nodegx lifted, KIT
+  written. **Lab fix before any round used it:** round.mjs's sandbox denied the kits folder (a mock round's
+  `create-nodegx` exited 255); it now allows reading the round's own KIT folder. Proven with two $0 mock rounds: the
+  MCP entry becomes `npx -y --package=<kit>/nodegx-mcp-0.2.5.tgz noodl-mcp --allow-writes --screenshots-to-files`,
+  `round.json` names the kit, and `get_example cloud-query-own-rows` (FIX-01 B's new example) answers. t1-nodegx-2
+  runs on it after t1-harness-2.
