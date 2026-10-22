@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "13176aab-c72a-520e-8e70-74913d9ee8c4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gp_user",
+      "fromProperty": "authenticated",
+      "toId": "gp_signed_in",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "gp_user",
+      "fromProperty": "authenticated",
+      "toId": "gp_signout",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gp_signed_in",
+      "fromProperty": "ontrue",
+      "toId": "gp_who",
+      "toProperty": "to-checking"
+    },
+    {
+      "fromId": "gp_signed_in",
+      "fromProperty": "ontrue",
+      "toId": "gp_am_i",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "gp_signed_in",
+      "fromProperty": "onfalse",
+      "toId": "gp_who",
+      "toProperty": "to-signedOut"
+    },
+    {
+      "fromId": "gp_am_i",
+      "fromProperty": "out-grownUp",
+      "toId": "gp_is_grownup",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "gp_am_i",
+      "fromProperty": "done",
+      "toId": "gp_is_grownup",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "gp_is_grownup",
+      "fromProperty": "ontrue",
+      "toId": "gp_who",
+      "toProperty": "to-grownup"
+    },
+    {
+      "fromId": "gp_is_grownup",
+      "fromProperty": "onfalse",
+      "toId": "gp_who",
+      "toProperty": "to-child"
+    },
+    {
+      "fromId": "gp_am_i",
+      "fromProperty": "failure",
+      "toId": "gp_who",
+      "toProperty": "to-child"
+    },
+    {
+      "fromId": "gp_key",
+      "fromProperty": "becameGrownUp",
+      "toId": "gp_who",
+      "toProperty": "to-grownup"
+    },
+    {
+      "fromId": "gp_who",
+      "fromProperty": "at-checking",
+      "toId": "gp_checking",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gp_who",
+      "fromProperty": "at-signedOut",
+      "toId": "gp_signin",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gp_who",
+      "fromProperty": "at-child",
+      "toId": "gp_key",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gp_who",
+      "fromProperty": "at-grownup",
+      "toId": "gp_settings",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gp_signout",
+      "fromProperty": "onClick",
+      "toId": "gp_logout",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "gp_back",
+      "fromProperty": "onClick",
+      "toId": "gp_to_game",
+      "toProperty": "do"
+    }
+  ]
+}

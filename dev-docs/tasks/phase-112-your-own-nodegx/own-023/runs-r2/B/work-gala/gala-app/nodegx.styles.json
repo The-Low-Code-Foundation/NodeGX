@@ -1,0 +1,66 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/styles-v2.json",
+  "variants": [
+    {
+      "typename": "net.noodl.controls.textinput",
+      "parameters": {
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-sans)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-normal)",
+        "labelcolor": "var(--foreground)",
+        "labelSpacing": "var(--space-2)"
+      },
+      "stateParameters": {
+        "hover": {
+          "borderColor": "var(--border-strong)"
+        },
+        "disabled": {
+          "opacity": 0.5
+        },
+        "focused": {
+          "borderColor": "var(--primary)"
+        }
+      }
+    },
+    {
+      "typename": "net.noodl.controls.options",
+      "parameters": {
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontFamily": "var(--font-sans)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "labelfontSize": "var(--text-sm)",
+        "labelfontWeight": "var(--font-normal)",
+        "labelcolor": "var(--foreground)",
+        "labelSpacing": "var(--space-2)"
+      },
+      "stateParameters": {
+        "hover": {
+          "borderColor": "var(--border-strong)"
+        },
+        "disabled": {
+          "opacity": 0.5
+        }
+      }
+    }
+  ]
+}

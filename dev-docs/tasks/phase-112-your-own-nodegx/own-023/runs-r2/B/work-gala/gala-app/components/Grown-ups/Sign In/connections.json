@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5e265947-47de-5e0f-8a23-5d1d355b46a7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "si_email",
+      "fromProperty": "onTextChanged",
+      "toId": "si_login",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "si_password",
+      "fromProperty": "onTextChanged",
+      "toId": "si_login",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "si_signin",
+      "fromProperty": "onClick",
+      "toId": "si_login",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "si_password",
+      "fromProperty": "onEnter",
+      "toId": "si_login",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "si_email",
+      "fromProperty": "onTextChanged",
+      "toId": "si_signup",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "si_email",
+      "fromProperty": "onTextChanged",
+      "toId": "si_signup",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "si_password",
+      "fromProperty": "onTextChanged",
+      "toId": "si_signup",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "si_create",
+      "fromProperty": "onClick",
+      "toId": "si_signup",
+      "toProperty": "signup"
+    },
+    {
+      "fromId": "si_login",
+      "fromProperty": "error",
+      "toId": "si_error",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "si_signup",
+      "fromProperty": "error",
+      "toId": "si_error",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "si_login",
+      "fromProperty": "error",
+      "toId": "si_error",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "si_signup",
+      "fromProperty": "error",
+      "toId": "si_error",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "si_login",
+      "fromProperty": "done",
+      "toId": "si_out",
+      "toProperty": "signedIn"
+    },
+    {
+      "fromId": "si_signup",
+      "fromProperty": "done",
+      "toId": "si_out",
+      "toProperty": "signedIn"
+    },
+    {
+      "fromId": "si_in",
+      "fromProperty": "mounted",
+      "toId": "si_card",
+      "toProperty": "mounted"
+    }
+  ]
+}

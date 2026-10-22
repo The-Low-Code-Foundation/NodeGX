@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5a06d3ff-d7cf-5ca0-8fc5-f5efeb1a6d39",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "am_request",
+      "fromProperty": "receive",
+      "toId": "am_roles",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "am_request",
+      "fromProperty": "userId",
+      "toId": "am_roles",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "am_roles",
+      "fromProperty": "roles",
+      "toId": "am_answer",
+      "toProperty": "in-roles"
+    },
+    {
+      "fromId": "am_roles",
+      "fromProperty": "done",
+      "toId": "am_answer",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "am_roles",
+      "fromProperty": "unchanged",
+      "toId": "am_answer",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "am_answer",
+      "fromProperty": "out-grownUp",
+      "toId": "am_ok",
+      "toProperty": "pm-grownUp"
+    },
+    {
+      "fromId": "am_answer",
+      "fromProperty": "out-answered",
+      "toId": "am_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "am_roles",
+      "fromProperty": "failure",
+      "toId": "am_refused",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "am_roles",
+      "fromProperty": "error",
+      "toId": "am_refused",
+      "toProperty": "errorMessage"
+    }
+  ]
+}

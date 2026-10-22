@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "85df51c8-ee63-5f8d-84b6-affe208abfe8",
+  "name": "Row Editor",
+  "path": "/Grown-ups/Row Editor",
+  "type": "visual",
+  "created": "2026-10-21T09:46:07.236Z",
+  "modified": "2026-10-21T09:46:07.236Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One row of the game a grown-up can change, drawn by a Repeater: its names, difficulty, price, minutes or stars, a Save button, and an Undo that puts the game's own back. Saving goes through the Save Change cloud function, which may refuse; the refusal is shown on the row. Publishes Saved so the list can refresh."
+}

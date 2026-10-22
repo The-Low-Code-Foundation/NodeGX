@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8245f41e-e5b9-5500-8d65-fe94d81b74e7",
+  "name": "Add New",
+  "path": "/Grown-ups/Add New",
+  "type": "visual",
+  "created": "2026-10-21T09:46:48.496Z",
+  "modified": "2026-10-21T09:46:48.496Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A form that adds a new step (table \"moves\") or a new costume (table \"outfits\") to the game. The new one is based on one the game has, so it dances or looks like it. Sent through Save Change under the next free grown-ups' id (x01…x20); publishes Added."
+}

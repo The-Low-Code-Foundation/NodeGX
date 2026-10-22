@@ -1,0 +1,193 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "Le Gala de danse",
+  "id": "60a82736-7ce3-4305-90cb-c821160c2dc2",
+  "version": "5",
+  "nodegxVersion": "0.2.4",
+  "runtimeVersion": "react19",
+  "created": "2026-10-21T09:25:34.692Z",
+  "modified": "2026-10-21T09:54:58.705Z",
+  "settings": {
+    "htmlTitle": "Le Gala de danse",
+    "navigationPathType": "path",
+    "bodyScroll": true
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  },
+  "rootNodeId": "30904e9f-2fd8-4938-86a9-907edaa194f5",
+  "metadata": {
+    "cloudservices": {
+      "instanceId": "backend_mvhxrihpl3jq8",
+      "endpoint": "http://127.0.0.1:8587",
+      "appId": "backend_mvhxrihpl3jq8",
+      "type": "nodegx"
+    },
+    "designTokens": {
+      "version": 1,
+      "customTokens": [
+        {
+          "name": "--background",
+          "value": "#241a30",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Page/app background"
+        },
+        {
+          "name": "--foreground",
+          "value": "#fff6ea",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Default text color"
+        },
+        {
+          "name": "--surface",
+          "value": "#30233f",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Card and panel surfaces"
+        },
+        {
+          "name": "--surface-raised",
+          "value": "#3b2c4d",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Elevated surface (dialogs, dropdowns)"
+        },
+        {
+          "name": "--muted",
+          "value": "#2c2139",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Subtle backgrounds, disabled states"
+        },
+        {
+          "name": "--muted-foreground",
+          "value": "#cbbdd6",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Text color on muted background"
+        },
+        {
+          "name": "--primary",
+          "value": "#f5b942",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Main brand and action color"
+        },
+        {
+          "name": "--primary-hover",
+          "value": "#ffc95e",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Primary color on hover"
+        },
+        {
+          "name": "--primary-foreground",
+          "value": "#2a1a00",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Text color on primary background"
+        },
+        {
+          "name": "--secondary",
+          "value": "#4a3860",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Supporting action color"
+        },
+        {
+          "name": "--secondary-hover",
+          "value": "#57426f",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Secondary color on hover"
+        },
+        {
+          "name": "--secondary-foreground",
+          "value": "#fff6ea",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Text color on secondary background"
+        },
+        {
+          "name": "--destructive",
+          "value": "#c23652",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Dangerous actions and errors"
+        },
+        {
+          "name": "--destructive-hover",
+          "value": "#d44866",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Destructive color on hover"
+        },
+        {
+          "name": "--destructive-foreground",
+          "value": "#fff6ea",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Text color on destructive background"
+        },
+        {
+          "name": "--accent",
+          "value": "#86d9a6",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Highlights and selections"
+        },
+        {
+          "name": "--accent-foreground",
+          "value": "#14301f",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Text color on accent background"
+        },
+        {
+          "name": "--border",
+          "value": "rgba(255,255,255,0.15)",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Default border color"
+        },
+        {
+          "name": "--border-subtle",
+          "value": "rgba(255,255,255,0.08)",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Subtle/light border"
+        },
+        {
+          "name": "--border-strong",
+          "value": "rgba(255,255,255,0.3)",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Strong/dark border"
+        },
+        {
+          "name": "--border-control",
+          "value": "#8f7fa3",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Border for controls — meets 3:1 against surface, unlike --border"
+        },
+        {
+          "name": "--ring",
+          "value": "#f5b942",
+          "category": "color-semantic",
+          "isCustom": true,
+          "description": "Focus ring color"
+        },
+        {
+          "name": "--red-700",
+          "value": "#ff9a9a",
+          "category": "color-palette",
+          "isCustom": true
+        }
+      ]
+    }
+  }
+}

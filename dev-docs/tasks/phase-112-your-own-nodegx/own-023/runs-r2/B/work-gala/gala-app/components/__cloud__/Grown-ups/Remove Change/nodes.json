@@ -1,0 +1,189 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6abfafef-c945-5d14-887e-9f1f6dd31f84",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rm_request",
+      "type": "noodl.cloud.request",
+      "label": "Request",
+      "parameters": {
+        "params": "key",
+        "allowNoAuth": false,
+        "ptype-key": "string",
+        "preq-key": true
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rm_roles",
+      "type": "noodl.cloud.getuserroles",
+      "label": "Who is asking",
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "rm_check",
+      "type": "JavaScriptFunction",
+      "label": "Grown-up, and a key the game knows?",
+      "parameters": {
+        "runOnChange-in-roles": false,
+        "runOnChange-in-key": false,
+        "functionScript": "if (Inputs.roles === undefined) return;\nconst roles = (Inputs.roles || []).map((r) => (typeof r === 'string' ? r : r && r.name));\nif (!roles.includes('grownup')) {\n  Outputs.message = 'Only a grown-up can change the game.';\n  Outputs.refused();\n  return;\n}\nconst key = String(Inputs.key || '');\nconst [table, rowId] = key.split(':');\nconst tables = ['start', 'moves', 'outfits', 'hairs', 'shoes', 'accs'];\nconst plainId = rowId && rowId.length <= 24 && [...rowId].every((ch) => /[A-Za-z0-9]/.test(ch));\nif (key.split(':').length !== 2 || !tables.includes(table) || !plainId) {\n  Outputs.message = 'That is not a change the game knows.';\n  Outputs.refused();\n  return;\n}\nOutputs.key = key;\nOutputs.accepted();\n"
+      },
+      "ports": [
+        {
+          "name": "out-accepted",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-roles",
+          "displayName": "roles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-message",
+          "displayName": "message",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-key",
+          "displayName": "key",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "rm_find",
+      "type": "DbCollection2",
+      "label": "Find that row's change",
+      "parameters": {
+        "collectionName": "GameChange",
+        "visualFilter": {
+          "combinator": "or",
+          "rules": [
+            {
+              "combinator": "and",
+              "rules": [
+                {
+                  "property": "key",
+                  "operator": "equal to",
+                  "input": "key"
+                }
+              ]
+            }
+          ]
+        },
+        "storageEnableLimit": true,
+        "storageLimit": 10,
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false
+      },
+      "metadata": {
+        "comment": "Filter port, so the implicit fetches are off and the check's Accepted is the only trigger."
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "rm_pick",
+      "type": "JavaScriptFunction",
+      "label": "The record holding exactly this key",
+      "parameters": {
+        "runOnChange-in-rows": false,
+        "runOnChange-in-key": false,
+        "functionScript": "if (Inputs.rows === undefined || !Inputs.key) return;\nconst keyOf = (r) => (r && typeof r.get === 'function' ? r.get('key') : r && r.key);\nconst match = (Inputs.rows || []).find((r) => keyOf(r) === Inputs.key);\nif (!match) {\n  Outputs.nothing();\n  return;\n}\nOutputs.id = match.getId ? match.getId() : match.id || match.objectId;\nOutputs.found();\n"
+      },
+      "ports": [
+        {
+          "name": "out-found",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-nothing",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Matches the key again itself: a query that ran before its filter value arrived would return every row, and this must never delete the wrong one."
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "rm_delete",
+      "type": "DeleteDbModelProperties",
+      "label": "Forget the change",
+      "parameters": {
+        "collectionName": "GameChange"
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "rm_ok",
+      "type": "noodl.cloud.response",
+      "label": "Undone",
+      "parameters": {
+        "params": "key"
+      },
+      "x": 40,
+      "y": 760
+    },
+    {
+      "id": "rm_refused",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 880
+    }
+  ]
+}

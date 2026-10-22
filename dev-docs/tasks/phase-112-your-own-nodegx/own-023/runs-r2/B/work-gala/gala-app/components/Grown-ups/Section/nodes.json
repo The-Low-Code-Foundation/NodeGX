@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "6a97b7eb-caba-505f-863f-019dbcca6937",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "se_root",
+      "type": "Group",
+      "label": "Section",
+      "children": [
+        "se_head",
+        "se_body"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-8)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "se_head",
+      "type": "Group",
+      "label": "Section head",
+      "parent": "se_root",
+      "children": [
+        "se_title",
+        "se_hint"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "se_title",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "se_head",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--primary)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "se_hint",
+      "type": "Text",
+      "label": "What it does",
+      "parent": "se_head",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 720,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "se_body",
+      "type": "Group",
+      "label": "Contents",
+      "parent": "se_root",
+      "children": [
+        "se_children"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "se_children",
+      "type": "Component Children",
+      "label": "What the section holds",
+      "parent": "se_body",
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "se_in",
+      "type": "Component Inputs",
+      "label": "Section interface in",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hint",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "se_root"
+  ]
+}

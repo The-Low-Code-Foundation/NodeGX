@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6a97b7eb-caba-505f-863f-019dbcca6937",
+  "name": "Section",
+  "path": "/Grown-ups/Section",
+  "type": "visual",
+  "created": "2026-10-21T09:47:04.867Z",
+  "modified": "2026-10-21T09:47:04.867Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One section of the grown-ups' settings: a heading, a sentence saying what changing it does in the game, and whatever is put inside it (a list of rows, a form)."
+}

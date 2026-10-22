@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ccb1eaef-1fe9-5143-8099-6a193cac4618",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "st_changes",
+      "fromProperty": "items",
+      "toId": "st_rows",
+      "toProperty": "in-changes"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-start",
+      "toId": "st_start_list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-moves",
+      "toId": "st_moves_list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-outfits",
+      "toId": "st_outfits_list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-hairs",
+      "toId": "st_hairs_list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-shoes",
+      "toId": "st_shoes_list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-accs",
+      "toId": "st_accs_list",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-freeStep",
+      "toId": "st_add_step",
+      "toProperty": "freeId"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-stepChoices",
+      "toId": "st_add_step",
+      "toProperty": "likeChoices"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-icons",
+      "toId": "st_add_step",
+      "toProperty": "iconChoices"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-freeCostume",
+      "toId": "st_add_costume",
+      "toProperty": "freeId"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-costumeChoices",
+      "toId": "st_add_costume",
+      "toProperty": "likeChoices"
+    },
+    {
+      "fromId": "st_rows",
+      "fromProperty": "out-icons",
+      "toId": "st_add_costume",
+      "toProperty": "iconChoices"
+    },
+    {
+      "fromId": "st_start_list",
+      "fromProperty": "itemOutputSignal-saved",
+      "toId": "st_changes",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "st_moves_list",
+      "fromProperty": "itemOutputSignal-saved",
+      "toId": "st_changes",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "st_outfits_list",
+      "fromProperty": "itemOutputSignal-saved",
+      "toId": "st_changes",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "st_hairs_list",
+      "fromProperty": "itemOutputSignal-saved",
+      "toId": "st_changes",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "st_shoes_list",
+      "fromProperty": "itemOutputSignal-saved",
+      "toId": "st_changes",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "st_accs_list",
+      "fromProperty": "itemOutputSignal-saved",
+      "toId": "st_changes",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "st_add_step",
+      "fromProperty": "added",
+      "toId": "st_changes",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "st_add_costume",
+      "fromProperty": "added",
+      "toId": "st_changes",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "st_in",
+      "fromProperty": "mounted",
+      "toId": "st_root",
+      "toProperty": "mounted"
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7c15edda-2dc7-5c18-8ffb-bdb39b08e625",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "save_request",
+      "type": "noodl.cloud.request",
+      "label": "Request",
+      "parameters": {
+        "params": "table,rowId,fields",
+        "allowNoAuth": false,
+        "ptype-table": "string",
+        "ptype-rowId": "string",
+        "ptype-fields": "object",
+        "preq-table": true,
+        "preq-rowId": true,
+        "preq-fields": true
+      },
+      "metadata": {
+        "comment": "Signed-in callers only; the Permissions file narrows the call to role:grownup, and the roles are read again below in case that rule is ever missing."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "save_roles",
+      "type": "noodl.cloud.getuserroles",
+      "label": "Who is asking",
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "save_check",
+      "type": "JavaScriptFunction",
+      "label": "Check the change against the rule book",
+      "parameters": {
+        "runOnChange-in-roles": false,
+        "runOnChange-in-table": false,
+        "runOnChange-in-rowId": false,
+        "runOnChange-in-fields": false,
+        "functionScript": "// ---- CHECKCHANGE BEGIN ----\nfunction checkChange(table, rowId, fields) {\n  const BUILT_IN = {\n    moves: ['plie', 'releve', 'bras', 'chasseD', 'chasseG', 'avance', 'recule', 'tourne', 'saute', 'reception', 'clap', 'vague', 'descente', 'remonte', 'pirouette', 'arabesque', 'sautChat', 'kick', 'roulade', 'moonwalk', 'toprock', 'grandJete', 'fouette', 'freeze', 'echange', 'reverence'],\n    outfits: ['justaucorps', 'jupette', 'tutu', 'robe', 'marin', 'fee', 'papillon', 'cygne', 'lapin', 'flocon', 'etoile', 'flamenco', 'princesse', 'street', 'abeille', 'disco'],\n    hairs: ['chignon', 'queue', 'tresses', 'carre', 'couettes', 'laches', 'macarons', 'couronne', 'ruban', 'afro'],\n    shoes: ['demi', 'pieds', 'pointes', 'jazz', 'baskets', 'paillettes', 'claquettes'],\n    accs: ['aucun', 'noeud', 'tiare', 'fleurs', 'ailes', 'oreilles', 'casquette', 'beret', 'baguette', 'antennes'],\n    start: ['start'],\n  };\n  // only what the shop already sells has a price to change: a starter costume stays free, so no child's plan locks up\n  const PRICED = {\n    outfits: ['robe', 'marin', 'fee', 'papillon', 'cygne', 'lapin', 'flocon', 'etoile', 'flamenco', 'princesse', 'abeille', 'disco'],\n    hairs: ['couettes', 'laches', 'macarons', 'couronne', 'ruban', 'afro'],\n    shoes: ['pointes', 'jazz', 'baskets', 'paillettes', 'claquettes'],\n    accs: ['tiare', 'fleurs', 'ailes', 'oreilles', 'casquette', 'beret', 'baguette', 'antennes'],\n  };\n  const NAME = { name: true }, PRICE = { min: 0, max: 200 }, MINUTES = { min: 1, max: 15 };\n  // what may change on a row the game ships with\n  const CHANGE = {\n    start: { stars: { min: 0, max: 300 } },\n    moves: { fr: NAME, en: NAME, d: { min: 1, max: 3 } },\n    outfits: { fr: NAME, en: NAME, price: PRICE, min: MINUTES },\n    hairs: { fr: NAME, en: NAME, price: PRICE, min: MINUTES },\n    shoes: { fr: NAME, en: NAME, price: PRICE },\n    accs: { fr: NAME, en: NAME, price: PRICE },\n  };\n  const ICONS = ['✨', '🌟', '⭐', '💫', '🌈', '🌸', '🌺', '🌼', '🍀', '🦋', '🐞', '🐝', '🐬', '🦄', '🐱', '🐶', '🐰', '🦊', '🐻', '🐼', '🐸', '🐧', '🦩', '🦚', '🎀', '🎈', '🎵', '🥁', '🎺', '🎻', '💃', '🕺', '🩰', '👑', '💎', '❄️', '☀️', '🌙', '🌊', '🍓', '🧁', '👗', '🩱', '🧚', '🚀', '⚡', '🌀'];\n  const STYLES = ['classique', 'contemporain', 'jazz', 'hiphop'];\n  const THEMES = ['lucioles', 'lapins', 'vent', 'marins', 'lumiere', 'lac', 'street', 'battle', 'disco'];\n  // a new step dances like a step the game has (its `like`); swapping places is the one step that can't be copied\n  const LIKE_MOVES = BUILT_IN.moves.filter((id) => id !== 'echange');\n  // a new row: every field its table's rows have, nothing else (applyRows takes a new row whole)\n  const ADD = {\n    moves: {\n      fr: NAME, en: NAME, c: { oneOf: [4, 8] }, d: { min: 1, max: 3 }, a: { min: 0, max: 2 }, b: { min: 0, max: 2 },\n      dx: { min: -1, max: 1 }, dz: { min: -1, max: 1 }, st: { styles: true }, icon: { oneOf: ICONS }, like: { oneOf: LIKE_MOVES },\n    },\n    outfits: {\n      fr: NAME, en: NAME, min: MINUTES, price: PRICE, icon: { oneOf: ICONS }, themes: { themes: true }, like: { oneOf: BUILT_IN.outfits },\n    },\n  };\n  // the grown-ups' own rows are x01 … x20: twenty new steps and twenty new costumes at most, and an id that can't be\n  // anything else (not \"__proto__\", not a row the game ships with)\n  const ADDED_ID = /^x(0[1-9]|1[0-9]|20)$/;\n\n  const refuse = (message) => ({ ok: false, message });\n  const isPlainObject = (o) => o !== null && typeof o === 'object' && !Array.isArray(o) && Object.getPrototypeOf(o) === Object.prototype;\n\n  // ---- the words a child must not be able to put on the screen ----\n  const LEET = { 0: 'o', 1: 'i', 3: 'e', 4: 'a', 5: 's', 7: 't', '@': 'a', $: 's', '!': 'i' };\n  const plain = (s) => s.normalize('NFD').replace(/\\p{M}/gu, '').toLowerCase().split('').map((ch) => LEET[ch] || ch).join('');\n  const squeeze = (s) => s.replace(/(.)\\1+/g, '$1');\n  const RUDE_WORDS = [\n    'fuck', 'fucker', 'fucking', 'fucked', 'shit', 'shitty', 'bitch', 'bitches', 'bastard', 'cunt', 'dick', 'dickhead', 'cock', 'pussy',\n    'ass', 'arse', 'asshole', 'arsehole', 'twat', 'wank', 'wanker', 'bollocks', 'bugger', 'slut', 'whore', 'piss', 'pissed', 'crap',\n    'fag', 'faggot', 'nigger', 'nigga', 'retard', 'retarded', 'prick', 'tits', 'titties', 'boobs', 'penis', 'vagina', 'sex', 'sexy',\n    'porn', 'poo', 'poop', 'butt', 'fart', 'idiot', 'stupid', 'dumb', 'moron', 'loser', 'ugly', 'fatso', 'hate', 'kill', 'nazi', 'hitler',\n    'merde', 'putain', 'pute', 'putes', 'salope', 'salopes', 'salaud', 'connard', 'connards', 'connasse', 'con', 'cons', 'conne', 'connes',\n    'couille', 'couilles', 'bite', 'bites', 'chier', 'chiant', 'chiante', 'encule', 'enculer', 'enculee', 'enfoire', 'batard', 'batarde',\n    'bordel', 'nique', 'niquer', 'ntm', 'fdp', 'pd', 'pede', 'tapette', 'gouine', 'negre', 'bouffon', 'debile', 'cretin', 'imbecile',\n    'abruti', 'abrutie', 'crotte', 'caca', 'pipi', 'prout', 'zizi', 'zezette', 'nichon', 'nichons', 'seins', 'cul', 'fesses', 'branleur',\n    'branler', 'pouffiasse', 'poufiasse', 'garce', 'grognasse', 'gueule', 'moche', 'nul', 'nulle', 'tuer', 'mort', 'sexe', 'porno',\n  ];\n  // words that stay rude wherever they hide: \"f.u.c.k\", \"fuuuck\" and \"superfuck\" are refused too\n  const RUDE_INSIDE = [\n    'fuck', 'shit', 'cunt', 'bitch', 'nigger', 'nigga', 'faggot', 'encul', 'salope', 'connard', 'connasse', 'putain', 'whore',\n    'wanker', 'asshole', 'arsehole', 'enfoire', 'pouffiasse', 'poufiasse', 'branleur', 'merde', 'porn', 'pussy', 'dick', 'couille',\n  ];\n  const isRude = (text) => {\n    const p = plain(text);\n    const words = p.split(/[^a-z]+/).filter(Boolean);\n    const rudeWords = new Set(RUDE_WORDS.flatMap((w) => [w, squeeze(w)]));\n    if (words.some((w) => rudeWords.has(w) || rudeWords.has(squeeze(w)))) return true;\n    const joined = words.join('');\n    return RUDE_INSIDE.some((w) => joined.includes(w) || squeeze(joined).includes(squeeze(w)));\n  };\n\n  const checkName = (value) => {\n    if (typeof value !== 'string') return { error: 'a name must be text' };\n    const name = value.normalize('NFC').trim().split(/\\s+/).join(' ');\n    if (name.length < 1 || name.length > 24) return { error: 'a name is 1 to 24 letters long' };\n    // letters, digits, spaces and a little punctuation: no < > & \" ` and no emoji, so nothing a name says can become markup\n    if (!/^[\\p{L}\\p{M}\\p{N} '’\\-.,!?()]+$/u.test(name)) return { error: `\"${name}\" may only use letters, digits, spaces and ' - . , ! ? ( )` };\n    if (!/\\p{L}/u.test(name)) return { error: 'a name needs at least one letter' };\n    if (isRude(name)) return { error: `\"${name}\" isn't a word for this game` };\n    return { value: name };\n  };\n  const checkValue = (field, spec, value) => {\n    if (spec.name) return checkName(value);\n    if (spec.styles) {\n      if (value === '*') return { value };\n      if (typeof value !== 'string') return { error: `${field} must be the styles it belongs to` };\n      const list = value.split(' ');\n      if (!list.length || list.some((s) => !STYLES.includes(s)) || new Set(list).size !== list.length) return { error: `${field} must be \"*\" or some of: ${STYLES.join(', ')}` };\n      return { value };\n    }\n    if (spec.themes) {\n      if (!Array.isArray(value) || value.length > 4 || value.some((s) => !THEMES.includes(s)) || new Set(value).size !== value.length) return { error: `${field} must be up to 4 of: ${THEMES.join(', ')}` };\n      return { value: value.slice() };\n    }\n    if (spec.oneOf) {\n      if (!spec.oneOf.includes(value)) return { error: `${field} must be one of: ${spec.oneOf.join(' ')}` };\n      return { value };\n    }\n    if (typeof value !== 'number' || !Number.isInteger(value) || value < spec.min || value > spec.max) return { error: `${field} must be a whole number from ${spec.min} to ${spec.max}` };\n    return { value };\n  };\n\n  if (typeof table !== 'string' || !Object.prototype.hasOwnProperty.call(CHANGE, table)) return refuse(`the grown-ups can change ${Object.keys(CHANGE).join(', ')}, not \"${table}\"`);\n  if (typeof rowId !== 'string') return refuse('which row?');\n  if (!isPlainObject(fields)) return refuse('the change must be a list of fields');\n  const builtIn = BUILT_IN[table].includes(rowId), added = !builtIn && ADDED_ID.test(rowId);\n  if (!builtIn && !added) return refuse(`\"${rowId}\" is not a row of ${table}`);\n  if (added && !ADD[table]) return refuse(`new rows can only be added to ${Object.keys(ADD).join(' and ')}`);\n  const spec = builtIn ? CHANGE[table] : ADD[table];\n  const names = Object.keys(fields);\n  if (!names.length) return refuse('nothing to change');\n  const unknown = names.filter((f) => !Object.prototype.hasOwnProperty.call(spec, f));\n  if (unknown.length) return refuse(`${table} can't change ${unknown.join(', ')}`);\n  if (builtIn && names.includes('price') && !(PRICED[table] || []).includes(rowId)) return refuse(`${rowId} is free in the game, so it has no price to change`);\n  if (added) {\n    const missing = Object.keys(spec).filter((f) => !names.includes(f));\n    if (missing.length) return refuse(`a new row needs ${missing.join(', ')}`);\n  }\n  const clean = {};\n  for (const f of Object.keys(spec)) {\n    if (!names.includes(f)) continue;\n    const r = checkValue(f, spec[f], fields[f]);\n    if (r.error) return refuse(r.error);\n    clean[f] = r.value;\n  }\n  return { ok: true, key: `${table}:${rowId}`, table, rowId, fields: clean };\n}\n// ---- CHECKCHANGE END ----\n\nif (Inputs.roles === undefined) return;\nconst roles = (Inputs.roles || []).map((r) => (typeof r === 'string' ? r : r && r.name));\nif (!roles.includes('grownup')) {\n  Outputs.message = 'Only a grown-up can change the game.';\n  Outputs.refused();\n  return;\n}\nconst change = checkChange(Inputs.table, Inputs.rowId, Inputs.fields);\nif (!change.ok) {\n  Outputs.message = change.message;\n  Outputs.refused();\n  return;\n}\nOutputs.key = change.key;\nOutputs.table = change.table;\nOutputs.rowId = change.rowId;\nOutputs.fields = change.fields;\nOutputs.accepted();\n"
+      },
+      "ports": [
+        {
+          "name": "out-accepted",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refused",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-roles",
+          "displayName": "roles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-table",
+          "displayName": "table",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rowId",
+          "displayName": "rowId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-fields",
+          "displayName": "fields",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-message",
+          "displayName": "message",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-key",
+          "displayName": "key",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-table",
+          "displayName": "table",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rowId",
+          "displayName": "rowId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-fields",
+          "displayName": "fields",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "checkChange is the same text as scripts/gala/rows.js (script files don't run in cloud functions yet); tests/rows-guard.test.mjs fails if they differ. A cloud function runs as system, so this check is the only thing between a request and the database."
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "save_record",
+      "type": "NewDbModelProperties",
+      "label": "Save it, replacing this row's last change",
+      "parameters": {
+        "collectionName": "GameChange",
+        "upsertOn": "key"
+      },
+      "metadata": {
+        "comment": "Upsert on key (table:rowId): one record per changed row, so the page always sends the row's whole change, not one field."
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "save_ok",
+      "type": "noodl.cloud.response",
+      "label": "Saved",
+      "parameters": {
+        "params": "key"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "save_refused",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 640
+    }
+  ]
+}

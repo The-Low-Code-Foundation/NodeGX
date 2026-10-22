@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b3167c3e-9505-5f79-8bfe-0ce443644a8c",
+  "name": "Household Key",
+  "path": "/Grown-ups/Household Key",
+  "type": "visual",
+  "created": "2026-10-21T09:48:35.475Z",
+  "modified": "2026-10-21T09:49:15.004Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Asks a signed-in account for the household key, once; the Become Grown-up cloud function checks it on the server and makes the account a grown-up. Publishes Became Grown-up."
+}

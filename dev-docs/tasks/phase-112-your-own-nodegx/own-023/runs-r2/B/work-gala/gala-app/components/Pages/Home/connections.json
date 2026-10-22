@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "704d8daa-4583-5888-8521-bf12b6fde2a7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "home_stage",
+      "fromProperty": "this",
+      "toId": "home_start",
+      "toProperty": "in-stage"
+    },
+    {
+      "fromId": "home_changes",
+      "fromProperty": "items",
+      "toId": "home_start",
+      "toProperty": "in-changes"
+    },
+    {
+      "fromId": "home_changes",
+      "fromProperty": "error",
+      "toId": "home_start",
+      "toProperty": "in-unreachable"
+    },
+    {
+      "fromId": "home_changes",
+      "fromProperty": "fetched",
+      "toId": "home_start",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "home_changes",
+      "fromProperty": "failure",
+      "toId": "home_start",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "home_start",
+      "fromProperty": "out-started",
+      "toId": "home_loaded",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "home_loaded",
+      "fromProperty": "result",
+      "toId": "home_loading",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "home_start",
+      "fromProperty": "out-openGrownUps",
+      "toId": "home_to_grownups",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "7c15edda-2dc7-5c18-8ffb-bdb39b08e625",
+  "name": "Save Change",
+  "path": "/#__cloud__/Grown-ups/Save Change",
+  "type": "cloud",
+  "created": "2026-10-21T09:35:49.018Z",
+  "modified": "2026-10-21T09:35:49.018Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Saves one grown-up's change to a row of the game (rename a step, its difficulty, a price, the starting stars, a new step or costume). Only for the grownup role, and only what the rule book allows; one GameChange record per row, replaced on the next save."
+}

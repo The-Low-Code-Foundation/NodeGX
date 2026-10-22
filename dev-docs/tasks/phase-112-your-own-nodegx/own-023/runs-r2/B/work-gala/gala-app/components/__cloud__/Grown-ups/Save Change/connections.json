@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "7c15edda-2dc7-5c18-8ffb-bdb39b08e625",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "save_request",
+      "fromProperty": "receive",
+      "toId": "save_roles",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "save_request",
+      "fromProperty": "userId",
+      "toId": "save_roles",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "save_roles",
+      "fromProperty": "roles",
+      "toId": "save_check",
+      "toProperty": "in-roles"
+    },
+    {
+      "fromId": "save_request",
+      "fromProperty": "pm-table",
+      "toId": "save_check",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "save_request",
+      "fromProperty": "pm-rowId",
+      "toId": "save_check",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "save_request",
+      "fromProperty": "pm-fields",
+      "toId": "save_check",
+      "toProperty": "in-fields"
+    },
+    {
+      "fromId": "save_roles",
+      "fromProperty": "done",
+      "toId": "save_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "save_roles",
+      "fromProperty": "unchanged",
+      "toId": "save_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "save_roles",
+      "fromProperty": "failure",
+      "toId": "save_refused",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "save_roles",
+      "fromProperty": "error",
+      "toId": "save_refused",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "save_check",
+      "fromProperty": "out-key",
+      "toId": "save_record",
+      "toProperty": "prop-key"
+    },
+    {
+      "fromId": "save_check",
+      "fromProperty": "out-table",
+      "toId": "save_record",
+      "toProperty": "prop-table"
+    },
+    {
+      "fromId": "save_check",
+      "fromProperty": "out-rowId",
+      "toId": "save_record",
+      "toProperty": "prop-rowId"
+    },
+    {
+      "fromId": "save_check",
+      "fromProperty": "out-fields",
+      "toId": "save_record",
+      "toProperty": "prop-fields"
+    },
+    {
+      "fromId": "save_check",
+      "fromProperty": "out-accepted",
+      "toId": "save_record",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "save_check",
+      "fromProperty": "out-refused",
+      "toId": "save_refused",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "save_check",
+      "fromProperty": "out-message",
+      "toId": "save_refused",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "save_record",
+      "fromProperty": "done",
+      "toId": "save_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "save_check",
+      "fromProperty": "out-key",
+      "toId": "save_ok",
+      "toProperty": "pm-key"
+    },
+    {
+      "fromId": "save_record",
+      "fromProperty": "failure",
+      "toId": "save_refused",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "save_record",
+      "fromProperty": "error",
+      "toId": "save_refused",
+      "toProperty": "errorMessage"
+    }
+  ]
+}

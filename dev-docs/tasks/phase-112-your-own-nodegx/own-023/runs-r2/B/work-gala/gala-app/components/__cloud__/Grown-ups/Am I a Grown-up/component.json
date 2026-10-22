@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5a06d3ff-d7cf-5ca0-8fc5-f5efeb1a6d39",
+  "name": "Am I a Grown-up",
+  "path": "/#__cloud__/Grown-ups/Am I a Grown-up",
+  "type": "cloud",
+  "created": "2026-10-21T09:36:47.235Z",
+  "modified": "2026-10-21T09:36:47.235Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Tells the settings page whether the signed-in account is a grown-up, so it shows the settings or asks for the household key. Showing is all it decides: every write checks the role again."
+}

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5a06d3ff-d7cf-5ca0-8fc5-f5efeb1a6d39",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "am_request",
+      "type": "noodl.cloud.request",
+      "label": "Request",
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "am_roles",
+      "type": "noodl.cloud.getuserroles",
+      "label": "Who is asking",
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "am_answer",
+      "type": "JavaScriptFunction",
+      "label": "In the grownup role?",
+      "parameters": {
+        "runOnChange-in-roles": false,
+        "functionScript": "if (Inputs.roles === undefined) return;\nconst roles = (Inputs.roles || []).map((r) => (typeof r === 'string' ? r : r && r.name));\nOutputs.grownUp = roles.includes('grownup');\nOutputs.answered();\n"
+      },
+      "ports": [
+        {
+          "name": "out-answered",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-roles",
+          "displayName": "roles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-grownUp",
+          "displayName": "grownUp",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "am_ok",
+      "type": "noodl.cloud.response",
+      "label": "Answer",
+      "parameters": {
+        "params": "grownUp"
+      },
+      "x": 40,
+      "y": 400
+    },
+    {
+      "id": "am_refused",
+      "type": "noodl.cloud.response",
+      "label": "Could not tell",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 520
+    }
+  ]
+}

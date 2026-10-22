@@ -1,0 +1,155 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "704d8daa-4583-5888-8521-bf12b6fde2a7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "home_page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "home_stage",
+        "home_loading"
+      ],
+      "parameters": {
+        "title": "Le Gala de danse",
+        "urlPath": "home"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "home_stage",
+      "type": "Group",
+      "label": "Stage",
+      "parent": "home_page",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "sizeMode": "explicit",
+        "backgroundColor": "var(--background)"
+      },
+      "metadata": {
+        "comment": "The game draws its own 3D school, side sheet and buttons in here (game/src/boot.js). Keep it childless: the game replaces its contents."
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "home_loading",
+      "type": "Text",
+      "label": "Opening the school…",
+      "parent": "home_page",
+      "parameters": {
+        "text": "Le Gala de danse · on ouvre l'école…",
+        "position": "absolute",
+        "alignX": "center",
+        "alignY": "center",
+        "textAlignX": "center",
+        "fontSize": "var(--text-xl)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "home_changes",
+      "type": "DbCollection2",
+      "label": "The grown-ups' changes",
+      "parameters": {
+        "collectionName": "GameChange",
+        "storageEnableLimit": true,
+        "storageLimit": 1000
+      },
+      "metadata": {
+        "comment": "Every saved change, for the whole family: they live in the backend so they survive a cleared browser, another computer and a new version of the game."
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "home_start",
+      "type": "JavaScriptFunction",
+      "label": "Start the game with the grown-ups' changes",
+      "parameters": {
+        "uses": "gala/rows.js,gala/editing.js",
+        "functionScript": "// wait for both: the stage on screen, and the changes (or the news that the backend can't be reached)\nif (!Inputs.stage || (Inputs.changes === undefined && !Inputs.unreachable)) return;\nconst CACHE = 'gala-grownups-last-known';\nlet records;\nif (Inputs.changes !== undefined) {\n  records = Inputs.changes.map(Scripts.editing.plainRecord);\n  try { localStorage.setItem(CACHE, JSON.stringify(records)); } catch (e) { /* storage blocked: nothing to keep */ }\n} else {\n  try { records = JSON.parse(localStorage.getItem(CACHE) || '[]'); } catch (e) { records = []; }\n}\nconst data = await import('/gala-rules/src/data.js');\nconst { over, skipped } = Scripts.rows.buildOverrides(records, data);\nif (skipped.length) console.warn('Grown-ups\\' changes left out:', skipped);\nconst game = await import('/game/src/boot.js');\nawait game.boot(Inputs.stage.getDOMElement(), { over, onGrownUps: () => Outputs.openGrownUps() });\nOutputs.started = true;\n"
+      },
+      "ports": [
+        {
+          "name": "out-openGrownUps",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "in-stage",
+          "displayName": "stage",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-changes",
+          "displayName": "changes",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-unreachable",
+          "displayName": "unreachable",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-started",
+          "displayName": "started",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Each saved change is checked again with the same rule book the server uses (scripts/gala/rows.js) and against this version's rows, so a change that no longer fits is skipped rather than breaking the game. When the backend can't be reached, the last changes this computer saw are used."
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "home_loaded",
+      "type": "Inverter",
+      "label": "Still opening?",
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "home_to_grownups",
+      "type": "net.noodl.externallink",
+      "label": "Go to the grown-ups' page",
+      "parameters": {
+        "link": "/grown-ups",
+        "openInNewTab": false
+      },
+      "metadata": {
+        "comment": "A full page load on purpose, both ways: the game starts again from scratch with the newest changes, and its 3D loop and keyboard shortcuts don't linger behind the settings."
+      },
+      "x": 350,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "home_page"
+  ]
+}

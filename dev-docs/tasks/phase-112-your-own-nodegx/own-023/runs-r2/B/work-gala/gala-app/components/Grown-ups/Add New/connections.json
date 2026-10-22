@@ -1,0 +1,199 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8245f41e-e5b9-5500-8d65-fe94d81b74e7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "an_in",
+      "fromProperty": "title",
+      "toId": "an_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "an_in",
+      "fromProperty": "hint",
+      "toId": "an_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "an_in",
+      "fromProperty": "likeChoices",
+      "toId": "an_like",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "an_in",
+      "fromProperty": "iconChoices",
+      "toId": "an_icon",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "an_in",
+      "fromProperty": "showDifficulty",
+      "toId": "an_d",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "an_in",
+      "fromProperty": "showPrice",
+      "toId": "an_price",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "an_in",
+      "fromProperty": "showMinutes",
+      "toId": "an_min",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "an_in",
+      "fromProperty": "table",
+      "toId": "an_compose",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "an_in",
+      "fromProperty": "freeId",
+      "toId": "an_compose",
+      "toProperty": "in-freeId"
+    },
+    {
+      "fromId": "an_fr",
+      "fromProperty": "onTextChanged",
+      "toId": "an_compose",
+      "toProperty": "in-fr"
+    },
+    {
+      "fromId": "an_en",
+      "fromProperty": "onTextChanged",
+      "toId": "an_compose",
+      "toProperty": "in-en"
+    },
+    {
+      "fromId": "an_d",
+      "fromProperty": "value",
+      "toId": "an_compose",
+      "toProperty": "in-d"
+    },
+    {
+      "fromId": "an_price",
+      "fromProperty": "onTextChanged",
+      "toId": "an_compose",
+      "toProperty": "in-price"
+    },
+    {
+      "fromId": "an_min",
+      "fromProperty": "onTextChanged",
+      "toId": "an_compose",
+      "toProperty": "in-min"
+    },
+    {
+      "fromId": "an_like",
+      "fromProperty": "value",
+      "toId": "an_compose",
+      "toProperty": "in-like"
+    },
+    {
+      "fromId": "an_icon",
+      "fromProperty": "value",
+      "toId": "an_compose",
+      "toProperty": "in-icon"
+    },
+    {
+      "fromId": "an_add",
+      "fromProperty": "onClick",
+      "toId": "an_compose",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "an_add",
+      "fromProperty": "onClick",
+      "toId": "an_state",
+      "toProperty": "to-busy"
+    },
+    {
+      "fromId": "an_in",
+      "fromProperty": "table",
+      "toId": "an_save_cf",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "an_compose",
+      "fromProperty": "out-rowId",
+      "toId": "an_save_cf",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "an_compose",
+      "fromProperty": "out-fields",
+      "toId": "an_save_cf",
+      "toProperty": "in-fields"
+    },
+    {
+      "fromId": "an_compose",
+      "fromProperty": "out-send",
+      "toId": "an_save_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "an_compose",
+      "fromProperty": "out-refused",
+      "toId": "an_state",
+      "toProperty": "to-refused"
+    },
+    {
+      "fromId": "an_compose",
+      "fromProperty": "out-message",
+      "toId": "an_error",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "an_save_cf",
+      "fromProperty": "failure",
+      "toId": "an_state",
+      "toProperty": "to-refused"
+    },
+    {
+      "fromId": "an_save_cf",
+      "fromProperty": "error",
+      "toId": "an_error",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "an_save_cf",
+      "fromProperty": "done",
+      "toId": "an_state",
+      "toProperty": "to-added"
+    },
+    {
+      "fromId": "an_state",
+      "fromProperty": "message",
+      "toId": "an_status",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "an_state",
+      "fromProperty": "at-refused",
+      "toId": "an_error",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "an_save_cf",
+      "fromProperty": "done",
+      "toId": "an_fr",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "an_save_cf",
+      "fromProperty": "done",
+      "toId": "an_en",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "an_save_cf",
+      "fromProperty": "done",
+      "toId": "an_out",
+      "toProperty": "added"
+    }
+  ]
+}

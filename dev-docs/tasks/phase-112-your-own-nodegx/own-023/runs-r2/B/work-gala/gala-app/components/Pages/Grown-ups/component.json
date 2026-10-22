@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "13176aab-c72a-520e-8e70-74913d9ee8c4",
+  "name": "Grown-ups",
+  "path": "/Pages/Grown-ups",
+  "type": "page",
+  "created": "2026-10-21T09:48:57.271Z",
+  "modified": "2026-10-21T09:49:17.282Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The grown-ups' settings page: sign in, give the household key once, then change the game for the whole family. Who sees what is only a convenience; every write is checked again on the server."
+}

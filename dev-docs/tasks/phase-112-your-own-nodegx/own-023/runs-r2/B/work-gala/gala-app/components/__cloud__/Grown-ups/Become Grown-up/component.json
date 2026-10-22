@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2f70f27e-7158-5534-84bc-1768eb34cd93",
+  "name": "Become Grown-up",
+  "path": "/#__cloud__/Grown-ups/Become Grown-up",
+  "type": "cloud",
+  "created": "2026-10-21T09:36:40.908Z",
+  "modified": "2026-10-21T09:38:27.653Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Makes the signed-in account a grown-up (role grownup) when it knows the household key, which lives only in the app's .env file on the family computer, never in the page."
+}

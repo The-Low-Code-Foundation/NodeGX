@@ -1,0 +1,219 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b3167c3e-9505-5f79-8bfe-0ce443644a8c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "hk_card",
+      "type": "Group",
+      "label": "Key card",
+      "children": [
+        "hk_title",
+        "hk_text",
+        "hk_key",
+        "hk_actions",
+        "hk_error"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "maxWidth": {
+          "value": 520,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "hk_title",
+      "type": "Text",
+      "label": "Title",
+      "parent": "hk_card",
+      "parameters": {
+        "text": "One more step: the household key",
+        "fontSize": "var(--text-2xl)",
+        "fontWeight": "var(--font-semibold)",
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "hk_text",
+      "type": "Text",
+      "label": "Why",
+      "parent": "hk_card",
+      "parameters": {
+        "text": "This account isn't a grown-up's yet. Type the household key once and it will be, on every computer. Don't have it? Ask the grown-up who set up the game.",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "hk_key",
+      "type": "net.noodl.controls.textinput",
+      "label": "Household key",
+      "parent": "hk_card",
+      "parameters": {
+        "useLabel": true,
+        "label": "Household key",
+        "type": "password",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "hk_actions",
+      "type": "Group",
+      "label": "Actions",
+      "parent": "hk_card",
+      "children": [
+        "hk_go",
+        "hk_status"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "alignItems": "center",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "hk_go",
+      "type": "net.noodl.controls.button",
+      "label": "Become a grown-up",
+      "parent": "hk_actions",
+      "parameters": {
+        "label": "Become a grown-up",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "hk_status",
+      "type": "Text",
+      "label": "Checking",
+      "parent": "hk_actions",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "hk_error",
+      "type": "Text",
+      "label": "Refusal",
+      "parent": "hk_card",
+      "parameters": {
+        "text": "",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--red-700)",
+        "lineHeight": "var(--leading-snug)"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "hk_cf",
+      "type": "CloudFunction2",
+      "label": "Become Grown-up",
+      "parameters": {
+        "function": "Grown-ups/Become Grown-up"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "hk_state",
+      "type": "States",
+      "label": "Key state",
+      "parameters": {
+        "states": "idle,checking,refused",
+        "values": "message",
+        "type-message": "string",
+        "value-idle-message": "",
+        "value-checking-message": "Checking…",
+        "value-refused-message": "",
+        "useTransitions": false
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "hk_out",
+      "type": "Component Outputs",
+      "label": "Key interface out",
+      "ports": [
+        {
+          "name": "becameGrownUp",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "hk_in",
+      "type": "Component Inputs",
+      "label": "Key interface in",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "hk_card"
+  ]
+}

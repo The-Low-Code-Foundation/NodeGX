@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b3167c3e-9505-5f79-8bfe-0ce443644a8c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hk_key",
+      "fromProperty": "onTextChanged",
+      "toId": "hk_cf",
+      "toProperty": "in-householdKey"
+    },
+    {
+      "fromId": "hk_go",
+      "fromProperty": "onClick",
+      "toId": "hk_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hk_key",
+      "fromProperty": "onEnter",
+      "toId": "hk_cf",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "hk_go",
+      "fromProperty": "onClick",
+      "toId": "hk_state",
+      "toProperty": "to-checking"
+    },
+    {
+      "fromId": "hk_key",
+      "fromProperty": "onEnter",
+      "toId": "hk_state",
+      "toProperty": "to-checking"
+    },
+    {
+      "fromId": "hk_cf",
+      "fromProperty": "failure",
+      "toId": "hk_state",
+      "toProperty": "to-refused"
+    },
+    {
+      "fromId": "hk_cf",
+      "fromProperty": "error",
+      "toId": "hk_error",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hk_state",
+      "fromProperty": "at-refused",
+      "toId": "hk_error",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "hk_state",
+      "fromProperty": "message",
+      "toId": "hk_status",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hk_cf",
+      "fromProperty": "done",
+      "toId": "hk_key",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "hk_cf",
+      "fromProperty": "done",
+      "toId": "hk_state",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "hk_cf",
+      "fromProperty": "done",
+      "toId": "hk_out",
+      "toProperty": "becameGrownUp"
+    },
+    {
+      "fromId": "hk_in",
+      "fromProperty": "mounted",
+      "toId": "hk_card",
+      "toProperty": "mounted"
+    }
+  ]
+}

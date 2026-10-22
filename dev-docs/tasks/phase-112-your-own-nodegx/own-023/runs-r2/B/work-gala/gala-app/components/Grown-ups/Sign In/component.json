@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5e265947-47de-5e0f-8a23-5d1d355b46a7",
+  "name": "Sign In",
+  "path": "/Grown-ups/Sign In",
+  "type": "visual",
+  "created": "2026-10-21T09:48:20.744Z",
+  "modified": "2026-10-21T09:49:13.453Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Sign in to a grown-up's account, or create one. An account alone changes nothing: it also needs the household key once (Household Key). Publishes Signed In."
+}
