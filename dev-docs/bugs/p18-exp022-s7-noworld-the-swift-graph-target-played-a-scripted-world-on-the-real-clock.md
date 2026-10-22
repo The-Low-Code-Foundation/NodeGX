@@ -6,7 +6,7 @@ severity: low
 area: export / Swift graph harness (`packages/nodegx-export/tests/helpers/swift-graph-target.ts`); the JavaScript host's test seam (`src/emit/swift/scripts.ts`, `__nodegx.world`)
 found: EXP-022 session 7, 2026-10-22, the second build of the 14 graph scenarios ("swift has no install(): it cannot play a graph that needs a world")
 fixed: EXP-022 session 7, 2026-10-22
-commit: pending
+commit: 62f274719
 evidence: packages/nodegx-export/tests/node-spec-graph-swift.test.ts B1, B2 (the 9 store scenarios, each trace equal to React's)
 ---
 

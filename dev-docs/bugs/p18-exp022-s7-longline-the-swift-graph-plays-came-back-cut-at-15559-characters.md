@@ -6,7 +6,7 @@ severity: low
 area: export / Swift graph harness (`packages/nodegx-export/tests/helpers/swift-graph-target.ts`, `playSwiftGraphs`)
 found: EXP-022 session 7, 2026-10-22, the first build of the 14 graph scenarios (S5's 5 plays fit on the line)
 fixed: EXP-022 session 7, 2026-10-22
-commit: pending
+commit: 62f274719
 evidence: packages/nodegx-export/tests/node-spec-graph-swift.test.ts B1–B4 (the first run: "SyntaxError: Unterminated string in JSON at position 15559")
 ---
 
