@@ -1,0 +1,47 @@
+{
+  "id": "cloud-shared-counter",
+  "title": "A count several devices change: add on the server, take each press once",
+  "description": "A value two tabs or two devices change at once (a count, a score, a balance, progress) is changed on the server by the amount, never read into the page, changed, and written back whole with Update Record: of two such saves the later erases the earlier. Here a Function node calls `Noodl.Records.increment(id, { points: 1 }, { className: 'Score' })`, which adds on the server and updates the local record, so the Record node bound to the same id shows the server's total. The press is taken once: the script turns `idle` false before it saves and true when the server has answered, and `idle` drives the Button's `enabled`, so a second press during the save does nothing. The record id is read once at the top of the script, so the answer belongs to the record the press was for even if the page has moved on. The Function's input does not re-run it (`runOnChange-in-recordId` off): only the press does. To replace a whole value instead, use Update Record with `onlyIfUnchanged`.",
+  "demonstrates": ["JavaScriptFunction", "DbModel2", "net.noodl.controls.button"],
+  "components": [
+    {
+      "name": "/Shared Count",
+      "nodes": [
+        {
+          "id": "root",
+          "type": "Group",
+          "label": "Count",
+          "parameters": { "flexDirection": "row", "alignItems": "center" },
+          "children": ["count_text", "add_btn"]
+        },
+        { "id": "count_text", "type": "Text", "label": "Total so far", "parent": "root" },
+        { "id": "add_btn", "type": "net.noodl.controls.button", "label": "Add one", "parent": "root", "parameters": { "label": "+1" } },
+        { "id": "count_inputs", "type": "Component Inputs", "label": "Record id in", "ports": [{ "name": "recordId", "plug": "output", "type": "string" }] },
+        { "id": "count_record", "type": "DbModel2", "label": "The shared record", "parameters": { "collectionName": "Score" } },
+        {
+          "id": "add_on_server",
+          "type": "JavaScriptFunction",
+          "label": "Add one on the server, once per press",
+          "parameters": {
+            "functionScript": "// Read the id once: the answer belongs to the record this press was for.\nconst id = Inputs.recordId;\nif (!id) return;\nOutputs.idle = false; // the Button ignores presses until the server has answered\ntry {\n  // Added on the server by the amount, so two devices pressing together both count.\n  await Noodl.Records.increment(id, { points: 1 }, { className: 'Score' });\n  Outputs.added();\n} catch (e) {\n  Outputs.error = e.message;\n  Outputs.failed();\n} finally {\n  Outputs.idle = true;\n}",
+            "runOnChange-in-recordId": false
+          },
+          "ports": [
+            { "name": "in-recordId", "plug": "input", "type": "string" },
+            { "name": "out-idle", "plug": "output", "type": "boolean" },
+            { "name": "out-error", "plug": "output", "type": "string" },
+            { "name": "out-added", "plug": "output", "type": "signal" },
+            { "name": "out-failed", "plug": "output", "type": "signal" }
+          ]
+        }
+      ],
+      "connections": [
+        { "fromId": "count_inputs", "fromProperty": "recordId", "toId": "count_record", "toProperty": "modelId" },
+        { "fromId": "count_inputs", "fromProperty": "recordId", "toId": "add_on_server", "toProperty": "in-recordId" },
+        { "fromId": "count_record", "fromProperty": "points", "toId": "count_text", "toProperty": "text" },
+        { "fromId": "add_btn", "fromProperty": "onClick", "toId": "add_on_server", "toProperty": "run" },
+        { "fromId": "add_on_server", "fromProperty": "out-idle", "toId": "add_btn", "toProperty": "enabled" }
+      ]
+    }
+  ]
+}

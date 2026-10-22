@@ -190,6 +190,15 @@ export const DIAGNOSTIC_EXAMPLES: readonly ExampleCitation[] = [
     code: DiagnosticCode.InertDimension,
     examples: ['ui-card-grid-repeater'],
     why: 'an Image given a real box — sizeMode "explicit" with a width, a height and objectFit "cover" — which is what makes any of the three apply'
+  },
+  // P112-OWN026-QUERYFILTERSHAPE — the shape a made-up query was reaching for: a `visualFilter` rule whose `input`
+  // mints `qp-ownerId`, the signed-in user's id wired into it, both fetch-at-build boxes off.
+  {
+    code: DiagnosticCode.QueryRecordsShape,
+    examples: ['cloud-query-own-rows'],
+    why:
+      'a Query Records filtered on the server: one visualFilter rule whose "input" mints the qp- port, the User id ' +
+      'wired into it, and the query run by that value arriving'
   }
 ];
 

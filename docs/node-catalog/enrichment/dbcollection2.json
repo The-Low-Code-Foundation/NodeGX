@@ -21,8 +21,9 @@
     "changedRecords": "All records of the last batch; for deletes, an array of primary-key strings.",
     "changedRecordId": "Primary key of the first affected record, across all three event types."
   },
-  "runtimeBehavior": "All *inputs* are runtime-determined (runtime-discovered + editor-adapter): the class choice, filter values, sort keys and paging inputs are generated from the project's database schema and the visual filter you build in the editor — e.g. each 'value' placeholder in a filter becomes its own input port, and actions like fetch ('storageFetch') are registered on demand. A generator cannot enumerate them statically; an authoring tool should set `collectionName` and filter parameters, and may wire signals to fetch-related inputs which the runtime registers when used.",
+  "runtimeBehavior": "Every input is drawn from the parameters (the static list is empty). Set `collectionName` (the class). FILTER ON THE SERVER with `visualFilter`: {\"combinator\": \"and\", \"rules\": [{\"property\": \"<field>\", \"operator\": \"equal to\", \"input\": \"<name>\"}]} — each rule's `input` mints an input port `qp-<name>`; wire the value into it (e.g. a User node's `id` → `qp-ownerId`), or give the rule a literal `\"value\"` instead of `input`. Operators: \"equal to\", \"not equal to\", \"greater than\", \"greater than or equal to\", \"less than\", \"less than or equal to\", \"contain\" (case-insensitive), \"exist\", \"not exist\" (no value), \"points to\" (a pointer field equals a record id), and \"related to\" (with `relatedTo` and `relationProperty`). A rule may itself be a {\"combinator\": \"or\", \"rules\": [...]} group. The filter is compiled to the backend's `where`, so only matching rows leave the server. Sort: `visualSort`: [{\"property\": \"<field>\", \"order\": \"ascending\" | \"descending\"}]. Paging: `storageEnableLimit`: true with `storageLimit` and `storageSkip` (both ignored without it); `storageEnableCount`: true adds the `storageTotalCount` output. `storageFetch` (Do) is the signal that re-runs it. ⚠️ A rule whose `qp-` value has not arrived yet is DROPPED, not failed, so the query that runs when the graph is built returns every row the user may read: with a wired filter value set `\"runOnChange-collectionName\": false` and `\"runOnChange-querySettings\": false` and leave Do unwired, so the value's arrival is what runs the query (get_example cloud-query-own-rows). Any other parameter name (`querySettings`, `filter`, `where`…) is stored and never read, and the write is refused. Once the filter is opened in the editor's panel it is saved as {\"type\": \"and\", \"conditions\": [{\"field\", \"operator\": \"equalTo\", \"valueSource\": \"connected\", \"valuePortName\": \"qp-<name>\"}]}; the runtime reads both shapes.",
   "examples": [
+    "cloud-query-own-rows",
     "repeater-query-records",
     "send-event-across-components",
     "cloud-record-live-refresh",
@@ -32,12 +33,14 @@
     "community-email-signup-validat"
   ],
   "patterns": [
+    "A signed-in user's own rows: `visualFilter` rule {\"property\": \"ownerId\", \"operator\": \"equal to\", \"input\": \"ownerId\"}, the User node's `id` wired into `qp-ownerId`, and both fetch-at-build boxes off — the server answers with only that user's rows.",
     "`items` → Repeater `items`, with record properties delivered to the item component via Component Inputs: the canonical list page.",
     "Event Receiver `eventReceived` → fetch input: re-run a query on demand from anywhere in the app.",
     "Turn on Subscribe To Changes and wire `Changed` back into this node's own `Do`: the list stays current without polling, on every backend whose descriptor allows it — SSE on the built-in backend and PocketBase, a WebSocket on Directus.",
     "`Subscribed` → a status indicator's visibility, so people can see when live updates are actually running rather than assuming."
   ],
   "antiPatterns": [
+    "Fetching every row and dropping the ones a user should not see in a Function or Filter Records: every row still reaches every browser. Filter on the server with `visualFilter` and a `qp-` port.",
     "Re-querying on a timer to feel 'live' — results already update from cloud events; explicit re-fetch is only needed when the server changed outside those events.",
     "Treating `Changed Record` as the full record on a delete — delete events carry only primary keys, so it is null and only `Changed Record Id` is populated.",
     "Polling with a Timer while Subscribe To Changes is available on this backend. Subscribe and re-fetch on `Changed` instead.",

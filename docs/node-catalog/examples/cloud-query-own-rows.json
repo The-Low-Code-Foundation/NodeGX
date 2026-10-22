@@ -1,0 +1,80 @@
+{
+  "id": "cloud-query-own-rows",
+  "title": "Only my records: a Query Records filtered on the server by the signed-in user's id",
+  "description": "A signed-in user's own rows, with the filter on the server (a server-side filter, the backend's where clause), not a Filter Records or a Function after the fetch. The Query Records node's `visualFilter` holds one rule, {\"property\": \"ownerId\", \"operator\": \"equal to\", \"input\": \"ownerId\"}, and that `input` mints the input port `qp-ownerId`; the User node's `id` is wired into it, so other users' rows never leave the server (owner isolation by an explicit field). Each row is created with `ownerId` set from the same User id. Both fetch-at-build boxes are off (`runOnChange-collectionName` and `runOnChange-querySettings`: false) and Do is unwired: a rule whose qp- value has not arrived yet is dropped, so a query run before the id arrives would return every row the user may read; this way the id's arrival is what runs it. Sort and limit sit beside the filter (`visualSort`, `storageEnableLimit` + `storageLimit`). When a collection keeps its default creatorOwns rule and the backend enforces it, a user's query already returns only rows they own; the filter is how you narrow further or query by another field.",
+  "demonstrates": ["DbCollection2", "net.noodl.user.User", "For Each", "Component Inputs"],
+  "components": [
+    {
+      "name": "/My Notes",
+      "nodes": [
+        {
+          "id": "notes_root",
+          "type": "Group",
+          "label": "My notes",
+          "parameters": { "flexDirection": "column" },
+          "children": ["notes_list"]
+        },
+        {
+          "id": "notes_list",
+          "type": "For Each",
+          "label": "One row per note of mine",
+          "parent": "notes_root",
+          "parameters": { "template": "/Note Row" }
+        },
+        {
+          "id": "me",
+          "type": "net.noodl.user.User",
+          "label": "Signed-in user"
+        },
+        {
+          "id": "my_notes",
+          "type": "DbCollection2",
+          "label": "Notes where ownerId = my id",
+          "parameters": {
+            "collectionName": "Note",
+            "visualFilter": {
+              "combinator": "and",
+              "rules": [{ "property": "ownerId", "operator": "equal to", "input": "ownerId" }]
+            },
+            "visualSort": [{ "property": "createdAt", "order": "descending" }],
+            "storageEnableLimit": true,
+            "storageLimit": 50,
+            "runOnChange-collectionName": false,
+            "runOnChange-querySettings": false
+          }
+        }
+      ],
+      "connections": [
+        { "fromId": "me", "fromProperty": "id", "toId": "my_notes", "toProperty": "qp-ownerId" },
+        { "fromId": "my_notes", "fromProperty": "items", "toId": "notes_list", "toProperty": "items" }
+      ]
+    },
+    {
+      "name": "/Note Row",
+      "nodes": [
+        {
+          "id": "row_root",
+          "type": "Group",
+          "label": "Note row",
+          "parameters": { "flexDirection": "column", "paddingTop": "var(--space-2)", "paddingBottom": "var(--space-2)" },
+          "children": ["row_title"]
+        },
+        {
+          "id": "row_title",
+          "type": "Text",
+          "label": "Note title",
+          "parent": "row_root"
+        },
+        {
+          "id": "row_inputs",
+          "type": "Component Inputs",
+          "label": "Record properties in",
+          "ports": [{ "name": "title", "plug": "output", "type": "*" }]
+        }
+      ],
+      "connections": [
+        { "fromId": "row_inputs", "fromProperty": "title", "toId": "row_title", "toProperty": "text" }
+      ]
+    }
+  ]
+}

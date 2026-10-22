@@ -17,7 +17,8 @@
   "runtimeBehavior": "Ports are runtime-determined: `collectionName` (Class) is registered as an edit-only enum of the project's classes plus _User/_Role, and each schema property of the chosen class becomes a value input `prop-<name>` typed from the schema. Access Control rules spawn `acl-<ruleId>-*` inputs like on Create Record. An authoring tool should set `collectionName` in parameters and drive the `prop-<name>` inputs it intends to change.",
   "examples": [
     "cloud-edit-record",
-    "cloud-record-crud"
+    "cloud-record-crud",
+    "cloud-shared-counter"
   ],
   "patterns": [
     "DbModel2 `prop-<name>` → Text Input `startValue`, edited `text` → `prop-<name>`, Button `onClick` → `store`: prefill, edit, save.",
@@ -26,7 +27,9 @@
   ],
   "antiPatterns": [
     "Setting `storeProperties` to 'All' to 'be safe' — it uploads the record's entire local data and can overwrite fields other users changed; send only what the form edits.",
-    "Retrying a `failure` from `onlyIfUnchanged` by pressing Do again without fetching the record first: the precondition is taken from the record as it was read, so the retry fails the same way until the record is re-read."
+    "Retrying a `failure` from `onlyIfUnchanged` by pressing Do again without fetching the record first: the precondition is taken from the record as it was read, so the retry fails the same way until the record is re-read.",
+    "Saving a count, score, balance or progress that several tabs or devices change from the value the page holds (read it, add one, Do): of two such saves the later erases the earlier. Change it on the server by the amount instead, with `Noodl.Records.increment` in a Function node (example `cloud-shared-counter`), or guard a whole-value save with `onlyIfUnchanged`.",
+    "Leaving the control that triggers Do pressable while its save is in flight: a second press saves twice, or saves against whatever item is on screen by then. Ignore presses from the press until `done` or `failure`, and send the save the id of the item it was pressed for."
   ],
   "relatedNodes": [
     "DbModel2",

@@ -958,6 +958,19 @@ export enum DiagnosticCode {
   QueryFetchesBeforeItsFilter = 'query-fetches-before-its-filter',
 
   /**
+   * P112-OWN026-QUERYFILTERSHAPE — a Query Records node given a query in a shape its runtime does not
+   * read: a parameter or wire it has no use for (`querySettings`, `filter`, `where`…, stored by name and
+   * never read), a `visualFilter` rule with an operator the translator does not know or no property (a
+   * rule it cannot read is DROPPED, so the query widens to more rows than asked for), a `visualSort` row
+   * that is not `{property, order}`, or a `qp-<name>` port no rule's `input` names (set, never read).
+   *
+   * An **error**: every arm is a query that runs and answers with rows the author did not ask for, and an
+   * agent that cannot see the filter shape reaches for exactly these. The suggestion carries the real
+   * shape. See `queryFilterShape.ts`.
+   */
+  QueryRecordsShape = 'query-records-shape',
+
+  /**
    * DSG-004 §2.3 — a page whose text is all one weight, so nothing on it is
    * emphasised over anything else.
    *
