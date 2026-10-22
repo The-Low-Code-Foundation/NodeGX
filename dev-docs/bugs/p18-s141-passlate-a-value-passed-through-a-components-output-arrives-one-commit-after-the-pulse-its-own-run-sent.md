@@ -1,11 +1,12 @@
 ---
 id: P18-S141-PASSLATE
 title: A value passed through a component's output reaches the parent one commit after the pulse its own run sent, so the parent writes the value before (over a persisted store, `undefined`)
-status: open
+status: fixed
 severity: high
 area: export / the §4d pass-through (`packages/nodegx-export/src/analyze/plan.ts` `liftInto`, `intoOutputs`; `src/emit/component.ts` the lifted callbacks)
 found: P18 session 141, 2026-10-22, measuring the order of rocket-school's Header writes on a desk before building them (EXP-021)
 evidence: dev-docs/tasks/phase-18-code-export-v2/s141-header-app/ (`EXPECTED.md`, `readings-runtime.json` beside `readings-head.json`, the Header Desk's Solo)
+commit: 8364e498c
 ---
 
 Session 139 made a placed component's value straight into a component's own output a pass-through: the component kept

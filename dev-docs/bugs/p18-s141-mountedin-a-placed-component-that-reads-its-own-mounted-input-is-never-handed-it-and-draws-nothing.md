@@ -1,11 +1,12 @@
 ---
 id: P18-S141-MOUNTEDIN
 title: A placed component that reads its own Mounted input is never handed it, so one that mounts its root on `m === true` draws nothing (rocket-school's Edit player form, every Confirm)
-status: open
+status: fixed
 severity: high
 area: export / placed components (`packages/nodegx-export/src/emit/component.ts` `instanceAttrs`, the binding loop's `mounted`)
 found: P18 session 141, 2026-10-22, driving rocket-school's Header (Edit player opened nothing in either export arm)
 evidence: dev-docs/tasks/phase-18-code-export-v2/s141-header-app/ (`readings.json` H2, `mountedin.ts`, `mountedin.out`, `EXPECTED.md` "the desk")
+commit: 8364e498c
 ---
 
 The runtime hands a component instance's Mounted to its Component Inputs port named `mounted`, as it hands any other
