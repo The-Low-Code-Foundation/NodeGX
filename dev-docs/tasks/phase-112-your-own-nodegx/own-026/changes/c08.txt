@@ -1,0 +1,3 @@
+On the grown-ups page, show me the questions each child got wrong in the last 7 days, grouped by times table, with how many times they got each one wrong.
+
+Please just build it without waiting for me to answer questions.

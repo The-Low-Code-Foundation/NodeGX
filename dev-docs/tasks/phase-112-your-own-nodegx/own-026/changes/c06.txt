@@ -1,0 +1,3 @@
+Add a time limit for each question, which I set for each child on the grown-ups page: off, 10 seconds or 5 seconds. Running out of time counts as a wrong answer and shows the right one.
+
+Please just build it without waiting for me to answer questions.
