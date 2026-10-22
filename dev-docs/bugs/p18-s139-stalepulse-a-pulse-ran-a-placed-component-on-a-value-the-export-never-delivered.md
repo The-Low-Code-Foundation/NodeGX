@@ -6,6 +6,7 @@ severity: high
 area: export / the lift pass and the trigger pass (`src/analyze/plan.ts`, `liftInto` and `PlanExclusions.pulses`)
 found: P18 session 139, 2026-10-22, reading rocket-school's emitted Lists page once App store was emitted
 fixed: P18 session 139, 2026-10-22; EXP-011 §109
+commit: 63ed1a9bf
 evidence: dev-docs/tasks/phase-18-code-export-v2/s139-persisted-store/README.md, wires.json
 regression: packages/nodegx-export/tests/a-persisted-store-travels.test.ts
 ---

@@ -6,6 +6,7 @@ severity: medium
 area: export / hook naming (`src/analyze/plan.ts`, `plan.file.symbol` for `plan.hook`)
 found: P18 session 139, 2026-10-22, the Store Desk's first export arm run (RangeError: Maximum call stack size exceeded)
 fixed: P18 session 139, 2026-10-22; EXP-011 §109
+commit: 63ed1a9bf
 evidence: dev-docs/tasks/phase-18-code-export-v2/s139-persisted-store/README.md
 regression: packages/nodegx-export/tests/a-persisted-store-travels.test.ts
 ---

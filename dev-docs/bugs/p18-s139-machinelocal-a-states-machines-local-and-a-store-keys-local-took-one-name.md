@@ -6,6 +6,7 @@ severity: low
 area: export / the emitter's local names (`src/emit/component.ts`, `reserved` before `storeKeyLocals`)
 found: P18 session 139, 2026-10-22, `tplbuild` after bot-garden's persisted store was emitted
 fixed: P18 session 139, 2026-10-22; EXP-011 §109
+commit: 63ed1a9bf
 evidence: dev-docs/tasks/phase-18-code-export-v2/s139-persisted-store/README.md, tplbuild.json
 regression: packages/nodegx-export/tests/a-persisted-store-travels.test.ts
 ---
