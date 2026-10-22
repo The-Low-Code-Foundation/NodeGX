@@ -56,8 +56,10 @@ thirty, and the day-thirty things are these three, in the order of how much evid
    they need. Claude Code, Mistral and DeepSeek have shown they do not much mind building in NodeGX's files instead of
    code. The off-ramp is ruled (2026-10-21, P18 EXP-019…023): React source from npm, then Swift. Today the React export
    carries every picker node and, since 2026-10-21, the scripts that read the clock, the browser or `this`; it names,
-   before writing anything, what it does not carry yet. Swift is scoped, not built. **This pillar is a promise until
-   EXP-021 lands, and the site says so.**
+   before writing anything, what it does not carry yet. Since 2026-10-22 a logic component exports as a hook
+   (EXP-021), driven on todo-list and rocket-school, and `@nodegx/export` is on npm. Swift is scoped, not built
+   (EXP-022 §7 proposes a bounded cut). **For React the pillar is checkable on two templates; for Swift it is a
+   promise, and the site says so.**
 
 What this changes about the earlier framing on this page: §1–§3 stand. The four reasons in §3 are *how* the blueprint
 is safe to build on (restraint, testing, security, do it yourself); §0 is *why a person would want the blueprint at
@@ -110,7 +112,7 @@ Each pillar may be advertised only as far as its third column reaches; the fourt
 |---|---|---|---|
 | **The blueprint stays open** | an editor for this app, for these people, without a rewrite | four editors built by an agent from the packages (OWN-008's three, P123's Studio, P124's backend map); the packages on npm | P124 (the backend on one canvas); OWN-009 (Richard's own) |
 | **The knowledge ships with the project** | the first conversation is loaded with the method | `npm create nodegx` writes the server entry, a note, the editor-building skill; `create_project` writes the brief and the plan; the Vibe kit's first-day and sizing skills | [OWN-025](tasks/phase-112-your-own-nodegx/OWN-025-THE-FIRST-CONVERSATION-IS-LOADED.md) (the seed: folder shape, skills, gates) |
-| **The off-ramp** | leave with source, React then Swift | `nodegx export` with its preflight; 130 picker nodes; host-trait scripts (EXP-019 s1); todo-list 12 of 62 components clean | P18 EXP-019 slice 2 → EXP-020 → EXP-021 → EXP-022 (Swift); EXP-023 (on npm) |
+| **The off-ramp** | leave with source, React then Swift | `@nodegx/export` 0.2.5 on npm with its preflight; 130 picker nodes; scripts travel as written (EXP-019), the Noodl API (EXP-020), logic components as hooks (EXP-021), driven on todo-list and rocket-school | EXP-021 §101; EXP-022 (Swift, the bounded cut of its §7) |
 
 Phase 111's four reasons (see it, trust it, steer it, leave or arrive) stay true as features. Seeing and steering are what
 the optional editor offers. Leaving with React code (P18) and arriving with your own (P111 SEE-006) are ways in and out.
@@ -153,7 +155,7 @@ Both ruled by Richard on 2026-10-06 as recommended ("D1: Ok. D2: ok").
 | D1 | **Where do the three pieces with no owner go?** The one install command, app-level tests and the per-app security report each need a task. | ✅ **Install command: [OWN-011](tasks/phase-112-your-own-nodegx/OWN-011-ONE-INSTALL.md) in phase 112**, since it ships the kit. **App-level tests: [SEE-011](tasks/phase-111-you-can-see-what-it-built/SEE-011-YOUR-APP-HAS-TESTS.md) in phase 111**, beside SEE-003, which already makes P107 traces follow a running app. **Security report: [SEE-012](tasks/phase-111-you-can-see-what-it-built/SEE-012-THE-SECURITY-REPORT.md) in phase 111**, since it is one of the reasons phase 111 puts on the tin. P53 stays the phase for regulated domains (payroll, medical). |
 | D3 (2026-10-21) | **Does the homepage lead with §0's honest sentence** ("on the first day it looks the same; what differs is what you can still do later") in place of "A full-stack app, drawn as a graph"? | ✅ **Yes.** Richard, having read it: *"I've read it, you can make it a fully fledged part of the site."* Deployed 2026-10-21 (nodegx-web `469575e`) with /from-code/ in the nav. |
 | D4 (2026-10-21, proposed) | **Is the seed's shape** (a thin note, a folder shape, skills on trigger, rules as server refusals) **the one to build, with the `dev-docs/` knowledge distilled into it?** | Recommended **yes**, as OWN-025 scopes it; the first gate is the Gala shell-copy (a page that is one HTML blob) refused by the validator. |
-| D5 (2026-10-21, proposed) | **Does the Gala comparison become the day-thirty test** (OWN-026) **rather than a third day-one round?** | Recommended **yes**. A day-one round measures the property the theory says is equal. |
+| D5 (2026-10-21, proposed) | **Does the Gala comparison become the day-thirty test** (OWN-026) **rather than a third day-one round?** | Recommended **yes**. A day-one round measures the property the theory says is equal. On 2026-10-22 Richard set the lab's shape himself (`own-026/PLAN.md`: DeepSeek builds the rocket times-tables app in three arms, then ten changes; Sonnet 5.5 hands the Gala builds over); it is running. What is owed is his word that it replaces the task file's first draft. |
 | D2 | **Does a plain React app that uses `@nodegx/nodes-react` count as a NodeGX app?** Phase 111 R6 recommends publishing that package so the honesty number applies to code written outside NodeGX. | ✅ **Publish it, as P111 R6 says, and call it a way in and out.** It gives a React app restraint and node tests. It can't give the editor or do-it-yourself editors, which read the project format. The site says so plainly. |
 
 ## 6. Where each phase stands

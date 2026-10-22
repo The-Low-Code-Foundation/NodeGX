@@ -222,7 +222,7 @@ as described before acting — several are second-hand from spec prose, not re-r
 
 ## Where this is referenced
 
-`.clinerules` · [`CLINE-INSTRUCTIONS.md`](../CLINE-INSTRUCTIONS.md) ·
+`.clinerules` · [`CLINE-INSTRUCTIONS.md`](../archive/CLINE-INSTRUCTIONS.md) ·
 [`TASK-TEMPLATE.md`](../TASK-TEMPLATE.md) · [`dev-docs/README.md`](../README.md) ·
 [`REVIVAL-PHASES-INDEX.md`](../tasks-archive/REVIVAL-PHASES-INDEX.md) · the phase-30 and phase-21 READMEs ·
 the individual specs listed in the table above.

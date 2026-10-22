@@ -1,7 +1,7 @@
 # Can Noodl Be Saved? — Viability Report
 
 **Prepared for:** Richard
-**Prepared by:** Claude (Fable), fresh-session assessment per `dev-docs/NOODL-VIABILITY-BRIEF.md`
+**Prepared by:** Claude (Fable), fresh-session assessment per `dev-docs/archive/NOODL-VIABILITY-BRIEF.md`
 **Date:** 2026-07-22
 **Repo state:** branch `cline-dev`, last commit `d1dacbd` (2026-02-18)
 **Companion doc:** [NOODL-REVIVAL-ROADMAP.md](./NOODL-REVIVAL-ROADMAP.md) — the unlimited-budget revival roadmap built on this report's findings

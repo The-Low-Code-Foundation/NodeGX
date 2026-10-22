@@ -1,7 +1,7 @@
 # EXP-022 — The same graph in Swift
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), from Richard's ruling of 2026-10-21: "I want that offramp promise
-fulfilled in React and Swift." **Status: ⬜ scoped, not started.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
+fulfilled in React and Swift." **Status: ⬜ scoped, not started; §7 proposes a bounded cut (2026-10-22), awaiting Richard.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
 out of the parked table: its reveal sentence stands ("one graph, three homes"), its rulings R1–R7 carry, and **its route
 changes**: P110 §0 scoped *a NodeGX runtime written in Swift that loads the project as data*; this task is *an emitter
 that writes a SwiftUI app from the same IR the React export reads*. Same reveal, and the person leaves with Swift source
@@ -66,3 +66,49 @@ need EXP-020 (the backend client) and EXP-021 (logic components). Kotlin is P110
 
 Phone plus cloud with offline sync (P110's second form, R3): after AC2. TestFlight and signing (R5): Richard's call when
 AC2 is in hand. Reminders and the Today tab (R7): out.
+
+## 7. The bounded cut (proposed 2026-10-22, awaits Richard)
+
+> "I don't want to spend 100 sessions like with the React stuff on it, the point of it is supposed to be 'whatever your
+> framework is, you can just build the offramp, because the spec makes it easier' and not 'yeah you'll need a Claude
+> Max subscription and several weeks of constant work to get your app to Kotlin in the future'." — Richard, 2026-10-22
+
+So the session count is the result, not an overhead. **The claim this task measures:** with the node specs, the IR and
+the plan in hand, a new target costs a printer, not a rewrite. **Its number:** sessions and printer lines for Swift,
+beside React's.
+
+**Measured first (2026-10-22, housekeeping session):**
+
+- **Nobody opens Xcode.** Xcode 26.3 and the iOS 26.3 simulator runtime are installed; `xcodebuild` builds,
+  `xcrun simctl` boots, installs, launches and screenshots, all headless. `swift test` runs on macOS without a
+  simulator, and JavaScriptCore is in macOS as in iOS.
+- **Where React's sessions went is reusable.** `src/analyze/plan.ts` is 23,537 lines deciding *when* things run
+  (arrival runs, pulses, lifts, hooks, persisted stores); 70 of them name a React construct, mostly in comments.
+  SwiftUI has React's model: state drives the view; `.onChange(of:)` is an effect over a value; a closure is a lifted
+  callback; an `ObservableObject` is a hook. A Swift target prints the plan's decisions in another syntax.
+  `src/emit/component.ts` (8,828 lines) and the ~40 `*Lib.ts` runtime helpers are the React printer; most helpers
+  (realtime, SSE, websockets, streaming) are outside this cut.
+
+**The cut:**
+
+| in | out (named by the preflight, not dropped silently) |
+|---|---|
+| one app: todo-list, phone-only, kept on the device | the other 16 templates |
+| the node types it uses (Group, Text, Button, Text Input, Checkbox, For Each, States, Page, Router) | every other type |
+| Function bodies verbatim in a `JSContext`, the EXP-019 wrapper contract | translating scripts to Swift |
+| the plan's state rows, effects, lifts and hooks, printed | a Swift planner |
+| — | the backend client (EXP-020's `Noodl.*` refused by name), signing, TestFlight, a real iPhone (R5), Kotlin |
+
+**Grading without anyone at a screen:** the logic through `swift test` on macOS, the generated objects and their
+`JSContext` read against the same desk predictions the React arm reads (the Hook Desk's shape); the screens through
+simulator screenshots beside `render_report`, and one scripted drive (`xcodebuild test`, headless): add, tick,
+delete, relaunch.
+
+**Sessions:** S1, AC1 (the smallest template, the visual tier only, builds and draws in the simulator). S2, state and
+scripts on todo-list's logic components, desk-graded. S3, todo-list driven in the simulator. S4, AC4's ledger line,
+the preflight, and the cost written beside React's. S5 is slack. **Hard stop at eight.** If it is not done by then,
+the finding is where the IR or the plan leaks React; that is a defect in the claim itself, filed and said plainly on
+the site, not a reason for a ninth session.
+
+**Kotlin after:** the same cut on Compose Desktop (JVM, no emulator) would be the third target and the real test of
+"whatever your framework". Not this task.

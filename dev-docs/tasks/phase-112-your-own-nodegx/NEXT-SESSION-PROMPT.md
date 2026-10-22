@@ -1,5 +1,10 @@
 # Phase 112 — next session
 
+> **Read first (2026-10-22, housekeeping):** what follows is from 2026-10-19 and is behind. Since then editor 0.4.3 and npm
+> 0.2.4 and 0.2.5 are published (0.2.5 on 2026-10-22: `--graph` / `read_graph`, `@nodegx/export`). P112's lanes now: lane 1
+> OWN-025 (the seed; waits on D4) then OWN-014 AC4; lane 2 the drawer's stranger round; lane 3 OWN-015's rest; lane 4
+> OWN-016 with P26; lane 5 the OWN-026 lab, running on `own-026/PLAN.md`. Where each stands: `dev-docs/BOARD.md` §2.
+
 **Written 2026-10-11 at the end of session 12** (Opus 5.5). Session 12 started OWN-013, the 0.4.0 cut, by UPG-008's
 runbook. G1 (the cut point) is measured and G2 (the changelog) is written and approved. Richard ruled R17: 0.4.0
 copies a 0.3.0 project to `<project>.before-0.4` before its format moves to 5 (`8f9137d8e`). **Continued 2026-10-12:**
