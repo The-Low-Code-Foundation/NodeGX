@@ -17,6 +17,34 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## npm packages 0.2.5 · 2026-10-22
+
+**Your agent can read a whole NodeGX app as one page of text, and the code export is on npm.**
+
+This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.5, and
+`@nodegx/export` at 0.2.5, published for the first time. `@nodegx/preview` stays at 0.2.4, and `@nodegx/node-spec`,
+`@nodegx/project-contract` and `@nodegx/canvas-look` at their versions. Nothing in them changed.
+
+### New
+
+- **The whole app on one page.** `npx -y @nodegx/mcp@0.2.5 <the app's folder> --graph` prints the app as text: a map
+  of its components, then for each component its ports, its screen tree, its nodes, every parameter, each function as
+  code, and every wire as `from.port -> to.port`. It writes nothing. With the server open, the tool `read_graph` is the
+  same page. Before this, an agent asked to read an app wrote its own scripts over the JSON under `components/` to list
+  the nodes and wires. On a game of 54 components, reading through the page cost about a tenth less and the agent
+  understood the app as fully as before.
+- **New projects tell the agent how to read an app.** The note `npm create nodegx` writes for your agent now names
+  `--graph`, and says that opening a project with the server writes nothing into its folder.
+- **Leaving for code, from npm.** `npx @nodegx/export export <the app's folder> --dry-run` says first what will and
+  will not translate. Without `--dry-run`, and with an empty folder named after the app, it writes a React + Vite app
+  there. It is in alpha: it lists what it cannot carry yet before it writes anything.
+
+### Changed
+
+- **`open_project` says it writes nothing.** An agent asked not to change any file refused to open the project with
+  the server, because the project's `.gitignore` said `.mcp.json` is written when the project is opened. The NodeGX
+  editor writes that file, not the server. The tool's description, the agent's note and that comment now say so.
+
 ## 0.4.3 · 2026-10-20
 
 **The backend NodeGX runs on your computer now makes the smaller photos an app shows on its cards and lists.**

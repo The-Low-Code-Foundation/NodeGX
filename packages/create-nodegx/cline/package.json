@@ -1,6 +1,6 @@
 {
   "name": "create-nodegx-cline",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "npm create nodegx-cline — sets a folder up so Cline can build NodeGX apps in it.",
   "license": "GPL-3.0-only",
   "homepage": "https://nodegx.io",
@@ -18,7 +18,7 @@
     "LICENSE"
   ],
   "dependencies": {
-    "create-nodegx": "0.2.4"
+    "create-nodegx": "0.2.5"
   },
   "engines": {
     "node": ">=18"
