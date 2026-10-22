@@ -83,8 +83,51 @@ export function unknownArgumentKeys(schema: unknown, args: unknown): string[] {
   return Object.keys(args).filter((key) => !declared.includes(key));
 }
 
+/**
+ * P112-OWN026-UPDATEASCREATE — a refusal that knows which OTHER tool the arguments belong to. t1-nodegx-2: 11 of the
+ * round's 26 refused calls were `update_component` sent `create_component`'s `nodes` / `connections` / `description`
+ * for components that did not exist yet; the refusal listed `update_component`'s own arguments, `didYouMean` was
+ * `null` for all three, and the same slip came back all round long. A tool registers a hint for the case where the
+ * names are right and the tool is wrong; it answers in plain words, or `undefined` to leave the refusal as it was.
+ */
+export interface RefusalHint {
+  message: string;
+  /** The tool these arguments belong to. */
+  callInstead?: string;
+}
+export type RefusalHinter = (args: Record<string, unknown>, unknown: readonly string[]) => RefusalHint | undefined;
+
+const HINTERS = Symbol('noodl.refusalHinters');
+type HintedServer = { [HINTERS]?: Map<string, RefusalHinter> };
+
+/**
+ * Register the hint for one tool's refusal, on this server only (the suite builds many servers). The map is made on
+ * the real server by `refuseUnknownArguments`, so a registration through `recordTools`' proxy (an `Object.create` of
+ * the server) reads it through the prototype and adds to the same map.
+ */
+export function addRefusalHint(server: McpServer, tool: string, hinter: RefusalHinter): void {
+  const s = server as unknown as HintedServer;
+  (s[HINTERS] ??= new Map()).set(tool, hinter);
+}
+
+/** The hint this server registered for `tool`, for these arguments — `undefined` when none applies. */
+export function refusalHintFor(server: McpServer, tool: string, args: unknown, unknown: readonly string[]): RefusalHint | undefined {
+  const hinter = (server as unknown as HintedServer)[HINTERS]?.get(tool);
+  if (!hinter || !args || typeof args !== 'object' || Array.isArray(args)) return undefined;
+  try {
+    return hinter(args as Record<string, unknown>, unknown);
+  } catch {
+    return undefined;
+  }
+}
+
 /** The refusal, in the door's own error shape (`{ error: { code, message, details } }`). */
-export function unknownArgumentsRefusal(tool: string, schema: unknown, unknown: readonly string[]): ToolErrorPayload {
+export function unknownArgumentsRefusal(
+  tool: string,
+  schema: unknown,
+  unknown: readonly string[],
+  hint?: RefusalHint
+): ToolErrorPayload {
   const declared = declaredKeys(schema) ?? [];
   const named = unknown.map((key) => {
     const meant = closestArgument(key, declared);
@@ -93,12 +136,14 @@ export function unknownArgumentsRefusal(tool: string, schema: unknown, unknown: 
   return {
     error: {
       code: 'invalid-argument',
-      message:
-        `${tool} has no argument ${named.join(', ')}. Nothing was done: an argument a tool does not have would be ` +
-        `dropped without a word. Its arguments are: ${declared.join(', ')}.`,
+      message: hint
+        ? `${hint.message} Nothing was done.`
+        : `${tool} has no argument ${named.join(', ')}. Nothing was done: an argument a tool does not have would be ` +
+          `dropped without a word. Its arguments are: ${declared.join(', ')}.`,
       details: {
         unknownArguments: [...unknown],
-        didYouMean: Object.fromEntries(unknown.map((key) => [key, closestArgument(key, declared) ?? null]))
+        didYouMean: Object.fromEntries(unknown.map((key) => [key, closestArgument(key, declared) ?? null])),
+        ...(hint?.callInstead ? { callInstead: hint.callInstead } : {})
       }
     }
   };
@@ -113,10 +158,14 @@ type ValidatingServer = { validateToolInput(tool: { inputSchema?: unknown }, arg
  */
 export function refuseUnknownArguments(server: McpServer): void {
   const s = server as unknown as ValidatingServer;
+  (server as unknown as HintedServer)[HINTERS] ??= new Map();
   const original = s.validateToolInput.bind(server);
   s.validateToolInput = async (tool, args, toolName) => {
     const unknown = unknownArgumentKeys(tool.inputSchema, args);
-    if (unknown.length > 0) throw new Error(JSON.stringify(unknownArgumentsRefusal(toolName, tool.inputSchema, unknown), null, 2));
+    if (unknown.length > 0) {
+      const hint = refusalHintFor(server, toolName, args, unknown);
+      throw new Error(JSON.stringify(unknownArgumentsRefusal(toolName, tool.inputSchema, unknown, hint), null, 2));
+    }
     return original(tool, args, toolName);
   };
 }

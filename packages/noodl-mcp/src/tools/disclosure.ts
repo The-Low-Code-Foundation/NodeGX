@@ -53,7 +53,7 @@ import {
   type ToolGroupId
 } from '../toolGroups';
 import type { FindToolsResponse } from './responses';
-import { unknownArgumentKeys, unknownArgumentsRefusal } from './unknownArguments';
+import { refusalHintFor, unknownArgumentKeys, unknownArgumentsRefusal } from './unknownArguments';
 import { errorResult, guarded, jsonResult } from './util';
 
 /** A node as it arrives at a write door: only its `type` matters here. */
@@ -633,7 +633,8 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
           // `update_component` its wires as a top-level `connections` beside `set`: `updated`, 0 errors, no wires.
           const unknown = unknownArgumentKeys(schema, args.arguments ?? {});
           if (unknown.length > 0) {
-            const { error } = unknownArgumentsRefusal(args.name, schema, unknown);
+            const hint = refusalHintFor(server, args.name, args.arguments ?? {}, unknown);
+            const { error } = unknownArgumentsRefusal(args.name, schema, unknown, hint);
             throw new ToolError(error.code, error.message, error.details);
           }
           const result = await safeParseAsync(schema as Parameters<typeof safeParseAsync>[0], args.arguments ?? {});

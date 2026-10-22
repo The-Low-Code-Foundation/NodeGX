@@ -143,6 +143,8 @@ export interface ProjectInfoResponse {
    * budget gate rules the `instructions` channel out.
    */
   backendDoctrine?: string;
+  /** P112-OWN026-GUIDANCECUT — the last field, so the end a middle cut keeps says how to fetch what it took. */
+  moreGuidance?: string;
   /**
    * CN-003 — the project's own node kits, and what reading them produced.
    *

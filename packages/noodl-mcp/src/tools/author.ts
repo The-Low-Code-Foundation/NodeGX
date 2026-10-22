@@ -65,6 +65,7 @@ import type {
   WriteValidationSummary
 } from './responses';
 import { guarded, jsonResult } from './util';
+import { addRefusalHint } from './unknownArguments';
 
 // ─── Zod shapes ───────────────────────────────────────────────────────────────
 // AAQ-005: the node/port/connection shapes are no longer written here. They are
@@ -620,6 +621,32 @@ export function registerAuthorTools(
       }
     )
   );
+
+  // P112-OWN026-UPDATEASCREATE — `create_component`'s arguments sent to this door. Refused rather than taken as a
+  // create: a path that does not resolve is as often a misspelling of one that does, and creating there would fork
+  // the component. The refusal names the tool to call, and, when the component exists, the `set` that replaces it.
+  addRefusalHint(server, 'update_component', (args, unknown) => {
+    const createKeys = Object.keys(CREATE_COMPONENT_SHAPE);
+    if (!unknown.every((key) => createKeys.includes(key))) return undefined;
+    const names = unknown.map((key) => `\`${key}\``).join(', ');
+    const path = typeof args.path === 'string' ? args.path : undefined;
+    const store = binding.peek();
+    const exists = path !== undefined && store !== null && store.resolve(toPathForm(path)) !== undefined;
+    if (!exists) {
+      return {
+        message:
+          `${path ? `"${path}"` : 'That component'} does not exist yet, and ${names} ${unknown.length === 1 ? 'is' : 'are'} ` +
+          `create_component's ${unknown.length === 1 ? 'argument' : 'arguments'}: call create_component with these same ` +
+          'arguments to make it. update_component changes a component that is already there (`path` plus `set` or `operations`).',
+        callInstead: 'create_component'
+      };
+    }
+    return {
+      message:
+        `${names} ${unknown.length === 1 ? 'is' : 'are'} create_component's, and "${path}" already exists. To replace its graph ` +
+        'pass them inside `set` (`set: { nodes, connections, visual_roots }`); to change part of it, send `operations`.'
+    };
+  });
 
   server.registerTool(
     'update_component',

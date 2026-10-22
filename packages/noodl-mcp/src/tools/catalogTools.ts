@@ -30,6 +30,38 @@ const MAX_TYPES_PER_CALL = 8;
  */
 export const FULL_DETAIL_BYTE_BUDGET = 60_000;
 
+/**
+ * P112-OWN026-GUIDANCECUT — a long `get_node_type` answer, for a client that keeps only its start and its end.
+ * t1-nodegx-2 asked for 8 types at once (25,901 characters) four times; Cline keeps ~8,000, so the types in the
+ * middle, traps and all, never arrived. Each entry now leads with what it is and how it fails (`summary`,
+ * `antiPatterns`, `runtimeBehavior`) and ends with its ports, and an answer past {@link CUT_RISK_CHARS} says so first.
+ */
+const CUT_RISK_CHARS = 8000;
+const LEADING_FIELDS = ['typeName', 'displayName', 'summary', 'antiPatterns', 'rules', 'warnings', 'runtimeBehavior', 'examples'];
+
+function trapsFirst<T extends object>(entry: T): T {
+  const record = entry as Record<string, unknown>;
+  const ordered: Record<string, unknown> = {};
+  for (const key of LEADING_FIELDS) if (key in record) ordered[key] = record[key];
+  for (const key of Object.keys(record)) if (!(key in ordered) && key !== 'ports') ordered[key] = record[key];
+  if ('ports' in record) ordered.ports = record.ports;
+  return ordered as T;
+}
+
+function withCutNote(payload: GetNodeTypeResponse): GetNodeTypeResponse & { readFirst?: string } {
+  const types = payload.types.map((t) => trapsFirst(t));
+  const ordered = { ...payload, types };
+  const size = JSON.stringify(ordered).length;
+  if (size <= CUT_RISK_CHARS || types.length < 2) return ordered;
+  return {
+    readFirst:
+      `This answer is ${size.toLocaleString('en-US')} characters for ${types.length} types, and some clients keep only the ` +
+      'start and the end of a long result: the types in the middle can be lost. Each entry leads with its summary and ' +
+      'its traps (antiPatterns); ask for one or two types per call when it matters.',
+    ...ordered
+  };
+}
+
 export function registerCatalogTools(server: McpServer): void {
   server.registerTool(
     'list_node_types',
@@ -125,7 +157,7 @@ export function registerCatalogTools(server: McpServer): void {
       // by turn 34.
       if (args.detail !== 'full') {
         const payload: GetNodeTypeResponse = { types: args.type_names.map(getNodeTypeSummary) };
-        return jsonResult(payload);
+        return jsonResult(withCutNote(payload));
       }
 
       // Full detail, with a byte budget (DEBT-009): seven enriched types once
@@ -153,7 +185,7 @@ export function registerCatalogTools(server: McpServer): void {
         payload.summarized = summarized;
         payload.hint = 'Response would exceed the tool-result size cap; the listed types were returned as summaries. Request them individually for full detail.';
       }
-      return jsonResult(payload);
+      return jsonResult(withCutNote(payload));
     })
   );
 
