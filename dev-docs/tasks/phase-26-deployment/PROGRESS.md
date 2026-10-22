@@ -49,6 +49,8 @@ be stale, correct it here rather than implementing around the description.
 | D18 | `models/BackendServices/` is a typed list of named remote services with a panel — the closest existing shape to a target list | `models/BackendServices/` | DEP-004 |
 | D19 | WF-003's general lesson, still live: when a later task takes ownership of a value, an earlier task's safety net around it becomes an active bug (the credential-rotation P1) | — | DEP-005 |
 | D20 | `lerna exec` runs the main checkout, not a worktree — a worktree cannot drive the editor, which is why WF-003 never deployed a real export | — | all live passes |
+| D21 | **Landed 2026-10-22 (Richard's ask, outside a task):** every deploy writes `DEPLOY.md` — generated, per mode, naming the backend address the export baked in — and a client-side deploy carries `serve.js` (no deps; `--port`/`PORT` exact, else first free from 3000, loopback-probed). The SSR server takes its port from the same file. **Named DEPLOY.md, not README.md, by Richard's ruling** — a project README copied into the deploy is never overwritten. DEP-002's "generated README" means this file: extend `build/deploy-guide.ts`, don't add a second one | `build/deploy-guide.ts`, `static/deploy/serve.js` | DEP-002 extends |
+| D22 | **A backend-port flag is not possible yet.** Richard asked for one beside the front-end port; the backend address is baked into the bundle (D2), so a flag can only exist once DEP-001's runtime override does. DEPLOY.md says so in plain words | `deploy-guide.ts` backend section | DEP-001 |
 
 ## Open questions
 

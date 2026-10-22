@@ -90,7 +90,7 @@ my-app/
     data/                  created on first run — SQLite lives here
   nodegx-config.json       DEP-001's override, pointing at the local origin
   start.sh / start.cmd     node backend/cli.js --serve-app ./app --port 8080 …
-  README.md                generated, project-specific
+  DEPLOY.md                generated, project-specific (exists since 2026-10-22 — extend it; see PROGRESS D21)
 ```
 
 The README is generated, not templated boilerplate: it names the project, states the Node version

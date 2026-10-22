@@ -6,6 +6,7 @@ import * as Exporter from '../../exporter';
 import { isCloudFunctionComponent } from '../../exporter/cloudFunctions';
 import { DeployEnvironment } from '../build-context';
 import { copyProjectFilesToFolder, formatCopyReportSummary, ProjectCopyReport } from './copy';
+import { DEPLOY_GUIDE_FILE, renderDeployGuide } from './deploy-guide';
 import { loadDeployIndex, copyDeployFilesToFolder, getExternalFolderPath } from './deploy-index';
 import { HtmlProcessor, HtmlProcessorParameters } from './processors/html-processor';
 
@@ -26,6 +27,12 @@ export type DeployToFolderOptions = {
 
   runtimeType?: string;
   envVariables?: Record<string, string>;
+
+  /**
+   * Write `DEPLOY.md`, the how-to-run guide, into the folder. Default true. The SSR layout's second
+   * pass into `public/` turns it off: one guide per deploy, at its top, describing the whole layout.
+   */
+  writeGuide?: boolean;
 };
 
 /**
@@ -60,7 +67,8 @@ export async function deployToFolder({
   environment,
   baseUrl,
   envVariables,
-  runtimeType = 'deploy'
+  runtimeType = 'deploy',
+  writeGuide = true
 }: DeployToFolderOptions): Promise<DeployToFolderResult> {
   // Check if this is a project folder
   try {
@@ -128,7 +136,21 @@ export async function deployToFolder({
     }
   }
 
-  return { copyReport, written: [...copyReport.copiedPaths, ...runtimeFiles, ...bundleFiles] };
+  // Last, so it wins over a project file of the same name — it is ours, and it is rewritten every
+  // deploy. The project's own README.md is left alone; see ./deploy-guide.ts.
+  const guideFiles: string[] = [];
+  if (writeGuide) {
+    const guide = renderDeployGuide({
+      projectName: project.name,
+      runtimeType,
+      backendEndpoint: exportJson.metadata?.cloudservices?.endpoint,
+      baseUrl
+    });
+    await filesystem.writeFileOverride(direntry + '/' + DEPLOY_GUIDE_FILE, guide);
+    guideFiles.push(DEPLOY_GUIDE_FILE);
+  }
+
+  return { copyReport, written: [...copyReport.copiedPaths, ...runtimeFiles, ...bundleFiles, ...guideFiles] };
 }
 
 /**

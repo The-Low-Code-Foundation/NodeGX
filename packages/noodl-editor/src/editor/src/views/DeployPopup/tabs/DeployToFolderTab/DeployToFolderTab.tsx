@@ -29,9 +29,9 @@ const RENDERING_MODE_OPTIONS = [
 ];
 
 const RENDERING_MODE_HINTS: Record<RenderingMode, string> = {
-  csr: 'A static folder rendered in the browser. Host it anywhere that serves files.',
-  ssr: 'A Node server that renders each page — with SEO tags and data — before sending it. In the folder, run: npm install && npm run build && npm start',
-  ssg: 'Pre-renders every page to static HTML at build time. In the folder, run: npm install && npm run build:ssg && npm run ssg — then host the dist/ output anywhere.'
+  csr: 'A static folder rendered in the browser. Host it anywhere that serves files, or try it with: node serve.js. DEPLOY.md in the folder says how.',
+  ssr: 'A Node server that renders each page — with SEO tags and data — before sending it. In the folder, run: npm install && npm run build && npm start. DEPLOY.md in the folder says how.',
+  ssg: 'Pre-renders every page to static HTML at build time. In the folder, run: npm install && npm run build:ssg && npm run ssg — then host the dist/ output anywhere. DEPLOY.md in the folder says how.'
 };
 
 function getSavedRenderingMode(): RenderingMode {
@@ -172,7 +172,7 @@ export function DeployToFolderTab() {
 
         // SSR and SSG share one deployment layout (the server at the root, the
         // browser app in public/) — which mode runs is decided by the npm script
-        // the user starts. See static/ssr/README.md, deployed with the folder.
+        // the user starts. See the DEPLOY.md the deploy writes (build/deploy-guide.ts).
         const runtimeType = renderingMode === 'csr' ? undefined : 'ssr';
 
         // NOTE: Fire-n-forget
@@ -199,8 +199,8 @@ export function DeployToFolderTab() {
 
             ToastLayer.showSuccess(
               excluded === 0
-                ? 'Deploy successful!'
-                : `Deploy successful! ${excluded} project file${excluded === 1 ? '' : 's'} excluded — see the console for the list.`
+                ? 'Deploy successful! DEPLOY.md in the folder says how to run it.'
+                : `Deploy successful! DEPLOY.md in the folder says how to run it. ${excluded} project file${excluded === 1 ? '' : 's'} excluded — see the console for the list.`
             );
           })
           .catch(() => {

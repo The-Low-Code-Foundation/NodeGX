@@ -1,4 +1,5 @@
 import fs from 'fs';
+import http from 'http';
 import path from 'path';
 import express from 'express';
 import fetch from 'node-fetch';
@@ -34,6 +35,9 @@ async function cacheFetch(args, callback) {
 const { installRuntimeGlobals } = require('./runtime-globals');
 const { loadKitModules } = require('./kit-modules');
 const { renderPage } = require('./server-core');
+// The port finder the client-side deploy's own `serve.js` uses. It lives in public/ because the
+// SSR layout always writes a full client-side deploy there; esbuild bundles it into server.js.
+const { listenOnFreePort } = require('./public/serve.js');
 
 const { trackersIdle } = installRuntimeGlobals({ React, ReactDOMServer, XMLHttpRequest, fetch });
 
@@ -45,7 +49,6 @@ require('./noodl.deploy');
 // From that file we get some runtime stuff defined on "NoodlSSR"
 const { createElement, ssrSetupRuntime } = globalThis.NoodlSSR;
 
-const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(express.static('public', { index: false }));
@@ -108,8 +111,13 @@ app.get('*', async (req, res) => {
   }
 });
 
-setup().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is listening on port ${PORT}`);
+// `--port N` or PORT: exactly that port, or stop and say so. Neither: the first free port from 3000.
+setup()
+  .then(() => listenOnFreePort(http.createServer(app)))
+  .then((port) => {
+    console.log(`Server is listening on port ${port} — open http://localhost:${port}/`);
+  })
+  .catch((error) => {
+    console.error(error.message);
+    process.exit(1);
   });
-});

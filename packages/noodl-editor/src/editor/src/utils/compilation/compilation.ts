@@ -236,14 +236,16 @@ export class Compilation {
       if (isSSR) {
         // The browser layer: a complete CSR deploy the server hydrates (and the
         // SSG build copies). The server loads bundles from the deploy root, the
-        // browser from public/ — both copies are required (see static/ssr docs).
+        // browser from public/ — both copies are required (see the DEPLOY.md the root pass writes).
+        // That root DEPLOY.md describes the whole layout, so this pass writes none of its own.
         await deployToFolder({
           project: coreContext.project,
           direntry: webRootPath,
           environment: options.environment,
           baseUrl: coreContext.getHostname(),
           runtimeType: 'deploy',
-          envVariables
+          envVariables,
+          writeGuide: false
         });
       }
 

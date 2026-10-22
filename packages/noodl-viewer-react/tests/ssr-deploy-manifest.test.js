@@ -80,9 +80,19 @@ function transitiveClosure() {
 const manifest = JSON.parse(fs.readFileSync(path.join(SSR_DIR, 'index.json'), 'utf8'));
 const listed = new Set(manifest.map((e) => e.url));
 
+/**
+ * `public/` in an SSR folder is a whole client-side deploy, written by a second pass from the
+ * OTHER manifest — so `require('./public/x')` is carried by `deploy/index.json`, not this one.
+ */
+const CSR_DIR = path.join(__dirname, '..', 'static', 'deploy');
+const csrListed = new Set(JSON.parse(fs.readFileSync(path.join(CSR_DIR, 'index.json'), 'utf8')).map((e) => e.url));
+const PUBLIC = 'public/';
+
 describe('the SSR deploy manifest carries everything the runtime requires', () => {
   it('lists every file reachable from index.js and ssg.js', () => {
-    const missing = [...transitiveClosure()].filter((f) => !listed.has(f)).sort();
+    const missing = [...transitiveClosure()]
+      .filter((f) => (f.startsWith(PUBLIC) ? !csrListed.has(f.slice(PUBLIC.length)) : !listed.has(f)))
+      .sort();
     // Named, not counted: the failure message has to say which file to add.
     expect(missing).toEqual([]);
   });
@@ -103,6 +113,14 @@ describe('the SSR deploy manifest carries everything the runtime requires', () =
     const topLevel = new Set([...localRequires('index.js'), ...localRequires('ssg.js')].map(resolveToFile));
     expect(topLevel.has('render-gate.js')).toBe(false);
     expect(transitiveClosure().has('render-gate.js')).toBe(true);
+  });
+
+  it('the server takes its port finder from the client-side deploy in public/', () => {
+    // A `public/` require is graded against the CSR manifest above. This row keeps that branch
+    // from being dead: if index.js stopped requiring serve.js, nothing would exercise it.
+    expect(localRequires('index.js')).toContain('public/serve.js');
+    expect(csrListed.has('serve.js')).toBe(true);
+    expect(fs.existsSync(path.join(CSR_DIR, 'serve.js'))).toBe(true);
   });
 
   it('every manifest entry actually exists on disk, except webpack’s own output', () => {
