@@ -20,6 +20,9 @@
  * P18 session 139 (EXP-021 AC4). `storage: { keys, seeds? }` (with `settled`) gives the window an origin, so it keeps a
  * localStorage; `seeds[i]` (key → text) is written into it before scenario i's app loads, and every reading ends with
  * `storage=<text, or null>` for each key, as `runtime-mounted-arm.js` reads it.
+ *
+ * EXP-022 S3. `allowErrors: [text, …]` (with `settled`): a console error containing one of these is one the scenario
+ * provokes on purpose (a refused write's raise); any other still fails the arm.
  */
 
 const fs = require('fs');
@@ -127,7 +130,7 @@ function bundle(dir, env = false) {
  * each inside an act, after the mount and after every step, as the runtime arm lets frames run: a zero timer the page
  * started has fired before the reading.
  */
-async function runSettled({ dir, scenarios, fields, ticks, backend, storage }) {
+async function runSettled({ dir, scenarios, fields, ticks, backend, storage, allowErrors }) {
   const code = bundle(dir, backend !== undefined);
   const out = [];
   const requests = [];
@@ -163,7 +166,8 @@ async function runSettled({ dir, scenarios, fields, ticks, backend, storage }) {
       if (ticks) await w.__ticks(ticks);
       readings.push(read());
     }
-    if (errors.length > 0) throw new Error(`the page logged errors: ${errors.join(' | ').slice(0, 600)}`);
+    const unexpected = errors.filter((e) => !(allowErrors ?? []).some((allowed) => e.includes(allowed)));
+    if (unexpected.length > 0) throw new Error(`the page logged errors: ${unexpected.join(' | ').slice(0, 600)}`);
     w.close();
     out.push(readings);
   }

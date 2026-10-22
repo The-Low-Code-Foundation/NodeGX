@@ -151,20 +151,22 @@ describe('§C todo-list, S2\'s work list', () => {
   const BACKEND = /a api-call action|a query-fetch action|session-get expression|query-get expression|a record query|reads Noodl/;
   const REACT_TOO = /the plan feeds it no items, so the React export does not draw its rows either/;
 
-  it('C1 of the 334 things S1 read and did not print, 44 are left, and each is the backend (S3) or undrawn in React too', () => {
-    expect(losses).toHaveLength(44);
-    expect(losses.filter((l) => !BACKEND.test(l) && !REACT_TOO.test(l))).toEqual([]);
-    expect(losses.filter((l) => BACKEND.test(l))).toHaveLength(39);
+  it('C1 of the 334 things S1 read and did not print, S2 left 44 (39 the backend); with S3\'s backend, 5 are left, each undrawn in React too', () => {
+    expect(losses).toHaveLength(5);
+    expect(losses.filter((l) => !REACT_TOO.test(l))).toEqual([]);
+    expect(losses.filter((l) => BACKEND.test(l))).toEqual([]);
   });
 
   it('C2 every logic component is printed, and every Function body travels, run or not', () => {
     expect(todo.preflight.logic).toHaveLength(36);
     const fns = Object.keys(todo.files).filter((f) => f.includes('/Scripts/functions/'));
     expect(fns).toHaveLength(64);
-    // Four are carried and not run: two the plan defers (the React export does not run them either), and two that run only
-    // in chains behind the session, which arrive with the backend (S3).
+    // S2 carried four and ran none of them; the two that run only in chains behind the session (the link's task and its
+    // Today) run since S3, behind `session.read("authenticated")`, where the React export runs them.
     const home = todo.files['Sources/TodoListKit/Views/TodoPageView.swift'] ?? '';
-    expect(home).not.toContain('"Pages/Todo/Which_task_did_the_link_ask_for"');
+    expect(home).toContain('"Pages/Todo/Which_task_did_the_link_ask_for"');
+    expect(home).toContain('"Pages/Todo/Did_the_link_ask_for_Today"');
+    expect(home).toMatch(/if JS\.truthy\(session\.read\("authenticated"\)\) \{\n\s+yourListFromTheBackendRefreshPulses \+= 1\n\s+let whichTaskDidTheLinkAskForRun/);
     expect(home).toContain('"Pages/Todo/A_minute_clock_and_a_wake_when_the_app_comes_back_into_view"');
   });
 

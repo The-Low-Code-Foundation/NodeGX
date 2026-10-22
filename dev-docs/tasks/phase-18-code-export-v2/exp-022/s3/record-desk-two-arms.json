@@ -1,0 +1,422 @@
+{
+ "swift": {
+  "readings": [
+   [
+    "false",
+    "",
+    "",
+    ""
+   ],
+   [
+    "false",
+    "",
+    "",
+    "",
+    "First",
+    "Second",
+    "Third"
+   ],
+   [
+    "true",
+    "ann",
+    "",
+    "",
+    "First",
+    "Second",
+    "Third"
+   ],
+   [
+    "true",
+    "ann",
+    "",
+    "",
+    "First",
+    "Second",
+    "Third"
+   ],
+   [
+    "true",
+    "ann",
+    "",
+    "",
+    "First",
+    "Second",
+    "Third",
+    "Fourth"
+   ],
+   [
+    "true",
+    "ann",
+    "",
+    "",
+    "Renamed",
+    "Second",
+    "Third",
+    "Fourth"
+   ],
+   [
+    "true",
+    "ann",
+    "",
+    "",
+    "Renamed",
+    "Second",
+    "Fourth"
+   ],
+   [
+    "true",
+    "ann",
+    "",
+    "Missing Record Id",
+    "Renamed",
+    "Second",
+    "Fourth"
+   ],
+   [
+    "true",
+    "ann",
+    "Invalid username/password.",
+    "Missing Record Id",
+    "Renamed",
+    "Second",
+    "Fourth"
+   ],
+   [
+    "false",
+    "",
+    "Invalid username/password.",
+    "Missing Record Id",
+    "Renamed",
+    "Second",
+    "Fourth"
+   ]
+  ],
+  "requests": [
+   {
+    "path": "/classes/Task",
+    "body": {
+     "skip": 0,
+     "order": "title",
+     "_method": "GET",
+     "limit": 100
+    },
+    "method": "POST",
+    "appId": "record-desk",
+    "signedIn": false
+   },
+   {
+    "path": "/login",
+    "body": {
+     "_method": "GET",
+     "username": "ann",
+     "password": "pw"
+    },
+    "method": "POST",
+    "appId": "record-desk",
+    "signedIn": false
+   },
+   {
+    "path": "/classes/Task",
+    "body": {
+     "skip": 0,
+     "order": "title",
+     "_method": "GET",
+     "limit": 100
+    },
+    "method": "POST",
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "path": "/classes/Task",
+    "body": {
+     "title": "Fourth",
+     "done": false
+    },
+    "method": "POST",
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "path": "/classes/Task",
+    "body": {
+     "skip": 0,
+     "order": "title",
+     "_method": "GET",
+     "limit": 100
+    },
+    "method": "POST",
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "path": "/classes/Task/t1",
+    "body": {
+     "title": "Renamed"
+    },
+    "method": "PUT",
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "path": "/classes/Task",
+    "body": {
+     "skip": 0,
+     "order": "title",
+     "_method": "GET",
+     "limit": 100
+    },
+    "method": "POST",
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "path": "/classes/Task/t3",
+    "body": null,
+    "method": "DELETE",
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "path": "/classes/Task",
+    "body": {
+     "skip": 0,
+     "order": "title",
+     "_method": "GET",
+     "limit": 100
+    },
+    "method": "POST",
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "path": "/login",
+    "body": {
+     "_method": "GET",
+     "username": "ann",
+     "password": "nope"
+    },
+    "method": "POST",
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "path": "/logout",
+    "body": {},
+    "method": "POST",
+    "appId": "record-desk",
+    "signedIn": true
+   }
+  ]
+ },
+ "react": {
+  "readings": [
+   [
+    "",
+    "",
+    "",
+    ""
+   ],
+   [
+    "",
+    "",
+    "",
+    "",
+    "First",
+    "Second",
+    "Third"
+   ],
+   [
+    "",
+    "ann",
+    "",
+    "",
+    "First",
+    "Second",
+    "Third"
+   ],
+   [
+    "",
+    "ann",
+    "",
+    "",
+    "First",
+    "Second",
+    "Third"
+   ],
+   [
+    "",
+    "ann",
+    "",
+    "",
+    "First",
+    "Second",
+    "Third",
+    "Fourth"
+   ],
+   [
+    "",
+    "ann",
+    "",
+    "",
+    "Renamed",
+    "Second",
+    "Third",
+    "Fourth"
+   ],
+   [
+    "",
+    "ann",
+    "",
+    "",
+    "Renamed",
+    "Second",
+    "Fourth"
+   ],
+   [
+    "",
+    "ann",
+    "",
+    "Missing Record Id",
+    "Renamed",
+    "Second",
+    "Fourth"
+   ],
+   [
+    "",
+    "ann",
+    "Invalid username/password.",
+    "Missing Record Id",
+    "Renamed",
+    "Second",
+    "Fourth"
+   ],
+   [
+    "",
+    "",
+    "Invalid username/password.",
+    "Missing Record Id",
+    "Renamed",
+    "Second",
+    "Fourth"
+   ]
+  ],
+  "requests": [
+   {
+    "method": "POST",
+    "path": "/classes/Task",
+    "body": {
+     "_method": "GET",
+     "order": "title",
+     "limit": 100,
+     "skip": 0
+    },
+    "appId": "record-desk",
+    "signedIn": false
+   },
+   {
+    "method": "POST",
+    "path": "/login",
+    "body": {
+     "username": "ann",
+     "password": "pw",
+     "_method": "GET"
+    },
+    "appId": "record-desk",
+    "signedIn": false
+   },
+   {
+    "method": "POST",
+    "path": "/classes/Task",
+    "body": {
+     "_method": "GET",
+     "order": "title",
+     "limit": 100,
+     "skip": 0
+    },
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "method": "POST",
+    "path": "/classes/Task",
+    "body": {
+     "done": false,
+     "title": "Fourth"
+    },
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "method": "POST",
+    "path": "/classes/Task",
+    "body": {
+     "_method": "GET",
+     "order": "title",
+     "limit": 100,
+     "skip": 0
+    },
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "method": "PUT",
+    "path": "/classes/Task/t1",
+    "body": {
+     "title": "Renamed"
+    },
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "method": "POST",
+    "path": "/classes/Task",
+    "body": {
+     "_method": "GET",
+     "order": "title",
+     "limit": 100,
+     "skip": 0
+    },
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "method": "DELETE",
+    "path": "/classes/Task/t3",
+    "body": null,
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "method": "POST",
+    "path": "/classes/Task",
+    "body": {
+     "_method": "GET",
+     "order": "title",
+     "limit": 100,
+     "skip": 0
+    },
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "method": "POST",
+    "path": "/login",
+    "body": {
+     "username": "ann",
+     "password": "nope",
+     "_method": "GET"
+    },
+    "appId": "record-desk",
+    "signedIn": true
+   },
+   {
+    "method": "POST",
+    "path": "/logout",
+    "body": {},
+    "appId": "record-desk",
+    "signedIn": true
+   }
+  ]
+ }
+}

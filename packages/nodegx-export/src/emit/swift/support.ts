@@ -139,6 +139,11 @@ public enum JS {
 
   /// \`tickedArrival\` (the web export's \`functionRun.ts\`): one of the ticked inputs holds a value that is not undefined
   /// (never delivered) and not the one that input already holds. Records each one that arrived.
+  /// EXP-022 S3. A node that was asked to act and could not (the web export's \`raiseAppError\`): said in the log.
+  public static func raise(_ message: String, node: String, in component: String) {
+    print("[nodegx] \\(component) \\(node): \\(message)")
+  }
+
   public static func tickedArrival(_ held: Ref<[Any?]>, _ values: [Any?]) -> Bool {
     var arrived = false
     for (i, value) in values.enumerated() {
@@ -309,15 +314,15 @@ public final class Drive {
     settle()
   }
 
-  /// Runs the main loop until nothing the page reports has changed for a while.
-  public func settle(quiet: TimeInterval = 0.08, limit: TimeInterval = 5) {
+  /// Runs the main loop until nothing the page reports has changed for a while and no request is waiting for its answer.
+  public func settle(quiet: TimeInterval = 0.08, limit: TimeInterval = 10) {
     let end = Date().addingTimeInterval(limit)
     var last = -1
     var still = Date()
     while Date() < end {
       window.contentView?.layoutSubtreeIfNeeded()
       RunLoop.main.run(until: Date().addingTimeInterval(0.01))
-      if probe.version != last {
+      if probe.version != last || Scripts.inFlight > 0 {
         last = probe.version
         still = Date()
       } else if Date().timeIntervalSince(still) >= quiet {

@@ -272,3 +272,77 @@ sink coerces it, as JavaScript does. Found and fixed before commit, not filed: o
 **One thing to say plainly:** an OWN-026 grade (t1-nodegx-1) ran 15:56–16:25 and my `nice -n 19` Swift builds overlapped
 it from about 16:01; I checked the lab log at the start of the session (a build round then) and not again before each
 build. Its six fails are product findings (no access control, a stale second click, the last-ten window), not timeouts.
+
+
+### S3 — Swift session 3 of at most 12 (2026-10-22, Opus 5.5)
+
+**Result: the backend goes through the one client.** The Swift app carries the React export's own client files, their
+types taken out, into its JavaScriptCore context. A Function that awaits `Noodl.Records.query`, a record verb, a query,
+Log In and Log Out and the session read all reach the backend through that client. Graded by `swift test` against the
+fake Parse backend the Noodl Desk uses, on two desks: the Swift app reads what the React export reads at every step,
+and sends the same requests with the same bodies, in order. todo-list's Swift gaps went **44 → 5**; the 5 are For Eaches
+the React export does not draw either. Evidence: [`exp-022/s3/`](exp-022/s3/).
+
+**The client in the host, decided by measuring.** The React export writes the client per project: the endpoint and app
+id, a schema table, one module per collection, and sections switched on by what the graph uses (a live record changes
+how `update` answers). So a constant JavaScript copy, the way S2 ships `functionRun.ts`, would be a second client that
+drifts. A bundler at export time is not there: the published package has no esbuild and no TypeScript. Node itself takes
+the types out (`module.stripTypeScriptTypes`, Node 22.13 and later; types become spaces, nothing else moves). The
+client's module lines have one shape each, because the React printer writes them. So `emit/swift/client.ts` (137 lines)
+turns each React file into one module the host requires by path (`api/client`, `lib/noodl`). A line of a shape it does
+not know throws with the line. §C loads every template's client in a bare JavaScript context: 7 templates write one, all
+load.
+
+**What the host gained** (`Scripts.swift`, `nodegx-host.js`): `fetch` over URLSession, with a count of requests in flight
+that `Drive.settle` waits on; `localStorage` as a Proxy over UserDefaults, read by method and by key (the client reads
+`localStorage[key]`); `window.addEventListener` as a no-op (a phone has no other tabs); the app's environment as
+`import.meta.env`, so `VITE_NODEGX_ENDPOINT` points the app at another backend without editing generated code; the
+`Noodl` a body reads (the client's members, and each Variable it names over the app's own Variable); an api call by its
+function's name (`updateTask`, `logIn`), awaited from Swift; and `Session`, React's `useSession` over the client's own
+`readSession` and `subscribeSession`.
+
+**How an awaiting chain prints.** A JavaScript async function runs until its first `await`. Swift's `Task` starts after
+the code that made it, and `Task.immediate`, which would match, needs iOS 26. So a chain where nothing can wait (a press,
+a callback, an effect) prints what comes before its first wait in place and the rest in a `Task` on the main actor. An
+awaiting run splits inside itself: the run and its first signals' chains now, then `await Scripts.shared.settled(run)`,
+then Success and Done, which read the node's outputs as the body left them. A detached call (§90) is its own `Task`, so the
+click's later wires run first. **One difference is left, and it is said here:** a detached call's request is sent when
+its `Task` starts, after the click's later wires, where the web app sends it before them. No graded scenario has a later
+wire that also sends a request, so the wire logs cannot show it yet.
+
+**Printed, from todo-list's work list:** `api-call` (20: the record verbs and Log In, Sign Up, Log Out; the done chain in
+the `do`, then the catch writes the Error row, raises and runs the Failure chain, as React's try/catch does), a query's
+rows as its state with its Fetch (`query-fetch` 7, sent at the pulse with the wired filter values read then, the
+translator's `where` built in the host from the plan's cases), a query's mount and on-value effects, `query-get` (the 6
+pushes), `session-get` (4 Conditions), a Variable seeded on mount (§67), the Function that reads `Noodl`, and a For Each fed
+by a query or by Static Data.
+
+**Graded** (`tests/the-same-graph-in-swift-s3.test.ts`, 20 rows, 13 behind `NODEGX_SWIFT_BUILD=1`):
+
+- **§A the Noodl Desk**, ten steps, signed in and signed out, three arms on one fake backend: the Swift app equals the
+  runtime's own nodes (but the word "Text", P18-S122-TEXTDEFAULT) and the React export at every reading. Its wire equals
+  React's, 11 requests body for body, and the runtime's but for the two no export sends. Green on the first build.
+- **§D the Record Desk** (`helpers/record-desk.ts`, new): a Fetch-only query drawn by a For Each, create, update and delete
+  (each Done fetches again), Log In right and wrong, a write whose Id is a Variable nothing sets (Missing Record Id), Log
+  Out, the User node's Authenticated and Username. The readings were predicted before either arm ran. The Swift app reads
+  exactly the prediction. The React export reads it too, but for one Text (below). The wire is the same 11 requests.
+- Four mutants: three killed, one equivalent on a local backend (`exp-022/s3/README.md`).
+
+**Found, filed:** `P18-EXP022-S3-BOOLTEXT` (low, open, the React session's): the React export prints a Text wired from the
+User node's Authenticated as `{session.authenticated}`, and React draws a boolean child as nothing. The running app draws
+`true` or `false` (`renderableText`). Swift draws what the runtime draws. Pinned by name in §D.
+
+**Changed in shared test helpers, additively:** `fake-parse-backend.js` answers the record writes and the user routes
+(create, update, delete, `/login`, `/logout`, `/users`); nothing the Noodl Desk asks moved. `export-react-arm.js` takes
+`allowErrors`, the console errors a scenario provokes on purpose (a refused write's raise). S2's §C now reads 5 gaps, and
+its C2 was wrong: "Which task did the link ask for" runs behind the session Condition in React, not "deferred by the
+plan". It runs in Swift now too.
+
+**Cost, so far:** 3 sessions. The printer is 3,363 lines (S2 2,781): `view` 1,223, `scripts` 541, `support` 397,
+`emitSwift` 323, `xcodeproj` 285, `modifiers` 272, `theme` 173, `client` 137, `functionRunJs` 12. Tests: S3's 20 rows, a
+131-line desk, a 44-line server for the fake backend, the backend arm (about 120 lines). `plan.ts` and `component.ts` were
+read, not changed.
+
+**Not done in S3:** todo-list run against a backend (S4 drives it in the simulator). A collection-fed For Each (the app's
+Collections are not carried). A slow backend: `Drive.settle` waits for requests in flight, but no mutant could show that
+on a local one.

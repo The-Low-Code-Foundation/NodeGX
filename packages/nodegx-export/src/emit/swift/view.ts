@@ -23,7 +23,7 @@
 
 import type { NodeIR } from '../../ir/types';
 import type { CatalogIndex } from '../../catalog';
-import { INPUT_PULSE_TS_TYPE, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type StateVarPlan, type ValueExpr } from '../../analyze/plan';
+import { INPUT_PULSE_TS_TYPE, variableSeedAction, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type StateVarPlan, type ValueExpr } from '../../analyze/plan';
 import { computeNodeStyle } from '../style';
 import { camelCase } from '../naming';
 import { swiftStyle, type StackLayout } from './modifiers';
@@ -100,7 +100,7 @@ export function swiftJson(value: unknown, pad: string): string {
 }
 
 /** Names a View already has, so a prop or state row of that name would collide with SwiftUI's own. */
-const VIEW_MEMBERS = new Set(['body', 'router', 'variables']);
+const VIEW_MEMBERS = new Set(['body', 'router', 'variables', 'session']);
 const SWIFT_KEYWORDS = new Set(['default', 'switch', 'case', 'class', 'struct', 'protocol', 'extension', 'func', 'var', 'let', 'in', 'repeat', 'return', 'self', 'Self', 'init', 'operator', 'where', 'is', 'as', 'some', 'any', 'true', 'false', 'nil', 'if', 'else', 'for', 'while', 'guard', 'do', 'try', 'catch', 'throw', 'import', 'enum', 'static', 'public', 'private', 'internal', 'subscript', 'Type', 'Protocol']);
 
 /** A plan name (a port name may hold spaces: "Show Label") as a Swift member name. */
@@ -141,6 +141,8 @@ interface Scope {
   pulses: Map<string, string>;
   runs: Set<string>;
   row?: { repeaterId: string; local: string };
+  /** Awaiting runs whose bodies have finished: their outputs are read off the node, as React reads `run.outputs` live. */
+  settled?: Set<string>;
 }
 /** Render mode: what `body` reads. */
 const TOP: Scope = { pulses: new Map(), runs: new Set() };
@@ -151,11 +153,9 @@ const chain = (): Scope => ({ pulses: new Map(), runs: new Set() });
 const UNPRINTED: Array<[keyof ComponentPlan, string]> = [
   ['branchEffects', 'a reactive Condition'],
   ['recordEffects', 'a Record bound by its Id'],
-  ['variableSeeds', 'a Variable seeded on mount'],
   ['objectSeeds', 'an Object seeded on mount'],
   ['fieldMounts', 'a field announcing its Value as it mounts'],
   ['receivers', 'an Event Receiver'],
-  ['queries', 'a record query (S3, the backend)'],
   ['animations', 'an Animate To Value'],
   ['scripts', 'a Script node'],
   ['streams', 'a streaming node'],
@@ -177,6 +177,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
   const webOnly: PrintedView['webOnly'] = [];
   let usesRouter = false;
   let usesVariables = false;
+  let usesSession = false;
   const lose = (nodeId: string, what: string) => {
     losses.push({ component: plan.path, nodeId, label: nodeById.get(nodeId)?.authoredLabel, what });
   };
@@ -189,7 +190,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
   /** A Function that keeps a node: one run per trigger, its values and its `this` kept across runs (EXP-019, §86). */
   const keptNode = (id: string): boolean => {
     const def = fnByNode[id];
-    return def !== undefined && def.kind === 'function' && (def.pulsed === true || (def.host?.length ?? 0) > 0);
+    return def !== undefined && def.kind === 'function' && (def.pulsed === true || (def.host?.length ?? 0) > 0 || def.awaits === true);
   };
   /**
    * P18-S128-FIELDSET. The fields a chain focuses, blurs or writes (a Set is not written into a focused field), and those
@@ -283,6 +284,17 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
         usesVariables = true;
         return `variables.${member}`;
       }
+      case 'query-get': {
+        const q = plan.queries.find((x) => x.nodeId === e.nodeId);
+        return q ? ident(q.stateName) : undefined;
+      }
+      case 'session-get':
+        usesSession = true;
+        return `session.read(${swiftString(e.field)})`;
+      case 'outcome-error':
+        // EXP-011 §90. Inside the catch, the message local; elsewhere the node's Error row.
+        if (e.viaState !== undefined) return stateByName.has(e.viaState) ? ident(e.viaState) : undefined;
+        return /^\w+$/.test(e.local) ? e.local : undefined;
       case 'static-rows':
         return plan.staticData.some((d) => d.constName === e.constName) ? `Self.${e.constName}` : undefined;
       case 'row-relay':
@@ -294,6 +306,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
         const names = runNamesOf(def);
         const pulse = scope.pulses.get(e.nodeId);
         if (pulse !== undefined) return fold(`JS.field(${pulse}.values, ${swiftString(e.output)})`, e.fold);
+        if (scope.settled?.has(e.nodeId)) return fold(`JS.field(${names.node}.outputs, ${swiftString(e.output)})`, e.fold);
         if (scope.runs.has(e.nodeId)) return fold(`JS.field(${names.run}.outputs, ${swiftString(e.output)})`, e.fold);
         if (e.viaState !== undefined) {
           // In a chain, a kept node's values as its wires delivered them (current within the press that ran it).
@@ -339,6 +352,20 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
 
   // ---- actions --------------------------------------------------------------------------------------------------
 
+  /** A query's request, sent now, its rows written into its state when they come (React's `fetchX(params).then(setX)`). */
+  const queryFetchLines = (q: (typeof plan.queries)[number], values: string[], pad: string): string[] => {
+    const params =
+      q.params === undefined
+        ? ''
+        : `Scripts.shared.queryParams(${swiftString(JSON.stringify(q.params))}${q.params.wired !== undefined ? `, [${values.join(', ') || ':'}], wiredClient: ${q.wiredClient === true}` : ''})`;
+    return [
+      `${pad}do {`,
+      `${pad}  let call = Scripts.shared.send(${swiftString(q.fetchName)}, [${params}])`,
+      `${pad}  Task { @MainActor in if let rows = try? await Scripts.shared.answer(call) { ${ident(q.stateName)} = rows } }`,
+      `${pad}}`
+    ];
+  };
+
   /** The React printer's `expandActions`: chains that are following statements, flattened. */
   const expand = (list: HandlerAction[]): HandlerAction[] =>
     list.flatMap((a): HandlerAction[] => {
@@ -352,19 +379,36 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       return [a];
     });
 
-  /** A chain as Swift statements, at `pad`. `nodeId` names the node a loss is reported against. */
-  const statements = (nodeId: string, list: HandlerAction[], pad: string, scope: Scope): string[] => {
-    const out: string[] = [];
+  /** A chain as Swift statements, one group per action, each saying whether it waits (an `await` outside a `Task`). */
+  type Group = { lines: string[]; awaits: boolean };
+  const block = (nodeId: string, list: HandlerAction[], pad: string, scope: Scope): Group[] => {
+    const out: Group[] = [];
     let inScope = scope;
     for (const a of expand(list)) {
       const printed = statement(nodeId, a, pad, inScope);
-      out.push(...printed.lines);
+      // A statement that is a sequence of its own (an awaiting run) hands back its parts, so a wait splits inside it.
+      out.push(...(printed.groups ?? [{ lines: printed.lines, awaits: printed.awaits === true }]));
       inScope = printed.scope;
     }
     return out;
   };
+  const awaitsIn = (groups: Group[]) => groups.some((g) => g.awaits);
+  const flat = (groups: Group[]) => groups.flatMap((g) => g.lines);
+  /** A chain inside another statement: its waits are the enclosing chain's. */
+  const statements = (nodeId: string, list: HandlerAction[], pad: string, scope: Scope): string[] => flat(block(nodeId, list, pad, scope));
+  /**
+   * EXP-022 S3. A chain where nothing can wait (a press, a callback, an effect): what comes before its first wait runs now,
+   * and the rest in a `Task` on the main actor — as a JavaScript async function runs until its first `await` (React's
+   * `async` handler). A `Task` starts after the code that made it, so this keeps the synchronous prefix in place.
+   */
+  const startNow = (groups: Group[], pad: string): string[] => {
+    const at = groups.findIndex((g) => g.awaits);
+    if (at < 0) return flat(groups);
+    return [...flat(groups.slice(0, at)), `${pad}Task { @MainActor in`, ...flat(groups.slice(at)).map((l) => `  ${l}`), `${pad}}`];
+  };
+  const rootStatements = (nodeId: string, list: HandlerAction[], pad: string, scope: Scope): string[] => startNow(block(nodeId, list, pad, scope), pad);
 
-  const statement = (nodeId: string, a: HandlerAction, pad: string, scope: Scope): { lines: string[]; scope: Scope } => {
+  const statement = (nodeId: string, a: HandlerAction, pad: string, scope: Scope): { lines: string[]; scope: Scope; awaits?: boolean; groups?: Group[] } => {
     const one = (line: string) => ({ lines: [`${pad}${line}`], scope });
     const lost = (what: string) => {
       lose(nodeId, what);
@@ -418,8 +462,6 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       case 'jsfun-run': {
         const def = fnByNode[a.nodeId];
         if (!def || def.kind !== 'function') return lost(`a run of a ${def?.kind ?? 'missing'} node`);
-        if (a.awaitsAt !== undefined || def.awaits) return lost(`a run of ${def.fnName}, whose body awaits`);
-        if (def.noodl !== undefined) lose(a.nodeId, `${def.fnName} reads Noodl (${[...def.noodl.members, ...def.noodl.variables].join(', ')}); the Noodl API reaches the JavaScriptCore host in S3`);
         useFunction(def);
         const names = runNamesOf(def);
         const args = jsArgs(def, scope);
@@ -437,7 +479,22 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
           if (a.materialize !== undefined) lines.push(`${pad}${ident(a.materialize)} = ${names.run}.outputs`);
           const runs = new Set(scope.runs);
           runs.add(a.nodeId);
-          return { lines, scope: { ...scope, runs } };
+          if (a.awaitsAt === undefined) return { lines, scope: { ...scope, runs } };
+          /**
+           * EXP-019 slice 1b. The body awaits: the chains of the signals it sent before its first `await`, then the wait
+           * for the body to finish, then Success and Done — whose reads of its outputs are the node's, written since.
+           * Detached (§90), the click's later wires run before it settles.
+           */
+          const inner: Scope = { ...scope, runs };
+          const after: Scope = { ...inner, settled: new Set([...(scope.settled ?? []), a.nodeId]) };
+          const groups: Group[] = [
+            { lines, awaits: false },
+            ...block(nodeId, a.then.slice(0, a.awaitsAt), pad, inner),
+            { lines: [`${pad}await Scripts.shared.settled(${names.run})`], awaits: true },
+            ...block(nodeId, a.then.slice(a.awaitsAt), pad, after)
+          ];
+          if (a.detached === true) return { lines: startNow(groups, pad), scope };
+          return { lines: flat(groups), scope: inner, awaits: true, groups };
         }
         if (a.materialize !== undefined) {
           lines.push(`${pad}${ident(a.materialize)} = Scripts.shared.call(${id}, ${args}${def.signals.length ? `, signals: [${def.signals.map(swiftString).join(', ')}]` : ''})`);
@@ -453,26 +510,104 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
         pulses.set(a.nodeId, names.pulse);
         const inner: Scope = { ...scope, pulses };
         const lines = [`${pad}for ${names.pulse} in ${names.run}.pulses {`];
+        let awaits = false;
         arms.forEach((arm, i) => {
           lines.push(`${pad}  ${i === 0 ? '' : '} else '}if ${names.pulse}.signal == ${swiftString(arm.signal)} {`);
-          const body = statements(nodeId, arm.then, pad + '    ', inner);
+          const groups = block(nodeId, arm.then, pad + '    ', inner);
+          awaits ||= awaitsIn(groups);
+          const body = flat(groups);
           lines.push(...(body.length ? body : [`${pad}    // Nothing is wired to "${arm.signal}".`]));
         });
         if (arms.length) lines.push(`${pad}  }`);
         lines.push(`${pad}}`);
-        return { lines, scope };
+        return { lines, scope, awaits };
       }
-      case 'jsfun-pulse':
-        return { lines: statements(nodeId, a.then, pad, scope), scope };
+      case 'jsfun-pulse': {
+        const groups = block(nodeId, a.then, pad, scope);
+        return { lines: flat(groups), scope, awaits: awaitsIn(groups) };
+      }
+      /**
+       * EXP-022 S3. A record verb or a user verb (RECORD-VERBS-TARGET §4a): the web export's own api function, awaited, in
+       * the JavaScriptCore host. The done chain follows the answer inside the `do`; the catch writes the Error row (never
+       * cleared, as the runtime's `_internal.error`), raises, then runs the Failure chain — React's try/catch, line for line.
+       */
+      case 'api-call': {
+        const args: string[] = [];
+        for (const arg of a.args) {
+          if (arg.kind === 'expr') {
+            const v = expr(arg.expr, scope);
+            if (v === undefined) return lost(`a ${a.verb} call (${a.fnName}) whose ${args.length === 0 ? 'first' : 'next'} argument reads a ${arg.expr.kind} expression`);
+            args.push(v);
+            continue;
+          }
+          const entries: string[] = [];
+          for (const p of arg.props) {
+            const v = expr(p.expr, scope);
+            if (v === undefined) return lost(`a ${a.verb} call (${a.fnName}) whose ${p.key} reads a ${p.expr.kind} expression`);
+            entries.push(`${swiftString(p.key)}: ${v}`);
+          }
+          args.push(entries.length ? `[${entries.join(', ')}] as [String: Any?]` : '[:] as [String: Any?]');
+        }
+        const inner = pad + '  ';
+        const body: string[] = [];
+        // EXP-011 §72. An id read from an untyped source is keyed by its text, and an unwritten one is the empty string.
+        if (a.coerceId === 'string') args[0] = `JS.string(JS.nullish(${args[0]}, ""))`;
+        if (a.guardId) {
+          // The runtime's "Missing Record Id": `setModelID` reads undefined, null and '' alike as no record.
+          body.push(`${inner}let recordId = ${args[0]}`, `${inner}if !JS.truthy(recordId) { throw BackendError(message: "Missing Record Id") }`);
+          args[0] = 'recordId';
+        }
+        for (const g of a.guards ?? []) {
+          body.push(`${inner}let ${g.local} = ${g.coerce === 'string' ? `JS.string(JS.nullish(${args[g.index]}, ""))` : args[g.index]}`);
+          body.push(`${inner}if !JS.truthy(${g.local}) { throw BackendError(message: ${swiftString(g.message)}) }`);
+          args[g.index] = g.local;
+        }
+        body.push(`${inner}_ = try await Scripts.shared.api(${swiftString(a.fnName)}, [${args.join(', ')}])`);
+        const row = stateByName.has(a.errorState) ? ident(a.errorState) : undefined;
+        if (a.clearErrorOnDone === true && row) body.push(`${inner}${row} = nil`);
+        body.push(...statements(nodeId, a.then, inner, scope));
+        const message = `${a.errorState}Message`;
+        const lines = [
+          `${pad}do {`,
+          ...body,
+          `${pad}} catch {`,
+          `${inner}let ${message} = (error as? BackendError)?.message ?? String(describing: error)`,
+          ...(row ? [`${inner}${row} = ${message}`] : []),
+          `${inner}JS.raise(${message}, node: ${swiftString(a.nodeId)}, in: ${swiftString(plan.legacyPath)})`,
+          ...statements(nodeId, a.failThen, inner, scope),
+          `${pad}}`
+        ];
+        // §90: detached, the click's later wires run first and the answer arrives after; otherwise the chain waits for it.
+        if (a.detached === true) return { lines: [`${pad}Task { @MainActor in`, ...lines.map((l) => `  ${l}`), `${pad}}`], scope };
+        return { lines, scope, awaits: true };
+      }
+      /**
+       * P18-S116-QUERYFETCH. A Query Records' Fetch: its request sent at the pulse, with the wired filter values the chain
+       * reads then, and its rows landing in the query's state when they answer. Not awaited: the runtime schedules it.
+       */
+      case 'query-fetch': {
+        const q = plan.queries.find((x) => x.nodeId === a.nodeId);
+        if (!q) return lost('a Fetch of a query the plan does not keep');
+        const values: string[] = [];
+        for (const v of a.values) {
+          const code = expr(v.expr, scope);
+          if (code === undefined) return lost(`a Fetch of ${q.collectionName} whose ${v.name} reads a ${v.expr.kind} expression`);
+          values.push(`${swiftString(v.name)}: ${code}`);
+        }
+        return { lines: queryFetchLines(q, values, pad), scope };
+      }
       case 'field-focus':
         return one(a.focus ? `focusedField = ${swiftString(a.inputId)}` : `if focusedField == ${swiftString(a.inputId)} { focusedField = nil }`);
       case 'branch': {
         const cond = expr(a.cond, scope);
         if (cond === undefined) return lost(`a Condition on a ${a.cond.kind} expression`);
-        const yes = statements(nodeId, a.whenTrue, pad + '  ', scope);
-        const no = statements(nodeId, a.whenFalse, pad + '  ', scope);
-        if (yes.length === 0) return { lines: [`${pad}if !JS.truthy(${cond}) {`, ...no, `${pad}}`], scope };
-        return { lines: [`${pad}if JS.truthy(${cond}) {`, ...yes, ...(no.length ? [`${pad}} else {`, ...no] : []), `${pad}}`], scope };
+        const yesGroups = block(nodeId, a.whenTrue, pad + '  ', scope);
+        const noGroups = block(nodeId, a.whenFalse, pad + '  ', scope);
+        const awaits = awaitsIn(yesGroups) || awaitsIn(noGroups);
+        const yes = flat(yesGroups);
+        const no = flat(noGroups);
+        if (yes.length === 0) return { lines: [`${pad}if !JS.truthy(${cond}) {`, ...no, `${pad}}`], scope, awaits };
+        return { lines: [`${pad}if JS.truthy(${cond}) {`, ...yes, ...(no.length ? [`${pad}} else {`, ...no] : []), `${pad}}`], scope, awaits };
       }
       default:
         return lost(`a ${a.kind} action`);
@@ -481,7 +616,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
 
   /** A callback's body: a closure of the chain, on one line where it is one statement. */
   const closure = (nodeId: string, list: HandlerAction[], pad: string, scope: Scope = chain(), param = ''): string => {
-    const body = statements(nodeId, list, pad + '  ', scope);
+    const body = rootStatements(nodeId, list, pad + '  ', scope);
     if (body.length === 0) return `{${param ? ` ${param} in` : ''} }`;
     if (body.length === 1 && !body[0].trimStart().startsWith('//')) return `{ ${param ? `${param} in ` : ''}${body[0].trim()} }`;
     return [`{${param ? ` ${param} in` : ''}`, ...body, `${pad}}`].join('\n');
@@ -586,7 +721,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       if (port === 'didMount') out.push(`.onAppear ${closure(id, list, pad + '  ')}`);
       else if (port === 'onEnter') out.push(`.onSubmit ${closure(id, list, pad + '  ')}`);
       else if (port === 'onBlur' && focusIds.has(id)) {
-        const body = statements(id, list, pad + '    ', chain());
+        const body = rootStatements(id, list, pad + '    ', chain());
         out.push([`.onChange(of: focusedField) { was, _ in`, `${pad}    guard was == ${swiftString(id)}, focusedField != ${swiftString(id)} else { return }`, ...body, `${pad}  }`].join('\n'));
       }
       else lose(id, `its ${port} handler is not carried yet`);
@@ -645,7 +780,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       let action = '{}';
       if (press) {
         const method = pressName(id, 'onClick');
-        const body = statements(id, press, '    ', chain());
+        const body = rootStatements(id, press, '    ', chain());
         pressMethods.push(`  func ${method}() {`, ...(body.length ? body : ['    // Nothing the press runs is carried yet.']), '  }');
         action = method;
       }
@@ -686,15 +821,21 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       const r = plan.repeaters[id];
       const templateStruct = r?.templatePath ? ctx.structOf(r.templatePath) : undefined;
       const template = r?.templatePath ? ctx.project.byLegacyPath.get(r.templatePath) : undefined;
-      const items = r?.itemsExpr ? expr(r.itemsExpr, TOP) : undefined;
+      // Its items as React's `renderRepeater` reads them: a query's rows, an expression, or Static Data's (a collection is not carried).
+      const query = r ? plan.queries.find((q) => q.nodeId === r.itemsQueryId) : undefined;
+      const statics = r?.itemsStaticId ? plan.staticData.find((d) => d.nodeId === r.itemsStaticId) : undefined;
+      const items = query ? ident(query.stateName) : r?.itemsExpr ? expr(r.itemsExpr, TOP) : statics ? `Self.${statics.constName}` : undefined;
       if (!r || !templateStruct || !template || items === undefined || r.mapping !== 'template-inputs') {
+        const fed = r !== undefined && (query !== undefined || r.itemsExpr !== undefined || statics !== undefined || r.itemsCollectionName != null);
         const why = !r
           ? 'the plan keeps no repeater'
-          : !r.itemsExpr
+          : !fed
             ? 'the plan feeds it no items, so the React export does not draw its rows either'
-            : items === undefined
-              ? `its items are a ${r.itemsExpr.kind} expression, which the Swift target does not read yet`
-              : `mapping ${r.mapping} is not printed yet`;
+            : r.itemsCollectionName != null && items === undefined
+              ? `its items are the app's ${r.itemsCollectionName} collection, which the Swift target does not carry yet`
+              : items === undefined
+                ? `its items are a ${r.itemsExpr?.kind} expression, which the Swift target does not read yet`
+                : `mapping ${r.mapping} is not printed yet`;
         lose(id, `the For Each's rows are not drawn: ${why}`);
         return [`${pad}// For Each ${id}: not drawn in this slice (see the preflight).`];
       }
@@ -710,7 +851,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
           continue;
         }
         const relays = plan.rowRelays.filter((x) => x.repeaterId === id).map((x) => `${pad}    ${ident(x.stateName)} = JS.field(row, ${swiftString(x.input)})`);
-        const chain = statements(id, list, pad + '    ', scope);
+        const chain = rootStatements(id, list, pad + '    ', scope);
         args.push(`${ident(prop)}: {\n${[...relays, ...chain].join('\n')}\n${pad}  }`);
       }
       const order = [...template.props.map((p) => p.name), ...template.outputProps.map((o) => o.prop)].map(ident);
@@ -749,6 +890,30 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
   }
   // Graph-path syncs (CONTROLLED-STATE §3.4): a wired value into a field or a Variable, with the input setter's coercion;
   // undefined abstains, and Changed never fires.
+  // The queries that ask as they are made, or again when a wired filter value changes (P18-S115/S116), before the seeds.
+  for (const q of plan.queries) {
+    const fetched = q.fetchWired;
+    if (fetched !== undefined && !fetched.mount && !(fetched.onValues && q.params?.wired !== undefined)) continue;
+    const once = fetched !== undefined && !fetched.onValues;
+    const reads = (q.wiredValues ?? []).map((v) => ({ name: v.name, code: expr(v.expr, TOP) }));
+    if (reads.some((r) => r.code === undefined)) {
+      lose(q.nodeId, `its query's wired filter value reads an expression the Swift target does not print yet`);
+      continue;
+    }
+    const key = once ? 'Same()' : `Same(${reads.map((r) => r.code).join(', ')})`;
+    effects.push(
+      [
+        `// ${nodeById.get(q.nodeId)?.authoredLabel ?? q.nodeId}: asks ${once || reads.length === 0 ? 'once, as it is made' : `again whenever ${reads.map((r) => `"${r.name}"`).join(' or ')} changes`}.`,
+        `    .onChange(of: ${key}, initial: true) { _, _ in`,
+        ...queryFetchLines(q, reads.map((r) => `${swiftString(r.name)}: ${r.code}`), '      '),
+        '    }'
+      ].join('\n')
+    );
+  }
+  // EXP-011 §67. A Variable's authored Value, stored on every mount of the component, before the mirrors read it.
+  for (const seed of plan.variableSeeds) {
+    effects.push([`// ${seed.comment.split('\n')[0]}`, `    .onChange(of: Same(), initial: true) { _, _ in`, ...rootStatements(seed.nodeId, [variableSeedAction(seed)], '      ', chain()), '    }'].join('\n'));
+  }
   for (const sync of plan.syncEffects) {
     const v = expr(sync.source, TOP);
     const row = stateByName.get(sync.stateName);
@@ -799,7 +964,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
         `.onChange(of: Same(${v}), initial: true) { _, arrival in`,
         `      if JS.same(${ident(effect.lastLocal)}.current, arrival.value) { return }`,
         `      ${ident(effect.lastLocal)}.current = arrival.value`,
-        ...statements(effect.nodeId, effect.actions, '      ', chain()),
+        ...rootStatements(effect.nodeId, effect.actions, '      ', chain()),
         '    }'
       ].join('\n')
     );
@@ -812,7 +977,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
         `    .onChange(of: ${p}?.sent, initial: true) { _, _ in`,
         `      guard let ${p}, ${p}.taken.current != ${p}.sent else { return }`,
         `      ${p}.taken.current = ${p}.sent`,
-        ...statements(plan.rootId ?? '', pulse.actions, '      ', chain()),
+        ...rootStatements(plan.rootId ?? '', pulse.actions, '      ', chain()),
         '    }'
       ].join('\n')
     );
@@ -825,7 +990,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       lose(ticked.nodeId, `${def.fnName} runs when a ticked input changes, and an input reads a value this target does not print`);
       continue;
     }
-    const run = statements(ticked.nodeId, [ticked.action], '        ', chain());
+    const run = rootStatements(ticked.nodeId, [ticked.action], '        ', chain());
     if (ticked.atLoad === true) {
       // EXP-019 slice 2: nothing sends its Run, so it runs once at load (one turn later, after the mount effects above
       // it), then once per arrival; an arrival in that time is the load run instead.
@@ -903,6 +1068,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     const t = stateSwiftType(s);
     members.push(`  @State var ${ident(s.name)}: ${t.type} = ${t.initial}`);
   }
+  for (const q of plan.queries) members.push(`  @State var ${ident(q.stateName)}: Any? = [] as [Any]`);
   if (focusIds.size > 0) members.push('  @FocusState var focusedField: String?');
   for (const pulse of plan.instancePulses) members.push(`  @State var ${ident(pulse.takenLocal)} = Ref(0.0)`);
   for (const effect of plan.valueChangedEffects) members.push(`  @State var ${ident(effect.lastLocal)} = Ref<Any?>(nil)`);
@@ -938,7 +1104,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     if (m.useTransitions || transitions > 0) lose(m.nodeId, 'its transitions are not animated yet (withAnimation)');
     // The States library's moves: a request drained after the handler that asked, then its listeners.
     const local = ident(m.local);
-    const listener = (list: HandlerAction[] | undefined, pad: string) => (list?.length ? statements(m.nodeId, list, pad, chain()) : []);
+    const listener = (list: HandlerAction[] | undefined, pad: string) => (list?.length ? rootStatements(m.nodeId, list, pad, chain()) : []);
     const reached = Object.entries(m.listeners.reached ?? {}).filter(([, l]) => l.length > 0);
     machineMethods.push(
       `  /// ${m.comment.split('\n')[0].replace(/\.$/, '')}: a To <state> or a Toggle, drained after the press that asked.`,
@@ -1013,7 +1179,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       `    // ${nodeById.get(id)?.authoredLabel ?? def.fnName}: what its body writes or sends after a run has returned arrives as the running app's does.`,
       `    let _ = ${names.node}.late = { ${names.run} in`,
       ...(materialize !== undefined ? [`      ${ident(materialize)} = ${names.run}.outputs`] : []),
-      ...(pulses !== undefined ? statements(id, [pulses], '      ', scope) : []),
+      ...(pulses !== undefined ? rootStatements(id, [pulses], '      ', scope) : []),
       '    }'
     );
   }
@@ -1038,6 +1204,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     `struct ${struct}: View {`,
     ...(usesRouter ? ['  @EnvironmentObject var router: AppRouter'] : []),
     ...(usesVariables ? ['  @ObservedObject var variables = Variables.shared'] : []),
+    ...(usesSession ? ['  @ObservedObject var session = Session.shared'] : []),
     ...members,
     ...(statics.length ? ['', ...statics] : []),
     '',

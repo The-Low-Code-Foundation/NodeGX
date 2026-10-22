@@ -23,16 +23,31 @@ export function keepsThis(def: JsFunctionPlan): boolean {
   return def.host?.some((t) => t.startsWith('keeps state on')) === true;
 }
 
+/**
+ * The `Noodl` a body reads, as the React wrapper binds it (`jsWrapperLines`): the client's `noodl` (the backend members),
+ * with each Variable the body names over the app's own Variable (EXP-020).
+ */
+function noodlLine(def: JsFunctionPlan): string[] {
+  if (def.noodl === undefined) return [];
+  const backend = def.noodl.members.some((m) => m !== 'Variables');
+  return [`  var Noodl = __nodegx.noodl(${JSON.stringify(def.noodl.variables)}, ${backend});`];
+}
+
 /** One Function's file: the wrapper the React export writes, in plain JavaScript, registered by its id. */
 export function functionFileJs(plan: ComponentPlan, def: JsFunctionPlan): string {
   const self = keepsThis(def);
+  const awaits = def.awaits === true;
+  // EXP-019 slice 1b. A body that awaits runs in an async function, and the run hands back its promise (`settled`).
+  const open = self ? `    ${awaits ? 'await ' : ''}(${awaits ? 'async ' : ''}function () {` : `    ${awaits ? 'await ' : ''}(${awaits ? 'async ' : ''}() => {`;
   return [
     `// @nodegx:generated (EXP-022) — the Function node "${def.fnName}" (node ${def.nodeId}) of ${plan.path}.`,
     '// The body is preserved verbatim; it runs in the app\'s JavaScriptCore context, as it runs in the web export.',
     ...(self ? ["// It keeps state on `this` across runs: the body runs bound to the node's own `self`."] : []),
-    `__nodegx.define(${JSON.stringify(functionId(plan, def))}, function (Inputs, Outputs, self, Component) {`,
+    ...(awaits ? ['// It awaits: the run returns at its first `await`, and Success and Done wait for it to finish.'] : []),
+    `__nodegx.define(${JSON.stringify(functionId(plan, def))}, ${awaits ? 'async ' : ''}function (Inputs, Outputs, self, Component) {`,
+    ...noodlLine(def),
     '  try {',
-    self ? '    (function () {' : '    (() => {',
+    open,
     ...def.body.split('\n'),
     self ? '    }).call(self);' : '    })();',
     '  } catch (e) {',
@@ -72,15 +87,66 @@ function setInterval(fn, ms) {
   return id;
 }
 function clearInterval(id) { delete __timers[id]; }
-// The page's global object is \`window\` in a browser; a body that reads \`window.localStorage\` reads the one below.
+// The page's global object is \`window\` in a browser; a body that reads \`window.localStorage\` reads the one below. A phone
+// app has one window and no other tabs, so nothing ever sends it an event.
 var window = globalThis;
+function addEventListener() {}
+function removeEventListener() {}
 // Kept on the device (UserDefaults), as a browser keeps it for the site: "remember this on this device" survives a relaunch.
-var localStorage = {
-  getItem: function (k) { var v = __storage('get', String(k), ''); return v === undefined ? null : v; },
-  setItem: function (k, v) { __storage('set', String(k), String(v)); },
-  removeItem: function (k) { __storage('remove', String(k), ''); },
-  clear: function () { __storage('clear', '', ''); }
-};
+// Read as a browser's is, by method or by key (the web client reads \`localStorage[key]\`).
+var localStorage = new Proxy({}, {
+  get: function (_target, key) {
+    if (key === 'getItem') return function (k) { var v = __storage('get', String(k), ''); return v === undefined || v === null ? null : v; };
+    if (key === 'setItem') return function (k, v) { __storage('set', String(k), String(v)); };
+    if (key === 'removeItem') return function (k) { __storage('remove', String(k), ''); };
+    if (key === 'clear') return function () { __storage('clear', '', ''); };
+    if (typeof key !== 'string') return undefined;
+    var v = __storage('get', key, '');
+    return v === undefined || v === null ? undefined : v;
+  },
+  set: function (_target, key, value) { __storage('set', String(key), String(value)); return true; },
+  deleteProperty: function (_target, key) { __storage('remove', String(key), ''); return true; },
+  has: function (_target, key) { var v = __storage('get', String(key), ''); return v !== undefined && v !== null; }
+});
+// EXP-022 S3. \`fetch\` over URLSession, as the web client reads it: \`status\`, \`ok\`, \`text()\`; no answer rejects, as a
+// browser's does.
+function fetch(url, init) {
+  init = init || {};
+  return new Promise(function (resolve, reject) {
+    var body = init.body === undefined || init.body === null ? null : init.body;
+    __fetch(init.method || 'GET', String(url), init.headers || {}, body, function (status, text) {
+      if (status === 0) reject(new TypeError('Failed to fetch'));
+      else resolve({
+        status: status,
+        ok: status >= 200 && status < 300,
+        text: function () { return Promise.resolve(text); },
+        json: function () { return Promise.resolve(JSON.parse(text)); }
+      });
+    });
+  });
+}
+// The web client's \`import.meta.env\`: the app's environment (VITE_NODEGX_ENDPOINT, VITE_NODEGX_APP_ID), so a scheme or a
+// test points the app at another backend without editing generated code.
+var __nodegxEnv = __env();
+// The web export's modules (\`Scripts/client/\`), each a function of its own run once, when first required.
+var __modules = {};
+var __loaded = {};
+function __define(name, factory) { __modules[name] = factory; }
+function __require(name) {
+  if (__loaded[name]) return __loaded[name].exports;
+  var factory = __modules[name];
+  if (!factory) throw new Error('The app carries no module ' + name);
+  var module = { exports: {} };
+  __loaded[name] = module;
+  factory(module.exports, __require);
+  return module.exports;
+}
+// React's hooks (the web session hook imports them); the Swift app reads the session through \`Session\` instead.
+__define('react', function (exports) {
+  ['useMemo', 'useSyncExternalStore', 'useState', 'useEffect', 'useRef', 'useCallback'].forEach(function (name) {
+    exports[name] = function () { throw new Error("React's " + name + ' does not run in the Swift app'); };
+  });
+});
 
 // The web export's src/lib/functionRun.ts, compiled to JavaScript.
 ${FUNCTION_RUN_JS}
@@ -93,7 +159,59 @@ var __nodegx = {
     var fn = this.fns[id];
     if (!fn) throw new Error('No Function ' + id);
     var run = runFunction(fn, inputs, node);
-    return { outputs: Object.assign({}, run.outputs), pulses: run.pulses };
+    return { outputs: Object.assign({}, run.outputs), pulses: run.pulses, settled: run.settled };
+  },
+  // The Noodl a body reads (EXP-020): the client's members, and each Variable it names over the app's own.
+  noodl: function (variables, backend) {
+    var base = backend ? __require('lib/noodl').noodl : {};
+    if (variables.length === 0) return base;
+    var vars = {};
+    variables.forEach(function (name) {
+      Object.defineProperty(vars, name, {
+        enumerable: true,
+        get: function () { return __variable(name); },
+        set: function (value) { __setVariable(name, value); }
+      });
+    });
+    return Object.assign({}, base, { Variables: vars });
+  },
+  // A call into the web export's api modules by its function's name (\`updateTask\`, \`logIn\`): its outcome, handed to Swift.
+  api: function (name, args, done) {
+    var fn;
+    Object.keys(__modules).forEach(function (m) {
+      if (fn === undefined && m.indexOf('api/') === 0 && typeof __require(m)[name] === 'function') fn = __require(m)[name];
+    });
+    var answer;
+    try {
+      if (fn === undefined) throw new Error('The app carries no api function ' + name);
+      answer = Promise.resolve(fn.apply(null, args));
+    } catch (e) {
+      answer = Promise.reject(e);
+    }
+    answer.then(function (value) { done(true, value); }, function (e) { done(false, e instanceof Error ? e.message : String(e)); });
+  },
+  // A member of a client module (\`api/client\`'s \`readSession\`), for the Swift side to call; nothing where the app has none.
+  member: function (module, name) { return __modules[module] ? __require(module)[name] : undefined; },
+  // P18-S115-QUERYPARAMS. A query's params at the call: its own where / sort / limit / skip, or, with wired filter values,
+  // the translator's document for which of them are set, each value put on the wire as the client's \`filterValue\` does.
+  queryParams: function (json, values, wiredClient) {
+    var params = JSON.parse(json);
+    var wired = params.wired;
+    if (wired === undefined) return params;
+    delete params.wired;
+    var mask = 0;
+    wired.params.forEach(function (name, i) { if (values[name] !== undefined) mask |= 1 << i; });
+    var where = wired.cases[mask];
+    if (where === undefined || where === null) return params;
+    var put = wiredClient ? __require('api/client').filterValue : function (v) { return v; };
+    params.where = JSON.parse(JSON.stringify(where), function (_key, v) {
+      return v !== null && typeof v === 'object' && '@nodegx/wired-value' in v ? put(values[v['@nodegx/wired-value']], v.date) : v;
+    });
+    return Object.assign({ where: params.where }, params);
+  },
+  // When a promise settles, either way.
+  settle: function (promise, done) {
+    Promise.resolve(promise).then(function () { done(true); }, function () { done(false); });
   },
   // A pure run, as the web export calls a render run: a fresh Outputs record, its signals no-ops.
   call: function (id, inputs, signals) {
@@ -138,13 +256,46 @@ public final class Scripts {
       }
       return nil
     }
+    // EXP-022 S3. The web client's \`fetch\`, over URLSession; its answer arrives on the main queue, as the page's would.
+    let fetch: @convention(block) (String, String, JSValue, JSValue, JSValue) -> Void = { method, url, headers, body, done in
+      guard let address = URL(string: url) else {
+        done.call(withArguments: [0, ""])
+        return
+      }
+      var request = URLRequest(url: address)
+      request.httpMethod = method
+      for (name, value) in (headers.toDictionary() as? [String: Any]) ?? [:] { request.setValue("\\(value)", forHTTPHeaderField: name) }
+      if body.isString { request.httpBody = body.toString().data(using: .utf8) }
+      Scripts.inFlight += 1
+      URLSession.shared.dataTask(with: request) { data, response, error in
+        let status = error == nil ? ((response as? HTTPURLResponse)?.statusCode ?? 0) : 0
+        let text = data.flatMap { String(data: $0, encoding: .utf8) } ?? ""
+        DispatchQueue.main.async {
+          Scripts.inFlight -= 1
+          done.call(withArguments: [status, text])
+        }
+      }.resume()
+    }
+    let env: @convention(block) () -> [String: String] = {
+      ProcessInfo.processInfo.environment.filter { $0.key.hasPrefix("VITE_NODEGX_") }
+    }
+    let variable: @convention(block) (String) -> Any? = { name in Scripts.variable(name) }
+    let setVariable: @convention(block) (String, JSValue) -> Void = { name, value in Scripts.setVariable(name, Scripts.shared.swift(value)) }
     context.setObject(log, forKeyedSubscript: "__log" as NSString)
     context.setObject(later, forKeyedSubscript: "__later" as NSString)
     context.setObject(storage, forKeyedSubscript: "__storage" as NSString)
+    context.setObject(fetch, forKeyedSubscript: "__fetch" as NSString)
+    context.setObject(env, forKeyedSubscript: "__env" as NSString)
+    context.setObject(variable, forKeyedSubscript: "__variable" as NSString)
+    context.setObject(setVariable, forKeyedSubscript: "__setVariable" as NSString)
     Scripts.load(context, "nodegx-host")
+    for module in Scripts.clientModules { Scripts.load(context, "client/" + module) }
     for file in Scripts.functionFiles { Scripts.load(context, "functions/" + file) }
     host = context.objectForKeyedSubscript("__nodegx")
   }
+
+  /// Requests sent and not answered yet: a driver waits for them as it waits for the page to settle.
+  public static var inFlight = 0
 
   private static func load(_ context: JSContext, _ name: String) {
     let parts = name.split(separator: "/").map(String.init)
@@ -174,14 +325,55 @@ public final class Scripts {
     return runOf(result)
   }
 
-  /// A run's record (\`{ outputs, pulses }\`) as Swift.
+  /// A run's record (\`{ outputs, pulses, settled }\`) as Swift.
   func runOf(_ result: JSValue) -> FunctionRun {
     let outputs = (swift(result.forProperty("outputs")) as? [String: Any]) ?? [:]
     let pulses = (result.forProperty("pulses").toArray() ?? []).indices.map { i -> FunctionPulse in
       let pulse = result.forProperty("pulses").atIndex(i)!
       return FunctionPulse(signal: pulse.forProperty("signal").toString(), values: (swift(pulse.forProperty("values")) as? [String: Any]) ?? [:])
     }
-    return FunctionRun(outputs: outputs, pulses: pulses)
+    let settled = result.forProperty("settled")
+    return FunctionRun(outputs: outputs, pulses: pulses, settled: settled?.isObject == true ? settled : nil)
+  }
+
+  /// EXP-019 slice 1b. Waits until an awaiting run's body has finished, as the web export's \`await run.settled\` does.
+  public func settled(_ run: FunctionRun) async {
+    guard let promise = run.settled else { return }
+    await withCheckedContinuation { (finished: CheckedContinuation<Void, Never>) in
+      let done: @convention(block) (Bool) -> Void = { _ in finished.resume() }
+      host.invokeMethod("settle", withArguments: [promise, JSValue(object: done, in: context)!])
+    }
+  }
+
+  /// EXP-022 S3. A call into the web export's api modules (\`updateTask\`, \`logIn\`), awaited as the React app awaits it:
+  /// what it answered, or its failure's message as a \`BackendError\` (\`error instanceof Error ? error.message : String(error)\`).
+  public func api(_ name: String, _ args: [Any?]) async throws -> Any? {
+    try await answer(send(name, args))
+  }
+
+  /// The call made now (its request on its way, as the web app's is at the click), its answer awaited later.
+  public func send(_ name: String, _ args: [Any?]) -> PendingCall {
+    let call = PendingCall()
+    let done: @convention(block) (Bool, JSValue) -> Void = { ok, value in
+      call.settle(ok ? .success(Scripts.shared.swift(value)) : .failure(BackendError(message: value.toString())))
+    }
+    host.invokeMethod("api", withArguments: [name, js(args), JSValue(object: done, in: context)!])
+    return call
+  }
+
+  public func answer(_ call: PendingCall) async throws -> Any? {
+    try await withCheckedThrowingContinuation { (answered: CheckedContinuation<Any?, Error>) in call.then { answered.resume(with: $0) } }
+  }
+
+  /// A query's params at the call (\`__nodegx.queryParams\`): the plan's own, with its wired filter values put in.
+  public func queryParams(_ json: String, _ values: [String: Any?] = [:], wiredClient: Bool = false) -> JSValue {
+    host.invokeMethod("queryParams", withArguments: [json, js(values), wiredClient])
+  }
+
+  /// A function of a client module (\`api/client\`'s \`readSession\`), called now.
+  public func call(module: String, _ name: String, _ args: [Any?] = []) -> Any? {
+    guard let fn = host.invokeMethod("member", withArguments: [module, name]), fn.isObject else { return nil }
+    return swift(fn.call(withArguments: args.map { js($0) }))
   }
 
   func newNode(_ signals: [String]) -> JSValue {
@@ -271,6 +463,11 @@ public final class FunctionNode {
     Scripts.shared.run(id, inputs, node: node)
   }
 
+  /// The node's outputs now: an awaiting body writes them after its run has returned (React reads \`run.outputs\` live).
+  public var outputs: [String: Any] {
+    (Scripts.shared.swift(node.forProperty("outputs")) as? [String: Any]) ?? [:]
+  }
+
   /// What each output last sent down its wire (undefined is never sent).
   public var delivered: [String: Any] {
     (Scripts.shared.swift(node.forProperty("delivered")) as? [String: Any]) ?? [:]
@@ -281,6 +478,60 @@ public final class FunctionNode {
 public struct FunctionRun {
   public let outputs: [String: Any]
   public let pulses: [FunctionPulse]
+  /// An awaiting body's promise: \`Scripts.shared.settled(run)\` waits for it.
+  public var settled: JSValue? = nil
+}
+
+/// A backend call on its way: its answer, once it has one, to whoever waits for it.
+public final class PendingCall {
+  private var result: Result<Any?, Error>?
+  private var waiting: [(Result<Any?, Error>) -> Void] = []
+  func settle(_ result: Result<Any?, Error>) {
+    self.result = result
+    waiting.forEach { $0(result) }
+    waiting = []
+  }
+  func then(_ next: @escaping (Result<Any?, Error>) -> Void) {
+    if let result { next(result) } else { waiting.append(next) }
+  }
+}
+
+/// Who is signed in (USER-FAMILY-TARGET §4c): the session the web client stores, read by its own \`readSession\`, and read
+/// again whenever the client says it changed (\`subscribeSession\`), as React's \`useSession\` reads it.
+public final class Session: ObservableObject {
+  public static let shared = Session()
+  @Published public private(set) var authenticated = false
+  @Published public private(set) var user: [String: Any]? = nil
+  private init() {
+    refresh()
+    let changed: @convention(block) () -> Void = { [weak self] in self?.refresh() }
+    _ = Scripts.shared.call(module: "api/client", "subscribeSession", [JSValue(object: changed, in: Scripts.shared.context)])
+  }
+
+  private func refresh() {
+    guard let stored = Scripts.shared.call(module: "api/client", "readSession") as? [String: Any] else {
+      authenticated = false
+      user = nil
+      return
+    }
+    authenticated = true
+    var read: [String: Any] = [:]
+    for (field, key) in [("id", "objectId"), ("username", "username"), ("email", "email")] {
+      if let value = stored[key] { read[field] = value }
+    }
+    user = read
+  }
+
+  /// \`session.authenticated\`, or a field of \`session.user\` (undefined when nobody is signed in).
+  public func read(_ field: String) -> Any? {
+    field == "authenticated" ? authenticated : user?[field]
+  }
+}
+
+/// What a backend call failed with: the message the React app's catch reads.
+public struct BackendError: Error, CustomStringConvertible {
+  public let message: String
+  public var description: String { message }
 }
 
 public struct FunctionPulse {

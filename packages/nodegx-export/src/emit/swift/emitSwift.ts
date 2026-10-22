@@ -19,6 +19,8 @@ import { Theme } from './theme';
 import { ident, printView, structNameOf, swiftString, type SwiftLoss } from './view';
 import { SUPPORT_SWIFT } from './support';
 import { functionFileJs, functionId, HOST_JS, SCRIPTS_SWIFT } from './scripts';
+import { clientModulesJs } from './client';
+import { emitApp } from '../emitApp';
 import { projectPbxproj } from './xcodeproj';
 import type { JsFunctionPlan } from '../../analyze/plan';
 
@@ -124,12 +126,32 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
   for (const { plan, def } of functions) files[`Sources/${libraryName}/Scripts/functions/${functionId(plan, def)}.js`] = functionFileJs(plan, def);
   files[`Sources/${libraryName}/Scripts/nodegx-host.js`] = HOST_JS;
   files[`Sources/${libraryName}/Scripts.swift`] = SCRIPTS_SWIFT;
+  // EXP-022 S3. The backend client: the web export's own api modules and Noodl API, the same text, its types taken out.
+  const client = clientModulesJs(emitApp(ir, catalog).files);
+  for (const mod of client) files[`Sources/${libraryName}/Scripts/client/${mod.name}.js`] = mod.js;
+  const list = (items: string[]) => (items.length ? ['', ...items.map((x, i) => `    ${swiftString(x)}${i < items.length - 1 ? ',' : ''}`), '  '] : []).join('\n');
   files[`Sources/${libraryName}/Functions.swift`] = [
-    '// @nodegx:generated (EXP-022) — the Function files the app loads into its JavaScriptCore context, in this order.',
+    '// @nodegx:generated (EXP-022) — the files the app loads into its JavaScriptCore context, in this order, and the',
+    '// Variables a Function reads and writes through `Noodl.Variables`.',
     'extension Scripts {',
-    '  static let functionFiles: [String] = [',
-    ...functions.map(({ plan, def }, i) => `    ${swiftString(functionId(plan, def))}${i < functions.length - 1 ? ',' : ''}`),
-    '  ]',
+    `  /// The web export's backend client, one module each (\`Scripts/client/\`).`,
+    `  static let clientModules: [String] = [${list(client.map((m) => m.name))}]`,
+    `  /// The Functions (\`Scripts/functions/\`).`,
+    `  static let functionFiles: [String] = [${list(functions.map(({ plan, def }) => functionId(plan, def)))}]`,
+    '',
+    '  /// `Noodl.Variables.<name>`, read.',
+    '  static func variable(_ name: String) -> Any? {',
+    ...(project.variables.length
+      ? ['    switch name {', ...project.variables.map((v) => `    case ${swiftString(v.name)}: return Variables.shared.${variableMember.get(v.name)}`), '    default: return nil', '    }']
+      : ['    nil']),
+    '  }',
+    '',
+    '  /// `Noodl.Variables.<name> = value`.',
+    '  static func setVariable(_ name: String, _ value: Any?) {',
+    ...(project.variables.length
+      ? ['    switch name {', ...project.variables.map((v) => `    case ${swiftString(v.name)}: Variables.shared.${variableMember.get(v.name)} = value`), '    default: break', '    }']
+      : []),
+    '  }',
     '}',
     ''
   ].join('\n');

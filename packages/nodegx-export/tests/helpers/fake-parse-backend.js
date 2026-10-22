@@ -18,6 +18,16 @@
  * - `GET /users/me` — the session's user (the runtime's UserService checks a stored session once, at its start; the
  *   export trusts the stored one, so this request is the runtime arm's alone).
  *
+ * EXP-022 S3, for the Record Desk (`record-desk.ts`): the record writes and the user routes, as the Parse wire carries them.
+ *
+ * - `POST /classes/<c>` with no `_method` — a create: the row stored with a fresh `objectId` (`n1`, `n2`, …);
+ *   `{ objectId, createdAt }`.
+ * - `PUT /classes/<c>/<id>` — an update: the fields written over the row; `{ updatedAt }`. `DELETE /classes/<c>/<id>` — the
+ *   row removed; `{}`. Either on a row that is not there: 404 `{ code: 101, error: 'Object not found.' }`.
+ * - `POST /login` (`_method: 'GET'`, `username`, `password`) — a user of `spec.users` whose password matches: the user's
+ *   fields and its `sessionToken` (never the password); otherwise 404 `{ code: 101, error: 'Invalid username/password.' }`.
+ * - `POST /logout` — `{}`. `POST /users` — a sign-up: `{ objectId, createdAt, sessionToken }`.
+ *
  * - any path under `/down` (`/classes/Down`, `/functions/down`, `/files/down.png/sign`): the backend cannot be reached —
  *   the XHR answers status 0 with no text, `fetch` rejects as a browser's does.
  * - `POST /functions/empty` — 500 with no body.
@@ -53,7 +63,8 @@ function matches(row, where) {
 
 function createFakeBackend(spec) {
   const classes = JSON.parse(JSON.stringify(spec.classes || {}));
-  const sessions = spec.sessions || {};
+  const sessions = Object.assign({}, spec.sessions || {});
+  const users = (spec.users || []).map((u) => Object.assign({}, u));
   const log = [];
   let made = 0;
 
@@ -68,6 +79,39 @@ function createFakeBackend(spec) {
       const count = rows.length;
       if (typeof body.limit === 'number') rows = rows.slice(0, body.limit);
       return json(200, body.count ? { results: rows, count } : { results: rows });
+    }
+    if (m && method === 'POST') {
+      made += 1;
+      const objectId = `n${made}`;
+      (classes[m[1]] = classes[m[1]] || []).push({ ...(body || {}), objectId });
+      return json(201, { objectId, createdAt: '2026-10-22T00:00:00.000Z' });
+    }
+    m = /^\/classes\/([^/]+)\/([^/]+)$/.exec(path);
+    if (m && (method === 'PUT' || method === 'DELETE')) {
+      const rows = classes[m[1]] || [];
+      const at = rows.findIndex((row) => row.objectId === decodeURIComponent(m[2]));
+      if (at < 0) return json(404, { code: 101, error: 'Object not found.' });
+      if (method === 'DELETE') {
+        rows.splice(at, 1);
+        return json(200, {});
+      }
+      Object.assign(rows[at], body || {});
+      return json(200, { updatedAt: '2026-10-22T00:00:00.000Z' });
+    }
+    if (path === '/login' && method === 'POST') {
+      const found = users.find((u) => u.username === (body && body.username) && u.password === (body && body.password));
+      if (!found) return json(404, { code: 101, error: 'Invalid username/password.' });
+      const { password: _password, ...fields } = found;
+      return json(200, fields);
+    }
+    if (path === '/logout' && method === 'POST') return json(200, {});
+    if (path === '/users' && method === 'POST') {
+      made += 1;
+      const objectId = `u${made}`;
+      const sessionToken = `tok-${objectId}`;
+      users.push({ ...(body || {}), objectId, sessionToken });
+      sessions[sessionToken] = { objectId, name: String((body && body.username) || '') };
+      return json(201, { objectId, createdAt: '2026-10-22T00:00:00.000Z', sessionToken });
     }
     m = /^\/functions\/([^/]+)$/.exec(path);
     if (m && method === 'POST') {
