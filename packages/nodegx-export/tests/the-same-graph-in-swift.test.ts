@@ -31,9 +31,16 @@ describe('EXP-022 S1: story-engine as a Swift package', () => {
       'EXPORT-PREFLIGHT.md',
       'Package.swift',
       'README.md',
+      `${kit}/Functions.swift`,
+      // S2: the logic component, the Function it runs, the host that runs it, the app's Variables.
+      `${kit}/Logic/SourceLogic.swift`,
       `${kit}/Router.swift`,
+      `${kit}/Scripts.swift`,
+      `${kit}/Scripts/functions/Story/Source/Which_story_is_being_read.js`,
+      `${kit}/Scripts/nodegx-host.js`,
       `${kit}/Support.swift`,
       `${kit}/Theme.swift`,
+      `${kit}/Variables.swift`,
       `${kit}/Views/CarriedView.swift`,
       `${kit}/Views/ChoiceView.swift`,
       `${kit}/Views/PassageView.swift`,
@@ -41,12 +48,14 @@ describe('EXP-022 S1: story-engine as a Swift package', () => {
       `${kit}/Views/ReadPageView.swift`,
       `${kit}/Views/RemixPageView.swift`,
       `${kit}/Views/SidebarView.swift`,
-      'StoryEngine.xcodeproj/project.pbxproj'
+      'StoryEngine.xcodeproj/project.pbxproj',
+      'Tests/StoryEngineKitTests/StoryEngineTests.swift'
     ]);
-    // A view for every component the React export writes a file for, except the logic component (a hook there).
+    // A view for every component the React export writes a file for; since S2 the logic component (a hook there) too.
     const plan = planProject(ir, new CatalogIndex(catalog));
     const drawn = plan.plans.filter((p) => p.file && !p.hook).map((p) => `${p.file!.symbol}View`).sort();
     expect([...app.preflight.views].sort()).toEqual(drawn);
+    expect(app.preflight.logic).toEqual(['SourceLogic']);
   });
 
   it('is deterministic: the same project prints the same files, the project file included', () => {
@@ -68,8 +77,9 @@ describe('EXP-022 S1: story-engine as a Swift package', () => {
     expect(passage).toContain('.foregroundStyle(Theme.color(JS.show(Self.READING_AN_ENDING_OR_A_PASSAGE_THAT_IS_NOT_THERE_STATES[readingAnEndingOrAPassageThatIsNotThere]?["tone"])) ?? Color.primary)');
     expect(passage).not.toContain('.foregroundStyle(Theme.primary)\n      .foregroundStyle(Theme.color');
     const sidebar = app.files[`${kit}/Views/SidebarView.swift`];
-    expect(sidebar).toContain('ForEach(Array(JS.rows(things).enumerated()), id: \\.offset) { _, row in');
-    expect(sidebar).toContain('CarriedView(thing: JS.show(JS.field(row, "thing")))');
+    expect(sidebar).toContain('ForEach(Array(JS.rows(things).enumerated()), id: \\.offset) { index, row in');
+    // S2: a prop holds the graph's value as it is (JavaScript has no types at a boundary); a sink coerces it.
+    expect(sidebar).toContain('CarriedView(thing: JS.field(row, "thing"))');
   });
 
   it('writes the tokens the views read, and only those', () => {
@@ -91,9 +101,11 @@ describe('EXP-022 S1: story-engine as a Swift package', () => {
     expect(p.planRefusals.map((r) => r.name)).toContain('Take what that choice gives you');
     // What the Swift printer read and does not print yet, by name.
     const losses = p.swiftLosses.map((l) => `${l.component} ${l.nodeId} ${l.what}`);
-    expect(losses).toContain('Story/Source  a logic component: its Functions run in S2, in the JavaScriptCore host');
-    expect(losses.some((l) => l.startsWith('Pages/Read rdSide its things reads a store (storyCarrying, untyped)'))).toBe(true);
-    expect(losses.some((l) => l.startsWith('Pages/Read rdChoices the For Each\'s rows are not drawn'))).toBe(true);
+    // S2 prints the logic component and the store read S1 named; what is left is the For Each React leaves undrawn too.
+    expect(losses).toEqual([
+      "Pages/Read rdChoices the For Each's rows are not drawn: the plan feeds it no items, so the React export does not draw its rows either"
+    ]);
+    expect(app.files[`${kit}/Views/ReadPageView.swift`]).toContain('SidebarView(things: variables.storyCarrying)');
     // CSS a phone has no counterpart for: the project's stylesheet classes.
     expect(p.webOnly.map((w) => w.decl)).toContain('cssClassName: pressable');
     expect(app.files['EXPORT-PREFLIGHT.md']).toContain(`## Left out by the plan (${p.planRefusals.length})`);

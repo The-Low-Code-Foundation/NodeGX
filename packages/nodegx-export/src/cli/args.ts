@@ -22,6 +22,8 @@ export type ParsedArgs =
       dryRun: boolean;
       /** Write into a folder that already holds something. */
       force: boolean;
+      /** EXP-022. What the export writes: React source (the default), or a SwiftUI package with an Xcode app around it. */
+      target: ExportTarget;
     }
   | {
       kind: 'serve';
@@ -89,12 +91,17 @@ export type ParsedArgs =
 
 const FLAGS = new Set(['--dry-run', '--preflight', '--force', '--help', '-h', '--version', '-v']);
 
+/** EXP-022. The export's targets: one IR, one plan, two printers. */
+export const EXPORT_TARGETS = ['react', 'swift'] as const;
+export type ExportTarget = (typeof EXPORT_TARGETS)[number];
+
 export function parseArgs(argv: readonly string[]): ParsedArgs {
   if (argv.length === 0) return { kind: 'help' };
   if (argv.includes('--help') || argv.includes('-h')) return { kind: 'help' };
   if (argv.includes('--version') || argv.includes('-v')) return { kind: 'version' };
 
-  const [command, ...rest] = argv;
+  const [command, ...args] = argv;
+  let rest = args;
   if (command.startsWith('-')) {
     return { kind: 'usage', problem: `\`${command}\` is a flag, not a command.` };
   }
@@ -104,6 +111,17 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
   if (command === 'live') return parseLive(rest);
   if (command !== 'export') {
     return { kind: 'usage', problem: `There is no \`nodegx ${command}\` command.` };
+  }
+
+  // `--target <name>` takes a value, so it leaves `rest` with its value before the flags and folders are read.
+  let target: ExportTarget = 'react';
+  const targetAt = rest.indexOf('--target');
+  if (targetAt !== -1) {
+    const value = rest[targetAt + 1];
+    if (value === undefined || value.startsWith('-')) return { kind: 'usage', problem: '`--target` needs a target: react or swift.' };
+    if (!(EXPORT_TARGETS as readonly string[]).includes(value)) return { kind: 'usage', problem: `\`--target ${value}\` is not a target: react or swift.` };
+    target = value as ExportTarget;
+    rest = [...rest.slice(0, targetAt), ...rest.slice(targetAt + 2)];
   }
 
   const unknown = rest.filter((arg) => arg.startsWith('-') && !FLAGS.has(arg));
@@ -143,7 +161,8 @@ export function parseArgs(argv: readonly string[]): ParsedArgs {
     projectDir: positional[0],
     outDir: dryRun ? null : positional[1],
     dryRun,
-    force
+    force,
+    target
   };
 }
 
@@ -364,6 +383,8 @@ function parseLive(rest: readonly string[]): ParsedArgs {
 export const USAGE = `nodegx — the NodeGX command line
 
   nodegx export <project> <output>   Export a project as a React app
+  nodegx export --target swift <project> <output>
+                                     Export it as a SwiftUI app (a Swift package and an Xcode project)
   nodegx export --dry-run <project>  Print what the export would produce, and write nothing
   nodegx deploy <project> <output>   Write a ready-to-host site you can upload as it is
   nodegx serve <folder>              Serve a built site over HTTP, on this machine only
@@ -378,6 +399,7 @@ export or deploy?
 Options
   --dry-run, --preflight   Print the pre-flight summary and exit without writing anything.
                            Exits 4 if anything would be left out, so a pipeline can gate on it.
+  --target <react|swift>   export: React source (the default), or a SwiftUI package with an Xcode app around it.
   --force                  Write into an output folder that already holds something. Files with
                            the same names are overwritten; nothing else is touched.
   --base-url <path>        deploy: the path the site is served from, when it is not the root of a

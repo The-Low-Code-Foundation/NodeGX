@@ -16,17 +16,27 @@ import { planProject } from '../../analyze/plan';
 import { routedPages } from '../scaffold';
 import { camelCase } from '../naming';
 import { Theme } from './theme';
-import { printView, structNameOf, swiftString, type SwiftLoss } from './view';
+import { ident, printView, structNameOf, swiftString, type SwiftLoss } from './view';
 import { SUPPORT_SWIFT } from './support';
+import { functionFileJs, functionId, HOST_JS, SCRIPTS_SWIFT } from './scripts';
 import { projectPbxproj } from './xcodeproj';
+import type { JsFunctionPlan } from '../../analyze/plan';
 
 export interface SwiftPreflight {
   appName: string;
   views: string[];
+  /** The logic components, each a `…Logic` view that draws nothing (React's hooks). */
+  logic: string[];
   /** Plan-layer refusals: the same nodes the React export leaves out, for the same reasons. */
   planRefusals: Array<{ component: string; nodeId: string; name: string; reason: string }>;
   /** What the Swift printer read in the plan and does not print yet. */
   swiftLosses: SwiftLoss[];
+  /**
+   * AC3. The Functions whose bodies touch the browser (EXP-019's classifier: `document`, `window`, `localStorage`, a url).
+   * They run in the JavaScriptCore host like every other; what they read of a browser is not there on a phone, so each is
+   * named here, before anything is written, never dropped.
+   */
+  browserScripts: Array<{ component: string; name: string; nodeId: string }>;
   /** CSS declarations with no SwiftUI counterpart, by declaration, with the nodes that carry them. */
   webOnly: Array<{ decl: string; nodes: string[] }>;
 }
@@ -72,13 +82,17 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
   }
 
   const structByLegacy = new Map<string, string>();
-  for (const plan of project.plans) if (plan.file && !plan.hook) structByLegacy.set(plan.legacyPath, structNameOf(plan));
+  for (const plan of project.plans) if (plan.file) structByLegacy.set(plan.legacyPath, structNameOf(plan));
+  // The app-wide Variables (EXP-011 Tier 1.4): one `@Published` member each on `Variables`, as `src/stores/variables.ts` is.
+  const variableMember = new Map(project.variables.map((v) => [v.name, ident(v.exportName)]));
 
   const losses: SwiftLoss[] = [];
   const webOnly = new Map<string, string[]>();
   const views: string[] = [];
+  const logic: string[] = [];
+  const functions: Array<{ plan: (typeof project.plans)[number]; def: JsFunctionPlan }> = [];
   for (const plan of project.plans) {
-    if (!plan.file || plan.hook) continue;
+    if (!plan.file) continue;
     const component = ir.components.find((c) => c.path === plan.path)!;
     const printed = printView(plan, {
       project,
@@ -87,11 +101,17 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
       styles: ir.project.styles,
       nodesOf: (path) => (path === plan.path ? component.nodes : (ir.components.find((c) => c.path === path)?.nodes ?? [])),
       structOf: (legacy) => structByLegacy.get(legacy),
-      routeOf: (url) => routeByUrl.get(url)
+      routeOf: (url) => routeByUrl.get(url),
+      variableOf: (name) => variableMember.get(name)
     });
-    files[`Sources/${libraryName}/Views/${printed.struct}.swift`] = printed.source;
-    views.push(printed.struct);
+    files[`Sources/${libraryName}/${plan.hook ? 'Logic' : 'Views'}/${printed.struct}.swift`] = printed.source;
+    (plan.hook ? logic : views).push(printed.struct);
     losses.push(...printed.losses);
+    // Every Function body travels, run or not (the React export keeps a refused one's body as a comment): the code is theirs.
+    for (const def of Object.values(plan.jsFunctions)) {
+      if (def.kind === 'function') functions.push({ plan, def });
+      else losses.push({ component: plan.path, nodeId: def.nodeId, what: `${def.kind === 'expression' ? 'an Expression' : 'a Visual Function'} node is not carried by the Swift target yet` });
+    }
     for (const w of printed.webOnly) {
       const list = webOnly.get(w.decl) ?? [];
       list.push(`${w.component}#${w.nodeId}`);
@@ -99,9 +119,32 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
     }
   }
 
-  // Logic components and the router shell the plan keeps no view for.
-  for (const plan of project.plans) {
-    if (plan.hook) losses.push({ component: plan.path, nodeId: '', what: 'a logic component: its Functions run in S2, in the JavaScriptCore host' });
+  // The Functions the components run: one file each, verbatim, and the host that runs them (EXP-022 S2).
+  functions.sort((a, b) => functionId(a.plan, a.def).localeCompare(functionId(b.plan, b.def)));
+  for (const { plan, def } of functions) files[`Sources/${libraryName}/Scripts/functions/${functionId(plan, def)}.js`] = functionFileJs(plan, def);
+  files[`Sources/${libraryName}/Scripts/nodegx-host.js`] = HOST_JS;
+  files[`Sources/${libraryName}/Scripts.swift`] = SCRIPTS_SWIFT;
+  files[`Sources/${libraryName}/Functions.swift`] = [
+    '// @nodegx:generated (EXP-022) — the Function files the app loads into its JavaScriptCore context, in this order.',
+    'extension Scripts {',
+    '  static let functionFiles: [String] = [',
+    ...functions.map(({ plan, def }, i) => `    ${swiftString(functionId(plan, def))}${i < functions.length - 1 ? ',' : ''}`),
+    '  ]',
+    '}',
+    ''
+  ].join('\n');
+  if (project.variables.length > 0) {
+    files[`Sources/${libraryName}/Variables.swift`] = [
+      '// @nodegx:generated (EXP-022) — the app-wide Variables: one value each, read and written by any component.',
+      'import SwiftUI',
+      '',
+      'public final class Variables: ObservableObject {',
+      '  public static let shared = Variables()',
+      ...project.variables.map((v) => `  /// "${v.name}"${v.writers.length ? `, written by ${v.writers.map((w) => `${w.nodeType} on /${w.componentPath}`).join(', ')}` : ', with no statically-known writer'}.\n  @Published public var ${variableMember.get(v.name)}: Any? = nil`),
+      '  public init() {}',
+      '}',
+      ''
+    ].join('\n');
   }
 
   const startLegacy = router?.startPage ?? (pages[0] ? `/${pages[0].componentPath}` : undefined);
@@ -147,8 +190,30 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
     `  name: ${swiftString(libraryName)},`,
     '  platforms: [.iOS(.v17), .macOS(.v14)],',
     `  products: [.library(name: ${swiftString(libraryName)}, targets: [${swiftString(libraryName)}])],`,
-    `  targets: [.target(name: ${swiftString(libraryName)})]`,
+    '  targets: [',
+    `    .target(name: ${swiftString(libraryName)}, resources: [.copy("Scripts")]),`,
+    `    .testTarget(name: ${swiftString(`${libraryName}Tests`)}, dependencies: [${swiftString(libraryName)}])`,
+    '  ]',
     ')',
+    ''
+  ].join('\n');
+  files[`Tests/${libraryName}Tests/${appName}Tests.swift`] = [
+    '// @nodegx:generated (EXP-022) — `swift test` on a Mac: the app draws its first page, and its Functions load.',
+    'import XCTest',
+    `@testable import ${libraryName}`,
+    '',
+    '@MainActor',
+    `final class ${appName}Tests: XCTestCase {`,
+    '  func testTheFirstPageDraws() {',
+    '    let drive = Drive(RootView())',
+    '    defer { drive.close() }',
+    '    XCTAssertFalse(drive.probe.entries.isEmpty, "the first page draws nothing a person can read or press")',
+    '  }',
+    '',
+    '  func testEveryFunctionLoads() {',
+    '    XCTAssertEqual(Scripts.shared.defined.sorted(), Scripts.functionFiles.sorted())',
+    '  }',
+    '}',
     ''
   ].join('\n');
   files[`App/${appName}App.swift`] = [
@@ -176,6 +241,12 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
   const preflight: SwiftPreflight = {
     appName,
     views,
+    logic,
+    browserScripts: project.plans.flatMap((p) =>
+      Object.values(p.jsFunctions)
+        .filter((f) => f.host?.includes('touches the browser environment'))
+        .map((f) => ({ component: p.path, name: f.fnName, nodeId: f.nodeId }))
+    ),
     planRefusals,
     swiftLosses: losses,
     webOnly: [...webOnly.entries()].sort((a, b) => b[1].length - a[1].length || a[0].localeCompare(b[0])).map(([decl, nodes]) => ({ decl, nodes }))
@@ -186,8 +257,11 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
     '',
     `- **Open \`${appName}.xcodeproj\` in Xcode** and press Run, or build without Xcode open:`,
     `  \`xcodebuild -project ${appName}.xcodeproj -scheme ${appName} -destination 'generic/platform=iOS Simulator' build\`.`,
-    `- **Everything you edit is in \`Sources/${libraryName}/\`** — one SwiftUI view per component, \`Theme.swift\` for the`,
-    '  design tokens, `Router.swift` for the pages. `swift build` builds it on a Mac with no simulator.',
+    `- **Everything you edit is in \`Sources/${libraryName}/\`** — one SwiftUI view per component (\`Views/\`), one per logic`,
+    '  component (`Logic/`, views that draw nothing), `Theme.swift` for the design tokens, `Router.swift` for the pages.',
+    '- **Your Functions are in `Scripts/functions/`**, one JavaScript file each, verbatim. They run in the app\'s JavaScriptCore',
+    '  context (`Scripts.swift`), through the same runner the web export uses (`Scripts/nodegx-host.js`).',
+    '- `swift build` builds it on a Mac with no simulator; `swift test` draws the first page and loads the Functions.',
     '- **`EXPORT-PREFLIGHT.md`** says what did not travel to the phone, by name.',
     ''
   ].join('\n');
@@ -203,10 +277,21 @@ export function renderSwiftPreflight(p: SwiftPreflight): string {
     '',
     `**${p.views.length} views**: ${p.views.join(', ')}.`,
     '',
+    `**${p.logic.length} logic components** (each a view that draws nothing): ${p.logic.join(', ') || 'none'}.`,
+    '',
     `## Left out by the plan (${p.planRefusals.length}) — the same nodes the React export leaves out`,
     ''
   ];
   for (const r of p.planRefusals) lines.push(`- \`${r.component}\` "${r.name}" — ${r.reason}`);
+  lines.push(
+    '',
+    `## Functions that touch the browser (${p.browserScripts.length}) — they run, but a phone has no browser around them`,
+    '',
+    'Each runs in the app\'s JavaScriptCore context. `window` is the global object there and `localStorage` is kept on the',
+    'device; `document`, `location` and `matchMedia` are not there, so what a body reads of them reads nothing.',
+    ''
+  );
+  for (const f of p.browserScripts) lines.push(`- \`${f.component}\` "${f.name}" (${f.nodeId})`);
   lines.push('', `## Read in the plan, not printed by the Swift target yet (${p.swiftLosses.length})`, '');
   for (const l of p.swiftLosses) lines.push(`- \`${l.component}\`${l.nodeId ? ` ${l.label ? `"${l.label}"` : l.nodeId}` : ''} — ${l.what}`);
   lines.push('', `## Looks a phone has no counterpart for (${p.webOnly.length} kinds)`, '');

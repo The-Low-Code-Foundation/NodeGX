@@ -35,6 +35,7 @@ import * as path from 'path';
 
 import { loadCatalog } from '../catalog';
 import { emitApp } from '../emit/emitApp';
+import { emitSwiftApp, renderSwiftPreflight } from '../emit/swift/emitSwift';
 import { renderPreflight, summarizePreflight } from '../emit/preflight';
 import { REPORT_PATH } from '../emit/report';
 import { errorMessage } from '../errorMessage';
@@ -219,6 +220,37 @@ export function runCli(argv: readonly string[], io: CliIO): ExitCode {
       );
       return EXIT.target;
     }
+  }
+
+  if (parsed.target === 'swift') {
+    // EXP-022. The same project, the same plan, the Swift printer. Its pre-flight is its own page (EXPORT-PREFLIGHT.md):
+    // the plan's refusals, what the Swift target does not print yet, the Functions that touch the browser.
+    let swift;
+    try {
+      const catalog = loadCatalog();
+      swift = emitSwiftApp(parseProject(projectDir, catalog), catalog);
+    } catch (error) {
+      io.err('The export could not be prepared, and nothing has been written.\n' + errorMessage(error) + '\n');
+      return EXIT.project;
+    }
+    const leftOutCount = swift.preflight.planRefusals.length + swift.preflight.swiftLosses.length;
+    if (parsed.dryRun) {
+      io.out(renderSwiftPreflight(swift.preflight) + '\n');
+      return leftOutCount > 0 ? EXIT.refusals : EXIT.ok;
+    }
+    let written;
+    try {
+      written = writeExport(projectDir, outDir as string, { files: swift.files, copies: [] }, fs);
+    } catch (error) {
+      io.err(`${errorMessage(error)}\n${outDir} now holds part of an app and will not build. Export again into an empty folder.\n`);
+      return EXIT.write;
+    }
+    io.out(
+      `${written.files} files written to ${outDir}: open ${swift.preflight.appName}.xcodeproj in Xcode, or run \`swift build\` there.` +
+        (leftOutCount > 0 ? ` ${leftOutCount} thing${leftOutCount === 1 ? ' is' : 's are'} left out — read EXPORT-PREFLIGHT.md first.` : '') +
+        '\n'
+    );
+    return EXIT.ok;
   }
 
   let app;

@@ -1,7 +1,7 @@
 # EXP-022 — The same graph in Swift
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), from Richard's ruling of 2026-10-21: "I want that offramp promise
-fulfilled in React and Swift." **Status: 🔵 Swift session 1 of at most 12 done (2026-10-22, §9): AC1 met on story-engine; the backend route measured (one client in two hosts works). Next: S2. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
+fulfilled in React and Swift." **Status: 🔵 Swift session 2 of at most 12 done (2026-10-22, §9): S1 met AC1 on story-engine and measured the backend route (one client in two hosts works); S2 printed the plan's logic and ran the Functions in JavaScriptCore — the Hook Desk reads what the runtime reads at every step, todo-list builds with 36 logic components and 64 Functions, and 44 of S1's 334 gaps are left, all the backend or undrawn in React too. Next: S3, the backend. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
 out of the parked table: its reveal sentence stands ("one graph, three homes"), its rulings R1–R7 carry, and **its route
 changes**: P110 §0 scoped *a NodeGX runtime written in Swift that loads the project as data*; this task is *an emitter
 that writes a SwiftUI app from the same IR the React export reads*. Same reveal, and the person leaves with Swift source
@@ -206,3 +206,69 @@ no xcodegen.
 **Not done in S1:** `nodegx export --target swift` on the CLI. It touches `cli/args.ts` and its `USAGE`, which the
 React session's suites assert on, so it moves to S2 with that suite. No scripted drive in the simulator yet (S4).
 
+
+### S2 — Swift session 2 of at most 12 (2026-10-22, Opus 5.5)
+
+**Result: the plan's logic prints in SwiftUI, the Functions run in JavaScriptCore, and the Hook Desk reads exactly what
+the runtime reads, at every one of its ten readings, on the first build.** Graded by `swift test` on macOS, no simulator:
+`tests/the-same-graph-in-swift-s2.test.ts` §A drives the desk's nine presses in the exported app
+(`tests/helpers/export-swift-arm.ts`) beside the runtime's own nodes (`runtime-mounted-arm.js`), the same arm and the
+same steps `a-logic-component-is-a-hook.test.ts` grades React with. Evidence: [`exp-022/s2/`](exp-022/s2/).
+
+**How React's model maps, and why the plan printed unchanged.** Every construct the React printer writes for a component
+has a SwiftUI one with the same timing:
+
+| React (the web export) | SwiftUI (`src/emit/swift/view.ts`) |
+|---|---|
+| `useState` | `@State` |
+| `useRef` | a `Ref` kept in `@State` |
+| `useEffect(…, [deps])` | `.onChange(of: Same(deps), initial: true)` (`Same`: JavaScript's equality over graph values) |
+| `useMemo` (a render run) | a `Memo` kept in `@State`, read in a computed property |
+| a logic component, `use<Name>(props)` | `<Name>Logic`, a view that draws nothing, placed in the page's `.background` |
+| a Function's body | the body verbatim in one `JSContext` (`Scripts.swift`), one `.js` file per Function |
+| `functionRun.ts` | the same file compiled to JavaScript (`functionRunJs.ts`, a test fails when the two differ) |
+
+**One measurement says the claim is not a coincidence.** The plan delays a pulse one update when a value lifted beside it
+must arrive first (P18-S127-SIBLINGVALUE, an `instancePulses[].delivered` row). Printed without the delay, SwiftUI reads
+`echo undefined` where the runtime reads `echo total 1`, the failure React had. So that rule is about "state drives the
+view and effects run after", which both frameworks share, not about React. Two mutants (the delivered effect removed; the
+pulse's taken-guard removed) each move the readings, so §A can fail (`exp-022/s2/README.md`).
+
+**todo-list, S2's work list.** It builds (`swift build`) with all 36 logic components and all 64 Function bodies, and its
+own generated `swift test` draws the first page and loads every Function with no JavaScript error. The Swift-side gaps
+went **334 → 44**, and each of the 44 is either the backend, which is S3 (39: record verbs, queries, session reads, the
+one body that reads `Noodl`), or one of 5 For Eaches the plan feeds no items, which the React export does not draw
+either. Printed in S2, by count: press actions (`state-set`, `states-go` with the States queue and listeners,
+`jsfun-run` with pulses, `store-set`, `branch`, `field-focus`), lifted values (one closure when a lift has several rows,
+React's `combinedLifted`), `jsfun-out` and `states-out` reads, push, sync, value-changed, input-pulse and ticked-run
+effects, a Function's late writes (the minute clock), Static Data, Global Variables (`Variables.swift`, one
+`@Published` each), and field writes and blurs through one `@FocusState`.
+
+**AC3, the scripts.** Every Function body travels, run or not (four are carried and not run: two the plan defers, as
+React does, and two that run only in chains behind the session, S3). The ten that touch the browser, EXP-019's
+classifier's count and P110's, are named in the pre-flight before anything is written. They run: the host gives
+`window` (the global object), `setTimeout`/`setInterval` and a `localStorage` kept in `UserDefaults`, so "remember the
+choice on this device" works on a phone; `document`, `location` and `matchMedia` are not there.
+
+**`nodegx export --target swift <project> <output>`** writes the package; `--dry-run --target swift` prints its
+pre-flight. `--target react` is the default, so no existing command changes.
+
+**What the second printer had to copy from the first** (the question §7 asks; filed as `P18-EXP022-S2-EMITDECIDES`,
+low): which Functions keep a node (`pulsedRunIds`), which reads are render runs and that they are memoised (LIFTLOOP),
+`expandActions`' flattening rules, `combinedLifted`, which runs get a `late` handler, and which fields a chain focuses.
+Each is a few lines in Swift; each is decided in `component.ts`, not in the plan, like S1's COLLAPSE. None changed
+behaviour; all are places where the two targets can drift.
+
+**Also fixed in S1's printer** (filed, fixed): a States table typed every value as text, so a boolean `false` read true
+(`P18-EXP022-S2-STATESTYPE`); and a placement coerced each input to its declared type at the boundary, so undefined
+became `""` or `0` and a number became text (`P18-EXP022-S2-PROPCOERCE`). Props now hold the graph's value as it is and a
+sink coerces it, as JavaScript does. Found and fixed before commit, not filed: one `body` too large to type-check
+(printed in stages now) and a stack of more than ten children (a placement's four lifts, now one closure).
+
+**Cost, so far:** 2 sessions. The printer is 2,781 lines (S1 1,447): `view` 1,056, `support` 392 (Swift text), `emitSwift`
+301, `scripts` 290 (Swift and JavaScript text), `xcodeproj` 285, `modifiers` 272, `theme` 173, `functionRunJs` 12
+(generated). Tests: 25 rows (8 behind `NODEGX_SWIFT_BUILD=1`), and an 83-line arm. `plan.ts` was read, not changed.
+
+**One thing to say plainly:** an OWN-026 grade (t1-nodegx-1) ran 15:56–16:25 and my `nice -n 19` Swift builds overlapped
+it from about 16:01; I checked the lab log at the start of the session (a build round then) and not again before each
+build. Its six fails are product findings (no access control, a stale second click, the last-ten window), not timeouts.
