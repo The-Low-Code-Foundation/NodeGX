@@ -1,0 +1,95 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "93847a55-071f-571e-8cf8-b277dfefaf6b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ne_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nums",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "ne_root",
+      "type": "Group",
+      "children": [
+        "ne_title",
+        "ne_line",
+        "ne_nums"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "marginBottom": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ne_title",
+      "type": "Text",
+      "parent": "ne_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ne_line",
+      "type": "Text",
+      "parent": "ne_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ne_nums",
+      "type": "Text",
+      "parent": "ne_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "ne_root"
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f25f79fe-1cde-5d86-8c8e-ae3babebaa17",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ib_in",
+      "fromProperty": "icon",
+      "toId": "ib_icon",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ib_in",
+      "fromProperty": "icon",
+      "toId": "ib_icon",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_in",
+      "fromProperty": "label",
+      "toId": "ib_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ib_in",
+      "fromProperty": "small",
+      "toId": "ib_small",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ib_in",
+      "fromProperty": "small",
+      "toId": "ib_small",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ib_in",
+      "fromProperty": "pressed",
+      "toId": "ib_state",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "ib_state",
+      "fromProperty": "currentValue",
+      "toId": "ib_look",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "ib_look",
+      "fromProperty": "bg",
+      "toId": "ib_root",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ib_look",
+      "fromProperty": "border",
+      "toId": "ib_root",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "ib_in",
+      "fromProperty": "locked",
+      "toId": "ib_lockstate",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "ib_lockstate",
+      "fromProperty": "currentValue",
+      "toId": "ib_lock",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "ib_lock",
+      "fromProperty": "opacity",
+      "toId": "ib_root",
+      "toProperty": "opacity"
+    },
+    {
+      "fromId": "ib_root",
+      "fromProperty": "onClick",
+      "toId": "ib_out",
+      "toProperty": "click"
+    }
+  ]
+}

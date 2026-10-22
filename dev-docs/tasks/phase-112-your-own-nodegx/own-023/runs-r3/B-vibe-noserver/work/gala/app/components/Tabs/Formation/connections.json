@@ -1,0 +1,727 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c1e9b73e-39c1-50fa-873e-4c409ac7ba25",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fo_in",
+      "fromProperty": "show",
+      "toId": "fo_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fo_in",
+      "fromProperty": "show",
+      "toId": "fo_view",
+      "toProperty": "in-show"
+    },
+    {
+      "fromId": "fo_save",
+      "fromProperty": "value",
+      "toId": "fo_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "fo_ui",
+      "fromProperty": "value",
+      "toId": "fo_view",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "fo_words",
+      "fromProperty": "value",
+      "toId": "fo_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-title",
+      "toId": "fo_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-nums",
+      "toId": "fo_numsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-facts",
+      "toId": "fo_factsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-hint",
+      "toId": "fo_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-planW",
+      "toId": "fo_plan",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-planH",
+      "toId": "fo_plan",
+      "toProperty": "height"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-stageLeft",
+      "toId": "fo_stageRect",
+      "toProperty": "marginLeft"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-stageTop",
+      "toId": "fo_stageRect",
+      "toProperty": "marginTop"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-stageW",
+      "toId": "fo_stageRect",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-stageH",
+      "toId": "fo_stageRect",
+      "toProperty": "height"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-ticksX",
+      "toId": "fo_ticksX",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-ticksZ",
+      "toId": "fo_ticksZ",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-path",
+      "toId": "fo_path",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-dots",
+      "toId": "fo_dots",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-showArms",
+      "toId": "fo_arms",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-armsLeft",
+      "toId": "fo_arms",
+      "toProperty": "marginLeft"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-armsTop",
+      "toId": "fo_arms",
+      "toProperty": "marginTop"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-armsSize",
+      "toId": "fo_arms",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-armsSize",
+      "toId": "fo_arms",
+      "toProperty": "height"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-audience",
+      "toId": "fo_aud",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-swaps",
+      "toId": "fo_ab",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-abChips",
+      "toId": "fo_abRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-names",
+      "toId": "fo_names",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-blocksH",
+      "toId": "fo_blocksH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-blocksHint",
+      "toId": "fo_blocksHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-blocks",
+      "toId": "fo_blocksRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-newBlock",
+      "toId": "fo_newBlk",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-copyBlock",
+      "toId": "fo_copyBlk",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-renameBlock",
+      "toId": "fo_renBlk",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-delBlock",
+      "toId": "fo_delBlk",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-noDel",
+      "toId": "fo_delBlk",
+      "toProperty": "hidden"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-renaming",
+      "toId": "fo_rename",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-blockName",
+      "toId": "fo_renInput",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-renameAsk",
+      "toId": "fo_renInput",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-ok",
+      "toId": "fo_renOk",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-cancel",
+      "toId": "fo_renCancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-delAsking",
+      "toId": "fo_delAsk",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-delText",
+      "toId": "fo_delText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-yes",
+      "toId": "fo_delYes",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-no",
+      "toId": "fo_delNo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-blockColor",
+      "toId": "fo_steps",
+      "toProperty": "borderLeftColor"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-steps",
+      "toId": "fo_stepsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-stepsEmpty",
+      "toId": "fo_empty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-emptyText",
+      "toId": "fo_empty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-legend",
+      "toId": "fo_legend",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-moveTools",
+      "toId": "fo_stepTools",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-left",
+      "toId": "fo_stepL",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-right",
+      "toId": "fo_stepR",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-remove",
+      "toId": "fo_stepX",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-blockLen",
+      "toId": "fo_blockLen",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-addH",
+      "toId": "fo_addH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-filters",
+      "toId": "fo_filtersRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-palette",
+      "toId": "fo_paletteRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-levels",
+      "toId": "fo_levels",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-chainH",
+      "toId": "fo_chainH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-chainHint",
+      "toId": "fo_chainHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-chain",
+      "toId": "fo_chainRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-chainEmpty",
+      "toId": "fo_chainEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-chainEmptyText",
+      "toId": "fo_chainEmpty",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-addToChain",
+      "toId": "fo_addChain",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-chainTools",
+      "toId": "fo_chainTool",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-left",
+      "toId": "fo_chainL",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-right",
+      "toId": "fo_chainR",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-remove",
+      "toId": "fo_chainX",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-danceLen",
+      "toId": "fo_danceLen",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-musicLabel",
+      "toId": "fo_musicLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-danceLabel",
+      "toId": "fo_danceLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-musicWidth",
+      "toId": "fo_musicFill",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-segs",
+      "toId": "fo_segsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-foreH",
+      "toId": "fo_foreH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-meters",
+      "toId": "fo_metersRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-risk",
+      "toId": "fo_risk",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-reasons",
+      "toId": "fo_reasonsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-tryBtn",
+      "toId": "fo_try",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "fo_view",
+      "fromProperty": "out-tryNote",
+      "toId": "fo_tryNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fo_numsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "fo_sNum",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "fo_numsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "fo_sNum",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_abRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "fo_sAb",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "fo_abRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "fo_sAb",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_blocksRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "fo_sBlock",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "fo_blocksRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "fo_sBlock",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_newBlk",
+      "fromProperty": "click",
+      "toId": "fo_sNew",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_copyBlk",
+      "fromProperty": "click",
+      "toId": "fo_sCopy",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_renBlk",
+      "fromProperty": "click",
+      "toId": "fo_sRenAsk",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_renInput",
+      "fromProperty": "onTextChanged",
+      "toId": "fo_sRen",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "fo_renOk",
+      "fromProperty": "click",
+      "toId": "fo_sRen",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_renInput",
+      "fromProperty": "onEnter",
+      "toId": "fo_sRen",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_renCancel",
+      "fromProperty": "click",
+      "toId": "fo_sRenNo",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_delBlk",
+      "fromProperty": "click",
+      "toId": "fo_sDelAsk",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_delYes",
+      "fromProperty": "click",
+      "toId": "fo_sDel",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_delNo",
+      "fromProperty": "click",
+      "toId": "fo_sDelNo",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_stepsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "fo_sStep",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "fo_stepsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "fo_sStep",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_stepL",
+      "fromProperty": "click",
+      "toId": "fo_sStepL",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_stepR",
+      "fromProperty": "click",
+      "toId": "fo_sStepR",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_stepX",
+      "fromProperty": "click",
+      "toId": "fo_sStepX",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_filtersRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "fo_sFilter",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "fo_filtersRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "fo_sFilter",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_paletteRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "fo_sAdd",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "fo_paletteRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "fo_sAdd",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_chainRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "fo_sChain",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "fo_chainRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "fo_sChain",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_addChain",
+      "fromProperty": "click",
+      "toId": "fo_sAddChain",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_chainL",
+      "fromProperty": "click",
+      "toId": "fo_sChainL",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_chainR",
+      "fromProperty": "click",
+      "toId": "fo_sChainR",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_chainX",
+      "fromProperty": "click",
+      "toId": "fo_sChainX",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_dots",
+      "fromProperty": "itemActionItemId",
+      "toId": "fo_sPick",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "fo_dots",
+      "fromProperty": "itemOutputSignal-tap",
+      "toId": "fo_sPick",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_dots",
+      "fromProperty": "itemActionItemId",
+      "toId": "fo_drop",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "fo_dots",
+      "fromProperty": "itemOutput-dropLeft",
+      "toId": "fo_drop",
+      "toProperty": "in-left"
+    },
+    {
+      "fromId": "fo_dots",
+      "fromProperty": "itemOutput-dropTop",
+      "toId": "fo_drop",
+      "toProperty": "in-top"
+    },
+    {
+      "fromId": "fo_dots",
+      "fromProperty": "itemOutputSignal-dropped",
+      "toId": "fo_drop",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fo_drop",
+      "fromProperty": "out-arg",
+      "toId": "fo_sDrop",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "fo_drop",
+      "fromProperty": "out-send",
+      "toId": "fo_sDrop",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "fo_try",
+      "fromProperty": "click",
+      "toId": "fo_sTry",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

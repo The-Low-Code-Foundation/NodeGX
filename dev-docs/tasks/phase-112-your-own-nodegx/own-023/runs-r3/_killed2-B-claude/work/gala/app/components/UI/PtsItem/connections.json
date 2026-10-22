@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "92d37990-ea49-5abd-886c-f7857a8b6147",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pi_in",
+      "fromProperty": "label",
+      "toId": "pi_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pi_in",
+      "fromProperty": "value",
+      "toId": "pi_value",
+      "toProperty": "text"
+    }
+  ]
+}

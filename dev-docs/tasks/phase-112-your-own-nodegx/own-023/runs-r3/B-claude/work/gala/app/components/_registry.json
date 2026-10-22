@@ -1,0 +1,444 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/registry-v2.json",
+  "version": 1,
+  "lastUpdated": "2026-10-21T13:45:42.948Z",
+  "components": {
+    "App": {
+      "path": "App",
+      "type": "root",
+      "nodeCount": 2,
+      "connectionCount": 0,
+      "modified": "2026-10-21T13:15:56.225Z",
+      "created": "2026-10-21T12:40:08.793Z"
+    },
+    "UI/Chip": {
+      "path": "UI/Chip",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 14,
+      "modified": "2026-10-21T13:16:28.832Z",
+      "created": "2026-10-21T12:58:02.355Z"
+    },
+    "UI/ItemButton": {
+      "path": "UI/ItemButton",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 13,
+      "modified": "2026-10-21T13:16:29.623Z",
+      "created": "2026-10-21T12:59:01.505Z"
+    },
+    "UI/Fact": {
+      "path": "UI/Fact",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 1,
+      "modified": "2026-10-21T13:18:22.034Z",
+      "created": "2026-10-21T12:59:22.525Z"
+    },
+    "UI/Stepper": {
+      "path": "UI/Stepper",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 5,
+      "modified": "2026-10-21T12:59:32.307Z",
+      "created": "2026-10-21T12:59:32.307Z"
+    },
+    "UI/OrderCard": {
+      "path": "UI/OrderCard",
+      "type": "visual",
+      "nodeCount": 12,
+      "connectionCount": 10,
+      "modified": "2026-10-21T13:16:31.490Z",
+      "created": "2026-10-21T12:59:45.748Z"
+    },
+    "UI/ShopRow": {
+      "path": "UI/ShopRow",
+      "type": "visual",
+      "nodeCount": 11,
+      "connectionCount": 12,
+      "modified": "2026-10-21T13:16:30.746Z",
+      "created": "2026-10-21T13:00:03.793Z"
+    },
+    "UI/Meter": {
+      "path": "UI/Meter",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 5,
+      "modified": "2026-10-21T13:25:59.081Z",
+      "created": "2026-10-21T13:00:11.802Z"
+    },
+    "UI/Swatch": {
+      "path": "UI/Swatch",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 5,
+      "modified": "2026-10-21T13:00:25.439Z",
+      "created": "2026-10-21T13:00:25.439Z"
+    },
+    "UI/FeedLine": {
+      "path": "UI/FeedLine",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 2,
+      "modified": "2026-10-21T13:00:29.596Z",
+      "created": "2026-10-21T13:00:29.596Z"
+    },
+    "UI/SumLine": {
+      "path": "UI/SumLine",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 7,
+      "modified": "2026-10-21T13:00:36.689Z",
+      "created": "2026-10-21T13:00:36.689Z"
+    },
+    "UI/PtsItem": {
+      "path": "UI/PtsItem",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 2,
+      "modified": "2026-10-21T13:00:44.543Z",
+      "created": "2026-10-21T13:00:44.543Z"
+    },
+    "UI/KcalRow": {
+      "path": "UI/KcalRow",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 4,
+      "modified": "2026-10-21T13:00:50.321Z",
+      "created": "2026-10-21T13:00:50.321Z"
+    },
+    "UI/NoteEntry": {
+      "path": "UI/NoteEntry",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 3,
+      "modified": "2026-10-21T13:00:55.959Z",
+      "created": "2026-10-21T13:00:55.959Z"
+    },
+    "UI/LiveCard": {
+      "path": "UI/LiveCard",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 7,
+      "modified": "2026-10-21T13:01:19.736Z",
+      "created": "2026-10-21T13:01:19.736Z"
+    },
+    "UI/GoButton": {
+      "path": "UI/GoButton",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 9,
+      "modified": "2026-10-21T13:18:14.080Z",
+      "created": "2026-10-21T13:01:29.381Z"
+    },
+    "UI/StepChip": {
+      "path": "UI/StepChip",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 10,
+      "modified": "2026-10-21T13:16:32.185Z",
+      "created": "2026-10-21T13:01:44.523Z"
+    },
+    "UI/ChainChip": {
+      "path": "UI/ChainChip",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 8,
+      "modified": "2026-10-21T13:16:32.913Z",
+      "created": "2026-10-21T13:01:52.918Z"
+    },
+    "UI/TryStep": {
+      "path": "UI/TryStep",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 6,
+      "modified": "2026-10-21T13:02:00.847Z",
+      "created": "2026-10-21T13:02:00.847Z"
+    },
+    "UI/TryBlock": {
+      "path": "UI/TryBlock",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 3,
+      "modified": "2026-10-21T13:02:09.992Z",
+      "created": "2026-10-21T13:02:09.992Z"
+    },
+    "UI/Verdict": {
+      "path": "UI/Verdict",
+      "type": "visual",
+      "nodeCount": 13,
+      "connectionCount": 11,
+      "modified": "2026-10-21T13:02:23.018Z",
+      "created": "2026-10-21T13:02:23.018Z"
+    },
+    "UI/HairRow": {
+      "path": "UI/HairRow",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 5,
+      "modified": "2026-10-21T13:02:30.424Z",
+      "created": "2026-10-21T13:02:30.424Z"
+    },
+    "UI/DancerDot": {
+      "path": "UI/DancerDot",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 13,
+      "modified": "2026-10-21T13:03:10.281Z",
+      "created": "2026-10-21T13:02:53.026Z"
+    },
+    "UI/PlanMark": {
+      "path": "UI/PlanMark",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 6,
+      "modified": "2026-10-21T13:03:09.950Z",
+      "created": "2026-10-21T13:02:59.009Z"
+    },
+    "UI/MusicSeg": {
+      "path": "UI/MusicSeg",
+      "type": "visual",
+      "nodeCount": 2,
+      "connectionCount": 3,
+      "modified": "2026-10-21T13:03:02.701Z",
+      "created": "2026-10-21T13:03:02.701Z"
+    },
+    "__cloud__/saveChange": {
+      "path": "__cloud__/saveChange",
+      "type": "cloud",
+      "nodeCount": 8,
+      "connectionCount": 27,
+      "modified": "2026-10-21T13:05:59.532Z",
+      "created": "2026-10-21T13:05:59.532Z"
+    },
+    "__cloud__/removeChange": {
+      "path": "__cloud__/removeChange",
+      "type": "cloud",
+      "nodeCount": 7,
+      "connectionCount": 18,
+      "modified": "2026-10-21T13:06:15.527Z",
+      "created": "2026-10-21T13:06:15.527Z"
+    },
+    "__cloud__/claimGrownup": {
+      "path": "__cloud__/claimGrownup",
+      "type": "cloud",
+      "nodeCount": 6,
+      "connectionCount": 13,
+      "modified": "2026-10-21T13:06:25.041Z",
+      "created": "2026-10-21T13:06:25.041Z"
+    },
+    "Logic/Start Up": {
+      "path": "Logic/Start Up",
+      "type": "logic",
+      "nodeCount": 13,
+      "connectionCount": 14,
+      "modified": "2026-10-21T13:16:33.654Z",
+      "created": "2026-10-21T13:13:27.880Z"
+    },
+    "Game/Stage 3D": {
+      "path": "Game/Stage 3D",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 21,
+      "modified": "2026-10-21T13:45:39.518Z",
+      "created": "2026-10-21T13:14:18.031Z"
+    },
+    "Game/Dispatcher": {
+      "path": "Game/Dispatcher",
+      "type": "logic",
+      "nodeCount": 13,
+      "connectionCount": 19,
+      "modified": "2026-10-21T13:14:45.330Z",
+      "created": "2026-10-21T13:14:45.330Z"
+    },
+    "Pages/Grownups": {
+      "path": "Pages/Grownups",
+      "type": "page",
+      "nodeCount": 62,
+      "connectionCount": 131,
+      "modified": "2026-10-21T13:38:27.765Z",
+      "created": "2026-10-21T13:15:17.791Z"
+    },
+    "Game/Top Bar": {
+      "path": "Game/Top Bar",
+      "type": "visual",
+      "nodeCount": 18,
+      "connectionCount": 16,
+      "modified": "2026-10-21T13:16:41.209Z",
+      "created": "2026-10-21T13:15:38.706Z"
+    },
+    "Pages/Game": {
+      "path": "Pages/Game",
+      "type": "page",
+      "nodeCount": 14,
+      "connectionCount": 5,
+      "modified": "2026-10-21T13:25:04.517Z",
+      "created": "2026-10-21T13:15:51.094Z"
+    },
+    "Game/Camera Bar": {
+      "path": "Game/Camera Bar",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 7,
+      "modified": "2026-10-21T13:45:41.302Z",
+      "created": "2026-10-21T13:17:02.227Z"
+    },
+    "Tabs/Order": {
+      "path": "Tabs/Order",
+      "type": "visual",
+      "nodeCount": 19,
+      "connectionCount": 19,
+      "modified": "2026-10-21T13:17:19.152Z",
+      "created": "2026-10-21T13:17:19.152Z"
+    },
+    "Game/Sheet": {
+      "path": "Game/Sheet",
+      "type": "visual",
+      "nodeCount": 23,
+      "connectionCount": 21,
+      "modified": "2026-10-21T13:25:18.070Z",
+      "created": "2026-10-21T13:17:43.103Z"
+    },
+    "Tabs/Gouter": {
+      "path": "Tabs/Gouter",
+      "type": "visual",
+      "nodeCount": 30,
+      "connectionCount": 35,
+      "modified": "2026-10-21T13:19:00.684Z",
+      "created": "2026-10-21T13:18:49.026Z"
+    },
+    "Tabs/Costumes": {
+      "path": "Tabs/Costumes",
+      "type": "visual",
+      "nodeCount": 33,
+      "connectionCount": 32,
+      "modified": "2026-10-21T13:19:38.095Z",
+      "created": "2026-10-21T13:19:38.095Z"
+    },
+    "Tabs/Build": {
+      "path": "Tabs/Build",
+      "type": "visual",
+      "nodeCount": 34,
+      "connectionCount": 34,
+      "modified": "2026-10-21T13:20:19.288Z",
+      "created": "2026-10-21T13:20:19.288Z"
+    },
+    "Tabs/Parking": {
+      "path": "Tabs/Parking",
+      "type": "visual",
+      "nodeCount": 22,
+      "connectionCount": 20,
+      "modified": "2026-10-21T13:20:44.492Z",
+      "created": "2026-10-21T13:20:44.492Z"
+    },
+    "Tabs/Shop": {
+      "path": "Tabs/Shop",
+      "type": "visual",
+      "nodeCount": 19,
+      "connectionCount": 17,
+      "modified": "2026-10-21T13:21:02.469Z",
+      "created": "2026-10-21T13:21:02.469Z"
+    },
+    "Tabs/Notebook": {
+      "path": "Tabs/Notebook",
+      "type": "visual",
+      "nodeCount": 19,
+      "connectionCount": 16,
+      "modified": "2026-10-21T13:21:19.256Z",
+      "created": "2026-10-21T13:21:19.256Z"
+    },
+    "Tabs/Formation": {
+      "path": "Tabs/Formation",
+      "type": "visual",
+      "nodeCount": 108,
+      "connectionCount": 120,
+      "modified": "2026-10-21T13:45:42.948Z",
+      "created": "2026-10-21T13:23:30.789Z"
+    },
+    "Game/Live": {
+      "path": "Game/Live",
+      "type": "visual",
+      "nodeCount": 16,
+      "connectionCount": 13,
+      "modified": "2026-10-21T13:23:53.266Z",
+      "created": "2026-10-21T13:23:53.266Z"
+    },
+    "Game/Results": {
+      "path": "Game/Results",
+      "type": "visual",
+      "nodeCount": 18,
+      "connectionCount": 15,
+      "modified": "2026-10-21T13:24:10.221Z",
+      "created": "2026-10-21T13:24:10.221Z"
+    },
+    "Game/Toast": {
+      "path": "Game/Toast",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 6,
+      "modified": "2026-10-21T13:25:05.112Z",
+      "created": "2026-10-21T13:24:27.676Z"
+    },
+    "Game/Season Letter": {
+      "path": "Game/Season Letter",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 8,
+      "modified": "2026-10-21T13:45:40.207Z",
+      "created": "2026-10-21T13:24:39.543Z"
+    },
+    "Game/Furniture Toolbar": {
+      "path": "Game/Furniture Toolbar",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 7,
+      "modified": "2026-10-21T13:24:49.024Z",
+      "created": "2026-10-21T13:24:49.024Z"
+    },
+    "Grownups/Row Editor": {
+      "path": "Grownups/Row Editor",
+      "type": "visual",
+      "nodeCount": 23,
+      "connectionCount": 23,
+      "modified": "2026-10-21T13:34:03.150Z",
+      "created": "2026-10-21T13:29:23.578Z"
+    },
+    "Grownups/New Costume": {
+      "path": "Grownups/New Costume",
+      "type": "visual",
+      "nodeCount": 21,
+      "connectionCount": 20,
+      "modified": "2026-10-21T13:34:27.543Z",
+      "created": "2026-10-21T13:30:40.263Z"
+    },
+    "UI/Labelled Pick": {
+      "path": "UI/Labelled Pick",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 4,
+      "modified": "2026-10-21T13:30:50.071Z",
+      "created": "2026-10-21T13:30:50.071Z"
+    },
+    "Grownups/New Step": {
+      "path": "Grownups/New Step",
+      "type": "visual",
+      "nodeCount": 15,
+      "connectionCount": 28,
+      "modified": "2026-10-21T13:34:17.027Z",
+      "created": "2026-10-21T13:31:12.621Z"
+    },
+    "Grownups/Words": {
+      "path": "Grownups/Words",
+      "type": "logic",
+      "nodeCount": 2,
+      "connectionCount": 1,
+      "modified": "2026-10-21T13:35:02.151Z",
+      "created": "2026-10-21T13:35:02.151Z"
+    }
+  },
+  "stats": {
+    "totalComponents": 54,
+    "totalNodes": 762,
+    "totalConnections": 874
+  }
+}

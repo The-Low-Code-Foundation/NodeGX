@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "357a2215-9e60-5f59-8de6-592e423eb5c7",
+  "name": "ShopRow",
+  "path": "/UI/ShopRow",
+  "type": "visual",
+  "created": "2026-10-21T13:00:03.751Z",
+  "modified": "2026-10-21T13:16:30.667Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One thing for sale in the shop: icon, name, what it does, and either a price button (dimmed when there aren't enough stars) or \"yours ✓\"."
+}

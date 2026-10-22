@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2311f6d3-5c2c-539c-88bd-b71d5bf55274",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "s3_host",
+      "fromProperty": "this",
+      "toId": "s3_run",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "s3_host",
+      "fromProperty": "didMount",
+      "toId": "s3_run",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "s3_in",
+      "fromProperty": "save",
+      "toId": "s3_run",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "s3_in",
+      "fromProperty": "ui",
+      "toId": "s3_run",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "s3_in",
+      "fromProperty": "words",
+      "toId": "s3_run",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-stage",
+      "toId": "s3_sync",
+      "toProperty": "in-stage"
+    },
+    {
+      "fromId": "s3_in",
+      "fromProperty": "save",
+      "toId": "s3_sync",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "s3_in",
+      "fromProperty": "ui",
+      "toId": "s3_sync",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "s3_in",
+      "fromProperty": "words",
+      "toId": "s3_sync",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-stage",
+      "toId": "s3_bye",
+      "toProperty": "in-stage"
+    },
+    {
+      "fromId": "s3_host",
+      "fromProperty": "willUnmount",
+      "toId": "s3_bye",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-stage",
+      "toId": "s3_out",
+      "toProperty": "stage"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-live",
+      "toId": "s3_live",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-liveChanged",
+      "toId": "s3_live",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-cam",
+      "toId": "s3_cam",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-camChanged",
+      "toId": "s3_cam",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-float",
+      "toId": "s3_float",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-floatChanged",
+      "toId": "s3_float",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-act",
+      "toId": "s3_send",
+      "toProperty": "act"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-arg",
+      "toId": "s3_send",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "s3_run",
+      "fromProperty": "out-acted",
+      "toId": "s3_send",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

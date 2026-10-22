@@ -1,0 +1,793 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "fe9d88e2-8ebb-585f-8b85-56a96c1af983",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gp_words",
+      "fromProperty": "value",
+      "toId": "gp_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "gp_gwords",
+      "fromProperty": "value",
+      "toId": "gp_view",
+      "toProperty": "in-gwords"
+    },
+    {
+      "fromId": "gp_save",
+      "fromProperty": "value",
+      "toId": "gp_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "gp_userNode",
+      "fromProperty": "authenticated",
+      "toId": "gp_view",
+      "toProperty": "in-authenticated"
+    },
+    {
+      "fromId": "gp_userNode",
+      "fromProperty": "roles",
+      "toId": "gp_view",
+      "toProperty": "in-roles"
+    },
+    {
+      "fromId": "gp_userNode",
+      "fromProperty": "username",
+      "toId": "gp_view",
+      "toProperty": "in-username"
+    },
+    {
+      "fromId": "gp_table",
+      "fromProperty": "value",
+      "toId": "gp_view",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "gp_message",
+      "fromProperty": "value",
+      "toId": "gp_view",
+      "toProperty": "in-message"
+    },
+    {
+      "fromId": "gp_changes",
+      "fromProperty": "items",
+      "toId": "gp_view",
+      "toProperty": "in-changes"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-title",
+      "toId": "gp_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-intro",
+      "toId": "gp_intro",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-back",
+      "toId": "gp_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-message",
+      "toId": "gp_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-message",
+      "toId": "gp_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-needSignIn",
+      "toId": "gp_signin",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-siH",
+      "toId": "gp_siH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-user",
+      "toId": "gp_user",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-pass",
+      "toId": "gp_pass",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-login",
+      "toId": "gp_login",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-signup",
+      "toId": "gp_signup",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-siHint",
+      "toId": "gp_siHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-notGrownup",
+      "toId": "gp_notg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-notGText",
+      "toId": "gp_notgText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-logout",
+      "toId": "gp_logout",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-logout",
+      "toId": "gp_logout2",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-isGrownup",
+      "toId": "gp_editor",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-who",
+      "toId": "gp_whoText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-tables",
+      "toId": "gp_tablesRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-applyNote",
+      "toId": "gp_applyNote",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-openGame",
+      "toId": "gp_open",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-rows",
+      "toId": "gp_rowsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-isStart",
+      "toId": "gp_start",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-startH",
+      "toId": "gp_startH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-startHint",
+      "toId": "gp_startHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-stars",
+      "toId": "gp_starsIn",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-save",
+      "toId": "gp_starsSave",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-isMoves",
+      "toId": "gp_newStep",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-nsTitle",
+      "toId": "gp_newStep",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-frL",
+      "toId": "gp_newStep",
+      "toProperty": "frLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-enL",
+      "toId": "gp_newStep",
+      "toProperty": "enLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-dL",
+      "toId": "gp_newStep",
+      "toProperty": "dLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-cL",
+      "toId": "gp_newStep",
+      "toProperty": "cLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-iconL",
+      "toId": "gp_newStep",
+      "toProperty": "iconLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-stL",
+      "toId": "gp_newStep",
+      "toProperty": "stLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-aL",
+      "toId": "gp_newStep",
+      "toProperty": "aLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-bL",
+      "toId": "gp_newStep",
+      "toProperty": "bLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-add",
+      "toId": "gp_newStep",
+      "toProperty": "addLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-diffs",
+      "toId": "gp_newStep",
+      "toProperty": "diffs"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-counts",
+      "toId": "gp_newStep",
+      "toProperty": "counts"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-icons",
+      "toId": "gp_newStep",
+      "toProperty": "icons"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-styles",
+      "toId": "gp_newStep",
+      "toProperty": "styles"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-levels",
+      "toId": "gp_newStep",
+      "toProperty": "levels"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-isOutfits",
+      "toId": "gp_newCostume",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-ncTitle",
+      "toId": "gp_newCostume",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-frL",
+      "toId": "gp_newCostume",
+      "toProperty": "frLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-enL",
+      "toId": "gp_newCostume",
+      "toProperty": "enLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-minL",
+      "toId": "gp_newCostume",
+      "toProperty": "minLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-priceL",
+      "toId": "gp_newCostume",
+      "toProperty": "priceLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-iconL",
+      "toId": "gp_newCostume",
+      "toProperty": "iconLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-themeL",
+      "toId": "gp_newCostume",
+      "toProperty": "themeLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-add",
+      "toId": "gp_newCostume",
+      "toProperty": "addLabel"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-icons",
+      "toId": "gp_newCostume",
+      "toProperty": "icons"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-themes",
+      "toId": "gp_newCostume",
+      "toProperty": "themes"
+    },
+    {
+      "fromId": "gp_back",
+      "fromProperty": "click",
+      "toId": "gp_goGame",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "gp_open",
+      "fromProperty": "click",
+      "toId": "gp_reload",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "gp_tablesRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "gp_setTable",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "gp_tablesRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "gp_setTable",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "gp_user",
+      "fromProperty": "onTextChanged",
+      "toId": "gp_login1",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "gp_pass",
+      "fromProperty": "onTextChanged",
+      "toId": "gp_login1",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "gp_user",
+      "fromProperty": "onTextChanged",
+      "toId": "gp_signup1",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "gp_pass",
+      "fromProperty": "onTextChanged",
+      "toId": "gp_signup1",
+      "toProperty": "password"
+    },
+    {
+      "fromId": "gp_login",
+      "fromProperty": "click",
+      "toId": "gp_login1",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "gp_signup",
+      "fromProperty": "click",
+      "toId": "gp_signup1",
+      "toProperty": "signup"
+    },
+    {
+      "fromId": "gp_login1",
+      "fromProperty": "done",
+      "toId": "gp_claimFn",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "gp_signup1",
+      "fromProperty": "done",
+      "toId": "gp_claimFn",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "gp_claimFn",
+      "fromProperty": "done",
+      "toId": "gp_userNode",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "gp_claimFn",
+      "fromProperty": "failure",
+      "toId": "gp_userNode",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "gp_logout",
+      "fromProperty": "click",
+      "toId": "gp_logout1",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "gp_logout2",
+      "fromProperty": "click",
+      "toId": "gp_logout1",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "gp_words",
+      "fromProperty": "value",
+      "toId": "gp_change",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "gp_gwords",
+      "fromProperty": "value",
+      "toId": "gp_change",
+      "toProperty": "in-gwords"
+    },
+    {
+      "fromId": "gp_save",
+      "fromProperty": "value",
+      "toId": "gp_change",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "gp_table",
+      "fromProperty": "value",
+      "toId": "gp_change",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "gp_rowsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "gp_change",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "gp_rowsRep",
+      "fromProperty": "itemOutput-values",
+      "toId": "gp_change",
+      "toProperty": "in-rowValues"
+    },
+    {
+      "fromId": "gp_rowsRep",
+      "fromProperty": "itemOutputSignal-save",
+      "toId": "gp_change",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gp_newStep",
+      "fromProperty": "values",
+      "toId": "gp_change",
+      "toProperty": "in-stepValues"
+    },
+    {
+      "fromId": "gp_newStep",
+      "fromProperty": "add",
+      "toId": "gp_change",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gp_newCostume",
+      "fromProperty": "values",
+      "toId": "gp_change",
+      "toProperty": "in-costumeValues"
+    },
+    {
+      "fromId": "gp_newCostume",
+      "fromProperty": "add",
+      "toId": "gp_change",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gp_change",
+      "fromProperty": "out-table",
+      "toId": "gp_saveFn",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "gp_change",
+      "fromProperty": "out-rowId",
+      "toId": "gp_saveFn",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "gp_change",
+      "fromProperty": "out-fields",
+      "toId": "gp_saveFn",
+      "toProperty": "in-fields"
+    },
+    {
+      "fromId": "gp_change",
+      "fromProperty": "out-send",
+      "toId": "gp_saveFn",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "gp_change",
+      "fromProperty": "out-message",
+      "toId": "gp_setMsg",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "gp_change",
+      "fromProperty": "out-said",
+      "toId": "gp_setMsg",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "gp_words",
+      "fromProperty": "value",
+      "toId": "gp_stars",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "gp_gwords",
+      "fromProperty": "value",
+      "toId": "gp_stars",
+      "toProperty": "in-gwords"
+    },
+    {
+      "fromId": "gp_save",
+      "fromProperty": "value",
+      "toId": "gp_stars",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "gp_starsIn",
+      "fromProperty": "onTextChanged",
+      "toId": "gp_stars",
+      "toProperty": "in-stars"
+    },
+    {
+      "fromId": "gp_starsSave",
+      "fromProperty": "click",
+      "toId": "gp_stars",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gp_stars",
+      "fromProperty": "out-table",
+      "toId": "gp_saveFn",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "gp_stars",
+      "fromProperty": "out-rowId",
+      "toId": "gp_saveFn",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "gp_stars",
+      "fromProperty": "out-fields",
+      "toId": "gp_saveFn",
+      "toProperty": "in-fields"
+    },
+    {
+      "fromId": "gp_stars",
+      "fromProperty": "out-send",
+      "toId": "gp_saveFn",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "gp_stars",
+      "fromProperty": "out-message",
+      "toId": "gp_setMsgStars",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "gp_stars",
+      "fromProperty": "out-said",
+      "toId": "gp_setMsgStars",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "gp_rowsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "gp_removeFn",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "gp_table",
+      "fromProperty": "value",
+      "toId": "gp_removeFn",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "gp_rowsRep",
+      "fromProperty": "itemOutputSignal-reset",
+      "toId": "gp_removeFn",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "gp_words",
+      "fromProperty": "value",
+      "toId": "gp_said",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "gp_gwords",
+      "fromProperty": "value",
+      "toId": "gp_said",
+      "toProperty": "in-gwords"
+    },
+    {
+      "fromId": "gp_save",
+      "fromProperty": "value",
+      "toId": "gp_said",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "gp_saveFn",
+      "fromProperty": "error",
+      "toId": "gp_said",
+      "toProperty": "in-error"
+    },
+    {
+      "fromId": "gp_saveFn",
+      "fromProperty": "failure",
+      "toId": "gp_said",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gp_removeFn",
+      "fromProperty": "error",
+      "toId": "gp_said",
+      "toProperty": "in-error"
+    },
+    {
+      "fromId": "gp_removeFn",
+      "fromProperty": "failure",
+      "toId": "gp_said",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gp_claimFn",
+      "fromProperty": "error",
+      "toId": "gp_said",
+      "toProperty": "in-error"
+    },
+    {
+      "fromId": "gp_claimFn",
+      "fromProperty": "failure",
+      "toId": "gp_said",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gp_login1",
+      "fromProperty": "error",
+      "toId": "gp_said",
+      "toProperty": "in-error"
+    },
+    {
+      "fromId": "gp_login1",
+      "fromProperty": "failure",
+      "toId": "gp_said",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gp_signup1",
+      "fromProperty": "error",
+      "toId": "gp_said",
+      "toProperty": "in-error"
+    },
+    {
+      "fromId": "gp_signup1",
+      "fromProperty": "failure",
+      "toId": "gp_said",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "gp_said",
+      "fromProperty": "out-message",
+      "toId": "gp_setMsgErr",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "gp_said",
+      "fromProperty": "out-said",
+      "toId": "gp_setMsgErr",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-savedText",
+      "toId": "gp_setMsgSaved",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "gp_saveFn",
+      "fromProperty": "done",
+      "toId": "gp_setMsgSaved",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "gp_view",
+      "fromProperty": "out-removedText",
+      "toId": "gp_setMsgRemoved",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "gp_removeFn",
+      "fromProperty": "done",
+      "toId": "gp_setMsgRemoved",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "gp_saveFn",
+      "fromProperty": "done",
+      "toId": "gp_changes",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "gp_removeFn",
+      "fromProperty": "done",
+      "toId": "gp_changes",
+      "toProperty": "storageFetch"
+    }
+  ]
+}

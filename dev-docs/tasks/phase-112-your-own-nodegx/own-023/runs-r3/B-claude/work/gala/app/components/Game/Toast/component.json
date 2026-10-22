@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f2ff18d2-b38d-5e86-8577-f784bf50964d",
+  "name": "Toast",
+  "path": "/Game/Toast",
+  "type": "visual",
+  "created": "2026-10-21T13:24:27.571Z",
+  "modified": "2026-10-21T13:25:04.623Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The little message at the bottom of the window (\"Bought: Fairy ✨\", \"Not enough stars…\", what just happened in the evening), shown for 2.6 seconds."
+}

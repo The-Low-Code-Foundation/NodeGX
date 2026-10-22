@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8c0a37ed-9f36-50b2-8a39-84513ddd35a4",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fl_in",
+      "fromProperty": "time",
+      "toId": "fl_time",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fl_in",
+      "fromProperty": "text",
+      "toId": "fl_text",
+      "toProperty": "text"
+    }
+  ]
+}

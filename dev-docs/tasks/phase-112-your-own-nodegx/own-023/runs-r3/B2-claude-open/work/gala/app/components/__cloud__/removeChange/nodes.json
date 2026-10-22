@@ -1,0 +1,159 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2a1ca1d4-76e5-5689-8230-c383a957b3f3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rm_req",
+      "type": "noodl.cloud.request",
+      "parameters": {
+        "params": "table,rowId"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rm_roles",
+      "type": "noodl.cloud.getuserroles",
+      "label": "Is the caller a grown-up?",
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "rm_query",
+      "type": "DbCollection2",
+      "label": "What is saved",
+      "parameters": {
+        "collectionName": "GameChange",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false
+      },
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "rm_find",
+      "type": "JavaScriptFunction",
+      "label": "Find the row to take back",
+      "parameters": {
+        "scriptOutputs": [
+          {
+            "id": "found",
+            "label": "found"
+          },
+          {
+            "id": "refused",
+            "label": "refused"
+          },
+          {
+            "id": "reason",
+            "label": "reason"
+          },
+          {
+            "id": "id",
+            "label": "id"
+          }
+        ],
+        "outtype-found": "signal",
+        "outtype-refused": "signal",
+        "outtype-reason": "string",
+        "outtype-id": "string",
+        "runOnChange-in-rows": false,
+        "runOnChange-in-roles": false,
+        "runOnChange-in-table": false,
+        "runOnChange-in-rowId": false,
+        "functionScript": "if (Inputs.rows === undefined || Inputs.roles === undefined) return;\nif (!(Inputs.roles || []).includes('grownup')) { Outputs.reason = 'notGrownup'; Outputs.refused(); return; }\nconst get = (o, k) => (o && typeof o.get === 'function' ? o.get(k) : o && o[k]);\nconst rowId = Inputs.table === 'start' ? 'row' : String(Inputs.rowId || '');\nconst row = (Inputs.rows || []).find((r) => get(r, 'table') === Inputs.table && get(r, 'rowId') === rowId);\nif (!row) { Outputs.reason = 'nothing'; Outputs.refused(); return; }\nOutputs.id = get(row, 'id') || row.id;\nOutputs.found();\n"
+      },
+      "x": 40,
+      "y": 400,
+      "ports": [
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-refused",
+          "displayName": "refused",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-reason",
+          "displayName": "reason",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-roles",
+          "displayName": "roles",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-table",
+          "displayName": "table",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rowId",
+          "displayName": "rowId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "rm_delete",
+      "type": "DeleteDbModelProperties",
+      "parameters": {
+        "collectionName": "GameChange",
+        "idSource": "explicit"
+      },
+      "x": 40,
+      "y": 520
+    },
+    {
+      "id": "rm_ok",
+      "type": "noodl.cloud.response",
+      "label": "Taken back",
+      "parameters": {
+        "params": "removed"
+      },
+      "x": 40,
+      "y": 640
+    },
+    {
+      "id": "rm_fail",
+      "type": "noodl.cloud.response",
+      "label": "Refused",
+      "parameters": {
+        "status": "failure"
+      },
+      "x": 40,
+      "y": 760
+    }
+  ]
+}

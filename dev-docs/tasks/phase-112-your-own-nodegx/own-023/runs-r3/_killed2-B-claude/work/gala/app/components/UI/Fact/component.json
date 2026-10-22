@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3f47a6e8-673a-5aec-8fcf-567fcb97f865",
+  "name": "Fact",
+  "path": "/UI/Fact",
+  "type": "visual",
+  "created": "2026-10-21T12:59:22.487Z",
+  "modified": "2026-10-21T13:18:21.944Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One line of a fact list: a gold bullet and a muted sentence (\"The hall closes at 21:00…\")."
+}

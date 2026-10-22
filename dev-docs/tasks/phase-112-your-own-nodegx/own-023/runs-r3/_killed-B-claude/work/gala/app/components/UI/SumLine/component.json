@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "75a18b58-4a0f-5c86-8692-8f74ce5aaebc",
+  "name": "SumLine",
+  "path": "/UI/SumLine",
+  "type": "visual",
+  "created": "2026-10-21T13:00:36.654Z",
+  "modified": "2026-10-21T13:00:36.654Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One line of a \"Why?\" sum: the reasoning on the left, a number on the right; a total line is bold with a rule above."
+}

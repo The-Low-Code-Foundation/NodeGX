@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "75a18b58-4a0f-5c86-8692-8f74ce5aaebc",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sl_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "a",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "b",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tot",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "sl_root",
+      "type": "Group",
+      "children": [
+        "sl_a",
+        "sl_b"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-2)",
+        "paddingTop": "var(--space-0-5)",
+        "paddingBottom": "var(--space-0-5)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sl_a",
+      "type": "Text",
+      "parent": "sl_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "lineHeight": "var(--leading-snug)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sl_b",
+      "type": "Text",
+      "parent": "sl_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "sl_look",
+      "type": "States",
+      "label": "Total line look",
+      "parameters": {
+        "states": "line,total",
+        "values": "weight,rule",
+        "type-weight": "number",
+        "type-rule": "color",
+        "value-line-weight": 500,
+        "value-total-weight": 800,
+        "value-line-rule": "transparent",
+        "value-total-rule": "var(--border-strong)"
+      },
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "sl_state",
+      "type": "Boolean To String",
+      "parameters": {
+        "trueString": "total",
+        "falseString": "line"
+      },
+      "x": 350,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "sl_root"
+  ]
+}

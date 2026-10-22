@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "bf167c57-9677-53c7-85ec-68f235eb5650",
+  "name": "Furniture Toolbar",
+  "path": "/Game/Furniture Toolbar",
+  "type": "visual",
+  "created": "2026-10-21T13:24:48.527Z",
+  "modified": "2026-10-21T13:24:48.527Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The little toolbar that floats over a chosen piece of furniture in the 3D dressing room: turn it, move it, put it away. The 3D view says where the piece is on screen."
+}

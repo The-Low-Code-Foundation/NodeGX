@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "faae6b38-a264-53e0-87d0-d3879906a6fb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gb_in",
+      "fromProperty": "label",
+      "toId": "gb_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gb_in",
+      "fromProperty": "kind",
+      "toId": "gb_look",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "gb_look",
+      "fromProperty": "bg",
+      "toId": "gb_root",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "gb_look",
+      "fromProperty": "border",
+      "toId": "gb_root",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "gb_look",
+      "fromProperty": "fg",
+      "toId": "gb_label",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "gb_in",
+      "fromProperty": "wide",
+      "toId": "gb_widestate",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "gb_widestate",
+      "fromProperty": "currentValue",
+      "toId": "gb_wide",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "gb_root",
+      "fromProperty": "onClick",
+      "toId": "gb_out",
+      "toProperty": "click"
+    },
+    {
+      "fromId": "gb_wide",
+      "fromProperty": "width",
+      "toId": "gb_root",
+      "toProperty": "width"
+    }
+  ]
+}

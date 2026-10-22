@@ -1,0 +1,11 @@
+{
+  "setup": {
+    "arm": "nodegx",
+    "seed": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/9d500e28-f5ed-41fa-bf07-570aa0896060/scratchpad/own023-r3/seeds/nodegx",
+    "kitVibeConfig": "# Mistral Vibe settings for this folder, written by `npm create nodegx`. Start Vibe here with:\n#\n#   vibe --legacy-harness\n#\n# Vibe's default harness hides a tool's error messages from the model, and NodeGX answers every refused change\n# with what to fix, so the legacy harness builds better apps. Edit anything below; it is never overwritten.\n\nactive_model = \"deepseek-v4.1-flash\"\n\n[[models]]\nname = \"mistral-large-4\"\nprovider = \"mistral\"\nalias = \"mistral-large-4\"\ndisplay_name = \"Mistral Large 4\"\ntemperature = 1.0\nthinking = \"high\"\nthinking_levels = [\"low\", \"high\"]\nmax_context_length = 1000000\ninput_price = 1.36\noutput_price = 4.18\ncached_input_price = 0.14\n\n[[mcp_servers]]\nname = \"nodegx\"\ntransport = \"stdio\"\ncommand = \"npx\"\nargs = [\"-y\", \"@nodegx/mcp@0.2.4\", \"--allow-writes\", \"--profile\", \"vibe\"]\nstartup_timeout_sec = 240\ntool_timeout_sec = 600\n\n[tools.nodegx_list_projects]\npermission = \"always\"\n\n[tools.nodegx_open_project]\npermission = \"always\"\n\n[tools.nodegx_create_project]\npermission = \"always\"\n\n[tools.nodegx_list_examples]\npermission = \"always\"\n\n[tools.nodegx_get_example]\npermission = \"always\"\n\n[tools.nodegx_find_tools]\npermission = \"always\"\n\n[tools.nodegx_call_tool]\npermission = \"always\"\n"
+  },
+  "sittings": 2,
+  "plan": true,
+  "seconds": 717,
+  "killed": []
+}

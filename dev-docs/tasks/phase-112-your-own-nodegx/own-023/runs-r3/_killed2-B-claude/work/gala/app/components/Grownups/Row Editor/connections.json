@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "72740e49-c862-5b2d-8917-cbeaceefb93e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "re_in",
+      "fromProperty": "icon",
+      "toId": "re_icon",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "fr",
+      "toId": "re_frIn",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "en",
+      "toId": "re_enIn",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "frLabel",
+      "toId": "re_frLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "enLabel",
+      "toId": "re_enLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "aShow",
+      "toId": "re_aBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "aLabel",
+      "toId": "re_aLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "a",
+      "toId": "re_aIn",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "bShow",
+      "toId": "re_bBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "bLabel",
+      "toId": "re_bLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "b",
+      "toId": "re_bIn",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "saveLabel",
+      "toId": "re_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "resetLabel",
+      "toId": "re_reset",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "re_in",
+      "fromProperty": "changed",
+      "toId": "re_unchanged",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "re_unchanged",
+      "fromProperty": "result",
+      "toId": "re_reset",
+      "toProperty": "hidden"
+    },
+    {
+      "fromId": "re_reset",
+      "fromProperty": "click",
+      "toId": "re_out",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "re_frIn",
+      "fromProperty": "onTextChanged",
+      "toId": "re_pack",
+      "toProperty": "in-fr"
+    },
+    {
+      "fromId": "re_enIn",
+      "fromProperty": "onTextChanged",
+      "toId": "re_pack",
+      "toProperty": "in-en"
+    },
+    {
+      "fromId": "re_aIn",
+      "fromProperty": "onTextChanged",
+      "toId": "re_pack",
+      "toProperty": "in-a"
+    },
+    {
+      "fromId": "re_bIn",
+      "fromProperty": "onTextChanged",
+      "toId": "re_pack",
+      "toProperty": "in-b"
+    },
+    {
+      "fromId": "re_save",
+      "fromProperty": "click",
+      "toId": "re_pack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "re_pack",
+      "fromProperty": "out-values",
+      "toId": "re_out",
+      "toProperty": "values"
+    },
+    {
+      "fromId": "re_pack",
+      "fromProperty": "out-go",
+      "toId": "re_out",
+      "toProperty": "save"
+    }
+  ]
+}

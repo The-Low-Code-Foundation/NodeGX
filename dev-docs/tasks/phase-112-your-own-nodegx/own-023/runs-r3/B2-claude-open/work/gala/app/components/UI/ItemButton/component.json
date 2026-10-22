@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f25f79fe-1cde-5d86-8c8e-ae3babebaa17",
+  "name": "ItemButton",
+  "path": "/UI/ItemButton",
+  "type": "visual",
+  "created": "2026-10-21T12:59:01.464Z",
+  "modified": "2026-10-21T13:16:29.517Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A tile you press to choose or buy something: an outfit, a snack, a piece of furniture, a step for the dance. Icon, name and a small line (time, price, effect). Pressed is gold; locked (not bought yet) is dimmed."
+}

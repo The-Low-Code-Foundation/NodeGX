@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0aed0e64-2945-5c91-841d-69d69c4086f9",
+  "name": "Chip",
+  "path": "/UI/Chip",
+  "type": "visual",
+  "created": "2026-10-21T12:58:02.301Z",
+  "modified": "2026-10-21T13:16:28.640Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A pill button with an optional coloured dot: the tabs, the number chips, the A/B choice, the filters, the shop categories. Pressed shows gold; locked dims it."
+}

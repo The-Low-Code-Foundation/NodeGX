@@ -1,0 +1,21 @@
+I've just been handed this folder. It's a game somebody else made. That's all I know about it: there's no documentation, and the person who made it isn't around to ask.
+
+Here's what I want to add next, and I'd like a plan for it before anyone writes any code.
+
+Kids sign in online and keep their progress.
+- A child should be able to sign in and find their game exactly where they left it, on another device (the family tablet, a laptop at school).
+- The players are children, roughly 8 to 13. They don't have an email address of their own, and a grown-up in the family should be the one who sets them up.
+- Two children of the same family can share one device, each with their own progress.
+- The game must still work for someone who never signs in, and a child who already has progress on this device must not lose it when they first sign in.
+- If the connection drops in the middle of a game, nothing the child did should be lost.
+- It needs a backend and whatever server-side workflows that takes; you decide what those are.
+
+Write the plan in a file called PLAN.md in this folder. Don't build the feature: the only file you should write yourself is PLAN.md.
+
+PLAN.md should have four parts:
+1. How the game works today, as you understand it: what it is, how it's put together, and in detail the parts this feature touches (name the files, functions or components).
+2. The plan: what you would add and change, where, and in what order; the data you'd store and where; how a child signs in; what happens to the progress already on a device; what happens offline; what could go wrong.
+3. What you'd check to know it works.
+4. How you found your way around: what was easy to understand, what was hard, and where you're unsure of what you wrote.
+
+Please work it out without asking me questions.

@@ -1,0 +1,130 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "faae6b38-a264-53e0-87d0-d3879906a6fb",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "gb_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "wide",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "gb_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "click",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "gb_root",
+      "type": "Group",
+      "label": "Button",
+      "children": [
+        "gb_label"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "justifyContent": "center",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "paddingTop": "var(--space-2-5)",
+        "paddingBottom": "var(--space-2-5)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-2)",
+        "marginBottom": "var(--space-2)",
+        "width": {
+          "value": 48.5,
+          "unit": "%"
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "gb_label",
+      "type": "Text",
+      "parent": "gb_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "gb_look",
+      "type": "States",
+      "label": "Rehearse or gala look",
+      "parameters": {
+        "states": "reh,gala",
+        "values": "bg,border,fg",
+        "type-bg": "color",
+        "type-border": "color",
+        "type-fg": "color",
+        "value-reh-bg": "transparent",
+        "value-reh-border": "var(--primary)",
+        "value-reh-fg": "var(--foreground)",
+        "value-gala-bg": "var(--secondary)",
+        "value-gala-border": "var(--secondary)",
+        "value-gala-fg": "var(--secondary-foreground)"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "gb_wide",
+      "type": "States",
+      "label": "Half or whole row",
+      "parameters": {
+        "states": "half,wide",
+        "values": "width",
+        "type-width": "number",
+        "value-half-width": 48.5,
+        "value-wide-width": 100
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "gb_widestate",
+      "type": "Boolean To String",
+      "parameters": {
+        "trueString": "wide",
+        "falseString": "half"
+      },
+      "x": 350,
+      "y": 640
+    }
+  ],
+  "visualRoots": [
+    "gb_root"
+  ]
+}

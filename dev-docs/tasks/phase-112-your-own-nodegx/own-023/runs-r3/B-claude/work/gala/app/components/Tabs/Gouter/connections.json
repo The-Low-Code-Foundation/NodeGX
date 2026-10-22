@@ -1,0 +1,217 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "48e716a9-903f-546e-8ce2-f14872ac024e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "go_in",
+      "fromProperty": "show",
+      "toId": "go_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "go_save",
+      "fromProperty": "value",
+      "toId": "go_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "go_words",
+      "fromProperty": "value",
+      "toId": "go_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-title",
+      "toId": "go_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-snackH",
+      "toId": "go_snackH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-snackHint",
+      "toId": "go_snackHint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-snacks",
+      "toId": "go_snacksRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-tableH",
+      "toId": "go_tableH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-facts",
+      "toId": "go_factsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-table",
+      "toId": "go_tableRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-cakeLabel",
+      "toId": "go_cake",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-cake",
+      "toId": "go_cake",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-bottlesLabel",
+      "toId": "go_bottles",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-bottles",
+      "toId": "go_bottles",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-crepesLabel",
+      "toId": "go_crepes",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-crepes",
+      "toId": "go_crepes",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-crepesOn",
+      "toId": "go_crepes",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-compotesLabel",
+      "toId": "go_compotes",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-compotes",
+      "toId": "go_compotes",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-compotesOn",
+      "toId": "go_compotes",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-hint",
+      "toId": "go_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "go_snacksRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "go_sSnack",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "go_snacksRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "go_sSnack",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "go_cake",
+      "fromProperty": "minus",
+      "toId": "go_sCakeM",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "go_cake",
+      "fromProperty": "plus",
+      "toId": "go_sCakeP",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "go_bottles",
+      "fromProperty": "minus",
+      "toId": "go_sBotM",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "go_bottles",
+      "fromProperty": "plus",
+      "toId": "go_sBotP",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "go_crepes",
+      "fromProperty": "minus",
+      "toId": "go_sCreM",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "go_crepes",
+      "fromProperty": "plus",
+      "toId": "go_sCreP",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "go_compotes",
+      "fromProperty": "minus",
+      "toId": "go_sComM",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "go_compotes",
+      "fromProperty": "plus",
+      "toId": "go_sComP",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-hCls",
+      "toId": "go_thead",
+      "toProperty": "cls"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-hN",
+      "toId": "go_thead",
+      "toProperty": "n"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-hKcal",
+      "toId": "go_thead",
+      "toProperty": "kcal"
+    },
+    {
+      "fromId": "go_view",
+      "fromProperty": "out-hJuice",
+      "toId": "go_thead",
+      "toProperty": "juice"
+    }
+  ]
+}

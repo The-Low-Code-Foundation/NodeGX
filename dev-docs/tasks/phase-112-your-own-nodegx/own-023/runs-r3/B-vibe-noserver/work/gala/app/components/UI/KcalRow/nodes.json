@@ -1,0 +1,119 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "de4ff221-bfab-54da-8b09-7ac551056e51",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "kr_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "cls",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "n",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "kcal",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "juice",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "kr_root",
+      "type": "Group",
+      "children": [
+        "kr_cls",
+        "kr_n",
+        "kr_kcal",
+        "kr_juice"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "kr_cls",
+      "type": "Text",
+      "parent": "kr_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "width": {
+          "value": 40,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "kr_n",
+      "type": "Text",
+      "parent": "kr_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "width": {
+          "value": 18,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "kr_kcal",
+      "type": "Text",
+      "parent": "kr_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "width": {
+          "value": 24,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "kr_juice",
+      "type": "Text",
+      "parent": "kr_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "width": {
+          "value": 18,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "kr_root"
+  ]
+}

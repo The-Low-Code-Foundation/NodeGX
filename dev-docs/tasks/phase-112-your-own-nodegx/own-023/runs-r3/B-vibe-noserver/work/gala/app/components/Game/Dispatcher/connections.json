@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bfd1695e-7ba5-5db1-8d92-d21841cbd88c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dp_rx",
+      "fromProperty": "act",
+      "toId": "dp_fn",
+      "toProperty": "in-act"
+    },
+    {
+      "fromId": "dp_rx",
+      "fromProperty": "arg",
+      "toId": "dp_fn",
+      "toProperty": "in-arg"
+    },
+    {
+      "fromId": "dp_rx",
+      "fromProperty": "eventReceived",
+      "toId": "dp_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "dp_save",
+      "fromProperty": "value",
+      "toId": "dp_fn",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "dp_ui",
+      "fromProperty": "value",
+      "toId": "dp_fn",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "dp_res",
+      "fromProperty": "value",
+      "toId": "dp_fn",
+      "toProperty": "in-res"
+    },
+    {
+      "fromId": "dp_live",
+      "fromProperty": "value",
+      "toId": "dp_fn",
+      "toProperty": "in-live"
+    },
+    {
+      "fromId": "dp_words",
+      "fromProperty": "value",
+      "toId": "dp_fn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "dp_in",
+      "fromProperty": "stage",
+      "toId": "dp_fn",
+      "toProperty": "in-stage"
+    },
+    {
+      "fromId": "dp_fn",
+      "fromProperty": "out-save",
+      "toId": "dp_setSave",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "dp_fn",
+      "fromProperty": "out-saveChanged",
+      "toId": "dp_setSave",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "dp_fn",
+      "fromProperty": "out-ui",
+      "toId": "dp_setUi",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "dp_fn",
+      "fromProperty": "out-uiChanged",
+      "toId": "dp_setUi",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "dp_fn",
+      "fromProperty": "out-res",
+      "toId": "dp_setRes",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "dp_fn",
+      "fromProperty": "out-resChanged",
+      "toId": "dp_setRes",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "dp_fn",
+      "fromProperty": "out-live",
+      "toId": "dp_setLive",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "dp_fn",
+      "fromProperty": "out-liveChanged",
+      "toId": "dp_setLive",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "dp_fn",
+      "fromProperty": "out-toast",
+      "toId": "dp_setToast",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "dp_fn",
+      "fromProperty": "out-toastChanged",
+      "toId": "dp_setToast",
+      "toProperty": "set"
+    }
+  ]
+}

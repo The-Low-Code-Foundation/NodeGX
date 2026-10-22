@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0aed0e64-2945-5c91-841d-69d69c4086f9",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "chip_in",
+      "fromProperty": "label",
+      "toId": "chip_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "chip_in",
+      "fromProperty": "dot",
+      "toId": "chip_dot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "chip_in",
+      "fromProperty": "pressed",
+      "toId": "chip_state",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "chip_state",
+      "fromProperty": "currentValue",
+      "toId": "chip_look",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "chip_look",
+      "fromProperty": "bg",
+      "toId": "chip_root",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "chip_look",
+      "fromProperty": "border",
+      "toId": "chip_root",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "chip_look",
+      "fromProperty": "fg",
+      "toId": "chip_text",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "chip_root",
+      "fromProperty": "onClick",
+      "toId": "chip_out",
+      "toProperty": "click"
+    },
+    {
+      "fromId": "chip_in",
+      "fromProperty": "locked",
+      "toId": "chip_lockstate",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "chip_lockstate",
+      "fromProperty": "currentValue",
+      "toId": "chip_lock",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "chip_lock",
+      "fromProperty": "opacity",
+      "toId": "chip_root",
+      "toProperty": "opacity"
+    },
+    {
+      "fromId": "chip_in",
+      "fromProperty": "dot",
+      "toId": "chip_dot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "chip_in",
+      "fromProperty": "hidden",
+      "toId": "chip_show",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "chip_show",
+      "fromProperty": "result",
+      "toId": "chip_root",
+      "toProperty": "mounted"
+    }
+  ]
+}

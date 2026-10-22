@@ -1,0 +1,321 @@
+{
+  "outcome": "finished",
+  "stop_reason": null,
+  "error": null,
+  "session_id": "25505b9f-a8ea-dd62-6b8d-be45f136b4b6",
+  "usage": {
+    "input_tokens": 136569,
+    "output_tokens": 5253,
+    "cached_input_tokens": 1920,
+    "total_tokens": 141822
+  },
+  "cost_usd": 0.023354909999999996,
+  "steps": null,
+  "config": {
+    "active_model": "deepseek-v4.1-flash",
+    "routed_default_model": "",
+    "routed_model_config": null,
+    "routed_extra_models": [],
+    "providers": [
+      {
+        "name": "mistral",
+        "api_base": "https://api.mistral.ai/v1",
+        "api_key_env_var": "MISTRAL_API_KEY",
+        "browser_auth_base_url": "https://console.mistral.ai",
+        "browser_auth_api_base_url": "https://console.mistral.ai/api",
+        "browser_auth_allow_origin_rewrite": false,
+        "api_style": "openai",
+        "backend": "mistral",
+        "reasoning_field_name": "reasoning_content",
+        "emits_finish_reason": true,
+        "project_id": "",
+        "region": "",
+        "extra_headers": {}
+      },
+      {
+        "name": "llamacpp",
+        "api_base": "http://127.0.0.1:8080/v1",
+        "api_key_env_var": "",
+        "browser_auth_base_url": null,
+        "browser_auth_api_base_url": null,
+        "browser_auth_allow_origin_rewrite": false,
+        "api_style": "openai",
+        "backend": "generic",
+        "reasoning_field_name": "reasoning_content",
+        "emits_finish_reason": true,
+        "project_id": "",
+        "region": "",
+        "extra_headers": {}
+      },
+      {
+        "name": "clinepass",
+        "api_base": "http://127.0.0.1:8933/api/v1",
+        "api_key_env_var": "CLINE_PASS_API_KEY",
+        "browser_auth_base_url": null,
+        "browser_auth_api_base_url": null,
+        "browser_auth_allow_origin_rewrite": false,
+        "api_style": "openai",
+        "backend": "generic",
+        "reasoning_field_name": "reasoning",
+        "emits_finish_reason": true,
+        "project_id": "",
+        "region": "",
+        "extra_headers": {}
+      }
+    ],
+    "models": {
+      "mistral-medium-3.5": {
+        "name": "mistral-vibe-cli-latest",
+        "provider": "mistral",
+        "alias": "mistral-medium-3.5",
+        "display_name": "Mistral Medium 3.5",
+        "temperature": 1.0,
+        "top_p": null,
+        "max_output_tokens": null,
+        "input_price": 1.5,
+        "output_price": 7.5,
+        "cached_input_price": 0.15,
+        "thinking": "high",
+        "thinking_levels": [
+          "off",
+          "high"
+        ],
+        "supports_images": true,
+        "max_context_length": 262144,
+        "auto_compact_threshold": 209715
+      },
+      "deepseek-v4.1-flash": {
+        "name": "cline-pass/deepseek-v4.1-flash",
+        "provider": "clinepass",
+        "alias": "deepseek-v4.1-flash",
+        "display_name": "DeepSeek V4.1 Flash (ClinePass)",
+        "temperature": 0.2,
+        "top_p": null,
+        "max_output_tokens": null,
+        "input_price": 0.15,
+        "output_price": 0.6,
+        "cached_input_price": 0.003,
+        "thinking": "off",
+        "thinking_levels": [
+          "off",
+          "low",
+          "medium",
+          "high",
+          "max"
+        ],
+        "supports_images": false,
+        "max_context_length": 1000000,
+        "auto_compact_threshold": 800000
+      },
+      "mistral-large-4": {
+        "name": "mistral-large-4",
+        "provider": "mistral",
+        "alias": "mistral-large-4",
+        "display_name": "Mistral Large 4",
+        "temperature": 1.0,
+        "top_p": null,
+        "max_output_tokens": null,
+        "input_price": 1.36,
+        "output_price": 4.18,
+        "cached_input_price": 0.14,
+        "thinking": "high",
+        "thinking_levels": [
+          "low",
+          "high"
+        ],
+        "supports_images": false,
+        "max_context_length": 1000000,
+        "auto_compact_threshold": 800000
+      }
+    },
+    "allowed_models": [],
+    "compaction_model": null,
+    "vision_model": null,
+    "utility_models": {
+      "title": "",
+      "smart_approve": ""
+    },
+    "auto_compact_threshold": -1,
+    "active_transcribe_model": "voxtral-realtime",
+    "transcribe_providers": [
+      {
+        "name": "mistral",
+        "api_base": "wss://api.mistral.ai",
+        "api_key_env_var": "MISTRAL_API_KEY",
+        "client": "mistral"
+      }
+    ],
+    "transcribe_models": [
+      {
+        "name": "voxtral-mini-transcribe-realtime-2602",
+        "provider": "mistral",
+        "alias": "voxtral-realtime",
+        "sample_rate": 16000,
+        "encoding": "pcm_s16le",
+        "language": "en",
+        "target_streaming_delay_ms": 500
+      }
+    ],
+    "active_tts_model": "voxtral-tts",
+    "tts_providers": [
+      {
+        "name": "mistral",
+        "api_base": "https://api.mistral.ai",
+        "api_key_env_var": "MISTRAL_API_KEY",
+        "client": "mistral"
+      }
+    ],
+    "tts_models": [
+      {
+        "name": "voxtral-mini-tts-latest",
+        "provider": "mistral",
+        "alias": "voxtral-tts",
+        "voice": "gb_jane_neutral",
+        "response_format": "wav"
+      }
+    ],
+    "tools": {
+      "nodegx_list_projects": {
+        "permission": "always"
+      },
+      "nodegx_open_project": {
+        "permission": "always"
+      },
+      "nodegx_create_project": {
+        "permission": "always"
+      },
+      "nodegx_list_examples": {
+        "permission": "always"
+      },
+      "nodegx_get_example": {
+        "permission": "always"
+      },
+      "nodegx_find_tools": {
+        "permission": "always"
+      },
+      "nodegx_call_tool": {
+        "permission": "always"
+      }
+    },
+    "tool_paths": [],
+    "enabled_tools": [
+      "no_tool_at_all"
+    ],
+    "disabled_tools": [
+      "ask_user_question",
+      "exit_plan_mode",
+      "cron",
+      "exit_plan_mode"
+    ],
+    "mcp_servers": [
+      {
+        "name": "nodegx",
+        "prompt": null,
+        "startup_timeout_sec": 240.0,
+        "tool_timeout_sec": 600.0,
+        "sampling_enabled": true,
+        "disabled": false,
+        "disabled_tools": [],
+        "transport": "stdio",
+        "command": "npx",
+        "args": [
+          "<redacted>",
+          "<redacted>",
+          "<redacted>",
+          "<redacted>",
+          "<redacted>"
+        ],
+        "env": {},
+        "cwd": null
+      }
+    ],
+    "enable_connectors": true,
+    "experimental_enable_document_library_connector": false,
+    "connectors": [],
+    "agent_paths": [],
+    "enabled_agents": [],
+    "disabled_agents": [],
+    "installed_agents": [],
+    "default_agent": "accept-edits",
+    "smart_approve_available": false,
+    "smart_approve_default": false,
+    "skill_paths": [],
+    "enabled_skills": [],
+    "disabled_skills": [],
+    "experimental_enable_registry_skills": false,
+    "experimental_enable_model_catalog": false,
+    "enable_otel": false,
+    "otel_endpoint": "",
+    "otel_redaction": "default",
+    "console_base_url": "https://console.mistral.ai",
+    "theme": "auto",
+    "applied_migrations": [],
+    "disable_welcome_banner_animation": false,
+    "cursor_blink": true,
+    "show_greeting": true,
+    "autocopy_to_clipboard": true,
+    "file_watcher_for_autocomplete": true,
+    "ask_confirmation_on_exit": true,
+    "displayed_workdir": "",
+    "context_warnings": false,
+    "voice_mode_enabled": false,
+    "narrator_enabled": false,
+    "show_thinking_nodes": false,
+    "show_subagent_status_list": true,
+    "worktree_limit": 15,
+    "bypass_tool_permissions": true,
+    "raise_on_compaction_failure": false,
+    "enable_telemetry": true,
+    "system_prompt_id": "cli",
+    "managed_shell_tools_enabled": false,
+    "enable_background_processes": true,
+    "enable_subagents": true,
+    "compaction_prompt_id": "compact",
+    "title_prompt_id": "session_title",
+    "include_commit_signature": true,
+    "include_model_info": true,
+    "include_project_context": true,
+    "include_prompt_detail": true,
+    "enable_update_checks": false,
+    "enable_auto_update": false,
+    "enable_notifications": true,
+    "experimental_enable_tab_status": true,
+    "enable_system_trust_store": false,
+    "api_timeout": 720.0,
+    "api_retry_max_elapsed_time": 300.0,
+    "api_stream_idle_timeout": 0.0,
+    "api_connect_timeout": 10.0,
+    "api_write_timeout": 30.0,
+    "api_pool_timeout": 10.0,
+    "vibe_base_url": "https://chat.mistral.ai",
+    "vibe_code_sessions_base_url": "https://chat.mistral.ai",
+    "log_level": null,
+    "project_context": {
+      "default_commit_count": 5,
+      "timeout_seconds": 2.0
+    },
+    "session_logging": {
+      "save_dir": "/private/var/tmp/own023-r3/B-vibe/home/.vibe/logs/session",
+      "session_prefix": "session",
+      "enabled": true,
+      "generate_titles": true
+    },
+    "experiments": {
+      "enable": true,
+      "api_host": "https://experiments.mistral.services/",
+      "client_key": "sdk-OE8yJgTXZY6tj"
+    }
+  },
+  "schema_version": 1,
+  "vibe_version": "2.26.1",
+  "journal_dir": "session",
+  "started_at": "2026-10-21T18:05:20.171697Z",
+  "ended_at": "2026-10-21T18:06:11.482994Z",
+  "limits": {
+    "max_turns": 300,
+    "max_price": 10.0,
+    "max_tokens": null,
+    "time_limit_s": 5400.0
+  },
+  "exit_code": 0
+}

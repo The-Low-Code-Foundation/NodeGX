@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "092e6473-af01-564f-82ef-ab33d8d675ca",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gm_ready",
+      "fromProperty": "value",
+      "toId": "gm_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "gm_save",
+      "fromProperty": "value",
+      "toId": "gm_stage",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "gm_ui",
+      "fromProperty": "value",
+      "toId": "gm_stage",
+      "toProperty": "ui"
+    },
+    {
+      "fromId": "gm_words",
+      "fromProperty": "value",
+      "toId": "gm_stage",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "gm_stage",
+      "fromProperty": "stage",
+      "toId": "gm_dispatch",
+      "toProperty": "stage"
+    }
+  ]
+}

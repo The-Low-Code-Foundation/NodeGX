@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "71e2162d-08e6-5fae-8bab-7c09654d51b3",
+  "name": "Stepper",
+  "path": "/UI/Stepper",
+  "type": "visual",
+  "created": "2026-10-21T12:59:32.273Z",
+  "modified": "2026-10-21T12:59:32.273Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A label with − and + buttons around a value (\"Show starts  − 20 h 00 +\"). Publishes minus and plus."
+}

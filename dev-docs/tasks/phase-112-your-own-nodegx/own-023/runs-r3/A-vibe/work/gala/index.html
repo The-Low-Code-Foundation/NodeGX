@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Le Gala de danse</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;700;800&family=Playball&display=swap">
+<link rel="stylesheet" href="style.css">
+<script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<div id="top">
+  <span id="brand"></span>
+  <button type="button" class="chip" id="introBtn"><span id="seasonchip"></span></button>
+  <span class="chip stars" id="starchip"></span>
+  <span class="chip" id="daychip"></span>
+  <button type="button" class="small" id="soundBtn">🔊</button>
+  <button type="button" class="small" id="langBtn">EN</button>
+  <button type="button" class="small gear" id="gearBtn">⚙️</button>
+</div>
+<div id="cam"></div>
+<div id="sheet" class="side"><nav class="tabs" id="tabs" role="tablist"></nav><div id="sbody"></div><div class="go" id="go"></div></div>
+<div id="float" hidden></div>
+<div id="toast"></div>
+<div id="modal" hidden></div>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

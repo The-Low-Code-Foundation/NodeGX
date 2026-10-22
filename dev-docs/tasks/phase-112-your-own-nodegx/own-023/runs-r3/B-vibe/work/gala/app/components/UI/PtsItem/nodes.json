@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "92d37990-ea49-5abd-886c-f7857a8b6147",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pi_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "pi_root",
+      "type": "Group",
+      "children": [
+        "pi_label",
+        "pi_value"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-1)",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "marginRight": "var(--space-1-5)",
+        "marginBottom": "var(--space-1-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pi_label",
+      "type": "Text",
+      "parent": "pi_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pi_value",
+      "type": "Text",
+      "parent": "pi_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-extrabold)",
+        "color": "var(--primary)"
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "pi_root"
+  ]
+}

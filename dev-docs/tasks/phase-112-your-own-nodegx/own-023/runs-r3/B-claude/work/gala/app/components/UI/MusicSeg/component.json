@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "96cfc4f4-6401-546e-89ea-404e0af0b6ee",
+  "name": "MusicSeg",
+  "path": "/UI/MusicSeg",
+  "type": "visual",
+  "created": "2026-10-21T13:03:02.627Z",
+  "modified": "2026-10-21T13:03:02.627Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One block of the dance on the music bar, in its block colour (red where it runs past the end of the music). Placed by percentages of the bar."
+}

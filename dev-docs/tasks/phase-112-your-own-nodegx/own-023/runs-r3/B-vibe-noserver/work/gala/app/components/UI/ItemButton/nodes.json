@@ -1,0 +1,177 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f25f79fe-1cde-5d86-8c8e-ae3babebaa17",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ib_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "icon",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "small",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pressed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "locked",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "ib_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "click",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "ib_root",
+      "type": "Group",
+      "label": "Tile",
+      "children": [
+        "ib_icon",
+        "ib_label",
+        "ib_small"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "center",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-0-5)",
+        "paddingLeft": "var(--space-1-5)",
+        "paddingRight": "var(--space-1-5)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "marginBottom": "var(--space-1-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ib_icon",
+      "type": "Text",
+      "label": "Icon",
+      "parent": "ib_root",
+      "parameters": {
+        "fontSize": "var(--text-xl)",
+        "textAlignX": "center",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ib_label",
+      "type": "Text",
+      "label": "Name",
+      "parent": "ib_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ib_small",
+      "type": "Text",
+      "label": "Small line",
+      "parent": "ib_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "ib_look",
+      "type": "States",
+      "label": "Pressed look",
+      "parameters": {
+        "states": "off,on",
+        "values": "bg,border",
+        "type-bg": "color",
+        "type-border": "color",
+        "value-off-bg": "var(--surface-raised)",
+        "value-off-border": "var(--border)",
+        "value-on-bg": "var(--accent)",
+        "value-on-border": "var(--primary)"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "ib_state",
+      "type": "Boolean To String",
+      "parameters": {
+        "trueString": "on",
+        "falseString": "off"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "ib_lockstate",
+      "type": "Boolean To String",
+      "parameters": {
+        "trueString": "locked",
+        "falseString": "open"
+      },
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "ib_lock",
+      "type": "States",
+      "label": "Locked look",
+      "parameters": {
+        "states": "open,locked",
+        "values": "opacity",
+        "type-opacity": "number",
+        "value-open-opacity": 1,
+        "value-locked-opacity": 0.62
+      },
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "ib_root"
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "91553f65-e1cc-5441-8c65-7da92d293d1c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sv_req",
+      "fromProperty": "userId",
+      "toId": "sv_roles",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "sv_req",
+      "fromProperty": "receive",
+      "toId": "sv_roles",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "sv_roles",
+      "fromProperty": "roles",
+      "toId": "sv_check",
+      "toProperty": "in-roles"
+    },
+    {
+      "fromId": "sv_roles",
+      "fromProperty": "done",
+      "toId": "sv_query",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "sv_roles",
+      "fromProperty": "unchanged",
+      "toId": "sv_query",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "sv_req",
+      "fromProperty": "pm-table",
+      "toId": "sv_check",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "sv_req",
+      "fromProperty": "pm-rowId",
+      "toId": "sv_check",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "sv_req",
+      "fromProperty": "pm-fields",
+      "toId": "sv_check",
+      "toProperty": "in-fields"
+    },
+    {
+      "fromId": "sv_query",
+      "fromProperty": "items",
+      "toId": "sv_check",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "sv_query",
+      "fromProperty": "fetched",
+      "toId": "sv_check",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "out-table",
+      "toId": "sv_create",
+      "toProperty": "prop-table"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "out-rowId",
+      "toId": "sv_create",
+      "toProperty": "prop-rowId"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "out-fieldsJson",
+      "toId": "sv_create",
+      "toProperty": "prop-fields"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "out-create",
+      "toId": "sv_create",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "out-existingId",
+      "toId": "sv_update",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "out-fieldsJson",
+      "toId": "sv_update",
+      "toProperty": "prop-fields"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "out-update",
+      "toId": "sv_update",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "out-fieldsJson",
+      "toId": "sv_ok",
+      "toProperty": "pm-fields"
+    },
+    {
+      "fromId": "sv_create",
+      "fromProperty": "done",
+      "toId": "sv_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sv_update",
+      "fromProperty": "done",
+      "toId": "sv_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "out-reason",
+      "toId": "sv_fail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "out-refused",
+      "toId": "sv_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sv_check",
+      "fromProperty": "failure",
+      "toId": "sv_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sv_create",
+      "fromProperty": "failure",
+      "toId": "sv_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sv_update",
+      "fromProperty": "failure",
+      "toId": "sv_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sv_query",
+      "fromProperty": "failure",
+      "toId": "sv_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "sv_roles",
+      "fromProperty": "failure",
+      "toId": "sv_fail",
+      "toProperty": "send"
+    }
+  ]
+}

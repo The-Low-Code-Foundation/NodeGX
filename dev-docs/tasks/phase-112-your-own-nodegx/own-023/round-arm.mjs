@@ -147,7 +147,9 @@ function warmServer(server, version) {
   });
 }
 
-const fence = ['//Users/**', '//Applications/**', ...deny.map((d) => `/${d}/**`)];
+// round 3: --deny-read <dir> fences the file tools only, no Bash rule (a Bash(*/tmp/*) would also refuse the round's
+// own /private/var/tmp root); a command that names one is caught by the audit, as /Users is.
+const fence = ['//Users/**', '//Applications/**', ...deny.map((d) => `/${d}/**`), ...all('--deny-read').map((d) => `/${path.resolve(d)}/**`)];
 const tools = ['Read', 'Write', 'Edit', 'MultiEdit', 'NotebookEdit', 'Glob', 'Grep', 'Bash', 'Skill', 'TodoWrite', 'Task', 'Agent', ...(mode === 'nodegx' ? ['mcp__nodegx'] : [])];
 const denied = ['WebFetch', 'WebSearch', 'Bash(open:*)',
   ...fence.flatMap((g) => ['Read', 'Edit', 'Write', 'Glob', 'Grep'].map((t) => `${t}(${g})`)),
@@ -156,14 +158,14 @@ const denied = ['WebFetch', 'WebSearch', 'Bash(open:*)',
   // 2026-10-19). A fence that refuses harmless commands, and refuses them more in whichever arm's prompt says `~/`, is
   // a confound; an explicit /Users path in a command is caught by the audit instead.
   ...['/Applications/', ...deny.map((d) => d + '/')].map((p) => `Bash(*${p}*)`)];
-const baseArgs = (prompt, resume, budget) => [
+// round 3: `closed` = the --then sitting, answered from what the session already holds: no tool, no MCP server.
+const baseArgs = (prompt, resume, budget, closed = false) => [
   '-p', prompt, ...(resume ? ['--resume', resume] : []),
   '--model', MODEL,
   '--output-format', 'stream-json', '--verbose',
   '--setting-sources', 'project,local',
-  '--strict-mcp-config', ...mcpArgs,
-  '--allowedTools', ...tools,
-  '--disallowedTools', ...denied,
+  '--strict-mcp-config', ...(closed ? [] : mcpArgs),
+  ...(closed ? ['--tools', ''] : ['--allowedTools', ...tools, '--disallowedTools', ...denied]),
   '--max-budget-usd', budget.toFixed(2)
 ];
 const brief = fs.readFileSync(briefFile, 'utf8').trim();
@@ -173,12 +175,12 @@ fs.writeFileSync(path.join(root, 'command.txt'),
   `cd ${APP} && claude ${baseArgs('BRIEF', null, CAP).map((a) => (a === 'BRIEF' ? `"$(cat ${path.resolve(briefFile)})"` : JSON.stringify(a))).join(' ')}\n` +
   `# then, while the judge (judge.txt, Haiku) says MORE, up to ${N} times: claude -p "Continue." --resume <session> … --max-budget-usd <what is left of ${CAP}>\n`);
 
-function sitting(k, prompt, resume, budget) {
+function sitting(k, prompt, resume, budget, closed = false) {
   return new Promise((resolve) => {
     const out = path.join(SITS, `${k}.jsonl`);
     const t0 = Date.now();
     const loadBefore = os.loadavg().map((x) => Number(x.toFixed(1)));
-    const child = spawn('perl', ['-e', `alarm ${SITTING_SECONDS}; exec @ARGV`, BIN, ...baseArgs(prompt, resume, budget)], { cwd: APP, env, stdio: ['ignore', 'pipe', 'pipe'] });
+    const child = spawn('perl', ['-e', `alarm ${SITTING_SECONDS}; exec @ARGV`, BIN, ...baseArgs(prompt, resume, budget, closed)], { cwd: APP, env, stdio: ['ignore', 'pipe', 'pipe'] });
     const log = fs.createWriteStream(out);
     child.stdout.pipe(log);
     child.stderr.pipe(fs.createWriteStream(path.join(SITS, `${k}.stderr`)));
@@ -197,7 +199,7 @@ function sitting(k, prompt, resume, budget) {
       }
     });
     // 'exit', not 'close': a server the agent left running can hold the pipe open (OWN-008).
-    child.on('exit', (code, signal) => log.end(() => resolve({ k, prompt: prompt === brief ? 'brief' : prompt, code, signal, endedAtFirstAnswer: ended, seconds: Math.round((Date.now() - t0) / 1000), load: { before: loadBefore, after: os.loadavg().map((x) => Number(x.toFixed(1))) }, ...read(out) })));
+    child.on('exit', (code, signal) => log.end(() => resolve({ k, prompt: prompt === brief ? 'brief' : closed ? 'then' : prompt, code, signal, endedAtFirstAnswer: ended, seconds: Math.round((Date.now() - t0) / 1000), load: { before: loadBefore, after: os.loadavg().map((x) => Number(x.toFixed(1))) }, ...read(out) })));
   });
 }
 
@@ -227,7 +229,7 @@ function read(file) {
 }
 
 function judge(message) {
-  const prompt = fs.readFileSync(path.join(HERE, 'judge.txt'), 'utf8').replace('{MESSAGE}', message.slice(-6000));
+  const prompt = fs.readFileSync(path.resolve(opt('--judge', path.join(HERE, 'judge.txt'))), 'utf8').replace('{MESSAGE}', message.slice(-6000));
   const cwd = path.join(root, 'judge');
   fs.mkdirSync(cwd, { recursive: true });
   const r = spawnSync(JUDGE_BIN, ['-p', prompt, '--model', 'haiku', '--output-format', 'json', '--setting-sources', '', '--strict-mcp-config', '--tools', '', '--no-session-persistence'],
@@ -271,6 +273,19 @@ for (let k = 1; ; k++) {
   continues++;
 }
 
+// round 3: --then <file> — one more sitting in the same session after the relay, closed book (no tools): the quiz is
+// answered from the understanding the work was built on. Its answer is kept as then.md; its cost counts in the arm's.
+const thenFile = opt('--then', null);
+if (thenFile && session && !/cap|week|failed/.test(stop || '')) {
+  const s = await sitting(sittings.length + 1, fs.readFileSync(path.resolve(thenFile), 'utf8').trim(), session, CAP, true);
+  const prevCum = sittings.filter((x) => x.session === s.session).reduce((n, x) => Math.max(n, x.cum || 0), 0);
+  s.usd = Math.max(0, (s.cum || 0) - prevCum);
+  sittings.push(s);
+  save();
+  fs.writeFileSync(path.join(root, 'then.md'), s.last || '');
+  console.log(`then: ${s.subtype} ${s.seconds}s $${s.usd.toFixed(2)}`);
+}
+
 function save() {
   fs.writeFileSync(path.join(root, 'sittings.json'), JSON.stringify(sittings, null, 2) + '\n');
 }
@@ -285,7 +300,17 @@ function teardown() {
       else if (line[0] === 'n' && (line.slice(1) + '/').startsWith(root + '/')) pids.add(pid);
     }
   } catch {}
-  try { for (const p of execFileSync('pgrep', ['-f', root], { encoding: 'utf8' }).split('\n')) if (p) pids.add(Number(p)); } catch {}
+  // round 3: a sibling arm's runner and its `claude` name this root in their --deny rules, so `pgrep -f root` matched
+  // them and A-claude's teardown killed B-claude mid-sitting. Those two shapes count only by cwd (above), never by name.
+  try {
+    for (const p of execFileSync('pgrep', ['-f', root], { encoding: 'utf8' }).split('\n')) {
+      if (!p) continue;
+      let command = '';
+      try { command = execFileSync('ps', ['-o', 'command=', '-p', p], { encoding: 'utf8' }); } catch { continue; }
+      if (/round-arm\.mjs|--disallowedTools|round-vibe\.mjs/.test(command)) continue;
+      pids.add(Number(p));
+    }
+  } catch {}
   pids.delete(process.pid);
   const killed = [];
   for (const p of pids) {

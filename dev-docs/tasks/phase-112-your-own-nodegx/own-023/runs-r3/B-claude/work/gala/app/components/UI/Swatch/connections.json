@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3ec36522-586b-5e1c-82ca-41f7b8fbd2fb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sw_in",
+      "fromProperty": "color",
+      "toId": "sw_root",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "sw_in",
+      "fromProperty": "pressed",
+      "toId": "sw_state",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "sw_state",
+      "fromProperty": "currentValue",
+      "toId": "sw_look",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "sw_look",
+      "fromProperty": "ring",
+      "toId": "sw_root",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "sw_root",
+      "fromProperty": "onClick",
+      "toId": "sw_out",
+      "toProperty": "click"
+    }
+  ]
+}

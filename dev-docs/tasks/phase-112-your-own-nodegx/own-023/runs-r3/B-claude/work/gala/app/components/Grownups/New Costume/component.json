@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6f6e3578-3fef-5f9f-84d4-9be8d4d05de3",
+  "name": "New Costume",
+  "path": "/Grownups/New Costume",
+  "type": "visual",
+  "created": "2026-10-21T13:30:40.059Z",
+  "modified": "2026-10-21T13:34:19.050Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The form for a new costume: its names, minutes to put on, price in stars, picture, and the dance it suits. Publishes the costume when Add is pressed."
+}

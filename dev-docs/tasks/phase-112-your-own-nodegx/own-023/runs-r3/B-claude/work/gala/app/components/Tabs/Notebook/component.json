@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2d5beb73-175e-5e27-8f35-222e26b4571f",
+  "name": "Notebook",
+  "path": "/Tabs/Notebook",
+  "type": "visual",
+  "created": "2026-10-21T13:21:19.157Z",
+  "modified": "2026-10-21T13:21:19.157Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The school's notebook: one entry per gala night (rehearsals leave no trace), and \"Start again\", which asks first."
+}

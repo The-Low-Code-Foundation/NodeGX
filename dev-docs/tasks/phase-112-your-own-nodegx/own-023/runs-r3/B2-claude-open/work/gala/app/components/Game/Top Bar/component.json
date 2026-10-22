@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e117ce50-5a3d-5db2-8d53-18bb8a88d559",
+  "name": "Top Bar",
+  "path": "/Game/Top Bar",
+  "type": "visual",
+  "created": "2026-10-21T13:15:38.595Z",
+  "modified": "2026-10-21T13:16:41.122Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The bar over the 3D view: the school's name, the season (tap it to read the season's letter again), the stars, the clock of the live evening, the music switch, the language switch, and the door to the grown-ups' settings."
+}

@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bb3457ec-8095-5182-81c8-c945e9d3193e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sh_save",
+      "fromProperty": "value",
+      "toId": "sh_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "sh_ui",
+      "fromProperty": "value",
+      "toId": "sh_view",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "sh_live",
+      "fromProperty": "value",
+      "toId": "sh_view",
+      "toProperty": "in-live"
+    },
+    {
+      "fromId": "sh_words",
+      "fromProperty": "value",
+      "toId": "sh_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-tabs",
+      "toId": "sh_tabsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-isPrep",
+      "toId": "sh_tabs",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-go",
+      "toId": "sh_goRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-show_order",
+      "toId": "sh_order",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "sh_tabsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "sh_sendTab",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "sh_tabsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "sh_sendTab",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "sh_goRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "sh_sendGo",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "sh_goRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "sh_sendGo",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-show_formation",
+      "toId": "sh_formation",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-show_gouter",
+      "toId": "sh_gouter",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-show_costumes",
+      "toId": "sh_costumes",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-show_build",
+      "toId": "sh_build",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-show_parking",
+      "toId": "sh_parking",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-show_shop",
+      "toId": "sh_shop",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-show_notebook",
+      "toId": "sh_notebook",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-isRun",
+      "toId": "sh_evening",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "sh_view",
+      "fromProperty": "out-isResults",
+      "toId": "sh_results",
+      "toProperty": "show"
+    }
+  ]
+}

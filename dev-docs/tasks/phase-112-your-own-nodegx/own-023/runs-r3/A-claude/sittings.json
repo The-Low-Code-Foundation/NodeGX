@@ -1,0 +1,70 @@
+[
+  {
+    "k": 1,
+    "prompt": "brief",
+    "code": 0,
+    "signal": null,
+    "endedAtFirstAnswer": true,
+    "seconds": 279,
+    "load": {
+      "before": [
+        1.9,
+        2.4,
+        2.3
+      ],
+      "after": [
+        1.9,
+        2.4,
+        2.3
+      ]
+    },
+    "session": "23b4e755-fa46-4579-8e5c-f606ddfc4187",
+    "week": 0.62,
+    "subtype": "success",
+    "isError": false,
+    "turns": 14,
+    "activeSeconds": 278,
+    "cum": 1.3028646,
+    "results": 1,
+    "last": "I've written the plan to `PLAN.md` in the folder; no other file was changed and no feature code was written.\n\n**What the game is:** *Le Gala de danse* is a French/English browser game where the player runs a dance school and prepares its end-of-season show, over several seasons. It's plain JavaScript modules with a 3D view, no build step, and a small Node server (`serve.mjs`) that only works on the same machine. There are no accounts at all. Each browser holds one save of about 3 KB, written by `save()` in `src/state.js`, with a second copy in a file kept by the local server.\n\n**Things in the code that shape the plan:**\n- **Saves get quietly changed on load.** `mend()` in `src/state.js` swaps out any custom costume or dance step the current device's grown-up settings don't define, and `load()` writes that changed save back. So a child's save can only travel safely between devices if their family's custom settings travel with it.\n- **\"Newest wins\" uses each device's own clock.** That's safe on one machine but not across several, so the plan uses a version number kept by the server instead.\n- **Failed saves to the server are never retried** (`putFile` in `src/store.js`). On one machine that's fine, because the next page load catches up.\n- **A gala that's interrupted can just be replayed.** It's saved only when it ends, and replaying it gives the same result. The progress that matters is each preparation change and the end of a gala.\n\n**What the plan proposes:**\n- **Who signs in:** a grown-up creates a family account with their email. Children are profiles inside it, with a nickname, an avatar and a picture password (4 of 9 pictures). A child signs in with the family code, their name and their pictures. A \"Is this a family device?\" question decides whether they stay signed in on that device.\n- **Children who never sign in:** they keep the exact same browser storage as today, so nothing changes for them.\n- **Two children on one device:** each gets their own copy of their game on the device, and switching player reloads the page.\n- **Offline:** every change is stored on the device first, then sent from a queue that keeps retrying until the server confirms it.\n- **Conflicts and undo:** if the same child played on two devices, the game asks which school to keep and stores the other. The server keeps a history of every save, so a grown-up can restore anything.\n- **Progress already on the device:** at first sign-in the child is asked \"Is this school yours?\". If they say yes, it moves to their account, and nothing is deleted on any branch.\n- **Backend:** a new hosted server alongside the local one, with a database. It covers the grown-up's sign-up, email check and consent, the family page, child sign-in with attempt limits and lockouts, the save sync, deletion and export of a family's data, and backups. The fonts should come from the game's own server rather than Google before launch, because children's addresses currently go to Google.\n\n**What I didn't check:**\n- I ran the 39 unit tests and they pass. I didn't run the browser tests: Playwright isn't installed, and installing it would have changed the folder.\n- The tests refer to a spec file, `changes/001-grown-up-settings.md`, that isn't in the folder.\n- I'm assuming the game runs one install per household; if it's actually installed on shared machines (say at a club), the plan would need more for those.\n- The legal side (parental consent rules for children's data in France and, if US children play, the US) needs a lawyer before launch.\n- The picture password should be tried with a few real families before it's final.",
+    "rateLimited": false,
+    "resetsAt": 1792615800,
+    "usd": 1.3028646,
+    "judge": {
+      "verdict": "DONE",
+      "said": "DONE"
+    }
+  },
+  {
+    "k": 2,
+    "prompt": "then",
+    "code": 0,
+    "signal": null,
+    "endedAtFirstAnswer": true,
+    "seconds": 43,
+    "load": {
+      "before": [
+        2,
+        2.4,
+        2.3
+      ],
+      "after": [
+        1.7,
+        2.3,
+        2.3
+      ]
+    },
+    "session": "23b4e755-fa46-4579-8e5c-f606ddfc4187",
+    "week": 0.62,
+    "subtype": "success",
+    "isError": false,
+    "turns": 1,
+    "activeSeconds": 42,
+    "cum": 2.0247783999999998,
+    "results": 1,
+    "last": "## 1. What the game is\n\n*Le Gala de danse* is a browser game in French, with an English switch, where the player runs a small dance school and gets its end-of-year show (the gala) ready, one season at a time. In a typical session the player:\n\n- arranges the running order;\n- sets each class's formation and dance steps;\n- picks costumes and hair;\n- chooses the snack;\n- lays out the dressing-room furniture;\n- from season 2, sets up the car park.\n\nThey run free dress rehearsals or try out a single number to see what goes wrong. Then they play gala night once, which earns stars to spend in the shop, and move on to the next season.\n\n**Sure.**\n\n## 2. Main screens and tabs\n\n**Screens:**\n- preparation (`prep`)\n- the live run (`run`)\n- results (`results`)\n\n**Tabs on the preparation screen:**\n- Programme (`order`)\n- Formation\n- Goûter (snack)\n- Costumes\n- La loge (`build`, the dressing room)\n- Parking (from season 2)\n- Shop\n- Notebook\n\n**Also on screen:**\n- a welcome card at the start of each season;\n- a top bar with:\n  - season and star chips;\n  - sound and language buttons;\n  - a ⚙️ button that opens, after the gate, the grown-ups' settings panel.\n\nThe settings panel has its own tabs: moves, outfits, shop, school, file.\n\n**Sure** for the tabs and screens. **Fairly sure** for the settings panel's tab names.\n\n## 3. What is saved, where and when\n\n**The save (the whole school's progress, one object):**\n- It is saved by `save()` in `state.js` after every change: each preparation edit (`changed()`), a purchase, the end of a gala, a new season, closing the welcome card, typing the school name, and the language and sound buttons.\n- It is written to two places:\n  - this browser's `localStorage`, under `gala-game-v2`;\n  - the local server's `save.json` in `~/.gala-de-danse/` (or `GALA_DIR`), sent with `PUT /api/save`.\n- The server copy is sent 300 ms after the last change, as the latest version only, and again when the page is closed (`pagehide`).\n- An older save under `gala-toy-v1` is read, but never written.\n\n**The grown-ups' settings:**\n- They are stored in `settings.json` on the same server, with a browser copy in `localStorage['gala-settings-copy']`.\n- A `sessionStorage` flag, `gala-settings-applied`, is used to show the \"settings applied\" message after the reload.\n\n**Sure.**\n\n## 4. Server, backend, accounts\n\nThere are no user accounts. The only server is `serve.mjs`, a small Node server:\n\n- It serves the game's files.\n- It exposes `GET` and `PUT` for `/api/settings` and `/api/save`, each tied to one JSON file.\n- Writes are atomic, limited to 100 KB, and checked before they are stored.\n- It listens only on `127.0.0.1` and refuses any other Host or Origin.\n\nSo only a browser on the same machine can use it.\n\n**Sure.**\n\n## 5. Who can change the settings\n\nAnyone at the device who passes the gate:\n\n1. hold ⚙️ for about two seconds;\n2. type the answer to a multiplication (a number from about 12–19 times one from about 3–9).\n\nThere is no real identity check. The gate only stops a young child opening it by accident. It also refuses to open while a run is playing. Anyone who can edit the files in `~/.gala-de-danse` can change the settings too.\n\n**Sure** about the mechanism. **Fairly sure** about the exact number ranges.\n\n## 6. From pressing the gala button to the results\n\n1. `beginRun('gala')` in `ui.js` clears what is selected and calls `startRun` in `play.js`.\n2. `startRun` refuses if `galaDone` is already true.\n3. Otherwise it runs `simulate()` from `engine.js` on the plan, the school and the season, using the season's stored seed. That works out the whole evening in advance: the order, the dancing, slips, the snack, parking and points.\n4. It builds the run object, hides the dancers and the cars, and resets the parents and the snack table.\n5. It sets `G.run`, and the screen switches to `run`.\n6. On every frame, the loop in `main.js` does the following:\n   - `stepRun` moves the evening's clock forward, at a rate that depends on what is happening and on the speed setting;\n   - `stepScene` and `updateDancers` animate the 3D (`world.js`, `people.js`);\n   - `hud` and `paintRunSheet` update the live feed;\n   - `music.js` plays the tunes.\n   - The player can speed up, skip a number or skip to the end. There is no \"stop\" button during a gala.\n7. When the run is done, `run.onDone` calls `finishRun`, which:\n   - sets `galaDone`;\n   - adds the points to the stars and to the total earned;\n   - adds an entry to the notebook;\n   - calls `save()`;\n   - shows the `results` screen with the points and the verdicts.\n\n**Fairly sure.** I didn't read exactly how `stepRun` decides the run is finished, or the name of the function that draws the results.\n\n## 7. Earning and spending\n\n**Earning:**\n- A new school starts with 30 stars (grown-ups can change this number).\n- Gala night's points are added to the stars.\n- Rehearsals show points, but don't pay any.\n\n**Spending, in the shop:**\n- **Upgrades:** seats, a bigger stage, a bigger dressing room, a refreshment bar, lights, backdrops; and for the car park, an attendant, carpooling, a shuttle and an extra row.\n- **Dressing-room furniture.**\n- **Outfits, hairstyles, shoes and accessories.**\n- **Snacks, crêpes and compotes.**\n\n**Fairly sure** about the categories. **Guessing** at some item meanings from their ids (placeur, covoit, navette).\n\n## 8. Seasons\n\n1. **Season 1:** the first gala.\n2. **Season 2:** adds the car park.\n3. **Season 3:** brings the teens' hip-hop class, with two numbers. It also adds two rules:\n   - hip-hop can't be danced on the dance mat (the floors rule);\n   - two calm numbers in a row make the parents sleepy (the moods rule).\n4. **Season 4:** brings the mothers' class.\n5. **After that:** a \"free\" season.\n\nWhen a new season starts, the game moves to the next season number, allows a new gala, picks a new random seed, adds the new classes' numbers to the programme, and shows that season's welcome card.\n\n**Sure.**\n\n## 9. French and English\n\n- The EN/FR button switches `G.lang`, calls `save()` (the save keeps `lang`) and redraws the sheet, the top bar and the school sign.\n- The interface text comes from the `TXT.fr` and `TXT.en` tables in `i18n.js`, read through `t()`.\n- The game's content (moves, outfits, classes, numbers) has its own `fr` and `en` fields in `data.js`, read through `nm()`. Grown-ups can rename those in the settings.\n\n**Sure.**\n\n## 10. Loading an older save\n\n- **The current format** (`v: 2`) goes through `mend()`, which:\n  - fills in any field added since the save was written;\n  - converts the old \"phrase × repeats\" dances into blocks and a chain (`migrateNumber`);\n  - adds the numbers of the current season;\n  - puts back the number's own costume, shoes, accessory or hair where the save names something the settings no longer have, and drops removed steps;\n  - cleans the school and block names with the rude-word filter;\n  - keeps the star count to a sensible number;\n  - treats a missing `at` as 0.\n- **A round-1 save** (`gala-toy-v1`, `v: 1`) is first converted by `fromRound1`, which keeps the order, the formation, the snack and the costumes, and then goes through `mend()` too.\n- **A broken save** starts fresh.\n\n**Sure.**\n\n## 11. Pure logic versus the screen\n\n**Pure (no screen):**\n- `engine.js` (the rules and `simulate`)\n- `plan.js`\n- `data.js`\n- `settings.js`\n- `words.js`\n- most of the save logic in `state.js` (`fresh`, `mend`). It does touch `localStorage`, though.\n\n**On screen:**\n- `ui.js`\n- `world.js` and `people.js` (three.js)\n- `play.js`\n- `main.js`\n- `grownups.js`\n\n**Neither:**\n- `music.js` produces sound, not pictures.\n- `i18n.js` is text only.\n\n**Fairly sure.** The unit tests cover the pure modules, but I didn't check every import in every file.\n\n## 12. The single riskiest thing in my plan\n\nSilent loss through `mend()` when the same child's save is opened against different settings.\n\n- The settings are applied by changing global tables in place (`applyRows`), before the save is loaded.\n- Then `mend()` rewrites any custom costume or step those settings don't know, and `load()` saves the rewritten version.\n\nSo a sync mistake, out-of-date settings on a device, or a claimed guest save would quietly delete parts of a child's work and then push that onto the server. My plan relies on family-wide settings, the server's version numbers and the save history to catch it. If any of those slips, the loss happens without any error.\n\n**Fairly sure** this is the riskiest part.",
+    "rateLimited": false,
+    "resetsAt": 1792615800,
+    "usd": 0.7219137999999998
+  }
+]

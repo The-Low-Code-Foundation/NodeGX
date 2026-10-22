@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4676e81a-3e44-541c-8beb-1370c98e5363",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cc_in",
+      "fromProperty": "label",
+      "toId": "cc_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cc_in",
+      "fromProperty": "dot",
+      "toId": "cc_box",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "cc_in",
+      "fromProperty": "link",
+      "toId": "cc_link",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cc_in",
+      "fromProperty": "link",
+      "toId": "cc_link",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cc_in",
+      "fromProperty": "pressed",
+      "toId": "cc_state",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "cc_state",
+      "fromProperty": "currentValue",
+      "toId": "cc_look",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "cc_look",
+      "fromProperty": "ring",
+      "toId": "cc_box",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "cc_box",
+      "fromProperty": "onClick",
+      "toId": "cc_out",
+      "toProperty": "click"
+    }
+  ]
+}

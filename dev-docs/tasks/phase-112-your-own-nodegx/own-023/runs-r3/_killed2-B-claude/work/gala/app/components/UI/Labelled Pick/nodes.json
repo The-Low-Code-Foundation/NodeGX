@@ -1,0 +1,84 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "90bbee3b-47e0-543f-8298-0973d5539f3e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lp_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "items",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "value",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "lp_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "value",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "lp_root",
+      "type": "Group",
+      "children": [
+        "lp_label",
+        "lp_pick"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "marginBottom": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lp_label",
+      "type": "Text",
+      "parent": "lp_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "lp_pick",
+      "type": "net.noodl.controls.options",
+      "parent": "lp_root",
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "lp_root"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "81d0a238-c1cc-571d-8dfa-806e398ae8db",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gw_data",
+      "fromProperty": "items",
+      "toId": "gw_var",
+      "toProperty": "value"
+    }
+  ]
+}

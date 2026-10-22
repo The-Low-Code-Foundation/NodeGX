@@ -1,0 +1,28 @@
+{
+  "mode": "bare",
+  "setup": {
+    "mode": "bare",
+    "seeds": [
+      {
+        "src": "/private/tmp/claude-501/-Users-richardosborne-vscode-projects-OpenNoodl/9d500e28-f5ed-41fa-bf07-570aa0896060/scratchpad/own023-r3/seeds/code",
+        "into": ".",
+        "files": 33
+      }
+    ]
+  },
+  "model": "claude-opus-5-5",
+  "cap": 40,
+  "n": 3,
+  "stop": "judge: DONE",
+  "continues": 0,
+  "rateLimitResumes": 0,
+  "sittings": 2,
+  "usd": 2.0248,
+  "seconds": 322,
+  "turns": 15,
+  "week": {
+    "first": 0.62,
+    "last": 0.62
+  },
+  "leaks": 0
+}

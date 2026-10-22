@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "fe9d88e2-8ebb-585f-8b85-56a96c1af983",
+  "name": "Grownups",
+  "path": "/Pages/Grownups",
+  "type": "page",
+  "created": "2026-10-21T13:15:17.734Z",
+  "modified": "2026-10-21T13:38:27.419Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The grown-ups' settings (being built)."
+}

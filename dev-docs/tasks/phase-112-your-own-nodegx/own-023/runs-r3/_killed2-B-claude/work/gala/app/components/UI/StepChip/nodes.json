@@ -1,0 +1,174 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "50aa256f-5420-5e0f-8cc3-784a01428988",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sc_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "icon",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "small",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pressed",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "link",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "sc_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "click",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "sc_root",
+      "type": "Group",
+      "children": [
+        "sc_box",
+        "sc_link"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-1)",
+        "marginBottom": "var(--space-1-5)",
+        "marginRight": "var(--space-1)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sc_box",
+      "type": "Group",
+      "parent": "sc_root",
+      "children": [
+        "sc_icon",
+        "sc_name",
+        "sc_small"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "alignItems": "center",
+        "sizeMode": "explicit",
+        "width": {
+          "value": 74,
+          "unit": "px"
+        },
+        "height": {
+          "value": 66,
+          "unit": "px"
+        },
+        "justifyContent": "center",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sc_icon",
+      "type": "Text",
+      "parent": "sc_box",
+      "parameters": {
+        "fontSize": "var(--text-lg)"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "sc_name",
+      "type": "Text",
+      "parent": "sc_box",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center",
+        "textOverflow": "ellipsis"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "sc_small",
+      "type": "Text",
+      "parent": "sc_box",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "sc_link",
+      "type": "Text",
+      "parent": "sc_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "sc_look",
+      "type": "States",
+      "parameters": {
+        "states": "off,on",
+        "values": "bg,border",
+        "type-bg": "color",
+        "type-border": "color",
+        "value-off-bg": "var(--surface-raised)",
+        "value-off-border": "var(--border)",
+        "value-on-bg": "var(--accent)",
+        "value-on-border": "var(--primary)"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "sc_state",
+      "type": "Boolean To String",
+      "parameters": {
+        "trueString": "on",
+        "falseString": "off"
+      },
+      "x": 410,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "sc_root"
+  ]
+}

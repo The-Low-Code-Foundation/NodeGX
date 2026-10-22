@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ff480805-48fb-5a94-882e-3930998ec5b6",
+  "name": "Costumes",
+  "path": "/Tabs/Costumes",
+  "type": "visual",
+  "created": "2026-10-21T13:19:38.004Z",
+  "modified": "2026-10-21T13:19:38.004Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The costumes tab: for the chosen dance its outfit, colour, shoes and accessory (✨ when it suits the dance; locked ones cost stars), and each class's hairdo."
+}

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b10e8e33-f827-5370-83e1-471986f5f5a8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "su_words",
+      "fromProperty": "items",
+      "toId": "su_wordsVar",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "su_gala",
+      "fromProperty": "ready",
+      "toId": "su_wait",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "su_gala",
+      "fromProperty": "ready",
+      "toId": "su_storeReady",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "su_changes",
+      "fromProperty": "items",
+      "toId": "su_apply",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "su_changes",
+      "fromProperty": "fetched",
+      "toId": "su_apply",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "su_changes",
+      "fromProperty": "failure",
+      "toId": "su_apply",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "su_wait",
+      "fromProperty": "timerFinished",
+      "toId": "su_apply",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "su_apply",
+      "fromProperty": "out-ready",
+      "toId": "su_open",
+      "toProperty": "in-rulesReady"
+    },
+    {
+      "fromId": "su_storeReady",
+      "fromProperty": "state",
+      "toId": "su_open",
+      "toProperty": "in-storeReady"
+    },
+    {
+      "fromId": "su_gala",
+      "fromProperty": "state",
+      "toId": "su_open",
+      "toProperty": "in-stored"
+    },
+    {
+      "fromId": "su_ready",
+      "fromProperty": "value",
+      "toId": "su_open",
+      "toProperty": "in-alreadyOpen"
+    },
+    {
+      "fromId": "su_open",
+      "fromProperty": "out-save",
+      "toId": "su_setSave",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "su_open",
+      "fromProperty": "out-opened",
+      "toId": "su_setSave",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "su_setSave",
+      "fromProperty": "done",
+      "toId": "su_setReady",
+      "toProperty": "do"
+    }
+  ]
+}

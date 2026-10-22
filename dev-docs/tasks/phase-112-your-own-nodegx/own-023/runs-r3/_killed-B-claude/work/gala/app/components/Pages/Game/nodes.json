@@ -1,0 +1,152 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "092e6473-af01-564f-82ef-ab33d8d675ca",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "gm_page",
+      "type": "Page",
+      "children": [
+        "gm_root"
+      ],
+      "parameters": {
+        "title": "Le Gala de danse",
+        "urlPath": "game"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "gm_root",
+      "type": "Group",
+      "label": "The window",
+      "parent": "gm_page",
+      "children": [
+        "gm_stage",
+        "gm_top",
+        "gm_cam",
+        "gm_sheet",
+        "gm_float",
+        "gm_toast",
+        "gm_letter"
+      ],
+      "parameters": {
+        "position": "relative",
+        "width": {
+          "value": 100,
+          "unit": "vw"
+        },
+        "height": {
+          "value": 100,
+          "unit": "vh"
+        },
+        "clip": true,
+        "backgroundColor": "var(--background)",
+        "mounted": false
+      },
+      "metadata": {
+        "comment": "Mounted only when the start-up has laid the grown-ups' changes over the game and opened the save, so nothing draws from the wrong tables."
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "gm_stage",
+      "type": "/Game/Stage 3D",
+      "parent": "gm_root",
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "gm_top",
+      "type": "/Game/Top Bar",
+      "parent": "gm_root",
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "gm_ready",
+      "type": "Variable2",
+      "label": "ready",
+      "parameters": {
+        "name": "ready"
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "gm_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "gm_ui",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "ui"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "gm_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "gm_dispatch",
+      "type": "/Game/Dispatcher",
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "gm_cam",
+      "type": "/Game/Camera Bar",
+      "parent": "gm_root",
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "gm_sheet",
+      "type": "/Game/Sheet",
+      "parent": "gm_root",
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "gm_float",
+      "type": "/Game/Furniture Toolbar",
+      "parent": "gm_root",
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "gm_toast",
+      "type": "/Game/Toast",
+      "parent": "gm_root",
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "gm_letter",
+      "type": "/Game/Season Letter",
+      "parent": "gm_root",
+      "x": 160,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "gm_page"
+  ]
+}

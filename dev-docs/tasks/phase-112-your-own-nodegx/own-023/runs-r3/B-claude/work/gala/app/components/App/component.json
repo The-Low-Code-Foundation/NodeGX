@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "719a7e98-43c1-5f48-828c-65cb230f99b2",
+  "name": "App",
+  "path": "/App",
+  "type": "root",
+  "modified": "2026-10-21T13:15:56.155Z",
+  "modifiedBy": "noodl-mcp"
+}

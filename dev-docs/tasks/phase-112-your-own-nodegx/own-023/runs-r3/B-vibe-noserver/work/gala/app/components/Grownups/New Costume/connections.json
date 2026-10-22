@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6f6e3578-3fef-5f9f-84d4-9be8d4d05de3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "nc_in",
+      "fromProperty": "title",
+      "toId": "nc_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nc_in",
+      "fromProperty": "frLabel",
+      "toId": "nc_fr",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "nc_in",
+      "fromProperty": "enLabel",
+      "toId": "nc_en",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "nc_in",
+      "fromProperty": "minLabel",
+      "toId": "nc_mL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nc_in",
+      "fromProperty": "priceLabel",
+      "toId": "nc_pL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nc_in",
+      "fromProperty": "iconLabel",
+      "toId": "nc_iL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nc_in",
+      "fromProperty": "themeLabel",
+      "toId": "nc_tL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "nc_in",
+      "fromProperty": "addLabel",
+      "toId": "nc_add",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "nc_in",
+      "fromProperty": "icons",
+      "toId": "nc_i",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "nc_in",
+      "fromProperty": "themes",
+      "toId": "nc_t",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "nc_fr",
+      "fromProperty": "onTextChanged",
+      "toId": "nc_pack",
+      "toProperty": "in-fr"
+    },
+    {
+      "fromId": "nc_en",
+      "fromProperty": "onTextChanged",
+      "toId": "nc_pack",
+      "toProperty": "in-en"
+    },
+    {
+      "fromId": "nc_m",
+      "fromProperty": "onTextChanged",
+      "toId": "nc_pack",
+      "toProperty": "in-min"
+    },
+    {
+      "fromId": "nc_p",
+      "fromProperty": "onTextChanged",
+      "toId": "nc_pack",
+      "toProperty": "in-price"
+    },
+    {
+      "fromId": "nc_i",
+      "fromProperty": "value",
+      "toId": "nc_pack",
+      "toProperty": "in-icon"
+    },
+    {
+      "fromId": "nc_t",
+      "fromProperty": "value",
+      "toId": "nc_pack",
+      "toProperty": "in-theme"
+    },
+    {
+      "fromId": "nc_add",
+      "fromProperty": "click",
+      "toId": "nc_pack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "nc_pack",
+      "fromProperty": "out-values",
+      "toId": "nc_out",
+      "toProperty": "values"
+    },
+    {
+      "fromId": "nc_pack",
+      "fromProperty": "out-go",
+      "toId": "nc_out",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "nc_in",
+      "fromProperty": "show",
+      "toId": "nc_root",
+      "toProperty": "mounted"
+    }
+  ]
+}

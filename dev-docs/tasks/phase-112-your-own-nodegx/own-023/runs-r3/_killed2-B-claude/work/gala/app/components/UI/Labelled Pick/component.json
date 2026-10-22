@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "90bbee3b-47e0-543f-8298-0973d5539f3e",
+  "name": "Labelled Pick",
+  "path": "/UI/Labelled Pick",
+  "type": "visual",
+  "created": "2026-10-21T13:30:49.771Z",
+  "modified": "2026-10-21T13:30:49.771Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A small label over a dropdown; publishes the picked value."
+}

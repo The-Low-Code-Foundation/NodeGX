@@ -1,0 +1,312 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8e903592-38e3-5a1c-8d3d-27d7a66496e1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lv_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "lv_root",
+      "type": "Group",
+      "children": [
+        "lv_h",
+        "lv_cards",
+        "lv_try",
+        "lv_feed"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lv_h",
+      "type": "Text",
+      "parent": "lv_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "marginTop": "var(--space-1-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "lv_cards",
+      "type": "Group",
+      "label": "The programme, live",
+      "parent": "lv_root",
+      "children": [
+        "lv_cardsRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "lv_cardsRep",
+      "type": "For Each",
+      "parent": "lv_cards",
+      "parameters": {
+        "template": "/UI/LiveCard"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "lv_try",
+      "type": "Group",
+      "label": "Step by step (try-out)",
+      "parent": "lv_root",
+      "children": [
+        "lv_tryH",
+        "lv_trySum",
+        "lv_tryRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "lv_tryH",
+      "type": "Text",
+      "parent": "lv_try",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "lv_trySum",
+      "type": "Text",
+      "parent": "lv_try",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "marginBottom": "var(--space-1)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "lv_tryRep",
+      "type": "For Each",
+      "parent": "lv_try",
+      "parameters": {
+        "template": "/UI/TryBlock"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "lv_feed",
+      "type": "Group",
+      "label": "What happened",
+      "parent": "lv_root",
+      "children": [
+        "lv_feedRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "lv_feedRep",
+      "type": "For Each",
+      "parent": "lv_feed",
+      "parameters": {
+        "template": "/UI/FeedLine"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "lv_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "lv_res",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "res"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "lv_live",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "live"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "lv_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "lv_view",
+      "type": "JavaScriptFunction",
+      "label": "The evening so far",
+      "parameters": {
+        "uses": "view/run,view/formation,view/common,game/text,rules/data,rules/engine,rules/tunes",
+        "functionScript": "if (!Inputs.show || !Inputs.save || !Inputs.res || !Inputs.live) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst v = Scripts.run.liveSheet(Inputs.res, Inputs.live, w);\nOutputs.title = v.title; Outputs.cards = v.cards; Outputs.feed = v.feed; Outputs.isTry = v.isTry;\nOutputs.stepsH = w('step_head');\nif (v.steps) { Outputs.stepsSum = v.steps.summary; Outputs.blocks = v.steps.blocks; }\n"
+      },
+      "x": 410,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-show",
+          "displayName": "show",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-res",
+          "displayName": "res",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-live",
+          "displayName": "live",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cards",
+          "displayName": "cards",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-feed",
+          "displayName": "feed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-isTry",
+          "displayName": "isTry",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stepsH",
+          "displayName": "stepsH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-stepsSum",
+          "displayName": "stepsSum",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-blocks",
+          "displayName": "blocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "lv_root"
+  ]
+}

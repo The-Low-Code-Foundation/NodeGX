@@ -1,0 +1,113 @@
+{
+  "arm": "B-vibe-noserver",
+  "harness": "vibe",
+  "sittings": [
+    {
+      "k": 1,
+      "prompt": "brief",
+      "seconds": 665,
+      "usage": {
+        "input_tokens": 2278564,
+        "output_tokens": 28308,
+        "cached_input_tokens": 2108510,
+        "total_tokens": 2306872
+      },
+      "vibeUsd": 0.048818429999999996,
+      "outcome": "finished",
+      "planWritten": true
+    }
+  ],
+  "quiz": {
+    "k": 2,
+    "prompt": "then",
+    "seconds": 52,
+    "usage": {
+      "input_tokens": 136569,
+      "output_tokens": 5253,
+      "cached_input_tokens": 1920,
+      "total_tokens": 141822
+    },
+    "vibeUsd": 0.023354909999999996,
+    "outcome": "finished",
+    "toolCalls": 0
+  },
+  "tap": {
+    "requests": 32,
+    "retries": 1,
+    "bad": 0,
+    "maxContextChars": 514676
+  },
+  "wallMinutes": 11,
+  "toolCalls": 57,
+  "subagentCalls": 0,
+  "tools": {
+    "bash": 28,
+    "read_file": 28,
+    "write_file": 1
+  },
+  "bashFirstWords": {
+    "ls": 5,
+    "find": 4,
+    "cat": 2,
+    "cd": 2,
+    "for": 1,
+    "grep": 3,
+    "python3": 10,
+    "wc": 1
+  },
+  "filesRead": 42,
+  "files": [
+    ".claude/skills/nodegx-your-own-editor/SKILL.md",
+    ".mcp.json",
+    "3D/nodes.json",
+    "Bar/nodes.json",
+    "Up/connections.json",
+    "Up/nodes.json",
+    "app/components/App/connections.json",
+    "app/components/App/nodes.json",
+    "app/components/Game/Dispatcher/connections.json",
+    "app/components/Game/Dispatcher/nodes.json",
+    "app/components/Grownups/Words/nodes.json",
+    "app/components/Pages/Game/connections.json",
+    "app/components/Pages/Game/nodes.json",
+    "app/components/Pages/Grownups/connections.json",
+    "app/components/Pages/Grownups/nodes.json",
+    "app/components/__cloud__/saveChange/connections.json",
+    "app/components/__cloud__/saveChange/nodes.json",
+    "app/scripts/game/actions.js",
+    "app/scripts/game/dispatch.js",
+    "app/scripts/game/save.js",
+    "app/scripts/game/text.js",
+    "app/scripts/rules/data.js",
+    "app/scripts/rules/engine.js",
+    "app/scripts/rules/plan.js",
+    "app/scripts/settings/apply.js",
+    "app/scripts/settings/check.js",
+    "app/scripts/stage/stage.js",
+    "app/scripts/view/common.js",
+    "app/scripts/view/frame.js",
+    "app/scripts/view/grownups.js",
+    "app/scripts/view/prep.js",
+    "app/scripts/view/run.js",
+    "gala-rules/tests/rows.test.mjs",
+    "opencode.json",
+    "tools/check-rules.mjs",
+    "tools/check-views.mjs",
+    "tools/check.cloud.js",
+    "tools/cloud-save.glue.js",
+    "tools/extract-words.mjs",
+    "tools/sync-check.mjs",
+    "tools/sync-rules.mjs",
+    "tools/sync-stage.mjs"
+  ],
+  "componentsRead": 0,
+  "errors": 2,
+  "errorSamples": [
+    "read_file failed: Output (56.8 KiB) exceeds maximum allowed size (50.0 KiB). Use offset and limit to read a smaller portion of the file.",
+    "bash failed: Command timed out after 300s: 'find / -maxdepth 6 -type d -name \"@nodegx\" 2>/dev/null | head; echo \"---\"; find / -maxdepth 8 -type d -path \\'*node_"
+  ],
+  "resultMegachars": 0.37,
+  "minutesToFirstSaveLook": 0.3,
+  "minutesToPlanWrite": 10.8,
+  "planBytes": 26609
+}

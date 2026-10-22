@@ -1,0 +1,77 @@
+{
+  "arm": "B2-claude-open",
+  "harness": "claude",
+  "sittings": [
+    {
+      "k": 1,
+      "prompt": "brief",
+      "seconds": 397,
+      "activeSeconds": 395,
+      "usd": 2.1497682000000005,
+      "turns": 27,
+      "judge": "DONE"
+    }
+  ],
+  "quiz": {
+    "k": 2,
+    "prompt": "then",
+    "seconds": 46,
+    "activeSeconds": 45,
+    "usd": 1.0465018000000001,
+    "turns": 1,
+    "judge": null,
+    "toolCalls": 0
+  },
+  "wallMinutes": 6.6,
+  "toolCalls": 26,
+  "subagentCalls": 0,
+  "tools": {
+    "Bash": 20,
+    "Grep": 2,
+    "ToolSearch": 1,
+    "mcp__nodegx__list_examples": 2,
+    "Write": 1
+  },
+  "bashFirstWords": {
+    "ls": 1,
+    "find": 1,
+    "wc": 1,
+    "cat": 3,
+    "cd": 5,
+    "python3": 3,
+    "mkdir": 1,
+    "for": 2,
+    "sed": 2,
+    "node": 1
+  },
+  "filesRead": 16,
+  "files": [
+    "Up/connections.json",
+    "Up/nodes.json",
+    "app/components/__cloud__/saveChange/nodes.json",
+    "app/scripts/game/actions.js",
+    "app/scripts/game/dispatch.js",
+    "app/scripts/game/save.js",
+    "app/scripts/game/text.js",
+    "app/scripts/rules/data.js",
+    "app/scripts/rules/plan.js",
+    "app/scripts/settings/apply.js",
+    "app/scripts/view/grownups.js",
+    "connections.json",
+    "nodes.json",
+    "tools/check-views.mjs",
+    "tools/check.cloud.js",
+    "tools/cloud-save.glue.js"
+  ],
+  "componentsRead": 0,
+  "errors": 3,
+  "errorSamples": [
+    "Exit code 1\n./.claude/skills/nodegx-your-own-editor/SKILL.md\n./.mcp.json\n./.vibe/config.toml\n./AGENTS.md\n./CLAUDE.md\n./app/.gitignore\n./app/assets/vendor/three.",
+    "Exit code 1\n=== App\n- f7c4077d-0021-443e-bcb1-8b0691564497 [Router] Main Router {\"name\": \"Main\", \"pages\": \"{\\\"startPage\\\": \\\"/Pages/Game\\\", \\\"routes\\\": [\\\"/Page",
+    "Exit code 1\nfresh bytes 3019\nseason5 bytes 4171 [\n  'v',         'lang',\n  'season',    'galaDone',\n  'seenIntro', 'plan',\n  'school',    'notebook',\n  'sound',"
+  ],
+  "resultMegachars": 0.2,
+  "minutesToFirstSaveLook": 0.2,
+  "minutesToPlanWrite": 6.3,
+  "planBytes": 40985
+}

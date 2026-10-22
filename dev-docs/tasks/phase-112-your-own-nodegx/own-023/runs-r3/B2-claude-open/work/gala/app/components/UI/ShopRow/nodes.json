@@ -1,0 +1,203 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "357a2215-9e60-5f59-8de6-592e423eb5c7",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "sr_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "icon",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "own",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "price",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "poor",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "sr_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "buy",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "sr_root",
+      "type": "Group",
+      "children": [
+        "sr_icon",
+        "sr_names",
+        "sr_own",
+        "sr_buy"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-2-5)",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "paddingLeft": "var(--space-2-5)",
+        "paddingRight": "var(--space-2-5)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "marginBottom": "var(--space-1-5)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "sr_icon",
+      "type": "Text",
+      "parent": "sr_root",
+      "parameters": {
+        "fontSize": "var(--text-xl)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "sr_names",
+      "type": "Group",
+      "parent": "sr_root",
+      "children": [
+        "sr_name",
+        "sr_note"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "sr_name",
+      "type": "Text",
+      "parent": "sr_names",
+      "parameters": {
+        "fontWeight": "var(--font-bold)",
+        "fontSize": "var(--text-sm)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "sr_note",
+      "type": "Text",
+      "parent": "sr_names",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "sr_own",
+      "type": "Text",
+      "parent": "sr_root",
+      "parameters": {
+        "color": "var(--success)",
+        "fontWeight": "var(--font-bold)",
+        "fontSize": "var(--text-sm)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "sr_buy",
+      "type": "net.noodl.controls.button",
+      "parent": "sr_root",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "fontWeight": "var(--font-bold)",
+        "fontSize": "var(--text-sm)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-1-5)",
+        "paddingBottom": "var(--space-1-5)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "sr_poor",
+      "type": "States",
+      "label": "Not enough stars dims the price",
+      "parameters": {
+        "states": "rich,poor",
+        "values": "opacity",
+        "type-opacity": "number",
+        "value-rich-opacity": 1,
+        "value-poor-opacity": 0.5
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "sr_poorstate",
+      "type": "Boolean To String",
+      "parameters": {
+        "trueString": "poor",
+        "falseString": "rich"
+      },
+      "x": 410,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "sr_root"
+  ]
+}

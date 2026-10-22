@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c4a9062c-a972-5771-8771-308aa8837343",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rs_in",
+      "fromProperty": "show",
+      "toId": "rs_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rs_in",
+      "fromProperty": "show",
+      "toId": "rs_view",
+      "toProperty": "in-show"
+    },
+    {
+      "fromId": "rs_save",
+      "fromProperty": "value",
+      "toId": "rs_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "rs_res",
+      "fromProperty": "value",
+      "toId": "rs_view",
+      "toProperty": "in-res"
+    },
+    {
+      "fromId": "rs_live",
+      "fromProperty": "value",
+      "toId": "rs_view",
+      "toProperty": "in-live"
+    },
+    {
+      "fromId": "rs_words",
+      "fromProperty": "value",
+      "toId": "rs_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "rs_view",
+      "fromProperty": "out-title",
+      "toId": "rs_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rs_view",
+      "fromProperty": "out-points",
+      "toId": "rs_pts",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rs_view",
+      "fromProperty": "out-note",
+      "toId": "rs_note",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rs_view",
+      "fromProperty": "out-ptsList",
+      "toId": "rs_listRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rs_view",
+      "fromProperty": "out-verdicts",
+      "toId": "rs_cardsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rs_view",
+      "fromProperty": "out-isTry",
+      "toId": "rs_try",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rs_view",
+      "fromProperty": "out-stepsH",
+      "toId": "rs_tryH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rs_view",
+      "fromProperty": "out-stepsSum",
+      "toId": "rs_trySum",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rs_view",
+      "fromProperty": "out-blocks",
+      "toId": "rs_tryRep",
+      "toProperty": "items"
+    }
+  ]
+}

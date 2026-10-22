@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e30cd6a5-ac4a-53a0-885b-0068921867b3",
+  "name": "OrderCard",
+  "path": "/UI/OrderCard",
+  "type": "visual",
+  "created": "2026-10-21T12:59:45.696Z",
+  "modified": "2026-10-21T13:16:31.412Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One item of the gala programme: its class's dot, its name, style tags, how long it lasts, and ▲▼ to move it (or a lock for the welcome and the finale)."
+}

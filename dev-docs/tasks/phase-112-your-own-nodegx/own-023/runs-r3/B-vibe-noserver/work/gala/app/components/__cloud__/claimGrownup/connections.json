@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b956d8e2-c31a-5fda-838f-2396aad5f67d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "cl_req",
+      "fromProperty": "receive",
+      "toId": "cl_list",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "cl_list",
+      "fromProperty": "userIds",
+      "toId": "cl_decide",
+      "toProperty": "in-ids"
+    },
+    {
+      "fromId": "cl_req",
+      "fromProperty": "userId",
+      "toId": "cl_decide",
+      "toProperty": "in-me"
+    },
+    {
+      "fromId": "cl_list",
+      "fromProperty": "done",
+      "toId": "cl_decide",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cl_list",
+      "fromProperty": "unchanged",
+      "toId": "cl_decide",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "cl_req",
+      "fromProperty": "userId",
+      "toId": "cl_add",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "cl_decide",
+      "fromProperty": "out-grant",
+      "toId": "cl_add",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "cl_add",
+      "fromProperty": "done",
+      "toId": "cl_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cl_add",
+      "fromProperty": "unchanged",
+      "toId": "cl_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cl_decide",
+      "fromProperty": "out-already",
+      "toId": "cl_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cl_decide",
+      "fromProperty": "out-refused",
+      "toId": "cl_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cl_add",
+      "fromProperty": "failure",
+      "toId": "cl_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "cl_list",
+      "fromProperty": "failure",
+      "toId": "cl_fail",
+      "toProperty": "send"
+    }
+  ]
+}
