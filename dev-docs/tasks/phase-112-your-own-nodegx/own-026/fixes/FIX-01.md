@@ -65,4 +65,52 @@ Keep each to a few lines. Generic words only (README rule 3).
 
 ## Done
 
-(the fixer writes this: commits, the kit folder, what each item changed, what was measured, what wasn't done and why)
+**2026-10-22, fixer session opennoodl-54.** Commits `f2afd62b0` (A + C backend/doctrine), `0b9becca8` (B + C
+example/catalogue), `ddd876378` (bug ledger). **Kit:** `/Users/Shared/nodegx-lab/kits/FIX-01-ddd876378/`
+(`nodegx-mcp-0.2.5.tgz` sha1 `db87ff4c8471c780fa79e0f5a8184a5cc009c0d9`; `create-nodegx-0.2.5.tgz` is byte-identical to
+the registry's, sha1 `cee60bdc…`, because nothing in it changed), packed under HEAVY.lock in the clean worktree
+`OpenNoodl-worktrees/own026-fix01-pack` at `ddd876378` (`git status` empty after).
+
+**A — users kept apart, enforced from the first record.** The backend takes `--enforce-rules`: a first start with
+no `security.json` (and no project policy) mints the existing defaults (`authenticated` + `creatorOwns`) with
+`devOpen: false`. `provision_backend` passes it (so does `@nodegx/preview`, which only matters once preview is
+re-published), and answers `rules: { enforced, note }` read back off the backend. New tool `set_backend_enforcement`
+(backend group; resident surface unchanged at 8274/8280) for a backend made dev-open before. What turning devOpen off
+breaks, measured: nothing the kit itself does — its backend tools use the admin credential (seeding, schema,
+permissions all work), deploying and calling cloud functions passes (hls013), and rows the tools seed have no owner, so
+every signed-in user reads them. What it changes for an app, by design: a page that reads before sign-in gets 403
+until that collection's find/get is "public", and a collection users share needs `creatorOwns: false`; the note says
+both. The editor's own spawner is untouched and still mints dev-open (its decision, not this kit's).
+**Proof, from the tarball, empty HOME, over stdio:** `create-nodegx --cline` writes AGENTS.md, the skill and
+`~/.cline/…/cline_mcp_settings.json`; `provision_backend` → `rules.enforced: true`; anonymous `/classes/Note` and
+`/classes/_User` 403; user B finds 0 of A's rows, B's PUT 404; A creates, finds, updates (200);
+`set_backend_enforcement` false → anonymous 200, true → 403.
+
+**B — the server filter is learnable.** `get_node_type DbCollection2` names `visualFilter` (rule shape, operators,
+`input` → `qp-<name>`, literal `value`, nested groups), `visualSort`, limit/skip/count, and the fetch-at-build trap
+with its fix; `ports:["querySettings"]` answers with the shape. New error rule `query-records-shape` on every write
+and validate refuses `querySettings`/`filter`/`where`/unknown operators/a `qp-` no rule reads, with the real shape
+and the example attached. Example `cloud-query-own-rows`. QUERYFILTERSHAPE fixed; ADAPTERLABEL fixed for this type
+only. **Proof from the tarball:** the node type names `visualFilter` and `qp-`; a `querySettings` write is refused
+with `query-records-shape` and the shape; `list_examples` "filter the query on the server owner" and "only my
+records" → `cloud-query-own-rows` (after `find_tools({group:"explore"})`, as an agent opens that group).
+
+**C — shared state changed on the server, once.** What the backend offers, measured: Parse's `Increment` op
+(`Noodl.Records.increment` in a Function node) and Update Record's `onlyIfUnchanged` (HLT-016). `Increment` on a field
+no record had set answered 404 "Object not found" — fixed in both SQL adapters (P112-OWN026-INCREMENTNEWFIELD); from
+the tarball it now answers 200 with the amount. Taught in three places an agent reads: `get_project_info`'s
+`backendDoctrine` (new section "Users, and values more than one device changes": the backend keeps users apart; change
+a shared value by the amount; a saving press taken once, applied to the item it was for), `provision_backend`'s rules
+note, and Update Record's antiPatterns; example `cloud-shared-counter` (increment on press, `idle` → Button
+`enabled`, id read once, `runOnChange-in-recordId` off), found by "a count several devices change" and "increment".
+Validated strict; **not driven in a browser** — its wire request is the one measured above.
+
+**Not done / not changed, and why:**
+- `@nodegx/preview`'s flag is not in this kit (a command the agent types resolves to the registry). It does not
+  gate: preview restarts the data dir `provision_backend` made, whose `security.json` is already enforced.
+- FilterDBModels (`fp-` ports) got no matching check or catalogue text (ADAPTERLABEL stays open for it and Router).
+- CORS `*` unchanged: on an enforced backend an anonymous cross-site read is refused like any other.
+- Found on the way, not FIX-01's: `sbr009ThemeEditorDrive` red (P112-OWN026-SBR009HOME, open; red with the new rule
+  removed too), and a stale email-template list in `backendTools.test.ts` (fixed, -EMAILCODESTALE).
+- Not run: the full noodl-mcp and backend suites (run: the touched specs, every provision/backend spec — 107 MCP and
+  247 backend tests — the template suites that write Query Records graphs, `catalog:examples` 112/112, the surface gate).
