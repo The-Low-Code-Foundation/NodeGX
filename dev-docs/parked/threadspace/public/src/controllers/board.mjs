@@ -9,6 +9,8 @@ import { rand, clamp, glow, cyl, mat, at, box } from '../util.mjs';
 const _ray = new THREE.Raycaster();
 const _dir = new THREE.Vector3();
 const _from = new THREE.Vector3();
+const _wdir = new THREE.Vector3();
+const TRACER = new THREE.BoxGeometry(0.04, 0.04, 1); // one box for every tracer, stretched to its length
 
 export class Boarding {
   constructor(game) {
@@ -50,7 +52,7 @@ export class Boarding {
   exit() {
     for (const d of this.defenders) d.mesh.removeFromParent();
     this.marine?.mesh.removeFromParent();
-    for (const t of this.tracers) t.removeFromParent();
+    for (const t of this.tracers) t.material.dispose(), t.removeFromParent();
     this.tracers = [];
   }
 
@@ -65,6 +67,7 @@ export class Boarding {
       t.userData.t -= dt;
       t.material.opacity = Math.max(0, t.userData.t * 6);
       if (t.userData.t <= 0) {
+        t.material.dispose();
         t.removeFromParent();
         this.tracers.splice(i, 1);
       }
@@ -87,9 +90,14 @@ export class Boarding {
     return this.defenders.filter((d) => d.alive).length;
   }
 
-  /** Where a ray from `from` toward `dir` first lands inside the hull: a wall, a defender, or nothing. */
+  /** Where a ray from `from` toward `dir` (both in the ship's frame, like everything aboard) first lands inside the hull:
+   *  a wall, a defender, or nothing. The point comes back in the ship's frame too. The raycaster works in the world, so
+   *  the ray goes out through the ship's matrix: s1 cast the ship-frame ray straight into the world, where it met
+   *  nothing unless the ship sat at the origin, so no rifle shot ever landed and defenders saw through walls (TS-S3-BOARDRAY). */
   cast(from, dir, far = 60, ignore = null) {
-    _ray.set(from, dir);
+    const host = this.ship.obj;
+    host.updateMatrixWorld();
+    _ray.set(_from.copy(from).applyMatrix4(host.matrixWorld), _wdir.copy(dir).transformDirection(host.matrixWorld));
     _ray.far = far;
     const hits = _ray.intersectObject(this.interior.group, true);
     for (const h of hits) {
@@ -101,7 +109,7 @@ export class Boarding {
       if (this.marine && o === this.marine.mesh) continue;
       if (o === this.interior.cratesGroup) continue;
       if (h.object.material?.transparent) continue;
-      return { point: h.point, defender: d ?? null, distance: h.distance };
+      return { point: this.interior.group.worldToLocal(h.point.clone()), defender: d ?? null, distance: h.distance };
     }
     return null;
   }
@@ -133,7 +141,8 @@ export class Boarding {
 
   tracer(a, b, color) {
     const len = a.distanceTo(b);
-    const m = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, len), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1, toneMapped: false }));
+    const m = new THREE.Mesh(TRACER, new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1, toneMapped: false }));
+    m.scale.z = Math.max(0.01, len);
     m.position.copy(a).lerp(b, 0.5);
     m.lookAt(b);
     m.userData.t = 0.16;

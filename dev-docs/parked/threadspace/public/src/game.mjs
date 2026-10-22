@@ -15,6 +15,7 @@ import { Sfx } from './sfx.mjs';
 import { LocalNet } from './net.mjs';
 import * as M from './ships.mjs';
 import { frigateInterior, capitalInterior, concourseInterior } from './interiors.mjs';
+import { LightPool } from './lights.mjs';
 import { Walker } from './controllers/walk.mjs';
 import { Flight } from './controllers/fly.mjs';
 import { TurretSeat } from './controllers/turret.mjs';
@@ -66,6 +67,9 @@ export class Game {
     const sun = new THREE.DirectionalLight('#fff4e0', 1.6);
     sun.position.set(0.6, 0.8, 0.3);
     this.scene.add(sun);
+    this.lightPool = new LightPool(this.scene);
+    this.maxPixelRatio = Math.min(window.devicePixelRatio || 1, 2);
+    this.perf = { avg: 1 / 60, cool: 3, block: null };
     this.sfx = new Sfx();
     this.space = new Space(this.scene, this.renderer, sun);
     this.world = new World(this.scene);
@@ -1390,9 +1394,47 @@ export class Game {
     // is a front face in your room (ships.mjs, SHELL_LAYER). Every other seat sees the whole ship.
     this.camera.layers.set(0);
     if (this.phase !== 'walk') this.camera.layers.enable(M.SHELL_LAYER);
+    // Only the rooms you are in are drawn and lit: the Kestrel's decks are out of sight from every other seat, and aboard
+    // another hull her outside is out of sight (its plated metal was shaded and then painted over by the walls).
+    if (this.interior) this.interior.group.visible = this.phase === 'walk';
+    const aboard = this.phase === 'board' ? this.boarding.ship : null;
+    if (this.hullHidden && this.hullHidden !== aboard) this.showHull(this.hullHidden, true);
+    if (aboard && this.hullHidden !== aboard) this.showHull(aboard, false);
+    const rooms = this.phase === 'walk' ? [this.interior] : this.phase === 'board' ? [this.boarding.interior] : this.phase === 'dock' ? [this.concourse] : [];
+    this.lightPool.update(this.camera.position, rooms);
+    this.adaptResolution(now);
     this.renderer.render(this.scene, this.camera);
     this.hud.draw(this);
     requestAnimationFrame(() => this.frame());
+  }
+
+  /** Hides (or shows again) everything of a ship but the rooms you are standing in. */
+  showHull(ship, show) {
+    for (const c of ship.obj.children) if (c !== ship.interior?.group) c.visible = show;
+    this.hullHidden = show ? null : ship;
+  }
+
+  /** A slow frame rate draws fewer pixels: the pixel ratio steps down by a quarter (not below 1) when the frames run
+   *  slower than 40 a second, and back up when they are faster than 57 (but not straight back to a level it just left). */
+  adaptResolution(now) {
+    const P = this.perf;
+    const real = (now - (P.last ?? now)) / 1000;
+    P.last = now;
+    if (real <= 0 || real > 0.5) return; // a hidden tab, a jump's fade: not a measure of anything
+    P.avg += (real - P.avg) * 0.05;
+    P.cool -= real;
+    if (P.cool > 0) return;
+    const r = this.renderer.getPixelRatio();
+    if (P.avg > 1 / 40 && r > 1) {
+      P.block = { ratio: r, until: this.clock + 30 };
+      this.renderer.setPixelRatio(Math.max(1, r - 0.25));
+      this.resize();
+      P.cool = 2;
+    } else if (P.avg < 1 / 57 && r < this.maxPixelRatio && !(P.block && P.block.ratio === r + 0.25 && this.clock < P.block.until)) {
+      this.renderer.setPixelRatio(Math.min(this.maxPixelRatio, r + 0.25));
+      this.resize();
+      P.cool = 6;
+    } else P.cool = 1;
   }
 
   /** For the drive: numbers a test can gate on. */
@@ -1424,7 +1466,9 @@ export class Game {
       eva: this.phase === 'eva' ? { o2: Math.round(this.eva.o2), pos: this.eva.pos.toArray().map(Math.round) } : null,
       hacking: this.hacking ? Math.round(this.hacking.k * 100) / 100 : null,
       locked: this.input.locked,
-      bolts: this.combat.bolts.length
+      bolts: this.combat.bolts.length,
+      pointLights: (() => { let n = 0; this.scene.traverse((o) => o.isPointLight && o.visible && n++); return n; })(),
+      pixelRatio: this.renderer.getPixelRatio()
     };
   }
 }

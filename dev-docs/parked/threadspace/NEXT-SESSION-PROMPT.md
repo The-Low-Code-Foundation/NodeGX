@@ -27,9 +27,14 @@ Shots are in `shots/` (gitignored: on this machine only; `l1`–`l6` are s3's lo
 
 | drive | reading |
 |---|---|
-| `tests/smoke.json` | **36 / 36**, exit 0 |
-| `tests/boarding.json` | **16 / 16**, exit 0 |
+| `tests/smoke.json` | **37 / 37**, exit 0 |
+| `tests/boarding.json` | **18 / 18**, exit 0 |
 | `tests/eva.json` | **11 / 11**, exit 0 |
+
+**s3b, the same day — Richard on his Mac: smooth until he boarded the hauler, then unplayable.** Two bugs, both fixed:
+TS-S3-BOARDFPS (19 point lights in the scene, the Kestrel's 12 burning out of sight; the hauler's outside drawn behind its
+own walls: software GL 2.5 fps aboard → 8.5, walking is 8.3) and TS-S3-BOARDRAY (every boarding ray cast in the ship's
+frame into the world: **no rifle shot had ever landed**, defenders saw through walls; the drive's check passed on a miss).
 
 `sh tools/run-all.sh` runs all three on :8793. The two new probes (WALKAXES, HOLES) were each run once against s2's
 `walk.mjs` / `interiors.mjs` in a scratch copy and **failed there**, then passed on s3's.
@@ -37,7 +42,7 @@ Shots are in `shots/` (gitignored: on this machine only; `l1`–`l6` are s3's lo
 **Not observed (all of it needs Richard's screen):** how any of it feels with a mouse and a real GPU (the chase spring,
 V, the click radius of 22 px, the drag-orbit); the sky at its real-GPU bake size (1024 a face: headless bakes 128, so every
 shot's nebula is blurrier than his) and whether the nebula is now too bright or still too faint (gain 1.6–1.7); the bake's
-cost on a sector jump (six passes + PMREM, inside the 1.7 s fade); the threat words' calibration (a rough
+cost on a sector jump (six passes + PMREM, inside the 1.7 s fade); the frame rate aboard on his GPU after s3b (software GL only); the threat words' calibration (a rough
 time-to-kill ratio, `game.threatOf`); sound.
 
 ## What s3 settled
@@ -45,6 +50,9 @@ time-to-kill ratio, `game.threatOf`); sound.
 - 🔴 **A check that a probe "hit something within 3 m" passed on an empty view.** `debug.see()` reports a miss as
   `Infinity`, JSON sends it as `null`, `null < 3` is true. Ask `typeof d === 'number'`. **Run every new check once against
   the code it fixes**; it must fail there.
+- 🔴 **A check with an `||` escape tests nothing.** "an aimed shot lands" expected `after < before || before === 60`; a fresh
+  defender has 60 hp, so every miss passed for three sessions while no shot ever landed (TS-S3-BOARDRAY).
+- 🔴 **Never add a `PointLight` to a room**: call `Interior.light` and let the pool shine it (`lights.mjs`).
 - 🔴 **Placing the Kestrel with `debug.go` after an undock puts her straight below the dock** (she undocks 220 m above it),
   and `lookAt` along a vertical line is degenerate: the autopilot check read 25.7 s, nearly all of it a turn. Start her
   level, nose on (the check does).

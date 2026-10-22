@@ -4,6 +4,7 @@
   { "clickSel": "#btn-new" },
   { "wait": 2500 },
   { "eval": "JSON.stringify(__game.stats())", "label": "a new captain walks the bridge", "expect": "r => r.phase === 'walk' && r.sector === 'haven' && r.credits === 1200 && r.entities >= 4" },
+  { "eval": "JSON.stringify(__game.stats())", "label": "the scene's point lights are the pool of 8, whatever rooms exist (TS-S3-BOARDFPS)", "expect": "r => r.pointLights === 8" },
   { "shot": "01-bridge.png" },
   { "eval": "JSON.stringify(__game.debug.see())", "label": "at spawn the eye lands on the bridge, not on the hull's own bow block (fixed 2026-10-22)", "expect": "r => r.dist > 8 && r.color !== '#9aa3ad'" },
   { "keyDown": "KeyW", "vk": 87 },

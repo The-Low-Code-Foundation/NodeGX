@@ -77,7 +77,7 @@ mid-job, music.
 ## Tests
 
 ```
-sh tools/run-all.sh        # smoke (36 checks), boarding (16), eva (11); exit 1 on any FAIL
+sh tools/run-all.sh        # smoke (37 checks), boarding (18), eva (11); exit 1 on any FAIL
 ```
 
 Each drive runs the real page in headless Chrome on software GL and gates on `__game.stats()` and, where
@@ -120,6 +120,11 @@ TS-S3-HOLES check passed on the broken code). Every new check was run once again
   height smaller than the last toward the ends): a camera inside a convex hull sees every face from behind, so the helm's
   eye inside the bow and a boarder inside the Carrion see out through her. A non-convex hull would put one of its own faces
   in your view (that was TS-S2-SHELLFACE).
+- **`lights.mjs`** — a fixed pool of 8 point lights moved each frame onto the room lights nearest you, in only the rooms
+  you are in. Interiors say where their lights are; they never own a `PointLight`. Every point light in a three.js scene
+  costs every lit pixel, seen or not, and changing their number recompiles every material (TS-S3-BOARDFPS: 19 lights
+  aboard the hauler, a third of the frame rate). Also in the frame: the Kestrel's decks are drawn only while you walk them,
+  a boarded hull's outside is hidden while you are in it, and the pixel ratio steps down when frames run slow.
 - **`space.mjs`** — the sky: a nebula computed from direction and baked to a cube map per sector (`setSector`), stars,
   the sun, planets, dust, the tractor's beams. **`sfx.mjs`** — synthesised sound.
 

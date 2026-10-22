@@ -24,6 +24,7 @@ export class Interior {
     this.floorY = floorY;
     this.colliders = [];
     this.interactables = [];
+    this.lights = []; // where its lights are; the scene's light pool shines them (lights.mjs)
     this.people = [];
     this.spawn = new THREE.Vector3();
     this.spawnYaw = 0;
@@ -110,12 +111,14 @@ export class Interior {
     }
   }
 
+  /** A ceiling light: a glowing fixture, and a place for the scene's light pool to put a point light (lights.mjs). */
   light(x, z, color = '#ffe6c4', intensity = 18, dist = 14, y = null) {
-    const l = new THREE.PointLight(color, intensity, dist, 1.6);
-    l.position.set(x, y ?? this.floorY + H - 0.3, z);
-    this.group.add(l);
+    const anchor = new THREE.Object3D();
+    anchor.position.set(x, y ?? this.floorY + H - 0.3, z);
+    this.group.add(anchor);
+    this.lights.push({ anchor, color: new THREE.Color(color), intensity, distance: dist, decay: 1.6 });
     this.group.add(at(box(0.8, 0.08, 0.8, glow(color)), x, y ?? this.floorY + H - 0.02, z));
-    return l;
+    return anchor;
   }
 
   prop(mesh, x, z, { collide = true, y = 0, ry = 0 } = {}) {
