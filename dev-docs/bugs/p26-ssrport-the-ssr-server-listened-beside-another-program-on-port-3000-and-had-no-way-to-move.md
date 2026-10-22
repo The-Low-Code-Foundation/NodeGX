@@ -1,7 +1,8 @@
 ---
 id: P26-SSRPORT
 title: The SSR server listened beside another program on port 3000, and had no way to pick another port except PORT
-status: open
+status: fixed
+commit: 3c41dc02d
 severity: medium
 area: deploy / SSR server, Deploy to folder
 found: Richard's ask 2026-10-22 ("3000 isn't working for me right now")
