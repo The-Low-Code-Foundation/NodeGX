@@ -70,11 +70,13 @@ mid-job, music.
 ## Tests
 
 ```
-sh tools/run-all.sh        # smoke (21 checks), boarding (15), eva (11); exit 1 on any FAIL
+sh tools/run-all.sh        # smoke (24 checks), boarding (15), eva (11); exit 1 on any FAIL
 ```
 
-Each drive runs the real page in headless Chrome on software GL and gates on `__game.stats()`;
-screenshots land in `shots/`. Software GL runs at ~8–10 fps, so held-key distances in a drive are
+Each drive runs the real page in headless Chrome on software GL and gates on `__game.stats()` and, where
+the question is what you *see*, on `__game.debug.see()`: what the camera's centre ray lands on, through the
+camera's own layers (distance, colour, geometry). Screenshots land in `shots/`; look at every one — s1's
+`01-bridge.png` was a flat grey wall (the hull's own bow block in the corridor, TS-S2-SHELLFACE) and 21/21 passed. Software GL runs at ~8–10 fps, so held-key distances in a drive are
 shorter than on a real GPU; the checks allow for it. A drive does not test the mouse (headless Chrome
 grants no pointer lock), nor how it feels.
 

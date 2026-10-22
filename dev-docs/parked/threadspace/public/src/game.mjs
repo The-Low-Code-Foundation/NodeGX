@@ -1274,6 +1274,10 @@ export class Game {
       this.toastT -= dt;
       if (this.toastT <= 0) this.bannerEl.hidden = true;
     }
+    // Walking inside the Kestrel, the hull shell is not drawn: its boxes overlap, and the inner face of the next box
+    // is a front face in your room (ships.mjs, SHELL_LAYER). Every other seat sees the whole ship.
+    this.camera.layers.set(0);
+    if (this.phase !== 'walk') this.camera.layers.enable(M.SHELL_LAYER);
     this.renderer.render(this.scene, this.camera);
     this.hud.draw(this);
     requestAnimationFrame(() => this.frame());

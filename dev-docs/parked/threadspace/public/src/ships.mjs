@@ -6,6 +6,13 @@ import * as THREE from 'three';
 import { box, cyl, at, mat, glow, mulberry } from './util.mjs';
 
 const DARK = '#2a2e35';
+
+/** Layer 1: the hull shell the rooms sit inside. The walking camera leaves this layer off, because the shell is
+ *  several overlapping boxes and the inner face of one box is a front face from inside the next: at the corridor's
+ *  spawn the bow block's aft face stood 1.5 m from your eyes and filled the view (2026-10-22). Back-face culling only
+ *  hides a shell you are inside of; it cannot hide the shell of the room next door. */
+export const SHELL_LAYER = 1;
+const shell = (m) => (m.layers.set(SHELL_LAYER), m);
 const TRIM = '#3c4350';
 
 /** The player's frigate: a long hull, a bridge block at the bow, a turret on the spine, a fighter bay door astern. */
@@ -15,13 +22,13 @@ export function frigate({ paint = '#9aa3ad', engine = '#58b0ff' } = {}) {
   const engMat = new THREE.MeshBasicMaterial({ color: engine, toneMapped: false });
   g.userData.hullMat = hullMat;
   g.userData.engMat = engMat;
-  g.add(at(box(14, 8, 56, hullMat), 0, 0, 2)); // main hull
-  g.add(at(box(10, 6, 16, hullMat), 0, 0.5, -28)); // bow, the bridge is in here
-  g.add(at(box(8, 2.6, 8, glow('#0d1b2a')), 0, 2.2, -30)); // the canopy band
+  g.add(shell(at(box(14, 8, 56, hullMat), 0, 0, 2))); // main hull
+  g.add(shell(at(box(10, 6, 16, hullMat), 0, 0.5, -28))); // bow, the bridge is in here
+  g.add(shell(at(box(8, 2.6, 8, glow('#0d1b2a')), 0, 2.2, -30))); // the canopy band (its underside hung 10 cm below the bridge ceiling)
   g.add(at(cyl(0.8, 2.4, 12, hullMat, 6), 0, -3.4, -42, -Math.PI / 2)); // the prow, low under the helm's eye line
   g.add(at(box(0.4, 0.4, 2, glow('#ff5540')), 0, -2.2, -47.5)); // the running light on the nose
-  g.add(at(box(16, 4, 12, hullMat), 0, -1, 24)); // the stern block: the bay
-  g.add(at(box(14, 3.2, 2, DARK), 0, -1, 30.5)); // the bay door
+  g.add(shell(at(box(16, 4, 12, hullMat), 0, -1, 24))); // the stern block: the bay
+  g.add(shell(at(box(14, 3.2, 2, DARK), 0, -1, 30.5))); // the bay door
   for (const s of [-1, 1]) {
     g.add(at(box(10, 1.2, 14, hullMat), s * 11, -1, 8)); // wings
     g.add(at(cyl(1.6, 1.6, 10, TRIM), s * 14, -1, 12, Math.PI / 2)); // nacelles

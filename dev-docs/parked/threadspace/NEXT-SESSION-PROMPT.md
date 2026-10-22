@@ -47,6 +47,18 @@ and the Wren's nose after the last size change (the shots `02-helm.png`, `08-dog
   `userData.cockpitHidden`); a prow added "to see the ship from the helm" was 4 m wide at 4 m and filled
   the view (fixed: low and thin); the Star Wars battle station from the copied `space.mjs` was in the
   sky (replaced by a cinder star). **Look at every shot; `stats()` cannot see the view.**
+- 🔴 **s2 (2026-10-22): a fourth one, and it was the first thing Richard saw.** New captain → a flat grey wall:
+  the hull shell is overlapping boxes, and the bow box's aft face is a *front* face inside the corridor, 1.5 m
+  from the spawn. Back-face culling hides only the box you are in. Fix: the five shell meshes are on
+  `SHELL_LAYER` and the `walk` camera leaves it off (`ships.mjs`, `game.mjs` frame). The drive now reads the
+  view with `__game.debug.see()` (what the centre ray hits); use it for every "what do I see" check.
+  Ledger: `dev-docs/bugs/ts-s2-shellface-*.md`.
+- 🔴 **s2 (2026-10-22): a fourth one, and it was the first thing Richard saw.** New captain → a flat grey wall:
+  the hull shell is overlapping boxes, and the bow box's aft face is a *front* face inside the corridor, 1.5 m
+  from the spawn. Back-face culling hides only the box you are in. Fix: the five shell meshes are on
+  `SHELL_LAYER` and the `walk` camera leaves it off (`ships.mjs`, `game.mjs` frame). The drive now reads the
+  view with `__game.debug.see()` (what the centre ray hits); use it for every "what do I see" check.
+  Ledger: `dev-docs/bugs/ts-s2-shellface-*.md`.
 - 🔴 **A fighter with a minimum speed cannot hack an airlock.** `speed[0]` 25 → 0 for the Wren, hack
   range 30 → 45 m, and the fighter *latches* to the hull once the hack starts.
 - 🔴 **The corvette's turrets killed the Kestrel in 14 s while the drive sat 400 m off** (30 dmg ×2 /
