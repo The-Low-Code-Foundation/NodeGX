@@ -1,0 +1,211 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f825cc4c-e3f8-5366-8b71-f9447fc6d07f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "bu_in",
+      "fromProperty": "show",
+      "toId": "bu_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bu_save",
+      "fromProperty": "value",
+      "toId": "bu_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "bu_ui",
+      "fromProperty": "value",
+      "toId": "bu_view",
+      "toProperty": "in-ui"
+    },
+    {
+      "fromId": "bu_words",
+      "fromProperty": "value",
+      "toId": "bu_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-nameH",
+      "toId": "bu_nameH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-name",
+      "toId": "bu_name",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-namePlaceholder",
+      "toId": "bu_name",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-title",
+      "toId": "bu_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-fxH",
+      "toId": "bu_fxH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-fx",
+      "toId": "bu_fxRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-warnings",
+      "toId": "bu_warnsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-hint",
+      "toId": "bu_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-goLoge",
+      "toId": "bu_goLoge",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-inLoge",
+      "toId": "bu_goLoge",
+      "toProperty": "hidden"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-armed",
+      "toId": "bu_armedTools",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-rotArm",
+      "toId": "bu_rotArm",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-cancel",
+      "toId": "bu_cancelArm",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-selected",
+      "toId": "bu_selTools",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-rotSel",
+      "toId": "bu_rotSel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-movSel",
+      "toId": "bu_movSel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-delSel",
+      "toId": "bu_delSel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-inLoge",
+      "toId": "bu_pieces",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "bu_view",
+      "fromProperty": "out-pieces",
+      "toId": "bu_piecesRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "bu_name",
+      "fromProperty": "onTextChanged",
+      "toId": "bu_sName",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "bu_name",
+      "fromProperty": "onEnter",
+      "toId": "bu_sName",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "bu_name",
+      "fromProperty": "onBlur",
+      "toId": "bu_sName",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "bu_goLoge",
+      "fromProperty": "click",
+      "toId": "bu_sGo",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "bu_rotArm",
+      "fromProperty": "click",
+      "toId": "bu_sRotArm",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "bu_cancelArm",
+      "fromProperty": "click",
+      "toId": "bu_sCancel",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "bu_rotSel",
+      "fromProperty": "click",
+      "toId": "bu_sRotSel",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "bu_movSel",
+      "fromProperty": "click",
+      "toId": "bu_sMovSel",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "bu_delSel",
+      "fromProperty": "click",
+      "toId": "bu_sDelSel",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "bu_piecesRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "bu_sPiece",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "bu_piecesRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "bu_sPiece",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

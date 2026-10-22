@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "50aa256f-5420-5e0f-8cc3-784a01428988",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sc_in",
+      "fromProperty": "icon",
+      "toId": "sc_icon",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sc_in",
+      "fromProperty": "label",
+      "toId": "sc_name",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sc_in",
+      "fromProperty": "small",
+      "toId": "sc_small",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sc_in",
+      "fromProperty": "link",
+      "toId": "sc_link",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "sc_in",
+      "fromProperty": "link",
+      "toId": "sc_link",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "sc_in",
+      "fromProperty": "pressed",
+      "toId": "sc_state",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "sc_state",
+      "fromProperty": "currentValue",
+      "toId": "sc_look",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "sc_look",
+      "fromProperty": "bg",
+      "toId": "sc_box",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "sc_look",
+      "fromProperty": "border",
+      "toId": "sc_box",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "sc_box",
+      "fromProperty": "onClick",
+      "toId": "sc_out",
+      "toProperty": "click"
+    }
+  ]
+}

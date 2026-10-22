@@ -1,0 +1,584 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "ff480805-48fb-5a94-882e-3930998ec5b6",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "co_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "co_root",
+      "type": "Group",
+      "children": [
+        "co_h",
+        "co_hint",
+        "co_nums",
+        "co_outH",
+        "co_outfits",
+        "co_colH",
+        "co_colors",
+        "co_shoeH",
+        "co_shoes",
+        "co_warn",
+        "co_accH",
+        "co_accs",
+        "co_suits",
+        "co_hairH",
+        "co_hairs"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "co_h",
+      "type": "Text",
+      "parent": "co_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "marginTop": "var(--space-1-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "co_hint",
+      "type": "Text",
+      "parent": "co_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "co_nums",
+      "type": "Group",
+      "label": "Which dance",
+      "parent": "co_root",
+      "children": [
+        "co_numsRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "marginTop": "var(--space-1)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "co_numsRep",
+      "type": "For Each",
+      "parent": "co_nums",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "co_outH",
+      "type": "Text",
+      "parent": "co_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "co_outfits",
+      "type": "net.noodl.visual.columns",
+      "parent": "co_root",
+      "children": [
+        "co_outfitsRep"
+      ],
+      "parameters": {
+        "layoutString": "1 1 1",
+        "marginX": {
+          "value": 6,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "co_outfitsRep",
+      "type": "For Each",
+      "parent": "co_outfits",
+      "parameters": {
+        "template": "/UI/ItemButton"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "co_colH",
+      "type": "Text",
+      "parent": "co_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "co_colors",
+      "type": "Group",
+      "parent": "co_root",
+      "children": [
+        "co_colorsRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "co_colorsRep",
+      "type": "For Each",
+      "parent": "co_colors",
+      "parameters": {
+        "template": "/UI/Swatch"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "co_shoeH",
+      "type": "Text",
+      "parent": "co_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "co_shoes",
+      "type": "net.noodl.visual.columns",
+      "parent": "co_root",
+      "children": [
+        "co_shoesRep"
+      ],
+      "parameters": {
+        "layoutString": "1 1 1",
+        "marginX": {
+          "value": 6,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "co_shoesRep",
+      "type": "For Each",
+      "parent": "co_shoes",
+      "parameters": {
+        "template": "/UI/ItemButton"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "co_warn",
+      "type": "Text",
+      "parent": "co_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--warning)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "co_accH",
+      "type": "Text",
+      "parent": "co_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1840
+    },
+    {
+      "id": "co_accs",
+      "type": "net.noodl.visual.columns",
+      "parent": "co_root",
+      "children": [
+        "co_accsRep"
+      ],
+      "parameters": {
+        "layoutString": "1 1 1",
+        "marginX": {
+          "value": 6,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 1960
+    },
+    {
+      "id": "co_accsRep",
+      "type": "For Each",
+      "parent": "co_accs",
+      "parameters": {
+        "template": "/UI/ItemButton"
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "co_suits",
+      "type": "Text",
+      "parent": "co_root",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 2200
+    },
+    {
+      "id": "co_hairH",
+      "type": "Text",
+      "parent": "co_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 2320
+    },
+    {
+      "id": "co_hairs",
+      "type": "Group",
+      "parent": "co_root",
+      "children": [
+        "co_hairsRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 2440
+    },
+    {
+      "id": "co_hairsRep",
+      "type": "For Each",
+      "parent": "co_hairs",
+      "parameters": {
+        "template": "/UI/HairRow"
+      },
+      "x": 160,
+      "y": 2560
+    },
+    {
+      "id": "co_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 410,
+      "y": 2680
+    },
+    {
+      "id": "co_ui",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "ui"
+      },
+      "x": 410,
+      "y": 2800
+    },
+    {
+      "id": "co_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 410,
+      "y": 2920
+    },
+    {
+      "id": "co_view",
+      "type": "JavaScriptFunction",
+      "label": "The costume tab's rows",
+      "parameters": {
+        "uses": "view/prep,view/common,game/text,rules/data,rules/engine",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst v = Scripts.prep.costumes(Inputs.save, Inputs.ui || {}, w);\nOutputs.title = w('costH'); Outputs.hint = w('costHint');\nOutputs.nums = v.numChips;\nOutputs.outH = w('outfit'); Outputs.outfits = v.outfits;\nOutputs.colH = w('colour'); Outputs.colors = v.colors;\nOutputs.shoeH = w('shoes'); Outputs.shoes = v.shoes;\nOutputs.warn = w('pointesWarn'); Outputs.shoeWarn = v.shoeWarn;\nOutputs.accH = w('acc'); Outputs.accs = v.accs;\nOutputs.suits = w('suits');\nOutputs.hairH = w('hairH'); Outputs.hair = v.hair;\n"
+      },
+      "x": 410,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hint",
+          "displayName": "hint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-nums",
+          "displayName": "nums",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-outH",
+          "displayName": "outH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-outfits",
+          "displayName": "outfits",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-colH",
+          "displayName": "colH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-colors",
+          "displayName": "colors",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shoeH",
+          "displayName": "shoeH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shoes",
+          "displayName": "shoes",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-warn",
+          "displayName": "warn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-shoeWarn",
+          "displayName": "shoeWarn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-accH",
+          "displayName": "accH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-accs",
+          "displayName": "accs",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-suits",
+          "displayName": "suits",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hairH",
+          "displayName": "hairH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hair",
+          "displayName": "hair",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "co_sNum",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "cos:pickNum"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "co_sOutfit",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "cos:item"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "co_sShoes",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "cos:item"
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "co_sAcc",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "cos:item"
+      },
+      "x": 410,
+      "y": 2080
+    },
+    {
+      "id": "co_sColor",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "cos:color"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "co_sHair",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "cos:hair"
+      },
+      "x": 410,
+      "y": 2560
+    }
+  ],
+  "visualRoots": [
+    "co_root"
+  ]
+}

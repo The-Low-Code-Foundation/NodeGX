@@ -1,0 +1,115 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2a1ca1d4-76e5-5689-8230-c383a957b3f3",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rm_req",
+      "fromProperty": "userId",
+      "toId": "rm_roles",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "rm_req",
+      "fromProperty": "receive",
+      "toId": "rm_roles",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "rm_roles",
+      "fromProperty": "roles",
+      "toId": "rm_find",
+      "toProperty": "in-roles"
+    },
+    {
+      "fromId": "rm_roles",
+      "fromProperty": "done",
+      "toId": "rm_query",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "rm_roles",
+      "fromProperty": "unchanged",
+      "toId": "rm_query",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "rm_req",
+      "fromProperty": "pm-table",
+      "toId": "rm_find",
+      "toProperty": "in-table"
+    },
+    {
+      "fromId": "rm_req",
+      "fromProperty": "pm-rowId",
+      "toId": "rm_find",
+      "toProperty": "in-rowId"
+    },
+    {
+      "fromId": "rm_query",
+      "fromProperty": "items",
+      "toId": "rm_find",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "rm_query",
+      "fromProperty": "fetched",
+      "toId": "rm_find",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rm_find",
+      "fromProperty": "out-id",
+      "toId": "rm_delete",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "rm_find",
+      "fromProperty": "out-found",
+      "toId": "rm_delete",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "rm_find",
+      "fromProperty": "out-id",
+      "toId": "rm_ok",
+      "toProperty": "pm-removed"
+    },
+    {
+      "fromId": "rm_delete",
+      "fromProperty": "done",
+      "toId": "rm_ok",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rm_find",
+      "fromProperty": "out-reason",
+      "toId": "rm_fail",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "rm_find",
+      "fromProperty": "out-refused",
+      "toId": "rm_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rm_delete",
+      "fromProperty": "failure",
+      "toId": "rm_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rm_query",
+      "fromProperty": "failure",
+      "toId": "rm_fail",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rm_roles",
+      "fromProperty": "failure",
+      "toId": "rm_fail",
+      "toProperty": "send"
+    }
+  ]
+}

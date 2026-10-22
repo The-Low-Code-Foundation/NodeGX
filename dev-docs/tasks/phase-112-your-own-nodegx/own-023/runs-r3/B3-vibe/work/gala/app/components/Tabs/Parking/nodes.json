@@ -1,0 +1,403 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f94e1728-4bdd-55db-8706-5fb3f967d630",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pk_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "show",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "pk_root",
+      "type": "Group",
+      "children": [
+        "pk_h",
+        "pk_hint",
+        "pk_facts",
+        "pk_wH",
+        "pk_widths",
+        "pk_warn",
+        "pk_dH",
+        "pk_doors",
+        "pk_uH",
+        "pk_ups"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "rowGap": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pk_h",
+      "type": "Text",
+      "parent": "pk_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontSize": {
+          "value": 19,
+          "unit": "px"
+        },
+        "fontWeight": "var(--font-semibold)",
+        "marginTop": "var(--space-1-5)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pk_hint",
+      "type": "Text",
+      "parent": "pk_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pk_facts",
+      "type": "Group",
+      "parent": "pk_root",
+      "children": [
+        "pk_factsRep"
+      ],
+      "parameters": {
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "pk_factsRep",
+      "type": "For Each",
+      "parent": "pk_facts",
+      "parameters": {
+        "template": "/UI/Fact"
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "pk_wH",
+      "type": "Text",
+      "parent": "pk_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "pk_widths",
+      "type": "Group",
+      "parent": "pk_root",
+      "children": [
+        "pk_widthsRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "pk_widthsRep",
+      "type": "For Each",
+      "parent": "pk_widths",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "pk_warn",
+      "type": "Text",
+      "parent": "pk_root",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "color": "var(--warning)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1000
+    },
+    {
+      "id": "pk_dH",
+      "type": "Text",
+      "parent": "pk_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "pk_doors",
+      "type": "Group",
+      "parent": "pk_root",
+      "children": [
+        "pk_doorsRep"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight"
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "pk_doorsRep",
+      "type": "For Each",
+      "parent": "pk_doors",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "pk_uH",
+      "type": "Text",
+      "parent": "pk_root",
+      "parameters": {
+        "fontFamily": "var(--font-display)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--primary)",
+        "marginTop": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "pk_ups",
+      "type": "net.noodl.visual.columns",
+      "parent": "pk_root",
+      "children": [
+        "pk_upsRep"
+      ],
+      "parameters": {
+        "layoutString": "1 1",
+        "marginX": {
+          "value": 6,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "pk_upsRep",
+      "type": "For Each",
+      "parent": "pk_ups",
+      "parameters": {
+        "template": "/UI/ItemButton"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "pk_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "pk_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "pk_view",
+      "type": "JavaScriptFunction",
+      "label": "The car park's rows",
+      "parameters": {
+        "uses": "view/prep,view/common,game/text,rules/data,rules/engine",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school || Inputs.save.season < 2) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst v = Scripts.prep.parking(Inputs.save, {}, w);\nOutputs.title = w('parkH'); Outputs.hint = w('parkHint'); Outputs.facts = v.facts;\nOutputs.wH = w('bayWidth'); Outputs.widths = v.widths; Outputs.warn = w('narrowWarn'); Outputs.narrow = v.narrow;\nOutputs.dH = w('doors'); Outputs.doors = v.doors;\nOutputs.uH = w('parkUpgrades'); Outputs.ups = v.upgrades;\n"
+      },
+      "x": 410,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hint",
+          "displayName": "hint",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-facts",
+          "displayName": "facts",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-wH",
+          "displayName": "wH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-widths",
+          "displayName": "widths",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-warn",
+          "displayName": "warn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-narrow",
+          "displayName": "narrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-dH",
+          "displayName": "dH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-doors",
+          "displayName": "doors",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-uH",
+          "displayName": "uH",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ups",
+          "displayName": "ups",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pk_sW",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "park:width"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "pk_sD",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "park:doors"
+      },
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "pk_sU",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "park:up"
+      },
+      "x": 410,
+      "y": 1720
+    }
+  ],
+  "visualRoots": [
+    "pk_root"
+  ]
+}

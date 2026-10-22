@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3b1cf175-6b08-5bd9-879e-992b6ceb2be6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "dd_in",
+      "fromProperty": "left",
+      "toId": "dd_drag",
+      "toProperty": "inputPositionX"
+    },
+    {
+      "fromId": "dd_in",
+      "fromProperty": "top",
+      "toId": "dd_drag",
+      "toProperty": "inputPositionY"
+    },
+    {
+      "fromId": "dd_in",
+      "fromProperty": "size",
+      "toId": "dd_dot",
+      "toProperty": "width"
+    },
+    {
+      "fromId": "dd_in",
+      "fromProperty": "size",
+      "toId": "dd_dot",
+      "toProperty": "height"
+    },
+    {
+      "fromId": "dd_in",
+      "fromProperty": "color",
+      "toId": "dd_dot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "dd_in",
+      "fromProperty": "label",
+      "toId": "dd_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "dd_in",
+      "fromProperty": "picked",
+      "toId": "dd_state",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "dd_state",
+      "fromProperty": "currentValue",
+      "toId": "dd_look",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "dd_look",
+      "fromProperty": "ring",
+      "toId": "dd_dot",
+      "toProperty": "borderColor"
+    },
+    {
+      "fromId": "dd_drag",
+      "fromProperty": "positionX",
+      "toId": "dd_out",
+      "toProperty": "dropLeft"
+    },
+    {
+      "fromId": "dd_drag",
+      "fromProperty": "positionY",
+      "toId": "dd_out",
+      "toProperty": "dropTop"
+    },
+    {
+      "fromId": "dd_drag",
+      "fromProperty": "onStop",
+      "toId": "dd_out",
+      "toProperty": "dropped"
+    },
+    {
+      "fromId": "dd_dot",
+      "fromProperty": "onClick",
+      "toId": "dd_out",
+      "toProperty": "tap"
+    }
+  ]
+}

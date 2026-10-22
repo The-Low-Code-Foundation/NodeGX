@@ -1,0 +1,348 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2311f6d3-5c2c-539c-88bd-b71d5bf55274",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "s3_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "save",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "ui",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 290,
+      "y": 280
+    },
+    {
+      "id": "s3_out",
+      "type": "Component Outputs",
+      "ports": [
+        {
+          "name": "stage",
+          "plug": "input",
+          "type": "object"
+        }
+      ],
+      "x": 290,
+      "y": 400
+    },
+    {
+      "id": "s3_host",
+      "type": "Group",
+      "label": "3D view",
+      "parameters": {
+        "position": "absolute",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "zIndex": 0,
+        "backgroundColor": "var(--scene-sky)",
+        "clip": true
+      },
+      "metadata": {
+        "comment": "Fills the window behind the sheet and the bars. The canvas three.js makes is put in here and nowhere else."
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "s3_run",
+      "type": "JavaScriptFunction",
+      "label": "3D stage",
+      "parameters": {
+        "uses": "stage/stage,stage/world,stage/people,stage/play,stage/music,rules/data,rules/engine,rules/tunes,game/text",
+        "runOnChange-in-host": false,
+        "runOnChange-in-save": false,
+        "runOnChange-in-ui": false,
+        "runOnChange-in-words": false,
+        "scriptOutputs": [
+          {
+            "id": "stage",
+            "label": "stage"
+          },
+          {
+            "id": "live",
+            "label": "live"
+          },
+          {
+            "id": "liveChanged",
+            "label": "liveChanged"
+          },
+          {
+            "id": "cam",
+            "label": "cam"
+          },
+          {
+            "id": "camChanged",
+            "label": "camChanged"
+          },
+          {
+            "id": "float",
+            "label": "float"
+          },
+          {
+            "id": "floatChanged",
+            "label": "floatChanged"
+          },
+          {
+            "id": "act",
+            "label": "act"
+          },
+          {
+            "id": "arg",
+            "label": "arg"
+          },
+          {
+            "id": "acted",
+            "label": "acted"
+          }
+        ],
+        "outtype-stage": "object",
+        "outtype-live": "object",
+        "outtype-liveChanged": "signal",
+        "outtype-cam": "object",
+        "outtype-camChanged": "signal",
+        "outtype-float": "object",
+        "outtype-floatChanged": "signal",
+        "outtype-act": "string",
+        "outtype-arg": "*",
+        "outtype-acted": "signal",
+        "functionScript": "const el = Inputs.host && Inputs.host.getDOMElement ? Inputs.host.getDOMElement() : null;\nif (!el || !Inputs.save) return;\nconst T = await import(new URL('assets/vendor/three.module.js', document.baseURI).href);\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nconst size = { w: el.clientWidth || window.innerWidth, h: el.clientHeight || window.innerHeight };\n// what the stage reports: the evening, the camera and the toolbar go to the screen state; a tap or the end of a\n// run is a press like any other, sent on to the dispatcher\nconst ACT = { done: 'runDone', ui: 'stageUi', place: 'place', key: 'key', say: 'say' };\nconst emit = (kind, data) => {\n  if (kind === 'live') { Outputs.live = data; Outputs.liveChanged(); return; }\n  if (kind === 'cam') { Outputs.cam = data; Outputs.camChanged(); return; }\n  if (kind === 'float') { Outputs.float = data; Outputs.floatChanged(); return; }\n  Outputs.act = ACT[kind] || kind;\n  Outputs.arg = data;\n  Outputs.acted();\n};\nconst stage = Scripts.stage.create({ T, window, document, size, save: Inputs.save, ui: Inputs.ui || {}, schoolName: (Inputs.save.school.name || '').trim() || w('school'), emit });\n// the one element code puts on the page: three.js's own canvas, inside this Group\nstage.canvas.style.width = '100%';\nstage.canvas.style.height = '100%';\nstage.canvas.style.display = 'block';\nel.appendChild(stage.canvas);\nconst onResize = () => { size.w = el.clientWidth || window.innerWidth; size.h = el.clientHeight || window.innerHeight; stage.resize(); };\nwindow.addEventListener('resize', onResize);\nstage.unmount = () => { window.removeEventListener('resize', onResize); stage.destroy(); };\nonResize();\nOutputs.stage = stage;\n"
+      },
+      "metadata": {
+        "comment": "No node draws three.js or synthesises music, so this stays code: reference/src world/people/play/music, as factories in scripts/stage. three.js itself is the vendored r177 in assets/vendor. It runs once, when the Group is on the page."
+      },
+      "x": 290,
+      "y": 40,
+      "ports": [
+        {
+          "name": "out-stage",
+          "displayName": "stage",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-live",
+          "displayName": "live",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-liveChanged",
+          "displayName": "liveChanged",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-cam",
+          "displayName": "cam",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-camChanged",
+          "displayName": "camChanged",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-float",
+          "displayName": "float",
+          "plug": "output",
+          "type": "object",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-floatChanged",
+          "displayName": "floatChanged",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-act",
+          "displayName": "act",
+          "plug": "output",
+          "type": "string",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-arg",
+          "displayName": "arg",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-acted",
+          "displayName": "acted",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-host",
+          "displayName": "host",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "s3_sync",
+      "type": "JavaScriptFunction",
+      "label": "Tell the stage",
+      "parameters": {
+        "uses": "game/text,rules/data",
+        "functionScript": "if (!Inputs.stage || !Inputs.save) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nInputs.stage.sync(Inputs.save, Inputs.ui || {}, (Inputs.save.school.name || '').trim() || w('school'));\n"
+      },
+      "metadata": {
+        "comment": "Whenever the save or the screen state changes, the 3D catches up (the coded game's G was shared; here the stage keeps its own copy)."
+      },
+      "x": 290,
+      "y": 520,
+      "ports": [
+        {
+          "name": "in-stage",
+          "displayName": "stage",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "s3_bye",
+      "type": "JavaScriptFunction",
+      "label": "Stop the 3D when the page goes",
+      "parameters": {
+        "runOnChange-in-stage": false,
+        "functionScript": "if (Inputs.stage && Inputs.stage.unmount) Inputs.stage.unmount();\n"
+      },
+      "x": 290,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-stage",
+          "displayName": "stage",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "s3_live",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "The evening so far",
+      "parameters": {
+        "storeName": "ui",
+        "key": "live"
+      },
+      "x": 290,
+      "y": 640
+    },
+    {
+      "id": "s3_cam",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "The camera",
+      "parameters": {
+        "storeName": "ui",
+        "key": "cam"
+      },
+      "x": 290,
+      "y": 760
+    },
+    {
+      "id": "s3_float",
+      "type": "net.noodl.GlobalStore.Set",
+      "label": "Where the toolbar goes",
+      "parameters": {
+        "storeName": "ui",
+        "key": "float"
+      },
+      "x": 290,
+      "y": 880
+    },
+    {
+      "id": "s3_send",
+      "type": "Event Sender",
+      "label": "A tap or the end of a run",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg"
+      },
+      "x": 290,
+      "y": 1000
+    }
+  ],
+  "visualRoots": [
+    "s3_host"
+  ]
+}

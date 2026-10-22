@@ -1,0 +1,146 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "81836afd-0f75-5b03-8aba-6c051f8d3d0f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "cb_root",
+      "type": "Group",
+      "label": "Camera bar",
+      "children": [
+        "cb_rep"
+      ],
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "top",
+        "marginTop": "var(--space-24)",
+        "marginLeft": "var(--space-3)",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 55,
+          "unit": "vw"
+        },
+        "columnGap": "var(--space-1-5)",
+        "rowGap": "var(--space-1-5)",
+        "zIndex": 3
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "cb_rep",
+      "type": "For Each",
+      "parent": "cb_root",
+      "parameters": {
+        "template": "/UI/Chip"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "cb_save",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "gala",
+        "keys": "save"
+      },
+      "x": 350,
+      "y": 400
+    },
+    {
+      "id": "cb_ui",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "ui"
+      },
+      "x": 350,
+      "y": 520
+    },
+    {
+      "id": "cb_cam",
+      "type": "net.noodl.GlobalStore.Subscribe",
+      "parameters": {
+        "storeName": "ui",
+        "keys": "cam"
+      },
+      "x": 350,
+      "y": 640
+    },
+    {
+      "id": "cb_words",
+      "type": "Variable2",
+      "label": "words (shared on purpose)",
+      "parameters": {
+        "name": "words"
+      },
+      "x": 350,
+      "y": 760
+    },
+    {
+      "id": "cb_view",
+      "type": "JavaScriptFunction",
+      "label": "The camera buttons",
+      "parameters": {
+        "uses": "view/frame,view/common,game/text,rules/data,rules/engine",
+        "functionScript": "if (!Inputs.save || !Inputs.save.school) return;\nconst w = Scripts.text.words(Inputs.words || [], Inputs.save.lang || 'fr');\nOutputs.buttons = Scripts.frame.cam(Inputs.save, { ...(Inputs.ui || {}), cam: Inputs.cam }, w);\n"
+      },
+      "x": 350,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-save",
+          "displayName": "save",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ui",
+          "displayName": "ui",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-cam",
+          "displayName": "cam",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-buttons",
+          "displayName": "buttons",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "cb_send",
+      "type": "Event Sender",
+      "parameters": {
+        "channelName": "gala-act",
+        "payload": "act,arg",
+        "act": "cam"
+      },
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "cb_root"
+  ]
+}

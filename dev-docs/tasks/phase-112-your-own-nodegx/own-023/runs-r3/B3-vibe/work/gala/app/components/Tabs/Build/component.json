@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f825cc4c-e3f8-5366-8b71-f9447fc6d07f",
+  "name": "Build",
+  "path": "/Tabs/Build",
+  "type": "visual",
+  "created": "2026-10-21T13:20:19.176Z",
+  "modified": "2026-10-21T13:20:19.176Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The dressing-room tab: the school's name, what the room does (hair stations, rails, seats, calm…), and the furniture to place, turn, move or put away — placing happens by tapping the floor in the 3D view."
+}

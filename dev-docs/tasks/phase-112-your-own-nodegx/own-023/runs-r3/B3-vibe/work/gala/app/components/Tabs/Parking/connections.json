@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f94e1728-4bdd-55db-8706-5fb3f967d630",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pk_in",
+      "fromProperty": "show",
+      "toId": "pk_root",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pk_save",
+      "fromProperty": "value",
+      "toId": "pk_view",
+      "toProperty": "in-save"
+    },
+    {
+      "fromId": "pk_words",
+      "fromProperty": "value",
+      "toId": "pk_view",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-title",
+      "toId": "pk_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-hint",
+      "toId": "pk_hint",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-facts",
+      "toId": "pk_factsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-wH",
+      "toId": "pk_wH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-widths",
+      "toId": "pk_widthsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-warn",
+      "toId": "pk_warn",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-narrow",
+      "toId": "pk_warn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-dH",
+      "toId": "pk_dH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-doors",
+      "toId": "pk_doorsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-uH",
+      "toId": "pk_uH",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pk_view",
+      "fromProperty": "out-ups",
+      "toId": "pk_upsRep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pk_widthsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "pk_sW",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "pk_widthsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "pk_sW",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "pk_doorsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "pk_sD",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "pk_doorsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "pk_sD",
+      "toProperty": "sendEvent"
+    },
+    {
+      "fromId": "pk_upsRep",
+      "fromProperty": "itemActionItemId",
+      "toId": "pk_sU",
+      "toProperty": "arg"
+    },
+    {
+      "fromId": "pk_upsRep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "pk_sU",
+      "toProperty": "sendEvent"
+    }
+  ]
+}

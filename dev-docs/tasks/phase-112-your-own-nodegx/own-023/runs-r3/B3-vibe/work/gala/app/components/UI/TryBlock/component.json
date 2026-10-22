@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2f1f2b4b-5690-5ad6-8d7e-b861f3733b9c",
+  "name": "TryBlock",
+  "path": "/UI/TryBlock",
+  "type": "visual",
+  "created": "2026-10-21T13:02:09.917Z",
+  "modified": "2026-10-21T13:02:09.917Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One block of a try-out, step by step: the block's name in its colour, then each of its steps and what happened."
+}

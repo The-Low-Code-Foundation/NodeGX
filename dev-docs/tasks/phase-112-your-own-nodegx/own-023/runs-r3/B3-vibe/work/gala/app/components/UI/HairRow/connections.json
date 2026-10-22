@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "487fd792-3299-58f6-8684-9ac63114f372",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "hr_in",
+      "fromProperty": "label",
+      "toId": "hr_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "hr_in",
+      "fromProperty": "dot",
+      "toId": "hr_dot",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "hr_in",
+      "fromProperty": "chips",
+      "toId": "hr_rep",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "hr_rep",
+      "fromProperty": "itemOutputSignal-click",
+      "toId": "hr_out",
+      "toProperty": "pick"
+    },
+    {
+      "fromId": "hr_rep",
+      "fromProperty": "itemActionItemId",
+      "toId": "hr_out",
+      "toProperty": "pickId"
+    }
+  ]
+}

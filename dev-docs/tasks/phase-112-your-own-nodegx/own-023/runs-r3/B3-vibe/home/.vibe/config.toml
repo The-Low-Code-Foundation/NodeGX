@@ -1,0 +1,22 @@
+# OWN-023 round 3 lab (harness, not the person): see round-vibe.mjs.
+active_model = "deepseek-v4.1-flash"
+enable_update_checks = false
+enable_auto_update = false
+
+[[providers]]
+name = "clinepass"
+api_base = "http://127.0.0.1:8931/api/v1"
+api_key_env_var = "CLINE_PASS_API_KEY"
+api_style = "openai"
+backend = "generic"
+reasoning_field_name = "reasoning"
+
+[[models]]
+name = "cline-pass/deepseek-v4.1-flash"
+provider = "clinepass"
+alias = "deepseek-v4.1-flash"
+display_name = "DeepSeek V4.1 Flash (ClinePass)"
+max_context_length = 1000000
+input_price = 0.15
+output_price = 0.60
+cached_input_price = 0.003

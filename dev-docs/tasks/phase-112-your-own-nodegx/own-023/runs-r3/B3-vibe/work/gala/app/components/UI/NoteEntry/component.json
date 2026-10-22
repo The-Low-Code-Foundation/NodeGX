@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "93847a55-071f-571e-8cf8-b277dfefaf6b",
+  "name": "NoteEntry",
+  "path": "/UI/NoteEntry",
+  "type": "visual",
+  "created": "2026-10-21T13:00:55.915Z",
+  "modified": "2026-10-21T13:00:55.915Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One gala night in the school's notebook: season, date and stars; how happy the parents were; each number's stars."
+}

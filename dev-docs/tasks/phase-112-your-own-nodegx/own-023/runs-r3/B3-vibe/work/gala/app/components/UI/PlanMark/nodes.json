@@ -1,0 +1,98 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "13783f03-b5c8-5dc3-8095-d7333602e20e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pm_in",
+      "type": "Component Inputs",
+      "ports": [
+        {
+          "name": "left",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "top",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "pm_root",
+      "type": "Group",
+      "children": [
+        "pm_text",
+        "pm_dot"
+      ],
+      "parameters": {
+        "position": "absolute",
+        "alignX": "left",
+        "alignY": "top",
+        "sizeMode": "contentSize",
+        "transformX": {
+          "value": 0,
+          "unit": "px"
+        },
+        "transformY": {
+          "value": 0,
+          "unit": "px"
+        },
+        "zIndex": 1
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pm_text",
+      "type": "Text",
+      "parent": "pm_root",
+      "parameters": {
+        "fontSize": {
+          "value": 10,
+          "unit": "px"
+        },
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pm_dot",
+      "type": "Group",
+      "parent": "pm_root",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 6,
+          "unit": "px"
+        },
+        "height": {
+          "value": 6,
+          "unit": "px"
+        },
+        "borderRadius": "var(--radius-full)",
+        "backgroundColor": "var(--sky)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "pm_nolabel",
+      "type": "Inverter",
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "pm_root"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "arm": "B3b-claude",
+  "harness": "claude",
+  "sittings": [
+    {
+      "k": 1,
+      "prompt": "brief",
+      "seconds": 355,
+      "activeSeconds": 353,
+      "usd": 2.0063808,
+      "turns": 33,
+      "judge": "DONE"
+    }
+  ],
+  "quiz": {
+    "k": 2,
+    "prompt": "then",
+    "seconds": 40,
+    "activeSeconds": 39,
+    "usd": 0.9457618000000001,
+    "turns": 1,
+    "judge": null,
+    "toolCalls": 0
+  },
+  "wallMinutes": 5.9,
+  "toolCalls": 32,
+  "subagentCalls": 0,
+  "tools": {
+    "Bash": 30,
+    "Read": 1,
+    "Write": 1
+  },
+  "bashFirstWords": {
+    "ls": 1,
+    "find": 1,
+    "npx": 12,
+    "cat": 3,
+    "grep": 3,
+    "for": 1,
+    "cd": 4,
+    "sed": 1,
+    "python3": 4
+  },
+  "filesRead": 8,
+  "files": [
+    "/Users/richardosborne/.claude/projects/-private-var-tmp-own023-r3b-B3b-claude-work-gala/13f97a4f-4dde-484c-9d39-76aa2fab67b8/tool-results/ben9aribl.txt",
+    "app/nodegx.project.json",
+    "app/nodegx.security.json",
+    "app/scripts/game/dispatch.js",
+    "app/scripts/game/save.js",
+    "node-catalog.json",
+    "tools/check.cloud.js",
+    "tools/cloud-save.glue.js"
+  ],
+  "componentsRead": 0,
+  "errors": 4,
+  "errorSamples": [
+    "Permission to use Bash with command npx -y @nodegx/mcp@0.2.4 app --graph > /tmp/gala-graph.txt 2>&1; wc -l /tmp/gala-graph.txt; head -150 /tmp/gala-graph.txt ha",
+    "<tool_use_error>File is in a directory that is denied by your permission settings.</tool_use_error>",
+    "Exit code 1\n// The save's shape and its repairs, from reference/src/state.js. Where it is kept is the graph's business: the\n// persisted Global Store \"gala\" hol",
+    "Permission to use Bash with command head -c 1500; echo; ls ~/.noodl/backends has been denied."
+  ],
+  "resultMegachars": 0.17,
+  "minutesToFirstSaveLook": 0.4,
+  "minutesToPlanWrite": 5.7,
+  "planBytes": 35054
+}
