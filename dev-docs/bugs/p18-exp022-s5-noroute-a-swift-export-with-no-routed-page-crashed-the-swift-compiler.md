@@ -6,6 +6,7 @@ severity: low
 area: export / Swift target (`packages/nodegx-export/src/emit/swift/emitSwift.ts`, `Router.swift`)
 found: EXP-022 session 5, 2026-10-22, the first build of the graph scenarios' package (five probe components, no page)
 fixed: EXP-022 session 5, 2026-10-22
+commit: dd0b13956
 evidence: packages/nodegx-export/tests/node-spec-graph-swift.test.ts V6; the first build's crash, `Assertion failed: (hasValidInsertionPoint())` in SILGen of `AppRouter.current` (Swift 6.2.4), is the mutant
 ---
 
