@@ -66,6 +66,12 @@ public enum JS {
     return Scripts.shared.string(d)
   }
 
+  /// \`Log\`: one console line at the node's level. An absent message prints as "", and data only when one arrived.
+  public static func log(_ level: String, _ message: Any?, _ data: Any? = nil) {
+    let text = message == nil || message is NSNull ? "" : string(message)
+    if let data, !(data is NSNull) { print("[\\(level)] \\(text)", string(data)) } else { print("[\\(level)] \\(text)") }
+  }
+
   /// JavaScript's Number(value), NaN where it reads none.
   public static func number(_ value: Any?) -> Double {
     guard let value else { return .nan }

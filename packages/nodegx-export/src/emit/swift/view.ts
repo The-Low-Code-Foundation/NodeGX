@@ -372,6 +372,8 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
   const expand = (list: HandlerAction[]): HandlerAction[] =>
     list.flatMap((a): HandlerAction[] => {
       if (a.kind === 'store-set' && a.then !== undefined) return [{ ...a, then: undefined }, ...expand(a.then)];
+      // EXP-022 S5. A Log's write is synchronous with one outcome: its Done chain is following statements (EXP-011 §39).
+      if (a.kind === 'log' && a.then.length > 0) return [{ ...a, then: [] }, ...expand(a.then)];
       if (a.kind === 'jsfun-run') {
         if (a.awaitsAt !== undefined) return [a];
         const own = a.materialize !== undefined || keptNode(a.nodeId) || (a.ticked !== true && tickedRunIds.has(a.nodeId));
@@ -597,6 +599,14 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
           values.push(`${swiftString(v.name)}: ${code}`);
         }
         return { lines: queryFetchLines(q, values, pad), scope };
+      }
+      case 'log': {
+        // EXP-022 S5. `Log`: one console line at the node's level, as the web export's `log` (utilLib.ts) writes it.
+        const message = expr(a.message, scope);
+        const data = a.data === undefined ? undefined : expr(a.data, scope);
+        if (message === undefined) return lost(`a Log whose message reads a ${a.message.kind} expression`);
+        if (a.data !== undefined && data === undefined) return lost(`a Log whose data reads a ${a.data.kind} expression`);
+        return one(`JS.log(${swiftString(a.level)}, ${message}${data === undefined ? '' : `, ${data}`})`);
       }
       case 'field-focus':
         return one(a.focus ? `focusedField = ${swiftString(a.inputId)}` : `if focusedField == ${swiftString(a.inputId)} { focusedField = nil }`);

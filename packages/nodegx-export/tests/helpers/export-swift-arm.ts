@@ -174,7 +174,7 @@ export async function swiftBackendArm(
 }
 
 /** Writes the package into `dir`, leaving a file that has not changed alone (so a second build is an incremental one). */
-function writePackage(dir: string, files: Record<string, string>): void {
+export function writePackage(dir: string, files: Record<string, string>): void {
   for (const [rel, text] of Object.entries(files)) {
     const file = path.join(dir, rel);
     if (fs.existsSync(file) && fs.readFileSync(file, 'utf-8') === text) continue;
@@ -198,7 +198,7 @@ function listFiles(dir: string): string[] {
 }
 
 /** A Swift raw string literal holding `text`, with as many `#` as it needs. */
-function rawString(text: string): string {
+export function rawString(text: string): string {
   let hashes = '#';
   while (text.includes(`"${hashes}`)) hashes += '#';
   return `${hashes}"${text}"${hashes}`;

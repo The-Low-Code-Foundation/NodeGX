@@ -21,6 +21,10 @@ printer has to derive it again:
 5. **Which kept Functions get a `late` handler**, and which row and pulses it writes (a walk over every chain).
 6. **Which fields a chain focuses, blurs or Sets** (the field refs).
 
+**Copied since S2:** (7) S4, a node authored Mounted false whose Mounted wire the plan does not carry is removed from
+the tree (P18-EXP022-S4-MOUNTEDFALSE). (8) S5, a Log's Done chain is following statements (`expandActions`, EXP-011
+§39), copied with the Log action itself. Eight decisions in five sessions, each a few lines of Swift.
+
 None changes behaviour today: the Hook Desk reads the same in both exports. Each is a place where a change to one printer
 moves one target and not the other, with no test comparing them.
 

@@ -1,7 +1,7 @@
 # EXP-022 — The same graph in Swift
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), from Richard's ruling of 2026-10-21: "I want that offramp promise
-fulfilled in React and Swift." **Status: 🔵 Swift session 4 of at most 12 done (2026-10-22, §9): S1 met AC1 on story-engine; S2 printed the plan's logic with the Functions in JavaScriptCore; S3 carried the backend through the React export's own client; S4 drove todo-list on the iPhone 17 simulator against a real backend, beside the running app and the React export: the Swift app reads and sends what the React export does at every step, and the two writes both exports cannot make (add, and every dialog) are the plan's, filed. Next: S5, the ledger line (AC4), the preflight and the cost beside React's. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
+fulfilled in React and Swift." **Status: 🔵 Swift session 5 of at most 12 done (2026-10-22, §9): S1 met AC1 on story-engine; S2 printed the plan's logic with the Functions in JavaScriptCore; S3 carried the backend through the React export's own client; S4 drove todo-list on the iPhone 17 simulator against a real backend, beside the running app and the React export: the Swift app reads and sends what the React export does at every step, and the two writes both exports cannot make (add, and every dialog) are the plan's, filed; S5 put AC4's line on P18's ledger beside React's (2 of 85 conform, 5 played, each with React's very trace; the 13 React plays and Swift does not are the `@nodegx/core` stores §7 cut) and wrote the cost: 5 sessions and 3,575 printer lines, nine decisions copied from the React printer. Next: AC5, the reveal (one project, web and phone, the numbers S4 and S5 measured), for Richard to read; whether a slack session carries the stores (as S3 carried the client) is his call. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
 out of the parked table: its reveal sentence stands ("one graph, three homes"), its rulings R1–R7 carry, and **its route
 changes**: P110 §0 scoped *a NodeGX runtime written in Swift that loads the project as data*; this task is *an emitter
 that writes a SwiftUI app from the same IR the React export reads*. Same reveal, and the person leaves with Swift source
@@ -416,3 +416,72 @@ The drive (outside the package, as s137's): a 148-line XCUITest and about 440 li
 command, so my `xcodebuild` overlapped it. After that the check was its own step and I waited for the peer each time.
 
 **Not done in S4:** the two plan refusals (the React lane's). A collection-fed For Each. Signing, a real iPhone.
+
+
+### S5 — Swift session 5 of at most 12 (2026-10-22, Opus 5.5)
+
+**Result: AC4's line is on P18's ledger beside React's, and on every scenario both exports play, the Swift app's trace
+equals the React export's, event for event.** Evidence: [`exp-022/s5/`](exp-022/s5/README.md).
+
+```
+P18 ledger (Swift): 2 of 85 graph scenarios conform on the Swift export — 5 played (2 conform, 3 differ as declared,
+0 known rows, 0 fail on filed rows); 34 outside on the exporter's verdict (21 the plan's, 13 the Swift printer's),
+46 on this harness's limits
+```
+
+**The prediction was written before the first run** ([EXPECTED.md](exp-022/s5/EXPECTED.md)) and the line read it exactly.
+The S4 prompt's "Swift equals React's 10" was wrong before any run: React reads 11 today (s139), and measuring first
+showed the Swift printer prints only 5 of React's 18 played graphs. The 13 others are the `@nodegx/core` stores and On
+App Error, which §7's cut put out. So the difference between the two lines is the cut, and it is named scenario by
+scenario.
+
+**How it is graded, decided by measuring.** One `swift test` per scenario (S3's way) would cost about 7 s a scenario, 10
+minutes at 85. Instead `tests/helpers/swift-graph-target.ts` prints every playable scenario as its own component of one
+package and plays them all in one generated XCTest (9 s warm for all five). It then replays the recorded settles through
+the runner's own `playGraph` with React's settle rule, so the grading is the runner's. The bounds are React's:
+
+- The harness's limits are read off the React target's own `canPlay`, so the two harnesses are one.
+- The plan's verdict is the plan's own notes. All 21 of React's exporter-verdict outsides are there, so the plan's
+  verdict is one verdict, pinned word for word (V2).
+- The Swift printer's verdict is what it reports it does not print.
+
+C7, C8 and G1 carry `divergence.export` to the Swift target and are asserted as differences.
+
+**Found:**
+
+- `P18-EXP022-S5-NOROUTE` (fixed): a project with no routed page printed an empty `Route` enum, and Swift 6.2.4
+  crashed compiling it.
+- `P18-EXP022-S5-THROWDIVERGES` (open, the node-spec runner's): a target that throws reads "differs as declared" on every
+  declared difference. The first run read "3 differ as declared" from a package that did not compile. The Swift line
+  refuses to count a play that threw; React's line has the same hole.
+
+**Printed:** Log (C10's only loss). Its Done chain is following statements, one more decision copied from React's
+`expandActions`.
+
+**Graded:** `tests/node-spec-graph-swift.test.ts`, 10 rows: 6 on the verdicts and printed text in the package suite, 4
+behind `NODEGX_SWIFT_BUILD=1`. Three mutants on the printed Swift (`exp-022/s5/mutants.ts`): two killed, one equivalent,
+as predicted. M3's C10 I predicted wrong (README). With `NODEGX_SWIFT_BUILD=1` the five Swift test files read 64 of 64. The
+whole package (`nice -n 19 --runInBand`, 19:32): **162 of 162 files, 5,345 passed, 28 skipped, 0 failed** (predicted
+5,339 + 6 and 24 + 4, read on the first run).
+
+**The cost beside React's (§7's number).**
+
+| | React | Swift |
+|---|---|---|
+| sessions | 140 so far | 5 |
+| printer | `component.ts` 8,828 lines + 32 runtime helpers (15,843 lines) | 3,575 lines |
+| graph scenarios | 11 of 85 | 2 of 85, each the same trace as React |
+
+The plan (23,537 lines) is built by React's sessions and only read by Swift.
+
+**Where the claim leaks:** nine decisions copied from `component.ts`, not read from the plan. They are COLLAPSE (S1), the
+six of EMITDECIDES (S2), Mounted false (S4) and a Log's Done chain (S5). None has changed behaviour yet. **Where it holds:**
+every refusal is the plan's and the same in both exports, and the second printer added none.
+
+**Cost, so far:** 5 sessions. The printer is 3,575 lines (S4 3,555): `view` 1,265, `scripts` 541, `support` 421,
+`xcodeproj` 401, `emitSwift` 353, `modifiers` 272, `theme` 173, `client` 137, `functionRunJs` 12. Tests: S5's 10 rows
+and a 395-line graph target. `plan.ts` and `component.ts` were read, not changed.
+
+**Not done in S5:** the stores in JavaScriptCore, the 13. The React export's own client already runs there (S3), and the
+stores are JavaScript too; that is a measurement for a slack session if Richard wants the line wider. The runner's
+THROWDIVERGES fix (P107's).

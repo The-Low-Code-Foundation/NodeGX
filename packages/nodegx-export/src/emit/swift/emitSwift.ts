@@ -171,7 +171,11 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
 
   const startLegacy = router?.startPage ?? (pages[0] ? `/${pages[0].componentPath}` : undefined);
   const startCase = startLegacy ? routeCase.get(startLegacy) : undefined;
-  const cases = pages.map((p) => ({ name: routeName(p.fileBase), struct: structByLegacy.get(`/${p.componentPath}`) }));
+  // P18-EXP022-S5-NOROUTE. A project with no routed page (components only) still gets a Router that builds: one case that
+  // draws nothing. An empty enum held by a `@Published` with no value crashed the compiler (Swift 6.2.4, SILGen).
+  const routed = pages.map((p) => ({ name: routeName(p.fileBase), struct: structByLegacy.get(`/${p.componentPath}`) }));
+  const cases = routed.length ? routed : [{ name: 'none', struct: undefined }];
+  const initialCase = startCase ?? cases[0].name;
   files[`Sources/${libraryName}/Router.swift`] = [
     '// @nodegx:generated (EXP-022) — the Router: which page is showing. A navigate replaces the page, as the web router does.',
     'import SwiftUI',
@@ -181,7 +185,7 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
     '}',
     '',
     'public final class AppRouter: ObservableObject {',
-    `  @Published public var current: Route${startCase ? ` = .${startCase}` : ''}`,
+    `  @Published public var current: Route = .${initialCase}`,
     '  public init() {}',
     '  public func go(_ route: Route) { current = route }',
     '}',

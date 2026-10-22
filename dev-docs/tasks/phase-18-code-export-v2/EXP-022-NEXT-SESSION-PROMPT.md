@@ -1,72 +1,62 @@
-# Next session — EXP-022 S5: AC4's ledger line, and the cost beside React's (BOARD lane 6, the Swift session)
+# Next session — EXP-022 S6: AC5, the reveal, after Richard's read of the cost (BOARD lane 6, the Swift session)
 
-**Swift session 5 of at most 12.** Written 2026-10-22 at the end of S4 (Opus 5.5). Say which model you are in your first
-message. This is lane 6's **second** session; the first (React, EXP-021) runs on [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md)
+**Swift session 6 of at most 12.** Written 2026-10-22 at the end of S5 (Opus 5.5). Say which model you are in your first
+message. This is lane 6's **second** session. The first (React, EXP-021) runs on [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md)
 in this same folder and the same package. Do not touch its files.
 
 ## Read first
 
-1. [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §4 (AC4: "P107's graph scenarios, driven against the Swift app the way
-   ISL-043 drives the React one; the line goes on P18's ledger beside React's"), §7 (Richard's bar, verbatim: *not* "100
-   sessions like the React stuff"; **the session count is the result**), §9 S4.
-2. The React line, the instrument to copy: `packages/nodegx-export/tests/node-spec-graph.test.ts` (prints
-   `P18 ledger: N of M graph scenarios conform on the export …`) over `tests/helpers/node-spec-target.ts`
-   `exportGraphTarget`, and [README.md](README.md) "The second line". The scenarios: `packages/nodegx-node-spec/scenarios/`.
-3. [`exp-022/s4/README.md`](exp-022/s4/README.md): the drive, and what the three arms read.
+1. [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §4 (AC5: "one project, web and phone, and the numbers that show they
+   behave the same"), §7 (Richard's bar, verbatim: *not* "100 sessions like the React stuff"; **the session count is the
+   result**), §9 S5.
+2. [`exp-022/s5/README.md`](exp-022/s5/README.md): the ledger line, how it is graded, and the cost table.
+3. [`exp-022/s4/README.md`](exp-022/s4/README.md) and `exp-022/s4/side-by-side.png`: the drive, which is half of AC5.
 
-## What is true at the end of S4 (measured 2026-10-22)
+## What is true at the end of S5 (measured 2026-10-22)
 
-- todo-list is driven on the iPhone 17 simulator against a real backend by an XCUITest (`exp-022/s4/Drive.swift`), beside
-  the running app and the React export in Chrome, each arm on its own fresh seeded backend. **At every step the Swift app
-  reads what the React export reads and sends the same requests**: sign in, the list, add, close, relaunch, sign out.
-  The picture: `exp-022/s4/side-by-side.png`.
-- **Both exports cannot add a task or open any dialog.** Those are plan refusals, filed high for the React lane:
-  `P18-EXP022-S4-ADDREFUSED` (a Create whose Id is used further down) and `P18-EXP022-S4-DIALOGREFUSED` (a States value
-  unauthored in one state; the runtime takes `undefined`). Not yours: `plan.ts` and `component.ts` stay read-only. If
-  the React session fixes either, re-run `exp-022/s4` (`build.sh`, `drive-swift.cjs`, `drive-web.cjs`) and the Swift app
-  should follow with no printer change. That re-run is the claim's best evidence.
-- The printed project has a UI test target (`<App>UITests/`, a synchronized folder; the autocreated scheme runs it).
-  ATS needs no plist key for 127.0.0.1. A drive presses "Not Now" on iOS's "Save Password?".
-- The printer is 3,555 lines; 4 sessions spent.
-- Open, low: `P18-EXP022-S4-CARDOVERFLOW` (Swift's detail card past the right edge), `P18-EXP022-S1-COLLAPSE`,
-  `P18-EXP022-S2-EMITDECIDES` (S4 added one more copied decision: authored Mounted false). React's, open:
-  `P18-EXP022-S4-LABELDROP` (153 labelled fields lose their label), `P18-EXP022-S3-BOOLTEXT`. The runtime's or the
-  template's: `P18-EXP022-S4-FIRSTPRESS`.
+- **AC1, AC3, AC4 met; the app as it ships (§8's AC2) driven in S4.** AC4's line is on P18's ledger (README "The
+  second line"): **2 of 85 graph scenarios conform on the Swift export, 5 played, and on all 5 the Swift app's trace
+  equals the React export's, event for event.** React reads 11 of 85 (s139). The 9 between them are `@nodegx/core`
+  stores (Global Store, State History, Optimistic Update, Action Dispatcher), outside §7's cut on the Swift printer's
+  verdict, named scenario by scenario (`tests/node-spec-graph-swift.test.ts` V3).
+- **The cost:** 5 sessions and 3,575 printer lines, against React's 140 sessions and 24,671 lines (`component.ts` and
+  32 runtime helpers). `plan.ts` is read, never changed. **Where the claim leaks:** nine decisions copied from
+  `component.ts` (COLLAPSE, the six of EMITDECIDES, Mounted false, a Log's Done chain). None has changed behaviour yet.
+- **Open:** `P18-EXP022-S5-THROWDIVERGES` (the node-spec runner counts a throw as the declared difference; P107's, and
+  React's line has the hole too; the Swift line guards itself). The plan's two refusals, `P18-EXP022-S4-ADDREFUSED` and
+  `-DIALOGREFUSED` (high, the React lane's). If the React session fixes either, re-run `exp-022/s4`. Low:
+  `-S4-CARDOVERFLOW`, `-S1-COLLAPSE`, `-S2-EMITDECIDES`.
+- The graph play: one package, one `swift test`, 9 s warm for all five (`tests/helpers/swift-graph-target.ts`).
 
-## S5 — the plan
+## S6 — the plan
 
-1. **Measure before building:** how `exportGraphTarget` plays one scenario (it emits a tiny project, runs it, records
-   events). Decide whether a `swiftGraphTarget` can play many scenarios in **one** `swift test` process (one package
-   holding each scenario as a page, or one generated test per scenario). One process per scenario is S3's way and will
-   be too slow for 85. Write the cost of each route before choosing.
-2. **The line.** `P18 ledger (Swift): N of M graph scenarios conform`, printed beside React's, with the same three
-   bounds (`outside` on the exporter's verdict; unobservable events projected out; C7/C8 asserted as differences). The
-   prediction is that Swift equals React's 10 conforming, because it prints the same plan. Write that prediction down
-   before the first run; a scenario where they differ is the finding.
-3. **The cost, written beside React's** (EXP-022 §7's number): Swift's sessions and printer lines against React's
-   (`component.ts` 8,828 lines and its sessions). Say plainly where the second printer had to copy decisions from the first
-   (EMITDECIDES, COLLAPSE, S4's Mounted false). That is where the claim leaks.
-4. The whole package suite after (`cd packages/nodegx-export && nice -n 19 npx jest --runInBand`), its count in the
-   commit message.
+1. **Ask Richard first, in plain words, with the cost table in front of him** (`exp-022/s5/README.md`): stop the build
+   at 5 sessions and write the reveal, or spend slack sessions widening the line. Widening means carrying
+   `@nodegx/core`'s stores into JavaScriptCore the way S3 carried the client, which would move up to 9 scenarios. Do not
+   start the stores without his word.
+2. **AC5, the reveal:** one project, the running app, the web export and the phone side by side, and the numbers (S4's
+   wire, request for request; S5's traces, event for event; the plan refusals both share). Where it lives (a page on
+   nodegx.io, an artifact) is Richard's call too. Ask it in the same question.
+3. The whole package suite after any code change (`cd packages/nodegx-export && nice -n 19 npx jest --runInBand`), its
+   count in the commit message. S5 read 162 of 162 files, 5,345 passed, 28 skipped, 0 failed.
 
 ## Rules this session must keep
 
-- 🔴 **One heavy job on the box, checked BEFORE EVERY build, as its own step — never chained into the build command**
-  (S4 chained it once and built over a peer's jest). Before any `swift build`/`swift test`/`xcodebuild`, a simulator boot,
-  and the whole suite: `pgrep -fl 'vitest|jest|xcodebuild|grade.mjs'` and `tail -2
-  /Users/Shared/nodegx-lab/own026/series-*.log`. Wait with a background `until ! kill -0 <pid>` loop. Builds at
-  `nice -n 19`. Shut your simulator down by its id when done.
+- 🔴 **One heavy job on the box, checked BEFORE EVERY build, as its own step, never chained into the build command.**
+  Before any `swift build`/`swift test`/`xcodebuild`, a simulator boot, and the whole suite, run `pgrep -fl
+  'vitest|jest|xcodebuild|grade.mjs'` and `tail -2 /Users/Shared/nodegx-lab/own026/series-*.log`. A lab round's agent
+  builds its app with `next` (a `jest-worker` in that list): wait for it too. Wait with a background `until ! kill -0
+  <pid>` loop. Builds at `nice -n 19`.
 - 🔴 **A peer works in this package and this folder** (the React session). Commit only your paths, through a temporary
   index with compare-and-swap. Never `git add -A` at the folder level, never `git stash`, never a bare `git reset`.
-- `plan.ts` and `component.ts` are read, not changed. If Swift needs a planner change, it goes through the React
-  session's suite first, and that suite's count is in the commit message.
+- `plan.ts` and `component.ts` are read, not changed. A planner change goes through the React session's suite first.
+- 🔴 Mutate the **printed** Swift (`playSwiftGraphs`' `mutate`, `exp-022/s5/mutants.ts`), never the printer source a
+  peer's suite reads.
 - 🔴 A `rm -rf` of a path built from a shell variable is refused: write `"${S:?}/dir"`.
-- 🔴 A backend you start is yours to stop: by its pid, never `pkill -f` a runner name.
-- A first-run all-green needs mutants. A mutant reading "0 total" did not compile; re-run it in a form that does.
 - Every bug found goes to `dev-docs/bugs/` (one file per bug, `node scripts/bugs.js check` clean on your rows), id
-  `P18-EXP022-S5-<WORD>`.
-- End: update EXP-022 §9 (S5), this file, BOARD lane 6's Swift sentence, and memory `phase-18-code-export-v2`.
+  `P18-EXP022-S6-<WORD>`.
+- End: update EXP-022 §9 (S6), this file, BOARD lane 6's Swift sentence, and memory `phase-18-code-export-v2`.
 
 ## Not this session
 
-Fixing the plan's two refusals (the React lane's). Signing, TestFlight, a real iPhone, Kotlin, the app's Collections.
+Fixing the plan's two refusals or the runner's THROWDIVERGES (other lanes'). Signing, TestFlight, a real iPhone, Kotlin.

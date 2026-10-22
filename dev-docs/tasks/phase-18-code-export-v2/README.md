@@ -68,6 +68,15 @@ failing scenario is pinned by name to its `dev-docs/bugs/` row, so a new failure
 make the exporter translate the graph (t01's three Global Store scenarios wait on the store translation itself), or lift a harness
 limit. The harness limits are recorded in `tests/helpers/node-spec-target.ts` `canPlay`.
 
+**The same line on the Swift export** (EXP-022 AC4; `NODEGX_SWIFT_BUILD=1 npx jest tests/node-spec-graph-swift.test.ts`,
+one `swift build` and one `swift test` for every played scenario, [exp-022/s5](exp-022/s5/README.md)):
+
+> **GRAPH SCENARIOS: 2 of 85 conform on the Swift export** — 2026-10-22, EXP-022 S5. **5 played**: 2 conform, 3 differ as
+> declared (C6/G1, C7, C8), **each with the very trace the React export reads**. **80 did not play**: 21 on the plan's
+> verdict (the same 21 as React's, in the same words), 13 on the Swift printer's (the `@nodegx/core` stores and On App
+> Error, outside EXP-022 §7's cut), 46 on the same harness's limits. React's line reads 11 of 85 on 2026-10-22 (the pin,
+> session 139); the 9 between them are all in the Swift printer's 13.
+
 **🔴 There is a second number and it must never again drive priority.** The corpus audit
 (`coverage-audit.ts` over ~40 old test projects) reads **85.00%**, or **93.38%** over components a
 route can reach. Both are true and both are about *those projects*, not about NodeGX. Keep the
