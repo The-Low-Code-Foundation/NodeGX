@@ -1,7 +1,7 @@
 # EXP-022 — The same graph in Swift
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), from Richard's ruling of 2026-10-21: "I want that offramp promise
-fulfilled in React and Swift." **Status: ⬜ ruled 2026-10-22 (§8, DIRECTION D6), not started: the bounded cut with the backend, hard stop at 12 sessions, starting now in a second lane-6 session.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
+fulfilled in React and Swift." **Status: 🔵 Swift session 1 of at most 12 done (2026-10-22, §9): AC1 met on story-engine; the backend route measured (one client in two hosts works). Next: S2. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
 out of the parked table: its reveal sentence stands ("one graph, three homes"), its rulings R1–R7 carry, and **its route
 changes**: P110 §0 scoped *a NodeGX runtime written in Swift that loads the project as data*; this task is *an emitter
 that writes a SwiftUI app from the same IR the React export reads*. Same reveal, and the person leaves with Swift source
@@ -139,3 +139,70 @@ todo-list's state, effects, lifts and hooks printed from the plan, Functions in 
 todo-list driven in the simulator against the same backend React's AC1 drive used: sign in, add, tick, delete,
 relaunch, beside the runtime and the React export. S5, the ledger line (AC4), the preflight, and the cost written
 beside React's. S6–S12 are slack, not plan.
+
+## 9. Sessions
+
+### S1 — Swift session 1 of at most 12 (2026-10-22, Opus 5.5)
+
+**Result: AC1 met.** story-engine goes through `emitSwiftApp` (`packages/nodegx-export/src/emit/swift/`) to a Swift
+package plus a thin iOS app target; `xcodebuild` builds it for the simulator, and its first page draws on an iPhone 17
+simulator beside the running app's `nodegx render` image: [`exp-022/s1/read-runtime-vs-swift.png`](exp-022/s1/read-runtime-vs-swift.png).
+The printed package is kept in [`exp-022/s1/story-swift/`](exp-022/s1/story-swift/).
+
+**What was measured first:**
+
+1. **The two small templates.** story-engine: 88 nodes, 9 components; its drawn components use 7 roles (page, group,
+   text, button, input, instance, repeater), all in §3's table. pixel-game: 97 nodes, 9 components, plus a keyboard kit
+   (4 KeyboardShortcut nodes) and Counters. Picked **story-engine**: fewer nodes, and buttons, a text input and
+   navigation are what a phone app has. Neither template is visual-only: both are mostly logic (Functions, Conditions,
+   Set Variables, States, Static Data).
+2. **The plan can be read without the React printer.** `emitApp(ir, catalog)` calls `planProject(ir, catalog)` first,
+   and `planProject` is a public export of the package. Its `ComponentPlan` carries `roleOf`, `childrenOf`,
+   `bindings`, `handlers`, `repeaters`, `stateVars`, `statesMachines`, `instanceLifted` as data. The style layer
+   (`computeNodeStyle`, also exported) reduces a node to CSS declarations: 29 distinct properties over story-engine's
+   45 drawn nodes. The Swift printer reads both and calls nothing in `component.ts`.
+   **One leak found:** the page collapse's style merge is decided in `component.ts`, not the plan, so the Swift printer
+   copies it (8 lines). Filed as `P18-EXP022-S1-COLLAPSE` (low).
+3. **The backend route: one client in two hosts works.** The client the React export writes (`src/lib/noodl.ts` and
+   `src/api/client.ts` of todo-list with a backend declared; 822 lines of TypeScript, bundled by esbuild to one 26 KB
+   script) runs unchanged in a `JSContext`. The host adds `fetch` bridged to `URLSession` (~25 lines of Swift) and a
+   `localStorage` object (~15 lines of JS, shared by both hosts). The Noodl Desk's own fake Parse backend
+   (`tests/helpers/fake-parse-backend.js`, unchanged) is put behind a real HTTP port. One scenario — `whoAmI` signed out
+   and as Ann, `Records.query` with a pointer and a date, `Users.Current`, `addTask` then a re-query, a record-verb
+   `query`, a refused class, a refused Cloud Function, a signed file link — runs in Node and in the Swift `JSContext`:
+   **identical results, and a byte-identical wire log (9 requests)**. So S3 needs no hand-written Swift client.
+   Evidence: [`exp-022/s1/jsc-spike/`](exp-022/s1/jsc-spike/) (`out-*.json`, `log-*.json`, and the files to re-run it).
+
+**What the Swift page shows, and what it does not.** It draws the runtime's chrome: the eyebrow, the passage rule
+with its States-chosen tone, the "What you carry" card, both pill buttons, and the footer. It does not draw the passage, the
+choices or the source line. The React export loses the first two to the same plan refusals: its `Read.tsx` places
+`<Passage />` with no props, and its choices are a TODO. The source line is the one thing React draws and Swift S1 does
+not: React runs `/Story/Source` as a hook (EXP-021), and Swift runs logic components in S2. The React export's page was
+read from its source, not rendered; no React screenshot was taken.
+
+**The preflight** (`EXPORT-PREFLIGHT.md` in the package, from `swiftPreflight` data): story-engine 21 plan refusals (the
+same nodes the React export leaves out, the same reasons), 7 things the Swift printer reads and does not print yet
+(by name), and 4 kinds of web-only look (the project stylesheet's classes, `useLabel`). The count is not the React
+preflight's "64": that one counts dropped wires and emit notes too.
+
+**How general it is already.** With no template-specific code, pixel-game and todo-list also emit and `swift build`.
+todo-list (51 files) was red first and showed five printer defects. All were fixed in the session: arguments out of
+declaration order, a prop called `rows` shadowing a helper, port names with spaces, a prop called `body`, and a frame
+after an `if`. Its preflight is S2's work list: 108 plan refusals and 334 Swift-side gaps, chiefly logic components
+not run (48 placements, 36 components), lifted values left empty (76), press actions not printed (state-set 44,
+states-go 45, jsfun-run 12, store-set 8, api-call 3, branch 2), and 35 bindings from `jsfun-out` (25) and
+`states-out` with a field other than `value` (10).
+
+**The rule changes from §3:** Page/Router/Navigate is a `switch` over a `Route` enum in an `ObservableObject`, not
+`NavigationStack`. A Router replaces the page, and a push stack is Page Stack's meaning. The app is a Swift package
+(everything a person edits; `swift build` and `swift test` on macOS) plus a generated `.xcodeproj` whose one source is
+the `@main` file. The `.xcodeproj` is there because a package cannot make an installable iOS `.app`, and the box has
+no xcodegen.
+
+**Cost, so far:** 1 session. The printer is 1,447 lines (`theme` 173, `modifiers` 272, `view` 389, `emitSwift` 216,
+`support` 112, `xcodeproj` 285), plus a 123-line test (7 cases, one of them a real `swift build` behind
+`NODEGX_SWIFT_BUILD=1`). For comparison, `component.ts` alone is 8,828 lines. `plan.ts` was read, not changed.
+
+**Not done in S1:** `nodegx export --target swift` on the CLI. It touches `cli/args.ts` and its `USAGE`, which the
+React session's suites assert on, so it moves to S2 with that suite. No scripted drive in the simulator yet (S4).
+

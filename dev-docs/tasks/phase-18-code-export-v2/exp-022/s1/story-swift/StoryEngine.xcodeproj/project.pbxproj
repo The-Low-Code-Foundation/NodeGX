@@ -1,0 +1,245 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 60;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2BF6A3E855BBBDE8F0B3D42E /* StoryEngineApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5A57133BA4409E7EA5D841C /* StoryEngineApp.swift */; };
+		DC96494349BBE7C3D5B0327E /* StoryEngineKit in Frameworks */ = {isa = PBXBuildFile; productRef = A9C75136180ED4DF4E074DCD /* StoryEngineKit */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		E5A57133BA4409E7EA5D841C /* StoryEngineApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoryEngineApp.swift; sourceTree = "<group>"; };
+		A7BBF930CB36BE93D9AFF1BF /* StoryEngine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StoryEngine.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		BF568197CABA488CA3DCD3CD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DC96494349BBE7C3D5B0327E /* StoryEngineKit in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6138306A7AC75CB8CB9BDA77 = {
+			isa = PBXGroup;
+			children = (
+				AE81FE015151995EA704688F /* App */,
+				02256C8BB30C2C700FB14705 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AE81FE015151995EA704688F /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E5A57133BA4409E7EA5D841C /* StoryEngineApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		02256C8BB30C2C700FB14705 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A7BBF930CB36BE93D9AFF1BF /* StoryEngine.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		31F85FEF601C4AB462BB43B0 /* StoryEngine */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B0B346EC6C2815DCC740CEC1 /* Build configuration list for PBXNativeTarget "StoryEngine" */;
+			buildPhases = (
+				5917CEE7946AD18D6685C397 /* Sources */,
+				BF568197CABA488CA3DCD3CD /* Frameworks */,
+				4704848538AB0B79C0564F76 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StoryEngine;
+			packageProductDependencies = (
+				A9C75136180ED4DF4E074DCD /* StoryEngineKit */,
+			);
+			productName = StoryEngine;
+			productReference = A7BBF930CB36BE93D9AFF1BF /* StoryEngine.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8233F098E2043E1EA77B6E79 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = EE56456227DA1E030E2E5EA3 /* Build configuration list for PBXProject "StoryEngine" */;
+			compatibilityVersion = "Xcode 15.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 6138306A7AC75CB8CB9BDA77;
+			packageReferences = (
+				3B2137F3A63DDCA5A7B18525 /* XCLocalSwiftPackageReference "." */,
+			);
+			productRefGroup = 02256C8BB30C2C700FB14705 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				31F85FEF601C4AB462BB43B0 /* StoryEngine */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		4704848538AB0B79C0564F76 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5917CEE7946AD18D6685C397 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2BF6A3E855BBBDE8F0B3D42E /* StoryEngineApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		F88FF1069E0C0255036CECF8 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		B82A2A5978CCDFD545ED9D9F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		47C651AC60576C3948910FA1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "StoryEngine";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.nodegx.export.storyengine;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		ECFD4131F6C487AD45EC1376 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "StoryEngine";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.nodegx.export.storyengine;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		EE56456227DA1E030E2E5EA3 /* Build configuration list for PBXProject "StoryEngine" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F88FF1069E0C0255036CECF8 /* Debug */,
+				B82A2A5978CCDFD545ED9D9F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B0B346EC6C2815DCC740CEC1 /* Build configuration list for PBXNativeTarget "StoryEngine" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				47C651AC60576C3948910FA1 /* Debug */,
+				ECFD4131F6C487AD45EC1376 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		3B2137F3A63DDCA5A7B18525 /* XCLocalSwiftPackageReference "." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = .;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A9C75136180ED4DF4E074DCD /* StoryEngineKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StoryEngineKit;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 8233F098E2043E1EA77B6E79 /* Project object */;
+}
