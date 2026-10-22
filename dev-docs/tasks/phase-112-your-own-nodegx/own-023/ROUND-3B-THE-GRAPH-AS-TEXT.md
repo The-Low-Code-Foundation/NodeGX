@@ -190,8 +190,19 @@ its own `/tmp` file.
   `npx -y file:<export tgz> export --dry-run <app>` prints the preflight; the vibe kit scaffolds. `publishable.js`:
   6 packages, 0 problems; `bugs.js gate core`: 0 blockers. **The publish is Richard's terminal (2FA):**
   `scripts/own/publish-npm.sh /Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.5-tarballs` — it
-  publishes export, then mcp, then the three kits, waiting for each to be live, and skips what is already there. After
-  it: deploy nodegx-web (the changelog page reads CHANGELOG.md), and EXP-023 AC4 (the npm section names the export).
+  publishes export, then mcp, then the three kits, waiting for each to be live, and skips what is already there.
+- **Published 2026-10-22 morning (Richard's terminal).** `npm view <pkg>@0.2.5 dist.shasum` for all five equals the
+  table above, byte for byte. From the registry, empty HOME, scratch folder, on a copy of Puppy test 3:
+  `npx -y @nodegx/mcp@0.2.5 <app> --graph` exit 0, 280 lines (12 components, 119 nodes, 57 wires);
+  `npx -y @nodegx/export@0.2.5 export --dry-run <app>` prints the preflight and exits 4 (EXIT.refusals: 20 things
+  will not translate in that fixture — the designed answer, EXP-023 AC1's "prints the preflight");
+  `npx -y create-nodegx@0.2.5 my-apps` exit 0, `.mcp.json` pins `@nodegx/mcp@0.2.5`, CLAUDE.md carries `--graph`.
+  The kit note's pin now resolves to a registry package that has the page. **Changelog page:** built from a clean
+  `git archive HEAD` of nodegx-web with the canonical URL (the checkout's own `site/*/index.html` were rebuilt by
+  someone without it — no canonical tags — so they are not the ones to ship); against live it only adds lines
+  (0.2.5, and a 0.2.3 section that had never gone up). The upload is `changelog/index.html` alone; the auto-mode
+  classifier refuses `ssh`/`rsync` to the host, so it is Richard's command. EXP-023 AC4 (the homepage npm section
+  names the export) still owed: `site/_page.html` is in another session's uncommitted pile.
 - **Public:** nodegx.io/from-code/ has a section "A stranger reads it" (2026-10-22): rounds 3 and 3b in six rows and
   plain words, linking to this file. Pushed as `from-code/index.html` only (nodegx-web `961459b`); the site repo has
   another session's uncommitted homepage/demos edits, so no `deploy.sh`.
