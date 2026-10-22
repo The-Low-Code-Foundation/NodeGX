@@ -190,3 +190,14 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   MCP entry becomes `npx -y --package=<kit>/nodegx-mcp-0.2.5.tgz noodl-mcp --allow-writes --screenshots-to-files`,
   `round.json` names the kit, and `get_example cloud-query-own-rows` (FIX-01 B's new example) answers. t1-nodegx-2
   runs on it after t1-harness-2.
+- **2026-10-22 19:03 CEST, t1-harness-2 ended `aborted` after 1 sitting (5,570 s, $0.308).** Not the lab: Cline's own
+  loop guard stopped it ("Detected 5 consecutive identical calls to `run_commands`; stopping to avoid a loop") while the
+  agent polled its own `npm run check` (`sleep 29; grep -c ✓ /tmp/rt-check2.log …`, 63 tests passed so far). The relay
+  (§1) continues only a *completed* sitting the judge calls MORE, so this round ends here and is graded as it stands,
+  as a person's Cline would have left it. The rule holds for every arm from here on: a Cline-aborted sitting is the
+  end of the round, and the round says so.
+- **2026-10-22 20:50 CEST — t1-nodegx-2 (kit FIX-01) 17/22; t1-harness-2 21/22, t1-code-2 21/22.** Stop-and-check #2
+  in `fixes/LEARNINGS.md`; `fixes/FIX-02.md` written (a Record by Id reads only memory, so a page opened by URL shows an
+  empty record and writes it back; the kit's guidance is cut by Cline's ~8,000-character tool-result limit, so FIX-01
+  C never reached the model; `update_component` given create arguments 11 times; 35 px default buttons). HOLD-nodegx
+  set again; t1-code-3 and t1-harness-3 run meanwhile.

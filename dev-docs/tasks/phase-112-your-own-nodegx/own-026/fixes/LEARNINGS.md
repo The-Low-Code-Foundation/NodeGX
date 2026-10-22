@@ -21,3 +21,17 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
 - **What it did well with the kit:** 3 `render_report` + 13 `drive_page` runs to check its own work (after the lab's
   Chrome fix), a working PIN gate, sign-in and restart. 12 of its 186 tool calls were refused (mostly
   `create_component` validation-failed, one unknown `update_component` argument); not yet read for a pattern.
+
+## #2 — t1-nodegx-2, kit FIX-01 (`ddd876378`), 17/22 (2026-10-22)
+
+- **FIX-01 A and B arrived and worked.** Backend enforced from its first start; T7/T8 pass. DeepSeek found
+  `cloud-query-own-rows` and wrote `visualFilter` on 2 of 4 Query Records. Script fell to 14 Function nodes / 114 lines.
+- **FIX-01 C never arrived.** Its lesson sits at character 40,311 of a 51,834-character `get_project_info`; Cline
+  keeps ~8,000. 26 nodegx results this round were over 8,000 characters. The kit's long answers are written for a
+  reader that sees all of them; DeepSeek in Cline sees each one's first and last few thousand. → FIX-02 B.
+- **The record that reads memory.** The game page binds a Record to the URL's child id; `setModelID` takes the
+  in-memory copy (empty after a reload) and fires `fetched` anyway; a launch from there overwrites real progress
+  (T1, T2). → FIX-02 A.
+- **One slip, eleven times.** `update_component` with `create_component`'s arguments for components that didn't exist
+  yet; `didYouMean: null`; it never stopped. → FIX-02 C.
+- **Buttons 35 px** in both NodeGX rounds, 40+ in every code round (T9). → FIX-02 D.
