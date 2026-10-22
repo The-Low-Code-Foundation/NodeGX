@@ -119,3 +119,34 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
 - Graders run on Claude Code (Richard's plan): about 39 Opus grades; each grade's `meta.json` keeps the 7-day utilization its stream reported.
 
 ## 8. What happened (dated entries only)
+
+- **2026-10-22 11:57 CEST, t1-code-1 ended** (completed, judge DONE, 1 sitting, 2,671 s, $0.208 at ClinePass prices).
+  Its seal audit named five paths in `/tmp` (`/tmp/rt-smoke.mjs`, `rt-browser.log`, `rt-live.log`, `rt-jar`,
+  `rt-npm.log`): its own scratch files, written there by name though its TMPDIR was inside the round. `/tmp` is shared
+  by every round, so a later round of another arm could have read them. **Lab change (not the agent's conditions):**
+  from t1-harness-1 on, `round.mjs` moves anything a round named in `/tmp` into `<round>/left-in-tmp/` when it ends;
+  t1-code-1's three surviving files were moved by hand before t1-harness-1 started.
+
+- **2026-10-22 12:10 CEST, the first grade of t1-code-1 stopped by the lab (kept as `t1-code-1.lab-broken-1`).** The
+  grader's sandbox denied `/private/tmp/claude-501`, where Claude Code's Bash writes each command's output: `cat`
+  answered "stdout: Operation not permitted" and node aborted at start, so the grader was working round its own shell.
+  Lab fault, §5: re-run. The grader's sandbox and file-tool rules no longer deny the scratchpads (Richard's home and every
+  round of the lab stay denied). The series restarted; t1-code-1's round stands and is re-graded first.
+
+- **2026-10-22 14:30 CEST — Chrome inside the fence; t1-code-1 and t1-nodegx-1 set aside as `.lab-broken-chrome`,
+  to be re-run.** t1-nodegx-1's `render_report` hung twice for 240 s (the kit's renderer waited on a Chrome that never
+  answered), and its killed renders stayed running. Reproduced on a copy: under the round's sandbox the render hangs
+  with no output; outside it, the same render finishes in 8 s. Cause, measured: **Chrome's own sandbox can't start
+  inside sandbox-exec** ("sandbox initialization failed: Operation not permitted"; renderer, GPU and network processes
+  crash). The grader's Chrome had worked only because Playwright launches it with `--no-sandbox`. Checked the code
+  arms: t1-harness-1 used Playwright and was unaffected (its screenshots exist); **t1-code-1's agent wrote its own CDP
+  probe against `/Applications/Google Chrome.app` and spent ~20 minutes (09:29–09:48 UTC) getting no page from it**,
+  so it was hit too, though it still scored 20/22. §5: both re-run, the originals and t1-code-1's grade kept beside them.
+  **Lab change:** every round (and grader) gets `CHROME_PATH=/Users/Shared/nodegx-lab/bin/chrome`, a two-line wrapper
+  that runs the same Chrome with `--no-sandbox`. The kit's render harness honours `CHROME_PATH`; so do many tools. An
+  agent that launches Chrome by its own path still fails inside the fence: `round.json`'s neighbour
+  `chrome-sandbox-hits.txt` counts the tool results that show it, per round, so the cost is visible wherever it falls.
+  Proven before the restart: the kit's renderer under the round's sandbox with the wrapper, 8.9 s, all pages drawn; a
+  mock round's shell, `"$CHROME_PATH" --dump-dom` → the page.
+- **Also seen, a kit defect to file:** when `render_report` times out it reports "killed", but the `render-from-disk`
+  server it started keeps running (three were left, 8–17 minutes old; the next render's own orphan sweep reaped them).

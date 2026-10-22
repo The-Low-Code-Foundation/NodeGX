@@ -43,18 +43,20 @@ fs.writeFileSync(path.join(G, 'sandbox.sb'), [
   '(version 1)', '(allow default)',
   '(deny file-read* file-write* (subpath "/Users/richardosborne"))',
   `(allow file-read* (subpath "${path.dirname(path.dirname(NODE_DIR))}"))`,
-  '(deny file-read* file-write* (subpath "/private/tmp/claude-501"))',
+  // NOT the Claude scratchpads: Claude Code's Bash writes each command's output into a file there, and a denied write
+  // makes `cat` fail ("stdout: Operation not permitted") and node abort at start (t1-code-1's first grade, 2026-10-22).
   `(deny file-read* file-write* (subpath "${LAB}"))`,
   `(allow file-read* (subpath "${KIT}"))`,
+  `(allow file-read* (subpath "${path.join(LAB, 'bin')}"))`,
   `(allow file-read* file-write* (subpath "${path.join(LAB, 'cache')}"))`,
   `(allow file-read* file-write* (subpath "${G}"))`,
-  ...[...new Set([G, KIT, NODE_DIR, path.join(LAB, 'cache', 'x'), '/private/tmp/claude-501/x'].flatMap(ancestors))].map((d) => `(allow file-read-metadata (literal "${d}"))`)
+  ...[...new Set([G, KIT, NODE_DIR, path.join(LAB, 'bin', 'x'), path.join(LAB, 'cache', 'x')].flatMap(ancestors))].map((d) => `(allow file-read-metadata (literal "${d}"))`)
 ].join('\n') + '\n');
 fs.copyFileSync(path.join(HERE, 'checks.md'), path.join(G, 'checks.md'));
 const prefix = path.join(G, 'shell-prefix.sh');
 fs.writeFileSync(prefix, `#!/bin/sh
 # OWN-026 grader: every shell command gets the copy's HOME and runs inside the lab's sandbox.
-export HOME="${HOME}" TMPDIR="${HOME}/tmp" npm_config_cache="${path.join(LAB, 'cache', 'npm')}" PLAYWRIGHT_BROWSERS_PATH="${path.join(LAB, 'cache', 'ms-playwright')}" BROWSER=none USER=grader PATH="${NODE_DIR}:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export HOME="${HOME}" TMPDIR="${HOME}/tmp" npm_config_cache="${path.join(LAB, 'cache', 'npm')}" PLAYWRIGHT_BROWSERS_PATH="${path.join(LAB, 'cache', 'ms-playwright')}" BROWSER=none CHROME_PATH="${path.join(LAB, 'bin', 'chrome')}" USER=grader PATH="${NODE_DIR}:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 exec /usr/bin/sandbox-exec -f "${path.join(G, 'sandbox.sb')}" /bin/zsh -c "$*"
 `, { mode: 0o755 });
 
@@ -62,7 +64,7 @@ const prompt = fs.readFileSync(path.join(HERE, 'grader.txt'), 'utf8')
   .replace('{APP}', APP).replace('{WORK}', WORK).replace('{REQUEST}', request).replace('{LAST}', last)
   .replace('{CHECKS}', path.join(G, 'checks.md')).replace('{IDS}', IDS.split(',').join(', ')).replace('{OUT}', OUT);
 fs.writeFileSync(path.join(G, 'prompt.txt'), prompt);
-const fence = ['//Users/richardosborne/**', `/${path.join(LAB, 'own026')}/**`, '//private/tmp/claude-501/**'];
+const fence = ['//Users/richardosborne/**', `/${path.join(LAB, 'own026')}/**`]; // not the scratchpads: long tool output is saved there for the grader to Read
 const denied = ['WebFetch', 'WebSearch', 'Bash(open:*)', ...fence.flatMap((g) => ['Read', 'Edit', 'Write', 'Glob', 'Grep'].map((t) => `${t}(${g})`))];
 const bin = process.env.CLAUDE_BIN || newestClaudeBin();
 const env = Object.fromEntries(Object.entries(process.env).filter(([k]) => !/^(CLAUDE|MCP_|NODEGX_|NOODL_)/.test(k) && !/KEY|TOKEN|SECRET/.test(k)));

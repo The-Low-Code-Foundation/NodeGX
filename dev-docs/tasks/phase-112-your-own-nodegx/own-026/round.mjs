@@ -65,6 +65,10 @@ Object.assign(env, {
   npm_config_cache: path.join(CACHE, 'npm'),
   PLAYWRIGHT_BROWSERS_PATH: path.join(CACHE, 'ms-playwright'),
   BROWSER: 'none', // OWN-008: a stranger's `npm start` opened Richard's browser
+  // Chrome's own sandbox can't start inside sandbox-exec (renderer/GPU/network crash; the kit's render_report hung 240 s
+  // and a code agent's own CDP probe got no page): the lab's Chrome runs with --no-sandbox, as Playwright runs it. Every
+  // arm alike; read by the NodeGX render harness and any tool that honours CHROME_PATH (PLAN §8, 2026-10-22 14:30).
+  CHROME_PATH: path.join(LAB, 'bin', 'chrome'),
   CLINE_DIR,
   CLINE_DATA_DIR: DATA,
   CLINE_MCP_SETTINGS_PATH: path.join(SETTINGS, 'cline_mcp_settings.json'),
@@ -91,9 +95,10 @@ const sb = [
   '(deny file-read* file-write* (subpath "/private/tmp/claude-501"))',
   `(deny file-read* file-write* (subpath "${LAB}"))`,
   `(allow file-read* (subpath "${path.join(LAB, 'cline-3.0.71')}"))`,
+  `(allow file-read* (subpath "${path.join(LAB, 'bin')}"))`,
   `(allow file-read* file-write* (subpath "${CACHE}"))`,
   `(allow file-read* file-write* (subpath "${root}"))`,
-  ...[...new Set([root, CACHE, NODE_DIR, path.join(LAB, 'cline-3.0.71'), '/private/tmp/claude-501/x'].flatMap(ancestors))].map((d) => `(allow file-read-metadata (literal "${d}"))`)
+  ...[...new Set([root, CACHE, NODE_DIR, path.join(LAB, 'cline-3.0.71'), path.join(LAB, 'bin', 'x'), '/private/tmp/claude-501/x'].flatMap(ancestors))].map((d) => `(allow file-read-metadata (literal "${d}"))`)
 ].join('\n') + '\n';
 fs.writeFileSync(path.join(root, 'sandbox.sb'), sb);
 
@@ -235,6 +240,21 @@ function audit() {
     }
   }
   fs.writeFileSync(path.join(root, 'seal-audit.txt'), seen.size ? [...seen].join('\n') + '\n' : 'clean\n');
+  // The fence's one known cost to an agent: Chrome launched by its own path (not CHROME_PATH) can't start its sandbox.
+  let chromeSandboxHits = 0;
+  for (const k of fs.readdirSync(SITS)) for (const l of readJsonl(path.join(SITS, k, 'agent.jsonl')))
+    if (l.type === 'agent_event' && l.event?.type === 'content_end' && /sandbox initialization failed|Failed to initialize sandbox/.test(JSON.stringify(l.event.output ?? ''))) chromeSandboxHits++;
+  fs.writeFileSync(path.join(root, 'chrome-sandbox-hits.txt'), `${chromeSandboxHits}\n`);
+  // /tmp is shared by every round (the sandbox can't take it away without breaking tools): what a round named there is
+  // moved into its own folder, so a later round of another arm can't read it (§8, 2026-10-22, after t1-code-1).
+  const left = path.join(root, 'left-in-tmp');
+  for (const entry of seen) {
+    const m = entry.match(/: (?:\/private)?\/tmp\/([^/]+)/);
+    const src = m && path.join('/private/tmp', m[1]);
+    if (!src || m[1].startsWith('claude-') || !fs.existsSync(src)) continue;
+    fs.mkdirSync(left, { recursive: true });
+    try { fs.renameSync(src, path.join(left, m[1])); } catch {}
+  }
   return seen.size ? `${seen.size} outside path(s)` : 'clean';
 }
 
