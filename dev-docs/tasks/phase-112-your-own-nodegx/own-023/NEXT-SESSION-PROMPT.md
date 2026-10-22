@@ -4,6 +4,8 @@
 > is its README §3, the brief is BRIEF.md, the first stranger ran from `stranger/`. The §6 rulings are its README §7.
 > This page is the record of where it came from.
 
+> **Round 3b finished 2026-10-22 morning (Fable 5.1), on "rock out".** Round 3's and round 2's loose files committed (`abb3fb0ef`…); B3-vibe (DeepSeek + the page: MUST 5/8 → 8/8, P 40 → 55 %, 291 → 236 s, same plan hole) and B3b-claude (Opus on the fixed note: 0 server calls again, quiz 20 / sound 17 / P 70 %, $2.95) run and graded; READONLYOPEN measured ×4, P112-OWN023-CATALOGDIG filed; **npm 0.2.5 packed** (`b2edd7cb1`, `OpenNoodl-worktrees/npm-0.2.5-tarballs/`, shasums in the write-up §6) — **the publish is Richard's terminal: `scripts/own/publish-npm.sh <that folder>`**, then deploy nodegx-web for the changelog; nodegx.io/from-code/#reading is LIVE with rounds 3 and 3b. Read `ROUND-3B-THE-GRAPH-AS-TEXT.md` §5b–§6.
+
 > **Round 3b, 2026-10-21 night (Fable 5.1), on Richard's "do what you need to do, whatever it takes": the graph as
 > text.** `noodl-mcp <project> --graph` / `read_graph` / the kit note (`db137a8f0`), READONLYOPEN wording (`fc206a738`),
 > arm B3-claude run and graded (`464b2d3c2`): the stranger reads the app through the page and nothing else, understands

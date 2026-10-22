@@ -116,11 +116,86 @@ writes it' took a few greps over the graph."*
    pinned `npx -y @nodegx/mcp@0.2.4` resolve to the local build, with nothing in the npx cache (`--mcp-tgz` and
    `--note-from` in `round-arm.mjs`). The warm start took 0.8 s.
 
-## 6. Next
+## 5b. The replication and the re-run (2026-10-22 morning, Fable 5.1)
 
-- The cheap replication: B3-vibe (DeepSeek V4.1 Flash, ~6 ¢) through `round3/round-vibe.mjs` with the same tarball
-  and note, against round 3's B-vibe / B-vibe-noserver (15/18, 14/18, P 40 %). A weaker reader is where a page
-  should matter most.
-- Ship it: the `--graph` flag and `read_graph` ride the next npm cut of `@nodegx/mcp` (0.2.5) with the kit note;
-  the note pins the version, so the line is only true once that cut is on the registry.
-- The write side (ComfyBench's "reversibly converted"): not started, and not owed by this round.
+Two more arms, both on a tarball packed from HEAD that morning (the 0.2.5 content at the kit's 0.2.4 pin, so the
+kit's `npx -y @nodegx/mcp@0.2.4` resolves to it) and the kit note **after** the READONLYOPEN wording (`fc206a738`):
+
+- **B3-vibe**: round 3's B-vibe exactly (DeepSeek V4.1 Flash in Mistral Vibe 2.26.1, `round3/round-vibe.mjs`, which
+  now takes `--mcp-tgz` / `--note-from` / `--nodegx`), plus the page and the note. The cheap replication §6 asked for.
+- **B3b-claude**: B3-claude exactly, on the fixed note. The bug file's "verify by re-running B3's brief".
+
+Graded by fresh Opus graders with the round 3 rubric (`round3/grades/B3-vibe.*`, `B3b-claude.*`; metrics
+`round3/metrics/`; runs `runs-r3/B3-vibe/`, `runs-r3/B3b-claude/`):
+
+| arm | plan $ | plan s | quiz $ | total $ | wall min | tool calls | quiz /22 | claims R/W/U | MUST | SHOULD | traps | secrets | sound /18 | P(ship) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| A-vibe (code, r3) | 0.040 | 201 | 0.025 | 0.06 | 3.3 | 38 | 19 | 72/3/1 | 7/8 | 4/5 | 1 | 1/10 | 16 | 65% |
+| B-vibe (NodeGX + server, r3) | 0.042 | 291 | 0.019 | 0.06 | 4.8 | 42 | 17 | 54/2/1 | 5/8 | 1/4 | 1 | 2/9 | 15 | 40% |
+| B-vibe-noserver (r3) | 0.049 | 665 | 0.023 | 0.07 | 11 | 57 | 20 | 62/3/1 | 5/8 | 2/4 | 2 | 3/9 | 14 | 40% |
+| **B3-vibe (NodeGX + the page)** | 0.047 | **236** | 0.021 | 0.07 | **3.9** | 47 | 17 | 46/1/2 | **8/8** | 1/4 | 1 | 2/10 | 15 | **55%** |
+| B3-claude (r3b, note before the fix) | 1.86 | 377 | 0.86 | 2.72 | 6.2 | 30 | 21 | 51/1/6 | 8/8 | 4/4 | 0 | 5/10 | 18 | 75% |
+| **B3b-claude (note after the fix)** | 2.01 | 355 | 0.95 | 2.95 | 5.9 | 32 | 20 | 54/2/4 | 8/8 | 3/4 | 0 | 7/10 | 17 | 70% |
+
+**The weaker reader, with the page.** B3-vibe used `--graph` as its main surface (saved it to its scratchpad, read it in
+slices after one 51 KiB read hit Vibe's 50 KiB cap), opened the project and asked the server for node types (3
+`list_node_types`, 3 `get_node_type`); `componentsRead: 0`. Against B-vibe: the plan sitting **291 → 236 s** and
+wall 4.8 → 3.9 min (the first NodeGX arm faster than the code arm's 4.4 wall, slower than its 201 s plan sitting);
+**MUST 5/8 → 8/8**: every place the feature has to touch, found; **P(ship) 40 → 55 %**. Quiz 17 and soundness 15
+unchanged; price unchanged (6–7 ¢). What did not move is the plan's hole, the same both times: it called the
+first-come `grownup` role "the biggest decision in the plan" and built every child-management function on it anyway.
+The page gave it the app; it did not give it judgement. So the sentence for the weaker model: **"the page makes a cheap
+model find the whole surface of the change, faster; it does not make its design better."**
+
+**Opus on the fixed note.** B3b-claude: 32 tool calls, **0 to the `nodegx` server**, again. Part 4: *"I did not run the
+app (`npx @nodegx/preview`) or open the project with the `nodegx` server. Everything here comes from reading the graph
+and the scripts and running the three existing checks."* No reason given this time; the fear of writing is gone and so
+is the need. It ran `npx … --graph` **14 times** (its third call redirected the page to `/tmp/gala-graph.txt` and the
+lab's fence refused it, so every later read re-ran the command and piped it through `sed`/`cut`; the lab's rule, not
+the product's, and B3 did the same). Then, as B3 did, it dug the node library out of `node_modules/@nodegx/mcp/dist/`
+with four `python3` one-liners: filed as **P112-OWN023-CATALOGDIG** (the page says nothing about what a node type can
+do, or where that is listed). Grades at the ceiling or next to it (quiz 20, soundness 17, MUST 8/8, 0 traps, secrets
+7/10 vs B3's 5/10); $2.95 vs B3's $2.72 and B's $3.06, 355 s vs 377 and 358: all three inside one run's noise.
+The one wrong fact its steps lean on: the save's key is `noodl_store_gala-game-v2` (the runtime prefixes it), not
+`gala-game-v2`; its own no-regression check would catch that loudly.
+
+**READONLYOPEN, measured a fourth time, after its fix:** the wording did not make Opus open the project, and with the
+page it no longer has to for a plan-only task. Item (3) of the bug (bind read-only) stays open; what the page owes
+instead is CATALOGDIG. The bug file carries the measurement.
+
+**Fence note for the next lab:** both Opus arms wrote the page to `/tmp` first and were refused. A `--deny-read` on
+`/tmp` costs the arm a dozen re-runs of a 1–2 s command; give the arm a scratch folder inside its root, or whitelist
+its own `/tmp` file.
+
+## 6. Shipped and next
+
+- **The npm cut, prepared 2026-10-22 (`b2edd7cb1`, pushed):** `@nodegx/mcp` 0.2.5 (`--graph`, `read_graph`, the
+  `open_project` wording), `create-nodegx` 0.2.5 (pins `@nodegx/mcp@0.2.5`, the note with the `--graph` line),
+  `create-nodegx-vibe` / `create-nodegx-cline` 0.2.5 (pin `create-nodegx@0.2.5`), `@nodegx/export` 0.2.5 (first
+  publish, P18 EXP-023). CHANGELOG "npm packages 0.2.5". `@nodegx/preview`, node-spec, project-contract and canvas-look
+  unchanged since 0.2.4, not re-published. Packed in the clean worktree `OpenNoodl-worktrees/own020-pack024` at
+  `b2edd7cb1` (`git status` empty before and after), under HEAVY.lock, runtime `build:types` first:
+
+  | tarball | shasum (sha1) | bytes |
+  |---|---|---|
+  | `nodegx-mcp-0.2.5.tgz` | `39e425baf87412ffc7ac9aad1347457104277b06` | 12,044,782 |
+  | `create-nodegx-0.2.5.tgz` | `cee60bdc412884eb655e2816f80973293f3eeb6d` | 43,071 |
+  | `create-nodegx-vibe-0.2.5.tgz` | `549196027598b1eef931cfa7c6d3be658beeacb8` | 13,641 |
+  | `create-nodegx-cline-0.2.5.tgz` | `62fca6bb20dacd75f23ed0413578f4789728957b` | 13,967 |
+  | `nodegx-export-0.2.5.tgz` | `bf4a58ffab3676fc2c16d3521f91dceb2306fcb0` | 6,076,067 |
+
+  Folder: `/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.5-tarballs/`. Smoke, from an empty HOME
+  outside the checkout: `npx -y file:<mcp tgz> <app> --graph` prints the page; `npx --package=file:<create tgz>
+  create-nodegx my-apps` writes `.mcp.json` pinning `@nodegx/mcp@0.2.5` and a CLAUDE.md with the `--graph` line;
+  `npx -y file:<export tgz> export --dry-run <app>` prints the preflight; the vibe kit scaffolds. `publishable.js`:
+  6 packages, 0 problems; `bugs.js gate core`: 0 blockers. **The publish is Richard's terminal (2FA):**
+  `scripts/own/publish-npm.sh /Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.5-tarballs` — it
+  publishes export, then mcp, then the three kits, waiting for each to be live, and skips what is already there. After
+  it: deploy nodegx-web (the changelog page reads CHANGELOG.md), and EXP-023 AC4 (the npm section names the export).
+- **Public:** nodegx.io/from-code/ has a section "A stranger reads it" (2026-10-22): rounds 3 and 3b in six rows and
+  plain words, linking to this file. Pushed as `from-code/index.html` only (nodegx-web `961459b`); the site repo has
+  another session's uncommitted homepage/demos edits, so no `deploy.sh`.
+- **Next, if wanted:** CATALOGDIG (a `--types` flag, or a header line on the page; then re-run B3b's brief: no
+  `node_modules/@nodegx/mcp` path in the transcript); READONLYOPEN item (3); the write side (ComfyBench's "reversibly
+  converted"), not owed by this round; n > 1 on the cheap arms (6–7 ¢ each) if the MUST 5 → 8 is to be believed
+  beyond one run.

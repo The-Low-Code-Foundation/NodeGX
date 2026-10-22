@@ -1,0 +1,14 @@
+{
+  "arm": "B3-vibe",
+  "quiz": { "scores": [2, 2, 1, 1, 2, 2, 2, 1, 1, 2, 1], "total": 17, "max": 22, "confidentlyWrong": 0 },
+  "micro": { "claims": 49, "right": 46, "wrong": 1, "unverifiable": 2, "wrongBuiltOn": 0 },
+  "macro": {
+    "mustFound": 8, "mustTotal": 8,
+    "shouldFound": 1, "shouldTotal": 4,
+    "trapsFallen": 1, "trapsAvoided": 3,
+    "secretsFound": 2, "secretsTotal": 10
+  },
+  "soundness": { "scores": [1, 2, 2, 2, 2, 2, 1, 1, 2], "total": 15, "max": 18 },
+  "probability": 55,
+  "biggestRisk": "The plan names the global, first-come `grownup` role as 'the biggest decision', then leaves it open. Its child-management functions (createChild, listChildren, resetChildPassword, deleteChild) still run on `role:grownup`, and step 1 reuses the auto-claiming Pages/Grownups sign-in. So only one family per backend can ever have a grown-up, that parent also becomes the content admin for GameChange, `signup:public` stays open, and an anonymous child device cannot call `listChildren` to show its name picker."
+}
