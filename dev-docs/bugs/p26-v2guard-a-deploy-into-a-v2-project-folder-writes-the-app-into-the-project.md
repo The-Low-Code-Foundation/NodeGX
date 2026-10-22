@@ -1,7 +1,8 @@
 ---
 id: P26-V2GUARD
 title: A deploy into a v2 project's own folder wrote the app into the project and exited 0
-status: open
+status: fixed
+commit: 858900dfc
 severity: medium
 area: deploy / deployToFolder target guard (editor Deploy and `nodegx deploy`)
 kit: preview
