@@ -1,0 +1,208 @@
+[
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Hangar/Shelf",
+  "node": "hsOut",
+  "type": "Component Outputs",
+  "label": "What was tapped",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"hasPicks\" is fed by /Logic/Hangar shelf — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Hunt/Play",
+  "node": "hpOut",
+  "type": "Component Outputs",
+  "label": "What the hunt did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"model\" is fed by /Logic/Finish hunt — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Logic/App store",
+  "node": "asStore",
+  "type": "net.noodl.GlobalStore",
+  "label": "The persisted store",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/stores/rocket.ts"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Logic/App store",
+  "node": "asRead",
+  "type": "net.noodl.GlobalStore.Subscribe",
+  "label": "Read the app object",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/AppStore.tsx"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Logic/App store",
+  "node": "asWrite",
+  "type": "net.noodl.GlobalStore.Set",
+  "label": "Write the app object",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "asIn"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Logic/App store",
+  "node": "asOut",
+  "type": "Component Outputs",
+  "label": "The store, read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"app\" is fed by net.noodl.GlobalStore.Subscribe — a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by net.noodl.GlobalStore — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Merge/Play",
+  "node": "mpOut",
+  "type": "Component Outputs",
+  "label": "What the board did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mergeMode\" is fed by /Game/Choice row — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "Rocket School 2026-09-24",
+  "component": "Race/Round",
+  "node": "rdOut",
+  "type": "Component Outputs",
+  "label": "The verdict",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"slipPct\" is fed by /Logic/Grade answer — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"nextKey\" is fed by Expression — input \"answer\" is fed by /Logic/Pick next question — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "STY-007 After Drive",
+  "component": "Todo/Dialog flow",
+  "node": "dfOut",
+  "type": "Component Outputs",
+  "label": "What was answered",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"note\" is fed by /Todo/Note dialog — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "TVW-004 s15 Todo",
+  "component": "Todo/Dialog flow",
+  "node": "dfOut",
+  "type": "Component Outputs",
+  "label": "What was answered",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"note\" is fed by /Todo/Note dialog — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "TVW-004 s15 Todo",
+  "component": "Todo/Task summary",
+  "node": "tsOut",
+  "type": "Component Outputs",
+  "label": "What you did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"deadlineText\" is fed by /Todo/Date picker — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"deadlineText\" is fed by /Todo/Date picker — instance output \"Value\" is not lifted by /Todo/Date picker — its feed defers there"
+  }
+ },
+ {
+  "project": "Todo list",
+  "component": "Todo/Dialog flow",
+  "node": "dfOut",
+  "type": "Component Outputs",
+  "label": "What was answered",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"note\" is fed by /Todo/Note dialog — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "tpl001-members-drive",
+  "component": "Members/Chrome",
+  "node": "outputs-3",
+  "type": "Component Outputs",
+  "label": "Who the band knows this person to be",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"isMember\" is fed by /Members/Standing — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"isMember\" is fed by /Members/Standing — instance output \"isMember\" is not lifted by /Members/Standing — its feed defers there"
+  }
+ }
+]

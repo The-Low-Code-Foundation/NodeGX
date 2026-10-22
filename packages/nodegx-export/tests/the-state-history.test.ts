@@ -445,9 +445,10 @@ describe('§C the shapes a wire changes, and the refusals by name', () => {
     expect(refusalOf(cp, CHECKPOINT, 'cp')).toBe(sentence);
   });
 
-  test('a store that defers as a whole (an authored Persist) is named in the refusal', () => {
-    const ir = mutated(HOME, (h) => setParam(nodeIn(h, 'appStore'), 'persist', { kind: 'literal', value: true }));
-    expect(refusalOf(ir, HOME, 'history')).toBe('the store "app" it names is not exported: a declarer authors persist — browser-storage rehydration is not translatable');
+  // P18 session 139 (EXP-021 AC4): an authored Persist is translated now; a wired one still defers the whole store.
+  test('a store that defers as a whole (a wired Persist) is named in the refusal', () => {
+    const ir = mutated(HOME, (h) => connect(h, 'titleInput', 'onTextChanged', 'appStore', 'persist'));
+    expect(refusalOf(ir, HOME, 'history')).toBe("the store \"app\" it names is not exported: a declarer's Persist is wired — whether the store is kept is decided at run time");
   });
 
   test('a store that only a history node names still gets its module, and the app typechecks', () => {

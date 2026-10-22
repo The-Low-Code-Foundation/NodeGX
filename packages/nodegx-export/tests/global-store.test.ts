@@ -179,14 +179,22 @@ describe('selectors in render, patches in handlers (NAMED-STORES-TARGET §2)', (
 });
 
 describe('what defers, all with notes (NAMED-STORES-TARGET §3)', () => {
-  test('persist defers the whole store: no module, no hooks, a note', () => {
+  /*
+   * P18 session 139 (EXP-021 AC4) reversed this row's first half: an authored Persist keeps the store in browser storage
+   * (`src/lib/persistStore.ts`, graded on the Store Desk, `a-persisted-store-travels.test.ts`). A wired one still defers.
+   */
+  test('persist keeps the store in browser storage; a wired Persist defers the whole store: no module, no hooks, a note', () => {
+    const kept = cloneIr();
+    setParam(nodeOf(kept, 'Pages/Mood', 'moodStore'), 'persist', { kind: 'literal', value: true });
+    expect(emitApp(kept, catalog).files['src/stores/mood.ts']).toContain("persistStore(mood, 'mood');");
     const mutated = cloneIr();
-    setParam(nodeOf(mutated, 'Pages/Mood', 'moodStore'), 'persist', { kind: 'literal', value: true });
+    const mood = mutated.components.find((c) => c.path === 'Pages/Mood')!;
+    mood.connections.push({ key: 'subNote:value->moodStore:persist', fromId: 'subNote', fromProperty: 'value', toId: 'moodStore', toProperty: 'persist', kind: 'value' });
     const result = emitApp(mutated, catalog);
     expect(result.files['src/stores/mood.ts']).toBeUndefined();
     expect(result.files['src/pages/Mood.tsx']).not.toContain('useStore');
     expect(result.files['src/pages/Mood.tsx']).not.toContain('mood.set');
-    expect(result.notes.join('\n')).toContain('a declarer authors persist');
+    expect(result.notes.join('\n')).toContain("a declarer's Persist is wired");
   });
 
   test('merge defers the Set', () => {

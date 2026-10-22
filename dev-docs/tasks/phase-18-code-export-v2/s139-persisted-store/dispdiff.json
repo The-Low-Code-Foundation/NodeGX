@@ -1,0 +1,885 @@
+[
+ {
+  "project": "bot-garden",
+  "component": "Grown/House panel",
+  "node": "ghOutPorts",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"model\" is fed by /Logic/Decode save code — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"model\" is fed by /Logic/Decode save code — instance output \"model\" is not lifted by /Logic/Decode save code — its feed defers there"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Grown/Renderer panel",
+  "node": "grdStore",
+  "type": "net.noodl.GlobalStore.Subscribe",
+  "label": "This computer’s renderer",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/RendererPanel.tsx"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Grown/Renderer panel",
+  "node": "grdWrite",
+  "type": "net.noodl.GlobalStore.Set",
+  "label": "Keep the choice on this computer",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "two wires feed its Value input — last-writer-wins is not statically ordered"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Island/World",
+  "node": "iwRendStore",
+  "type": "net.noodl.GlobalStore.Subscribe",
+  "label": "This computer’s renderer",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/World.tsx"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Island/World",
+  "node": "iwRendWrite",
+  "type": "net.noodl.GlobalStore.Set",
+  "label": "Keep the choice on this computer",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "two wires feed its Value input — last-writer-wins is not statically ordered"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Island/World",
+  "node": "iwOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"requestId\" is fed by /Logic/Island choose — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "two wires feed value output \"model\" — last-writer-wins is not statically ordered"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Logic/App store",
+  "node": "asStore",
+  "type": "net.noodl.GlobalStore",
+  "label": "The persisted store",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/stores/garden.ts"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Logic/App store",
+  "node": "asRead",
+  "type": "net.noodl.GlobalStore.Subscribe",
+  "label": "Read the family",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/AppStore.tsx"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Logic/App store",
+  "node": "asWrite",
+  "type": "net.noodl.GlobalStore.Set",
+  "label": "Write the family",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "asIn"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Logic/App store",
+  "node": "asOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"model\" is fed by net.noodl.GlobalStore.Subscribe — a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by net.noodl.GlobalStore — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Workshop/Play",
+  "node": "plRendStore",
+  "type": "net.noodl.GlobalStore.Subscribe",
+  "label": "This computer’s renderer",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/Play.tsx"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Workshop/Play",
+  "node": "plRendWrite",
+  "type": "net.noodl.GlobalStore.Set",
+  "label": "Keep the choice on this computer",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "two wires feed its Value input — last-writer-wins is not statically ordered"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Workshop/Play",
+  "node": "plOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"found\" is fed by /Logic/Start world — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "two wires feed value output \"runWorld\" — last-writer-wins is not statically ordered"
+  }
+ },
+ {
+  "project": "bot-garden",
+  "component": "Workshop/Runner",
+  "node": "rnOut",
+  "type": "Component Outputs",
+  "label": "What it answers",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"glowId\" is fed by /Logic/Glow — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "trigger rnSetRunNew.done: the Set Variable that sends it is not exported — the value wire has no statically known source"
+  }
+ },
+ {
+  "project": "members-area",
+  "component": "Members/Chrome",
+  "node": "outputs-4",
+  "type": "Component Outputs",
+  "label": "Who the band knows this person to be",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"isMember\" is fed by /Members/Standing — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"isMember\" is fed by /Members/Standing — instance output \"isMember\" is not lifted by /Members/Standing — its feed defers there"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Money balance",
+  "node": "mbOut",
+  "type": "Component Outputs",
+  "label": "Recorded",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"on\" is fed by /Week/Date picker — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"on\" is fed by /Week/Date picker — instance output \"Value\" is not lifted by /Week/Date picker — its feed defers there"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Money repeat",
+  "node": "rpOut",
+  "type": "Component Outputs",
+  "label": "What to do with it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"tickOn\" is fed by /Week/Date picker — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"tickRest\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning",
+  "component": "Week/Project detail",
+  "node": "pdOut",
+  "type": "Component Outputs",
+  "label": "What you did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"planDate\" is fed by /Week/Date picker — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"planDate\" is fed by /Week/Date picker — instance output \"Value\" is not lifted by /Week/Date picker — its feed defers there"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Money balance",
+  "node": "mbOut",
+  "type": "Component Outputs",
+  "label": "Recorded",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"on\" is fed by /Week/Date picker — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"on\" is fed by /Week/Date picker — instance output \"Value\" is not lifted by /Week/Date picker — its feed defers there"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Money repeat",
+  "node": "rpOut",
+  "type": "Component Outputs",
+  "label": "What to do with it",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"tickOn\" is fed by /Week/Date picker — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"tickRest\" is fed by net.noodl.controls.options — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "planning-demo",
+  "component": "Week/Project detail",
+  "node": "pdOut",
+  "type": "Component Outputs",
+  "label": "What you did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"planDate\" is fed by /Week/Date picker — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"planDate\" is fed by /Week/Date picker — instance output \"Value\" is not lifted by /Week/Date picker — its feed defers there"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Game/Focus picker",
+  "node": "fpOut",
+  "type": "Component Outputs",
+  "label": "What was chosen",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"subject\" is fed by /Logic/Focus choices — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Hangar/Shelf",
+  "node": "hsOut",
+  "type": "Component Outputs",
+  "label": "What was tapped",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"hasPicks\" is fed by /Logic/Hangar shelf — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Hunt/Play",
+  "node": "hpOut",
+  "type": "Component Outputs",
+  "label": "What the hunt did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"model\" is fed by /Logic/Finish hunt — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Lists/Editor",
+  "node": "leOut",
+  "type": "Component Outputs",
+  "label": "The list to save",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"items\" is fed by /Logic/Parse question set — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/App store",
+  "node": "asStore",
+  "type": "net.noodl.GlobalStore",
+  "label": "The persisted store",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/stores/rocket.ts"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/App store",
+  "node": "asRead",
+  "type": "net.noodl.GlobalStore.Subscribe",
+  "label": "Read the app object",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/AppStore.tsx"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/App store",
+  "node": "asWrite",
+  "type": "net.noodl.GlobalStore.Set",
+  "label": "Write the app object",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "asIn"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Logic/App store",
+  "node": "asOut",
+  "type": "Component Outputs",
+  "label": "The store, read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"app\" is fed by net.noodl.GlobalStore.Subscribe — a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by net.noodl.GlobalStore — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Merge/Play",
+  "node": "mpOut",
+  "type": "Component Outputs",
+  "label": "What the board did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mergeMode\" is fed by /Game/Choice row — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Monster/Setup",
+  "node": "zsOut",
+  "type": "Component Outputs",
+  "label": "Go",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mode\" is fed by /Logic/Resolve focus — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Moon/Adopt",
+  "node": "maOut",
+  "type": "Component Outputs",
+  "label": "Adopted",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"app\" is fed by /Logic/Moon act — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Moon/Big things",
+  "node": "btOut",
+  "type": "Component Outputs",
+  "label": "The store to write",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"app\" is fed by /Logic/Moon act — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Race/Round",
+  "node": "rdOut",
+  "type": "Component Outputs",
+  "label": "The verdict",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"slipPct\" is fed by /Logic/Grade answer — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"nextKey\" is fed by Expression — input \"answer\" is fed by /Logic/Pick next question — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "rocket-school",
+  "component": "Race/Setup",
+  "node": "rsOut",
+  "type": "Component Outputs",
+  "label": "Go",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mode\" is fed by /Logic/Resolve focus — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Game/Focus picker",
+  "node": "fpOut",
+  "type": "Component Outputs",
+  "label": "What was chosen",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"subject\" is fed by /Logic/Focus choices — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Hangar/Shelf",
+  "node": "hsOut",
+  "type": "Component Outputs",
+  "label": "What was tapped",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"hasPicks\" is fed by /Logic/Hangar shelf — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Hunt/Play",
+  "node": "hpOut",
+  "type": "Component Outputs",
+  "label": "What the hunt did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"model\" is fed by /Logic/Finish hunt — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Lists/Editor",
+  "node": "leOut",
+  "type": "Component Outputs",
+  "label": "The list to save",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"items\" is fed by /Logic/Parse question set — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/App store",
+  "node": "asStore",
+  "type": "net.noodl.GlobalStore",
+  "label": "The persisted store",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/stores/rocket.ts"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/App store",
+  "node": "asRead",
+  "type": "net.noodl.GlobalStore.Subscribe",
+  "label": "Read the app object",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "src/components/AppStore.tsx"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/App store",
+  "node": "asWrite",
+  "type": "net.noodl.GlobalStore.Set",
+  "label": "Write the app object",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "collapsed",
+   "into": "asIn"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Logic/App store",
+  "node": "asOut",
+  "type": "Component Outputs",
+  "label": "The store, read",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"app\" is fed by net.noodl.GlobalStore.Subscribe — a declarer authors persist — browser-storage rehydration is not translatable"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"error\" is fed by net.noodl.GlobalStore — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Merge/Play",
+  "node": "mpOut",
+  "type": "Component Outputs",
+  "label": "What the board did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mergeMode\" is fed by /Game/Choice row — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Monster/Setup",
+  "node": "zsOut",
+  "type": "Component Outputs",
+  "label": "Go",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mode\" is fed by /Logic/Resolve focus — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Moon/Adopt",
+  "node": "maOut",
+  "type": "Component Outputs",
+  "label": "Adopted",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"app\" is fed by /Logic/Moon act — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Moon/Big things",
+  "node": "btOut",
+  "type": "Component Outputs",
+  "label": "The store to write",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"app\" is fed by /Logic/Moon act — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Race/Round",
+  "node": "rdOut",
+  "type": "Component Outputs",
+  "label": "The verdict",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"slipPct\" is fed by /Logic/Grade answer — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"nextKey\" is fed by Expression — input \"answer\" is fed by /Logic/Pick next question — no statically known source in the emit vocabulary"
+  }
+ },
+ {
+  "project": "star-class",
+  "component": "Race/Setup",
+  "node": "rsOut",
+  "type": "Component Outputs",
+  "label": "Go",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mode\" is fed by /Logic/Resolve focus — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Projects/Kind group",
+  "node": "kgOut",
+  "type": "Component Outputs",
+  "label": "What a row said",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"projectId\" is fed by /Projects/Project list — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mode\" is fed by /Projects/Project list — instance output \"mode\" is not lifted by /Projects/Project list — its feed defers there"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Todo/Dialog flow",
+  "node": "dfOut",
+  "type": "Component Outputs",
+  "label": "What was answered",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"note\" is fed by /Todo/Note dialog — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list",
+  "component": "Todo/Routine summary",
+  "node": "rsOut",
+  "type": "Component Outputs",
+  "label": "What you did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"startText\" is fed by /Todo/Date picker — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"startText\" is fed by /Todo/Date picker — instance output \"Value\" is not lifted by /Todo/Date picker — its feed defers there"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Projects/Kind group",
+  "node": "kgOut",
+  "type": "Component Outputs",
+  "label": "What a row said",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"projectId\" is fed by /Projects/Project list — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"mode\" is fed by /Projects/Project list — instance output \"mode\" is not lifted by /Projects/Project list — its feed defers there"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Todo/Dialog flow",
+  "node": "dfOut",
+  "type": "Component Outputs",
+  "label": "What was answered",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"note\" is fed by /Todo/Note dialog — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "static"
+  }
+ },
+ {
+  "project": "todo-list-demo",
+  "component": "Todo/Routine summary",
+  "node": "rsOut",
+  "type": "Component Outputs",
+  "label": "What you did",
+  "before": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"startText\" is fed by /Todo/Date picker — no statically known source in the emit vocabulary"
+  },
+  "after": {
+   "kind": "deferred",
+   "to": "EXP-003",
+   "reason": "value output \"startText\" is fed by /Todo/Date picker — instance output \"Value\" is not lifted by /Todo/Date picker — its feed defers there"
+  }
+ }
+]

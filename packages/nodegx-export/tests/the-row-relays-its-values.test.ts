@@ -101,8 +101,12 @@ const RUNTIME_CONTROL: Readings = [L0, L0, L0, L0, L0];
 /** The export's control: the Shower is handed `undefined` and its Set writes it; the Text prints '' (P18-S130-UNDEFTEXT). */
 const EXPORT_CONTROL: Readings = [L0, ['', ''], ['', ''], ['', ''], ['', '']];
 const RUNTIME_COMPUTED: Readings = [L0, ['t1', 'Milk!'], ['t2', 'Bread!'], ['t2', 'Bread!'], ['t1', 'Milk!']];
-/** Refused by name for the computed label; the id still relays. */
-const EXPORT_COMPUTED: Readings = [L0, ['t1', ''], ['t2', ''], ['t2', ''], ['t1', '']];
+/**
+ * P18 session 139 (P18-S139-STALEPULSE). Before: the computed label refused by name, the id still relayed, and the Shower's
+ * `show` ran with its `named` missing (it printed ''). Now the List's `open` and `picked` into the Shower are refused by
+ * name with it: the runtime hands the Shower the label with the pulse, and the export cannot.
+ */
+const EXPORT_COMPUTED: Readings = [L0, L0, L0, L0, L0];
 
 const desks = VARIANTS.map((v) => writeRelayDesk(v.edit));
 const apps = desks.map((d) => emitDir(d.dir));
@@ -138,7 +142,7 @@ describe('§A the emitted app runs what the runtime runs, press by press', () =>
     expect(exported[2][0]).toEqual(EXPORT_CONTROL);
   });
 
-  it('A7 a label computed in the row: the runtime relays it; the export refuses that value by name and still relays the id', () => {
+  it('A7 a label computed in the row: the runtime relays it; the export refuses that value, and the pulse it goes with, by name (P18-S139-STALEPULSE)', () => {
     expect(runtime[3][0]).toEqual(RUNTIME_COMPUTED);
     expect(exported[3][0]).toEqual(EXPORT_COMPUTED);
   });

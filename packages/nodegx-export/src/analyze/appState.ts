@@ -94,8 +94,13 @@ export interface StorePlan {
    * handed the store module itself, so a store one of them names is emitted even when no Global Store node declares it.
    */
   historians?: VariableWriter[];
-  /** Set: the whole store defers (authored persist, unparseable initial state on every declarer). */
+  /** Set: the whole store defers (a wired or disputed persist, unparseable initial state on every declarer). */
   deferred?: string;
+  /**
+   * EXP-021 AC4 (session 139). Present when a declarer authors Persist: the store is kept in browser storage under
+   * `noodl_store_<storageKey>` (the runtime's `STORAGE_KEY_PREFIX`), the Storage Key defaulting to the store's name.
+   */
+  persist?: { storageKey: string };
   /**
    * Merged initial states, ignored storageKeys — one per declarer, routed app-wide by `emitApp` (P18-S110-STORENOTES:
    * this list had no reader, so "nothing dropped silently" did not hold for it).
@@ -451,6 +456,8 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
     }
     return plan;
   };
+  /** Session 139. The first declarer's authored Persist per store, so a second that disagrees is refused rather than ordered. */
+  const persistSaid = new Map<string, { on: boolean; storageKey?: string }>();
   const ensureStore = (name: string): StorePlan => {
     let plan = stores.get(name);
     if (!plan) {
@@ -604,9 +611,33 @@ export function collectAppState(ir: ExportIR): AppStateRegistry {
         const plan = ensureStore(storeName);
         if (node.type === GLOBAL_STORE) {
           plan.declarers.push(writerRef(component, node));
-          if (literalBool(node, 'persist') === true || wiredPortsOf(component).has(`${node.id}:persist`)) {
-            plan.deferred =
-              plan.deferred ?? 'a declarer authors persist — browser-storage rehydration is not translatable';
+          /*
+           * EXP-021 AC4 (session 139). A declarer that authors Persist keeps the store in browser storage
+           * (globalstore.ts `configureStore`): the stored copy, under `noodl_store_<Storage Key or Store Name>`,
+           * is applied over the initial state when the store is configured, and every commit is saved on the
+           * next turn. The store module transcribes both (`src/lib/persistStore.ts`). What is decided at run
+           * time stays refused by name: a wired Persist or Storage Key, and declarers that disagree — the
+           * runtime's answer would depend on which component mounted first.
+           */
+          const persistAuthored = literalBool(node, 'persist');
+          if (wiredPortsOf(component).has(`${node.id}:persist`)) {
+            plan.deferred = plan.deferred ?? "a declarer's Persist is wired — whether the store is kept is decided at run time";
+          } else if (wiredPortsOf(component).has(`${node.id}:storageKey`)) {
+            plan.deferred = plan.deferred ?? "a declarer's Storage Key is wired — where the store is kept is decided at run time";
+          } else if (persistAuthored !== undefined) {
+            const storageKey = literalString(node, 'storageKey') || plan.name;
+            const said = { on: persistAuthored, storageKey: persistAuthored ? storageKey : undefined };
+            const before = persistSaid.get(plan.name);
+            if (before !== undefined && (before.on !== said.on || (said.on && before.storageKey !== said.storageKey))) {
+              plan.deferred =
+                plan.deferred ??
+                'its declarers disagree about Persist or Storage Key — which one holds depends on which component mounts first';
+            }
+            if (before === undefined) persistSaid.set(plan.name, said);
+            if (persistAuthored) plan.persist = { storageKey };
+            else if (node.parameters.some((p) => p.name === 'storageKey')) {
+              plan.notes.push({ componentPath: component.path, nodeId: node.id, text: 'sets storageKey without persist — inert, ignored' });
+            }
           } else if (node.parameters.some((p) => p.name === 'storageKey')) {
             plan.notes.push({ componentPath: component.path, nodeId: node.id, text: 'sets storageKey without persist — inert, ignored' });
           }

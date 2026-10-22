@@ -4529,6 +4529,11 @@ export interface ComponentPlan {
     intoInstance?: true;
     /** EXP-011 §108. The sink is a For Each's items: the lifted row becomes its `itemsExpr`. */
     intoItems?: true;
+    /**
+     * EXP-021 AC4 (session 139). The sink is this component's own Component Outputs value port (the Editor's `items`, from
+     * the Parse question set it places): the lifted row is pushed on, a pass-through lift, decided once the child's lift is.
+     */
+    intoOutputs?: { prop: string; tsType: string };
   }>;
   dispositions: Record<string, Disposition>;
   /** Dropped wires, unhandled constructs — EXP-004's report feed. Nothing silently dropped. */
@@ -4669,11 +4674,32 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
   // or it does not, and a parent passing `onXChanged` to a child whose emitted interface lacks
   // it would fail the emitted app's own typecheck (the popups closable lesson).
   const byLegacyNow = (legacy: string) => plannedByLegacy.get(legacy);
+  /** Session 139. Per component, the pulses `liftInto` found would arrive without their value (`PlanExclusions.pulses`). */
+  const liftedPulseRefusals = new Map<string, Map<string, string>>();
   const liftInto = (plan: ComponentPlan) => {
     const liftedVarByKey = new Map<string, string>();
+    const liftedOf = (pending: ComponentPlan['pendingLifted'][number]) =>
+      byLegacyNow(pending.targetLegacy)?.liftedOutputProps.find((l) => l.port === pending.port);
+    /*
+     * EXP-021 AC4 (session 139). Several placed components' values into one input (rocket-school's Lists page: Save's,
+     * Delete's and the Header's `app` into App store's): the runtime's input holds what arrived last. One parent row they
+     * all write, each feed's callback that row's own setter (a stable callback, so a feed pushes only when it changes) —
+     * last-writer-wins, by when each changed. Before this each feed bound the input in turn and the last one placed won
+     * silently: App store wrote Delete's value when Save sent the pulse. A feed whose value also reaches another sink keeps
+     * its own row for those, and its callback writes both (todo-list's project list's `projectId`, into Link, Move and Save
+     * project, each fed by five lists): the emitter prints one stable callback for a placement's port with two setters.
+     */
+    const sinkKeyOf = (pending: ComponentPlan['pendingLifted'][number]) => `${pending.toNodeId}\u0000${pending.toProperty}`;
+    const sourceKeyOf = (pending: ComponentPlan['pendingLifted'][number]) => `${pending.instanceId}:${pending.port}`;
+    const feedsOfSink = new Map<string, Array<ComponentPlan['pendingLifted'][number]>>();
     for (const pending of plan.pendingLifted) {
-      const child = byLegacyNow(pending.targetLegacy);
-      const lifted = child?.liftedOutputProps.find((l) => l.port === pending.port);
+      if (liftedOf(pending) === undefined || pending.intoItems === true) continue;
+      feedsOfSink.set(sinkKeyOf(pending), [...(feedsOfSink.get(sinkKeyOf(pending)) ?? []), pending]);
+    }
+    /** Session 139. The row each multi-fed input reads, by sink. */
+    const mergedVarBySink = new Map<string, string>();
+    for (const pending of plan.pendingLifted) {
+      const lifted = liftedOf(pending);
       // EXP-011 §108. Into a repeater's items, a lifted value typed as something other than a list draws nothing.
       const notAList = pending.intoItems === true && lifted !== undefined && lifted.tsType !== 'any' && !lifted.tsType.endsWith('[]');
       if (!lifted || notAList) {
@@ -4681,9 +4707,45 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
           ? `items are fed by a source not statically typed as a list (${lifted!.tsType})`
           : `instance output "${pending.port}" is not lifted by ${pending.targetLegacy} — its feed defers there`;
         plan.notes.push(`wire ${pending.connectionKey} dropped: ${reason}`);
+        // Session 139. A pass-through that does not lift: the output is not lifted either, as a refused feed leaves it.
+        if (pending.intoOutputs !== undefined) {
+          plan.notes.push(`output "${pending.toProperty}" is a value output with no statically-translatable feed — not lifted in this slice`);
+          plan.droppedWires.push({ key: pending.connectionKey, fromId: pending.instanceId, fromProperty: pending.port, toId: pending.toNodeId, toProperty: pending.toProperty, reason });
+          if (plan.dispositions[pending.toNodeId]?.kind !== 'deferred') {
+            plan.dispositions[pending.toNodeId] = { kind: 'deferred', to: 'EXP-003', reason: `value output "${pending.toProperty}" is fed by ${pending.targetLegacy} — ${reason}` };
+          }
+          continue;
+        }
         // P18-S127-SIBLINGVALUE. Into another placed component, the wire was named on its marker before; it still is.
         if (pending.intoInstance === true || pending.intoItems === true) {
           plan.droppedWires.push({ key: pending.connectionKey, fromId: pending.instanceId, fromProperty: pending.port, toId: pending.toNodeId, toProperty: pending.toProperty, reason });
+        }
+        /*
+         * EXP-021 AC4 (session 139). The sender's pulses into the same component would run there without this value: the
+         * runtime hands it first (Header's `app`, then its `write` into App store; the Editor's `items`, then `save` into
+         * Save question set), and the export would write what the input last held — over a persisted store, the player's
+         * data. Refused in the next plan by name (the DEADROW rounds).
+         */
+        const parentIR = ir.components.find((c) => `/${c.path}` === plan.legacyPath);
+        const targetType = parentIR?.nodes.find((n) => n.id === pending.toNodeId)?.type;
+        const targetIR = ir.components.find((c) => `/${c.path}` === targetType);
+        // Only where the component reads that input: a value nothing inside it reads cannot be stale.
+        const readInside =
+          targetIR !== undefined &&
+          targetIR.connections.some((w) => w.fromProperty === pending.toProperty && targetIR.nodes.find((n) => n.id === w.fromId)?.type === 'Component Inputs');
+        // And only where the sender's output is fed inside it: a port nothing feeds is never delivered in the runtime either
+        // (the Relay Desk's control, P18-S130-UNDEFTEXT's), so the export's missing value is the runtime's.
+        const senderIR = ir.components.find((c) => `/${c.path}` === pending.targetLegacy);
+        const fedInside =
+          senderIR !== undefined &&
+          senderIR.connections.some((w) => w.toProperty === pending.port && senderIR.nodes.find((n) => n.id === w.toId)?.type === 'Component Outputs');
+        if (pending.intoInstance === true && readInside && fedInside) {
+          const refusals = liftedPulseRefusals.get(plan.legacyPath) ?? new Map<string, string>();
+          const key = `${pending.instanceId}\u0000${pending.toNodeId}`;
+          if (!refusals.has(key)) {
+            refusals.set(key, `the placed component that sends it also hands this one its "${pending.toProperty}", which the export does not deliver (${reason}) — the pulse would run on what that input last held`);
+          }
+          liftedPulseRefusals.set(plan.legacyPath, refusals);
         }
         // EXP-011 §108. The repeater draws no rows: what its rows relay is never written (its row signals go with the
         // trigger pass below, which asks `rowlessReasonOf`).
@@ -4696,27 +4758,48 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
         }
         continue;
       }
-      const varKey = `${pending.instanceId}:${pending.port}`;
-      let name = liftedVarByKey.get(varKey);
-      if (name === undefined) {
+      const varKey = sourceKeyOf(pending);
+      const merged = pending.intoItems !== true && (feedsOfSink.get(sinkKeyOf(pending))?.length ?? 1) > 1;
+      const feeds = merged ? feedsOfSink.get(sinkKeyOf(pending))! : [pending];
+      const allocRow = (tsType: string, comment: string): string => {
         const taken = takenNamesOf(plan);
         const cleaned = pending.port.replace(/[^A-Za-z0-9_$]+/g, '_').replace(/^_+|_+$/g, '');
         const base = cleaned.length > 0 && !/^[0-9]/.test(cleaned) ? cleaned : `_${cleaned || 'lifted'}`;
-        name = base;
+        let row = base;
         let counter = 2;
-        while (taken.has(name) || taken.has(setterNameOf(name))) name = `${base}${counter++}`;
+        while (taken.has(row) || taken.has(setterNameOf(row))) row = `${base}${counter++}`;
+        plan.stateVars.push({ name: row, setterName: setterNameOf(row), tsType: `${tsType} | undefined`, boot: null, originNodeId: pending.instanceId, origin: 'lifted', comment });
+        return row;
+      };
+      // Session 139. A multi-fed input reads one row every feed writes; any other sink reads the feed's own row.
+      let name: string;
+      if (merged) {
+        name =
+          mergedVarBySink.get(sinkKeyOf(pending)) ??
+          allocRow(
+            new Set(feeds.map((f) => liftedOf(f)?.tsType)).size > 1 ? 'any' : lifted.tsType,
+            `"${pending.toProperty}" as the runtime's input holds it: what arrived last of ${feeds.map((f) => `${f.targetLegacy}'s "${f.port}"`).join(', ')} — each writes this row when it changes (session 139, last-writer-wins).`
+          );
+        mergedVarBySink.set(sinkKeyOf(pending), name);
+      } else {
+        name =
+          liftedVarByKey.get(varKey) ??
+          allocRow(lifted.tsType, `Lifted from ${pending.targetLegacy}'s value output "${pending.port}" — undefined until the child's mount push (CONTROLLED-STATE-TARGET §4d).`);
         liftedVarByKey.set(varKey, name);
-        plan.stateVars.push({
-          name,
-          setterName: setterNameOf(name),
-          tsType: `${lifted.tsType} | undefined`,
-          boot: null,
-          originNodeId: pending.instanceId,
-          origin: 'lifted',
-          comment: `Lifted from ${pending.targetLegacy}'s value output "${pending.port}" — undefined until the child's mount push (CONTROLLED-STATE-TARGET §4d).`
+      }
+      const callbacks = (plan.instanceLifted[pending.instanceId] = plan.instanceLifted[pending.instanceId] ?? []);
+      if (!callbacks.some((c) => c.prop === lifted.prop && c.setterName === setterNameOf(name))) callbacks.push({ prop: lifted.prop, setterName: setterNameOf(name) });
+      // Session 139. The pass-through: this component's output pushes the row its placed component lifted into it.
+      if (pending.intoOutputs !== undefined) {
+        const out = pending.intoOutputs;
+        const rowType = liftedOf(pending)!.tsType;
+        plan.pushEffects.push({
+          prop: out.prop,
+          expr: { kind: 'state-get', name, maybeUndefined: true },
+          ...(out.tsType !== 'any' && rowType !== out.tsType ? { castTo: out.tsType } : {})
         });
-        const list = (plan.instanceLifted[pending.instanceId] = plan.instanceLifted[pending.instanceId] ?? []);
-        list.push({ prop: lifted.prop, setterName: setterNameOf(name) });
+        plan.liftedOutputProps.push({ port: pending.toProperty, prop: out.prop, tsType: out.tsType });
+        continue;
       }
       if (pending.intoItems === true) {
         // EXP-011 §108. §4e's untyped list: `(rows ?? []).map(…)`, `?? []` the runtime's "empty arrival clears the list".
@@ -4751,7 +4834,30 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
     }
     plan.pendingLifted = [];
   };
-  for (const legacy of order) liftInto(plannedByLegacy.get(legacy)!);
+  /*
+   * Session 139. The lift pass runs children first by placement: a pass-through (`intoOutputs`) adds the lifted prop its
+   * parents look for, so a component's lift is decided before any component that places it reads it.
+   */
+  const placementRank = new Map<string, number>();
+  {
+    const legacies = new Set(ir.components.map((c) => `/${c.path}`));
+    const onStack = new Set<string>();
+    const rank = (legacy: string): number => {
+      const known = placementRank.get(legacy);
+      if (known !== undefined) return known;
+      if (onStack.has(legacy)) return 0;
+      onStack.add(legacy);
+      const component = ir.components.find((c) => `/${c.path}` === legacy)!;
+      let r = 0;
+      for (const node of component.nodes) if (legacies.has(node.type) && node.type !== legacy) r = Math.max(r, rank(node.type) + 1);
+      onStack.delete(legacy);
+      placementRank.set(legacy, r);
+      return r;
+    };
+    for (const legacy of legacies) rank(legacy);
+  }
+  const byPlacement = (legacies: string[]) => [...legacies].sort((a, b) => (placementRank.get(a) ?? 0) - (placementRank.get(b) ?? 0));
+  for (const legacy of byPlacement(order)) liftInto(plannedByLegacy.get(legacy)!);
 
   /**
    * P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. Decided after the render, attach and lift passes, because only then is it
@@ -4768,9 +4874,11 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
       const planned = plannedByLegacy.get(legacy)!;
       const component = ir.components.find((c) => `/${c.path}` === legacy)!;
       const found = unreachedTriggersOf(planned, component);
-      const known = exclusionsOf.get(legacy) ?? { owners: new Map(), mounts: new Map(), rows: new Map() };
+      const known = exclusionsOf.get(legacy) ?? { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map() };
       let fresh = false;
-      for (const key of ['owners', 'mounts', 'rows'] as const) {
+      // Session 139. The value wires the lift pass dropped between two placed components refuse their pulses.
+      for (const [key, reason] of liftedPulseRefusals.get(legacy) ?? []) found.pulses.set(key, reason);
+      for (const key of ['owners', 'mounts', 'rows', 'pulses'] as const) {
         for (const [id, reason] of found[key]) {
           if (known[key].has(id)) continue;
           known[key].set(id, reason);
@@ -4798,7 +4906,7 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
         planOne(parent);
       }
     }
-    for (const legacy of again) liftInto(plannedByLegacy.get(legacy)!);
+    for (const legacy of byPlacement(again)) liftInto(plannedByLegacy.get(legacy)!);
   }
 
   // P18-S122-DEADROW. A dead row's readers that are not drawn elements keep reading it (see PlanExclusions); each is said.
@@ -4851,10 +4959,30 @@ export function planProject(ir: ExportIR, catalog: CatalogIndex): ProjectPlan {
 /** P18 session 126 (EXP-011 §93). The words a refusal under a page's own wired Group starts with; the emitter says the same. */
 export const UNCARRIED_PAGE_GROUP = "the page's own Group,";
 
+/**
+ * P18-S139-HOOKNAME. Every `use…` name the emitted code imports (react, react-router, `@nodegx/core/react`, the emitted
+ * `src/lib/*` modules): a logic component's hook may not take one, or it shadows the import in its own file.
+ */
+const IMPORTED_HOOK_NAMES = new Set([
+  'useRef', 'useEffect', 'useState', 'useReducer', 'useMemo', 'useCallback', 'useContext', 'useId', 'useLayoutEffect',
+  'useSyncExternalStore', 'useNavigate', 'useParams', 'useSearchParams', 'useRoutes', 'useValue', 'useCollection', 'useSignal',
+  'useStore', 'useStates', 'useAppError', 'useSession', 'useParentComponentObject', 'useParentBounds', 'useDrag',
+  'useComponentObject', 'useAnimatedValue', 'useTransitions', 'useScript', 'useScreenResolution', 'useRunTasks', 'useWebSocket',
+  'useUndoRedo', 'useSubscribeToChanges', 'useStateSnapshot', 'useStateHistory', 'useServerSentEvents', 'useRepeat',
+  'usePageStack', 'useOptimisticUpdate', 'useIcon', 'useActionHandler', 'useActionDispatcher', 'useSignInWith',
+  'useTextAccumulator', 'useStreamBuffer', 'useJsonStreamParser'
+]);
+
 export interface PlanExclusions {
   owners: Map<string, string>;
   mounts: Map<string, string>;
   rows: Map<string, string>;
+  /**
+   * EXP-021 AC4 (P18 session 139). A placed component's pulses into another placed component whose value it also hands
+   * that component, where the lift pass dropped the value: by `<sender id>\u0000<target id>`. The runtime delivers the
+   * value before the pulse (rocket-school's `app` then `write`); the export would run the pulse on a stale value.
+   */
+  pulses: Map<string, string>;
 }
 
 /**
@@ -4955,7 +5083,7 @@ export function rowlessReasonOf(plan: ComponentPlan, repeaterId: string): string
  * finished plan: its handlers, its bindings after the lift phase, and every action list it carries.
  */
 export function unreachedTriggersOf(plan: ComponentPlan, component: ComponentIR): PlanExclusions {
-  const found: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map() };
+  const found: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map() };
   if (plan.file === null) return found;
   const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
   const labelOf = (nodeId: string) => {
@@ -5065,7 +5193,7 @@ function planComponent(
   /** EXP-011 §53. The components on a template cycle (a task that runs itself). */
   templateCycle: ReadonlySet<string>,
   /** P18-S122-DEADROW, P18-S123-UNDRAWNTRIGGER. The triggers a first plan of this component found never run. */
-  excluded: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map() }
+  excluded: PlanExclusions = { owners: new Map(), mounts: new Map(), rows: new Map(), pulses: new Map() }
 ): ComponentPlan {
   const nodeById = new Map(component.nodes.map((n) => [n.id, n]));
   const dispositions: Record<string, Disposition> = {};
@@ -5553,7 +5681,9 @@ function planComponent(
   } else if (plan.hook === true) {
     // EXP-021 slice 1. The file keeps the component's name; the function is the hook's.
     const fileBase = dedupe(pascalCase(lastSegment(component.path)), usedComponentNames);
-    plan.file = { dir: 'components', fileBase, symbol: `use${fileBase}` };
+    // P18-S139-HOOKNAME. A logic component called "Store" printed `useStore`, which shadows `@nodegx/core/react`'s in its
+    // own file and calls itself (the Store Desk's first export run: a stack overflow). A name the emitted code imports yields.
+    plan.file = { dir: 'components', fileBase, symbol: IMPORTED_HOOK_NAMES.has(`use${fileBase}`) ? `use${fileBase}Logic` : `use${fileBase}` };
   } else {
     const fileBase = dedupe(pascalCase(lastSegment(component.path)), usedComponentNames);
     plan.file = { dir: 'components', fileBase, symbol: fileBase };
@@ -17725,6 +17855,40 @@ function planComponent(
         compiledOf(from, 'run');
       }
       const ctx = newCtx();
+      /**
+       * EXP-021 AC4 (session 139). A Subscribe's key the analysis cannot type (rocket-school's `app`, written from a
+       * component's object input) is handed on, not computed with: §10's binding rule, the sink that reads it decides —
+       * the lift is a pass-through, and the parent's sinks are where the strict rule applies. `exprTsType` reads it
+       * `unknown`, so the push is cast to the port's declared type, as an untyped Variable's is.
+       */
+      /*
+       * EXP-021 AC4 (session 139). A placed component's value straight into this component's own output: passed on, once the
+       * second phase knows the placed component lifts it (`liftInto`'s `intoOutputs`). The Editor's `items` is its Parse
+       * question set's; Save question set reads it from the Editor.
+       */
+      if (relayExpr === undefined && from !== undefined && plan.roleOf[from.id] === 'instance' && rendered.has(from.id)) {
+        const fromIR = ir.components.find((tc) => `/${tc.path}` === from.type);
+        if (fromIR !== undefined && componentOutputInterface(fromIR).valueProps.some((v) => v.port === wire.fromProperty)) {
+          consumed.add(wire.key);
+          plan.pendingLifted.push({
+            connectionKey: wire.key,
+            instanceId: from.id,
+            targetLegacy: from.type,
+            port: wire.fromProperty,
+            toNodeId: wire.toId,
+            toProperty: port,
+            intoOutputs: { prop: vp.prop, tsType: vp.tsType }
+          });
+          continue;
+        }
+      }
+      if (relayExpr === undefined && from?.type === GLOBAL_STORE_SUBSCRIBE && wire.fromProperty === 'value') {
+        const read = storeKeyReadOf(from, 'binding');
+        if (!('defer' in read) && read.untyped === true) {
+          relayExpr = { kind: 'store-key-get', storeName: read.storeName, key: read.key };
+          ctx.subscriberIds.push(from.id);
+        }
+      }
       const expr = relayExpr ?? (from === undefined ? null : resolveExpr(from, wire.fromProperty, ctx));
       if (expr === null) {
         fail(
@@ -17758,7 +17922,7 @@ function planComponent(
     }
     // Declared value ports that did not lift keep a named note (the s10 report, updated).
     for (const port of outputInterface.valuePorts) {
-      if (!plan.liftedOutputProps.some((l) => l.port === port)) {
+      if (!plan.liftedOutputProps.some((l) => l.port === port) && !plan.pendingLifted.some((p) => p.intoOutputs !== undefined && p.toProperty === port)) {
         notes.push(`output "${port}" is a value output with no statically-translatable feed — not lifted in this slice`);
       }
     }
@@ -19150,7 +19314,7 @@ function planComponent(
       rendered.has(fromNode.id) &&
       (connection.kind === 'signal' || instanceSignal || customSignal || repeaterRowSignal)
     ) {
-      const unreached = unreachedOwnerOf(connection);
+      const unreached = unreachedOwnerOf(connection) ?? excluded.pulses.get(`${connection.fromId}\u0000${connection.toId}`);
       if (unreached !== undefined) {
         refuseUnreached(connection, toNode, compiled, unreached, outputsSink);
         continue;

@@ -1,3 +1,36 @@
+# Next session — session 139 (2026-10-22, BOARD lane 6) made **a persisted Global Store travel, and the write idiom over it** (EXP-011 §109): rocket-school's `/Logic/App store` is kept where the runtime keeps it, every page is handed `app`, and the Lists page's Save writes Save's value, not Delete's. Opening the store made four more things reachable, all built: an untyped store key lifts, several hooks' values into one input are one row (MULTIFEED), the Editor's `items` passes through to Save, and a pulse whose value the export does not deliver is refused by name (STALEPULSE, high).
+
+## ✅ Session 139: the persisted store, and the write idiom over it
+
+Read EXP-011 §109, EXP-021 §9 and `s139-persisted-store/README.md`. In short:
+
+| what | where |
+|---|---|
+| Measured first: 51 "browser-storage rehydration" report lines + 106 wires "not lifted by /Logic/App store" (rocket-school, star-class, bot-garden); the runtime's load/save read in `globalstore.ts` | `s139-persisted-store/README.md` |
+| An authored Persist keeps the store: `StorePlan.persist`; `src/lib/persistStore.ts` (the stored copy over the initial state at import, each change saved next turn); a wired Persist / Storage Key or disagreeing declarers refused by name | `src/analyze/appState.ts`, `src/emit/persistStoreLib.ts`, `state.ts`, `emitApp.ts` |
+| A Subscribe's untyped key lifts through a component's output (§10's binding rule) | `src/analyze/plan.ts` (§4d child side) |
+| **P18-S139-MULTIFEED** (high): several lifted values into one input are one shared row; a source feeding other sinks too writes all its rows through one stable `useCallback` (84 inputs, 232 feeds, 54 combined callbacks in the templates) | `plan.ts` (`liftInto`), `src/emit/component.ts` (`combinedLifted`) |
+| The pass-through: a placed component's value into the component's own output (`intoOutputs`); `liftInto` runs children-first by placement | `plan.ts` |
+| **P18-S139-STALEPULSE** (high): a pulse into a placed component whose value the lift pass dropped, where the sender feeds that port and the target reads it, is refused by name in the next plan (`PlanExclusions.pulses`); 115 template pulses ran on HEAD on a value never delivered | `plan.ts` |
+| **-HOOKNAME** (`/Logic/Store` → `useStore` called itself; now `useStoreLogic`), **-MACHINELOCAL** (bot-garden TS2451 ×4) | `plan.ts`, `component.ts` |
+| Store Desk, both arms with localStorage seeded and read; 28 / 28; 13 mutants all killed | `tests/a-persisted-store-travels.test.ts`, `tests/helpers/store-desk.ts`, both arms, `s139-persisted-store/EXPECTED.md`, `mutants.py`, `mutants.out` |
+
+- 🔴 **Opening a refused node made its neighbours' defects live, again** (s138's lesson, a second time). With App store emitted, the Lists page would have written Delete's value on Save (MULTIFEED) and `undefined` over the stored app on a Header write (STALEPULSE). I found both by reading the emitted page before writing a single test.
+- 🔴 **A refusal rule needs its own control.** STALEPULSE's first form refused a pulse whose sender never feeds the port. The runtime never delivers a value there either, so nothing is stale. The whole package found it (the Relay Desk's control, A6); now it refuses only where the sender's port is fed (C6, M13).
+- 🔴 **A mutant table goes stale when the code moves after it ran.** I rewrote `liftInto` after the first mutant run, and M5's site was gone. The ledger attribution script failed loudly on it. Re-run the harness on the final code (`mutants.out` is that run).
+- 🔴 **The runtime arm graded my prediction and corrected it**: Bad's two feeds into one output wrote `badA`, not `bad`. That is the order the export refuses to guess ("last-writer-wins is not statically ordered"). Recorded in A7, not adjusted.
+- 🔴 **`grep` here is a shell function (ugrep) and skipped `.ts` files as binary**: the refusal sentence "was not in `src`". Use `/usr/bin/grep -a`.
+- Attribution of a moved count: switch each change off with the mutant table and read the count (`ledger-attr`, in the scratchpad): NSP-008's +1 is the untyped lift.
+
+Readings: the spec 28 / 28; mutants 13 / 13 killed; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0. Reach (HEAD's `src` against the tree): **templates 482 wires gained, 115 lost, every loss a STALEPULSE refusal of a pulse HEAD ran on a missing value**; nodes templates 32 gained, 0 lost; corpus 9 / 0. NSP-008's ledger: 18 played, 11 conform (was 17 / 10). Whole package (`nice -n 19 --runInBand`, JSON 12:13): **155 suites, 5,280 passed, 0 failed, 3 skipped** (predicted 5,278 + 2 after the first run moved three rows; the first run read 5,275 / 3 failed, each named in the README).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **EXP-021 AC4, driven** (translated in s139, not driven). s137's recipe: the exported rocket-school built with its own `npm run build` against npm's packages; one headless Chrome; a profile seeded in localStorage under `noodl_store_rocket-school` (its shape: read `/Logic/Active profile` and `/Logic/Create profile`); Lists → New / Edit → Save; read the store back and the list redrawn; the runtime arm beside it (`render-from-disk`, viewer bundle mtime checked first). Predict from the emitted Lists page before driving.
+2. **The Header's `app`** (three wires into one output port, refused; its `write` is refused on 8 pages, so settings, rename and delete-player do not save). The runtime writes whichever arrived last. A Component Outputs port fed by several sources could be one push effect per source (each pushes when its value changes), but measure the order on a desk first, as the Bad desk did.
+3. App store's `written` (a Set Global Store's Done chain shares its port with `game-kit.KeepStorage`; the Profiles page goes home on it), §101 proper (the Lists guard, the Editor's count line), a Function's own output into `items` (nightbook 16), P18-S137-HALFREFUSED, "node beside the router shell".
+
+---
+
 # Next session — session 138 (2026-10-22, BOARD lane 6) made **a repeater fed by a placed component's list draw its rows** (EXP-011 §108): the hook's lifted list is the For Each's items, and a row's value reaches another hook with the row's signal. Reading the emitted code and `tplbuild` found three more, all fixed. Templates: repeaters drawing rows 114 → 161, 146 wires gained, 0 lost.
 
 ## ✅ Session 138: a hook's list draws its rows

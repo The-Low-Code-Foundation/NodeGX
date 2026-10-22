@@ -26,6 +26,10 @@
  * and `Files`, `Variables` the global variables record), the project's `cloudservices`, and `session` where the running
  * app keeps it. Needs `RUNTIME_ARM_URL` in the environment (jsdom keeps no localStorage without an origin), and one
  * session per process (the viewer's UserService is a singleton). The output is then `{ readings, requests }`.
+ *
+ * P18 session 139 (EXP-021 AC4). `storage: { keys, seeds? }`, with `RUNTIME_ARM_URL` set: before scenario i the
+ * localStorage is emptied and `seeds[i]` (key → text) written into it, and the Global Store manager (a singleton) is reset
+ * with its state, as a reload would leave it; every reading ends with `storage=<text, or null>` for each key.
  */
 
 const fs = require('fs');
@@ -88,8 +92,13 @@ const MODULES = [
   def(require(path.join(VIEWER, 'nodes', 'controls', 'text-input'))),
   // P18 session 130 (EXP-011 §99): the Relay Desk's list, the viewer's own For Each over the runtime's own Static Data.
   def(require(path.join(LIB, 'nodes', 'std-library', 'data', 'staticdata'))),
-  def(require(path.join(VIEWER, 'nodes', 'std-library', 'data', 'foreach')))
+  def(require(path.join(VIEWER, 'nodes', 'std-library', 'data', 'foreach'))),
+  // P18 session 139 (EXP-021 AC4): the Store Desk's Global Store, Subscribe and Set, over the runtime's own manager.
+  def(require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstorenode'))),
+  def(require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstoresubscribenode'))),
+  def(require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstoresetnode')))
 ];
+const { globalStoreManager } = require(path.join(LIB, 'nodes', 'std-library', 'agent', 'globalstore'));
 
 // P18 session 130. The viewer's For Each reads the project's settings off the running runtime, which the harness does not
 // start: an empty set is the default project's (as `noodl-viewer-react/tests/corpus/f50-repeater-plain-array.test.ts` lends it).
@@ -198,7 +207,7 @@ function installBackend(backend) {
   return fake;
 }
 
-async function run({ dir, scenarios, fields, backend }) {
+async function run({ dir, scenarios, fields, backend, storage }) {
   const components = componentsOf(dir);
   const home = components.find((c) => c.name === '/Pages/Home');
   // The Home page's Page node is the router's; the arm draws the Page's one child, the page's Group.
@@ -207,8 +216,13 @@ async function run({ dir, scenarios, fields, backend }) {
   home.roots = pageNode.children.map((c) => c.id);
   const out = [];
   const requests = [];
-  for (const presses of scenarios) {
+  for (const [index, presses] of scenarios.entries()) {
     delete Model._models['--ndl--global-variables'];
+    if (storage !== undefined) {
+      globalStoreManager.reset({ clearState: true });
+      localStorage.clear();
+      for (const [key, text] of Object.entries((storage.seeds ?? [])[index] ?? {})) localStorage.setItem(key, text);
+    }
     if (backend !== undefined) requests.push(installBackend(backend).log);
     const graph = await createCorpusGraph({ modules: MODULES, data: { components }, rootComponent: '/Pages/Home' });
     graph.context.styles = { getTextStyle: () => ({}), resolveColor: (c) => c };
@@ -232,7 +246,11 @@ async function run({ dir, scenarios, fields, backend }) {
         if (el && container.contains(el)) texts.push({ el, text: (el.textContent ?? '').trim() });
       }
       texts.sort((a, b) => (a.el.compareDocumentPosition(b.el) & 4 ? -1 : 1));
-      return [...texts.map((t) => t.text), ...(fields ? fieldReading(container) : [])];
+      return [
+        ...texts.map((t) => t.text),
+        ...(fields ? fieldReading(container) : []),
+        ...(storage === undefined ? [] : storage.keys.map((key) => `storage=${localStorage.getItem(key)}`))
+      ];
     };
     /**
      * React commits (and the viewer sends Did Mount from `componentDidMount`) as an `act` scope closes, after the frames

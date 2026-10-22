@@ -63,6 +63,7 @@ import { README_PATH, renderReadme } from './readme';
 import { ExportReportData, REPORT_PATH, ReportComponent, StylesReport, renderReport, stripScope } from './report';
 import { emitScaffold, routerNotes } from './scaffold';
 import { emitStateModules } from './state';
+import { PERSIST_STORE_LIB_PATH, persistStoreLibSource } from './persistStoreLib';
 
 const GENERATED_TS = '// @nodegx:generated (api stub — provenance markers complete in EXP-007)\n';
 const GENERATED_MODULE_TS = '// @nodegx:generated (api module — provenance markers complete in EXP-007)\n';
@@ -474,6 +475,10 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   // fact and file a working backend under "what needs your attention", which is the exact failure
   // EXP-004's risk table calls "a good export looking bad".
   Object.assign(files, emitStateModules(project));
+  // EXP-021 AC4 (session 139). `src/lib/persistStore.ts` — browser storage under a store whose declarer authors Persist.
+  if (project.stores.some((s) => s.deferred === undefined && s.persist !== undefined)) {
+    files[PERSIST_STORE_LIB_PATH] = GENERATED_MODULE_TS + persistStoreLibSource();
+  }
 
   // Dependencies are computed from the output (TARGET-OUTPUT §3): the library is earned by an
   // import, never declared up front.

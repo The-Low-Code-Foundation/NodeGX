@@ -16,6 +16,10 @@
  * `fake-parse-backend.js`, fresh per scenario, with `session` stored where the running app keeps it
  * (`Parse/<appId>/currentUser`); `import.meta.env` is empty, so the client reads the project's own endpoint. The project's
  * output is then `{ readings, requests }`: the readings as above, and per scenario every request the backend was sent.
+ *
+ * P18 session 139 (EXP-021 AC4). `storage: { keys, seeds? }` (with `settled`) gives the window an origin, so it keeps a
+ * localStorage; `seeds[i]` (key → text) is written into it before scenario i's app loads, and every reading ends with
+ * `storage=<text, or null>` for each key, as `runtime-mounted-arm.js` reads it.
  */
 
 const fs = require('fs');
@@ -122,17 +126,18 @@ function bundle(dir, env = false) {
  * each inside an act, after the mount and after every step, as the runtime arm lets frames run: a zero timer the page
  * started has fired before the reading.
  */
-async function runSettled({ dir, scenarios, fields, ticks, backend }) {
+async function runSettled({ dir, scenarios, fields, ticks, backend, storage }) {
   const code = bundle(dir, backend !== undefined);
   const out = [];
   const requests = [];
-  for (const presses of scenarios) {
+  for (const [index, presses] of scenarios.entries()) {
     const dom = new JSDOM('<!doctype html><html><body><div id="root"></div></body></html>', {
       runScripts: 'outside-only',
       pretendToBeVisual: true,
-      ...(backend !== undefined ? { url: 'http://localhost/' } : {})
+      ...(backend !== undefined || storage !== undefined ? { url: 'http://localhost/' } : {})
     });
     const w = dom.window;
+    if (storage !== undefined) for (const [key, text] of Object.entries((storage.seeds ?? [])[index] ?? {})) w.localStorage.setItem(key, text);
     if (backend !== undefined) {
       const fake = createFakeBackend(backend.spec);
       w.fetch = fake.fetch;
@@ -147,7 +152,8 @@ async function runSettled({ dir, scenarios, fields, ticks, backend }) {
     w.eval(code);
     await w.__mountSettled();
     if (ticks) await w.__ticks(ticks);
-    const read = () => [...w.__read(), ...(fields ? w.__fields() : [])];
+    const stored = () => (storage === undefined ? [] : storage.keys.map((key) => `storage=${w.localStorage.getItem(key)}`));
+    const read = () => [...w.__read(), ...(fields ? w.__fields() : []), ...stored()];
     const readings = [read()];
     for (const label of presses) {
       const step = STEP.exec(label);

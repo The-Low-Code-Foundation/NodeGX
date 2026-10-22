@@ -1652,6 +1652,9 @@ export function emitComponent(
     reserved.add(stateVar.name);
     reserved.add(stateVar.setterName);
   }
+  // Session 139. A States machine's local too: bot-garden's `renderer` machine beside its `renderer` store key (TS2451),
+  // reachable once the persisted store it reads was emitted.
+  for (const machine of plan.statesMachines) reserved.add(machine.local);
   // The popup slot's state pair (POPUPS-TARGET §2) — allocated before the hook locals so a
   // variable named "openPopup" yields, not the slot.
   const allocLocal = (base: string): string => {
@@ -1661,6 +1664,20 @@ export function emitComponent(
     reserved.add(name);
     return name;
   };
+  /*
+   * Session 139 (EXP-021 AC4). A placement's lifted port that writes two rows (its own, and an input several placements
+   * feed): one stable callback writing both, so the child's push effect, which depends on it, runs only when the value
+   * changes — an inline arrow would push on every render and make the last effect to run the last writer.
+   */
+  const combinedLifted = new Map<string, { local: string; setters: string[]; tsType: string }>();
+  for (const [instanceId, entries] of Object.entries(plan.instanceLifted)) {
+    for (const prop of new Set(entries.map((e) => e.prop))) {
+      const setters = entries.filter((e) => e.prop === prop).map((e) => e.setterName);
+      if (setters.length < 2) continue;
+      const tsType = plan.stateVars.find((v) => v.setterName === setters[0])?.tsType ?? 'unknown';
+      combinedLifted.set(`${instanceId}\u0000${prop}`, { local: allocLocal(`${prop}${pascalCase(instanceId)}`), setters, tsType });
+    }
+  }
   const popupState = plan.popups.length > 0 ? allocLocal('openPopup') : null;
   const popupSetter = plan.popups.length > 0 ? allocLocal('setOpenPopup') : null;
   plan.queries.forEach((q) => {
@@ -4710,6 +4727,7 @@ export function emitComponent(
   }
   if (radioNameLocals.size > 0) reactImports.push('useId');
   if (memoJsIds.size > 0) reactImports.push('useMemo');
+  if (combinedLifted.size > 0) reactImports.push('useCallback');
   // EXP-011 §39. The timer handle and the last value seen both live in refs.
   if (delayRefs.size > 0 || plan.valueChangedEffects.length > 0 || usedKeptLocals.size > 0 || pulsedRunIds.size > 0 || plan.tickedRuns.length > 0 || plan.instancePulses.length > 0 || fieldRefs.size > 0) reactImports.push('useRef');
   // P18-S128-FIELDSET. A Cleared mark's reset is an effect.
@@ -6624,7 +6642,9 @@ export function emitComponent(
     }
     // The lifted callbacks (§4d parent side): `onXChanged={setX}` writes the parent state var.
     for (const lifted of plan.instanceLifted[node.id] ?? []) {
-      attrs.push(`${lifted.prop}={${lifted.setterName}}`);
+      const combined = combinedLifted.get(`${node.id}\u0000${lifted.prop}`);
+      if (combined !== undefined && combined.setters[0] !== lifted.setterName) continue;
+      attrs.push(`${lifted.prop}={${combined?.local ?? lifted.setterName}}`);
     }
     return attrs;
   };
@@ -7427,6 +7447,10 @@ export function emitComponent(
   for (const effect of plan.valueChangedEffects) body.push(`  const ${effect.lastLocal} = useRef<unknown>(undefined);`);
   // P18-S126-INSIGNAL. The count each placed component has acted on, kept here so it outlives the child's unmount.
   for (const pulse of plan.instancePulses) body.push(`  const ${pulse.takenLocal} = useRef(0);`);
+  // Session 139. A lifted port with two rows to write: one stable callback (setters never change).
+  for (const { local, setters, tsType } of combinedLifted.values()) {
+    body.push(`  const ${local} = useCallback((value: ${tsType}) => { ${setters.map((setter) => `${setter}(value);`).join(' ')} }, []);`);
+  }
   /*
    * P18-S127-SIBLINGVALUE (EXP-011 §96). The count handed to a placed component that reads a lifted value follows the count
    * sent from this component's own effect: a parent's effects run after its children's, so the push of the value lifted

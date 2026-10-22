@@ -1,7 +1,7 @@
 # EXP-021 — A logic component is a hook
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), under Richard's ruling of 2026-10-21. This is **EXP-003 Tier B**
-("logic components in the export"), the row the BOARD's 0.5.0 line already names. **Status: 🟡 slice 1 built (session 136, §6); AC1 driven (session 137, §7); AC4 and the parent's reads (§101) to come.**
+("logic components in the export"), the row the BOARD's 0.5.0 line already names. **Status: 🟡 slice 1 built (session 136, §6); AC1 driven (session 137, §7); AC4's path translated (sessions 138–139, §8–§9), its drive and the parent's reads (§101) to come.**
 Follows [EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md) and [EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md),
 because most of a logic component's body is Functions those two carry.
 
@@ -135,3 +135,27 @@ lifted render run is memoised (**P18-S138-LIFTLOOP**). A hook's Variable-fed pro
 |---|---|
 | AC4 | ⬜ rocket-school's Lists page now draws its list, and Delete hands Delete question set the row's id. Editing a set waits on `/Logic/App store`, a persisted Global Store the export refuses (no hook on the page gets `app`, so the list is drawn from nothing), and on §101 (the Editor's `items` into Save) |
 | AC5 | ✅ `tplbuild` all 17 at the floor; 0 wires lost, 0 nodes lost |
+
+## 9. Session 139 (2026-10-22): the persisted store, and the write idiom over it (AC4's second blocker)
+
+[EXP-011 §109](EXP-011-PICKER-COVERAGE.md) is the ledger entry; `s139-persisted-store/` holds the measurements.
+
+`/Logic/App store` is a Global Store with Persist on: refused whole (51 report lines, and 106 wires "not lifted by
+/Logic/App store"), so every rocket-school and star-class page drew from nothing. It is kept where the runtime keeps it
+now (`src/lib/persistStore.ts`). Opening it made the idiom around it reachable, and the slice carries that too:
+
+- App store's `app` (a Subscribe of an untyped key) lifts through its output.
+- Several hooks' `app` into App store's one input are one row (**P18-S139-MULTIFEED**). On HEAD the last one placed
+  bound it: App store would have written Delete's value when Save sent the pulse.
+- The Editor's `items` passes through to Save question set.
+- A pulse whose value the export does not deliver is refused by name (**P18-S139-STALEPULSE**, high: 115 template pulses
+  ran on HEAD with that value missing; the Header's `write` would have written `undefined` over the stored app object).
+
+Graded on the Store Desk, predicted first, both arms with localStorage seeded and read. Templates: 482 wires gained, 115
+lost (every loss a STALEPULSE refusal); nodes 32 gained, 0 lost.
+
+| AC | |
+|---|---|
+| AC4 | 🟡 translated, not driven: the Lists page hands App store one `app` row, the Editor's `items` reaches Save, Save's and Delete's writes are kept and saved. The Header's settings writes are refused (its `app` has three feeds). Next: the drive |
+| AC5 | ✅ `tplbuild` all 17 at the floor; 0 nodes lost; the 115 wires lost are refusals of pulses HEAD ran on missing values |
+

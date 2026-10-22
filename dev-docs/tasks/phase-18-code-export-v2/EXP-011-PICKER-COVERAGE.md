@@ -14724,3 +14724,48 @@ The 15 children that lift nothing. A Function's own output into `items` (nightbo
 star-class 2 each). A row output computed inside the row. EXP-021 AC4 (rocket-school's list editing) is now blocked by
 `/Logic/App store`, a persisted Global Store ("browser-storage rehydration is not translatable"), and by §101 (the
 Editor's list to save is a hook's output read by the parent's Save).
+
+## §109 A persisted store travels, and the write idiom over it (session 139, 2026-10-22): EXP-021 AC4's second blocker
+
+`s139-persisted-store/README.md` is the record (measurements, mutants, reach); EXP-021 §9 the task's view.
+
+### §109.0 Measured first
+
+A Global Store whose declarer authors Persist was refused whole ("a declarer authors persist — browser-storage
+rehydration is not translatable"): 51 report lines in bot-garden, rocket-school and star-class, and 106 wires "not lifted
+by /Logic/App store" under another sentence. The runtime (`globalstore.ts`): the stored copy under
+`noodl_store_<Storage Key or Store Name>` is applied over the initial state in one commit when Persist first turns on;
+each commit is saved on the next turn, the whole state as JSON.
+
+### §109.1 Built
+
+- **The persisted store.** `StorePlan.persist`; `src/lib/persistStore.ts` loads at import (so the first render reads the
+  stored copy) and saves each change on the next turn. A wired Persist or Storage Key, or two declarers that disagree, are
+  refused by name. Residuals, said in the lib: the runtime loads when the first persisting declarer mounts, and
+  `@nodegx/core`'s store notifies on every write, so a write that changed nothing saves the same JSON again.
+- **An untyped Subscribe key lifts** through a Component Outputs port: §10's binding rule applies to a pass-through too.
+- **P18-S139-MULTIFEED.** Several placed components' values into one input share one row that every feed's callback
+  writes. That is last-writer-wins by when each changed, as the runtime's input holds what arrived last. A source that
+  also feeds another sink writes both rows through one stable `useCallback`. Before this, the last one placed bound the
+  input and the others were never read.
+- **The pass-through** (`intoOutputs`): a placed component's value straight into the component's own output, decided in
+  `liftInto`. The lift pass runs children-first by placement.
+- **P18-S139-STALEPULSE.** When `liftInto` drops a value wire between two placed components and the target reads that
+  input, the sender's pulses into the target are refused by name in the next plan (`PlanExclusions.pulses`). Only where
+  the sender's output is fed inside it: a port nothing feeds is `undefined` in the runtime too (the Relay Desk's control).
+- **P18-S139-HOOKNAME**, **P18-S139-MACHINELOCAL**: two names that could collide no longer can.
+
+### §109.2 Graded
+
+The Store Desk (`tests/helpers/store-desk.ts`): App store, Add, Drop, Show, an Editor passing its Word through, and a Bad
+variant whose `app` has two feeds. Both arms gained opt-in storage (seeded before load, read after every step). The runtime
+read exactly what `s139-persisted-store/EXPECTED.md` predicted for both main scenarios; the export matches it at every
+step, including what is stored. Bad: the runtime wrote `badA` where I predicted `bad`, the order the export refuses to
+guess; the export kept the stored copy, as predicted. `a-persisted-store-travels.test.ts` 28 / 28; 13 mutants, all killed.
+NSP-008's ledger line gains one t01 scenario (played 18, conforming 11), attributed to the untyped Subscribe lift.
+
+### §109.3 What it leaves
+
+AC4's drive (the exported rocket-school, a set edited). The Header's own `app` (three feeds into one output port, the
+order unknown statically), and with it its `write` on 8 pages. App store's `written`: a Set Global Store's Done chain
+shares its port with a kit node the export does not run. §101 proper.
