@@ -70,14 +70,17 @@ const STEPS = ['More', 'Go A', 'Go B', 'Go A', 'More'];
 
 /** P18-S122-TEXTDEFAULT: a wired Text the wire has not reached shows the word "Text" in the runtime. */
 const T = 'Text';
-/** As `s136-hooks/EXPECTED.md` predicted it, before either arm ran: y · label · total A · total B · dones · echo. */
+/**
+ * As `s136-hooks/EXPECTED.md` predicted it, before either arm ran: y · label · total A · total B · dones · echo; and rows,
+ * as `s137-todo-drive/EXPECTED.md` predicted it.
+ */
 const BASE: Readings = [
-  ['0', 'y is 0', T, T, T, T],
-  ['2', 'y is 2', T, T, T, T],
-  ['2', 'y is 2', 'total 1', T, 'dones 1', 'echo total 1'],
-  ['2', 'y is 2', 'total 1', 'total 10', 'dones 2', 'echo total 1'],
-  ['2', 'y is 2', 'total 2', 'total 10', 'dones 3', 'echo total 2'],
-  ['4', 'y is 4', 'total 2', 'total 10', 'dones 3', 'echo total 2']
+  ['0', 'y is 0', T, T, T, T, 'rows 0'],
+  ['2', 'y is 2', T, T, T, T, 'rows 3'],
+  ['2', 'y is 2', 'total 1', T, 'dones 1', 'echo total 1', 'rows 3'],
+  ['2', 'y is 2', 'total 1', 'total 10', 'dones 2', 'echo total 1', 'rows 3'],
+  ['2', 'y is 2', 'total 2', 'total 10', 'dones 3', 'echo total 2', 'rows 3'],
+  ['4', 'y is 4', 'total 2', 'total 10', 'dones 3', 'echo total 2', 'rows 6']
 ];
 const withoutDefault = (rows: Readings): Readings => rows.map((r) => r.map((c) => (c === T ? '' : c)));
 
@@ -110,6 +113,10 @@ describe('§A the emitted app does what the runtime does, step by step', () => {
 
   it('A6 a value and the signal sent with it reach another logic component in that order (todo-list\'s lists, s122)', () => {
     expect(exported[0][0].map((r) => r[5])).toEqual(['', '', 'echo total 1', 'echo total 1', 'echo total 2', 'echo total 2']);
+  });
+
+  it('A7 an arrival run\'s value reaches the page through Component Outputs, at load and on each arrival (todo-list\'s rows, s137)', () => {
+    expect(exported[0][0].map((r) => r[6])).toEqual(['rows 0', 'rows 3', 'rows 3', 'rows 3', 'rows 3', 'rows 6']);
   });
 });
 
@@ -152,7 +159,7 @@ describe('§B what is emitted', () => {
 
 describe('§C the plan', () => {
   it('C1 a placed logic component plans as a hook: a file named for it, nothing in it refused', () => {
-    for (const [legacy, symbol] of [['/Logic/Double', 'useDouble'], ['/Logic/Tally', 'useTally'], ['/Logic/Echo', 'useEcho']]) {
+    for (const [legacy, symbol] of [['/Logic/Double', 'useDouble'], ['/Logic/Tally', 'useTally'], ['/Logic/Echo', 'useEcho'], ['/Logic/Stamp', 'useStamp']]) {
       const plan = planOf(desk.dir, legacy);
       expect(plan.hook).toBe(true);
       expect(plan.file).toMatchObject({ dir: 'components', symbol });
@@ -162,7 +169,7 @@ describe('§C the plan', () => {
 
   it('C2 its placements are hook calls: instances in the rendered set, in source order, none refused', () => {
     const home = planOf(desk.dir, '/Pages/Home');
-    expect(home.hookCalls).toEqual(['double', 'label', 'tallyA', 'tallyB', 'echo']);
+    expect(home.hookCalls).toEqual(['double', 'label', 'tallyA', 'tallyB', 'echo', 'stamp']);
     for (const id of home.hookCalls) {
       expect(home.roleOf[id]).toBe('instance');
       expect(home.dispositions[id]).toEqual({ kind: 'static' });
@@ -205,6 +212,12 @@ describe('§C the plan', () => {
     expect(tally.liftedOutputProps).toEqual([{ port: 'total', prop: 'onTotalChanged', tsType: 'string' }]);
     expect(tally.pushEffects).toEqual([expect.objectContaining({ prop: 'onTotalChanged', expr: expect.objectContaining({ kind: 'jsfun-out', viaState: 'workOut' }) })]);
   });
+
+  it('C7 an arrival run\'s value lifts through Component Outputs: the run compiles first, with its upstream, and its row is read (s137)', () => {
+    const stamp = planOf(desk.dir, '/Logic/Stamp');
+    expect(stamp.liftedOutputProps).toEqual([{ port: 'rows', prop: 'onRowsChanged', tsType: 'string' }]);
+    expect(stamp.pushEffects).toEqual([expect.objectContaining({ prop: 'onRowsChanged', expr: expect.objectContaining({ kind: 'jsfun-out', viaState: 'workOut' }) })]);
+  });
 });
 
 /**
@@ -226,6 +239,13 @@ describe('§E the templates, where the code was read', () => {
     expect(data).toContain('    onTasksChanged?.(tasks);\n  }, [tasks, onTasksChanged]);');
     expect(data).toContain('  }, [routineChecks, onChecksChanged]);');
     expect(fileOf(tpl('todo-list'), /pages\/Todo\.tsx$/)).toMatch(/useTodoData\(\{\n {4}refresh: \{ sent: \w+, taken: \w+ \},/);
+  });
+
+  it('E7 todo-list\'s Task rows lifts the rows it builds, and the page hands them to the Task list (EXP-021 AC1, driven in s137)', () => {
+    const rows = fileOf(tpl('todo-list'), /components\/TaskRows\.tsx$/);
+    expect(rows).toMatch(/onOpenRowsChanged\?\.\(\(?buildTheRowsOut\?\.openRows/);
+    const page = fileOf(tpl('todo-list'), /pages\/Todo\.tsx$/);
+    expect(page).toMatch(/<TaskList\n(?: {20}[^\n]*\n)*? {20}rows=\{openRows\}/);
   });
 
   it('E2 a component whose only root is a logic placement is a logic component: a hook that calls the other', () => {

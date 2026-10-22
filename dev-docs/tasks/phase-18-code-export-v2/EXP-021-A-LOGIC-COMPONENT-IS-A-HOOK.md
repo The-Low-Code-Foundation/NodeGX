@@ -1,7 +1,7 @@
 # EXP-021 — A logic component is a hook
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), under Richard's ruling of 2026-10-21. This is **EXP-003 Tier B**
-("logic components in the export"), the row the BOARD's 0.5.0 line already names. **Status: 🟡 slice 1 built (session 136, §6); AC1's drive, AC4 and the parent's reads (§101) to come.**
+("logic components in the export"), the row the BOARD's 0.5.0 line already names. **Status: 🟡 slice 1 built (session 136, §6); AC1 driven (session 137, §7); AC4 and the parent's reads (§101) to come.**
 Follows [EXP-019](EXP-019-THE-SCRIPT-TRAVELS-AS-WRITTEN.md) and [EXP-020](EXP-020-THE-NOODL-API-IN-THE-EXPORT.md),
 because most of a logic component's body is Functions those two carry.
 
@@ -97,3 +97,26 @@ its values (`const data = useTodoData(…)`, read in the same render) is the nex
 - A hook call whose every pulse was refused stays, as a drawn placement does (§94): it runs nothing (todo-list's Add task,
   its Create Record refused for an Id read outside its chain). Counted among the gains; it is honest code, not working code.
 - **P18-S136-CHAINWATCH** (open): the faithful watch reads the call's answer row.
+
+## 7. Session 137 (2026-10-22): AC1, driven
+
+[EXP-011 §107](EXP-011-PICKER-COVERAGE.md) is the ledger entry; `s137-todo-drive/` holds the drive.
+
+Reading the emitted Todo page before driving it found the lists dropped: todo-list's row builders (Task rows, Today rows,
+Log rows, Selected task, Selected routine) read the clock, so each is an arrival run, and the lift pass refused a Component
+Outputs value fed by one (**P18-S137-ARRIVALLIFT**, high, fixed: the lift compiles the arrival run first, with its
+upstream). Then the drive: one backend running the template's policy, the runtime against HEAD's export and the fixed
+export, each built as a person builds it and signed in through its own page. The runtime and the fixed export show the same
+lists; HEAD's showed none.
+
+| AC | |
+|---|---|
+| AC1 | ✅ `useTodoData` fetches, and the page's lists fill from the local backend in both arms: List, Today, Done and Log, the same rows, order and lines (`s137-todo-drive/README.md`) |
+| AC2 | ✅ (session 136) |
+| AC3 | ✅ for the reach; the arrival lift adds templates 61, corpus 18, 0 lost |
+| AC4 | ⬜ not attempted |
+| AC5 | ✅ `tplbuild` all 17 at the floor; `dispdiff` 0 lost |
+
+What the drive showed that is not AC1: the export's look (`App`'s CSS Definition and theme Function are "node beside the
+router shell"), Projects (refused by its `Noodl.Records` member), selecting a task (a lifted value into a Set Variable), and
+the report calling a Function left out that the export runs from its other trigger (**P18-S137-HALFREFUSED**, low, open).

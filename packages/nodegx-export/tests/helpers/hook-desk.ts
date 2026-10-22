@@ -7,7 +7,7 @@ import { Desk, Graph, RawNode, placeAll, writeDeskProject } from './root-desk';
  * the runtime's own nodes (`runtime-mounted-arm.js`), predicted first in
  * `dev-docs/tasks/phase-18-code-export-v2/s136-hooks/EXPECTED.md`.
  *
- * The page draws More, the Texts y and label, Go A, Go B, the Texts total A, total B and dones. Beside them, not drawn:
+ * The page draws More, the Texts y and label, Go A, Go B, the Texts total A, total B, dones, echo and rows. Beside them, not drawn:
  * the Function bump (More runs it), and four placements:
  *
  * - **Double** (`/Logic/Double`, x ← bump.n): a Function with no Run, `y = x * 2`. The page's y reads it.
@@ -17,6 +17,9 @@ import { Desk, Graph, RawNode, placeAll, writeDeskProject } from './root-desk';
  *   Function dones.
  * - **Echo** (`/Logic/Echo`, `said` ← Tally A's total, `take` ← Tally A's done): todo-list's lists' shape (s122), a value
  *   and the signal that goes with it; Run by `take`, it says 'echo ' + said. The page's echo reads it.
+ * - **Stamp** (`/Logic/Stamp`, x ← bump.n; P18 session 137): a Function with no Run that reads the clock, so it is an
+ *   arrival run (EXP-019 slice 2), as todo-list's Task rows, Today rows and Log rows are; it says 'rows ' + x * 3. The
+ *   page's rows reads it (`s137-todo-drive/EXPECTED.md`).
  *
  * The logic components are written as the templates write them: registry type `visual`, no visual root.
  */
@@ -46,6 +49,8 @@ export const DONES_SCRIPT = "this.k = (this.k || 0) + 1;\nOutputs.k = 'dones ' +
 export const DOUBLE_SCRIPT = 'Outputs.y = (Number(Inputs.x) || 0) * 2;';
 export const LABEL_SCRIPT = "Outputs.text = 'y is ' + Inputs.y;";
 export const ECHO_SCRIPT = "Outputs.echo = 'echo ' + Inputs.said;";
+/** Reads the clock, so it runs on its inputs' arrival (a host trait); what it says does not depend on the time. */
+export const STAMP_SCRIPT = "var now = new Date();\nOutputs.rows = 'rows ' + (Number(Inputs.x) || 0) * 3 + (now.getTime() > 0 ? '' : '?');";
 export const TALLY_SCRIPT = [
   'this.total = (this.total || 0) + (Number(Inputs.step) || 0);',
   "Outputs.total = 'total ' + this.total;",
@@ -60,7 +65,7 @@ const homeGraph = (): Graph => ({
       type: 'Group',
       label: 'Shell',
       parent: 'page',
-      children: ['moreBtn', 'yText', 'labelText', 'goABtn', 'goBBtn', 'totalAText', 'totalBText', 'donesText', 'echoText'],
+      children: ['moreBtn', 'yText', 'labelText', 'goABtn', 'goBBtn', 'totalAText', 'totalBText', 'donesText', 'echoText', 'rowsText'],
       parameters: { flexDirection: 'column' }
     },
     button('moreBtn', 'More'),
@@ -72,13 +77,15 @@ const homeGraph = (): Graph => ({
     text('totalBText', 'total B'),
     text('donesText', 'dones'),
     text('echoText', 'echo'),
+    text('rowsText', 'rows'),
     fn('bump', 'Bump', BUMP_SCRIPT, { inputs: [], outputs: ['n'] }),
     fn('dones', 'Count dones', DONES_SCRIPT, { inputs: [], outputs: ['k'] }),
     { id: 'double', type: '/Logic/Double', label: 'Double', parameters: {} },
     { id: 'label', type: '/Logic/Label', label: 'Label', parameters: {} },
     { id: 'tallyA', type: '/Logic/Tally', label: 'Tally A', parameters: { step: 1 } },
     { id: 'tallyB', type: '/Logic/Tally', label: 'Tally B', parameters: { step: 10 } },
-    { id: 'echo', type: '/Logic/Echo', label: 'Echo', parameters: {} }
+    { id: 'echo', type: '/Logic/Echo', label: 'Echo', parameters: {} },
+    { id: 'stamp', type: '/Logic/Stamp', label: 'Stamp', parameters: {} }
   ]),
   connections: [
     { fromId: 'moreBtn', fromProperty: 'onClick', toId: 'bump', toProperty: 'run' },
@@ -96,7 +103,10 @@ const homeGraph = (): Graph => ({
     // todo-list's lists' shape (s122): a value and the signal that goes with it, from one placed component into another.
     { fromId: 'tallyA', fromProperty: 'total', toId: 'echo', toProperty: 'said' },
     { fromId: 'tallyA', fromProperty: 'done', toId: 'echo', toProperty: 'take' },
-    { fromId: 'echo', fromProperty: 'echo', toId: 'echoText', toProperty: 'text' }
+    { fromId: 'echo', fromProperty: 'echo', toId: 'echoText', toProperty: 'text' },
+    // todo-list's row builders' shape (s137): an arrival run's value, lifted to the page.
+    { fromId: 'bump', fromProperty: 'out-n', toId: 'stamp', toProperty: 'x' },
+    { fromId: 'stamp', fromProperty: 'rows', toId: 'rowsText', toProperty: 'text' }
   ]
 });
 
@@ -131,6 +141,7 @@ export const hookDesk = (): Desk => ({
     'Pages/Home': homeGraph(),
     'Logic/Double': logicGraph('db', DOUBLE_SCRIPT, [{ name: 'x', type: 'number' }], [{ name: 'y', type: 'number' }]),
     'Logic/Label': logicGraph('lb', LABEL_SCRIPT, [{ name: 'y', type: 'number' }], [{ name: 'text', type: 'string' }]),
+    'Logic/Stamp': logicGraph('st', STAMP_SCRIPT, [{ name: 'x', type: 'number' }], [{ name: 'rows', type: 'string' }]),
     'Logic/Echo': logicGraph(
       'ec',
       ECHO_SCRIPT,

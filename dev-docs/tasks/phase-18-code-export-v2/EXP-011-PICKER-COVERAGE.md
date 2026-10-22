@@ -14633,3 +14633,46 @@ unticked where Run is wired (NDA-017) and the runtime arm does not; boxes writte
 AC1's drive (todo-list against the local backend), AC4 (rocket-school's list editing), §101 (a parent's logic reading a
 hook's output; with hooks the returned-value shape answers its timing), P18-S136-CHAINWATCH, and the hook call whose every
 pulse was refused (it stays, as a drawn placement does, and runs nothing: todo-list's Add task).
+
+## §107 The todo list fills from its backend (session 137, 2026-10-22): EXP-021 AC1 driven, and P18-S137-ARRIVALLIFT
+
+[EXP-021 §7](EXP-021-A-LOGIC-COMPONENT-IS-A-HOOK.md) is the task's record; `s137-todo-drive/` the drive and measurements.
+
+### §107.0 What reading the page found before the drive
+
+todo-list's exported Todo page dropped every list's `rows` wire ("instance output "openRows" is not lifted by /Logic/Task
+rows"). Task rows, Today rows, Log rows, Selected task and Selected routine are Component Inputs → one Function → Component
+Outputs, and each Function reads the clock: an arrival run (§103), no Run wire. The hook ran it and kept its row; the §4d
+lift resolved the Component Outputs read before the arrival run compiled (arrival runs compile after the sink loop, §103)
+and refused it: "that run writes no row this read can reach". 65 template refusals carried that reason, 57 of them
+Component Outputs, in 9 templates (`s137-todo-drive/census.json`). **P18-S137-ARRIVALLIFT** (high).
+
+### §107.1 Built
+
+The lift pass compiles an arrival-run feeder before reading it, with every Function upstream of it first
+(`compileUpstreamOf`, then `compiledOf(from, 'run')`), as the sink loop's `compileFunctionFeedersOf` does; those two helpers
+are defined above the lift pass now. s136's Run-wired branch is unchanged beside it.
+
+### §107.2 Graded
+
+- **Driven** (`s137-todo-drive/`, predicted in its `EXPECTED.md`): one real backend from `src` running todo-list's own
+  policy, one account seeded through the REST API; the runtime (viewer bundle rebuilt from HEAD first: it was older than a
+  commit to the Function node), HEAD's export and the fixed export, each built with its own `npm run build` against npm's
+  packages, each signed in through its own Sign in page. The runtime and the fixed export read the same tabs (`List (3)`,
+  `Today (2)`, `Done (1)`), the same three tasks in the same order with the same lines, the same Done, Today and Log; HEAD's
+  export read three blank tabs and "Nothing on the list". No console errors in any arm.
+- One prediction was wrong: the export queries Projects' four collections, which the report says it left out (a Function
+  with two Run wires, one refused, is reported whole as left out): **P18-S137-HALFREFUSED** (low, open).
+- `tests/a-logic-component-is-a-hook.test.ts` **25 / 25**: the Hook Desk's `/Logic/Stamp` (an arrival run lifted to the
+  page; A1 the runtime, A7 the export, C7 the plan) and E7 (todo-list's Task rows); a mutant switching the branch off fails
+  A2, A7, C1, C7, E7 by name.
+- Reach (`dispdiff`, HEAD's `src` against the tree): templates **61 gained, 0 lost, 5 re-worded**; corpus **18 gained, 0
+  lost**. `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0.
+- Whole package (`nice -n 19 --runInBand`, JSON 08:06): **154 suites, 5,246 passed, 0 failed, 3 skipped** (predicted
+  5,243 + 3, read on the first run).
+
+### §107.3 What it leaves
+
+The look of todo-list's export (dark theme, two columns, which icon shows) is `App`'s CSS Definition and theme Function,
+refused as "node beside the router shell" (77 template nodes, 15 of them CSS Definitions). P18-S137-HALFREFUSED. AC4
+(rocket-school's list editing), §101, the hook call whose every pulse was refused.

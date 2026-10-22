@@ -1,3 +1,31 @@
+# Next session — session 137 (2026-10-22, BOARD lane 6) drove **EXP-021 AC1**: todo-list signed in against one real backend running its own policy, the runtime against HEAD's export and the fixed export, each built as a person builds it. Reading the emitted page first found every list dropped (P18-S137-ARRIVALLIFT, fixed); after the fix the runtime and the export show the same lists, rows, order and lines. HEAD's showed none.
+
+## ✅ Session 137: the todo list fills from its backend
+
+Read EXP-011 §107, EXP-021 §7 and `s137-todo-drive/README.md`. In short:
+
+| what | where |
+|---|---|
+| Read the emitted Todo page before driving: every list's `rows` wire dropped. Task rows / Today rows / Log rows / Selected task / Selected routine read the clock ⇒ arrival runs (§103); the §4d lift read their Component Outputs before the arrival run compiled ⇒ "that run writes no row this read can reach". 65 template refusals, 57 Component Outputs, 9 templates | `s137-todo-drive/census.json` |
+| Fix: the lift pass compiles an arrival-run feeder first with its upstream (`compileUpstreamOf` + `compiledOf`, as `compileFunctionFeedersOf` does; both helpers moved above the lift) | `src/analyze/plan.ts` |
+| The drive: backend from `src` on :8597, todo-list's policy, an account seeded by REST; runtime (`render-from-disk`, viewer bundle REBUILT first: it predated a commit to the Function node), export-head (HEAD's `src` via a `git archive` base) and export-fixed, each `npm run build` (tsc 0) against npm's packages; signed in through each app's Sign in page; tabs pressed | `s137-todo-drive/` `build.sh`, `drive.cjs`, `EXPECTED.md` (first), `readings.json`, `shot-D2-*.png` |
+| Hook Desk + `/Logic/Stamp` (an arrival run lifted to the page, its column predicted first), C7, E7; 25 / 25; mutant kills A2, A7, C1, C7, E7 | `tests/a-logic-component-is-a-hook.test.ts`, `tests/helpers/hook-desk.ts` |
+
+- 🔴 **Read the emitted page before driving it**: the drive's blocker was in the report's dropped-wire lines; predicting from them made the drive confirm instead of discover.
+- 🔴 **I predicted from the report's sentence and was wrong**: "Read the projects and the money" is listed as left out, and the export ran it (four queries). It has two Run wires; one is refused. Filed P18-S137-HALFREFUSED (low). The requests were the fact.
+- 🔴 **`render-from-disk` serves a built viewer bundle**: check its mtime against `git log -- packages/noodl-runtime/src packages/noodl-viewer-react/src` before a runtime arm; this one was stale (`noodl-viewer-react` `npm run build`, ~50 s).
+- 🔴 A mutant written `false && …` narrows to `never` and does not compile: jest says "0 total" (s133's trap). Use a condition that typechecks (`&& component.nodes.length < 0`).
+- The look of todo-list's export (dark theme, two columns, which icon shows) is `App`'s CSS Definition + theme Function, refused as "node beside the router shell": 77 template nodes, 15 CSS Definitions. Reported honestly; a ranking candidate.
+
+Readings: the spec 25 / 25; mutant 5 rows red by name; `tplbuild` all 17 at the floor (1 in 1, nightbook STYLENULL); package `tsc --noEmit` 0. Reach (`dispdiff`, HEAD's `src` against the tree): **templates 61 gained, 0 lost, 5 re-worded**; **corpus 18 gained, 0 lost**. Whole package (`nice -n 19 --runInBand`, JSON 08:06): **154 suites, 5,246 passed, 0 failed, 3 skipped** (predicted 5,243 + 3 = 5,246, read 5,246 on the first run).
+
+**Next (BOARD lane 6, the ruling's order):**
+1. **A repeater fed by a placed component's lifted list** (AC4's blocker, and the biggest drawn gap): 128 For Each in 15 templates draw no rows; 90 are fed by an instance output ("instance output "sets" feeds For Each.items, which has no static binding"; rocket-school's `lsSets → lsEach`, bot-garden 20, nightbook 18, digital-bricks-training 11). Counted by `s137-todo-drive/reports.cts` (a For Each's refusal is a note, not a disposition: the census cannot see it). The shape: `liftInto` makes the lifted row; a For Each `items` sink takes it as `itemsExpr` (`any`-typed list, `(x ?? []).map`). 🔴 Row relays and row-signal chains decide "rowless" INSIDE the first plan (`plan.ts` ~21491), before `liftInto`: mark the repeater fed by a pending lift up front, and refuse again if the child does not lift. Predict on a desk first (a logic component returning a list into a For Each with a row signal).
+2. **EXP-021 AC4** then: rocket-school's list editing on that.
+3. **§101 with hooks**, P18-S137-HALFREFUSED, "node beside the router shell" (the templates' look), as s136 listed.
+
+---
+
 # Next session — session 136 (2026-10-21, BOARD lane 6) built **EXP-021 slice 1, a logic component is a hook**: a component with no node that draws, placed by another, exports as `use<Name>(props)` — the props interface a visual component has (values, §94 pulses, signal-out callbacks, §4d lifted values) — and the parent calls it where the graph places it, drawing nothing. Graded on the Hook Desk against the runtime's own instances, predicted first and read exactly. Templates 1,571 gained, 0 lost; their refusals 3,790 → 2,219.
 
 ## ✅ Session 136: a logic component is a hook

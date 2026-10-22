@@ -17520,6 +17520,51 @@ function planComponent(
     return { stateName: stateVar.name };
   };
 
+  /**
+   * EXP-021 AC1 (P18 session 137). Defined here, above the §4d lift below, which compiles a Component Outputs value's
+   * feeder the same way (an arrival run's row, read by the parent: todo-list's Task rows); the sink loop calls them as before.
+   */
+  /**
+   * "Hold the id". The runs of the Run-wired Functions whose outputs feed `node`, compiled before it, feeders first: a reader
+   * finds the row a feeder's run materialized (§4f) only if that run has compiled. Here, at the top of the sink loop, as
+   * the loop itself would compile them, with no chain open; compiling them from inside a reader's resolution instead
+   * re-entered sinks already compiling (nightbook's three toggles share one Set Variable) and refused them as cyclic.
+   */
+  const feedersCompiled = new Set<string>();
+  const compileUpstreamOf = (node: NodeIR, seen: Set<string>): void => {
+    for (const c of component.connections) {
+      if (c.toId !== node.id || seen.has(c.fromId)) continue;
+      const from = nodeById.get(c.fromId);
+      if (!from) continue;
+      seen.add(from.id);
+      compileUpstreamOf(from, seen);
+      compileFunctionFeedersOf(from);
+    }
+  };
+  const compileFunctionFeedersOf = (node: NodeIR): void => {
+    if (feedersCompiled.has(node.id)) return;
+    feedersCompiled.add(node.id);
+    for (const c of component.connections) {
+      if (c.toId !== node.id || !c.fromProperty.startsWith('out-')) continue;
+      const from = nodeById.get(c.fromId);
+      // EXP-019 slice 2: an arrival run's row is read the same way.
+      if (!from || jsNodeKindOf(from.type) !== 'function' || !(wiredPorts.has(`${from.id}:run`) || isArrivalRun(from))) continue;
+      // 🔴 Only a run an element's event or a Did Mount sends: a row whose run never attaches is never written
+      // (P18-S122-DEADROW, open), and a reader compiled after it would read nothing where HEAD refused it (the Site
+      // Builder's Home link, its settings Function run by a refused Query's Fetched).
+      const runs = component.connections.filter((w) => w.toId === from.id && w.toProperty === 'run');
+      if (!runs.every((w) => w.fromProperty === 'didMount' || rendered.has(w.fromId))) continue;
+      compileFunctionFeedersOf(from);
+      /**
+       * EXP-019 slice 2. An arrival run resolves its inputs as it compiles, and an input may read a node whose own read of a
+       * Function's row is not compiled yet: every Function upstream of it first, through any node. 🔴 Measured: members-area's
+       * Announcement date (fed by the Record whose Id "Hold the id" holds) compiled from its Text, before the loop reached
+       * "Hold the id"; the Record's Fetch compiled refused and was kept, and the Record was lost.
+       */
+      if (isArrivalRun(from)) compileUpstreamOf(from, new Set([from.id]));
+      compiledOf(from, 'run');
+    }
+  };
   // §4d child side: a Component Outputs value port fed by the vocabulary lifts — an optional
   // callback prop plus a push effect. A port whose feed does not resolve fails alone (the
   // mixed-outputs rule); the node's verdict names the first failure while good ports keep
@@ -17588,6 +17633,16 @@ function planComponent(
           .filter((w) => w.toId === from.id && w.toProperty === 'run')
           .every((w) => w.fromProperty === 'didMount' || rendered.has(w.fromId) || nodeById.get(w.fromId)?.type === 'Component Inputs')
       ) {
+        compiledOf(from, 'run');
+      }
+      /**
+       * EXP-021 AC1 (P18 session 137). An arrival run's value too (EXP-019 slice 2): it runs when its inputs arrive, and the
+       * read finds the row that run writes. Compiled as `compileFunctionFeedersOf` compiles one, every Function upstream of
+       * it first (s133's members-area loss). 🔴 Found driving todo-list: Task rows built its rows and nothing lifted them, so
+       * every list on the page read empty under a hook that had fetched them.
+       */
+      if (from !== undefined && relayExpr === undefined && isArrivalRun(from)) {
+        compileUpstreamOf(from, new Set([from.id]));
         compiledOf(from, 'run');
       }
       const ctx = newCtx();
@@ -18405,47 +18460,6 @@ function planComponent(
   // Every action sink compiles before attachment — the sweeps that report unattached sinks
   // read compiledSinks for their reasons. (This loop sits below outputSinkOf because the popup
   // compilers' done-chains reach it.)
-  /**
-   * "Hold the id". The runs of the Run-wired Functions whose outputs feed `node`, compiled before it, feeders first: a reader
-   * finds the row a feeder's run materialized (§4f) only if that run has compiled. Here, at the top of the sink loop, as
-   * the loop itself would compile them, with no chain open; compiling them from inside a reader's resolution instead
-   * re-entered sinks already compiling (nightbook's three toggles share one Set Variable) and refused them as cyclic.
-   */
-  const feedersCompiled = new Set<string>();
-  const compileUpstreamOf = (node: NodeIR, seen: Set<string>): void => {
-    for (const c of component.connections) {
-      if (c.toId !== node.id || seen.has(c.fromId)) continue;
-      const from = nodeById.get(c.fromId);
-      if (!from) continue;
-      seen.add(from.id);
-      compileUpstreamOf(from, seen);
-      compileFunctionFeedersOf(from);
-    }
-  };
-  const compileFunctionFeedersOf = (node: NodeIR): void => {
-    if (feedersCompiled.has(node.id)) return;
-    feedersCompiled.add(node.id);
-    for (const c of component.connections) {
-      if (c.toId !== node.id || !c.fromProperty.startsWith('out-')) continue;
-      const from = nodeById.get(c.fromId);
-      // EXP-019 slice 2: an arrival run's row is read the same way.
-      if (!from || jsNodeKindOf(from.type) !== 'function' || !(wiredPorts.has(`${from.id}:run`) || isArrivalRun(from))) continue;
-      // 🔴 Only a run an element's event or a Did Mount sends: a row whose run never attaches is never written
-      // (P18-S122-DEADROW, open), and a reader compiled after it would read nothing where HEAD refused it (the Site
-      // Builder's Home link, its settings Function run by a refused Query's Fetched).
-      const runs = component.connections.filter((w) => w.toId === from.id && w.toProperty === 'run');
-      if (!runs.every((w) => w.fromProperty === 'didMount' || rendered.has(w.fromId))) continue;
-      compileFunctionFeedersOf(from);
-      /**
-       * EXP-019 slice 2. An arrival run resolves its inputs as it compiles, and an input may read a node whose own read of a
-       * Function's row is not compiled yet: every Function upstream of it first, through any node. 🔴 Measured: members-area's
-       * Announcement date (fed by the Record whose Id "Hold the id" holds) compiled from its Text, before the loop reached
-       * "Hold the id"; the Record's Fetch compiled refused and was kept, and the Record was lost.
-       */
-      if (isArrivalRun(from)) compileUpstreamOf(from, new Set([from.id]));
-      compiledOf(from, 'run');
-    }
-  };
   for (const node of component.nodes) {
     compileFunctionFeedersOf(node);
     if (TRIGGER_PORTS[node.type] !== undefined) compiledOf(node, TRIGGER_PORTS[node.type]);
