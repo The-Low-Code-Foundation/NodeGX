@@ -6,7 +6,7 @@ severity: high
 area: threadspace / boarding (`public/src/controllers/board.mjs` `cast`)
 found: Threadspace s3, 2026-10-22, reading the boarding code while measuring TS-S3-BOARDFPS
 fixed: Threadspace s3, 2026-10-22
-commit: pending (threadspace s3b)
+commit: 5c65b6530
 evidence: aboard the Carrion (at 700, −60, 900), a ray aimed at each of the four defenders met nothing, and a ray into the corridor wall met nothing; on the fixed cast the aimed ray meets the defender and the shot takes 25 hp off. Both new checks fail on s3's board.mjs ("ray: nothing, before 60, after 60"; "wall: null, floor: null")
 regression: dev-docs/parked/threadspace/tests/boarding.json "an aimed rifle shot lands on a defender in sight…" and "a defender in the crew room cannot see you at the airlock through the corridor wall…"
 ---

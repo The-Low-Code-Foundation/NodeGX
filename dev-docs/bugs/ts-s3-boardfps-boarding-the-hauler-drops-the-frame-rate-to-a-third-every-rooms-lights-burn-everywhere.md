@@ -6,7 +6,7 @@ severity: high
 area: threadspace / lighting and drawing (`public/src/lights.mjs`, `interiors.mjs` `light`, `game.mjs` frame, `controllers/board.mjs` tracers)
 found: Threadspace s3, 2026-10-22, Richard on his Mac: "everything is smooth until I hacked into the hauler ship thing and got into an FPS fight, it was unplayable, very low FPS"
 fixed: Threadspace s3, 2026-10-22
-commit: pending (threadspace s3b)
+commit: 5c65b6530
 evidence: measured on software GL (headless Chrome), the same 4-s window: walking the Kestrel 7.5 fps, 12 point lights; aboard the hauler 2.5 fps, 19 point lights, 155 draw calls; hauler's lights off 4.0; all point lights off 5.3. After the fix: walking 8.3, aboard 8.5 (8 point lights, 138 calls, geometry count flat while firing)
 regression: dev-docs/parked/threadspace/tests/boarding.json "aboard, the scene holds the light pool's 8 point lights, not every room's"; tests/smoke.json "the scene's point lights are the pool of 8"
 ---
