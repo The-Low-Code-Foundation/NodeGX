@@ -6,7 +6,7 @@ severity: high
 area: export / the §4d lift pass (`src/analyze/plan.ts`, the Component Outputs value read of an arrival run's row)
 found: P18 session 137, 2026-10-22, reading todo-list's emitted page before driving EXP-021 AC1, then driving it (runtime against two exported builds, one backend)
 fixed: P18 session 137, 2026-10-22; EXP-011 §107, EXP-021 §7
-commit:
+commit: 550a1fe44
 evidence: dev-docs/tasks/phase-18-code-export-v2/s137-todo-drive/README.md, readings.json, shot-D2-*.png
 regression: packages/nodegx-export/tests/a-logic-component-is-a-hook.test.ts
 ---
