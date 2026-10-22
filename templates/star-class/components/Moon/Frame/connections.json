@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f7f4b2f7-43b3-560a-8d42-fcb42633634d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "fmIn",
+      "fromProperty": "mounted",
+      "toId": "fmCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "fmIn",
+      "fromProperty": "line",
+      "toId": "fmTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "fmIn",
+      "fromProperty": "rows",
+      "toId": "fmEach",
+      "toProperty": "items"
+    }
+  ]
+}

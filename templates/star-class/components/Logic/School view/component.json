@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f4b170da-fffa-5bbc-8d53-49d3e692108e",
+  "name": "School view",
+  "path": "/Logic/School view",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "TPL-014 M4: Alien school as the player sees it — the chosen alien, what it says, what it has learned (a bar per topic), how an alien changes (its stages and its form), and the three forms with what each needs."
+}

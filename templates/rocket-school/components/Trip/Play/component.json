@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "28e09358-486e-565b-8de4-4a5c4be63997",
+  "name": "Play",
+  "path": "/Trip/Play",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Expedition (TPL-014 M2): Start lands on a fogged planet; a tap on a tile beside the alien aims, Race/Round asks (untimed, the player’s focus) and grades, the answer is saved to the model and then walks the alien (or not: a wrong answer loses nothing); Show me how opens the Teach card. Who walks is a row of the moon’s aliens; Come home brings the bag home. App in; App and Write out."
+}

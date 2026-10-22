@@ -89,6 +89,10 @@ import {
   FOCUS_CHOICES_SCRIPT,
   TOGGLE_ID_SCRIPT,
   ITEM_LEARNED_AT,
+  TRIP_ACT_SCRIPT,
+  TRIP_VIEW_SCRIPT,
+  SCHOOL_ACT_SCRIPT,
+  SCHOOL_VIEW_SCRIPT,
   portsOf,
   runScript
 } from './tpl007Scripts';
@@ -2831,7 +2835,7 @@ describe('TPL-007 — the engine', () => {
       const app = act(withPurse(400), 'adopt', { species: 'blob', colour: 'lime' }).app;
       expect(view(app).bigs.find((b: ViewRow) => b.id === 'egg')).toEqual(expect.objectContaining({ line: '300 ⭐ · an alien you have never had (35 it could be)', ask: true }));
       const fr = act(withPurse(400, 'fr'), 'adopt', { species: 'blob', colour: 'lime' }).app;
-      expect(view(fr).bigs.map((b: ViewRow) => b.label)).toEqual(['Dôme du cratère', 'Dôme de la crête', 'Œuf surprise']);
+      expect(view(fr).bigs.map((b: ViewRow) => b.label)).toEqual(['Dôme du cratère', 'Dôme de la crête', 'Œuf surprise', 'Jardin de lune', 'Cadre à cartes postales']);
       expect(act(fr, 'egg').said).toMatch(/^L’œuf éclot : voici \S+, un /);
     });
 
@@ -2844,6 +2848,372 @@ describe('TPL-007 — the engine', () => {
       const there = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code });
       const after = view(there.app);
       expect([after.bookCount, after.bigs[0].worn, after.purse]).toEqual([before.bookCount, true, before.purse]);
+    });
+  });
+
+  // ── TPL-014 M2–M5 — the moon grows: the Expedition, its gear, Alien school, the fourth form, the garden ──
+  describe('TPL-014 M2–M5 — the moon grows: an expedition, gear, Alien school, the fourth form, the garden', () => {
+    const withPurse = (stars: number, lang = 'en') => {
+      let app: any = runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Ellie', level: '6e', lang }).app;
+      app = runScript(SAVE_MODEL_SCRIPT, { app, model: { rating: 0, answered: 0, lastSkill: '', skills: {}, stars, spent: 0, bests: {} } }).app;
+      return app;
+    };
+    const moonAct = (app: any, action: string, over: Record<string, unknown> = {}) => runScript(MOON_ACT_SCRIPT, { app, action, ...over });
+    const moonView = (app: any) => runScript(MOON_VIEW_SCRIPT, { app });
+    const tripAct = (app: any, action: string, over: Record<string, unknown> = {}) => runScript(TRIP_ACT_SCRIPT, { app, action, ...over });
+    const tripView = (app: any) => runScript(TRIP_VIEW_SCRIPT, { app });
+    const schoolAct = (app: any, action: string, over: Record<string, unknown> = {}) => runScript(SCHOOL_ACT_SCRIPT, { app, action, ...over });
+    const schoolView = (app: any) => runScript(SCHOOL_VIEW_SCRIPT, { app });
+    const me = (app: any) => app.profiles.find((p: Profile) => p.id === app.activeId);
+    /** Her moon: Zib (a grown Blob) and Wiggo (a grown Squiggle), and stars to spend. */
+    const herMoon = (stars = 2000, lang = 'en') => {
+      let app = withPurse(stars, lang);
+      app = moonAct(app, 'adopt', { species: 'blob', colour: 'lime', name: 'Zib' }).app;
+      app = moonAct(app, 'adopt', { species: 'squid', colour: 'sky', name: 'Wiggo' }).app;
+      for (const a of me(app).moon.aliens) a.meals = 20;
+      me(app).moon.sel = me(app).moon.aliens[0].id;
+      return app;
+    };
+    /**
+     * A planet drawn by hand, so a walk can be written down. Home is the bottom-left corner (30); plain everywhere but a pond
+     * (20, 21) and a crater (22). A crystal at 25, a postcard at 26, a seed at 27, an egg clue at 0, a shell in the pond, a
+     * meteorite in the crater.
+     */
+    const landed = (given: any) => {
+      const app = JSON.parse(JSON.stringify(given));
+      const map = Array(36).fill('p');
+      map[30] = 'h';
+      map[20] = 'w';
+      map[21] = 'w';
+      map[22] = 'c';
+      const items = Array(36).fill('');
+      Object.assign(items, { 25: 'crystal', 26: 'postcard', 27: 'seed', 0: 'egg', 21: 'shell', 22: 'meteor' });
+      const seen = Array(36).fill(false);
+      for (const i of [30, 24, 31]) seen[i] = true;
+      me(app).moon.trip = { id: 't1', planet: 'Zuma', map, items, seen, pos: 30, who: me(app).moon.aliens[0].id, aim: -1, hopped: false, bag: [] };
+      return app;
+    };
+    /** Aim at a tile and answer the question it asks. */
+    const step = (app: any, at: number, correct = true) => {
+      const aimed = tripAct(app, 'aim', { at });
+      expect({ at, aimed: aimed.ok, why: aimed.why }).toEqual({ at, aimed: true, why: '' });
+      return tripAct(aimed.app, 'answer', { correct });
+    };
+    const trip = (app: any) => me(app).moon.trip;
+
+    it('🔴 every planet is 6 × 6, lands at home with its neighbours seen, and its plain ground is joined up, so every find on it can be reached (500 planets)', () => {
+      const app = herMoon();
+      for (let n = 0; n < 500; n++) {
+        const t = me(tripAct(app, 'start').app).moon.trip;
+        expect(t.map).toHaveLength(36);
+        expect([t.pos, t.map[30]]).toEqual([30, 'h']);
+        expect(t.seen.map((s: boolean, i: number) => (s ? i : -1)).filter((i: number) => i >= 0)).toEqual([24, 30, 31]);
+        const reach = new Set([30]);
+        const todo = [30];
+        while (todo.length) {
+          const at = todo.pop()!;
+          for (const j of [at - 6, at + 6, at % 6 ? at - 1 : -1, at % 6 < 5 ? at + 1 : -1]) if (j >= 0 && j < 36 && !reach.has(j) && t.map[j] !== 'w' && t.map[j] !== 'c') { reach.add(j); todo.push(j); }
+        }
+        const plain = t.map.map((k: string, i: number) => (k === 'p' || k === 'h' ? i : -1)).filter((i: number) => i >= 0);
+        expect(plain.filter((i: number) => !reach.has(i))).toEqual([]);
+        // The finds: eight on plain ground and the egg clue (two of 36 met), a shell in the water, a meteorite in a crater.
+        const on = (where: string) => t.items.map((k: string, i: number) => (k && (where === 'p' ? t.map[i] === 'p' : t.map[i] === where) ? k : '')).filter(Boolean).sort();
+        expect(on('p')).toEqual(['crystal', 'crystal', 'egg', 'fossil', 'fossil', 'postcard', 'postcard', 'seed', 'seed']);
+        expect(on('w')).toEqual(['shell']);
+        expect(on('c')).toEqual(['meteor']);
+        expect(t.items[30]).toBe('');
+        expect(t.map.filter((k: string) => k === 'c')).toHaveLength(3);
+        expect(t.map.filter((k: string) => k === 'w').length).toBeGreaterThanOrEqual(1);
+      }
+    });
+
+    it('a trip starts with the chosen alien on the planet the trip count names; a second Start, or one with no alien, changes nothing', () => {
+      const app = herMoon();
+      const r = tripAct(app, 'start');
+      expect([r.ok, r.said]).toEqual([true, 'Landed on Zuma! Zib steps out of the rocket.']);
+      expect([trip(r.app).who, trip(r.app).planet]).toEqual([me(app).moon.aliens[0].id, 'Zuma']);
+      expect(tripAct(r.app, 'start').why).toBe('onTrip');
+      expect(tripAct(withPurse(0), 'start').why).toBe('noAlien');
+      me(app).moon.trips = 1;
+      expect(trip(tripAct(app, 'start').app).planet).toBe('Pobo');
+    });
+
+    it('🔴 a right answer walks one tile and picks up what lies there; a wrong one moves nothing and loses nothing; a far tile is refused', () => {
+      let app = landed(herMoon());
+      expect(tripAct(app, 'aim', { at: 18 }).why).toBe('far');
+      // Wrong: the aim is cleared, and nothing else is different.
+      const before = JSON.parse(JSON.stringify(trip(app)));
+      const wrong = step(app, 24, false);
+      expect([wrong.ok, wrong.said]).toEqual([true, 'Not quite. Nothing is lost: pick a tile and try again.']);
+      expect(trip(wrong.app)).toEqual(before);
+      // Right: up one, then across to the crystal.
+      app = step(app, 24).app;
+      expect([trip(app).pos, trip(app).seen[18]]).toEqual([24, false]);
+      const found = step(app, 25);
+      expect(found.said).toBe('Right! Zib found a crystal 💎!');
+      app = found.app;
+      expect([trip(app).pos, trip(app).items[25], trip(app).bag]).toEqual([25, '', [{ k: 'crystal', by: me(app).moon.aliens[0].id, card: '' }]]);
+      const v = tripView(app);
+      expect([v.bagLine, v.countLine, v.title]).toEqual(['💎', '1 finds · the bag holds 6', 'Planet Zuma']);
+      expect(v.rows).toHaveLength(6);
+      expect(v.rows[4].cells[1]).toEqual(expect.objectContaining({ at: 25, me: true, edge: 'here', species: 'blob', kind: 'plain' }));
+      expect(v.rows[4].cells.map((c: { edge: string }) => c.edge)).toEqual(['near', 'here', 'near', 'none', 'none', 'none']);
+      expect(v.rows[0].cells[0]).toEqual(expect.objectContaining({ kind: 'fog', glyph: '' }));
+      // Answering with no tile aimed is refused.
+      expect(tripAct(app, 'answer', { correct: true }).why).toBe('noAim');
+    });
+
+    it('🔴 the lantern clears the fog on all four sides with each right answer; without it, only the tile walked onto', () => {
+      let app = landed(herMoon());
+      app = step(app, 24).app;
+      expect([18, 25].map((i) => trip(app).seen[i])).toEqual([false, false]);
+      app = moonAct(app, 'build', { thingId: 'lantern' }).app;
+      expect(me(app).moon.gear).toEqual(['lantern']);
+      const lit = step(app, 25);
+      expect(lit.said).toBe('Right! Zib found a crystal 💎!');
+      expect([19, 26, 31, 24].map((i) => trip(lit.app).seen[i])).toEqual([true, true, true, true]);
+    });
+
+    it('🔴 water needs a swimmer: a Blob is refused at seen water, fog that turns out to be water stops it, and a Squiggle swims in for the shell', () => {
+      let app = landed(herMoon());
+      for (const at of [24, 25, 26]) app = step(app, at).app;
+      // 20 is water under fog: a right answer shows it, and the Blob stays where it is.
+      const wet = step(app, 20);
+      expect(wet.said).toBe('Right! But that tile is water: Zib can’t swim. A Squiggle can.');
+      app = wet.app;
+      expect([trip(app).pos, trip(app).seen[20]]).toEqual([26, true]);
+      expect(tripAct(app, 'aim', { at: 20 }).said).toBe('Zib can’t swim. A Squiggle can: switch aliens.');
+      expect(tripView(app).tip).toMatch(/Water needs a swimmer: switch to a Squiggle\.$/);
+      const swap = tripAct(app, 'crew', { alienId: me(app).moon.aliens[1].id });
+      expect(swap.said).toBe('Wiggo takes the lead. It can swim!');
+      app = step(swap.app, 20).app;
+      app = step(app, 21).app;
+      expect(trip(app).bag.map((b: { k: string }) => b.k)).toEqual(['crystal', 'postcard', 'shell']);
+      expect(tripView(app).crew.map((c: { label: string }) => c.label)).toEqual(['Zib', 'Wiggo · swims']);
+    });
+
+    it('🔴 a crater takes the jetpack, once a trip; climbing out is free; the gear never answers the question', () => {
+      let app = landed(herMoon());
+      for (const at of [24, 25, 26, 27, 28]) app = step(app, at).app;
+      app = step(app, 22, false).app; // fog: wrong, nothing seen
+      expect(trip(app).seen[22]).toBe(false);
+      const noJet = step(app, 22);
+      expect(noJet.said).toBe('Right! But that tile is a crater: it takes the jetpack.');
+      app = noJet.app;
+      expect(tripAct(app, 'aim', { at: 22 }).why).toBe('crater');
+      app = moonAct(app, 'build', { thingId: 'jetpack' }).app;
+      // The question is still asked: a wrong answer with the jetpack moves nothing.
+      expect(trip(step(app, 22, false).app).pos).toBe(28);
+      app = step(app, 22).app;
+      expect([trip(app).pos, trip(app).hopped, trip(app).bag.map((b: { k: string }) => b.k).pop()]).toEqual([22, true, 'meteor']);
+      app = step(app, 28).app; // out again, free
+      me(app).moon.trip.map[29] = 'c';
+      me(app).moon.trip.seen[29] = true;
+      expect(tripAct(app, 'aim', { at: 29 }).why).toBe('hopped');
+    });
+
+    it('🔴 the bag holds six, the big boots two more; a find that will not fit waits on its tile', () => {
+      let app = landed(herMoon());
+      me(app).moon.trip.bag = Array.from({ length: 6 }, () => ({ k: 'fossil', by: '', card: '' }));
+      app = step(app, 24).app;
+      const full = step(app, 25);
+      expect(full.said).toBe('Right! Zib walks on. The bag is full: come home to empty it, and the 💎 waits here.');
+      expect([trip(full.app).pos, trip(full.app).items[25], trip(full.app).bag.length]).toEqual([25, 'crystal', 6]);
+      app = moonAct(full.app, 'build', { thingId: 'boots' }).app;
+      app = step(step(app, 24).app, 25).app;
+      expect([trip(app).bag.length, tripView(app).countLine]).toEqual([7, '7 finds · the bag holds 8']);
+    });
+
+    it('🔴 Come home brings everything: the finds counted, seeds to plant, an egg to hatch free, new postcards, and each alien’s own finds; nothing is lost', () => {
+      let app = landed(herMoon());
+      for (const at of [24, 25, 26, 27]) app = step(app, at).app;
+      // The pond is in the way (20, 21), so back along the row and up the left side to the egg clue at 0.
+      for (const at of [26, 25, 24, 18, 12, 6, 0]) app = step(app, at).app;
+      const bag = trip(app).bag.map((b: { k: string }) => b.k);
+      expect(bag).toEqual(['crystal', 'postcard', 'seed', 'egg']);
+      expect(trip(app).bag[1].card).toBe('volcano');
+      const home = tripAct(app, 'home');
+      expect([home.ok, home.said]).toEqual([true, 'Home safe with 💎 📮 🌱 🥚! Everything goes in the Alien Book.']);
+      const moon = me(home.app).moon;
+      expect([moon.trip, moon.trips, moon.finds, moon.seeds, moon.eggs, moon.cards, moon.aliens[0].finds]).toEqual([null, 1, { crystal: 1, postcard: 1, seed: 1, egg: 1 }, 1, 1, ['volcano'], 4]);
+      // The egg from the trip hatches free, with an alien never had.
+      const v = moonView(home.app);
+      expect(v.bigs[0]).toEqual(expect.objectContaining({ id: 'clue', line: 'free · ×1 · tap to hatch it', use: true }));
+      expect(v.findsLine).toBe('Found on expeditions: 💎 ×1  🌱 ×1  📮 ×1  🥚 ×1');
+      const spent = me(home.app).model.spent;
+      const hatched = moonAct(home.app, 'egg', { thingId: 'clue' });
+      expect([hatched.ok, me(hatched.app).moon.eggs, me(hatched.app).model.spent, me(hatched.app).moon.aliens.length]).toEqual([true, 0, spent, 3]);
+      expect(moonAct(hatched.app, 'egg', { thingId: 'clue' }).why).toBe('noEgg');
+      // The next postcard found is the next one not had yet.
+      let again = landed(home.app);
+      again = step(step(step(again, 24).app, 25).app, 26).app;
+      expect(trip(again).bag.map((b: { card: string }) => b.card)).toEqual(['', 'rings']);
+      // An empty bag comes home too.
+      expect(tripAct(landed(herMoon()), 'home').said).toBe('Home safe. Nothing found this time, and nothing lost.');
+      expect(tripAct(home.app, 'home').why).toBe('noTrip');
+    });
+
+    it('🔴 a trip survives a reload and travels in the save code; the old map shows the egg clue under the fog', () => {
+      let app = landed(herMoon());
+      app = step(step(app, 24).app, 25).app;
+      const view = tripView(app);
+      const reloaded = JSON.parse(JSON.stringify(app));
+      expect(tripView(reloaded)).toEqual(view);
+      const code = runScript(ENCODE_SAVE_SCRIPT, { app }).code;
+      const there = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code });
+      expect(tripView(there.app).rows).toEqual(view.rows);
+      expect(view.rows[0].cells[0].glyph).toBe('');
+      app = moonAct(app, 'build', { thingId: 'map' }).app;
+      expect(tripView(app).rows[0].cells[0]).toEqual(expect.objectContaining({ kind: 'fog', glyph: '🥚' }));
+      // A broken trip is no trip: the moon still opens.
+      me(app).moon.trip = { map: [1, 2, 3] };
+      expect([tripView(app).has, tripView(app).canStart]).toEqual([false, true]);
+    });
+
+    it('gear is bought once from the moon with earned stars, says what it does, and is greyed when too dear', () => {
+      let app = herMoon(160);
+      const spent = me(app).model.spent;
+      const gear = moonView(app).gear;
+      expect(gear.map((g: ViewRow) => g.id)).toEqual(['lantern', 'jetpack', 'map', 'boots']);
+      expect(gear[0]).toEqual(expect.objectContaining({ glyph: '🔦', label: 'Lantern', line: '120 ⭐ · each right answer clears the fog on all four sides', ask: false, dim: true }));
+      expect(gear[1]).toEqual(expect.objectContaining({ ask: true, dim: false }));
+      const jet = moonAct(app, 'build', { thingId: 'jetpack' });
+      expect(jet.said).toBe('🎒 Jetpack for expeditions: hop into one crater a trip.');
+      app = jet.app;
+      expect(me(app).model.spent).toBe(spent + 60);
+      expect(moonView(app).gear[1]).toEqual(expect.objectContaining({ worn: true, ask: false, line: 'Yours ✓ · hop into one crater a trip' }));
+      expect(moonAct(app, 'build', { thingId: 'jetpack' }).why).toBe('owned');
+      expect(moonAct(app, 'build', { thingId: 'lantern' }).why).toBe('tooDear');
+    });
+
+    it('🔴 Alien school: a right answer teaches the alien a topic, a full topic stays full, a wrong one changes nothing; the bars never go down', () => {
+      let app = herMoon();
+      const zib = () => me(app).moon.aliens[0];
+      const r = schoolAct(app, 'teach', { correct: true, topic: 'tables' });
+      expect(r.said).toBe('“Oh! I see. Times tables: 1 of 5. Another one?”');
+      app = r.app;
+      const before = JSON.parse(JSON.stringify(me(app).moon));
+      const miss = schoolAct(app, 'teach', { correct: false, topic: 'tables' });
+      expect([miss.ok, miss.said]).toEqual([true, '“Hmm, tricky. Shall we try one like it?”']);
+      expect(me(miss.app).moon).toEqual(before);
+      for (let i = 0; i < 3; i++) app = schoolAct(app, 'teach', { correct: true, topic: 'tables' }).app;
+      expect(schoolAct(app, 'teach', { correct: true, topic: 'tables' }).said).toBe('“I get Times tables now! Look at me!”');
+      app = schoolAct(app, 'teach', { correct: true, topic: 'tables' }).app;
+      expect(schoolAct(app, 'teach', { correct: true, topic: 'tables' }).said).toBe('“I knew that one, thank you!”');
+      expect(zib().taught).toEqual({ tables: 5 });
+      const v = schoolView(app);
+      expect([v.title, v.topics]).toEqual(['Zib is stuck', [{ id: 'tables', label: 'Times tables', line: 'Learned ✓', pct: 100 }]]);
+      expect(schoolAct(app, 'teach', { correct: true, topic: '' }).why).toBe('noTopic');
+    });
+
+    it('🔴 the fourth form: three topics make a grown-up a Scholar; twenty finds an Explorer; its favourite ten times a Superstar; a young one waits, and a form is kept', () => {
+      let app = herMoon();
+      const zib = () => me(app).moon.aliens[0];
+      zib().meals = 10; // young
+      const teachTopic = (t: string) => { for (let i = 0; i < 5; i++) app = schoolAct(app, 'teach', { correct: true, topic: t }).app; };
+      teachTopic('tables');
+      teachTopic('divide');
+      teachTopic('bonds');
+      expect([zib().forms, schoolView(app).formLine]).toEqual([[], 'Zib grows up first (8 more meals): the fourth form comes after.']);
+      // Grown up by eating, and the form it earned comes with it.
+      let said = '';
+      for (let i = 0; i < 8; i++) { const r = moonAct(app, 'feed', { foodId: 'strawberry' === zib().fav ? 'cookie' : 'strawberry' }); app = r.app; said = r.said; }
+      expect(said).toMatch(/Zib grew! Zib became a Scholar!$/);
+      expect([zib().forms, zib().form]).toEqual([['scholar'], 'scholar']);
+      expect(moonView(app).aliens[0]).toEqual(expect.objectContaining({ form: 'scholar', line: 'Scholar' }));
+      const v = schoolView(app);
+      expect(v.forms.map((f: ViewRow) => f.line)).toEqual(['Showing ✓ · tap to put away', 'bring home 20 finds with it · 0 of 20', 'its favourite food, 10 times · 0 of 10']);
+      expect(v.evo.map((e: ViewRow) => [e.name, e.grown, e.form, e.selected])).toEqual([['Baby', 0, '', false], ['Young', 1, '', false], ['Grown up', 2, '', false], ['Scholar', 2, 'scholar', true]]);
+      // Put away, and shown again; one not taken cannot be shown.
+      app = schoolAct(app, 'form', { formId: 'scholar' }).app;
+      expect(zib().form).toBe('');
+      expect(schoolAct(app, 'form', { formId: 'explorer' }).why).toBe('notOwned');
+      // Superstar: its favourite, ten times.
+      for (let i = 0; i < 10; i++) app = moonAct(app, 'feed', { foodId: zib().fav }).app;
+      expect([zib().forms, zib().favs]).toEqual([['scholar', 'superstar'], 10]);
+      // Explorer: twenty finds brought home with it.
+      app = landed(app);
+      me(app).moon.trip.bag = Array.from({ length: 20 }, () => ({ k: 'fossil', by: zib().id, card: '' }));
+      const home = tripAct(app, 'home');
+      expect(home.said).toMatch(/ Zib became an Explorer!$/);
+      expect(me(home.app).moon.aliens[0].forms).toEqual(['scholar', 'superstar', 'explorer']);
+    });
+
+    it('🔴 the garden: built once; a seed from a trip planted; ripe once enough stars are earned; picked as free meals that feed for nothing', () => {
+      let app = herMoon(2000);
+      expect(moonAct(app, 'plant').why).toBe('noGarden');
+      app = moonAct(app, 'build', { thingId: 'garden' }).app;
+      expect(moonAct(app, 'plant').why).toBe('noSeed');
+      me(app).moon.seeds = 2;
+      const planted = moonAct(app, 'plant');
+      expect(planted.said).toBe('A seed is planted. Every right answer waters it!');
+      app = planted.app;
+      let v = moonView(app);
+      expect([v.hasGarden, v.canPlant, v.plantLine, v.plots[0].line, v.plots[0].use]).toEqual([true, true, '🌱 Plant a seed · 1 to plant', '15 more ⭐ to earn', false]);
+      expect(moonAct(app, 'pick', { thingId: '0' }).why).toBe('notRipe');
+      // Stars earned water it (spending does not).
+      app = runScript(SAVE_MODEL_SCRIPT, { app, model: { ...me(app).model, stars: me(app).model.stars + 15 } }).app;
+      v = moonView(app);
+      expect([v.plots[0].use, v.plots[0].line]).toEqual([true, 'Ripe! Tap to pick']);
+      const crop = me(app).moon.plots[0].food;
+      const picked = moonAct(app, 'pick', { thingId: '0' });
+      expect(picked.said).toMatch(/ picked: 3 free meals!$/);
+      app = picked.app;
+      expect([me(app).moon.plots, me(app).moon.larder]).toEqual([[], { [crop]: 3 }]);
+      const food = moonView(app).foods[0];
+      expect(food).toEqual(expect.objectContaining({ id: crop, line: 'free · ×3', use: true, cost: 0 }));
+      const spent = me(app).model.spent;
+      app = moonAct(app, 'feed', { foodId: crop }).app;
+      expect([me(app).model.spent, me(app).moon.larder[crop], me(app).moon.aliens[0].meals]).toEqual([spent, 2, 21]);
+      app = moonAct(moonAct(app, 'feed', { foodId: crop }).app, 'feed', { foodId: crop }).app;
+      expect([me(app).moon.larder, moonAct(app, 'feed', { foodId: crop }).why]).toEqual([{}, 'noFood']);
+    });
+
+    it('🔴 the new things to wear: headphones and a flower crown on the head, little wings and a cape on the back, each bought once', () => {
+      let app = herMoon(1000);
+      const wear = moonView(app).wear;
+      expect(wear.map((w: ViewRow) => w.id).slice(-4)).toEqual(['headphones', 'flowers', 'cape', 'wings']);
+      expect(wear.find((w: ViewRow) => w.id === 'wings')).toEqual(expect.objectContaining({ line: '150 ⭐', back: 'wings', hat: '', showAlien: true }));
+      app = moonAct(app, 'buy', { wearId: 'crown' }).app;
+      app = moonAct(app, 'buy', { wearId: 'wings' }).app;
+      expect(me(app).moon.aliens[0].wear).toEqual({ hat: 'crown', eyes: '', neck: '', back: 'wings' });
+      expect(moonView(app)).toEqual(expect.objectContaining({ selBack: 'wings', selHat: 'crown' }));
+      app = moonAct(app, 'buy', { wearId: 'cape' }).app;
+      expect(me(app).moon.aliens[0].wear.back).toBe('cape');
+    });
+
+    it('the moon says what there is to aim for, and the frame hangs the postcards', () => {
+      let app = herMoon(400);
+      me(app).moon.cards = ['volcano', 'rings'];
+      const goals = moonView(app).goals;
+      expect(goals.map((g: { id: string }) => g.id)).toEqual(['book', 'dome', 'form', 'cards']);
+      expect(goals[0]).toEqual({ id: 'book', label: 'Alien Book', line: '2 of 36 aliens met', pct: 6 });
+      expect(goals[1]).toEqual(expect.objectContaining({ label: 'Crater Dome', pct: Math.round((100 * moonView(app).purse) / 1000) }));
+      expect(goals[3]).toEqual({ id: 'cards', label: 'Postcards', line: '2 of 20 found on trips', pct: 10 });
+      expect(moonView(app).hasFrame).toBe(false);
+      app = moonAct(app, 'build', { thingId: 'frame' }).app;
+      const v = moonView(app);
+      expect([v.hasFrame, v.cardsLine, v.cards.map((c: ViewRow) => c.glyph)]).toEqual([true, 'Postcards · 2 of 20', ['🌋', '🪐']]);
+      expect(v.tripLine).toBe('Explore a planet with an alien. Your answers move it.');
+      expect(moonView(landed(app)).tripLine).toBe('Your trip to Zuma is waiting: 0 finds in the bag.');
+    });
+
+    it('the Expedition and the school speak French to a French player', () => {
+      let app = landed(herMoon(2000, 'fr'));
+      expect(tripView(app).title).toBe('Planète Zuma');
+      app = step(app, 24).app;
+      expect(step(app, 25).said).toBe('Juste ! Zib a trouvé : 💎 cristal !');
+      expect(tripAct(app, 'home').said).toBe('De retour. Rien trouvé cette fois, et rien perdu.');
+      expect(schoolAct(app, 'teach', { correct: true, topic: 'tables' }).said).toBe('« Oh ! Je vois. Tables de multiplication : 1 sur 5. Encore une ? »');
+      expect(schoolView(app).title).toBe('Zib est bloqué');
+    });
+
+    it('the verdict line on a trip is a step, and at school a lesson; a wrong one loses nothing', () => {
+      const grade = (game: string, typed: string) => runScript(GRADE_ANSWER_SCRIPT, { model: freshModel(), skillId: 'mul-2-5-10', level: 'CM1', lang: 'en', answer: '10', typed, fluentMs: 4000, shownAt: Date.now() - 1000, game });
+      expect(grade('trip', '10').boost).toMatch(/^🧭 1\.0 s · one step$/);
+      expect(grade('trip', '9').boost).toBe('No step · nothing lost');
+      expect(grade('school', '10').boost).toMatch(/^🎓 1\.0 s · taught$/);
+      expect(grade('school', '9').boost).toBe('Still learning');
     });
   });
 

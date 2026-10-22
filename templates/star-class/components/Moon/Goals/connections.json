@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "22ea07d5-449b-51c6-8b12-2dbd858431c8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "gsIn",
+      "fromProperty": "title",
+      "toId": "gsTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "gsIn",
+      "fromProperty": "rows",
+      "toId": "gsEach",
+      "toProperty": "items"
+    }
+  ]
+}

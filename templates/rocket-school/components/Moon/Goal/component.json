@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8ea70491-ae0b-5bfd-8b88-cc4bc56b34b5",
+  "name": "Goal",
+  "path": "/Moon/Goal",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One goal on the moon, or one topic an alien has learned (TPL-014): its name, a bar filled to Pct, and a line saying how far."
+}

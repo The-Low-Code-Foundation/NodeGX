@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "662f1a4e-8d4c-55e1-8063-831acc076f2d",
+  "name": "Garden",
+  "path": "/Moon/Garden",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The moon garden (TPL-014 M5), shown once built: a tile per plot, growing then ripe (a tap picks it as free meals, Logic/Moon act pick), and Plant a seed (Logic/Moon act plant) while there are seeds and room. App in; App, Write and Said out."
+}

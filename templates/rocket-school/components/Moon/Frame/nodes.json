@@ -1,0 +1,135 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f7f4b2f7-43b3-560a-8d42-fcb42633634d",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fmIn",
+      "type": "Component Inputs",
+      "label": "The postcards",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "fmCard",
+      "type": "Group",
+      "label": "The frame",
+      "children": [
+        "fmTitle",
+        "fmCards"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fmTitle",
+      "type": "Text",
+      "label": "Postcards, so many of twenty",
+      "parent": "fmCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "fmCards",
+      "type": "Group",
+      "label": "The postcards",
+      "parent": "fmCard",
+      "children": [
+        "fmEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "fmEach",
+      "type": "For Each",
+      "label": "One tile per postcard",
+      "parameters": {
+        "template": "/Moon/Shop tile",
+        "templateType": "explicit"
+      },
+      "parent": "fmCards",
+      "x": 160,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "fmCard"
+  ]
+}

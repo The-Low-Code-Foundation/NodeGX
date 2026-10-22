@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "6445bc7c-e85b-5e30-897f-85c602038e2c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tripactIn",
+      "fromProperty": "app",
+      "toId": "tripactFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "tripactIn",
+      "fromProperty": "profileId",
+      "toId": "tripactFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "tripactIn",
+      "fromProperty": "action",
+      "toId": "tripactFn",
+      "toProperty": "in-action"
+    },
+    {
+      "fromId": "tripactIn",
+      "fromProperty": "alienId",
+      "toId": "tripactFn",
+      "toProperty": "in-alienId"
+    },
+    {
+      "fromId": "tripactIn",
+      "fromProperty": "at",
+      "toId": "tripactFn",
+      "toProperty": "in-at"
+    },
+    {
+      "fromId": "tripactIn",
+      "fromProperty": "correct",
+      "toId": "tripactFn",
+      "toProperty": "in-correct"
+    },
+    {
+      "fromId": "tripactIn",
+      "fromProperty": "run",
+      "toId": "tripactFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tripactFn",
+      "fromProperty": "out-app",
+      "toId": "tripactOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tripactFn",
+      "fromProperty": "out-ok",
+      "toId": "tripactOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "tripactFn",
+      "fromProperty": "out-why",
+      "toId": "tripactOut",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "tripactFn",
+      "fromProperty": "out-said",
+      "toId": "tripactOut",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "tripactFn",
+      "fromProperty": "success",
+      "toId": "tripactOut",
+      "toProperty": "done"
+    }
+  ]
+}

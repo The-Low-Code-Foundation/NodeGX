@@ -41,6 +41,18 @@
     },
     {
       "fromId": "mtIn-2",
+      "fromProperty": "back",
+      "toId": "mtAlien",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "mtIn-2",
+      "fromProperty": "form",
+      "toId": "mtAlien",
+      "toProperty": "form"
+    },
+    {
+      "fromId": "mtIn-2",
       "fromProperty": "happy",
       "toId": "mtAlien",
       "toProperty": "happy"

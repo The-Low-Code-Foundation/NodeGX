@@ -1,0 +1,691 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "28e09358-486e-565b-8de4-4a5c4be63997",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tpIn",
+      "fromProperty": "app",
+      "toId": "tpView",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "title",
+      "toId": "tpTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "introLine",
+      "toId": "tpIntro",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "has",
+      "toId": "tpNoTrip",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "tpNoTrip",
+      "fromProperty": "result",
+      "toId": "tpIntro",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "canStart",
+      "toId": "tpStart",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "startLine",
+      "toId": "tpStart",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "has",
+      "toId": "tpWhoLabel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "whoWord",
+      "toId": "tpWhoLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "has",
+      "toId": "tpCrew",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "crew",
+      "toId": "tpCrew",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "who",
+      "toId": "tpCrew",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "has",
+      "toId": "tpGrid",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "rows",
+      "toId": "tpRows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "tip",
+      "toId": "tpTip",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "has",
+      "toId": "tpBagCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "bagWord",
+      "toId": "tpBagTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "countLine",
+      "toId": "tpCount",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "bagLine",
+      "toId": "tpBag",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "gearLine",
+      "toId": "tpGear",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "homeWord",
+      "toId": "tpHome",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "app",
+      "toId": "tpGo",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "profileId",
+      "toId": "tpGo",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "app",
+      "toId": "tpWho",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "profileId",
+      "toId": "tpWho",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "app",
+      "toId": "tpAim",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "profileId",
+      "toId": "tpAim",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "app",
+      "toId": "tpBack",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "profileId",
+      "toId": "tpBack",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "tpGo",
+      "fromProperty": "app",
+      "toId": "tpOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpGo",
+      "fromProperty": "done",
+      "toId": "tpOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "tpGo",
+      "fromProperty": "said",
+      "toId": "tpSayGo",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tpGo",
+      "fromProperty": "done",
+      "toId": "tpSayGo",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tpWho",
+      "fromProperty": "app",
+      "toId": "tpOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpWho",
+      "fromProperty": "done",
+      "toId": "tpOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "tpWho",
+      "fromProperty": "said",
+      "toId": "tpSayWho",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tpWho",
+      "fromProperty": "done",
+      "toId": "tpSayWho",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tpAim",
+      "fromProperty": "app",
+      "toId": "tpOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpAim",
+      "fromProperty": "done",
+      "toId": "tpOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "tpAim",
+      "fromProperty": "said",
+      "toId": "tpSayAim",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tpAim",
+      "fromProperty": "done",
+      "toId": "tpSayAim",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tpWalk",
+      "fromProperty": "app",
+      "toId": "tpOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpWalk",
+      "fromProperty": "done",
+      "toId": "tpOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "tpWalk",
+      "fromProperty": "said",
+      "toId": "tpSayWalk",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tpWalk",
+      "fromProperty": "done",
+      "toId": "tpSayWalk",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tpBack",
+      "fromProperty": "app",
+      "toId": "tpOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpBack",
+      "fromProperty": "done",
+      "toId": "tpOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "tpBack",
+      "fromProperty": "said",
+      "toId": "tpSayBack",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tpBack",
+      "fromProperty": "done",
+      "toId": "tpSayBack",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tpSaidNow",
+      "fromProperty": "value",
+      "toId": "tpSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tpStart",
+      "fromProperty": "onClick",
+      "toId": "tpGo",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tpGo",
+      "fromProperty": "done",
+      "toId": "tpPhase",
+      "toProperty": "to-map"
+    },
+    {
+      "fromId": "tpCrew",
+      "fromProperty": "value",
+      "toId": "tpWho",
+      "toProperty": "alienId"
+    },
+    {
+      "fromId": "tpCrew",
+      "fromProperty": "changed",
+      "toId": "tpWho",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tpWho",
+      "fromProperty": "done",
+      "toId": "tpPhase",
+      "toProperty": "to-map"
+    },
+    {
+      "fromId": "tpWho",
+      "fromProperty": "done",
+      "toId": "tpRound",
+      "toProperty": "abandon"
+    },
+    {
+      "fromId": "tpRows",
+      "fromProperty": "itemOutput-at",
+      "toId": "tpAim",
+      "toProperty": "at"
+    },
+    {
+      "fromId": "tpPhase",
+      "fromProperty": "map",
+      "toId": "tpCanAim",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "tpRows",
+      "fromProperty": "itemOutputSignal-tapped",
+      "toId": "tpCanAim",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "tpCanAim",
+      "fromProperty": "ontrue",
+      "toId": "tpAim",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tpAim",
+      "fromProperty": "ok",
+      "toId": "tpAimed",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "tpAim",
+      "fromProperty": "done",
+      "toId": "tpAimed",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "tpAimed",
+      "fromProperty": "ontrue",
+      "toId": "tpPhase",
+      "toProperty": "to-asking"
+    },
+    {
+      "fromId": "tpAimed",
+      "fromProperty": "ontrue",
+      "toId": "tpRound",
+      "toProperty": "ask"
+    },
+    {
+      "fromId": "tpPhase",
+      "fromProperty": "asking",
+      "toId": "tpRoundSlot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "mode",
+      "toId": "tpRound",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "level",
+      "toId": "tpRound",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "lang",
+      "toId": "tpRound",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "layout",
+      "toId": "tpRound",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "answerMode",
+      "toId": "tpRound",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "model",
+      "toId": "tpRound",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "curriculum",
+      "toId": "tpRound",
+      "toProperty": "curriculum"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "wordLists",
+      "toId": "tpRound",
+      "toProperty": "wordLists"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "soundOn",
+      "toId": "tpRound",
+      "toProperty": "soundOn"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "focus",
+      "toId": "tpRound",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "customSet",
+      "toId": "tpRound",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "customSetId",
+      "toId": "tpRound",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "customSetBoth",
+      "toId": "tpRound",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "placeholder",
+      "toId": "tpRound",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "checkWord",
+      "toId": "tpRound",
+      "toProperty": "checkWord"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "fluentWord",
+      "toId": "tpRound",
+      "toProperty": "fluentWord"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "correctWord",
+      "toId": "tpRound",
+      "toProperty": "correctWord"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "wrongWord",
+      "toId": "tpRound",
+      "toProperty": "wrongWord"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "timeUpWord",
+      "toId": "tpRound",
+      "toProperty": "timeUpWord"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "nextWord",
+      "toId": "tpRound",
+      "toProperty": "nextWord"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "showMeWord",
+      "toId": "tpRound",
+      "toProperty": "showMeWord"
+    },
+    {
+      "fromId": "tpView",
+      "fromProperty": "tripId",
+      "toId": "tpRound",
+      "toProperty": "raceId"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "app",
+      "toId": "tpSave",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "profileId",
+      "toId": "tpSave",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "tpRound",
+      "fromProperty": "model",
+      "toId": "tpSave",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "tpRound",
+      "fromProperty": "graded",
+      "toId": "tpSave",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tpSave",
+      "fromProperty": "app",
+      "toId": "tpWalk",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "profileId",
+      "toId": "tpWalk",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "tpRound",
+      "fromProperty": "correct",
+      "toId": "tpWalk",
+      "toProperty": "correct"
+    },
+    {
+      "fromId": "tpSave",
+      "fromProperty": "done",
+      "toId": "tpWalk",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tpRound",
+      "fromProperty": "next",
+      "toId": "tpPhase",
+      "toProperty": "to-map"
+    },
+    {
+      "fromId": "tpRound",
+      "fromProperty": "showMe",
+      "toId": "tpPhase",
+      "toProperty": "to-teaching"
+    },
+    {
+      "fromId": "tpTeach",
+      "fromProperty": "gotIt",
+      "toId": "tpPhase",
+      "toProperty": "to-map"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "teachCards",
+      "toId": "tpTeachPick",
+      "toProperty": "cards"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "lang",
+      "toId": "tpTeachPick",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "tpRound",
+      "fromProperty": "teach",
+      "toId": "tpTeachPick",
+      "toProperty": "teachId"
+    },
+    {
+      "fromId": "tpRound",
+      "fromProperty": "missCount",
+      "toId": "tpStep",
+      "toProperty": "misses"
+    },
+    {
+      "fromId": "tpStep",
+      "fromProperty": "result",
+      "toId": "tpTeachPick",
+      "toProperty": "step"
+    },
+    {
+      "fromId": "tpTeachPick",
+      "fromProperty": "title",
+      "toId": "tpTeach",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "tpTeachPick",
+      "fromProperty": "text",
+      "toId": "tpTeach",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tpTeachPick",
+      "fromProperty": "example",
+      "toId": "tpTeach",
+      "toProperty": "example"
+    },
+    {
+      "fromId": "tpRound",
+      "fromProperty": "prompt",
+      "toId": "tpTeach",
+      "toProperty": "prompt"
+    },
+    {
+      "fromId": "tpRound",
+      "fromProperty": "worked",
+      "toId": "tpTeach",
+      "toProperty": "worked"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "anExampleWord",
+      "toId": "tpTeach",
+      "toProperty": "anExampleWord"
+    },
+    {
+      "fromId": "tpIn",
+      "fromProperty": "gotItWord",
+      "toId": "tpTeach",
+      "toProperty": "gotItWord"
+    },
+    {
+      "fromId": "tpPhase",
+      "fromProperty": "teaching",
+      "toId": "tpTeach",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tpHome",
+      "fromProperty": "onClick",
+      "toId": "tpBack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tpHome",
+      "fromProperty": "onClick",
+      "toId": "tpRound",
+      "toProperty": "abandon"
+    },
+    {
+      "fromId": "tpBack",
+      "fromProperty": "done",
+      "toId": "tpPhase",
+      "toProperty": "to-map"
+    }
+  ]
+}

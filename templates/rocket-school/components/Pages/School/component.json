@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4f29d464-0575-5c60-87d6-9a211a76990c",
+  "name": "School",
+  "path": "/Pages/School",
+  "type": "page",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Alien school (TPL-014 M4): School/Play, with the player, their focus and the words. Reached from the moon, and back to it."
+}

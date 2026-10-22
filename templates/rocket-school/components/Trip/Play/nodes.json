@@ -1,0 +1,813 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "28e09358-486e-565b-8de4-4a5c4be63997",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "tpIn",
+      "type": "Component Inputs",
+      "label": "The store, the player and the words",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "layout",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "answerMode",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "model",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "curriculum",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "wordLists",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "soundOn",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "focus",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "customSet",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "customSetId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "customSetBoth",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "teachCards",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "placeholder",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "checkWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fluentWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "correctWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "wrongWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "timeUpWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nextWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "showMeWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "anExampleWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "gotItWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "whoWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bagWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "homeWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "tpWrap",
+      "type": "Group",
+      "label": "The expedition",
+      "children": [
+        "tpMapCard",
+        "tpRoundSlot",
+        "tpTeach",
+        "tpBagCard"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "tpMapCard",
+      "type": "Group",
+      "label": "The planet",
+      "parent": "tpWrap",
+      "children": [
+        "tpTitle",
+        "tpIntro",
+        "tpStart",
+        "tpWhoLabel",
+        "tpCrew",
+        "tpGrid",
+        "tpTip",
+        "tpSaid"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "tpTitle",
+      "type": "Text",
+      "label": "Planet, by name",
+      "parent": "tpMapCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "tpIntro",
+      "type": "Text",
+      "label": "What an expedition is",
+      "parent": "tpMapCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "tpStart",
+      "type": "net.noodl.controls.button",
+      "label": "Set off",
+      "parent": "tpMapCard",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Set off",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "tpWhoLabel",
+      "type": "Text",
+      "label": "Who walks",
+      "parent": "tpMapCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "textAlignX": "center",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "tpCrew",
+      "type": "/Game/Choice row",
+      "label": "Who walks",
+      "parent": "tpMapCard",
+      "parameters": {
+        "mounted": false
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "tpGrid",
+      "type": "Group",
+      "label": "The planet, row by row",
+      "parent": "tpMapCard",
+      "children": [
+        "tpRows"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "rowGap": "var(--space-1)",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "tpRows",
+      "type": "For Each",
+      "label": "One row of tiles per row",
+      "parameters": {
+        "template": "/Trip/Row",
+        "templateType": "explicit"
+      },
+      "parent": "tpGrid",
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "tpTip",
+      "type": "Text",
+      "label": "What to do",
+      "parent": "tpMapCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "tpSaid",
+      "type": "Text",
+      "label": "What just happened",
+      "parent": "tpMapCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "tpRoundSlot",
+      "type": "Group",
+      "label": "The question, to walk there",
+      "parent": "tpWrap",
+      "children": [
+        "tpRound"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "tpRound",
+      "type": "/Race/Round",
+      "label": "This question",
+      "parent": "tpRoundSlot",
+      "parameters": {
+        "timed": false,
+        "game": "trip"
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
+      "id": "tpTeach",
+      "type": "/Game/Teach card",
+      "label": "Show me how",
+      "parent": "tpWrap",
+      "x": 100,
+      "y": 1600
+    },
+    {
+      "id": "tpBagCard",
+      "type": "Group",
+      "label": "The backpack",
+      "parent": "tpWrap",
+      "children": [
+        "tpBagTitle",
+        "tpCount",
+        "tpBag",
+        "tpGear",
+        "tpHome"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 1720
+    },
+    {
+      "id": "tpBagTitle",
+      "type": "Text",
+      "label": "In the backpack",
+      "parent": "tpBagCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 1840
+    },
+    {
+      "id": "tpCount",
+      "type": "Text",
+      "label": "How many, of how many",
+      "parent": "tpBagCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 1960
+    },
+    {
+      "id": "tpBag",
+      "type": "Text",
+      "label": "What is in it",
+      "parent": "tpBagCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-2xl)",
+        "color": "var(--foreground)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 2080
+    },
+    {
+      "id": "tpGear",
+      "type": "Text",
+      "label": "The gear owned",
+      "parent": "tpBagCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 2200
+    },
+    {
+      "id": "tpHome",
+      "type": "net.noodl.controls.button",
+      "label": "Come home",
+      "parent": "tpBagCard",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Come home with everything"
+      },
+      "x": 160,
+      "y": 2320
+    },
+    {
+      "id": "tpView",
+      "type": "/Logic/Trip view",
+      "label": "The trip, as they see it",
+      "x": 470,
+      "y": 280
+    },
+    {
+      "id": "tpGo",
+      "type": "/Logic/Trip act",
+      "label": "Land on a planet",
+      "parameters": {
+        "action": "start"
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "tpWho",
+      "type": "/Logic/Trip act",
+      "label": "Who walks",
+      "parameters": {
+        "action": "crew"
+      },
+      "x": 470,
+      "y": 1480
+    },
+    {
+      "id": "tpAim",
+      "type": "/Logic/Trip act",
+      "label": "Aim at a tile",
+      "parameters": {
+        "action": "aim"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "tpWalk",
+      "type": "/Logic/Trip act",
+      "label": "The answer, walked",
+      "parameters": {
+        "action": "answer"
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "tpBack",
+      "type": "/Logic/Trip act",
+      "label": "Come home",
+      "parameters": {
+        "action": "home"
+      },
+      "x": 470,
+      "y": 2320
+    },
+    {
+      "id": "tpSave",
+      "type": "/Logic/Save model",
+      "label": "Remember what was learned",
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "tpPhase",
+      "type": "States",
+      "label": "The map, a question, or a Teach card",
+      "parameters": {
+        "states": "map,asking,teaching",
+        "values": "map,asking,teaching",
+        "useTransitions": false,
+        "type-map": "boolean",
+        "value-map-map": true,
+        "value-asking-map": false,
+        "value-teaching-map": false,
+        "type-asking": "boolean",
+        "value-map-asking": false,
+        "value-asking-asking": true,
+        "value-teaching-asking": false,
+        "type-teaching": "boolean",
+        "value-map-teaching": false,
+        "value-asking-teaching": false,
+        "value-teaching-teaching": true
+      },
+      "x": 470,
+      "y": 1360
+    },
+    {
+      "id": "tpCanAim",
+      "type": "Condition",
+      "label": "Only between questions",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 1120
+    },
+    {
+      "id": "tpAimed",
+      "type": "Condition",
+      "label": "A tile it can walk to?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 470,
+      "y": 1840
+    },
+    {
+      "id": "tpNoTrip",
+      "type": "Expression",
+      "label": "No trip yet?",
+      "parameters": {
+        "expression": "has !== true"
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "tpTeachPick",
+      "type": "/Logic/Teach card",
+      "label": "The card for the skill just missed",
+      "x": 470,
+      "y": 2080
+    },
+    {
+      "id": "tpStep",
+      "type": "Expression",
+      "label": "Which step: less each miss in a row",
+      "parameters": {
+        "expression": "min(2, max(0, misses - 1))"
+      },
+      "x": 470,
+      "y": 1960
+    },
+    {
+      "id": "tpSaidNow",
+      "type": "Variable2",
+      "label": "What just happened",
+      "parameters": {
+        "name": "tripSaid"
+      },
+      "metadata": {
+        "comment": "One trip on screen at a time: the line is the trip’s own."
+      },
+      "x": 470,
+      "y": 1240
+    },
+    {
+      "id": "tpSayGo",
+      "type": "Set Variable",
+      "label": "Say what go did",
+      "parameters": {
+        "name": "tripSaid"
+      },
+      "x": 470,
+      "y": 2440
+    },
+    {
+      "id": "tpSayWho",
+      "type": "Set Variable",
+      "label": "Say what who did",
+      "parameters": {
+        "name": "tripSaid"
+      },
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "tpSayAim",
+      "type": "Set Variable",
+      "label": "Say what aim did",
+      "parameters": {
+        "name": "tripSaid"
+      },
+      "x": 470,
+      "y": 2680
+    },
+    {
+      "id": "tpSayWalk",
+      "type": "Set Variable",
+      "label": "Say what walk did",
+      "parameters": {
+        "name": "tripSaid"
+      },
+      "x": 470,
+      "y": 2800
+    },
+    {
+      "id": "tpSayBack",
+      "type": "Set Variable",
+      "label": "Say what back did",
+      "parameters": {
+        "name": "tripSaid"
+      },
+      "x": 470,
+      "y": 2920
+    },
+    {
+      "id": "tpOut",
+      "type": "Component Outputs",
+      "label": "The store to write",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 3040
+    }
+  ],
+  "visualRoots": [
+    "tpWrap"
+  ]
+}

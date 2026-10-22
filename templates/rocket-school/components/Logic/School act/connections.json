@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cc1c3513-81a6-514f-8631-ca6fc9b69037",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "schoolactIn",
+      "fromProperty": "app",
+      "toId": "schoolactFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "schoolactIn",
+      "fromProperty": "profileId",
+      "toId": "schoolactFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "schoolactIn",
+      "fromProperty": "action",
+      "toId": "schoolactFn",
+      "toProperty": "in-action"
+    },
+    {
+      "fromId": "schoolactIn",
+      "fromProperty": "alienId",
+      "toId": "schoolactFn",
+      "toProperty": "in-alienId"
+    },
+    {
+      "fromId": "schoolactIn",
+      "fromProperty": "correct",
+      "toId": "schoolactFn",
+      "toProperty": "in-correct"
+    },
+    {
+      "fromId": "schoolactIn",
+      "fromProperty": "topic",
+      "toId": "schoolactFn",
+      "toProperty": "in-topic"
+    },
+    {
+      "fromId": "schoolactIn",
+      "fromProperty": "formId",
+      "toId": "schoolactFn",
+      "toProperty": "in-formId"
+    },
+    {
+      "fromId": "schoolactIn",
+      "fromProperty": "run",
+      "toId": "schoolactFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "schoolactFn",
+      "fromProperty": "out-app",
+      "toId": "schoolactOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "schoolactFn",
+      "fromProperty": "out-ok",
+      "toId": "schoolactOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "schoolactFn",
+      "fromProperty": "out-why",
+      "toId": "schoolactOut",
+      "toProperty": "why"
+    },
+    {
+      "fromId": "schoolactFn",
+      "fromProperty": "out-said",
+      "toId": "schoolactOut",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "schoolactFn",
+      "fromProperty": "success",
+      "toId": "schoolactOut",
+      "toProperty": "done"
+    }
+  ]
+}

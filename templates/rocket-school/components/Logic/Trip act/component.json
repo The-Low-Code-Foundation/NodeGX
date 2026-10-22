@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6445bc7c-e85b-5e30-897f-85c602038e2c",
+  "name": "Trip act",
+  "path": "/Logic/Trip act",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "TPL-014 M2: one thing done on a trip. Action is a parameter, placed once per action: start (a new planet), crew (Alien Id walks now), aim (At, a tile beside the alien), answer (Correct: right walks there and picks up what lies there; wrong loses nothing) or home (the bag comes home). Refused with nothing changed when it does not apply (Why). Said is the line to show."
+}

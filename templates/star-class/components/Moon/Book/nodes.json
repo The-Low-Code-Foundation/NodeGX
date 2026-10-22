@@ -22,6 +22,11 @@
           "name": "closeWord",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "findsLine",
+          "plug": "output",
+          "type": "string"
         }
       ],
       "x": 470,
@@ -119,6 +124,7 @@
       "children": [
         "mkTitle",
         "mkPages",
+        "mkFinds",
         "mkClose"
       ],
       "parameters": {
@@ -190,6 +196,21 @@
       "y": 640
     },
     {
+      "id": "mkFinds",
+      "type": "Text",
+      "label": "What expeditions brought home",
+      "parent": "mkBody",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "textAlignX": "center"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
       "id": "mkClose",
       "type": "net.noodl.controls.button",
       "label": "Close the book",
@@ -226,7 +247,7 @@
         "label": "Close the book"
       },
       "x": 160,
-      "y": 760
+      "y": 880
     },
     {
       "id": "mkOpen",

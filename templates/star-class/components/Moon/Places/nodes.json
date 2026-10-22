@@ -1,0 +1,251 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7105ed65-1005-59c7-8fbd-4bfb14b30add",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "plIn",
+      "type": "Component Inputs",
+      "label": "The places",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "tripWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "tripLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "schoolWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "schoolLine",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "plRow",
+      "type": "Group",
+      "label": "The two places",
+      "children": [
+        "plTrip",
+        "plSchool"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "plTrip",
+      "type": "Group",
+      "label": "The Expedition",
+      "parent": "plRow",
+      "children": [
+        "plTripTitle",
+        "plTripLine"
+      ],
+      "parameters": {
+        "width": {
+          "value": 45,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "cssClassName": "pressable",
+        "minWidth": {
+          "value": 220,
+          "unit": "px"
+        },
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "plTripTitle",
+      "type": "Text",
+      "label": "Expedition",
+      "parent": "plTrip",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "plTripLine",
+      "type": "Text",
+      "label": "What waits there",
+      "parent": "plTrip",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "plSchool",
+      "type": "Group",
+      "label": "Alien school",
+      "parent": "plRow",
+      "children": [
+        "plSchoolTitle",
+        "plSchoolLine"
+      ],
+      "parameters": {
+        "width": {
+          "value": 45,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "cssClassName": "pressable",
+        "minWidth": {
+          "value": 220,
+          "unit": "px"
+        },
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "plSchoolTitle",
+      "type": "Text",
+      "label": "Alien school",
+      "parent": "plSchool",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander"
+      },
+      "x": 160,
+      "y": 640
+    },
+    {
+      "id": "plSchoolLine",
+      "type": "Text",
+      "label": "Who is stuck",
+      "parent": "plSchool",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "plOut",
+      "type": "Component Outputs",
+      "label": "Where to",
+      "ports": [
+        {
+          "name": "trip",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "school",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "plRow"
+  ]
+}

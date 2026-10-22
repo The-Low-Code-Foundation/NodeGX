@@ -87,6 +87,16 @@
           "name": "neck",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "back",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "form",
+          "plug": "output",
+          "type": "string"
         }
       ],
       "x": 410,

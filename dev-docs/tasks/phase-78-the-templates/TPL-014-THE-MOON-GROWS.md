@@ -8,7 +8,10 @@
 > This would be a big motivational boost, especially if you can buy stuff for your alien to help it win the game (my
 > eldest now has too many points and nothing to do with them)."*
 
-**Status: 🟡 M1 BUILT, GATED and DRIVEN in both games (2026-10-14): the Alien Book, two domes and the surprise egg.**
+**Status: ✅ M1–M5 BUILT, GATED and DRIVEN in both games; Rocket School's is LIVE at `nodegx.io/templates/rocket-school/`
+(2026-10-22, Richard: *"build the updates to the Rocket School game from our artifact 'The Moon Grows' and push them to the
+NodeGX demo site"*).** M1 (2026-10-14): the Alien Book, two domes and the surprise egg. M2–M5 (2026-10-22): §7 below.
+Owed: Richard's children play it; the community shelf's `rocket-school` bundle is older than this (not republished).
 Richard on the picture: *"That's hot shit, the kids are going to go nuts … add the moon stuff to Rocket School, my
 eldest is going to shit a brick."* M2–M5 below are next. Research: [tpl-014-research-briefing.md](tpl-014-research-briefing.md)
 (about 60 sources). The picture: claude.ai artifact *The Moon grows* (private, `https://claude.ai/artifact/8wajmBYntcKUTCpZ1RRN9v`),
@@ -95,6 +98,22 @@ Each slice: engine first with its gate, then the parts through the plan door, bo
 | **Gates** | Engine 280/280, 7 new: the book's 36 pages and its grey ones; an old moon's book, kept by the first thing done; a dome's room, built once, too dear refused with the store unchanged; the egg never repeats a page until all are had, needs room, and says how many it could be; French; the save code carries book and domes; no name given twice. Template 111/111, one new: **no two components author one node id** (§8.1). Star Class 9/9. DEF-038 green for both (its one red is `templates/nightbook`, not ours). |
 | **Drive** | `drive-tpl014-moon.js`: a player made through the form, given her moon (five grown aliens, favourites found, 2 800 ⭐) by editing the store the game writes; on the moon: "Alien Book · 5 of 36", both domes and the egg with prices, the open book's 36 pages, the dome asked for on the hangar's card and built (1 800 ⭐ left), an egg hatched ("The egg hatched: meet …", 6 of 36, 1 500 ⭐ left), both kept after a reload, 0 console errors. **16/16 on Rocket School at 1100 and 390 px, and 16/16 on Star Class.** |
 
+### M2–M5 (2026-10-22) — the Expedition, its gear, Alien school, the fourth form, the garden, new things to wear
+
+Built as the picture drew them, with three choices of mine: finds pay no stars of their own (the answers already pay, and
+§4.4 says reward milestones, not answers); a trip's supplies were left out (the picture had none; the garden and the frame
+are the sinks); the garden grows as stars are earned (a right answer pays one), so "right answers water it" is literal.
+
+| | |
+|---|---|
+| **Art** | `game-kit.Alien` gains **Form** (scholar: a cap and a book; explorer: packs, a flag and a lamp; superstar: stars; each with a gold halo that reduced motion stills) and a fourth place, **Back** (little wings, a cape, drawn behind the body), and two hats (headphones, a flower crown). A cap or a lamp shows only when no hat does. Looked at on a sheet of all six species before any page used them; the first cape read as a red base and was redrawn. |
+| **Catalogue** | `tpl007Moon.ts`: `MOON_GEAR` (lantern 120, jetpack 60, old map 40, big boots 80), `MOON_THINGS` (garden 250, frame 90), `TRIP_FINDS` (crystal, fossil, seed, postcard, egg clue on plain ground; a shell in water; a meteorite in a crater), `POSTCARDS` (20), `PLANETS`, `MOON_FORMS` (3 topics / 20 finds / its favourite 10 times), `TOPIC_FULL` 5, `GARDEN_*` (6 plots, ripe after 15 ⭐ earned, 3 free meals), the four new things to wear. |
+| **Engine** | `moonOf` carries everything new (trip, gear, things, finds, cards, seeds, eggs, plots, larder; per alien taught, finds, favs, forms, form). `Logic/Trip view` + `Logic/Trip act` (start, crew, aim, answer, home); `Logic/School view` + `Logic/School act` (teach, form); `Logic/Moon act` gains plant, pick, form, the clue egg (free) and builds things and gear through `build`; the grader says "🧭 one step" / "🎓 taught". A planet's plain ground is always joined up, so every plain find can be reached (fuzzed over 500 planets). |
+| **Parts** | `Moon/Goal(s)` (something to aim for), `Moon/Places`, `Moon/Garden`, `Moon/Frame`, a second `Moon/Big things` for gear; `Trip/Tile`, `Trip/Row`, `Trip/Play`; `School/Play`; pages `Pages/Expedition` and `Pages/School`, reached from the moon. Both games ask with Race/Round (untimed, the player's own focus), save the model first, then walk or teach with the store the save hands back. Race/Round publishes the question's Topic. |
+| **Gates** | Engine 304/304 (17 new), kit 53/53, template 111/111 with no door warning, Star Class 162/162, DEF-038 green for both (the one red is `templates/nightbook`, untracked). |
+| **Drive** | `scripts/devtools/drive-tpl014-grows.js` (`--hash`, `--origin`): her moon seeded, the 7 times table as her focus; buy the lantern, build the garden, land on Zuma, walk nine steps by answering (one wrong on purpose: nothing moves), finds in the bag, reload mid-trip, switch to the Squiggle, come home, the book lists the finds; school: one right answer makes Zib a Scholar and draws it. **28/28 on Rocket School at 1100 and 390 px, 28/28 on Star Class, 28/28 on the staged demo and on the live nodegx.io demo at both widths.** M1's drive still 16/16 on both games. |
+| **Deploy** | A copy with `navigationPathType: "hash"`, built with `--base-url /templates/rocket-school/` and a fresh production engine (1.75 MB); only `site/templates/rocket-school/` pushed by rsync (not `ops/deploy.sh`: other sessions' homepage edits are uncommitted there). Live and local md5 match; the neighbours answered 200. |
+
 ## 8. Findings
 
 1. **The plan door renames a node in ANOTHER component when two share an id.** `Moon/Big things` first used `mg…` ids;
@@ -104,3 +123,8 @@ Each slice: engine first with its gate, then the parts through the plan door, bo
    `tpl007Template.test.ts`; `mtIn` (Merge/Tile and Moon/Alien tile, shipped in P113) is the one allowed.
 2. **The first drive's screenshot found a bug the text could not:** the egg hatched a second "Tilly" beside her own
    Tilly. Suggestions went round the species' list by count. Fixed (`moonFreshName`) and gated.
+3. **A repeated line publishes nothing** (bug P78-TPL014-STALELINE): the Expedition kept the last step's line beside the
+   next question. Fixed with a Variable and a setter per act. Moon/Care has the same shape and was left.
+4. **Under hash navigation a drive's "reload" is not one**: `/#/moon` from the same document is a hash change, so the
+   game never read the store the drive had seeded and wrote its old state back over it (5/27 on the first staged run).
+   The drive now reloads for real when `--hash` is on.

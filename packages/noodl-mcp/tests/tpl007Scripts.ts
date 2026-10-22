@@ -1228,6 +1228,14 @@ if (game === 'gate') {
   boost = !correct ? (isFr(lang) ? 'Pas de poussée' : 'No push')
     : fluent ? '⚡ ' + secs + ' s · ' + (isFr(lang) ? 'poussée à fond' : 'full push')
     : secs + ' s · ' + (isFr(lang) ? 'poussée ' + boostPct + ' %' : 'push ' + boostPct + '%');
+} else if (game === 'trip') {
+  // TPL-014 M2: on an expedition a right answer is one step, at any speed, and a wrong one loses nothing.
+  boostPct = correct ? 100 : 0;
+  boost = correct ? '🧭 ' + secs + ' s · ' + (isFr(lang) ? 'un pas' : 'one step') : isFr(lang) ? 'Pas de pas · rien de perdu' : 'No step · nothing lost';
+} else if (game === 'school') {
+  // TPL-014 M4: at Alien school a right answer teaches the alien, at any speed.
+  boostPct = correct ? 100 : 0;
+  boost = correct ? '🎓 ' + secs + ' s · ' + (isFr(lang) ? 'appris' : 'taught') : isFr(lang) ? 'Il apprend encore' : 'Still learning';
 }
 
 // PLY-006: one or two more clauses on the line, each only when it is true. After the gate/push branches, so every
@@ -2937,8 +2945,19 @@ function moonOf(p) {
   var raw = Array.isArray(m.aliens) ? m.aliens.filter(function (a) { return a && typeof a.id === 'string' && a.id; }) : [];
   var aliens = raw.map(function (a) {
     var w = a.wear && typeof a.wear === 'object' ? a.wear : {};
-    return { id: a.id, species: moonFind(MOON.species, a.species) ? a.species : MOON.species[0].id, colour: moonFind(MOON.colours, a.colour) ? a.colour : MOON.colours[0].id, name: String(a.name || ''), meals: Math.max(0, Math.floor(Number(a.meals) || 0)), fav: moonFind(MOON.foods, a.fav) ? a.fav : MOON.foods[0].id, found: a.found === true, wear: { hat: typeof w.hat === 'string' ? w.hat : '', eyes: typeof w.eyes === 'string' ? w.eyes : '', neck: typeof w.neck === 'string' ? w.neck : '' } };
+    var taught = {};
+    if (a.taught && typeof a.taught === 'object') for (var tk in a.taught) { var tn = Math.floor(Number(a.taught[tk]) || 0); if (tn > 0) taught[tk] = Math.min(MOON.topicFull, tn); }
+    var forms = Array.isArray(a.forms) ? a.forms.filter(function (f) { return !!moonFind(MOON.forms, f); }) : [];
+    return {
+      id: a.id, species: moonFind(MOON.species, a.species) ? a.species : MOON.species[0].id, colour: moonFind(MOON.colours, a.colour) ? a.colour : MOON.colours[0].id, name: String(a.name || ''), meals: Math.max(0, Math.floor(Number(a.meals) || 0)), fav: moonFind(MOON.foods, a.fav) ? a.fav : MOON.foods[0].id, found: a.found === true,
+      wear: { hat: typeof w.hat === 'string' ? w.hat : '', eyes: typeof w.eyes === 'string' ? w.eyes : '', neck: typeof w.neck === 'string' ? w.neck : '', back: typeof w.back === 'string' ? w.back : '' },
+      // TPL-014 M4: what it was taught (topic → right answers, never more than full, never less), the finds it brought home,
+      // its favourite eaten, and the forms it has taken (the one it shows is form).
+      taught: taught, finds: Math.max(0, Math.floor(Number(a.finds) || 0)), favs: Math.max(0, Math.floor(Number(a.favs) || 0)),
+      forms: forms, form: forms.indexOf(a.form) !== -1 ? a.form : ''
+    };
   });
+  var count = function (o) { var out = {}; if (o && typeof o === 'object') for (var k in o) { var n = Math.floor(Number(o[k]) || 0); if (n > 0) out[k] = n; } return out; };
   return {
     aliens: aliens,
     sel: typeof m.sel === 'string' ? m.sel : '',
@@ -2946,8 +2965,65 @@ function moonOf(p) {
     // TPL-014 M1: every alien ever had (species-colour), for the Alien Book; read as the union with the aliens on the moon,
     // so a moon from before the book opens with what it already has. The domes built.
     met: moonMetOf(m, aliens),
-    domes: Array.isArray(m.domes) ? m.domes.filter(function (x) { return !!moonFind(MOON.domes, x); }) : []
+    domes: Array.isArray(m.domes) ? m.domes.filter(function (x) { return !!moonFind(MOON.domes, x); }) : [],
+    // TPL-014 M2–M5: the other big things built, the gear owned, what trips brought home (counts by find, the postcards had,
+    // seeds to plant, egg clues to hatch), the trips taken, the trip under way, the garden's plots and what it grew.
+    things: Array.isArray(m.things) ? m.things.filter(function (x) { return !!moonFind(MOON.things, x); }) : [],
+    gear: Array.isArray(m.gear) ? m.gear.filter(function (x) { return !!moonFind(MOON.gear, x); }) : [],
+    finds: count(m.finds),
+    cards: Array.isArray(m.cards) ? m.cards.filter(function (x) { return !!moonFind(MOON.postcards, x); }) : [],
+    seeds: Math.max(0, Math.floor(Number(m.seeds) || 0)),
+    eggs: Math.max(0, Math.floor(Number(m.eggs) || 0)),
+    trips: Math.max(0, Math.floor(Number(m.trips) || 0)),
+    trip: tripOf(m.trip),
+    plots: Array.isArray(m.plots) ? m.plots.filter(function (x) { return x && moonFind(MOON.garden.foods, x.food); }).slice(0, MOON.garden.plots).map(function (x) { return { food: x.food, at: Math.max(0, Number(x.at) || 0) }; }) : [],
+    larder: count(m.larder)
   };
+}
+/** TPL-014 M2: the trip under way, or null. A trip that is not whole is no trip (Come home has nothing to lose). */
+function tripOf(t) {
+  var n = MOON.trip.size * MOON.trip.size;
+  if (!t || typeof t !== 'object' || !Array.isArray(t.map) || t.map.length !== n) return null;
+  var cell = function (k) { return k === 'w' || k === 'c' || k === 'h' ? k : 'p'; };
+  var items = Array.isArray(t.items) ? t.items : [];
+  var seen = Array.isArray(t.seen) ? t.seen : [];
+  var out = { id: String(t.id || ''), planet: String(t.planet || MOON.planets[0]), map: [], items: [], seen: [], pos: 0, who: String(t.who || ''), aim: -1, hopped: t.hopped === true, bag: [] };
+  for (var i = 0; i < n; i++) { out.map.push(cell(t.map[i])); out.items.push(moonFind(MOON.finds, items[i]) ? items[i] : ''); out.seen.push(seen[i] === true); }
+  var pos = Math.floor(Number(t.pos));
+  out.pos = pos >= 0 && pos < n ? pos : out.map.indexOf('h') === -1 ? 0 : out.map.indexOf('h');
+  out.seen[out.pos] = true;
+  var aim = Math.floor(Number(t.aim));
+  out.aim = aim >= 0 && aim < n ? aim : -1;
+  out.bag = Array.isArray(t.bag) ? t.bag.filter(function (b) { return b && moonFind(MOON.finds, b.k); }).map(function (b) { return { k: b.k, by: String(b.by || ''), card: moonFind(MOON.postcards, b.card) ? b.card : '' }; }) : [];
+  return out;
+}
+/** TPL-014 M2: the tiles beside one (up, down, left, right). */
+function tripNear(i) {
+  var n = MOON.trip.size, r = Math.floor(i / n), c = i % n, out = [];
+  if (r > 0) out.push(i - n);
+  if (r < n - 1) out.push(i + n);
+  if (c > 0) out.push(i - 1);
+  if (c < n - 1) out.push(i + 1);
+  return out;
+}
+function tripBagSize(moon) { return MOON.trip.bag + (moon.gear.indexOf('boots') !== -1 ? MOON.trip.boots : 0); }
+/** TPL-014 M4: how far an alien is towards each form. */
+function moonFormProgress(al, form) {
+  if (form.what === 'topics') { var full = 0; for (var k in al.taught) if (al.taught[k] >= MOON.topicFull) full++; return full; }
+  return form.what === 'finds' ? al.finds : al.favs;
+}
+/** TPL-014 M4: give a grown-up alien every form it has earned and not taken; the first it takes, it shows. Returns the new ones. */
+function moonTakeForms(al) {
+  var fresh = [];
+  if (moonStage(al.meals) < 2) return fresh;
+  for (var i = 0; i < MOON.forms.length; i++) {
+    var f = MOON.forms[i];
+    if (al.forms.indexOf(f.id) === -1 && moonFormProgress(al, f) >= f.need) { al.forms.push(f.id); fresh.push(f); if (!al.form) al.form = f.id; }
+  }
+  return fresh;
+}
+function moonFormSaid(al, fresh, lang) {
+  return fresh.map(function (f) { return (lang === 'fr' ? ' {n} devient {f} !' : ' {n} became {f}!').replace('{n}', al.name).replace('{f}', moonText(f.as, lang)); }).join('');
 }
 function moonKey(species, colour) { return species + '-' + colour; }
 /** TPL-014 M1: a name to suggest that no alien on this moon already has (the list goes round; then a number). */
@@ -2977,6 +3053,11 @@ function moonStage(meals) { return meals >= MOON.grow[1] ? 2 : meals >= MOON.gro
 function moonAlienCost(n) { return n < MOON.cost.length ? MOON.cost[n] : MOON.cost[MOON.cost.length - 1]; }
 function moonColour(id) { var c = moonFind(MOON.colours, id) || MOON.colours[0]; return 'var(' + c.token + ')'; }
 function moonSelected(moon) { return moonFind(moon.aliens, moon.sel) || moon.aliens[0] || null; }
+function moonNewAlien(species, colour, name) {
+  return { id: 'a' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36), species: species, colour: colour, name: name, meals: 0, fav: MOON.foods[Math.floor(Math.random() * MOON.foods.length)].id, found: false, wear: { hat: '', eyes: '', neck: '', back: '' }, taught: {}, finds: 0, favs: 0, forms: [], form: '' };
+}
+/** TPL-014 M5: the stars earned so far, which water the garden (a right answer pays one). */
+function moonEarned(model) { return Math.max(0, Number(model && model.stars) || 0); }
 `;
 
 /**
@@ -3001,8 +3082,15 @@ function stageLine(a) {
   if (st >= 2) return STAGE[2] + (fr ? ' ! · ' : '! · ') + meals;
   return STAGE[st] + ' · ' + meals + ' · ' + (fr ? 'encore {n} pour grandir' : '{n} more to grow').replace('{n}', MOON.grow[st] - a.meals);
 }
+/** One tile the moon offers (Moon/Shop tile): every field, so a repeated row never carries an old row's value. */
+function itemRow(o) {
+  var row = { id: '', glyph: '', label: '', line: '', cost: 0, use: false, ask: false, dim: false, worn: false, showAlien: false, species: '', colour: '', grown: 2, hat: '', eyes: '', neck: '', back: '', form: '' };
+  for (var k in o) row[k] = o[k];
+  return row;
+}
+function formName(a) { var f = moonFind(MOON.forms, a.form); return f ? moonText(f.name, lang) : ''; }
 Outputs.aliens = moon.aliens.map(function (a) {
-  return { id: a.id, name: a.name, species: a.species, colour: moonColour(a.colour), grown: moonStage(a.meals), hat: a.wear.hat, eyes: a.wear.eyes, neck: a.wear.neck, happy: a.meals, selected: !!sel && sel.id === a.id, line: STAGE[moonStage(a.meals)] };
+  return { id: a.id, name: a.name, species: a.species, colour: moonColour(a.colour), grown: moonStage(a.meals), hat: a.wear.hat, eyes: a.wear.eyes, neck: a.wear.neck, back: a.wear.back, form: a.form, happy: a.meals, selected: !!sel && sel.id === a.id, line: formName(a) || STAGE[moonStage(a.meals)] };
 });
 Outputs.has = moon.aliens.length > 0;
 Outputs.count = moon.aliens.length;
@@ -3019,24 +3107,32 @@ Outputs.selGrown = sel ? moonStage(sel.meals) : 0;
 Outputs.selHat = sel ? sel.wear.hat : '';
 Outputs.selEyes = sel ? sel.wear.eyes : '';
 Outputs.selNeck = sel ? sel.wear.neck : '';
+Outputs.selBack = sel ? sel.wear.back : '';
+Outputs.selForm = sel ? sel.form : '';
 Outputs.selHappy = sel ? sel.meals : 0;
 Outputs.selLine = sel ? stageLine(sel) : '';
 Outputs.favLine = !sel ? '' : sel.found && fav ? (fr ? 'Plat préféré : ' : 'Favourite food: ') + fav.glyph + ' ' + moonText(fav.name, lang) : fr ? 'Plat préféré : ❓ — trouve-le !' : 'Favourite food: ❓ — find it!';
 // Food: a tap feeds. Too dear is greyed, and says nothing worse than its price.
-Outputs.foods = MOON.foods.map(function (f) {
-  return { id: f.id, glyph: f.glyph, label: moonText(f.name, lang), line: f.cost + ' ⭐', cost: f.cost, use: !!sel && f.cost <= purse, ask: false, dim: f.cost > purse, worn: false, showAlien: false, species: '', colour: '', grown: 2, hat: '', eyes: '', neck: '' };
+var foods = MOON.foods.map(function (f) {
+  return itemRow({ id: f.id, glyph: f.glyph, label: moonText(f.name, lang), line: f.cost + ' ⭐', cost: f.cost, use: !!sel && f.cost <= purse, dim: f.cost > purse });
 });
+// TPL-014 M5: what the garden grew comes first, free, with how many meals are left.
+MOON.garden.foods.forEach(function (g) {
+  var left = moon.larder[g.id] || 0;
+  if (left > 0) foods.unshift(itemRow({ id: g.id, glyph: g.glyph, label: moonText(g.name, lang), line: (fr ? 'gratuit · ×{n}' : 'free · ×{n}').replace('{n}', left), use: !!sel }));
+});
+Outputs.foods = foods;
 // What to wear: the chosen alien drawn wearing it. Owned goes on or off with a tap; not owned asks first (the hangar's card).
 Outputs.wear = MOON.wear.map(function (w) {
   var owned = moon.owned.indexOf(w.id) !== -1;
   var worn = !!sel && sel.wear[w.slot] === w.id;
-  var look = sel ? { hat: sel.wear.hat, eyes: sel.wear.eyes, neck: sel.wear.neck } : { hat: '', eyes: '', neck: '' };
+  var look = sel ? { hat: sel.wear.hat, eyes: sel.wear.eyes, neck: sel.wear.neck, back: sel.wear.back } : { hat: '', eyes: '', neck: '', back: '' };
   look[w.slot] = w.id;
-  return {
-    id: w.id, glyph: '', label: moonText(w.name, lang), line: worn ? (fr ? 'Porté ✓' : 'On ✓') : owned ? (fr ? 'Le mettre' : 'Put it on') : w.cost + ' ⭐', cost: w.cost,
+  return itemRow({
+    id: w.id, label: moonText(w.name, lang), line: worn ? (fr ? 'Porté ✓' : 'On ✓') : owned ? (fr ? 'Le mettre' : 'Put it on') : w.cost + ' ⭐', cost: w.cost,
     use: !!sel && owned, ask: !!sel && !owned && w.cost <= purse, dim: !owned && w.cost > purse, worn: worn, showAlien: true,
-    species: sel ? sel.species : MOON.species[0].id, colour: sel ? moonColour(sel.colour) : moonColour(''), grown: 2, hat: look.hat, eyes: look.eyes, neck: look.neck
-  };
+    species: sel ? sel.species : MOON.species[0].id, colour: sel ? moonColour(sel.colour) : moonColour(''), grown: 2, hat: look.hat, eyes: look.eyes, neck: look.neck, back: look.back, form: sel ? sel.form : ''
+  });
 });
 // The adopt card.
 var draftSp = moonFind(MOON.species, String(Inputs.draftSpecies || '')) || MOON.species[0];
@@ -3060,21 +3156,74 @@ var bookRows = [];
 for (var bs = 0; bs < MOON.species.length; bs++) for (var bc = 0; bc < MOON.colours.length; bc++) {
   var bsp = MOON.species[bs], bcol = MOON.colours[bc];
   var isMet = moon.met.indexOf(moonKey(bsp.id, bcol.id)) !== -1;
-  bookRows.push({ id: moonKey(bsp.id, bcol.id), name: isMet ? moonText(bsp.name, lang) : '?', species: bsp.id, colour: isMet ? moonColour(bcol.id) : 'var(--muted)', grown: 2, hat: '', eyes: '', neck: '', happy: 0, selected: false, line: isMet ? moonText(bcol.name, lang) : '' });
+  bookRows.push({ id: moonKey(bsp.id, bcol.id), name: isMet ? moonText(bsp.name, lang) : '?', species: bsp.id, colour: isMet ? moonColour(bcol.id) : 'var(--muted)', grown: 2, hat: '', eyes: '', neck: '', back: '', form: '', happy: 0, selected: false, line: isMet ? moonText(bcol.name, lang) : '' });
 }
 Outputs.book = bookRows;
 Outputs.bookCount = moon.met.length;
 Outputs.bookLine = (fr ? 'Le livre des aliens · {n} sur {t}' : 'Alien Book · {n} of {t}').replace('{n}', moon.met.length).replace('{t}', bookRows.length);
+// TPL-014 M2: what trips brought home, under the book's pages.
+var foundBits = MOON.finds.filter(function (f) { return moon.finds[f.id] > 0; }).map(function (f) { return f.glyph + ' ×' + moon.finds[f.id]; });
+Outputs.findsLine = foundBits.length ? (fr ? 'Trouvé en expédition : ' : 'Found on expeditions: ') + foundBits.join('  ') : fr ? 'Rien trouvé en expédition pour l’instant.' : 'Nothing found on expeditions yet.';
 // The big things: the domes, then the egg. A dome built says so; the egg needs room and says what it does.
 var room = moonMax(moon) - moon.aliens.length;
 var unmet = bookRows.length - moon.met.length;
 var bigs = MOON.domes.map(function (d) {
   var built = moon.domes.indexOf(d.id) !== -1;
-  return { id: d.id, glyph: d.glyph, label: moonText(d.name, lang), line: built ? (fr ? 'Construit ✓ · +{r} places' : 'Built ✓ · room for {r} more').replace('{r}', d.room) : d.cost + ' ⭐ · ' + (fr ? '+{r} places' : 'room for {r} more').replace('{r}', d.room), cost: d.cost, use: false, ask: !built && d.cost <= purse, dim: !built && d.cost > purse, worn: built, showAlien: false, species: '', colour: '', grown: 2, hat: '', eyes: '', neck: '' };
+  return itemRow({ id: d.id, glyph: d.glyph, label: moonText(d.name, lang), line: built ? (fr ? 'Construit ✓ · +{r} places' : 'Built ✓ · room for {r} more').replace('{r}', d.room) : d.cost + ' ⭐ · ' + (fr ? '+{r} places' : 'room for {r} more').replace('{r}', d.room), cost: d.cost, ask: !built && d.cost <= purse, dim: !built && d.cost > purse, worn: built });
 });
 var eggLine = room <= 0 ? (fr ? 'La Lune est pleine : construis un dôme' : 'The moon is full: build a dome first') : MOON.egg + ' ⭐ · ' + (unmet > 0 ? (fr ? 'un alien jamais vu ({n} possibles)' : 'an alien you have never had ({n} it could be)').replace('{n}', unmet) : (fr ? 'un alien surprise' : 'a surprise alien'));
-bigs.push({ id: 'egg', glyph: '🥚', label: fr ? 'Œuf surprise' : 'Surprise egg', line: eggLine, cost: MOON.egg, use: false, ask: room > 0 && MOON.egg <= purse, dim: room <= 0 || MOON.egg > purse, worn: false, showAlien: false, species: '', colour: '', grown: 2, hat: '', eyes: '', neck: '' });
+bigs.push(itemRow({ id: 'egg', glyph: '🥚', label: fr ? 'Œuf surprise' : 'Surprise egg', line: eggLine, cost: MOON.egg, ask: room > 0 && MOON.egg <= purse, dim: room <= 0 || MOON.egg > purse }));
+// TPL-014 M2: an egg clue a trip brought home hatches free, with no question (it costs nothing).
+if (moon.eggs > 0) bigs.unshift(itemRow({ id: 'clue', glyph: '🥚', label: fr ? 'Œuf d’expédition' : 'Egg from a trip', line: room <= 0 ? (fr ? 'La Lune est pleine : construis un dôme' : 'The moon is full: build a dome first') : (fr ? 'gratuit · ×{n} · touche pour l’éclore' : 'free · ×{n} · tap to hatch it').replace('{n}', moon.eggs), use: room > 0, dim: room <= 0 }));
+// TPL-014 M5: the garden and the postcard frame, built once.
+MOON.things.forEach(function (t) {
+  var built = moon.things.indexOf(t.id) !== -1;
+  bigs.push(itemRow({ id: t.id, glyph: t.glyph, label: moonText(t.name, lang), line: built ? (fr ? 'Construit ✓' : 'Built ✓') : t.cost + ' ⭐ · ' + moonText(t.line, lang).toLowerCase(), cost: t.cost, ask: !built && t.cost <= purse, dim: !built && t.cost > purse, worn: built }));
+});
 Outputs.bigs = bigs;
+// TPL-014 M3: gear for expeditions, bought once. It helps the walk and never answers a question.
+Outputs.gear = MOON.gear.map(function (g) {
+  var has = moon.gear.indexOf(g.id) !== -1;
+  return itemRow({ id: g.id, glyph: g.glyph, label: moonText(g.name, lang), line: has ? (fr ? 'À toi ✓ · ' : 'Yours ✓ · ') + moonText(g.line, lang).toLowerCase() : g.cost + ' ⭐ · ' + moonText(g.line, lang).toLowerCase(), cost: g.cost, ask: !has && g.cost <= purse, dim: !has && g.cost > purse, worn: has });
+});
+// TPL-014 M5: the garden, once built: a plot per seed planted, ripe once enough stars have been earned since.
+var earned = moonEarned(model);
+var hasGarden = moon.things.indexOf('garden') !== -1;
+Outputs.hasGarden = hasGarden;
+Outputs.plots = moon.plots.map(function (pl, i) {
+  var crop = moonFind(MOON.garden.foods, pl.food);
+  var left = Math.max(0, Math.ceil(MOON.garden.ripe - (earned - pl.at)));
+  var ripe = left <= 0;
+  var half = left <= MOON.garden.ripe / 2;
+  return itemRow({ id: String(i), glyph: ripe ? crop.glyph : half ? '🌿' : '🌱', label: ripe ? moonText(crop.name, lang) : fr ? 'Ça pousse' : 'Growing', line: ripe ? (fr ? 'Mûr ! Touche pour cueillir' : 'Ripe! Tap to pick') : (fr ? 'encore {n} ⭐ à gagner' : '{n} more ⭐ to earn').replace('{n}', left), use: ripe, worn: ripe });
+});
+Outputs.canPlant = hasGarden && moon.seeds > 0 && moon.plots.length < MOON.garden.plots;
+Outputs.plantLine = (fr ? '🌱 Planter une graine · {n} à planter' : '🌱 Plant a seed · {n} to plant').replace('{n}', moon.seeds);
+Outputs.gardenLine = !hasGarden ? '' : moon.seeds > 0 || moon.plots.length ? (fr ? 'Chaque bonne réponse arrose le jardin.' : 'Every right answer waters the garden.') : fr ? 'Pas encore de graines : une expédition en trouve.' : 'No seeds yet: an expedition finds some.';
+// TPL-014 M5: the postcards, hung in the frame once it is built.
+Outputs.hasFrame = moon.things.indexOf('frame') !== -1;
+Outputs.cards = moon.cards.map(function (id) { var c = moonFind(MOON.postcards, id); return itemRow({ id: c.id, glyph: c.glyph, label: moonText(c.name, lang), worn: true }); });
+Outputs.cardsLine = (fr ? 'Cartes postales · {n} sur {t}' : 'Postcards · {n} of {t}').replace('{n}', moon.cards.length).replace('{t}', MOON.postcards.length);
+// TPL-014: something to aim for. Every goal fills, nothing empties.
+var goals = [];
+var pct = function (n, of) { return of > 0 ? Math.max(0, Math.min(100, Math.round((100 * n) / of))) : 0; };
+goals.push({ id: 'book', label: fr ? 'Le livre des aliens' : 'Alien Book', line: (fr ? '{n} sur {t} aliens rencontrés' : '{n} of {t} aliens met').replace('{n}', moon.met.length).replace('{t}', bookRows.length), pct: pct(moon.met.length, bookRows.length) });
+var nextBig = MOON.domes.filter(function (d) { return moon.domes.indexOf(d.id) === -1; })[0];
+if (nextBig) goals.push({ id: 'dome', label: moonText(nextBig.name, lang), line: (purse >= nextBig.cost ? (fr ? 'Tu peux le construire ! {t} ⭐ · +{r} places' : 'You can build it now! {t} ⭐ · room for {r} more') : fr ? '{n} sur {t} ⭐ · +{r} places' : '{n} of {t} ⭐ · room for {r} more').replace('{n}', Math.min(purse, nextBig.cost)).replace('{t}', nextBig.cost).replace('{r}', nextBig.room), pct: pct(purse, nextBig.cost) });
+if (sel) {
+  var stage = moonStage(sel.meals);
+  if (stage < 2) goals.push({ id: 'grow', label: (fr ? '{n} grandit' : '{n} grows up').replace('{n}', sel.name), line: (fr ? 'encore {m} repas' : '{m} more meals').replace('{m}', MOON.grow[1] - sel.meals), pct: pct(sel.meals, MOON.grow[1]) });
+  else {
+    var best = null;
+    MOON.forms.forEach(function (f) { if (sel.forms.indexOf(f.id) !== -1) return; var at = moonFormProgress(sel, f) / f.need; if (!best || at > best.at) best = { f: f, at: at }; });
+    if (best) goals.push({ id: 'form', label: sel.name + ' → ' + moonText(best.f.name, lang), line: moonText(best.f.how, lang) + ' · ' + Math.min(best.f.need, moonFormProgress(sel, best.f)) + (fr ? ' sur ' : ' of ') + best.f.need, pct: pct(moonFormProgress(sel, best.f), best.f.need) });
+  }
+}
+goals.push({ id: 'cards', label: fr ? 'Cartes postales' : 'Postcards', line: (fr ? '{n} sur {t} trouvées en voyage' : '{n} of {t} found on trips').replace('{n}', moon.cards.length).replace('{t}', MOON.postcards.length), pct: pct(moon.cards.length, MOON.postcards.length) });
+Outputs.goals = goals;
+// TPL-014: the two places to go from the moon, saying what is waiting there.
+Outputs.tripLine = moon.trip ? (fr ? 'Ton expédition sur {p} t’attend : {n} trouvailles dans le sac.' : 'Your trip to {p} is waiting: {n} finds in the bag.').replace('{p}', moon.trip.planet).replace('{n}', moon.trip.bag.length) : fr ? 'Explore une planète avec un alien. Ce sont tes réponses qui le font avancer.' : 'Explore a planet with an alien. Your answers move it.';
+Outputs.schoolLine = sel ? (fr ? '{n} bloque sur une question. Apprends-lui, et il change.' : '{n} is stuck on a question. Teach it, and it changes.').replace('{n}', sel.name) : '';
 `;
 
 /**
@@ -3108,7 +3257,7 @@ for (var i = 0; i < app.profiles.length; i++) {
       var sp = moonFind(MOON.species, String(Inputs.species || '')) || MOON.species[0];
       var col = moonFind(MOON.colours, String(Inputs.colour || '')) || MOON.colours[0];
       var nm = String(Inputs.name || '').trim().slice(0, 16) || moonFreshName(sp, moon);
-      al = { id: 'a' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36), species: sp.id, colour: col.id, name: nm, meals: 0, fav: MOON.foods[Math.floor(Math.random() * MOON.foods.length)].id, found: false, wear: { hat: '', eyes: '', neck: '' } };
+      al = moonNewAlien(sp.id, col.id, nm);
       moon.aliens.push(al);
       if (moon.met.indexOf(moonKey(al.species, al.colour)) === -1) moon.met.push(moonKey(al.species, al.colour));
       model.spent = spentOf(model) + cost;
@@ -3116,22 +3265,34 @@ for (var i = 0; i < app.profiles.length; i++) {
       ok = true;
     }
   } else if (action === 'build') {
-    // TPL-014 M1: a dome, built once, makes room for more aliens.
-    var dome = moonFind(MOON.domes, String(Inputs.thingId || ''));
-    if (!dome) why = 'unknown';
-    else if (moon.domes.indexOf(dome.id) !== -1) why = 'owned';
-    else if (dome.cost > purse) why = 'tooDear';
+    // TPL-014 M1: a dome, built once, makes room for more aliens. M3/M5: the same tap builds the garden or the frame, or buys
+    // a piece of gear, each once.
+    var thingId = String(Inputs.thingId || '');
+    var dome = moonFind(MOON.domes, thingId);
+    var other = moonFind(MOON.things, thingId);
+    var kit = moonFind(MOON.gear, thingId);
+    var big = dome || other || kit;
+    var list = dome ? moon.domes : other ? moon.things : moon.gear;
+    if (!big) why = 'unknown';
+    else if (list.indexOf(big.id) !== -1) why = 'owned';
+    else if (big.cost > purse) why = 'tooDear';
     else {
-      moon.domes.push(dome.id);
-      model.spent = spentOf(model) + dome.cost;
-      said = (fr ? '{d} est construit : {r} places de plus sur la Lune !' : 'The {d} is built: room for {r} more aliens!').replace('{d}', moonText(dome.name, lang)).replace('{r}', dome.room);
+      list.push(big.id);
+      model.spent = spentOf(model) + big.cost;
+      if (dome) said = (fr ? '{d} est construit : {r} places de plus sur la Lune !' : 'The {d} is built: room for {r} more aliens!').replace('{d}', moonText(dome.name, lang)).replace('{r}', dome.room);
+      else if (other) said = (fr ? '{g} {d} : c’est fait !' : '{g} The {d} is ready!').replace('{g}', other.glyph).replace('{d}', fr ? moonText(other.name, lang) : moonText(other.name, lang).toLowerCase());
+      else said = (fr ? '{g} {d} pour les expéditions : {l}.' : '{g} {d} for expeditions: {l}.').replace('{g}', kit.glyph).replace('{d}', moonText(kit.name, lang)).replace('{l}', moonText(kit.line, lang).toLowerCase());
       ok = true;
     }
   } else if (action === 'egg') {
     // TPL-014 M1: always an alien never had (a species in a colour) while there is one; then any. No rarity, no spin.
+    // M2: an egg clue a trip brought home (Thing Id clue) hatches the same way, and costs nothing.
+    var clue = String(Inputs.thingId || '') === 'clue';
     if (moon.aliens.length >= moonMax(moon)) why = 'full';
-    else if (MOON.egg > purse) why = 'tooDear';
+    else if (clue && moon.eggs < 1) why = 'noEgg';
+    else if (!clue && MOON.egg > purse) why = 'tooDear';
     else {
+      if (clue) moon.eggs -= 1;
       var pool = [];
       for (var es = 0; es < MOON.species.length; es++) for (var ec = 0; ec < MOON.colours.length; ec++) {
         if (moon.met.indexOf(moonKey(MOON.species[es].id, MOON.colours[ec].id)) === -1) pool.push([MOON.species[es], MOON.colours[ec]]);
@@ -3140,23 +3301,53 @@ for (var i = 0; i < app.profiles.length; i++) {
       var hatch = pool[Math.floor(Math.random() * pool.length)];
       var hsp = hatch[0], hcol = hatch[1];
       var hname = moonFreshName(hsp, moon);
-      al = { id: 'a' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36), species: hsp.id, colour: hcol.id, name: hname, meals: 0, fav: MOON.foods[Math.floor(Math.random() * MOON.foods.length)].id, found: false, wear: { hat: '', eyes: '', neck: '' } };
+      al = moonNewAlien(hsp.id, hcol.id, hname);
       moon.aliens.push(al);
       if (moon.met.indexOf(moonKey(hsp.id, hcol.id)) === -1) moon.met.push(moonKey(hsp.id, hcol.id));
-      model.spent = spentOf(model) + MOON.egg;
+      if (!clue) model.spent = spentOf(model) + MOON.egg;
       said = (fr ? 'L’œuf éclot : voici {n}, un {s} {c} !' : 'The egg hatched: meet {n}, a {c} {s}!').replace('{n}', hname).replace('{s}', moonText(hsp.name, lang)).replace('{c}', moonText(hcol.name, lang).toLowerCase());
+      ok = true;
+    }
+  } else if (action === 'plant') {
+    // TPL-014 M5: a seed from a trip into the first free plot; what it grows goes round the garden's list.
+    if (moon.things.indexOf('garden') === -1) why = 'noGarden';
+    else if (moon.seeds < 1) why = 'noSeed';
+    else if (moon.plots.length >= MOON.garden.plots) why = 'full';
+    else {
+      var crop = MOON.garden.foods[(moon.trips + moon.seeds + moon.plots.length) % MOON.garden.foods.length];
+      moon.seeds -= 1;
+      moon.plots.push({ food: crop.id, at: moonEarned(model) });
+      said = fr ? 'Une graine est plantée. Chaque bonne réponse l’arrose !' : 'A seed is planted. Every right answer waters it!';
+      ok = true;
+    }
+  } else if (action === 'pick') {
+    var plot = Math.floor(Number(Inputs.thingId));
+    var pl = plot >= 0 && plot < moon.plots.length ? moon.plots[plot] : null;
+    if (!pl) why = 'unknown';
+    else if (moonEarned(model) - pl.at < MOON.garden.ripe) why = 'notRipe';
+    else {
+      var crop2 = moonFind(MOON.garden.foods, pl.food);
+      moon.plots.splice(plot, 1);
+      moon.larder[crop2.id] = (moon.larder[crop2.id] || 0) + MOON.garden.meals;
+      said = (fr ? '{g} {f} cueilli : {m} repas gratuits !' : '{g} {f} picked: {m} free meals!').replace('{g}', crop2.glyph).replace('{f}', moonText(crop2.name, lang)).replace('{m}', MOON.garden.meals);
       ok = true;
     }
   } else if (!al) why = 'noAlien';
   else if (action === 'select') ok = true;
   else if (action === 'feed') {
     var food = moonFind(MOON.foods, String(Inputs.foodId || ''));
+    // TPL-014 M5: what the garden grew is free, one meal each, while there is some.
+    var grown = !food ? moonFind(MOON.garden.foods, String(Inputs.foodId || '')) : null;
+    if (grown) food = { id: grown.id, glyph: grown.glyph, name: grown.name, cost: 0 };
     if (!food) why = 'unknown';
+    else if (grown && !(moon.larder[grown.id] > 0)) why = 'noFood';
     else if (food.cost > purse) why = 'tooDear';
     else {
       var before = moonStage(al.meals);
       var loved = food.id === al.fav;
       al.meals += loved ? MOON.fav : 1;
+      if (loved) al.favs += 1;
+      if (grown) { moon.larder[grown.id] -= 1; if (!moon.larder[grown.id]) delete moon.larder[grown.id]; }
       model.spent = spentOf(model) + food.cost;
       if (loved && !al.found) said = fr ? '{n} ADORE {f} ! C’est son plat préféré : deux repas d’un coup.' : '{n} LOVES {f}! It’s the favourite: two meals in one.';
       else if (loved) said = fr ? '{n} ADORE {f} ! (+2 repas)' : '{n} LOVES {f}! (+2 meals)';
@@ -3164,6 +3355,17 @@ for (var i = 0; i < app.profiles.length; i++) {
       if (loved) al.found = true;
       said = said.replace('{n}', al.name).replace('{f}', food.glyph);
       if (moonStage(al.meals) > before) said += (fr ? ' {n} a grandi !' : ' {n} grew!').replace('{n}', al.name);
+      said += moonFormSaid(al, moonTakeForms(al), lang);
+      ok = true;
+    }
+  } else if (action === 'form') {
+    // TPL-014 M4: show a form it has taken, or none (Form Id empty, or the one it shows already).
+    var fid = String(Inputs.formId || '');
+    if (fid && al.forms.indexOf(fid) === -1) why = 'notOwned';
+    else {
+      al.form = fid === al.form ? '' : fid;
+      var shown = moonFind(MOON.forms, al.form);
+      said = shown ? (fr ? '{n} se montre en {f}.' : '{n} shows off its {f} form.').replace('{n}', al.name).replace('{f}', moonText(shown.name, lang)) : (fr ? '{n} redevient comme avant.' : '{n} is back to just {n}.').split('{n}').join(al.name);
       ok = true;
     }
   } else if (action === 'buy' || action === 'wear') {
@@ -3199,6 +3401,364 @@ Outputs.ok = ok;
 Outputs.why = why;
 Outputs.said = said;
 Outputs.alienId = alienId;
+`;
+
+// ── TPL-014 M2/M3 — the Expedition ──────────────────────────────────────────
+
+/**
+ * The trip under way, as the Expedition draws it: six rows of six tiles for the nested repeaters (fog until seen; the alien
+ * drawn where it stands; a dashed edge on the tiles it can walk to), the crew to choose who walks, the bag, the gear owned,
+ * and a line saying what to do. Everything in the player's language.
+ */
+export const TRIP_VIEW_SCRIPT = `${PROFILE_HELPERS}${STAR_HELPERS}${MOON_HELPERS}
+var app = appOf(Inputs.app);
+var p = null;
+for (var i = 0; i < app.profiles.length; i++) if (app.profiles[i].id === app.activeId) p = app.profiles[i];
+var fr = !!p && p.lang === 'fr';
+var lang = fr ? 'fr' : 'en';
+var moon = moonOf(p);
+var trip = moon.trip;
+var walker = trip ? moonFind(moon.aliens, trip.who) || moonSelected(moon) : moonSelected(moon);
+var swims = !!walker && walker.species === MOON.trip.swimmer;
+var hasGear = function (id) { return moon.gear.indexOf(id) !== -1; };
+var n = MOON.trip.size;
+var rows = [];
+var seenWater = false;
+for (var r = 0; r < n; r++) {
+  var cells = [];
+  for (var c = 0; c < n; c++) {
+    var at = r * n + c;
+    var here = !!trip && trip.pos === at;
+    var seen = !!trip && trip.seen[at];
+    var k = trip ? trip.map[at] : 'p';
+    var item = trip ? trip.items[at] : '';
+    var find = item ? moonFind(MOON.finds, item) : null;
+    if (seen && k === 'w') seenWater = true;
+    var glyph = '';
+    if (here) glyph = '';
+    else if (seen) glyph = find ? find.glyph : k === 'w' ? '💧' : k === 'c' ? '🕳️' : k === 'h' ? '🚀' : '';
+    else if (item === 'egg' && hasGear('map')) glyph = '🥚';
+    var kind = !seen ? 'fog' : k === 'w' ? 'water' : k === 'c' ? 'crater' : k === 'h' ? 'home' : 'plain';
+    var near = !!trip && tripNear(trip.pos).indexOf(at) !== -1;
+    cells.push({ id: 'c' + at, at: at, glyph: glyph, kind: kind, edge: here ? 'here' : near ? 'near' : 'none', me: here, species: walker ? walker.species : 'blob', colour: walker ? moonColour(walker.colour) : moonColour(''), grown: walker ? moonStage(walker.meals) : 2, hat: walker ? walker.wear.hat : '', eyes: walker ? walker.wear.eyes : '', neck: walker ? walker.wear.neck : '', back: walker ? walker.wear.back : '', form: walker ? walker.form : '' });
+  }
+  rows.push({ id: 'r' + r, cells: cells });
+}
+Outputs.rows = rows;
+Outputs.has = !!trip;
+Outputs.tripId = trip ? trip.id : '';
+Outputs.canStart = !trip && moon.aliens.length > 0;
+Outputs.noAliens = moon.aliens.length === 0;
+Outputs.title = trip ? (fr ? 'Planète {p}' : 'Planet {p}').replace('{p}', trip.planet) : fr ? 'Une expédition' : 'An expedition';
+Outputs.crew = moon.aliens.map(function (a) { return { label: a.name + (a.species === MOON.trip.swimmer ? (fr ? ' · nage' : ' · swims') : ''), value: a.id }; });
+Outputs.who = walker ? walker.id : '';
+Outputs.whoName = walker ? walker.name : '';
+var room = tripBagSize(moon);
+var bag = trip ? trip.bag : [];
+Outputs.bagLine = bag.length ? bag.map(function (b) { return moonFind(MOON.finds, b.k).glyph; }).join(' ') : fr ? 'Rien pour l’instant. Cristaux, fossiles, graines et cartes postales se cachent sous le brouillard.' : 'Nothing yet. Crystals, fossils, seeds and postcards hide under the fog.';
+Outputs.countLine = (fr ? '{n} trouvailles · le sac en porte {m}' : '{n} finds · the bag holds {m}').replace('{n}', bag.length).replace('{m}', room);
+var tip = walker ? (fr ? 'Touche une case juste à côté de {n} (bord en pointillés), puis réponds pour y aller.' : 'Tap a tile right next to {n} (a dashed edge), then answer to walk there.').replace('{n}', walker.name) : '';
+if (seenWater && !swims) tip += fr ? ' 💧 L’eau, c’est pour un Gribouille : change d’alien pour nager.' : ' 💧 Water needs a swimmer: switch to a Squiggle.';
+Outputs.tip = tip;
+var owned = MOON.gear.filter(function (g) { return hasGear(g.id); });
+Outputs.gearLine = owned.length ? owned.map(function (g) { return g.glyph + ' ' + moonText(g.name, lang); }).join(' · ') : fr ? 'Pas encore d’équipement : la boutique de la Lune a une lanterne, un jetpack, une vieille carte et de grosses bottes.' : 'No gear yet: the moon’s shop has a lantern, a jetpack, an old map and big boots.';
+Outputs.startLine = (fr ? 'Partir avec {n}' : 'Set off with {n}').replace('{n}', walker ? walker.name : '');
+Outputs.introLine = fr ? 'Une planète dans le brouillard. Chaque bonne réponse fait avancer ton alien d’une case ; une erreur ne fait rien perdre. Reviens quand tu veux avec tout ce que tu as trouvé.' : 'A planet in the fog. Every right answer walks your alien one tile; a wrong one loses nothing. Come home any time with everything you found.';
+`;
+
+/** TPL-014 M2: a new planet. Water and craters never cut the plain ground in two, so every find on it can be reached. */
+const TRIP_NEW = `
+function tripRand(k) { return Math.floor(Math.random() * k); }
+function tripJoined(map, home) {
+  var seen = {}, todo = [home], count = 0, total = 0;
+  for (var i = 0; i < map.length; i++) if (map[i] !== 'w' && map[i] !== 'c') total++;
+  seen[home] = true;
+  while (todo.length) {
+    var at = todo.pop(); count++;
+    tripNear(at).forEach(function (j) { if (!seen[j] && map[j] !== 'w' && map[j] !== 'c') { seen[j] = true; todo.push(j); } });
+  }
+  return count === total;
+}
+function tripNew(moon) {
+  var n = MOON.trip.size, cells = n * n, home = (n - 1) * n, L = MOON.trip.layout;
+  var unmet = MOON.species.length * MOON.colours.length - moon.met.length;
+  var sel = moonSelected(moon);
+  for (var attempt = 0; attempt < 80; attempt++) {
+    var map = [];
+    for (var i = 0; i < cells; i++) map.push('p');
+    map[home] = 'h';
+    var safe = [home].concat(tripNear(home));
+    var free = function (j) { return map[j] === 'p' && safe.indexOf(j) === -1; };
+    var start = tripRand(cells);
+    if (!free(start)) continue;
+    map[start] = 'w';
+    var pond = [start];
+    while (pond.length < L.water) {
+      var edge = [];
+      pond.forEach(function (j) { tripNear(j).forEach(function (q) { if (free(q) && edge.indexOf(q) === -1) edge.push(q); }); });
+      if (!edge.length) break;
+      var w = edge[tripRand(edge.length)];
+      map[w] = 'w';
+      pond.push(w);
+    }
+    var holes = 0, guard = 0;
+    while (holes < L.craters && guard++ < 200) { var h = tripRand(cells); if (free(h)) { map[h] = 'c'; holes++; } }
+    if (!tripJoined(map, home)) continue;
+    var plains = [];
+    for (var x = 0; x < cells; x++) if (map[x] === 'p') plains.push(x);
+    for (var y = plains.length - 1; y > 0; y--) { var z = tripRand(y + 1), t = plains[y]; plains[y] = plains[z]; plains[z] = t; }
+    var list = L.plain.slice();
+    if (unmet > 0) for (var e = 0; e < L.egg; e++) list.push('egg');
+    if (plains.length < list.length) continue;
+    var items = [];
+    for (var u = 0; u < cells; u++) items.push('');
+    list.forEach(function (k, v) { items[plains[v]] = k; });
+    var waters = [], craters = [];
+    for (var m = 0; m < cells; m++) { if (map[m] === 'w') waters.push(m); if (map[m] === 'c') craters.push(m); }
+    if (waters.length) items[waters[tripRand(waters.length)]] = 'shell';
+    if (craters.length) items[craters[tripRand(craters.length)]] = 'meteor';
+    var seen = [];
+    for (var s2 = 0; s2 < cells; s2++) seen.push(s2 === home || tripNear(home).indexOf(s2) !== -1);
+    return { id: 't' + Date.now().toString(36) + tripRand(1000000).toString(36), planet: MOON.planets[moon.trips % MOON.planets.length], map: map, items: items, seen: seen, pos: home, who: sel ? sel.id : '', aim: -1, hopped: false, bag: [] };
+  }
+  return null;
+}
+`;
+
+/**
+ * One thing done on a trip. Action is a parameter, placed once per action: start (a new planet, with the chosen alien), crew
+ * (Alien Id walks now), aim (At: a tile beside the alien, to walk to once a question is answered), answer (Correct: the
+ * question for the aim was graded; right walks there, clears the fog and picks up what lies there; wrong changes nothing but
+ * the aim) or home (everything in the bag comes home, the trip ends). Refused with nothing changed when it does not apply
+ * (Why). Said is the line to show.
+ */
+export const TRIP_ACT_SCRIPT = `${PROFILE_HELPERS}${STAR_HELPERS}${MOON_HELPERS}${TRIP_NEW}
+var app = appOf(Inputs.app);
+var id = String(Inputs.profileId || app.activeId);
+var action = String(Inputs.action || '');
+var ok = false, why = 'noProfile', said = '';
+for (var i = 0; i < app.profiles.length; i++) {
+  var p = app.profiles[i];
+  if (p.id !== id) continue;
+  var fr = p.lang === 'fr';
+  var lang = fr ? 'fr' : 'en';
+  var moon = moonOf(p);
+  var trip = moon.trip;
+  var walker = trip ? moonFind(moon.aliens, trip.who) || moonSelected(moon) : null;
+  var hasGear = function (g) { return moon.gear.indexOf(g) !== -1; };
+  why = '';
+  if (action === 'start') {
+    if (trip) why = 'onTrip';
+    else if (!moon.aliens.length) why = 'noAlien';
+    else {
+      moon.trip = tripNew(moon);
+      if (!moon.trip) why = 'noMap';
+      else {
+        var lead = moonFind(moon.aliens, moon.trip.who);
+        said = (fr ? 'Atterrissage sur {p} ! {n} sort de la fusée.' : 'Landed on {p}! {n} steps out of the rocket.').replace('{p}', moon.trip.planet).replace('{n}', lead ? lead.name : '');
+        ok = true;
+      }
+    }
+  } else if (!trip) why = 'noTrip';
+  else if (action === 'crew') {
+    var who = moonFind(moon.aliens, String(Inputs.alienId || ''));
+    if (!who) why = 'noAlien';
+    else {
+      trip.who = who.id;
+      trip.aim = -1;
+      said = (fr ? '{n} prend la tête.' : '{n} takes the lead.').replace('{n}', who.name) + (who.species === MOON.trip.swimmer ? (fr ? ' Il sait nager !' : ' It can swim!') : '');
+      ok = true;
+    }
+  } else if (action === 'aim') {
+    var at = Math.floor(Number(Inputs.at));
+    var k = trip.map[at];
+    var name = walker ? walker.name : '';
+    var inCrater = trip.map[trip.pos] === 'c';
+    if (!(at >= 0 && at < trip.map.length) || tripNear(trip.pos).indexOf(at) === -1) {
+      why = 'far';
+      said = fr ? 'Choisis une case juste à côté de ton alien (bord en pointillés).' : 'Pick a tile right next to your alien (it has a dashed edge).';
+    } else if (trip.seen[at] && k === 'w' && !(walker && walker.species === MOON.trip.swimmer)) {
+      why = 'swim';
+      said = (fr ? '{n} ne sait pas nager. Un Gribouille, si : change d’alien.' : '{n} can’t swim. A Squiggle can: switch aliens.').replace('{n}', name);
+    } else if (trip.seen[at] && k === 'c' && !hasGear('jetpack')) {
+      why = 'crater';
+      said = fr ? 'Un cratère ! Il faut le jetpack pour y sauter.' : 'A crater! It takes the jetpack to hop in.';
+    } else if (trip.seen[at] && k === 'c' && trip.hopped && !inCrater) {
+      why = 'hopped';
+      said = fr ? 'Le jetpack a déjà sauté une fois pendant ce voyage.' : 'The jetpack has already hopped once this trip.';
+    } else {
+      trip.aim = at;
+      said = fr ? 'Pour y aller, réponds :' : 'To walk there, answer:';
+      ok = true;
+    }
+  } else if (action === 'answer') {
+    if (trip.aim < 0) why = 'noAim';
+    else if (Inputs.correct !== true) {
+      trip.aim = -1;
+      said = fr ? 'Pas tout à fait. Rien n’est perdu : choisis une case et essaie encore.' : 'Not quite. Nothing is lost: pick a tile and try again.';
+      ok = true;
+    } else {
+      var to = trip.aim;
+      var kind = trip.map[to];
+      var nm = walker ? walker.name : '';
+      trip.aim = -1;
+      trip.seen[to] = true;
+      var swims = !!walker && walker.species === MOON.trip.swimmer;
+      var fromCrater = trip.map[trip.pos] === 'c';
+      if (kind === 'w' && !swims) said = (fr ? 'Juste ! Mais c’est de l’eau : {n} ne sait pas nager. Un Gribouille, si.' : 'Right! But that tile is water: {n} can’t swim. A Squiggle can.').replace('{n}', nm);
+      else if (kind === 'c' && (!hasGear('jetpack') || (trip.hopped && !fromCrater))) said = hasGear('jetpack') ? (fr ? 'Juste ! Mais le jetpack a déjà sauté pendant ce voyage.' : 'Right! But the jetpack has already hopped this trip.') : fr ? 'Juste ! Mais c’est un cratère : il faut le jetpack.' : 'Right! But that tile is a crater: it takes the jetpack.';
+      else {
+        if (kind === 'c' && !fromCrater) trip.hopped = true;
+        trip.pos = to;
+        var lantern = hasGear('lantern');
+        if (lantern) tripNear(to).forEach(function (j) { trip.seen[j] = true; });
+        var item = trip.items[to];
+        var find = item ? moonFind(MOON.finds, item) : null;
+        if (find && trip.bag.length >= tripBagSize(moon)) said = (fr ? 'Juste ! {n} avance. Le sac est plein : rentre le vider, {g} t’attend ici.' : 'Right! {n} walks on. The bag is full: come home to empty it, and the {g} waits here.').replace('{n}', nm).replace('{g}', find.glyph);
+        else if (find) {
+          var card = '';
+          if (item === 'postcard') {
+            var have = moon.cards.concat(trip.bag.map(function (b) { return b.card; }));
+            var fresh = MOON.postcards.filter(function (c) { return have.indexOf(c.id) === -1; });
+            card = (fresh.length ? fresh[0] : MOON.postcards[Math.floor(Math.random() * MOON.postcards.length)]).id;
+          }
+          trip.bag.push({ k: item, by: walker ? walker.id : '', card: card });
+          trip.items[to] = '';
+          var pc = card ? moonFind(MOON.postcards, card) : null;
+          said = (fr ? 'Juste ! {n} a trouvé : {g} {f} !' : 'Right! {n} found a {f} {g}!').replace('{n}', nm).replace('{g}', find.glyph).replace('{f}', fr ? moonText(find.name, lang).toLowerCase() : moonText(find.name, lang).toLowerCase()) + (pc ? ' ' + pc.glyph + ' ' + moonText(pc.name, lang) + '.' : '');
+        } else said = lantern ? (fr ? 'Juste ! {n} avance, et la lanterne chasse le brouillard autour.' : 'Right! {n} walks on, and the lantern clears the fog around it.').replace('{n}', nm) : (fr ? 'Juste ! {n} avance d’une case.' : 'Right! {n} walks one tile on.').replace('{n}', nm);
+      }
+      ok = true;
+    }
+  } else if (action === 'home') {
+    var brought = trip.bag;
+    brought.forEach(function (b) {
+      moon.finds[b.k] = (moon.finds[b.k] || 0) + 1;
+      if (b.k === 'seed') moon.seeds += 1;
+      if (b.k === 'egg') moon.eggs += 1;
+      if (b.k === 'postcard' && b.card && moon.cards.indexOf(b.card) === -1) moon.cards.push(b.card);
+      var by = moonFind(moon.aliens, b.by);
+      if (by) by.finds += 1;
+    });
+    moon.trips += 1;
+    moon.trip = null;
+    said = brought.length ? (fr ? 'De retour avec {g} ! Tout va dans le livre des aliens.' : 'Home safe with {g}! Everything goes in the Alien Book.').replace('{g}', brought.map(function (b) { return moonFind(MOON.finds, b.k).glyph; }).join(' ')) : fr ? 'De retour. Rien trouvé cette fois, et rien perdu.' : 'Home safe. Nothing found this time, and nothing lost.';
+    moon.aliens.forEach(function (a) { said += moonFormSaid(a, moonTakeForms(a), lang); });
+    ok = true;
+  } else why = 'action';
+  if (ok) p.moon = moon;
+}
+Outputs.app = app;
+Outputs.ok = ok;
+Outputs.why = why;
+Outputs.said = said;
+`;
+
+// ── TPL-014 M4 — Alien school ───────────────────────────────────────────────
+
+/**
+ * Alien school as the player sees it: the chosen alien, stuck; what it has learned (a bar per topic, never emptying); how an
+ * alien changes (baby, young, grown up, then its form) and the three forms with what each needs and how far it has got.
+ */
+export const SCHOOL_VIEW_SCRIPT = `${PROFILE_HELPERS}${STAR_HELPERS}${MOON_HELPERS}
+var TOPICS = ${JSON.stringify(TOPICS)};
+var app = appOf(Inputs.app);
+var p = null;
+for (var i = 0; i < app.profiles.length; i++) if (app.profiles[i].id === app.activeId) p = app.profiles[i];
+var fr = !!p && p.lang === 'fr';
+var lang = fr ? 'fr' : 'en';
+var moon = moonOf(p);
+var al = moonSelected(moon);
+var topicName = function (tid) { for (var t = 0; t < TOPICS.length; t++) if (TOPICS[t].id === tid) return moonText(TOPICS[t].name, lang); return tid; };
+Outputs.has = !!al;
+Outputs.crew = moon.aliens.map(function (a) { return { label: a.name, value: a.id }; });
+Outputs.who = al ? al.id : '';
+Outputs.name = al ? al.name : '';
+Outputs.species = al ? al.species : 'blob';
+Outputs.colour = al ? moonColour(al.colour) : moonColour('');
+Outputs.grown = al ? moonStage(al.meals) : 2;
+Outputs.hat = al ? al.wear.hat : '';
+Outputs.eyes = al ? al.wear.eyes : '';
+Outputs.neck = al ? al.wear.neck : '';
+Outputs.back = al ? al.wear.back : '';
+Outputs.form = al ? al.form : '';
+Outputs.title = al ? (fr ? '{n} est bloqué' : '{n} is stuck').replace('{n}', al.name) : fr ? 'Adopte d’abord un alien sur la Lune' : 'Adopt an alien on the moon first';
+Outputs.says = fr ? '« Je ne comprends pas celle-ci. Tu peux me montrer ? »' : '“I don’t get this one. Can you show me?”';
+var taught = [];
+if (al) for (var tk in al.taught) taught.push({ id: tk, n: al.taught[tk] });
+taught.sort(function (a, b) { return b.n - a.n || (a.id < b.id ? -1 : 1); });
+Outputs.topics = taught.map(function (t) { return { id: t.id, label: topicName(t.id), line: t.n >= MOON.topicFull ? (fr ? 'Appris ✓' : 'Learned ✓') : t.n + (fr ? ' sur ' : ' of ') + MOON.topicFull, pct: Math.round((100 * t.n) / MOON.topicFull) }; });
+Outputs.hasTopics = taught.length > 0;
+Outputs.topicsTitle = (fr ? 'Ce que {n} a appris' : 'What {n} has learned').replace('{n}', al ? al.name : '');
+Outputs.topicsNote = (fr ? 'Un chapitre se remplit avec tes bonnes réponses ({m} pour le remplir) et ne redescend jamais.' : 'A topic fills from your right answers ({m} to fill it) and never goes down.').replace('{m}', MOON.topicFull);
+var STAGE = fr ? ['Bébé', 'Jeune', 'Tout grand'] : ['Baby', 'Young', 'Grown up'];
+var stage = al ? moonStage(al.meals) : 0;
+var shape = function (o) { var row = { id: '', name: '', species: al ? al.species : 'blob', colour: al ? moonColour(al.colour) : moonColour(''), grown: 2, hat: '', eyes: '', neck: '', back: '', form: '', happy: 0, selected: false, line: '' }; for (var k in o) row[k] = o[k]; return row; };
+var evo = [0, 1, 2].map(function (g) { return shape({ id: 'g' + g, name: STAGE[g], grown: g, selected: g === stage && !(al && al.form), line: g < stage || (g === stage && al && al.form) ? '✓' : g === stage ? (fr ? 'maintenant' : 'now') : (fr ? 'à {m} repas' : 'at {m} meals').replace('{m}', MOON.grow[g - 1]) }); });
+var shownForm = al ? moonFind(MOON.forms, al.form) : null;
+evo.push(shape({ id: 'g3', name: shownForm ? moonText(shownForm.name, lang) : '?', form: shownForm ? shownForm.id : '', colour: shownForm ? (al ? moonColour(al.colour) : '') : 'var(--muted)', selected: !!shownForm, line: shownForm ? (fr ? 'maintenant' : 'now') : fr ? 'la forme suivante' : 'the next form' }));
+Outputs.evo = evo;
+Outputs.forms = MOON.forms.map(function (f) {
+  var has = !!al && al.forms.indexOf(f.id) !== -1;
+  var at = al ? Math.min(f.need, moonFormProgress(al, f)) : 0;
+  return shape({ id: f.id, name: moonText(f.name, lang), form: f.id, colour: has ? (al ? moonColour(al.colour) : '') : 'var(--muted)', selected: has && al.form === f.id, line: has ? (al.form === f.id ? (fr ? 'Montrée ✓ · touche pour l’enlever' : 'Showing ✓ · tap to put away') : fr ? 'À lui ✓ · touche pour la montrer' : 'Its own ✓ · tap to show it') : moonText(f.how, lang) + ' · ' + at + (fr ? ' sur ' : ' of ') + f.need });
+});
+Outputs.formLine = !al ? '' : stage < 2 ? (fr ? '{n} doit d’abord grandir (encore {m} repas) : la quatrième forme vient après.' : '{n} grows up first ({m} more meals): the fourth form comes after.').replace('{n}', al.name).replace('{m}', MOON.grow[1] - al.meals) : fr ? 'La quatrième forme dépend de ce que l’alien fait le plus avec toi. Tu vois toujours ce qu’il faut pour la suivante.' : 'The fourth form depends on what the alien does most with you. You can always see what the next one needs.';
+`;
+
+/**
+ * One thing done at Alien school. Action is a parameter, placed once per action: teach (Correct and Topic: the question just
+ * graded; a right answer teaches the alien that topic, and a full topic stays full) or form (Form Id: show a form it has
+ * taken, or put it away). Refused with nothing changed when it does not apply (Why). Said is what the alien says.
+ */
+export const SCHOOL_ACT_SCRIPT = `${PROFILE_HELPERS}${STAR_HELPERS}${MOON_HELPERS}
+var TOPICS = ${JSON.stringify(TOPICS)};
+var app = appOf(Inputs.app);
+var id = String(Inputs.profileId || app.activeId);
+var action = String(Inputs.action || '');
+var ok = false, why = 'noProfile', said = '';
+for (var i = 0; i < app.profiles.length; i++) {
+  var p = app.profiles[i];
+  if (p.id !== id) continue;
+  var fr = p.lang === 'fr';
+  var lang = fr ? 'fr' : 'en';
+  var moon = moonOf(p);
+  var al = moonFind(moon.aliens, String(Inputs.alienId || '')) || moonSelected(moon);
+  why = '';
+  if (!al) why = 'noAlien';
+  else if (action === 'teach') {
+    var topic = String(Inputs.topic || '');
+    var tname = topic;
+    for (var t = 0; t < TOPICS.length; t++) if (TOPICS[t].id === topic) tname = moonText(TOPICS[t].name, lang);
+    if (Inputs.correct !== true) {
+      said = fr ? '« Hmm, pas facile. On en essaie une autre comme ça ? »' : '“Hmm, tricky. Shall we try one like it?”';
+      ok = true;
+    } else if (!topic) why = 'noTopic';
+    else {
+      var was = al.taught[topic] || 0;
+      al.taught[topic] = Math.min(MOON.topicFull, was + 1);
+      if (al.taught[topic] >= MOON.topicFull && was < MOON.topicFull) said = (fr ? '« J’ai compris {t} ! Regarde-moi ! »' : '“I get {t} now! Look at me!”').replace('{t}', tname);
+      else if (was >= MOON.topicFull) said = (fr ? '« Je le savais déjà, mais merci ! »' : '“I knew that one, thank you!”');
+      else said = (fr ? '« Oh ! Je vois. {t} : {n} sur {m}. Encore une ? »' : '“Oh! I see. {t}: {n} of {m}. Another one?”').replace('{t}', tname).replace('{n}', al.taught[topic]).replace('{m}', MOON.topicFull);
+      said += moonFormSaid(al, moonTakeForms(al), lang);
+      ok = true;
+    }
+  } else if (action === 'form') {
+    var fid = String(Inputs.formId || '');
+    if (fid && al.forms.indexOf(fid) === -1) why = 'notOwned';
+    else {
+      al.form = fid === al.form ? '' : fid;
+      var shown = moonFind(MOON.forms, al.form);
+      said = shown ? (fr ? '{n} se montre en {f}.' : '{n} shows off its {f} form.').replace('{n}', al.name).replace('{f}', moonText(shown.name, lang)) : (fr ? '{n} redevient comme avant.' : '{n} is back to just {n}.').split('{n}').join(al.name);
+      ok = true;
+    }
+  } else why = 'action';
+  if (ok) { moon.sel = al.id; p.moon = moon; }
+}
+Outputs.app = app;
+Outputs.ok = ok;
+Outputs.why = why;
+Outputs.said = said;
 `;
 
 // ── Translate words ─────────────────────────────────────────────────────────

@@ -125,12 +125,6 @@
     },
     {
       "fromId": "hdT",
-      "fromProperty": "language",
-      "toId": "hdLang",
-      "toProperty": "label"
-    },
-    {
-      "fromId": "hdT",
       "fromProperty": "soundOn",
       "toId": "hdSound",
       "toProperty": "label"
@@ -152,12 +146,6 @@
       "fromProperty": "closeMenu",
       "toId": "hdClose",
       "toProperty": "label"
-    },
-    {
-      "fromId": "hdLangItems",
-      "fromProperty": "items",
-      "toId": "hdLang",
-      "toProperty": "items"
     },
     {
       "fromId": "hdT",
@@ -203,12 +191,6 @@
     },
     {
       "fromId": "hdIn",
-      "fromProperty": "lang",
-      "toId": "hdLang",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "hdIn",
       "fromProperty": "soundMode",
       "toId": "hdSound",
       "toProperty": "value"
@@ -232,12 +214,6 @@
       "toProperty": "profileId"
     },
     {
-      "fromId": "hdLang",
-      "fromProperty": "value",
-      "toId": "hdSet",
-      "toProperty": "lang"
-    },
-    {
       "fromId": "hdSound",
       "fromProperty": "value",
       "toId": "hdSet",
@@ -248,12 +224,6 @@
       "fromProperty": "value",
       "toId": "hdSet",
       "toProperty": "answerMode"
-    },
-    {
-      "fromId": "hdLang",
-      "fromProperty": "changed",
-      "toId": "hdSet",
-      "toProperty": "run"
     },
     {
       "fromId": "hdSound",

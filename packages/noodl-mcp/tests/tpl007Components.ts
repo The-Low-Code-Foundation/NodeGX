@@ -68,6 +68,10 @@ import {
   MONSTER_LOOKS,
   MOON_ACT_SCRIPT,
   MOON_VIEW_SCRIPT,
+  SCHOOL_ACT_SCRIPT,
+  SCHOOL_VIEW_SCRIPT,
+  TRIP_ACT_SCRIPT,
+  TRIP_VIEW_SCRIPT,
   MONSTER_MOVE_SCRIPT,
   NEW_BOARD_SCRIPT,
   NEW_HUNT_SCRIPT,
@@ -208,7 +212,19 @@ export const C = {
   moonBookTile: '/Moon/Book tile',
   moonBook: '/Moon/Book',
   moonBig: '/Moon/Big things',
-  pageMoon: '/Pages/Moon'
+  pageMoon: '/Pages/Moon',
+  // TPL-014 M2–M5 — the moon grows.
+  moonGoal: '/Moon/Goal',
+  moonGoals: '/Moon/Goals',
+  moonPlaces: '/Moon/Places',
+  moonGarden: '/Moon/Garden',
+  moonFrame: '/Moon/Frame',
+  tripTile: '/Trip/Tile',
+  tripRow: '/Trip/Row',
+  tripPlay: '/Trip/Play',
+  pageExpedition: '/Pages/Expedition',
+  schoolPlay: '/School/Play',
+  pageSchool: '/Pages/School'
 } as const;
 
 /** The arrow keys, from the `keyboard-shortcuts` library module (TPL-005 vendored it for the same job). */
@@ -640,13 +656,39 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
     name: 'Logic/Moon view', script: MOON_VIEW_SCRIPT,
     description: 'P113 REV-005: the moon as the active player sees it — their aliens as rows, the chosen one close up and its lines, the food and the things to wear as tiles with what a tap does, and the adopt card (each species in the Draft Colour, the next alien’s price, a name to suggest). Every line in their language.',
     ins: [['app', 'object'], ['draftSpecies', 'string'], ['draftColour', 'string']],
-    outs: [['book', 'array'], ['bookCount', 'number'], ['bookLine', 'string'], ['bigs', 'array'], ['aliens', 'array'], ['has', 'boolean'], ['count', 'number'], ['full', 'boolean'], ['purse', 'number'], ['purseLine', 'string'], ['selId', 'string'], ['selName', 'string'], ['selSpecies', 'string'], ['selColour', 'string'], ['selGrown', 'number'], ['selHat', 'string'], ['selEyes', 'string'], ['selNeck', 'string'], ['selHappy', 'number'], ['selLine', 'string'], ['favLine', 'string'], ['foods', 'array'], ['wear', 'array'], ['adoptSpecies', 'array'], ['adoptColours', 'array'], ['draftSpecies', 'string'], ['draftColour', 'string'], ['adoptCost', 'number'], ['adoptFree', 'boolean'], ['canAdopt', 'boolean'], ['suggestedName', 'string'], ['adoptButton', 'string'], ['anotherLine', 'string']]
+    outs: [['book', 'array'], ['bookCount', 'number'], ['bookLine', 'string'], ['bigs', 'array'], ['aliens', 'array'], ['has', 'boolean'], ['count', 'number'], ['full', 'boolean'], ['purse', 'number'], ['purseLine', 'string'], ['selId', 'string'], ['selName', 'string'], ['selSpecies', 'string'], ['selColour', 'string'], ['selGrown', 'number'], ['selHat', 'string'], ['selEyes', 'string'], ['selNeck', 'string'], ['selHappy', 'number'], ['selLine', 'string'], ['favLine', 'string'], ['foods', 'array'], ['wear', 'array'], ['adoptSpecies', 'array'], ['adoptColours', 'array'], ['draftSpecies', 'string'], ['draftColour', 'string'], ['adoptCost', 'number'], ['adoptFree', 'boolean'], ['canAdopt', 'boolean'], ['suggestedName', 'string'], ['adoptButton', 'string'], ['anotherLine', 'string'],
+      // TPL-014 M2–M5.
+      ['selBack', 'string'], ['selForm', 'string'], ['findsLine', 'string'], ['gear', 'array'], ['hasGarden', 'boolean'], ['plots', 'array'], ['canPlant', 'boolean'], ['plantLine', 'string'], ['gardenLine', 'string'], ['hasFrame', 'boolean'], ['cards', 'array'], ['cardsLine', 'string'], ['goals', 'array'], ['tripLine', 'string'], ['schoolLine', 'string']]
   },
   {
     name: 'Logic/Moon act', script: MOON_ACT_SCRIPT, run: true,
     description: 'P113 REV-005: one thing done on the moon. Action is a parameter, placed once per action: adopt (Species, Colour, Name; the first alien free), select (Alien Id), feed (Food Id), buy (Wear Id: bought once and put on) or wear (Wear Id, owned: on, or off); TPL-014: build (Thing Id, a dome: room for more aliens) or egg (always an alien never had, while there is one). Refused with nothing changed when the purse is short, the moon is full or the thing is not theirs (Why). Said is the line to show.',
-    ins: [['app', 'object'], ['profileId', 'string'], ['action', 'string'], ['alienId', 'string'], ['foodId', 'string'], ['wearId', 'string'], ['thingId', 'string'], ['species', 'string'], ['colour', 'string'], ['name', 'string']],
+    ins: [['app', 'object'], ['profileId', 'string'], ['action', 'string'], ['alienId', 'string'], ['foodId', 'string'], ['wearId', 'string'], ['thingId', 'string'], ['species', 'string'], ['colour', 'string'], ['name', 'string'], ['formId', 'string']],
     outs: [['app', 'object'], ['ok', 'boolean'], ['why', 'string'], ['said', 'string'], ['alienId', 'string']]
+  },
+  {
+    name: 'Logic/Trip view', script: TRIP_VIEW_SCRIPT,
+    description: 'TPL-014 M2: the trip under way as the Expedition draws it — six rows of six tiles (fog until seen, the walking alien where it stands, a dashed edge where it can walk), who can walk, the bag, the gear owned, and a line saying what to do. Every line in their language.',
+    ins: [['app', 'object']],
+    outs: [['rows', 'array'], ['has', 'boolean'], ['tripId', 'string'], ['canStart', 'boolean'], ['noAliens', 'boolean'], ['title', 'string'], ['crew', 'array'], ['who', 'string'], ['whoName', 'string'], ['bagLine', 'string'], ['countLine', 'string'], ['tip', 'string'], ['gearLine', 'string'], ['startLine', 'string'], ['introLine', 'string']]
+  },
+  {
+    name: 'Logic/Trip act', script: TRIP_ACT_SCRIPT, run: true,
+    description: 'TPL-014 M2: one thing done on a trip. Action is a parameter, placed once per action: start (a new planet), crew (Alien Id walks now), aim (At, a tile beside the alien), answer (Correct: right walks there and picks up what lies there; wrong loses nothing) or home (the bag comes home). Refused with nothing changed when it does not apply (Why). Said is the line to show.',
+    ins: [['app', 'object'], ['profileId', 'string'], ['action', 'string'], ['alienId', 'string'], ['at', 'number'], ['correct', 'boolean']],
+    outs: [['app', 'object'], ['ok', 'boolean'], ['why', 'string'], ['said', 'string']]
+  },
+  {
+    name: 'Logic/School view', script: SCHOOL_VIEW_SCRIPT,
+    description: 'TPL-014 M4: Alien school as the player sees it — the chosen alien, what it says, what it has learned (a bar per topic), how an alien changes (its stages and its form), and the three forms with what each needs.',
+    ins: [['app', 'object']],
+    outs: [['has', 'boolean'], ['crew', 'array'], ['who', 'string'], ['name', 'string'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['back', 'string'], ['form', 'string'], ['title', 'string'], ['says', 'string'], ['topics', 'array'], ['hasTopics', 'boolean'], ['topicsTitle', 'string'], ['topicsNote', 'string'], ['evo', 'array'], ['forms', 'array'], ['formLine', 'string']]
+  },
+  {
+    name: 'Logic/School act', script: SCHOOL_ACT_SCRIPT, run: true,
+    description: 'TPL-014 M4: one thing done at Alien school. Action is a parameter, placed once per action: teach (Correct and Topic: a right answer teaches the alien that topic; a full topic stays full) or form (Form Id: show a form it has taken, or put it away). Said is what the alien says.',
+    ins: [['app', 'object'], ['profileId', 'string'], ['action', 'string'], ['alienId', 'string'], ['correct', 'boolean'], ['topic', 'string'], ['formId', 'string']],
+    outs: [['app', 'object'], ['ok', 'boolean'], ['why', 'string'], ['said', 'string']]
   },
   {
     name: 'Logic/Teach card', script: TEACH_CARD_SCRIPT,
@@ -2155,7 +2197,7 @@ const RACE_ROUND: Tpl007Component = {
   path: 'Race/Round',
   description: 'One question of a race: Ask picks it, the box or the clock answers it, the grader scores it, the banner shows it. Publishes Graded with the gains and the new model, then Next or ShowMe when the banner is dismissed. Abandon stops the clock, so a question left behind never grades.',
   inputs: [port('ask', 'signal'), port('abandon', 'signal'), port('raceId', 'string'), port('forB', 'boolean'), port('level', 'string'), port('lang', 'string'), port('layout', 'string'), port('mode', 'string'), port('answerMode', 'string'), port('model', 'object'), port('curriculum', 'array'), port('wordLists', 'array'), port('timed', 'boolean'), port('soundOn', 'boolean'), port('placeholder', 'string'), port('checkWord', 'string'), port('fluentWord', 'string'), port('correctWord', 'string'), port('wrongWord', 'string'), port('timeUpWord', 'string'), port('nextWord', 'string'), port('showMeWord', 'string'), port('limitScale', 'number', 'TPL-007 §16: the clock as a share of the skill’s; the race sends none'), port('game', 'string', 'TPL-007 §16: gate or push, so the verdict says a hit or a push; the race sends none'), port('myAt', 'number', 'PLY-006: where this player’s rocket is, so the grader can see the gap'), port('cpuAt', 'number', 'PLY-006: where the other rocket is'), port('turboWord', 'string'), port('chargingWord', 'string'), port('armedWord', 'string'), port('armedHintWord', 'string'), port('focus', 'array', 'P113: the skills the chooser ticked; none is everything'), port('customSet', 'array', 'P113: the person’s list, when the focus is one'), port('customSetId', 'string'), port('customSetBoth', 'boolean')],
-  outputs: [port('graded', 'signal'), port('correct', 'boolean'), port('gain', 'number'), port('cpuGain', 'number'), port('slipPct', 'number'), port('chain', 'number'), port('chainOf', 'number'), port('chainReady', 'boolean'), port('turboUsed', 'boolean'), port('behind', 'boolean'), port('model', 'object'), port('outcome', 'string'), port('teach', 'string'), port('next', 'signal'), port('showMe', 'signal'), port('isTyping', 'boolean'), port('nextKey', 'string'), port('missCount', 'number'), port('worked', 'string'), port('prompt', 'string'), port('layoutSeen', 'string'), port('layoutSeenNow', 'signal'), port('layoutPick', 'string'), port('layoutPickNow', 'signal'), port('clockLeft', 'number')],
+  outputs: [port('graded', 'signal'), port('correct', 'boolean'), port('gain', 'number'), port('cpuGain', 'number'), port('slipPct', 'number'), port('chain', 'number'), port('chainOf', 'number'), port('chainReady', 'boolean'), port('turboUsed', 'boolean'), port('behind', 'boolean'), port('model', 'object'), port('outcome', 'string'), port('teach', 'string'), port('next', 'signal'), port('showMe', 'signal'), port('isTyping', 'boolean'), port('nextKey', 'string'), port('missCount', 'number'), port('worked', 'string'), port('prompt', 'string'), port('layoutSeen', 'string'), port('layoutSeenNow', 'signal'), port('layoutPick', 'string'), port('layoutPickNow', 'signal'), port('clockLeft', 'number'), port('topic', 'string', 'TPL-014 M4: the topic of the question asked, which Alien school teaches')],
   instantiates: [C.questionBox, C.countdown, C.banner, C.keyboard, logicName('Logic/Pick next question'), logicName('Logic/Grade answer'), C.sounds],
   nodes: [
     inputs('rdIn', 'The profile and the words', [['ask', 'signal'], ['abandon', 'signal'], ['raceId', 'string'], ['forB', 'boolean'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['mode', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['timed', 'boolean'], ['soundOn', 'boolean'], ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'], ['limitScale', 'number'], ['game', 'string'], ['myAt', 'number'], ['cpuAt', 'number'], ['turboWord', 'string'], ['chargingWord', 'string'], ['armedWord', 'string'], ['armedHintWord', 'string'], ['focus', 'array'], ['customSet', 'array'], ['customSetId', 'string'], ['customSetBoth', 'boolean']]),
@@ -2215,7 +2257,7 @@ const RACE_ROUND: Tpl007Component = {
     // RKT-004: Show me only after a wrong or timed-out answer, on a skill that has a card. It showed after "Fast and correct!" too.
     logic('rdCanTeach', EXPRESSION_NODE, 'Something to teach?', { expression: "correct !== true && ((teach || '') + '').length > 0" }),
     gate('rdRight', 'Right or wrong?'),
-    outputs('rdOut', 'The verdict', [['graded', 'signal'], ['correct', 'boolean'], ['gain', 'number'], ['cpuGain', 'number'], ['model', 'object'], ['outcome', 'string'], ['teach', 'string'], ['next', 'signal'], ['showMe', 'signal'], ['isTyping', 'boolean'], ['nextKey', 'string'], ['missCount', 'number'], ['worked', 'string'], ['prompt', 'string'], ['layoutSeen', 'string'], ['layoutSeenNow', 'signal'], ['layoutPick', 'string'], ['layoutPickNow', 'signal'], ['clockLeft', 'number'], ['slipPct', 'number'], ['chain', 'number'], ['chainOf', 'number'], ['chainReady', 'boolean'], ['turboUsed', 'boolean'], ['behind', 'boolean']])
+    outputs('rdOut', 'The verdict', [['graded', 'signal'], ['correct', 'boolean'], ['gain', 'number'], ['cpuGain', 'number'], ['model', 'object'], ['outcome', 'string'], ['teach', 'string'], ['next', 'signal'], ['showMe', 'signal'], ['isTyping', 'boolean'], ['nextKey', 'string'], ['missCount', 'number'], ['worked', 'string'], ['prompt', 'string'], ['layoutSeen', 'string'], ['layoutSeenNow', 'signal'], ['layoutPick', 'string'], ['layoutPickNow', 'signal'], ['clockLeft', 'number'], ['slipPct', 'number'], ['chain', 'number'], ['chainOf', 'number'], ['chainReady', 'boolean'], ['turboUsed', 'boolean'], ['behind', 'boolean'], ['topic', 'string']])
   ],
   connections: [
     // 🔴 PLY-006: the grader is the only thing that knows the comeback, and it can only know it if it is told the gap.
@@ -2361,7 +2403,9 @@ const RACE_ROUND: Tpl007Component = {
     wire('rdPick', 'worked', 'rdOut', 'worked'),
     wire('rdPick', 'prompt', 'rdOut', 'prompt'),
     // TPL-007 §16: the bar's own position, for the monster's walk.
-    wire('rdClock', 'left', 'rdOut', 'clockLeft')
+    wire('rdClock', 'left', 'rdOut', 'clockLeft'),
+    // TPL-014 M4: the topic asked, which Alien school teaches the alien.
+    wire('rdPick', 'topic', 'rdOut', 'topic')
   ]
 };
 
@@ -3183,6 +3227,10 @@ ${MONSTER_CSS}
  * has no work to do as a containing block. The class stays on the group because it names the pair, and the template
  * gate reads it to check the shelf and the card really are siblings.
  */
+/* TPL-014 M2: the planet's tiles. Fog is hatched; a tile the alien can walk to has a dashed edge, the one it stands on a solid one. */
+.rkt-trip-fog { background-image: repeating-linear-gradient(45deg, transparent 0 6px, color-mix(in srgb, var(--foreground) 12%, transparent) 6px 7px); }
+.rkt-trip-near { outline: 3px dashed var(--primary); outline-offset: -7px; cursor: pointer; }
+.rkt-trip-here { outline: 3px solid var(--foreground); outline-offset: -7px; }
 .rkt-buy-over { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; z-index: 6; justify-content: center !important; align-items: center !important; background: color-mix(in srgb, var(--background) 82%, transparent); padding-left: var(--space-4); padding-right: var(--space-4); }
 @media (prefers-reduced-motion: reduce) {
   .pressable, .game-card { transition: none; }
@@ -4928,10 +4976,10 @@ const PAGE_LISTS: Tpl007Component = {
 const MOON_TILE: Tpl007Component = {
   path: 'Moon/Alien tile',
   description: 'One alien: the kit draws it (species, colour, what it wears, how grown), its name and a line under it. Selected fills it sunshine. Publishes Tap with its Id — only the card answers, never the picture as well.',
-  inputs: [port('id', 'string'), port('name', 'string'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string'), port('happy', 'number'), port('selected', 'boolean'), port('line', 'string')],
+  inputs: [port('id', 'string'), port('name', 'string'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string'), port('back', 'string'), port('form', 'string'), port('happy', 'number'), port('selected', 'boolean'), port('line', 'string')],
   outputs: [port('tap', 'signal'), port('id', 'string')],
   nodes: [
-    inputs('mtIn', 'The alien', [['id', 'string'], ['name', 'string'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['happy', 'number'], ['selected', 'boolean'], ['line', 'string']]),
+    inputs('mtIn', 'The alien', [['id', 'string'], ['name', 'string'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['back', 'string'], ['form', 'string'], ['happy', 'number'], ['selected', 'boolean'], ['line', 'string']]),
     group('mtCard', 'The tile', undefined, { ...CARD, width: px(120), sizeMode: 'contentHeight', alignItems: 'center', rowGap: 'var(--space-1)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-3)', paddingLeft: 'var(--space-2)', paddingRight: 'var(--space-2)' }, ['mtAlien', 'mtName', 'mtLine']),
     place('mtAlien', KIT_ALIEN, 'The alien', 'mtCard', { size: 92 }),
     text('mtName', 'Its name', 'mtCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
@@ -4941,7 +4989,7 @@ const MOON_TILE: Tpl007Component = {
     outputs('mtOut', 'Tapped', [['tap', 'signal'], ['id', 'string']])
   ],
   connections: [
-    ...(['species', 'name', 'grown', 'hat', 'eyes', 'neck', 'happy'] as const).map((f) => wire('mtIn', f, 'mtAlien', f)),
+    ...(['species', 'name', 'grown', 'hat', 'eyes', 'neck', 'back', 'form', 'happy'] as const).map((f) => wire('mtIn', f, 'mtAlien', f)),
     wire('mtIn', 'colour', 'mtAlien', 'color'),
     wire('mtIn', 'name', 'mtName', 'text'),
     wire('mtIn', 'line', 'mtLine', 'text'),
@@ -4961,10 +5009,10 @@ const MOON_TILE: Tpl007Component = {
 const MOON_ITEM: Tpl007Component = {
   path: 'Moon/Shop tile',
   description: 'One food or one thing to wear: a glyph, or the chosen alien wearing it; its name; and its price or what a tap does. Worn fills it sunshine; Dim greys it (not enough stars yet). Publishes Use (feed it, or put it on or take it off) or Ask (buy it first), with the Id, Label and Cost.',
-  inputs: [port('id', 'string'), port('glyph', 'string'), port('label', 'string'), port('line', 'string'), port('cost', 'number'), port('use', 'boolean'), port('ask', 'boolean'), port('dim', 'boolean'), port('worn', 'boolean'), port('showAlien', 'boolean'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string')],
+  inputs: [port('id', 'string'), port('glyph', 'string'), port('label', 'string'), port('line', 'string'), port('cost', 'number'), port('use', 'boolean'), port('ask', 'boolean'), port('dim', 'boolean'), port('worn', 'boolean'), port('showAlien', 'boolean'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string'), port('back', 'string'), port('form', 'string')],
   outputs: [port('use', 'signal'), port('ask', 'signal'), port('id', 'string'), port('label', 'string'), port('cost', 'number')],
   nodes: [
-    inputs('miIn', 'The thing', [['id', 'string'], ['glyph', 'string'], ['label', 'string'], ['line', 'string'], ['cost', 'number'], ['use', 'boolean'], ['ask', 'boolean'], ['dim', 'boolean'], ['worn', 'boolean'], ['showAlien', 'boolean'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string']]),
+    inputs('miIn', 'The thing', [['id', 'string'], ['glyph', 'string'], ['label', 'string'], ['line', 'string'], ['cost', 'number'], ['use', 'boolean'], ['ask', 'boolean'], ['dim', 'boolean'], ['worn', 'boolean'], ['showAlien', 'boolean'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['back', 'string'], ['form', 'string']]),
     group('miCard', 'The tile', undefined, { ...CARD, width: px(112), sizeMode: 'contentHeight', alignItems: 'center', rowGap: 'var(--space-1)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-3)', paddingLeft: 'var(--space-2)', paddingRight: 'var(--space-2)' }, ['miGlyph', 'miAlienBox', 'miLabel', 'miLine']),
     text('miGlyph', 'The food', 'miCard', '', { ...T_BODY, fontSize: 'var(--text-4xl)', textAlignX: 'center' }),
     // A placed node has no Mounted of its own, so the alien sits in a Group that has one.
@@ -4987,7 +5035,7 @@ const MOON_ITEM: Tpl007Component = {
     wire('miIn', 'showAlien', 'miGlyphShown', 'showAlien'),
     wire('miGlyphShown', 'result', 'miGlyph', 'mounted'),
     wire('miIn', 'showAlien', 'miAlienBox', 'mounted'),
-    ...(['species', 'grown', 'hat', 'eyes', 'neck'] as const).map((f) => wire('miIn', f, 'miAlien', f)),
+    ...(['species', 'grown', 'hat', 'eyes', 'neck', 'back', 'form'] as const).map((f) => wire('miIn', f, 'miAlien', f)),
     wire('miIn', 'colour', 'miAlien', 'color'),
     wire('miIn', 'label', 'miLabel', 'text'),
     wire('miIn', 'line', 'miLine', 'text'),
@@ -5008,8 +5056,8 @@ const MOON_ITEM: Tpl007Component = {
   ]
 };
 
-const MOON_ROW_FIELDS = ['id', 'name', 'species', 'colour', 'grown', 'hat', 'eyes', 'neck', 'happy', 'selected', 'line'];
-const MOON_ITEM_FIELDS = ['id', 'glyph', 'label', 'line', 'cost', 'use', 'ask', 'dim', 'worn', 'showAlien', 'species', 'colour', 'grown', 'hat', 'eyes', 'neck'];
+const MOON_ROW_FIELDS = ['id', 'name', 'species', 'colour', 'grown', 'hat', 'eyes', 'neck', 'back', 'form', 'happy', 'selected', 'line'];
+const MOON_ITEM_FIELDS = ['id', 'glyph', 'label', 'line', 'cost', 'use', 'ask', 'dim', 'worn', 'showAlien', 'species', 'colour', 'grown', 'hat', 'eyes', 'neck', 'back', 'form'];
 /** The hangar's buy card, worded for the moon: what the child has, what it costs, what is left. */
 const moonConfirmWords = (from: string, to: string): unknown[] => [
   wire(from, 'haveWord', to, 'haveWord'),
@@ -5029,12 +5077,12 @@ const MOON_CONFIRM_PORTS: Array<[string, string]> = [['haveWord', 'string'], ['c
 const MOON_CARE: Tpl007Component = {
   path: 'Moon/Care',
   description: 'The chosen alien close up, then Something to eat and Something to wear. A food tap feeds it (Logic/Moon act, feed); something already owned goes on or off; something not owned asks first on Hangar/Confirm, then is bought and put on. App in; App and Write out.',
-  inputs: [port('mounted', 'boolean'), port('app', 'object'), port('profileId', 'string'), port('name', 'string'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string'), port('happy', 'number'), port('line', 'string'), port('favLine', 'string'), port('said', 'string'), port('foods', 'array'), port('wear', 'array'), port('purse', 'number'), port('feedWord', 'string'), port('dressWord', 'string'), port('buyTitle', 'string'), ...MOON_CONFIRM_PORTS.map(([n, t]) => port(n, t))],
+  inputs: [port('mounted', 'boolean'), port('app', 'object'), port('profileId', 'string'), port('name', 'string'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string'), port('back', 'string'), port('form', 'string'), port('happy', 'number'), port('line', 'string'), port('favLine', 'string'), port('said', 'string'), port('foods', 'array'), port('wear', 'array'), port('purse', 'number'), port('feedWord', 'string'), port('dressWord', 'string'), port('buyTitle', 'string'), ...MOON_CONFIRM_PORTS.map(([n, t]) => port(n, t))],
   outputs: [port('app', 'object'), port('write', 'signal')],
   repeats: { source: 'array', rowFields: MOON_ITEM_FIELDS },
   instantiates: [C.moonItem, C.hangarConfirm, logicName('Logic/Moon act')],
   nodes: [
-    inputs('mcIn', 'The chosen alien, and the store', [['mounted', 'boolean'], ['app', 'object'], ['profileId', 'string'], ['name', 'string'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['happy', 'number'], ['line', 'string'], ['favLine', 'string'], ['said', 'string'], ['foods', 'array'], ['wear', 'array'], ['purse', 'number'], ['feedWord', 'string'], ['dressWord', 'string'], ['buyTitle', 'string'], ...MOON_CONFIRM_PORTS]),
+    inputs('mcIn', 'The chosen alien, and the store', [['mounted', 'boolean'], ['app', 'object'], ['profileId', 'string'], ['name', 'string'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['back', 'string'], ['form', 'string'], ['happy', 'number'], ['line', 'string'], ['favLine', 'string'], ['said', 'string'], ['foods', 'array'], ['wear', 'array'], ['purse', 'number'], ['feedWord', 'string'], ['dressWord', 'string'], ['buyTitle', 'string'], ...MOON_CONFIRM_PORTS]),
     group('mcCard', 'Close up', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-5)', paddingBottom: 'var(--space-5)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)' }, ['mcAlien', 'mcName', 'mcLine', 'mcFav', 'mcSaid', 'mcFeedLabel', 'mcFoods', 'mcDressLabel', 'mcStack']),
     place('mcAlien', KIT_ALIEN, 'The chosen alien', 'mcCard', { size: 200 }),
     text('mcName', 'Its name', 'mcCard', '', { ...T_CARD, textAlignX: 'center' }),
@@ -5065,7 +5113,7 @@ const MOON_CARE: Tpl007Component = {
   connections: [
     wire('mcIn', 'mounted', 'mcShown', 'm'),
     wire('mcShown', 'result', 'mcCard', 'mounted'),
-    ...(['species', 'name', 'grown', 'hat', 'eyes', 'neck', 'happy'] as const).map((f) => wire('mcIn', f, 'mcAlien', f)),
+    ...(['species', 'name', 'grown', 'hat', 'eyes', 'neck', 'back', 'form', 'happy'] as const).map((f) => wire('mcIn', f, 'mcAlien', f)),
     wire('mcIn', 'colour', 'mcAlien', 'color'),
     wire('mcIn', 'name', 'mcName', 'text'),
     wire('mcIn', 'line', 'mcLine', 'text'),
@@ -5256,17 +5304,18 @@ const MOON_BOOK_TILE: Tpl007Component = {
 const MOON_BOOK: Tpl007Component = {
   path: 'Moon/Book',
   description: 'The Alien Book (TPL-014 M1): every species in every colour, folded to one button that says how many the player has had ("Alien Book · 9 of 36"). Open, the pages wrap; one never had is a grey shape. Close folds it again.',
-  inputs: [port('rows', 'array'), port('line', 'string'), port('closeWord', 'string')],
+  inputs: [port('rows', 'array'), port('line', 'string'), port('closeWord', 'string'), port('findsLine', 'string', 'TPL-014 M2: what expeditions brought home')],
   repeats: { source: 'array', rowFields: BOOK_FIELDS },
   instantiates: [C.moonBookTile],
   nodes: [
-    inputs('mkIn', 'The book', [['rows', 'array'], ['line', 'string'], ['closeWord', 'string']]),
+    inputs('mkIn', 'The book', [['rows', 'array'], ['line', 'string'], ['closeWord', 'string'], ['findsLine', 'string']]),
     group('mkCard', 'The book', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-3)', paddingRight: 'var(--space-3)' }, ['mkOpenIt', 'mkBody']),
     place('mkOpenIt', BUTTON_NODE, 'Open the book', 'mkCard', { ...BTN_OUTLINE, label: 'Alien Book' }),
-    group('mkBody', 'The pages', 'mkCard', column({ alignItems: 'center', rowGap: 'var(--space-3)' }), ['mkTitle', 'mkPages', 'mkClose']),
+    group('mkBody', 'The pages', 'mkCard', column({ alignItems: 'center', rowGap: 'var(--space-3)' }), ['mkTitle', 'mkPages', 'mkFinds', 'mkClose']),
     text('mkTitle', 'How many, of how many', 'mkBody', '', { ...T_CARD, textAlignX: 'center' }),
     group('mkPages', 'Every species in every colour', 'mkBody', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch', columnGap: 'var(--space-2)', rowGap: 'var(--space-2)' }), ['mkEach']),
     logic('mkEach', FOR_EACH_NODE, 'One page per species and colour', { template: C.moonBookTile, templateType: 'explicit' }),
+    text('mkFinds', 'What expeditions brought home', 'mkBody', '', { ...T_BODY, textAlignX: 'center' }),
     place('mkClose', BUTTON_NODE, 'Close the book', 'mkBody', { ...BTN_OUTLINE, label: 'Close the book' }),
     withStates('mkOpen', 'Folded, or open', ['folded', 'open'], {
       folded: { type: 'boolean', by: { folded: true, open: false } },
@@ -5277,6 +5326,7 @@ const MOON_BOOK: Tpl007Component = {
     wire('mkIn', 'line', 'mkOpenIt', 'label'),
     wire('mkIn', 'line', 'mkTitle', 'text'),
     wire('mkIn', 'closeWord', 'mkClose', 'label'),
+    wire('mkIn', 'findsLine', 'mkFinds', 'text'),
     wire('mkIn', 'rows', 'mkEach', 'items'),
     wire('mkOpenIt', 'onClick', 'mkOpen', 'to-open'),
     wire('mkClose', 'onClick', 'mkOpen', 'to-folded'),
@@ -5312,7 +5362,7 @@ const MOON_BIG: Tpl007Component = {
       asking: { type: 'boolean', by: { idle: false, asking: true } }
     }),
     logic('btBuyTitle', EXPRESSION_NODE, 'Buy what?', { expression: "String(word || '').replace('{item}', String(label || ''))" }),
-    logic('btWhich', EXPRESSION_NODE, 'A dome, or the egg?', { expression: "thing === 'egg' ? 'egg' : 'build'" }),
+    logic('btWhich', EXPRESSION_NODE, 'An egg, or something to build or buy?', { expression: "thing === 'egg' || thing === 'clue' ? 'egg' : 'build'" }),
     logic('btDo', logicName('Logic/Moon act'), 'Build it, or hatch it', { action: 'build' }),
     outputs('btOut', 'The store to write', [['app', 'object'], ['write', 'signal'], ['said', 'string']])
   ],
@@ -5336,6 +5386,8 @@ const MOON_BIG: Tpl007Component = {
     wire('btEach', 'itemOutput-id', 'btWhich', 'thing'),
     wire('btWhich', 'result', 'btDo', 'action'),
     wire('btConfirm', 'yes', 'btDo', 'run'),
+    // TPL-014 M2: an egg a trip brought home is free, so it hatches at a tap, with no question.
+    wire('btEach', 'itemOutputSignal-use', 'btDo', 'run'),
     wire('btDo', 'said', 'btSaid', 'text'),
     wire('btDo', 'app', 'btOut', 'app'),
     wire('btDo', 'done', 'btOut', 'write'),
@@ -5351,12 +5403,12 @@ const MOON_BIG: Tpl007Component = {
 const PAGE_MOON: Tpl007Component = {
   path: 'Pages/Moon',
   description: 'The moon (P113 REV-005): the player’s aliens as tiles, the chosen one close up (Moon/Care: feed it, dress it), and Moon/Adopt. Spends the same purse as the hangar. Reached from the hangar.',
-  instantiates: [C.header, C.moonTile, C.moonCare, C.moonAdopt, C.moonBig, C.moonBook, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Moon view'), logicName('Logic/Moon act'), C.words],
+  instantiates: [C.header, C.moonTile, C.moonCare, C.moonAdopt, C.moonBig, C.moonBook, C.moonPlaces, C.moonGoals, C.moonGarden, C.moonFrame, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Moon view'), logicName('Logic/Moon act'), C.words],
   repeats: { source: 'array', rowFields: MOON_ROW_FIELDS },
   nodes: [
     { id: 'mnPage', type: 'Page', label: 'Moon', parameters: { title: 'Rocket School', urlPath: 'moon' }, children: ['mnOuter'] },
     group('mnOuter', 'The ground', 'mnPage', column({ alignItems: 'center' }), ['mnWrap']),
-    group('mnWrap', 'The screen', 'mnOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['mnHeader', 'mnTitle', 'mnPurse', 'mnAliens', 'mnCare', 'mnAdopt', 'mnBig', 'mnBook', 'mnBack']),
+    group('mnWrap', 'The screen', 'mnOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['mnHeader', 'mnTitle', 'mnPurse', 'mnAliens', 'mnPlaces', 'mnGoals', 'mnCare', 'mnAdopt', 'mnGarden', 'mnFrame', 'mnBig', 'mnGear', 'mnBook', 'mnBack']),
     place('mnHeader', C.header, 'The bar', 'mnWrap', { showHome: true, showHangar: true }),
     text('mnTitle', 'The Moon', 'mnWrap', '', T_SECTION),
     text('mnPurse', 'The stars to spend', 'mnWrap', '', { ...T_LEAD, fontWeight: 'var(--font-bold)' }),
@@ -5364,7 +5416,12 @@ const PAGE_MOON: Tpl007Component = {
     logic('mnEach', FOR_EACH_NODE, 'One tile per alien', { template: C.moonTile, templateType: 'explicit' }),
     place('mnCare', C.moonCare, 'The chosen alien', 'mnWrap'),
     place('mnAdopt', C.moonAdopt, 'Adopt an alien', 'mnWrap'),
+    place('mnPlaces', C.moonPlaces, 'Where to go', 'mnWrap'),
+    place('mnGoals', C.moonGoals, 'Something to aim for', 'mnWrap'),
+    place('mnGarden', C.moonGarden, 'The moon garden', 'mnWrap'),
+    place('mnFrame', C.moonFrame, 'The postcard frame', 'mnWrap'),
     place('mnBig', C.moonBig, 'Big things to save for', 'mnWrap'),
+    place('mnGear', C.moonBig, 'Gear for expeditions', 'mnWrap'),
     place('mnBook', C.moonBook, 'The Alien Book', 'mnWrap'),
     place('mnBack', BUTTON_NODE, 'Back to the hangar', 'mnWrap', { ...BTN_OUTLINE, label: 'Back to the hangar' }),
     logic('mnStore', C.store, 'The store'),
@@ -5377,7 +5434,9 @@ const PAGE_MOON: Tpl007Component = {
     gate('mnGuard', 'Send them to the profiles?'),
     logic('mnGoProfiles', NAVIGATE_NODE, 'To the profiles', { router: ROUTER, target: C.pageProfiles }),
     logic('mnGoHome', NAVIGATE_NODE, 'Home', { router: ROUTER, target: C.pageHome }),
-    logic('mnGoHangar', NAVIGATE_NODE, 'To the hangar', { router: ROUTER, target: C.pageHangar })
+    logic('mnGoHangar', NAVIGATE_NODE, 'To the hangar', { router: ROUTER, target: C.pageHangar }),
+    logic('mnGoTrip', NAVIGATE_NODE, 'To the Expedition', { router: ROUTER, target: C.pageExpedition }),
+    logic('mnGoSchool', NAVIGATE_NODE, 'To Alien school', { router: ROUTER, target: C.pageSchool })
   ],
   connections: [
     wire('mnStore', 'app', 'mnMe', 'app'),
@@ -5410,7 +5469,7 @@ const PAGE_MOON: Tpl007Component = {
     wire('mnView', 'has', 'mnCare', 'mounted'),
     wire('mnStore', 'app', 'mnCare', 'app'),
     wire('mnMe', 'profileId', 'mnCare', 'profileId'),
-    ...([['selName', 'name'], ['selSpecies', 'species'], ['selColour', 'colour'], ['selGrown', 'grown'], ['selHat', 'hat'], ['selEyes', 'eyes'], ['selNeck', 'neck'], ['selHappy', 'happy'], ['selLine', 'line'], ['favLine', 'favLine'], ['foods', 'foods'], ['wear', 'wear'], ['purse', 'purse']] as const).map(([from, to]) => wire('mnView', from, 'mnCare', to)),
+    ...([['selName', 'name'], ['selSpecies', 'species'], ['selColour', 'colour'], ['selGrown', 'grown'], ['selHat', 'hat'], ['selEyes', 'eyes'], ['selNeck', 'neck'], ['selBack', 'back'], ['selForm', 'form'], ['selHappy', 'happy'], ['selLine', 'line'], ['favLine', 'favLine'], ['foods', 'foods'], ['wear', 'wear'], ['purse', 'purse']] as const).map(([from, to]) => wire('mnView', from, 'mnCare', to)),
     wire('mnAdopt', 'said', 'mnCare', 'said'),
     wire('mnT', 'moonFeed', 'mnCare', 'feedWord'),
     wire('mnT', 'moonDress', 'mnCare', 'dressWord'),
@@ -5454,9 +5513,595 @@ const PAGE_MOON: Tpl007Component = {
     wire('mnBig', 'write', 'mnStore', 'write'),
     wire('mnView', 'book', 'mnBook', 'rows'),
     wire('mnView', 'bookLine', 'mnBook', 'line'),
-    wire('mnT', 'moonBookClose', 'mnBook', 'closeWord')
+    wire('mnT', 'moonBookClose', 'mnBook', 'closeWord'),
+    // TPL-014 M2–M5: where to go, what to aim for, the garden, the postcards, the gear, and what trips found.
+    wire('mnView', 'has', 'mnPlaces', 'mounted'),
+    wire('mnT', 'moonTrip', 'mnPlaces', 'tripWord'),
+    wire('mnView', 'tripLine', 'mnPlaces', 'tripLine'),
+    wire('mnT', 'moonSchool', 'mnPlaces', 'schoolWord'),
+    wire('mnView', 'schoolLine', 'mnPlaces', 'schoolLine'),
+    wire('mnPlaces', 'trip', 'mnGoTrip', 'navigate'),
+    wire('mnPlaces', 'school', 'mnGoSchool', 'navigate'),
+    wire('mnT', 'moonGoals', 'mnGoals', 'title'),
+    wire('mnView', 'goals', 'mnGoals', 'rows'),
+    wire('mnView', 'hasGarden', 'mnGarden', 'mounted'),
+    wire('mnStore', 'app', 'mnGarden', 'app'),
+    wire('mnMe', 'profileId', 'mnGarden', 'profileId'),
+    wire('mnT', 'moonGarden', 'mnGarden', 'title'),
+    wire('mnView', 'gardenLine', 'mnGarden', 'line'),
+    wire('mnView', 'plots', 'mnGarden', 'rows'),
+    wire('mnView', 'canPlant', 'mnGarden', 'canPlant'),
+    wire('mnView', 'plantLine', 'mnGarden', 'plantLine'),
+    wire('mnGarden', 'app', 'mnStore', 'app'),
+    wire('mnGarden', 'write', 'mnStore', 'write'),
+    wire('mnView', 'hasFrame', 'mnFrame', 'mounted'),
+    wire('mnView', 'cardsLine', 'mnFrame', 'line'),
+    wire('mnView', 'cards', 'mnFrame', 'rows'),
+    wire('mnStore', 'app', 'mnGear', 'app'),
+    wire('mnMe', 'profileId', 'mnGear', 'profileId'),
+    wire('mnView', 'gear', 'mnGear', 'items'),
+    wire('mnView', 'purse', 'mnGear', 'purse'),
+    wire('mnT', 'moonGear', 'mnGear', 'title'),
+    wire('mnT', 'buyTitle', 'mnGear', 'buyTitle'),
+    wire('mnT', 'youHave', 'mnGear', 'haveWord'),
+    wire('mnT', 'itCosts', 'mnGear', 'costWord'),
+    wire('mnT', 'youllHave', 'mnGear', 'leftWord'),
+    wire('mnT', 'yesBuy', 'mnGear', 'yesWord'),
+    wire('mnT', 'noThanks', 'mnGear', 'noWord'),
+    wire('mnGear', 'app', 'mnStore', 'app'),
+    wire('mnGear', 'write', 'mnStore', 'write'),
+    wire('mnView', 'findsLine', 'mnBook', 'findsLine')
   ]
 };
+
+// ── TPL-014 M2–M5 — the moon grows ──────────────────────────────────────────
+
+/** What every alien the kit draws can wear and become: the ports a part passes straight to `game-kit.Alien`. */
+const ALIEN_LOOK: Array<[string, string]> = [['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['back', 'string'], ['form', 'string']];
+const lookWires = (from: string, to: string): unknown[] => [...(['species', 'grown', 'hat', 'eyes', 'neck', 'back', 'form'] as const).map((f) => wire(from, f, to, f)), wire(from, 'colour', to, 'color')];
+
+/** One goal, or one topic an alien learned: its name, a bar that fills, and how far. Nothing in it ever empties. */
+const GOAL_FIELDS = ['id', 'label', 'line', 'pct'];
+const MOON_GOAL: Tpl007Component = {
+  path: 'Moon/Goal',
+  description: 'One goal on the moon, or one topic an alien has learned (TPL-014): its name, a bar filled to Pct, and a line saying how far.',
+  inputs: [port('label', 'string'), port('line', 'string'), port('pct', 'number')],
+  nodes: [
+    inputs('gqIn', 'The goal', [['label', 'string'], ['line', 'string'], ['pct', 'number']]),
+    group('gqBox', 'The goal', undefined, column({ rowGap: 'var(--space-1)' }), ['gqLabel', 'gqBar', 'gqLine']),
+    text('gqLabel', 'Its name', 'gqBox', '', { ...T_BODY, fontWeight: 'var(--font-bold)' }),
+    group('gqBar', 'The bar', 'gqBox', { width: pct(100), height: px(14), sizeMode: 'explicit', backgroundColor: 'var(--surface-raised)', borderRadius: 'var(--radius-full)', borderStyle: 'solid', borderWidth: 'var(--border-1)', borderColor: 'var(--border)', clip: true }, ['gqFill']),
+    // A number reaching a units port keeps the port's unit, so the width stays a percentage.
+    group('gqFill', 'How far', 'gqBar', { width: pct(0), height: pct(100), sizeMode: 'explicit', backgroundColor: ROLE.picked }),
+    text('gqLine', 'How far, in words', 'gqBox', '', T_META)
+  ],
+  connections: [wire('gqIn', 'label', 'gqLabel', 'text'), wire('gqIn', 'pct', 'gqFill', 'width'), wire('gqIn', 'line', 'gqLine', 'text')]
+};
+
+/** TPL-014: something to aim for — every goal fills and nothing empties (the picture's first card). */
+const MOON_GOALS: Tpl007Component = {
+  path: 'Moon/Goals',
+  description: 'Something to aim for (TPL-014): the Alien Book, the next dome, the chosen alien’s next form and the postcards, each a bar that only fills.',
+  inputs: [port('title', 'string'), port('rows', 'array')],
+  repeats: { source: 'array', rowFields: GOAL_FIELDS },
+  instantiates: [C.moonGoal],
+  nodes: [
+    inputs('gsIn', 'The goals', [['title', 'string'], ['rows', 'array']]),
+    group('gsCard', 'Something to aim for', undefined, { ...CARD, rowGap: 'var(--space-3)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)' }, ['gsTitle', 'gsRows']),
+    text('gsTitle', 'Something to aim for', 'gsCard', '', T_CARD),
+    group('gsRows', 'The goals', 'gsCard', column({ rowGap: 'var(--space-3)' }), ['gsEach']),
+    logic('gsEach', FOR_EACH_NODE, 'One bar per goal', { template: C.moonGoal, templateType: 'explicit' })
+  ],
+  connections: [wire('gsIn', 'title', 'gsTitle', 'text'), wire('gsIn', 'rows', 'gsEach', 'items')]
+};
+
+/** TPL-014: the two places to go from the moon — the Expedition and Alien school — each saying what waits there. */
+const MOON_PLACES: Tpl007Component = {
+  path: 'Moon/Places',
+  description: 'The two places to go from the moon (TPL-014): the Expedition and Alien school, each a card that says what waits there. Publishes Trip or School when one is tapped; shown once there is an alien.',
+  inputs: [port('mounted', 'boolean'), port('tripWord', 'string'), port('tripLine', 'string'), port('schoolWord', 'string'), port('schoolLine', 'string')],
+  outputs: [port('trip', 'signal'), port('school', 'signal')],
+  nodes: [
+    inputs('plIn', 'The places', [['mounted', 'boolean'], ['tripWord', 'string'], ['tripLine', 'string'], ['schoolWord', 'string'], ['schoolLine', 'string']]),
+    group('plRow', 'The two places', undefined, { ...row({ width: pct(100), sizeMode: 'contentHeight', alignItems: 'stretch', columnGap: 'var(--space-3)' }), mounted: false }, ['plTrip', 'plSchool']),
+    group('plTrip', 'The Expedition', 'plRow', { ...CARD, cssClassName: 'pressable', width: pct(45), minWidth: px(220), sizeMode: 'contentHeight', rowGap: 'var(--space-1)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)' }, ['plTripTitle', 'plTripLine']),
+    text('plTripTitle', 'Expedition', 'plTrip', '', T_CARD),
+    text('plTripLine', 'What waits there', 'plTrip', '', T_META),
+    group('plSchool', 'Alien school', 'plRow', { ...CARD, cssClassName: 'pressable', width: pct(45), minWidth: px(220), sizeMode: 'contentHeight', rowGap: 'var(--space-1)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)' }, ['plSchoolTitle', 'plSchoolLine']),
+    text('plSchoolTitle', 'Alien school', 'plSchool', '', T_CARD),
+    text('plSchoolLine', 'Who is stuck', 'plSchool', '', T_META),
+    outputs('plOut', 'Where to', [['trip', 'signal'], ['school', 'signal']])
+  ],
+  connections: [
+    wire('plIn', 'mounted', 'plRow', 'mounted'),
+    wire('plIn', 'tripWord', 'plTripTitle', 'text'),
+    wire('plIn', 'tripLine', 'plTripLine', 'text'),
+    wire('plIn', 'schoolWord', 'plSchoolTitle', 'text'),
+    wire('plIn', 'schoolLine', 'plSchoolLine', 'text'),
+    wire('plTrip', 'onClick', 'plOut', 'trip'),
+    wire('plSchool', 'onClick', 'plOut', 'school')
+  ]
+};
+
+/**
+ * TPL-014 M5 — the moon garden, once built: a plot per seed planted (Moon/Shop tile: growing, then ripe — a tap picks it as
+ * free meals), and Plant a seed while there are seeds and room. Right answers water it: a plot ripens as stars are earned.
+ */
+const MOON_GARDEN: Tpl007Component = {
+  path: 'Moon/Garden',
+  description: 'The moon garden (TPL-014 M5), shown once built: a tile per plot, growing then ripe (a tap picks it as free meals, Logic/Moon act pick), and Plant a seed (Logic/Moon act plant) while there are seeds and room. App in; App, Write and Said out.',
+  inputs: [port('mounted', 'boolean'), port('app', 'object'), port('profileId', 'string'), port('title', 'string'), port('line', 'string'), port('rows', 'array'), port('canPlant', 'boolean'), port('plantLine', 'string')],
+  outputs: [port('app', 'object'), port('write', 'signal'), port('said', 'string')],
+  repeats: { source: 'array', rowFields: MOON_ITEM_FIELDS },
+  instantiates: [C.moonItem, logicName('Logic/Moon act')],
+  nodes: [
+    inputs('gdIn', 'The garden, and the store', [['mounted', 'boolean'], ['app', 'object'], ['profileId', 'string'], ['title', 'string'], ['line', 'string'], ['rows', 'array'], ['canPlant', 'boolean'], ['plantLine', 'string']]),
+    group('gdCard', 'The garden', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-5)', paddingBottom: 'var(--space-5)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', mounted: false }, ['gdTitle', 'gdLine', 'gdSaid', 'gdPlots', 'gdPlant']),
+    text('gdTitle', 'The moon garden', 'gdCard', '', { ...T_CARD, textAlignX: 'center' }),
+    text('gdLine', 'What waters it', 'gdCard', '', { ...T_META, textAlignX: 'center' }),
+    text('gdSaid', 'What just happened', 'gdCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
+    group('gdPlots', 'The plots', 'gdCard', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['gdEach']),
+    logic('gdEach', FOR_EACH_NODE, 'One tile per plot', { template: C.moonItem, templateType: 'explicit' }),
+    place('gdPlant', BUTTON_NODE, 'Plant a seed', 'gdCard', { ...BTN_PRIMARY, label: 'Plant a seed', mounted: false }),
+    logic('gdPick', logicName('Logic/Moon act'), 'Pick what is ripe', { action: 'pick' }),
+    logic('gdSow', logicName('Logic/Moon act'), 'Plant a seed', { action: 'plant' }),
+    outputs('gdOut', 'The store to write', [['app', 'object'], ['write', 'signal'], ['said', 'string']])
+  ],
+  connections: [
+    wire('gdIn', 'mounted', 'gdCard', 'mounted'),
+    wire('gdIn', 'title', 'gdTitle', 'text'),
+    wire('gdIn', 'line', 'gdLine', 'text'),
+    wire('gdIn', 'rows', 'gdEach', 'items'),
+    wire('gdIn', 'canPlant', 'gdPlant', 'mounted'),
+    wire('gdIn', 'plantLine', 'gdPlant', 'label'),
+    wire('gdIn', 'app', 'gdPick', 'app'),
+    wire('gdIn', 'profileId', 'gdPick', 'profileId'),
+    wire('gdEach', 'itemOutput-id', 'gdPick', 'thingId'),
+    wire('gdEach', 'itemOutputSignal-use', 'gdPick', 'run'),
+    wire('gdIn', 'app', 'gdSow', 'app'),
+    wire('gdIn', 'profileId', 'gdSow', 'profileId'),
+    wire('gdPlant', 'onClick', 'gdSow', 'run'),
+    ...(['gdPick', 'gdSow'] as const).flatMap((a) => [wire(a, 'app', 'gdOut', 'app'), wire(a, 'done', 'gdOut', 'write'), wire(a, 'said', 'gdSaid', 'text'), wire(a, 'said', 'gdOut', 'said')])
+  ]
+};
+
+/** TPL-014 M5 — the postcard frame, once built: every postcard a trip brought home, hung on the moon. */
+const MOON_FRAME: Tpl007Component = {
+  path: 'Moon/Frame',
+  description: 'The postcard frame (TPL-014 M5), shown once built: every postcard a trip brought home, and how many of the twenty.',
+  inputs: [port('mounted', 'boolean'), port('line', 'string'), port('rows', 'array')],
+  repeats: { source: 'array', rowFields: MOON_ITEM_FIELDS },
+  instantiates: [C.moonItem],
+  nodes: [
+    inputs('fmIn', 'The postcards', [['mounted', 'boolean'], ['line', 'string'], ['rows', 'array']]),
+    group('fmCard', 'The frame', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-5)', paddingBottom: 'var(--space-5)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', mounted: false }, ['fmTitle', 'fmCards']),
+    text('fmTitle', 'Postcards, so many of twenty', 'fmCard', '', { ...T_CARD, textAlignX: 'center' }),
+    group('fmCards', 'The postcards', 'fmCard', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['fmEach']),
+    logic('fmEach', FOR_EACH_NODE, 'One tile per postcard', { template: C.moonItem, templateType: 'explicit' })
+  ],
+  connections: [wire('fmIn', 'mounted', 'fmCard', 'mounted'), wire('fmIn', 'line', 'fmTitle', 'text'), wire('fmIn', 'rows', 'fmEach', 'items')]
+};
+
+/**
+ * TPL-014 M2 — one tile of the planet. Fog until seen (a hatched ground), then plain, water, a crater or the rocket, and what
+ * lies on it; the walking alien is drawn where it stands. Its edge is a class: dashed where the alien can walk, solid where it is.
+ */
+const TRIP_CELL_FIELDS = ['id', 'at', 'glyph', 'kind', 'edge', 'me', 'species', 'colour', 'grown', 'hat', 'eyes', 'neck', 'back', 'form'];
+const TRIP_TILE: Tpl007Component = {
+  path: 'Trip/Tile',
+  description: 'One tile of the planet (TPL-014 M2): Kind colours it (fog, plain, water, crater, home), Glyph is what lies on it, Me draws the walking alien on it, Edge marks it near (dashed: it can walk there) or here. Publishes Tapped with At.',
+  inputs: [port('at', 'number'), port('glyph', 'string'), port('kind', 'string'), port('edge', 'string'), port('me', 'boolean'), ...ALIEN_LOOK.map(([n, t]) => port(n, t))],
+  outputs: [port('tapped', 'signal'), port('at', 'number')],
+  nodes: [
+    inputs('ttIn', 'The tile', [['at', 'number'], ['glyph', 'string'], ['kind', 'string'], ['edge', 'string'], ['me', 'boolean'], ...ALIEN_LOOK]),
+    group('ttCell', 'The tile', undefined, { sizeMode: 'explicit', width: px(48), height: px(48), alignItems: 'center', justifyContent: 'center', borderRadius: 'var(--radius-md)', borderStyle: 'solid', borderWidth: px(2), borderColor: 'var(--foreground)' }, ['ttGlyph', 'ttMeBox']),
+    text('ttGlyph', 'What lies here', 'ttCell', '', { ...T_BODY, fontSize: 'var(--text-2xl)', textAlignX: 'center' }),
+    group('ttMeBox', 'The alien, here', 'ttCell', { sizeMode: 'contentSize', mounted: false }, ['ttAlien']),
+    place('ttAlien', KIT_ALIEN, 'The walking alien', 'ttMeBox', { size: 42 }),
+    // `fog` FIRST (D55): a tile nothing has said anything about is fog.
+    withStates('ttKind', 'Fog, plain, water, crater or home', ['fog', 'plain', 'water', 'crater', 'home'], {
+      ground: { type: 'color', by: { fog: 'var(--muted)', plain: 'var(--surface)', water: 'var(--alien-sky)', crater: 'var(--border-subtle)', home: 'var(--accent)' } }
+    }),
+    logic('ttClass', EXPRESSION_NODE, 'Fog, and the edge, as classes', { expression: "(kind === 'fog' ? 'rkt-trip-fog ' : '') + (edge === 'near' ? 'rkt-trip-near' : edge === 'here' ? 'rkt-trip-here' : 'rkt-trip-far')" }),
+    logic('ttGlyphShown', EXPRESSION_NODE, 'Nothing drawn under the alien', { expression: 'me !== true' }),
+    outputs('ttOut', 'Tapped', [['tapped', 'signal'], ['at', 'number']])
+  ],
+  connections: [
+    wire('ttIn', 'kind', 'ttKind', 'currentState'),
+    wire('ttKind', 'ground', 'ttCell', 'backgroundColor'),
+    wire('ttIn', 'kind', 'ttClass', 'kind'),
+    wire('ttIn', 'edge', 'ttClass', 'edge'),
+    wire('ttClass', 'result', 'ttCell', 'cssClassName'),
+    wire('ttIn', 'glyph', 'ttGlyph', 'text'),
+    wire('ttIn', 'me', 'ttGlyphShown', 'me'),
+    wire('ttGlyphShown', 'result', 'ttGlyph', 'mounted'),
+    wire('ttIn', 'me', 'ttMeBox', 'mounted'),
+    ...lookWires('ttIn', 'ttAlien'),
+    wire('ttCell', 'onClick', 'ttOut', 'tapped'),
+    wire('ttIn', 'at', 'ttOut', 'at')
+  ]
+};
+
+/** One row of the planet: Hunt/Row's nested repeaters, and the tap passed up with its tile. */
+const TRIP_ROW: Tpl007Component = {
+  path: 'Trip/Row',
+  description: 'One row of the planet (TPL-014 M2): a Trip/Tile per cell in Cells. Publishes Tapped with At, the tile that was tapped.',
+  inputs: [port('cells', 'array')],
+  outputs: [port('tapped', 'signal'), port('at', 'number')],
+  repeats: { source: 'array', rowFields: TRIP_CELL_FIELDS },
+  instantiates: [C.tripTile],
+  nodes: [
+    inputs('twIn', 'The row', [['cells', 'array']]),
+    group('twRow', 'One row', undefined, { sizeMode: 'contentSize', flexDirection: 'row', alignItems: 'center', columnGap: 'var(--space-1)' }, ['twCells']),
+    logic('twCells', FOR_EACH_NODE, 'One tile per cell', { template: C.tripTile, templateType: 'explicit' }),
+    outputs('twOut', 'A tile was tapped', [['tapped', 'signal'], ['at', 'number']])
+  ],
+  connections: [
+    wire('twIn', 'cells', 'twCells', 'items'),
+    // The repeater publishes the row's value BEFORE its signal (measured, TPL-006), so At is in place when Tapped fires.
+    wire('twCells', 'itemOutput-at', 'twOut', 'at'),
+    wire('twCells', 'itemOutputSignal-tapped', 'twOut', 'tapped')
+  ]
+};
+
+/** The round's inputs a page hands a moon game (TPL-014): the player, the focus, and the words a question needs. */
+const MOON_ROUND_INPUTS: Array<[string, string]> = [
+  ['mode', 'string'], ['level', 'string'], ['lang', 'string'], ['layout', 'string'], ['answerMode', 'string'], ['model', 'object'], ['curriculum', 'array'], ['wordLists', 'array'], ['soundOn', 'boolean'],
+  ['focus', 'array'], ['customSet', 'array'], ['customSetId', 'string'], ['customSetBoth', 'boolean'], ['teachCards', 'array'],
+  ['placeholder', 'string'], ['checkWord', 'string'], ['fluentWord', 'string'], ['correctWord', 'string'], ['wrongWord', 'string'], ['timeUpWord', 'string'], ['nextWord', 'string'], ['showMeWord', 'string'], ['anExampleWord', 'string'], ['gotItWord', 'string']
+];
+const ROUND_PASS = ['mode', 'level', 'lang', 'layout', 'answerMode', 'model', 'curriculum', 'wordLists', 'soundOn', 'focus', 'customSet', 'customSetId', 'customSetBoth', 'placeholder', 'checkWord', 'fluentWord', 'correctWord', 'wrongWord', 'timeUpWord', 'nextWord', 'showMeWord'] as const;
+/** Show me how, as Monster/Play has it: the card for the skill just missed, in the round's place, and Got it back. */
+function teachWires(p: string, round: string, card: string, pick: string, stepNode: string, phase: string, back: string): unknown[] {
+  return [
+    wire(round, 'showMe', phase, 'to-teaching'),
+    wire(card, 'gotIt', phase, back),
+    wire(`${p}In`, 'teachCards', pick, 'cards'),
+    wire(`${p}In`, 'lang', pick, 'lang'),
+    wire(round, 'teach', pick, 'teachId'),
+    wire(round, 'missCount', stepNode, 'misses'),
+    wire(stepNode, 'result', pick, 'step'),
+    wire(pick, 'title', card, 'title'),
+    wire(pick, 'text', card, 'text'),
+    wire(pick, 'example', card, 'example'),
+    wire(round, 'prompt', card, 'prompt'),
+    wire(round, 'worked', card, 'worked'),
+    wire(`${p}In`, 'anExampleWord', card, 'anExampleWord'),
+    wire(`${p}In`, 'gotItWord', card, 'gotItWord'),
+    wire(phase, 'teaching', card, 'mounted')
+  ];
+}
+
+/**
+ * TPL-014 M2 — the Expedition. Start lands on a fogged planet with the chosen alien; a tap on a tile beside it aims (Logic/Trip
+ * act, aim), and the question is Race/Round's own, untimed, from the player's focus. A graded answer is saved to the model
+ * (Logic/Save model: answers pay and teach as a race's do), then walks or not (Logic/Trip act, answer). The crew row changes
+ * who walks (a Squiggle swims). Come home brings the bag home. The trip lives in the store, so a reload keeps it.
+ */
+const TRIP_PLAY_INPUTS: Array<[string, string]> = [['app', 'object'], ['profileId', 'string'], ...MOON_ROUND_INPUTS, ['whoWord', 'string'], ['bagWord', 'string'], ['homeWord', 'string']];
+const TRIP_PLAY: Tpl007Component = {
+  path: 'Trip/Play',
+  description: 'The Expedition (TPL-014 M2): Start lands on a fogged planet; a tap on a tile beside the alien aims, Race/Round asks (untimed, the player’s focus) and grades, the answer is saved to the model and then walks the alien (or not: a wrong answer loses nothing); Show me how opens the Teach card. Who walks is a row of the moon’s aliens; Come home brings the bag home. App in; App and Write out.',
+  inputs: TRIP_PLAY_INPUTS.map(([n, t]) => port(n, t)),
+  outputs: [port('app', 'object'), port('write', 'signal')],
+  repeats: { source: 'array', rowFields: ['id', 'cells'] },
+  instantiates: [C.tripRow, C.choiceRow, C.raceRound, C.teachCard, logicName('Logic/Trip view'), logicName('Logic/Trip act'), logicName('Logic/Save model'), logicName('Logic/Teach card')],
+  nodes: [
+    inputs('tpIn', 'The store, the player and the words', TRIP_PLAY_INPUTS),
+    group('tpWrap', 'The expedition', undefined, column({ alignItems: 'stretch', rowGap: 'var(--space-3)' }), ['tpMapCard', 'tpRoundSlot', 'tpTeach', 'tpBagCard']),
+    group('tpMapCard', 'The planet', 'tpWrap', { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-3)', paddingRight: 'var(--space-3)' }, ['tpTitle', 'tpIntro', 'tpStart', 'tpWhoLabel', 'tpCrew', 'tpGrid', 'tpTip', 'tpSaid']),
+    text('tpTitle', 'Planet, by name', 'tpMapCard', '', { ...T_CARD, textAlignX: 'center' }),
+    text('tpIntro', 'What an expedition is', 'tpMapCard', '', { ...T_BODY, textAlignX: 'center' }),
+    place('tpStart', BUTTON_NODE, 'Set off', 'tpMapCard', { ...BTN_PRIMARY, label: 'Set off', mounted: false }),
+    text('tpWhoLabel', 'Who walks', 'tpMapCard', '', { ...T_META, fontWeight: 'var(--font-semibold)', textAlignX: 'center', mounted: false }),
+    place('tpCrew', C.choiceRow, 'Who walks', 'tpMapCard', { mounted: false }),
+    group('tpGrid', 'The planet, row by row', 'tpMapCard', { sizeMode: 'contentSize', flexDirection: 'column', alignItems: 'center', rowGap: 'var(--space-1)', mounted: false }, ['tpRows']),
+    logic('tpRows', FOR_EACH_NODE, 'One row of tiles per row', { template: C.tripRow, templateType: 'explicit' }),
+    text('tpTip', 'What to do', 'tpMapCard', '', { ...T_META, textAlignX: 'center' }),
+    text('tpSaid', 'What just happened', 'tpMapCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
+    group('tpRoundSlot', 'The question, to walk there', 'tpWrap', { ...column({ alignItems: 'center' }), mounted: false }, ['tpRound']),
+    place('tpRound', C.raceRound, 'This question', 'tpRoundSlot', { timed: false, game: 'trip' }),
+    place('tpTeach', C.teachCard, 'Show me how', 'tpWrap'),
+    group('tpBagCard', 'The backpack', 'tpWrap', { ...CARD, alignItems: 'center', rowGap: 'var(--space-2)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', mounted: false }, ['tpBagTitle', 'tpCount', 'tpBag', 'tpGear', 'tpHome']),
+    text('tpBagTitle', 'In the backpack', 'tpBagCard', '', { ...T_CARD, textAlignX: 'center' }),
+    text('tpCount', 'How many, of how many', 'tpBagCard', '', { ...T_META, textAlignX: 'center' }),
+    text('tpBag', 'What is in it', 'tpBagCard', '', { ...T_BODY, fontSize: 'var(--text-2xl)', textAlignX: 'center' }),
+    text('tpGear', 'The gear owned', 'tpBagCard', '', { ...T_META, textAlignX: 'center' }),
+    place('tpHome', BUTTON_NODE, 'Come home', 'tpBagCard', { ...BTN_OUTLINE, label: 'Come home with everything' }),
+    logic('tpView', logicName('Logic/Trip view'), 'The trip, as they see it'),
+    logic('tpGo', logicName('Logic/Trip act'), 'Land on a planet', { action: 'start' }),
+    logic('tpWho', logicName('Logic/Trip act'), 'Who walks', { action: 'crew' }),
+    logic('tpAim', logicName('Logic/Trip act'), 'Aim at a tile', { action: 'aim' }),
+    logic('tpWalk', logicName('Logic/Trip act'), 'The answer, walked', { action: 'answer' }),
+    logic('tpBack', logicName('Logic/Trip act'), 'Come home', { action: 'home' }),
+    logic('tpSave', logicName('Logic/Save model'), 'Remember what was learned'),
+    // `map` FIRST (D55): between questions the map answers taps.
+    withStates('tpPhase', 'The map, a question, or a Teach card', ['map', 'asking', 'teaching'], {
+      map: { type: 'boolean', by: { map: true, asking: false, teaching: false } },
+      asking: { type: 'boolean', by: { map: false, asking: true, teaching: false } },
+      teaching: { type: 'boolean', by: { map: false, asking: false, teaching: true } }
+    }),
+    gate('tpCanAim', 'Only between questions'),
+    gate('tpAimed', 'A tile it can walk to?'),
+    logic('tpNoTrip', EXPRESSION_NODE, 'No trip yet?', { expression: 'has !== true' }),
+    logic('tpTeachPick', logicName('Logic/Teach card'), 'The card for the skill just missed'),
+    logic('tpStep', EXPRESSION_NODE, 'Which step: less each miss in a row', { expression: 'min(2, max(0, misses - 1))' }),
+    // 🔴 What just happened, through one Variable and a setter per act: an act whose line repeats its own last one publishes
+    // nothing, so a line wired straight to the Text kept another act's older words (driven: "Right! Zib walks on" stayed up
+    // beside the next question, because the second aim said what the first had).
+    { ...(logic('tpSaidNow', VARIABLE_NODE, 'What just happened', { name: 'tripSaid' }) as object), comment: 'One trip on screen at a time: the line is the trip’s own.' },
+    ...(['Go', 'Who', 'Aim', 'Walk', 'Back'] as const).map((a) => logic(`tpSay${a}`, SET_VARIABLE_NODE, `Say what ${a.toLowerCase()} did`, { name: 'tripSaid' })),
+    outputs('tpOut', 'The store to write', [['app', 'object'], ['write', 'signal']])
+  ],
+  connections: [
+    // The trip, drawn from the store.
+    wire('tpIn', 'app', 'tpView', 'app'),
+    wire('tpView', 'title', 'tpTitle', 'text'),
+    wire('tpView', 'introLine', 'tpIntro', 'text'),
+    wire('tpView', 'has', 'tpNoTrip', 'has'),
+    wire('tpNoTrip', 'result', 'tpIntro', 'mounted'),
+    wire('tpView', 'canStart', 'tpStart', 'mounted'),
+    wire('tpView', 'startLine', 'tpStart', 'label'),
+    wire('tpView', 'has', 'tpWhoLabel', 'mounted'),
+    wire('tpIn', 'whoWord', 'tpWhoLabel', 'text'),
+    wire('tpView', 'has', 'tpCrew', 'mounted'),
+    wire('tpView', 'crew', 'tpCrew', 'items'),
+    wire('tpView', 'who', 'tpCrew', 'value'),
+    wire('tpView', 'has', 'tpGrid', 'mounted'),
+    wire('tpView', 'rows', 'tpRows', 'items'),
+    wire('tpView', 'tip', 'tpTip', 'text'),
+    wire('tpView', 'has', 'tpBagCard', 'mounted'),
+    wire('tpIn', 'bagWord', 'tpBagTitle', 'text'),
+    wire('tpView', 'countLine', 'tpCount', 'text'),
+    wire('tpView', 'bagLine', 'tpBag', 'text'),
+    wire('tpView', 'gearLine', 'tpGear', 'text'),
+    wire('tpIn', 'homeWord', 'tpHome', 'label'),
+    // Every act takes the store and hands back the store to write, and says what happened.
+    ...(['tpGo', 'tpWho', 'tpAim', 'tpBack'] as const).flatMap((a) => [wire('tpIn', 'app', a, 'app'), wire('tpIn', 'profileId', a, 'profileId')]),
+    ...(['tpGo', 'tpWho', 'tpAim', 'tpWalk', 'tpBack'] as const).flatMap((a) => [wire(a, 'app', 'tpOut', 'app'), wire(a, 'done', 'tpOut', 'write'), wire(a, 'said', `tpSay${a.slice(2)}`, 'value'), wire(a, 'done', `tpSay${a.slice(2)}`, 'do')]),
+    wire('tpSaidNow', 'value', 'tpSaid', 'text'),
+    wire('tpStart', 'onClick', 'tpGo', 'run'),
+    wire('tpGo', 'done', 'tpPhase', 'to-map'),
+    // Who walks: a tap on the row; a question left open is dropped.
+    wire('tpCrew', 'value', 'tpWho', 'alienId'),
+    wire('tpCrew', 'changed', 'tpWho', 'run'),
+    wire('tpWho', 'done', 'tpPhase', 'to-map'),
+    wire('tpWho', 'done', 'tpRound', 'abandon'),
+    // A tap on a tile, between questions: aim, and when it is a tile it can walk to, ask.
+    wire('tpRows', 'itemOutput-at', 'tpAim', 'at'),
+    wire('tpPhase', 'map', 'tpCanAim', 'condition'),
+    wire('tpRows', 'itemOutputSignal-tapped', 'tpCanAim', 'eval'),
+    wire('tpCanAim', 'ontrue', 'tpAim', 'run'),
+    wire('tpAim', 'ok', 'tpAimed', 'condition'),
+    wire('tpAim', 'done', 'tpAimed', 'eval'),
+    wire('tpAimed', 'ontrue', 'tpPhase', 'to-asking'),
+    wire('tpAimed', 'ontrue', 'tpRound', 'ask'),
+    wire('tpPhase', 'asking', 'tpRoundSlot', 'mounted'),
+    // The question is the race's: the player, the focus and the words, under the trip's id, untimed.
+    ...ROUND_PASS.map((p) => wire('tpIn', p, 'tpRound', p)),
+    wire('tpView', 'tripId', 'tpRound', 'raceId'),
+    // 🔴 Graded: the model is saved FIRST, and the walk takes the store that save hands back, so neither write loses the other.
+    wire('tpIn', 'app', 'tpSave', 'app'),
+    wire('tpIn', 'profileId', 'tpSave', 'profileId'),
+    wire('tpRound', 'model', 'tpSave', 'model'),
+    wire('tpRound', 'graded', 'tpSave', 'run'),
+    wire('tpSave', 'app', 'tpWalk', 'app'),
+    wire('tpIn', 'profileId', 'tpWalk', 'profileId'),
+    wire('tpRound', 'correct', 'tpWalk', 'correct'),
+    wire('tpSave', 'done', 'tpWalk', 'run'),
+    // Next: back to the map, to choose the next tile.
+    wire('tpRound', 'next', 'tpPhase', 'to-map'),
+    ...teachWires('tp', 'tpRound', 'tpTeach', 'tpTeachPick', 'tpStep', 'tpPhase', 'to-map'),
+    // Come home: the bag comes home, any question left open is dropped.
+    wire('tpHome', 'onClick', 'tpBack', 'run'),
+    wire('tpHome', 'onClick', 'tpRound', 'abandon'),
+    wire('tpBack', 'done', 'tpPhase', 'to-map')
+  ]
+};
+
+/**
+ * TPL-014 M4 — Alien school. The chosen alien is stuck: Race/Round asks (untimed, the player's focus) and grades; the answer is
+ * saved to the model, then teaches the alien the question's topic (Logic/School act, teach). What it has learned is a bar per
+ * topic that never empties; how an alien changes shows baby, young, grown up and its form, and the three forms with what each
+ * needs. A tap on a form it has taken shows it, or puts it away.
+ */
+const SCHOOL_PLAY_INPUTS: Array<[string, string]> = [['app', 'object'], ['profileId', 'string'], ...MOON_ROUND_INPUTS, ['changesWord', 'string']];
+const SCHOOL_PLAY: Tpl007Component = {
+  path: 'School/Play',
+  description: 'Alien school (TPL-014 M4): the chosen alien (a row to choose another) is stuck; Race/Round asks (untimed, the player’s focus) and grades; the answer is saved to the model, then teaches the alien the topic (Logic/School act, teach) and the alien says so. What it has learned (a bar per topic, never emptying), and how an alien changes (its stages, its form, and the three forms with what each needs; a tap on one it has shows it). App in; App and Write out.',
+  inputs: SCHOOL_PLAY_INPUTS.map(([n, t]) => port(n, t)),
+  outputs: [port('app', 'object'), port('write', 'signal')],
+  repeats: { source: 'array', rowFields: MOON_ROW_FIELDS },
+  instantiates: [C.choiceRow, C.raceRound, C.teachCard, C.moonGoal, C.moonTile, logicName('Logic/School view'), logicName('Logic/School act'), logicName('Logic/Moon act'), logicName('Logic/Save model'), logicName('Logic/Teach card')],
+  nodes: [
+    inputs('spIn', 'The store, the player and the words', SCHOOL_PLAY_INPUTS),
+    group('spWrap', 'Alien school', undefined, column({ alignItems: 'stretch', rowGap: 'var(--space-3)' }), ['spCard', 'spLearned', 'spChanges']),
+    group('spCard', 'The alien, stuck', 'spWrap', { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-3)', paddingRight: 'var(--space-3)' }, ['spTitle', 'spCrew', 'spMe', 'spRoundSlot', 'spTeach']),
+    text('spTitle', 'Who is stuck', 'spCard', '', { ...T_CARD, textAlignX: 'center' }),
+    place('spCrew', C.choiceRow, 'Who to teach', 'spCard', { mounted: false }),
+    group('spMe', 'The alien, and what it says', 'spCard', { ...row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center' }), mounted: false }, ['spAlien', 'spSays']),
+    place('spAlien', KIT_ALIEN, 'The alien', 'spMe', { size: 120 }),
+    text('spSays', 'What it says', 'spMe', '', { ...T_BODY, fontWeight: 'var(--font-bold)', maxWidth: px(320) }),
+    group('spRoundSlot', 'The question it is stuck on', 'spCard', { ...column({ alignItems: 'center' }), mounted: false }, ['spRound']),
+    place('spRound', C.raceRound, 'This question', 'spRoundSlot', { timed: false, game: 'school' }),
+    place('spTeach', C.teachCard, 'Show me how', 'spCard'),
+    group('spLearned', 'What it has learned', 'spWrap', { ...CARD, rowGap: 'var(--space-3)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', mounted: false }, ['spLearnedTitle', 'spTopics', 'spNote']),
+    text('spLearnedTitle', 'What it has learned', 'spLearned', '', T_CARD),
+    group('spTopics', 'A bar per topic', 'spLearned', column({ rowGap: 'var(--space-3)' }), ['spTopicEach']),
+    logic('spTopicEach', FOR_EACH_NODE, 'One bar per topic', { template: C.moonGoal, templateType: 'explicit' }),
+    text('spNote', 'How a topic fills', 'spLearned', '', T_META),
+    group('spChanges', 'How an alien changes', 'spWrap', { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-4)', paddingLeft: 'var(--space-3)', paddingRight: 'var(--space-3)', mounted: false }, ['spChangesTitle', 'spEvo', 'spForms', 'spFormLine']),
+    text('spChangesTitle', 'How an alien changes', 'spChanges', '', { ...T_CARD, textAlignX: 'center' }),
+    group('spEvo', 'Baby, young, grown up, and its form', 'spChanges', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['spEvoEach']),
+    logic('spEvoEach', FOR_EACH_NODE, 'One tile per stage', { template: C.moonTile, templateType: 'explicit' }),
+    group('spForms', 'The three forms', 'spChanges', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['spFormEach']),
+    logic('spFormEach', FOR_EACH_NODE, 'One tile per form', { template: C.moonTile, templateType: 'explicit' }),
+    text('spFormLine', 'What the next form needs', 'spChanges', '', { ...T_META, textAlignX: 'center' }),
+    logic('spView', logicName('Logic/School view'), 'The school, as they see it'),
+    logic('spTeachIt', logicName('Logic/School act'), 'Teach it', { action: 'teach' }),
+    logic('spShowForm', logicName('Logic/School act'), 'Show a form, or put it away', { action: 'form' }),
+    logic('spPickWho', logicName('Logic/Moon act'), 'Choose an alien', { action: 'select' }),
+    logic('spSave', logicName('Logic/Save model'), 'Remember what was learned'),
+    // `asking` FIRST (D55): the school opens on the question the alien is stuck on.
+    withStates('spPhase', 'A question, or a Teach card', ['asking', 'teaching'], {
+      asking: { type: 'boolean', by: { asking: true, teaching: false } },
+      teaching: { type: 'boolean', by: { asking: false, teaching: true } }
+    }),
+    logic('spAsking', EXPRESSION_NODE, 'An alien, and a question?', { expression: 'has === true && asking === true' }),
+    logic('spFirst', TIMER_NODE, 'Once the card has mounted', { duration: 120 }),
+    logic('spTeachPick', logicName('Logic/Teach card'), 'The card for the skill just missed'),
+    logic('spStep', EXPRESSION_NODE, 'Which step: less each miss in a row', { expression: 'min(2, max(0, misses - 1))' }),
+    // What the alien says, through one Variable (Trip/Play's reason: a repeated line publishes nothing).
+    { ...(logic('spSaysNow', VARIABLE_NODE, 'What the alien says', { name: 'schoolSays' }) as object), comment: 'One school on screen at a time: the line is the school’s own.' },
+    logic('spSayTaught', SET_VARIABLE_NODE, 'Say what it learned', { name: 'schoolSays' }),
+    logic('spSayForm', SET_VARIABLE_NODE, 'Say how it looks', { name: 'schoolSays' }),
+    outputs('spOut', 'The store to write', [['app', 'object'], ['write', 'signal']])
+  ],
+  connections: [
+    wire('spIn', 'app', 'spView', 'app'),
+    wire('spView', 'title', 'spTitle', 'text'),
+    wire('spView', 'has', 'spCrew', 'mounted'),
+    wire('spView', 'crew', 'spCrew', 'items'),
+    wire('spView', 'who', 'spCrew', 'value'),
+    wire('spView', 'has', 'spMe', 'mounted'),
+    ...lookWires('spView', 'spAlien'),
+    wire('spView', 'name', 'spAlien', 'name'),
+    wire('spView', 'says', 'spSays', 'text'),
+    wire('spView', 'has', 'spLearned', 'mounted'),
+    wire('spView', 'topicsTitle', 'spLearnedTitle', 'text'),
+    wire('spView', 'topics', 'spTopicEach', 'items'),
+    wire('spView', 'hasTopics', 'spTopics', 'mounted'),
+    wire('spView', 'topicsNote', 'spNote', 'text'),
+    wire('spView', 'has', 'spChanges', 'mounted'),
+    wire('spIn', 'changesWord', 'spChangesTitle', 'text'),
+    wire('spView', 'evo', 'spEvoEach', 'items'),
+    wire('spView', 'forms', 'spFormEach', 'items'),
+    wire('spView', 'formLine', 'spFormLine', 'text'),
+    // Who to teach: the moon's own select.
+    wire('spIn', 'app', 'spPickWho', 'app'),
+    wire('spIn', 'profileId', 'spPickWho', 'profileId'),
+    wire('spCrew', 'value', 'spPickWho', 'alienId'),
+    wire('spCrew', 'changed', 'spPickWho', 'run'),
+    // The first question, once the card is up; then one after each Next.
+    wire('spCard', 'didMount', 'spFirst', 'restart'),
+    wire('spFirst', 'timerFinished', 'spRound', 'ask'),
+    wire('spRound', 'next', 'spRound', 'ask'),
+    wire('spView', 'has', 'spAsking', 'has'),
+    wire('spPhase', 'asking', 'spAsking', 'asking'),
+    wire('spAsking', 'result', 'spRoundSlot', 'mounted'),
+    ...ROUND_PASS.map((p) => wire('spIn', p, 'spRound', p)),
+    wire('spView', 'who', 'spRound', 'raceId'),
+    // 🔴 Graded: the model is saved FIRST, and the lesson takes the store that save hands back.
+    wire('spIn', 'app', 'spSave', 'app'),
+    wire('spIn', 'profileId', 'spSave', 'profileId'),
+    wire('spRound', 'model', 'spSave', 'model'),
+    wire('spRound', 'graded', 'spSave', 'run'),
+    wire('spSave', 'app', 'spTeachIt', 'app'),
+    wire('spIn', 'profileId', 'spTeachIt', 'profileId'),
+    wire('spView', 'who', 'spTeachIt', 'alienId'),
+    wire('spRound', 'correct', 'spTeachIt', 'correct'),
+    wire('spRound', 'topic', 'spTeachIt', 'topic'),
+    wire('spSave', 'done', 'spTeachIt', 'run'),
+    wire('spTeachIt', 'said', 'spSayTaught', 'value'),
+    wire('spTeachIt', 'done', 'spSayTaught', 'do'),
+    wire('spSaysNow', 'value', 'spSays', 'text'),
+    // A form it has taken: shown, or put away.
+    wire('spIn', 'app', 'spShowForm', 'app'),
+    wire('spIn', 'profileId', 'spShowForm', 'profileId'),
+    wire('spView', 'who', 'spShowForm', 'alienId'),
+    wire('spFormEach', 'itemOutput-id', 'spShowForm', 'formId'),
+    wire('spFormEach', 'itemOutputSignal-tap', 'spShowForm', 'run'),
+    wire('spShowForm', 'said', 'spSayForm', 'value'),
+    wire('spShowForm', 'done', 'spSayForm', 'do'),
+    ...(['spTeachIt', 'spShowForm', 'spPickWho'] as const).flatMap((a) => [wire(a, 'app', 'spOut', 'app'), wire(a, 'done', 'spOut', 'write')]),
+    ...teachWires('sp', 'spRound', 'spTeach', 'spTeachPick', 'spStep', 'spPhase', 'to-asking'),
+    wire('spTeach', 'gotIt', 'spRound', 'ask')
+  ]
+};
+
+/** What a moon page hands its game: the player, the focus (resolved here: there is no setup), and the words a question needs. */
+function moonGameWires(p: string, play: string): unknown[] {
+  const me = `${p}Me`;
+  return [
+    wire(`${p}Store`, 'app', play, 'app'),
+    wire(me, 'profileId', play, 'profileId'),
+    ...(['level', 'lang', 'layout', 'answerMode', 'model'] as const).map((field) => wire(me, field, play, field)),
+    wire(me, 'sound', play, 'soundOn'),
+    wire(`${p}Curriculum`, 'skills', play, 'curriculum'),
+    wire(`${p}WordLists`, 'lists', play, 'wordLists'),
+    wire(`${p}TeachCards`, 'cards', play, 'teachCards'),
+    // The focus the player chose last for a game, resolved as a setup would.
+    wire(`${p}Curriculum`, 'skills', `${p}Focus`, 'curriculum'),
+    ...(['sets', 'level', 'lang'] as const).map((f) => wire(me, f, `${p}Focus`, f)),
+    wire(me, 'focusSubject', `${p}Focus`, 'subject'),
+    wire(me, 'focusSkills', `${p}Focus`, 'skills'),
+    wire(`${p}T`, 'everythingAtLevel', `${p}Focus`, 'everythingWord'),
+    wire(`${p}T`, 'skillsCount', `${p}Focus`, 'countWord'),
+    wire(`${p}T`, 'myList', `${p}Focus`, 'listWord'),
+    ...(['mode', 'focus', 'customSet', 'customSetId', 'customSetBoth'] as const).map((f) => wire(`${p}Focus`, f, play, f)),
+    ...([['typeAnswer', 'placeholder'], ['check', 'checkWord'], ['fluent', 'fluentWord'], ['correct', 'correctWord'], ['wrong', 'wrongWord'], ['timeUp', 'timeUpWord'], ['next', 'nextWord'], ['showMe', 'showMeWord'], ['anExample', 'anExampleWord'], ['gotIt', 'gotItWord']] as const).map(([word, portName]) => wire(`${p}T`, word, play, portName)),
+    wire(play, 'app', `${p}Store`, 'app'),
+    wire(play, 'write', `${p}Store`, 'write')
+  ];
+}
+
+/** A page reached from the moon (TPL-014): the bar, the title, the game, Back to the moon, and the guard every page has. */
+function moonPage(p: string, path: string, label: string, urlPath: string, play: Tpl007Component, titleWord: string, extra: { nodes: unknown[]; connections: unknown[] }, description: string): Tpl007Component {
+  return {
+    path,
+    description,
+    instantiates: [C.header, '/' + play.path, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Resolve focus'), C.words, C.curriculum, C.wordLists, C.teachCards],
+    nodes: [
+      { id: `${p}Page`, type: 'Page', label, parameters: { title: 'Rocket School', urlPath }, children: [`${p}Outer`] },
+      group(`${p}Outer`, 'The ground', `${p}Page`, column({ alignItems: 'center' }), [`${p}Wrap`]),
+      group(`${p}Wrap`, 'The screen', `${p}Outer`, column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), [`${p}Header`, `${p}Title`, `${p}Play`, `${p}Back`]),
+      place(`${p}Header`, C.header, 'The bar', `${p}Wrap`, { showHome: true, showHangar: true }),
+      text(`${p}Title`, label, `${p}Wrap`, '', T_SECTION),
+      place(`${p}Play`, '/' + play.path, label, `${p}Wrap`),
+      place(`${p}Back`, BUTTON_NODE, 'Back to the moon', `${p}Wrap`, { ...BTN_OUTLINE, label: 'Back to the moon' }),
+      ...pageCommon(p).nodes,
+      logic(`${p}TeachCards`, C.teachCards, 'The Teach cards'),
+      logic(`${p}Focus`, logicName('Logic/Resolve focus'), 'What they practise'),
+      logic(`${p}NoOne`, EXPRESSION_NODE, 'Nobody signed in?', { expression: 'has === false' }),
+      gate(`${p}Guard`, 'Send them to the profiles?'),
+      logic(`${p}GoProfiles`, NAVIGATE_NODE, 'To the profiles', { router: ROUTER, target: C.pageProfiles }),
+      logic(`${p}GoHome`, NAVIGATE_NODE, 'Home', { router: ROUTER, target: C.pageHome }),
+      logic(`${p}GoHangar`, NAVIGATE_NODE, 'To the hangar', { router: ROUTER, target: C.pageHangar }),
+      logic(`${p}GoMoon`, NAVIGATE_NODE, 'Back to the moon', { router: ROUTER, target: C.pageMoon }),
+      ...extra.nodes
+    ],
+    connections: [
+      ...pageCommon(p).connections,
+      wire(`${p}Me`, 'hasProfile', `${p}NoOne`, 'has'),
+      wire(`${p}NoOne`, 'result', `${p}Guard`, 'condition'),
+      wire(`${p}Page`, 'didMount', `${p}Guard`, 'eval'),
+      wire(`${p}Guard`, 'ontrue', `${p}GoProfiles`, 'navigate'),
+      ...headerWires(p),
+      wire(`${p}Header`, 'home', `${p}GoHome`, 'navigate'),
+      wire(`${p}T`, titleWord, `${p}Title`, 'text'),
+      wire(`${p}T`, 'backToMoon', `${p}Back`, 'label'),
+      wire(`${p}Back`, 'onClick', `${p}GoMoon`, 'navigate'),
+      ...moonGameWires(p, `${p}Play`),
+      ...extra.connections
+    ]
+  };
+}
+
+const PAGE_EXPEDITION: Tpl007Component = moonPage(
+  'xp', 'Pages/Expedition', 'Expedition', 'expedition', TRIP_PLAY, 'moonTrip',
+  { nodes: [], connections: [] },
+  'The Expedition (TPL-014 M2): Trip/Play, with the player, their focus and the words. Reached from the moon, and back to it.'
+);
+// The Expedition's own words.
+(PAGE_EXPEDITION.connections as unknown[]).push(wire('xpT', 'tripWho', 'xpPlay', 'whoWord'), wire('xpT', 'tripBag', 'xpPlay', 'bagWord'), wire('xpT', 'tripHome', 'xpPlay', 'homeWord'));
+
+const PAGE_SCHOOL: Tpl007Component = moonPage(
+  'sh', 'Pages/School', 'Alien school', 'school', SCHOOL_PLAY, 'moonSchool',
+  { nodes: [], connections: [] },
+  'Alien school (TPL-014 M4): School/Play, with the player, their focus and the words. Reached from the moon, and back to it.'
+);
+(PAGE_SCHOOL.connections as unknown[]).push(wire('shT', 'schoolChanges', 'shPlay', 'changesWord'));
+
 
 /** Every component, in the order the plan creates them — a component before anything that places it. */
 export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
@@ -5513,6 +6158,16 @@ export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
   MOON_BOOK_TILE,
   MOON_BOOK,
   MOON_BIG,
+  // TPL-014 M2–M5: the moon grows.
+  MOON_GOAL,
+  MOON_GOALS,
+  MOON_PLACES,
+  MOON_GARDEN,
+  MOON_FRAME,
+  TRIP_TILE,
+  TRIP_ROW,
+  TRIP_PLAY,
+  SCHOOL_PLAY,
   PAGE_PROFILES,
   PAGE_HOME,
   PAGE_RACE,
@@ -5521,11 +6176,13 @@ export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
   PAGE_HUNT,
   PAGE_MONSTER,
   PAGE_LISTS,
-  PAGE_MOON
+  PAGE_MOON,
+  PAGE_EXPEDITION,
+  PAGE_SCHOOL
 ];
 
 /** The library modules the door must find installed before authoring. */
 export const REQUIRED_MODULES = ['game-kit', 'keyboard-shortcuts'] as const;
 
 /** The pages, for the gate and the start page. */
-export const PAGES = [C.pageProfiles, C.pageHome, C.pageRace, C.pageHangar, C.pageMerge, C.pageHunt, C.pageMonster, C.pageLists, C.pageMoon] as const;
+export const PAGES = [C.pageProfiles, C.pageHome, C.pageRace, C.pageHangar, C.pageMerge, C.pageHunt, C.pageMonster, C.pageLists, C.pageMoon, C.pageExpedition, C.pageSchool] as const;

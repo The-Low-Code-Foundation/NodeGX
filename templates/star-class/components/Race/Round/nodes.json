@@ -635,6 +635,11 @@
           "name": "behind",
           "plug": "input",
           "type": "boolean"
+        },
+        {
+          "name": "topic",
+          "plug": "input",
+          "type": "string"
         }
       ],
       "x": 410,

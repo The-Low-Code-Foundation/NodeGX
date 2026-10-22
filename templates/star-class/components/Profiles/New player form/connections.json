@@ -47,12 +47,6 @@
     },
     {
       "fromId": "nfIn",
-      "fromProperty": "langWord",
-      "toId": "nfLang",
-      "toProperty": "label"
-    },
-    {
-      "fromId": "nfIn",
       "fromProperty": "createWord",
       "toId": "nfCreate",
       "toProperty": "label"
@@ -79,12 +73,6 @@
       "fromId": "nfLevelItems",
       "fromProperty": "items",
       "toId": "nfLevel",
-      "toProperty": "items"
-    },
-    {
-      "fromId": "nfLangItems",
-      "fromProperty": "items",
-      "toId": "nfLang",
       "toProperty": "items"
     },
     {
@@ -193,24 +181,6 @@
       "fromId": "nfLevel",
       "fromProperty": "changed",
       "toId": "nfSetLevel",
-      "toProperty": "do"
-    },
-    {
-      "fromId": "nfLangVar",
-      "fromProperty": "value",
-      "toId": "nfLang",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "nfLang",
-      "fromProperty": "value",
-      "toId": "nfSetLang",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "nfLang",
-      "fromProperty": "changed",
-      "toId": "nfSetLang",
       "toProperty": "do"
     },
     {
@@ -596,12 +566,6 @@
       "fromProperty": "result",
       "toId": "nfMode",
       "toProperty": "currentState"
-    },
-    {
-      "fromId": "nfMode",
-      "fromProperty": "create",
-      "toId": "nfLangWrap",
-      "toProperty": "mounted"
     },
     {
       "fromId": "nfMode",

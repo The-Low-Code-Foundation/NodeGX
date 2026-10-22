@@ -65,6 +65,12 @@
     },
     {
       "fromId": "moonactIn",
+      "fromProperty": "formId",
+      "toId": "moonactFn",
+      "toProperty": "in-formId"
+    },
+    {
+      "fromId": "moonactIn",
       "fromProperty": "run",
       "toId": "moonactFn",
       "toProperty": "run"

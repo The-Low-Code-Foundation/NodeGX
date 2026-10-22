@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f4b170da-fffa-5bbc-8d53-49d3e692108e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "schoolviewIn",
+      "fromProperty": "app",
+      "toId": "schoolviewFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-has",
+      "toId": "schoolviewOut",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-crew",
+      "toId": "schoolviewOut",
+      "toProperty": "crew"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-who",
+      "toId": "schoolviewOut",
+      "toProperty": "who"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-name",
+      "toId": "schoolviewOut",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-species",
+      "toId": "schoolviewOut",
+      "toProperty": "species"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-colour",
+      "toId": "schoolviewOut",
+      "toProperty": "colour"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-grown",
+      "toId": "schoolviewOut",
+      "toProperty": "grown"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-hat",
+      "toId": "schoolviewOut",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-eyes",
+      "toId": "schoolviewOut",
+      "toProperty": "eyes"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-neck",
+      "toId": "schoolviewOut",
+      "toProperty": "neck"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-back",
+      "toId": "schoolviewOut",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-form",
+      "toId": "schoolviewOut",
+      "toProperty": "form"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-title",
+      "toId": "schoolviewOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-says",
+      "toId": "schoolviewOut",
+      "toProperty": "says"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-topics",
+      "toId": "schoolviewOut",
+      "toProperty": "topics"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-hasTopics",
+      "toId": "schoolviewOut",
+      "toProperty": "hasTopics"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-topicsTitle",
+      "toId": "schoolviewOut",
+      "toProperty": "topicsTitle"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-topicsNote",
+      "toId": "schoolviewOut",
+      "toProperty": "topicsNote"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-evo",
+      "toId": "schoolviewOut",
+      "toProperty": "evo"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-forms",
+      "toId": "schoolviewOut",
+      "toProperty": "forms"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "out-formLine",
+      "toId": "schoolviewOut",
+      "toProperty": "formLine"
+    },
+    {
+      "fromId": "schoolviewFn",
+      "fromProperty": "success",
+      "toId": "schoolviewOut",
+      "toProperty": "done"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "cc1c3513-81a6-514f-8631-ca6fc9b69037",
+  "name": "School act",
+  "path": "/Logic/School act",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "TPL-014 M4: one thing done at Alien school. Action is a parameter, placed once per action: teach (Correct and Topic: a right answer teaches the alien that topic; a full topic stays full) or form (Form Id: show a form it has taken, or put it away). Said is what the alien says."
+}

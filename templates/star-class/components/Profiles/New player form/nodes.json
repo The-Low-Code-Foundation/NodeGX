@@ -128,7 +128,6 @@
         "nfLook",
         "nfSkin",
         "nfLevel",
-        "nfLangWrap",
         "nfActions",
         "nfDanger"
       ],
@@ -447,33 +446,6 @@
       "y": 1600
     },
     {
-      "id": "nfLangWrap",
-      "type": "Group",
-      "label": "The language, for a new player",
-      "parent": "nfCard",
-      "children": [
-        "nfLang"
-      ],
-      "parameters": {
-        "width": {
-          "value": 100,
-          "unit": "%"
-        },
-        "sizeMode": "contentHeight",
-        "flexDirection": "column"
-      },
-      "x": 100,
-      "y": 1720
-    },
-    {
-      "id": "nfLang",
-      "type": "/Game/Choice row",
-      "label": "Which language",
-      "parent": "nfLangWrap",
-      "x": 160,
-      "y": 1840
-    },
-    {
       "id": "nfActions",
       "type": "Group",
       "label": "The two buttons",
@@ -491,7 +463,7 @@
         "rowGap": "var(--space-3)"
       },
       "x": 100,
-      "y": 1960
+      "y": 1720
     },
     {
       "id": "nfCreate",
@@ -530,7 +502,7 @@
         "label": "Let’s go!"
       },
       "x": 160,
-      "y": 2080
+      "y": 1840
     },
     {
       "id": "nfCancel",
@@ -569,7 +541,7 @@
         "label": "Cancel"
       },
       "x": 160,
-      "y": 2200
+      "y": 1960
     },
     {
       "id": "nfLookItems",
@@ -676,7 +648,7 @@
         "expression": "''"
       },
       "x": 530,
-      "y": 3400
+      "y": 3040
     },
     {
       "id": "nfResetSkin",
@@ -686,7 +658,7 @@
         "name": "newSkin"
       },
       "x": 530,
-      "y": 3520
+      "y": 3160
     },
     {
       "id": "nfFillSkin",
@@ -696,18 +668,7 @@
         "name": "newSkin"
       },
       "x": 530,
-      "y": 3640
-    },
-    {
-      "id": "nfLangItems",
-      "type": "Static Data",
-      "label": "The two languages",
-      "parameters": {
-        "type": "json",
-        "json": "[{\"label\":\"English\",\"value\":\"en\"},{\"label\":\"Français\",\"value\":\"fr\"}]"
-      },
-      "x": 530,
-      "y": 2800
+      "y": 3280
     },
     {
       "id": "nfLookVar",
@@ -766,17 +727,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 2920
-    },
-    {
-      "id": "nfSetLang",
-      "type": "Set Variable",
-      "label": "Choose a language",
-      "parameters": {
-        "name": "newLang"
-      },
-      "x": 530,
-      "y": 3040
+      "y": 3400
     },
     {
       "id": "nfSeedVar",
@@ -799,7 +750,7 @@
         "name": "newSeed"
       },
       "x": 530,
-      "y": 3760
+      "y": 3520
     },
     {
       "id": "nfRandom",
@@ -822,7 +773,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 3880
+      "y": 3640
     },
     {
       "id": "nfSetHist",
@@ -832,7 +783,7 @@
         "name": "newSeedHistory"
       },
       "x": 530,
-      "y": 4000
+      "y": 3760
     },
     {
       "id": "nfAtVar",
@@ -845,7 +796,7 @@
         "comment": "Shared on purpose: one player draft at a time. New player resets it and Edit player fills it each time the form opens, and only one form is ever on screen."
       },
       "x": 530,
-      "y": 4120
+      "y": 3880
     },
     {
       "id": "nfSetAt",
@@ -855,7 +806,7 @@
         "name": "newSeedAt"
       },
       "x": 530,
-      "y": 4240
+      "y": 4000
     },
     {
       "id": "nfRollSet",
@@ -905,7 +856,7 @@
         "expression": "'pixel-art'"
       },
       "x": 530,
-      "y": 4360
+      "y": 4120
     },
     {
       "id": "nfDefaultLevel",
@@ -915,7 +866,7 @@
         "expression": "'P3'"
       },
       "x": 530,
-      "y": 4480
+      "y": 4240
     },
     {
       "id": "nfDefaultLang",
@@ -925,7 +876,7 @@
         "expression": "'en'"
       },
       "x": 530,
-      "y": 4600
+      "y": 4360
     },
     {
       "id": "nfResetLook",
@@ -935,7 +886,7 @@
         "name": "newLook"
       },
       "x": 530,
-      "y": 4720
+      "y": 4480
     },
     {
       "id": "nfResetLevel",
@@ -945,7 +896,7 @@
         "name": "newLevel"
       },
       "x": 530,
-      "y": 4840
+      "y": 4600
     },
     {
       "id": "nfResetLang",
@@ -955,7 +906,7 @@
         "name": "newLang"
       },
       "x": 530,
-      "y": 4960
+      "y": 4720
     },
     {
       "id": "nfShown",
@@ -975,7 +926,7 @@
         "expression": "editing === true ? 'edit' : 'create'"
       },
       "x": 530,
-      "y": 5080
+      "y": 4840
     },
     {
       "id": "nfMode",
@@ -1014,7 +965,7 @@
         "rowGap": "var(--space-3)"
       },
       "x": 100,
-      "y": 2320
+      "y": 2080
     },
     {
       "id": "nfDelete",
@@ -1053,7 +1004,7 @@
         "label": "Delete this player"
       },
       "x": 160,
-      "y": 2440
+      "y": 2200
     },
     {
       "id": "nfAsk",
@@ -1074,7 +1025,7 @@
         "rowGap": "var(--space-3)"
       },
       "x": 160,
-      "y": 2560
+      "y": 2320
     },
     {
       "id": "nfAskText",
@@ -1089,7 +1040,7 @@
         "fontWeight": "var(--font-semibold)"
       },
       "x": 220,
-      "y": 2680
+      "y": 2440
     },
     {
       "id": "nfAskButtons",
@@ -1113,7 +1064,7 @@
         }
       },
       "x": 220,
-      "y": 2800
+      "y": 2560
     },
     {
       "id": "nfNo",
@@ -1152,7 +1103,7 @@
         "label": "No, keep"
       },
       "x": 280,
-      "y": 2920
+      "y": 2680
     },
     {
       "id": "nfYes",
@@ -1191,7 +1142,7 @@
         "label": "Yes, delete"
       },
       "x": 280,
-      "y": 3040
+      "y": 2800
     },
     {
       "id": "nfAskState",
@@ -1209,7 +1160,7 @@
         "value-asking-asking": true
       },
       "x": 530,
-      "y": 3160
+      "y": 2800
     },
     {
       "id": "nfAskLine",
@@ -1219,7 +1170,7 @@
         "functionScript": "Outputs.line = String(Inputs.word || '').replace('{name}', String(Inputs.name || ''));"
       },
       "x": 530,
-      "y": 3280,
+      "y": 2920,
       "ports": [
         {
           "name": "in-word",
@@ -1252,7 +1203,7 @@
         "name": "newLook"
       },
       "x": 530,
-      "y": 5200
+      "y": 4960
     },
     {
       "id": "nfFillLevel",
@@ -1262,7 +1213,7 @@
         "name": "newLevel"
       },
       "x": 530,
-      "y": 5320
+      "y": 5080
     },
     {
       "id": "nfOut",

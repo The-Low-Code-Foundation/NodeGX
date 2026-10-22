@@ -1,0 +1,132 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8ea70491-ae0b-5bfd-8b88-cc4bc56b34b5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "gqIn",
+      "type": "Component Inputs",
+      "label": "The goal",
+      "ports": [
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "pct",
+          "plug": "output",
+          "type": "number"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "gqBox",
+      "type": "Group",
+      "label": "The goal",
+      "children": [
+        "gqLabel",
+        "gqBar",
+        "gqLine"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "gqLabel",
+      "type": "Text",
+      "label": "Its name",
+      "parent": "gqBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "gqBar",
+      "type": "Group",
+      "label": "The bar",
+      "parent": "gqBox",
+      "children": [
+        "gqFill"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "height": {
+          "value": 14,
+          "unit": "px"
+        },
+        "sizeMode": "explicit",
+        "backgroundColor": "var(--surface-raised)",
+        "borderRadius": "var(--radius-full)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "gqFill",
+      "type": "Group",
+      "label": "How far",
+      "parent": "gqBar",
+      "parameters": {
+        "width": {
+          "value": 0,
+          "unit": "%"
+        },
+        "height": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "explicit",
+        "backgroundColor": "var(--accent)"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "gqLine",
+      "type": "Text",
+      "label": "How far, in words",
+      "parent": "gqBox",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "gqBox"
+  ]
+}

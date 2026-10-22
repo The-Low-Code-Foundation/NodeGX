@@ -1,0 +1,121 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0ee3767a-bfc9-5df0-8d0a-5b4665aa3107",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ttIn",
+      "fromProperty": "kind",
+      "toId": "ttKind",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "ttKind",
+      "fromProperty": "ground",
+      "toId": "ttCell",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "kind",
+      "toId": "ttClass",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "edge",
+      "toId": "ttClass",
+      "toProperty": "edge"
+    },
+    {
+      "fromId": "ttClass",
+      "fromProperty": "result",
+      "toId": "ttCell",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "glyph",
+      "toId": "ttGlyph",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "me",
+      "toId": "ttGlyphShown",
+      "toProperty": "me"
+    },
+    {
+      "fromId": "ttGlyphShown",
+      "fromProperty": "result",
+      "toId": "ttGlyph",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "me",
+      "toId": "ttMeBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "species",
+      "toId": "ttAlien",
+      "toProperty": "species"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "grown",
+      "toId": "ttAlien",
+      "toProperty": "grown"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "hat",
+      "toId": "ttAlien",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "eyes",
+      "toId": "ttAlien",
+      "toProperty": "eyes"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "neck",
+      "toId": "ttAlien",
+      "toProperty": "neck"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "back",
+      "toId": "ttAlien",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "form",
+      "toId": "ttAlien",
+      "toProperty": "form"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "colour",
+      "toId": "ttAlien",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "ttCell",
+      "fromProperty": "onClick",
+      "toId": "ttOut",
+      "toProperty": "tapped"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "at",
+      "toId": "ttOut",
+      "toProperty": "at"
+    }
+  ]
+}

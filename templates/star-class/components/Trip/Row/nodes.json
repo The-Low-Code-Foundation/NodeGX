@@ -1,0 +1,71 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5f192d13-1f6e-5eff-89e4-63a58da842a3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "twIn",
+      "type": "Component Inputs",
+      "label": "The row",
+      "ports": [
+        {
+          "name": "cells",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "twRow",
+      "type": "Group",
+      "label": "One row",
+      "children": [
+        "twCells"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-1)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "twCells",
+      "type": "For Each",
+      "label": "One tile per cell",
+      "parameters": {
+        "template": "/Trip/Tile",
+        "templateType": "explicit"
+      },
+      "parent": "twRow",
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "twOut",
+      "type": "Component Outputs",
+      "label": "A tile was tapped",
+      "ports": [
+        {
+          "name": "tapped",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "at",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "twRow"
+  ]
+}

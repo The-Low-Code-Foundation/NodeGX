@@ -305,6 +305,18 @@
     },
     {
       "fromId": "mnView",
+      "fromProperty": "selBack",
+      "toId": "mnCare",
+      "toProperty": "back"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "selForm",
+      "toId": "mnCare",
+      "toProperty": "form"
+    },
+    {
+      "fromId": "mnView",
       "fromProperty": "selHappy",
       "toId": "mnCare",
       "toProperty": "happy"
@@ -656,6 +668,222 @@
       "fromProperty": "moonBookClose",
       "toId": "mnBook",
       "toProperty": "closeWord"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "has",
+      "toId": "mnPlaces",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonTrip",
+      "toId": "mnPlaces",
+      "toProperty": "tripWord"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "tripLine",
+      "toId": "mnPlaces",
+      "toProperty": "tripLine"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonSchool",
+      "toId": "mnPlaces",
+      "toProperty": "schoolWord"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "schoolLine",
+      "toId": "mnPlaces",
+      "toProperty": "schoolLine"
+    },
+    {
+      "fromId": "mnPlaces",
+      "fromProperty": "trip",
+      "toId": "mnGoTrip",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mnPlaces",
+      "fromProperty": "school",
+      "toId": "mnGoSchool",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonGoals",
+      "toId": "mnGoals",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "goals",
+      "toId": "mnGoals",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "hasGarden",
+      "toId": "mnGarden",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mnStore",
+      "fromProperty": "app",
+      "toId": "mnGarden",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "profileId",
+      "toId": "mnGarden",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonGarden",
+      "toId": "mnGarden",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "gardenLine",
+      "toId": "mnGarden",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "plots",
+      "toId": "mnGarden",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "canPlant",
+      "toId": "mnGarden",
+      "toProperty": "canPlant"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "plantLine",
+      "toId": "mnGarden",
+      "toProperty": "plantLine"
+    },
+    {
+      "fromId": "mnGarden",
+      "fromProperty": "app",
+      "toId": "mnStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnGarden",
+      "fromProperty": "write",
+      "toId": "mnStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "hasFrame",
+      "toId": "mnFrame",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "cardsLine",
+      "toId": "mnFrame",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "cards",
+      "toId": "mnFrame",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "mnStore",
+      "fromProperty": "app",
+      "toId": "mnGear",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "profileId",
+      "toId": "mnGear",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "gear",
+      "toId": "mnGear",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "purse",
+      "toId": "mnGear",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonGear",
+      "toId": "mnGear",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "buyTitle",
+      "toId": "mnGear",
+      "toProperty": "buyTitle"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "youHave",
+      "toId": "mnGear",
+      "toProperty": "haveWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "itCosts",
+      "toId": "mnGear",
+      "toProperty": "costWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "youllHave",
+      "toId": "mnGear",
+      "toProperty": "leftWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "yesBuy",
+      "toId": "mnGear",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "noThanks",
+      "toId": "mnGear",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "mnGear",
+      "fromProperty": "app",
+      "toId": "mnStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnGear",
+      "fromProperty": "write",
+      "toId": "mnStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "findsLine",
+      "toId": "mnBook",
+      "toProperty": "findsLine"
     }
   ]
 }
