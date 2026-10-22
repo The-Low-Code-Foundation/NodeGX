@@ -3,8 +3,8 @@
 **Scoped:** 2026-10-21, from [DIRECTION.md §0](../../DIRECTION.md) pillar 2 and §4 item 6 (Richard, the same day:
 *"what if all of the above was cooked into the npm package? So when you do `npm create nodegx`, the user's project folder
 gets filled up with a library of starting stuff, such that the first conversation they have with their LLM is loaded
-with the entire knowledge base, blueprint and techniques"*). **Status: ⬜ scoped, not started.** Lane 1 (apps with npm).
-**Waits on:** D4 ([DIRECTION §5](../../DIRECTION.md)).
+with the entire knowledge base, blueprint and techniques"*). **Status: ⬜ ready: D4 ruled yes, as scoped (Richard, 2026-10-22).** Lane 1 (apps with npm).
+**Was waiting on:** D4, ruled 2026-10-22 ([DIRECTION §5](../../DIRECTION.md)).
 
 ## 1. The person sentence
 

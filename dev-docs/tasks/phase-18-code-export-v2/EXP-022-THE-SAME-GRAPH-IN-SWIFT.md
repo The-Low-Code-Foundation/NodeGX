@@ -1,7 +1,7 @@
 # EXP-022 — The same graph in Swift
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), from Richard's ruling of 2026-10-21: "I want that offramp promise
-fulfilled in React and Swift." **Status: ⬜ scoped, not started; §7 proposes a bounded cut (2026-10-22), awaiting Richard.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
+fulfilled in React and Swift." **Status: ⬜ ruled 2026-10-22 (§8, DIRECTION D6), not started: the bounded cut with the backend, hard stop at 12 sessions, starting now in a second lane-6 session.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
 out of the parked table: its reveal sentence stands ("one graph, three homes"), its rulings R1–R7 carry, and **its route
 changes**: P110 §0 scoped *a NodeGX runtime written in Swift that loads the project as data*; this task is *an emitter
 that writes a SwiftUI app from the same IR the React export reads*. Same reveal, and the person leaves with Swift source
@@ -112,3 +112,30 @@ the site, not a reason for a ninth session.
 
 **Kotlin after:** the same cut on Compose Desktop (JVM, no emulator) would be the third target and the real test of
 "whatever your framework". Not this task.
+
+## 8. Ruled (Richard, 2026-10-22)
+
+Asked in plain words, four choices each, he picked **"Go, with a backend"** and **"Now, beside React"**. So §7 stands
+with these changes:
+
+- **The app is the todo-list as it ships**: it signs in and reads and writes its records on the backend. Not the
+  phone-only form. The reveal is the strongest one P110 named: the same backend, the web app and the phone app side
+  by side, the same lists.
+- **The backend route to measure first (S1), not assume:** one client in two hosts. The React export already writes
+  the Noodl API client (`src/lib/noodl.ts`, EXP-020) and the record verbs (`src/api`). Run that same client inside the
+  `JSContext` that hosts the Functions, with `fetch` bridged to `URLSession`, so `Noodl.Records`, `CloudFunctions`,
+  `Users` and the record nodes reach the backend through code that is already graded. Fall back to a hand-written Swift
+  client only if that measures worse, and say why.
+- **Hard stop at 12 sessions**, not 8. An overrun is reported on the site as evidence against "the spec makes the
+  off-ramp cheap", not hidden.
+- **Starts now, in a second lane-6 session**, beside the React session on EXP-021 §101. Swift lives in
+  `packages/nodegx-export/src/emit/swift/` and its own tests; it touches `plan.ts` only to read it, and any change
+  there goes through the React session's suite first. Xcode builds are a heavy job: none while an OWN-026 grade or a
+  full test suite is running (`pgrep -fl vitest`, `pgrep -fl jest`, the lab's `series-*.log`).
+
+**Sessions:** S1, measure, then the smallest template drawn in the simulator beside its `render_report` (AC1). S2,
+todo-list's state, effects, lifts and hooks printed from the plan, Functions in the `JSContext`, desk-graded by
+`swift test`. S3, the backend through the one client, graded against the fake Parse backend the Noodl Desk uses. S4,
+todo-list driven in the simulator against the same backend React's AC1 drive used: sign in, add, tick, delete,
+relaunch, beside the runtime and the React export. S5, the ledger line (AC4), the preflight, and the cost written
+beside React's. S6–S12 are slack, not plan.

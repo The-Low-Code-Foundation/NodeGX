@@ -1,7 +1,10 @@
 # OWN-026 — The day-thirty test
 
-**Scoped:** 2026-10-21, from [DIRECTION.md §0](../../DIRECTION.md) and §4 item 8. **Status: ⬜ scoped, not started.**
-Lane 5 (the measured comparison), after OWN-023. **Waits on:** D5 ([DIRECTION §5](../../DIRECTION.md)).
+**Scoped:** 2026-10-21, from [DIRECTION.md §0](../../DIRECTION.md) and §4 item 8. **Status: 🟡 running (the lab, test 1).** Lane 5 (the measured comparison), after OWN-023. D5 ruled 2026-10-22
+([DIRECTION §5](../../DIRECTION.md)): **the plan of record is [`own-026/PLAN.md`](own-026/PLAN.md)**, the lab Richard set that
+morning (DeepSeek V4.1 Flash in Cline builds the rocket times-tables app in three arms, ×3, then takes ten changes;
+Sonnet 5.5 hands the Gala builds over). §2–§3 below are the first draft, kept for the record and superseded; the
+result goes on nodegx.io whichever way it comes out (AC4 stands).
 
 ## 1. Why a third day-one round would measure nothing
 
@@ -12,7 +15,7 @@ nodes plus 1,257 hand-written lines (`own-023/ROUND-2-THE-GALA.md` §9.4). Richa
 surface. But one is built on concrete, the other on sand."* A day-one round grades the property the theory says is
 equal. The claim is about what the person can still do later. That is what this round grades.
 
-## 2. The shape
+## 2. The shape (first draft, superseded by `own-026/PLAN.md`, 2026-10-22)
 
 Two finished builds of the same app, one in plain code by Claude Code bare, one in NodeGX (round 2's A+ and B2 are
 candidates, if both are kept whole). Each is handed to a **fresh** stranger session with no memory of the build and the
