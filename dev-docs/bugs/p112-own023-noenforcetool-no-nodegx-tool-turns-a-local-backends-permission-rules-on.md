@@ -1,7 +1,10 @@
 ---
 id: P112-OWN023-NOENFORCETOOL
 title: No NodeGX MCP tool turns a local backend's permission rules on, so an agent that finds them off must use the admin dashboard
-status: open
+status: fixed
+commit: f2afd62b0
+kit: core
+regression: packages/noodl-mcp/tests/backendTools.test.ts "set_backend_enforcement turns the rules off and back on"
 severity: medium
 area: mcp / backend tools
 found: P112 OWN-023 round 2 (the gala), arm B, 2026-10-21
@@ -16,3 +19,10 @@ that describe what the app doesn't enforce.
 
 Proposed: a backend tool (or a `provision_backend` option) that turns enforcement on and says so in its result, and
 `get_project_info` naming `devOpen` while it is on. Small. Related: P112-OWN023-DEVOPENREAD (open), P104-DEVOPEN (fixed).
+
+**Fixed, P112 OWN-026 FIX-01 (2026-10-22).** `set_backend_enforcement({ enforced })` in the backend tool group
+(deferred: costs the resident surface nothing). It writes `devOpen` through `PUT /admin/permissions`, reads the
+backend back, and answers `enforced` with a note on what that means for queries, sharing and shared values. The spec
+reads the consequence: an anonymous `GET /classes/…` goes 403 → 200 → 403 as the tool moves. `provision_backend`
+now answers `rules: { enforced, note }` (read back off the backend), and a new backend is enforced from the start
+(P112-OWN023-DEVOPENREAD), so the tool is for a backend made dev-open before.

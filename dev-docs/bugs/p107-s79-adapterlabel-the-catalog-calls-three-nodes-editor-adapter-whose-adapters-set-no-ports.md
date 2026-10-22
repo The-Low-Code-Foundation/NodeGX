@@ -42,3 +42,7 @@ dynamic ports are its data attributes, which its spec draws from the params; the
 comes from the source-text heuristic in `build-catalog.js` `hasRuntimeDiscoveredPorts` :68-76, not read further), and
 `get_node_type`'s description for Query Records / Filter Records still names an adapter. Reach of fixing it: 1 ledger
 row; 0 wires in Richard's projects reach a Router dynamic port.
+
+**Partly fixed, P112 OWN-026 FIX-01 (2026-10-22, `0b9becca8`):** DbCollection2 (Query Records) is out of
+`EDITOR_ADAPTER_TYPES` and its note names the parameters that draw its ports. FilterDBModels and Router are unchanged.
+
