@@ -1,0 +1,12 @@
+{
+ "email": "ann@example.invalid",
+ "password": "a long enough password",
+ "base": "http://127.0.0.1:8644",
+ "ids": {
+  "mot": "cfbcee60-da37-4e7c-b0cc-818fb68e7869",
+  "vat": "7e339137-c89d-4ffa-8eb4-24eb4f0f3f83",
+  "notes": "9175fa89-30c5-4c0c-a700-a13d40e6fb48",
+  "domain": "81c2e908-fc13-4997-b72e-1adc49cabe1e",
+  "routine": "995e23c9-606a-40db-8d6d-78b374302c4b"
+ }
+}

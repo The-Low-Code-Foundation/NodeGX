@@ -49,6 +49,8 @@ describe('EXP-022 S1: story-engine as a Swift package', () => {
       `${kit}/Views/RemixPageView.swift`,
       `${kit}/Views/SidebarView.swift`,
       'StoryEngine.xcodeproj/project.pbxproj',
+      // S4: the UI test target's folder, with its launch test (a drive is a file added beside it).
+      'StoryEngineUITests/StoryEngineUITests.swift',
       'Tests/StoryEngineKitTests/StoryEngineTests.swift'
     ]);
     // A view for every component the React export writes a file for; since S2 the logic component (a hook there) too.

@@ -1,0 +1,505 @@
+{
+ "D0": {
+  "runtime": {
+   "page": "Sign in",
+   "tabs": [],
+   "rows": [],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "wire": {}
+  },
+  "react": {
+   "page": "Sign in",
+   "tabs": [],
+   "rows": [],
+   "fields": [
+    "text::",
+    "secure::"
+   ],
+   "wire": {}
+  },
+  "swift": {
+   "page": "Sign in",
+   "tabs": [],
+   "rows": [],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "wire": {}
+  }
+ },
+ "D1": {
+  "runtime": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {
+    "POST /classes/Action 200": 1,
+    "POST /classes/BalanceReading 200": 1,
+    "POST /classes/Event 200": 1,
+    "POST /classes/MoneyItem 200": 1,
+    "POST /classes/MoneyMark 200": 1,
+    "POST /classes/Project 200": 1,
+    "POST /classes/Routine 200": 1,
+    "POST /classes/RoutineCheck 200": 1,
+    "POST /classes/Task 200": 2,
+    "POST /login 200": 1
+   }
+  },
+  "react": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {
+    "POST /classes/Action 200": 1,
+    "POST /classes/BalanceReading 200": 1,
+    "POST /classes/Event 200": 1,
+    "POST /classes/MoneyItem 200": 1,
+    "POST /classes/MoneyMark 200": 1,
+    "POST /classes/Project 200": 1,
+    "POST /classes/Routine 200": 1,
+    "POST /classes/RoutineCheck 200": 1,
+    "POST /classes/Task 200": 1,
+    "POST /login 200": 1
+   }
+  },
+  "swift": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {
+    "POST /classes/Action 200": 1,
+    "POST /classes/BalanceReading 200": 1,
+    "POST /classes/Event 200": 1,
+    "POST /classes/MoneyItem 200": 1,
+    "POST /classes/MoneyMark 200": 1,
+    "POST /classes/Project 200": 1,
+    "POST /classes/Routine 200": 1,
+    "POST /classes/RoutineCheck 200": 1,
+    "POST /classes/Task 200": 1,
+    "POST /login 200": 1
+   }
+  }
+ },
+ "D2": {
+  "runtime": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {}
+  },
+  "react": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {}
+  },
+  "swift": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {}
+  }
+ },
+ "D3": {
+  "runtime": {
+   "page": "Todo",
+   "tabs": [
+    "List (4)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes",
+    "Pick up the dry cleaning"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #5)"
+   ],
+   "wire": {
+    "POST /classes/Action 200": 1,
+    "POST /classes/Event 200": 1,
+    "POST /classes/Event 201": 1,
+    "POST /classes/Routine 200": 1,
+    "POST /classes/RoutineCheck 200": 1,
+    "POST /classes/Task 200": 1,
+    "POST /classes/Task 201": 1
+   }
+  },
+  "react": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {}
+  },
+  "swift": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {}
+  }
+ },
+ "D4dialog": {
+  "runtime": {
+   "page": "Todo",
+   "tabs": [
+    "List (4)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes",
+    "Pick up the dry cleaning"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #5)",
+    "text::What happened?"
+   ],
+   "wire": {}
+  },
+  "react": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {}
+  },
+  "swift": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {}
+  }
+ },
+ "D4": {
+  "runtime": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (2)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Pick up the dry cleaning"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {
+    "POST /classes/Action 200": 1,
+    "POST /classes/Event 200": 1,
+    "POST /classes/Event 201": 1,
+    "POST /classes/Routine 200": 1,
+    "POST /classes/RoutineCheck 200": 1,
+    "POST /classes/Task 200": 1,
+    "PUT /classes/Task/<id> 200": 1
+   }
+  },
+  "react": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {}
+  },
+  "swift": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {}
+  }
+ },
+ "D5": {
+  "runtime": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (2)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Pick up the dry cleaning"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {
+    "GET /users/me 200": 1,
+    "POST /classes/Action 200": 1,
+    "POST /classes/BalanceReading 200": 1,
+    "POST /classes/Event 200": 1,
+    "POST /classes/MoneyItem 200": 1,
+    "POST /classes/MoneyMark 200": 1,
+    "POST /classes/Project 200": 1,
+    "POST /classes/Routine 200": 1,
+    "POST /classes/RoutineCheck 200": 1,
+    "POST /classes/Task 200": 2
+   }
+  },
+  "react": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {
+    "POST /classes/Action 200": 1,
+    "POST /classes/BalanceReading 200": 1,
+    "POST /classes/Event 200": 1,
+    "POST /classes/MoneyItem 200": 1,
+    "POST /classes/MoneyMark 200": 1,
+    "POST /classes/Project 200": 1,
+    "POST /classes/Routine 200": 1,
+    "POST /classes/RoutineCheck 200": 1,
+    "POST /classes/Task 200": 1
+   }
+  },
+  "swift": {
+   "page": "Todo",
+   "tabs": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)"
+   ],
+   "rows": [
+    "Book the van in for its MOT",
+    "Chase the accountant about VAT",
+    "Write the release notes"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "wire": {
+    "POST /classes/Action 200": 1,
+    "POST /classes/BalanceReading 200": 1,
+    "POST /classes/Event 200": 1,
+    "POST /classes/MoneyItem 200": 1,
+    "POST /classes/MoneyMark 200": 1,
+    "POST /classes/Project 200": 1,
+    "POST /classes/Routine 200": 1,
+    "POST /classes/RoutineCheck 200": 1,
+    "POST /classes/Task 200": 1
+   }
+  }
+ },
+ "D6": {
+  "runtime": {
+   "page": "Sign in",
+   "tabs": [],
+   "rows": [],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "wire": {
+    "POST /logout 200": 1
+   }
+  },
+  "react": {
+   "page": "Sign in",
+   "tabs": [],
+   "rows": [],
+   "fields": [
+    "text::",
+    "secure::"
+   ],
+   "wire": {
+    "POST /logout 200": 1
+   }
+  },
+  "swift": {
+   "page": "Sign in",
+   "tabs": [],
+   "rows": [],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "wire": {
+    "POST /logout 200": 1
+   }
+  }
+ },
+ "D6relaunch": {
+  "runtime": {
+   "page": "Sign in",
+   "tabs": [],
+   "rows": [],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "wire": {}
+  },
+  "react": {
+   "page": "Sign in",
+   "tabs": [],
+   "rows": [],
+   "fields": [
+    "text::",
+    "secure::"
+   ],
+   "wire": {}
+  },
+  "swift": {
+   "page": "Sign in",
+   "tabs": [],
+   "rows": [],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "wire": {}
+  }
+ }
+}

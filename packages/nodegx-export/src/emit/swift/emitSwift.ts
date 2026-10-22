@@ -251,6 +251,32 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
     '}',
     ''
   ].join('\n');
+  files[`${appName}UITests/${appName}UITests.swift`] = [
+    '// @nodegx:generated (EXP-022) — `xcodebuild test` on a simulator: the app launches and draws its first page. Every',
+    '// .swift file in this folder is a UI test (the folder is synchronized), so a drive is added by writing one beside it.',
+    'import XCTest',
+    '',
+    'extension XCUIApplication {',
+    '  /// The app, with the test run\'s `VITE_NODEGX_` variables in its environment: `TEST_RUNNER_VITE_NODEGX_ENDPOINT=…',
+    '  /// xcodebuild test` points it at another backend, as the web build\'s `.env` does.',
+    '  static func nodegx() -> XCUIApplication {',
+    '    let app = XCUIApplication()',
+    '    for (key, value) in ProcessInfo.processInfo.environment where key.hasPrefix("VITE_NODEGX_") { app.launchEnvironment[key] = value }',
+    '    return app',
+    '  }',
+    '}',
+    '',
+    `final class ${appName}UITests: XCTestCase {`,
+    '  @MainActor',
+    '  func testTheAppLaunchesAndDraws() {',
+    '    let app = XCUIApplication.nodegx()',
+    '    app.launch()',
+    '    let drawn = app.staticTexts.firstMatch.waitForExistence(timeout: 15) || app.buttons.firstMatch.exists',
+    '    XCTAssertTrue(drawn, "the first page draws nothing a person can read or press")',
+    '  }',
+    '}',
+    ''
+  ].join('\n');
   files[`${appName}.xcodeproj/project.pbxproj`] = projectPbxproj({
     appName,
     libraryName,

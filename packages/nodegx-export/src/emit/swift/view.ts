@@ -101,6 +101,8 @@ export function swiftJson(value: unknown, pad: string): string {
 
 /** Names a View already has, so a prop or state row of that name would collide with SwiftUI's own. */
 const VIEW_MEMBERS = new Set(['body', 'router', 'variables', 'session']);
+/** A Text Input's label parameters, drawn by the field's own printer (S4), so not looks a phone has no counterpart for. */
+const INPUT_LABEL_PARAMS = new Set(['useLabel', 'label', 'labelSpacing', 'labelfontSize', 'labelcolor']);
 const SWIFT_KEYWORDS = new Set(['default', 'switch', 'case', 'class', 'struct', 'protocol', 'extension', 'func', 'var', 'let', 'in', 'repeat', 'return', 'self', 'Self', 'init', 'operator', 'where', 'is', 'as', 'some', 'any', 'true', 'false', 'nil', 'if', 'else', 'for', 'while', 'guard', 'do', 'try', 'catch', 'throw', 'import', 'enum', 'static', 'public', 'private', 'internal', 'subscript', 'Type', 'Protocol']);
 
 /** A plan name (a port name may hold spaces: "Show Label") as a Swift member name. */
@@ -700,6 +702,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     for (const u of s.unmapped) webOnly.push({ component: plan.path, nodeId: id, decl: u });
     for (const name of computed.unhandled) {
       if (name === 'visible' || name === 'mounted') continue;
+      if (role === 'input' && INPUT_LABEL_PARAMS.has(name)) continue;
       const v = literalParam(node, name);
       webOnly.push({ component: plan.path, nodeId: id, decl: `${name}${v !== undefined ? `: ${v}` : ''}` });
     }
@@ -736,6 +739,9 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     if (!node || role === undefined) return [];
     const bound = plan.bindings[id] ?? {};
     let out: string[];
+    // Authored Mounted false with no wire the plan carries: not in the tree, as the React printer removes it
+    // (component.ts; S4 found the Swift app drawing a dead "Also keep track of projects and money").
+    if (!bound.mounted && literalParam(node, 'mounted') === false) return [`${pad}// ${id}: authored Mounted false, so not drawn`];
 
     if (role === 'page' || role === 'group') {
       const s = styleOf(id, role);
@@ -797,13 +803,39 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     } else if (role === 'input') {
       const s = styleOf(id, role);
       const state = plan.stateVars.find((v) => v.originNodeId === id && v.origin === 'control');
-      const placeholder = String(literalParam(node, 'placeholder') ?? '');
-      const multiline = literalParam(node, 'type') === 'textArea';
+      const boundPlaceholder = bound.placeholder ? binding(id, 'placeholder', bound.placeholder) : undefined;
+      const placeholder = boundPlaceholder !== undefined ? `JS.show(${boundPlaceholder})` : swiftString(String(literalParam(node, 'placeholder') ?? ''));
+      const type = literalParam(node, 'type');
+      const multiline = type === 'textArea';
+      // `password` hides what is typed; `email`, `url` and `number` choose the phone's keyboard (S4, the Sign in page).
+      const field = type === 'password' ? 'SecureField' : 'TextField';
+      const kind = type === 'email' || type === 'url' || type === 'number' ? [`.inputKind(.${type})`] : [];
+      // `useLabel`: the label the web draws above the field, drawn above it here, and the name a screen reader says.
+      const label = literalParam(node, 'useLabel') === true ? String(literalParam(node, 'label') ?? '') : '';
       if (!state) lose(id, 'its text has no state row in the plan, so the field is drawn read-only');
       const textBinding = state ? `$${ident(state.name)}` : '.constant("")';
-      out = [`${pad}TextField(${swiftString(placeholder)}, text: ${textBinding}${multiline ? ', axis: .vertical' : ''})`];
+      out = [`${pad}${field}(${placeholder}, text: ${textBinding}${multiline ? ', axis: .vertical' : ''})`];
       const focus = focusIds.has(id) ? [`.focused($focusedField, equals: ${swiftString(id)})`] : [];
-      out = mods(out, [...(multiline ? ['.lineLimit(nil)'] : []), '.textFieldStyle(.plain)', ...s.modifiers, ...focus, ...otherHandlers(id, pad, [])], pad);
+      const named = [...(label ? [`.accessibilityLabel(${swiftString(label)})`] : []), `.accessibilityIdentifier(${swiftString(id)})`];
+      out = mods(out, [...(multiline ? ['.lineLimit(nil)'] : []), '.textFieldStyle(.plain)', ...kind, ...s.modifiers, ...named, ...focus, ...otherHandlers(id, pad, [])], pad);
+      if (label) {
+        const decls = [
+          { prop: 'font-size', value: literalParam(node, 'labelfontSize') },
+          { prop: 'color', value: literalParam(node, 'labelcolor') }
+        ].filter((d): d is { prop: string; value: string } => typeof d.value === 'string');
+        const gapRaw = literalParam(node, 'labelSpacing');
+        const gap = gapRaw === undefined ? undefined : ctx.theme.read(typeof gapRaw === 'number' ? `${gapRaw}px` : String(gapRaw));
+        const spacing = gap?.kind === 'number' ? gap.swift : '0';
+        const labelStyle = swiftStyle(decls, 'text', ctx.theme);
+        out = [
+          `${pad}VStack(alignment: .leading, spacing: ${spacing}) {`,
+          `${pad}  Text(verbatim: ${swiftString(label)})`,
+          ...labelStyle.content.map((m) => `${pad}    ${m}`),
+          `${pad}    .accessibilityHidden(true)`,
+          ...out.flatMap((l) => l.split('\n')).map((l) => `  ${l}`),
+          `${pad}}`
+        ];
+      }
       for (const _ of plan.changeHandlers[id] ?? []) {
         lose(id, 'its onChange chain is not carried yet');
         break;

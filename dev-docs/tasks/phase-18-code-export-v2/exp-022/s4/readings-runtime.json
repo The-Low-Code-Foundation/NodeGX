@@ -1,0 +1,414 @@
+{
+ "arm": "runtime",
+ "seeded": {
+  "mot": "52c5130d-a45b-49c5-af36-a84dae265645",
+  "vat": "c9f3bdbd-de13-4448-a7c0-cf481ff8d93b",
+  "notes": "471825de-9b56-4cf2-b12d-7df08cd844ec",
+  "domain": "ca02a3a1-0845-4cba-8dfd-bfceda5b758d",
+  "routine": "df2e2f88-3ed0-4e07-bcb3-1533f80230b5"
+ },
+ "steps": [
+  {
+   "step": "D0",
+   "at": "2026-10-22T16:01:54.396Z",
+   "texts": [
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Email",
+    "Password",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "path": "/sign-in",
+   "requests": []
+  },
+  {
+   "step": "D1",
+   "at": "2026-10-22T16:01:58.760Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "path": "/",
+   "reachedTodo": true,
+   "requests": [
+    "POST /login 200",
+    "POST /classes/Project 200",
+    "POST /classes/MoneyItem 200",
+    "POST /classes/Action 200",
+    "POST /classes/MoneyMark 200",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/Routine 200",
+    "POST /classes/BalanceReading 200",
+    "POST /classes/Task 200",
+    "POST /classes/Event 200",
+    "POST /classes/Task 200"
+   ]
+  },
+  {
+   "step": "D2",
+   "at": "2026-10-22T16:01:58.825Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "path": "/",
+   "requests": []
+  },
+  {
+   "step": "D3",
+   "at": "2026-10-22T16:02:01.881Z",
+   "texts": [
+    "Todo list",
+    "List (4)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "4",
+    "Pick up the dry cleaning",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ],
+   "buttons": [
+    "List (4)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #5)"
+   ],
+   "path": "/",
+   "addPressed": true,
+   "requests": [
+    "POST /classes/Task 201",
+    "POST /classes/Event 201",
+    "POST /classes/Task 200",
+    "POST /classes/Action 200",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/Event 200",
+    "POST /classes/Routine 200"
+   ]
+  },
+  {
+   "step": "D4dialog",
+   "at": "2026-10-22T16:02:03.449Z",
+   "texts": [
+    "Todo list",
+    "List (4)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Write the release notes",
+    "✓",
+    "4",
+    "Pick up the dry cleaning",
+    "✓",
+    "Add",
+    "Also keep track of projects and money",
+    "Write the release notes",
+    "What happened?",
+    "Every task keeps a record. One line is enough, even “not needed, dropping it”.",
+    "Cancel",
+    "Close task"
+   ],
+   "buttons": [
+    "List (4)",
+    "Today (2)",
+    "Done (1)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "✓",
+    "Add",
+    "Also keep track of projects and money",
+    "Cancel",
+    "Close task"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #5)",
+    "text::What happened?"
+   ],
+   "path": "/",
+   "circle": "pressed 4",
+   "requests": []
+  },
+  {
+   "step": "D4",
+   "at": "2026-10-22T16:02:08.055Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (2)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Pick up the dry cleaning",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (2)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "path": "/",
+   "ok": "Close task",
+   "noted": true,
+   "okPressed": true,
+   "pressedAgain": true,
+   "requests": [
+    "PUT /classes/Task/471825de-9b56-4cf2-b12d-7df08cd844ec 200",
+    "POST /classes/Event 201",
+    "POST /classes/Task 200",
+    "POST /classes/Action 200",
+    "POST /classes/Event 200",
+    "POST /classes/Routine 200",
+    "POST /classes/RoutineCheck 200"
+   ]
+  },
+  {
+   "step": "D5",
+   "at": "2026-10-22T16:02:13.139Z",
+   "texts": [
+    "Todo list",
+    "List (3)",
+    "Today (2)",
+    "Done (2)",
+    "Log",
+    "Sign out",
+    "☼",
+    "1",
+    "Book the van in for its MOT",
+    "Next: Ring the garage",
+    "✓",
+    "2",
+    "Chase the accountant about VAT",
+    "Due today",
+    "✓",
+    "3",
+    "Pick up the dry cleaning",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ],
+   "buttons": [
+    "List (3)",
+    "Today (2)",
+    "Done (2)",
+    "Log",
+    "Sign out",
+    "☼",
+    "✓",
+    "✓",
+    "✓",
+    "Add",
+    "Also keep track of projects and money"
+   ],
+   "fields": [
+    "text::Add a task (it goes in at #4)"
+   ],
+   "path": "/",
+   "requests": [
+    "GET /users/me 200",
+    "POST /classes/Project 200",
+    "POST /classes/MoneyItem 200",
+    "POST /classes/MoneyMark 200",
+    "POST /classes/BalanceReading 200",
+    "POST /classes/Task 200",
+    "POST /classes/Event 200",
+    "POST /classes/Task 200",
+    "POST /classes/Routine 200",
+    "POST /classes/RoutineCheck 200",
+    "POST /classes/Action 200"
+   ]
+  },
+  {
+   "step": "D6",
+   "at": "2026-10-22T16:02:15.697Z",
+   "texts": [
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Email",
+    "Password",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "path": "/sign-in",
+   "requests": [
+    "POST /logout 200"
+   ]
+  },
+  {
+   "step": "D6relaunch",
+   "at": "2026-10-22T16:02:19.245Z",
+   "texts": [
+    "☼",
+    "Todo list",
+    "Sign in, or create an account. Your list is kept on your server, so every device you sign in on sees the same one.",
+    "Email",
+    "Password",
+    "Sign in",
+    "Create account"
+   ],
+   "buttons": [
+    "☼",
+    "Sign in",
+    "Create account"
+   ],
+   "fields": [
+    "text:Email:",
+    "secure:Password:"
+   ],
+   "path": "/sign-in",
+   "requests": []
+  }
+ ],
+ "console": []
+}

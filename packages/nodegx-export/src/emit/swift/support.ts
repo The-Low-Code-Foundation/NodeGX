@@ -266,7 +266,8 @@ private struct NodeReport: ViewModifier {
   @State private var key = UUID()
   func body(content: Content) -> some View {
     let _ = Probe.current?.report(key, Probe.Entry(path: path + [ordinal], node: node, role: role, text: text, press: press))
-    return content.onDisappear { Probe.current?.remove(key) }
+    // The graph node's id is its accessibility identifier, so a UI test (XCUITest) finds a node as the graph names it.
+    return content.accessibilityIdentifier(node).onDisappear { Probe.current?.remove(key) }
   }
 }
 
@@ -290,6 +291,23 @@ extension View {
   /// A placed component, or one row of a For Each: what it draws sits here in the page.
   func node(_ ordinal: Int, row: Int? = nil) -> some View {
     modifier(NodePlacement(steps: row.map { [ordinal, $0] } ?? [ordinal]))
+  }
+}
+
+/// A Text Input's \`type\`, as a phone reads it: the keyboard it shows, and no capital letter or correction in an address.
+enum InputKind { case email, url, number }
+
+extension View {
+  @ViewBuilder func inputKind(_ kind: InputKind) -> some View {
+    #if os(iOS)
+    switch kind {
+    case .email: self.keyboardType(.emailAddress).textInputAutocapitalization(.never).autocorrectionDisabled()
+    case .url: self.keyboardType(.URL).textInputAutocapitalization(.never).autocorrectionDisabled()
+    case .number: self.keyboardType(.decimalPad)
+    }
+    #else
+    self
+    #endif
   }
 }
 

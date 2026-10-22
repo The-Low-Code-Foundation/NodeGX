@@ -1,7 +1,7 @@
 # EXP-022 — The same graph in Swift
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), from Richard's ruling of 2026-10-21: "I want that offramp promise
-fulfilled in React and Swift." **Status: 🔵 Swift session 2 of at most 12 done (2026-10-22, §9): S1 met AC1 on story-engine and measured the backend route (one client in two hosts works); S2 printed the plan's logic and ran the Functions in JavaScriptCore — the Hook Desk reads what the runtime reads at every step, todo-list builds with 36 logic components and 64 Functions, and 44 of S1's 334 gaps are left, all the backend or undrawn in React too. Next: S3, the backend. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
+fulfilled in React and Swift." **Status: 🔵 Swift session 4 of at most 12 done (2026-10-22, §9): S1 met AC1 on story-engine; S2 printed the plan's logic with the Functions in JavaScriptCore; S3 carried the backend through the React export's own client; S4 drove todo-list on the iPhone 17 simulator against a real backend, beside the running app and the React export: the Swift app reads and sends what the React export does at every step, and the two writes both exports cannot make (add, and every dialog) are the plan's, filed. Next: S5, the ledger line (AC4), the preflight and the cost beside React's. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
 out of the parked table: its reveal sentence stands ("one graph, three homes"), its rulings R1–R7 carry, and **its route
 changes**: P110 §0 scoped *a NodeGX runtime written in Swift that loads the project as data*; this task is *an emitter
 that writes a SwiftUI app from the same IR the React export reads*. Same reveal, and the person leaves with Swift source
@@ -346,3 +346,73 @@ read, not changed.
 **Not done in S3:** todo-list run against a backend (S4 drives it in the simulator). A collection-fed For Each (the app's
 Collections are not carried). A slow backend: `Drive.settle` waits for requests in flight, but no mutant could show that
 on a local one.
+
+
+### S4 — Swift session 4 of at most 12 (2026-10-22, Opus 5.5)
+
+**Result: todo-list is driven on the iPhone 17 simulator against a real backend, beside the running app and the React
+export. At every step the Swift app reads what the React export reads and sends the same requests.** The steps are: sign
+in through the page, the list, add a task, close one, relaunch, and sign out then relaunch. Where both exports differ from
+the running app, the plan refuses the node in both, and both preflights say so. The evidence is
+[`exp-022/s4/`](exp-022/s4/) ([`side-by-side.png`](exp-022/s4/side-by-side.png) is the picture to read).
+
+**How it was driven, decided by measuring.**
+
+- **App Transport Security** lets plain `http` to 127.0.0.1 through, so the printer gained no `Info.plist` key.
+- **XCUITest, not the package's macOS `Drive`.** The controls are real SwiftUI buttons and fields, which accessibility
+  reads by label, and an XCUITest presses them on the phone the app ships to. So the printed project has a UI test target
+  now, whose sources are the folder `<App>UITests/` (a synchronized folder, Xcode 16 and later): a drive is a `.swift` file
+  dropped there. The autocreated scheme runs it, so no scheme file is written. The export's own launch test hands the
+  run's `VITE_NODEGX_*` variables to the app.
+- **Each arm has its own fresh backend** (s137's seeding, on :8644). The wire is the backend's own request log, split by
+  the time of each reading, so the three arms are read by one instrument.
+
+| step | the running app | the React export | the Swift app |
+|---|---|---|---|
+| open | Sign in, fields labelled | Sign in, **two unlabelled fields** | Sign in, labelled |
+| sign in | `List (3)` `Today (2)` `Done (1)`, the three tasks; `/login` + 10 queries | the same; `/login` + 9 queries | **the same 9**; iOS offers "Save Password?" |
+| add a task | `List (4)`; `Task 201`, `Event 201` | **nothing sent** | **the same** |
+| close a task | the note dialog; `PUT Task`, `Event 201`; `Done (2)` | **no dialog** | **the same** |
+| relaunch | signed in, the list back | the same | the same |
+| sign out, relaunch | Sign in, both times | the same | the same |
+
+**What both exports cannot do is the plan's, and neither is Swift's.** Add a task: Create's Id output is used further
+down the chain, so the plan refuses the Create (`P18-EXP022-S4-ADDREFUSED`, high). Every dialog in the app: the seven
+States nodes that pick a dialog leave `heading` unauthored in the state `none`, and the plan refuses a States node with
+any unauthored value (`P18-EXP022-S4-DIALOGREFUSED`, high). That loses close, reopen, tick, untick, and a routine's tick
+and stop. The runtime takes `undefined` (or `0` for a number) there. Fixing it changes the type both printers read, so
+it is the React lane's (`plan.ts`, `component.ts`), filed with this drive as its evidence. This is the claim's own
+finding: the second printer added no gap here; it inherited the plan's.
+
+**Found in the printer and fixed:**
+
+- **The Sign in page a phone can use** (`P18-EXP022-S4-SIGNINFIELDS`, found by reading the printed page before the
+  drive). Every Text Input printed as a plain field: the password in clear, neither field named, an email keyboard that
+  capitalises. Now `password` prints `SecureField`, `email`/`url`/`number` choose the keyboard (iOS only), and `useLabel`
+  draws the label above the field and names it for a screen reader. A bound placeholder is read too. The React export
+  drops the label as well, in 153 fields over 7 templates (`P18-EXP022-S4-LABELDROP`, open, the React session's).
+- **An authored Mounted false node was drawn** when the plan carries no Mounted wire. The app showed a dead "Also keep
+  track of projects and money" (`P18-EXP022-S4-MOUNTEDFALSE`). Fixed with the React printer's rule, one more decision a
+  second printer copies (`P18-EXP022-S2-EMITDECIDES`).
+- Every drawn Text and Button carries its graph node id as its accessibility identifier.
+
+**Found and filed, not chased:** in the running app, the first press on "Close task" after typing a note does nothing;
+the second closes it (`P18-EXP022-S4-FIRSTPRESS`, the runtime or the template). The Swift Todo page runs its detail card
+past the right edge (`P18-EXP022-S4-CARDOVERFLOW`, low; the page's two-pane layout is a web-only look).
+
+**What I predicted wrong:** I predicted add and close in all three arms. I had not read the preflight's refusals for
+`Commands/Add task` and `Todo/Dialog flow` first: s137's lesson again.
+
+**Graded:** `tests/the-same-graph-in-swift-s4.test.ts`, 9 rows on the printed text. Six mutants, each killed by its own
+row. With `NODEGX_SWIFT_BUILD=1` the four Swift test files read 54 of 54 (todo-list builds and passes `swift test` on a
+Mac with the new helpers). The whole package (`nice -n 19 --runInBand`, 18:28): **161 of 161 files, 5,339 passed, 24 skipped, 0 failed** (predicted 5,330 + 9, read on the first run).
+
+**Cost, so far:** 4 sessions. The printer is 3,555 lines (S3 3,363): `view` 1,255, `scripts` 541, `support` 415,
+`xcodeproj` 401, `emitSwift` 349, `modifiers` 272, `theme` 173, `client` 137, `functionRunJs` 12. Tests: S4's 9 rows.
+The drive (outside the package, as s137's): a 148-line XCUITest and about 440 lines of harness. `plan.ts` and
+`component.ts` were read, not changed.
+
+**Said plainly:** once, a peer's single jest file was running when I chained the box check into the build in one
+command, so my `xcodebuild` overlapped it. After that the check was its own step and I waited for the peer each time.
+
+**Not done in S4:** the two plan refusals (the React lane's). A collection-fed For Each. Signing, a real iPhone.
