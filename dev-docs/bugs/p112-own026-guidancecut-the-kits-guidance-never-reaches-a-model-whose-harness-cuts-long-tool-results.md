@@ -2,7 +2,7 @@
 id: P112-OWN026-GUIDANCECUT
 title: The kit's guidance sits in the middle of 50,000-character answers, so a model whose harness keeps only the start and end of a tool result (Cline keeps ~8,000) never sees it
 status: fixed
-commit: pending
+commit: 328f1dd1d
 regression: packages/noodl-mcp/tests/own026GuidanceCut.test.ts
 severity: high
 area: kit / MCP (`get_project_info`, `get_node_type`; `packages/noodl-mcp/src/guidance.ts`)

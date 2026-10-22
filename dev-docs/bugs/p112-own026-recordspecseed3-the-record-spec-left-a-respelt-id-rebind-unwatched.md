@@ -2,7 +2,7 @@
 id: P112-OWN026-RECORDSPECSEED3
 title: The Record's node spec left the branch "the same record under another spelling of its Id (1, then "1")" unwatched — on seed 3 two mutants of it survive
 status: fixed
-commit: pending
+commit: f3d2a66e9
 severity: low
 area: test — `packages/nodegx-node-spec/scenarios/DbModel2.json`
 found: P112 OWN-026 FIX-02, 2026-10-22, running the Record's conformance on more seeds than the day's

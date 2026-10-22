@@ -2,7 +2,7 @@
 id: P112-OWN026-RECORDBYIDMEMORY
 title: A Record whose Id names a record nothing in memory holds binds an empty one and fires Fetched, so a page opened by its own URL shows nothing and an Update Record fed from it writes the emptiness back
 status: fixed
-commit: pending
+commit: f3d2a66e9
 regression: packages/noodl-runtime/test/nodes/record-backend-routing.test.ts ("binding an Id nothing in memory holds"); packages/nodegx-node-spec/scenarios/DbModel2.json (v5 rows)
 severity: high
 area: runtime / Record (`packages/noodl-runtime/src/nodes/std-library/data/dbmodelnode2.ts` `setModelID`)

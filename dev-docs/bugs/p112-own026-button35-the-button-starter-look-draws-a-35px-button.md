@@ -2,7 +2,7 @@
 id: P112-OWN026-BUTTON35
 title: The kit's Button starter look (set_element_style starter) draws a 35 px button, under the 44 px touch-target guidance
 status: fixed
-commit: pending
+commit: 328f1dd1d
 regression: packages/noodl-mcp/tests/own026GuidanceCut.test.ts ("the Button starter is a comfortable touch target")
 severity: medium
 area: kit / MCP (`packages/noodl-mcp/src/tools/elementStyles.ts` `ELEMENT_STYLE_STARTERS`)

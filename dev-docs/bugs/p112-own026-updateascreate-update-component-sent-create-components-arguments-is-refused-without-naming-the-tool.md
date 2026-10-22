@@ -2,7 +2,7 @@
 id: P112-OWN026-UPDATEASCREATE
 title: update_component sent create_component's arguments (nodes, connections, description) for a component that does not exist is refused with update_component's own argument list and no suggestion, so the same slip repeats all round
 status: fixed
-commit: pending
+commit: 328f1dd1d
 regression: packages/noodl-mcp/tests/unknownArguments.test.ts ("create_component's arguments sent to update_component")
 severity: medium
 area: kit / MCP (`packages/noodl-mcp/src/tools/unknownArguments.ts`, `src/tools/author.ts`)
