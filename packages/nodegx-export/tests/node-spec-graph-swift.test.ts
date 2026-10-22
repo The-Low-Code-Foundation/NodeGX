@@ -54,12 +54,13 @@ describe('the verdicts: what the Swift export can play, and whose limit the rest
   const plan = outside.filter((v) => !SWIFT_PRINTER_VERDICT.test(v.outside!) && EXPORTER_VERDICT.test(v.outside!));
   const harness = outside.filter((v) => !EXPORTER_VERDICT.test(v.outside!) && !SWIFT_PRINTER_VERDICT.test(v.outside!));
 
-  test('V1 the split, pinned: 5 playable; 21 outside on the plan, 13 on the Swift printer, 46 on the harness', () => {
+  // EXP-022 S7. The stores carried (Global Store, State History, Optimistic Update, Action Dispatcher): 13 → 4.
+  test('V1 the split, pinned: 14 playable; 21 outside on the plan, 4 on the Swift printer, 46 on the harness', () => {
     expect({ of: verdicts.length, playable: verdicts.length - outside.length, plan: plan.length, swiftPrinter: swiftPrinter.length, harness: harness.length }).toEqual({
       of: 85,
-      playable: 5,
+      playable: 14,
       plan: 21,
-      swiftPrinter: 13,
+      swiftPrinter: 4,
       harness: 46
     });
   });
@@ -72,18 +73,33 @@ describe('the verdicts: what the Swift export can play, and whose limit the rest
     for (const v of harness) expect(v.outside).toBe(reactOutside.get(v.name));
   });
 
-  test("V3 the Swift printer's 13 are §7's cut: the @nodegx/core stores and streams, and On App Error — nothing of the todo-list's types", () => {
+  test("V3 the Swift printer's 4 are On App Error, which no ruling carries (S5's 13 less the 9 stores S7 carried)", () => {
     const byFile: Record<string, number> = {};
     for (const v of swiftPrinter) byFile[fileOf(v.name)] = (byFile[fileOf(v.name)] ?? 0) + 1;
-    expect(byFile).toEqual({ 't01-global-store': 1, 't02-state-history': 4, 't03-optimistic-update': 2, 't04-action-dispatcher': 2, 't07-on-app-error': 4 });
+    expect(byFile).toEqual({ 't07-on-app-error': 4 });
     // every one of them React plays: the Swift printer's verdict is the whole of the difference between the two reaches
     for (const v of swiftPrinter) expect(reactOutside.get(v.name)).toBeUndefined();
   });
 
-  test('V4 Swift plays nothing React does not, and what it plays is the clause scenarios: C2, the G1 diamond, C7, C8, C10', () => {
+  test('V4 Swift plays nothing React does not: the clause scenarios (C2, the G1 diamond, C7, C8, C10) and, since S7, the 9 store scenarios', () => {
     const playable = verdicts.filter((v) => v.outside === undefined);
     for (const v of playable) expect(reactOutside.get(v.name)).toBeUndefined();
-    expect(playable.map((v) => fileOf(v.name)).sort()).toEqual(['c02-every-send-is-delivered', 'c06-upstream-is-pulled-first', 'c07-lockstep', 'c08-the-first-update-consolidates', 'c10-units-travel-as-objects']);
+    expect(playable.map((v) => fileOf(v.name)).sort()).toEqual([
+      'c02-every-send-is-delivered',
+      'c06-upstream-is-pulled-first',
+      'c07-lockstep',
+      'c08-the-first-update-consolidates',
+      'c10-units-travel-as-objects',
+      't01-global-store',
+      't02-state-history',
+      't02-state-history',
+      't02-state-history',
+      't02-state-history',
+      't03-optimistic-update',
+      't03-optimistic-update',
+      't04-action-dispatcher',
+      't04-action-dispatcher'
+    ]);
   });
 
   test("V5 a Log prints (S5): C10's two Log buttons write what the React export's `log('info', undefined)` writes — before S5 they were C10's only loss", () => {
@@ -127,12 +143,12 @@ describe('the play: one package, one swift test', () => {
     // eslint-disable-next-line no-console
     console.log(`P18 ledger (Swift): ${line.conforming} of ${line.of} graph scenarios conform on the Swift export — ${line.played} played (${line.conforming} conform, ${line.declaredDifferent} differ as declared, ${line.knownRows} known rows, ${line.failing} fail on filed rows); ${line.outsideExporter} outside on the exporter's verdict (${line.outsideExporter - line.outsideSwiftPrinter} the plan's, ${line.outsideSwiftPrinter} the Swift printer's), ${line.outsideHarness} on this harness's limits`);
     expect(r.results.filter((x) => x.status === 'refused')).toEqual([]);
-    expect(line).toEqual({ of: 85, played: 5, conforming: 2, declaredDifferent: 3, knownRows: 0, failing: 0, outsideExporter: 34, outsideSwiftPrinter: 13, outsideHarness: 46 });
+    expect(line).toEqual({ of: 85, played: 14, conforming: 11, declaredDifferent: 3, knownRows: 0, failing: 0, outsideExporter: 25, outsideSwiftPrinter: 4, outsideHarness: 46 });
   });
 
   built('B2 the claim: on every scenario both exports play, the Swift app\'s trace equals the React export\'s, event for event', () => {
     const both = report!.results.filter((s) => s.status !== 'outside' && reactReport!.results.find((x) => x.name === s.name)?.status !== 'outside');
-    expect(both.length).toBe(5);
+    expect(both.length).toBe(14);
     for (const s of both) {
       const r = reactReport!.results.find((x) => x.name === s.name)!;
       expect({ name: s.name, status: s.status, trace: s.actual }).toEqual({ name: s.name, status: r.status, trace: r.actual });
@@ -152,7 +168,7 @@ describe('the play: one package, one swift test', () => {
   });
 
   built('B4 one build and one process for every played scenario', () => {
-    expect(run!.scenarios).toBe(5);
-    expect(Object.keys(run!.files).filter((f) => /\/Views\/Probe\d+View\.swift$/.test(f))).toHaveLength(5);
+    expect(run!.scenarios).toBe(14);
+    expect(Object.keys(run!.files).filter((f) => /\/Views\/Probe\d+View\.swift$/.test(f))).toHaveLength(14);
   });
 });

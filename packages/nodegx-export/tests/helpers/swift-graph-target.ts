@@ -23,6 +23,7 @@
  */
 
 import { execFileSync } from 'child_process';
+import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
@@ -35,6 +36,8 @@ import { emitSwiftApp } from '../../src/emit/swift/emitSwift';
 import { ident } from '../../src/emit/swift/view';
 import type { ComponentIR, ExportIR } from '../../src/ir/types';
 import { drivenInputs, exportGraphTarget, graphComponent, probeProject } from './node-spec-target';
+import { World } from '../../../nodegx-node-spec/src/world';
+import { specFor } from '../../../nodegx-node-spec/src/nodes';
 import { rawString, writePackage } from './export-swift-arm';
 
 let catalogCache: Catalog | undefined;
@@ -124,9 +127,23 @@ export interface SwiftGraphPlay {
 /** A JSON value as the generated test hands it to Swift: undefined is absent, so a set to undefined passes nil. */
 const swiftValue = (value: unknown) => (value === undefined ? 'nil' : `jsonValue(${rawString(JSON.stringify(value))})`);
 
+/**
+ * EXP-022 S7. The world the runner plays a scenario in (graph.ts `worldFor`, the same rule): the React target installs its
+ * clock and its random source over `Date.now` and `Math.random`, and the store nodes read both (a history entry's time, a
+ * transaction's and an action's id). So the Swift play is handed the same: the clock's time and the first random numbers.
+ */
+const RANDOMS = 512;
+function worldOf(sc: GraphScenario): { now: number; randoms: number[] } | undefined {
+  const needs = Object.values(sc.nodes).some((n) => (specFor(n.type)?.needs?.length ?? 0) > 0);
+  if (sc.world === undefined && !needs) return undefined;
+  const world = new World(sc.world ?? {});
+  return { now: world.clock.now(), randoms: Array.from({ length: RANDOMS }, () => world.random.next()) };
+}
+
 /** The Swift that plays one scenario on its probe `Probe<k>View`. */
 function playSource(k: number, sc: GraphScenario, v: SwiftGraphVerdict): string[] {
   const plan = v.plan!;
+  const world = worldOf(sc);
   const struct = `Probe${k}View`;
   const liftedByProp = new Map([...v.lifted].map(([output, prop]) => [prop, output]));
   // A memberwise init takes its arguments in declaration order: props, then output callbacks, then lifted ones.
@@ -154,6 +171,8 @@ function playSource(k: number, sc: GraphScenario, v: SwiftGraphVerdict): string[
     `    var body: some View { ${struct}(${args.join(', ')}) }`,
     '  }',
     `  func play${k}() -> [String: Any] {`,
+    '    Scripts.shared.fresh()',
+    ...(world ? [`    Scripts.shared.world(now: ${world.now}, randoms: [${world.randoms.map((r) => JSON.stringify(r)).join(', ')}])`] : []),
     `    let model = GraphModel([${initial.join(', ') || ':'}])`,
     `    let drive = Drive(Host${k}(model: model))`,
     '    var snapshots: [[String: Any]] = []',
@@ -241,6 +260,15 @@ export function playSwiftGraphs(
   const played = scenarios.map((sc, i) => ({ sc, v: verdicts[i] })).filter(({ v }) => v.outside === undefined);
   const components = played.map(({ v }, k) => ({ ...v.component!, id: `probe-graph-${k}`, path: `Components/Probe${k}` }));
   const ir: ExportIR = { ...probeProject(components[0]), components };
+  // EXP-022 S7. One package is one app, so a Global Store's name is one store across every probe: `Scripts.shared.fresh()`
+  // empties it between plays, but its Initial State is the merge of every probe's declarers. A store that more than one
+  // probe declares, with an Initial State, would start one scenario with another's keys; refused by name, not played.
+  for (const store of planProject(ir, new CatalogIndex(catalog())).stores) {
+    const probes = new Set(store.declarers.map((d) => d.componentPath));
+    if (probes.size > 1 && store.keys.some((k) => k.required)) {
+      throw new Error(`the store "${store.name}" has an Initial State and is declared by ${probes.size} probes: one package cannot keep their scenarios apart`);
+    }
+  }
   const app = emitSwiftApp(ir, catalog());
   const kit = `${app.preflight.appName}Kit`;
   const files: Record<string, string> = { ...app.files };
@@ -262,7 +290,8 @@ export function playSwiftGraphs(
     '  func testGraphScenarios() throws {',
     `    let plays: [[String: Any]] = [${played.map((_, k) => `play${k}()`).join(', ')}]`,
     '    let data = try JSONSerialization.data(withJSONObject: plays)',
-    '    print("NODEGX-GRAPHS " + String(data: data, encoding: .utf8)!)',
+    '    // A file, not a line of output: `swift test` splits a long line (S7\'s 14 plays came back cut at 15,559 characters).',
+    '    try data.write(to: URL(fileURLWithPath: ProcessInfo.processInfo.environment["NODEGX_GRAPHS_OUT"]!))',
     '  }',
     '}',
     ''
@@ -272,17 +301,24 @@ export function playSwiftGraphs(
   writePackage(dir, files);
   const t0 = Date.now();
   const plays = new Map<string, SwiftGraphPlay>();
-  let output = '';
+  const out = path.join(dir, 'plays.json');
+  fs.rmSync(out, { force: true });
   let error: string | undefined;
   try {
-    output = execFileSync('nice', ['-n', '19', 'swift', 'test', '--filter', 'GraphTests'], { cwd: dir, encoding: 'utf-8', stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 64 * 1024 * 1024 });
+    execFileSync('nice', ['-n', '19', 'swift', 'test', '--filter', 'GraphTests'], {
+      cwd: dir,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'pipe'],
+      maxBuffer: 64 * 1024 * 1024,
+      env: { ...process.env, NODEGX_GRAPHS_OUT: out }
+    });
   } catch (e) {
     const err = e as { stdout?: string; stderr?: string };
     error = `the Swift package did not build or run: ${`${err.stdout ?? ''}\n${err.stderr ?? ''}`.split('\n').filter((l) => /error:/.test(l)).slice(0, 3).join(' | ') || String(e).split('\n')[0]}`;
   }
-  const line = output.split('\n').find((l) => l.startsWith('NODEGX-GRAPHS '));
-  if (!error && !line) error = 'the Swift package printed no plays';
-  const recorded = line ? (JSON.parse(line.slice('NODEGX-GRAPHS '.length)) as Array<{ snapshots: Array<Record<string, unknown>>; missing: string[] }>) : [];
+  const written = fs.existsSync(out) ? fs.readFileSync(out, 'utf-8') : undefined;
+  if (!error && written === undefined) error = 'the Swift package wrote no plays';
+  const recorded = written !== undefined ? (JSON.parse(written) as Array<{ snapshots: Array<Record<string, unknown>>; missing: string[] }>) : [];
   played.forEach(({ sc }, k) => {
     const r = recorded[k];
     plays.set(sc.name, r ? { snapshots: r.snapshots.map((s) => revive(s) as Record<string, unknown>), missing: r.missing } : { snapshots: [], missing: [], error: error ?? 'no play recorded' });
@@ -329,6 +365,11 @@ export function swiftGraphTarget(verdicts: readonly SwiftGraphVerdict[], run: Sw
     },
     graphReach(sc) {
       return reachOf(byName.get(sc.name)!.lifted);
+    },
+    // The world is played inside the Swift app (`Scripts.shared.world`, written into each play from the same script), so
+    // there is nothing to install here; the runner's clock never moves, as no played scenario advances it.
+    install() {
+      return () => undefined;
     },
     mountGraph(nodes) {
       const v = current!;

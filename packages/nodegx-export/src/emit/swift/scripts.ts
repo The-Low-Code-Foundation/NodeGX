@@ -150,6 +150,8 @@ __define('react', function (exports) {
 
 // The web export's src/lib/functionRun.ts, compiled to JavaScript.
 ${FUNCTION_RUN_JS}
+var __realNow = Date.now;
+var __realRandom = Math.random;
 var __nodegx = {
   fns: {},
   define: function (id, fn) { this.fns[id] = fn; },
@@ -222,6 +224,52 @@ var __nodegx = {
   isPlainObject: function (v) {
     var p = Object.getPrototypeOf(v);
     return p === Object.prototype || p === null;
+  },
+  // EXP-022 S7. A module of the web export (\`stores/app\`), for Swift to hold.
+  module: function (name) { return __require(name); },
+  // What a test calls between scenarios: every module the web export wrote runs again when next required, over an empty
+  // store registry, as a relaunch starts them (React's graph target loads them fresh for each scenario).
+  fresh: function () {
+    Object.keys(__loaded).forEach(function (name) { if (name !== 'react' && name.indexOf('@nodegx/core') !== 0) delete __loaded[name]; });
+    if (__loaded['@nodegx/core']) __require('@nodegx/core').clearStores();
+    Date.now = __realNow;
+    Math.random = __realRandom;
+  },
+  // What a test calls to play under a scripted world (the node-spec runner's): the clock stands at \`now\`, and the
+  // random numbers are the world's, in order, as the web export's graph target installs them. \`fresh()\` puts both back.
+  world: function (now, randoms) {
+    var i = 0;
+    Date.now = function () { return now; };
+    Math.random = function () {
+      if (i >= randoms.length) throw new Error('the play drew more random numbers than its world was given');
+      return randoms[i++];
+    };
+  },
+  // A Global Store's write: one key, its value as given (undefined too), as the web export's \`app.set({ key: value })\`.
+  storeSet: function (store, key, value) { var patch = {}; patch[key] = value; store.set(patch); },
+  // A node of \`lib/history\` or \`lib/actions\`, made by its module's factory, as React's hook makes it once per mount.
+  stream: function (module, factory, source, second, rerender) {
+    return __require(module)[factory](source, second === null ? undefined : second, rerender);
+  },
+  // React's \`applyInputs\`: each option that arrived with a value other than the last one applied goes through the
+  // node's setter. The ports that did, in order.
+  applyInputs: function (node, applied, options) {
+    var changed = [];
+    Object.keys(options).forEach(function (port) {
+      var value = options[port];
+      if (value === undefined) return;
+      if (applied.has(port) && Object.is(applied.get(port), value)) return;
+      applied.set(port, value);
+      node.setInput(port, value);
+      changed.push(port);
+    });
+    return changed;
+  },
+  // A node's listeners: each signal calls Swift by its name.
+  setListeners: function (node, names, call) {
+    var on = {};
+    names.forEach(function (name) { on[name] = function () { call(name); }; });
+    node.setListeners(on);
   }
 };
 `;
@@ -374,6 +422,39 @@ public final class Scripts {
   public func call(module: String, _ name: String, _ args: [Any?] = []) -> Any? {
     guard let fn = host.invokeMethod("member", withArguments: [module, name]), fn.isObject else { return nil }
     return swift(fn.call(withArguments: args.map { js($0) }))
+  }
+
+  /// EXP-022 S7. What a test calls between scenarios: the web export's modules and the Global Stores start again, as a
+  /// relaunch starts them.
+  public func fresh() {
+    host.invokeMethod("fresh", withArguments: [])
+    JSStore.held.removeAll()
+  }
+
+  /// EXP-022 S7. What a test calls to play under a scripted world: the clock standing at \`now\`, the random numbers given.
+  public func world(now: Double, randoms: [Double]) {
+    host.invokeMethod("world", withArguments: [now, randoms])
+  }
+
+  /// EXP-022 S7. A module of the web export, held as JavaScript (\`stores/app\`).
+  public func module(_ name: String) -> JSValue {
+    host.invokeMethod("module", withArguments: [name])
+  }
+
+  func storeSet(_ store: JSValue, _ key: String, _ value: Any?) {
+    host.invokeMethod("storeSet", withArguments: [store, key, js(value)])
+  }
+
+  func stream(_ module: String, _ factory: String, _ source: [String: Any], _ second: JSValue?, _ rerender: JSValue) -> JSValue {
+    host.invokeMethod("stream", withArguments: [module, factory, js(source), second ?? JSValue(nullIn: context)!, rerender])
+  }
+
+  func applyInputs(_ node: JSValue, _ applied: JSValue, _ options: [String: Any?]) -> [String] {
+    host.invokeMethod("applyInputs", withArguments: [node, applied, js(options)]).toArray() as? [String] ?? []
+  }
+
+  func setListeners(_ node: JSValue, _ names: [String], _ call: JSValue) {
+    host.invokeMethod("setListeners", withArguments: [node, names, call])
   }
 
   func newNode(_ signals: [String]) -> JSValue {
@@ -537,5 +618,101 @@ public struct BackendError: Error, CustomStringConvertible {
 public struct FunctionPulse {
   public let signal: String
   public let values: [String: Any]
+}
+
+/// What JavaScript calls before the Swift object that answers it exists.
+private final class Relay {
+  var fire: () -> Void = {}
+}
+
+/// EXP-022 S7. A Global Store: the web export's own module (\`stores/<name>\`, \`@nodegx/core\`'s \`store()\`) in the
+/// JavaScript host. Read by key, written one key at a time; every write tells the views that read it to draw again, as
+/// React's \`useStore\` does.
+public final class JSStore: ObservableObject {
+  /// One per store, made when first read (\`Stores.app\`), forgotten by \`Scripts.shared.fresh()\`.
+  static var held: [String: JSStore] = [:]
+  public static func named(_ module: String, _ export: String) -> JSStore {
+    if let store = held[module] { return store }
+    let store = JSStore(module: module, export: export)
+    held[module] = store
+    return store
+  }
+
+  public let value: JSValue
+  public init(module: String, export: String) {
+    value = Scripts.shared.module(module).forProperty(export)
+    let relay = Relay()
+    let changed: @convention(block) () -> Void = { relay.fire() }
+    value.invokeMethod("subscribe", withArguments: [JSValue(object: changed, in: Scripts.shared.context)!])
+    relay.fire = { [weak self] in self?.objectWillChange.send() }
+  }
+
+  /// \`app.get().key\`: undefined (nil) when the store has no such key.
+  public func get(_ key: String) -> Any? {
+    Scripts.shared.swift(value.invokeMethod("peek", withArguments: []).forProperty(key))
+  }
+
+  /// \`app.set({ key: value })\`.
+  public func set(_ key: String, _ newValue: Any?) {
+    Scripts.shared.storeSet(value, key, newValue)
+  }
+}
+
+/// EXP-022 S7. A node of the web export's own \`lib/history\` or \`lib/actions\` (State History, Undo / Redo, State
+/// Snapshot, Optimistic Update, Action Dispatcher, Action Handler): made once per placement, as React's hook makes it, and
+/// held in \`@StateObject\`. Its options are applied as they change, its listeners set at every draw, its values read live;
+/// when it says it changed, the view draws again.
+public final class StreamNode: ObservableObject {
+  public let node: JSValue
+  private let applied: JSValue
+  private var handlers: [String: () -> Void] = [:]
+  private var listening: [String] = []
+  /// How many options reached the node's setters, and how many of them were its Key: React's \`changes\` and \`keys\`.
+  public private(set) var changes = 0
+  public private(set) var keyChanges = 0
+
+  public init(module: String, factory: String, source: [String: Any], with second: JSValue? = nil) {
+    let relay = Relay()
+    let rerender: @convention(block) () -> Void = { relay.fire() }
+    node = Scripts.shared.stream(module, factory, source, second, JSValue(object: rerender, in: Scripts.shared.context)!)
+    applied = Scripts.shared.context.evaluateScript("new Map()")
+    relay.fire = { [weak self] in self?.objectWillChange.send() }
+  }
+
+  /// The options as this draw has them (an undefined one runs no setter).
+  public func inputs(_ options: [String: Any?]) {
+    let changed = Scripts.shared.applyInputs(node, applied, options)
+    changes += changed.count
+    if changed.contains("key") { keyChanges += 1 }
+  }
+
+  /// The chains wired off its signals, as this draw has them.
+  public func on(_ listeners: [String: () -> Void]) {
+    handlers = listeners
+    let names = listeners.keys.sorted()
+    if names == listening { return }
+    listening = names
+    let call: @convention(block) (String) -> Void = { [weak self] name in self?.handlers[name]?() }
+    Scripts.shared.setListeners(node, names, JSValue(object: call, in: Scripts.shared.context)!)
+  }
+
+  /// A signal input (\`undo\`, \`dispatch\`), with the value its data port carries where it takes one.
+  public func act(_ verb: String, _ args: Any?...) {
+    _ = node.invokeMethod(verb, withArguments: args.map { Scripts.shared.js($0) })
+  }
+
+  /// A value output, live.
+  public func read(_ field: String) -> Any? {
+    Scripts.shared.swift(node.forProperty(field))
+  }
+
+  /// A method of the node's own (\`setupTracking\`, \`dispose\`).
+  public func call(_ method: String) {
+    _ = node.invokeMethod(method, withArguments: [])
+  }
+
+  /// The Action Handler's registration: what it registers under, and whether a setter asked for it again.
+  public var registrationKey: String { node.forProperty("registrationKey").toString() }
+  public var setupRequested: Bool { node.forProperty("setupRequested").toBool() }
 }
 `;

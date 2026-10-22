@@ -23,7 +23,7 @@
 
 import type { NodeIR } from '../../ir/types';
 import type { CatalogIndex } from '../../catalog';
-import { INPUT_PULSE_TS_TYPE, variableSeedAction, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type StateVarPlan, type ValueExpr } from '../../analyze/plan';
+import { INPUT_PULSE_TS_TYPE, STREAM_NODES, variableSeedAction, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type StateVarPlan, type StreamPlan, type ValueExpr } from '../../analyze/plan';
 import { computeNodeStyle } from '../style';
 import { camelCase } from '../naming';
 import { swiftStyle, type StackLayout } from './modifiers';
@@ -160,7 +160,6 @@ const UNPRINTED: Array<[keyof ComponentPlan, string]> = [
   ['receivers', 'an Event Receiver'],
   ['animations', 'an Animate To Value'],
   ['scripts', 'a Script node'],
-  ['streams', 'a streaming node'],
   ['popups', 'a popup slot'],
   ['drags', 'a Drag'],
   ['pageStacks', 'a Component Stack'],
@@ -171,6 +170,20 @@ const UNPRINTED: Array<[keyof ComponentPlan, string]> = [
   ['styleSheets', 'a CSS Definition']
 ];
 
+/**
+ * EXP-022 S7. The streaming nodes the Swift app runs: the web export's own module and factory for each, and what its React
+ * hook does after mount (a setup run again when a count of option changes moves, or the Action Handler's registration)
+ * and at unmount. The other streaming nodes (HTTP streams, SSE, websockets, realtime, Repeat, Sign In With) are a named loss.
+ */
+const STREAM_HOSTS: Record<string, { module: string; factory: string; setup?: { count: 'changes' | 'keyChanges'; method: string } | 'registration'; disposes: boolean }> = {
+  history: { module: 'lib/history', factory: 'createStateHistoryNode', setup: { count: 'changes', method: 'setupTracking' }, disposes: true },
+  undo: { module: 'lib/history', factory: 'createUndoRedoNode', disposes: false },
+  snapshot: { module: 'lib/history', factory: 'createStateSnapshotNode', disposes: false },
+  optimistic: { module: 'lib/history', factory: 'createOptimisticUpdateNode', setup: { count: 'keyChanges', method: 'setupSubscription' }, disposes: true },
+  dispatcher: { module: 'lib/actions', factory: 'createDispatcherNode', disposes: true },
+  handler: { module: 'lib/actions', factory: 'createHandlerNode', setup: 'registration', disposes: true }
+};
+
 export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedView {
   const struct = structNameOf(plan);
   const nodes = ctx.nodesOf(plan.path);
@@ -180,6 +193,17 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
   let usesRouter = false;
   let usesVariables = false;
   let usesSession = false;
+  /** EXP-022 S7. The Global Stores this view reads as it draws: it observes each, as React's `useStore` subscribes. */
+  const observedStores = new Set<string>();
+  /** A Global Store's member on `Stores` (its module's export), or undefined where the plan defers it. */
+  const storeMember = (name: string): string | undefined => {
+    const store = ctx.project.stores.find((x) => x.name === name && x.deferred === undefined);
+    return store ? ident(store.exportName) : undefined;
+  };
+  /** The streaming nodes this target runs, by node id (a host for its kind, and its store kept); the others are a named loss. */
+  const streams = new Map<string, StreamPlan>(
+    plan.streams.filter((x) => STREAM_HOSTS[x.kind] !== undefined && (x.store === undefined || storeMember(x.store) !== undefined)).map((x) => [x.nodeId, x])
+  );
   const lose = (nodeId: string, what: string) => {
     losses.push({ component: plan.path, nodeId, label: nodeById.get(nodeId)?.authoredLabel, what });
   };
@@ -291,6 +315,18 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       case 'query-get': {
         const q = plan.queries.find((x) => x.nodeId === e.nodeId);
         return q ? ident(q.stateName) : undefined;
+      }
+      // EXP-022 S7. A Global Store's key, read off the web export's own store; read as the view draws, the view observes it.
+      case 'store-key-get': {
+        const member = storeMember(e.storeName);
+        if (member === undefined) return undefined;
+        if (scope === TOP) observedStores.add(member);
+        return `Stores.${member}.get(${swiftString(e.key)})`;
+      }
+      // EXP-022 S7. A streaming node's value output: a live read off the node, the same in both modes (React's getter).
+      case 'stream-out': {
+        const stream = streams.get(e.nodeId);
+        return stream ? `${ident(stream.local)}.read(${swiftString(e.field)})` : undefined;
       }
       case 'session-get':
         usesSession = true;
@@ -439,6 +475,21 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
         if (member === undefined || v === undefined) return lost(`a store-set of ${a.variableName}`);
         usesVariables = true;
         return one(`variables.${member} = ${a.fallback !== undefined ? `JS.nullish(${v}, ${swiftLiteral(a.fallback)})` : v}`);
+      }
+      // EXP-022 S7. A Set Global Store: one key of the web export's own store (`app.set({ key: value })`).
+      case 'globalstore-set': {
+        const member = storeMember(a.storeName);
+        const v = expr(a.expr, scope);
+        if (member === undefined || v === undefined) return lost(`a Set of ${a.storeName}.${a.key}`);
+        return one(`Stores.${member}.set(${swiftString(a.key)}, ${a.fallback !== undefined ? `JS.nullish(${v}, ${swiftLiteral(a.fallback)})` : v})`);
+      }
+      // EXP-022 S7. A streaming node's signal input: one call on the node, with the data its port carries where it takes one.
+      case 'stream-action': {
+        const stream = streams.get(a.nodeId);
+        if (!stream) return lost(`a ${a.verb} on a streaming node the Swift target does not run`);
+        const v = a.value === undefined ? undefined : expr(a.value, scope);
+        if (a.value !== undefined && v === undefined) return lost(`a ${a.verb} whose value reads a ${a.value.kind} expression`);
+        return one(`${ident(stream.local)}.act(${swiftString(a.verb)}${v === undefined ? '' : `, ${v}`})`);
       }
       case 'state-set': {
         const row = stateByName.get(a.name);
@@ -1092,6 +1143,56 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     if (Array.isArray(list) && list.length > 0) lose(plan.rootId ?? '', `${list.length} × ${what}, not printed by the Swift target yet`);
   }
 
+  /**
+   * EXP-022 S7. The streaming nodes, as React's hooks run them: one node per placement (a member), its options applied and
+   * its listeners set at every draw (the body's first lines), its setup after mount and again when what it depends on
+   * moves (before the component's own effects, as a hook's effects run first), and its disposal at unmount.
+   */
+  const streamMembers: string[] = [];
+  const streamLines: string[] = [];
+  const streamSetups: string[] = [];
+  const streamDisposals: string[] = [];
+  for (const stream of plan.streams) {
+    const host = STREAM_HOSTS[stream.kind];
+    if (host === undefined) {
+      lose(stream.nodeId, `a streaming node (${STREAM_NODES[stream.type]?.displayName ?? stream.type}), not printed by the Swift target yet`);
+      continue;
+    }
+    const local = ident(stream.local);
+    if (!streams.has(stream.nodeId)) {
+      lose(stream.nodeId, `its store ${stream.store} is one the plan defers`);
+      continue;
+    }
+    const store = stream.store === undefined ? undefined : storeMember(stream.store);
+    const source = `["label": ${swiftString(stream.label)}, "nodeId": ${swiftString(stream.nodeId)}, "componentName": ${swiftString(plan.legacyPath)}]`;
+    streamMembers.push(
+      `  /// ${stream.label}: the web export's own node (${host.module}), made once for this placement.`,
+      `  @StateObject var ${local} = StreamNode(module: ${swiftString(host.module)}, factory: ${swiftString(host.factory)}, source: ${source}${store !== undefined ? `, with: Stores.${store}.value` : ''})`
+    );
+    const options: string[] = [];
+    for (const c of stream.config) {
+      const v = expr(c.expr, TOP);
+      if (v === undefined) {
+        lose(stream.nodeId, `its ${c.port} reads a ${c.expr.kind} expression, which the Swift target does not print yet`);
+        continue;
+      }
+      options.push(`${swiftString(c.port)}: ${v}`);
+    }
+    if (options.length) streamLines.push(`    let _ = ${local}.inputs([${options.join(', ')}])`);
+    const listeners = Object.entries(stream.listeners).filter(([, list]) => list.length > 0);
+    if (listeners.length) {
+      streamLines.push(`    let _ = ${local}.on([`);
+      listeners.forEach(([signal, list], i) => streamLines.push(`      ${swiftString(signal)}: ${closure(stream.nodeId, list, '      ')}${i < listeners.length - 1 ? ',' : ''}`));
+      streamLines.push('    ])');
+    }
+    if (host.setup === 'registration') {
+      streamSetups.push(`.onChange(of: ${local}.registrationKey, initial: true) { _, _ in if ${local}.setupRequested { ${local}.call("setupRegistration") } }`);
+    } else if (host.setup !== undefined) {
+      streamSetups.push(`.onChange(of: ${local}.${host.setup.count}, initial: true) { _, _ in ${local}.call(${swiftString(host.setup.method)}) }`);
+    }
+    if (host.disposes) streamDisposals.push(`.onDisappear { ${local}.call("dispose") }`);
+  }
+
   // The logic components it places: one view each, drawing nothing, in the order React calls their hooks.
   const hookViews: string[][] = [];
   for (const id of plan.hookCalls) {
@@ -1138,6 +1239,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     if (ticked.atLoad === true) members.push(`  @State var ${names.run}Loaded = Ref(false)`);
   }
   for (const id of renderLocals.keys()) members.push(`  @State var ${runNamesOf(fnByNode[id]).memo} = Memo()`);
+  members.push(...streamMembers);
 
   const statics: string[] = [];
   // Static Data (STATIC-DATA-TARGET §3): its rows, verbatim, as a constant of the component, as React hoists them.
@@ -1209,7 +1311,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       : tree.length
         ? tree
         : ['    EmptyView()'];
-  const modifiers = [...effectsBefore, ...(!plan.hook && logicView ? [`.background { ${logicView} }`] : []), ...effects];
+  const modifiers = [...effectsBefore, ...(!plan.hook && logicView ? [`.background { ${logicView} }`] : []), ...streamSetups, ...effects, ...streamDisposals];
   // EXP-019 (session 133). What a kept Function's body writes or sends after its run has returned (a timer, a listener)
   // arrives as the running app's does: into its row, and its signals' chains. Set at every render, as React's is.
   const lateLines: string[] = [];
@@ -1260,11 +1362,13 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     ...(usesRouter ? ['  @EnvironmentObject var router: AppRouter'] : []),
     ...(usesVariables ? ['  @ObservedObject var variables = Variables.shared'] : []),
     ...(usesSession ? ['  @ObservedObject var session = Session.shared'] : []),
+    ...[...observedStores].sort().map((m) => `  @ObservedObject var ${m}Store = Stores.${m}`),
     ...members,
     ...(statics.length ? ['', ...statics] : []),
     '',
     '  var body: some View {',
     ...lateLines,
+    ...streamLines,
     ...bodyLines,
     '  }',
     ...(parts.length ? ['', ...parts.slice(0, -1)] : []),

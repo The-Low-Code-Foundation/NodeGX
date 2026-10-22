@@ -14,13 +14,25 @@
  * A line of a shape this does not know throws with the line, so a new React printer shape fails the Swift export's
  * tests by name instead of loading wrong.
  *
+ * EXP-022 S7. The same road carries the app's Global Stores (`src/stores/<name>.ts`, `@nodegx/core`'s `store()`) and the
+ * modules of the nodes over them (`src/lib/history.ts`, `src/lib/actions.ts`): `@nodegx/core` itself travels as
+ * `nodegx-core`, a constant transpiled from its source (`coreJs.ts`), only where a carried module imports it.
+ *
  * @module emit/swift/client
  */
 
 import * as nodeModule from 'node:module';
 
-/** The React files the client is made of: every api module, the Noodl API, and whatever they import, transitively. */
-const ENTRY = /^src\/api\/[^/]+\.ts$|^src\/lib\/noodl\.ts$/;
+import { CORE_JS } from './coreJs';
+
+/**
+ * The React files the Swift app runs as JavaScript: every api module, the Noodl API, the Global Stores (the Variables
+ * apart: the Swift app keeps its own, `Variables.swift`), the history and action nodes' modules, and whatever they
+ * import, transitively.
+ */
+const ENTRY = /^src\/api\/[^/]+\.ts$|^src\/lib\/noodl\.ts$|^src\/stores\/(?!variables\.ts$)[^/]+\.ts$|^src\/lib\/(history|actions)\.ts$/;
+/** Imports the host carries itself: React's stand-in, and `@nodegx/core` (the module `nodegx-core`). */
+const CARRIED = new Set(['react', '@nodegx/core']);
 
 /** `src/api/client.ts` → `api/client`. */
 function moduleName(file: string): string {
@@ -29,7 +41,7 @@ function moduleName(file: string): string {
 
 /** An import's path, from the importing module, as a module name; bare `react` is the host's own stand-in. */
 function resolve(from: string, spec: string): string {
-  if (spec === 'react') return 'react';
+  if (CARRIED.has(spec)) return spec;
   if (!spec.startsWith('.')) throw new Error(`the client imports "${spec}", which the Swift host does not carry`);
   const parts = moduleName(from).split('/').slice(0, -1);
   for (const p of spec.split('/')) {
@@ -54,7 +66,13 @@ function stripTypes(code: string): string {
       const emit = process.emitWarning;
       process.emitWarning = (() => undefined) as typeof process.emitWarning;
       try {
-        return stripper(text, { mode: 'strip' });
+        try {
+          return stripper(text, { mode: 'strip' });
+        } catch (e) {
+          // EXP-022 S7. `lib/actions.ts` declares a parameter property, which only TypeScript's transform can take out.
+          if (!/parameter property/.test(String((e as Error)?.message))) throw e;
+          return stripper(text, { mode: 'transform' } as unknown as { mode: 'strip' });
+        }
       } finally {
         process.emitWarning = emit;
       }
@@ -119,6 +137,7 @@ export function clientModuleJs(file: string, ts: string): { name: string; js: st
  */
 export function clientModulesJs(reactFiles: Record<string, string>): Array<{ name: string; js: string }> {
   const out = new Map<string, { name: string; js: string }>();
+  let core = false;
   const queue = Object.keys(reactFiles).filter((f) => ENTRY.test(f)).sort();
   while (queue.length > 0) {
     const file = queue.shift()!;
@@ -127,11 +146,23 @@ export function clientModulesJs(reactFiles: Record<string, string>): Array<{ nam
     const mod = clientModuleJs(file, reactFiles[file]);
     out.set(name, { name: mod.name, js: mod.js });
     for (const imp of mod.imports) {
-      if (imp === 'react' || out.has(imp)) continue;
+      if (imp === '@nodegx/core') core = true;
+      if (CARRIED.has(imp) || out.has(imp)) continue;
       const next = `src/${imp}.ts`;
       if (!(next in reactFiles)) throw new Error(`${file} imports ${imp}, which the web export does not write`);
       queue.push(next);
     }
+  }
+  if (core) {
+    // The file answers to its own name too, as every carried module does: `__require('nodegx-core')` is `@nodegx/core`.
+    const alias = [
+      '__define("nodegx-core", function (exports, __require) {',
+      '  var core = __require("@nodegx/core");',
+      '  Object.keys(core).forEach(function (name) { Object.defineProperty(exports, name, { enumerable: true, get: function () { return core[name]; } }); });',
+      '});',
+      ''
+    ].join('\n');
+    out.set('nodegx-core', { name: 'nodegx-core', js: `// @nodegx:generated (EXP-022 S7) — the web export's one dependency its stores import.\n${CORE_JS}${alias}` });
   }
   return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
 }

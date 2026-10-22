@@ -129,6 +129,20 @@ export function emitSwiftApp(ir: ExportIR, catalog: Catalog): EmittedSwiftApp {
   // EXP-022 S3. The backend client: the web export's own api modules and Noodl API, the same text, its types taken out.
   const client = clientModulesJs(emitApp(ir, catalog).files);
   for (const mod of client) files[`Sources/${libraryName}/Scripts/client/${mod.name}.js`] = mod.js;
+  // EXP-022 S7. The Global Stores: each the web export's own module, held as a `JSStore` the views read and write.
+  const stores = project.stores.filter((s) => s.deferred === undefined && client.some((m) => m.name === `stores/${s.exportName}`));
+  if (stores.length > 0) {
+    files[`Sources/${libraryName}/Stores.swift`] = [
+      "// @nodegx:generated (EXP-022 S7) — the app's Global Stores: each one the web export's own module (`Scripts/client/stores/`),",
+      "// `@nodegx/core`'s `store()`, run in the app's JavaScriptCore context. Any view reads and writes it by key.",
+      'import JavaScriptCore',
+      '',
+      'public enum Stores {',
+      ...stores.map((s) => `  /// "${s.name}".\n  public static var ${ident(s.exportName)}: JSStore { JSStore.named(${swiftString(`stores/${s.exportName}`)}, ${swiftString(s.exportName)}) }`),
+      '}',
+      ''
+    ].join('\n');
+  }
   const list = (items: string[]) => (items.length ? ['', ...items.map((x, i) => `    ${swiftString(x)}${i < items.length - 1 ? ',' : ''}`), '  '] : []).join('\n');
   files[`Sources/${libraryName}/Functions.swift`] = [
     '// @nodegx:generated (EXP-022) — the files the app loads into its JavaScriptCore context, in this order, and the',

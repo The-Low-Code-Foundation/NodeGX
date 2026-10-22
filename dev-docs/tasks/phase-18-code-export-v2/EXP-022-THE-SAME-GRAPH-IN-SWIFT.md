@@ -1,7 +1,7 @@
 # EXP-022 — The same graph in Swift
 
 **Scoped:** 2026-10-21 (P18 session 132, BOARD lane 6), from Richard's ruling of 2026-10-21: "I want that offramp promise
-fulfilled in React and Swift." **Status: 🔵 Swift session 6 of at most 12 done (2026-10-22, §9 S6): Richard ruled add & close fixed first, then the stores, then the reveal; S6 made adding a task and closing one work in both exports, all three arms equal at every step of S4's drive. Before that, S1–S5 (2026-10-22, §9): S1 met AC1 on story-engine; S2 printed the plan's logic with the Functions in JavaScriptCore; S3 carried the backend through the React export's own client; S4 drove todo-list on the iPhone 17 simulator against a real backend, beside the running app and the React export: the Swift app reads and sends what the React export does at every step, and the two writes both exports cannot make (add, and every dialog) are the plan's, filed; S5 put AC4's line on P18's ledger beside React's (2 of 85 conform, 5 played, each with React's very trace; the 13 React plays and Swift does not are the `@nodegx/core` stores §7 cut) and wrote the cost: 5 sessions and 3,575 printer lines, nine decisions copied from the React printer. Next: AC5, the reveal (one project, web and phone, the numbers S4 and S5 measured), for Richard to read; whether a slack session carries the stores (as S3 carried the client) is his call. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
+fulfilled in React and Swift." **Status: 🔵 Swift session 7 of at most 12 done (2026-10-22, §9 S7): the stores run in JavaScriptCore (the React export's own `stores/`, `lib/history`, `lib/actions` and `@nodegx/core`), and the Swift line reads React's 11 of 85, the same 11, with Swift's trace equal to React's on all 14 it plays; the reveal is a private page for Richard (https://claude.ai/artifact/NPyF9RpBWa2rf2Gi2rwjCk), waiting on his ruling on its words before nodegx.io. Before that, S6: Richard ruled add & close fixed first, then the stores, then the reveal; S6 made adding a task and closing one work in both exports, all three arms equal at every step of S4's drive. Before that, S1–S5 (2026-10-22, §9): S1 met AC1 on story-engine; S2 printed the plan's logic with the Functions in JavaScriptCore; S3 carried the backend through the React export's own client; S4 drove todo-list on the iPhone 17 simulator against a real backend, beside the running app and the React export: the Swift app reads and sends what the React export does at every step, and the two writes both exports cannot make (add, and every dialog) are the plan's, filed; S5 put AC4's line on P18's ledger beside React's (2 of 85 conform, 5 played, each with React's very trace; the 13 React plays and Swift does not are the `@nodegx/core` stores §7 cut) and wrote the cost: 5 sessions and 3,575 printer lines, nine decisions copied from the React printer. Next: AC5, the reveal (one project, web and phone, the numbers S4 and S5 measured), for Richard to read; whether a slack session carries the stores (as S3 carried the client) is his call. Ruled 2026-10-22 (§8, DIRECTION D6): the bounded cut with the backend, hard stop at 12 sessions.** Takes [P110](../phase-110-the-app-in-your-pocket/README.md)
 out of the parked table: its reveal sentence stands ("one graph, three homes"), its rulings R1–R7 carry, and **its route
 changes**: P110 §0 scoped *a NodeGX runtime written in Swift that loads the project as data*; this task is *an emitter
 that writes a SwiftUI app from the same IR the React export reads*. Same reveal, and the person leaves with Swift source
@@ -537,3 +537,47 @@ files, 5,361 passed, 28 skipped, 0 failed** (S5: 5,345).
 changed this session, through the package's whole suite (the React lane's own).
 
 **Next (ruled):** the stores in JavaScriptCore (§7's 9 scenarios), then the reveal as a private page for Richard.
+
+### S7 — Swift session 7 of at most 12 (2026-10-22, Opus 5.5)
+
+**Result: the stores run in the Swift app, and its line is React's.** The Swift app now carries the web export's own
+Global Stores (`src/stores/<name>.ts`), `lib/history.ts`, `lib/actions.ts` and `@nodegx/core` into its JavaScriptCore
+context, by S3's road. AC4's line reads **11 of 85 conform on the Swift export, 14 played (11 conform, 3 differ as
+declared, 0 fail)**: the same 11 as React's, and on all 14 that both play, the Swift app's trace equals the React export's,
+event for event. The 4 the Swift printer still leaves out are On App Error (t07), which no ruling carries. Evidence:
+[`exp-022/s7/`](exp-022/s7/README.md).
+
+**Measured before building** (`exp-022/s7/measure.ts`, predictions in `EXPECTED.md`): the 9 scenarios miss only the
+store modules, Set and Subscribe, and the plan's `streams`. Under React's hooks the six nodes are framework-free factories
+(`createStateHistoryNode(source, store, rerender)` …). `lib/actions.ts` needs Node's transform for one parameter property.
+`@nodegx/core` is no dependency of the exporter and its `dist/` is not in git, so it travels as a generated constant
+compared to its source on every run, as S2's runner does.
+
+**Built:** `JSStore` (a Global Store as an `ObservableObject`, read by key, written one key at a time, observed where a
+view reads it as it draws) and `StreamNode` (React's hook again: made once per placement, options applied and listeners
+set at every draw, setup before the component's pushes, disposed on disappear), in `Scripts.swift`. `Stores.swift`. The
+printer prints `globalstore-set`, `store-key-get`, `stream-action`, `stream-out` and each node's member, options,
+listeners and effects. Test seams in the host: `fresh()` (the modules and stores start again between plays, as React's
+graph target loads them per scenario) and `world(now:randoms:)` (the runner's clock and seeded random).
+
+**Predicted wrong, said plainly:** the 9 did not play on the first build. The runner plays a declared world under its
+clock and random, which the store nodes read, and the Swift target had none (`P18-EXP022-S7-NOWORLD`, fixed). The plays'
+one output line was cut at 15,559 characters (`P18-EXP022-S7-LONGLINE`, fixed). todo-list's views, modules and preflight
+are byte for byte HEAD's, but its 2 constant host files changed (I had predicted no file would). Mutant M3 killed t01 and
+not t03.
+
+**Graded:** `tests/the-same-graph-in-swift-s7.test.ts` (13 rows, 1 behind the build: §A the core constant, §B the carried
+modules run in a bare context, §C the 9 printed whole, §D todo-list unmoved and the 3 templates with a Global Store
+carrying it, §E a store node's listener), and `node-spec-graph-swift.test.ts` V1–V4, B1, B2, B4 moved to the measured
+line. Six mutants on the printed Swift: four killed, two equivalent as predicted. One of the equivalents found that no
+P107 scenario wires a store node's signal, so §E plays a graph of its own: a Counter stepped by History Changed and Undone
+reads 0, 1, 3 on both exports, and with the listeners removed Swift's stays at 0. The whole package (`nice -n 19 --runInBand`, 12:01): **164 files, 163 passed, 5,372 tests passed, 29 skipped, 1 failed**: hls006's socket scan read my host helper `listen(` as a server opening a socket. It opens none; renamed `setListeners`, and hls006, S3, S7 and the graph rows (both Swift builds) ran again green.
+
+**Cost:** the Swift printer **+326 net** lines written by hand (3,612 → 3,938), plus the generated core constant. The
+plan, the React printer and every React module: **0**. Seven sessions of twelve.
+
+**The reveal (AC5, ruled "private page first, then site"):** https://claude.ai/artifact/NPyF9RpBWa2rf2Gi2rwjCk. It shows the
+running app, the web export and the phone side by side (S6's drive), the step-by-step reads and writes, what differs (the
+dark theme the exports do not carry, "Also keep track of projects and money", two reads, the Sign in labels, todo-list's
+91 + 5), the two scorecards and the cost. **Nothing goes on nodegx.io until Richard rules on its words.**
+
