@@ -14,6 +14,47 @@
  */
 
 export const DEPLOY_GUIDE_FILE = 'DEPLOY.md';
+export const DEPLOY_PACKAGE_FILE = 'package.json';
+
+/** DEP-001 — the backend override the deployed page reads; the runtime's own name for it is in viewer-react `src/deploy-config.ts`. */
+export const DEPLOY_CONFIG_FILE = 'nodegx-config.json';
+
+/**
+ * A client-side deploy's `package.json`: no dependencies, and `npm start` runs `serve.js`.
+ *
+ * Nothing needs installing, but a person who meets a folder of JavaScript types `npm install` and
+ * `npm start` by reflex. Without this file `npm install` wrote a stray `package-lock.json` and
+ * `npm start` failed (Richard, 2026-10-22). The server layout ships its own `package.json`.
+ */
+export function renderDeployPackageJson(projectName: string | undefined): string {
+  const name =
+    (projectName ?? '')
+      .toLowerCase()
+      .replace(/[^a-z0-9._-]+/g, '-')
+      .replace(/^[._-]+|[._-]+$/g, '')
+      .slice(0, 200) || 'nodegx-app';
+  const pkg = {
+    name,
+    private: true,
+    description: `${projectName?.trim() || 'A NodeGX app'}, deployed from NodeGX. See DEPLOY.md.`,
+    scripts: { start: 'node serve.js' }
+  };
+  return JSON.stringify(pkg, null, 2) + '\n';
+}
+
+/**
+ * DEP-001 — `nodegx-config.json`, holding exactly the backend address this deploy baked in.
+ *
+ * Belt and braces: the app still carries the baked value, and the file only overrides it, so a
+ * deploy that loses the file behaves as before. It exists so a person can re-point the app by
+ * editing one line, and so `serve.js --backend` and the SSR server have a file to start from.
+ * With nothing baked it is `{}` — no override, and no empty endpoint that would read as one.
+ */
+export function renderDeployConfig(metadata: { cloudservices?: Record<string, unknown> } | undefined): string {
+  const cloudservices = metadata?.cloudservices;
+  const config = cloudservices && cloudservices.endpoint ? { cloudservices } : {};
+  return JSON.stringify(config, null, 2) + '\n';
+}
 
 export type DeployGuideInput = {
   projectName?: string;
@@ -35,13 +76,40 @@ function isLocalEndpoint(endpoint: string): boolean {
   }
 }
 
-function backendSection(endpoint: string | undefined): string {
+function changingTheBackend(ssr: boolean): string {
+  const run = ssr ? 'npm start --' : 'node serve.js';
+  return `### Pointing it at another backend
+
+No rebuild is needed. Either:
+
+- start it with the backend you want:
+
+  \`\`\`sh
+  ${run} --backend-port 8577                 # a backend on this computer, at port 8577
+  ${run} --backend https://data.example.com  # a backend anywhere
+  \`\`\`
+
+  (\`NODEGX_CLOUDSERVICES_ENDPOINT\` does the same for hosts that set environment variables)${
+    ssr ? '. The pre-render takes the same flags: `npm run ssg -- --backend-port 8577`.' : ''
+  }
+- or edit \`nodegx-config.json\` in this folder and reload the page.${
+    ssr ? '' : ' That works on any static host too, not only with `serve.js`.'
+  }
+
+\`nodegx-config.json\` may set \`cloudservices\` (this backend) and \`backendServices\`, nothing else.
+If the file is missing or unreadable, the app uses the address it was deployed with.
+`;
+}
+
+function backendSection(endpoint: string | undefined, ssr: boolean): string {
   if (!endpoint) {
     return `## Backend
 
 No backend address is built into this deploy. That is fine if the app does not use records, users
-or cloud functions. If it does, set the backend in NodeGX (Backend Services) and deploy again.
-`;
+or cloud functions. If it does, set the backend in NodeGX (Backend Services) and deploy again, or
+point it at one as below.
+
+${changingTheBackend(ssr)}`;
   }
 
   if (isLocalEndpoint(endpoint)) {
@@ -51,13 +119,11 @@ This app reads its data from a backend on **this computer**: \`${endpoint}\`
 
 - It works only while that backend is running on that port. The NodeGX editor runs it while the
   project is open.
-- If the backend starts on a different port later, deploy again from NodeGX so the app points at
-  the new one.
+- If the backend starts on a different port later, point the app at the new port as below.
 - Nobody else can reach a backend on your computer. To put the app online, the backend has to be
   online too.
 
-The backend address is built into the app when you deploy, so there is no flag to change it here.
-`;
+${changingTheBackend(ssr)}`;
   }
 
   return `## Backend
@@ -65,9 +131,7 @@ The backend address is built into the app when you deploy, so there is no flag t
 This app reads its data from \`${endpoint}\`. That backend has to be running and reachable from
 wherever the app is opened.
 
-The address is built into the app when you deploy. To point the app at another backend, change it
-in NodeGX (Backend Services) and deploy again.
-`;
+${changingTheBackend(ssr)}`;
 }
 
 function baseUrlNote(baseUrl: string | undefined): string {
@@ -86,8 +150,9 @@ another, because a host that sets \`PORT\` sends its traffic to exactly that por
 function clientSideGuide(input: DeployGuideInput): string {
   return `## What this is
 
-A static website: \`index.html\`, the app's JavaScript, and its pages in \`noodl_bundles/\`. There
-is nothing to install or build.
+A static website: \`index.html\`, the app's JavaScript, its pages in \`noodl_bundles/\`, and
+\`nodegx-config.json\`, which says which backend it talks to. There is nothing to install or
+build.
 ${baseUrlNote(input.baseUrl)}
 ## Run it on this computer
 
@@ -97,6 +162,9 @@ You need [Node.js](https://nodejs.org). In this folder, run:
 node serve.js              # first free port from 3000 up
 node serve.js --port 8080  # or choose one
 \`\`\`
+
+\`npm start\` (and \`npm start -- --port 8080\`) does the same. There is nothing to
+\`npm install\`, though running it does no harm.
 
 Then open the address it prints.
 
@@ -115,8 +183,8 @@ The app uses real page addresses (\`/about\`, not \`/#/about\`). Set the host to
 found". On Netlify that is a \`_redirects\` file holding \`/* /index.html 200\`. Most hosts call it
 "single-page app" or "SPA fallback".
 
-\`serve.js\` and this file are only for you. A host serves them as plain files, which does no
-harm, and you can leave them out.
+\`serve.js\`, \`package.json\` and this file are only for you. A host serves them as plain files,
+which does no harm, and you can leave them out. Keep \`nodegx-config.json\`.
 `;
 }
 
@@ -130,6 +198,8 @@ a build that pre-renders every page to static HTML (SSG).
   are the server and its render pipeline.
 - \`ssg.js\` and \`ssg-paths.js\` are the pre-render build.
 - \`noodl.deploy.js\` is the app's runtime, with your project inside it.
+- \`nodegx-config.json\` says which backend it talks to. The server reads it and hands the same
+  address to the browser.
 - \`public/\` is the complete client-side app. The server sends it to the browser, and a pre-render
   copies it.
 - \`noodl_bundles/\` holds your pages. It is in this folder (the server reads it from here) **and**
@@ -188,5 +258,5 @@ NodeGX writes this file and everything beside it on every deploy, so changes mad
 overwritten. To change the app, change the project in NodeGX and deploy again.
 
 ${ssr ? serverGuide(input) : clientSideGuide(input)}
-${backendSection(input.backendEndpoint)}`;
+${backendSection(input.backendEndpoint, ssr)}`;
 }

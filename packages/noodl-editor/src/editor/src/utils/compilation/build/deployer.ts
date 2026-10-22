@@ -6,7 +6,15 @@ import * as Exporter from '../../exporter';
 import { isCloudFunctionComponent } from '../../exporter/cloudFunctions';
 import { DeployEnvironment } from '../build-context';
 import { copyProjectFilesToFolder, formatCopyReportSummary, ProjectCopyReport } from './copy';
-import { DEPLOY_GUIDE_FILE, renderDeployGuide } from './deploy-guide';
+import {
+  DEPLOY_CONFIG_FILE,
+  DEPLOY_GUIDE_FILE,
+  DEPLOY_PACKAGE_FILE,
+  renderDeployConfig,
+  renderDeployGuide,
+  renderDeployPackageJson
+} from './deploy-guide';
+import { PROJECT_FILES } from './deploy-target';
 import { loadDeployIndex, copyDeployFilesToFolder, getExternalFolderPath } from './deploy-index';
 import { HtmlProcessor, HtmlProcessorParameters } from './processors/html-processor';
 
@@ -29,10 +37,12 @@ export type DeployToFolderOptions = {
   envVariables?: Record<string, string>;
 
   /**
-   * Write `DEPLOY.md`, the how-to-run guide, into the folder. Default true. The SSR layout's second
-   * pass into `public/` turns it off: one guide per deploy, at its top, describing the whole layout.
+   * This pass writes the top of the deploy: `DEPLOY.md` (how to run it) and `nodegx-config.json`
+   * (DEP-001, the backend address a person can change without the editor). Default true. The SSR
+   * layout's second pass into `public/` turns it off: one guide and one config per deploy, at its
+   * top, where the server reads the config and serves it to the browser.
    */
-  writeGuide?: boolean;
+  deployRoot?: boolean;
 };
 
 /**
@@ -68,18 +78,13 @@ export async function deployToFolder({
   baseUrl,
   envVariables,
   runtimeType = 'deploy',
-  writeGuide = true
+  deployRoot = true
 }: DeployToFolderOptions): Promise<DeployToFolderResult> {
-  // Check if this is a project folder
-  try {
-    const projectContent = await filesystem.readJson(direntry + '/project.json');
-    if (projectContent) {
-      return Promise.reject({ result: 'failure', message: 'Cannot deploy to a project folder.' });
-    }
-
-    // There is no project.json, this is not a project folder, good continue with the deploy
-  } catch (error) {
-    // noop; file doesn't exist
+  // Never into a project. 🔴 P26-V2GUARD: this used to look for `project.json` only, and a v2
+  // project has `nodegx.project.json` instead — a deploy into one wrote index.html, the runtime and
+  // noodl_bundles/ in among the project's own files, and exited 0.
+  if (PROJECT_FILES.some((file) => filesystem.exists(filesystem.join(direntry, file)))) {
+    return Promise.reject({ result: 'failure', message: 'Cannot deploy to a project folder.' });
   }
 
   // Start by copying all files from the project folder to the deploy directory.
@@ -136,10 +141,10 @@ export async function deployToFolder({
     }
   }
 
-  // Last, so it wins over a project file of the same name — it is ours, and it is rewritten every
+  // Last, so they win over project files of the same names — both are ours, and rewritten every
   // deploy. The project's own README.md is left alone; see ./deploy-guide.ts.
-  const guideFiles: string[] = [];
-  if (writeGuide) {
+  const rootFiles: string[] = [];
+  if (deployRoot) {
     const guide = renderDeployGuide({
       projectName: project.name,
       runtimeType,
@@ -147,10 +152,19 @@ export async function deployToFolder({
       baseUrl
     });
     await filesystem.writeFileOverride(direntry + '/' + DEPLOY_GUIDE_FILE, guide);
-    guideFiles.push(DEPLOY_GUIDE_FILE);
+    rootFiles.push(DEPLOY_GUIDE_FILE);
+
+    await filesystem.writeFileOverride(direntry + '/' + DEPLOY_CONFIG_FILE, renderDeployConfig(exportJson.metadata));
+    rootFiles.push(DEPLOY_CONFIG_FILE);
+
+    // The server layout's package.json comes from its runtime manifest; only the static one needs ours.
+    if (runtimeType === 'deploy') {
+      await filesystem.writeFileOverride(direntry + '/' + DEPLOY_PACKAGE_FILE, renderDeployPackageJson(project.name));
+      rootFiles.push(DEPLOY_PACKAGE_FILE);
+    }
   }
 
-  return { copyReport, written: [...copyReport.copiedPaths, ...runtimeFiles, ...bundleFiles, ...guideFiles] };
+  return { copyReport, written: [...copyReport.copiedPaths, ...runtimeFiles, ...bundleFiles, ...rootFiles] };
 }
 
 /**

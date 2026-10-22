@@ -234,6 +234,11 @@ export class PreviewServer {
       return this.sendDynamic(res, bundle, 'application/json; charset=utf-8');
     }
 
+    // DEP-001: the deploy page asks for `nodegx-config.json` to re-point its backend. A preview's
+    // backend arrives with its build; a stray config file in the project folder must not override
+    // it, so this path is always "no override" (404) and never a project file.
+    if (pathname === '/nodegx-config.json') return this.notFound(res);
+
     const asset = pathname.slice(1);
     if (DEPLOY_ASSETS.includes(asset)) {
       return this.sendFile(req, res, deployAssetPath(asset));

@@ -246,6 +246,43 @@ belong to the backend and cannot be used by your app's own files or routes:
 `executions`, `files`, `functions`, `health`, `hooks`, `login`, `logout`, `mcp`,
 `oauth`, `realtime`, `requestPasswordReset`, `users`, `verificationEmailRequest`.
 
+## Pointing the app at its backend
+
+A deployed app knows its backend's address from the project's Backend Services setting when you
+deployed. Every deploy also writes `nodegx-config.json` beside `index.html`, holding that address:
+
+```json
+{
+  "cloudservices": {
+    "endpoint": "https://apps.example.com",
+    "appId": "…",
+    "type": "nodegx"
+  }
+}
+```
+
+The page reads this file before it starts, so **one build can be pointed at another backend
+without the editor and without rebuilding**:
+
+- **Edit the file and reload.** It works on any static host. The page asks for it with
+  `cache: no-store`, so no cache bust is needed.
+- **Start the bundled server with a flag.** `node serve.js --backend-port 8577` (a backend on this
+  computer) or `node serve.js --backend https://apps.example.com`. The SSR server takes the same
+  flags (`npm start -- --backend-port 8577`), and so does the static pre-render
+  (`npm run ssg -- --backend-port 8577`).
+- **Set the environment**, for hosts that configure apps that way:
+  `NODEGX_CLOUDSERVICES_ENDPOINT` and `NODEGX_CLOUDSERVICES_APP_ID`. A flag wins over these.
+
+The SSR server applies the address to the pages it renders **and** serves the same
+`nodegx-config.json` to the browser, so a page hydrates against the backend its data came from. The
+pre-render writes the same file into `dist/`.
+
+What the file may change is fixed: `cloudservices` (this backend) and `backendServices`. Any other
+key is ignored with a console warning; a config file that could rewrite the app's metadata could
+rewrite the app. If the file is missing (404), the app uses the address it was deployed with, which is
+what an app deployed before this file existed does. If the file is unreadable (not JSON, for example
+a host that answers `index.html` for every path), the app does the same and logs a warning.
+
 ## Other hosting
 
 Nothing about a NodeGX deploy is exotic. The application is a static folder, and
@@ -268,7 +305,8 @@ same deterministic tree the images are built from; the pieces in
 other front door needs to do.
 
 The two things you must reproduce yourself, whatever you use: serve the app and
-the API on one origin (or set the endpoint to wherever the API really is), and
+the API on one origin (or [point the app](#pointing-the-app-at-its-backend) at wherever the API
+really is), and
 never bind the backend beyond localhost with `devOpen` still on — it will refuse,
 and that refusal is protecting you.
 

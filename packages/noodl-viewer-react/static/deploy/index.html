@@ -81,9 +81,21 @@
 
     <script src="%baseUrl%noodl.deploy.js"></script>
     <script type="application/javascript">
+      // DEP-001: nodegx-config.json beside this page may re-point the backend. The request starts
+      // now, not at DOMContentLoaded, so it overlaps the parse. It never rejects: no file (404) or
+      // an unreadable one means the address this app was deployed with.
+      var noodlDeployConfig = window.Noodl._viewerReact.loadDeployConfig("%baseUrl%nodegx-config.json");
       document.addEventListener("DOMContentLoaded", function () {
         const root = document.getElementById("root");
-        window.Noodl._viewerReact.renderDeployed(root, __noodl_modules, window.projectData);
+        const viewer = window.Noodl._viewerReact;
+        noodlDeployConfig.then(function (config) {
+          try {
+            viewer.applyDeployConfig(window.projectData, config);
+          } catch (error) {
+            console.warn("NodeGX: nodegx-config.json was not applied.", error);
+          }
+          viewer.renderDeployed(root, __noodl_modules, window.projectData);
+        });
       });
     </script>
   </body>

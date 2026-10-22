@@ -8,6 +8,7 @@ import {
   previewProjectFileExclusions,
   ProjectCopyReport
 } from '@noodl-utils/compilation/build/copy';
+import { chooseDeployFolder, deployFolderName, PROJECT_FILES } from '@noodl-utils/compilation/build/deploy-target';
 import { createEditorCompilation } from '@noodl-utils/compilation/compilation.editor';
 
 import { PrimaryButton } from '@noodl-core-ui/components/inputs/PrimaryButton';
@@ -143,7 +144,30 @@ export function DeployToFolderTab() {
       .openDialog({
         allowCreateDirectory: true
       })
-      .then((direntry) => {
+      .then(async (chosenDir) => {
+        // The app gets its own folder, named after it, inside the one chosen (deploy-target.ts).
+        const target = chooseDeployFolder({
+          chosenDir,
+          projectName: ProjectModel.instance.name,
+          projectDir: ProjectModel.instance._retainedProjectDirectory,
+          join: (...parts) => filesystem.join(...parts),
+          isProjectFolder: (dir) => PROJECT_FILES.some((file) => filesystem.exists(filesystem.join(dir, file)))
+        });
+        if ('error' in target) {
+          ToastLayer.showError(target.error);
+          return;
+        }
+        const direntry = target.dir;
+        if (!filesystem.exists(direntry)) {
+          try {
+            await filesystem.makeDirectory(direntry);
+          } catch (error) {
+            ToastLayer.showError(`Could not create the folder "${target.folderName}" there: ${error?.message ?? error}`);
+            return;
+          }
+        }
+        const deployedTo = `Deployed to "${target.folderName}".` + (target.note ? ` ${target.note}` : '');
+
         const compilation = createEditorCompilation(ProjectModel.instance)
           .addProjectBuildScripts()
           .addBuildScript({
@@ -191,16 +215,17 @@ export function DeployToFolderTab() {
               // A path that is excluded now but exists in the output folder was
               // put there by an earlier deploy, and is still being served.
               ToastLayer.showError(
-                `Deploy successful, but ${stale} excluded path${stale === 1 ? '' : 's'} already existed in the output folder ` +
+                `${deployedTo} But ${stale} excluded path${stale === 1 ? '' : 's'} already existed in the output folder ` +
                   'from an earlier deploy and were left in place. Delete them by hand — see the console.'
               );
               return;
             }
 
             ToastLayer.showSuccess(
-              excluded === 0
-                ? 'Deploy successful! DEPLOY.md in the folder says how to run it.'
-                : `Deploy successful! DEPLOY.md in the folder says how to run it. ${excluded} project file${excluded === 1 ? '' : 's'} excluded — see the console for the list.`
+              `${deployedTo} DEPLOY.md there says how to run it.` +
+                (excluded === 0
+                  ? ''
+                  : ` ${excluded} project file${excluded === 1 ? '' : 's'} excluded — see the console for the list.`)
             );
           })
           .catch(() => {
@@ -216,6 +241,11 @@ export function DeployToFolderTab() {
       <PopupSection>
         <Text hasBottomSpacing textType={TextType.DefaultContrast}>
           Deploy your frontend to a local folder
+        </Text>
+
+        <Text hasBottomSpacing textType={TextType.Shy}>
+          The app goes in its own folder, "{deployFolderName(ProjectModel.instance.name)}", inside the folder you
+          choose.
         </Text>
 
         <Text hasBottomSpacing textType={TextType.Shy}>

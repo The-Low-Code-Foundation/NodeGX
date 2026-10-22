@@ -126,6 +126,76 @@ async function listenOnFreePort(
   return listenOn(server, 0);
 }
 
+const DEPLOY_CONFIG_FILE = 'nodegx-config.json';
+
+/**
+ * DEP-001 — the backend a person asked for when starting the app, or `null`:
+ *
+ *   --backend <url>          the backend's address
+ *   --backend-port <n>       a backend on this computer: http://localhost:<n>
+ *   NODEGX_CLOUDSERVICES_ENDPOINT / NODEGX_CLOUDSERVICES_APP_ID   the same, for hosts
+ *
+ * A flag wins over the environment. The page reads the result from `nodegx-config.json`, and the
+ * runtime's allow-list (viewer-react `src/deploy-config.ts`) decides what it may change.
+ */
+function readBackendArg(argv, env) {
+  let endpoint;
+  let from;
+  for (let i = 0; i < argv.length; i++) {
+    const arg = argv[i];
+    const [flag, inline] = arg.startsWith('--') && arg.includes('=') ? [arg.slice(0, arg.indexOf('=')), arg.slice(arg.indexOf('=') + 1)] : [arg, undefined];
+    const value = inline !== undefined ? inline : argv[i + 1];
+    if (flag === '--backend') {
+      endpoint = parseBackendUrl(value, '--backend');
+      from = '--backend';
+    } else if (flag === '--backend-port') {
+      endpoint = `http://localhost:${parsePort(value, '--backend-port').port}`;
+      from = '--backend-port';
+    }
+  }
+  if (!endpoint && env.NODEGX_CLOUDSERVICES_ENDPOINT) {
+    endpoint = parseBackendUrl(env.NODEGX_CLOUDSERVICES_ENDPOINT, 'NODEGX_CLOUDSERVICES_ENDPOINT');
+    from = 'NODEGX_CLOUDSERVICES_ENDPOINT';
+  }
+  const appId = env.NODEGX_CLOUDSERVICES_APP_ID || undefined;
+  if (!endpoint && !appId) return null;
+  return { endpoint, appId, from: from || 'NODEGX_CLOUDSERVICES_APP_ID' };
+}
+
+function parseBackendUrl(value, from) {
+  let url;
+  try {
+    url = new URL(String(value));
+  } catch {
+    url = null;
+  }
+  if (!url || (url.protocol !== 'http:' && url.protocol !== 'https:')) {
+    throw new Error(`${from} wants the backend's address, like http://localhost:8577, and got "${value ?? ''}".`);
+  }
+  return String(value).replace(/\/+$/, '');
+}
+
+/**
+ * The config this folder's app should run with: `nodegx-config.json` in `dir` (what the deploy
+ * baked), with `override` written over its `cloudservices`. `changed` says whether the override
+ * did anything — a server only needs to answer the file itself when it did.
+ */
+function resolveDeployConfig(dir, override) {
+  let config = {};
+  try {
+    const parsed = JSON.parse(fs.readFileSync(path.join(dir, DEPLOY_CONFIG_FILE), 'utf8'));
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) config = parsed;
+  } catch {
+    // No file, or not JSON: the deploy's baked address stands, and the runtime says so if it matters.
+  }
+  if (!override) return { config, changed: false };
+
+  const cloudservices = Object.assign({}, config.cloudservices);
+  if (override.endpoint) cloudservices.endpoint = override.endpoint;
+  if (override.appId) cloudservices.appId = override.appId;
+  return { config: Object.assign({}, config, { cloudservices }), changed: true };
+}
+
 const TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
@@ -160,8 +230,9 @@ const TYPES = {
  * A file under `root`, else `index.html` for an app route (a path with no extension — the router
  * uses real paths, so reloading `/about` must still load the app), else 404.
  */
-function createStaticHandler(root) {
+function createStaticHandler(root, { deployConfig } = {}) {
   const indexHtml = path.join(root, 'index.html');
+  const configBody = deployConfig ? JSON.stringify(deployConfig, null, 2) + '\n' : null;
 
   function send(res, file, method) {
     fs.stat(file, (error, stat) => {
@@ -196,6 +267,13 @@ function createStaticHandler(root) {
       return;
     }
 
+    // DEP-001: started with --backend, the address the page reads is the one asked for, not the file's.
+    if (configBody !== null && pathname === '/' + DEPLOY_CONFIG_FILE) {
+      res.writeHead(200, { 'Content-Type': TYPES['.json'], 'Cache-Control': 'no-store' });
+      res.end(req.method === 'HEAD' ? undefined : configBody);
+      return;
+    }
+
     const file = path.join(root, pathname);
     const outside = file !== root && !file.startsWith(root + path.sep);
     const hidden = pathname.split('/').some((part) => part.startsWith('.'));
@@ -219,17 +297,29 @@ function main() {
   if (argv.includes('--help') || argv.includes('-h')) {
     console.log(
       'Serves this NodeGX deploy on this computer.\n\n' +
-        '  node serve.js                first free port from 3000 up\n' +
-        '  node serve.js --port 8080    exactly 8080, or stop if it is taken\n'
+        '  node serve.js                        first free port from 3000 up\n' +
+        '  node serve.js --port 8080            exactly 8080, or stop if it is taken\n' +
+        '  node serve.js --backend-port 8577    use the backend on this computer at port 8577\n' +
+        '  node serve.js --backend <url>        use the backend at that address\n'
     );
     return;
   }
 
   const root = __dirname;
-  const server = http.createServer(createStaticHandler(root));
+  let backend;
+  try {
+    backend = readBackendArg(argv, process.env);
+  } catch (error) {
+    console.error(error.message);
+    process.exit(1);
+  }
+  const resolved = resolveDeployConfig(root, backend);
+  const server = http.createServer(createStaticHandler(root, { deployConfig: resolved.changed ? resolved.config : null }));
   listenOnFreePort(server)
     .then((port) => {
+      const endpoint = resolved.config.cloudservices && resolved.config.cloudservices.endpoint;
       console.log(`Serving ${root}`);
+      if (endpoint) console.log(`Backend: ${endpoint} (from ${backend ? backend.from : DEPLOY_CONFIG_FILE})`);
       console.log(`Open http://localhost:${port}/  (Ctrl+C to stop)`);
     })
     .catch((error) => {
@@ -238,6 +328,6 @@ function main() {
     });
 }
 
-module.exports = { listenOnFreePort, readPortArg, createStaticHandler };
+module.exports = { listenOnFreePort, readPortArg, readBackendArg, resolveDeployConfig, createStaticHandler, DEPLOY_CONFIG_FILE };
 
 if (require.main === module) main();

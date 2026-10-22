@@ -14,7 +14,7 @@ import { XMLHttpRequest } from 'xmlhttprequest';
  * — SSG is the SSR render executed once per route at build time instead of
  * per request.
  *
- * Usage: node ssg.js [outDir]   (default ./dist)
+ * Usage: node ssg.js [outDir] [--backend <url> | --backend-port <n>]   (outDir default ./dist)
  *
  * Output: public/* copied to outDir, then one <route>/index.html per route
  * (directory-index layout — '/second' → second/index.html — so static hosts
@@ -27,6 +27,7 @@ const { installRuntimeGlobals } = require('./runtime-globals');
 const { loadKitModules } = require('./kit-modules');
 const { renderPage } = require('./server-core');
 const { routesFromExport, outputPathFor } = require('./ssg-paths');
+const { readBackendArg, resolveDeployConfig, DEPLOY_CONFIG_FILE } = require('./public/serve.js');
 
 const { trackersIdle } = installRuntimeGlobals({ React, ReactDOMServer, XMLHttpRequest, fetch });
 
@@ -35,9 +36,30 @@ globalThis.projectData = {{#export#}};
 // Import the Noodl runtime
 require('./noodl.deploy');
 
-const { createElement, ssrSetupRuntime } = globalThis.NoodlSSR;
+const { createElement, ssrSetupRuntime, applyDeployConfig } = globalThis.NoodlSSR;
 
-const OUT_DIR = process.argv[2] || './dist';
+const ARGV = process.argv.slice(2);
+const FLAGS_WITH_VALUES = ['--backend', '--backend-port'];
+/** The output folder is the one argument that is neither a flag nor a flag's value. */
+function positionalArg(argv) {
+  for (let i = 0; i < argv.length; i++) {
+    if (FLAGS_WITH_VALUES.includes(argv[i])) i++;
+    else if (!argv[i].startsWith('--')) return argv[i];
+  }
+  return undefined;
+}
+const OUT_DIR = positionalArg(ARGV) || './dist';
+
+// DEP-001: pre-render against the backend the person asked for, and write that same config into
+// the output, so the static pages hydrate against the backend their data came from.
+let deployConfig;
+try {
+  deployConfig = resolveDeployConfig(path.resolve('.'), readBackendArg(ARGV, process.env)).config;
+} catch (error) {
+  console.error(error.message);
+  process.exit(1);
+}
+applyDeployConfig(globalThis.projectData, deployConfig);
 const PAGE_READY_TIMEOUT = Number(process.env.NOODL_SSR_PAGE_READY_TIMEOUT || 10000);
 
 async function main() {
@@ -60,6 +82,7 @@ async function main() {
   // Start from the browser assets — the generated pages hydrate with them.
   await fs.promises.rm(OUT_DIR, { recursive: true, force: true });
   await fs.promises.cp('./public', OUT_DIR, { recursive: true });
+  await fs.promises.writeFile(path.join(OUT_DIR, DEPLOY_CONFIG_FILE), JSON.stringify(deployConfig, null, 2) + '\n');
 
   let failed = 0;
   for (const route of routes) {

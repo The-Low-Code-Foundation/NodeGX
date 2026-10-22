@@ -1,6 +1,6 @@
 # Phase 26 — Deployment (Track K): Progress
 
-**Status:** 📋 Specced, not started — 0 / 8
+**Status:** 🟡 In progress — 1 / 8 (DEP-001)
 **Specced:** 2026-07-27 (DEP-001…007 from the deployment scoping session; DEP-008 filed by AIX-009 the same day)
 **Phase overview:** [README.md](./README.md)
 
@@ -12,7 +12,7 @@ Not started · In progress · **Built–not wired** · Complete · Superseded
 
 | ID | Title | Tier | Status | Landed | Notes |
 |---|---|---|---|---|---|
-| [DEP-001](./DEP-001-RUNTIME-BACKEND-CONFIG.md) | Runtime backend config — un-freeze the endpoint | 1 | ⬜ Not started | — | Prerequisite for 002/003/005. ~100 lines; the care is in four existing consumers and the SSR hydration case |
+| [DEP-001](./DEP-001-RUNTIME-BACKEND-CONFIG.md) | Runtime backend config — un-freeze the endpoint | 1 | ✅ Complete (SSR criterion by drive, not test) | 2026-10-22 | Prerequisite for 002/003/005. ~100 lines; the care is in four existing consumers and the SSR hydration case |
 | [DEP-008](./DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md) | Artifact contents & the ignore mechanism | 1 | ⬜ Not started | — | Filed by AIX-009. A **live privacy defect** in the shipping deploy path, not only a blocker. Blocks AIX-009 |
 | [DEP-002](./DEP-002-LOCAL-FULLSTACK-BUNDLE.md) | Local full-stack bundle — one process, no Docker | 2 | ⬜ Not started | — | Owns the Deploy popup's new IA. Closes phase-5 TASK-007F |
 | [DEP-003](./DEP-003-STATIC-HOST-PUBLISH.md) | Publish to Netlify & Cloudflare Pages | 2 | ⬜ Not started | — | Two adapters, one interface. No git anywhere in the flow |
@@ -50,7 +50,9 @@ be stale, correct it here rather than implementing around the description.
 | D19 | WF-003's general lesson, still live: when a later task takes ownership of a value, an earlier task's safety net around it becomes an active bug (the credential-rotation P1) | — | DEP-005 |
 | D20 | `lerna exec` runs the main checkout, not a worktree — a worktree cannot drive the editor, which is why WF-003 never deployed a real export | — | all live passes |
 | D21 | **Landed 2026-10-22 (Richard's ask, outside a task):** every deploy writes `DEPLOY.md` — generated, per mode, naming the backend address the export baked in — and a client-side deploy carries `serve.js` (no deps; `--port`/`PORT` exact, else first free from 3000, loopback-probed). The SSR server takes its port from the same file. **Named DEPLOY.md, not README.md, by Richard's ruling** — a project README copied into the deploy is never overwritten. DEP-002's "generated README" means this file: extend `build/deploy-guide.ts`, don't add a second one | `build/deploy-guide.ts`, `static/deploy/serve.js` | DEP-002 extends |
-| D22 | **A backend-port flag is not possible yet.** Richard asked for one beside the front-end port; the backend address is baked into the bundle (D2), so a flag can only exist once DEP-001's runtime override does. DEPLOY.md says so in plain words | `deploy-guide.ts` backend section | DEP-001 |
+| D22 | ~~A backend-port flag is not possible yet~~ — **resolved by DEP-001, 2026-10-22**: `--backend-port` / `--backend` on `serve.js`, the SSR server and SSG | `static/deploy/serve.js` | DEP-001 ✅ |
+| D23 | **Richard's ruling 2026-10-22:** an editor deploy goes into a folder named after the app inside the folder chosen (`nodegx_projects` → `nodegx_projects/My App/`); never inside the project; `<name>-deploy` when `<chosen>/<name>` is the project. A client-side deploy also gets a dependency-free `package.json` (`npm start` = `serve.js`) — Richard's `npm install` in a deploy had written a stray `package-lock.json`. The CLI keeps `<out>` as given | `build/deploy-target.ts`, `deploy-guide.ts` | — |
+| D24 | P26-V2GUARD: the deployer's "not into a project" guard read `project.json` only; a v2 project (`nodegx.project.json`) took a deploy into its own folder and exited 0. Fixed with D23 | `deployer.ts` | — |
 
 ## Open questions
 
