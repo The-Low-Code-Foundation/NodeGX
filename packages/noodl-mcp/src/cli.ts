@@ -11,6 +11,8 @@
  */
 
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import * as os from 'os';
+import * as path from 'path';
 
 import { reapOrphanedBackends } from './backend/reaper';
 import { CLIENT_PROFILES, isClientProfileName } from './clientProfile';
@@ -18,6 +20,8 @@ import { ToolError } from './errors';
 import { runGraphCli } from './graphText';
 import { parseReproducibleFlag, type ReproducibleOutput } from './project/writeClock';
 import { createServer } from './server';
+import { clientLabel } from './studio/companion';
+import { findStudioApp, launchStudioApp, STUDIO_DOWNLOAD_URL, STUDIO_URL_SCHEME } from './studio/studioApp';
 import { startStudioProxy } from './studio/studioProxy';
 import { BOOTSTRAP_ADVERTISED } from './toolGroups';
 
@@ -164,7 +168,14 @@ async function main(): Promise<void> {
   try {
     // P125 CCN-001 s7 — Studio's panel origin, before the server exists: the MCP App resource names it in its CSP,
     // and a host that prefetches the resource (Claude Desktop) reads it before any Studio runs.
-    const studioProxy = await startStudioProxy();
+    // CCN-006 — the port it had last time first, so a browser window left open across a restart reconnects.
+    // `NODEGX_STUDIO_PORT_FILE=none` (and any jest run) takes a free port and remembers nothing.
+    const portFileEnv = process.env.NODEGX_STUDIO_PORT_FILE;
+    const portFile =
+      portFileEnv === 'none' || process.env.JEST_WORKER_ID
+        ? undefined
+        : (portFileEnv ?? path.join(os.homedir(), '.noodl', 'studio-proxy-port'));
+    const studioProxy = await startStudioProxy({ portFile });
     const { server, binding, disclosure } = createServer({
       projectDir: positional[0],
       allowWrites,
@@ -174,6 +185,24 @@ async function main(): Promise<void> {
       studioProxy,
       ...(reproducible ? { reproducible } : {})
     });
+    // CCN-006 — what a browser window of Studio reads to offer the desktop app (studio/companion.ts).
+    studioProxy.setCompanion(
+      () => {
+        const app = findStudioApp();
+        return {
+          client: clientLabel(server.server.getClientVersion()?.name),
+          projectDir: binding.projectDir ?? null,
+          app: app ? { opensLinks: app.opensLinks } : null,
+          download: STUDIO_DOWNLOAD_URL,
+          scheme: STUDIO_URL_SCHEME
+        };
+      },
+      async () => {
+        const app = findStudioApp();
+        const dir = binding.projectDir;
+        return app && dir ? launchStudioApp(app, dir) : false;
+      }
+    );
     process.stderr.write(`noodl-mcp: Studio panel served through ${studioProxy.origin}\n`);
     // AWP-006 — the surface is now a decision, so it is stated at startup rather
     // than inferred from a tools/list. `--all-tools` is named here because the

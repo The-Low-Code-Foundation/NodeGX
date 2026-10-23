@@ -201,7 +201,9 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
         });
       }
       const hold = readHold(dir);
-      const url = `${instance.origin}/`;
+      // CCN-006 — through the proxy when there is one: the page then carries the companion, which offers the
+      // desktop app when this server goes away (studio/companion.ts), and survives a restart on the same port.
+      const url = `${proxy ? proxy.origin : instance.origin}/`;
       // A proxied call (through call_tool) draws no panel even in a host that renders them: the browser, then.
       const viaProxy = consumeOpenStudioProxied();
       const rendersApps = clientRendersApps(server) && !viaProxy;
