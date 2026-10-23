@@ -1,4 +1,4 @@
-# OWN-026 — the next lab session: test 2 is RUNNING (code + harness chains), NodeGX waits for FIX-03
+# OWN-026 — the next lab session: test 2 is RUNNING, all three chains (NodeGX on FIX-03 since 10:35 CEST)
 
 **Updated 2026-10-23 ~08:30 CEST by the lab session `opennoodl-8c` (Opus 5.5), the one that started test 2.** Read
 PLAN §8's 2026-10-23 08:12 entry first: what changed in the lab and why.
@@ -11,7 +11,7 @@ PLAN §8's 2026-10-23 08:12 entry first: what changed in the lab and why.
   zsh doesn't split a `$list`), never by name.
 - **Code and harness take turns** on `LOCK-web3000` (both apps serve :3000), first come first served; NodeGX runs
   beside them. Don't delete the lock or a `.want-<pid>` file whose pid is alive.
-- **The NodeGX chain waits for two things:** `HOLD-nodegx` gone (the fixer deletes it) **and** `KIT-PROVEN` = `KIT`
+- **FIX-03 is proven and in use** (PLAN §8 10:35; `mock/steps-fix03.json` is the probe to copy for FIX-04). **A NodeGX chain waits for two things:** `HOLD-nodegx` gone (the fixer deletes it) **and** `KIT-PROVEN` = `KIT`
   (the lab writes it). When FIX-03 lands: (1) `M=/Users/Shared/nodegx-lab/own026-mocks/fix03`, `mkdir -p $M $M-grades`,
   `ln -s /Users/Shared/nodegx-lab/own026/t1-nodegx-3 $M/`, `cp ../KIT $M/KIT $M/KIT-PROVEN`; (2) a $0 one-change chain:
   `JUDGE_BIN=$PWD/mock/fake-claude.mjs CLAUDE_BIN=$PWD/mock/fake-claude.mjs node series.mjs t2 nodegx t1-nodegx-3 --changes 1 --rounds $M
