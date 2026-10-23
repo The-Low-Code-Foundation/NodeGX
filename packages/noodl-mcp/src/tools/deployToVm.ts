@@ -47,6 +47,8 @@ import { z } from 'zod';
 import { backendsRoot } from '../backend/client';
 import { ToolError } from '../errors';
 import type { ProjectBinding } from '../project/ProjectBinding';
+import type { ProjectStore } from '../project/ProjectStore';
+import { isUntouchedSkeletonPage } from './createProject';
 import { guarded, jsonResult } from './util';
 
 // ─── the pieces it runs ────────────────────────────────────────────────────────────────────────────────────────────
@@ -177,6 +179,32 @@ export interface DeployToVmRequest {
   sshPort?: number;
   /** The local backend whose function secrets travel; `undefined` = none. */
   secretsFile?: string;
+  /** The project's pages when every one is still create_project's placeholder (P26-SKELSHIP); empty otherwise. */
+  skeletonPages?: string[];
+  /** Ship a project with nothing built anyway (a test fixture). */
+  allowEmpty?: boolean;
+}
+
+/**
+ * P26-SKELSHIP — a deploy put create_project's placeholder in front of every visitor: lingo.nodegx.io read "Lingo —
+ * nothing built yet. Review the plan in docs/ and start when you are ready.", a sentence to the agent, and the person
+ * could not tell whether the deploy had worked. The pages (components with a `Page` node) when every one is that
+ * untouched placeholder; empty when any page has been built, or there are none (the engine refuses that itself).
+ */
+export function untouchedSkeletonPages(store: Pick<ProjectStore, 'listComponents' | 'readComponent'>): string[] {
+  const pages: string[] = [];
+  for (const row of store.listComponents()) {
+    let nodes;
+    try {
+      nodes = store.readComponent(row.path).files.nodes.nodes;
+    } catch {
+      continue;
+    }
+    if (!nodes.some((n) => n.type === 'Page')) continue;
+    if (!isUntouchedSkeletonPage(nodes)) return [];
+    pages.push(row.path);
+  }
+  return pages;
 }
 
 const APP_RE = /^[a-z][a-z0-9-]{1,30}$/;
@@ -294,6 +322,15 @@ export interface DeployDeps {
 
 export async function deployToVm(request: DeployToVmRequest, deps: DeployDeps): Promise<DeployToVmResult> {
   checkRequest(request);
+  if (request.skeletonPages?.length && !request.allowEmpty) {
+    throw fail(
+      'build',
+      `Nothing is built in this project yet: ${request.skeletonPages.join(', ')} ${request.skeletonPages.length === 1 ? 'is' : 'are'} still the placeholder create_project wrote, ` +
+        'whose sentence is addressed to the agent and would be every visitor\'s first page. Build the app first; nothing was sent. ' +
+        '(A test fixture can ship as it is with allow_empty.)',
+      { skeletonPages: request.skeletonPages }
+    );
+  }
   const { app, port, host, domain } = request;
   const secrets = secretsEnv(request.secretsFile);
   const sshArgs = ['-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', '-o', 'StrictHostKeyChecking=accept-new'];
@@ -465,7 +502,8 @@ const deployToVmSchema = {
   domain: z.string().optional().describe('The public address, e.g. app.example.com, whose DNS points at the server: Caddy serves it over https. Omit it to install without one (it then answers on the server only).'),
   ssh_key: z.string().optional().describe('An ssh identity file, if not ssh\'s default.'),
   ssh_port: z.number().int().optional().describe('The server\'s ssh port, if not 22.'),
-  backend_id: z.string().optional().describe('The local backend whose function secrets travel (default: the one this project is bound to).')
+  backend_id: z.string().optional().describe('The local backend whose function secrets travel (default: the one this project is bound to).'),
+  allow_empty: z.boolean().optional().describe('Ship even though no page is built yet (a test fixture). Default: refused.')
 };
 
 interface DeployToVmArgs {
@@ -476,6 +514,7 @@ interface DeployToVmArgs {
   ssh_key?: string;
   ssh_port?: number;
   backend_id?: string;
+  allow_empty?: boolean;
 }
 
 export function registerDeployToVmTools(server: McpServer, binding: ProjectBinding): void {
@@ -509,7 +548,9 @@ export function registerDeployToVmTools(server: McpServer, binding: ProjectBindi
             domain: a.domain,
             sshKey: a.ssh_key,
             sshPort: a.ssh_port,
-            secretsFile: boundBackendSecrets(binding, a.backend_id)
+            secretsFile: boundBackendSecrets(binding, a.backend_id),
+            skeletonPages: untouchedSkeletonPages(store),
+            allowEmpty: a.allow_empty
           },
           { run: runProcess, tar: tarStream, engine: resolveDeployEngine(), provisionScript: resolveProvisionScript(), progress }
         );

@@ -19,11 +19,14 @@ import {
   describeSshFailure,
   resolveDeployEngine,
   resolveProvisionScript,
+  untouchedSkeletonPages,
   type DeployDeps,
   type DeployToVmRequest,
   type RunOptions,
   type RunResult
 } from '../src/tools/deployToVm';
+import { ProjectStore } from '../src/project/ProjectStore';
+import { writeProjectSkeleton } from '../src/tools/createProject';
 import type { ToolErrorPayload } from '../src/tools/responses';
 import { call, connect, copyFixture, reveal } from './helpers';
 
@@ -300,6 +303,42 @@ describe('DEP-002 s4 — the tool on the server', () => {
       expect((await readOnly.client.listTools()).tools.map((t) => t.name)).not.toContain('deploy_to_vm');
     } finally {
       await readOnly.close();
+    }
+  });
+});
+
+describe('P26-SKELSHIP — a project with nothing built is not shipped', () => {
+  it('refuses before the box is touched, naming the placeholder pages and the way on', async () => {
+    const box = fakeBox();
+    const err = await deployToVm(request({ skeletonPages: ['Pages/Home'] }), box.deps).catch((e) => e);
+    expect(err).toBeInstanceOf(ToolError);
+    expect(err.message).toMatch(/^Nothing is built in this project yet: Pages\/Home is still the placeholder/);
+    expect(err.message).toMatch(/nothing was sent/);
+    expect(err.message).toMatch(/allow_empty/);
+    expect(box.calls).toHaveLength(0);
+  });
+
+  it('ships it with allow_empty, and ships a built project without asking (control)', async () => {
+    const fixture = fakeBox();
+    await deployToVm(request({ skeletonPages: ['Pages/Home'], allowEmpty: true }), fixture.deps);
+    expect(fixture.remotes().some((r) => r.includes('bash -s'))).toBe(true);
+    const built = fakeBox();
+    await deployToVm(request({ skeletonPages: [] }), built.deps);
+    expect(built.remotes().some((r) => r.includes('bash -s'))).toBe(true);
+  });
+
+  it('reads the pages: every one the untouched placeholder, or any one built', () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'skelship-'));
+    try {
+      writeProjectSkeleton(dir, 'Lingo');
+      expect(untouchedSkeletonPages(new ProjectStore(dir))).toEqual(['Pages/Home']);
+      const file = path.join(dir, 'components/Pages/Home/nodes.json');
+      const nodes = JSON.parse(fs.readFileSync(file, 'utf8'));
+      nodes.nodes[1].parameters.text = 'Welcome to Lingo';
+      fs.writeFileSync(file, JSON.stringify(nodes));
+      expect(untouchedSkeletonPages(new ProjectStore(dir))).toEqual([]);
+    } finally {
+      fs.rmSync(dir, { recursive: true, force: true });
     }
   });
 });
