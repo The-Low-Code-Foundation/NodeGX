@@ -1,6 +1,39 @@
 # Phase 125 — next session (lane 3 on the BOARD)
 
-Read `README.md` here, then the task you take. State on 2026-10-23 evening:
+Read `README.md` here, then the task you take.
+
+## FIRST: finish the puppy-run fixes (s11, 2026-10-23 late)
+
+Richard's puppy landing page in Claude Desktop (Sonnet 5.5) found six things. Built and committed, NOT pushed, NOT in
+his Desktop yet:
+- **OpenNoodl 58f973f95** — `create_plan` refuses > `STUDIO_BURST` (3) component ops while `studioFor(dir)` is up, and
+  says the order (page shell first, then one section created AND placed per apply); `open_studio` says once per turn,
+  first, never to finish it. Gate `packages/noodl-mcp/tests/p125PuppyBursts.test.ts` 7/7. Bugs P125-PUPPY-ONEAPPLY,
+  P125-PUPPY-TWOPANELS (both open until seen in Desktop). CCN-005 has the s11 section.
+- **nodegx-studio 2185e9c** — hover inside copies, a reusable edited ON its page (`host`), the tree unfolded in place,
+  the header's "⋯". `check:editor` 203/203 (control on f1cc559 also 203/203). SCOPE.md "Changed (P125 …)" under STU-015.
+  Bugs P123-STU-REUSABLENAV and -TOPBAROVERFLOW fixed (OpenNoodl b21eeb342); P123-STU031-COPYBOX worked around in
+  Studio, the kit's `elementsOf` fix still open.
+
+To finish, in order:
+1. **Rebuild the `noodl-mcp` dist from a clean worktree** at the current HEAD (recipe below; never the primary tree),
+   copy `kit-extract.cjs`, and tell Richard to fully quit/reopen Claude Desktop and start a NEW conversation.
+2. **Ask Richard before pushing** OpenNoodl and nodegx-studio.
+3. **P125-PUPPY-TWOPANELS part 2, the "port error" in the second panel:** not reproduced (the project loads clean in a
+   browser; Desktop's logs say nothing). Get his words or screenshot. Then reproduce with two panels at once: the fake
+   host (`tools-fake-host.mjs`) with two iframes on the same proxy/Studio. Note s11 saw TWO servers start in Desktop
+   (`claude-ai` proxy 53272, `local-agent-mode-nodegx` 55849) and ONE `resources/read` — a panel built against one
+   server's proxy port while the other server answers is a candidate.
+4. **Richard's re-run** (his sitting): the puppy page again. Read `~/Library/Logs/Claude/mcp-server-nodegx.log` and
+   the project's file mtimes after: writes should arrive section by section, one panel per turn. If the model fights
+   the refusal or stages 3-op plans that never place anything, that is CCN-005's next cut.
+5. Small leftovers: after Esc up to a For Each (a copy's rows), nothing is boxed (the For Each draws no element of its
+   own — box its rows); `create_component` calls are not budgeted; Studio's `check:editor` step "Set a custom state in a
+   reusable" can fail under load and then the gate HANGS in `rebuilt(n0)` with no timeout (a gate defect: give it one).
+
+Then the lane's order: CCN-003 (show before apply) → CCN-004 → CCN-007.
+
+## State before s11 (2026-10-23 evening)
 
 - **CCN-001 ✅** (eight sessions in one day; Studio renders inside Claude Desktop, the hold holds every tool).
 - **CCN-006 s9 built** (the desktop app offered when the agent's server goes; OpenNoodl 9fcd69f0f, studio 65b1623);
