@@ -1,7 +1,9 @@
 ---
 id: P112-OWN026-SKIPNOTEREPEAT
 title: A write's answer repeats every "this check did not run" note, one per node, on every write
-status: open
+status: fixed
+commit: eee0d410a
+regression: packages/noodl-mcp/tests/own026Thinner.test.ts
 severity: medium
 area: mcp authoring answers (`packages/noodl-mcp/src/tools/author.ts` successPayload / rejectWith, `planTools.ts`)
 kit: mcp

@@ -1,7 +1,9 @@
 ---
 id: P112-OWN026-WIREWRITECOST
 title: A wire costs about 128 characters to write, and the one line read_graph prints it as was refused by every write door
-status: open
+status: fixed
+commit: eee0d410a
+regression: packages/noodl-mcp/tests/own026Thinner.test.ts
 severity: medium
 area: mcp authoring (`packages/noodl-mcp/src/tools/author.ts`, `planTools.ts`, `vocabulary.ts`)
 kit: mcp
