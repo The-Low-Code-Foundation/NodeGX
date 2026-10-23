@@ -1585,9 +1585,11 @@ function wireTableControls(n) {
     ? r.error
       ? `<div class="verdict bad">${esc(r.error)}</div>`
       : r.onlyChecks
-      ? `<div class="verdict good">${checksHtml(r.checks)}</div>`
-      : `<div class="verdict good result">
-          <div class="row"><span class="${r.inBackend ? 'yes' : 'no'}">${r.inBackend ? '✓' : '✗'}</span><span>${r.inBackend ? 'The backend is obeying it now.' : 'The backend is not showing it.'}</span></div>
+      ? `<div class="verdict ${rulesOffIn(r.checks) ? 'bad' : 'good'}">${checksHtml(r.checks)}</div>`
+      : `<div class="verdict ${r.enforced === false ? 'bad' : 'good'} result">
+          <div class="row"><span class="${r.inBackend && r.enforced !== false ? 'yes' : 'no'}">${r.inBackend && r.enforced !== false ? '✓' : '✗'}</span><span>${
+            !r.inBackend ? 'The backend is not showing it.' : r.enforced === false ? 'The backend has it, but is NOT enforcing its rules right now: it keeps nobody out yet.' : 'The backend is obeying it now.'
+          }</span></div>
           <div class="row"><span class="${r.inFile ? 'yes' : 'no'}">${r.inFile ? '✓' : '✗'}</span><span>${r.inFile ? `Saved in the app’s folder (${esc(m.securityFile)}): it holds when the backend restarts.` : 'Not in the app’s folder: a restart would undo it.'}</span></div>
           ${checksHtml(r.checks)}
         </div>`
@@ -1632,15 +1634,20 @@ function wireTableControls(n) {
   };
 }
 
+/** NPMAUDIT-BACKENDMAPCHECK: the server marks every check with `ruleAllows` when the backend's rules are off. */
+const rulesOffIn = (checks) => !!checks?.some((c) => 'ruleAllows' in c);
+
 function checksHtml(checks) {
   if (!checks?.length) return '';
   const by = {};
   for (const c of checks) (by[c.who] ??= {})[c.op] = c;
-  return `<p style="margin-top:10px"><b>The backend’s own answer</b> (a dry run: nothing ran, nothing changed):</p><ul>${Object.entries(by)
-    .map(
-      ([who, ops]) =>
-        `<li><b>${esc(who)}</b>: looking ${ops.find?.allowed ? '<span class="no">let in</span>' : '<span class="yes">turned away</span>'}, adding ${ops.create?.allowed ? '<span class="no">let in</span>' : '<span class="yes">turned away</span>'}</li>`
-    )
+  // With the rules off, what happens comes first and the rule's answer second.
+  const off = rulesOffIn(checks);
+  const said = (c) =>
+    (c?.allowed ? '<span class="no">let in</span>' : '<span class="yes">turned away</span>') +
+    (off && c && !c.ruleAllows ? ' (the rule would turn them away once rules are on)' : '');
+  return `${off ? '<p class="verdict bad" style="margin-top:10px"><b>The backend is NOT enforcing its rules right now</b>, so everyone below is let in, whatever the rule says.</p>' : ''}<p style="margin-top:10px"><b>The backend’s own answer</b> (a dry run: nothing ran, nothing changed):</p><ul>${Object.entries(by)
+    .map(([who, ops]) => `<li><b>${esc(who)}</b>: looking ${said(ops.find)}, adding ${said(ops.create)}</li>`)
     .join('')}</ul>`;
 }
 
@@ -1662,7 +1669,14 @@ async function saveRule(n, reset) {
     select(n.id);
     state.lastResult = r;
     renderPanel();
-    toast(r.unchanged ? 'Nothing to change: it already was like that.' : `Done. The backend obeys the new rule for ${W.tableWords(n.key)}, and it is saved.`, 'good');
+    toast(
+      r.unchanged
+        ? 'Nothing to change: it already was like that.'
+        : r.enforced === false
+          ? `Saved, but the backend is NOT enforcing its rules right now, so the new rule for ${W.tableWords(n.key)} keeps nobody out yet.`
+          : `Done. The backend obeys the new rule for ${W.tableWords(n.key)}, and it is saved.`,
+      r.enforced === false ? 'bad' : 'good'
+    );
     state.flashes[n.id] = { at: performance.now(), ok: true };
   } catch (err) {
     state.lastResult = { error: err.message };

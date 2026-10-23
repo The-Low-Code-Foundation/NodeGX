@@ -7,6 +7,7 @@
 // function that names twenty tables but hands back one person's rows lights up that person's rows.
 
 import { runnable, personName, learnerIds } from './asperson.mjs';
+import { rulesOff } from './rules.mjs';
 
 /** How many different ways one function is asked, per person, at most. Said on screen when it bites. */
 export const MAX_ASKS = 16;
@@ -331,6 +332,11 @@ export async function anonymousReach({ be, app, world, config }) {
  */
 async function directly(be, world, config, principal) {
   const out = {};
+  // NPMAUDIT-BACKENDMAPCHECK: with rules off every table opens to everyone, whatever its rule says.
+  if (await rulesOff(be)) {
+    for (const t of world.schema.tables) out[t.name] = true;
+    return out;
+  }
   const def = config?.defaults ?? {};
   const closed = (r) => r === 'nobody' || r == null || (Array.isArray(r) && r.every(closed));
   await Promise.all(

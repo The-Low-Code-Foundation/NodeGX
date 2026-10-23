@@ -80,6 +80,7 @@ export async function verify({ be, files }, table, entry) {
   const inBackend = sameJson(cfg.collections?.[table] ?? null, entry);
   const inFile = sameJson(file.config?.collections?.[table] ?? null, entry);
   const checks = await dryRuns(be, table);
+  const off = await rulesOff(be);
   const rule = tableRule(cfg, table);
   return {
     inBackend,
@@ -87,24 +88,42 @@ export async function verify({ be, files }, table, entry) {
     etag: live.json.etag,
     fileStamp: file.stamp,
     rule,
+    enforced: !off,
     checks,
     words: [
-      inBackend ? 'The backend is obeying it now.' : 'The backend is NOT showing this rule.',
+      !inBackend ? 'The backend is NOT showing this rule.' : off ? `The backend has the rule, but it is not keeping anyone out: ${off}` : 'The backend is obeying it now.',
       inFile ? `It is saved in the app’s folder (${SECURITY_FILE}), so it holds when the backend restarts.` : `It is NOT in the app’s folder, so a restart would undo it.`,
       `Reading: ${ruleWords(rule.permissions.find)}. Changing: ${ruleWords(rule.permissions.create)}.`
     ]
   };
 }
 
+/**
+ * NPMAUDIT-BACKENDMAPCHECK — the backend's dry run judges the rule as written, whether or not the backend
+ * is enforcing rules at all. With rules off (dev-open) it answered "turned away (rule authenticated)" for
+ * someone not signed in while an anonymous POST created and read a row. So every answer that says who
+ * gets in asks this first: null when the rules are on, else the sentence that has to come before the rule's.
+ */
+export async function rulesOff(be) {
+  const health = await be.health();
+  if (health?.security?.enforced && !health.security.devOpen) return null;
+  return 'The backend is NOT enforcing its rules right now, so it lets everyone in, whatever the rule says.';
+}
+
 /** The backend's own dry run, for three kinds of person, reading and adding. Nothing runs. */
 export async function dryRuns(be, table) {
+  const off = await rulesOff(be);
   const people = await samplePeople(be);
   const out = [];
   for (const p of people) {
     for (const op of ['find', 'create']) {
       try {
         const r = await be.post('/admin/permissions/check', { principal: p.principal, collection: table, op });
-        out.push({ who: p.words, op, allowed: !!r.allowed, reason: r.reason ?? '' });
+        if (off) {
+          // What happens is "let in"; what the rule would do once rules are on comes second.
+          const once = r.allowed ? 'The rule would let them in too.' : 'The rule would turn them away once rules are on.';
+          out.push({ who: p.words, op, allowed: true, ruleAllows: !!r.allowed, reason: `${off} ${once}${r.reason ? ` (${r.reason})` : ''}` });
+        } else out.push({ who: p.words, op, allowed: !!r.allowed, reason: r.reason ?? '' });
       } catch (e) {
         out.push({ who: p.words, op, allowed: null, reason: e.message });
       }
