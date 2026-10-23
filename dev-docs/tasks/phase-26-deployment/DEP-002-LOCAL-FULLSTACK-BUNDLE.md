@@ -346,3 +346,73 @@ assets), not this layer's.
   `node start.js --port <p> --no-admin` (loopback, Caddy in front), the secrets file unchanged, and
   the no-domain case is served by the backend itself. Then `deploy_to_vm` in `@nodegx/mcp`
   (`dist/backend/folder/` already ships with this commit's prepack).
+
+## Session 3 (2026-10-23, Opus 5.5): the folder goes to a VM
+
+**Built.** OWN-016's two scripts (`dev-docs/tasks/phase-112-your-own-nodegx/own-016/`) ship the `--full-stack`
+folder whole, in place of a site plus a loose `cli.js` from the `@nodegx/mcp` tarball.
+
+- **`ship-to-vm.sh [--ssh-key f] [--ssh-port n] [--preview pkg|tgz] <project> <local-backend|-> <user@host> <app>
+  <port> [domain]`.** `nodegx-deploy --full-stack` writes the folder (`NODEGX_DEPLOY_CMD` runs an engine that is not
+  on npm yet). A cloud function the engine could not build refuses the ship by name: it would not be in the folder.
+  The functions come from the project, not the local backend; only its `secrets.json` travels, over ssh stdin, and
+  `-` means none. `--mcp-tgz` is gone (exit 2 with a sentence). With no domain, the last line is the `ssh -L` that
+  shows the app.
+- **`provision-app.sh`.** The folder → `/opt/<app>/` (rsync `--delete`, root-owned, read-only to the service under
+  `ProtectSystem=strict`), the data → `/var/lib/<app>/data/`. The unit runs `<command -v node> /opt/<app>/start.js
+  --port P --host 127.0.0.1 --data-dir /var/lib/<app>/data --backend-id <app> --no-admin`, so start.js installs the
+  functions and, on the first start, the rules. Caddy proxies everything but `_admin|admin|executions|metrics` to the
+  backend, which serves the app and answers `/nodegx-config.json` with the origin the browser used: the
+  hand-written list of route families is gone. With no domain (`CADDY=off`) the backend serves the app on
+  127.0.0.1. It checks for `/` 200 beside `/health`, prints start.js's and SB-015's lines from the journal, and
+  removes `/srv/<app>` (the earlier layout's site) once no drop-in can point at it.
+- **`start.js --data-dir <dir>`** (both forms, resolved from the cwd, stripped from what reaches the backend): the
+  functions are installed there and no second `data/` appears in the folder.
+
+**Found (two ledger rows).**
+- 🔴 **P26-VMOPEN (high, open): the earlier VM layout ran public with every access rule off, and lingo.nodegx.io
+  does now.** Its unit had no `--enforce-rules`, so the first start minted `devOpen: true`. BAK-003's interlock
+  refuses dev-open only on a non-loopback bind, and the unit binds 127.0.0.1 behind Caddy. Measured: in the
+  container, a visitor's `GET /classes/_User` returned the signed-up account's email. Live, lingo's `/health` says
+  `devOpen: true, enforced: false` (0 accounts there; contents not read). A new layout's first start would mint
+  `devOpen: false`, but a migrated box KEEPS its `security.json`, so `--enforce-rules` alone did not close it
+  (measured: still 200 after the first migration). Now **`start.js` refuses a data folder with `devOpen: true`** in
+  a sentence, and **`provision-app.sh` refuses before writing anything** and prints the one `sed … && systemctl
+  restart` that closes it. lingo needs Richard to run that on its box (SSH that changes a server is classifier-refused).
+- **P26-VMNODE (medium):** the unit named `/usr/bin/node`, so a box with Node in `/usr/local/bin` (the nodejs.org
+  tarball) failed with 203/EXEC after the version check passed. The unit now uses `command -v node`.
+
+**Graded.**
+- `nodegx-backend/tests/dep-002-full-stack-folder.test.ts` 11 rows (+2): `--data-dir` in both forms (one
+  `--data-dir` reaches the backend, the functions are installed there, no `data/` in the folder); the dev-open refusal
+  with its control (rules on → starts), by default and by `--data-dir`. **Four mutants, all caught** (`--data-dir`
+  passed through, functions into the default `data/`, the `=` form unread, no refusal call).
+  `noodl-preview/tests/dep-002-full-stack-deploy.test.ts` 8/8.
+- **Driven, against a throwaway VM:** an Ubuntu 24.04 container (systemd, sshd, Caddy 2.6.2, Node 22.13.1 in
+  `/usr/local/bin`), ssh on 127.0.0.1:22722 and https on :8443, the scripts run as a person would. `members-area`
+  with a domain (`shiptest.localhost`): 8 functions installed, the project's rules applied, a stand-in secret in the
+  process environment, `nodegx-config.json` = `https://shiptest.localhost:8443`, a deep link 200, `/_admin`,
+  `/admin/x`, `/metrics` 404, `myStanding` 200, `decideMembership` 403, sign-up 403 (the project turns it off),
+  headless Chromium 0 page errors. `todo-list` with no domain, through the printed `ssh -L`: **Create account**
+  `POST /users 201`, a task `POST /classes/Task 201`. A reship over the running app: `security.json`
+  byte-identical, a fresh browser `POST /login 200` and the task still there. Migration: an app provisioned with the
+  committed OLD script, an account signed up through its Caddy, then the new ship. After that ship (before the
+  refusal existed) it was still dev-open, and the refusal was written. With the refusal: refused, nothing changed,
+  the old app still 200. After the printed command and a ship: visitor 403 on `_User` and `Task`, the old account
+  signs in, a signed-in read 200, `/health` `enforced: true`, `/srv/shipold` gone.
+
+**Left for the next session.**
+- **A project whose rules change cannot get them onto the box by reshipping.** SB-015 installs the project's rules
+  on the first start only and prints its notice every time after. That is right for a person's laptop. Is it right
+  for `deploy_to_vm`, where the project IS the source? A ruling for Richard before the tool is written.
+- `deploy_to_vm` in `@nodegx/mcp`: these two scripts are its spec, and the container is its test bed (Dockerfile
+  in the session notes below).
+- No-domain public access (`--host 0.0.0.0` on a bare IP) was not offered: the backend's `requiresAuth` applies to
+  a non-loopback bind, and with no TLS the session tokens travel in clear text.
+
+Throwaway VM, for the next session: `FROM ubuntu:24.04`; apt `systemd systemd-sysv openssh-server curl rsync
+ca-certificates iproute2 xz-utils caddy`; Node from `nodejs.org/dist/v22.13.1/node-v22.13.1-linux-arm64.tar.xz` into
+`/usr/local`; `/etc/caddy/Caddyfile` = `{ admin localhost:2019 }` + `import /etc/caddy/conf.d/*`; an ed25519 key in
+`/root/.ssh/authorized_keys`; `systemctl enable ssh caddy`; `CMD /sbin/init`. Run with `--privileged
+--cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup:rw -p 127.0.0.1:22722:22 -p 127.0.0.1:8443:443`. Curl and Chromium
+reach `<app>.localhost:8443` (`--resolve`, `--host-resolver-rules`, certificate errors ignored: Caddy's local CA).

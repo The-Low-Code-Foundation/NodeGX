@@ -5,6 +5,8 @@
  *   node start.js                first free port from 3000 up
  *   node start.js --port 8090    exactly 8090, or stop and say it is taken
  *   PORT=8090 node start.js      the same, for hosts that set PORT
+ *   node start.js --data-dir /var/lib/my-app/data   keep the data outside this folder (a server
+ *                                whose app folder is read-only; a mounted volume)
  *
  * Every other option goes to the backend as it is (`node backend/cli.js help` lists them).
  *
@@ -21,12 +23,16 @@
  *   3. Installs the cloud functions this deploy carries (`backend/workflows/`) into `data/`,
  *      replacing the ones the previous deploy installed. The deploy is their source, as a push from
  *      the editor is; a function deleted from the project is gone after the next deploy.
- *   4. Runs the backend in this process with the app beside its API (`--serve-app`) and the access
+ *   4. Refuses a data folder whose access rules are switched off (`"devOpen": true`), which is how
+ *      a development backend's data arrives — and the backend's own interlock only refuses that on
+ *      a public bind, while this app is usually behind a proxy on 127.0.0.1.
+ *   5. Runs the backend in this process with the app beside its API (`--serve-app`) and the access
  *      rules enforced from the first record (`--enforce-rules`). When the project ships its own
  *      rules (`backend/nodegx.security.json`), they are installed on the FIRST start, and only then
  *      — a backend that already has `data/security.json` keeps it.
  *
- * `data/` is the app's: its database, uploads, the admin credential. A deploy never writes there.
+ * `data/` (or the `--data-dir` given) is the app's: its database, uploads, the admin credential. A
+ * deploy never writes there.
  */
 'use strict';
 
@@ -37,7 +43,7 @@ const path = require('path');
 const HERE = __dirname;
 const APP = path.join(HERE, 'app');
 const BACKEND = path.join(HERE, 'backend');
-const DATA = path.join(HERE, 'data');
+const DEFAULT_DATA = path.join(HERE, 'data');
 const POLICY_FILE = 'nodegx.security.json';
 const WORKFLOW_SUFFIX = '.workflow.json';
 
@@ -65,18 +71,36 @@ function checkNode() {
   }
 }
 
-/** `--port N`, `--port=N` and `-p N` are this script's; everything else is the backend's. */
-function withoutPortArgs(argv) {
+/** The options this script reads itself; everything else is the backend's. */
+const OWN_OPTIONS = ['--port', '-p', '--data-dir'];
+
+/** `--port N`, `--port=N`, `-p N` and `--data-dir` (either form) are this script's. */
+function withoutOwnArgs(argv) {
   const rest = [];
   for (let i = 0; i < argv.length; i++) {
-    if (argv[i] === '--port' || argv[i] === '-p') {
+    if (OWN_OPTIONS.includes(argv[i])) {
       i++;
       continue;
     }
-    if (argv[i].startsWith('--port=')) continue;
+    if (OWN_OPTIONS.some((option) => argv[i].startsWith(`${option}=`))) continue;
     rest.push(argv[i]);
   }
   return rest;
+}
+
+/**
+ * `--data-dir <dir>` or `--data-dir=<dir>`, resolved from where the command was run; `data/` beside
+ * this file when it is not given. The functions are installed THERE and the backend keeps its
+ * records there, so a folder whose data lives elsewhere never grows a second `data/`.
+ */
+function readDataDir(argv) {
+  for (let i = 0; i < argv.length; i++) {
+    const value = argv[i] === '--data-dir' ? argv[i + 1] : argv[i].startsWith('--data-dir=') ? argv[i].slice(11) : null;
+    if (value === null) continue;
+    if (!value) throw new Error('--data-dir wants a folder, and got nothing.');
+    return path.resolve(value);
+  }
+  return DEFAULT_DATA;
 }
 
 // ── The port: `serve.js`'s rule, copied ─────────────────────────────────────────────────────────
@@ -153,9 +177,9 @@ async function choosePort(argv, env) {
  * Replace the installed cloud functions with the ones this deploy carries. Returns the files: one
  * per project (`<project>.workflow.json`), each holding all of its functions.
  */
-function installFunctions() {
+function installFunctions(dataDir) {
   const from = path.join(BACKEND, 'workflows');
-  const to = path.join(DATA, 'workflows');
+  const to = path.join(dataDir, 'workflows');
   const carried = fs.existsSync(from) ? fs.readdirSync(from).filter((f) => f.endsWith(WORKFLOW_SUFFIX)) : [];
   if (carried.length === 0 && !fs.existsSync(to)) return carried;
   fs.mkdirSync(to, { recursive: true });
@@ -164,6 +188,32 @@ function installFunctions() {
   }
   for (const file of carried) fs.copyFileSync(path.join(from, file), path.join(to, file));
   return carried;
+}
+
+/**
+ * 🔴 A data folder with `"devOpen": true` is refused. Dev-open turns every access rule off, and the
+ * backend's interlock (BAK-003) refuses it only when the bind is not loopback — but a deployed
+ * folder normally binds 127.0.0.1 with a proxy in front, so the interlock never fires and the app
+ * is public with no rules at all (P26-VMOPEN: OWN-016's VM layout ran exactly that way). A first
+ * start mints `devOpen: false` (`--enforce-rules`), so only data brought from elsewhere trips this.
+ * An unreadable file is left to the backend, which refuses it in its own words.
+ */
+function refuseDevOpen(dataDir) {
+  const file = path.join(dataDir, 'security.json');
+  let config;
+  try {
+    config = JSON.parse(fs.readFileSync(file, 'utf8'));
+  } catch {
+    return;
+  }
+  if (!config || config.devOpen !== true) return;
+  fail(
+    `This app's access rules are switched off: ${file} has "devOpen": true. With them off, anyone who can ` +
+      'reach the app reads and changes every record, every account included, so a deployed app does not start ' +
+      'that way.\n' +
+      'That data folder most likely came from a development backend. Set "devOpen": false in that file and ' +
+      'start this again; the rules written in the file then apply.'
+  );
 }
 
 /** The project's name, as the deploy wrote it into `package.json`; `/health` reports it. */
@@ -187,25 +237,28 @@ async function main() {
 
   const argv = process.argv.slice(2);
   let port;
+  let dataDir;
   try {
+    dataDir = readDataDir(argv);
     port = await choosePort(argv, process.env);
   } catch (error) {
     fail(error && error.message ? error.message : String(error));
   }
 
-  fs.mkdirSync(DATA, { recursive: true });
-  const functions = installFunctions();
+  fs.mkdirSync(dataDir, { recursive: true });
+  refuseDevOpen(dataDir);
+  const functions = installFunctions(dataDir);
   process.stdout.write(
     functions.length
       ? `[start] cloud functions: installed ${functions.map((f) => `backend/workflows/${f}`).join(', ')}\n`
       : '[start] cloud functions: none in this deploy\n'
   );
 
-  const args = ['serve', '--data-dir', DATA, '--port', String(port), '--serve-app', APP, '--enforce-rules'];
+  const args = ['serve', '--data-dir', dataDir, '--port', String(port), '--serve-app', APP, '--enforce-rules'];
   if (fs.existsSync(path.join(BACKEND, POLICY_FILE))) args.push('--project-dir', BACKEND);
   const name = appName();
   if (name) args.push('--backend-name', name);
-  args.push(...withoutPortArgs(argv));
+  args.push(...withoutOwnArgs(argv));
 
   const backend = require(path.join(BACKEND, 'cli.js'));
   await backend.main(args);

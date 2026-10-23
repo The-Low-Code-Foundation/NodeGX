@@ -209,6 +209,41 @@ describe('DEP-002 s2 — start.js starts the backend with the app beside it', ()
     expect(fs.readFileSync(path.join(outDir, 'data', 'local.db'), 'utf8')).toBe('the records');
   });
 
+  it('keeps the data in the --data-dir given (a server with a read-only app folder), never in a second data/', () => {
+    const { outDir } = pack();
+    for (const form of ['spaced', 'equals']) {
+      const dataDir = path.join(fs.realpathSync(scratch('dep002-var-')), 'data');
+      const flag = form === 'spaced' ? ['--data-dir', dataDir] : [`--data-dir=${dataDir}`];
+      const { run, started } = start(outDir, [...flag, '--no-admin']);
+      expect(run.status).toBe(0);
+      const args = started as string[];
+      expect(args.filter((a) => a === '--data-dir' || a.startsWith('--data-dir='))).toEqual(['--data-dir']);
+      expect(valueOf(args, '--data-dir')).toBe(dataDir);
+      expect(args).toContain('--no-admin');
+      expect(fs.readdirSync(path.join(dataDir, 'workflows'))).toEqual(['todo-1234.workflow.json']);
+      expect(fs.existsSync(path.join(outDir, 'data'))).toBe(false);
+    }
+  });
+
+  it('refuses a data folder whose access rules are switched off (devOpen: true), and starts nothing', () => {
+    const { outDir } = pack();
+    const data = path.join(outDir, 'data');
+    fs.mkdirSync(data, { recursive: true });
+    const security = path.join(data, 'security.json');
+    // The control: the same file with the rules on starts.
+    fs.writeFileSync(security, JSON.stringify({ version: 1, devOpen: false, collections: {} }));
+    expect(start(outDir).started).not.toBeNull();
+    fs.writeFileSync(security, JSON.stringify({ version: 1, devOpen: true, collections: {} }, null, 2));
+    for (const args of [[], ['--data-dir', data]]) {
+      const { run, started } = start(outDir, args);
+      expect(run.status).toBe(1);
+      expect(run.stderr).toContain(`access rules are switched off: ${security} has "devOpen": true`);
+      expect(started).toBeNull();
+    }
+    // The file is the operator's: a refusal leaves it as it was.
+    expect(fs.readFileSync(security, 'utf8')).toContain('"devOpen": true');
+  });
+
   it('says which Node it needs when this one cannot keep the data, and starts nothing', () => {
     const { outDir } = pack();
     // The control: the same folder starts under this Node.
