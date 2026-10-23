@@ -399,7 +399,8 @@ describe('EXP-011 §75 §B — the translation', () => {
     });
     expectParses(app);
     const page = notesFile(app);
-    expect(page).toContain("import { parseCsv } from '../lib/parse';");
+    // EXP-022 S9 (P18-S106-PARSERAISE): the node's raise earns its failure helper beside it.
+    expect(page).toContain("import { parseCsv, parseCsvFailure } from '../lib/parse';");
     // `true` and `,` are initialize's — the panel the author never opened.
     // A text with a newline prints as a double-quoted literal (`tsLiteral`); `true` and `,` are initialize's.
     expect(page).toContain('parseCsv("name,team\\nann,red\\nbo,blue", true, \',\', \'count\')');
@@ -466,7 +467,8 @@ describe('EXP-011 §75 §B — the translation', () => {
     });
     expectParses(app);
     const page = notesFile(app);
-    expect(page).toContain("import { parseXml } from '../lib/parse';");
+    // EXP-022 S9 (P18-S106-PARSERAISE): the node's raise earns its failure helper beside it.
+    expect(page).toContain("import { parseXml, parseXmlFailure } from '../lib/parse';");
     // `@`, `''`, `true`, 5 MB: initialize's, and the catalog's declared defaults agree with them node by node.
     expect(page).toContain("parseXml('<a href=\"x\">hi</a>', '@', '', true, 5242880, 'error')");
     expect(manifestOf(app).dependencies['fast-xml-parser']).toBe('4.5.7');
@@ -567,7 +569,8 @@ describe('EXP-011 §75 §C — sheet-desk, a project a person could have built, 
   it('nothing on the Home page is refused, and the four helpers are all called', () => {
     expect(app.notes.filter((n) => n.startsWith('Pages/Home'))).toEqual([]);
     expect(home).not.toContain('TODO(export)');
-    expect(home).toContain("import { parseCsv, parseFeed, parseXml, toCsv } from '../lib/parse';");
+    // EXP-022 S9 (P18-S106-PARSERAISE): each parser's raise earns its failure helper; To CSV raises nothing.
+    expect(home).toContain("import { parseCsv, parseCsvFailure, parseFeed, parseFeedFailure, parseXml, parseXmlFailure, toCsv } from '../lib/parse';");
     expect(app.files[PARSE_LIB_PATH]).toBeDefined();
     expect(manifestOf(app).dependencies['fast-xml-parser']).toBe('4.5.7');
   });

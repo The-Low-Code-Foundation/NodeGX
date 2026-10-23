@@ -138,12 +138,14 @@ function __require(name) {
   if (!factory) throw new Error('The app carries no module ' + name);
   var module = { exports: {} };
   __loaded[name] = module;
-  factory(module.exports, __require);
+  // EXP-022 S9. \`module\` too: a package carried as it ships (fast-xml-parser) sets \`module.exports\` whole.
+  factory(module.exports, __require, module);
   return module.exports;
 }
-// React's hooks (the web session hook imports them); the Swift app reads the session through \`Session\` instead.
+// React's hooks (the web session hook and the error channel's boundary import them); the Swift app reads the session
+// through \`Session\` and keeps its boundaries in \`AppErrors\` instead.
 __define('react', function (exports) {
-  ['useMemo', 'useSyncExternalStore', 'useState', 'useEffect', 'useRef', 'useCallback'].forEach(function (name) {
+  ['useMemo', 'useSyncExternalStore', 'useState', 'useEffect', 'useRef', 'useCallback', 'useLayoutEffect', 'useReducer'].forEach(function (name) {
     exports[name] = function () { throw new Error("React's " + name + ' does not run in the Swift app'); };
   });
 });
@@ -714,5 +716,62 @@ public final class StreamNode: ObservableObject {
   /// The Action Handler's registration: what it registers under, and whether a setter asked for it again.
   public var registrationKey: String { node.forProperty("registrationKey").toString() }
   public var setupRequested: Bool { node.forProperty("setupRequested").toBool() }
+}
+
+/// EXP-022 S9. An On App Error (the web export's \`useAppError\`): it hears every error raised on the app's channel (the
+/// web export's own \`lib/errors\`) while its view is on screen. A Filter is a code prefix; empty catches everything. Its
+/// values describe the latest error it accepted, and are current before its Error chain runs. Every boundary hears every
+/// error: nothing claims one.
+public final class AppErrorBoundary: ObservableObject {
+  @Published public private(set) var last: [String: Any]? = nil
+  private var filter: Any? = nil
+  private var onError: () -> Void = {}
+  private var unsubscribe: JSValue?
+
+  public init() {
+    let heard: @convention(block) (JSValue) -> Void = { [weak self] error in self?.hear(error) }
+    unsubscribe = Scripts.shared.module("lib/errors").invokeMethod("subscribeAppErrors", withArguments: [JSValue(object: heard, in: Scripts.shared.context)!])
+  }
+
+  deinit { _ = unsubscribe?.call(withArguments: []) }
+
+  /// Its Filter, as this draw has it.
+  public func inputs(filter: Any?) { self.filter = filter }
+
+  /// The chain wired off its Error, as this draw has it.
+  public func on(_ error: @escaping () -> Void) { onError = error }
+
+  private func hear(_ error: JSValue) {
+    // The hook's own coercion: undefined and null clear the Filter, anything else is String(value); empty catches all.
+    if let filter, !(filter is NSNull) {
+      let prefix = Scripts.shared.string(filter)
+      if !prefix.isEmpty && !error.forProperty("code").toString().hasPrefix(prefix) { return }
+    }
+    last = Scripts.shared.swift(error) as? [String: Any]
+    onError()
+  }
+
+  /// A value output: Message, Code, Node Id, Component Name, Node Type, or the Error Object (the record itself).
+  public func read(_ field: String) -> Any? {
+    field == "errorObject" ? last : last?[field]
+  }
+}
+
+/// EXP-022 S9. The app's error channel, from Swift.
+public enum AppErrors {
+  /// P18-S106-PARSERAISE. A parser's failed parse, raised as the node raises it: the web export's own \`<parser>Failure\`
+  /// for these inputs, and when it failed, \`raiseAppError\` with the node's code, id, type and component.
+  public static func raiseParse(_ failure: String, _ args: [Any?], code: String, nodeId: String, nodeType: String, componentName: String) {
+    guard let failed = Scripts.shared.module("lib/parse").invokeMethod(failure, withArguments: args.map { Scripts.shared.js($0) }), failed.isObject else { return }
+    let error: [String: Any?] = [
+      "code": code,
+      "message": Scripts.shared.swift(failed.forProperty("message")),
+      "nodeId": nodeId,
+      "nodeType": nodeType,
+      "componentName": componentName,
+      "detail": Scripts.shared.swift(failed.forProperty("detail"))
+    ]
+    _ = Scripts.shared.module("lib/errors").invokeMethod("raiseAppError", withArguments: [Scripts.shared.js(error)])
+  }
 }
 `;

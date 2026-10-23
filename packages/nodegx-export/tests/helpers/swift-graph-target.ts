@@ -35,7 +35,7 @@ import { planProject, type ComponentPlan } from '../../src/analyze/plan';
 import { emitSwiftApp } from '../../src/emit/swift/emitSwift';
 import { ident } from '../../src/emit/swift/view';
 import type { ComponentIR, ExportIR } from '../../src/ir/types';
-import { drivenInputs, exportGraphTarget, graphComponent, probeProject } from './node-spec-target';
+import { asRuntimeHarnessNames, drivenInputs, exportGraphTarget, graphComponent, probeProject } from './node-spec-target';
 import { World } from '../../../nodegx-node-spec/src/world';
 import { specFor } from '../../../nodegx-node-spec/src/nodes';
 import { rawString, writePackage } from './export-swift-arm';
@@ -332,6 +332,8 @@ interface SwiftGraphHandle extends Handle {
 
 interface ReplayGraph {
   ids: string[];
+  /** EXP-022 S9. Each node's type, for the React target's one rename (`asRuntimeHarnessNames`). */
+  types: Record<string, string>;
   live: Set<string>;
   play: SwiftGraphPlay;
   lifted: string[];
@@ -376,7 +378,7 @@ export function swiftGraphTarget(verdicts: readonly SwiftGraphVerdict[], run: Sw
       const play = run!.plays.get(v.name);
       if (!play) throw new Error(`the Swift run holds no play for ${JSON.stringify(v.name)}`);
       if (play.error) throw new Error(play.error);
-      const g: ReplayGraph = { ids: Object.keys(nodes), live: new Set(Object.keys(nodes)), play, lifted: [...v.lifted.keys()], latest: {}, recorded: {}, settles: 0, events: {}, driven: v.driven };
+      const g: ReplayGraph = { ids: Object.keys(nodes), types: Object.fromEntries(Object.entries(nodes).map(([id, n]) => [id, n.type])), live: new Set(Object.keys(nodes)), play, lifted: [...v.lifted.keys()], latest: {}, recorded: {}, settles: 0, events: {}, driven: v.driven };
       const handles: Record<string, SwiftGraphHandle> = {};
       for (const id of g.ids) {
         g.events[id] = [];
@@ -417,7 +419,7 @@ export function swiftGraphTarget(verdicts: readonly SwiftGraphVerdict[], run: Sw
         for (const port of ports) {
           const output = `${id}.${port}`;
           if (!(output in g.latest) || g.latest[output] === undefined) continue;
-          const value = canonicalise(g.latest[output]);
+          const value = canonicalise(asRuntimeHarnessNames(g.types[id], port, g.latest[output], g.latest[`${id}.nodeId`]));
           const k = JSON.stringify(value);
           if (g.recorded[output] === k) continue;
           g.recorded[output] = k;

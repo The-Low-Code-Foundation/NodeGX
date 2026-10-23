@@ -26,6 +26,7 @@ import type { CatalogIndex } from '../../catalog';
 import { INPUT_PULSE_TS_TYPE, STREAM_NODES, variableSeedAction, type ComponentPlan, type HandlerAction, type JsFunctionPlan, type ProjectPlan, type StateVarPlan, type StreamPlan, type ValueExpr } from '../../analyze/plan';
 import { computeNodeStyle } from '../style';
 import { camelCase } from '../naming';
+import { isParseHelper } from '../parseLib';
 import { swiftStyle, type StackLayout } from './modifiers';
 import type { Theme } from './theme';
 import { functionId } from './scripts';
@@ -164,7 +165,6 @@ const UNPRINTED: Array<[keyof ComponentPlan, string]> = [
   ['drags', 'a Drag'],
   ['pageStacks', 'a Component Stack'],
   ['runTasks', 'a Run Tasks'],
-  ['appErrors', 'an On App Error boundary'],
   ['screenResolutions', 'a Screen Resolution'],
   ['repeaterItems', "a Repeater Item's Added chain"],
   ['styleSheets', 'a CSS Definition']
@@ -207,6 +207,10 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
   const lose = (nodeId: string, what: string) => {
     losses.push({ component: plan.path, nodeId, label: nodeById.get(nodeId)?.authoredLabel, what });
   };
+  /** EXP-022 S9 (P18-S106-PARSERAISE). The parsers this view reads, by node: each raises a failed parse, as React's do. */
+  const parseRaisers = new Map<string, { fn: string; nodeId: string; nodeType: string; code: string; args: ValueExpr[] }>();
+  /** EXP-022 S9. The On App Error boundaries, by node: React's `useAppError` handles, as `AppErrorBoundary`s. */
+  const boundaries = new Map(plan.appErrors.map((b) => [b.nodeId, b]));
 
   const stateByName = new Map(plan.stateVars.map((s) => [s.name, s]));
   const stateBySetter = new Map(plan.stateVars.map((s) => [s.setterName, s]));
@@ -331,6 +335,20 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       case 'session-get':
         usesSession = true;
         return `session.read(${swiftString(e.field)})`;
+      // EXP-022 S9. A parser's output: the web export's own `lib/parse`, called in the app's JavaScriptCore context (it
+      // memoises one parse per inputs, as on the web). The other library helpers are not carried yet.
+      case 'util-call': {
+        if (!isParseHelper(e.fn)) return undefined;
+        const args = e.args.map((a) => expr(a, scope));
+        if (args.some((a) => a === undefined)) return undefined;
+        if (e.raiser !== undefined) parseRaisers.set(e.raiser.nodeId, { fn: e.fn, ...e.raiser });
+        return `Scripts.shared.call(module: "lib/parse", ${swiftString(e.fn)}, [${args.join(', ')}])`;
+      }
+      // EXP-022 S9. An On App Error's value output: off the boundary's latest accepted error (React's `handle.last`).
+      case 'app-error-out': {
+        const boundary = boundaries.get(e.nodeId);
+        return boundary ? `${ident(boundary.local)}.read(${swiftString(e.field)})` : undefined;
+      }
       case 'outcome-error':
         // EXP-011 §90. Inside the catch, the message local; elsewhere the node's Error row.
         if (e.viaState !== undefined) return stateByName.has(e.viaState) ? ident(e.viaState) : undefined;
@@ -1193,6 +1211,20 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
     if (host.disposes) streamDisposals.push(`.onDisappear { ${local}.call("dispose") }`);
   }
 
+  /**
+   * EXP-022 S9. The On App Error boundaries, as React's `useAppError` runs them: one per placement, listening to the app's
+   * error channel (the web export's own `lib/errors`) from the moment the view is made until it goes; its Filter and its
+   * Error chain set at every draw (the hook's refs). Its values are current before the chain runs.
+   */
+  for (const boundary of plan.appErrors) {
+    const local = ident(boundary.local);
+    streamMembers.push(`  /// ${boundary.label}: hears every error raised in the app while this view is on screen.`, `  @StateObject var ${local} = AppErrorBoundary()`);
+    const filter = boundary.filter === undefined ? 'nil' : expr(boundary.filter, TOP);
+    if (filter === undefined) lose(boundary.nodeId, `its Filter reads a ${boundary.filter!.kind} expression, which the Swift target does not print yet`);
+    else if (filter !== 'nil') streamLines.push(`    let _ = ${local}.inputs(filter: ${filter})`);
+    if (boundary.listener?.length) streamLines.push(`    let _ = ${local}.on(${closure(boundary.nodeId, boundary.listener, '    ')})`);
+  }
+
   // The logic components it places: one view each, drawing nothing, in the order React calls their hooks.
   const hookViews: string[][] = [];
   for (const id of plan.hookCalls) {
@@ -1210,6 +1242,22 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
   // ---- the struct -----------------------------------------------------------------------------------------------
 
   const tree = plan.rootId ? print(plan.rootId, '    ') : [];
+
+  // EXP-022 S9 (P18-S106-PARSERAISE). Each parser read anywhere above raises its failed parse on the app's channel, once
+  // per change of its inputs, as React's effect does. Gathered after the tree, the last place a read can print.
+  const raiseEffects: string[] = [];
+  for (const raiser of parseRaisers.values()) {
+    const args = raiser.args.map((a) => expr(a, TOP));
+    if (args.some((a) => a === undefined)) {
+      lose(raiser.nodeId, 'its failed parse is not raised on the app error channel: an input is not printed');
+      continue;
+    }
+    const label = nodeById.get(raiser.nodeId)?.authoredLabel ?? raiser.nodeType.replace(/^net\.noodl\.Parse/, 'Parse ');
+    raiseEffects.push(
+      `// ${label} raises a failed parse on the app error channel, beside its Error output.\n` +
+        `    .onChange(of: Same(${args.join(', ')}), initial: true) { _, _ in AppErrors.raiseParse(${swiftString(`${raiser.fn}Failure`)}, [${args.join(', ')}], code: ${swiftString(raiser.code)}, nodeId: ${swiftString(raiser.nodeId)}, nodeType: ${swiftString(raiser.nodeType)}, componentName: ${swiftString(plan.legacyPath)}) }`
+    );
+  }
 
   const members: string[] = [];
   if (plan.docComment) members.push(`  // ${plan.docComment.split('\n')[0]}`);
@@ -1311,7 +1359,7 @@ export function printView(plan: ComponentPlan, ctx: SwiftViewContext): PrintedVi
       : tree.length
         ? tree
         : ['    EmptyView()'];
-  const modifiers = [...effectsBefore, ...(!plan.hook && logicView ? [`.background { ${logicView} }`] : []), ...streamSetups, ...effects, ...streamDisposals];
+  const modifiers = [...effectsBefore, ...(!plan.hook && logicView ? [`.background { ${logicView} }`] : []), ...streamSetups, ...effects, ...raiseEffects, ...streamDisposals];
   // EXP-019 (session 133). What a kept Function's body writes or sends after its run has returned (a timer, a listener)
   // arrives as the running app's does: into its row, and its signals' chains. Set at every render, as React's is.
   const lateLines: string[] = [];

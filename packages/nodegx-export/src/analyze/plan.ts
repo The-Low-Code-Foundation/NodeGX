@@ -1427,6 +1427,12 @@ const UTIL_NODES: Record<
      */
     previous?: { kept: string; instead: string };
     /**
+     * P18-S106-PARSERAISE — the code a failed parse raises on the app error channel under (the node file's
+     * `PARSE_ERROR_CODE`), beside its own Error output. Every call carries it as `raiser`; the printer raises once
+     * per node from an effect over the node's inputs.
+     */
+    raises?: string;
+    /**
      * `Color Blend` only (EXP-011 §38) — a numbered family passed as **variadic arguments** after
      * `args`, index-aligned and with a hole printed as `undefined`. Unlike `numbered`, a wired
      * entry is fine here: the family is a list of values the call receives at run time, not a
@@ -1498,7 +1504,8 @@ const UTIL_NODES: Record<
     outputs: ['items', 'count', 'error'],
     select: true,
     signals: PARSE_SIGNAL_SENTENCES,
-    previous: { kept: 'Items and Count', instead: 'no Items and a Count of 0' }
+    previous: { kept: 'Items and Count', instead: 'no Items and a Count of 0' },
+    raises: 'parse-csv/parse-failed'
   },
   'net.noodl.ToCSV': {
     fn: 'toCsv',
@@ -1524,7 +1531,8 @@ const UTIL_NODES: Record<
     outputs: ['result', 'error', 'errorCode'],
     select: true,
     signals: PARSE_SIGNAL_SENTENCES,
-    previous: { kept: 'Result', instead: 'no Result' }
+    previous: { kept: 'Result', instead: 'no Result' },
+    raises: 'parse-xml/parse-failed'
   },
   'net.noodl.ParseFeed': {
     fn: 'parseFeed',
@@ -1532,7 +1540,8 @@ const UTIL_NODES: Record<
     outputs: ['items', 'count', 'feedTitle', 'feedLink', 'feedDescription', 'feedUpdated', 'kind', 'source', 'error', 'errorCode'],
     select: true,
     signals: PARSE_SIGNAL_SENTENCES,
-    previous: { kept: 'Items, Count and the Feed outputs', instead: 'no Items, a Count of 0 and empty Feed outputs' }
+    previous: { kept: 'Items, Count and the Feed outputs', instead: 'no Items, a Count of 0 and empty Feed outputs' },
+    raises: 'parse-feed/parse-failed'
   }
 };
 
@@ -2188,6 +2197,12 @@ export type ValueExpr =
        * (`collectExprUse` and `hookExprSources`) record it; missing one prints a call naming a local nobody declared.
        */
       kept?: string;
+      /**
+       * P18-S106-PARSERAISE — a parser's read (Parse CSV, Parse XML, Parse Feed): the node a failed parse raises for,
+       * under `code`, and its inputs without the selector (`args` minus the last). The same objects as `args`, so a
+       * walker over `args` has walked these. 🔴 Both walkers record it, as for `kept`.
+       */
+      raiser?: { nodeId: string; nodeType: string; code: string; args: ValueExpr[] };
     }
   /**
    * A `States` node's value outputs (EXP-011 §49) — a read off the `useStates` handle the
@@ -9699,6 +9714,8 @@ function planComponent(
       }
     }
 
+    // P18-S106-PARSERAISE. The node's inputs, before the selector: what its raise re-parses with.
+    const raiser = spec.raises !== undefined ? { nodeId: node.id, nodeType: node.type, code: spec.raises, args: args.slice() } : undefined;
     // EXP-011 §75. Several answers off one node: the output port's name selects, as `DATE_NODES`' selector does.
     if (spec.select === true) args.push({ kind: 'literal', value: fromProperty });
     ctx.logicNodeIds.push(node.id);
@@ -9714,7 +9731,7 @@ function planComponent(
         return { kind: 'util-call', fn: 'blendColorKept', args, kept: mintLocal(blendShownLocals, node, 'colorBlend', 'Shown') };
       }
     }
-    return { kind: 'util-call', fn: spec.fn, args, ...(cases !== undefined ? { cases } : {}) };
+    return { kind: 'util-call', fn: spec.fn, args, ...(cases !== undefined ? { cases } : {}), ...(raiser !== undefined ? { raiser } : {}) };
   };
 
   /**

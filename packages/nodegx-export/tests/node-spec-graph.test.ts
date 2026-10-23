@@ -35,12 +35,9 @@ const result = (prefix: string) => {
  * The scenarios that play on the export and FAIL, each a filed `dev-docs/bugs/` row. Pinned by name so a new red is new
  * and a fixed row turns this pin red too (take it out with the fix). `report.conforms` is false while any is here.
  */
-const FAILING_ROWS: Readonly<Record<string, string>> = {
-  'On App Error with no Filter reports': 'P18-S106-PARSERAISE',
-  "On App Error's Filter is a Code prefix": 'P18-S106-PARSERAISE',
-  "On App Error's Filter cleared to null": 'P18-S106-PARSERAISE',
-  'On App Error declared AFTER the node that fails': 'P18-S106-PARSERAISE'
-};
+// EXP-022 S9: P18-S106-PARSERAISE fixed — the four On App Error scenarios conform (the parsers raise; an error's
+// Component Name is read through `asRuntimeHarnessNames`, the harness's one rename).
+const FAILING_ROWS: Readonly<Record<string, string>> = {};
 
 /** Where an outside reason puts the limit: the exporter's own verdict on the graph, or this harness's. */
 const EXPORTER_VERDICT = /refused part of the graph|lifts none of the outputs|declares no prop for/;
@@ -78,7 +75,7 @@ describe('NSP-008 on the export', () => {
     // s108 §78 part 2: t03's two clock-free Optimistic Update scenarios play and pass — the harness now installs the
     // world's seeded Math.random too, so a generated Transaction Id is the same id on both sides; t03's third advances a clock
     // s139 (EXP-011 §109): a Subscribe's untyped key lifts through a component's output, and one more t01 scenario plays and passes.
-    expect(line).toEqual({ of: 85, played: 18, conforming: 11, declaredDifferent: 3, knownRows: 0, failing: 4, outsideExporter: 21, outsideHarness: 46 }); // s106 §77: t04 S1 and S3 play and pass
+    expect(line).toEqual({ of: 85, played: 18, conforming: 15, declaredDifferent: 3, knownRows: 0, failing: 0, outsideExporter: 21, outsideHarness: 46 }); // s106 §77: t04 S1 and S3 play and pass; EXP-022 S9: t07's four conform (PARSERAISE)
   });
 
   test('C2 — two values in one frame are both delivered: the emitted Counter → Value Changed → Counter reads 3, as the runtime does', () => {

@@ -18,21 +18,26 @@
  * modules of the nodes over them (`src/lib/history.ts`, `src/lib/actions.ts`): `@nodegx/core` itself travels as
  * `nodegx-core`, a constant transpiled from its source (`coreJs.ts`), only where a carried module imports it.
  *
+ * EXP-022 S9. And the error channel (`src/lib/errors.ts`, its raise and its subscribers; the boundary is Swift's
+ * `AppErrorBoundary`) and the parsers (`src/lib/parse.ts`): `fast-xml-parser`, which the parsers import, travels as a
+ * constant read from the package at the pinned version (`fxpJs.ts`), only where a carried module imports it.
+ *
  * @module emit/swift/client
  */
 
 import * as nodeModule from 'node:module';
 
 import { CORE_JS } from './coreJs';
+import { FXP_JS } from './fxpJs';
 
 /**
  * The React files the Swift app runs as JavaScript: every api module, the Noodl API, the Global Stores (the Variables
- * apart: the Swift app keeps its own, `Variables.swift`), the history and action nodes' modules, and whatever they
- * import, transitively.
+ * apart: the Swift app keeps its own, `Variables.swift`), the history and action nodes' modules, the error channel, the
+ * parsers, and whatever they import, transitively.
  */
-const ENTRY = /^src\/api\/[^/]+\.ts$|^src\/lib\/noodl\.ts$|^src\/stores\/(?!variables\.ts$)[^/]+\.ts$|^src\/lib\/(history|actions)\.ts$/;
-/** Imports the host carries itself: React's stand-in, and `@nodegx/core` (the module `nodegx-core`). */
-const CARRIED = new Set(['react', '@nodegx/core']);
+const ENTRY = /^src\/api\/[^/]+\.ts$|^src\/lib\/noodl\.ts$|^src\/stores\/(?!variables\.ts$)[^/]+\.ts$|^src\/lib\/(history|actions|errors|parse)\.ts$/;
+/** Imports the host carries itself: React's stand-in, `@nodegx/core` (the module `nodegx-core`), and `fast-xml-parser`. */
+const CARRIED = new Set(['react', '@nodegx/core', 'fast-xml-parser']);
 
 /** `src/api/client.ts` → `api/client`. */
 function moduleName(file: string): string {
@@ -138,6 +143,7 @@ export function clientModuleJs(file: string, ts: string): { name: string; js: st
 export function clientModulesJs(reactFiles: Record<string, string>): Array<{ name: string; js: string }> {
   const out = new Map<string, { name: string; js: string }>();
   let core = false;
+  let fxp = false;
   const queue = Object.keys(reactFiles).filter((f) => ENTRY.test(f)).sort();
   while (queue.length > 0) {
     const file = queue.shift()!;
@@ -147,6 +153,7 @@ export function clientModulesJs(reactFiles: Record<string, string>): Array<{ nam
     out.set(name, { name: mod.name, js: mod.js });
     for (const imp of mod.imports) {
       if (imp === '@nodegx/core') core = true;
+      if (imp === 'fast-xml-parser') fxp = true;
       if (CARRIED.has(imp) || out.has(imp)) continue;
       const next = `src/${imp}.ts`;
       if (!(next in reactFiles)) throw new Error(`${file} imports ${imp}, which the web export does not write`);
@@ -163,6 +170,9 @@ export function clientModulesJs(reactFiles: Record<string, string>): Array<{ nam
       ''
     ].join('\n');
     out.set('nodegx-core', { name: 'nodegx-core', js: `// @nodegx:generated (EXP-022 S7) — the web export's one dependency its stores import.\n${CORE_JS}${alias}` });
+  }
+  if (fxp) {
+    out.set('fast-xml-parser', { name: 'fast-xml-parser', js: `// @nodegx:generated (EXP-022 S9) — the XML parser the web export's parsers import, at the version it pins.\n${FXP_JS}` });
   }
   return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
 }

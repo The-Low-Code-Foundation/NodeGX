@@ -1,0 +1,159 @@
+net.noodl.StateHistory.Undo (/Components/Probe): No State History node is tracking store "other" [undo/operation-failed] {
+  code: 'undo/operation-failed',
+  message: 'No State History node is tracking store "other"',
+  nodeId: 'u',
+  nodeType: 'net.noodl.StateHistory.Undo',
+  componentName: '/Components/Probe'
+}
+net.noodl.StateHistory.Undo (/Components/Probe): Target index 5 is outside the history [undo/operation-failed] {
+  code: 'undo/operation-failed',
+  message: 'Target index 5 is outside the history',
+  nodeId: 'j',
+  nodeType: 'net.noodl.StateHistory.Undo',
+  componentName: '/Components/Probe'
+}
+net.noodl.StateSnapshot (/Components/Probe): State Snapshot: a snapshot name is required [state-snapshot/operation-failed] {
+  code: 'state-snapshot/operation-failed',
+  message: 'State Snapshot: a snapshot name is required',
+  nodeId: 'noName',
+  nodeType: 'net.noodl.StateSnapshot',
+  componentName: '/Components/Probe'
+}
+net.noodl.OptimisticUpdate (/Components/Probe): Key is required [optimistic-update/operation-failed] {
+  code: 'optimistic-update/operation-failed',
+  message: 'Key is required',
+  nodeId: 'noKey',
+  nodeType: 'net.noodl.OptimisticUpdate',
+  componentName: '/Components/Probe'
+}
+net.noodl.OptimisticUpdate (/Components/Probe): There is no open update to roll back [optimistic-update/operation-failed] {
+  code: 'optimistic-update/operation-failed',
+  message: 'There is no open update to roll back',
+  nodeId: 'none',
+  nodeType: 'net.noodl.OptimisticUpdate',
+  componentName: '/Components/Probe'
+}
+net.noodl.ActionDispatcher (/Components/Probe): Nothing on Action was admitted; every action in it was refused [action-dispatcher/nothing-admitted] {
+  code: 'action-dispatcher/nothing-admitted',
+  message: 'Nothing on Action was admitted; every action in it was refused',
+  nodeId: 'd',
+  nodeType: 'net.noodl.ActionDispatcher',
+  componentName: '/Components/Probe',
+  detail: { reason: 'unknown', message: 'no handler is registered for "PONG"' }
+}
+net.noodl.ParseXML (/Components/Probe): There was no XML to parse — the text was empty [parse-xml/parse-failed] {
+  code: 'parse-xml/parse-failed',
+  message: 'There was no XML to parse — the text was empty',
+  nodeId: 'xml',
+  nodeType: 'net.noodl.ParseXML',
+  componentName: '/Components/Probe',
+  detail: { code: 'xml/empty' }
+}
+net.noodl.ParseCSV (/Components/Probe): The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as "". [parse-csv/parse-failed] {
+  code: 'parse-csv/parse-failed',
+  message: 'The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as "".',
+  nodeId: 'csv',
+  nodeType: 'net.noodl.ParseCSV',
+  componentName: '/Components/Probe',
+  detail: { line: 1 }
+}
+net.noodl.ParseXML (/Components/Probe): There was no XML to parse — the text was empty [parse-xml/parse-failed] {
+  code: 'parse-xml/parse-failed',
+  message: 'There was no XML to parse — the text was empty',
+  nodeId: 'xml',
+  nodeType: 'net.noodl.ParseXML',
+  componentName: '/Components/Probe',
+  detail: { code: 'xml/empty' }
+}
+net.noodl.ParseXML (/Components/Probe): There was no XML to parse — the text was empty [parse-xml/parse-failed] {
+  code: 'parse-xml/parse-failed',
+  message: 'There was no XML to parse — the text was empty',
+  nodeId: 'xml',
+  nodeType: 'net.noodl.ParseXML',
+  componentName: '/Components/Probe',
+  detail: { code: 'xml/empty' }
+}
+net.noodl.ParseCSV (/Components/Probe): The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as "". [parse-csv/parse-failed] {
+  code: 'parse-csv/parse-failed',
+  message: 'The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as "".',
+  nodeId: 'csv',
+  nodeType: 'net.noodl.ParseCSV',
+  componentName: '/Components/Probe',
+  detail: { line: 1 }
+}
+net.noodl.ParseXML (/Components/Probe): There was no XML to parse — the text was empty [parse-xml/parse-failed] {
+  code: 'parse-xml/parse-failed',
+  message: 'There was no XML to parse — the text was empty',
+  nodeId: 'xml',
+  nodeType: 'net.noodl.ParseXML',
+  componentName: '/Components/Probe',
+  detail: { code: 'xml/empty' }
+}
+net.noodl.ParseXML (/Components/Probe): There was no XML to parse — the text was empty [parse-xml/parse-failed] {
+  code: 'parse-xml/parse-failed',
+  message: 'There was no XML to parse — the text was empty',
+  nodeId: 'xml',
+  nodeType: 'net.noodl.ParseXML',
+  componentName: '/Components/Probe',
+  detail: { code: 'xml/empty' }
+}
+
+M1 no parser raises (the raise effect removed) (4 files changed; predicted: all four t07 fail: no boundary value ever arrives; the other 14 pass)
+    passed   same as React  c02-every-send-is-delivered: two values sent in one frame are both delivered, in order
+    diverged same as React  c06-upstream-is-pulled-first: the same diamond into a per-write node: what the wire carrie
+    diverged same as React  c07-lockstep: two ports fed two values each advance in lockstep: (p1,q1) t
+    diverged same as React  c08-the-first-update-consolidates: values queued before a node's first update collapse to the l
+    passed   same as React  c10-units-travel-as-objects: a value with a unit travels as { value, unit }; a bare numbe
+    passed   same as React  t01-global-store: two Global Store nodes naming one store are one store: a Set
+    passed   same as React  t02-state-history: State History records each commit; Undo steps back and the s
+    passed   same as React  t02-state-history: a new write after an Undo discards the redo stack
+    passed   same as React  t02-state-history: Undo at a store nothing tracks is a failure that says so; Ju
+    passed   same as React  t02-state-history: State Snapshot: Save keeps a checkpoint without disturbing t
+    passed   same as React  t03-optimistic-update: Optimistic Update: Apply writes the value now and opens a tr
+    passed   same as React  t03-optimistic-update: a Rollback after a plain write to the same key leaves the ne
+    passed   same as React  t04-action-dispatcher: Action Dispatcher runs an action through the Action Handler 
+    passed   same as React  t04-action-dispatcher: an array of actions runs in order, one at a time; an action 
+    failed   DIFFERS from React  t07-on-app-error: On App Error with no Filter reports another node's raised er
+    failed   DIFFERS from React  t07-on-app-error: On App Error's Filter is a Code prefix: 'parse-csv' catches 
+    failed   DIFFERS from React  t07-on-app-error: On App Error's Filter cleared to null catches everything aga
+    failed   DIFFERS from React  t07-on-app-error: On App Error declared AFTER the node that fails still hears 
+
+M2 a boundary ignores its Filter (1 files changed; predicted: t07:1 (prefix filters) and t07:2 (filter set, then cleared) fail; t07:0 and t07:3 (no Filter) pass)
+    passed   same as React  c02-every-send-is-delivered: two values sent in one frame are both delivered, in order
+    diverged same as React  c06-upstream-is-pulled-first: the same diamond into a per-write node: what the wire carrie
+    diverged same as React  c07-lockstep: two ports fed two values each advance in lockstep: (p1,q1) t
+    diverged same as React  c08-the-first-update-consolidates: values queued before a node's first update collapse to the l
+    passed   same as React  c10-units-travel-as-objects: a value with a unit travels as { value, unit }; a bare numbe
+    passed   same as React  t01-global-store: two Global Store nodes naming one store are one store: a Set
+    passed   same as React  t02-state-history: State History records each commit; Undo steps back and the s
+    passed   same as React  t02-state-history: a new write after an Undo discards the redo stack
+    passed   same as React  t02-state-history: Undo at a store nothing tracks is a failure that says so; Ju
+    passed   same as React  t02-state-history: State Snapshot: Save keeps a checkpoint without disturbing t
+    passed   same as React  t03-optimistic-update: Optimistic Update: Apply writes the value now and opens a tr
+    passed   same as React  t03-optimistic-update: a Rollback after a plain write to the same key leaves the ne
+    passed   same as React  t04-action-dispatcher: Action Dispatcher runs an action through the Action Handler 
+    passed   same as React  t04-action-dispatcher: an array of actions runs in order, one at a time; an action 
+    passed   same as React  t07-on-app-error: On App Error with no Filter reports another node's raised er
+    failed   DIFFERS from React  t07-on-app-error: On App Error's Filter is a Code prefix: 'parse-csv' catches 
+    failed   DIFFERS from React  t07-on-app-error: On App Error's Filter cleared to null catches everything aga
+    passed   same as React  t07-on-app-error: On App Error declared AFTER the node that fails still hears 
+
+M3 a boundary runs its Error chain before its values describe the error (1 files changed; predicted: equivalent: the graph target reads values at each settle and no t07 scenario wires Error to anything it observes)
+    passed   same as React  c02-every-send-is-delivered: two values sent in one frame are both delivered, in order
+    diverged same as React  c06-upstream-is-pulled-first: the same diamond into a per-write node: what the wire carrie
+    diverged same as React  c07-lockstep: two ports fed two values each advance in lockstep: (p1,q1) t
+    diverged same as React  c08-the-first-update-consolidates: values queued before a node's first update collapse to the l
+    passed   same as React  c10-units-travel-as-objects: a value with a unit travels as { value, unit }; a bare numbe
+    passed   same as React  t01-global-store: two Global Store nodes naming one store are one store: a Set
+    passed   same as React  t02-state-history: State History records each commit; Undo steps back and the s
+    passed   same as React  t02-state-history: a new write after an Undo discards the redo stack
+    passed   same as React  t02-state-history: Undo at a store nothing tracks is a failure that says so; Ju
+    passed   same as React  t02-state-history: State Snapshot: Save keeps a checkpoint without disturbing t
+    passed   same as React  t03-optimistic-update: Optimistic Update: Apply writes the value now and opens a tr
+    passed   same as React  t03-optimistic-update: a Rollback after a plain write to the same key leaves the ne
+    passed   same as React  t04-action-dispatcher: Action Dispatcher runs an action through the Action Handler 
+    passed   same as React  t04-action-dispatcher: an array of actions runs in order, one at a time; an action 
+    passed   same as React  t07-on-app-error: On App Error with no Filter reports another node's raised er
+    passed   same as React  t07-on-app-error: On App Error's Filter is a Code prefix: 'parse-csv' catches 
+    passed   same as React  t07-on-app-error: On App Error's Filter cleared to null catches everything aga
+    passed   same as React  t07-on-app-error: On App Error declared AFTER the node that fails still hears 

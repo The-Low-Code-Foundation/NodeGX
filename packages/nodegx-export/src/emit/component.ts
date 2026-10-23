@@ -638,6 +638,11 @@ export function emitComponent(
    * BOTH walkers, in the clause that earns the helper's import, so the declaration and the import cannot part.
    */
   const usedKeptLocals = new Set<string>();
+  /**
+   * P18-S106-PARSERAISE — the parsers this component reads, by node: each raises its failed parse on the app error
+   * channel from one effect. 🔴 Recorded by BOTH walkers, beside the helper's import, as `usedKeptLocals` is.
+   */
+  const parseRaisers = new Map<string, { fn: string; nodeId: string; nodeType: string; code: string; args: ValueExpr[] }>();
   // EXP-011 §60. Whether an emitted expression or action reaches the record hook / the parent hook — the parent hook
   // prints only where something reads or writes through it; the record hook prints whenever the plan registered it
   // (the provider is owed to descendants even when the host itself reads nothing).
@@ -772,6 +777,7 @@ export function emitComponent(
     if (expr.kind === 'util-call') {
       usedUtilHelpers.add(expr.fn);
       if (expr.kept !== undefined) usedKeptLocals.add(expr.kept);
+      if (expr.raiser !== undefined) parseRaisers.set(expr.raiser.nodeId, { fn: expr.fn, ...expr.raiser });
       expr.args.forEach(collectExprUse);
     }
     // A read through the row earns that row; the chain-local form names a local the enclosing
@@ -1259,6 +1265,7 @@ export function emitComponent(
     if (expr.kind === 'util-call') {
       usedUtilHelpers.add(expr.fn);
       if (expr.kept !== undefined) usedKeptLocals.add(expr.kept);
+      if (expr.raiser !== undefined) parseRaisers.set(expr.raiser.nodeId, { fn: expr.fn, ...expr.raiser });
       expr.args.forEach(hookExprSources);
     }
     if (expr.kind === 'now-out' && expr.viaState !== undefined) referencedStateNames.add(expr.viaState);
@@ -4734,6 +4741,8 @@ export function emitComponent(
     (plan.syncEffects.length > 0 ||
       plan.pushEffects.length > 0 ||
       plan.branchEffects.length > 0 ||
+      // P18-S106-PARSERAISE. A parser's raise is an effect (sheet-desk's Home has no other).
+      parseRaisers.size > 0 ||
       // EXP-011 §39. A Value Changed is an effect; a Delay owes the unmount cleanup effect.
       plan.valueChangedEffects.length > 0 ||
       // P18-S119-TICKEDRUN. A ticked input's run is an effect.
@@ -4950,9 +4959,10 @@ export function emitComponent(
     internalImports.set(specifier, `import { useRunTasks } from '${specifier}';`);
   }
   // EXP-011 §54. The channel: the boundary hook, and the raise every request's failure arm makes.
-  if (plan.appErrors.length > 0 || raisesAppErrors) {
+  // P18-S106-PARSERAISE. A parser read raises too.
+  if (plan.appErrors.length > 0 || raisesAppErrors || parseRaisers.size > 0) {
     const specifier = `${relRoot}/${ERRORS_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
-    const names = [...(raisesAppErrors ? ['raiseAppError'] : []), ...(plan.appErrors.length > 0 ? ['useAppError'] : [])];
+    const names = [...(raisesAppErrors || parseRaisers.size > 0 ? ['raiseAppError'] : []), ...(plan.appErrors.length > 0 ? ['useAppError'] : [])];
     internalImports.set(specifier, `import { ${names.join(', ')} } from '${specifier}';`);
   }
   // EXP-011 §58 + §64 + §65 + §66. The streaming hooks, one import per hook the plan kept, grouped by the module each lives in.
@@ -4974,7 +4984,7 @@ export function emitComponent(
   }
   // EXP-011 §75. One kind, two modules: the parse helpers import from `src/lib/parse.ts`, the rest from `util.ts`.
   const usedPlainUtilHelpers = [...usedUtilHelpers].filter((fn) => !isParseHelper(fn)).sort();
-  const usedParseHelpers = [...usedUtilHelpers].filter(isParseHelper).sort();
+  const usedParseHelpers = [...[...usedUtilHelpers].filter(isParseHelper), ...[...parseRaisers.values()].map((r) => `${r.fn}Failure`)].sort();
   if (usedPlainUtilHelpers.length > 0) {
     const specifier = `${relRoot}/${UTIL_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${usedPlainUtilHelpers.join(', ')} } from '${specifier}';`);
@@ -7931,6 +7941,21 @@ export function emitComponent(
       ''
     );
   }
+  // P18-S106-PARSERAISE. A parser says a failed parse twice, as the node does: on its Error output, and to every On App
+  // Error. Once per node, from an effect over its inputs (the helper memoises one parse per inputs), so each parse that
+  // fails raises once. The runtime raises again when the same text arrives again; a prop that does not change runs no effect.
+  for (const raiser of parseRaisers.values()) {
+    const deps = [...new Set(raiser.args.flatMap((a) => effectDeps(a)))].join(', ');
+    const label = nodeById.get(raiser.nodeId)?.authoredLabel ?? raiser.nodeType.replace(/^net\.noodl\.Parse/, 'Parse ');
+    body.push(
+      `  // ${label} raises a failed parse on the app error channel, beside its Error output.`,
+      '  useEffect(() => {',
+      `    const failed = ${raiser.fn}Failure(${raiser.args.map((a) => exprCode(a, 'render')).join(', ')});`,
+      `    if (failed !== undefined) ${raiseLine(raiser.nodeId, tsLiteral(raiser.code), 'failed.message', 'failed.detail')}`,
+      `  }, [${deps}]);`,
+      ''
+    );
+  }
   // Reactive Conditions (LOGIC-TARGET §10): the node re-tests whenever its condition arrives and
   // fires one arm, so the branch runs from an effect keyed on the condition. `actionCode` already
   // prints the negated single-arm form, which is what the auth-gate idiom (`On False` → navigate)
@@ -8460,7 +8485,7 @@ export function emitComponent(
     // EXP-011 §53.
     runTasksLib: plan.runTasks.length > 0,
     // EXP-011 §54.
-    errorsLib: plan.appErrors.length > 0 || raisesAppErrors,
+    errorsLib: plan.appErrors.length > 0 || raisesAppErrors || parseRaisers.size > 0,
     // EXP-011 §56.
     recordFilterLib: usedRecordFilter,
     // EXP-011 §58 + §64 + §65. Each module, where a hook of its own printed.

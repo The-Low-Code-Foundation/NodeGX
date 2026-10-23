@@ -607,4 +607,48 @@ root@49.12.102.195:/srv/nodegx/site/` from nodegx-web. Then `curl -s https://nod
 build (`d86e5833…`); the picture 200, 149,912 bytes, `image/webp`; `/why/` carries the link (1).
 
 **Left stale, not mine to ship in the same push:** From code's "Swift comes after React" (`site/from-code/_page.html`).
+Then ruled (2026-10-23, verbatim): *"Don't put it in the site menu yet. Update the 'Swift comes after React'. Keep going
+with Swift a bit more"*. From code now says what Why says, linked to `/one-graph/` (nodegx-web `3cc5e8f`; the one file
+for Richard to push).
+
+### S9 — Swift session 9 of at most 12 (2026-10-23, Opus 5.5)
+
+**Ruled:** "Keep going with Swift a bit more" (above). Then asked in plain words (AskUserQuestion), answered:
+
+| asked | ruled |
+|---|---|
+| The OWN-026 lab is grading a series of ten (hours). Run my Swift builds beside it, or wait? | **"Run at lowest priority"** (`nice -n 19`, one at a time, never beside a peer's suite) |
+| React fails the same 4 On App Error scenarios on one filed row, P18-S106-PARSERAISE (low, no real project). Fix it in the shared code too? | **"Fix it in both"** (counted apart, as S6's) |
+
+**Result: On App Error and the parsers run in the Swift app, PARSERAISE is fixed in both exports, and both ledger lines
+read 15 of 85, the same 15. On all 18 both play, Swift's trace equals React's, event for event. The Swift printer leaves
+no scenario outside: the two exports' reaches are one.** Evidence: [`exp-022/s9/`](exp-022/s9/README.md).
+
+**Measured before building** (`exp-022/s9/measure.ts`): the four t07 scenarios missed the parsers (`util-call`) and the
+boundary (`appErrors`, `app-error-out`), nothing else; and React failed all four on PARSERAISE. So the boundary alone
+would have made Swift play 18 and fail the same 4.
+
+**Built.** PARSERAISE, in the plan and both printers: a parser read carries `raiser` (its node, type, code and inputs);
+each printer raises once per parser node from one effect over its inputs, through new `parse*Failure` helpers in
+`lib/parse` (CSV's detail is its line, XML's and Feed's their code, as the node files raise them). Swift carries the web
+export's own `lib/errors` and `lib/parse`, with `fast-xml-parser` 4.5.7 as a constant read from the package (`fxpJs.ts`,
+11 modules; S9 A1 reads it again and checks the pin); the host now hands a module its `module`. `AppErrorBoundary` is
+React's `useAppError` (subscribed while the view lives, Filter and Error chain set at every draw, values before the
+chain). The harness reads one name as the runtime arm would (`asRuntimeHarnessNames`): an On App Error's Component Name,
+from the probe's `/Components/Probe<k>` to `node-spec/<the raiser's Node Id>`, as the runtime arm hosts a lone node.
+
+**Predicted wrong, said plainly:** the component name (React's four still failed on it, and only it, until the harness
+read it; then Swift's numbered probes, the same); a component whose only effect is the raise printed `useEffect` with no
+import (sheet-desk's Home, TS2304 ×3, found by the parsers' §C typecheck, fixed). **And my background wait loop waited
+four hours**: `pgrep -f` matched other sessions' wait-loop shells, so the Swift build never started. Now checked by
+process name, and the start confirmed within a minute.
+
+**Graded:** `tests/the-same-graph-in-swift-s9.test.ts` (13 rows: §A the constant, §B the carried modules in a bare
+context, §C the printer, §D PARSERAISE in React), the two graph ledgers moved to 15 (Swift V1–V4, B1, B2, B4), the
+parsers' 3 import pins. Mutants on the printed Swift (`mutants.out`): no raise kills exactly the four t07; a boundary
+deaf to its Filter kills exactly t07:1 and t07:2; the chain before the values is equivalent, as predicted. Filed:
+**P18-EXP022-S9-RAISELOG** (low): a failed request in the Swift app is logged, not raised on the channel.
+
+**Cost:** the Swift printer **+117 net** by hand (3,938 → 4,055), plus the generated `fxpJs.ts`. Shared (PARSERAISE):
+plan +17, React printer +25, `parseLib` +36. Nine sessions of twelve.
 

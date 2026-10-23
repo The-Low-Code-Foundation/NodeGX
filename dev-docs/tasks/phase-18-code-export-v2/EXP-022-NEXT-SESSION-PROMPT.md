@@ -1,49 +1,51 @@
-# Next session — EXP-022 S9: the page is live; Richard's choice of slack or stop (BOARD lane 6, the Swift session)
+# Next session — EXP-022 S10: Richard's choice, with the claim at 15 of 85 on both (BOARD lane 4, the off-ramp; it was lane 6 until the 2026-10-23 BOARD; the Swift session)
 
-**Swift session 9 of at most 12.** Written 2026-10-23 at the end of S8 (Opus 5.5). Say which model you are in your first
-message. This is lane 6's **second** session. The first (React, EXP-021) runs on [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md)
+**Swift session 10 of at most 12.** Written 2026-10-23 at the end of S9 (Opus 5.5). Say which model you are in your
+first message. This is lane 4's **second** session. The first (React, EXP-021) runs on [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md)
 in this same folder and the same package. Do not touch its files.
 
 ## Read first
 
-1. [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §9 S8: the ruling, what changed for the public, why it is not live.
-2. The page's source: `~/vscode_projects/nodegx-web/site/one-graph/_page.html` (nodegx-web `28ef4c3`).
+1. [EXP-022](EXP-022-THE-SAME-GRAPH-IN-SWIFT.md) §9 S8 and S9: the page, then On App Error and PARSERAISE.
+2. [`exp-022/s9/README.md`](exp-022/s9/README.md): the route, the harness's one rename, the mutants.
 
-## Ruled so far, in order
+## Ruled so far (Richard)
 
-1. ~~Fix add and close before the reveal~~ **done in S6.**
-2. ~~The `@nodegx/core` stores in JavaScriptCore~~ **done in S7**: Swift 11 of 85, the same 11 as React.
-3. ~~The reveal, "private page first, then site"~~ **ruled 2026-10-23: "the artifact text is fine, rock out".** Built as
-   `nodegx.io/one-graph/`, plus one sentence on `/why/` linking it. **LIVE 2026-10-23** (Richard ran the push; auto
-   mode refuses it as a production deploy). Live md5 = local build.
+1. ~~add and close~~ S6. ~~the stores~~ S7. ~~the reveal's words~~ S8: live at nodegx.io/one-graph/, **not in the nav**
+   ("Don't put it in the site menu yet"). From code's Swift line rewritten (nodegx-web `3cc5e8f`): **is it live?**
+   `curl -s https://nodegx.io/from-code/ | grep -c one-graph` (0 = Richard has not pushed it yet; the command is in §9 S8).
+2. "Keep going with Swift a bit more" → S9: "Fix it in both" (PARSERAISE), "Run at lowest priority" beside the lab.
 
-## This session
+## What is true at the end of S9 (measured 2026-10-23)
 
-1. Any further push to nodegx.io is Richard's: give him FULL paths (`~/vscode_projects/nodegx-web/site/<folder>`), since
-   he runs it from OpenNoodl. Never `ops/deploy.sh` while other sessions' demos and changelog edits sit uncommitted.
-2. **Ask Richard (plain words, AskUserQuestion):** a nav slot or a homepage door for `/one-graph/`? (Not ruled; it is
-   linked from `/why/` only.) From code's "Swift comes after React" is stale too: fix it in the same push?
-3. **Then slack or stop, his call:** On App Error (t07, 4 scenarios) raises Swift's played count, not its conforming
-   count (React fails them on filed rows). Or stop at 8 of 12: the claim is measured and published.
+- **Both ledger lines: 15 of 85 conform, 18 played (15, 3 declared, 0 fail); 21 outside on the plan, 46 on the harness.
+  The Swift printer leaves nothing outside**, and on all 18 Swift's trace equals React's.
+- The Swift printer is 4,055 lines by hand, plus `coreJs.ts` and `fxpJs.ts` (generated, each compared on every run).
+- The page at /one-graph/ says 11 of 85 and "7 of 12". It is now 15 and 9. **Do not change a live page without Richard.**
+- Open: `P18-EXP022-S9-RAISELOG` (low, Swift: a failed request is logged, not raised), `-S5-THROWDIVERGES`, `-S4-LABELDROP`.
 
-## What is true at the end of S8 (measured 2026-10-23)
+## This session: ask Richard first (plain words, AskUserQuestion), then do what he picks
 
-- Swift line unchanged from S7: **11 of 85 conform, 14 played (11, 3 declared, 0 fail)**; React's 11 of 85, 18 played.
-- `/one-graph/` live (md5 `d86e5833…` = local); `/why/` links it.
-- No code changed in S8. Open, other lanes': `P18-EXP022-S5-THROWDIVERGES`, `-S4-LABELDROP`.
+1. **The page's numbers**: update /one-graph/ to 15 of 85 and 9 sessions (a sentence and two cards), or leave it at
+   S7's measurement with its date?
+2. **What next, of three, or stop**: (a) RAISELOG (move each verb's error code into the plan, so both printers raise it:
+   it also closes part of `-S2-EMITDECIDES`); (b) todo-list again on the simulator, now carrying `lib/errors`, to check
+   nothing moved in the drive (S4's recipe); (c) stop at 9 of 12: the claim is measured and equal.
 
 ## Rules this session must keep
 
-- 🔴 **One heavy job on the box, checked BEFORE EVERY build, as its own step**: `pgrep -fl 'vitest|jest|xcodebuild|grade.mjs'`
-  and `tail -2 /Users/Shared/nodegx-lab/own026/series-*.log`, and wait.
+- 🔴 **Busy check by process NAME, never `pgrep -f`**: `ps -axo pid=,comm=,args= | awk '$2 !~ /(^|\/)(zsh|bash|sh|grep|awk|ps|sleep)$/ && /node_modules\/\.bin\/jest|vitest|xcodebuild|swift-build|swift-test|swift-frontend/'`.
+  `pgrep -f` matched other sessions' wait loops and held S9's build back four hours. After starting a waiter, check
+  within a minute that the job really started.
+- 🔴 One heavy job at a time, `nice -n 19`. A Swift graph build is ~20–30 s; the whole package suite is the heavy one.
 - 🔴 **Never edit `src/` while the whole suite runs.**
 - 🔴 **A peer works in this package and this folder** (the React session). Commit only your paths, through a temporary
   index with compare-and-swap. Never `git add -A` at the folder level, never `git stash`, never a bare `git reset`.
-- 🔴 nodegx-web has other sessions' uncommitted edits: commit by pathspec, push by folder.
-- 🔴 `@nodegx/core` changed? Regenerate `src/emit/swift/coreJs.ts` (`tests/helpers/swift-core-js.ts`); S7 A1 fails until you do.
-- Every bug found goes to `dev-docs/bugs/` (one file per bug), id `P18-EXP022-S9-<WORD>`.
-- End: update EXP-022 §9 (S9), this file, BOARD lane 6's Swift sentence, and memory `phase-18-code-export-v2`.
+- 🔴 `@nodegx/core` changed? Regenerate `coreJs.ts` (`tests/helpers/swift-core-js.ts`). `fast-xml-parser` moved off
+  4.5.7? S9 A1 fails; regenerate `fxpJs.ts` (`tests/helpers/swift-fxp-js.ts`) and move `PARSE_DEPENDENCIES` with it.
+- Every bug found goes to `dev-docs/bugs/` (one file per bug), id `P18-EXP022-S10-<WORD>`.
+- End: update EXP-022 §9 (S10), this file, BOARD lane 4's Swift sentence, and memory `phase-18-code-export-v2`.
 
 ## Not this session
 
-Signing, TestFlight, a real iPhone, Kotlin.
+Signing, TestFlight, a real iPhone, Kotlin. Publishing to nodegx.io without Richard's word.

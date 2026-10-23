@@ -249,6 +249,13 @@
  * `textarea { resize: none; }` (every project's), and a Text Input whose Type is Text Area is a `<textarea>`: the corpus
  * has one, `puppy-test-3`'s Admin page. Predicted 64 + 1 before counting; `golden-diff` under ts-node read **65 moved
  * (64 `src/styles/base.css` and `puppy-test-3/src/pages/Admin.tsx`), 0 added, 0 removed**.
+ *
+ * ✅ **Regenerated for P18-S106-PARSERAISE (EXP-022 S9, 2026-10-23), counted before it was touched.** A parser raises its
+ * failed parse on the app error channel: `lib/parse.ts` gains the three `parse*Failure` helpers, a page with a parser
+ * gains one raise effect per parser node, and `lib/errors.ts` is written where it was not. `sheet-desk` is the corpus's one
+ * project with parsers. The whole suite named exactly its files: **4 moved (`EXPORT-REPORT.md`, `src/lib/parse.ts`,
+ * `src/pages/Home.tsx`, `@report`), 1 added (`src/lib/errors.ts`), 0 removed**, and no other project; regenerating moved
+ * those five lines and no others.
  */
 import * as fs from 'fs';
 import * as path from 'path';
