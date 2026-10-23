@@ -148,3 +148,12 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
   characters; c04 had 13), own-docs reads 7.
 - F6 and T6 failed on the graders' reading again (#5, #7).
 - **Not gating change 6; no hold** (Richard: the chain stays on FIX-03). → `FIX-05.md`, drafted for after the chain.
+
+## #9 — t2-nodegx-c06 (a time limit per question), kit FIX-03, 23/27 (2026-10-23)
+
+- C6.1 and C6.2 passed (the limit per child, a wrong answer at timeout, no stray wrong answer after leaving).
+  $0.129, 21 min, 1 sitting; 40 nodes added, 11 changed; JavaScriptFunctions unchanged in count (19; +12 lines),
+  Expressions 127 → 143. Kit lookups back down (14 calls, 163k), own-docs reads 7.
+- The four fails: F6 and T6 on the graders' readings again (#5, #7). C5.3 and T7 are #8's forged invite, carried:
+  nothing in this change touched it, and a teacher or parent can still read another family's children. **Not
+  regressions by the rule** (they failed after c05 too), but the leak is still open. FIX-05 waits.
