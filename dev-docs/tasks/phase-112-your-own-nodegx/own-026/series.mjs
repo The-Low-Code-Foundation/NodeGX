@@ -42,7 +42,9 @@ const run = (cmd, args, out) => new Promise((resolve) => {
 
 const T1_IDS = 'S0,F1,F2,F3,F4,F5,F6,F7,F8,T1,T2,T3,T4,T5,T6,T7,T8,T9,T10,T11,T12,T13';
 const C_IDS = { 1: ['C1.1', 'C1.2'], 2: ['C2.1', 'C2.2'], 3: ['C3.1', 'C3.2'], 4: ['C4.1', 'C4.2', 'C4.3'], 5: ['C5.1', 'C5.2', 'C5.3'],
-  6: ['C6.1', 'C6.2'], 7: ['C7.1', 'C7.2'], 8: ['C8.1', 'C8.2'], 9: ['C9.1', 'C9.2'], 10: ['C10.1', 'C10.2'] };
+  6: ['C6.1', 'C6.2'], 7: ['C7.1', 'C7.2'], 8: ['C8.1', 'C8.2'], 9: ['C9.1', 'C9.2'], 10: ['C10.1', 'C10.2'],
+  // 11–20: pre-registered 2026-10-23 before any change 5 was graded (PLAN §8); two checks each
+  ...Object.fromEntries(Array.from({ length: 10 }, (_, i) => [i + 11, [`C${i + 11}.1`, `C${i + 11}.2`]])) };
 const t2Ids = (n) => ['S0', ...C_IDS[n], 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'T1', 'T4', 'T6', 'T7', ...Array.from({ length: n - 1 }, (_, i) => C_IDS[i + 1]).flat()].join(',');
 
 let jobs;
@@ -52,7 +54,8 @@ if (which === 't1') {
   if (!['code', 'harness', 'nodegx'].includes(ARM) || !START) throw new Error('usage: node series.mjs t2 <arm> <start-round-id>');
   let seed = path.join(ROUNDS, START);
   jobs = [];
-  for (let n = 1; n <= Number(opt('--changes', 10)); n++) {
+  const CHANGES = fs.readdirSync(path.join(HERE, 'changes')).filter((f) => /^c\d\d\.txt$/.test(f)).length;
+  for (let n = 1; n <= Number(opt('--changes', CHANGES)); n++) {
     const id = `t2-${ARM}-c${String(n).padStart(2, '0')}`;
     // the grader reads the whole history the person asked for: the build, then every change so far, in order
     const history = path.join(GRADES, `${id}-request.txt`);

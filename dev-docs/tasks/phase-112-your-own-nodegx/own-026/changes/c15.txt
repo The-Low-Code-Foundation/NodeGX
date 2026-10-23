@@ -1,0 +1,3 @@
+The teacher would like to set homework: a times table and a number of questions, with a date it's due. The child sees it when they sign in, and both the parent and the teacher can see whether it's done.
+
+Please just build it without waiting for me to answer questions.

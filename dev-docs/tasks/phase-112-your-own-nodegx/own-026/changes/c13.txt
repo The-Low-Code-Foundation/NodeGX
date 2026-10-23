@@ -1,0 +1,3 @@
+Every Sunday I'd like a short report on the grown-ups page for each child: how many questions they answered that week, how many they got right, and which tables they mastered that week.
+
+Please just build it without waiting for me to answer questions.

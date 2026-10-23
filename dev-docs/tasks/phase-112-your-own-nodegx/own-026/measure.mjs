@@ -105,13 +105,27 @@ for (let n = 1; n <= 10; n++) {
     const a = graph(path.join(seed, 'work', 'apps')), b = graph(path.join(ROUNDS, id, 'work', 'apps'));
     row.nodes = { added: [...b.nodes.keys()].filter((k) => !a.nodes.has(k)).length, removed: [...a.nodes.keys()].filter((k) => !b.nodes.has(k)).length,
       changed: [...b.nodes.keys()].filter((k) => a.nodes.has(k) && shallow(a.nodes.get(k)) !== shallow(b.nodes.get(k))).length, total: b.nodes.size };
+    // what it read to learn: the kit's teaching tools against its own project's docs (LEARNINGS #7)
+    const KIT = ['get_node_type', 'get_example', 'list_examples', 'find_tools', 'get_project_info', 'list_node_types', 'get_style_vocabulary'];
+    let lookups = 0, lookupChars = 0, docs = 0;
+    for (const k of fs.existsSync(path.join(ROUNDS, id, 'sittings')) ? fs.readdirSync(path.join(ROUNDS, id, 'sittings')) : []) {
+      const ls = fs.readFileSync(path.join(ROUNDS, id, 'sittings', k, 'agent.jsonl'), 'utf8').split('\n').map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter((l) => l?.type === 'agent_event');
+      const out = new Map(ls.filter((l) => l.event?.type === 'content_end' && l.event.toolCallId).map((l) => [l.event.toolCallId, l.event.output]));
+      for (const l of ls.filter((x) => x.event?.type === 'content_start' && x.event.contentType === 'tool')) {
+        const name = l.event.toolName === 'nodegx__call_tool' ? l.event.input?.name : String(l.event.toolName).replace(/^nodegx__/, '');
+        const input = JSON.stringify(l.event.input ?? '');
+        if (KIT.includes(name)) { lookups++; lookupChars += JSON.stringify(out.get(l.event.toolCallId) ?? '').length; }
+        if ((name === 'read_files' || (name === 'run_commands' && /\b(cat|sed|head|grep|less)\b/.test(input))) && /docs\//.test(input)) docs++;
+      }
+    }
+    row.learning = { lookups, lookupKChars: Math.round(lookupChars / 1000), ownDocsReads: docs };
     row.script = { functions: `${a.functions} → ${b.functions}`, functionLines: `${a.functionLines} → ${b.functionLines}`, expressions: `${a.expressions} → ${b.expressions}` };
   }
   rows.push(row);
 }
 fs.writeFileSync(path.join(GRADES, `measure-t2-${arm}.json`), JSON.stringify(rows, null, 2) + '\n');
-const head = ['change', '$', 'min', 'sittings', 'end', 'checks', 'own', 'regressions', 'files (+/−lines)', ...(arm === 'nodegx' ? ['nodes +/~/−', 'JS fns (lines)', 'Expr'] : [])];
+const head = ['change', '$', 'min', 'sittings', 'end', 'checks', 'own', 'regressions', 'files (+/−lines)', ...(arm === 'nodegx' ? ['nodes +/~/−', 'JS fns (lines)', 'Expr', 'kit lookups (k chars)', 'own docs reads'] : [])];
 console.log(`| ${head.join(' | ')} |\n|${head.map(() => '---').join('|')}|`);
 for (const r of rows) console.log(`| ${[r.id, r.usd, r.minutes, r.sittings, `${r.finish}/${r.judge}`, r.graded ? `${r.pass}/${r.of}` : '—', r.own.join(', ') || '—',
   r.regressions ? (r.regressions.join(' ') || 'none') : '—', `${r.touched.files} (+${r.touched.plus}/−${r.touched.minus})`,
-  ...(arm === 'nodegx' ? [`${r.nodes.added}/${r.nodes.changed}/${r.nodes.removed}`, `${r.script.functions} (${r.script.functionLines})`, r.script.expressions] : [])].join(' | ')} |`);
+  ...(arm === 'nodegx' ? [`${r.nodes.added}/${r.nodes.changed}/${r.nodes.removed}`, `${r.script.functions} (${r.script.functionLines})`, r.script.expressions, `${r.learning.lookups} (${r.learning.lookupKChars}k)`, r.learning.ownDocsReads] : [])].join(' | ')} |`);

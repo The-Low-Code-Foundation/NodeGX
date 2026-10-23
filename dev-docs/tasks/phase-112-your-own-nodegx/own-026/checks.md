@@ -99,6 +99,44 @@ After change 4, "fuel" may be called stars: read F5 as "each right answer moves 
 - **C10.2** After deleting: the child is gone from the grown-ups page and from the teacher's view; replaying its data
   requests with its old id returns nothing; its name is no longer anywhere in the stored data.
 
+Changes 11–20 (added 2026-10-23 ~14:20 CEST, before any arm's change 5 was graded; PLAN §8):
+
+- **C11.1** A parent invites a second parent by email; the second parent signs in with their own account and can
+  change everything the first can for that family's children (add a child, change a setting, reset).
+- **C11.2** The first parent removes the second; after that the second parent's session sees none of the family's
+  children, in the page or in replayed requests.
+- **C12.1** Tables up to 12 can be switched on per child on the grown-ups page. On: questions from the 11 and 12 tables
+  appear, are marked right when right, and those tables can be mastered and are shown as such. Off: none appear.
+- **C12.2** With 11–12 on, the features made for 1–10 hold for them too: division if it's on (132 ÷ 12), the
+  mistakes list (C8) and revisiting a mastered table (C9).
+- **C13.1** The grown-ups page shows a weekly report per child: questions answered that week, how many right, and the
+  tables mastered that week. Its counts match a known set of answers you gave (e.g. 12 answered, 9 right).
+- **C13.2** Another child's answers aren't in the report, and answers from before the week aren't counted.
+- **C14.1** The shop can be turned off per child on the grown-ups page. Off: no shop for that child (no button, typed
+  address refused or empty), stars still counted for right answers. Back on: the stars earned meanwhile can be spent.
+- **C14.2** The other child's shop is unchanged.
+- **C15.1** The teacher sets homework for an invited child (a table, a number of questions, a due date); the child sees
+  it after signing in; after answering that many questions on that table, the parent and the teacher both see it done.
+- **C15.2** A child whose parent didn't invite this teacher can't be given homework (refused in the page and in a replayed
+  request), and the teacher still can't change a child's progress or settings (C5.2 holds).
+- **C16.1** A theme per child on the grown-ups page: space (as before) or ocean, where the game's pictures and words are
+  a submarine and sea creatures, with no rocket or planet words left on the game screens.
+- **C16.2** With ocean on, progress still moves on one stop per ten right answers and survives a reload; the other
+  child is still in space.
+- **C17.1** A parent shares one child with another family's account by email; that family's parent sees the child and
+  can change its progress and settings; changes from either family show for both.
+- **C17.2** Each family's other children stay private: the other family sees only the shared child, in the page and in
+  replayed requests.
+- **C18.1** The grown-ups page downloads a file a spreadsheet opens (CSV or similar), with one row per answered
+  question: date, question, the child's answer, right or wrong. Its rows match answers you gave.
+- **C18.2** It holds that child's rows only.
+- **C19.1** A wrong answer takes one star off and says so kindly; at 0 stars a wrong answer leaves 0 (never negative).
+- **C19.2** Ten right answers still launch the rocket; the shop's prices and purchases are unchanged.
+- **C20.1** A purchase can be undone within 10 minutes: the price comes back exactly and the rocket stops wearing it;
+  pressing undo twice very fast refunds once.
+- **C20.2** After 10 minutes (move the clock or wait, and say which) the undo is gone or refused, in the page and in a
+  replayed request.
+
 ## What each grade runs
 
 - **Test 1 (a fresh build):** S0, F1–F8, T1–T13.

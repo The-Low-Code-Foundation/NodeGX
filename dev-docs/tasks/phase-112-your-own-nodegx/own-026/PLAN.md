@@ -320,3 +320,19 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   also asks **what made the layer thicker**, and a FIX may aim to cut overhead, not only to fix a fail. The two
   levers seen so far: defaults that just work beat advice that's read and argued away (FIX-03 B against FIX-03 C),
   and argument-name refusals are pure overhead (14 in c01).
+- **2026-10-23 14:25 CEST — test 2 extended to twenty changes, pre-registered before any arm's change 5 was graded.**
+  Richard, after change 4 (NodeGX 22/22 at 1.2× code's $; code needed 135 turns): *"we have to keep this experiment
+  going with more and more features to see if this trend holds up, if code is struggling more the deeper we go and
+  NodeGX is sailing through … I'll not get my hopes up."* So `changes/c11–c20.txt` and checks C11.1–C20.2
+  (`checks.md` §C) are written now, while only change 4's results are known. That way they can't be chosen to fit a
+  trend. Half cut across the design: a second parent (roles), tables up to 12 (every 1–10 assumption), homework
+  (teacher writes, a new entity), a themed world (every picture and word), a child shared between two families (the
+  ownership edge). The other half are additions: a weekly report, the shop off per child, a CSV download, a wrong
+  answer costs a star, undo a purchase. Same rules as §4: the same words in the same order to every arm; after each,
+  one grade of S0, the change's checks and the regression set, which by c20 holds every earlier change's checks.
+  `series.mjs` runs as many changes as `changes/` holds. The running chains stop at c10 ("series done") and are
+  restarted to go on. Cost, from c01–c04: about $6–7 a change for the three Opus grades and $0.3–0.7 of DeepSeek;
+  ten more is about $70 and, with the plain-code arms taking turns, about 15 hours. `measure.mjs nodegx` now also
+  reports **kit lookups** (calls and characters to the kit's teaching tools) and **reads of its own `docs/`**: c01–c04
+  went 19/119k → 16/206k → 23/492k → 13/115k against 2 → 3 → 8 → 10. Whether the project, not the kit, teaches the
+  agent as the chain grows is the reading of LEARNINGS #7 to test.
