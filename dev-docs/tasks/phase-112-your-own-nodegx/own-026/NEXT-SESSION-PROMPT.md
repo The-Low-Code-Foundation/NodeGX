@@ -6,7 +6,7 @@ PLAN §8's 2026-10-23 08:12 entry first: what changed in the lab and why.
 ## Test 2, as left
 
 - Three series started 08:12 CEST from `own-026/`: `node series.mjs t2 code t1-code-3` (pid 53944),
-  `t2 harness t1-harness-1` (53945), `t2 nodegx t1-nodegx-3 --lock` (80216 since 16:09; 59102 before), and the FIX-04 comparison chain `--rounds own026-fix04 --grades own026-grades/fix04 --changes 3 --lock --lock-dir own026 --port-base 49300` (80561).
+  `t2 harness t1-harness-1` (18135 since 21:25; 53945 before), `t2 nodegx t1-nodegx-3 --lock` (80216 since 16:09; 59102 before), and the FIX-04 comparison chain `--rounds own026-fix04 --grades own026-grades/fix04 --changes 3 --lock --lock-dir own026 --port-base 49300` (80561).
   Logs: `/Users/Shared/nodegx-lab/own026/series-t2-<arm>.log`. Check they live by **pid** (`kill -0`, one pid per call:
   zsh doesn't split a `$list`), never by name.
 - **Code and harness take turns** on `LOCK-web3000` (both apps serve :3000), first come first served; NodeGX runs

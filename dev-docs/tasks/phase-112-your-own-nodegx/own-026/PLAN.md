@@ -367,3 +367,11 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   agent's own function, and c06's grader found it again independently. No port clash in c05 or c06's grader logs (no
   EADDRINUSE; each drove its own 8575/8584). **Noted:** a grader's `lsof` lists other processes' listening ports on
   the Mac (c05's saw 8520, 8591 …, other sessions' servers). It doesn't reach them, and the fence doesn't hide them.
+- **2026-10-23 21:25 CEST — a grader's malformed grade.json stopped the harness series; repaired, not re-graded.**
+  t2-harness-c08's grader finished (its summary: *"29 PASS, 2 FAIL … C7.1 … C7.2"*) but wrote `grade.json` with one
+  `}` too many. `grade.mjs` crashed parsing it before writing `meta.json`, so the series exited (no meta.json). The
+  verdicts were all there, so this isn't a lab-broken grade to re-run (§5). `grade.mjs` now repairs such a file: the
+  longest prefix that parses is the grade, the original is kept as `grade.raw.json`, `meta.json` says `repaired: true`,
+  and `--remeta` writes `meta.json` for a finished grade without grading again. t2-harness-c08 → 29/31 (C7.1, C7.2
+  carried; no regressions), as its grader said. The harness series restarted (pid 18135; it was 53945). A grade
+  with no readable `grade.json` now writes no `meta.json`, so it stops its series instead of passing on nulls.

@@ -19,6 +19,15 @@ const [roundArg, gradeArg, ...rest] = process.argv.slice(2);
 const opt = (name, dflt) => { const i = rest.indexOf(name); return i >= 0 ? rest[i + 1] : dflt; };
 const IDS = opt('--ids', null);
 if (!roundArg || !gradeArg || !IDS) throw new Error('usage: node grade.mjs <round-root> <grade-root> --ids S0,F1,…');
+// --remeta (2026-10-23, t2-harness-c08): a grade that finished but whose meta.json wasn't written (the grader's
+// grade.json had one `}` too many) gets its meta.json from what's on disk, without grading again.
+if (rest.includes('--remeta')) {
+  const G0 = fs.realpathSync(gradeArg);
+  const lines0 = readJsonl(path.join(G0, 'grader.jsonl'));
+  const res0 = lines0.findLast((l) => l.type === 'result');
+  finish(G0, path.join(G0, 'grade.json'), fs.realpathSync(roundArg), IDS, res0 ? 0 : null, Math.round((res0?.duration_ms ?? 0) / 1000), 0, lines0);
+  process.exit(0);
+}
 if (fs.existsSync(gradeArg)) throw new Error(`${gradeArg} exists`);
 const round = fs.realpathSync(roundArg);
 fs.mkdirSync(gradeArg, { recursive: true });
@@ -86,16 +95,35 @@ child.on('close', (code) => {
   const ps = spawnSync('ps', ['-E', '-ww', '-Ao', 'pid=,command='], { encoding: 'utf8' }).stdout || '';
   const left = ps.split('\n').filter((l) => l.includes(`HOME=${HOME} `)).map((l) => Number(l.trim().split(/\s+/)[0])).filter(Boolean);
   for (const pid of left) try { process.kill(pid, 'SIGTERM'); } catch {}
-  const lines = fs.readFileSync(path.join(G, 'grader.jsonl'), 'utf8').split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+  finish(G, OUT, round, IDS, code, Math.round((Date.now() - t0) / 1000), left.length, readJsonl(path.join(G, 'grader.jsonl')));
+});
+
+function readJsonl(f) { return fs.readFileSync(f, 'utf8').split('\n').filter(Boolean).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean); }
+
+// The grader writes grade.json itself, and once (t2-harness-c08) closed the object and added one more `}`. A file
+// whose verdicts are all there is repaired, never re-graded: the longest prefix that parses is the grade, the
+// original is kept as grade.raw.json, and meta.json says `repaired`.
+function readGrade(OUT) {
+  if (!fs.existsSync(OUT)) return { grade: null, repaired: false };
+  const text = fs.readFileSync(OUT, 'utf8');
+  try { return { grade: JSON.parse(text), repaired: false }; } catch {}
+  for (let end = text.lastIndexOf('}'); end > 0; end = text.lastIndexOf('}', end - 1)) {
+    try { const grade = JSON.parse(text.slice(0, end + 1)); fs.writeFileSync(OUT.replace(/\.json$/, '.raw.json'), text); fs.writeFileSync(OUT, JSON.stringify(grade, null, 2) + '\n'); return { grade, repaired: true }; } catch {}
+  }
+  return { grade: null, repaired: false };
+}
+
+function finish(G, OUT, round, IDS, code, seconds, reaped, lines) {
   const res = lines.findLast((l) => l.type === 'result');
-  const grade = fs.existsSync(OUT) ? JSON.parse(fs.readFileSync(OUT, 'utf8')) : null;
+  const { grade, repaired } = readGrade(OUT);
   const count = (g) => (grade ? Object.entries(grade).filter(([k, v]) => /^[SFTC]\d/.test(k) && v?.grade?.startsWith(g)).length : null);
   const rl = lines.find((l) => l.type === 'rate_limit_event');
-  const meta = { round, ids: IDS, exit: code, sevenDay: rl?.rate_limit_info?.seven_day?.utilization ?? rl?.seven_day?.utilization ?? null, seconds: Math.round((Date.now() - t0) / 1000), usd: res?.total_cost_usd ?? null, reaped: left.length,
-    pass: count('PASS'), fail: count('FAIL'), notReached: count('NOT REACHED'), result: res?.result ?? null };
+  const meta = { round, ids: IDS, exit: code, sevenDay: rl?.rate_limit_info?.seven_day?.utilization ?? rl?.seven_day?.utilization ?? null, seconds, usd: res?.total_cost_usd ?? null, reaped,
+    pass: count('PASS'), fail: count('FAIL'), notReached: count('NOT REACHED'), result: res?.result ?? null, ...(repaired ? { repaired: true } : {}) };
+  if (!grade) { console.log('grade: no readable grade.json'); return; }
   fs.writeFileSync(path.join(G, 'meta.json'), JSON.stringify(meta, null, 2) + '\n');
   console.log('grade', JSON.stringify(meta));
-});
+}
 
 function newestClaudeBin() {
   const ext = '/Users/richardosborne/.vscode/extensions';
