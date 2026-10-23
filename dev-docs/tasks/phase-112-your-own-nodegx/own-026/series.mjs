@@ -55,7 +55,8 @@ if (which === 't1') {
   let seed = path.join(ROUNDS, START);
   jobs = [];
   const CHANGES = fs.readdirSync(path.join(HERE, 'changes')).filter((f) => /^c\d\d\.txt$/.test(f)).length;
-  for (let n = 1; n <= Number(opt('--changes', CHANGES)); n++) {
+  // --first n (FIX-05, 2026-10-23): start the chain at change n, seeded from <start-round> (e.g. the main chain's c(n−1))
+  for (let n = Number(opt('--first', 1)); n <= Number(opt('--changes', CHANGES)); n++) {
     const id = `t2-${ARM}-c${String(n).padStart(2, '0')}`;
     // the grader reads the whole history the person asked for: the build, then every change so far, in order
     const history = path.join(GRADES, `${id}-request.txt`);
@@ -207,9 +208,10 @@ for (;;) {
   }
   if (which === 't2') {
     // change n is graded: its grade copy's packages go, and round n−1's (round n stays: n+1 copies it)
-    const prev = j.n > 1 ? path.join(ROUNDS, jobs[j.n - 2].id, 'work', 'apps') : null;
+    const k = jobs.indexOf(j);
+    const prev = k > 0 ? path.join(ROUNDS, jobs[k - 1].id, 'work', 'apps') : null;
     const mb = prune(g) + (prev ? prune(prev) : 0);
-    if (mb) log(`${j.id}: pruned ${Math.round(mb)} MB (grade copy${prev ? `, ${jobs[j.n - 2].id}` : ''}); ${freeGB().toFixed(1)} GB free`);
+    if (mb) log(`${j.id}: pruned ${Math.round(mb)} MB (grade copy${prev ? `, ${jobs[k - 1].id}` : ''}); ${freeGB().toFixed(1)} GB free`);
   }
 }
 log('series done');
