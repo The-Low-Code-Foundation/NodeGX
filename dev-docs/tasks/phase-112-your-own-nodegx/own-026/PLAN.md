@@ -393,3 +393,17 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   chain: checks identical, $0.392 → $0.296, turns 282 → 218, c03 alone $0.228 → $0.145. NodeGX over plain code
   (c01–c03): 2.0× → 1.5×. Table in `fixes/FIX-04.md` (Lab result). The comparison series ended ("series done",
   pid 80561). The main chain stays on FIX-03 (Richard's ruling).
+- **2026-10-23 22:48 CEST — FIX-05 landed and proven; change 5 re-run twice on it.** Fixer `opennoodl-4b`: kit
+  `kits/FIX-05-fbd337bfe/` (FIX-03's commit + `9127660c1`, Done `e4ced937d`). Its changes:
+  - `owner` is the server's word: a create names the caller, and an update drops a client's `owner`;
+  - an undeclared Pointer reads as its id;
+  - two infos at the write (`owner-sent-by-the-page`, `function-trusts-a-field-the-caller-wrote`);
+  - the examples teach filtering on `owner` (`cloud-share-my-records-with-someone` is new; `cloud-query-own-rows` no
+    longer teaches copying the User id into a field).
+
+  Its preview tgz carries the backend and runtime change, so the graded app runs it. **Confound (the fixer's):** this
+  kit is the first to serve FIX-03's own `cloud-shared-counter` (the earlier kits' generated catalogue was stale,
+  `P112-OWN026-ENRICHEDSTALE`). $0 mock seeded from main's t2-nodegx-c04 (`mock/steps-fix05.json`): entry, both examples
+  and the preview shim all on FIX-05. **Re-runs:** `own026-fix05a/` and `own026-fix05b/`, each `--first 5 --changes 5`
+  from main's t2-nodegx-c04 (linked), grades in `own026-grades/fix05a|b/`, on the NodeGX lock. Pre-registered win: C5.3
+  and T7 pass in both, with no check lost against main's t2-nodegx-c05 (21/25, which failed C5.3, T7, F6, T6).
