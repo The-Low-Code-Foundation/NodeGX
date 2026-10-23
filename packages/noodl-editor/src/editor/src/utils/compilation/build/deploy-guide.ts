@@ -43,6 +43,59 @@ export function renderDeployPackageJson(projectName: string | undefined): string
 }
 
 /**
+ * NPMAUDIT-LICENCE (Richard, 2026-10-23: state the split everywhere it ships). A deployed folder said nothing about
+ * whose files it holds, so a company could not tell whether its app was GPL like the tools that built it. This file
+ * says it: the app's own files are its builder's, the runtime is MIT (its text below, verbatim from
+ * `noodl-runtime/LICENSE`; `deploy-licence-notice.test.ts` asserts they match), React keeps its own licence, and the
+ * third-party notices extracted from a bundle ship beside it.
+ */
+export const DEPLOY_LICENCE_FILE = 'NODEGX-LICENSE.txt';
+
+export const RUNTIME_MIT_LICENSE = `MIT License
+
+Copyright (c) 2024 Future Platforms AB
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE
+OR OTHER DEALINGS IN THE SOFTWARE.
+`;
+
+/** Which of the runtime files a deploy wrote are which, by name. */
+export function renderLicenceNotice(runtimeFiles: readonly string[], notices: readonly string[]): string {
+  const react = runtimeFiles.filter((f) => /^react(-dom)?\.[a-z.]*js$/.test(f));
+  // index.js is written with its content's hash in the name (`index-<hex>.js`, deploy-index.ts)
+  const starters = runtimeFiles.filter((f) => f === 'index.html' || /^index(-[0-9a-f]+)?\.js$/.test(f));
+  const runtime = runtimeFiles.filter((f) => !react.includes(f) && !starters.includes(f));
+  const lines = [
+    'Which licence covers what in this folder',
+    '',
+    'This folder is an app built with NodeGX. Its pages, data and assets are the app\'s own and belong to whoever',
+    'built it. NodeGX puts no licence on them.',
+    ''
+  ];
+  if (runtime.length) lines.push(`The NodeGX runtime runs the app: ${runtime.join(', ')}. It is under the MIT licence printed below.`);
+  if (starters.length) lines.push(`${starters.join(' and ')} start the runtime, with the app filled in.`);
+  if (react.length) lines.push(`${react.join(' and ')} ${react.length === 1 ? 'is' : 'are'} React, under React's own MIT licence, stated at the top of ${react.length === 1 ? 'the file' : 'each file'}.`);
+  for (const n of notices) lines.push(`${n} lists the other open-source code inside ${n.replace(/\.LICENSE\.txt$/, '')}, each under its own licence.`);
+  lines.push('', 'The NodeGX editor and tools are under the GPL-3.0. What an app runs on is under the MIT licence.', '', '-'.repeat(80), '', RUNTIME_MIT_LICENSE);
+  return lines.join('\n').replace(/\n*$/, '\n');
+}
+
+/**
  * DEP-001 — `nodegx-config.json`, holding exactly the backend address this deploy baked in.
  *
  * Belt and braces: the app still carries the baked value, and the file only overrides it, so a

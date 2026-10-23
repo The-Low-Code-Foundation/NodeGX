@@ -160,3 +160,7 @@ Task spec: `dev-docs/tasks-archive/phase-13-format-ai-substrate/SUB-009-LIVE-PRE
 
 The preview is licensed GPL-3.0-only because it bundles code from the NodeGX editor. The source is in
 [The-Low-Code-Foundation/NodeGX](https://github.com/The-Low-Code-Foundation/NodeGX), under `packages/noodl-preview`.
+
+The sites it deploys aren't under the GPL. Their pages, data and assets belong to whoever built them. The runtime
+they run on is MIT, and so is the backend a full-stack folder carries in `backend/`, with its own `LICENSE`. Every
+deployed folder holds a `NODEGX-LICENSE.txt` that says which licence covers which file.

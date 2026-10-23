@@ -32,3 +32,6 @@ converting.
 
 GPL-3.0-only. The source is in [The-Low-Code-Foundation/NodeGX](https://github.com/The-Low-Code-Foundation/NodeGX),
 under `packages/create-nodegx`.
+
+The project it creates isn't under the GPL. Its pages, data and assets belong to whoever builds it, and the
+runtime it runs on is MIT.

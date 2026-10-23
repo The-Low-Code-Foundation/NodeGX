@@ -76,6 +76,8 @@ beforeAll(() => {
   work = fs.mkdtempSync(path.join(os.tmpdir(), 'dep002-engine-'));
   fakeCli = path.join(work, 'cli.js');
   fs.writeFileSync(fakeCli, 'exports.main = async () => {};\n');
+  // NPMAUDIT-LICENCE: the backend's licence, beside the cli.js an installation ships
+  fs.writeFileSync(path.join(work, 'LICENSE'), 'MIT License\n\n(the backend licence stand-in)\n');
 });
 
 afterAll(() => {
@@ -105,6 +107,9 @@ describe('DEP-002 s2 — nodegx-deploy --full-stack', () => {
     expect(report.blank).toBeNull();
     expect(fs.existsSync(path.join(outDir, 'app', 'index.html'))).toBe(true);
     expect(read(outDir, 'backend', 'cli.js')).toBe(read(fakeCli));
+    // NPMAUDIT-LICENCE: the MIT backend says so inside the folder, and the app beside it says what covers what
+    expect(read(outDir, 'backend', 'LICENSE')).toBe(read(path.join(path.dirname(fakeCli), 'LICENSE')));
+    expect(read(outDir, 'app', 'NODEGX-LICENSE.txt')).toContain('belong to whoever\nbuilt it');
     expect(JSON.parse(read(outDir, 'MANIFEST.json')).layout).toBe('full-stack');
     expect(JSON.parse(read(outDir, 'package.json')).scripts).toEqual({ start: 'node start.js' });
   });

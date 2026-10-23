@@ -310,3 +310,7 @@ npm run build --workspace @nodegx/mcp   # esbuild → dist/noodl-mcp.cjs
 
 The server is licensed GPL-3.0-only because it bundles code from the NodeGX editor. The source is in
 [The-Low-Code-Foundation/NodeGX](https://github.com/The-Low-Code-Foundation/NodeGX), under `packages/noodl-mcp`.
+
+The apps it builds aren't under the GPL. Their pages, data and assets belong to whoever built them. A deployed
+app runs on the NodeGX runtime, which is MIT, and on the backend in `dist/backend/`, which is MIT too and carries its
+own `LICENSE`. Every deployed folder holds a `NODEGX-LICENSE.txt` that says which licence covers which file.

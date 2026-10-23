@@ -257,6 +257,12 @@ export async function finishFullStack(
     fs.rmSync(to, { recursive: true, force: true });
     fs.cpSync(path.join(packaged, entry), to, { recursive: true });
   }
+  // NPMAUDIT-LICENCE — the backend's MIT licence beside it: next to the cli.js this installation ships
+  // (dist/backend/LICENSE, build-backend-copy.mjs), or the package's own in a checkout (dist/cli.js's parent).
+  const backendLicence = [path.dirname(plan.cliPath), path.dirname(path.dirname(plan.cliPath))]
+    .map((dir) => path.join(dir, 'LICENSE'))
+    .find((file) => fs.existsSync(file));
+  if (backendLicence) fs.copyFileSync(backendLicence, path.join(plan.outDir, 'backend', 'LICENSE'));
   fs.writeFileSync(
     path.join(plan.outDir, 'DEPLOY.md'),
     renderFullStackGuide({ projectName: options.projectName, baseUrl: options.baseUrl, uses, hasRules: rules })

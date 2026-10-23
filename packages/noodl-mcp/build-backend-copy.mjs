@@ -59,4 +59,7 @@ cpSync(path.join(BACKEND, 'deploy', 'folder'), path.join(OUT, 'folder'), { recur
 // P26 DEP-002 s4 — the script `deploy_to_vm` runs on the box (as root, over ssh's stdin) to install that folder as a
 // service. One file, read by the tool from here and by own-016's ship-to-vm.sh from the checkout.
 cpSync(path.join(BACKEND, 'deploy', 'vm'), path.join(OUT, 'vm'), { recursive: true });
+// NPMAUDIT-LICENCE — the backend is MIT (what an app runs on), and it reaches people inside the GPL @nodegx/mcp and
+// @nodegx/preview, and in every full-stack folder's backend/. Its licence goes with it.
+cpSync(path.join(BACKEND, 'LICENSE'), path.join(OUT, 'LICENSE'));
 console.log(`build-backend-copy: ${path.relative(process.cwd(), path.join(OUT, 'cli.js'))} (${((Date.now() - started) / 1000).toFixed(1)} s)`);

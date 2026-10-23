@@ -9,10 +9,12 @@ import { copyProjectFilesToFolder, formatCopyReportSummary, ProjectCopyReport } 
 import {
   DEPLOY_CONFIG_FILE,
   DEPLOY_GUIDE_FILE,
+  DEPLOY_LICENCE_FILE,
   DEPLOY_PACKAGE_FILE,
   renderDeployConfig,
   renderDeployGuide,
-  renderDeployPackageJson
+  renderDeployPackageJson,
+  renderLicenceNotice
 } from './deploy-guide';
 import { PROJECT_FILES } from './deploy-target';
 import { loadDeployIndex, copyDeployFilesToFolder, getExternalFolderPath } from './deploy-index';
@@ -172,6 +174,18 @@ export async function deployToFolder({
   if (deployRoot) {
     await filesystem.writeFileOverride(direntry + '/' + DEPLOY_CONFIG_FILE, renderDeployConfig(exportJson.metadata));
     rootFiles.push(DEPLOY_CONFIG_FILE);
+
+    // NPMAUDIT-LICENCE: the third-party notices a bundler extracted beside a runtime file go with it (MIT asks for
+    // them), and one file says which licence covers what. Written every deploy, like DEPLOY.md.
+    const notices: string[] = [];
+    for (const file of runtimeFiles) {
+      const source = filesystem.join(getExternalFolderPath(), runtimeType, `${file}.LICENSE.txt`);
+      if (!filesystem.exists(source)) continue;
+      await filesystem.writeFileOverride(`${direntry}/${file}.LICENSE.txt`, await filesystem.readFile(source));
+      notices.push(`${file}.LICENSE.txt`);
+    }
+    await filesystem.writeFileOverride(direntry + '/' + DEPLOY_LICENCE_FILE, renderLicenceNotice(runtimeFiles, notices));
+    rootFiles.push(...notices, DEPLOY_LICENCE_FILE);
   }
 
   return { copyReport, written: [...copyReport.copiedPaths, ...runtimeFiles, ...bundleFiles, ...rootFiles] };
