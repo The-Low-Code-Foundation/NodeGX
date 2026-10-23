@@ -52,3 +52,25 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
 - **T6** failed here for the first time in a NodeGX round (the unlocked page stays open after the parent's setup),
   as in all six plain-code rounds; **F6** failed on the grader's doubt over the Moon, as in t1-harness-1 and
   t1-nodegx-2. Neither is the kit's.
+
+## #4 — t2-nodegx-c01 (division), kit FIX-03 (`cb7e0d6e4`), 14/15 (2026-10-23)
+
+- **Level with both plain-code arms** on the first change: 14/15 each, C1.1 and C1.2 passed, no regressions, T6 the
+  one fail in all three (still a property of the request). Cost and time sit between them: $0.075 and 17 min, against
+  code's $0.051 / 10 min and harness's $0.098 / 19 min; 1 sitting each. Touched 17 files (+345/−46): 9 nodes added,
+  4 changed, none removed. Script: **+1 JavaScriptFunction (4 lines, a flip of the child's setting) and +22 lines in
+  the existing question drawer** (4 → 5 functions, 102 → 128 non-blank lines; `measure.mjs`), plus 4 Expressions
+  for the wording. The division rule itself lives in script.
+- **Day N worked through the server:** `list_projects` → `open_project` on its own copy, then 116 `call_tool`. 14
+  were refused, all argument-shape slips the error named (`typeName` → `type_names` ×3; `drive_page`'s `wait_for`
+  given `text_contains` ×5; one nested `call_tool`; `search_project` `query`). Same rate as #3 (about 1 in 9).
+- **FIX-03 C was read and argued away, the #3 pattern a third time.** `shared-value-written-back-whole` fired on
+  the inherited score save (`fuel`, `currentPlanet`, `bestRound`, `recentAnswers`, written back from the page's Record,
+  the T5 shape). Its words: *"The 6 remaining infos are all pre-existing (including `lp_save`'s 'written back whole',
+  which is the app's existing single-small-write design …)"*. Not wrong for a change that asked for division: the
+  person didn't ask for it to be fixed, and T5 isn't in test 2's regression set. Add To went unused (no count in this
+  change). B, the press guard, is on by default in the runtime, so the inherited Check button is covered without a
+  graph change. Not measured here (T3 isn't in the set).
+- **Not gating; no FIX-04.** Filed on the way: `P112-OWN026-CONFIGFOUROHFOUR` (low). The preview's deliberate 404 for
+  `nodegx-config.json` puts 1–2 red console errors on every page load of every previewed app (27 in this grade).
+  It cost no agent anything yet.
