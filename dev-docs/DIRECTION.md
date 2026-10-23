@@ -74,6 +74,30 @@ your Claude, we bring the editor and backend management visually for non coders"
 are (Claude Desktop first), never a move to ours. The day-thirty test (§4 item 8) gains a measurement nothing else
 has: whether the person stopped it, and what happened next (P125 CCN-007).
 
+**The hook (2026-10-23, ruled D8): make your AI coder a true copilot.** After six runs in one day ended with
+Studio drawn inside Claude Desktop's conversation, HOLD stopping the agent, and Richard's *"It's fucking perfect"*,
+he named the pitch. In his words: *"the thinnest layer possible on top of LLM's existing coding knowledge, building in
+tandem inside the chat, no more 45 min vibe coding one shot apps you end up having to give 20 points of review and
+redoing, easy to learn nocode editor interface, everything inside your favourite coding agent — nothing extra to
+install, offramp to React or Swift (and any major framework once we build the ramps), or just choose to stay in NodeGX
+and deploy to a VM (work in progress) and try out your app without thinking about frameworks yet, or just stay in
+NodeGX forever and keep using Claude to tweak your app and collaborate on the advancements. You're in the driver's
+seat, Claude is your true copilot."* Read against the pillars: the copilot is pillar 1 made live (the editor a person
+and an agent share, during the build), the seed is what makes the layer thin for the agent, and the ramps are the way
+out. What each clause can claim today, by the §3a rule (checkable / promised):
+
+| clause | today |
+|---|---|
+| building in tandem inside the chat, a stop button | **checkable** — P125 CCN-001, Claude Desktop, 2026-10-23: the panel, HOLD, "what did you see?" |
+| the thinnest layer on the LLM's coding knowledge | **measured the other way so far** — OWN-026 test 1: code 21, NodeGX 18 after two fixes; the day-thirty test (test 2) and the person test (CCN-007) are what would turn this |
+| an easy-to-learn no-code editor | **built, not yet tested on a stranger** — Studio 0.2's alpha line; CCN-007 |
+| nothing extra to install, inside your favourite agent | **promised** — today: a checkout, an absolute node path in a config file, Studio found on disk. CCN-006 (Studio on npm, a Desktop Extension, `create-nodegx --desktop`) is the gap, and the stranger audit's 17 packaging defects are its other half |
+| off-ramp to React, Swift, any major framework | **React checkable on two templates; Swift a bounded promise** (EXP-022, 11 of 85 scenarios); "any framework" is a direction, not a claim |
+| deploy to a VM without thinking about frameworks | **work in progress** (lane 3/4) — say so |
+| stay forever and keep tweaking with Claude | **checkable in the small** (every run today was that); the day-thirty number is still owed |
+
+The site says the checkable column and names the rest as what is being built.
+
 What this changes about the earlier framing on this page: §1–§3 stand. The four reasons in §3 are *how* the blueprint
 is safe to build on (restraint, testing, security, do it yourself); §0 is *why a person would want the blueprint at
 all*. The place named on 2026-10-20 ("the workbench of the person who vouches", `reviews/THE-PLACE-NODEGX-BESIDE-REPLIT.md`)
@@ -171,6 +195,7 @@ Both ruled by Richard on 2026-10-06 as recommended ("D1: Ok. D2: ok").
 | D5 (2026-10-21) | **Does the comparison measure day thirty** (OWN-026) **rather than a third day-one round?** | ✅ **Yes, and the running lab replaces the first draft** (Richard, 2026-10-22). `own-026/PLAN.md` is the plan of record: DeepSeek builds the rocket times-tables app in three arms, then ten changes; Sonnet 5.5 hands the Gala builds over. The task file's three-asks section is kept, marked superseded. The result goes on the site whichever way it comes out. |
 | D6 (2026-10-22) | **How far does the Swift off-ramp go, and when?** | ✅ **The bounded cut of EXP-022 §7, with the backend** (Richard, 2026-10-22): the todo-list as it ships (signs in, reads and writes its records) on the same backend the web app uses; scripts verbatim in JavaScriptCore; graded headless; **hard stop at 12 sessions**, an overrun reported on the site as evidence against the claim. **Starts now, in a second lane-6 session beside React's EXP-021 §101**, Xcode builds yielding to any lab grade or full suite. |
 | D7 (2026-10-23) | **Is co-construction — Studio inside the conversation, a HOLD the server enforces, the person in the loop as a tenet — the lane to build, Claude Desktop first?** | ✅ **"We can target Claude Desktop to start. Make it so."** (Richard, 2026-10-23). P125 opened; CCN-001 built the same day; its AC5 is his run in Claude Desktop, which decides whether the panel is inside the conversation or beside it (the hold holds either way). |
+| D8 (2026-10-23) | **Is "make your AI coder a true copilot" the hook — co-construction inside the person's own agent as the reason to use NodeGX?** | ✅ **Yes** (Richard, 2026-10-23, after run 6: *"It's fucking perfect. Let's commit this and add it to our canon as possibly the way to justify using NodeGX."*). §0's hook paragraph is the statement; its table is what may be said today. Lane 8 is the lane; CCN-006 (nothing extra to install) and CCN-007 (the person test) are what turn the promised rows into checkable ones. |
 | D2 | **Does a plain React app that uses `@nodegx/nodes-react` count as a NodeGX app?** Phase 111 R6 recommends publishing that package so the honesty number applies to code written outside NodeGX. | ✅ **Publish it, as P111 R6 says, and call it a way in and out.** It gives a React app restraint and node tests. It can't give the editor or do-it-yourself editors, which read the project format. The site says so plainly. |
 
 ## 6. Where each phase stands

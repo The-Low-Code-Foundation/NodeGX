@@ -14,6 +14,13 @@
 > I'd rather integrate with what people already use and trust. You use your Claude, we bring the editor and backend
 > management visually for non coders." — Richard, 2026-10-23
 
+## The hook (D8, 2026-10-23)
+
+After run 6: *"It's fucking perfect. Let's commit this and add it to our canon as possibly the way to justify using
+NodeGX … You're in the driver's seat, Claude is your true copilot. Make your AI Coder a true Copilot."* DIRECTION §0
+carries the statement and the table of what each clause may claim today; this phase is the lane that makes the
+promised rows checkable (CCN-006: nothing extra to install; CCN-007: the person test).
+
 ## Why this phase, and why now
 
 The stranger audit of the npm packages (`dev-docs/reviews/npm-stranger-audit-2026-10-23.md`, three agents with no

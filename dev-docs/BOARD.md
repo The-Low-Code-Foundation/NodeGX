@@ -17,7 +17,9 @@ README stays right about *what* the work is. The running log each lane cell carr
 
 ## 1. Start here
 
-1. **Why:** [DIRECTION.md §0](DIRECTION.md), the three pillars: *the blueprint stays open* (an editor for this app is
+1. **Why:** [DIRECTION.md §0](DIRECTION.md) — the hook, ruled D8 2026-10-23: *make your AI coder a true copilot*
+   (co-construction inside the person's own agent; Studio in the conversation, a HOLD the server keeps; lane 8) —
+   and under it the three pillars: *the blueprint stays open* (an editor for this app is
    a view over its files), *the knowledge ships with the project* (the seed), *the off-ramp* (React, then Swift). On
    day one a NodeGX app looks like one built without it; the claim is what you can still do on day thirty. A lane row
    that serves none of the three is a row to question.
