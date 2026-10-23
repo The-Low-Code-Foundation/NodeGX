@@ -38,6 +38,26 @@ export interface Hold {
   at?: string;
   note?: string;
   file?: string;
+  /** P125 CCN-002 — hours since `at` (whole hours), so a hold left on since yesterday is said, not silently honoured. */
+  ageHours?: number;
+}
+
+/** P125 CCN-002 — a hold older than this is reported as old: still honoured (only the person removes it), but said. */
+export const OLD_HOLD_HOURS = 24;
+
+function withAge(hold: Hold): Hold {
+  const at = hold.at ? Date.parse(hold.at) : NaN;
+  return Number.isFinite(at) ? { ...hold, ageHours: Math.max(0, Math.floor((Date.now() - at) / 3_600_000)) } : hold;
+}
+
+/** The sentence for a hold left on a long time, or '' for a fresh one. */
+export function oldHoldWords(hold: Hold): string {
+  if (hold.ageHours === undefined || hold.ageHours < OLD_HOLD_HOURS) return '';
+  const days = Math.floor(hold.ageHours / 24);
+  return (
+    `This hold has been on for ${days === 1 ? 'a day' : `${days} days`}: it may be one they forgot. Ask whether ` +
+    'they still mean it; do not remove it yourself. '
+  );
 }
 
 /** What the hold file says, or `{ held: false }`. An unreadable file is a hold: somebody put it there. */
@@ -46,9 +66,9 @@ export function readHold(projectDir: string): Hold {
   if (!fs.existsSync(file)) return { held: false };
   try {
     const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as Omit<Hold, 'held' | 'file'>;
-    return { held: true, ...parsed, file };
+    return withAge({ held: true, ...parsed, file });
   } catch {
-    return { held: true, at: fs.statSync(file).mtime.toISOString(), file };
+    return withAge({ held: true, at: fs.statSync(file).mtime.toISOString(), file });
   }
 }
 
@@ -59,9 +79,10 @@ export function holdError(hold: Hold): ToolError {
   return new ToolError(
     'held',
     `The person pressed HOLD in Studio${since}: STOP. Nothing runs against this project — no read, no render, ` +
-      `no write — until they release it.${note} Do not call another tool. Tell them, in a sentence or two, what ` +
-      'you were doing and what you were about to do next, and ask what they saw. When they release the hold, ' +
-      're-read anything you were about to change, because they may have edited it in Studio meanwhile. ' +
+      `no write — until they release it.${note} Do not call another tool. ${oldHoldWords(hold)}Tell them, in a ` +
+      'sentence or two, what you were doing and what you were about to do next, and ask what they saw. When they ' +
+      'release the hold, call what_changed_since: it lists what they changed in Studio meanwhile. Re-read anything ' +
+      'you were about to change before you change it. ' +
       `(The hold is the file ${hold.file ?? HOLD_FILE}; only the person removes it.)`,
     { hold }
   );

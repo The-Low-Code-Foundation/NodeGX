@@ -47,6 +47,7 @@ import { holdGate } from './hold';
 import { clientLoadsToolsItself, clientRendersApps } from './clientApps';
 import type { StudioProxy } from './studio/studioProxy';
 import { registerSessionStatusTools } from './tools/sessionStatus';
+import { registerWhatChangedTools } from './tools/whatChanged';
 import { registerKitTools } from './tools/kitTools';
 import { registerProjectSettingsTools } from './tools/projectSettingsTools';
 import { registerLibraryTools } from './tools/libraryTools';
@@ -274,7 +275,11 @@ export function createServer(options: ServerOptions): CreatedServer {
   // is the call that stops an agent writing over somebody. Appended to the same deferred `project`
   // group, so it costs **0** resident tokens; see the manifest note. Resident was not available at
   // any price — the surface had 8 tokens of headroom and a resident tool costs its whole schema.
-  registerSessionStatusTools(rec);
+  // P125 CCN-002 — it takes the binding now, for one fact: the person's hold on the bound project (`hold`).
+  registerSessionStatusTools(rec, binding);
+  // P125 CCN-002 — the read that follows a hold or a drift refusal: what the person changed since this agent last
+  // read each component. Both modes (it is a read), in the deferred `explore` group: 0 resident tokens.
+  registerWhatChangedTools(rec, binding);
   // HLS-008. Registered in BOTH modes, deliberately, and it is worth saying why on a server
   // started `--read-only`: an export writes to a folder the caller names, outside the project, and
   // reads the project without touching it. The flag protects the *project* from an agent, and

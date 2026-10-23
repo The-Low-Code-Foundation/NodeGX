@@ -54,6 +54,21 @@ export interface ComponentListRow {
   description?: string;
 }
 
+/** P125 CCN-002 — a component as this server last read or wrote it. */
+export interface SeenComponent {
+  files: ComponentFiles;
+  revision: string;
+  at: string;
+}
+
+/** P125 CCN-002 — a component whose files differ from what this server last saw. */
+export interface SeenChange {
+  key: string;
+  before: SeenComponent;
+  now: ComponentFiles;
+  revision: string;
+}
+
 export interface Usage {
   component: string; // path form
   legacyName: string;
@@ -89,6 +104,13 @@ export class ProjectStore {
   readonly clock: WriteClock;
   /** The format's store, over this folder. Every component read and write goes through it. */
   readonly format: V2ProjectStore;
+  /**
+   * P125 CCN-002 — each component as this server last read or wrote it, for `what_changed_since`: the
+   * format's snapshots say THAT a file changed (stamps), this says WHAT (the files, copied at the read).
+   */
+  private readonly seen = new Map<string, SeenComponent>();
+  /** P125 CCN-002 — the registry's keys when this store opened, so a component added since can be named. */
+  private readonly keysAtOpen: ReadonlySet<string> | undefined;
 
   /**
    * ⚠️ **The two refusal messages below are mirrored in the editor**, in
@@ -115,6 +137,11 @@ export class ProjectStore {
             `(NodeGX editor: project settings → migrate) before using the MCP server.`
           : `${this.projectDir} is not a NodeGX v2 project (no nodegx.project.json or components/_registry.json).`
       );
+    }
+    try {
+      this.keysAtOpen = new Set(this.format.componentKeys());
+    } catch {
+      this.keysAtOpen = undefined;
     }
   }
 
@@ -396,7 +423,37 @@ export class ProjectStore {
   // ─── Reads ──────────────────────────────────────────────────────────────────
 
   readComponent(input: string): StoredComponent {
-    return this.viaFormat(() => this.format.readComponent(input), input);
+    const stored = this.viaFormat(() => this.format.readComponent(input), input);
+    this.remember(stored.key, stored.files, stored.revision);
+    return stored;
+  }
+
+  private remember(key: string, files: ComponentFiles, revision: string): void {
+    this.seen.set(key, { files: structuredClone(files), revision, at: new Date().toISOString() });
+  }
+
+  /**
+   * P125 CCN-002 — what changed on disk since this server last read or wrote each component: the answer to
+   * "they released the hold; what did they do?". Reads with no snapshot, so it neither satisfies nor resets the
+   * drift rule: a write after it is still refused until the component is read again.
+   */
+  changesSinceSeen(): { changed: SeenChange[]; deleted: string[]; added: string[]; unchanged: number } {
+    const changed: SeenChange[] = [];
+    const deleted: string[] = [];
+    let unchanged = 0;
+    for (const [key, before] of this.seen) {
+      const hit = this.format.resolve(key);
+      if (!hit) {
+        deleted.push(key);
+        continue;
+      }
+      const now = this.viaFormat(() => this.format.filesOf(hit.key, hit.entry), key);
+      const revision = computeRevision(now);
+      if (revision === before.revision) unchanged++;
+      else changed.push({ key, before, now, revision });
+    }
+    const added = this.keysAtOpen ? this.format.componentKeys().filter((k) => !this.keysAtOpen!.has(k) && !this.seen.has(k)) : [];
+    return { changed, deleted, added, unchanged };
   }
 
   listComponents(): ComponentListRow[] {
@@ -528,11 +585,15 @@ export class ProjectStore {
     );
     const entry = this.format.resolve(key)?.entry;
     const dir = path.join(this.componentsDir, entry?.path ?? key);
+    if (entry) this.remember(key, this.format.filesOf(key, entry), written.revision);
     if (written.unchanged) return { revision: written.revision, dir, unchanged: true };
     return { revision: written.revision, dir, ...(ticked.length > 0 ? { ticked } : {}) };
   }
 
   deleteComponent(input: string): { removed: string[] } {
-    return this.viaFormat(() => this.format.deleteComponent(input), input);
+    const key = this.format.resolve(input)?.key;
+    const removed = this.viaFormat(() => this.format.deleteComponent(input), input);
+    if (key !== undefined) this.seen.delete(key);
+    return removed;
   }
 }

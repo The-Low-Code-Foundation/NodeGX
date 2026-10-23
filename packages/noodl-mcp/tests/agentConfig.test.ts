@@ -123,14 +123,27 @@ describe('BST-005 the project configures the next agent', () => {
   });
 
   it('does not add a second ignore line when one is already there', async () => {
-    const host = memoryHost({ [AGENT_CONFIG_PATHS.gitignore]: 'node_modules\n.mcp.json\n' });
+    const host = memoryHost({ [AGENT_CONFIG_PATHS.gitignore]: 'node_modules\n.mcp.json\n.nodegx-hold.json\n' });
     const report = await installAgentConfig(host, OPTIONS);
 
-    const occurrences = host.files[AGENT_CONFIG_PATHS.gitignore]
-      .split(/\r?\n/)
-      .filter((line) => line.trim() === '.mcp.json').length;
-    expect(occurrences).toBe(1);
+    const lines = host.files[AGENT_CONFIG_PATHS.gitignore].split(/\r?\n/).map((line) => line.trim());
+    expect(lines.filter((line) => line === '.mcp.json')).toHaveLength(1);
+    expect(lines.filter((line) => line === '.nodegx-hold.json')).toHaveLength(1);
     expect(report.files.find((f) => f.path === AGENT_CONFIG_PATHS.gitignore)?.outcome).toBe('kept-existing');
+  });
+
+  // P125 CCN-002 AC1 — the person's hold is one machine's pause; committed, it would pause a teammate's agent.
+  it('ignores the hold file, and adds only the line that is missing', async () => {
+    const fresh = memoryHost();
+    await installAgentConfig(fresh, OPTIONS);
+    expect(fresh.files[AGENT_CONFIG_PATHS.gitignore].split(/\r?\n/)).toEqual(expect.arrayContaining(['.mcp.json', '.nodegx-hold.json']));
+
+    const old = memoryHost({ [AGENT_CONFIG_PATHS.gitignore]: 'node_modules\n.mcp.json\n' });
+    const report = await installAgentConfig(old, OPTIONS);
+    const lines = old.files[AGENT_CONFIG_PATHS.gitignore].split(/\r?\n/);
+    expect(lines.filter((line) => line === '.mcp.json')).toHaveLength(1);
+    expect(lines).toContain('.nodegx-hold.json');
+    expect(report.files.find((f) => f.path === AGENT_CONFIG_PATHS.gitignore)?.outcome).toBe('written');
   });
 
   it('writes CLAUDE.md but no .mcp.json when no server could be resolved', async () => {

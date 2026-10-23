@@ -35,9 +35,13 @@
  * @module tools/sessionStatus
  */
 
+import * as path from 'path';
+
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { readHold, type Hold } from '../hold';
+import type { ProjectBinding } from '../project/ProjectBinding';
 import { findRelayToken, relayPort } from './openInEditor';
 import { guarded, jsonResult } from './util';
 
@@ -346,7 +350,20 @@ const sessionStatusSchema = {
     .describe('Absolute path of the project you are about to edit, to report whether it is the one that is open.')
 };
 
-export function registerSessionStatusTools(server: McpServer): void {
+/**
+ * P125 CCN-002 — the person's hold, beside the editor's answer: Studio holds through a file, not the relay, so the
+ * relay can say "no editor" while Studio has the project held. The bound project's hold, and the asked directory's
+ * when that is another folder. `session_status` is exempt from the hold (`HOLD_EXEMPT`), so a model that joins late
+ * reads it here.
+ */
+function holdsFor(binding: ProjectBinding | undefined, directory: string | undefined): Hold[] {
+  const dirs = new Set<string>();
+  if (binding?.projectDir) dirs.add(path.resolve(binding.projectDir));
+  if (directory) dirs.add(path.resolve(directory));
+  return [...dirs].map((dir) => readHold(dir)).filter((h) => h.held);
+}
+
+export function registerSessionStatusTools(server: McpServer, binding?: ProjectBinding): void {
   server.registerTool(
     'session_status',
     {
@@ -357,6 +374,18 @@ export function registerSessionStatusTools(server: McpServer): void {
         'components differ from disk. A transport failure answers "unknown", never "nobody is here".',
       inputSchema: sessionStatusSchema
     },
-    guarded(async (args: { directory?: string }) => jsonResult(await askEditorForStatus(args.directory)))
+    guarded(async (args: { directory?: string }) => {
+      const status = await askEditorForStatus(args.directory);
+      const holds = holdsFor(binding, args.directory);
+      if (holds.length === 0) return jsonResult(status);
+      return jsonResult({
+        ...status,
+        hold: holds.length === 1 ? holds[0] : holds,
+        note:
+          'The person pressed HOLD in Studio: every tool on that project is refused until they release it. Do not ' +
+          'try to work around it; tell them what you were doing and ask what they saw. ' +
+          status.note
+      });
+    })
   );
 }

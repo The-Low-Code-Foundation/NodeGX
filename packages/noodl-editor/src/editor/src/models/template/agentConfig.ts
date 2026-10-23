@@ -141,6 +141,18 @@ const GITIGNORE_BLOCK = [
   ''
 ].join('\n');
 
+/**
+ * P125 CCN-002 — the hold file, ignored for the same reason in the other direction: `.nodegx-hold.json` is one
+ * person pausing their agent on one machine. Committed, it would pause every teammate's agent on checkout.
+ */
+const HOLD_FILE = '.nodegx-hold.json';
+const GITIGNORE_HOLD_BLOCK = [
+  '',
+  '# A pause on this machine: NodeGX Studio writes it while the person holds the agent, and removes it on release.',
+  HOLD_FILE,
+  ''
+].join('\n');
+
 /** `.mcp.json`, formatted the way the client formats its own. */
 export function renderMcpJson(serverName: string, registration: AgentServerRegistration): string {
   return JSON.stringify({ mcpServers: { [serverName]: registration } }, null, 2) + '\n';
@@ -461,10 +473,10 @@ export async function upgradeAgentConfigForDocs(
 }
 
 /**
- * Add `.mcp.json` to `.gitignore`, appending rather than replacing.
+ * Add `.mcp.json` and the hold file to `.gitignore`, appending rather than replacing.
  *
  * ⚠️ The one place here that touches a file the project already owns, so it
- * reads before it writes and does nothing when the pattern is already covered.
+ * reads before it writes and adds only the lines that are missing.
  * Matching is on the exact line: `.gitignore` glob semantics are more than a
  * substring test can decide, and a duplicated ignore line is harmless where a
  * clobbered `.gitignore` is not.
@@ -474,19 +486,21 @@ async function ignoreMcpJson(host: AgentConfigHost): Promise<AgentConfigFileResu
     ? await host.read(AGENT_CONFIG_PATHS.gitignore)
     : '';
 
-  const alreadyIgnored = existing
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .some((line) => line === '.mcp.json' || line === '/.mcp.json');
+  const lines = new Set(existing.split(/\r?\n/).map((line) => line.trim()));
+  const ignored = (name: string) => lines.has(name) || lines.has('/' + name);
+  const blocks = [
+    ...(ignored('.mcp.json') ? [] : [GITIGNORE_BLOCK]),
+    ...(ignored(HOLD_FILE) ? [] : [GITIGNORE_HOLD_BLOCK])
+  ];
 
-  if (alreadyIgnored) {
+  if (blocks.length === 0) {
     return {
       path: AGENT_CONFIG_PATHS.gitignore,
       outcome: 'kept-existing',
-      reason: '.mcp.json was already ignored.'
+      reason: `.mcp.json and ${HOLD_FILE} were already ignored.`
     };
   }
 
-  await host.write(AGENT_CONFIG_PATHS.gitignore, existing.replace(/\s*$/, '') + GITIGNORE_BLOCK);
+  await host.write(AGENT_CONFIG_PATHS.gitignore, existing.replace(/\s*$/, '') + blocks.map((b) => b.replace(/\n$/, '')).join('\n') + '\n');
   return { path: AGENT_CONFIG_PATHS.gitignore, outcome: 'written' };
 }

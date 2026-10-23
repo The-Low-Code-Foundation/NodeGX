@@ -42,7 +42,7 @@ import type { McpServer, RegisteredResource } from '@modelcontextprotocol/sdk/se
 
 import { clientRendersApps, consumeOpenStudioProxied } from '../clientApps';
 import { ToolError } from '../errors';
-import { readHold } from '../hold';
+import { oldHoldWords, readHold } from '../hold';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -221,6 +221,8 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
             : openedBrowser
               ? `Studio opened in the person's browser at ${url}. `
               : `Tell the person to open ${url} in a browser: Studio is there. `) +
+          // P125 CCN-002 — a hold older than a day is said, with how old it is (`hold.ageHours` in the answer).
+          (hold.held ? oldHoldWords(hold) : '') +
           (viaProxy
             ? 'You reached open_studio through call_tool, so the host drew no panel; next time call open_studio by ' +
               'its own name and Studio appears inside the conversation. '

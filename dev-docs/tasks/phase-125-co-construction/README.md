@@ -80,7 +80,7 @@ same Studio beside the conversation. Either way the hold holds.
 | id | task | state |
 |---|---|---|
 | [CCN-001](CCN-001-STUDIO-IN-THE-CONVERSATION.md) | Studio in the conversation, with HOLD | built 2026-10-23; **waits on Richard's run in Claude Desktop** |
-| [CCN-002](CCN-002-THE-HOLD-IS-A-TENET.md) | The hold everywhere: gitignored in created projects, reported by `session_status` and `get_project_info`, `what_changed_since`, Studio's drift answer names the agent | open |
+| [CCN-002](CCN-002-THE-HOLD-IS-A-TENET.md) | The hold everywhere: gitignored in created projects, reported by `session_status` and `get_project_info`, `what_changed_since`, Studio's drift answer names the agent | built 2026-10-23 |
 | [CCN-003](CCN-003-SHOW-BEFORE-APPLY.md) | Staged plan operations render in Studio; the person accepts before `apply_plan` | open |
 | [CCN-004](CCN-004-LOOK-FIRST.md) | No page until the look is accepted in Studio: tokens, sample card, sample button; refused by the server | open |
 | [CCN-005](CCN-005-SHORT-BURSTS.md) | One component per turn, rendered; budgets in the server, not advice | open |
