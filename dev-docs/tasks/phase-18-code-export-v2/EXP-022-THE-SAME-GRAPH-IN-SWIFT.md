@@ -603,5 +603,8 @@ nodegx-web `28ef4c3`.
 push is Richard's: `rsync -az -e "ssh -i ~/.ssh/nexus_hetzner" --exclude _page.html site/one-graph site/why
 root@49.12.102.195:/srv/nodegx/site/` from nodegx-web. Then `curl -s https://nodegx.io/one-graph/ | grep -c "One graph"`.
 
+**Live 2026-10-23** (Richard ran the push, full paths): `/one-graph/` reads "One graph" ×3 and its md5 equals the local
+build (`d86e5833…`); the picture 200, 149,912 bytes, `image/webp`; `/why/` carries the link (1).
+
 **Left stale, not mine to ship in the same push:** From code's "Swift comes after React" (`site/from-code/_page.html`).
 
