@@ -124,3 +124,27 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
   may be a real defect that only some paths reach, or a race in how the unlock clears. Not driven: one per grader is
   what §5 allows. In the table it's listed apart, like F6.
 - **Not gating; no FIX-04 for a fail** (FIX-04, thinning, runs in parallel).
+
+## #8 — t2-nodegx-c05 (a teacher invited by email), kit FIX-03, 21/25 (2026-10-23)
+
+- **The first real loss to plain code, and it's security.** Code 23/25 (C5.1–C5.3 passed; T6 and C2.1 carried).
+  NodeGX passed C5.1 (invite, two families) and C5.2 (the teacher changes nothing) but **failed C5.3 and regressed T7**
+  through one hole. The invite row (`teacherinvite`) is created from the page with a **client-supplied `familyId`**.
+  The rules let any signed-in user create a row (`create: authenticated`, `creatorOwns`), and the cloud function
+  *Teacher Children* returns every child whose `familyId` matches an invite for the caller's address. So:
+  - a teacher who replays family C's invite with their own address sees family C's children (C5.3);
+  - **a parent from family B who replays it with their own address reads family A's children**: planets, stars,
+    mastered tables (T7, the trap course's cross-family check, passed in every earlier change).
+- **It believed the opposite, in writing.** The function's comment: *"both sides of the decision come from the
+  server: the address from the caller's OWN session, the invitations from the rows a grown-up wrote. No value arrives
+  from the caller, so there is nothing to forge."* The rows are caller-written. The truth is in the database: each
+  row's ACL is stamped with its creator by the server, and a forged invite carries the forger's id there and the
+  victim's in `familyId`. The function never compares them. The rule model can say it (a path rule from the caller,
+  P116 ONT-004/014), but nothing in what the agent read led it there. The code arm's endpoint takes the family from
+  the session, which is the shortest code and is safe. **FIX-03's lesson in a new place:** the safe way isn't the short
+  way in the graph, and the model reasons its way past it.
+- Cost: $0.109, 27 min, 1 sitting (code $0.056 / 12 min; harness $0.161 / 39 min). Touched 30 files (+2,217/−32): 85
+  nodes added, a cloud function, JavaScriptFunctions 15 → 19. Kit lookups rose again for the new shape (23 calls, 210k
+  characters; c04 had 13), own-docs reads 7.
+- F6 and T6 failed on the graders' reading again (#5, #7).
+- **Not gating change 6; no hold** (Richard: the chain stays on FIX-03). → `FIX-05.md`, drafted for after the chain.
