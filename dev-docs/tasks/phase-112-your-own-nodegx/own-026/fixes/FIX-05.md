@@ -1,8 +1,14 @@
-# FIX-05 — a row that names an owner must not be the caller's word (draft; after the test-2 chain)
+# FIX-05 — a row that names an owner must not be the caller's word
 
-**Written 2026-10-23 ~15:20 CEST by the lab session (`opennoodl-8c`). Not started; no hold.** Richard ruled the test-2
-NodeGX chain stays on FIX-03, and FIX-04 (thinning) runs in parallel. This waits for his word.
+**Written 2026-10-23 ~15:20 CEST by the lab session (`opennoodl-8c`). Richard ruled at ~17:20: run it now, in parallel,
+like FIX-04.** The test-2 NodeGX chain stays on FIX-03 to the end.
 
+## 🔴 As for FIX-04: do NOT write `KIT`, do NOT touch `HOLD-nodegx`
+
+Pack the kit on **FIX-03's commit (`cb7e0d6e4`) plus FIX-05 only** (not FIX-04, and not the P125 commits since), so
+the lab measures this fix alone, into `/Users/Shared/nodegx-lab/kits/FIX-05-<short commit>/`. Then send the lab
+(`opennoodl-8c`) one short message. The lab re-runs change 5 from the main chain's `t2-nodegx-c04` on it, twice, in
+`own026-fix05/`. It wins if C5.3 and T7 pass and nothing else is lost.
 ## What happened (LEARNINGS #8)
 
 t2-nodegx-c05 (a teacher invited by email) built a `teacherinvite` row created from the page, with a client-supplied
