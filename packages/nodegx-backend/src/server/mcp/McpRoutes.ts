@@ -62,7 +62,7 @@ import type { RequestContext } from '../HttpServer';
 import type { SecurityState } from '../../security/state';
 import type { WorkflowRunner } from '../../workflow/WorkflowRunner';
 import type { AuditLog } from '../../ops/audit';
-import type { Principal } from '../../security/model';
+import { dropCallerOwner, type Principal } from '../../security/model';
 import { HttpError, readJSONBody, sendJSON } from '../http-util';
 import { assertSeriesWrite, seriesAnswer } from '../series-door';
 import { logger } from '../../ops/logger';
@@ -429,6 +429,7 @@ export class McpRoutes {
         delete data.ACL;
         delete data.createdAt;
         delete data.updatedAt;
+        dropCallerOwner(ctx.principal, data, this.deps.facade.schemaManager?.getTableSchema(collection)); // P112 OWN-026 FIX-05: `owner` is the server's.
         if (Object.keys(data).length === 0) throw new Error('Send at least one field to change.');
         try {
           await this.deps.facade.rawSave(collection, id, data, ctx.acl('write', collection));

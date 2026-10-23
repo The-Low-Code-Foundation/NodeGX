@@ -964,6 +964,56 @@ export function effectiveRule(config: SecurityConfig, collection: string, op: Cl
   return rule !== undefined ? rule : config.defaults.permissions[op];
 }
 
+/**
+ * P112 OWN-026 FIX-05 — the field that says who made a record. The server writes it from the
+ * caller on every create by a signed-in user (`stampCreate`), and a caller never does: a value a
+ * page sends there is dropped, on create and on update. That is what lets a cloud function, a
+ * query or a person trust it, where any other field holds whatever its creator chose to send
+ * (P112-OWN026-CALLEROWNER: an invitation whose "family" field named somebody else's family).
+ */
+export const OWNER_FIELD = 'owner';
+
+/**
+ * Who may name a record's owner themselves: an admin (a person managing their own app, a seed, a
+ * cloud function running as the system) and an unbound server key. A session, a key bound to a
+ * user and an anonymous caller may not — for them the owner is who they are, or nobody.
+ */
+export function mayNameOwner(principal: Principal): boolean {
+  const subject = rulePrincipal(principal);
+  return subject.kind === 'admin' || subject.kind === 'apiKey';
+}
+
+/**
+ * Whether `owner` is the APP's own field here rather than the server's: a collection may already use the name for
+ * a link to one of its own classes (a Chunk's `owner` pointing at an `Owner`). The server's `owner` always points
+ * at `_User`, so a declared `owner` column that is a Pointer to another class is the app's, and so is the first
+ * write's value when no column exists yet and it is a Pointer to another class. A declared `_User` (or untyped)
+ * column is the server's whatever the value says, so relabelling a pointer cannot get a forged owner past it.
+ */
+export function ownerFieldIsTheApps(
+  table: { columns?: readonly { name: string; type?: string; targetClass?: string }[] } | null | undefined,
+  value: unknown
+): boolean {
+  const column = table?.columns?.find((c) => c.name === OWNER_FIELD);
+  if (column) return column.type === 'Pointer' && !!column.targetClass && column.targetClass !== '_User';
+  const v = value as { __type?: unknown; className?: unknown } | null;
+  return !!v && typeof v === 'object' && v.__type === 'Pointer' && typeof v.className === 'string' && v.className !== '_User';
+}
+
+/**
+ * Drop a caller's `owner` from a write it may not make (see {@link mayNameOwner}). `table` is the collection's
+ * declared schema, for {@link ownerFieldIsTheApps}; a collection whose `owner` is its own link is left alone.
+ */
+export function dropCallerOwner(
+  principal: Principal,
+  data: Record<string, unknown> | null | undefined,
+  table?: Parameters<typeof ownerFieldIsTheApps>[0]
+): void {
+  if (!data || mayNameOwner(principal) || !(OWNER_FIELD in data)) return;
+  if (ownerFieldIsTheApps(table, data[OWNER_FIELD])) return;
+  delete data[OWNER_FIELD];
+}
+
 export function effectiveCreatorOwns(config: SecurityConfig, collection: string): boolean {
   if (isSystemCollection(collection)) return false;
   const entry = config.collections[collection];

@@ -1011,6 +1011,20 @@ export enum DiagnosticCode {
   TwoControlsStartOneSave = 'two-controls-start-one-save',
 
   /**
+   * P112 OWN-026 FIX-05 B — a Create or Update Record in a browser component writes the signed-in User's \`id\`
+   * into a field of its own: the caller's word, where the backend's \`owner\` is the server's. Info, never
+   * blocking. See \`ownerField.ts\`.
+   */
+  OwnerSentByThePage = 'owner-sent-by-the-page',
+
+  /**
+   * P112 OWN-026 FIX-05 B — a cloud function reads records as the system and answers per caller, and reads
+   * \`owner\` nowhere, so a field a forger wrote decides what the caller gets. Info, never blocking. See
+   * \`ownerField.ts\`.
+   */
+  FunctionTrustsAFieldTheCallerWrote = 'function-trusts-a-field-the-caller-wrote',
+
+  /**
    * LEG-002 — a run of three or more same-type sibling nodes, none of them
    * named, each of which is something the reader has to go *through*.
    *

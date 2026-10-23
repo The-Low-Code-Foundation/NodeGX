@@ -33,7 +33,7 @@
     "community-email-signup-validat"
   ],
   "patterns": [
-    "A signed-in user's own rows: `visualFilter` rule {\"property\": \"ownerId\", \"operator\": \"equal to\", \"input\": \"ownerId\"}, the User node's `id` wired into `qp-ownerId`, and both fetch-at-build boxes off — the server answers with only that user's rows.",
+    "A signed-in user's own rows: `visualFilter` rule {\"property\": \"owner\", \"operator\": \"equal to\", \"input\": \"owner\"}, the User node's `id` wired into `qp-owner`, and both fetch-at-build boxes off — the server answers with only that user's rows. `owner` is the backend's: it writes the creator into every record from their session, and a page never sends it. A field the page filled from the User id (an ownerId, a familyId) is the caller's word, never proof of whose a record is.",
     "`items` → Repeater `items`, with record properties delivered to the item component via Component Inputs: the canonical list page.",
     "Event Receiver `eventReceived` → fetch input: re-run a query on demand from anywhere in the app.",
     "Turn on Subscribe To Changes and wire `Changed` back into this node's own `Do`: the list stays current without polling, on every backend whose descriptor allows it — SSE on the built-in backend and PocketBase, a WebSocket on Directus.",

@@ -1,7 +1,7 @@
 {
   "id": "cloud-query-own-rows",
   "title": "Only my records: a Query Records filtered on the server by the signed-in user's id",
-  "description": "A signed-in user's own rows, with the filter on the server (a server-side filter, the backend's where clause), not a Filter Records or a Function after the fetch. The Query Records node's `visualFilter` holds one rule, {\"property\": \"ownerId\", \"operator\": \"equal to\", \"input\": \"ownerId\"}, and that `input` mints the input port `qp-ownerId`; the User node's `id` is wired into it, so other users' rows never leave the server (owner isolation by an explicit field). Each row is created with `ownerId` set from the same User id. Both fetch-at-build boxes are off (`runOnChange-collectionName` and `runOnChange-querySettings`: false) and Do is unwired: a rule whose qp- value has not arrived yet is dropped, so a query run before the id arrives would return every row the user may read; this way the id's arrival is what runs it. Sort and limit sit beside the filter (`visualSort`, `storageEnableLimit` + `storageLimit`). When a collection keeps its default creatorOwns rule and the backend enforces it, a user's query already returns only rows they own; the filter is how you narrow further or query by another field.",
+  "description": "A signed-in user's own rows, with the filter on the server (a server-side filter, the backend's where clause), not a Filter Records or a Function after the fetch. The Query Records node's `visualFilter` holds one rule, {\"property\": \"owner\", \"operator\": \"equal to\", \"input\": \"owner\"}, and that `input` mints the input port `qp-owner`; the User node's `id` is wired into it, so other users' rows never leave the server. `owner` is the backend's own field: it writes the creator's id into every record a signed-in user makes, from their session, and drops any `owner` a page sends, so the page that creates a Note sends no owner field at all. Never copy the user's id into a field of your own (an ownerId, a familyId, a teamId) to say whose a record is: that is the caller's word, and anyone signed in can send another id. Both fetch-at-build boxes are off (`runOnChange-collectionName` and `runOnChange-querySettings`: false) and Do is unwired: a rule whose qp- value has not arrived yet is dropped, so a query run before the id arrives would return every row the user may read; this way the id's arrival is what runs it. Sort and limit sit beside the filter (`visualSort`, `storageEnableLimit` + `storageLimit`). When a collection keeps its default creatorOwns rule and the backend enforces it, a user's query already returns only rows they own; the filter is how you narrow further, or how you ask for one person's rows in a shared collection.",
   "demonstrates": ["DbCollection2", "net.noodl.user.User", "For Each", "Component Inputs"],
   "components": [
     {
@@ -29,12 +29,12 @@
         {
           "id": "my_notes",
           "type": "DbCollection2",
-          "label": "Notes where ownerId = my id",
+          "label": "Notes where owner = my id",
           "parameters": {
             "collectionName": "Note",
             "visualFilter": {
               "combinator": "and",
-              "rules": [{ "property": "ownerId", "operator": "equal to", "input": "ownerId" }]
+              "rules": [{ "property": "owner", "operator": "equal to", "input": "owner" }]
             },
             "visualSort": [{ "property": "createdAt", "order": "descending" }],
             "storageEnableLimit": true,
@@ -45,7 +45,7 @@
         }
       ],
       "connections": [
-        { "fromId": "me", "fromProperty": "id", "toId": "my_notes", "toProperty": "qp-ownerId" },
+        { "fromId": "me", "fromProperty": "id", "toId": "my_notes", "toProperty": "qp-owner" },
         { "fromId": "my_notes", "fromProperty": "items", "toId": "notes_list", "toProperty": "items" }
       ]
     },

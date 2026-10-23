@@ -23,7 +23,8 @@
     "`done` → a navigation or Event Sender, with `id` as payload: jump straight to the new record's detail page."
   ],
   "antiPatterns": [
-    "Re-fetching a Query Records node after `done` — live queries already receive the new record; only re-fetch when the query is not live."
+    "Re-fetching a Query Records node after `done` — live queries already receive the new record; only re-fetch when the query is not live.",
+    "Wiring the User node's `id` into a field of your own (an ownerId, a familyId, a teamId) to say whose the record is. The backend already writes the creator into `owner` from the session and drops an `owner` the page sends; a field the page fills is whatever the caller sent, so anyone signed in can name another id. Read `owner` wherever it is decided who sees the record (example `cloud-share-my-records-with-someone`)."
   ],
   "relatedNodes": [
     "SetDbModelProperties",

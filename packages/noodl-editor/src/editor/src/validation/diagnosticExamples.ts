@@ -205,6 +205,17 @@ export const DIAGNOSTIC_EXAMPLES: readonly ExampleCitation[] = [
     code: DiagnosticCode.SharedValueWrittenBackWhole,
     examples: ['cloud-shared-counter'],
     why: 'an Update Record with Add To naming the field and the change wired in: the backend adds it, no script'
+  },
+  // P112 OWN-026 FIX-05 B — the server's own field, filtered on the server.
+  {
+    code: DiagnosticCode.OwnerSentByThePage,
+    examples: ['cloud-query-own-rows'],
+    why: 'a Query Records filtered on "owner", the field the backend writes from the creator, with the User id wired in; the page sends no owner'
+  },
+  {
+    code: DiagnosticCode.FunctionTrustsAFieldTheCallerWrote,
+    examples: ['cloud-share-my-records-with-someone'],
+    why: "a cloud function that returns the records of the shares' owners, never a field the page wrote"
   }
 ];
 

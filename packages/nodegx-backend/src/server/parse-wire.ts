@@ -27,7 +27,7 @@
 import type { IStorageFacade, StorageQueryOptions as QueryOptions } from '@noodl/backend-contract';
 import type { RequestContext } from './HttpServer';
 import { assertSeriesWrite, seriesAnswer } from './series-door';
-import { validateAclShape } from '../security/model';
+import { dropCallerOwner, validateAclShape } from '../security/model';
 import { heldWhile, whyRefused } from '../persistence/onlyWhile';
 // The adapter stack is plain CommonJS without type declarations (see AdapterFacade).
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -473,6 +473,7 @@ export class ParseWireRoutes {
     delete data.objectId;
     delete data.createdAt;
     delete data.updatedAt;
+    dropCallerOwner(ctx.principal, data, this.facade.schemaManager?.getTableSchema(collection));
 
     // An ACL the caller sent explicitly is applied (it is what the node's
     // Access Control Rules emit); one it did not send leaves the row's alone.
@@ -574,6 +575,8 @@ export class ParseWireRoutes {
     delete body.createdAt;
     delete body.updatedAt;
     delete body.objectId;
+    // P112 OWN-026 FIX-05: `owner` is the server's, like the three above (an 'All' save sends it back as read).
+    dropCallerOwner(ctx.principal, body, this.facade.schemaManager?.getTableSchema(collection));
     // A client may set the ACL on rows it can write (Parse semantics; the Set
     // Record node's Access Control Rules emit this). Shape-validate it.
     const aclError = validateAclShape(body.ACL);

@@ -500,11 +500,13 @@ describe('SB-004 §7 — the publication invariant on a real backend', () => {
       // Every column here was created by `_ensureTable` + `inferColumnType` on
       // the first write. `data` typed as `Object` is the one that matters after
       // `pageId`: §2 keeps the kind-specific payload in one column precisely
-      // because the section shapes have nothing in common.
+      // because the section shapes have nothing in common. `owner` is the backend's own (P112 OWN-026 FIX-05):
+      // who made the record, stamped on every collection a signed-in person writes to, shared ones included.
       expect(schema.json.columns.map((c) => `${c.name}:${c.type}`).sort()).toEqual([
         'data:Object',
         'kind:String',
         'order:Number',
+        'owner:Pointer',
         'pageId:String'
       ]);
     });

@@ -51,6 +51,10 @@ import {
   effectiveFunctionRateLimit,
   functionIdempotency,
   functionTimeoutMs,
+  dropCallerOwner,
+  isSystemCollection,
+  OWNER_FIELD,
+  ownerFieldIsTheApps,
   ruleAllows,
   rulePrincipal,
   validateAclShape,
@@ -2261,6 +2265,13 @@ export class HttpServer {
    * Create-time stamping (model doc §5): validate any client ACL, and when a
    * user creates into a creator-owns collection, stamp `owner` and the
    * template ACL. Runs in dev-open too, so the posture survives the flip.
+   *
+   * P112 OWN-026 FIX-05: `owner` is the server's on EVERY collection, not only a
+   * creator-owned one. A signed-in caller's record names them whatever the body
+   * said, a shared collection's included (the template ACL stays creator-owns
+   * only: who made a record is not who may read it), and an anonymous caller's
+   * `owner` is dropped. Before, a shared collection kept whatever `owner` the
+   * page sent, so the one field that looked like the server's word wasn't.
    */
   private stampCreate(principal: Principal, collection: string, data: Record<string, unknown>): void {
     const aclError = validateAclShape(data.ACL);
@@ -2278,6 +2289,21 @@ export class HttpServer {
     // write, not about whose row it is.
     const owner =
       principal.kind === 'admin' && principal.userId ? { kind: 'user' as const, userId: principal.userId } : rulePrincipal(principal);
+    const table = this.facade.schemaManager?.getTableSchema(collection) ?? null;
+    dropCallerOwner(principal, data, table);
+    if (
+      owner.kind === 'user' &&
+      !this.security.creatorOwns(collection) &&
+      !isSystemCollection(collection) &&
+      !ownerFieldIsTheApps(table, data[OWNER_FIELD])
+    ) {
+      const sm = this.facade.schemaManager;
+      if (sm) {
+        sm.createTable({ name: collection, columns: [] });
+        sm.addColumn(collection, { name: OWNER_FIELD, type: 'Pointer', targetClass: '_User' });
+      }
+      data[OWNER_FIELD] = owner.userId;
+    }
     if (owner.kind === 'user' && this.security.creatorOwns(collection)) {
       const sm = this.facade.schemaManager;
       if (sm) {

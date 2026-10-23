@@ -53,6 +53,7 @@ import {
   readStoredTokens,
   type Diagnostic,
   type FunctionSecurityPolicy,
+  type CollectionWriteRules,
   type ValidationReport,
   type ComponentNodesView
 } from './editor-deps';
@@ -178,6 +179,21 @@ export function projectSecurity(store: ProjectStore): FunctionSecurityPolicy | n
 }
 
 /**
+ * P112 OWN-026 FIX-05 — the `defaults` and `collections` of the same `nodegx.security.json`: who may
+ * write a collection, for `function-trusts-a-field-the-caller-wrote`. `null` (no file, or one that
+ * will not parse) reads as "not known", which the check treats as "a caller may write it".
+ */
+export function projectCollectionRules(store: ProjectStore): CollectionWriteRules | null {
+  try {
+    const raw = fs.readFileSync(path.join(store.projectDir, 'nodegx.security.json'), 'utf8');
+    const parsed = JSON.parse(raw) as CollectionWriteRules;
+    return parsed && typeof parsed === 'object' ? { defaults: parsed.defaults ?? null, collections: parsed.collections ?? null } : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * REL-002a — the project's `settings.bodyScroll`, in the three states
  * `checkPageScroll` distinguishes.
  *
@@ -222,6 +238,7 @@ export function preconditionDiagnostics(
     component: legacyName,
     // DEF-009 — null means "no policy file", never undefined: see projectSecurity.
     security: projectSecurity(store),
+    collectionRules: projectCollectionRules(store),
     // REL-002a — null means "the project has not set it", never undefined: see projectBodyScroll.
     bodyScroll: options.bodyScroll !== undefined ? options.bodyScroll : projectBodyScroll(store),
     nodes: authoredNodes(candidate.nodes.nodes),

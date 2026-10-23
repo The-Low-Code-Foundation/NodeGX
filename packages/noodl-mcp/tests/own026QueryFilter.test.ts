@@ -157,7 +157,7 @@ describe('P112-OWN026-QUERYFILTERSHAPE — the write gate refuses a made-up quer
       expect(res.isError).toBe(true);
       const recipe = res.data.error.details.examples?.recipes.find((r) => r.code === CODE);
       expect(recipe?.exampleId).toBe(ID);
-      expect(JSON.stringify(recipe?.fragment)).toContain('qp-ownerId');
+      expect(JSON.stringify(recipe?.fragment)).toContain('qp-owner'); // FIX-05: the server's own field
     } finally {
       await fresh.close();
     }
@@ -205,7 +205,7 @@ describe('P112-OWN026-QUERYFILTERSHAPE — the example an agent finds', () => {
     expect(description).toContain('narrow further');
   });
 
-  it('passes the write gate with no error and no warning, its filter wired from the User id into qp-ownerId', async () => {
+  it('passes the write gate with no error and no warning, its filter wired from the User id into qp-owner', async () => {
     const session = await connect(copyFixture());
     try {
       const example = getExample(ID)!;
@@ -225,7 +225,7 @@ describe('P112-OWN026-QUERYFILTERSHAPE — the example an agent finds', () => {
         expect(report.data.summary).toEqual(expect.objectContaining({ errors: 0, warnings: 0 }));
       }
       const page = example.components.find((c) => c.name === '/My Notes')!;
-      expect(page.connections).toContainEqual(wire('me', 'id', 'my_notes', 'qp-ownerId'));
+      expect(page.connections).toContainEqual(wire('me', 'id', 'my_notes', 'qp-owner'));
     } finally {
       await session.close();
     }

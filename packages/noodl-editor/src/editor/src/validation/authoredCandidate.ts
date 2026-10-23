@@ -82,6 +82,7 @@ import { checkOneWayGate } from './oneWayGate';
 import { checkQueryBeforeFilter } from './queryBeforeFilter';
 import { checkQueryFilterShape } from './queryFilterShape';
 import { checkSharedValueWrites } from './sharedValueWrites';
+import { checkOwnerField, type CollectionWriteRules } from './ownerField';
 import { checkResponsiveArrangement } from './responsiveArrangement';
 import { checkRuntimeContext } from './runtimeContext';
 import { checkTypographyHierarchy } from './typographyHierarchy';
@@ -517,6 +518,11 @@ export interface AuthoredPreconditionOptions {
    */
   security?: FunctionSecurityPolicy | null;
   /**
+   * P112 OWN-026 FIX-05 — the `defaults` and `collections` of the same file, for who may write a collection.
+   * **`undefined` or `null` means "not known"**: every collection then reads as one a caller may write.
+   */
+  collectionRules?: CollectionWriteRules | null;
+  /**
    * P109 ISL-005 — every script file in the project (`engine/world.js`), for a Function's `uses`.
    * **Omitted means "do not check"**, the convention every option above follows: a caller that cannot
    * read the project's `scripts/` folder cannot tell a missing file from one it has not listed.
@@ -580,6 +586,7 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     wires,
     derived,
     security,
+    collectionRules,
     bodyScroll,
     views,
     scripts
@@ -671,6 +678,9 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // P112 OWN-026 FIX-03 C — a shared value written back whole, two controls starting one save: infos, said where
     // the graph is written.
     ...checkSharedValueWrites(nodes, { component, wires }),
+    // P112 OWN-026 FIX-05 B — whose a record is: the page's word in a field of its own, or a function that never
+    // reads the server's (`owner`). Infos, said where the graph is written.
+    ...checkOwnerField(nodes, { component, wires, rules: collectionRules }),
     // DSG-004 §2.3 — doctrine §3, as an info that never blocks.
     ...checkTypographyHierarchy(nodes, { component, connectedInputs: connections }),
     // FIX-007 §2 — the wire the port rule is right to skip and nothing else could see.

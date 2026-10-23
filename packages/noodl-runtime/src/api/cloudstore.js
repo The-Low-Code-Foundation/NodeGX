@@ -417,6 +417,12 @@ function _fromJSON(item, collectionName, modelScope) {
     if (key === 'objectId' || key === 'ACL') continue;
 
     var _type = schema && schema.properties && schema.properties[key] ? schema.properties[key].type : undefined;
+    // P112 OWN-026 FIX-05: a Pointer the app never declared (`owner`, which the backend stamps on every record a
+    // signed-in user makes) is the id it points at, as a declared one is and as a `plain` read is. It used to
+    // become a Model of the envelope, so `row.owner === Inputs.userId` was false and the safe check the long one.
+    if (_type === undefined && item[key] && item[key].__type === 'Pointer' && item[key].objectId !== undefined) {
+      _type = 'Pointer';
+    }
 
     const value = _deserializeJSON(item[key], _type, modelScope);
     // ISL-027 / P107-C49, ruled "Compare the list's contents": a list arrives as a NEW array on every

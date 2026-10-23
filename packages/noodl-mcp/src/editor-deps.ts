@@ -84,6 +84,7 @@ export { backendRequirementFor } from '../../noodl-editor/src/editor/src/validat
 // DEF-009 — the shape of `nodegx.security.json`'s `functions` block, as the
 // shared `checkPublicWriteDoor` precondition reads it.
 export type { FunctionSecurityPolicy } from '../../noodl-editor/src/editor/src/validation';
+export type { CollectionWriteRules } from '../../noodl-editor/src/editor/src/validation';
 
 // ─── LAS-007: retrieval into the failure moment ───────────────────────────────
 // The DiagnosticCode → example table, beside the checks that produce the

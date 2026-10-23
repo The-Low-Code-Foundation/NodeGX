@@ -11,7 +11,10 @@ export const ENFORCED_RULES_NOTE =
   'record a user creates is read and changed only by that user (creatorOwns), so a query already returns only the ' +
   "signed-in user's own records, with no owner filter needed. Records the backend tools create have no owner: every " +
   'signed-in user reads them. A collection all signed-in users share needs set_collection_permissions with ' +
-  'creatorOwns: false; one visitors read before signing in needs find and get "public". A value several devices ' +
+  'creatorOwns: false; one visitors read before signing in needs find and get "public". Every record a signed-in ' +
+  "user makes says who made it in owner, written by the backend from their session; a page never sends it, and no " +
+  'other field proves whose a record is: a field the page fills from the User id is whatever the caller sent. Where ' +
+  'a cloud function decides who sees what, it checks owner. A value several devices ' +
   'change (a count, a score, a balance) is changed on the server by the amount, never written back whole from what ' +
   'a page holds: Update Record with Add To naming the field and the change (1, -1) wired into it, which updates the ' +
   "record to the server's total (in a script, Noodl.Records.increment); or Update Record with Only If Unchanged. Test as two users: what " +

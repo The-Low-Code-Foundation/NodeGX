@@ -64,6 +64,14 @@ A workflow orchestrates; a cloud function computes; a workflow calls cloud funct
   Query Records already returns only their rows. Never fetch everyone's rows and filter them in a
   Function node: every row reaches every browser. Narrow further with the query's own server filter
   (\`visualFilter\`). A collection everyone shares needs \`creatorOwns: false\`.
+- **Whose a record is, is the backend's word: \`owner\`.** The backend writes the creator's id into
+  every record a signed-in user makes, from their session, and drops any \`owner\` a page sends (in
+  a cloud function, a record reads \`row.owner\`). Every other field is what its creator sent. So
+  never copy the User id into a field of your own (an ownerId, a familyId, a teamId) to say whose a
+  record is: anyone signed in can send another id. To let someone else see your records (invite a
+  teacher, a coach, a colleague), the page creates a share naming only who it is shared with, and a
+  cloud function returns the records of the shares' \`owner\`s (example
+  \`cloud-share-my-records-with-someone\`).
 - **Change a shared value on the server, by the amount.** A count, score, balance or progress that two
   tabs or devices change is never read into the page, changed, and written back whole: the later
   write erases the earlier. Update Record with \`addTo\` naming the field (\`addTo: "points"\`) and

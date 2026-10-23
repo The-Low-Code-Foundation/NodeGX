@@ -24,7 +24,7 @@ import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import type { RequestContext } from './HttpServer';
 import { assertSeriesWrite } from './series-door';
 import { seriesProblem } from '@noodl/runtime/src/api/adapters/series';
-import type { ClpOp } from '../security/model';
+import { dropCallerOwner, type ClpOp } from '../security/model';
 import type {
   StorageCheckDecl,
   StorageCheckStatus,
@@ -329,6 +329,7 @@ export class ByobAdminRoutes {
     const data = await readJSONBody(ctx.req);
     assertAclShape(data);
     assertAccountWrite(ctx.params.table, data);
+    dropCallerOwner(ctx.principal, data, this.facade.schemaManager?.getTableSchema(ctx.params.table)); // P112 OWN-026 FIX-05: `owner` is the server's.
     try {
       const record = await this.facade.rawSave(ctx.params.table, ctx.params.id, data, ctx.acl('write'));
       sendJSON(ctx.res, 200, forWire(ctx.params.table, record));
@@ -399,6 +400,7 @@ export class ByobAdminRoutes {
             ctx.checkData(collection, clpOp);
             assertAclShape(op.data as Record<string, unknown>);
             assertAccountWrite(collection, op.data as Record<string, unknown>);
+            dropCallerOwner(ctx.principal, op.data as Record<string, unknown>, this.facade.schemaManager?.getTableSchema(collection));
             await this.facade.rawSave(
               collection,
               op.objectId as string,
