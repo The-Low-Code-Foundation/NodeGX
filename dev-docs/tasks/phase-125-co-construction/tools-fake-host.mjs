@@ -1,11 +1,11 @@
 // A fake MCP Apps host, for the local gate: serves host.html on a port of its own, so the panel is drawn from a
 // FOREIGN origin (as Claude's sandbox draws it), answers ui/initialize over postMessage, and logs every message the
 // panel sends into the page (#log) where a CDP drive can read it.
-//   node serve.mjs <port> <panel-url>
+//   node serve.mjs <port> <panel-url> [iframe-width-px]
 import http from 'node:http';
-const [port, panelUrl] = process.argv.slice(2);
+const [port, panelUrl, width = '100%'] = process.argv.slice(2);
 const html = `<!doctype html><meta charset="utf-8"><title>fake host</title>
-<style>body{margin:0;font:13px monospace;background:#eee}#log{white-space:pre-wrap;padding:8px;max-height:200px;overflow:auto;background:#fff}iframe{width:100%;height:640px;border:2px solid #c00;display:block}</style>
+<style>body{margin:0;font:13px monospace;background:#eee}#log{white-space:pre-wrap;padding:8px;max-height:200px;overflow:auto;background:#fff}iframe{width:${/^\d+$/.test(width) ? width + 'px' : width};height:640px;border:2px solid #c00;display:block}</style>
 <pre id="log">host: ready\n</pre>
 <iframe id="app" src="${panelUrl}" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
 <script>

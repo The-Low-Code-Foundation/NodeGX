@@ -196,8 +196,9 @@ export function createServer(options: ServerOptions): CreatedServer {
   const renderLedger = new RenderLedger();
 
   const disclosure = new ToolDisclosure(binding.isBound);
-  const recAll = recordTools(server, disclosure);
-  const rec = recAll;
+  // P125 CCN-001 s6 — every tool registered below is held while the person's `.nodegx-hold.json` is in the
+  // project, reads included: HOLD means stop (`hold.ts`, `HOLD_EXEMPT` for the four that let the agent see it).
+  const rec = holdGate(recordTools(server, disclosure), binding);
 
   // P125 CCN-001 s3/s4 — at `initialize`: one stderr line naming the client and what it can render (Claude Desktop
   // keeps a server's stderr in ~/Library/Logs/Claude/mcp-server-<name>.log and logs no request params, so this is
@@ -284,11 +285,6 @@ export function createServer(options: ServerOptions): CreatedServer {
   // P112-OWN018-LISTCHANGED — resident in every mode: the door for a client that never re-reads the tool list.
   registerCallTool(rec, disclosure);
   if (options.allowWrites) {
-    // P125 CCN-001 — every tool registered in this block is held while the person's `.nodegx-hold.json` is in
-    // the project: the recorder is wrapped once here, so "write-gated" and "held" are the same set by
-    // construction (see `hold.ts`). The shadow is deliberate: nothing below needs to know.
-    // eslint-disable-next-line @typescript-eslint/no-shadow
-    const rec = holdGate(recAll, binding);
     // LAS-006 §4 — one plan registry, shared by the two write groups that both
     // have an opinion about it: the plan tools own the plans, and
     // `create_component` needs only to know whether any exist.

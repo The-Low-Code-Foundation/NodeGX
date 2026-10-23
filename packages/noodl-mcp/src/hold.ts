@@ -58,13 +58,24 @@ export function holdError(hold: Hold): ToolError {
   const note = hold.note ? ` They wrote: "${hold.note}".` : '';
   return new ToolError(
     'held',
-    `The person pressed HOLD in Studio${since}: nothing is written to this project until they release it.${note} ` +
-      'Stop building. Tell them what you were about to do and ask what they saw; when they release the hold, ' +
+    `The person pressed HOLD in Studio${since}: STOP. Nothing runs against this project — no read, no render, ` +
+      `no write — until they release it.${note} Do not call another tool. Tell them, in a sentence or two, what ` +
+      'you were doing and what you were about to do next, and ask what they saw. When they release the hold, ' +
       're-read anything you were about to change, because they may have edited it in Studio meanwhile. ' +
       `(The hold is the file ${hold.file ?? HOLD_FILE}; only the person removes it.)`,
     { hold }
   );
 }
+
+/**
+ * The tools a hold does not stop: the ones that let the agent see the hold, and nothing that touches the project.
+ *
+ * s6 (2026-10-23, Richard's AC5 run): a hold on writes only let the agent "keep beavering away until it tried to
+ * write something, then fail". HOLD means stop; so every tool is held, and these four are the exceptions —
+ * `open_studio` (which reports the hold and keeps Studio on screen), `session_status` (which will report it), and
+ * the two doors (`find_tools`, `call_tool`), whose targets are held on their own.
+ */
+export const HOLD_EXEMPT: ReadonlySet<string> = new Set(['open_studio', 'session_status', 'find_tools', 'call_tool']);
 
 /**
  * The recorder with the hold in front of every handler registered through it.
@@ -73,11 +84,11 @@ export function holdError(hold: Hold): ToolError {
  * forwards that and nothing else, `disclosure.ts`), so wrapping the last argument covers them all. The check runs
  * per call, against the binding as it is then: a server that binds a project later is held by that project's file.
  */
-export function holdGate(rec: McpServer, binding: ProjectBinding): McpServer {
+export function holdGate(rec: McpServer, binding: ProjectBinding, exempt: ReadonlySet<string> = HOLD_EXEMPT): McpServer {
   const proxy = Object.create(rec) as McpServer;
   proxy.registerTool = ((name: string, ...rest: unknown[]) => {
     const handler = rest[rest.length - 1];
-    if (typeof handler === 'function') {
+    if (typeof handler === 'function' && !exempt.has(name)) {
       rest[rest.length - 1] = async (...args: unknown[]) => {
         const dir = binding.projectDir;
         if (dir !== undefined) {

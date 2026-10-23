@@ -17,10 +17,10 @@ stays open), as the live form of it.
 4. ✅ HOLD binds: with `.nodegx-hold.json` in the project, `set_project_settings` and `create_component` answer
    `{ error: { code: "held", … "the background went blue" … } }`; `validate_project` and `open_studio` still answer;
    with the file gone the same writes succeed (`run A` 08 vs `run B2` 04/05).
-5. ⏳ **In Claude Desktop:** the person says "make me a NodeGX app", clicks Allow, and Studio is inside the
-   conversation with the app redrawing as Claude writes it; HOLD refuses Claude's next write and Claude says so.
-   If the sandbox refuses `http://127.0.0.1` in the CSP, the strip still works and **Open in a window** is the route;
-   file that as the finding and this AC closes on the window.
+5. ✅ **In Claude Desktop (run 4, 2026-10-23 ~11:08):** Studio rendered inside the conversation under the
+   `open_studio` call (Richard's screenshot: the strip, "HELD since 11:07:44 — the agent cannot write", Release, Full
+   screen, Open in a window, Studio's rail and tree). HOLD refused the write to `Pages/Home`; Claude said what it had
+   been about to write and asked what he saw. The sandbox honours `http://127.0.0.1:<port>` in `csp`.
 6. ✅ `tests/toolDisclosure.test.ts` 18/18 (manifest = registrations, both modes); `tsc --noEmit` clean for noodl-mcp
    (the two errors on HEAD are `nodegx-export/src/emit/swift/modifiers.ts`, lane 6's open edit).
 
@@ -98,6 +98,28 @@ pool with a 16-entry PATH, in which `node` is `~/.nvm/versions/node/v16.20.2/bin
 Fix: the config's `"command"` is an absolute path to Node 22, not `node`; `bin/noodl-mcp.js` now says this in one
 line on Node < 20 and exits 1 instead of a stack trace. A stranger's install (CCN-006) has to write the absolute path
 or ship its own runtime.
+
+## s6 (same day): it works — and the two things Richard saw
+
+Run 4 closed AC5. Richard: *"It works! Bad UI squeeze within the chat, maybe optimised version for the chat
+constraints? Also 'HOLD' worked, but it still kept beavering away until it tried to write something, then failed and
+got annoyed."* (The Claude in that chat: *"You pressed HOLD in Studio, so my write to Pages/Home was refused. Nothing
+in the project has changed. This is what I was about to write … What did you see that made you hold?"*)
+
+Built in s6:
+- **HOLD means stop.** The gate now wraps every tool, reads and renders included (`hold.ts` `HOLD_EXEMPT`: only
+  `open_studio`, `session_status`, `find_tools`, `call_tool` answer, and `call_tool`'s target is held on its own). The
+  refusal says STOP, no other tool, say what you were doing, ask. Measured: held, `get_project_info` and
+  `validate_project` → `held`; `open_studio` and `find_tools` answer; `call_tool(set_project_settings)` → `held`.
+- **A compact inline layout.** The panel is ~740 px wide and Studio's columns are 260 | stage | 360, so inline is the
+  stage alone, with **Elements** and **Properties** buttons on the strip (properties come up by themselves when an
+  element is picked); Full screen is Studio as it is. The strip is `position: fixed` — in the flow above `<body>`,
+  Studio's own scroll took it to y = −45 (measured) and it vanished. `shots/02-inline-compact.png` at 740 px.
+- Not done: the `ui/update-model-context` sent on HOLD does not reach a model mid-turn (it kept going until a
+  tool call); with every tool held, the next call is the stop, which is as early as a host allows.
+
+**Run 5 (Richard, when his weekly limit allows — it read 87 %):** reload the server, a new conversation, the same
+prompt. Expect: the stage fills the panel; HOLD stops the very next call; Elements / Properties toggle; Full screen.
 
 **AC5 run 4:** config with the absolute node path, reload the server, a NEW conversation (the index is built at its start), connector on. Say: *"Open the
 NodeGX project at ~/vscode_projects/NodeGX test projects/Tap Counter C7Q4 with open_project, then call open_studio,
