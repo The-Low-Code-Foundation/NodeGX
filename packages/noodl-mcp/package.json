@@ -31,7 +31,7 @@
   ],
   "scripts": {
     "build": "node build.mjs",
-    "prepack": "node build.mjs && node build-render-harness.mjs && node build-backend-copy.mjs && node build-preset-fonts-copy.mjs && node build-starter-assets-copy.mjs",
+    "prepack": "node build.mjs && node build-render-harness.mjs && node build-backend-copy.mjs && node build-preset-fonts-copy.mjs && node build-starter-assets-copy.mjs && node check-pack-paths.mjs",
     "postpack": "node build-render-harness.mjs --remove && node build-backend-copy.mjs --remove && node build-preset-fonts-copy.mjs --remove && node build-starter-assets-copy.mjs --remove",
     "test": "jest",
     "typecheck": "tsc --noEmit"

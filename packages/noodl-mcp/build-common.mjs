@@ -3,7 +3,7 @@
  * `build-cloud-bundle.mjs` (which a spec runs to build the cloud bundler into a temp path,
  * P109 ISL-042) read one copy. Paths resolve from this file, not the working directory.
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -23,6 +23,42 @@ const here = path.dirname(fileURLToPath(import.meta.url));
  */
 const APP_VERSION = JSON.parse(readFileSync(path.join(here, '..', 'noodl-editor', 'package.json'), 'utf8')).version;
 
+/**
+ * NPMAUDIT-LOCALPATH — a release is built in a worktree, whose `node_modules` entries are links to
+ * the primary checkout's (`scripts/devtools/make-worktree.sh`). esbuild names a module by its real
+ * path, so every module comment and `__commonJS` key in the bundle read
+ * `../../../../OpenNoodl/node_modules/…`: a folder outside the repo, shipped to everyone. These name
+ * the same files through the links, as a checkout would. The real folder is found through esbuild's
+ * own entry, which every build here has. `check-pack-paths.mjs` (prepack) refuses any that get through.
+ */
+const NODE_MODULES = path.resolve(here, '..', '..', 'node_modules');
+const NODE_MODULES_REAL = existsSync(path.join(NODE_MODULES, 'esbuild'))
+  ? path.dirname(realpathSync(path.join(NODE_MODULES, 'esbuild')))
+  : NODE_MODULES;
+
+/** One path esbuild read, relative to `fromDir`, renamed through the `node_modules` link. */
+export function throughNodeModulesLink(rel, fromDir = here) {
+  if (NODE_MODULES_REAL === NODE_MODULES) return rel;
+  const abs = path.resolve(fromDir, rel);
+  if (!abs.startsWith(NODE_MODULES_REAL + path.sep)) return rel;
+  return path.relative(fromDir, path.join(NODE_MODULES, abs.slice(NODE_MODULES_REAL.length + 1)));
+}
+
+/** The same rename over a written bundle (esbuild prints paths relative to `absWorkingDir`). */
+export const nodeModulesThroughLink = {
+  name: 'node-modules-through-link',
+  setup(build) {
+    build.onEnd((result) => {
+      const { outfile, absWorkingDir = process.cwd() } = build.initialOptions;
+      if (result.errors.length || !outfile || NODE_MODULES_REAL === NODE_MODULES) return;
+      const real = path.relative(absWorkingDir, NODE_MODULES_REAL) + '/';
+      const link = path.relative(absWorkingDir, NODE_MODULES) + '/';
+      const text = readFileSync(outfile, 'utf8');
+      if (text.includes(real)) writeFileSync(outfile, text.split(real).join(link));
+    });
+  }
+};
+
 export const common = {
   define: { __NODEGX_APP_VERSION__: JSON.stringify(APP_VERSION) },
   bundle: true,
@@ -30,6 +66,7 @@ export const common = {
   format: 'cjs',
   sourcemap: false,
   logLevel: 'info',
+  plugins: [nodeModulesThroughLink],
   /**
    * HLS-008 — the third of the three resolvers that have to agree, after
    * `tsconfig.json`'s `paths` and `jest.config.js`'s `moduleNameMapper`.

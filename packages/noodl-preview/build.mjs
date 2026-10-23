@@ -28,6 +28,9 @@
 import path from 'path';
 import { readFileSync, renameSync, writeFileSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
+
+// NPMAUDIT-LOCALPATH: a worktree's linked node_modules named through the link, as in the MCP's bundles.
+import { nodeModulesThroughLink, throughNodeModulesLink } from '../noodl-mcp/build-common.mjs';
 import { fileURLToPath } from 'url';
 
 import esbuild from 'esbuild';
@@ -107,7 +110,7 @@ const shared = {
     '.woff': 'empty',
     '.woff2': 'empty'
   },
-  plugins: [shimPlugin],
+  plugins: [shimPlugin, nodeModulesThroughLink],
   logLevel: 'warning'
 };
 
@@ -135,6 +138,7 @@ for (const { entry, out } of DEPLOY_ONLY ? ENTRIES.filter((e) => e.out === 'dist
   // A plugin's own namespace (`preview-stub:…`) is not a file; everything else is, relative to this package.
   const inputs = Object.keys(result.metafile.inputs)
     .filter((p) => !/^[a-z-]+:/.test(p))
+    .map((p) => throughNodeModulesLink(p, HERE))
     .sort();
   const listFile = outfile.replace(/\.cjs$/, '.inputs.json');
   writeFileSync(listFile + suffix, JSON.stringify({ inputs }, null, 1) + '\n');
