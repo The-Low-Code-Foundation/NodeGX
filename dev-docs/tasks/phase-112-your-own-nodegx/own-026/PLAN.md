@@ -336,3 +336,7 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   reports **kit lookups** (calls and characters to the kit's teaching tools) and **reads of its own `docs/`**: c01–c04
   went 19/119k → 16/206k → 23/492k → 13/115k against 2 → 3 → 8 → 10. Whether the project, not the kit, teaches the
   agent as the chain grows is the reading of LEARNINGS #7 to test.
+- **2026-10-23 ~14:30 CEST — Richard's ClinePass bars during test 2** (OWN-020's rule; after 13 test-2 rounds,
+  $1.84 at ClinePass prices): 5-hour **5%**, weekly **13%** (he thinks it reset this morning), monthly **42%**
+  (holds test 1 and earlier labs). He ruled to go on to twenty changes. The Opus grades (12 so far, $21.86 by Claude
+  Code's own count) use his Claude plan, not ClinePass, and show on neither bar.
