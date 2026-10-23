@@ -289,3 +289,12 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   name.) KIT-PROVEN written; t2-nodegx-c01 started 10:35. Code and harness were at change 3 by then: c01 14/15 both;
   c02 code 15/17 (C2.1 FAIL: multiple choice instead of a number pad), harness 15/17 (F6 regressed, graded as a doubt;
   harness 56 min / $0.238 against code's 12 min / $0.052).
+- **2026-10-23 11:37 CEST — a seed carries its old folder's path; left as it is for the rest of test 2.** Each round
+  works on a copy at a new path, so a file that names its own folder names the seed's. t2-nodegx-c02 found the
+  project's `.mcp.json` (written by `create_project`, for Claude Code) pointing at t1-nodegx-3. It ran
+  `ls -d …/t1-nodegx-3`, the fence refused it ("Operation not permitted"), and it rewrote the path to its own folder (2
+  calls). The code arm's README names its builder's folder too (t2-code-c01's grader). A person on day N has the
+  same folder, so this is the lab's. It's small and touches every arm, and rewriting seeds mid-test would change the
+  conditions halfway through, so the lab is unchanged; the audits show each case. The product side is a real defect,
+  filed: `P112-OWN026-MCPJSONABSPATH` (a moved, renamed or cloned project points its Claude Code server at the old
+  folder).
