@@ -40,7 +40,7 @@ import { getParseErrorMessage, normalizeObjectSchema, safeParseAsync } from '@mo
 import { toJsonSchemaCompat } from '@modelcontextprotocol/sdk/server/zod-json-schema-compat.js';
 import { z } from 'zod';
 
-import { clientRendersApps } from '../clientApps';
+import { clientRendersApps, markOpenStudioProxied } from '../clientApps';
 import { callHint, clientProfile } from '../clientProfile';
 import { ToolError } from '../errors';
 
@@ -220,6 +220,25 @@ export class ToolDisclosure {
   }
 
   /** Enable named handles that are currently disabled, reporting only what changed. */
+  /**
+   * P125 CCN-001 s4 — every tool, from the first `tools/list`, bootstrap included.
+   *
+   * For a client that indexes a server's tools once, when the conversation starts, and loads them into the
+   * model on demand (`clientLoadsToolsItself`): Claude Desktop. On such a host a later reveal is in the list and
+   * not in the index — measured 2026-10-23, run 3: `open_studio` revealed, re-listed, and unreachable by name.
+   * The bootstrap surface's reason (BST-001: do not offer 89 project tools on a server with no project) still
+   * holds for a client that sees reveals; here it would hide, for the whole conversation, every tool the project
+   * gets when it is created. An unbound project tool answers `no-project` with the way out, which that client
+   * can read; a tool it cannot see, it cannot read. The deferral is turned off for the binding too, so
+   * {@link bindProject} has nothing left to hide.
+   */
+  advertiseEverything(): string[] {
+    this.requestedDeferTools = false;
+    this.deferring = false;
+    for (const group of TOOL_GROUPS) this.revealed.add(group.id);
+    return this.enableAll([...this.handles.keys()]);
+  }
+
   private enableAll(names: readonly string[]): string[] {
     const newly: string[] = [];
     for (const name of names) {
@@ -618,14 +637,12 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
         // panel is drawn for the tool the host sees being called, and through here the host sees `call_tool`.
         // Richard's second run (2026-10-23): 18 tools/call, 7 tools/list, 0 resources/read — Studio started, the
         // panel never fetched. So reveal it by name (the host re-lists on `list_changed`) and send the model to it.
+        // s4: not refused — refused, the person got nothing (run 3: the model stopped and asked). The call goes
+        // through, `open_studio` opens the browser instead of counting on a panel, and its note says to call it by
+        // name next time.
         if (args.name === 'open_studio' && !args.describe && clientRendersApps(server)) {
           disclosure.revealNames(['open_studio']);
-          throw new ToolError(
-            'invalid-argument',
-            'open_studio draws Studio inside this conversation only when your client calls it by its own name: ' +
-              'through call_tool the host sees call_tool and draws nothing. It is in your tool list now — call ' +
-              'open_studio directly, with no arguments.'
-          );
+          markOpenStudioProxied();
         }
         const schema = handle.inputSchema ? normalizeObjectSchema(handle.inputSchema) ?? handle.inputSchema : undefined;
         const jsonSchema = (): { properties?: Record<string, unknown> } =>

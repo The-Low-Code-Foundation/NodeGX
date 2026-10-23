@@ -40,7 +40,7 @@ import { spawn } from 'child_process';
 
 import type { McpServer, RegisteredResource } from '@modelcontextprotocol/sdk/server/mcp.js';
 
-import { clientRendersApps } from '../clientApps';
+import { clientRendersApps, consumeOpenStudioProxied } from '../clientApps';
 import { ToolError } from '../errors';
 import { readHold } from '../hold';
 import type { ProjectBinding } from '../project/ProjectBinding';
@@ -146,10 +146,8 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
       _meta: { ui: { resourceUri: STUDIO_RESOURCE_URI }, 'ui/resourceUri': STUDIO_RESOURCE_URI }
     },
     guarded(async () => {
-      const dir = binding.projectDir;
-      if (dir === undefined) {
-        throw new ToolError('no-project', 'No project is open. Call create_project or open_project first, then open_studio.');
-      }
+      // BST-001 — the one no-project refusal lives in ProjectBinding.require(); nothing here words its own.
+      const dir = binding.require().projectDir;
       const found = findStudio();
       if (found.dir === null) throw new ToolError('not-found', found.reason);
       let instance: StudioInstance;
@@ -171,7 +169,9 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
       }
       const hold = readHold(dir);
       const url = `${instance.origin}/`;
-      const rendersApps = clientRendersApps(server);
+      // A proxied call (through call_tool) draws no panel even in a host that renders them: the browser, then.
+      const viaProxy = consumeOpenStudioProxied();
+      const rendersApps = clientRendersApps(server) && !viaProxy;
       const openedBrowser = rendersApps ? false : openInBrowser(url);
       return jsonResult({
         ok: true,
@@ -186,6 +186,10 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
             : openedBrowser
               ? `Studio opened in the person's browser at ${url}. `
               : `Tell the person to open ${url} in a browser: Studio is there. `) +
+          (viaProxy
+            ? 'You reached open_studio through call_tool, so the host drew no panel; next time call open_studio by ' +
+              'its own name and Studio appears inside the conversation. '
+            : '') +
           'Build in short steps and keep calling render_report or validate_component as you go: the person is ' +
           'watching the same files redraw. A write refused with code `held` means they pressed HOLD — stop and ask.'
       });

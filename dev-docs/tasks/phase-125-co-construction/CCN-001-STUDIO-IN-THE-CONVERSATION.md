@@ -67,6 +67,32 @@ Built in s3:
 **The host must restart the server to run the new build** (Developer → Reload MCP Configuration, or restart Claude
 Desktop): the chat's server is the process that started at 10:45 with the old bundle.
 
+## s4 (same day): the third run — Claude Desktop cannot see a tool revealed mid-conversation
+
+The stderr line answered the capability question: `claude-ai 0.1.0` and its calling client `local-agent-mode-nodegx
+1.0.0` both declare `extensions["io.modelcontextprotocol/ui"]`. The run then showed the real obstacle: the host
+re-issued `tools/list` after every `list_changed` (ids 7, 8, 10, 11) and the model still could not call
+`open_studio` by name — *"Searching for it again only returned the tools I'd already loaded."* Desktop indexes a
+server's tools when the conversation starts and loads them into the model on demand; a tool this server reveals
+later is in the list and not in the index. Our deferral hides tools on a host that already defers, and it hid the one
+tool that must be called by name. The model, told not to use `call_tool`, stopped and asked. Correct, and nothing on
+screen. (Studio at 57123 from run 2 was open in Richard's browser meanwhile: the app, the tree, the properties.)
+
+Built in s4:
+- `clientLoadsToolsItself`: a client named `claude-ai` or `local-agent-mode-*` gets **every tool from the first
+  `tools/list`**, bootstrap included (`ToolDisclosure.advertiseEverything()`, called from `oninitialized`, which
+  fires before that list). An unbound project tool answers `no-project` with the way out. Measured: a JSON-RPC
+  client named `claude-ai` lists 121 tools unbound, `open_studio` among them; unbound `open_studio` → `no-project`;
+  after `open_project`, the direct call → `onScreen: "in the conversation"`.
+- `call_tool` no longer refuses `open_studio`: it proxies it and marks it, and `open_studio` opens the browser for a
+  proxied call (a host draws no panel for it) with a note to call it by name next time. The person always gets
+  Studio somewhere.
+- The resident budget (8,280) is untouched: Desktop's path is profile-specific; `toolDisclosure.test.ts` 18/18.
+
+**AC5 run 4:** reload the server, a NEW conversation (the index is built at its start), connector on. Say: *"Open the
+NodeGX project at ~/vscode_projects/NodeGX test projects/Tap Counter C7Q4 with open_project, then call open_studio,
+then build its Home page: the count, a Tap button and a Reset button."* Click Allow on the panel.
+
 ## How to run it (Richard)
 
 Use a **normal chat, not a Cowork session**. In the chat's tools menu check that `nodegx` is on. If Claude starts

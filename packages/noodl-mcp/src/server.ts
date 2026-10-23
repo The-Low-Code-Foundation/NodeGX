@@ -44,6 +44,7 @@ import { registerExportReactTools } from './tools/exportReact';
 import { registerOpenInEditorTools } from './tools/openInEditor';
 import { registerOpenStudioTools } from './tools/openStudio';
 import { holdGate } from './hold';
+import { clientLoadsToolsItself, clientRendersApps } from './clientApps';
 import { registerSessionStatusTools } from './tools/sessionStatus';
 import { registerKitTools } from './tools/kitTools';
 import { registerProjectSettingsTools } from './tools/projectSettingsTools';
@@ -177,19 +178,6 @@ export function createServer(options: ServerOptions): CreatedServer {
   // P109-S12 — a key no tool declares is refused by name before any handler runs (zod would strip it without a word).
   refuseUnknownArguments(server);
 
-  // P125 CCN-001 s3 — one stderr line naming the client and what it can render. Claude Desktop keeps a server's
-  // stderr in ~/Library/Logs/Claude/mcp-server-<name>.log and logs no request params, so without this line nothing
-  // on disk says whether the host declared MCP Apps (`extensions["io.modelcontextprotocol/ui"]`) — the fact that
-  // decides whether `open_studio` is a panel or a browser window.
-  server.server.oninitialized = () => {
-    const who = server.server.getClientVersion();
-    const caps = server.server.getClientCapabilities() as { extensions?: Record<string, unknown> } | undefined;
-    process.stderr.write(
-      `noodl-mcp: client ${who ? `${who.name} ${who.version}` : 'unknown'}; renders MCP Apps: ` +
-        `${caps?.extensions && 'io.modelcontextprotocol/ui' in caps.extensions ? 'yes' : 'no'}; ` +
-        `capabilities ${JSON.stringify(caps ?? {})}\n`
-    );
-  };
 
   // AWP-006 — every registration below goes through the recorder, which keeps
   // the SDK's handle so a group can be hidden at startup and revealed later.
@@ -210,6 +198,24 @@ export function createServer(options: ServerOptions): CreatedServer {
   const disclosure = new ToolDisclosure(binding.isBound);
   const recAll = recordTools(server, disclosure);
   const rec = recAll;
+
+  // P125 CCN-001 s3/s4 — at `initialize`: one stderr line naming the client and what it can render (Claude Desktop
+  // keeps a server's stderr in ~/Library/Logs/Claude/mcp-server-<name>.log and logs no request params, so this is
+  // the only record on disk of whether the host declared MCP Apps), and for a client that indexes tools once
+  // (Claude Desktop), everything advertised before its first `tools/list` — see `clientApps.ts`. It fires before
+  // that list (measured: the line precedes `tools/list id=1`), and again if a second client initialises on the
+  // same transport (Desktop's `local-agent-mode-*` does); the reveal is idempotent.
+  server.server.oninitialized = () => {
+    const who = server.server.getClientVersion();
+    const loadsItself = clientLoadsToolsItself(server);
+    const advertised = loadsItself ? disclosure.advertiseEverything() : [];
+    process.stderr.write(
+      `noodl-mcp: client ${who ? `${who.name} ${who.version}` : 'unknown'}; renders MCP Apps: ` +
+        `${clientRendersApps(server) ? 'yes' : 'no'}; loads tools itself: ${loadsItself ? 'yes' : 'no'}` +
+        (advertised.length > 0 ? ` (${advertised.length} more tools advertised from the first list)` : '') +
+        `; capabilities ${JSON.stringify(server.server.getClientCapabilities() ?? {})}\n`
+    );
+  };
 
   // ⚠️ BST-001 — every call below passes the **binding**, not a store. The
   // handlers dereference it per request; a registration function that resolved
