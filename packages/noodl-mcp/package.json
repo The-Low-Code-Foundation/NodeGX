@@ -9,7 +9,6 @@
     "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
     "directory": "packages/noodl-mcp"
   },
-  "main": "src/index.ts",
   "bin": {
     "noodl-mcp": "./bin/noodl-mcp.js"
   },

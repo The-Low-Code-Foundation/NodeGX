@@ -13,7 +13,9 @@ const path = require('path');
 const engine = path.join(__dirname, '..', 'dist', 'nodegx-deploy.cjs');
 if (!fs.existsSync(engine)) {
   process.stderr.write(
-    'nodegx-deploy: dist/nodegx-deploy.cjs is missing.\n' + 'Build it first:  npm --prefix packages/noodl-preview run build\n'
+    'nodegx-deploy: dist/nodegx-deploy.cjs is missing, so this copy of @nodegx/preview is incomplete.\n' +
+      'Installed from npm: install it again (npx -y --package @nodegx/preview@latest nodegx-deploy …).\n' +
+      'In a NodeGX checkout: build it first,  npm --prefix packages/noodl-preview run build\n'
   );
   process.exit(2);
 }

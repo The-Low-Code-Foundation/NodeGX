@@ -9,7 +9,6 @@
     "url": "git+https://github.com/The-Low-Code-Foundation/NodeGX.git",
     "directory": "packages/noodl-preview"
   },
-  "main": "src/index.ts",
   "bin": {
     "noodl-preview": "./bin/noodl-preview.js",
     "nodegx-deploy": "./bin/nodegx-deploy.js",
