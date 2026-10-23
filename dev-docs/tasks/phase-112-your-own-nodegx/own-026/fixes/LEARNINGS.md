@@ -180,3 +180,10 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
   address; C5.3: the teacher writes one naming family C). `measure.mjs` shows them as regressions against c07,
   whose grader didn't trigger the leak (#10). That's the confirmation: c07's pass was the grader, not a fix. **Read
   T7 and C5.3 as failing from c05 on.** F6 and T6 passed this time: the coin-flips again.
+
+## #12 — t2-nodegx-c09 (revisit mastered tables), kit FIX-03, 30/33 (2026-10-23)
+
+- C9.1 and C9.2 passed. $0.122, 25 min, 1 sitting. **A small change, done small:** 3 nodes added, 6 changed, +263/−61
+  lines, one JavaScriptFunction (+32 lines). The question drawer already held the rule's place. Kit lookups 11 (99k),
+  own-docs reads 6.
+- Fails: the c05 leak (T7, C5.3; same forged invite) and T6 (browser back, as before; a coin-flip that passed in c08).
