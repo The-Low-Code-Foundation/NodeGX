@@ -195,3 +195,18 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
   small ones (c01 ±0). Over plain code, NodeGX's c01–c03 cost goes from 2.0× to 1.5×. **What thinned it was cutting
   what the kit says back, not teaching more.** Of FIX-04's parts, the write answers (−69% on c03) and the
   one-line wires did the most; the aliases halved refusals.
+
+## #14 — t2-nodegx-c10 (delete a child for good), kit FIX-03, 30/35 (2026-10-23)
+
+- **Both of the change's own checks failed**, each for a specific reason:
+  - **C10.1, no way to cancel.** The row asks "Delete … for good? Nothing here can be undone." and the button becomes
+    "Yes, delete … for good", but there's no Cancel or Keep; only leaving the page backs out. The model built half a
+    confirmation.
+  - **C10.2, the platform's.** The app's delete was complete (404s, empty queries, 0 matches in a logical dump), but
+    the backend's SQLite WAL still held the name 25 times. The backend opens SQLite in WAL mode, with no
+    `secure_delete` and no checkpoint after a delete. Filed `P112-OWN026-DELETELEAVESBYTES` (medium): "delete for
+    good" isn't, in any NodeGX app.
+- Small and cheap: $0.078, 15 min; 3 nodes added; kit lookups 6 (39k, the fewest yet), own-docs reads 10 (the most).
+  The trend from #7 again: the project's own docs teach more as the chain grows.
+- The other fails: the c05 leak (T7, C5.3) and T6. **End of the pre-registered ten for NodeGX.** The chain goes on to
+  c11 on FIX-03 (Richard's ruling stands until he says otherwise).
