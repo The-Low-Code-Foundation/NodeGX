@@ -64,7 +64,18 @@ if ss -tln | awk '{print $4}' | grep -qE ":${PORT}\$" && ! systemctl is-active -
   echo "FATAL: port $PORT is taken by something else" >&2; exit 1
 fi
 if [ "$CADDY" != off ]; then
-  grep -qE '^\s*import\s+/etc/caddy/conf\.d/' "$CADDY_MAIN" || { echo "FATAL: Caddyfile does not import conf.d" >&2; exit 1; }
+  [ -f "$CADDY_MAIN" ] || { echo "FATAL: Caddy is not set up on this server ($CADDY_MAIN is missing). Install Caddy, or ship with no domain. Nothing was changed." >&2; exit 1; }
+  # A freshly installed Caddy's file has no such line, so a stranger's first ship with a domain stops here. Adding it
+  # is theirs to do: this script never edits the main file, which other sites on a shared server depend on.
+  grep -qE '^\s*import\s+/etc/caddy/conf\.d/' "$CADDY_MAIN" || {
+    cat >&2 <<REFUSAL
+FATAL: $CADDY_MAIN does not read /etc/caddy/conf.d/, where each app's site goes (a freshly installed Caddy's
+file does not). Nothing was changed. ON THE SERVER, add the line once, then ship again:
+
+  mkdir -p /etc/caddy/conf.d && echo 'import /etc/caddy/conf.d/*' >> $CADDY_MAIN && systemctl reload caddy
+REFUSAL
+    exit 1
+  }
 fi
 # 🔴 P26-VMOPEN: the earlier layout ran `cli.js serve` without --enforce-rules, so its first start minted
 # security.json with "devOpen": true, and on a 127.0.0.1 bind the backend's interlock never refused it — the app was
