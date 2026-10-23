@@ -23,6 +23,9 @@ with NodeGX projects to at least get them to the same level as Claude coded ones
   (`create-nodegx-<v>.tgz` and `nodegx-mcp-<v>.tgz`, nothing else matching those names). The next NodeGX round
   creates its folder with that `create-nodegx` and runs that `@nodegx/mcp` as its server. No KIT file means the
   registry's 0.2.5.
+- `/Users/Shared/nodegx-lab/own026/KIT-PROVEN` (since test 2): a NodeGX chain also waits until this names the same
+  folder as `KIT`. The lab writes it after its own $0 mock round on your kit, so deleting the hold doesn't start a
+  chain by itself. It isn't the fixer's file; leave it alone.
 - What a round can't take from a local kit: a command the agent types itself (`npx @nodegx/preview`,
   `npx @nodegx/mcp --graph`) still resolves to the registry. If a fix lives in one of those, say so in your
   ready message, and the lab decides.

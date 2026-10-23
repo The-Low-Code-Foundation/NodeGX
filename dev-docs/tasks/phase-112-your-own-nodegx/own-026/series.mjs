@@ -138,6 +138,10 @@ function prune(dir) {
 // The learning loop (PLAN §8, 2026-10-22): while HOLD-nodegx exists, NodeGX jobs wait and the others run; when nothing
 // else is left, the series waits for the hold to lift (round.mjs also waits, before it makes a folder).
 const HOLD = path.join(ROUNDS, 'HOLD-nodegx');
+// ...and until KIT-PROVEN names the kit KIT names: the fixer lifts the hold when the kit is ready, and the lab proves it
+// with a $0 mock round before a chain spends on it (FIX-01, FIX-02's rule; the gate added 2026-10-23 for FIX-03).
+const readOr = (f) => { try { return fs.readFileSync(f, 'utf8').trim(); } catch { return ''; } };
+const gated = () => fs.existsSync(HOLD) ? 'the hold to lift' : readOr(path.join(ROUNDS, 'KIT')) !== readOr(path.join(ROUNDS, 'KIT-PROVEN')) ? `KIT-PROVEN to name ${readOr(path.join(ROUNDS, 'KIT')) || '(no KIT)'}` : null;
 const finished = (j) => fs.existsSync(path.join(ROUNDS, j.id, 'round.json')) && (rest.includes('--no-grade') || fs.existsSync(path.join(GRADES, j.id, 'meta.json')));
 let waitedLogged = false;
 for (;;) {
@@ -145,13 +149,14 @@ for (;;) {
   if (!pending.length) break;
   // test 2 is a chain: only its first unfinished change can run
   const runnable = which === 't2' ? pending.slice(0, 1) : pending;
-  const j = runnable.find((x) => x.arm !== 'nodegx' || !fs.existsSync(HOLD));
+  const gate = gated();
+  const j = runnable.find((x) => x.arm !== 'nodegx' || !gate);
   if (!j) {
-    if (!waitedLogged) { log(`waiting for the hold to lift (${pending.map((x) => x.id).join(', ')})`); waitedLogged = true; }
+    if (waitedLogged !== gate) { log(`waiting for ${gate} (${pending.map((x) => x.id).join(', ')})`); waitedLogged = gate; }
     await sleep(60000);
     continue;
   }
-  if (waitedLogged) log('the hold lifted');
+  if (waitedLogged) log(`no longer waiting for ${waitedLogged}`);
   waitedLogged = false;
   const root = path.join(ROUNDS, j.id);
   if (!fs.existsSync(path.join(root, 'round.json'))) {
