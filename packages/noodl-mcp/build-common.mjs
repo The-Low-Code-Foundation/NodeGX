@@ -3,7 +3,7 @@
  * `build-cloud-bundle.mjs` (which a spec runs to build the cloud bundler into a temp path,
  * P109 ISL-042) read one copy. Paths resolve from this file, not the working directory.
  */
-import { existsSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -49,12 +49,20 @@ export const nodeModulesThroughLink = {
   name: 'node-modules-through-link',
   setup(build) {
     build.onEnd((result) => {
-      const { outfile, absWorkingDir = process.cwd() } = build.initialOptions;
-      if (result.errors.length || !outfile || NODE_MODULES_REAL === NODE_MODULES) return;
+      const { outfile, outdir, write = true, absWorkingDir = process.cwd() } = build.initialOptions;
+      if (result.errors.length || !write || NODE_MODULES_REAL === NODE_MODULES) return;
+      // One file, or every script an `outdir` build wrote (the render harness's three entries)
+      const outputs = outfile
+        ? [outfile]
+        : outdir
+          ? readdirSync(outdir).filter((f) => /\.[cm]?js$/.test(f)).map((f) => path.join(outdir, f))
+          : [];
       const real = path.relative(absWorkingDir, NODE_MODULES_REAL) + '/';
       const link = path.relative(absWorkingDir, NODE_MODULES) + '/';
-      const text = readFileSync(outfile, 'utf8');
-      if (text.includes(real)) writeFileSync(outfile, text.split(real).join(link));
+      for (const file of outputs) {
+        const text = readFileSync(file, 'utf8');
+        if (text.includes(real)) writeFileSync(file, text.split(real).join(link));
+      }
     });
   }
 };
