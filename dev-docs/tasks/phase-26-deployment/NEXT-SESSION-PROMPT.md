@@ -9,9 +9,8 @@ one folder (`app/`, `backend/`, `start.js`). s3, OWN-016's `ship-to-vm.sh` + `pr
 a VM (`/opt/<app>`, data in `/var/lib/<app>/data`, Caddy proxies everything but the admin paths), graded in a
 throwaway VM container. `start.js` gained `--data-dir` and refuses a dev-open data folder.
 
-**🔴 First, for Richard (P26-VMOPEN, open, high):** lingo.nodegx.io runs with every access rule off (`/health`:
-`devOpen: true, enforced: false`). The bug file has the one command to run on its box. Until then, shipping lingo
-again is refused, by design. Ask him; do not re-measure the live site beyond `/health`.
+**P26-VMOPEN is closed:** lingo.nodegx.io ran with every access rule off. Richard switched them on
+(2026-10-23, measured `enforced: true`), so it can be reshipped with the new scripts.
 
 **Next, in order:**
 

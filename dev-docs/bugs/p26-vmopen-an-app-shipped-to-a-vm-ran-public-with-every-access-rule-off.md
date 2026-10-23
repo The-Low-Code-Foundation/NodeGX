@@ -1,7 +1,8 @@
 ---
 id: P26-VMOPEN
-title: An app shipped to a VM by OWN-016's scripts ran public with every access rule off (lingo.nodegx.io is, now)
-status: open
+title: An app shipped to a VM by OWN-016's scripts ran public with every access rule off (lingo.nodegx.io did)
+status: fixed
+commit: e32218cf4
 severity: high
 area: deploy / OWN-016 provision-app.sh (VM layout), nodegx-backend deploy/folder/start.js
 found: P26 lane 5 session 3 (the VM push), 2026-10-23
@@ -38,3 +39,8 @@ command to run. A new layout's first start mints `devOpen: false` (`--enforce-ru
     ssh nexus "sed -i 's/\"devOpen\": *true/\"devOpen\": false/' /var/lib/lingo/data/security.json && systemctl restart lingo-backend && grep devOpen /var/lib/lingo/data/security.json"
 
 (SSH that changes a server is refused to an agent by the auto-mode classifier.) Then close this row.
+
+**Closed on the box, 2026-10-23.** Richard ran the command above. Measured after: lingo's `/health`
+`{"devOpen":false,"enforced":true}`; a visitor's `/classes/_User` and `/classes/Task` 403; `/` 200. `speak`
+stays callable by visitors: its graph has `allowNoAuth: true` (the deployed workflow), which decides when the
+rules file names no function. lingo has no collections, and sign-up stays public.
