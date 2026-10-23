@@ -107,3 +107,20 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
 - 19 refused calls. 17 `read_files` calls, mostly its own screenshots (requests reached 2.1M characters).
 - **Not gating; no FIX-04 for a fail.** For the thin layer (PLAN §8 12:30) this is the lever #5 didn't show: the
   cost of WRITING a feature in the graph's operation format, beside the cost of reading (screenshots) and of refusals.
+
+## #7 — t2-nodegx-c04 (stars and a shop), kit FIX-03, 22/22 (2026-10-23)
+
+- **The first full grade in test 2:** C4.1–C4.3 passed, no regressions, and T6 and F6 passed too. Code scored
+  20/22 (T6, C2.1), harness 21/22 (T6).
+- **Thinner than c03:** $0.151 and 28 min, against code's $0.125 / 18 min (1.2× in $, 1.6× in minutes, **0.7× the
+  turns**, 1.4× tokens written) and harness's $0.389 / 81 min / 3 sittings. Touched 65 files (+3,673/−521): 96 nodes
+  added, 26 changed, 14 removed (the shop: a Static Data catalogue, two pages, Star Bank / Shop Shelf / Shop Till
+  components). Script: JavaScriptFunctions 11 → 15 (253 → 385 lines; the buying rules live in `st_buy`,
+  `sh_decorate`), Expressions 105 → 114. Its decision note (`docs/decisions/004-stars-and-the-shop.md`) keeps the
+  journey bar unspendable, so "reaching planets works as before" stays true (C4.3).
+- **T6 passed with no change to the gate.** No node about the lock or PIN changed between c03 and c04. The router only
+  gained `/Pages/Shop`. c03's grader got in by "Players → Grown-ups" after an unlock; c04's tried the button, back
+  and the typed URL and was asked each time. So T6 joins F6 (#5): **graded both ways on an unchanged mechanism.** It
+  may be a real defect that only some paths reach, or a race in how the unlock clears. Not driven: one per grader is
+  what §5 allows. In the table it's listed apart, like F6.
+- **Not gating; no FIX-04 for a fail** (FIX-04, thinning, runs in parallel).
