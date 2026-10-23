@@ -31,9 +31,10 @@ Fix (this session): `start.js` refuses a data folder with `"devOpen": true`, in 
 to switch the rules on, and the new `provision-app.sh` refuses before it writes anything, with the one
 command to run. A new layout's first start mints `devOpen: false` (`--enforce-rules`).
 
-**Still open: the live box.** Shipping lingo again is refused until its rules are on. On the box that
-serves lingo.nodegx.io, Richard runs:
+**Still open: the live box.** Shipping lingo again is refused until its rules are on. lingo runs on nexus-1
+(OWN-016 §8). From the Mac (the `sed -i` here is GNU sed on the box; run on macOS directly it fails with
+"extra characters at the end of l command", measured 2026-10-23):
 
-    sed -i 's/"devOpen": *true/"devOpen": false/' /var/lib/lingo/data/security.json && systemctl restart lingo-backend
+    ssh root@49.12.102.195 "sed -i 's/\"devOpen\": *true/\"devOpen\": false/' /var/lib/lingo/data/security.json && systemctl restart lingo-backend && grep devOpen /var/lib/lingo/data/security.json"
 
 (SSH that changes a server is refused to an agent by the auto-mode classifier.) Then close this row.
