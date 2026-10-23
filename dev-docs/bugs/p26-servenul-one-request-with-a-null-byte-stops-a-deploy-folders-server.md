@@ -2,6 +2,7 @@
 id: P26-SERVENUL
 title: One request with %00 in its path stops a deploy folder's serve.js for everyone
 status: fixed
+commit: 32481a4a8
 severity: medium
 area: deploy / static/deploy/serve.js (every client-side deploy, and the SSR server's port helper)
 kit: preview
