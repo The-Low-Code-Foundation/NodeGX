@@ -581,3 +581,27 @@ running app, the web export and the phone side by side (S6's drive), the step-by
 dark theme the exports do not carry, "Also keep track of projects and money", two reads, the Sign in labels, todo-list's
 91 + 5), the two scorecards and the cost. **Nothing goes on nodegx.io until Richard rules on its words.**
 
+### S8 — Swift session 8 of at most 12 (2026-10-23, Opus 5.5)
+
+**Ruled (Richard, 2026-10-23), verbatim:** *"Yeah the artifact text is fine, rock out"*, after being told the next step
+was his ruling on the private page's words. No questions were asked; where on the site was not ruled, so the page took a
+folder of its own and stays out of the nav.
+
+**Built:** `nodegx.io/one-graph/`, the reveal's words in the site's own look (nodegx-web `site/one-graph/_page.html`,
+registered in `ops/build.py` `SUBPAGES`, the picture S6's `side-by-side.png` as webp). Changed for the public only
+where the page spoke to Richard or named internal ids: the eyebrow ("Code export · React and Swift"), "You set a hard
+stop" → "The Swift work has a hard stop", the "Your call" box removed, "P107 wrote" → "We wrote", the bug ids
+(LABELDROP, EMITDECIDES) and "filed rows" → "a known bug" / "known bugs". Every number is S7's. The Why page's "Swift is
+planned after React" now reads "Swift is coming: the same graph already runs as an iPhone app in the simulator", linked
+to the page. Built for those two folders only (`wrap()` with the canonical URL; Why's built file differs from HEAD by the
+one sentence). At 390 wide neither page scrolls sideways (scrollWidth 375 in a 390 frame, Why as the control).
+nodegx-web `28ef4c3`.
+
+**Not deployed.** The `rsync` of `site/one-graph/` and `site/why/` to nexus-1 was refused by the auto-mode classifier
+("Production Deploy"). Measured before it: live `/why/` equals HEAD's (md5 `7377af30…`), `/one-graph/` 404. Not
+`ops/deploy.sh`: the site has other sessions' uncommitted edits (demos, changelog) that a full deploy would ship. The
+push is Richard's: `rsync -az -e "ssh -i ~/.ssh/nexus_hetzner" --exclude _page.html site/one-graph site/why
+root@49.12.102.195:/srv/nodegx/site/` from nodegx-web. Then `curl -s https://nodegx.io/one-graph/ | grep -c "One graph"`.
+
+**Left stale, not mine to ship in the same push:** From code's "Swift comes after React" (`site/from-code/_page.html`).
+
