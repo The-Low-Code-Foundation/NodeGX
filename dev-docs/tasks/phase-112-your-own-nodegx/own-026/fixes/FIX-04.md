@@ -202,3 +202,19 @@ answer drops below it.
 - **The resident surface has 3 tokens left.** The next field is a renegotiation. The honest one is per-tool `$ref`s
   for the node schema, which `create_component`, `update_component` and `stage_plan_operation` each inline (~550
   tokens each).
+
+## Lab result (2026-10-23 22:10 CEST, the lab session)
+
+c01–c03 on FIX-04 from t1-nodegx-3 (`/Users/Shared/nodegx-lab/own026-fix04/`, grades `own026-grades/fix04/`), against the
+test-2 chain's same changes on FIX-03:
+
+| change | checks FIX-03 → FIX-04 | $ | min | turns | cached tokens re-read |
+|---|---|---|---|---|---|
+| c01 | 14/15 → 14/15 | 0.075 → 0.076 | 17 → 15 | 75 → 75 | 7.4M → 8.2M |
+| c02 | 15/17 → 15/17 | 0.089 → 0.075 | 19 → 18 | 69 → 56 | 8.1M → 7.2M |
+| c03 | 17/19 → 17/19 | 0.228 → 0.145 | 44 → 32 | 138 → 87 | 36.4M → 16.5M |
+| **total** | **the same checks** | **0.392 → 0.296 (−24%)** | 80 → 65 | 282 → 218 | 51.9M → 31.9M |
+
+The checks lost were the same coin-flips (F6, T6) on both kits. Change 3 (a new page) shows the effect: write answers
+234k → 72k characters, writes 142k → 92k, refusals 12 → 6. Over plain code's c01–c03 ($0.195), NodeGX goes from
+**2.0× to 1.5×**. n = 1 chain per kit: a measurement, not a significance test. **A keeper.**

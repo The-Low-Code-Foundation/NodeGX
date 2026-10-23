@@ -187,3 +187,11 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
   lines, one JavaScriptFunction (+32 lines). The question drawer already held the rule's place. Kit lookups 11 (99k),
   own-docs reads 6.
 - Fails: the c05 leak (T7, C5.3; same forged invite) and T6 (browser back, as before; a coin-flip that passed in c08).
+
+## #13 — FIX-04 (thinning) measured: the same checks for 24% less (2026-10-23)
+
+- c01–c03 on FIX-04 against FIX-03, the same seed: checks identical (14/15, 15/17, 17/19), $0.392 → $0.296, turns 282
+  → 218, cached tokens re-read 51.9M → 31.9M. The saving is where the fixer measured it: big writes (c03 −36%), not
+  small ones (c01 ±0). Over plain code, NodeGX's c01–c03 cost goes from 2.0× to 1.5×. **What thinned it was cutting
+  what the kit says back, not teaching more.** Of FIX-04's parts, the write answers (−69% on c03) and the
+  one-line wires did the most; the aliases halved refusals.

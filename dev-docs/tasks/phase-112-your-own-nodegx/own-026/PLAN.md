@@ -389,3 +389,7 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   mid-test would split the chains' conditions. **For the next lab:** keep the lab's notes outside the agent-readable
   root. Also seen: `ps` is refused inside the fence (*"/bin/ps: Operation not permitted"*). t2-code-c09 ended with
   judge MORE after 3 sittings (the relay's limit), its last words checking and adding tests.
+- **2026-10-23 22:10 CEST — FIX-04 measured: the same checks for 24% less.** `own026-fix04/` c01–c03 against the FIX-03
+  chain: checks identical, $0.392 → $0.296, turns 282 → 218, c03 alone $0.228 → $0.145. NodeGX over plain code
+  (c01–c03): 2.0× → 1.5×. Table in `fixes/FIX-04.md` (Lab result). The comparison series ended ("series done",
+  pid 80561). The main chain stays on FIX-03 (Richard's ruling).
