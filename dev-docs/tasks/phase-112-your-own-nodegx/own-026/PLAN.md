@@ -361,3 +361,9 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   on: it writes `meta.json` before it prints) and restarted with `--lock` once that grade ended. Beside it,
   **`own026-fix04/`: c01–c03 on FIX-04 from t1-nodegx-3** (grades in `own026-grades/fix04/`), compared with the
   FIX-03 chain's c01–c03 by `measure.mjs`: the same checks, less overhead.
+- **2026-10-23 17:15 CEST — did FIX-04 touch the main chain's grades? No (Richard asked).** c04–c07's `mcp-entry.json`
+  and `round.json` all name `kits/FIX-03-cb7e0d6e4`; `KIT` and `KIT-PROVEN` still do. c05 was built 14:16–14:43 and
+  graded by 15:14; FIX-04 was packed at 15:30, and its chain's first round started after 16:59. c05's failure is in the
+  agent's own function, and c06's grader found it again independently. No port clash in c05 or c06's grader logs (no
+  EADDRINUSE; each drove its own 8575/8584). **Noted:** a grader's `lsof` lists other processes' listening ports on
+  the Mac (c05's saw 8520, 8591 …, other sessions' servers). It doesn't reach them, and the fence doesn't hide them.
