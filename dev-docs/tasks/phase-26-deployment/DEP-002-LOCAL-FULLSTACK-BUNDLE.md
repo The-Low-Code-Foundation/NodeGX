@@ -149,17 +149,17 @@ combination (one Node process doing both) and may be more work than it is worth 
 
 ## Success Criteria
 
-- [ ] A full-stack project deploys to a folder and runs with one command, with no Docker and no
-      `npm install`.
+- [x] A full-stack project deploys to a folder and runs with one command, with no Docker and no
+      `npm install`. *(s2, `nodegx-deploy --full-stack`, driven; from the editor is s3)*
 - [x] Records written through the running app survive a restart of the process. *(s1, driven through `--serve-app`)*
 - [x] Client-side routing survives a browser refresh on a deep path. *(s1, driven and specced)*
 - [x] Every backend route family is reachable with `--serve-app` active, asserted by a test that
       reads `getRouteTable()` rather than a hand-written list. *(s1)*
 - [x] Path traversal is refused, with tests. *(s1)*
 - [x] The admin credential and `/_admin` URL are printed on first run. *(already true of `serve`; read off s1's drive. The folder's `start.sh` must not hide it)*
-- [ ] The generated README is project-specific and states what needs configuring before it works.
+- [x] The generated README is project-specific and states what needs configuring before it works. *(s2, `renderFullStackGuide`)*
 - [ ] The Deploy popup shows three destinations; the two unbuilt ones name their task.
-- [ ] The backend bundle in the folder comes from the same packaging script as the Docker target.
+- [x] The backend bundle in the folder comes from the same packaging script as the Docker target. *(s2: `packageDeploy` packages it, with the scan and manifest)*
 
 ## Out of Scope
 
@@ -243,3 +243,106 @@ backend and pass it as `--project-dir`, or the first start mints the default rul
 (step 6). **Lane 5's `deploy_to_vm` builds on this:** one process behind Caddy, which also makes the
 no-domain case reachable (`ship-to-vm.sh` with no domain leaves the site unserved).
 
+
+## Session 2 (2026-10-23, Opus 5.5): the folder
+
+**Built (steps 3–5), on the headless engine first.** `nodegx-deploy <project> <out> --full-stack`
+(`noodl-preview/src/fullStack.ts`). The engine is what `ship-to-vm.sh` already runs and what a
+`deploy_to_vm` tool will run, so lane 5 gets the folder before the popup does. The editor's popup
+(step 6) is s3 and calls the same pieces.
+
+```
+my-app/
+  app/                         the client-side deploy (its nodegx-config.json kept; no second DEPLOY.md)
+  backend/cli.js               the backend this installation ships
+  backend/workflows/<p>.workflow.json   the project's cloud functions, built by the editor's builder
+  backend/nodegx.security.json the project's access rules, when it has them
+  start.js  start.sh  start.cmd the launcher (nodegx-backend deploy/folder/)
+  MANIFEST.json                every file, with its checksum; layout "full-stack"
+  DEPLOY.md  package.json      generated (renderFullStackGuide / renderFullStackPackageJson)
+  data/                        made by the first start; never written by a deploy
+```
+
+- **One packaging path.** `package-deploy.js` gains `cliPath` (package the bundle the caller has),
+  `backendFiles` (functions and rules under `backend/`), `fullStack` (the launcher) and
+  `launcherDir`. So the folder gets the image's credential scan and manifest: a key pasted into a
+  cloud function refuses the deploy, by file and pattern (OWN-016 AC3's finding, now a gate). The
+  bundle in an npm install is still built by `noodl-mcp/build-backend-copy.mjs` with the backend's
+  own esbuild config; that script now also ships `deploy/folder/` as `dist/backend/folder/`.
+- **`start.js`** (Node, with thin `start.sh`/`start.cmd`): checks the Node by loading `node:sqlite`,
+  not by a version table, and names 22.13 when it fails; picks the port by `serve.js`'s rule (asked
+  for exactly, else the first loopback-free from 3000, never 8080); replaces the installed cloud
+  functions in `data/workflows/` with the deploy's; runs the backend in-process with
+  `--serve-app app --data-dir data --enforce-rules` (+ `--project-dir backend` when the rules ship,
+  `--backend-name` from `package.json`). Other options pass through.
+- **The port rule is a copy, not a require of `app/serve.js`.** The launcher ships with the backend;
+  an app deployed by an older runtime (this checkout's `src/external` is from December) has no
+  `serve.js` with that function, and a launcher that needs it fails for a reason that is not the
+  backend's. A spec row holds the two refusals equal word for word (mutant caught).
+- **A redeploy replaces `app/` and `backend/` wholesale and never names `data/`.** The folder must be
+  empty or an earlier full-stack deploy (`MANIFEST.json` says so); anything else is refused as
+  `target`, before a byte is written. A missing backend or launcher is `runtime`. Both are typed
+  errors, not sentence matches.
+- **Found on the way, fixed before commit:** preparing the second model for the cloud functions
+  schedules the editor's one-second autosave, and its "Skipping auto-save" line reached stdout after
+  the engine's JSON report (two lines; a parser failed). `deploy-cli.ts` now writes the report
+  through the real stdout and leaves stdout on stderr afterwards. Never shipped, so no ledger row.
+
+**Decisions (the task left these to this task):**
+- **Permissions: no derived policy.** The folder starts with `--enforce-rules`: the project's own
+  `nodegx.security.json` if it ships one (installed on the first start only, SB-015), else the
+  enforced defaults (a visitor not signed in reads and saves nothing; a signed-in person sees their
+  own records; anyone may sign up). DEPLOY.md leads with which of the two it is, before "Start it".
+  Deriving `find: public` from the graph was rejected: a collection made public without the author
+  saying so is the worse failure, and the project's rules file is where that is said.
+- **`data/` at the top, not `backend/data/`.** A deploy replaces `backend/` wholesale; the data must
+  not live inside anything a deploy replaces.
+- **A project with no backend features still gets the full-stack layout** (one shape for the VM
+  path); its DEPLOY.md says the backend only serves the pages and that the static deploy is the
+  same app. This departs from "skip the backend entirely".
+- **Full-stack + SSR: not supported.** `--full-stack` deploys the client-side runtime.
+- **Sharp is not in the folder.** DEPLOY.md says resized images answer an error until
+  `npm install sharp` in `backend/`; uploads and originals work. Read from Node's resolution and
+  `storage/transform.ts`, not driven.
+
+**Graded.**
+- `nodegx-backend/tests/dep-002-full-stack-folder.test.ts`, 9 rows (a stand-in `cli.js` records the
+  arguments it was started with): layout and manifest, the credential refusal in a function, no app
+  refused; the arguments; rules only when shipped; port by flag and `PORT` with pass-through; a taken
+  port refused in `serve.js`'s words; old functions replaced and `data/` otherwise untouched; the
+  Node refusal under `--no-experimental-sqlite` with its control. **Five mutants, all caught**
+  (no function removal, rules always, port flags passed through, no Node check, one word of the
+  refusal changed).
+- `noodl-preview/tests/dep-002-full-stack-deploy.test.ts`, 8 rows on the BUILT engine: members-area
+  (8 functions by name, one bundle, rules beside the backend and not in the app, no second guide in
+  `app/`), a redeploy over `data/` (byte-identical, same build id, a stale app file gone), the
+  refusal, todo-list without rules, and the plain deploy unchanged. The one-line-report row caught
+  the old stdout restore (mutant).
+- `noodl-editor/tests-unit/deploy-guide.test.ts` +7 rows (19). Neighbours green: deploy-assets,
+  dep-002-serve-app, deploy-credential-stability (38), exp017 + gam-023 (13), hls015 (24).
+
+**Driven (step 7, from the engine; the editor is s3).** Backend and launcher built from today's
+sources into scratch (`build-backend-copy.mjs --out`), deploy runtime by `OUT_PATH` webpack, engine
+from today's sources. `templates/todo-list` copy, `--full-stack`, then `./start.sh` under `env -i`
+(PATH and an empty HOME only): first free port 3000, the project's rules installed, the admin
+credential's location printed; headless Chromium: 0 page errors, `GET /nodegx-config.json`,
+**Create account** `POST /users 201`, a task `POST /classes/Task 201`, reload on `/todo-list` still
+signed in. SIGTERM, `node start.js --port 3417`: the rules file kept, a fresh browser `POST /login
+200` and the task read back (screenshot read). Redeploy over the running folder: the 8 files in
+`data/` byte-identical, same build id, the app still 200. `node backend/cli.js backup --data-dir
+data` while running: written via online backup. `templates/members-area`: 8 functions packaged and
+loaded; `POST /functions/myStanding` 200 (`visitor`), `decideMembership` 403 by the project's rules.
+Its four `starter-imagery` 404s are the template folder's (it never carries installed starter
+assets), not this layer's.
+
+**Next (s3).**
+- `nodegx deploy --full-stack` at the front door (`nodegx-export`, its deploy manifest and `--force`
+  rules: `app/` and `backend/` are replaced wholesale here, so its stale-file sweep is not needed
+  under them).
+- The popup (step 6): "Run it locally" calls the same pieces. The editor's renderer has no
+  `package-deploy.js` or launcher on disk in a packaged app: they need `extraResources` beside
+  `Resources/nodegx-backend/cli.js`.
+- **Lane 5:** `ship-to-vm.sh` can ship this folder whole; `provision-app.sh`'s unit becomes
+  `node start.js --port <p> --no-admin` (loopback, Caddy in front), the secrets file unchanged, and
+  the no-domain case is served by the backend itself. Then `deploy_to_vm` in `@nodegx/mcp`
+  (`dist/backend/folder/` already ships with this commit's prepack).

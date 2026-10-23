@@ -43,6 +43,14 @@ export type DeployToFolderOptions = {
    * top, where the server reads the config and serves it to the browser.
    */
   deployRoot?: boolean;
+
+  /**
+   * With `deployRoot`, also write `DEPLOY.md` and the static layout's `package.json`. Default true.
+   * A full-stack deploy (DEP-002) turns it off for its `app/`: the folder's guide and
+   * `package.json` sit above it and describe `start.js`, and a second guide beside them saying
+   * "run node serve.js" would describe a different way of running the same app.
+   */
+  writeGuide?: boolean;
 };
 
 /**
@@ -78,7 +86,8 @@ export async function deployToFolder({
   baseUrl,
   envVariables,
   runtimeType = 'deploy',
-  deployRoot = true
+  deployRoot = true,
+  writeGuide = true
 }: DeployToFolderOptions): Promise<DeployToFolderResult> {
   // Never into a project. 🔴 P26-V2GUARD: this used to look for `project.json` only, and a v2
   // project has `nodegx.project.json` instead — a deploy into one wrote index.html, the runtime and
@@ -144,7 +153,7 @@ export async function deployToFolder({
   // Last, so they win over project files of the same names — both are ours, and rewritten every
   // deploy. The project's own README.md is left alone; see ./deploy-guide.ts.
   const rootFiles: string[] = [];
-  if (deployRoot) {
+  if (deployRoot && writeGuide) {
     const guide = renderDeployGuide({
       projectName: project.name,
       runtimeType,
@@ -154,14 +163,15 @@ export async function deployToFolder({
     await filesystem.writeFileOverride(direntry + '/' + DEPLOY_GUIDE_FILE, guide);
     rootFiles.push(DEPLOY_GUIDE_FILE);
 
-    await filesystem.writeFileOverride(direntry + '/' + DEPLOY_CONFIG_FILE, renderDeployConfig(exportJson.metadata));
-    rootFiles.push(DEPLOY_CONFIG_FILE);
-
     // The server layout's package.json comes from its runtime manifest; only the static one needs ours.
     if (runtimeType === 'deploy') {
       await filesystem.writeFileOverride(direntry + '/' + DEPLOY_PACKAGE_FILE, renderDeployPackageJson(project.name));
       rootFiles.push(DEPLOY_PACKAGE_FILE);
     }
+  }
+  if (deployRoot) {
+    await filesystem.writeFileOverride(direntry + '/' + DEPLOY_CONFIG_FILE, renderDeployConfig(exportJson.metadata));
+    rootFiles.push(DEPLOY_CONFIG_FILE);
   }
 
   return { copyReport, written: [...copyReport.copiedPaths, ...runtimeFiles, ...bundleFiles, ...rootFiles] };

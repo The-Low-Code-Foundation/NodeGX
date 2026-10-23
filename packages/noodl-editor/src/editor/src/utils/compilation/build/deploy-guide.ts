@@ -260,3 +260,176 @@ overwritten. To change the app, change the project in NodeGX and deploy again.
 ${ssr ? serverGuide(input) : clientSideGuide(input)}
 ${backendSection(input.backendEndpoint, ssr)}`;
 }
+
+/**
+ * P26 DEP-002 — what a full-stack deploy's project asks of its backend, read off its graph
+ * (`backendRequirementFor`'s table) and its cloud functions.
+ */
+export type BackendUse = {
+  /** Record nodes: queries, creates, changes, realtime. */
+  records: boolean;
+  /** User nodes: sign-up, log-in, the signed-in user. */
+  users: boolean;
+  /** Upload File, Cloud File, Sign File URL. */
+  files: boolean;
+  /** The cloud functions this deploy carries, by component name. */
+  functions: string[];
+};
+
+export type FullStackGuideInput = {
+  projectName?: string;
+  baseUrl?: string;
+  uses: BackendUse;
+  /** The project ships its own access rules (`nodegx.security.json`), carried in `backend/`. */
+  hasRules: boolean;
+};
+
+/** A full-stack folder's `package.json`: `npm start` runs `start.js`, and `start.js` reads the name. */
+export function renderFullStackPackageJson(projectName: string | undefined): string {
+  const pkg = JSON.parse(renderDeployPackageJson(projectName));
+  pkg.scripts = { start: 'node start.js' };
+  pkg.engines = { node: '>=22.13' };
+  pkg.nodegx = { name: projectName?.trim() || pkg.name, layout: 'full-stack' };
+  return JSON.stringify(pkg, null, 2) + '\n';
+}
+
+function usesAnything(uses: BackendUse): boolean {
+  return uses.records || uses.users || uses.files || uses.functions.length > 0;
+}
+
+function rulesSection(input: FullStackGuideInput): string {
+  if (input.hasRules) {
+    return `## Who can read and change the data
+
+The project's own access rules are in \`backend/nodegx.security.json\`. The backend installs them
+the first time the app starts, and keeps its copy in \`data/security.json\` from then on.
+
+A later deploy with different rules does not change that copy. To change the rules of a running
+app, edit \`data/security.json\` and restart it, or delete that file and restart it to install the
+rules from the latest deploy.
+`;
+  }
+  return `## Who can read and change the data
+
+**Read this before you open the app.** The project has no access rules of its own, so the backend
+starts with its defaults:
+
+- A visitor who has not signed in can read nothing and save nothing.
+- A signed-in person can add records, and sees and changes only the records they added.
+- Anyone can create an account.
+
+So a page that lists records for visitors who are not signed in shows an empty list. That is the
+rule working, not the app failing. To let visitors read a list, give its collection a rule in the
+project (a \`nodegx.security.json\` file in the project folder) and deploy again. The backend
+installs that file the first time a new \`data/\` folder starts.
+`;
+}
+
+function needsSection(input: FullStackGuideInput): string {
+  const { uses } = input;
+  if (!usesAnything(uses)) {
+    return `## What this app uses
+
+This project uses no records, users, files or cloud functions, so its backend only serves the
+pages. The client-side deploy (without \`--full-stack\`) is the same app as a static website, and
+any static host can serve it.
+`;
+  }
+  const items: string[] = [];
+  if (uses.records) items.push('- **Records.** They are kept in `data/` and need nothing set up.');
+  if (uses.users) {
+    items.push(
+      '- **Users.** Sign-up and log-in work as they are. Emails (address checks, password resets,\n' +
+        '  sign-in links) need an email account: set one up on the admin page, under Email.'
+    );
+  }
+  if (uses.files) {
+    items.push(
+      '- **Files.** Uploads are kept in `data/`. Resized images (`?thumb=`) answer with an error\n' +
+        '  until the image library sharp is installed beside the backend (`npm install sharp` in\n' +
+        '  `backend/`). Uploads and full-size images work without it.'
+    );
+  }
+  if (uses.functions.length > 0) {
+    const names = uses.functions.map((name) => `\`${name}\``).join(', ');
+    items.push(
+      `- **Cloud functions** (${uses.functions.length}): ${names}. They are in \`backend/workflows/\`, and\n` +
+        '  each start installs them, replacing the ones the previous deploy installed. A function that\n' +
+        '  reads a secret (an API key, say) gets it from an environment variable called\n' +
+        '  `NODEGX_SECRET_<NAME>`, set before you start the app. Secrets are never written into this\n' +
+        '  folder.'
+    );
+  }
+  return `## What this app uses
+
+${items.join('\n')}
+`;
+}
+
+/**
+ * `DEPLOY.md` for a full-stack folder: the app, its backend, and `start.js` (P26 DEP-002).
+ *
+ * 🔴 It leads with the access rules, because a fresh backend refuses every read from a visitor who
+ * is not signed in, and the first sight of a full-stack deploy is otherwise an empty page (WF-003).
+ */
+export function renderFullStackGuide(input: FullStackGuideInput): string {
+  const name = input.projectName?.trim() || 'this app';
+  return `# Running ${name}
+
+This folder is **${name}** and its own backend, deployed from NodeGX as one program. The backend
+keeps the data and serves the app's pages on the same address.
+
+NodeGX writes everything here on every deploy, except \`data/\`. To change the app, change the
+project in NodeGX and deploy again.
+${baseUrlNote(input.baseUrl)}
+${rulesSection(input)}
+## Start it
+
+You need [Node.js](https://nodejs.org) 22.13 or later. Nothing needs installing. In this folder,
+run:
+
+\`\`\`sh
+./start.sh                 # macOS and Linux
+start.cmd                  # Windows
+node start.js --port 8090  # anywhere, on a port you choose
+\`\`\`
+
+\`npm start\` does the same. Then open the address it prints. Ctrl+C stops it.
+
+${PORTS}
+
+On its first start the backend makes an admin credential and prints where to find it, with the
+address of the admin page (\`/_admin\`). The admin page shows the data, the users and the cloud
+functions, and sets up email.
+
+## Your data
+
+\`data/\` holds the database, uploaded files and the admin credential (\`data/secrets.json\`). It
+is made on the first start, and a deploy never writes there, so the data survives a restart and a
+new deploy. Never publish \`data/\` or commit it to a repository.
+
+To back it up (the app may be running):
+
+\`\`\`sh
+node backend/cli.js backup --data-dir data
+\`\`\`
+
+${needsSection(input)}
+## Put it online
+
+Copy this folder to a server with Node.js 22.13 or later and start it there, behind a web server
+that adds HTTPS (Caddy or nginx) and forwards to the port it prints. Keep the app on that port on
+the server's own address (\`127.0.0.1\`), and let the web server be the only way in.
+
+The app asks its backend for the address the browser used, so it works on a domain with no change.
+Start it with a process manager (systemd, say) to restart it after a crash or a reboot.
+
+## What is in this folder
+
+- \`app/\` is the app's pages, as a static website.
+- \`backend/\` is the backend program (\`cli.js\`), the cloud functions and the access rules.
+- \`start.js\` starts the backend with the app beside it. \`start.sh\` and \`start.cmd\` run it.
+- \`MANIFEST.json\` lists every file the deploy wrote, with its checksum.
+- \`data/\` is yours, as above.
+`;
+}

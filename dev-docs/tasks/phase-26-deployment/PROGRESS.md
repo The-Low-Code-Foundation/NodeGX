@@ -14,7 +14,7 @@ Not started · In progress · **Built–not wired** · Complete · Superseded
 |---|---|---|---|---|---|
 | [DEP-001](./DEP-001-RUNTIME-BACKEND-CONFIG.md) | Runtime backend config — un-freeze the endpoint | 1 | ✅ Complete (SSR criterion by drive, not test) | 2026-10-22 | Prerequisite for 002/003/005. ~100 lines; the care is in four existing consumers and the SSR hydration case |
 | [DEP-008](./DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md) | Artifact contents & the ignore mechanism | 1 | ⬜ Not started | — | Filed by AIX-009. A **live privacy defect** in the shipping deploy path, not only a blocker. Blocks AIX-009 |
-| [DEP-002](./DEP-002-LOCAL-FULLSTACK-BUNDLE.md) | Local full-stack bundle — one process, no Docker | 2 | 🟡 In progress — s1: `--serve-app` | — | s1 2026-10-23: the backend serves the app on one origin (steps 1–2, 7 driven). Next: the folder, `start.sh`, DEPLOY.md, permissions, the popup. Closes phase-5 TASK-007F |
+| [DEP-002](./DEP-002-LOCAL-FULLSTACK-BUNDLE.md) | Local full-stack bundle — one process, no Docker | 2 | 🟡 In progress — s2: the folder | — | s1 2026-10-23: the backend serves the app on one origin. s2 2026-10-23: `nodegx-deploy --full-stack` writes app + backend + functions + rules + `start.js`, packaged by `package-deploy.js`; driven (sign-up, a record, restart, redeploy over `data/`). Next: `nodegx deploy --full-stack`, the popup. Closes phase-5 TASK-007F |
 | [DEP-003](./DEP-003-STATIC-HOST-PUBLISH.md) | Publish to Netlify & Cloudflare Pages | 2 | ⬜ Not started | — | Two adapters, one interface. No git anywhere in the flow |
 | [DEP-004](./DEP-004-DEPLOY-TARGETS-AND-SECRETS.md) | Deploy targets & secret storage | 3 | ⬜ Not started | — | Where "dev VM / prod VM" lives. Decides where every credential in the phase goes |
 | [DEP-005](./DEP-005-REMOTE-DEPLOY-SSH.md) | Remote deploy over SSH + the Caddy target | 3 | ⬜ Not started | — | Transport wrapper over WF-003's tested script. Closes two WF-003 residuals (SSE, file upload through the proxy) |
@@ -61,18 +61,25 @@ be stale, correct it here rather than implementing around the description.
 - **Do targets belong to the project or to the machine?** DEP-004 proposes per-project *editor
   settings* — so a clone inherits no servers. Defensible the other way for a team with one shared
   prod box. Decide when someone actually has a team.
-- **Full-stack + SSR in one process.** DEP-002 adds a full-stack local option alongside the existing
-  SSR mode, and the two overlap. Whether the combination is supported is DEP-002's call to make and
-  record.
-- **Should the local deploy set starting collection permissions?** It dramatically improves first
-  run, and a silently-public collection is worse than a blank page. DEP-002 decides; whatever it
-  decides must be stated in the generated README in plain words.
+- ~~**Full-stack + SSR in one process.**~~ Decided by DEP-002 s2: not supported; `--full-stack`
+  deploys the client-side runtime.
+- ~~**Should the local deploy set starting collection permissions?**~~ Decided by DEP-002 s2: no
+  derived policy. The project's `nodegx.security.json` if it has one, else the enforced defaults,
+  and DEPLOY.md leads with which.
 - **Encrypted SSH private keys** — supported with a passphrase prompt, or refused with a clear
   message? DEP-004 picks one; silent failure is not an option.
 - **How much does DEP-007 actually help?** Its four induced-failure diagnoses are the evidence. If
   they are unimpressive, the honest outcome is to ship the DNS explainer and drop the rest.
 
 ## Log
+
+- **2026-10-23 — DEP-002 s2: the folder (lane 5).** `nodegx-deploy --full-stack`: `app/`, `backend/`
+  (bundle, cloud functions, rules), `start.js`/`.sh`/`.cmd`, `MANIFEST.json`, a generated DEPLOY.md
+  that leads with who can read the data; `data/` is never written by a deploy. Packaged by
+  `package-deploy.js`, so a credential in a cloud function refuses the deploy. Driven on todo-list
+  (`./start.sh` in an empty environment, sign-up, a task, restart on another port, the task back,
+  redeploy over the running folder with `data/` byte-identical) and members-area (8 functions,
+  `myStanding` 200, an admin-only one 403). Detail in DEP-002 §s2.
 
 - **2026-10-23 — DEP-002 s1: the backend serves the app (lane 5).** `--serve-app <dir>` on
   `nodegx-backend`, the deploy's `serve.js` handler bundled in rather than a second static server,

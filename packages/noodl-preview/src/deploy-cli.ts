@@ -24,6 +24,7 @@ import {
   type DeployOutcome,
   type ViewerBuildReading
 } from './deploy';
+import { FULL_STACK_FLAG, FullStackInstallError, FullStackTargetError } from './fullStack';
 
 /** What the caller reads. One object, one line, nothing else on stdout. */
 export type EngineResult =
@@ -35,14 +36,16 @@ export type EngineResult =
        * each word means one fixable thing:
        *
        * - `usage`   — the arguments are wrong.
-       * - `runtime` — this installation has no deployable viewer runtime.
+       * - `runtime` — this installation has no deployable viewer runtime, or (`--full-stack`) no
+       *               backend or launcher to put beside the app.
        * - `engine`  — EXP-017: the viewer runtime it has is a DEVELOPMENT build. Nothing was
        *               written. Its own word, and not `runtime`, because the two have opposite
        *               fixes: one installation has no viewer at all and this one has the wrong
        *               build of it, and a pipeline told "no deploy engine here" will go looking
        *               for a missing file that is sitting right there.
        * - `project` — the project could not be read, validated, or has no root.
-       * - `target`  — the output folder was refused (a project folder, most often).
+       * - `target`  — the output folder was refused (a project folder, most often; for `--full-stack`,
+       *               a folder holding anything but an earlier full-stack deploy).
        * - `write`   — it failed part-way through writing.
        */
       stage: 'usage' | 'runtime' | 'engine' | 'project' | 'target' | 'write';
@@ -85,6 +88,7 @@ async function main(): Promise<void> {
   const [projectDir, outDir, ...rest] = process.argv.slice(2);
   let baseUrl: string | undefined;
   let allowDevelopmentEngine = false;
+  let fullStack = false;
   for (let i = 0; i < rest.length; i++) {
     if (rest[i] === '--base-url' && rest[i + 1] !== undefined) {
       baseUrl = rest[++i];
@@ -92,6 +96,10 @@ async function main(): Promise<void> {
     }
     if (rest[i] === ALLOW_DEV_ENGINE_FLAG) {
       allowDevelopmentEngine = true;
+      continue;
+    }
+    if (rest[i] === FULL_STACK_FLAG) {
+      fullStack = true;
       continue;
     }
     emit({ ok: false, stage: 'usage', message: `nodegx-deploy: unexpected argument ${rest[i]}` });
@@ -102,7 +110,7 @@ async function main(): Promise<void> {
     emit({
       ok: false,
       stage: 'usage',
-      message: `Usage: nodegx-deploy <project-dir> <out-dir> [--base-url /path] [${ALLOW_DEV_ENGINE_FLAG}]`
+      message: `Usage: nodegx-deploy <project-dir> <out-dir> [--base-url /path] [${FULL_STACK_FLAG}] [${ALLOW_DEV_ENGINE_FLAG}]`
     });
     process.exitCode = 1;
     return;
@@ -118,7 +126,7 @@ async function main(): Promise<void> {
 
   let result: EngineResult;
   try {
-    const outcome = await deployProject({ projectDir, outDir, baseUrl, allowDevelopmentEngine });
+    const outcome = await deployProject({ projectDir, outDir, baseUrl, allowDevelopmentEngine, fullStack });
     result = { ok: true, ...outcome };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
@@ -128,12 +136,19 @@ async function main(): Promise<void> {
     result =
       error instanceof DevelopmentEngineError
         ? { ok: false, stage: 'engine', message, engine: error.engine }
+        : error instanceof FullStackTargetError
+        ? { ok: false, stage: 'target', message }
+        : error instanceof FullStackInstallError
+        ? { ok: false, stage: 'runtime', message }
         : { ok: false, stage: classify(message), message };
-  } finally {
-    process.stdout.write = realWrite;
   }
 
-  emit(result);
+  // 🔴 The report goes through the real stdout, and stdout STAYS on stderr after it. Work the
+  // deploy started can log after it returns: a full-stack deploy prepares a second model for the
+  // cloud functions, which schedules the editor's one-second autosave, and the read-only guard's
+  // "Skipping auto-save" line used to arrive on stdout after the report (DEP-002 s2, measured). A
+  // caller parsing stdout as one JSON object got two lines.
+  realWrite(JSON.stringify(result) + '\n');
   process.exitCode = 0;
 }
 

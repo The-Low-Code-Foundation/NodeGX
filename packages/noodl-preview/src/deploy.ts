@@ -61,6 +61,13 @@ import { setExternalFolderPath } from '@noodl-utils/compilation/build/deploy-ind
 import { deployToFolder } from '@noodl-utils/compilation/build/deployer';
 
 import { gradeRoots, readDeployedRoots, type RootsReading } from './deployReading';
+import {
+  finishFullStack,
+  openFullStackStage,
+  planFullStack,
+  type FullStackPlan,
+  type FullStackReading
+} from './fullStack';
 import { bootstrapNodeLibrary } from './headless';
 import {
   EXTERNAL_DIR,
@@ -192,6 +199,8 @@ export interface DeployOutcome {
    */
   wires: WireHealthReading;
   warnings: string[];
+  /** P26 DEP-002 — present on a `--full-stack` deploy: the backend, the functions and the rules it carries. */
+  fullStack?: FullStackReading;
 }
 
 /**
@@ -209,6 +218,11 @@ export async function deployProject(options: {
    * the point: the dev build is what is on disk in every checkout where `npm run dev` has run.
    */
   allowDevelopmentEngine?: boolean;
+  /**
+   * P26 DEP-002 — the app and its backend, as one folder a person starts with one command. The app
+   * goes to `<outDir>/app`, and `./fullStack.ts` says what goes beside it.
+   */
+  fullStack?: boolean;
 }): Promise<DeployOutcome> {
   assertDeployRuntime();
 
@@ -222,6 +236,10 @@ export async function deployProject(options: {
   // 🔴 C68. Stated before anything reads it, and stated from this file's own location — see
   // EXTERNAL_DIR. Without this line the run below depends on the caller's working directory.
   setExternalFolderPath(EXTERNAL_DIR);
+
+  // DEP-002 — the folder, the backend and the launcher are checked before the project is read, so
+  // a refusal writes nothing.
+  const fullStack: FullStackPlan | null = options.fullStack ? planFullStack(options.outDir) : null;
 
   const { dir, format } = resolveTarget(options.projectDir);
   const nodeTypes = bootstrapNodeLibrary();
@@ -249,26 +267,49 @@ export async function deployProject(options: {
   healthProject._isReadOnly = true;
   const wires = await readWireHealth(healthProject);
 
+  // DEP-002 — the app is deployed into a temporary folder, packaged with its backend, and only then
+  // put in `outDir`; the folder is removed however that ends.
+  const stage = fullStack ? openFullStackStage(fullStack) : null;
   let copyReport;
   let written: string[];
+  let fullStackReading: FullStackReading | undefined;
   try {
-    ({ copyReport, written } = await deployToFolder({
-      project,
-      direntry: options.outDir,
-      environment: undefined,
-      baseUrl: options.baseUrl ?? '/'
-    }));
-  } catch (error) {
-    // 🔴 `deployToFolder` rejects TWO ways and they do not share a type. Its own refusals are
-    // plain objects (`{ result: 'failure', message: 'Cannot deploy to a project folder.' }`) and
-    // everything underneath is an `Error`. A caller that only reads `.stack` gets `undefined` for
-    // the refusal that a person is most likely to provoke.
-    const message =
-      error instanceof Error ? error.message : (error as { message?: string })?.message ?? JSON.stringify(error);
-    throw new Error(message);
+    try {
+      ({ copyReport, written } = await deployToFolder({
+        project,
+        direntry: stage ? stage.appStage : options.outDir,
+        environment: undefined,
+        baseUrl: options.baseUrl ?? '/',
+        writeGuide: !fullStack
+      }));
+    } catch (error) {
+      // 🔴 `deployToFolder` rejects TWO ways and they do not share a type. Its own refusals are
+      // plain objects (`{ result: 'failure', message: 'Cannot deploy to a project folder.' }`) and
+      // everything underneath is an `Error`. A caller that only reads `.stack` gets `undefined` for
+      // the refusal that a person is most likely to provoke.
+      const message =
+        error instanceof Error ? error.message : (error as { message?: string })?.message ?? JSON.stringify(error);
+      throw new Error(message);
+    }
+
+    if (stage) {
+      const { project: cloudProject } = buildProjectModel(readLegacyProject(dir, format).legacy, dir);
+      const finished = await finishFullStack(stage, {
+        project,
+        cloudProject,
+        projectDir: dir,
+        projectName: project.name ?? path.basename(dir),
+        baseUrl: options.baseUrl
+      });
+      written = finished.written;
+      fullStackReading = finished.reading;
+    }
+  } finally {
+    if (stage) fs.rmSync(stage.stage, { recursive: true, force: true });
   }
 
-  const roots = readDeployedRoots(options.outDir);
+  // A full-stack folder's site is its `app/`.
+  const roots = readDeployedRoots(fullStack ? path.join(options.outDir, 'app') : options.outDir);
   return {
     outDir: options.outDir,
     projectName: project.name ?? path.basename(dir),
@@ -295,7 +336,12 @@ export async function deployProject(options: {
         (kept) =>
           `${kept.path} (${kept.bytes} B) is the same file as ${kept.keep} and both were published — ` +
           `${kept.reason}. Point that reference at ${kept.keep} to stop shipping it twice.`
+      ),
+      ...(fullStackReading?.functionFailures ?? []).map(
+        (failure) =>
+          `The cloud function ${failure.name} could not be built, so it is not in the folder: ${failure.reason}`
       )
-    ]
+    ],
+    ...(fullStackReading ? { fullStack: fullStackReading } : {})
   };
 }

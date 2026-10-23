@@ -4,13 +4,20 @@
  * it.
  *
  *   node scripts/package-deploy.js [--app <dir>] [--out <dir>] [--build-id <id>]
- *                                  [--site-url <url>] [--skip-build] [--json]
+ *                                  [--site-url <url>] [--skip-build] [--full-stack] [--json]
  *
  * Output tree (`deploy/artifact` by default):
  *
  *   backend/cli.js      the self-contained service bundle (scripts/build.js)
  *   app/                the built NodeGX application frontend, if --app given
  *   MANIFEST.json       buildId, digest, and sha256 of every file above
+ *
+ * With `--full-stack` (P26 DEP-002) it is also a folder a person runs: `start.js` and its
+ * `start.sh` / `start.cmd` from `deploy/folder/` at the top, which start the backend serving the
+ * app on one port. A full-stack deploy (`nodegx-deploy --full-stack`) calls `packageDeploy` with
+ * the bundle it already has (`cliPath`) and the project's cloud functions and access rules
+ * (`backendFiles`, under `backend/`), so the folder a person runs passes the same credential scan
+ * and carries the same manifest as the image — one packaging path, not a second one beside it.
  *
  * ## Why a packaging step at all, when `dist/cli.js` is already one file
  *
@@ -285,6 +292,10 @@ function rmrf(target) {
 // Packaging
 // ============================================================================
 
+/** The full-stack launcher, copied to the top of a `--full-stack` artifact. */
+const LAUNCHER_FILES = ['start.js', 'start.sh', 'start.cmd'];
+const LAUNCHER_DIR = path.join(pkgRoot, 'deploy', 'folder');
+
 /**
  * @param {object} opts
  * @param {string} [opts.appDir]   built frontend to include at `app/`
@@ -293,12 +304,21 @@ function rmrf(target) {
  * @param {string} [opts.siteUrl]  public URL this stack will serve on; turns the
  *                                 baked-endpoint audit from a warning into a gate
  * @param {boolean} [opts.skipBuild] reuse an existing dist/cli.js
+ * @param {string} [opts.cliPath]  package THIS service bundle and build nothing — a caller that
+ *                                 ships its own copy (`@nodegx/preview`'s `dist/backend/cli.js`)
+ * @param {Record<string, string>} [opts.backendFiles] more files for `backend/`, as
+ *                                 `{ 'workflows/x.workflow.json': '/abs/src' }`; scanned like the rest
+ * @param {boolean} [opts.fullStack] add the launcher (`start.js`, `start.sh`, `start.cmd`)
+ * @param {string} [opts.launcherDir] where the launcher is, when this file is bundled away from
+ *                                 `deploy/folder/` (default: beside this script)
+ * @param {string|null} [opts.backendVersion] the version recorded in the manifest (default: this
+ *                                 package's, read from its package.json)
  */
 function packageDeploy(opts = {}) {
   const outDir = opts.outDir || path.join(pkgRoot, 'deploy', 'artifact');
-  const distCli = path.join(pkgRoot, 'dist', 'cli.js');
+  const distCli = opts.cliPath ? path.resolve(opts.cliPath) : path.join(pkgRoot, 'dist', 'cli.js');
 
-  if (!opts.skipBuild) {
+  if (!opts.skipBuild && !opts.cliPath) {
     // Same build the package's own `npm run build` runs — one build path, not
     // two. Spawned rather than `require`d: build.js kicks off an async esbuild
     // and returns immediately, so requiring it packages whatever `dist/cli.js`
@@ -312,17 +332,36 @@ function packageDeploy(opts = {}) {
   if (!fs.existsSync(distCli)) {
     throw new Error(`No service bundle at ${distCli}. Run \`npm run build\` in packages/nodegx-backend first.`);
   }
+  if (opts.fullStack && !opts.appDir) {
+    throw new Error('A full-stack artifact is the app and its backend: it needs --app <dir>.');
+  }
+  const launcherDir = opts.launcherDir || LAUNCHER_DIR;
+  if (opts.fullStack) {
+    const missing = LAUNCHER_FILES.filter((f) => !fs.existsSync(path.join(launcherDir, f)));
+    if (missing.length) throw new Error(`The full-stack launcher is incomplete in ${launcherDir}: no ${missing.join(', ')}.`);
+  }
 
   rmrf(outDir);
   fs.mkdirSync(path.join(outDir, 'backend'), { recursive: true });
   // Always present, even when empty: the web image COPYs it unconditionally, and
   // a backend-only deploy (API + /_admin, no app) is a supported outcome rather
   // than a build error. `.keep` exists because `COPY emptydir/ dest/` is an
-  // error in Docker, not a no-op.
+  // error in Docker, not a no-op. A full-stack folder is not an image, and its app is never empty.
   fs.mkdirSync(path.join(outDir, 'app'), { recursive: true });
-  fs.writeFileSync(path.join(outDir, 'app', '.keep'), '');
+  if (!opts.fullStack) fs.writeFileSync(path.join(outDir, 'app', '.keep'), '');
   fs.copyFileSync(distCli, path.join(outDir, 'backend', 'cli.js'));
   // NB: cli.js.map is deliberately NOT copied (see the module doc).
+  for (const [rel, src] of Object.entries(opts.backendFiles || {})) {
+    const to = path.join(outDir, 'backend', rel);
+    if (!to.startsWith(path.join(outDir, 'backend') + path.sep)) throw new Error(`backend file outside backend/: ${rel}`);
+    fs.mkdirSync(path.dirname(to), { recursive: true });
+    fs.copyFileSync(src, to);
+  }
+  if (opts.fullStack) {
+    for (const f of LAUNCHER_FILES) fs.copyFileSync(path.join(launcherDir, f), path.join(outDir, f));
+    fs.chmodSync(path.join(outDir, 'start.sh'), 0o755);
+    fs.chmodSync(path.join(outDir, 'start.js'), 0o755);
+  }
 
   let appFiles = 0;
   if (opts.appDir) {
@@ -340,9 +379,16 @@ function packageDeploy(opts = {}) {
 
   // --- baked-endpoint audit -------------------------------------------------
   const baked = opts.appDir ? readBakedEndpoint(path.join(outDir, 'app')) : { found: false };
-  const endpointAudit = opts.appDir
-    ? auditEndpoint(baked, opts.siteUrl)
-    : { level: 'ok', message: 'backend-only artifact; no app bundle to audit.' };
+  // A full-stack folder's backend answers the page's `nodegx-config.json` with the origin the
+  // browser used (DEP-002 s1), so what was baked is overridden on every load and is not a fault.
+  const endpointAudit = !opts.appDir
+    ? { level: 'ok', message: 'backend-only artifact; no app bundle to audit.' }
+    : opts.fullStack
+      ? {
+          level: 'ok',
+          message: 'full-stack: the backend serves the app and tells it its own address (nodegx-config.json).'
+        }
+      : auditEndpoint(baked, opts.siteUrl);
   if (endpointAudit.level === 'error') {
     throw new Error('Refusing to package: ' + endpointAudit.message);
   }
@@ -378,8 +424,10 @@ function packageDeploy(opts = {}) {
     artifactDigest,
     // Recorded, never hashed — the digest must not move because the clock did.
     createdAt: new Date().toISOString(),
-    backendVersion: require(path.join(pkgRoot, 'package.json')).version,
+    backendVersion:
+      opts.backendVersion !== undefined ? opts.backendVersion : require(path.join(pkgRoot, 'package.json')).version,
     includesApp: Boolean(opts.appDir),
+    layout: opts.fullStack ? 'full-stack' : 'image',
     appFileCount: appFiles,
     siteUrl: opts.siteUrl || null,
     backendEndpoint: baked.found ? { endpoint: baked.endpoint, appId: baked.appId, type: baked.type } : null,
@@ -413,6 +461,9 @@ function parse(argv) {
         break;
       case '--skip-build':
         o.skipBuild = true;
+        break;
+      case '--full-stack':
+        o.fullStack = true;
         break;
       case '--json':
         o.json = true;
@@ -458,5 +509,6 @@ module.exports = {
   listFiles,
   readBakedEndpoint,
   auditEndpoint,
-  SECRET_PATTERNS
+  SECRET_PATTERNS,
+  LAUNCHER_FILES
 };

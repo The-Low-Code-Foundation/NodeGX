@@ -10,7 +10,9 @@ import {
   DEPLOY_GUIDE_FILE,
   renderDeployConfig,
   renderDeployGuide,
-  renderDeployPackageJson
+  renderDeployPackageJson,
+  renderFullStackGuide,
+  renderFullStackPackageJson
 } from '@noodl-utils/compilation/build/deploy-guide';
 
 describe('DEPLOY.md', () => {
@@ -103,5 +105,81 @@ describe('a client-side deploy package.json', () => {
     expect(JSON.parse(renderDeployPackageJson('My Café App!')).name).toBe('my-caf-app');
     expect(JSON.parse(renderDeployPackageJson('  ')).name).toBe('nodegx-app');
     expect(JSON.parse(renderDeployPackageJson(undefined)).name).toBe('nodegx-app');
+  });
+});
+
+describe('DEPLOY.md for a full-stack folder (DEP-002)', () => {
+  const NONE = { records: false, users: false, files: false, functions: [] as string[] };
+  const TODO = { records: true, users: true, files: false, functions: [] as string[] };
+
+  it('leads with who can read the data: with no rules of its own, a visitor not signed in reads nothing', () => {
+    const md = renderFullStackGuide({ projectName: 'Todo List', uses: TODO, hasRules: false });
+    expect(md).toContain('# Running Todo List');
+    const rules = md.indexOf('## Who can read and change the data');
+    expect(rules).toBeGreaterThan(-1);
+    // Before the instructions to start it: the empty page is the first thing a person would meet.
+    expect(rules).toBeLessThan(md.indexOf('## Start it'));
+    expect(md).toContain('A visitor who has not signed in can read nothing and save nothing.');
+    expect(md).toContain('nodegx.security.json');
+  });
+
+  it("with the project's own rules, says they install on the first start and a later deploy does not change them", () => {
+    const md = renderFullStackGuide({ projectName: 'Todo List', uses: TODO, hasRules: true });
+    expect(md).toContain('`backend/nodegx.security.json`');
+    expect(md).toContain('A later deploy with different rules does not change that copy.');
+    expect(md).not.toContain('can read nothing and save nothing');
+  });
+
+  it('gives the one command, the Node it needs, and where the data is', () => {
+    const md = renderFullStackGuide({ projectName: 'Todo List', uses: TODO, hasRules: true });
+    expect(md).toContain('./start.sh');
+    expect(md).toContain('start.cmd');
+    expect(md).toContain('node start.js --port 8090');
+    expect(md).toContain('22.13 or later');
+    expect(md).toContain('first free port from 3000');
+    expect(md).toContain('`data/` holds the database');
+    expect(md).toContain('/_admin');
+    // Not the static layout's instructions.
+    expect(md).not.toContain('node serve.js');
+  });
+
+  it('names what each feature the project uses needs, and only those', () => {
+    const md = renderFullStackGuide({
+      projectName: 'Lingo',
+      uses: { records: true, users: true, files: true, functions: ['speak', 'translate'] },
+      hasRules: true
+    });
+    expect(md).toContain('**Users.**');
+    expect(md).toContain('sharp');
+    expect(md).toContain('**Cloud functions** (2): `speak`, `translate`.');
+    expect(md).toContain('NODEGX_SECRET_<NAME>');
+
+    const recordsOnly = renderFullStackGuide({
+      projectName: 'Lingo',
+      uses: { ...NONE, records: true },
+      hasRules: true
+    });
+    expect(recordsOnly).toContain('**Records.**');
+    expect(recordsOnly).not.toContain('**Users.**');
+    expect(recordsOnly).not.toContain('sharp');
+    expect(recordsOnly).not.toContain('**Cloud functions**');
+  });
+
+  it('says so when the project uses no backend at all', () => {
+    const md = renderFullStackGuide({ projectName: 'Clock', uses: NONE, hasRules: false });
+    expect(md).toContain('uses no records, users, files or cloud functions');
+  });
+
+  it("package.json: npm start runs start.js, and carries the project's name for the backend", () => {
+    const pkg = JSON.parse(renderFullStackPackageJson('Todo List'));
+    expect(pkg.scripts).toEqual({ start: 'node start.js' });
+    expect(pkg.nodegx).toEqual({ name: 'Todo List', layout: 'full-stack' });
+    expect(pkg.dependencies).toBeUndefined();
+  });
+
+  it('carries no date', () => {
+    const input = { projectName: 'Todo List', uses: TODO, hasRules: false };
+    expect(renderFullStackGuide(input)).toBe(renderFullStackGuide(input));
+    expect(renderFullStackGuide(input)).not.toMatch(/20\d\d-\d\d-\d\d/);
   });
 });

@@ -2,7 +2,8 @@
 /**
  * P112 OWN-015 — the backend an npm install of `@nodegx/mcp` provisions.
  *
- *   node build-backend-copy.mjs            bundle nodegx-backend's service into dist/backend/cli.js (npm's prepack)
+ *   node build-backend-copy.mjs            bundle nodegx-backend's service into dist/backend/cli.js, and its full-stack
+ *                                          launcher into dist/backend/folder/ (npm's prepack)
  *   node build-backend-copy.mjs --remove   delete it again (npm's postpack)
  *   … --out <dir>                          build into (or remove) <dir> instead — @nodegx/preview's prepack
  *
@@ -16,7 +17,7 @@
  * Not a dependency on a separate npm package: no workspace is called that, so declaring one would send the
  * monorepo's own install to the registry. A standalone package for servers is OWN-016's question.
  */
-import { mkdirSync, rmSync } from 'node:fs';
+import { cpSync, mkdirSync, rmSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -51,4 +52,7 @@ await esbuild.build({
   entryPoints: [path.join(BACKEND, 'src', 'cli.ts')],
   outfile: path.join(OUT, 'cli.js')
 });
+// P26 DEP-002 — the launcher a full-stack deploy puts beside the app (`start.js`, `start.sh`, `start.cmd`). It ships
+// beside the backend it starts, so `nodegx-deploy --full-stack` from an install finds both in one place.
+cpSync(path.join(BACKEND, 'deploy', 'folder'), path.join(OUT, 'folder'), { recursive: true });
 console.log(`build-backend-copy: ${path.relative(process.cwd(), path.join(OUT, 'cli.js'))} (${((Date.now() - started) / 1000).toFixed(1)} s)`);
