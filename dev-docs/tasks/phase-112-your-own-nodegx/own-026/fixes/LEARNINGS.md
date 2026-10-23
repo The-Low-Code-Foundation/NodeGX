@@ -92,3 +92,18 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
 - **FIX-03 C again:** `shared-value-written-back-whole` came back on the inherited score save (7 mentions). It wasn't
   touched, and the change didn't ask. Add To unused.
 - **Not gating; no FIX-04.**
+
+## #6 — t2-nodegx-c03 (a two-child race), kit FIX-03, 17/19 (2026-10-23)
+
+- **Level on checks again** (17/19 in all three arms; F6 on the grader's doubt over the Moon and Earth, as in #5, and
+  T6). C3.1 and C3.2 passed. No regressions.
+- **The first change where the layer was clearly thick:** $0.228 and 44 min, against code's $0.092 and 18 min
+  (2.5×, 2.4×), and harness's $0.197. **Tokens written 2.4× code's**, where c01–c02 were 1.0–1.2×. The race is a new
+  page: 174 nodes added, +4,693/−240 lines in 38 files, JavaScriptFunctions 7 → 11 (150 → 253 lines), Expressions
+  66 → 105. What it wrote, by tool input: 142k characters of graph operations (25 `update_component`, 9
+  `create_component`), 36k through the editor (docs, decisions), 25k of `drive_page` scripts. Code wrote 90k through
+  the editor for the same feature. **A new feature costs about 1.6× the characters as graph operations as it does as
+  code**, before the checking.
+- 19 refused calls. 17 `read_files` calls, mostly its own screenshots (requests reached 2.1M characters).
+- **Not gating; no FIX-04 for a fail.** For the thin layer (PLAN §8 12:30) this is the lever #5 didn't show: the
+  cost of WRITING a feature in the graph's operation format, beside the cost of reading (screenshots) and of refusals.
