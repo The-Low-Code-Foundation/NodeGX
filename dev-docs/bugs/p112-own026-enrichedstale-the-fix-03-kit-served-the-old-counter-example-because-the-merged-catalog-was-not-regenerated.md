@@ -2,7 +2,7 @@
 id: P112-OWN026-ENRICHEDSTALE
 title: The FIX-03 and FIX-04 kits served the old cloud-shared-counter (a script increment), not FIX-03's Add To version, because the committed merged catalog was not regenerated after the example changed
 status: fixed
-commit: PENDING
+commit: fbd337bfe
 regression: packages/noodl-types/src/node-catalog-enriched.json (regenerated; `npm run catalog:merge:check`)
 severity: medium
 area: kit / catalog build (`packages/noodl-types/src/node-catalog-enriched.json`, read by `packages/noodl-mcp/src/catalog.ts` and bundled into `dist/noodl-mcp.cjs`)

@@ -2,7 +2,7 @@
 id: P112-OWN026-OWNERWRITABLE
 title: A signed-in caller could rewrite a record's owner with an update, and a shared collection stored whatever owner the page sent, so the one field that looked like the server's word was not
 status: fixed
-commit: PENDING
+commit: fbd337bfe
 regression: packages/nodegx-backend/tests/own026-owner-is-the-servers.test.ts
 severity: high
 area: backend / data plane (`packages/nodegx-backend/src/server/HttpServer.ts` `stampCreate`; `parse-wire.ts` `classPut` + upsert; `byob-admin.ts` save + batch; `mcp/McpRoutes.ts` update)

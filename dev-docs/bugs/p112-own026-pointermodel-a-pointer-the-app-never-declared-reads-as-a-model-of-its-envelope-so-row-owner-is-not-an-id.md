@@ -2,7 +2,7 @@
 id: P112-OWN026-POINTERMODEL
 title: A Pointer field the app never declared (owner) reads on a page or in a Function as a Model of its wire envelope, so `row.owner === userId` is false
 status: fixed
-commit: PENDING
+commit: fbd337bfe
 regression: packages/noodl-runtime/test/nodes/hlt022-plain-records.test.ts "a Pointer the app never declared is the id it points at (P112 OWN-026 FIX-05: `owner`)"
 severity: medium
 area: runtime / cloudstore `_fromJSON` (Record, Query Records, `Noodl.Records`)

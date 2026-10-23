@@ -2,7 +2,7 @@
 id: P112-OWN026-CALLEROWNER
 title: The kit taught "owner isolation by an explicit field" set from the User id on the page, and nothing said so where a page wrote one or a cloud function trusted one, so the shortest graph for "invite someone to see my records" leaked another family's records
 status: fixed
-commit: PENDING
+commit: fbd337bfe
 regression: packages/noodl-editor/tests-unit/validation/ownerField.test.ts
 severity: high
 area: kit / examples + validation (`docs/node-catalog/examples/cloud-query-own-rows.json`; `packages/noodl-editor/src/editor/src/validation/ownerField.ts`)
