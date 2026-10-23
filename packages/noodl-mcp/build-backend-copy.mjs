@@ -25,6 +25,8 @@ import { fileURLToPath } from 'node:url';
 
 import esbuild from 'esbuild';
 
+import { nodeModulesThroughLink } from './build-common.mjs';
+
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 // `--out <dir>`: P112-OWN019-BACKENDSESSION — @nodegx/preview ships the same service (its prepack builds it here into
 // its own dist/backend), so a person's preview can start the app's own backend.
@@ -48,6 +50,9 @@ mkdirSync(OUT, { recursive: true });
 await buildAdminApp();
 await esbuild.build({
   ...shared,
+  // NPMAUDIT-LOCALPATH: the backend's own options, so the link rename has to be added here too (a worktree build
+  // printed ../../../../OpenNoodl/node_modules/… 51 times in cli.js; check-pack-paths refused the 0.2.6 pack).
+  plugins: [...(shared.plugins || []), nodeModulesThroughLink],
   sourcemap: false,
   logLevel: 'warning',
   entryPoints: [path.join(BACKEND, 'src', 'cli.ts')],
