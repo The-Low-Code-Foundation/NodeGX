@@ -151,12 +151,12 @@ combination (one Node process doing both) and may be more work than it is worth 
 
 - [ ] A full-stack project deploys to a folder and runs with one command, with no Docker and no
       `npm install`.
-- [ ] Records written through the running app survive a restart of the process.
-- [ ] Client-side routing survives a browser refresh on a deep path.
-- [ ] Every backend route family is reachable with `--serve-app` active, asserted by a test that
-      reads `getRouteTable()` rather than a hand-written list.
-- [ ] Path traversal is refused, with tests.
-- [ ] The admin credential and `/_admin` URL are printed on first run.
+- [x] Records written through the running app survive a restart of the process. *(s1, driven through `--serve-app`)*
+- [x] Client-side routing survives a browser refresh on a deep path. *(s1, driven and specced)*
+- [x] Every backend route family is reachable with `--serve-app` active, asserted by a test that
+      reads `getRouteTable()` rather than a hand-written list. *(s1)*
+- [x] Path traversal is refused, with tests. *(s1)*
+- [x] The admin credential and `/_admin` URL are printed on first run. *(already true of `serve`; read off s1's drive. The folder's `start.sh` must not hide it)*
 - [ ] The generated README is project-specific and states what needs configuring before it works.
 - [ ] The Deploy popup shows three destinations; the two unbuilt ones name their task.
 - [ ] The backend bundle in the folder comes from the same packaging script as the Docker target.
@@ -186,3 +186,60 @@ combination (one Node process doing both) and may be more work than it is worth 
   bypasses all four.
 - **`deployToFolder` is fire-and-forget** in the current tab (there is a literal `NOTE: Fire-n-forget`
   comment). A multi-step deploy needs real completion and error reporting; do not inherit that shape.
+
+## Session 1 (2026-10-23, Opus 5.5): the backend serves the app
+
+**Assessed first (step 1).** `static/deploy/serve.js`, which DEP-001 put in every client-side deploy,
+already had a static handler worth reusing: MIME types, the traversal and dot-file refusals, the SPA
+fallback (a path with no extension is `index.html`). So the backend does not get a second one:
+`src/server/static-app.ts` requires that file by relative path and esbuild inlines it into
+`dist/cli.js` (checked in a scratch bundle). One handler, so a deploy folder served by `serve.js` and
+the same folder served by the backend refuse the same paths.
+
+**Built (step 2): `--serve-app <dir>`.**
+- `HttpServer.handle` asks the app only when **no route matched**, for `GET`/`HEAD`, and never when
+  the path's first segment is a route family. The families are the first segments of the live route
+  table (`HttpServer.appFamilies`), so a mistyped `/classes/…` keeps its JSON 404 and a family added
+  later is reserved the day it lands. `POST` to an unknown path stays a 404.
+- `/nodegx-config.json` is answered per request: the folder's file, with `cloudservices.endpoint` set
+  to the origin the browser used (`Host`; `https` when `X-Forwarded-Proto` says a proxy terminated
+  TLS). One folder works at `localhost`, on a bare IP and behind Caddy. **Not `''`**: the runtime
+  reads an empty endpoint as no backend (PROGRESS D26).
+- A folder that is not a folder, or has no `index.html`, is refused at the top of `start()`, before
+  the database opens, naming the folder. A page that never reads `nodegx-config.json` (a deploy older
+  than DEP-001) gets a warning at start.
+- Found on the way: **P26-SERVENUL** (`dev-docs/bugs/`), one `%00` request stopped `serve.js`. Fixed in
+  the shared handler, so both consumers have the fix.
+
+**Graded.** `nodegx-backend/tests/dep-002-serve-app.test.ts`, 13 rows: two live services, one with
+the app and one without; every route in `getRouteTable()` answers the same status on both and never
+with the app's page; family misses keep the JSON 404; `/_admin` is still the dashboard; the page, its
+files, a deep path, a missing file; the config's origin, plain and proxied; five hostile paths, with
+the backend still answering `/health` after each; the two refusals. **Two mutants, both caught:**
+dropping the family guard fails the family row; serving the app before the route match fails the
+route walk with 15+ named routes and the dashboard row. `noodl-viewer-react/tests/dep-002-serve-hostile-paths.test.js`,
+9 rows, red on the old `serve.js` (the NUL row; measured on a scratch copy), green on the new.
+
+**Driven (step 7, partly).** The deploy runtime (`OUT_PATH=<scratch>` webpack) and the deploy engine
+built from today's sources, the engine run from scratch so the checkout's `src/external` (built before
+DEP-001) was not used. `templates/todo-list` deployed (`nodegx-config.json` = `{}`: no baked backend),
+then `node cli.js serve --serve-app <deploy> --project-dir <copy>` on :3417, headless Chromium:
+- the sign-in page from `/`, 0 page errors; the app's first backend request is `GET /nodegx-config.json`;
+- **Create account** → `POST /users 201`; a task typed and Entered → `POST /classes/Task 201`;
+- reload on `/todo-list` → 200, still signed in, the task shown;
+- SIGTERM ("stopped cleanly"), started again on the same data dir; a fresh browser signs in
+  (`POST /login 200`) and the task is in the list (screenshot read). Its text was never typed in
+  that browser.
+
+Not driven here: cloud functions and files through `--serve-app` (no fixture function in the todo
+list); a `--host 0.0.0.0` start.
+
+**Next (s2): the folder.** Steps 3–5: `package-deploy.js` makes the backend artifact the deploy
+copies (one packaging path); the layout (`app/`, `backend/cli.js`, `start.sh`/`start.cmd`, Node
+version check, not port 8080); DEPLOY.md extended for the full-stack mode, leading with the 403
+default; and the permissions decision. The project's `nodegx.security.json` is excluded from the app
+folder today (correctly: it is not the app's), so the full-stack folder has to carry it beside the
+backend and pass it as `--project-dir`, or the first start mints the default rules. Then the popup
+(step 6). **Lane 5's `deploy_to_vm` builds on this:** one process behind Caddy, which also makes the
+no-domain case reachable (`ship-to-vm.sh` with no domain leaves the site unserved).
+

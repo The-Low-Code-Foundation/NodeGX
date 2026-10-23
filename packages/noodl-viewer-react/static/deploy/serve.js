@@ -266,6 +266,12 @@ function createStaticHandler(root, { deployConfig } = {}) {
       res.end('Bad request');
       return;
     }
+    // P26-SERVENUL: `fs.stat` THROWS on a NUL byte rather than calling back, and the throw stopped the process.
+    if (pathname.indexOf('\0') !== -1) {
+      res.writeHead(400);
+      res.end('Bad request');
+      return;
+    }
 
     // DEP-001: started with --backend, the address the page reads is the one asked for, not the file's.
     if (configBody !== null && pathname === '/' + DEPLOY_CONFIG_FILE) {

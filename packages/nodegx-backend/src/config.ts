@@ -92,6 +92,12 @@ export interface BackendServiceOptions {
    * it; the editor's spawner does not, and keeps dev-open as its local default.
    */
   enforceRules: boolean;
+  /**
+   * DEP-002 — a deployed app's folder this backend also serves, on its own origin (`--serve-app`).
+   * Asked only when no route matched, and never for a route family's path, so the API is unchanged
+   * by it. null = serve no app (every existing spawner). See `server/static-app.ts`.
+   */
+  serveApp: string | null;
 }
 
 /** Non-loopback bind => a token is mandatory. */
@@ -117,7 +123,8 @@ const DEFAULTS: BackendServiceOptions = {
   readonlyToken: null,
   projectDir: null,
   requireSecrets: false,
-  enforceRules: false
+  enforceRules: false,
+  serveApp: null
 };
 
 /**

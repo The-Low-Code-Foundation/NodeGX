@@ -30,6 +30,7 @@ import { AdapterFacade, DEFAULT_PAGE_CAP } from './persistence/AdapterFacade';
 import { ExecutionHistory, ExecutionHistoryStatus } from './execution/ExecutionStore';
 import { IdempotencyStore } from './execution/IdempotencyStore';
 import { HttpServer, ListenInfo } from './server/HttpServer';
+import { openServedApp, ServedApp } from './server/static-app';
 import { WorkflowRunner } from './workflow/WorkflowRunner';
 import { scanDeployedFunctions } from './workflow/functionDeclarations';
 import { WorkflowSubsystem } from './workflow/WorkflowSubsystem';
@@ -117,6 +118,8 @@ export interface StartedService {
     /** Collections whose FTS5 shadow table was (re)built during this start. */
     reconciledCollections: string[];
   };
+  /** DEP-002: the app this backend serves beside its API (`--serve-app`), or null. */
+  servedApp: ServedApp | null;
   stop(): Promise<void>;
 }
 
@@ -125,6 +128,7 @@ export class BackendService {
   private persistence: PersistenceHandle | null = null;
   private facade: IStorageFacade | null = null;
   private http: HttpServer | null = null;
+  private servedApp: ServedApp | null = null;
   private runner: WorkflowRunner | null = null;
   private workflows: WorkflowSubsystem | null = null;
   private security: SecurityState | null = null;
@@ -166,6 +170,10 @@ export class BackendService {
     if (typeof g._noodl_cloud_runtime_version === 'undefined') {
       g._noodl_cloud_runtime_version = 'nodegx-backend';
     }
+
+    // 0.4 DEP-002: the app folder is checked before anything opens, so a wrong path is a refusal
+    //     that names the folder, with no database left half-open behind it.
+    this.servedApp = this.options.serveApp ? openServedApp(this.options.serveApp) : null;
 
     // 0.5 Operational config (BAK-009) BEFORE anything that logs: ops.json owns
     //     the log level and format, so loading it first is what makes startup
@@ -558,6 +566,7 @@ export class BackendService {
     // 3. HTTP surface.
     this.http = new HttpServer({
       options: this.options,
+      servedApp: this.servedApp,
       persistence: this.persistence,
       facade: this.facade,
       executions: this.executions,
@@ -745,6 +754,7 @@ export class BackendService {
         fts5Available: searchIndexer.hasFts5(),
         reconciledCollections: searchReconciledCollections
       },
+      servedApp: this.servedApp,
       stop: () => this.stop()
     };
   }

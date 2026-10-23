@@ -29,6 +29,7 @@ import * as http from 'http';
 import * as path from 'path';
 
 import type { BackendServiceOptions } from '../config';
+import type { ServedApp } from './static-app';
 import type { PersistenceHandle } from '../persistence/createAdapter';
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
@@ -299,6 +300,8 @@ interface RouteDef extends RouteInfo {
 
 export interface HttpServerDeps {
   options: BackendServiceOptions;
+  /** DEP-002: the app served for a GET no route matched (`--serve-app`); absent = none. */
+  servedApp?: ServedApp | null;
   persistence: PersistenceHandle;
   facade: IStorageFacade;
   executions: ExecutionHistory;
@@ -389,6 +392,8 @@ export interface ListenInfo {
 
 export class HttpServer {
   private readonly options: BackendServiceOptions;
+  private readonly servedApp: ServedApp | null;
+  private appFamilySet: Set<string> | null = null;
   private readonly persistence: PersistenceHandle;
   private readonly facade: IStorageFacade;
   private readonly security: SecurityState;
@@ -458,6 +463,7 @@ export class HttpServer {
 
   constructor(deps: HttpServerDeps) {
     this.options = deps.options;
+    this.servedApp = deps.servedApp || null;
     this.persistence = deps.persistence;
     this.facade = deps.facade;
     this.security = deps.security;
@@ -631,6 +637,15 @@ export class HttpServer {
   /** `http://127.0.0.1:<bound port>` — the documented local fallback when no baseUrl is configured. */
   private localUrl(): string {
     return `http://127.0.0.1:${this.boundPort || this.options.port}`;
+  }
+
+  /**
+   * DEP-002: the first path segment of every route — names `--serve-app` never answers with the app.
+   * Read off the live table, so a new route family is reserved the day it is added.
+   */
+  get appFamilies(): Set<string> {
+    if (!this.appFamilySet) this.appFamilySet = new Set(this.routes.map((r) => r.pattern.split('/')[0]));
+    return this.appFamilySet;
   }
 
   /** The full route table (method/pattern/access) — the route-walk test's input. */
@@ -1794,6 +1809,14 @@ export class HttpServer {
     const seg = pathSegments(pathname);
     const match = this.matchRoute(method, seg);
     if (!match) {
+      // DEP-002: the app answers only what the API does not, and never under a route family's name —
+      // a mistyped `/classes/…` keeps the JSON 404 its caller can read.
+      if (this.servedApp && (method === 'GET' || method === 'HEAD') && !this.appFamilies.has(seg[0] || '')) {
+        trace.route = '(app)';
+        trace.rateClass = 'app';
+        this.servedApp.handle(req, res);
+        return;
+      }
       throw new HttpError(404, `Not found: ${method} ${pathname}`);
     }
     const { route, params } = match;

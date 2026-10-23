@@ -283,6 +283,36 @@ rewrite the app. If the file is missing (404), the app uses the address it was d
 what an app deployed before this file existed does. If the file is unreadable (not JSON, for example
 a host that answers `index.html` for every path), the app does the same and logs a warning.
 
+## The app and its backend in one process
+
+The backend can serve the deployed app itself, on its own address:
+
+```bash
+node cli.js serve --data-dir ./data --port 3100 --serve-app ./app
+```
+
+`./app` is the folder a deploy wrote (the one with `index.html` in it). Open
+`http://localhost:3100/` and the app is there, talking to the backend at the same address. That
+is the single-origin shape of the stack above, made by one Node process with no Docker and no
+nginx:
+
+- **The API always wins.** The app is asked only for a `GET` that no backend route matched.
+- **A route family's name is never the app's.** `/classes/…`, `/admin/…`, `/files/…` and the
+  rest of the reserved names above keep the backend's JSON 404 when the path matches no route, so
+  a mistyped API call is not answered with a web page. An app page cannot use one of those names
+  as its first path segment.
+- **A page path is the app's page.** A path with no file extension that is not a file answers
+  `index.html`, so a refresh on `/lessons/3` loads the app. A missing file with an extension
+  (`/logo.png`) is a 404. Dot-files are never served, and no path leaves the folder.
+- **The page is pointed at this address.** The backend answers `nodegx-config.json` itself: the
+  folder's file, with `cloudservices.endpoint` set to the address the browser used. Behind a proxy
+  that terminates TLS, it uses `X-Forwarded-Proto`, so the same folder works at
+  `http://localhost:3100`, on a server's bare IP and at `https://app.example.com` behind Caddy. An
+  app deployed before `nodegx-config.json` existed calls the address it was deployed with; the
+  backend says so when it starts.
+- A folder with no `index.html` is refused at start, before the database opens, with the folder
+  named.
+
 ## Other hosting
 
 Nothing about a NodeGX deploy is exotic. The application is a static folder, and

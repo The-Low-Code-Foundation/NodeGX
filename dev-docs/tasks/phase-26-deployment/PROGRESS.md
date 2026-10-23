@@ -14,7 +14,7 @@ Not started · In progress · **Built–not wired** · Complete · Superseded
 |---|---|---|---|---|---|
 | [DEP-001](./DEP-001-RUNTIME-BACKEND-CONFIG.md) | Runtime backend config — un-freeze the endpoint | 1 | ✅ Complete (SSR criterion by drive, not test) | 2026-10-22 | Prerequisite for 002/003/005. ~100 lines; the care is in four existing consumers and the SSR hydration case |
 | [DEP-008](./DEP-008-ARTIFACT-CONTENTS-AND-IGNORE.md) | Artifact contents & the ignore mechanism | 1 | ⬜ Not started | — | Filed by AIX-009. A **live privacy defect** in the shipping deploy path, not only a blocker. Blocks AIX-009 |
-| [DEP-002](./DEP-002-LOCAL-FULLSTACK-BUNDLE.md) | Local full-stack bundle — one process, no Docker | 2 | ⬜ Not started | — | Owns the Deploy popup's new IA. Closes phase-5 TASK-007F |
+| [DEP-002](./DEP-002-LOCAL-FULLSTACK-BUNDLE.md) | Local full-stack bundle — one process, no Docker | 2 | 🟡 In progress — s1: `--serve-app` | — | s1 2026-10-23: the backend serves the app on one origin (steps 1–2, 7 driven). Next: the folder, `start.sh`, DEPLOY.md, permissions, the popup. Closes phase-5 TASK-007F |
 | [DEP-003](./DEP-003-STATIC-HOST-PUBLISH.md) | Publish to Netlify & Cloudflare Pages | 2 | ⬜ Not started | — | Two adapters, one interface. No git anywhere in the flow |
 | [DEP-004](./DEP-004-DEPLOY-TARGETS-AND-SECRETS.md) | Deploy targets & secret storage | 3 | ⬜ Not started | — | Where "dev VM / prod VM" lives. Decides where every credential in the phase goes |
 | [DEP-005](./DEP-005-REMOTE-DEPLOY-SSH.md) | Remote deploy over SSH + the Caddy target | 3 | ⬜ Not started | — | Transport wrapper over WF-003's tested script. Closes two WF-003 residuals (SSE, file upload through the proxy) |
@@ -36,7 +36,7 @@ be stale, correct it here rather than implementing around the description.
 | D5 | `copyProjectFilesToFolder` ships the whole project folder past a five-name filter with a `// TODO: Load something like .noodlignore` | `build/copy.ts:5-24` | DEP-008 |
 | D6 | The `.git`/`.noodl` exclusions are unanchored `indexOf` substring matches, so legitimate assets are silently dropped | `build/copy.ts` | DEP-008 |
 | D7 | v2 project source (`nodegx.*.json`, `components/`) is deployed by accident — `project.json` is excluded by name, its successors are not | `build/copy.ts` | DEP-008 |
-| D8 | `nodegx-backend` has **no general static file serving** — only the self-contained `/_admin` document | `admin/AdminDashboardRoutes.ts` | DEP-002 |
+| D8 | ~~`nodegx-backend` has **no general static file serving**~~ — **resolved by DEP-002 s1, 2026-10-23**: `--serve-app <dir>` (`src/server/static-app.ts`), asked only when no route matched and never under a route family's name; the files are served by the deploy's own `serve.js` handler, bundled in | `server/static-app.ts` | DEP-002 ✅ |
 | D9 | Phase-5 TASK-007F (bundle the backend with the exported app) was specced and never started; it is far cheaper now that WF-004 produces a single Node-runnable bundle | `phase-5/PROGRESS.md` | DEP-002 |
 | D10 | `deployToFolder` is fire-and-forget (literal `NOTE: Fire-n-forget`), so there is no completion or error reporting to build multi-step deploys on | `DeployToFolderTab.tsx` | DEP-002 |
 | D11 | `deploy/Caddyfile.example` exists, unused and unverified | `nodegx-backend/deploy/` | DEP-005 |
@@ -52,6 +52,8 @@ be stale, correct it here rather than implementing around the description.
 | D21 | **Landed 2026-10-22 (Richard's ask, outside a task):** every deploy writes `DEPLOY.md` — generated, per mode, naming the backend address the export baked in — and a client-side deploy carries `serve.js` (no deps; `--port`/`PORT` exact, else first free from 3000, loopback-probed). The SSR server takes its port from the same file. **Named DEPLOY.md, not README.md, by Richard's ruling** — a project README copied into the deploy is never overwritten. DEP-002's "generated README" means this file: extend `build/deploy-guide.ts`, don't add a second one | `build/deploy-guide.ts`, `static/deploy/serve.js` | DEP-002 extends |
 | D22 | ~~A backend-port flag is not possible yet~~ — **resolved by DEP-001, 2026-10-22**: `--backend-port` / `--backend` on `serve.js`, the SSR server and SSG | `static/deploy/serve.js` | DEP-001 ✅ |
 | D23 | **Richard's ruling 2026-10-22:** an editor deploy goes into a folder named after the app inside the folder chosen (`nodegx_projects` → `nodegx_projects/My App/`); never inside the project; `<name>-deploy` when `<chosen>/<name>` is the project. A client-side deploy also gets a dependency-free `package.json` (`npm start` = `serve.js`) — Richard's `npm install` in a deploy had written a stray `package-lock.json`. The CLI keeps `<out>` as given | `build/deploy-target.ts`, `deploy-guide.ts` | — |
+| D25 | **P26-SERVENUL (fixed 2026-10-23):** one `GET /a%00b` stopped a deploy folder's `serve.js` — `fs.stat` throws on a NUL byte instead of calling back. In every client-side deploy since 3c41dc02d; not in the published `@nodegx/preview` (0.2.4). Now a 400, graded by `noodl-viewer-react/tests/dep-002-serve-hostile-paths.test.js` (red on the old file, measured) | `static/deploy/serve.js` | DEP-002 ✅ |
+| D26 | **Read, not driven:** an EMPTY baked endpoint — the form `package-deploy.js`'s audit calls "correct for this single-origin stack" — is read by the runtime as *no backend*: `endpointBackendEntry` returns `undefined` for `!cloudservices.endpoint`, so `_active_` resolves to nothing (or to a BYOB backend). `--serve-app` avoids it by answering the request's own origin. Owed: one drive of an app deployed with `endpoint: ""` behind WF-003's nginx; if it fails, a bug row, and the audit's sentence changes | `resolveBackend.pure.ts:142`, `package-deploy.js` `auditEndpoint` | DEP-005 |
 | D24 | P26-V2GUARD: the deployer's "not into a project" guard read `project.json` only; a v2 project (`nodegx.project.json`) took a deploy into its own folder and exited 0. Fixed with D23 | `deployer.ts` | — |
 
 ## Open questions
@@ -71,6 +73,13 @@ be stale, correct it here rather than implementing around the description.
   they are unimpressive, the honest outcome is to ship the DNS explainer and drop the rest.
 
 ## Log
+
+- **2026-10-23 — DEP-002 s1: the backend serves the app (lane 5).** `--serve-app <dir>` on
+  `nodegx-backend`, the deploy's `serve.js` handler bundled in rather than a second static server,
+  the page pointed at the request's own origin, P26-SERVENUL found and fixed on the way. Driven on a
+  fresh deploy of `templates/todo-list` (runtime and engine built from today's sources into scratch):
+  account created, a task written, the process stopped and started, signed in from a fresh browser,
+  the task read back; a refresh on `/todo-list` loads the app. Detail in DEP-002 §s1.
 
 - **2026-07-27** — Phase specced. Seven tasks from the deployment scoping session, tiered so each
   tier is a stopping point. Four decisions taken and recorded in the README: the deploy path is
