@@ -1,7 +1,8 @@
 ---
 id: P123-STU-REUSABLENAV
 title: "NodeGX Studio: editing a reusable replaces the page's element list with the reusable's, and the only way back is the page picker"
-status: open
+status: fixed
+commit: nodegx-studio 2185e9c (check:editor 203/203; drive on a copy of the puppy project, scratchpad d1–d5)
 severity: medium
 area: nodegx-studio `editor/studio.html` (`openComponent`, `renderTree`, `previewFiles`' reusable canvas, STU-015)
 found: P125, Richard's puppy run in Claude Desktop, 2026-10-23

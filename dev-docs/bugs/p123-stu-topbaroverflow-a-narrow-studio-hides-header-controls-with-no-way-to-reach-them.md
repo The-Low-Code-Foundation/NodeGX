@@ -1,7 +1,8 @@
 ---
 id: P123-STU-TOPBAROVERFLOW
 title: "NodeGX Studio: in a narrow window (the panel in a chat) header controls are hidden by the layout, with no menu to reach them"
-status: open
+status: fixed
+commit: nodegx-studio 2185e9c (check:editor 203/203; drive on a copy of the puppy project, scratchpad d1–d5)
 severity: medium
 area: nodegx-studio `editor/studio.html` (the header, `#topbar`)
 found: P125, Richard's puppy run in Claude Desktop, 2026-10-23

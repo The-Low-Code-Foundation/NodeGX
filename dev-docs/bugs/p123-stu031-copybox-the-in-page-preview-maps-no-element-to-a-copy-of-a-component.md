@@ -37,3 +37,7 @@ created page just showed the 'home' component highlighted with the blue outline.
 one box: every point falls through `hitAt`'s walk to the page root. Richard wants more than the copy's box: the
 elements inside a copy are hovered and boxed one by one, as in the NodeGX editor, and a click edits that element in
 its reusable (P123-STU-REUSABLENAV).
+
+**Worked around in Studio, 2026-10-23 (nodegx-studio 2185e9c):** Design maps every element the app draws to its
+runtime node (`getAllNodesRecursive`) and walks `nodeScope.componentOwner` → `parentNodeScope` to the page, and boxes a
+copy through its roots (`drawnElements`). The kit's `elementsOf(copyId)` is still `[]`; the fix proposed above stands.
