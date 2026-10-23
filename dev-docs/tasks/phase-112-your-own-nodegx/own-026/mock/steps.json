@@ -1,0 +1,5 @@
+[
+  { "tool": "run_commands", "args": { "commands": ["mkdir -p node_modules/mockpkg .next/cache test-results && head -c 5000000 /dev/zero > node_modules/mockpkg/blob && date -u >> mock-changes.log && pwd && ls -a"] } },
+  { "tool": "run_commands", "args": { "commands": ["sleep 20; echo slept"] } },
+  { "text": "Done: the mock change is made." }
+]

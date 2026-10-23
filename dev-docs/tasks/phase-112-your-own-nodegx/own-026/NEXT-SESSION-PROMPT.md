@@ -1,11 +1,31 @@
-# OWN-026 — the next lab session: test 2 (the ten changes), then part 3
+# OWN-026 — the next lab session: test 2 is RUNNING (code + harness chains), NodeGX waits for FIX-03
 
-**Written 2026-10-23 ~00:50 CEST by the session that ran test 1 (`opennoodl-8c`, Opus 5.5).** Read in order: this
-file; `PLAN.md` (§1–§6 pre-registered, §8 everything that happened, dated); `fixes/README.md` (the loop);
-`fixes/LEARNINGS.md`; `checks.md` §C; `changes/c01–c10.txt`. Scripts: `round.mjs`, `grade.mjs`, `series.mjs`,
-`kitnpx.sh` (a copy of `/Users/Shared/nodegx-lab/bin/kitnpx/npx`).
+**Updated 2026-10-23 ~08:30 CEST by the lab session `opennoodl-8c` (Opus 5.5), the one that started test 2.** Read
+PLAN §8's 2026-10-23 08:12 entry first: what changed in the lab and why.
 
-## Where it stands
+## Test 2, as left
+
+- Three series started 08:12 CEST from `own-026/`: `node series.mjs t2 code t1-code-3` (pid 53944),
+  `t2 harness t1-harness-1` (53945), `t2 nodegx t1-nodegx-3` (59102, restarted 08:15 under the KIT-PROVEN gate).
+  Logs: `/Users/Shared/nodegx-lab/own026/series-t2-<arm>.log`. Check they live by **pid** (`kill -0`, one pid per call:
+  zsh doesn't split a `$list`), never by name.
+- **Code and harness take turns** on `LOCK-web3000` (both apps serve :3000), first come first served; NodeGX runs
+  beside them. Don't delete the lock or a `.want-<pid>` file whose pid is alive.
+- **The NodeGX chain waits for two things:** `HOLD-nodegx` gone (the fixer deletes it) **and** `KIT-PROVEN` = `KIT`
+  (the lab writes it). When FIX-03 lands: (1) `M=/Users/Shared/nodegx-lab/own026-mocks/fix03`, `mkdir -p $M $M-grades`,
+  `ln -s /Users/Shared/nodegx-lab/own026/t1-nodegx-3 $M/`, `cp ../KIT $M/KIT $M/KIT-PROVEN`; (2) a $0 one-change chain:
+  `JUDGE_BIN=$PWD/mock/fake-claude.mjs CLAUDE_BIN=$PWD/mock/fake-claude.mjs node series.mjs t2 nodegx t1-nodegx-3 --changes 1 --rounds $M
+  --grades $M-grades --mock mock/<steps>.json --port-base 49300` with steps that call the tools FIX-03 changed (copy
+  `mock/steps-list-projects.json`; `mock/steps.json` is the lab-plumbing one); read `$M/t2-nodegx-c01/mcp-entry.json`
+  (names the new tgz) and the tool results in `$M/t2-nodegx-c01-tap/req-*.json`; (3) `cp KIT KIT-PROVEN` in the real
+  lab folder. The chain starts within a minute.
+- **Per change:** `node measure.mjs <arm>` prints PLAN §4's row (also `own026-grades/measure-t2-<arm>.json`).
+  Stop-and-check after every graded NodeGX change → `fixes/LEARNINGS.md` #4…; a gating defect → `FIX-04.md`, set
+  `HOLD-nodegx`, tell Richard, give him the fixer prompt.
+
+## Before test 2 (kept for the record)
+
+## Where it stood at 00:50
 
 - **Test 1 is done** (PLAN §8's table): code 21/21/21, harness 20/21/20, NodeGX 16 → 17 → 18 on kit 0.2.5 → FIX-01 → FIX-02.
 - **The fix loop works.** FIX-01 (`opennoodl-54`) and FIX-02 (`opennoodl-ac`) landed. Kits are in
@@ -18,7 +38,7 @@ file; `PLAN.md` (§1–§6 pre-registered, §8 everything that happened, dated);
 
 ## What to do, in order
 
-1. **Before any test-2 round, make `series.mjs` safe to run three at once:**
+1. ✅ (done 2026-10-23 08:12, PLAN §8) **Before any test-2 round, make `series.mjs` safe to run three at once:**
    - **The log** is per series (`series-t2-<arm>.log`), not one shared `series-t2.log`.
    - **The tap port:** each chain takes its own range (code 49000+, harness 49100+, nodegx 49200+). The free-port check
      alone races between processes.
