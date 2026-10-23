@@ -375,3 +375,17 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   and `--remeta` writes `meta.json` for a finished grade without grading again. t2-harness-c08 → 29/31 (C7.1, C7.2
   carried; no regressions), as its grader said. The harness series restarted (pid 18135; it was 53945). A grade
   with no readable `grade.json` now writes no `meta.json`, so it stops its series instead of passing on nulls.
+- **2026-10-23 22:10 CEST — an agent can read the lab's own notes in its round folder; left as it is, counted.** The
+  fence allows the whole round root, and the root holds the lab's notes beside `work/` and `home/`:
+  - `command.txt` names the request file and *"relay judge.txt → Haiku, MORE → a new sitting, up to 2"*;
+  - `seed.txt` names the previous round;
+  - `teardown.txt`, `judge/`, `sittings/`.
+
+  t2-code-c09 read them (`cat command.txt; cat seed.txt; cat teardown.txt; ls judge`), then tried the request file in
+  the repo and the previous round's folder; the fence refused both. **Since test 1, 3 of 12 code rounds, 3 of 12 NodeGX
+  rounds and 0 of 12 harness rounds read them** (t1-code-1, -2, t2-code-c09; t1-nodegx-2, t2-nodegx-c03, -c09). No
+  grade or check is in them. The agent learns it's in a relayed lab, which a person's machine wouldn't tell it. It's
+  been a condition of the whole experiment, nearly even across the two arms that touched it, so it stays; changing it
+  mid-test would split the chains' conditions. **For the next lab:** keep the lab's notes outside the agent-readable
+  root. Also seen: `ps` is refused inside the fence (*"/bin/ps: Operation not permitted"*). t2-code-c09 ended with
+  judge MORE after 3 sittings (the relay's limit), its last words checking and adding tests.
