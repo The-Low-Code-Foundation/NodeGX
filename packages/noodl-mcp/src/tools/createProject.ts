@@ -623,7 +623,8 @@ export function completeBind(bind: CreateProjectBinding, projectDir: string): Bi
       // first page, so the person watches it come together rather than waiting for it.
       ' Before you build a page, call open_studio (find_tools({query: "studio"}) reveals it): it puts the app on' +
       ' the person\'s screen beside this conversation, redrawing as you write, with a HOLD button that refuses' +
-      ' your writes until they release it.',
+      ' your writes until they release it. Call it again, first, in every later turn that changes the app: the' +
+      ' panel sits in the message that called it, and the person reads the newest message.',
     guidance: bindGuidance(projectDir, bind.deferTools)
   };
 }

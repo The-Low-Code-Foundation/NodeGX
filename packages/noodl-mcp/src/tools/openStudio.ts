@@ -170,6 +170,8 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
         'on every component you write. In a host that renders MCP Apps (Claude Desktop) it appears inside the ' +
         'conversation; elsewhere the result carries the URL to open beside it. Call it as soon as a project is open ' +
         'and before you build a page, so the person watches the app come together instead of waiting for it. ' +
+        'The panel lives in the message whose call drew it and the person reads the newest message, so call it ' +
+        'again, first, in every later turn in which you change the app: it costs nothing (the same Studio answers). ' +
         'Studio has a HOLD button: while it is pressed, every write you make is refused with code `held` — stop and ' +
         'ask them what they saw. Calling this again for the same project is a no-op that returns the same URL.',
       inputSchema: {},
@@ -222,7 +224,9 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
               'its own name and Studio appears inside the conversation. '
             : '') +
           'Build in short steps and keep calling render_report or validate_component as you go: the person is ' +
-          'watching the same files redraw. A write refused with code `held` means they pressed HOLD — stop and ask.'
+          'watching the same files redraw. A write refused with code `held` means they pressed HOLD — stop and ask. ' +
+          'In every later turn that changes the app, call open_studio first again: the panel sits in the message ' +
+          'that called it, and the person is reading the newest one.'
       });
     })
   );

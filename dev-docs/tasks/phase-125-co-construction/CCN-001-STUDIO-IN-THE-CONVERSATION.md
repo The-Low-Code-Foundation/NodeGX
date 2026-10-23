@@ -145,6 +145,26 @@ Built in s7, so the resource is the same whenever it is read:
 **Run 6 (Richard):** reload the server, a NEW conversation, the same prompt. The panel should come up with "Studio is
 starting…" and draw the app within a second or two of `open_studio`.
 
+## s8 (same day): run 6 — "It's so fucking cool." and where the panel lives
+
+Run 6 drew Studio through the proxy. Richard: *"The only issue is when you follow up with a new message, you have to
+scroll back up to the original output to see the editor. Would be cool if it kind of 'closed' in the original and
+'opened' in the new output … Or can it open in the artifact pane at the right side of the chat??"*
+
+A panel belongs to the message whose tool call drew it; a server cannot close one. Built in s8:
+- **Opened in the new output:** `open_studio`'s description, its result note and `create_project`'s note now say to
+  call it again, first, in every later turn that changes the app (the same Studio answers; a second instance costs a
+  page load).
+- **The pane on the right:** the spec's third display mode, `pip`, is a docked panel that stays while the chat
+  scrolls. The bridge now declares `inline, fullscreen, pip`, shows a **Dock** button only when the host's
+  `availableDisplayModes` includes `pip`, and names the host's modes in the strip's tooltip — the measurement is
+  the strip itself. **Full screen** is already on the strip; Claude's guidelines describe it as the app large with
+  the chat kept as a sheet, which may be the right-hand pane he means. Not measured yet: whether Claude Desktop
+  offers `pip`, and what its full screen looks like for this app.
+
+**Run 7 (Richard):** reload, new conversation; hover the strip to read the modes; press Full screen; press Dock if it
+is there; ask for a change in a second message and see the panel reappear under it.
+
 **AC5 run 4:** config with the absolute node path, reload the server, a NEW conversation (the index is built at its start), connector on. Say: *"Open the
 NodeGX project at ~/vscode_projects/NodeGX test projects/Tap Counter C7Q4 with open_project, then call open_studio,
 then build its Home page: the count, a Tap button and a Reset button."* Click Allow on the panel.
