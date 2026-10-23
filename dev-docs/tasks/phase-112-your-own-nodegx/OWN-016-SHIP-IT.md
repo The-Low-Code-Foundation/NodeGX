@@ -100,7 +100,7 @@ A hostname waits for a real app (an A record, e.g. `lingo.nodegx.io` → `49.12.
 backend on the box can take the set the agent's local `deploy_cloud_functions` made. No admin API is needed.
 
 **Written (bash -n clean, NOT YET RUN against the box):**
-- `own-016/provision-app.sh` runs as root on the box. It is P78's script parametrized (`APP`, `PORT`, `DOMAIN`,
+- `own-016/provision-app.sh` (since DEP-002 s4: `packages/nodegx-backend/deploy/vm/provision-app.sh`, shipped in `@nodegx/mcp` for `deploy_to_vm`) runs as root on the box. It is P78's script parametrized (`APP`, `PORT`, `DOMAIN`,
   `CADDY=off`). It adds `workflows/` and an `EnvironmentFile=/etc/<app>/secrets.env` (640 root:<app>), read through the
   backend's `NODEGX_SECRET_<NAME>` fallback, and refuses a Node below 22.13.
 - `own-016/ship-to-vm.sh` runs locally: `<project> <local-backend-dir> <user@host> <app> <port> [domain]`.

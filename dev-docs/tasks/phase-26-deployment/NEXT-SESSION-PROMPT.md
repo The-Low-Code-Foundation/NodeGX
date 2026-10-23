@@ -1,35 +1,32 @@
 # Phase 26 — next session (BOARD lane 5, the VM push)
 
-**Written 2026-10-23, after DEP-002 s3.** Read [BOARD.md](../../BOARD.md) §2 lane 5, then
-[DEP-002](./DEP-002-LOCAL-FULLSTACK-BUNDLE.md) "Session 3". That section is the state; this page is the order of
+**Written 2026-10-23, after DEP-002 s4.** Read [BOARD.md](../../BOARD.md) §2 lane 5, then
+[DEP-002](./DEP-002-LOCAL-FULLSTACK-BUNDLE.md) "Session 4". That section is the state; this page is the order of
 work.
 
 **Done:** s1, the backend serves the app on its own origin (`--serve-app`). s2, `nodegx-deploy --full-stack` writes
-one folder (`app/`, `backend/`, `start.js`). s3, OWN-016's `ship-to-vm.sh` + `provision-app.sh` ship that folder to
-a VM (`/opt/<app>`, data in `/var/lib/<app>/data`, Caddy proxies everything but the admin paths), graded in a
-throwaway VM container. `start.js` gained `--data-dir` and `--check`, refuses dev-open rules, and installs the project's rules whenever a
-deploy brings different ones (Richard's ruling, 2026-10-23; DEP-002 s3 "Ruled").
-
-**P26-VMOPEN is closed:** lingo.nodegx.io ran with every access rule off. Richard switched them on
-(2026-10-23, measured `enforced: true`), so it can be reshipped with the new scripts.
+one folder (`app/`, `backend/`, `start.js`). s3, `ship-to-vm.sh` + `provision-app.sh` ship that folder to a VM
+(`/opt/<app>`, data in `/var/lib/<app>/data`, Caddy proxies everything but the admin paths); a reship brings the
+project's rules (Richard's ruling). **s4, `deploy_to_vm` in `@nodegx/mcp`**: the agent ships it in one call, graded by
+17 unit rows and driven 5 of 5 through the MCP client against the throwaway VM. `provision-app.sh` now lives in
+`packages/nodegx-backend/deploy/vm/` and ships in `dist/backend/vm/`.
 
 **Next, in order:**
 
-1. **`deploy_to_vm` in `@nodegx/mcp`:** SSH to a host the person names, the folder as a service, the URL back. The two
-   scripts are its spec. `dist/backend/folder/` already ships in the MCP's and the preview's prepack. Grade it
-   against the container (DEP-002 s3 has the Dockerfile and run line). 🔴 SSH to a real server is classifier-refused;
-   a local container is not.
+1. **Publish what a stranger needs.** `deploy_to_vm` from an npm install runs `npx @nodegx/preview nodegx-deploy`, and
+   preview 0.2.4 predates `--full-stack` (measured), so it refuses. A preview and an MCP carrying s2–s4 is a
+   release: Richard's call (lane 1 owns the publish and NPMAUDIT's rows; say so to him, do not publish).
 2. **`nodegx deploy --full-stack`** at the front door (`nodegx-export/src/cli/args.ts` `parseDeploy`).
 3. **The popup (step 6)**, three destinations. A packaged editor has no `package-deploy.js` or launcher on disk:
    `extraResources` beside `Resources/nodegx-backend/cli.js`.
+4. **The runbook** a stranger follows (a VM from a provider, `ssh-copy-id`, DNS, then the agent's call), and a second
+   provider. lingo.nodegx.io can be reshipped with `deploy_to_vm` by Richard (a real server is classifier-refused).
 
 **Traps:**
-- The checkout's `noodl-editor/src/external/deploy` is from December. Drive with the runtime built into scratch
-  (`OUT_PATH=<s>/eng/external npx webpack --config webpack-configs/webpack.deploy.prod.js` in viewer-react) and the
-  engine at `<s>/eng/nodegx-deploy.cjs`. Backend and launcher: `node packages/noodl-mcp/build-backend-copy.mjs --out
-  <s>/backend`, then `NODEGX_BACKEND_ENTRY=<s>/backend/cli.js`. The launcher is taken from beside `cli.js` FIRST:
-  rebuild that folder after editing `start.js`. `ship-to-vm.sh` takes the engine as
-  `NODEGX_DEPLOY_CMD="env NODEGX_BACKEND_ENTRY=… node <s>/eng/nodegx-deploy.cjs"`.
-- `start.js` with no port takes the first free from 3000, and :3000 is OWN-026's. Pass `--port`.
-- Shipping to the container adds `[127.0.0.1]:22722` to `~/.ssh/known_hosts`; remove it at teardown
-  (`ssh-keygen -R '[127.0.0.1]:22722'`), with the container (`docker rm -f nodegx-shiptest`).
+- Driving: the checkout's `noodl-editor/src/external/deploy` is from December, so copy the engine beside a runtime
+  built into scratch (recipe at the end of DEP-002 s4). Rebuild `<s>/backend` after editing `start.js` or
+  `provision-app.sh`? Only `start.js`: the tool reads the provision script from the checkout under jest.
+- The drive's first arm needs a container whose `authorized_keys` does NOT hold the key: start a fresh container
+  every full run (`-t` runs one arm on a live one).
+- `start.js` with no port takes the first free from 3000, and :3000 is OWN-026's. The tool always passes one.
+- Teardown: `docker rm -f nodegx-shiptest`, `ssh-keygen -R '[127.0.0.1]:22722'`.

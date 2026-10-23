@@ -439,3 +439,74 @@ ca-certificates iproute2 xz-utils caddy`; Node from `nodejs.org/dist/v22.13.1/no
 `/root/.ssh/authorized_keys`; `systemctl enable ssh caddy`; `CMD /sbin/init`. Run with `--privileged
 --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup:rw -p 127.0.0.1:22722:22 -p 127.0.0.1:8443:443`. Curl and Chromium
 reach `<app>.localhost:8443` (`--resolve`, `--host-resolver-rules`, certificate errors ignored: Caddy's local CA).
+
+## Session 4 (2026-10-23, Opus 5.5): `deploy_to_vm`, the agent ships it (`0aff68e6b`)
+
+**Built.** `@nodegx/mcp` has `deploy_to_vm` (`packages/noodl-mcp/src/tools/deployToVm.ts`): `host`, `app`, `port`,
+optional `domain`, `ssh_key`, `ssh_port`, `backend_id`. It is the glue `ship-to-vm.sh` was, in the server, and nothing
+more: the folder from the same engine, the box running the same script.
+- **One provision script.** `provision-app.sh` moved to `packages/nodegx-backend/deploy/vm/` (git mv);
+  `build-backend-copy.mjs` copies it to `dist/backend/vm/`, so the published MCP (and the preview) carry it. The tool
+  reads it from there or from the checkout; `ship-to-vm.sh` reads it from the checkout (driven after the move).
+- **The engine:** `NODEGX_DEPLOY_CLI` (the variable `nodegx deploy` reads; pointing at nothing is refused), a
+  checkout's `noodl-preview/dist/nodegx-deploy.cjs`, else `npx -y --package @nodegx/preview@latest nodegx-deploy`
+  (`NODEGX_PREVIEW_PKG` for a tgz). An engine that writes no full-stack folder is refused ("predates DEP-002"):
+  @nodegx/preview 0.2.4 on npm is that engine (measured: its `nodegx-deploy.cjs` has no "full-stack", its
+  `dist/backend/` only `cli.js`), so **a stranger's install cannot ship until a preview carrying s2 is published**.
+- **Six steps, in this order:** (1) one ssh call checks the box: uid, Node ≥ 22.13, systemd, rsync, curl, Caddy when a
+  domain is given, root or passwordless sudo; everything missing is named at once, before the slow build. (2) the
+  engine builds the folder in a temp dir; a cloud function that would not build refuses by name. (3) the folder goes
+  as a tar stream over ssh's stdin into `/tmp/<app>-provision` (no local rsync, so a Windows box with OpenSSH could
+  run it; `COPYFILE_DISABLE` and `--no-xattrs` keep macOS metadata out). (4) `provision-app.sh` as root over stdin;
+  its refusal comes back verbatim in `details.said`. (5) the function secrets as `NODEGX_SECRET_<NAME>=` lines over
+  stdin into `/etc/<app>/secrets.env` (an empty file when there are none, which clears ones the project dropped),
+  then a restart. (6) `/health` and `/` must both be 200, or it is a failure, not a URL.
+- **ssh can never stop to ask:** `BatchMode=yes` (no password prompt to hang on), `StrictHostKeyChecking=accept-new`
+  (a new host trusted once, a changed key refused and said). A refused login names `ssh-copy-id [-p n] <host>`. A
+  non-root login runs every root step through `sudo -n`.
+- **Every value that reaches the box's shell is checked first:** host (user@host or an ssh alias, never a leading
+  `-`), app (`^[a-z][a-z0-9-]{1,30}$`), port 1024–65535, domain (a lowercase host name). A secret holding a line break
+  is refused before anything runs. Secret values travel on stdin only.
+- **Placement:** write-gated (in `WRITE_ONLY_TOOLS`, beside `provision_backend`), held by HOLD like every tool, in the
+  deferred `project` group beside `export_react` (0 resident tokens; `[surface] 8277 / 21 resident — 3 under the
+  8280 budget`, the same as without it), keywords `server`, `vm`, `vps`, `ssh`, `go live`, `online` (plus the
+  group's `deploy`, `ship`, `host`). Errors use a new code `deploy-failed` with `details.stage` (connect, box, build,
+  stage, provision, secrets, up). Progress notifications (6 steps) when the client sends a progress token.
+- **Fixed on the way:** `provision-app.sh` printed the last 60 journal lines, so a reship's account repeated the
+  previous start's lines (measured: "installing" and "unchanged" both appeared). It now reads `--since` the restart.
+
+**Graded.** `noodl-mcp/tests/dep002DeployToVm.test.ts` 17 rows (a fake runner records every call: the order; each
+refusal stops before the next step; a secret's value in no argument list and not in the result; sudo for a non-root
+login; Node 22.12 refused and 22.13 / 24 not; the resolvers; the tool reached through `find_tools` on a writing
+server and absent read-only). **Four mutants, all caught** (BatchMode dropped, a secret in an argument list, no box
+refusal, provision not run as root). The disclosure gates (`toolDisclosure`, `bootstrap`, `openProject`,
+`own018CallTool`, `p109FindToolsPhrase`, `sbr013Doctrine`, `hls008ExportReact`, `isl016ProjectSettings`) green;
+`instructions.test.ts` has one red that is not this change (P125-BRIEFSHAPE, filed).
+
+**Driven, through the MCP client against the throwaway VM** (`tests/dep002DeployToVm.drive.test.ts`, skipped unless
+`DEP002_VM` is set; a fresh container each run, real ssh, tar, engine, systemd, Caddy): 5 of 5.
+- A key the box does not accept: `deploy-failed`/`connect` in 0.35 s, "the person runs `ssh-copy-id -p 22722
+  root@127.0.0.1` once"; nothing built.
+- `todo-list`, no domain: 20 files, the project's rules installed (SB-015 `devOpen: false`), `see` = the `ssh -L`
+  line; the unit active; sign-up `POST /users 201`, a task `POST /classes/Task 201`; a visitor's `_User` not 200.
+- `members-area`, domain `shipmembers.localhost`, bound to a local backend holding one stand-in function secret:
+  8 functions, `secrets: ["drive_probe"]`, `NODEGX_SECRET_DRIVE_PROBE` in the service's environment (name read, value
+  not), `https://…:8443/` 200, `nodegx-config.json` names the https origin, `/_admin` 404; the value in no result.
+- `todo-list` reshipped: `security.json` sha256 unchanged, "unchanged" said once, the account logs in, the task is
+  still there.
+- A second app on the first one's port: `deploy-failed`/`provision`, `said: ["FATAL: port 8721 is taken by
+  something else"]`; the first app still active, no unit written for the second.
+- `ship-to-vm.sh` after the move: shipped, health 200, the app 200.
+
+**Not driven:** a non-root login with sudo (the container has root only; graded by the fake), a box without
+Caddy/rsync (the probe is graded by the fake), the npx engine (nothing published carries `--full-stack` yet), and a
+real provider. The tool also leaves `/tmp/<app>-provision` on the box when provision refuses (it is replaced by the
+next ship).
+
+**Recipe for the next drive:** engine = `noodl-preview/dist/nodegx-deploy.cjs` copied beside an `external/deploy`
+runtime built by `OUT_PATH=<s>/eng/external npx webpack --config webpack-configs/webpack.deploy.prod.js` (viewer-react);
+`node packages/noodl-mcp/build-backend-copy.mjs --out <s>/backend`; `ssh-keygen -t ed25519 -f <s>/shipkey`; the
+container from the run line above (image `nodegx-shiptest-vm`); then
+`DEP002_VM=1 DEP002_KEY=<s>/shipkey NODEGX_DEPLOY_CLI=<s>/eng/nodegx-deploy.cjs NODEGX_BACKEND_ENTRY=<s>/backend/cli.js
+npx jest tests/dep002DeployToVm.drive.test.ts` in `packages/noodl-mcp`. Teardown: `docker rm -f nodegx-shiptest`,
+`ssh-keygen -R '[127.0.0.1]:22722'`.
