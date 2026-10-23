@@ -2,7 +2,7 @@
 id: P112-OWN026-EXPORTADDTO
 title: The React export would write an Update Record's Add To amount as the field's new value
 status: fixed
-commit: PENDING
+commit: cb7e0d6e4
 regression: packages/nodegx-export/tests/silent-parameters-closed.test.ts ("Set Record Properties with Add To")
 severity: medium
 area: export (`packages/nodegx-export/src/analyze/plan.ts`)

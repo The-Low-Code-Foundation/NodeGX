@@ -2,7 +2,7 @@
 id: P112-OWN026-WRITESILENT
 title: A write whose Update Record writes back a field worked out from the same field the page read, or whose save two controls start through different nodes, is accepted without a word
 status: fixed
-commit: PENDING
+commit: cb7e0d6e4
 regression: packages/noodl-editor/tests-unit/validation/sharedValueWrites.test.ts
 severity: medium
 area: validation (`packages/noodl-editor/src/editor/src/validation/sharedValueWrites.ts`, `authoredCandidate.ts`)

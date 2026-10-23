@@ -2,7 +2,7 @@
 id: P112-OWN026-SHORTPATHUNSAFE
 title: Changing a shared value by an amount needed a Function node and Noodl.Records.increment, so the shortest graph (read, add, write back whole with Update Record) was the one that loses a change
 status: fixed
-commit: PENDING
+commit: cb7e0d6e4
 regression: packages/noodl-runtime/test/nodes/own026-fix03-add-to-and-press-guard.test.ts (FIX-03 A rows); packages/nodegx-node-spec/scenarios/SetDbModelProperties.json (v5 Add To rows)
 severity: high
 area: runtime / Update Record (`packages/noodl-runtime/src/nodes/std-library/data/setdbmodelpropertiesnode.ts`)
