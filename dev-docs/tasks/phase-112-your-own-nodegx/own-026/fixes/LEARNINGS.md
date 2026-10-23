@@ -157,3 +157,17 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
 - The four fails: F6 and T6 on the graders' readings again (#5, #7). C5.3 and T7 are #8's forged invite, carried:
   nothing in this change touched it, and a teacher or parent can still read another family's children. **Not
   regressions by the rule** (they failed after c05 too), but the leak is still open. FIX-05 waits.
+
+## #10 — t2-nodegx-c07 (French), kit FIX-03, 27/29 (2026-10-23)
+
+- **C7.1 failed**: a child set to French sees French everywhere but the race. On her turn in a race the other child
+  started, the screen read "ZOE'S TURN", "Clear", "Check". C7.2 passed. The dearest NodeGX change so far: $0.324,
+  49 min, 1 sitting. 102 files (+4,961/−604): 201 nodes added, 51 changed, 6 removed (every string on every screen).
+  JavaScriptFunctions 19 → 25. Kit lookups low (15 calls, 108k), own-docs reads 4.
+- **T7 and C5.3 passed, and the hole is almost certainly still open.** The Teacher Children function's component and
+  `security.json` are byte-identical to c06's (the "nothing to forge" comment, and the trust in `familyId`, both
+  still there). The c07 grader forged an invite as the teacher (`familyId: <family C's user id>`) and saw nothing come
+  back. Why isn't established: a different id from the child rows' `familyId`, the address's case, timing. Not a fix.
+  **T7 and C5.3 join F6 and T6: graded both ways on an unchanged mechanism.** The table lists them apart. The leak
+  stays in the findings (#8) until a grade shows the mechanism closed.
+- T6 failed on the browser-back path, as before.
