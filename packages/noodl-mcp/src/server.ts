@@ -45,6 +45,7 @@ import { registerOpenInEditorTools } from './tools/openInEditor';
 import { registerOpenStudioTools } from './tools/openStudio';
 import { holdGate } from './hold';
 import { clientLoadsToolsItself, clientRendersApps } from './clientApps';
+import type { StudioProxy } from './studio/studioProxy';
 import { registerSessionStatusTools } from './tools/sessionStatus';
 import { registerKitTools } from './tools/kitTools';
 import { registerProjectSettingsTools } from './tools/projectSettingsTools';
@@ -85,6 +86,12 @@ export interface ServerOptions {
    * reachable from a machine that has no projects yet.
    */
   projectDir?: string;
+  /**
+   * P125 CCN-001 s7 — the loopback origin Studio's panel is served through, started by the CLI before this server
+   * is built so the MCP App resource can name it from the first read (`studio/studioProxy.ts`). Absent (every
+   * test, a library caller), the resource is served from the running Studio as before.
+   */
+  studioProxy?: StudioProxy;
   allowWrites: boolean;
   /**
    * AWP-006 — advertise the authoring set and hold the rest behind `find_tools`.
@@ -260,7 +267,7 @@ export function createServer(options: ServerOptions): CreatedServer {
   // P125 CCN-001 — Studio beside the conversation. Both modes, like `open_in_editor` and for the same reason: a
   // person watching is a read-only server's whole point. The resource goes on `server` itself (the recorder
   // forwards `registerTool` only); the tool goes through `rec` like every other.
-  registerOpenStudioTools(rec, server, binding);
+  registerOpenStudioTools(rec, server, binding, options.studioProxy);
   // FLD-010. Beside HLS-009 because it is the same transport and the same subject — the editor
   // process, not this server's project — and registered in both modes for a stronger reason than
   // `open_in_editor`'s: on a read-only server this is pure observation, and on a read-write one it

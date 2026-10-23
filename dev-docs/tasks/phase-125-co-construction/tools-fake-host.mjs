@@ -1,9 +1,12 @@
 // A fake MCP Apps host, for the local gate: serves host.html on a port of its own, so the panel is drawn from a
 // FOREIGN origin (as Claude's sandbox draws it), answers ui/initialize over postMessage, and logs every message the
 // panel sends into the page (#log) where a CDP drive can read it.
-//   node serve.mjs <port> <panel-url> [iframe-width-px]
+//   node serve.mjs <port> <panel-url> [iframe-width-px] [panel-file]
+// With <panel-file>, the host also serves that file at /panel.html — pass "/panel.html" as <panel-url> to draw the
+// MCP App resource exactly as a host would: from its own origin, talking to Studio (or the proxy) cross-origin.
+import fs from 'node:fs';
 import http from 'node:http';
-const [port, panelUrl, width = '100%'] = process.argv.slice(2);
+const [port, panelUrl, width = '100%', panelFile] = process.argv.slice(2);
 const html = `<!doctype html><meta charset="utf-8"><title>fake host</title>
 <style>body{margin:0;font:13px monospace;background:#eee}#log{white-space:pre-wrap;padding:8px;max-height:200px;overflow:auto;background:#fff}iframe{width:${/^\d+$/.test(width) ? width + 'px' : width};height:640px;border:2px solid #c00;display:block}</style>
 <pre id="log">host: ready\n</pre>
@@ -38,5 +41,12 @@ window.addEventListener('message', (ev) => {
   }
 });
 </script>`;
-http.createServer((req, res) => { res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' }); res.end(html); })
-  .listen(Number(port), '127.0.0.1', () => console.log(`fake-host: http://127.0.0.1:${port}/`));
+http.createServer((req, res) => {
+  if (panelFile && req.url === '/panel.html') {
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
+    res.end(fs.readFileSync(panelFile));
+    return;
+  }
+  res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+  res.end(html);
+}).listen(Number(port), '127.0.0.1', () => console.log(`fake-host: http://127.0.0.1:${port}/`));

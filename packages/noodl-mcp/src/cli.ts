@@ -18,6 +18,7 @@ import { ToolError } from './errors';
 import { runGraphCli } from './graphText';
 import { parseReproducibleFlag, type ReproducibleOutput } from './project/writeClock';
 import { createServer } from './server';
+import { startStudioProxy } from './studio/studioProxy';
 import { BOOTSTRAP_ADVERTISED } from './toolGroups';
 
 const USAGE = `Usage: noodl-mcp [project-dir] [options]
@@ -161,14 +162,19 @@ async function main(): Promise<void> {
   }
 
   try {
+    // P125 CCN-001 s7 — Studio's panel origin, before the server exists: the MCP App resource names it in its CSP,
+    // and a host that prefetches the resource (Claude Desktop) reads it before any Studio runs.
+    const studioProxy = await startStudioProxy();
     const { server, binding, disclosure } = createServer({
       projectDir: positional[0],
       allowWrites,
       deferTools,
       screenshotsToFiles,
       profile: profileName,
+      studioProxy,
       ...(reproducible ? { reproducible } : {})
     });
+    process.stderr.write(`noodl-mcp: Studio panel served through ${studioProxy.origin}\n`);
     // AWP-006 — the surface is now a decision, so it is stated at startup rather
     // than inferred from a tools/list. `--all-tools` is named here because the
     // one failure mode of deferral is a client that never re-lists, and the

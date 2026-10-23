@@ -44,7 +44,12 @@ import { clientRendersApps, consumeOpenStudioProxied } from '../clientApps';
 import { ToolError } from '../errors';
 import { readHold } from '../hold';
 import type { ProjectBinding } from '../project/ProjectBinding';
+import * as fs from 'fs';
+import * as path from 'path';
+
+import { panelHtml } from '../studio/panelHtml';
 import { ensureStudio, findStudio, type StudioInstance, studioFor } from '../studio/studioProcess';
+import type { StudioProxy } from '../studio/studioProxy';
 import { guarded, jsonResult } from './util';
 
 export const STUDIO_RESOURCE_URI = 'ui://nodegx/studio.html';
@@ -95,7 +100,22 @@ function holdingPage(words: string): string {
  * Registers the tool (through the recorder, like every tool) and the resource (on the server itself: the recorder
  * forwards `registerTool` only, and a resource is not a tool to hide or reveal).
  */
-export function registerOpenStudioTools(rec: McpServer, server: McpServer, binding: ProjectBinding): void {
+/**
+ * s7 — the panel from the Studio INSTALL, for a host that reads the resource before any Studio runs. Studio's page
+ * is static (it loads the project over `/api/project` at run time), so the install's `editor/studio.html` rewritten
+ * to the proxy's origin is the panel, whenever it is read. `null` when Studio is not installed.
+ */
+function panelFromInstall(origin: string): string | null {
+  const found = findStudio();
+  if (found.dir === null) return null;
+  try {
+    return panelHtml(fs.readFileSync(path.join(found.dir, 'editor', 'studio.html'), 'utf8'), origin);
+  } catch {
+    return null;
+  }
+}
+
+export function registerOpenStudioTools(rec: McpServer, server: McpServer, binding: ProjectBinding, proxy?: StudioProxy): void {
   let current: StudioInstance | null = null;
 
   const resource: RegisteredResource = server.registerResource(
@@ -105,9 +125,19 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
       title: 'NodeGX Studio',
       description: 'The app being built, on screen and editable, beside the conversation. Rendered by open_studio.',
       mimeType: MIME,
-      _meta: studioResourceMeta(null)
+      _meta: studioResourceMeta(proxy?.origin ?? null)
     },
     async (uri) => {
+      // With the proxy (the CLI's server): the install's page at the proxy's origin, valid before Studio exists.
+      if (proxy) {
+        const text =
+          panelFromInstall(proxy.origin) ??
+          holdingPage(
+            'NodeGX Studio is not installed on this machine (set NODEGX_STUDIO to its folder). ' +
+              'The agent can still build; ask it for the app\'s URL once it has rendered something.'
+          );
+        return { contents: [{ uri: uri.href, mimeType: MIME, text, _meta: studioResourceMeta(proxy.origin) }] };
+      }
       const dir = binding.projectDir;
       const live = dir !== undefined ? studioFor(dir) : null;
       const origin = live?.origin ?? current?.origin ?? null;
@@ -156,7 +186,8 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
       } catch (err) {
         throw new ToolError('io-error', `Studio could not start: ${(err as Error).message}`);
       }
-      if (!current || current.origin !== instance.origin) {
+      if (proxy) proxy.setTarget(instance.origin);
+      if (!proxy && (!current || current.origin !== instance.origin)) {
         current = instance;
         resource.update({
           metadata: {

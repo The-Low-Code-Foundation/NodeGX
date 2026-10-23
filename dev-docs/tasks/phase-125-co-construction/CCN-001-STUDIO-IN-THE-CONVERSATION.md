@@ -121,6 +121,30 @@ Built in s6:
 **Run 5 (Richard, when his weekly limit allows — it read 87 %):** reload the server, a new conversation, the same
 prompt. Expect: the stage fills the panel; HOLD stops the very next call; Elements / Properties toggle; Full screen.
 
+## s7 (same day): run 5 — "It didn't open the studio this time": the host prefetches the resource
+
+`mcp-server-nodegx.log`: the ONE `resources/read` at 09:22:57, **before the first `tools/call` at 09:23:07**, and
+none after. Claude Desktop prefetches every `ui://` resource a tool names when the conversation loads and caches it;
+no project was open and no Studio running, so the panel was the holding page for the whole conversation. Run 4 had
+the read after the call, which is why it worked once. Also seen in run 4's own screenshot, understood now: an empty
+tree and a blank stage — Studio's module imports `./specs.js`, which in a sandbox resolves against `about:srcdoc`.
+
+Built in s7, so the resource is the same whenever it is read:
+- **A proxy in the MCP server** (`studio/studioProxy.ts`): a loopback port of its own, taken at CLI start before the
+  transport connects, forwarding everything (SSE included) to whichever Studio `open_studio` has started; 503
+  `{starting:true}` before. Its origin is what the resource's CSP names and what the page talks to.
+- **The panel from the install** (`studio/panelHtml.ts`): the Studio install's `editor/studio.html` rewritten to the
+  proxy's origin — the same five rewrites as Studio's own `/panel`, now including `./` imports — so the resource
+  needs no running Studio. Studio's module waits for `window.__studioReady`, the bridge's poll of `/api/hold`
+  through the proxy (the strip says "Studio is starting…").
+- Measured: a `claude-ai` client reads the resource before anything and gets the panel with the proxy origin (16
+  occurrences, CSP `connectDomains` = the proxy) and the same bytes after `open_studio`; the proxy answers 503 then
+  200; the resource HTML served from the fake host's own origin draws Studio with the app through the proxy
+  (`shots/02-inline-compact.png`). toolDisclosure + projectBinding 25/25.
+
+**Run 6 (Richard):** reload the server, a NEW conversation, the same prompt. The panel should come up with "Studio is
+starting…" and draw the app within a second or two of `open_studio`.
+
 **AC5 run 4:** config with the absolute node path, reload the server, a NEW conversation (the index is built at its start), connector on. Say: *"Open the
 NodeGX project at ~/vscode_projects/NodeGX test projects/Tap Counter C7Q4 with open_project, then call open_studio,
 then build its Home page: the count, a Tap button and a Reset button."* Click Allow on the panel.
