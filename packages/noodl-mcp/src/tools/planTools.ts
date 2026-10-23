@@ -78,6 +78,15 @@ import { pathToLegacyName, toPathForm, validateComponentPath } from '../paths';
 import { componentIsPage, registerPages, registrationSummary, unroutedPagesSummary } from '../project/pageRegistration';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
+import { studioFor } from '../studio/studioProcess';
+
+/**
+ * P125-PUPPY-ONEAPPLY (CCN-005) — the most component operations one plan may hold while Studio is on screen for the
+ * project. Richard's puppy run, 2026-10-23: a plan of eight components staged for three minutes and applied in one
+ * second; the person watched an empty Studio and had nothing to stop. Three is a section with its leaves and the page
+ * update that places it (StepItem, HowItWorks, Pages/Home), the largest burst that page needed.
+ */
+export const STUDIO_BURST = 3;
 import { authoredProjectViews, foldSkipNotes, preconditionDiagnostics } from '../validate';
 import type { WriteValidation } from '../validate';
 import { drawnPortCheck } from '../specPorts';
@@ -721,6 +730,25 @@ export function registerPlanTools(
       }
       if (errors.length > 0) {
         throw new ToolError('invalid-argument', 'The plan is not executable — nothing was created.', { errors });
+      }
+
+      // P125-PUPPY-ONEAPPLY — a person watching in Studio sees a plan only when it is applied. A plan the size of a
+      // site is a site that appears all at once, after minutes of nothing, with no moment to say stop. A refusal, not
+      // advice: the order below is the one that fills the screen part by part (the page first, then each section
+      // created and placed in the same apply), and a model told it once in a description builds the site anyway.
+      const componentOps = operations.filter((op) => op.kind !== 'doc');
+      if (componentOps.length > STUDIO_BURST && studioFor(store.projectDir) !== null) {
+        throw new ToolError(
+          'invalid-argument',
+          `The person is watching this app in Studio, and a plan reaches their screen only when it is applied: ` +
+            `${componentOps.length} components in one plan would appear all at once, after minutes of nothing, with ` +
+            `no moment for them to stop you. Build it in bursts of at most ${STUDIO_BURST} components, applying each ` +
+            'before you plan the next: first the page with its Page node and nothing on it yet (so Studio has ' +
+            'something to show), then one plan per section that creates the section (and any leaf it needs) AND ' +
+            'updates the page to place it. After each apply, say in one line what appeared, so they can press HOLD ' +
+            'before the next. Nothing was created.',
+          { watched: true, limit: STUDIO_BURST, components: componentOps.map((op) => op.target) }
+        );
       }
 
       const ordered = orderPlanOperations(operations);

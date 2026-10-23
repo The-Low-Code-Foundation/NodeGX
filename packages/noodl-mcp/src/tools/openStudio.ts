@@ -50,6 +50,7 @@ import * as path from 'path';
 import { panelHtml } from '../studio/panelHtml';
 import { ensureStudio, findStudio, type StudioInstance, studioFor } from '../studio/studioProcess';
 import type { StudioProxy } from '../studio/studioProxy';
+import { STUDIO_BURST } from './planTools';
 import { guarded, jsonResult } from './util';
 
 export const STUDIO_RESOURCE_URI = 'ui://nodegx/studio.html';
@@ -171,9 +172,10 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
         'conversation; elsewhere the result carries the URL to open beside it. Call it as soon as a project is open ' +
         'and before you build a page, so the person watches the app come together instead of waiting for it. ' +
         'The panel lives in the message whose call drew it and the person reads the newest message, so call it ' +
-        'again, first, in every later turn in which you change the app: it costs nothing (the same Studio answers). ' +
+        'ONCE per turn, as the turn\'s FIRST call, in every turn in which you change the app: never again later in ' +
+        'the same turn and never to finish it, because each call draws another Studio in the conversation. ' +
         'Studio has a HOLD button: while it is pressed, every write you make is refused with code `held` — stop and ' +
-        'ask them what they saw. Calling this again for the same project is a no-op that returns the same URL.',
+        'ask them what they saw. A later call starts no second Studio: the same one answers, at the same URL.',
       inputSchema: {},
       _meta: { ui: { resourceUri: STUDIO_RESOURCE_URI }, 'ui/resourceUri': STUDIO_RESOURCE_URI }
     },
@@ -227,10 +229,14 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
             ? 'You reached open_studio through call_tool, so the host drew no panel; next time call open_studio by ' +
               'its own name and Studio appears inside the conversation. '
             : '') +
-          'Build in short steps and keep calling render_report or validate_component as you go: the person is ' +
-          'watching the same files redraw. A write refused with code `held` means they pressed HOLD — stop and ask. ' +
-          'In every later turn that changes the app, call open_studio first again: the panel sits in the message ' +
-          'that called it, and the person is reading the newest one.'
+          // P125-PUPPY-ONEAPPLY — the order that fills the screen part by part. Leaves first and the page last (the
+          // order for a build nobody watches) shows nothing until the end: a section appears only once a page places it.
+          'The person sees each write as it lands, so build in the order that fills their screen: first the page ' +
+          'with its Page node and nothing on it, then one section at a time, each created AND placed on the page in ' +
+          'the same apply (a plan holds at most ' + STUDIO_BURST + ' components while Studio is open), with a line ' +
+          'saying what appeared. A write refused with code `held` means they pressed HOLD — stop and ask. ' +
+          'This panel stays where it is for the rest of this turn: do not call open_studio again until the next ' +
+          'turn that changes the app, and then call it first.'
       });
     })
   );

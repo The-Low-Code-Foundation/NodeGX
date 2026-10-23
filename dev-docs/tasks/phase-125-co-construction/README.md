@@ -83,7 +83,7 @@ same Studio beside the conversation. Either way the hold holds.
 | [CCN-002](CCN-002-THE-HOLD-IS-A-TENET.md) | The hold everywhere: gitignored in created projects, reported by `session_status` and `get_project_info`, `what_changed_since`, Studio's drift answer names the agent | built 2026-10-23 |
 | [CCN-003](CCN-003-SHOW-BEFORE-APPLY.md) | Staged plan operations render in Studio; the person accepts before `apply_plan` | open |
 | [CCN-004](CCN-004-LOOK-FIRST.md) | No page until the look is accepted in Studio: tokens, sample card, sample button; refused by the server | open |
-| [CCN-005](CCN-005-SHORT-BURSTS.md) | One component per turn, rendered; budgets in the server, not advice | open |
+| [CCN-005](CCN-005-SHORT-BURSTS.md) | One component per turn, rendered; budgets in the server, not advice | first cut 2026-10-23 s11 (puppy run): a plan of more than 3 components refused while Studio is open |
 | [CCN-006](CCN-006-ONE-CLICK.md) | A stranger's install: Studio on npm, a `.mcpb` Desktop Extension, `create-nodegx --desktop` | open |
 | [CCN-007](CCN-007-THE-PERSON-TEST.md) | The test that settles the canon: a non-coder watches two builds (React agent / NodeGX + Studio) and stops one | open; needs Richard |
 

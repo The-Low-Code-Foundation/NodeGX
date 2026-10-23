@@ -31,3 +31,9 @@ Proposed fix, small: in `elementsOf`, for a node with no `getDOMElement` and a `
 (recursively for a copy whose root is itself a copy). Studio's `drawnElements` (editor/studio.html) is that fallback
 written outside the kit and can then go. Gate: `elementsOf(copyId)` is non-empty for a placed reusable, and its first
 element contains what the copy draws.
+
+**Seen on screen, 2026-10-23 (P125, Richard's puppy run in Claude Desktop):** *"Hovering the mouse anywhere on the
+created page just showed the 'home' component highlighted with the blue outline."* A page built from six copies is
+one box: every point falls through `hitAt`'s walk to the page root. Richard wants more than the copy's box: the
+elements inside a copy are hovered and boxed one by one, as in the NodeGX editor, and a click edits that element in
+its reusable (P123-STU-REUSABLENAV).
