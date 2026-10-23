@@ -42,6 +42,8 @@ import { registerReviewTools } from './tools/review';
 import { registerListProjectsTools } from './tools/listProjects';
 import { registerExportReactTools } from './tools/exportReact';
 import { registerOpenInEditorTools } from './tools/openInEditor';
+import { registerOpenStudioTools } from './tools/openStudio';
+import { holdGate } from './hold';
 import { registerSessionStatusTools } from './tools/sessionStatus';
 import { registerKitTools } from './tools/kitTools';
 import { registerProjectSettingsTools } from './tools/projectSettingsTools';
@@ -192,7 +194,8 @@ export function createServer(options: ServerOptions): CreatedServer {
   const renderLedger = new RenderLedger();
 
   const disclosure = new ToolDisclosure(binding.isBound);
-  const rec = recordTools(server, disclosure);
+  const recAll = recordTools(server, disclosure);
+  const rec = recAll;
 
   // ⚠️ BST-001 — every call below passes the **binding**, not a store. The
   // handlers dereference it per request; a registration function that resolved
@@ -233,6 +236,10 @@ export function createServer(options: ServerOptions): CreatedServer {
   // when "put it on screen for me" is asked. It is deferred (the `project` group), so it costs
   // nothing resident; see the manifest note for why that placement and not a resident one.
   registerOpenInEditorTools(rec);
+  // P125 CCN-001 — Studio beside the conversation. Both modes, like `open_in_editor` and for the same reason: a
+  // person watching is a read-only server's whole point. The resource goes on `server` itself (the recorder
+  // forwards `registerTool` only); the tool goes through `rec` like every other.
+  registerOpenStudioTools(rec, server, binding);
   // FLD-010. Beside HLS-009 because it is the same transport and the same subject — the editor
   // process, not this server's project — and registered in both modes for a stronger reason than
   // `open_in_editor`'s: on a read-only server this is pure observation, and on a read-write one it
@@ -257,6 +264,11 @@ export function createServer(options: ServerOptions): CreatedServer {
   // P112-OWN018-LISTCHANGED — resident in every mode: the door for a client that never re-reads the tool list.
   registerCallTool(rec, disclosure);
   if (options.allowWrites) {
+    // P125 CCN-001 — every tool registered in this block is held while the person's `.nodegx-hold.json` is in
+    // the project: the recorder is wrapped once here, so "write-gated" and "held" are the same set by
+    // construction (see `hold.ts`). The shadow is deliberate: nothing below needs to know.
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    const rec = holdGate(recAll, binding);
     // LAS-006 §4 — one plan registry, shared by the two write groups that both
     // have an opinion about it: the plan tools own the plans, and
     // `create_component` needs only to know whether any exist.

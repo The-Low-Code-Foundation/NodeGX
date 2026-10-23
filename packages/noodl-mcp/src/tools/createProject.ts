@@ -618,7 +618,12 @@ export function completeBind(bind: CreateProjectBinding, projectDir: string): Bi
         ? `When the user should see it, call ${callHint('open_in_editor', '{ directory }')} and the running ` +
           'editor will open it and list it under Recent projects.'
         : 'When the user should see it, call open_in_editor with this directory — find_tools({query:' +
-          ' "editor"}) reveals it — and the running editor will open it and list it under Recent projects.'),
+          ' "editor"}) reveals it — and the running editor will open it and list it under Recent projects.') +
+      // P125 CCN-001 — the co-construction door, said in the one turn a project has just been made: before the
+      // first page, so the person watches it come together rather than waiting for it.
+      ' Before you build a page, call open_studio (find_tools({query: "studio"}) reveals it): it puts the app on' +
+      ' the person\'s screen beside this conversation, redrawing as you write, with a HOLD button that refuses' +
+      ' your writes until they release it.',
     guidance: bindGuidance(projectDir, bind.deferTools)
   };
 }

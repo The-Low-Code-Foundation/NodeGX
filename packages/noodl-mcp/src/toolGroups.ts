@@ -477,6 +477,13 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'unsaved',
       'conflict',
       'is anyone',
+      // P125 CCN-001 — `open_studio`: the words for putting the app in front of the person.
+      'studio',
+      'screen',
+      'beside',
+      'watch',
+      'look',
+      'co-construct',
       // P109 ISL-016 — `set_project_settings`. The words for what it sets, none of them in the
       // purpose line; matched server-side, never sent.
       'settings',
@@ -504,6 +511,9 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'open_in_editor',
       'export_react',
       'session_status',
+      // P125 CCN-001 — `open_studio`, appended on the same arithmetic as the three above: 0 resident tokens.
+      // The door is by keyword ('studio', 'screen', 'beside', 'watch', 'look') and by name.
+      'open_studio',
       // P109 ISL-016 — appended on the arithmetic the notes above record: 0 resident tokens ("8
       // tools" and "9 tools" are the same length). `tests/isl016ProjectSettings.test.ts` measures
       // that and reaches it through `find_tools` by keyword.

@@ -1,0 +1,7 @@
+[
+  { "wait": 25000 },
+  { "shot": "01-panel-in-fake-host.png" },
+  { "eval": "document.getElementById('log').textContent", "expect": "r => /initialize from/.test(r)", "label": "the panel completed ui/initialize" },
+  { "eval": "document.getElementById('log').textContent", "expect": "r => /size-changed/.test(r)", "label": "the panel reports its size" },
+  { "eval": "document.getElementById('log').textContent" }
+]

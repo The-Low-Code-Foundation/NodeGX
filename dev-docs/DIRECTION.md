@@ -61,6 +61,19 @@ thirty, and the day-thirty things are these three, in the order of how much evid
    (EXP-022, ruled 2026-10-22 as D6: the todo-list with its backend, hard stop at 12 sessions). **For React the pillar is checkable on two templates; for Swift it is a
    promise, and the site says so.**
 
+**The tenet that binds the three (2026-10-23): the person is in the loop, and the server keeps it so.** The stranger
+audit of the npm packages (`reviews/npm-stranger-audit-2026-10-23.md`) found one thing code cannot match: a person who
+cannot code opening the app and changing it. Everything else — validation, driving, a backend, an export — an agent
+writing React also has, cheaper. So the pillars are read through that person. Pillar 1 is not "the agent builds you an
+editor" (an admin panel is cheaper in code, Richard's own point); it is the editor a person and an agent share, *live,
+during the build*: Studio in the conversation, redrawing on every write, with a HOLD that refuses the agent's next
+write until the person releases it (P125). Pillar 2's rule stands — *prose advises, gates bind* — and the hold is its
+first gate on behalf of a person rather than a format. Pillar 3 is the way out the person takes when they know what
+they need. Richard, 2026-10-23: *"make the 'human in the loop' concept a hardcore tenet of our canon"*, and *"You use
+your Claude, we bring the editor and backend management visually for non coders"*: the surface is where people already
+are (Claude Desktop first), never a move to ours. The day-thirty test (§4 item 8) gains a measurement nothing else
+has: whether the person stopped it, and what happened next (P125 CCN-007).
+
 What this changes about the earlier framing on this page: §1–§3 stand. The four reasons in §3 are *how* the blueprint
 is safe to build on (restraint, testing, security, do it yourself); §0 is *why a person would want the blueprint at
 all*. The place named on 2026-10-20 ("the workbench of the person who vouches", `reviews/THE-PLACE-NODEGX-BESIDE-REPLIT.md`)
@@ -157,6 +170,7 @@ Both ruled by Richard on 2026-10-06 as recommended ("D1: Ok. D2: ok").
 | D4 (2026-10-21) | **Is the seed's shape** (a thin note, a folder shape, skills on trigger, rules as server refusals) **the one to build, with the `dev-docs/` knowledge distilled into it?** | ✅ **Yes, as scoped** (Richard, 2026-10-22). OWN-025 starts; the first gate is the Gala shell-copy (a page that is one HTML blob) refused by the validator, with the thin note. |
 | D5 (2026-10-21) | **Does the comparison measure day thirty** (OWN-026) **rather than a third day-one round?** | ✅ **Yes, and the running lab replaces the first draft** (Richard, 2026-10-22). `own-026/PLAN.md` is the plan of record: DeepSeek builds the rocket times-tables app in three arms, then ten changes; Sonnet 5.5 hands the Gala builds over. The task file's three-asks section is kept, marked superseded. The result goes on the site whichever way it comes out. |
 | D6 (2026-10-22) | **How far does the Swift off-ramp go, and when?** | ✅ **The bounded cut of EXP-022 §7, with the backend** (Richard, 2026-10-22): the todo-list as it ships (signs in, reads and writes its records) on the same backend the web app uses; scripts verbatim in JavaScriptCore; graded headless; **hard stop at 12 sessions**, an overrun reported on the site as evidence against the claim. **Starts now, in a second lane-6 session beside React's EXP-021 §101**, Xcode builds yielding to any lab grade or full suite. |
+| D7 (2026-10-23) | **Is co-construction — Studio inside the conversation, a HOLD the server enforces, the person in the loop as a tenet — the lane to build, Claude Desktop first?** | ✅ **"We can target Claude Desktop to start. Make it so."** (Richard, 2026-10-23). P125 opened; CCN-001 built the same day; its AC5 is his run in Claude Desktop, which decides whether the panel is inside the conversation or beside it (the hold holds either way). |
 | D2 | **Does a plain React app that uses `@nodegx/nodes-react` count as a NodeGX app?** Phase 111 R6 recommends publishing that package so the honesty number applies to code written outside NodeGX. | ✅ **Publish it, as P111 R6 says, and call it a way in and out.** It gives a React app restraint and node tests. It can't give the editor or do-it-yourself editors, which read the project format. The site says so plainly. |
 
 ## 6. Where each phase stands
