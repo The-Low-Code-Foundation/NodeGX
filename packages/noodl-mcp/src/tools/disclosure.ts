@@ -40,6 +40,7 @@ import { getParseErrorMessage, normalizeObjectSchema, safeParseAsync } from '@mo
 import { toJsonSchemaCompat } from '@modelcontextprotocol/sdk/server/zod-json-schema-compat.js';
 import { z } from 'zod';
 
+import { clientRendersApps } from '../clientApps';
 import { callHint, clientProfile } from '../clientProfile';
 import { ToolError } from '../errors';
 
@@ -612,6 +613,20 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
         }
         // Unbound, a project tool is NOT refused here: its own handler asks `ProjectBinding`, which owns the one
         // no-project refusal (BST-001, `projectBinding.test.ts`), so the answer is the one a direct call would get.
+        //
+        // P125 CCN-001 s3 — the ONE tool this door does not proxy, and only in a host that renders MCP Apps: a
+        // panel is drawn for the tool the host sees being called, and through here the host sees `call_tool`.
+        // Richard's second run (2026-10-23): 18 tools/call, 7 tools/list, 0 resources/read — Studio started, the
+        // panel never fetched. So reveal it by name (the host re-lists on `list_changed`) and send the model to it.
+        if (args.name === 'open_studio' && !args.describe && clientRendersApps(server)) {
+          disclosure.revealNames(['open_studio']);
+          throw new ToolError(
+            'invalid-argument',
+            'open_studio draws Studio inside this conversation only when your client calls it by its own name: ' +
+              'through call_tool the host sees call_tool and draws nothing. It is in your tool list now — call ' +
+              'open_studio directly, with no arguments.'
+          );
+        }
         const schema = handle.inputSchema ? normalizeObjectSchema(handle.inputSchema) ?? handle.inputSchema : undefined;
         const jsonSchema = (): { properties?: Record<string, unknown> } =>
           schema

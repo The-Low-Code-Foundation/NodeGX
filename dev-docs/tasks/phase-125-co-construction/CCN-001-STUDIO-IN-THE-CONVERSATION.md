@@ -45,6 +45,28 @@ Two consequences, both built in s2:
 **AC5 is still open.** It needs a *regular* chat, not Cowork: the host's own client has to make the call for the
 panel to exist.
 
+## s3 (same day): the second run — a regular chat, the connector on, still no panel, and why
+
+`mcp-server-nodegx.log` after the 10:45 start: 18 `tools/call`, **7 `tools/list`** (Claude Desktop re-lists on every
+`list_changed` — 39 of them), one `resources/list`, one `resources/list_changed` (the CSP update when Studio
+started), **zero `resources/read`**. Studio was started (port 57123, alive after the chat) and never fetched. The
+model's own account says why: *"Some of those reached me through call_tool"* — `open_studio` is deferred, so it
+called it through `call_tool`, and a host draws a panel for the tool IT sees being called, which was `call_tool`.
+
+Built in s3:
+- `call_tool` refuses to proxy `open_studio` when the client declares MCP Apps
+  (`extensions["io.modelcontextprotocol/ui"]`): it reveals the tool by name and says *call open_studio directly*.
+  A client that does not declare it is proxied as before and gets the browser. Measured over JSON-RPC with a client
+  that declares the extension (refusal, then the direct call answers `onScreen: "in the conversation"`) and one that
+  does not (proxied, `onScreen` the browser route).
+- One stderr line on `initialize`: the client's name and whether it declares MCP Apps, with its capabilities. Claude
+  Desktop logs no request params, so this is the only record on disk of what the host said it can render.
+- Not done: making `open_studio` resident. The resident surface is 14 tokens under its 8,280 budget and the tool's
+  description is ~150; the reveal-by-name path is the one the budget allows.
+
+**The host must restart the server to run the new build** (Developer → Reload MCP Configuration, or restart Claude
+Desktop): the chat's server is the process that started at 10:45 with the old bundle.
+
 ## How to run it (Richard)
 
 Use a **normal chat, not a Cowork session**. In the chat's tools menu check that `nodegx` is on. If Claude starts

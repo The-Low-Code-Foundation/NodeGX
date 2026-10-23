@@ -40,6 +40,7 @@ import { spawn } from 'child_process';
 
 import type { McpServer, RegisteredResource } from '@modelcontextprotocol/sdk/server/mcp.js';
 
+import { clientRendersApps } from '../clientApps';
 import { ToolError } from '../errors';
 import { readHold } from '../hold';
 import type { ProjectBinding } from '../project/ProjectBinding';
@@ -62,18 +63,11 @@ export function studioResourceMeta(origin: string | null): Record<string, unknow
   };
 }
 
-/**
- * Does the client render MCP Apps? The extension announces itself in the client's capabilities
- * (`extensions["io.modelcontextprotocol/ui"]`, the id `@modelcontextprotocol/ext-apps` exports as EXTENSION_ID).
- * A client that does not — Claude Code, Cline, Vibe, a script somebody wrote around this server — gets Studio
- * opened in the browser instead, beside whatever it is. Measured 2026-10-23: a Claude Desktop Cowork session
- * connected this server, listed its tools, and then drove a second copy from a shell script; nothing it did could
- * have drawn a panel, and the person saw no editor. The URL in a result is not "on screen"; a browser window is.
- */
-function clientRendersApps(server: McpServer): boolean {
-  const caps = server.server.getClientCapabilities() as { extensions?: Record<string, unknown> } | undefined;
-  return Boolean(caps?.extensions?.['io.modelcontextprotocol/ui']);
-}
+// A client that does not render MCP Apps — Claude Code, Cline, Vibe, a script somebody wrote around this server —
+// gets Studio opened in the browser instead, beside whatever it is (`clientRendersApps`, `../clientApps.ts`).
+// Measured 2026-10-23: a Claude Desktop Cowork session connected this server, listed its tools, and then drove a
+// second copy from a shell script; nothing it did could have drawn a panel, and the person saw no editor. The URL
+// in a result is not "on screen"; a browser window is.
 
 /** The person's browser, on the platform's own opener. `NODEGX_STUDIO_NO_OPEN` keeps a test from opening windows. */
 function openInBrowser(url: string): boolean {

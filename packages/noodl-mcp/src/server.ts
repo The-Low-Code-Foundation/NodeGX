@@ -177,6 +177,20 @@ export function createServer(options: ServerOptions): CreatedServer {
   // P109-S12 — a key no tool declares is refused by name before any handler runs (zod would strip it without a word).
   refuseUnknownArguments(server);
 
+  // P125 CCN-001 s3 — one stderr line naming the client and what it can render. Claude Desktop keeps a server's
+  // stderr in ~/Library/Logs/Claude/mcp-server-<name>.log and logs no request params, so without this line nothing
+  // on disk says whether the host declared MCP Apps (`extensions["io.modelcontextprotocol/ui"]`) — the fact that
+  // decides whether `open_studio` is a panel or a browser window.
+  server.server.oninitialized = () => {
+    const who = server.server.getClientVersion();
+    const caps = server.server.getClientCapabilities() as { extensions?: Record<string, unknown> } | undefined;
+    process.stderr.write(
+      `noodl-mcp: client ${who ? `${who.name} ${who.version}` : 'unknown'}; renders MCP Apps: ` +
+        `${caps?.extensions && 'io.modelcontextprotocol/ui' in caps.extensions ? 'yes' : 'no'}; ` +
+        `capabilities ${JSON.stringify(caps ?? {})}\n`
+    );
+  };
+
   // AWP-006 — every registration below goes through the recorder, which keeps
   // the SDK's handle so a group can be hidden at startup and revealed later.
   // The recorder forwards `registerTool` and nothing else, because that is the
