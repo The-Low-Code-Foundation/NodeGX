@@ -80,19 +80,25 @@ async function freePort() {
 
 // LOCK-web3000: the code and harness chains' apps and graders share localhost:3000. mkdir is the atomic step; the
 // owner's pid is inside, and a lock whose owner is gone is taken over (and said so). Only our own lock is removed.
-const LOCK = path.join(ROUNDS, 'LOCK-web3000');
-const needsLock = (j) => which === 't2' && j.arm !== 'nodegx';
+// Since FIX-04's comparison chain (2026-10-23): every NodeGX app serves on 8575 (the preview's default) and 8584 (the
+// backend's port, in the app's own config, inherited by every seed), so two NodeGX chains take turns on
+// LOCK-nodegx8575 the same way. A chain in another rounds folder shares the main lab's locks with --lock-dir.
+const LOCK_DIR = path.resolve(opt('--lock-dir', ROUNDS));
+const LOCK_NAME = ARM === 'nodegx' ? 'LOCK-nodegx8575' : 'LOCK-web3000';
+const LOCK_PORTS = ARM === 'nodegx' ? [8575, 8584] : [3000];
+const LOCK = path.join(LOCK_DIR, LOCK_NAME);
+const needsLock = () => which === 't2' && (ARM !== 'nodegx' || rest.includes('--lock'));
 const alive = (pid) => { try { process.kill(pid, 0); return true; } catch (e) { return e.code === 'EPERM'; } };
 // First come, first served: a series that wants the lock leaves LOCK-web3000.want-<pid> (its time inside) and tries only
 // when no live series has wanted it longer; else the one that just dropped it takes it straight back, every time
 // (the first mock, 2026-10-23: the harness chain waited through code's round, grade and next round).
-const want = path.join(ROUNDS, `LOCK-web3000.want-${process.pid}`);
+const want = path.join(LOCK_DIR, `${LOCK_NAME}.want-${process.pid}`);
 function myTurn() {
   const mine = fs.statSync(want).mtimeMs;
-  for (const f of fs.readdirSync(ROUNDS).filter((x) => x.startsWith('LOCK-web3000.want-') && x !== path.basename(want))) {
+  for (const f of fs.readdirSync(LOCK_DIR).filter((x) => x.startsWith(`${LOCK_NAME}.want-`) && x !== path.basename(want))) {
     const pid = Number(f.split('-').at(-1));
-    let t; try { t = fs.statSync(path.join(ROUNDS, f)).mtimeMs; } catch { continue; }
-    if (!alive(pid)) { fs.rmSync(path.join(ROUNDS, f), { force: true }); continue; }
+    let t; try { t = fs.statSync(path.join(LOCK_DIR, f)).mtimeMs; } catch { continue; }
+    if (!alive(pid)) { fs.rmSync(path.join(LOCK_DIR, f), { force: true }); continue; }
     if (t < mine) return false;
   }
   return true;
@@ -105,17 +111,18 @@ async function takeLock(what) {
     let owner = '';
     try { owner = fs.readFileSync(path.join(LOCK, 'owner'), 'utf8').trim(); } catch {}
     const pid = Number(owner.split(' ')[0]);
-    if (pid && !alive(pid)) { log(`${what}: LOCK-web3000's owner (${owner}) is gone; taking it over`); fs.rmSync(LOCK, { recursive: true, force: true }); continue; }
-    if (!said) { log(`${what}: waiting for LOCK-web3000 (${owner || 'another series wanted it first'})`); said = true; }
+    if (pid && !alive(pid)) { log(`${what}: ${LOCK_NAME}'s owner (${owner}) is gone; taking it over`); fs.rmSync(LOCK, { recursive: true, force: true }); continue; }
+    if (!said) { log(`${what}: waiting for ${LOCK_NAME} (${owner || 'another series wanted it first'})`); said = true; }
     await sleep(15000);
   }
   // the lock is ours; the port should be too (an orphaned server, or a peer's, would answer this job's checks)
   let said3000 = false;
-  while (listening(3000).length) {
-    if (!said3000) { log(`${what}: localhost:3000 is held by pid ${listening(3000).join(' ')} (not this lab's lock holder); waiting`); said3000 = true; }
+  const held = () => LOCK_PORTS.flatMap((q) => listening(q).map((pid) => `${q}:${pid}`));
+  while (held().length) {
+    if (!said3000) { log(`${what}: ${held().join(' ')} still listening (not this lab's lock holder); waiting`); said3000 = true; }
     await sleep(30000);
   }
-  if (said) log(`${what}: got LOCK-web3000`);
+  if (said) log(`${what}: got ${LOCK_NAME}`);
 }
 const dropLock = () => {
   fs.rmSync(want, { force: true });

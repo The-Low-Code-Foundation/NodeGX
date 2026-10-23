@@ -340,3 +340,24 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   $1.84 at ClinePass prices): 5-hour **5%**, weekly **13%** (he thinks it reset this morning), monthly **42%**
   (holds test 1 and earlier labs). He ruled to go on to twenty changes. The Opus grades (12 so far, $21.86 by Claude
   Code's own count) use his Claude plan, not ClinePass, and show on neither bar.
+- **2026-10-23 15:35 CEST — FIX-04 (thinning) landed; proven; its comparison chain shares the NodeGX ports by a
+  lock.** Fixer `opennoodl-0d`: `eee0d410a` (+ Done `ebc1b699f`), kit `kits/FIX-04-eee0d410a/` packed on FIX-03's
+  commit plus FIX-04 only (the P125 commits since would have changed what's measured). Its Done **corrects this
+  lab's reading of the screenshots**: an opened shot is 200–490k base64 characters in a request but ≤ ~1k billed
+  tokens; images were 0–2% of c01–c03's input. The tap log's `chars=` is not billing. The thickness by billed
+  input: write answers 20.8%, `read_files` 13%, the writes 9.5%, `get_node_type` 9.3%. FIX-04:
+  - wires as one line (c03's writes −26%);
+  - one line per skipped-check code in write answers (−57%);
+  - argument aliases (15 of 27 refusals);
+  - screenshots measured and left as they are;
+  - the resident tool surface at 8,277 of 8,280.
+
+  $0 mock (`own026-mocks/fix04`, `mock/steps-fix04.json`): `get_node_type` answers `typeName` and a string list,
+  `search_project` answers `query`. **Ports:** every NodeGX app serves the preview on 8575 (its default) and the
+  backend on 8584 (the app's own `config.json`, inherited by every seed). So two NodeGX chains take turns on
+  `LOCK-nodegx8575` (`series.mjs --lock`, opt-in, with `--lock-dir` to share the main lab's lock from another rounds
+  folder). The lock also waits while either port is held by anyone. A $0 two-chain mock waited, correctly, on the
+  real c06 grade's preview. The main NodeGX series (59102) was stopped during t2-nodegx-c06's grade (the grade runs
+  on: it writes `meta.json` before it prints) and restarted with `--lock` once that grade ended. Beside it,
+  **`own026-fix04/`: c01–c03 on FIX-04 from t1-nodegx-3** (grades in `own026-grades/fix04/`), compared with the
+  FIX-03 chain's c01–c03 by `measure.mjs`: the same checks, less overhead.
