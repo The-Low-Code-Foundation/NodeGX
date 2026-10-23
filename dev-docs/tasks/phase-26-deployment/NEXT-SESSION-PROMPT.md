@@ -24,6 +24,34 @@ project's rules (Richard's ruling). **s4, `deploy_to_vm` in `@nodegx/mcp`**: the
   `../../../../OpenNoodl/…` or `/Users/…`, and both `prepack`s end with `check-pack-paths.mjs`. So the release in item 1
   can be built from a clean worktree (the recipe in P125's handoff) without leaking the machine.
 
+**The npm 0.2.6 cut, packed 2026-10-23 night (opennoodl-d7), waiting on Richard's publish.** Richard: "yes" to the
+release. Prep `71af37b55` + `b7deafca0` (versions, pins, lockfile, CHANGELOG "npm packages 0.2.6"); packed in a clean
+worktree at the pushed `3055514b7` under HEAVY.lock, its linked `dist/` entries replaced by real folders first.
+`check-pack-paths` stopped the first two packs (the backend bundle and the render harness still leaked worktree
+paths; fixed in `eeb51872a` and `3055514b7`). Tarballs in
+`/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.6-tarballs/`:
+
+| tarball | shasum (sha1) | bytes |
+|---|---|---|
+| `nodegx-preview-0.2.5.tgz` | `bc475e0b8d9bec5fb1875fbfb76784cf9705cb3b` | 6,099,108 |
+| `nodegx-mcp-0.2.6.tgz` | `5c72a6373fffa5ebc8e333d3c3aafd6caa001124` | 12,199,457 |
+| `create-nodegx-0.2.6.tgz` | `1aa0576e97c05946bcb344383d2bc67d35d59754` | 43,135 |
+| `create-nodegx-vibe-0.2.6.tgz` | `5fb41aeacc1a827795965bab674ed6eb8d2bc818` | 13,641 |
+| `create-nodegx-cline-0.2.6.tgz` | `54a7f38d7c90932542914abf968ac1cf09ce0e45` | 13,967 |
+
+Smoke from the tarballs, empty HOME, outside the checkout, on a copy of the todo-list template: `nodegx-deploy
+--full-stack` exit 0 (app/, backend/ with LICENSE, app/NODEGX-LICENSE.txt); `node start.js --port 8797` health 200,
+app 200, the licence file 200, a sign-up 201, a clean stop; `@nodegx/mcp --version` 0.2.6, `--graph` exit 0
+(10,419 lines), `deploy_to_vm` in the bundle, `dist/backend/` holds LICENSE, cli.js, folder/, vm/; `create-nodegx
+my-apps` exit 0 pinning `@nodegx/mcp@0.2.6`. `publishable.js` 6 packages / 0 problems; `bugs.js gate core` 0
+blockers. **Richard's terminal (2FA):** `scripts/own/publish-npm.sh
+/Users/richardosborne/vscode_projects/OpenNoodl-worktrees/npm-0.2.6-tarballs` (preview before mcp, so
+`deploy_to_vm`'s `npx @nodegx/preview@latest` finds `--full-stack`), and `@nodegx/backend-map` 0.1.1:
+`cd dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm publish --access public`. After: `npm view`
+each shasum against the table; nodegx-studio's pins to `@nodegx/mcp` 0.2.6, `@nodegx/preview` 0.2.5,
+`@nodegx/backend-map` 0.1.1, `npm run vendor`, every gate; the changelog page (nodegx-web's deploy, Richard's
+rsync). Not driven: `deploy_to_vm` from the npm install against a server (the throwaway VM recipe above).
+
 **Next, in order:**
 
 1. **Publish what a stranger needs.** `deploy_to_vm` from an npm install runs `npx @nodegx/preview nodegx-deploy`, and
