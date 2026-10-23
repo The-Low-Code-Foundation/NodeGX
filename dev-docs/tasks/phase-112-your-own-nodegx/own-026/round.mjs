@@ -44,10 +44,11 @@ const KIT_V = opt('--kit-version', '0.2.5');
 // folder exists, so a waiting round can be stopped with nothing to clean up.
 let KIT_DIR = opt('--kit-dir', null);
 if (ARM === 'nodegx' && !KIT_DIR) {
-  const hold = '/Users/Shared/nodegx-lab/own026/HOLD-nodegx';
+  // --hold / --kit-file: series.mjs names its own folder's (a $0 mock series keeps its own); the defaults are the lab's
+  const hold = opt('--hold', '/Users/Shared/nodegx-lab/own026/HOLD-nodegx');
   if (fs.existsSync(hold)) console.log(`waiting: ${hold} exists (${fs.readFileSync(hold, 'utf8').trim().split('\n')[0]})`);
   while (fs.existsSync(hold)) await new Promise((r) => setTimeout(r, 60000));
-  const kitFile = '/Users/Shared/nodegx-lab/own026/KIT';
+  const kitFile = opt('--kit-file', '/Users/Shared/nodegx-lab/own026/KIT');
   if (fs.existsSync(kitFile)) KIT_DIR = fs.readFileSync(kitFile, 'utf8').trim() || null;
 }
 if (KIT_DIR) { KIT_DIR = path.resolve(KIT_DIR); kitTarball(KIT_DIR, 'create-nodegx'); kitTarball(KIT_DIR, 'nodegx-mcp'); }
@@ -133,6 +134,10 @@ if (seed) {
   fs.cpSync(path.join(s, 'work', 'apps'), APPS, { recursive: true, verbatimSymlinks: true });
   // the person's machine on day N: the backend's data and the agent's own caches came with it; never the old chat.
   fs.cpSync(path.join(s, 'home'), HOME, { recursive: true, verbatimSymlinks: true, filter: (p) => !p.startsWith(path.join(s, 'home', '.cline')) });
+  // ...but the MCP servers they set up are theirs too (the kit wrote Cline's file once, at create): NodeGX's entry is
+  // pointed at today's kit below. Without it a seeded NodeGX round had no entry to read (found by the t2 mock, 2026-10-23).
+  const mcp = path.join(s, 'home', path.relative(HOME, env.CLINE_MCP_SETTINGS_PATH));
+  if (fs.existsSync(mcp)) { fs.mkdirSync(SETTINGS, { recursive: true }); fs.copyFileSync(mcp, env.CLINE_MCP_SETTINGS_PATH); }
   fs.writeFileSync(path.join(root, 'seed.txt'), s + '\n');
 } else if (ARM === 'nodegx') {
   const r = KIT_DIR
@@ -156,11 +161,21 @@ if (ARM === 'nodegx') {
   const mcpFile = JSON.parse(fs.readFileSync(env.CLINE_MCP_SETTINGS_PATH, 'utf8'));
   const entry = mcpFile.mcpServers.nodegx;
   const at = entry ? entry.args.findIndex((a) => /^@nodegx\/mcp@/.test(a)) : -1;
-  if (at < 0 || (!KIT_DIR && entry.args[at] !== `@nodegx/mcp@${KIT_V}`)) throw new Error(`the kit wrote ${JSON.stringify(entry)}`);
-  // A local kit: the server the kit names, from its tarball (OWN-020's recipe); every flag the kit wrote is kept.
-  if (KIT_DIR) { entry.args.splice(at, 1, `--package=${kitTarball(KIT_DIR, 'nodegx-mcp')}`, 'noodl-mcp'); fs.writeFileSync(env.CLINE_MCP_SETTINGS_PATH, JSON.stringify(mcpFile, null, 2) + '\n'); }
+  // a seeded round's entry already names an earlier kit's tarball (`--package=<tgz>`, `noodl-mcp`)
+  const atTgz = entry && seed ? entry.args.findIndex((a) => /^--package=.*\/nodegx-mcp-[^/]*\.tgz$/.test(a)) : -1;
+  if (atTgz >= 0) {
+    if (!KIT_DIR || entry.args[atTgz + 1] !== 'noodl-mcp') throw new Error(`the seed's entry ${JSON.stringify(entry)} needs a kit`);
+    entry.args[atTgz] = `--package=${kitTarball(KIT_DIR, 'nodegx-mcp')}`;
+    fs.writeFileSync(env.CLINE_MCP_SETTINGS_PATH, JSON.stringify(mcpFile, null, 2) + '\n');
+  } else {
+    if (at < 0 || (!KIT_DIR && entry.args[at] !== `@nodegx/mcp@${KIT_V}`)) throw new Error(`the kit wrote ${JSON.stringify(entry)}`);
+    // A local kit: the server the kit names, from its tarball (OWN-020's recipe); every flag the kit wrote is kept.
+    if (KIT_DIR) { entry.args.splice(at, 1, `--package=${kitTarball(KIT_DIR, 'nodegx-mcp')}`, 'noodl-mcp'); fs.writeFileSync(env.CLINE_MCP_SETTINGS_PATH, JSON.stringify(mcpFile, null, 2) + '\n'); }
+  }
+  fs.writeFileSync(path.join(root, 'mcp-entry.json'), JSON.stringify(entry, null, 2) + '\n');
   // Warm the server's npx install so the first connect doesn't race Cline's clock (OWN-020).
-  sh('npx', [...entry.args.slice(0, KIT_DIR ? at + 2 : at + 1), '--version'], { cwd: APPS, timeout: 240000 });
+  const bin = entry.args.findIndex((a) => a === 'noodl-mcp' || /^@nodegx\/mcp@/.test(a));
+  sh('npx', [...entry.args.slice(0, bin + 1), '--version'], { cwd: APPS, timeout: 240000 });
 }
 
 // 2. Sittings.

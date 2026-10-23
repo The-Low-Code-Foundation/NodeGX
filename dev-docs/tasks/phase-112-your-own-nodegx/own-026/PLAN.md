@@ -248,3 +248,34 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   2. **The three chains run side by side** (about 10–12 hours), not one after another.
   3. **The NodeGX chain waits for FIX-03** (`fixes/FIX-03.md`: the safe way must be the short way); the code chains
      start without it. HOLD-nodegx set. The session closed here; test 2 is the next session's (`NEXT-SESSION-PROMPT.md`).
+- **2026-10-23 08:12 CEST — the lab made safe for three chains at once; test 2 started** (session `opennoodl`, Opus 5.5).
+  series.mjs: a log per series (`series-t2-<arm>.log`); tap ports per chain (t1 48900+, code 49000+, harness 49100+,
+  nodegx 49200+), free only when lsof sees no LISTEN on any address, and the started tap must be the port's listener;
+  after change *n* is graded, `node_modules`/`.next`/`test-results` go from the grade copy and from round *n−1* (never
+  a t1 seed, never round *n*); a step waits while the disk has under 8 GB free. **Two hazards the handoff didn't name,
+  found by measuring first:**
+  1. **The code and harness apps both serve on localhost:3000** (t1-code-3's `server/index.js` defaults `PORT` to
+     3000; t1-harness-1 is `next dev`), and every code and harness grader of test 1 drove :3000. Side by side, one
+     arm's agent or grader would test the other arm's app. So a code or harness round or grade holds
+     `LOCK-web3000` (an atomic mkdir, owner pid inside, a dead owner's lock taken over and logged) for as long as it
+     runs, and also waits for :3000 to be free. Those two chains **take turns**, first come first served (a
+     `LOCK-web3000.want-<pid>` queue: in the first mock the code chain dropped the lock and took it straight back,
+     round → grade → next round, and harness starved); the NodeGX chain (its apps on 8584/8575) runs beside them.
+     Richard's "side by side" holds for NodeGX against the plain-code arms, not between the two plain-code arms.
+  2. **A seeded NodeGX round would have crashed:** the seed copy leaves out `home/.cline` (the old chat), and with it
+     the MCP settings file the kit wrote once at create, which round.mjs then read. round.mjs now copies that one file
+     (a person's MCP servers are theirs on day N) and points its `--package=<tgz>` at today's KIT; the entry is saved
+     as `mcp-entry.json`. A $0 seeded round called `nodegx__list_projects` and got "Rocket Tables" at its own round's
+     path. The kit's other create-time files (`AGENTS.md`, the skill) come with the seed from FIX-02's kit and are not
+     re-written: a kit fix that lives only in those files would not reach a t2 NodeGX round (FIX-03's targets, the
+     guidance, `get_node_type` and the examples, come from the server and do).
+  round.mjs takes `--hold`/`--kit-file` (defaults the lab's), so a mock series keeps its own; grade.mjs accepts a grade
+  root under `own026-mocks/`. **Proven with $0 mocks** (`own026-mocks/t2s1`, `t2s2`: mock-model on the tap port, a
+  stand-in `claude` as judge and grader via `JUDGE_BIN`/`CLAUDE_BIN`, `--changes 2` from the real t1 seeds): three
+  chains at once; the hold logged once over two minutes and the chain started within a minute of lifting; code and
+  harness strictly alternate; each round carried the last change forward; pruning left `node_modules` only in round
+  *n* (a harness round + grade copy: 1.6 GB back). Then the real chains: `node series.mjs t2 code t1-code-3`,
+  `t2 harness t1-harness-1`, `t2 nodegx t1-nodegx-3` (waiting on HOLD-nodegx for FIX-03). First requests have the
+  same shape as test 1's (4 tools plain code, 12 NodeGX in the mock). **Known, not fenced:** `/tmp` is still shared;
+  two concurrent rounds that name the same `/tmp` file would share it (each round's `seal-audit.txt` lists the
+  names, so overlaps can be counted afterwards).

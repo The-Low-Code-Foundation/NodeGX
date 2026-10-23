@@ -23,7 +23,7 @@ if (fs.existsSync(gradeArg)) throw new Error(`${gradeArg} exists`);
 const round = fs.realpathSync(roundArg);
 fs.mkdirSync(gradeArg, { recursive: true });
 const G = fs.realpathSync(gradeArg);
-if (!G.startsWith(path.join(LAB, 'own026-grades') + '/')) throw new Error('a grade root sits under ' + path.join(LAB, 'own026-grades'));
+if (![path.join(LAB, 'own026-grades'), path.join(LAB, 'own026-mocks')].some((d) => G.startsWith(d + '/'))) throw new Error('a grade root sits under ' + path.join(LAB, 'own026-grades'));
 const APP = path.join(G, 'app');
 const HOME = path.join(G, 'home');
 const WORK = path.join(G, 'work');
