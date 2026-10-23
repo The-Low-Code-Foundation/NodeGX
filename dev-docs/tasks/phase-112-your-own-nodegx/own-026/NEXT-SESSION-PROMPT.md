@@ -20,6 +20,7 @@ PLAN §8's 2026-10-23 08:12 entry first: what changed in the lab and why.
   (names the new tgz) and the tool results in `$M/t2-nodegx-c01-tap/req-*.json`; (3) `cp KIT KIT-PROVEN` in the real
   lab folder. The chain starts within a minute.
 - **FIX-04 (thinning) is a PARALLEL experiment** (Richard, 13:40): its fixer packs `kits/FIX-04-*` and messages the lab, but does NOT write `KIT`; the t2 NodeGX chain stays on FIX-03. When it lands: $0 mock, then c01–c03 on it in `own026-fix04/` from t1-nodegx-3, graded, compared by `measure.mjs compare` (same checks, less overhead).
+- **Test 2 is TWENTY changes now** (PLAN §8 14:25). The running series stop at c10 ("series done"); restart each with the same command (`node series.mjs t2 <arm> <start>`), and it skips what's finished and runs c11–c20.
 - **Per change:** `node measure.mjs <arm>` prints PLAN §4's row (also `own026-grades/measure-t2-<arm>.json`).
   Stop-and-check after every graded NodeGX change → `fixes/LEARNINGS.md` #4…; a gating defect → `FIX-04.md`, set
   `HOLD-nodegx`, tell Richard, give him the fixer prompt.
