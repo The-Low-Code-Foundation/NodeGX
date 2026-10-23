@@ -401,10 +401,33 @@ folder whole, in place of a site plus a loose `cli.js` from the `@nodegx/mcp` ta
   the old app still 200. After the printed command and a ship: visitor 403 on `_User` and `Task`, the old account
   signs in, a signed-in read 200, `/health` `enforced: true`, `/srv/shipold` gone.
 
+**Ruled (Richard, 2026-10-23, "Yep change em"): a reship brings the project's rules.** Built the same day, in
+`start.js`, so it holds for every way the folder runs (laptop, VM, `deploy_to_vm`):
+- The launcher records the checksum of the rules it installed (`data/deployed-rules.json`). A start whose
+  `backend/nodegx.security.json` differs from that (or a box with rules and no record, like lingo or an s2 folder)
+  moves `data/security.json` aside as `security.json.before-<time>` and passes `--project-dir`, so the BACKEND
+  installs and validates the project's rules (`applyProjectPolicy`), as on a first start. Same checksum, or a plain
+  restart: the backend's file is left alone and `--project-dir` is not passed (no SB-015 "never overwritten" notice
+  every start). So an edit made on the server lasts until the project's rules change. A project with no rules file
+  leaves the server's alone.
+- The dev-open refusal reads the rules that WILL be enforced: the project's when this start installs them (a
+  dev-open project file is refused, naming the project file), else the server's. A dev-open box whose ship brings
+  rules is therefore fixed by the ship, not refused. A rules file that is not JSON is refused before anything moves.
+- **`start.js --check --data-dir <dir>`** plans and refuses exactly as a start would, writing and starting nothing,
+  and skips the port (the app it would replace holds it). `provision-app.sh` asks it before writing anything and
+  prints its line; the bash dev-open snippet is gone (one decision, one place).
+- The folder's DEPLOY.md says the same (`deploy-guide.ts`, both rules sections).
+
+Graded: `dep-002-full-stack-folder.test.ts` 16 rows (+5: first start then a restart keeps an edit; a changed deploy
+replaces with the previous file kept; a box with no record; a dev-open or non-JSON project file refused with the data
+untouched; `--check`). **Five mutants, all caught** (no "unchanged", copy instead of move, apply before refuse,
+`--project-dir` on every start, `--check` falling through). `deploy-guide.test.ts` 19/19, the engine's 8/8. Driven in
+the container: `todo-list` first ship "installing"; reship "unchanged" with no SB-015 line; the project's `signup`
+changed to `nobody` and reshipped: "replaced", sign-up 201 → 403, `security.json.before-…` holds `public`, an
+existing account still signs in. An OLD-layout dev-open box: with project rules, replaced (visitor `_User` 403);
+with none, refused before anything changed, the old app still active.
+
 **Left for the next session.**
-- **A project whose rules change cannot get them onto the box by reshipping.** SB-015 installs the project's rules
-  on the first start only and prints its notice every time after. That is right for a person's laptop. Is it right
-  for `deploy_to_vm`, where the project IS the source? A ruling for Richard before the tool is written.
 - `deploy_to_vm` in `@nodegx/mcp`: these two scripts are its spec, and the container is its test bed (Dockerfile
   in the session notes below).
 - No-domain public access (`--host 0.0.0.0` on a bare IP) was not offered: the backend's `requiresAuth` applies to

@@ -67,22 +67,23 @@ if [ "$CADDY" != off ]; then
 fi
 # 🔴 P26-VMOPEN: the earlier layout ran `cli.js serve` without --enforce-rules, so its first start minted
 # security.json with "devOpen": true, and on a 127.0.0.1 bind the backend's interlock never refused it — the app was
-# public behind Caddy with every access rule off. start.js refuses such a data folder; say it HERE, before anything
-# is written, so the running app is left exactly as it was. The file is the operator's; this never edits it.
-if [ -f "$DATA_DIR/security.json" ] && "$NODE" -e \
-  'process.exit(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).devOpen===true?0:1)' "$DATA_DIR/security.json" 2>/dev/null; then
+# public behind Caddy with every access rule off. The staged start.js decides what a start will do with the rules
+# (the project's replace the server's when this ship brings different ones — Richard, 2026-10-23) and refuses
+# rules that are switched off. Ask it HERE, before anything is written, so a refusal leaves the running app as it is.
+if ! CHECK="$("$NODE" "$STAGE/start.js" --check --data-dir "$DATA_DIR" 2>&1)"; then
+  echo "$CHECK" | sed 's/^/    /' >&2
   cat >&2 <<REFUSAL
-FATAL: $APP's access rules are switched off ($DATA_DIR/security.json has "devOpen": true), so anyone who can reach it
-reads and changes every record. A ship does not start an app that way, and nothing has been changed: the app that
-is running now keeps running as it is. To switch the rules on (the ones written in that file), run ON THE SERVER
-(ssh in first; on a Mac this sed refuses the command):
+FATAL: refused before anything was changed: the app that is running now keeps running as it is.
+If the file named is $DATA_DIR/security.json, either give the project its own rules (nodegx.security.json, which
+a ship installs) or switch the server's on — ON THE SERVER (ssh in first; on a Mac this sed refuses the command):
 
   sed -i 's/"devOpen": *true/"devOpen": false/' $DATA_DIR/security.json && systemctl restart $APP-backend
 
-then ship again. To see first what the rules allow: cat $DATA_DIR/security.json
+then ship again.
 REFUSAL
   exit 1
 fi
+echo "$CHECK" | sed 's/^/    /'
 
 id -u "$APP_USER" >/dev/null 2>&1 || useradd --system --home-dir "/var/lib/$APP" --shell /usr/sbin/nologin "$APP_USER"
 mkdir -p "$FOLDER" "$DATA_DIR" "/etc/$APP"

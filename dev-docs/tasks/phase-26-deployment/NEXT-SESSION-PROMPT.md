@@ -7,23 +7,20 @@ work.
 **Done:** s1, the backend serves the app on its own origin (`--serve-app`). s2, `nodegx-deploy --full-stack` writes
 one folder (`app/`, `backend/`, `start.js`). s3, OWN-016's `ship-to-vm.sh` + `provision-app.sh` ship that folder to
 a VM (`/opt/<app>`, data in `/var/lib/<app>/data`, Caddy proxies everything but the admin paths), graded in a
-throwaway VM container. `start.js` gained `--data-dir` and refuses a dev-open data folder.
+throwaway VM container. `start.js` gained `--data-dir` and `--check`, refuses dev-open rules, and installs the project's rules whenever a
+deploy brings different ones (Richard's ruling, 2026-10-23; DEP-002 s3 "Ruled").
 
 **P26-VMOPEN is closed:** lingo.nodegx.io ran with every access rule off. Richard switched them on
 (2026-10-23, measured `enforced: true`), so it can be reshipped with the new scripts.
 
 **Next, in order:**
 
-1. **A ruling before `deploy_to_vm`:** a reship never updates the box's rules (SB-015 installs the project's on the
-   first start only). Should `deploy_to_vm` replace them with the project's, since the project is the source? Ask
-   Richard in plain words, with the two consequences (a rule edited on the box is lost / a rule changed in the
-   project never arrives).
-2. **`deploy_to_vm` in `@nodegx/mcp`:** SSH to a host the person names, the folder as a service, the URL back. The two
+1. **`deploy_to_vm` in `@nodegx/mcp`:** SSH to a host the person names, the folder as a service, the URL back. The two
    scripts are its spec. `dist/backend/folder/` already ships in the MCP's and the preview's prepack. Grade it
    against the container (DEP-002 s3 has the Dockerfile and run line). 🔴 SSH to a real server is classifier-refused;
    a local container is not.
-3. **`nodegx deploy --full-stack`** at the front door (`nodegx-export/src/cli/args.ts` `parseDeploy`).
-4. **The popup (step 6)**, three destinations. A packaged editor has no `package-deploy.js` or launcher on disk:
+2. **`nodegx deploy --full-stack`** at the front door (`nodegx-export/src/cli/args.ts` `parseDeploy`).
+3. **The popup (step 6)**, three destinations. A packaged editor has no `package-deploy.js` or launcher on disk:
    `extraResources` beside `Resources/nodegx-backend/cli.js`.
 
 **Traps:**

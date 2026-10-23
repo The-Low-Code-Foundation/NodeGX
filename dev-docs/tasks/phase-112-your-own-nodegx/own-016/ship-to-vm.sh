@@ -67,7 +67,7 @@ node -e '
   }
   console.log("    " + r.projectName + ", build " + full.buildId + ", " + r.written.length + " files");
   console.log("    cloud functions: " + (full.uses.functions.length ? full.uses.functions.join(", ") : "none"));
-  console.log("    access rules: " + (full.rules ? "the project'"'"'s own (installed on the first start)" : "the enforced defaults (DEPLOY.md)"));
+  console.log("    access rules: " + (full.rules ? "the project'"'"'s own (they replace the server'"'"'s when they changed)" : "none in the project: the server keeps its own (the enforced defaults on a first ship)"));
 ' "$WORK/deploy.json"
 
 echo "==> 2/4 stage and provision on $HOST"

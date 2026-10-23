@@ -302,11 +302,12 @@ function rulesSection(input: FullStackGuideInput): string {
     return `## Who can read and change the data
 
 The project's own access rules are in \`backend/nodegx.security.json\`. The backend installs them
-the first time the app starts, and keeps its copy in \`data/security.json\` from then on.
+the first time the app starts, and keeps its copy in \`data/security.json\`.
 
-A later deploy with different rules does not change that copy. To change the rules of a running
-app, edit \`data/security.json\` and restart it, or delete that file and restart it to install the
-rules from the latest deploy.
+A later deploy with different rules replaces that copy when the app next starts, and keeps the
+previous one beside it (\`data/security.json.before-<time>\`). A restart, or a deploy with the same
+rules, leaves the copy as it is, so an edit to \`data/security.json\` lasts until the project's
+rules change. To change the rules for good, change them in the project and deploy again.
 `;
   }
   return `## Who can read and change the data
@@ -320,8 +321,8 @@ starts with its defaults:
 
 So a page that lists records for visitors who are not signed in shows an empty list. That is the
 rule working, not the app failing. To let visitors read a list, give its collection a rule in the
-project (a \`nodegx.security.json\` file in the project folder) and deploy again. The backend
-installs that file the first time a new \`data/\` folder starts.
+project (a \`nodegx.security.json\` file in the project folder) and deploy again. The app's next
+start installs it in place of the defaults.
 `;
 }
 

@@ -226,7 +226,8 @@ describe('DEP-002 s2 — start.js starts the backend with the app beside it', ()
   });
 
   it('refuses a data folder whose access rules are switched off (devOpen: true), and starts nothing', () => {
-    const { outDir } = pack();
+    // No project rules: the backend's own file is the one that would be enforced.
+    const { outDir } = pack({ policy: false });
     const data = path.join(outDir, 'data');
     fs.mkdirSync(data, { recursive: true });
     const security = path.join(data, 'security.json');
@@ -253,5 +254,106 @@ describe('DEP-002 s2 — start.js starts the backend with the app beside it', ()
     expect(run.stderr).toContain('This app needs Node.js 22.13 or later');
     expect(run.stderr).toContain(process.version);
     expect(started).toBeNull();
+  });
+});
+
+describe("DEP-002 s3 — a deploy brings the project's access rules (Richard, 2026-10-23)", () => {
+  const rulesOf = (outDir: string) => path.join(outDir, 'data', 'security.json');
+  /** What the real backend does with --project-dir on a data folder with no rules: install them. */
+  const backendInstalls = (outDir: string, started: string[] | null) => {
+    if (started && started.includes('--project-dir') && !fs.existsSync(rulesOf(outDir))) {
+      fs.copyFileSync(path.join(outDir, 'backend', 'nodegx.security.json'), rulesOf(outDir));
+    }
+  };
+  const repack = (outDir: string, policy: string) =>
+    fs.writeFileSync(path.join(outDir, 'backend', 'nodegx.security.json'), policy);
+
+  it('installs them on the first start, and a restart leaves the backend rules alone (an edit on the server lasts)', () => {
+    const { outDir } = pack();
+    const first = start(outDir);
+    expect(first.run.stdout).toContain('access rules: installing');
+    expect(valueOf(first.started as string[], '--project-dir')).toBe(path.join(outDir, 'backend'));
+    backendInstalls(outDir, first.started);
+    const edited = JSON.stringify({ version: 1, devOpen: false, collections: { Note: {} } });
+    fs.writeFileSync(rulesOf(outDir), edited);
+    const again = start(outDir);
+    expect(again.run.stdout).toContain('unchanged');
+    // Not told: the backend would say its rules are "never overwritten" on every start.
+    expect(again.started).not.toContain('--project-dir');
+    expect(fs.readFileSync(rulesOf(outDir), 'utf8')).toBe(edited);
+  });
+
+  it("replaces the backend rules with a deploy's changed ones, keeping the previous file beside them", () => {
+    const { outDir } = pack();
+    backendInstalls(outDir, start(outDir).started);
+    const before = fs.readFileSync(rulesOf(outDir), 'utf8');
+    const changed = JSON.stringify({ version: 1, devOpen: false, collections: { Task: {} } });
+    repack(outDir, changed);
+    const { run, started } = start(outDir);
+    expect(run.status).toBe(0);
+    expect(run.stdout).toContain('access rules: replaced');
+    expect(started).toContain('--project-dir');
+    expect(fs.existsSync(rulesOf(outDir))).toBe(false); // the backend installs the deploy's
+    const kept = fs.readdirSync(path.join(outDir, 'data')).filter((f) => f.startsWith('security.json.before-'));
+    expect(kept).toHaveLength(1);
+    expect(fs.readFileSync(path.join(outDir, 'data', kept[0]), 'utf8')).toBe(before);
+    backendInstalls(outDir, started);
+    expect(fs.readFileSync(rulesOf(outDir), 'utf8')).toBe(changed);
+    expect(start(outDir).started).not.toContain('--project-dir');
+  });
+
+  it('replaces the rules on a server that has some but no record of a deploy installing them (a box from before)', () => {
+    const { outDir } = pack();
+    fs.mkdirSync(path.join(outDir, 'data'), { recursive: true });
+    // An old layout's dev-open file: the project's rules replace it rather than being refused.
+    fs.writeFileSync(rulesOf(outDir), JSON.stringify({ version: 1, devOpen: true, collections: {} }));
+    const { run, started } = start(outDir);
+    expect(run.status).toBe(0);
+    expect(run.stdout).toContain('access rules: replaced');
+    expect(started).toContain('--project-dir');
+  });
+
+  it('--check says what a start would do, or refuses as it would, writing and starting nothing', () => {
+    const { outDir } = pack();
+    const dataDir = path.join(fs.realpathSync(scratch('dep002-check-')), 'data');
+    const fresh = start(outDir, ['--check', '--data-dir', dataDir]);
+    expect(fresh.run.status).toBe(0);
+    expect(fresh.run.stdout).toContain('[check] access rules: installing');
+    expect(fresh.started).toBeNull();
+    expect(fs.existsSync(dataDir)).toBe(false);
+    // An old layout's dev-open file, which the project's rules would replace: not a refusal.
+    fs.mkdirSync(dataDir);
+    const open = JSON.stringify({ version: 1, devOpen: true, collections: {} });
+    fs.writeFileSync(path.join(dataDir, 'security.json'), open);
+    const replacing = start(outDir, ['--check', '--data-dir', dataDir]);
+    expect(replacing.run.status).toBe(0);
+    expect(replacing.run.stdout).toContain('[check] access rules: replaced');
+    expect(fs.readdirSync(dataDir)).toEqual(['security.json']);
+    // The same file with no project rules to replace it: refused, as a start would be.
+    const { outDir: bare } = pack({ policy: false });
+    const refused = start(bare, ['--check', '--data-dir', dataDir]);
+    expect(refused.run.status).toBe(1);
+    expect(refused.run.stderr).toContain('access rules are switched off');
+    expect(fs.readFileSync(path.join(dataDir, 'security.json'), 'utf8')).toBe(open);
+  });
+
+  it('refuses a deploy whose own rules are switched off, or not JSON, and changes nothing in the data', () => {
+    const { outDir } = pack();
+    backendInstalls(outDir, start(outDir).started);
+    const before = fs.readFileSync(rulesOf(outDir), 'utf8');
+    for (const [policy, words] of [
+      [JSON.stringify({ version: 1, devOpen: true, collections: {} }), "This deploy's access rules are switched off"],
+      ['{ not json', "This deploy's access rules (backend/nodegx.security.json) are not valid JSON"]
+    ]) {
+      repack(outDir, policy);
+      const { run, started } = start(outDir);
+      expect(run.status).toBe(1);
+      expect(run.stderr).toContain(words);
+      expect(started).toBeNull();
+      expect(fs.readFileSync(rulesOf(outDir), 'utf8')).toBe(before);
+      expect(fs.readdirSync(path.join(outDir, 'data')).filter((f) => f.startsWith('security.json.before-'))).toEqual(
+        []
+      );
+    }
   });
 });

@@ -123,10 +123,11 @@ describe('DEPLOY.md for a full-stack folder (DEP-002)', () => {
     expect(md).toContain('nodegx.security.json');
   });
 
-  it("with the project's own rules, says they install on the first start and a later deploy does not change them", () => {
+  it("with the project's own rules, says a later deploy with different rules replaces the server's copy", () => {
     const md = renderFullStackGuide({ projectName: 'Todo List', uses: TODO, hasRules: true });
     expect(md).toContain('`backend/nodegx.security.json`');
-    expect(md).toContain('A later deploy with different rules does not change that copy.');
+    expect(md).toContain('A later deploy with different rules replaces that copy when the app next starts');
+    expect(md).toContain('`data/security.json.before-<time>`');
     expect(md).not.toContain('can read nothing and save nothing');
   });
 

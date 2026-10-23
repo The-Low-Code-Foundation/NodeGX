@@ -7,6 +7,9 @@
  *   PORT=8090 node start.js      the same, for hosts that set PORT
  *   node start.js --data-dir /var/lib/my-app/data   keep the data outside this folder (a server
  *                                whose app folder is read-only; a mounted volume)
+ *   node start.js --check --data-dir <dir>   say what a start would do with the rules, or refuse
+ *                                as a start would; writes nothing and starts nothing (a server's
+ *                                provisioning asks this before it replaces a running app)
  *
  * Every other option goes to the backend as it is (`node backend/cli.js help` lists them).
  *
@@ -23,19 +26,24 @@
  *   3. Installs the cloud functions this deploy carries (`backend/workflows/`) into `data/`,
  *      replacing the ones the previous deploy installed. The deploy is their source, as a push from
  *      the editor is; a function deleted from the project is gone after the next deploy.
- *   4. Refuses a data folder whose access rules are switched off (`"devOpen": true`), which is how
- *      a development backend's data arrives — and the backend's own interlock only refuses that on
- *      a public bind, while this app is usually behind a proxy on 127.0.0.1.
- *   5. Runs the backend in this process with the app beside its API (`--serve-app`) and the access
- *      rules enforced from the first record (`--enforce-rules`). When the project ships its own
- *      rules (`backend/nodegx.security.json`), they are installed on the FIRST start, and only then
- *      — a backend that already has `data/security.json` keeps it.
+ *   4. Installs the project's access rules (`backend/nodegx.security.json`) when this deploy brings
+ *      rules other than the ones the last deploy installed: on the first start, and after a deploy
+ *      that changed them, the backend's `data/security.json` is moved aside
+ *      (`security.json.before-<time>`) and the backend installs the project's. A restart, or a deploy
+ *      with the same rules, leaves `data/security.json` as it is (Richard, 2026-10-23: a reship
+ *      brings the project's rules; an edit made on the server lasts until the project's change).
+ *   5. Refuses rules that are switched off (`"devOpen": true`), which is how a development backend's
+ *      data arrives — and the backend's own interlock only refuses that on a public bind, while this
+ *      app is usually behind a proxy on 127.0.0.1. Refused before anything in the data is changed.
+ *   6. Runs the backend in this process with the app beside its API (`--serve-app`) and the access
+ *      rules enforced from the first record (`--enforce-rules`).
  *
  * `data/` (or the `--data-dir` given) is the app's: its database, uploads, the admin credential. A
- * deploy never writes there.
+ * deploy never writes there; this script writes only the functions and the rules described above.
  */
 'use strict';
 
+const crypto = require('crypto');
 const fs = require('fs');
 const net = require('net');
 const path = require('path');
@@ -45,6 +53,10 @@ const APP = path.join(HERE, 'app');
 const BACKEND = path.join(HERE, 'backend');
 const DEFAULT_DATA = path.join(HERE, 'data');
 const POLICY_FILE = 'nodegx.security.json';
+/** The backend's own rules file, in the data folder. */
+const BACKEND_RULES = 'security.json';
+/** Which rules the last deploy installed (their checksum), in the data folder. */
+const RULES_MARKER = 'deployed-rules.json';
 const WORKFLOW_SUFFIX = '.workflow.json';
 
 /** The Node this app needs, and the one property that decides it. */
@@ -191,29 +203,111 @@ function installFunctions(dataDir) {
 }
 
 /**
+ * What to do with the access rules, decided before anything is written:
+ *
+ *   none       the deploy ships no rules; the backend keeps (or mints) its own
+ *   unchanged  the rules this deploy ships are the ones the last deploy installed
+ *   install    the backend has no rules yet (a first start): it installs the project's
+ *   replace    the backend has rules, and this deploy ships different ones (or no deploy recorded
+ *              which it installed — a box from before this file existed)
+ *
+ * A rules file that is not JSON stops here, before the backend's rules are moved; the backend
+ * validates the rest when it installs them, in its own words.
+ */
+function planRules(dataDir) {
+  const shipped = path.join(BACKEND, POLICY_FILE);
+  const current = path.join(dataDir, BACKEND_RULES);
+  if (!fs.existsSync(shipped)) return { action: 'none', current };
+  const bytes = fs.readFileSync(shipped);
+  let config;
+  try {
+    config = JSON.parse(bytes.toString('utf8'));
+  } catch (error) {
+    fail(
+      `This deploy's access rules (backend/${POLICY_FILE}) are not valid JSON: ${error.message}. Deploy the project again.`
+    );
+  }
+  const sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
+  let installed = null;
+  try {
+    installed = JSON.parse(fs.readFileSync(path.join(dataDir, RULES_MARKER), 'utf8')).sha256;
+  } catch {
+    installed = null;
+  }
+  let action = 'replace';
+  if (!fs.existsSync(current)) action = 'install';
+  else if (installed === sha256) action = 'unchanged';
+  return { action, current, shipped, config, sha256 };
+}
+
+/** Carry out the plan. Returns where the previous rules were moved, when they were. */
+function applyRules(plan, dataDir) {
+  if (plan.action !== 'install' && plan.action !== 'replace') return null;
+  let movedTo = null;
+  if (plan.action === 'replace') {
+    movedTo = `${plan.current}.before-${new Date().toISOString().replace(/[:.]/g, '-')}`;
+    fs.renameSync(plan.current, movedTo);
+  }
+  fs.writeFileSync(
+    path.join(dataDir, RULES_MARKER),
+    JSON.stringify({ sha256: plan.sha256, installedAt: new Date().toISOString() }, null, 2) + '\n'
+  );
+  return movedTo;
+}
+
+/**
  * 🔴 A data folder with `"devOpen": true` is refused. Dev-open turns every access rule off, and the
  * backend's interlock (BAK-003) refuses it only when the bind is not loopback — but a deployed
  * folder normally binds 127.0.0.1 with a proxy in front, so the interlock never fires and the app
  * is public with no rules at all (P26-VMOPEN: OWN-016's VM layout ran exactly that way). A first
  * start mints `devOpen: false` (`--enforce-rules`), so only data brought from elsewhere trips this.
- * An unreadable file is left to the backend, which refuses it in its own words.
+ * The rules checked are the ones that WILL be enforced: the project's when this start installs
+ * them, else the backend's. An unreadable file is left to the backend, which refuses it.
  */
-function refuseDevOpen(dataDir) {
-  const file = path.join(dataDir, 'security.json');
+function refuseDevOpen(plan) {
+  const installing = plan.action === 'install' || plan.action === 'replace';
+  if (installing) {
+    if (plan.config && plan.config.devOpen === true) {
+      fail(
+        `This deploy's access rules are switched off: backend/${POLICY_FILE} has "devOpen": true. With them off, ` +
+          'anyone who can reach the app reads and changes every record, every account included, so a deployed app ' +
+          'does not start that way.\n' +
+          `Set "devOpen": false in the project's ${POLICY_FILE} and deploy again.`
+      );
+    }
+    return;
+  }
   let config;
   try {
-    config = JSON.parse(fs.readFileSync(file, 'utf8'));
+    config = JSON.parse(fs.readFileSync(plan.current, 'utf8'));
   } catch {
     return;
   }
   if (!config || config.devOpen !== true) return;
   fail(
-    `This app's access rules are switched off: ${file} has "devOpen": true. With them off, anyone who can ` +
+    `This app's access rules are switched off: ${plan.current} has "devOpen": true. With them off, anyone who can ` +
       'reach the app reads and changes every record, every account included, so a deployed app does not start ' +
       'that way.\n' +
       'That data folder most likely came from a development backend. Set "devOpen": false in that file and ' +
-      'start this again; the rules written in the file then apply.'
+      "start this again (or ship the project's own rules); the rules written in the file then apply."
   );
+}
+
+/** The `[start]` line for the rules. */
+function describeRules(plan, movedTo) {
+  switch (plan.action) {
+    case 'none':
+      return "[start] access rules: this deploy carries none; the backend's own apply\n";
+    case 'unchanged':
+      return `[start] access rules: data/${BACKEND_RULES}, unchanged (this deploy's are the ones already installed)\n`;
+    case 'install':
+      return `[start] access rules: installing this deploy's backend/${POLICY_FILE}\n`;
+    default:
+      return (
+        `[start] access rules: replaced with this deploy's backend/${POLICY_FILE}; the previous ones are kept ` +
+        `as ${movedTo}\n`
+      );
+  }
 }
 
 /** The project's name, as the deploy wrote it into `package.json`; `/health` reports it. */
@@ -240,13 +334,23 @@ async function main() {
   let dataDir;
   try {
     dataDir = readDataDir(argv);
+    if (argv.includes('--check')) {
+      // The port is not asked about: the app this would replace is usually the one holding it.
+      const plan = planRules(dataDir);
+      refuseDevOpen(plan);
+      process.stdout.write(describeRules(plan, `${plan.current}.before-<time>`).replace('[start]', '[check]'));
+      process.exit(0);
+    }
     port = await choosePort(argv, process.env);
   } catch (error) {
     fail(error && error.message ? error.message : String(error));
   }
 
   fs.mkdirSync(dataDir, { recursive: true });
-  refuseDevOpen(dataDir);
+  const rules = planRules(dataDir);
+  refuseDevOpen(rules);
+  const movedTo = applyRules(rules, dataDir);
+  process.stdout.write(describeRules(rules, movedTo));
   const functions = installFunctions(dataDir);
   process.stdout.write(
     functions.length
@@ -255,7 +359,9 @@ async function main() {
   );
 
   const args = ['serve', '--data-dir', dataDir, '--port', String(port), '--serve-app', APP, '--enforce-rules'];
-  if (fs.existsSync(path.join(BACKEND, POLICY_FILE))) args.push('--project-dir', BACKEND);
+  // The backend installs the project's rules only when it has none, and says so loudly when it
+  // does not — so it is told about them only on a start that installs them.
+  if (rules.action === 'install' || rules.action === 'replace') args.push('--project-dir', BACKEND);
   const name = appName();
   if (name) args.push('--backend-name', name);
   args.push(...withoutOwnArgs(argv));
