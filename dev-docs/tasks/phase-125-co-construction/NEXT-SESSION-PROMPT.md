@@ -9,9 +9,11 @@ Read `README.md` here, then the task you take. State on 2026-10-23 evening:
   reports the hold; a hold over a day old is said; `.nodegx-hold.json` is gitignored by the shared merge; Studio names
   the agent in a clash and in the "redrawn" toast.
 
-🔴 **The `noodl-mcp` dist has not been rebuilt since s8** (12:06). Richard's Claude Desktop runs the bundle, so it runs
-none of CCN-006 s9 or CCN-002 until `npm run build` in `packages/noodl-mcp` (esbuild, no typecheck). Ask before
-rebuilding it: it is what his Desktop is running right now.
+**The `noodl-mcp` dist was rebuilt 2026-10-23 17:35 from a clean worktree at 5eab4d7be** (Richard: "Rebuild: yes"),
+so his Claude Desktop runs CCN-006 s9 and CCN-002 from its next restart. 🔴 Build from a clean worktree, never from the
+primary tree: the bundle takes `noodl-editor` validation and `nodegx-backend` sources, which other sessions often have
+open edits in. `scripts/devtools/make-worktree.sh <name> <sha>`; its `dist/` entries are links to the primary's, so
+the build lands there (except `kit-extract.cjs`, written as a real file: copy it). Both repos pushed the same evening.
 
 🔴 **CCN-002 found the drift rule weaker than the tasks assumed.** `update_component` re-reads before it applies, so
 an agent's write after the person's Studio edit lands ON that edit (kept, but the same setting overwritten), and is

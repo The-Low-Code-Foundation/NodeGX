@@ -1,6 +1,6 @@
 # CCN-002 — The hold everywhere
 
-**State:** built 2026-10-23 (lane 3; OpenNoodl c5da19b12, nodegx-studio 6a60d51, not pushed). **After:** CCN-001 AC5 ✅.
+**State:** built 2026-10-23 (lane 3; OpenNoodl c5da19b12, nodegx-studio 6a60d51, both pushed 2026-10-23; dist rebuilt 17:35). **After:** CCN-001 AC5 ✅.
 
 A hold that only the panel knows about is a hold the rest of the kit can trip over. Make it a first-class fact:
 
@@ -45,5 +45,5 @@ A hold that only the panel knows about is a hold the rest of the kit can trip ov
    yourself."*
 
 Gates: `tests/ccn002HoldEverywhere.test.ts` 6/6 (mutant: drop the write-side `remember` ⇒ the create case fails),
-`agentConfig.test.ts` and `toolDisclosure.test.ts` green (64 with the new file). Studio: `check:editor` **203/203** (3 new), `check:data` 80/80, `check:timeline` 53/53, `check:app` 54/54. Not yet: the `noodl-mcp` dist is not
-rebuilt, so Richard's Claude Desktop runs none of this until `npm run build` in `packages/noodl-mcp`.
+`agentConfig.test.ts` and `toolDisclosure.test.ts` green (64 with the new file). Studio: `check:editor` **203/203** (3 new), `check:data` 80/80, `check:timeline` 53/53, `check:app` 54/54. The `noodl-mcp` dist was rebuilt
+17:35 from a clean worktree; Richard's Claude Desktop runs it from its next restart.
