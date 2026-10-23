@@ -1,0 +1,70 @@
+# OWN-026 — the next lab session: test 2 (the ten changes), then part 3
+
+**Written 2026-10-23 ~00:50 CEST by the session that ran test 1 (`opennoodl-8c`, Opus 5.5).** Read in order: this
+file; `PLAN.md` (§1–§6 pre-registered, §8 everything that happened, dated); `fixes/README.md` (the loop);
+`fixes/LEARNINGS.md`; `checks.md` §C; `changes/c01–c10.txt`. Scripts: `round.mjs`, `grade.mjs`, `series.mjs`,
+`kitnpx.sh` (a copy of `/Users/Shared/nodegx-lab/bin/kitnpx/npx`).
+
+## Where it stands
+
+- **Test 1 is done** (PLAN §8's table): code 21/21/21, harness 20/21/20, NodeGX 16 → 17 → 18 on kit 0.2.5 → FIX-01 → FIX-02.
+- **The fix loop works.** FIX-01 (`opennoodl-54`) and FIX-02 (`opennoodl-ac`) landed. Kits are in
+  `/Users/Shared/nodegx-lab/kits/`; `/Users/Shared/nodegx-lab/own026/KIT` points at `FIX-02-328f1dd1d`.
+- **FIX-03 is written, not started.** `HOLD-nodegx` is set. Richard opens a fixer for it.
+- **Richard's rulings for test 2** (PLAN §8, 2026-10-23):
+  - NodeGX starts from `t1-nodegx-3`; code from `t1-code-3`; harness from `t1-harness-1`.
+  - The three chains run side by side.
+  - The NodeGX chain waits for FIX-03.
+
+## What to do, in order
+
+1. **Before any test-2 round, make `series.mjs` safe to run three at once:**
+   - **The log** is per series (`series-t2-<arm>.log`), not one shared `series-t2.log`.
+   - **The tap port:** each chain takes its own range (code 49000+, harness 49100+, nodegx 49200+). The free-port check
+     alone races between processes.
+   - **Disk:** after change *n* is graded, delete `node_modules` (and `.next`, `test-results`) from the grade copy
+     and from round *n−1*. Keep round *n*, because *n+1* copies it. Disk had 69 GB free at 00:30, down to 17 GB
+     earlier in the day; a harness round is about 1.2 GB.
+   - **The hold:** a t2 NodeGX chain waits while `HOLD-nodegx` exists, and so does `round.mjs`. Check it doesn't spin
+     a log line a minute.
+2. **Prove it with $0 mock rounds** (`mock-model.mjs`, a two-step `--seed` chain) before any spend. Every lab change
+   so far was caught that way: the kits folder blocked by the fence, the shared /tmp, the orphan tap.
+3. **Start the code and harness chains:** `node series.mjs t2 code t1-code-3`, `node series.mjs t2 harness t1-harness-1`
+   (in the background, from `own-026/`). Start the NodeGX chain (`t2 nodegx t1-nodegx-3`) at once too: it waits on the
+   hold by itself.
+4. **When FIX-03 lands** (the fixer messages the lab session by name), prove its kit with a mock round before the
+   chain uses it, as FIX-01 and FIX-02 were. If its `Done` says a fix lives in the runtime, the preview shim
+   (`kitnpx`) already routes `npx @nodegx/preview` when the kit folder has a `nodegx-preview-*.tgz`.
+5. **A stop-and-check after every graded NodeGX change:** append to `LEARNINGS.md`, and write `FIX-04`… when something
+   gates the next change (set `HOLD-nodegx`; tell Richard; give him the fixer prompt). Measure per change (PLAN §4):
+   - dollars, minutes and sittings;
+   - the change's own checks;
+   - **regressions** (passed after *n−1*, failed after *n*);
+   - files and lines touched;
+   - for NodeGX, the script share.
+6. **After test 2: part 3** (PLAN §6). Sonnet 5.5 in Claude Code on the gala builds A+ and B2 (`own-023/runs-r2/Aplus`,
+   `runs-r2b/B2`): the eldest's own editor, three changes, does the editor still tell the truth, then Richard's five
+   timed jobs. Scope it with Richard first.
+
+## Traps this session hit (all fixed, each in PLAN §8)
+
+- **Chrome's own sandbox can't start inside `sandbox-exec`.** Every round and grade gets `CHROME_PATH` →
+  `/Users/Shared/nodegx-lab/bin/chrome` (`--no-sandbox`). An agent that launches Chrome by its own path still fails;
+  `chrome-sandbox-hits.txt` counts it.
+- **A grader shell can't write to the scratchpads, where Claude Code saves command output.** So the grader's sandbox
+  doesn't deny them.
+- **A killed series orphans its tap**, which keeps its port. Kill taps by PID; ports are now checked.
+- **The hold must be checked before a round makes its folder**, so a waiting round can be stopped clean.
+- **`npx` ignores a globally installed package** and reuses the shared cache's registry copy. Hence the PATH shim.
+- **zsh doesn't split `$P`:** kill PIDs in a loop.
+- **Cline's loop guard ends a sitting** after 5 identical `run_commands` (the harness arm polling its own test suite,
+  twice). An aborted sitting ends the round.
+- **The network can drop** (`ENOTFOUND api.cline.bot`). Set such a round aside as `.infra-broken-*`, don't grade it,
+  and re-run.
+- **A Cline prompt of one word is read as a subcommand.**
+
+## Waits on Richard
+
+- His ClinePass bars before and after test 2: OWN-020's rule, not yet read this run. Test 1 cost about $2.4 at
+  ClinePass prices.
+- Opening the FIX-03 fixer session.

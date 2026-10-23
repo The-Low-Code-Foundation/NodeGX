@@ -241,3 +241,10 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   ones the lessons now reach and the model argued away (`fixes/LEARNINGS.md` #3). T6 is failed by 7 of 9 rounds
   across all arms: a property of the request, not of an arm. Not significance; n = 3 per arm and the NodeGX arm's
   kit changed between its rounds.
+- **2026-10-23 ~00:45 CEST — Richard's rulings for test 2** (asked with the test 1 table in front of him):
+  1. **NodeGX starts from t1-nodegx-3** (the FIX-02 build, 18/22), not the pre-registered median (t1-nodegx-2): the
+     learning loop's latest kit and its build. The code arms keep §4's rule: median F+T, ties to the cheaper →
+     **t1-code-3** (21, $0.129) and **t1-harness-1** (20, $0.255).
+  2. **The three chains run side by side** (about 10–12 hours), not one after another.
+  3. **The NodeGX chain waits for FIX-03** (`fixes/FIX-03.md`: the safe way must be the short way); the code chains
+     start without it. HOLD-nodegx set. The session closed here; test 2 is the next session's (`NEXT-SESSION-PROMPT.md`).
