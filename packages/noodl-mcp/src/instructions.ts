@@ -219,6 +219,12 @@ export const BOOTSTRAP_INSTRUCTIONS: string =
   'WHEN THE PERSON ASKS FOR AN APP, BUILD IT WITH THIS SERVER: a NodeGX app is the graph these tools write, so ' +
   'do not write a separate web server or hand-made HTML and JavaScript instead — that is a different app, and ' +
   'they connected this server to get a NodeGX one. ' +
+  // P125 CCN-001 s2 (2026-10-23). A Claude Desktop Cowork session connected this server, listed its tools, then
+  // wrote a script that spawned a second copy over stdio and drove it from a shell: zero tools/call ever reached
+  // the host's client, and nothing a scripted server does can put Studio on the person's screen.
+  'CALL THESE TOOLS THROUGH YOUR MCP CLIENT, never by starting noodl-mcp yourself from a shell or a script: a ' +
+  'tool run that way has no host behind it, so it cannot put the app on the person\'s screen (open_studio), and ' +
+  'the person cannot stop it. ' +
   // 🔴 F87 — this said "four" and `tools/list` returned five: the four capability
   // tools plus `find_tools`, which stays advertised in this mode. Counted from
   // the manifest now, because the sentence a cold agent reads first is the worst

@@ -36,6 +36,8 @@
  * @module tools/openStudio
  */
 
+import { spawn } from 'child_process';
+
 import type { McpServer, RegisteredResource } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import { ToolError } from '../errors';
@@ -58,6 +60,32 @@ export function studioResourceMeta(origin: string | null): Record<string, unknow
         : { connectDomains: [], resourceDomains: FONTS, baseUriDomains: [] }
     }
   };
+}
+
+/**
+ * Does the client render MCP Apps? The extension announces itself in the client's capabilities
+ * (`extensions["io.modelcontextprotocol/ui"]`, the id `@modelcontextprotocol/ext-apps` exports as EXTENSION_ID).
+ * A client that does not — Claude Code, Cline, Vibe, a script somebody wrote around this server — gets Studio
+ * opened in the browser instead, beside whatever it is. Measured 2026-10-23: a Claude Desktop Cowork session
+ * connected this server, listed its tools, and then drove a second copy from a shell script; nothing it did could
+ * have drawn a panel, and the person saw no editor. The URL in a result is not "on screen"; a browser window is.
+ */
+function clientRendersApps(server: McpServer): boolean {
+  const caps = server.server.getClientCapabilities() as { extensions?: Record<string, unknown> } | undefined;
+  return Boolean(caps?.extensions?.['io.modelcontextprotocol/ui']);
+}
+
+/** The person's browser, on the platform's own opener. `NODEGX_STUDIO_NO_OPEN` keeps a test from opening windows. */
+function openInBrowser(url: string): boolean {
+  if (process.env.NODEGX_STUDIO_NO_OPEN) return false;
+  const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'cmd' : 'xdg-open';
+  const args = process.platform === 'win32' ? ['/c', 'start', '', url] : [url];
+  try {
+    spawn(cmd, args, { detached: true, stdio: 'ignore' }).unref();
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function holdingPage(words: string): string {
@@ -148,16 +176,24 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
         });
       }
       const hold = readHold(dir);
+      const url = `${instance.origin}/`;
+      const rendersApps = clientRendersApps(server);
+      const openedBrowser = rendersApps ? false : openInBrowser(url);
       return jsonResult({
         ok: true,
-        url: `${instance.origin}/`,
+        url,
         panel: STUDIO_RESOURCE_URI,
+        onScreen: rendersApps ? 'in the conversation' : openedBrowser ? 'in the browser, beside the conversation' : 'not yet',
         projectDir: dir,
         hold: hold.held ? hold : undefined,
         note:
-          'Studio is on screen (or at the URL, in a host that does not render MCP Apps). Build in short steps and ' +
-          'keep calling render_report or validate_component as you go: the person is watching the same files redraw. ' +
-          'A write refused with code `held` means they pressed HOLD — stop and ask.'
+          (rendersApps
+            ? 'Studio is inside this conversation. '
+            : openedBrowser
+              ? `Studio opened in the person's browser at ${url}. `
+              : `Tell the person to open ${url} in a browser: Studio is there. `) +
+          'Build in short steps and keep calling render_report or validate_component as you go: the person is ' +
+          'watching the same files redraw. A write refused with code `held` means they pressed HOLD — stop and ask.'
       });
     })
   );

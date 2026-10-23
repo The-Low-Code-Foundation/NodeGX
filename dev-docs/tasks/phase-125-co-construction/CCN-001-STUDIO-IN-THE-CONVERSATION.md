@@ -24,7 +24,33 @@ stays open), as the live form of it.
 6. ✅ `tests/toolDisclosure.test.ts` 18/18 (manifest = registrations, both modes); `tsc --noEmit` clean for noodl-mcp
    (the two errors on HEAD are `nodegx-export/src/emit/swift/modifiers.ts`, lane 6's open edit).
 
+## s2 (2026-10-23, the same day): Richard's first run — no editor, and why
+
+`~/Library/Logs/Claude/mcp-server-nodegx.log`: the `nodegx` server connected three times (10:29, 10:32, 10:38),
+answered `initialize`, `tools/list` (bootstrap, 7 tools) and `resources/list` — and received **zero `tools/call`
+and zero `resources/read`, ever**. `cowork_vm_node.log` loads its VM at the same three minutes: it was a **Cowork
+session**. Claude, having a computer of its own, wrote `mcp.mjs` in its scratch workspace, spawned a second
+`noodl-mcp` over stdio and drove the tools from a shell (Richard's paste: "noodl-mcp serving … Tap Counter 2
+(read-write) on stdio", then `get_project_info`, `get_style_vocabulary`, `get_node_type` with a wrong argument name).
+A tool called from a script has no host behind it: nothing it does can draw a panel, and it never called
+`open_studio` anyway.
+
+Two consequences, both built in s2:
+- **`open_studio` opens the browser itself when the client cannot render MCP Apps** (the client's capabilities carry
+  `extensions["io.modelcontextprotocol/ui"]` when it can). Claude Code, Cline, Vibe and a script all get Studio in a
+  window beside them; the result says `onScreen`. `NODEGX_STUDIO_NO_OPEN=1` keeps a test from opening windows.
+- The briefings say: call these tools through your MCP client, never start `noodl-mcp` from a shell — a tool run
+  from a script cannot put anything on the person's screen.
+
+**AC5 is still open.** It needs a *regular* chat, not Cowork: the host's own client has to make the call for the
+panel to exist.
+
 ## How to run it (Richard)
+
+Use a **normal chat, not a Cowork session**. In the chat's tools menu check that `nodegx` is on. If Claude starts
+writing a script or running `noodl-mcp` itself, say: *"Use the nodegx connector's tools directly; don't run the
+server yourself."*
+
 
 1. Claude Desktop → Settings → Developer → Edit Config, add inside `mcpServers` (auto mode refused to write your
    config; the backup it made first is `claude_desktop_config.json.bak-2026-10-23`):

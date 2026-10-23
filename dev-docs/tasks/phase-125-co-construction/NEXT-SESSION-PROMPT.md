@@ -1,7 +1,10 @@
 # Phase 125 — next session
 
-Read `README.md` here, then `CCN-001-STUDIO-IN-THE-CONVERSATION.md` §"How to run it". The build is done and measured
-up to AC4; **AC5 is Richard's run in Claude Desktop** and its result decides the next task:
+Read `README.md` here, then `CCN-001-STUDIO-IN-THE-CONVERSATION.md` §s2 and §"How to run it". The build is done and
+measured up to AC4; Richard's first run (s2) was a **Cowork** session whose Claude scripted around the connector —
+zero `tools/call` in `~/Library/Logs/Claude/mcp-server-nodegx.log` — so it answered nothing about the panel. Read that
+log first after any run: it says whether the host ever called a tool. **AC5 is Richard's run in a regular chat**, and
+its result decides the next task:
 
 - Studio renders inside Claude → close AC5, start CCN-002 (the hold everywhere), then CCN-003.
 - The panel is blank with a CSP refusal in the inner iframe's console → file it as a bug (`dev-docs/bugs/`, id
