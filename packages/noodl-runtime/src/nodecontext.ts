@@ -15,6 +15,7 @@ import { DEFAULT_VALUE_CAP, TraceBuffer, previewValue, toWireEvent } from './tra
 import type { SessionDictionary, TraceEvent, TraceState } from './tracebuffer';
 import Variants = require('./variants');
 import { createBlockRunRecorder } from './blockrun';
+import { beginPressUpdate, endPressUpdate } from './pressguard';
 import type { BlockRunRecorder } from './blockrun';
 
 /** Set by the viewer before any node runs; carries deploy-time environment values. */
@@ -461,33 +462,40 @@ NodeContext.prototype.updateDirtyNodes = function () {
 
   this.isUpdating = true;
 
-  while (loop && iterations < 10) {
-    var dirtyNodes = this._dirtyNodes;
-    this._dirtyNodes = [];
-    for (i = 0, len = dirtyNodes.length; i < len; ++i) {
-      try {
-        if (!dirtyNodes[i]._deleted) {
-          dirtyNodes[i].update();
+  // P112 OWN-026 FIX-03 B: a press noted since the last update is this update's cause, so a backend
+  // write it starts holds the control that pressed (`pressguard.ts`).
+  beginPressUpdate();
+  try {
+    while (loop && iterations < 10) {
+      var dirtyNodes = this._dirtyNodes;
+      this._dirtyNodes = [];
+      for (i = 0, len = dirtyNodes.length; i < len; ++i) {
+        try {
+          if (!dirtyNodes[i]._deleted) {
+            dirtyNodes[i].update();
+          }
+        } catch (e) {
+          console.error(e, e.stack);
         }
-      } catch (e) {
-        console.error(e, e.stack);
       }
-    }
 
-    //make a new reference and reset array in case new callbacks are scheduled
-    //by the current callbacks
-    var callbacks = this.callbacksAfterUpdate;
-    this.callbacksAfterUpdate = [];
-    for (i = 0, len = callbacks.length; i < len; i++) {
-      try {
-        callbacks[i]();
-      } catch (e) {
-        console.error(e);
+      //make a new reference and reset array in case new callbacks are scheduled
+      //by the current callbacks
+      var callbacks = this.callbacksAfterUpdate;
+      this.callbacksAfterUpdate = [];
+      for (i = 0, len = callbacks.length; i < len; i++) {
+        try {
+          callbacks[i]();
+        } catch (e) {
+          console.error(e);
+        }
       }
-    }
 
-    loop = this.callbacksAfterUpdate.length > 0 || this._dirtyNodes.length > 0;
-    iterations++;
+      loop = this.callbacksAfterUpdate.length > 0 || this._dirtyNodes.length > 0;
+      iterations++;
+    }
+  } finally {
+    endPressUpdate();
   }
 
   this.isUpdating = false;

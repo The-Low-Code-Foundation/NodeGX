@@ -117,6 +117,17 @@ describe('P18-S110-UPSERTON and -ONLYIFUNCHANGED — refused by name', () => {
     const base = emitApp(irOf('puppy-test-3'), catalog);
     expect(emitApp(varied('puppy-test-3', 'SetDbModelProperties', 'onlyIfUnchanged', ' , '), catalog).files).toEqual(base.files);
   });
+
+  // P112 OWN-026 FIX-03 A (P112-OWN026-EXPORTADDTO): the amount would be written as the new value.
+  it('Set Record Properties with Add To', () => {
+    expect(notesOf(irOf('puppy-test-3'))).not.toContain('Add To');
+    expect(notesOf(varied('puppy-test-3', 'SetDbModelProperties', 'addTo', 'points'))).toContain('its Add To names properties');
+  });
+
+  it('Add To that is only commas is the setter’s empty — nothing refused', () => {
+    const base = emitApp(irOf('puppy-test-3'), catalog);
+    expect(emitApp(varied('puppy-test-3', 'SetDbModelProperties', 'addTo', ' , '), catalog).files).toEqual(base.files);
+  });
 });
 
 describe('P18-S110-STORENOTES — a store declarer’s notes have a reader', () => {

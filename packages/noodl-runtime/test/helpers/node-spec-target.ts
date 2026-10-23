@@ -913,6 +913,9 @@ const BACKEND_OPS: Readonly<Record<string, (o: BackendOptions, ok: unknown, emit
     o.success(ok);
     emit({ type: 'save', objectId: o.objectId, object: ok, collection: o.collection });
   },
+  // P112 OWN-026 FIX-03 A — RestDataAdapter.ts `increment` (the atomic path) and ParseWireAdapter.ts `increment`:
+  // `success(record)` with the backend's totals and NO event
+  increment: (o, ok) => o.success(ok),
   // s23 — RestDataAdapter.ts :972-1015 — `success(record)`, then `fetch { objectId: <the one asked for>, object, collection }`
   fetch: (o, ok, emit) => {
     o.success(ok);

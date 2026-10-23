@@ -129,5 +129,6 @@ NodeSharedPortDefinitions.addShadowInputs(ButtonNode);
 
 Utils.addControlEventsAndStates(ButtonNode);
 Utils.addFocusActions(ButtonNode, { noun: 'button' });
+Utils.addTakenOnceWhileSaving(ButtonNode, { outputName: 'onClick', one: 'a click', press: 'click' });
 
 export default createNodeFromReactComponent(ButtonNode);

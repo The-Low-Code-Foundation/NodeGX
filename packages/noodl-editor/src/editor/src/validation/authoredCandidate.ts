@@ -81,6 +81,7 @@ import { checkGateStartsShown } from './gateStartsShown';
 import { checkOneWayGate } from './oneWayGate';
 import { checkQueryBeforeFilter } from './queryBeforeFilter';
 import { checkQueryFilterShape } from './queryFilterShape';
+import { checkSharedValueWrites } from './sharedValueWrites';
 import { checkResponsiveArrangement } from './responsiveArrangement';
 import { checkRuntimeContext } from './runtimeContext';
 import { checkTypographyHierarchy } from './typographyHierarchy';
@@ -667,6 +668,9 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // P112-OWN026-QUERYFILTERSHAPE — a Query Records query in a shape its runtime does not read (a made-up
     // parameter, a rule it drops, a qp- value no rule reads): each one runs and answers with more rows than asked.
     ...checkQueryFilterShape(nodes, { component, wires }),
+    // P112 OWN-026 FIX-03 C — a shared value written back whole, two controls starting one save: infos, said where
+    // the graph is written.
+    ...checkSharedValueWrites(nodes, { component, wires }),
     // DSG-004 §2.3 — doctrine §3, as an info that never blocks.
     ...checkTypographyHierarchy(nodes, { component, connectedInputs: connections }),
     // FIX-007 §2 — the wire the port rule is right to skip and nothing else could see.

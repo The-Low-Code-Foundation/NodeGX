@@ -28,6 +28,8 @@ const NoodlRuntime = require('../../noodl-runtime');
 const Model = require('../model');
 const Collection = require('../collection');
 const CloudFile = require('./cloudfile');
+// P112 OWN-026 FIX-03 B: a write started by a press holds that press's control until it answers.
+const { holdOptionsForWrite } = require('../pressguard');
 const { ParseWireAdapter } = require('./backends/ParseWireAdapter');
 const { RestDataAdapter } = require('./backends/RestDataAdapter');
 const { makeRestSerializer, filterSchemaFor } = require('./backends/restSerialize');
@@ -209,27 +211,27 @@ class CloudStore {
   }
 
   create(options) {
-    this._adapter.create(this._handle(), options);
+    this._adapter.create(this._handle(), holdOptionsForWrite(options));
   }
 
   increment(options) {
-    this._adapter.increment(this._handle(), options);
+    this._adapter.increment(this._handle(), holdOptionsForWrite(options));
   }
 
   save(options) {
-    this._adapter.save(this._handle(), options);
+    this._adapter.save(this._handle(), holdOptionsForWrite(options));
   }
 
   delete(options) {
-    this._adapter.delete(this._handle(), options);
+    this._adapter.delete(this._handle(), holdOptionsForWrite(options));
   }
 
   addRelation(options) {
-    this._adapter.addRelation(this._handle(), options);
+    this._adapter.addRelation(this._handle(), holdOptionsForWrite(options));
   }
 
   removeRelation(options) {
-    this._adapter.removeRelation(this._handle(), options);
+    this._adapter.removeRelation(this._handle(), holdOptionsForWrite(options));
   }
 
   uploadFile(options) {

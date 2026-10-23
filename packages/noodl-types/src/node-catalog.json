@@ -29188,6 +29188,17 @@
           "index": 1000
         },
         {
+          "name": "addTo",
+          "displayName": "Add To",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "string"
+          },
+          "isSignal": false,
+          "description": "Property names, comma-separated (e.g. points). For these, the value wired in is an amount added to what the backend holds, in one step on the backend, instead of replacing it: two devices adding at once both count. Wire the amount (1, -1, 5). The record then shows the backend's total. Leave empty to write every value as given."
+        },
+        {
           "name": "idSource",
           "displayName": "Id Source",
           "group": "General",
@@ -29475,6 +29486,9 @@
         ],
         "onlyIfUnchanged": [
           "always: read by the next save — the fields the backend must still hold as this record holds them, or the save is refused"
+        ],
+        "addTo": [
+          "always: read by the next Do — the fields whose value is an amount the backend adds, not a value it stores"
         ],
         "accessControl": [
           "always: read by the next call — the access rules sent with the record"
@@ -46460,6 +46474,18 @@
           "index": 11
         },
         {
+          "name": "repeatWhileSaving",
+          "displayName": "Repeat While Saving",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Off (the default): when a click starts a save, the next click is ignored until the backend has answered, and for at least half a second, so a double press saves once. Controls wired to the same node share this. On: every click fires, for a control that saves each quick tap"
+        },
+        {
           "name": "scrollIntoView",
           "displayName": "Scroll Into View",
           "group": "Scroll Into View",
@@ -58533,6 +58559,18 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "repeatWhileSaving",
+          "displayName": "Repeat While Saving",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Off (the default): when Enter starts a save, the next Enter is ignored until the backend has answered, and for at least half a second, so a double press saves once. Controls wired to the same node share this. On: every Enter fires, for a control that saves each quick tap"
         },
         {
           "name": "runOnChange-startValue",

@@ -91,6 +91,8 @@ describe('SB-002 — the backend doctrine reaches the agent', () => {
     expect(BACKEND_DOCTRINE_MD).toContain('The backend keeps users apart; the page does not.');
     expect(BACKEND_DOCTRINE_MD).toContain('Change a shared value on the server, by the amount.');
     expect(BACKEND_DOCTRINE_MD).toContain("await Noodl.Records.increment(id, { points: 1 }, { className: 'Score' })");
+    // FIX-03 A: the one-node way leads.
+    expect(BACKEND_DOCTRINE_MD).toContain('Update Record with `addTo` naming the field');
     expect(BACKEND_DOCTRINE_MD).toContain('`onlyIfUnchanged`');
     expect(BACKEND_DOCTRINE_MD).toContain('A press that saves is taken once.');
 

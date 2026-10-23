@@ -997,6 +997,20 @@ export enum DiagnosticCode {
   MonotoneTypography = 'monotone-typography',
 
   /**
+   * P112 OWN-026 FIX-03 C — an Update Record whose \`prop-X\` is worked out from \`prop-X\` of a Record of the same
+   * class: read, change, write back whole, so two tabs or devices overwrite each other. Info, never blocking; the
+   * repair (\`addTo\` or \`onlyIfUnchanged\`) is in the message. See \`sharedValueWrites.ts\`.
+   */
+  SharedValueWrittenBackWhole = 'shared-value-written-back-whole',
+
+  /**
+   * P112 OWN-026 FIX-03 C — two press controls start one save through different first nodes, so the runtime's
+   * press guard (shared only by controls wired to the same node) still lets one press of each save twice. Info,
+   * never blocking. See \`sharedValueWrites.ts\`.
+   */
+  TwoControlsStartOneSave = 'two-controls-start-one-save',
+
+  /**
    * LEG-002 — a run of three or more same-type sibling nodes, none of them
    * named, each of which is something the reader has to go *through*.
    *

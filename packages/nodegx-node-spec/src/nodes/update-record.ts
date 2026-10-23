@@ -59,6 +59,28 @@ export const PRECONDITION_MESSAGE = 'Someone else changed this record after it w
 /** :172-174 */
 export const UNREAD_MESSAGE = (name: string) => `Only If Unchanged names "${name}", which this record has not been read with. Fetch the record first.`;
 export const NOT_SCALAR_MESSAGE = (name: string) => `Only If Unchanged names "${name}", which holds an object or list. Name a plain value such as a version number.`;
+/** v5 (P112 OWN-026 FIX-03 A) — `_splitAdds` */
+export const NOT_AN_AMOUNT_MESSAGE = (name: string, raw: unknown) => `Add To names "${name}", whose value (${JSON.stringify(raw)}) is not a number. Wire the amount to add, such as 1 or -1.`;
+/** v5 — the add after a save fails */
+export const ADD_FAILED_MESSAGE = (names: readonly string[], err: unknown, restSaved: boolean) =>
+  restSaved ? `The other properties were saved, but adding to ${names.join(', ')} failed: ${err || 'no reason given'}` : (err as string) || `Failed to add to ${names.join(', ')}.`;
+
+/** v5 — the wired values split into amounts (the Add To names) and values to write; a string is the refusal */
+function splitAdds(values: Readonly<Record<string, unknown>>, names: readonly string[] | undefined): { adds: Record<string, number>; rest: Record<string, unknown> } | string {
+  const adds: Record<string, number> = {};
+  const rest: Record<string, unknown> = {};
+  for (const key in values) {
+    if (!names || names.indexOf(key) === -1) {
+      rest[key] = values[key];
+      continue;
+    }
+    const raw = values[key];
+    const amount = typeof raw === 'number' ? raw : typeof raw === 'string' && raw.trim() !== '' ? Number(raw) : NaN;
+    if (!Number.isFinite(amount)) return NOT_AN_AMOUNT_MESSAGE(key, raw);
+    adds[key] = amount;
+  }
+  return { adds, rest };
+}
 
 type Job = 'bind' | 'save' | 'store';
 
@@ -70,6 +92,8 @@ type UpdateRecordState = RecordIdState &
     storeProperties: unknown;
     /** `_internal.onlyIfUnchanged` (:122-131) — the names, or `undefined` */
     onlyIfUnchanged: readonly string[] | undefined;
+    /** v5 `_internal.addTo` — the names whose value is an amount added on the backend, or `undefined` */
+    addTo: readonly string[] | undefined;
     /** the frame's scheduled callbacks, in order (`bindToRepeaterItem`, `scheduleOnce('StorageSave')`, `scheduleStore`) */
     jobs: readonly Job[];
     /** dbmodelcrudbase.ts :196-205 `hasScheduledStorageSave` */
@@ -81,7 +105,7 @@ type UpdateRecordState = RecordIdState &
     /** :227 — the local presses the frame's batch holds */
     storePresses: number;
     /** every save made, by the spec's call id: the presses it settles, the record it wrote, and what the write replaced (:184-188) */
-    calls: Readonly<Record<string, { n: number; record: string; before: Readonly<Record<string, unknown>> }>>;
+    calls: Readonly<Record<string, { n: number; record: string; before: Readonly<Record<string, unknown>>; adds?: Readonly<Record<string, number>>; restSaved?: boolean; backend?: string }>>;
     nextCall: number;
   };
 
@@ -120,7 +144,10 @@ export const UpdateRecord = defineNode({
   // with ACL_ROLE_MISSING, nothing written or sent; v2 sent the key `role:undefined`.
   // v4 (P109 ISL-029, row D24 ruled "Ask the record's own backend"): the access rules' signed-in user is the one signed in on
   // the backend the save goes to (its session); v3 read the legacy store's, so a Log In there was nobody to the rules.
-  version: 4,
+  // v5 (P112 OWN-026 FIX-03 A): Add To — the named properties' values are amounts, sent to the backend as an `increment` after
+  // the other properties' save (or alone, when nothing else is sent), so a refused save adds nothing; a value that is not a
+  // number fails the save with its sentence. Local only adds the amount to the record held.
+  version: 5,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/setdbmodelpropertiesnode.ts; dbmodelcrudbase.ts',
   needs: ['backend', 'registry'],
   worldPool: {
@@ -134,6 +161,7 @@ export const UpdateRecord = defineNode({
     storeType: undefined,
     storeProperties: undefined,
     onlyIfUnchanged: undefined,
+    addTo: undefined,
     jobs: [],
     saveScheduled: false,
     savePresses: 0,
@@ -180,6 +208,16 @@ export const UpdateRecord = defineNode({
         'Property names, comma-separated (e.g. version). The update is applied only if these still hold the values the record had when it was read; otherwise Failure fires and nothing is written. Fetch the record again before retrying. Needs a NodeGX backend. Leave empty to always write.',
       examples: ['version', 'version, title', 'nothere', 'tags', '', ' , ']
     },
+    // v5 (FIX-03 A)
+    addTo: {
+      type: 'string',
+      coerce: 'none',
+      displayName: 'Add To',
+      group: 'General',
+      description:
+        "Property names, comma-separated (e.g. points). For these, the value wired in is an amount added to what the backend holds, in one step on the backend, instead of replacing it: two devices adding at once both count. Wire the amount (1, -1, 5). The record then shows the backend's total. Leave empty to write every value as given.",
+      examples: ['title', 'version', 'version, title', 'nothere', '', ' , ']
+    },
     // dbmodelcrudbase.ts :815-845
     accessControl: ACCESS_CONTROL_INPUT
   },
@@ -199,6 +237,7 @@ export const UpdateRecord = defineNode({
     storeProperties: (_s, v) => ({ says: 'always: read by the next save — the property inputs only, or All: the whole record', set: { storeProperties: v }, send: [] }),
     storeType: (_s, v) => ({ says: 'always: read at the next Do — Cloud (or unset) saves to the backend, anything else writes the record here only', set: { storeType: v }, send: [] }),
     onlyIfUnchanged: (_s, v) => ({ says: 'always: read by the next save — the fields the backend must still hold as this record holds them, or the save is refused', set: { onlyIfUnchanged: parseNames(v) }, send: [] }),
+    addTo: (_s, v) => ({ says: 'always: read by the next Do — the fields whose value is an amount the backend adds, not a value it stores', set: { addTo: parseNames(v) }, send: [] }),
     accessControl: (_s, v) => ({ says: 'always: read by the next call — the access rules sent with the record', set: { accessControlRules: v }, send: [] }),
     // :64-67
     store: (s) => {
@@ -259,8 +298,18 @@ export const UpdateRecord = defineNode({
             fail(n, 'Missing Record Id');
             continue;
           }
+          const split = splitAdds(s.inputValues, s.addTo);
+          if (typeof split === 'string') {
+            fail(n, split);
+            continue;
+          }
           const record = w.registry.model(bound);
-          for (const key in s.inputValues) record.set(key, s.inputValues[key], { resolve: true });
+          for (const key in split.rest) record.set(key, split.rest[key], { resolve: true });
+          // v5: Local only has no backend to add on, so the record held here adds the amount
+          for (const name in split.adds) {
+            const held = Number(record.get(name));
+            record.set(name, (Number.isFinite(held) ? held : 0) + split.adds[name]);
+          }
           outcomes.push(...dones(n));
           continue;
         }
@@ -268,6 +317,12 @@ export const UpdateRecord = defineNode({
         const n = s.savePresses;
         if (bound === undefined) {
           fail(n, 'Missing Record Id');
+          continue;
+        }
+        // v5 — the amounts, out of what is written; a value that is not a number refuses the save
+        const split = splitAdds(s.inputValues, s.addTo);
+        if (typeof split === 'string') {
+          fail(n, split);
           continue;
         }
         const record = w.registry.model(bound);
@@ -299,9 +354,25 @@ export const UpdateRecord = defineNode({
         }
         // the write, what it replaces kept for any failure (v2, C34)
         const before: Record<string, unknown> = {};
-        for (const key in s.inputValues) {
+        for (const key in split.rest) {
           before[key] = record.get(key);
-          record.set(key, s.inputValues[key], { resolve: true });
+          record.set(key, split.rest[key], { resolve: true });
+        }
+        const addNames = Object.keys(split.adds);
+        const acl = aclFor(s, w.backendUser(backend));
+        let data: Record<string, unknown> = { ...split.rest };
+        if (s.storeProperties === 'all') {
+          // v5 — All never sends an amount's field as a value
+          data = { ...record.data };
+          for (const name of addNames) delete data[name];
+        }
+        const adds = addNames.length > 0 ? split.adds : undefined;
+        if (adds && Object.keys(data).length === 0 && acl === undefined && !ifMatch) {
+          // v5 — the amounts alone: no save
+          const id = 'increment:' + nextCall++;
+          call = { id, op: 'increment', backend, args: { collection: s.collectionId, objectId: record.getId(), properties: { ...adds } } };
+          calls = { ...calls, [id]: { n, record: bound, before, adds, restSaved: false } };
+          continue;
         }
         const id = 'save:' + nextCall++;
         // :194-199 — `data` is the live object on the runtime; the call is recorded canonical at the call
@@ -309,9 +380,9 @@ export const UpdateRecord = defineNode({
           id,
           op: 'save',
           backend,
-          args: { collection: s.collectionId, objectId: record.getId(), data: s.storeProperties === 'all' ? { ...record.data } : { ...s.inputValues }, acl: aclFor(s, w.backendUser(backend)), ifMatch }
+          args: { collection: s.collectionId, objectId: record.getId(), data, acl, ifMatch }
         };
-        calls = { ...calls, [id]: { n, record: bound, before } };
+        calls = { ...calls, [id]: adds ? { n, record: bound, before, adds, backend } : { n, record: bound, before } };
       }
       const patch = {
         set: { bound, error, jobs: [], saveScheduled: false, savePresses: 0, storeScheduled: false, storePresses: 0, calls, nextCall },
@@ -325,10 +396,28 @@ export const UpdateRecord = defineNode({
         const call = s.calls[answer.id];
         const n = call?.n ?? 0;
         const record = call ? w.registry.model(call.record) : undefined;
+        if (answer.id.startsWith('increment:')) {
+          // v5 — the add's answer: the backend's totals written as handed, or its refusal (nothing put back: any save before it held)
+          if ('ok' in answer) {
+            const response = answer.ok as Record<string, unknown> | null;
+            if (record && response) for (const key in response) record.set(key, response[key]);
+            return { send: [], outcomes: dones(n) };
+          }
+          return { set: { error: ADD_FAILED_MESSAGE(Object.keys(call?.adds ?? {}), answer.error, call?.restSaved === true) }, send: ['error'], outcomes: failures(n, RECORD_FAILURE_CODE) };
+        }
         if ('ok' in answer) {
           // :200-206 — every key handed back, written as handed
           const response = answer.ok as Record<string, unknown> | null;
           if (record && response) for (const key in response) record.set(key, response[key]);
+          if (call && call.adds && record) {
+            // v5 — the amounts follow the save
+            const id = 'increment:' + s.nextCall;
+            return {
+              set: { calls: { ...s.calls, [id]: { n, record: call.record, before: {}, adds: call.adds, restSaved: true } }, nextCall: s.nextCall + 1 },
+              send: [],
+              backend: { id, op: 'increment', backend: call.backend as string, args: { collection: s.collectionId, objectId: record.getId(), properties: { ...call.adds } } }
+            };
+          }
           return { send: [], outcomes: dones(n) };
         }
         // what the write replaced, put back on ANY failure (v2, C34; v1 only for a refused precondition)

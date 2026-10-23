@@ -13,8 +13,8 @@ export const ENFORCED_RULES_NOTE =
   'signed-in user reads them. A collection all signed-in users share needs set_collection_permissions with ' +
   'creatorOwns: false; one visitors read before signing in needs find and get "public". A value several devices ' +
   'change (a count, a score, a balance) is changed on the server by the amount, never written back whole from what ' +
-  "a page holds: in a Function node, await Noodl.Records.increment(id, { field: amount }, { className: '<collection>' }), " +
-  'which updates the record to the server\'s total; or Update Record with Only If Unchanged. Test as two users: what ' +
+  'a page holds: Update Record with Add To naming the field and the change (1, -1) wired into it, which updates the ' +
+  "record to the server's total (in a script, Noodl.Records.increment); or Update Record with Only If Unchanged. Test as two users: what " +
   'one creates, the other must not read.';
 
 export const OPEN_RULES_NOTE =

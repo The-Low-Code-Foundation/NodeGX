@@ -199,6 +199,12 @@ export const DIAGNOSTIC_EXAMPLES: readonly ExampleCitation[] = [
     why:
       'a Query Records filtered on the server: one visualFilter rule whose "input" mints the qp- port, the User id ' +
       'wired into it, and the query run by that value arriving'
+  },
+  // P112 OWN-026 FIX-03 C — the one-node way to change a shared value.
+  {
+    code: DiagnosticCode.SharedValueWrittenBackWhole,
+    examples: ['cloud-shared-counter'],
+    why: 'an Update Record with Add To naming the field and the change wired in: the backend adds it, no script'
   }
 ];
 

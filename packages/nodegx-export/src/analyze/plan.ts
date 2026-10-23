@@ -12572,7 +12572,7 @@ function planComponent(
     // P18-S110-UPSERTON. A non-empty Upsert On is an `X-NodeGX-Upsert` header on the create (ParseWireAdapter
     // `create`): a clash on that unique property updates the row there. The api module's create sends none.
     /** Wired, or authored as text the setter keeps: `upsertOn` trims, `onlyIfUnchanged` splits on commas, then trims. */
-    const namesProperties = (name: 'upsertOn' | 'onlyIfUnchanged') => {
+    const namesProperties = (name: 'upsertOn' | 'onlyIfUnchanged' | 'addTo') => {
       const value = literalParam(node, name);
       if (wiredPorts.has(`${node.id}:${name}`)) return true;
       if (typeof value !== 'string') return false;
@@ -12585,6 +12585,11 @@ function planComponent(
     // `scheduleSave`, an `X-NodeGX-If` header); the export holds no read copy of the record to take it from.
     if (verb === 'update' && namesProperties('onlyIfUnchanged')) {
       return { defer: 'its Only If Unchanged names properties — the runtime writes only if they still hold what the record was read with, and the exported update writes unconditionally' };
+    }
+    // P112 OWN-026 FIX-03 A (P112-OWN026-EXPORTADDTO). Add To's values are amounts the backend adds (`increment`, after
+    // the save); the exported update would write each one as the new value, which is the overwrite Add To prevents.
+    if (verb === 'update' && namesProperties('addTo')) {
+      return { defer: 'its Add To names properties — the runtime adds those values on the backend, and the exported update would write them as the new values' };
     }
     if (verb === 'update') {
       if (literalParam(node, 'storeType') === 'local' || wiredPorts.has(`${node.id}:storeType`)) {

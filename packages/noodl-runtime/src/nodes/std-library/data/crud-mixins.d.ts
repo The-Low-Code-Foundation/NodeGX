@@ -154,6 +154,8 @@ export interface DbCrudBaseInstance extends NodeInstance {
 export interface DbCloudStoreLike {
   create(options: Record<string, unknown>): void;
   save(options: Record<string, unknown>): void;
+  /** P112 OWN-026 FIX-03 A: Update Record's Add To. */
+  increment(options: Record<string, unknown>): void;
   delete(options: Record<string, unknown>): void;
   addRelation(options: Record<string, unknown>): void;
   removeRelation(options: Record<string, unknown>): void;

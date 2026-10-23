@@ -469,9 +469,45 @@ function addFocusActions(definition, options: { noun: string; done?: string; unc
   });
 }
 
+/**
+ * P112 OWN-026 FIX-03 B — **a press that saves is taken once**, on the control's submit signal.
+ *
+ * Marks `outputName` (a signal outputProp) so `react-component-node.ts` routes it through the
+ * runtime's press guard (`@noodl/runtime/src/pressguard`): when a press starts a backend write,
+ * the same control's next press, and that of any control wired to the same node, is ignored until
+ * the backend has answered and for at least half a second. A press that starts no write holds
+ * nothing.
+ *
+ * ⚠️ **On by default, with this port to turn it off**: the double press it stops is the defect a
+ * graph forgets (t1-nodegx-3: Enter twice, fuel +2), and the control that wants every tap (a
+ * stepper that saves each one) is the rare one, and says so.
+ */
+function addTakenOnceWhileSaving(definition, options: { outputName: string; one: string; press: string }) {
+  const output = definition.outputProps && definition.outputProps[options.outputName];
+  if (!output) throw new Error(`addTakenOnceWhileSaving: no output prop ${options.outputName}`);
+  output.takenOnceWhileSaving = true;
+
+  addInputs(definition, {
+    repeatWhileSaving: {
+      type: 'boolean',
+      group: 'General',
+      displayName: 'Repeat While Saving',
+      description:
+        `Off (the default): when ${options.one} starts a save, the next ${options.press} is ignored until the backend ` +
+        'has answered, and for at least half a second, so a double press saves once. Controls wired to the same node ' +
+        `share this. On: every ${options.press} fires, for a control that saves each quick tap`,
+      default: false,
+      set(value) {
+        this._internal.repeatWhileSaving = !!value;
+      }
+    }
+  });
+}
+
 export default {
   updateStylesForClass,
   addControlEventsAndStates,
   addFocusActions,
+  addTakenOnceWhileSaving,
   controlEvents
 };

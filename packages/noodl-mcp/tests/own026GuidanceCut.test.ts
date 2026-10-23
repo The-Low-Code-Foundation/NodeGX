@@ -37,7 +37,7 @@ describe('get_project_info — what costs a rebuild arrives in the first 4,000 c
 
   it('the lessons FIX-01 put in the backend doctrine survive the cut — they did not before', async () => {
     const seen = kept(await callRawText(session, 'get_project_info'));
-    for (const lesson of ['visualFilter', 'Noodl.Records.increment', 'cloud-shared-counter', 'taken once', 'its own URL']) {
+    for (const lesson of ['visualFilter', 'addTo', 'cloud-shared-counter', 'taken once', 'its own URL']) {
       expect({ lesson, seen: seen.includes(lesson) }).toEqual({ lesson, seen: true });
     }
   });

@@ -134,6 +134,9 @@ export const Button = defineNode({
     // utils.ts :75-89
     enabled: { type: 'boolean', default: true, coerce: 'none', displayName: 'Enabled', group: 'General', description: 'Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing', portability: 'logic' },
     // button.ts :58-66 — read by the component at each press (Button.tsx :122)
+    // P112 OWN-026 FIX-03 B (controls/utils.ts `addTakenOnceWhileSaving`): read by the press guard, which holds a click while a
+    // save an earlier click started is waiting. One node starts no save, so in this spec nothing reads it.
+    repeatWhileSaving: { type: 'boolean', default: false, coerce: 'none', displayName: 'Repeat While Saving', group: 'General', description: 'Off (the default): when a click starts a save, the next click is ignored until the backend has answered, and for at least half a second, so a double press saves once. Controls wired to the same node share this. On: every click fires, for a control that saves each quick tap', portability: 'logic' },
     keepsFocus: { type: 'boolean', default: false, coerce: 'none', displayName: 'Keeps Focus', group: 'General', description: 'Leaves the keyboard where it was when this button is clicked, instead of taking it — what a key on an on-screen keypad needs, so the cursor stays in the field being typed into', portability: 'logic' },
     // react-component-node.ts :2302-2321
     mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind. Wired, it counts as true until the first value arrives, so set it to false here to start hidden (a lock, a private screen)', portability: 'logic', layout: 'present' },

@@ -66,12 +66,16 @@ A workflow orchestrates; a cloud function computes; a workflow calls cloud funct
   (\`visualFilter\`). A collection everyone shares needs \`creatorOwns: false\`.
 - **Change a shared value on the server, by the amount.** A count, score, balance or progress that two
   tabs or devices change is never read into the page, changed, and written back whole: the later
-  write erases the earlier. In a Function node,
-  \`await Noodl.Records.increment(id, { points: 1 }, { className: 'Score' })\` adds on the server and
-  updates the record to the server's total. To replace a whole value safely, Update Record's
-  \`onlyIfUnchanged\` refuses a write over a newer one (Failure fires: fetch again, then retry).
-- **A press that saves is taken once.** From the press until that save's Done or Failure, the control
-  ignores presses (disable it). Send the save the id of the item it was pressed for, and when the
+  write erases the earlier. Update Record with \`addTo\` naming the field (\`addTo: "points"\`) and
+  the CHANGE wired into it (\`prop-points\` = 1, or -1) adds on the server in one step and updates
+  the record to the server's total: one node, no script. In a script, the same is
+  \`await Noodl.Records.increment(id, { points: 1 }, { className: 'Score' })\`. To replace a whole
+  value safely, Update Record's \`onlyIfUnchanged\` refuses a write over a newer one (Failure fires:
+  fetch again, then retry).
+- **A press that saves is taken once.** The runtime does it: a Button's Click or a Text Input's
+  On Enter that starts a save is ignored a second time while that save waits (and for half a
+  second), and controls wired to the SAME node share this, so wire a Button and its field's Enter
+  into one node, never two. Send the save the id of the item it was pressed for, and when the
   answer arrives, apply it only if that item is still the one on screen.
 
 ## The runtime is the path
