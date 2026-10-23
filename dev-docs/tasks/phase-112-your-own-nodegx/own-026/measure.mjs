@@ -16,11 +16,34 @@ const [arm, ...rest] = process.argv.slice(2);
 const opt = (name, dflt) => { const i = rest.indexOf(name); return i >= 0 ? rest[i + 1] : dflt; };
 const ROUNDS = opt('--rounds', path.join(LAB, 'own026'));
 const GRADES = opt('--grades', path.join(LAB, 'own026-grades'));
-if (!['code', 'harness', 'nodegx'].includes(arm)) throw new Error('usage: node measure.mjs <arm>');
+const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } };
+// `compare` (Richard, 2026-10-23: the goal is the THINNEST layer: as good as plain code, at little extra cost to the
+// model): per change, each arm's checks, and NodeGX's overhead over plain code in $, minutes, turns, the tokens it
+// read fresh and the tokens it wrote.
+if (arm === 'compare') {
+  const one = (a, n) => {
+    const id = `t2-${a}-c${String(n).padStart(2, '0')}`;
+    const r = readJson(path.join(ROUNDS, id, 'round.json'));
+    if (!r) return null;
+    const g = readJson(path.join(GRADES, id, 'grade.json'));
+    const s = readJson(path.join(ROUNDS, id, 'sittings.json')) ?? [];
+    const ids = g ? Object.keys(g).filter((k) => /^[SFTC]\d/.test(k)) : [];
+    return { usd: r.usdAtClinePassPrices, min: r.seconds / 60, turns: s.reduce((t, x) => t + (x.iterations || 0), 0), fresh: r.tokens.input, out: r.tokens.output,
+      checks: g ? `${ids.filter((k) => g[k]?.grade?.startsWith('PASS')).length}/${ids.length}` : '—' };
+  };
+  const x = (a, b) => (a && b ? `${(a / b).toFixed(1)}×` : '—');
+  console.log('| change | checks code / harness / nodegx | nodegx ÷ code: $ | min | turns | fresh in | out | nodegx ÷ harness: $ |\n|---|---|---|---|---|---|---|---|');
+  for (let n = 1; n <= 10; n++) {
+    const [c, h, g] = ['code', 'harness', 'nodegx'].map((a) => one(a, n));
+    if (!c && !h && !g) break;
+    console.log(`| c${String(n).padStart(2, '0')} | ${[c, h, g].map((v) => v?.checks ?? '—').join(' / ')} | ${x(g?.usd, c?.usd)} | ${x(g?.min, c?.min)} | ${x(g?.turns, c?.turns)} | ${x(g?.fresh, c?.fresh)} | ${x(g?.out, c?.out)} | ${x(g?.usd, h?.usd)} |`);
+  }
+  process.exit(0);
+}
+if (!['code', 'harness', 'nodegx'].includes(arm)) throw new Error('usage: node measure.mjs <arm> | compare');
 
 const SKIP_DIR = new Set(['node_modules', '.next', 'test-results', 'playwright-report', '.previews', 'dist', 'build', '.git', '.cache', '.turbo', 'coverage']);
 const SKIP_FILE = /\.(db|sqlite3?|db-wal|db-shm|sqlite-wal|sqlite-shm|log|tsbuildinfo|png|jpe?g|webm|mp4)$/i;
-const readJson = (f) => { try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return null; } };
 function files(dir, out = new Map(), rel = '') {
   if (!fs.existsSync(dir)) return out;
   for (const e of fs.readdirSync(dir, { withFileTypes: true })) {

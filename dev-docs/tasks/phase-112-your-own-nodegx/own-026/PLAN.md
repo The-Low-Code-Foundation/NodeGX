@@ -304,3 +304,19 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   its evidence supports its verdict. The test-2 table will **list F6 separately from the regression count**, so the
   curve isn't moved by a borderline check's coin. Stop-and-check #5: NodeGX c02 15/17, the only arm that built the
   number pad well (code built multiple choice: C2.1 FAIL; harness passed at 2.7× NodeGX's cost).
+- **2026-10-23 12:30 CEST — Richard's goal for NodeGX, and how test 2 is read for it.** His words: *"our goal now
+  is not to make NodeGX 'better' than coding pure, it's to make it the thinnest layer of additional context
+  possible, to be easily as good as a coded app in your LLM vibe coding engine without much extra cost or work for
+  the LLM, such that even DeepSeek can do it"*. The payoff is the Studio in the agent's chat (a true copilot, not the
+  driver), deploy and CI/CD from the Studio, and the off-ramp only when it's worth the bother (DIRECTION D8).
+  §4's pre-registered reading stands. Beside it, test 2 is read as **parity at small overhead**: per change, NodeGX's
+  checks against the plain-code arm's, and its overhead as ratios (`node measure.mjs compare`: $, minutes, turns,
+  tokens read fresh, tokens written). So far: checks level on c01 and c02 (14/15, 15/17 in all three arms; NodeGX
+  the only one to build c02's number pad well); overhead over code 1.5× and 1.7× in $, 1.3× in turns, but **1.0–1.2×
+  in tokens written**. The model writes about the same; the extra is what it reads (1.6×, 2.1× fresh input).
+  In t2-nodegx-c02, 2.9M of 3.5M characters of tool results were its own screenshots read back with `read_files`
+  (the kit saves `drive_page` shots to files; DeepSeek does see them: *"⌫ renders as a real backspace glyph"*),
+  carried in every later request (3.7M characters a request by the end, mostly cached). So from here a stop-and-check
+  also asks **what made the layer thicker**, and a FIX may aim to cut overhead, not only to fix a fail. The two
+  levers seen so far: defaults that just work beat advice that's read and argued away (FIX-03 B against FIX-03 C),
+  and argument-name refusals are pure overhead (14 in c01).
