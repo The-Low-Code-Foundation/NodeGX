@@ -89,7 +89,17 @@ Built in s4:
   Studio somewhere.
 - The resident budget (8,280) is untouched: Desktop's path is profile-specific; `toolDisclosure.test.ts` 18/18.
 
-**AC5 run 4:** reload the server, a NEW conversation (the index is built at its start), connector on. Say: *"Open the
+## s5 (same day): "nodegx couldn't start" — Desktop's second server runs on Node 16
+
+After the reload, the chat's server started on Node 22, advertised 121 tools and answered two `tools/list`s; Desktop
+recycled it as it always does. Then Desktop started a SECOND copy "for Cowork and Code sessions" from a shared
+pool with a 16-entry PATH, in which `node` is `~/.nvm/versions/node/v16.20.2/bin/node`; the bundle threw
+`@nodegx/node-spec: this host has no File constructor` three times and Desktop reported the server as failed.
+Fix: the config's `"command"` is an absolute path to Node 22, not `node`; `bin/noodl-mcp.js` now says this in one
+line on Node < 20 and exits 1 instead of a stack trace. A stranger's install (CCN-006) has to write the absolute path
+or ship its own runtime.
+
+**AC5 run 4:** config with the absolute node path, reload the server, a NEW conversation (the index is built at its start), connector on. Say: *"Open the
 NodeGX project at ~/vscode_projects/NodeGX test projects/Tap Counter C7Q4 with open_project, then call open_studio,
 then build its Home page: the count, a Tap button and a Reset button."* Click Allow on the panel.
 
