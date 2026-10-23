@@ -74,3 +74,21 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
 - **Not gating; no FIX-04.** Filed on the way: `P112-OWN026-CONFIGFOUROHFOUR` (low). The preview's deliberate 404 for
   `nodegx-config.json` puts 1–2 red console errors on every page load of every previewed app (27 in this grade).
   It cost no agent anything yet.
+
+## #5 — t2-nodegx-c02 (number pad for one child), kit FIX-03, 15/17 (2026-10-23)
+
+- **The only arm whose number pad was a number pad.** C2.1 and C2.2 passed. The grader saw keys 1–9, 0, ⌫ and Clear
+  at about 93×80 px, a 48 px Check and no text field, answered by touch only; the setting showed on a fresh device.
+  The code arm built four multiple-choice buttons instead (C2.1 FAIL); harness built a pad but took 56 min / $0.238.
+  NodeGX: $0.089, 19 min, 1 sitting. Touched 21 files (+973/−55): 33 nodes added, 6 changed. Script: +2
+  JavaScriptFunctions (5 → 7, 128 → 150 lines), +10 Expressions. 48 calls (counted as starts/ends), 5 refused.
+- **The F6 "regression" is the grader's, not the change's.** The planet nodes are the same in t1-nodegx-3, c01 and
+  c02 (Moon as the pad, then Mercury … Earth … Neptune). c01's grader passed it with an "interpretation note" (the
+  Moon is the launch pad, Earth is included). c02's grader wrote the same facts as a doubt, so FAIL by the rules.
+  Harness shows the same shape at its c02: c01's grader read the strip after a reload, and c02's and c03's watched it
+  during play and saw it never move. That one may be a real defect the first grader didn't look for, not a change's
+  doing. By PLAN §5 the grades stand (each one's evidence supports its own verdict). **But F6 is a borderline check
+  graded both ways on identical apps**, so the regression curve should be read with it marked.
+- **FIX-03 C again:** `shared-value-written-back-whole` came back on the inherited score save (7 mentions). It wasn't
+  touched, and the change didn't ask. Add To unused.
+- **Not gating; no FIX-04.**

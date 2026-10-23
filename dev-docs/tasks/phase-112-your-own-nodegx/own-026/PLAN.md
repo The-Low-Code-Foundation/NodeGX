@@ -298,3 +298,9 @@ AI changed last time and say whether it's right". Scoped in full after tests 1�
   conditions halfway through, so the lab is unchanged; the audits show each case. The product side is a real defect,
   filed: `P112-OWN026-MCPJSONABSPATH` (a moved, renamed or cloned project points its Claude Code server at the old
   folder).
+- **2026-10-23 12:10 CEST — F6 is graded both ways on identical apps.** t2-nodegx-c02 and t2-harness-c02 each show F6
+  as a regression, but NodeGX's planet nodes didn't change between c01 and c02 (LEARNINGS #5). c01's grader passed the
+  same facts with an "interpretation note"; c02's wrote them as a doubt, so FAIL. §5 holds: each grade stands, since
+  its evidence supports its verdict. The test-2 table will **list F6 separately from the regression count**, so the
+  curve isn't moved by a borderline check's coin. Stop-and-check #5: NodeGX c02 15/17, the only arm that built the
+  number pad well (code built multiple choice: C2.1 FAIL; harness passed at 2.7× NodeGX's cost).
