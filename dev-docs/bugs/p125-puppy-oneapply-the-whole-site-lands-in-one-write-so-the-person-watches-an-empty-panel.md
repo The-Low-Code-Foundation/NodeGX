@@ -28,3 +28,7 @@ Fix: CCN-005 (short bursts), with the order above. While a Studio panel is open 
 the instructions and `create_plan`'s description say: write the page shell first; then one apply per section, each
 placing its section on the page; and the server refuses a staged plan that grows past one section without an apply.
 CCN-003 (staged operations drawn in Studio) is the other half.
+
+Built: s11 (OpenNoodl 58f973f95) `create_plan` refuses more than 3 component operations while Studio runs; s12
+`create_component` is refused when it would leave 3 components this server made that nothing places (CCN-005 s12).
+Open until Richard's re-run in Desktop shows the page arriving section by section.

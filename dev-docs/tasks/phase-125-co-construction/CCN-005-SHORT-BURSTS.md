@@ -1,6 +1,7 @@
 # CCN-005 — Short bursts
 
-**State:** first cut built 2026-10-23 (s11, from Richard's puppy run); not yet seen in Claude Desktop. **After:** CCN-003.
+**State:** first cut built 2026-10-23 (s11, from Richard's puppy run), `create_component` budgeted s12 (2026-10-24);
+not yet seen in Claude Desktop. **After:** CCN-003.
 
 One component per turn, each one rendered, so the person can stop between any two. The budget is in the server:
 a plan with more than N operations staged without an `apply` is refused ("apply what you have; the person is
@@ -31,5 +32,21 @@ The resident instructions were not changed (3 tokens free on the surface); the r
 both outside the budget. Gate: `packages/noodl-mcp/tests/p125PuppyBursts.test.ts` (a stand-in Studio found through
 `NODEGX_STUDIO`; the no-Studio control beside the refusal).
 
-**Still open:** the per-turn write count measured in Desktop; `create_component` (not a plan) is not budgeted; whether
-DeepSeek keeps to it; CCN-003 (staged operations drawn in Studio) is the other half of "nothing lands unseen".
+## s12 (2026-10-24): `create_component` budgeted; the dist Richard runs
+
+A plan refusal pushes a model towards single `create_component` calls, and leaves-first through that door is the same
+three empty minutes. While Studio runs for the project, `create_component` of a component that is not a page and not
+cloud is refused when it would leave `STUDIO_BURST` (3) components **this server created** that nothing places (no
+node of any other component has its type; the candidate's own instances count). Leaf, leaf, then the section that
+places them passes (one unplaced: the section); a third leaf before anything is placed is refused, naming all three,
+with "Place what you have first". Components made before this server started, or since deleted, do not count.
+`STUDIO_BURST` moved to `src/studio/burst.ts` (planTools re-exports it; `author.ts` could not import planTools without
+a cycle). Gate `tests/p125PuppyBursts.test.ts` 10/10 (3 new, the no-Studio control included); the mutant (cap off)
+turns both new Studio cases red. `stage_plan_operation` is not a way round the plan cap: it fills only operations
+`create_plan` declared.
+
+The `noodl-mcp` dist Richard's Desktop loads was rebuilt 2026-10-23 23:35 from a clean worktree at 7c2c10e0b (the s11
+cap and words, not this `create_component` cap); Desktop restarted 23:45 and advertises 116 tools.
+
+**Still open:** the per-turn write count measured in Desktop (Richard's re-run); whether DeepSeek keeps to it; CCN-003
+(staged operations drawn in Studio) is the other half of "nothing lands unseen".

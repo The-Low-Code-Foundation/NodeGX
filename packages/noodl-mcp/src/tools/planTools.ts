@@ -79,14 +79,10 @@ import { componentIsPage, registerPages, registrationSummary, unroutedPagesSumma
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { studioFor } from '../studio/studioProcess';
+import { STUDIO_BURST } from '../studio/burst';
 
-/**
- * P125-PUPPY-ONEAPPLY (CCN-005) — the most component operations one plan may hold while Studio is on screen for the
- * project. Richard's puppy run, 2026-10-23: a plan of eight components staged for three minutes and applied in one
- * second; the person watched an empty Studio and had nothing to stop. Three is a section with its leaves and the page
- * update that places it (StepItem, HowItWorks, Pages/Home), the largest burst that page needed.
- */
-export const STUDIO_BURST = 3;
+// P125-PUPPY-ONEAPPLY (CCN-005) — the cap lives in studio/burst.ts, beside create_component's; exported here as before.
+export { STUDIO_BURST };
 import { authoredProjectViews, foldSkipNotes, preconditionDiagnostics } from '../validate';
 import type { WriteValidation } from '../validate';
 import { drawnPortCheck } from '../specPorts';

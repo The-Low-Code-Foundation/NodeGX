@@ -32,6 +32,15 @@ function sections(n: number): Array<{ kind: 'create'; target: string; intent: st
   return Array.from({ length: n }, (_, i) => ({ kind: 'create' as const, target: `Components/Section${i + 1}`, intent: `Section ${i + 1} of the landing page` }));
 }
 
+/** `create_component` of a Group, with an instance of each of `places` (legacy names) inside it. */
+function leaf(path: string, places: string[] = []) {
+  const root = `${path.replace(/\W/g, '')}-root`;
+  return {
+    path,
+    nodes: [{ id: root, type: 'Group' }, ...places.map((p, i) => ({ id: `${root}-i${i}`, type: p, parent: root }))]
+  };
+}
+
 describe('P125-PUPPY-ONEAPPLY — a plan reaches a watching person in bursts', () => {
   let studioDir: string;
   const saved = { studio: process.env.NODEGX_STUDIO, noOpen: process.env.NODEGX_STUDIO_NO_OPEN };
@@ -64,6 +73,13 @@ describe('P125-PUPPY-ONEAPPLY — a plan reaches a watching person in bursts', (
       const res = await call<Plan | Refusal>(session, 'create_plan', { request: 'a landing page', scroll: 'page', operations: sections(STUDIO_BURST + 3) });
       expect(res.isError).toBe(false);
       expect((res.data as Plan).planId).toEqual(expect.any(String));
+    });
+
+    it(`accepts ${STUDIO_BURST} unplaced components created one call at a time, as before`, async () => {
+      for (const p of ['Components/Free1', 'Components/Free2', 'Components/Free3']) {
+        const res = await call(session, 'create_component', leaf(p));
+        expect(res.isError).toBe(false);
+      }
     });
   });
 
@@ -113,6 +129,22 @@ describe('P125-PUPPY-ONEAPPLY — a plan reaches a watching person in bursts', (
       const ops = [...sections(STUDIO_BURST), { kind: 'doc', target: 'docs/decisions/001-landing.md', intent: 'Why the landing page is built this way' }];
       const res = await call<Plan | Refusal>(session, 'create_plan', { request: 'one section and a note', scroll: 'page', operations: ops });
       expect(res.isError).toBe(false);
+    });
+
+    it(`create_component: two unplaced leaves pass, a ${STUDIO_BURST}rd is refused and names all ${STUDIO_BURST}`, async () => {
+      expect((await call(session, 'create_component', leaf('Components/LeafA'))).isError).toBe(false);
+      expect((await call(session, 'create_component', leaf('Components/LeafB'))).isError).toBe(false);
+      const res = await call<Refusal & { error: { details?: { unplaced?: string[] } } }>(session, 'create_component', leaf('Components/LeafC'));
+      expect(res.isError).toBe(true);
+      expect(res.data.error.details).toMatchObject({ watched: true, limit: STUDIO_BURST });
+      expect(res.data.error.details?.unplaced).toEqual(['/Components/LeafA', '/Components/LeafB', '/Components/LeafC']);
+      expect(res.data.error.message).toMatch(/Place what you have first/);
+    });
+
+    it('create_component: the section that places both leaves passes (it leaves one unplaced: itself), and then a leaf does too', async () => {
+      const section = await call(session, 'create_component', leaf('Components/SectionAB', ['/Components/LeafA', '/Components/LeafB']));
+      expect(section.isError).toBe(false);
+      expect((await call(session, 'create_component', leaf('Components/LeafC'))).isError).toBe(false);
     });
 
     it("open_studio's result says the order and says not to call it again in the same turn (P125-PUPPY-TWOPANELS)", () => {

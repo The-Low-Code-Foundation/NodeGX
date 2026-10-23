@@ -27,6 +27,8 @@ import type { ComponentFiles, UpdateOperation } from '../graph';
 import { applyOperations, reconcileHierarchy } from '../graph';
 import { pathToLegacyName, toPathForm, validateComponentPath } from '../paths';
 import { withAuthoredScriptPorts } from '../scriptPorts';
+import { STUDIO_BURST, unplacedAfter } from '../studio/burst';
+import { studioFor } from '../studio/studioProcess';
 import {
   componentIsPage,
   registerPages,
@@ -500,6 +502,8 @@ export function registerAuthorTools(
   // node with one set of words and `update_component` cannot drift from
   // `create_component`.
   const allowUnknownArg = CREATE_COMPONENT_SHAPE.allow_unknown_types;
+  // P125 CCN-005 — the components this door created, by legacy name: the ones the burst cap counts while unplaced.
+  const createdHere = new Set<string>();
 
   server.registerTool(
     'create_component',
@@ -590,7 +594,26 @@ export function registerAuthorTools(
         });
         if (!validation.ok) rejectWith(validation, `create_component "${path}"`, examples);
 
+        // P125 CCN-005 — create_plan's burst cap, for components created one call at a time: while the person watches
+        // in Studio, a component nothing places draws nothing, and a run of them is the puppy run's three empty
+        // minutes again. Leaves then the section that places them pass (the section leaves one unplaced: itself).
+        const placeable = !isCloudPath && !componentIsPage(legacyName, candidate);
+        if (placeable && studioFor(store.projectDir) !== null) {
+          const unplaced = unplacedAfter(store, createdHere, legacyName, candidate);
+          if (unplaced.length >= STUDIO_BURST) {
+            throw new ToolError(
+              'invalid-argument',
+              `The person is watching this app in Studio, and a component appears there only once a page places it: ` +
+                `${unplaced.join(', ')} would be ${unplaced.length} components you made that nothing places yet, all ` +
+                `invisible to them. Place what you have first: update the page (or the section) so it has an ` +
+                `instance of each, say in one line what appeared, then create the next. Nothing was created.`,
+              { watched: true, limit: STUDIO_BURST, unplaced }
+            );
+          }
+        }
+
         const { revision, ticked } = store.writeComponent(path, candidate, { expectNew: true });
+        if (placeable) createdHere.add(legacyName);
         ledger.invalidate();
         // AAQ-005: a page component is not a page until a Router lists it. The
         // editor's apply has done this since AAQ-001; this door did not, so
