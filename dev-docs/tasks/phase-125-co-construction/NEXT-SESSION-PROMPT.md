@@ -2,7 +2,29 @@
 
 Read `README.md` here, then the task you take.
 
-## FIRST: finish the puppy-run fixes (s11, 2026-10-23 late)
+## FIRST: Richard's puppy re-run in Desktop, then read it (s12, 2026-10-24 00:15)
+
+s12 did steps 1–3 and 5 below. State:
+- **dist rebuilt TWICE from clean worktrees** (23:35 at 7c2c10e0b, 00:12 at 4b3319c60; the cloud bundle byte-identical
+  across both once paths are normalised). Desktop restarted 23:45 on the first; the second adds the `create_component`
+  cap, so Desktop needs ONE more full quit/reopen and a NEW conversation before the re-run.
+- **Pushed:** OpenNoodl cline-dev up to 3055514b7 (a peer pushed it while Richard said yes); nodegx-studio 2185e9c was
+  already on origin. NOT pushed: OpenNoodl 4b3319c60, nodegx-studio 2f9b321. Ask before pushing.
+- **Part 2 of P125-PUPPY-TWOPANELS** measured and not reproduced (the bug's s12 section): three panel mounts in s11,
+  one server, three clean two-iframe runs. Richard had no words or screenshot. If a second panel errors again, get the
+  words FIRST. The scripts are in s12's scratchpad (`twopanels/`: mcp-driver, two-host, replay, breakfix); copy them
+  here if the repro is needed again.
+- **Leftovers done:** `create_component` budgeted (CCN-005 s12), Esc up to a For Each boxes its rows
+  (P125-STU-FOREACHBOX), check:editor's CDP calls time out at 60 s (P125-STU-GATEHANG). Studio check:editor 203/203.
+
+**The read after the re-run (step 4 below):** `~/Library/Logs/Claude/mcp-server-nodegx.log` from the restart on (the
+`tools/call` times; params are not logged), `~/Library/Logs/Claude/claude.ai-web.log` (`oncalltool handler replaced`
+= one panel mounted; `tool_approval_gate` names the gated tools), and the project's file times AND folder birth times
+(`stat -f '%SB %Sm %N' -t %H:%M:%S`, a folder's birth = when the component first appeared). Pass = the page shell
+first, then sections arriving across several applies, one panel per turn. Then update CCN-005, P125-PUPPY-ONEAPPLY and
+P125-PUPPY-TWOPANELS from it.
+
+## (s11) finish the puppy-run fixes (2026-10-23 late)
 
 Richard's puppy landing page in Claude Desktop (Sonnet 5.5) found six things. Built and committed, NOT pushed, NOT in
 his Desktop yet:
