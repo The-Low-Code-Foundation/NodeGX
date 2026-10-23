@@ -4,7 +4,8 @@
 # app, its backend, its cloud functions, its access rules and `start.js`), run as a service, plus its function secrets.
 # Modelled on P78's todo-digitalbricks/provision.sh, which put todo.digitalbricks.io on nexus-1.
 #
-# Run as root on the box, after ship-to-vm.sh has staged the folder:
+# Run as root on the box, after the folder is staged in /tmp/<app>-provision — by @nodegx/mcp's deploy_to_vm, which
+# ships this file in dist/backend/vm/, or by own-016/ship-to-vm.sh from a checkout:
 #
 #   APP=lingo DOMAIN=lingo.nodegx.io PORT=8692 bash -s < provision-app.sh
 #   APP=lingo PORT=8692 CADDY=off bash -s < provision-app.sh     # no public address yet (no DNS): the backend serves
@@ -160,15 +161,17 @@ fi
 
 systemctl daemon-reload
 systemctl enable "$APP-backend" >/dev/null
+# This start's lines only: the journal also holds every earlier start's, which said other things about the rules.
+STARTED="$(date '+%Y-%m-%d %H:%M:%S')"
 systemctl restart "$APP-backend"
 for i in $(seq 1 20); do
   curl -fsS "http://127.0.0.1:${PORT}/health" >/dev/null 2>&1 && break
   sleep 1
 done
-curl -fsS "http://127.0.0.1:${PORT}/health" >/dev/null || { echo "FATAL: backend not healthy" >&2; journalctl -u "$APP-backend" -n 40 --no-pager >&2; exit 1; }
+curl -fsS "http://127.0.0.1:${PORT}/health" >/dev/null || { echo "FATAL: backend not healthy" >&2; journalctl -u "$APP-backend" --since "$STARTED" -n 40 --no-pager >&2; exit 1; }
 curl -fsS -o /dev/null "http://127.0.0.1:${PORT}/" || { echo "FATAL: the backend is up but does not serve the app at /" >&2; exit 1; }
 # What start.js installed and which access rules are in force, in the backend's own words.
-journalctl -u "$APP-backend" -n 60 --no-pager -o cat | grep -E '^\[start\]|polic|rules' | sed 's/^/    /' || true
+journalctl -u "$APP-backend" --since "$STARTED" --no-pager -o cat | grep -E '^\[start\]|polic|rules' | sed 's/^/    /' || true
 
 [ "$CADDY" != off ] && systemctl reload caddy
 # Only once no drop-in can still point at it: CADDY=off over an earlier domain ship leaves that drop-in in place.

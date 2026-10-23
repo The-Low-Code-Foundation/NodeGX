@@ -3,7 +3,8 @@
  * P112 OWN-015 — the backend an npm install of `@nodegx/mcp` provisions.
  *
  *   node build-backend-copy.mjs            bundle nodegx-backend's service into dist/backend/cli.js, and its full-stack
- *                                          launcher into dist/backend/folder/ (npm's prepack)
+ *                                          launcher into dist/backend/folder/, the VM provision script into
+ *                                          dist/backend/vm/ (npm's prepack)
  *   node build-backend-copy.mjs --remove   delete it again (npm's postpack)
  *   … --out <dir>                          build into (or remove) <dir> instead — @nodegx/preview's prepack
  *
@@ -55,4 +56,7 @@ await esbuild.build({
 // P26 DEP-002 — the launcher a full-stack deploy puts beside the app (`start.js`, `start.sh`, `start.cmd`). It ships
 // beside the backend it starts, so `nodegx-deploy --full-stack` from an install finds both in one place.
 cpSync(path.join(BACKEND, 'deploy', 'folder'), path.join(OUT, 'folder'), { recursive: true });
+// P26 DEP-002 s4 — the script `deploy_to_vm` runs on the box (as root, over ssh's stdin) to install that folder as a
+// service. One file, read by the tool from here and by own-016's ship-to-vm.sh from the checkout.
+cpSync(path.join(BACKEND, 'deploy', 'vm'), path.join(OUT, 'vm'), { recursive: true });
 console.log(`build-backend-copy: ${path.relative(process.cwd(), path.join(OUT, 'cli.js'))} (${((Date.now() - started) / 1000).toFixed(1)} s)`);

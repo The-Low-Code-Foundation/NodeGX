@@ -34,6 +34,9 @@ while [[ "${1:-}" == --* ]]; do
 done
 PROJECT="${1:?project dir}"; BACKEND="${2:?local backend dir, or -}"; HOST="${3:?user@host}"; APP="${4:?app}"; PORT="${5:?port}"; DOMAIN="${6:-}"
 HERE="$(cd "$(dirname "$0")" && pwd)"
+# The script that runs on the box ships inside @nodegx/mcp (dist/backend/vm/), where deploy_to_vm reads it too.
+PROVISION="$HERE/../../../../packages/nodegx-backend/deploy/vm/provision-app.sh"
+[ -f "$PROVISION" ] || { echo "no provision script at $PROVISION" >&2; exit 2; }
 SSH_OPTS=(-o ConnectTimeout=15 -o StrictHostKeyChecking=accept-new)
 [ -n "${SSH_KEY:-}" ] && SSH_OPTS+=(-i "$SSH_KEY")
 [ -n "${SSH_PORT:-}" ] && SSH_OPTS+=(-p "$SSH_PORT")
@@ -74,7 +77,7 @@ echo "==> 2/4 stage and provision on $HOST"
 ssh "${SSH_OPTS[@]}" "$HOST" "rm -rf /tmp/$APP-provision && mkdir -p /tmp/$APP-provision"
 rsync -az -e "ssh ${SSH_OPTS[*]}" "$FOLDER/" "$HOST:/tmp/$APP-provision/"
 CADDY=on; [ -n "$DOMAIN" ] || CADDY=off
-ssh "${SSH_OPTS[@]}" "$HOST" "APP=$APP PORT=$PORT DOMAIN=$DOMAIN CADDY=$CADDY bash -s" < "$HERE/provision-app.sh"
+ssh "${SSH_OPTS[@]}" "$HOST" "APP=$APP PORT=$PORT DOMAIN=$DOMAIN CADDY=$CADDY bash -s" < "$PROVISION"
 
 echo "==> 3/4 the function secrets (from the local backend's store, over stdin)"
 { [ -n "$SECRETS_JSON" ] && node -e '

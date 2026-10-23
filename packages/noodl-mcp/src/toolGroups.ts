@@ -472,6 +472,13 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'deploy',
       'host',
       'hand over',
+      // P26 DEP-002 s4 — `deploy_to_vm`.
+      'server',
+      'vm',
+      'vps',
+      'ssh',
+      'go live',
+      'online',
       'session',
       'who',
       'unsaved',
@@ -515,6 +522,9 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'create_node_kit',
       'open_in_editor',
       'export_react',
+      // P26 DEP-002 s4 — `deploy_to_vm`, the other way out: the app running on a server the person owns. Appended on
+      // the arithmetic above (0 resident tokens); reached by name and by 'deploy', 'ship', 'host', 'server', 'vm'.
+      'deploy_to_vm',
       'session_status',
       // P125 CCN-001 — `open_studio`, appended on the same arithmetic as the three above: 0 resident tokens.
       // The door is by keyword ('studio', 'screen', 'beside', 'watch', 'look') and by name.
@@ -586,6 +596,8 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   // HLS-013. Writes a bundle to a running backend, so it is write-gated for the
   // same reason `provision_backend` is.
   'deploy_cloud_functions',
+  // P26 DEP-002 s4. Installs and restarts a service on another machine: write-gated like `provision_backend`.
+  'deploy_to_vm',
   // Reads the process registry and changes nothing — but it ships in
   // `registerProvisionTools`, which is inside the write gate, so it is
   // write-only in fact whatever it is in spirit. Recorded as observed rather

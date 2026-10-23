@@ -38,6 +38,7 @@ import { registerValidateTools } from './tools/validateTools';
 import { registerCreateProjectTools } from './tools/createProject';
 import { registerOpenProjectTools } from './tools/openProject';
 import { registerProvisionTools } from './tools/provisionTools';
+import { registerDeployToVmTools } from './tools/deployToVm';
 import { registerReviewTools } from './tools/review';
 import { registerListProjectsTools } from './tools/listProjects';
 import { registerExportReactTools } from './tools/exportReact';
@@ -318,6 +319,10 @@ export function createServer(options: ServerOptions): CreatedServer {
     // diagnosis (checkBackendRequirements says a graph needs a backend) without
     // the ability to act on it, which is the same posture as everything else.
     registerProvisionTools(rec, binding);
+    // P26 DEP-002 s4 — the app on a server the person owns. Write-gated for the reason `provision_backend` is, and
+    // more so: it installs and restarts a service on another machine. In the deferred `project` group beside
+    // `export_react` (0 resident tokens); the door is the keywords 'deploy', 'ship', 'host', 'server', 'vm'.
+    registerDeployToVmTools(rec, binding);
     // AIX-012. Takes no store: it creates a project at a directory the caller
     // names, which is by definition not the one this server is pointed at.
     //

@@ -23,6 +23,9 @@ export class ToolError extends Error {
       // write is refused until they release it. Not `read-only` (a flag on the server) and not `conflict` (a
       // drift on one file): a person, now, saying stop.
       | 'held'
+      // P26 DEP-002 s4 — `deploy_to_vm` stopped; `data.stage` says where (connect, box, build, stage, provision,
+      // secrets, up), and `data.said` carries the box's own words when it refused.
+      | 'deploy-failed'
       | 'io-error',
     message: string,
     public readonly data?: Record<string, unknown>
