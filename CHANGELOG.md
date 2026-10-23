@@ -17,6 +17,41 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## npm packages 0.2.6 · 2026-10-23
+
+**Your agent can put your app, its backend and its data on a server you own.**
+
+This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.6.
+`@nodegx/preview` moves to 0.2.5. `@nodegx/export`, `@nodegx/node-spec`, `@nodegx/project-contract` and
+`@nodegx/canvas-look` stay at their versions.
+
+### New
+
+- **Your app on your own server.** Ask your agent to put the app on a Linux server you rent. Its new `deploy_to_vm`
+  tool sends the app over ssh with its backend, cloud functions, access rules and function secrets. It installs them
+  as a service. With a web address, the app is served over https. Publishing again keeps the server's
+  data. `docs/runtime/YOUR-OWN-SERVER.md` in the NodeGX repository says how to set the server up.
+- **The whole app in one folder.** `npx -y --package @nodegx/preview nodegx-deploy <app> <folder> --full-stack` writes
+  the app with its backend, its cloud functions and its access rules. `./start.sh` in that folder runs it.
+- **What each file is licensed under.** Every deployed folder now holds `NODEGX-LICENSE.txt`. The app's own files
+  belong to whoever built it, and the runtime and the backend it runs on are MIT. The open-source notices inside the
+  runtime now ship beside it.
+
+### Fixed
+
+- A deploy no longer publishes the backend's access policy or its `backend/` folder beside the site.
+- A backend the agent sets up has its access rules switched on from its first record.
+- Who owns a record is decided by the server. A caller can't write it.
+- A project with nothing built yet is refused before anything reaches the server.
+- The packages no longer contain folder paths from the computer they were built on.
+
+### Good to know
+
+- NodeGX Studio can appear inside a Claude Desktop conversation (`open_studio`), but only on a computer with Studio
+  installed and `NODEGX_STUDIO` set to its folder. Studio isn't on npm yet.
+- While Studio is open beside the agent, a plan of more than three components is refused. The person sees the app take
+  shape a few components at a time.
+
 ## npm packages 0.2.5 · 2026-10-22
 
 **Your agent can read a whole NodeGX app as one page of text, and the code export is on npm.**
