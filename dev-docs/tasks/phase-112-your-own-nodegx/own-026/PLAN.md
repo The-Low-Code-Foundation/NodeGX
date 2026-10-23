@@ -279,3 +279,13 @@ AI changed last time and say whether it's right". Scoped in full after tests 1â€
   same shape as test 1's (4 tools plain code, 12 NodeGX in the mock). **Known, not fenced:** `/tmp` is still shared;
   two concurrent rounds that name the same `/tmp` file would share it (each round's `seal-audit.txt` lists the
   names, so overlaps can be counted afterwards).
+- **2026-10-23 10:35 CEST â€” FIX-03 landed and proven; the NodeGX chain of test 2 started on it.** Fixer `opennoodl-26`
+  (`cb7e0d6e4`, `a877b99e7`; kit `kits/FIX-03-cb7e0d6e4/`, with a rebuilt preview tgz: A and B live in the runtime).
+  The KIT-PROVEN gate held: the hold went at ~10:33 and the chain waited. $0 mock (`own026-mocks/fix03b`, steps
+  `mock/steps-fix03.json`), on a seed of t1-nodegx-3 as the chain runs it: the MCP entry names FIX-03's tgz;
+  `open_project` binds the round's own copy; `get_node_type SetDbModelProperties` has Add To at character 832 and
+  "taken once" at 1,180 (the fixer's numbers); `get_example cloud-shared-counter` answers; the round's `npx` is the
+  kitnpx shim on FIX-03's preview tgz. (The first mock, `fix03`, sent wrong argument names; the server refused them by
+  name.) KIT-PROVEN written; t2-nodegx-c01 started 10:35. Code and harness were at change 3 by then: c01 14/15 both;
+  c02 code 15/17 (C2.1 FAIL: multiple choice instead of a number pad), harness 15/17 (F6 regressed, graded as a doubt;
+  harness 56 min / $0.238 against code's 12 min / $0.052).
