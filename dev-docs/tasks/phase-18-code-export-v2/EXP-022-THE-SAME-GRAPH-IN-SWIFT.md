@@ -652,3 +652,12 @@ deaf to its Filter kills exactly t07:1 and t07:2; the chain before the values is
 **Cost:** the Swift printer **+117 net** by hand (3,938 → 4,055), plus the generated `fxpJs.ts`. Shared (PARSERAISE):
 plan +17, React printer +25, `parseLib` +36. Nine sessions of twelve.
 
+**Then, the same day: the page without figures, and the lane paused.** Richard read "15 of 85" as months of work for 15,
+with years to go. It is 15 of the scenarios the test rig can grade (39), 3 differ by design, and 46 the rig cannot run
+against an export at all (a scripted backend 23, several components 17, a late wire 3, a clock 3). He ruled: *"we need to
+update and not confuse people with figures"*, and *"we can stop the code export work for now and focus on the other lanes
+to get our NodeGX Studio 'the true copilot' concept out and in Beta"*. His line, "working 100%", was not used, because
+parts do not come across (the dark theme, drag to reorder, rocket-school's settings choices); he chose the drafted wording
+("Publish as written"). nodegx-web `9eae688`: /one-graph/ says two full apps exported and tested end to end, and what is
+left, with no numbers. **Lane 4 is paused; no session opens S10 until Richard names it.**
+

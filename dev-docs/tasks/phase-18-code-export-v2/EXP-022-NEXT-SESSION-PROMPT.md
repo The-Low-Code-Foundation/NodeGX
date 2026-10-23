@@ -1,5 +1,10 @@
 # Next session — EXP-022 S10: Richard's choice, with the claim at 15 of 85 on both (BOARD lane 4, the off-ramp; it was lane 6 until the 2026-10-23 BOARD; the Swift session)
 
+> 🔴 **PAUSED by Richard, 2026-10-23:** *"we can stop the code export work for now and focus on the other lanes to get
+> our NodeGX Studio 'the true copilot' concept out and in Beta"*. Do not open S10 until he names lane 4 again. The
+> page at /one-graph/ drops its numbers for plain words (his: "two full apps have already been fully exported and
+> tested end to end"); see EXP-022 §9 S9's last paragraph for where that stands.
+
 **Swift session 10 of at most 12.** Written 2026-10-23 at the end of S9 (Opus 5.5). Say which model you are in your
 first message. This is lane 4's **second** session. The first (React, EXP-021) runs on [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md)
 in this same folder and the same package. Do not touch its files.
