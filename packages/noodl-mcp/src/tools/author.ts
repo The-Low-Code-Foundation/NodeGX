@@ -51,8 +51,9 @@ import { backendRevealPayload } from './disclosure';
 import { cloudDeployPayload } from './cloudDeployNote';
 import type { PlanRegistry } from './planTools';
 import type { WriteValidation } from '../validate';
-import { validateCandidate, validateDeletion } from '../validate';
-import { CREATE_COMPONENT_SHAPE, NODE_COMMENT_ARG, connectionSchema, nodeSchema, portSchema } from '../vocabulary';
+import { foldSkipNotes, validateCandidate, validateDeletion } from '../validate';
+import { CREATE_COMPONENT_SHAPE, NODE_COMMENT_ARG, connectionInputSchema, nodeSchema, portSchema } from '../vocabulary';
+import { wireTextSchema } from '../wireText';
 import type { VisualTypePredicate } from '../visualRoots';
 import { catalogVisualPredicate, makeProjectVisualPredicate, resolveVisualRoots } from '../visualRoots';
 import type {
@@ -118,8 +119,8 @@ const operationSchema = z.discriminatedUnion('op', [
     ports: z.array(portSchema).optional()
   }),
   z.object({ op: z.literal('remove_node'), id: z.string().describe('Removes the node, its subtree and attached connections') }),
-  z.object({ op: z.literal('add_connection'), connection: connectionSchema }),
-  z.object({ op: z.literal('remove_connection'), connection: connectionSchema }),
+  z.object({ op: z.literal('add_connection'), connection: connectionInputSchema }),
+  z.object({ op: z.literal('remove_connection'), connection: connectionInputSchema }),
   z.object({ op: z.literal('set_visual_roots'), visualRoots: z.array(z.string()) }),
   z.object({
     op: z.literal('set_ports'),
@@ -133,6 +134,16 @@ const operationSchema = z.discriminatedUnion('op', [
     category: z.string().optional(),
     tags: z.array(z.string()).optional()
   })
+]);
+
+/**
+ * P112 OWN-026 FIX-04 A — an `operations` item may also be a wire line on its own (`"a.click -> b.run"`), which is an
+ * `add_connection`. In c03 the `{"op": "add_connection", "connection": {…}}` wrapper and the four keys were most of
+ * what a wire cost; a removal keeps its op (`{op: "remove_connection", connection: "a.click -> b.run"}`).
+ */
+const operationItemSchema = z.union([
+  operationSchema,
+  wireTextSchema.transform((connection) => ({ op: 'add_connection' as const, connection }))
 ]);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -423,7 +434,8 @@ function rejectWith(validation: WriteValidation, intent: string, budget: Example
     readable: lines,
     structural: validation.structural,
     newErrors: validation.newErrors,
-    allDiagnostics: validation.diagnostics,
+    // FIX-04 D — the same notes a success folds; a refusal that repeats 19 of them buries the error it is for.
+    allDiagnostics: foldSkipNotes(validation.diagnostics),
     // LAS-007 — the recipe, in the rejection. Keyed on the errors that caused
     // the refusal, not on every diagnostic in the candidate: the attachment
     // answers "what do I do about this", and a warning nobody was refused for
@@ -440,7 +452,8 @@ function remapPayload(remapped: readonly NodeIdRemap[]): NodeIdRemapSummary {
 }
 
 function successPayload(validation: WriteValidation): WriteValidationSummary {
-  const nonErrors = validation.diagnostics.filter((d) => d.severity !== 'error');
+  // P112 OWN-026 FIX-04 D — the skip notes, once per code (`foldSkipNotes`).
+  const nonErrors = foldSkipNotes(validation.diagnostics.filter((d) => d.severity !== 'error'));
   return {
     validation: {
       summary: validation.summary,
@@ -495,7 +508,8 @@ export function registerAuthorTools(
       description:
         'Create a new component from nodes + connections. The write is validated first (schemas, node types, ' +
         'ports, connection endpoints); any error rejects it with actionable diagnostics and nothing is written. ' +
-        'Node hierarchy may be given via `parent` fields, `children` arrays, or both. To use the new component ' +
+        'Node hierarchy may be given via `parent` fields, `children` arrays, or both. A connection may be one line: ' +
+        '"fromId.port -> toId.port". To use the new component ' +
         'from another graph, add a node whose type is the returned legacyName. ' +
         'Node ids must be unique across the whole project: any id you send that is already used elsewhere is ' +
         'reallocated (and the graph rewired to match) — see `remappedNodeIds` in the response and use those ids ' +
@@ -655,7 +669,7 @@ export function registerAuthorTools(
       description:
         'Change one component, either with `set` (full replacement of nodes/connections/visualRoots) or with a ' +
         'batch of `operations` (add/update/remove nodes, add/remove connections, set ports/info) — one call, one ' +
-        'reviewable change. Validated before writing; new errors reject the whole batch and nothing is written. ' +
+        'reviewable change. An `operations` item "fromId.port -> toId.port" adds that wire. Validated before writing; new errors reject the whole batch and nothing is written. ' +
         'A node id this call introduces that is already used elsewhere in the project is reallocated and ' +
         'reported as `remappedNodeIds`; ids the component already had are never touched. ' +
         'Pass the `revision` from get_component as `if_revision` to fail cleanly if the component changed since ' +
@@ -665,12 +679,12 @@ export function registerAuthorTools(
         set: z
           .object({
             nodes: z.array(nodeSchema),
-            connections: z.array(connectionSchema).optional(),
+            connections: z.array(connectionInputSchema).optional(),
             visual_roots: z.array(z.string()).optional()
           })
           .optional()
           .describe('Full graph replacement'),
-        operations: z.array(operationSchema).min(1).optional().describe('Batched delta operations, applied in order'),
+        operations: z.array(operationItemSchema).min(1).optional().describe('Batched delta operations, applied in order'),
         if_revision: z.string().optional().describe('Expected current revision (from get_component)'),
         allow_unknown_types: allowUnknownArg
       }

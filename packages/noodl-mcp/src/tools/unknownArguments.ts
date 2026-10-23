@@ -18,6 +18,7 @@
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
+import { normalizeArguments } from './argumentAliases';
 import type { ToolErrorPayload } from './responses';
 
 /** The keys a zod v3 object declares, or `undefined` when it takes keys it does not declare (or is not an object). */
@@ -160,7 +161,9 @@ export function refuseUnknownArguments(server: McpServer): void {
   const s = server as unknown as ValidatingServer;
   (server as unknown as HintedServer)[HINTERS] ??= new Map();
   const original = s.validateToolInput.bind(server);
-  s.validateToolInput = async (tool, args, toolName) => {
+  s.validateToolInput = async (tool, sent, toolName) => {
+    // FIX-04 C — a spelling whose meaning is not in doubt becomes the call it means (`argumentAliases.ts`).
+    const args = normalizeArguments(toolName, sent);
     const unknown = unknownArgumentKeys(tool.inputSchema, args);
     if (unknown.length > 0) {
       const hint = refusalHintFor(server, toolName, args, unknown);

@@ -54,6 +54,7 @@ import {
   type ToolGroupId
 } from '../toolGroups';
 import type { FindToolsResponse } from './responses';
+import { normalizeArguments } from './argumentAliases';
 import { refusalHintFor, unknownArgumentKeys, unknownArgumentsRefusal } from './unknownArguments';
 import { errorResult, guarded, jsonResult } from './util';
 
@@ -663,13 +664,15 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
           // P112-OWN020-CALLTOOLSTRIP — the parse below strips a key the tool does not have, so the guard a direct
           // `tools/call` gets (P109-S12, `refuseUnknownArguments`) runs here too, in the same words. DeepSeek sent
           // `update_component` its wires as a top-level `connections` beside `set`: `updated`, 0 errors, no wires.
-          const unknown = unknownArgumentKeys(schema, args.arguments ?? {});
+          // FIX-04 C — the same spellings a direct call is forgiven (`argumentAliases.ts`), before the same check.
+          const sent = normalizeArguments(args.name, args.arguments ?? {}) as Record<string, unknown>;
+          const unknown = unknownArgumentKeys(schema, sent);
           if (unknown.length > 0) {
-            const hint = refusalHintFor(server, args.name, args.arguments ?? {}, unknown);
+            const hint = refusalHintFor(server, args.name, sent, unknown);
             const { error } = unknownArgumentsRefusal(args.name, schema, unknown, hint);
             throw new ToolError(error.code, error.message, error.details);
           }
-          const result = await safeParseAsync(schema as Parameters<typeof safeParseAsync>[0], args.arguments ?? {});
+          const result = await safeParseAsync(schema as Parameters<typeof safeParseAsync>[0], sent);
           if (!result.success) {
             throw new ToolError(
               'invalid-argument',

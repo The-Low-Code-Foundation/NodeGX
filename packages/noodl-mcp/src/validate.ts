@@ -445,6 +445,70 @@ const SKIP_NOTE_CODES: ReadonlySet<string> = new Set<string>([
   DiagnosticCode.UnknownTypeCheckSkipped
 ]);
 
+/** A skip note standing for several: `count` of them, in one line. */
+export type FoldedDiagnostic = Diagnostic & { count?: number };
+
+const FOLD_LIST_MAX = 40;
+
+const FOLD_LEAD: Record<string, (n: number) => string> = {
+  [DiagnosticCode.DynamicPortSkipped]: (n) =>
+    `${n} nodes set parameters the catalog sees no port for, because their type makes those ports at run time, so ` +
+    'those parameters were not checked (a misspelt name is not caught here; get_node_type on the type says how it ' +
+    'makes them):',
+  [DiagnosticCode.UnknownTypeCheckSkipped]: (n) =>
+    `${n} nodes were not checked because their type is not in the node catalog (a module's or a kit's own type):`
+};
+
+/** `"value"`, `"a", "b"` — the parameters a dynamic-port note names, read off its one sentence (`parameterValues.ts`). */
+function namedParameters(message: string): string {
+  const m = /^Parameters? ((?:"[^"]*"(?:, )?)+) on /.exec(message);
+  return m ? ` ${m[1]}` : '';
+}
+
+/**
+ * P112 OWN-026 FIX-04 D — a write's answer says once that some checks did not run, not once per node.
+ *
+ * The skip notes above say that a check did not run, and `validate_project` has always left them out. A write's
+ * answer carried every one, every time: in t2-nodegx-c03, 19 `dynamic-port-skipped` notes on one page (a Set
+ * Variable's `value` port follows its variable, so each one draws one) were 12k of a 13.5k answer, sent back
+ * unchanged on six writes in a row, and they were 212 of the round's ~240 write diagnostics. Two or more notes of a
+ * code become one line that names each node and the parameters left unchecked (so a misspelt name on a dynamic-port
+ * node is still in the answer). A single note stays as it was. Findings keep their place, before the folded lines.
+ * Measured on c01–c03's write answers: 71–73% fewer characters.
+ */
+export function foldSkipNotes(diagnostics: readonly Diagnostic[]): FoldedDiagnostic[] {
+  const notes = new Map<string, Diagnostic[]>();
+  for (const d of diagnostics) {
+    if (!SKIP_NOTE_CODES.has(d.code)) continue;
+    notes.set(d.code, [...(notes.get(d.code) ?? []), d]);
+  }
+  const folded = [...notes.entries()].filter(([, list]) => list.length >= 2);
+  if (folded.length === 0) return [...diagnostics];
+  const foldedCodes = new Set(folded.map(([code]) => code));
+  const out: FoldedDiagnostic[] = diagnostics.filter((d) => !foldedCodes.has(d.code));
+  for (const [code, list] of folded) {
+    const byType = new Map<string, string[]>();
+    for (const d of list.slice(0, FOLD_LIST_MAX)) {
+      const type = d.location.nodeType ?? '?';
+      const where = d.location.nodeId ?? d.location.nodeLabel ?? '?';
+      const at = code === DiagnosticCode.DynamicPortSkipped ? `${where}${namedParameters(d.message)}` : where;
+      byType.set(type, [...(byType.get(type) ?? []), at]);
+    }
+    const listed = [...byType.entries()].map(([type, ats]) => `${type}: ${ats.join(', ')}`).join('; ');
+    const more = list.length > FOLD_LIST_MAX ? `; +${list.length - FOLD_LIST_MAX} more` : '';
+    const lead = FOLD_LEAD[code]?.(list.length) ?? `${list.length} nodes were not checked by one check:`;
+    const components = [...new Set(list.map((d) => d.location.component))];
+    out.push({
+      code: code as Diagnostic['code'],
+      severity: 'info',
+      message: `${lead} ${listed}${more}.`,
+      location: { component: components.length === 1 ? components[0] : components.join(', ') },
+      count: list.length
+    });
+  }
+  return out;
+}
+
 /**
  * The precondition half, for components already on disk.
  *

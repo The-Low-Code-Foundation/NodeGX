@@ -78,7 +78,7 @@ import { pathToLegacyName, toPathForm, validateComponentPath } from '../paths';
 import { componentIsPage, registerPages, registrationSummary, unroutedPagesSummary } from '../project/pageRegistration';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
-import { authoredProjectViews, preconditionDiagnostics } from '../validate';
+import { authoredProjectViews, foldSkipNotes, preconditionDiagnostics } from '../validate';
 import type { WriteValidation } from '../validate';
 import { drawnPortCheck } from '../specPorts';
 import type { WriteValidationSummary } from './responses';
@@ -89,7 +89,7 @@ import { isUntouchedSkeletonPage } from './createProject';
 // AAQ-005: one authoring vocabulary — the same node/connection shapes
 // `create_component` takes, rendered from the shared table rather than from a
 // second hand-written copy.
-import { connectionSchema, nodeSchema } from '../vocabulary';
+import { connectionInputSchema, nodeSchema } from '../vocabulary';
 import { writeProjectDocFile } from './docsTools';
 import type { ExampleBudget } from './attachments';
 import { examplesBlock } from './attachments';
@@ -534,7 +534,7 @@ function validateStaged(
     warnings: diagnostics.filter((d) => d.severity === 'warning').length,
     // Exactly `successPayload`'s filter in author.ts — the two doors decide
     // "what survives a successful write" the same way or they are two dialects.
-    diagnostics: diagnostics.filter((d) => d.severity !== 'error'),
+    diagnostics: foldSkipNotes(diagnostics.filter((d) => d.severity !== 'error')),
     summary: summarize(diagnostics)
   };
 }
@@ -781,7 +781,7 @@ export function registerPlanTools(
         plan_id: z.string(),
         operation_id: z.string().describe('The operation id from create_plan (e.g. "op-2")'),
         nodes: z.array(nodeSchema).min(1).optional().describe('Component operations only'),
-        connections: z.array(connectionSchema).optional(),
+        connections: z.array(connectionInputSchema).optional(),
         visual_roots: z.array(z.string()).optional(),
         description: z.string().optional().describe('Summary stored on the component (creates only)'),
         content: z

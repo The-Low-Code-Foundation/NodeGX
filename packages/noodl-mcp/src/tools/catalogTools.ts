@@ -118,14 +118,15 @@ export function registerCatalogTools(server: McpServer): void {
         'semantics of just the ports you are setting; pass detail: "full" for the whole type — every ' +
         'port\'s prose, whenToUse, runtimeBehavior, relatedNodes, patterns. ' +
         'Full is large (Group is ~11k tokens for 111 ports) and is re-sent on every ' +
-        'later turn, so spend it on choosing between types, not on setting a value. ' +
-        'Unknown names return a nearest-match suggestion; an oversized full response degrades its tail to ' +
-        'summaries in-band (see `summarized`).',
+        'later turn, so spend it on choosing between types, not on setting a value.',
+      // FIX-04 — "unknown names return a nearest-match suggestion; an oversized full answer degrades its tail to
+      // summaries (`summarized`)" was said here, on every request; the answer says both in-band when they happen.
       inputSchema: {
+        // FIX-04 C — no `.max`: past the cap the answer covers the first ones and names the rest (`notAnswered`),
+        // where a refusal cost a turn and answered none (t2-nodegx-c03 asked for nine).
         type_names: z
           .array(z.string())
           .min(1)
-          .max(MAX_TYPES_PER_CALL)
           .describe('Exact catalog typeNames, e.g. ["Group", "net.noodl.controls.button"]'),
         detail: z
           .enum(['summary', 'full'])
@@ -137,14 +138,26 @@ export function registerCatalogTools(server: McpServer): void {
           .describe('Full detail for these ports only, e.g. ["width", "flexDirection"]. Cheaper than detail:"full"')
       }
     },
-    guarded((args: { type_names: string[]; detail?: 'summary' | 'full'; ports?: string[] }) => {
+    guarded((sent: { type_names: string[]; detail?: 'summary' | 'full'; ports?: string[] }) => {
+      const over = sent.type_names.slice(MAX_TYPES_PER_CALL);
+      const args = { ...sent, type_names: sent.type_names.slice(0, MAX_TYPES_PER_CALL) };
+      const answer = (payload: GetNodeTypeResponse) =>
+        jsonResult(
+          over.length
+            ? {
+                ...payload,
+                notAnswered: over,
+                notAnsweredHint: `Up to ${MAX_TYPES_PER_CALL} types a call: these were not looked up. Ask for them in a second call.`
+              }
+            : payload
+        );
       // AWP-005 §2 — per-port detail wins over `detail`, because it is the more
       // specific request and the two together can only mean "these ports".
       if (args.ports && args.ports.length > 0) {
         const payload: GetNodeTypeResponse = {
           types: args.type_names.map((n) => getNodeTypePorts(n, args.ports!))
         };
-        return jsonResult(payload);
+        return answer(payload);
       }
 
       // AWP-005 §2 — `summary` is the default. It was measured sufficient for
@@ -157,7 +170,7 @@ export function registerCatalogTools(server: McpServer): void {
       // by turn 34.
       if (args.detail !== 'full') {
         const payload: GetNodeTypeResponse = { types: args.type_names.map(getNodeTypeSummary) };
-        return jsonResult(withCutNote(payload));
+        return answer(withCutNote(payload));
       }
 
       // Full detail, with a byte budget (DEBT-009): seven enriched types once
@@ -185,7 +198,7 @@ export function registerCatalogTools(server: McpServer): void {
         payload.summarized = summarized;
         payload.hint = 'Response would exceed the tool-result size cap; the listed types were returned as summaries. Request them individually for full detail.';
       }
-      return jsonResult(withCutNote(payload));
+      return answer(withCutNote(payload));
     })
   );
 
