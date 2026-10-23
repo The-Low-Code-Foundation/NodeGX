@@ -74,7 +74,8 @@ if [ -f "$DATA_DIR/security.json" ] && "$NODE" -e \
   cat >&2 <<REFUSAL
 FATAL: $APP's access rules are switched off ($DATA_DIR/security.json has "devOpen": true), so anyone who can reach it
 reads and changes every record. A ship does not start an app that way, and nothing has been changed: the app that
-is running now keeps running as it is. To switch the rules on (the ones written in that file), run on this box:
+is running now keeps running as it is. To switch the rules on (the ones written in that file), run ON THE SERVER
+(ssh in first; on a Mac this sed refuses the command):
 
   sed -i 's/"devOpen": *true/"devOpen": false/' $DATA_DIR/security.json && systemctl restart $APP-backend
 
