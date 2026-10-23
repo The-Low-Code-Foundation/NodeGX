@@ -171,3 +171,12 @@ where the trace has them), and what went into a FIX file. Measurements, not impr
   **T7 and C5.3 join F6 and T6: graded both ways on an unchanged mechanism.** The table lists them apart. The leak
   stays in the findings (#8) until a grade shows the mechanism closed.
 - T6 failed on the browser-back path, as before.
+
+## #11 — t2-nodegx-c08 (the mistakes of the last 7 days), kit FIX-03, 29/31 (2026-10-23)
+
+- C8.1 and C8.2 passed. $0.101, 19 min, 1 sitting; 26 nodes added, JavaScriptFunctions 25 → 26 (+100 lines). Kit lookups
+  11 (147k), own-docs reads 6.
+- **The only two fails are #8's leak, found again by the same forged invite** (T7: B replays A's invite with its own
+  address; C5.3: the teacher writes one naming family C). `measure.mjs` shows them as regressions against c07,
+  whose grader didn't trigger the leak (#10). That's the confirmation: c07's pass was the grader, not a fix. **Read
+  T7 and C5.3 as failing from c05 on.** F6 and T6 passed this time: the coin-flips again.
