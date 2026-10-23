@@ -1,7 +1,8 @@
 ---
 id: P26-VMNODE
 title: The VM service named /usr/bin/node and would not start on a box whose Node lives elsewhere
-status: open
+status: fixed
+commit: e32218cf4
 severity: medium
 area: deploy / OWN-016 provision-app.sh (VM layout)
 found: P26 lane 5 session 3 (the VM push), 2026-10-23
