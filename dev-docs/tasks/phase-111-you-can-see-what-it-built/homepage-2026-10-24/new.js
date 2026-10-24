@@ -1,7 +1,7 @@
 <script>
-  /* The downloads moved to /build/ on 2026-10-24. Old links to /#download (the nav, other pages) land there. */
+  /* The downloads moved to /start/ on 2026-10-24. Old links to /#download (the nav, other pages) land there. */
   (function () {
-    function go() { if (location.hash === '#download') location.replace('/build/#download'); }
+    function go() { if (location.hash === '#download') location.replace('/start/#download'); }
     go(); window.addEventListener('hashchange', go);
   })();
 </script>

@@ -1,0 +1,1023 @@
+<title>Start here · NodeGX</title>
+<style>
+  /* Tokens: nodegx.io's own, verbatim, so this page reads as part of the same site. */
+  :root {
+    --ground: #f6f8fa; --panel: #ffffff; --panel-2: #f0f3f6;
+    --ink: #12161c; --ink-soft: #495260; --ink-faint: #79828f;
+    --line: #dce1e8; --line-soft: #e7ebf0;
+    --signal: #0b8f81; --signal-bright: #12b3a1; --signal-wash: #e0f2ef; --signal-ink: #ffffff;
+    --amber: #b9772a; --amber-wash: #f7ecdc;
+    --dot: rgba(11,143,129,0.16); --wire: rgba(11,143,129,0.30);
+    --ring: #f2a93b;
+    --shadow: 0 1px 2px rgba(18,22,28,.04), 0 8px 24px -12px rgba(18,22,28,.14);
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", "SFMono-Regular", Menlo, "Cascadia Mono", "Roboto Mono", monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #0e1116; --panel: #161b22; --panel-2: #1b212a; --ink: #eef1f5;
+      --ink-soft: #b3bcc8; --ink-faint: #7c8695; --line: #262d38; --line-soft: #1f252e;
+      --signal: #2dd4bf; --signal-bright: #5eead4; --signal-wash: rgba(45,212,191,0.10); --signal-ink: #06231f;
+      --amber: #e0a458; --amber-wash: rgba(224,164,88,0.12);
+      --dot: rgba(45,212,191,0.15); --wire: rgba(45,212,191,0.34);
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #0e1116; --panel: #161b22; --panel-2: #1b212a; --ink: #eef1f5;
+    --ink-soft: #b3bcc8; --ink-faint: #7c8695; --line: #262d38; --line-soft: #1f252e;
+    --signal: #2dd4bf; --signal-bright: #5eead4; --signal-wash: rgba(45,212,191,0.10); --signal-ink: #06231f;
+    --amber: #e0a458; --amber-wash: rgba(224,164,88,0.12);
+    --dot: rgba(45,212,191,0.15); --wire: rgba(45,212,191,0.34);
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -14px rgba(0,0,0,.6);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--ground); color: var(--ink);
+    font-family: var(--sans); font-size: 18px; line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding-inline: 24px; }
+  @media (max-width: 480px) { .wrap { padding-inline: 16px; } body { font-size: 17px; } }
+
+  a { color: var(--signal); }
+  a:focus-visible, button:focus-visible, textarea:focus-visible { outline: 2px solid var(--signal-bright); outline-offset: 3px; border-radius: 4px; }
+  h1, h2, h3 { text-wrap: balance; }
+  p { margin: 0; }
+  b { font-weight: 650; }
+
+  .label {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--ink-faint);
+  }
+
+  /* ---------- Top bar ---------- */
+  .top { border-bottom: 1px solid var(--line); background: var(--panel); }
+  .top .wrap { display: flex; align-items: center; gap: 10px; padding-block: 14px; }
+  .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); font-weight: 700; letter-spacing: -0.02em; text-decoration: none; }
+  .brand svg { width: 30px; height: 30px; border-radius: 7px; display: block; }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    border-bottom: 1px solid var(--line);
+    background: radial-gradient(circle at 1px 1px, var(--dot) 1.4px, transparent 1.5px);
+    background-size: 24px 24px;
+  }
+  .hero .wrap { padding-block: 56px 48px; display: grid; gap: 18px; }
+  .hero h1 { font-size: clamp(36px, 6vw, 54px); line-height: 1.05; letter-spacing: -0.03em; font-weight: 800; margin: 0; }
+  .hero .lede { font-size: 20px; color: var(--ink-soft); max-width: 32em; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 16px;
+    padding: 11px 18px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--panel); color: var(--ink); cursor: pointer; font-family: inherit;
+    text-decoration: none; justify-self: start;
+  }
+  .btn.primary { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); }
+  .btn:hover { filter: brightness(1.06); }
+
+  section { padding-block: 52px; border-bottom: 1px solid var(--line-soft); }
+  section > .wrap > h2 { font-size: clamp(26px, 4vw, 32px); letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 12px; }
+  .intro { color: var(--ink-soft); max-width: 36em; }
+
+  /* ---------- Who does what ---------- */
+  .who { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 24px; }
+  @media (max-width: 680px) { .who { grid-template-columns: 1fr; } }
+  .who div { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 18px; }
+  .who h3 { margin: 0 0 6px; font-size: 20px; }
+  .who p { font-size: 16.5px; color: var(--ink-soft); }
+
+  /* ---------- Steps ---------- */
+  .steps { list-style: none; margin: 0; padding: 0; }
+  .step { border-bottom: 1px solid var(--line-soft); padding-block: 48px; }
+  .step:first-child { padding-top: 8px; }
+  .step:last-child { border-bottom: none; padding-bottom: 0; }
+  .step-head { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .step .n {
+    flex: none; width: 40px; height: 40px; border-radius: 50%;
+    display: grid; place-items: center; font-family: var(--mono); font-size: 16px; font-weight: 700;
+    background: var(--signal); color: var(--signal-ink);
+  }
+  .step h3 { font-size: clamp(22px, 3.4vw, 26px); letter-spacing: -0.02em; margin: 0; line-height: 1.2; }
+  .step .body { display: grid; gap: 16px; }
+  .step .body > p { max-width: 36em; }
+  .soft { color: var(--ink-soft); }
+
+  .note { background: var(--amber-wash); border-radius: 10px; padding: 14px 16px; font-size: 16.5px; }
+  .note .label { color: var(--amber); display: block; margin-bottom: 4px; font-size: 11.5px; }
+  .note ul { margin: 0; padding-left: 20px; }
+  .note li + li { margin-top: 6px; }
+
+  /* screenshot with the button ringed */
+  .shot { margin: 0; display: grid; gap: 8px; }
+  .shot-frame { position: relative; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); max-width: 100%; }
+  .shot-frame img { display: block; width: 100%; height: auto; }
+  .shot-ring {
+    position: absolute; left: 5.3%; top: 80.6%; width: 31.8%; height: 12.8%;
+    border: 3px solid var(--ring); border-radius: 12px;
+    box-shadow: 0 0 0 4px rgba(242,169,59,0.35);
+  }
+  .shot figcaption { font-size: 15px; color: var(--ink-soft); }
+
+  /* copyable prompts */
+  .say { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow); overflow: hidden; }
+  .say-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 8px 10px 8px 16px; background: var(--panel-2); border-bottom: 1px solid var(--line); }
+  .say-head .btn { font-size: 14px; padding: 6px 14px; }
+  .say textarea {
+    display: block; width: 100%; border: 0; resize: vertical;
+    padding: 14px 16px; font: inherit; font-size: 16.5px; line-height: 1.55;
+    background: var(--panel); color: var(--ink);
+  }
+  .say textarea:focus { outline: 2px solid var(--signal-bright); outline-offset: -2px; }
+
+  .ideas { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .ideas .label { margin-right: 4px; }
+  .chip {
+    font: inherit; font-size: 14.5px; padding: 6px 12px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink);
+  }
+  .chip:hover { border-color: var(--signal); color: var(--signal); }
+
+  .asks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px 24px; margin: 0; padding: 0; list-style: none; }
+  @media (max-width: 600px) { .asks { grid-template-columns: 1fr; } }
+  .asks li { padding-left: 22px; position: relative; font-size: 16.5px; }
+  .asks li::before { content: "?"; position: absolute; left: 0; top: 0; font-family: var(--mono); font-weight: 700; color: var(--signal); }
+
+  details.words { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+  details.words summary { cursor: pointer; padding: 14px 16px; font-weight: 600; }
+  details.words[open] summary { border-bottom: 1px solid var(--line-soft); }
+  details.words dl { margin: 0; padding: 6px 16px 14px; display: grid; grid-template-columns: max-content 1fr; gap: 10px 18px; font-size: 16px; }
+  details.words dt { font-weight: 650; }
+  details.words dd { margin: 0; color: var(--ink-soft); }
+  @media (max-width: 520px) { details.words dl { grid-template-columns: 1fr; gap: 2px; } details.words dd { margin-bottom: 10px; } }
+
+  .costs { display: grid; gap: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); overflow: hidden; }
+  .costs div { display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; padding: 12px 16px; border-bottom: 1px solid var(--line-soft); align-items: baseline; }
+  .costs div:last-child { border-bottom: none; }
+  .costs .what { font-weight: 600; }
+  .costs .where { grid-column: 1; font-size: 15.5px; color: var(--ink-soft); }
+  .costs .price { grid-row: 1; grid-column: 2; font-family: var(--mono); font-size: 14.5px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  /* ---------- Cards (watch, guide, help) ---------- */
+  .cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 22px; }
+  @media (max-width: 640px) { .cards { grid-template-columns: 1fr; } }
+  .card { display: grid; gap: 6px; align-content: start; padding: 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); text-decoration: none; }
+  a.card:hover { border-color: var(--signal); }
+  .card h3 { margin: 0; font-size: 18px; line-height: 1.3; }
+  .card p { font-size: 15.5px; color: var(--ink-soft); }
+  .card .go { font-size: 15px; font-weight: 600; color: var(--signal); }
+
+  .coach {
+    display: grid; grid-template-columns: auto 1fr; gap: 18px 20px; align-items: center;
+    background: var(--signal-wash); border: 1px solid var(--signal); border-radius: 14px; padding: 22px;
+    margin-top: 22px;
+  }
+  @media (max-width: 560px) { .coach { grid-template-columns: 1fr; } }
+  .coach .mono-av {
+    width: 64px; height: 64px; border-radius: 50%; background: var(--signal); color: var(--signal-ink);
+    display: grid; place-items: center; font-weight: 800; font-size: 22px; letter-spacing: -0.02em;
+  }
+  .coach h3 { margin: 0 0 4px; font-size: 21px; }
+  .coach p { color: var(--ink-soft); font-size: 16.5px; }
+  .coach .btn { margin-top: 12px; }
+
+  footer { padding-block: 32px 48px; font-size: 14.5px; color: var(--ink-faint); }
+
+  @media (prefers-reduced-motion: no-preference) { .btn, .chip, .card { transition: filter .15s, border-color .15s, color .15s; } }
+
+  [hidden] { display: none !important; }
+  /* ---------- 2026-10-24: one Start page, four profiles ----------
+     The steps below the picker change with the profile. Elements carry data-profiles="new play business bubble";
+     without JavaScript every profile shows, one after another. */
+  .kicker { font-family: var(--mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--signal); margin: 0 0 8px; }
+  .picker { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
+  @media (max-width: 560px) { .picker { grid-template-columns: minmax(0, 1fr); } }
+  .picker button {
+    display: grid; gap: 4px; align-content: start; text-align: left; cursor: pointer; font: inherit; color: var(--ink);
+    padding: 16px 16px 18px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); box-shadow: var(--shadow);
+  }
+  .picker button b { font-size: 17.5px; line-height: 1.3; }
+  .picker button span { font-size: 15px; color: var(--ink-soft); line-height: 1.45; }
+  .picker button[aria-pressed=true] { border-color: var(--signal); box-shadow: 0 0 0 2px var(--signal), var(--shadow); background: var(--signal-wash); }
+  .picker button:hover { border-color: var(--signal); }
+  .profile-title { font-size: clamp(26px, 4vw, 32px); letter-spacing: -0.02em; line-height: 1.2; margin: 0 0 8px; }
+
+  .cmd {
+    display: block; margin: 0; font-family: var(--mono); font-size: 14px; line-height: 1.6;
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+    overflow-x: auto; white-space: pre; color: var(--ink);
+  }
+  .coders { display: flex; flex-wrap: wrap; gap: 6px; }
+  .coders button {
+    font: inherit; font-size: 15px; font-weight: 600; padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink-soft);
+  }
+  .coders button[aria-selected=true] { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); }
+  .pane { display: grid; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .pane p { font-size: 16.5px; }
+
+  .sub-steps { margin: 0; padding-left: 22px; display: grid; gap: 14px; }
+  .sub-steps li::marker { color: var(--signal); font-weight: 700; font-family: var(--mono); }
+
+  .chooser .q { font-weight: 650; margin-bottom: 8px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button {
+    font: inherit; font-size: 15px; padding: 6px 12px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel-2); color: var(--ink-soft);
+  }
+  .seg button[aria-pressed=true] { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); }
+  .cards.three { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); margin-top: 0; }
+  .card .port { font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--signal); }
+  .card-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+  .state { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); }
+  .state.now { color: var(--signal); background: var(--signal-wash); border-color: var(--wire); }
+  .state.soon { color: var(--amber); background: var(--amber-wash); border-color: var(--amber-wash); }
+  .card.pick { transition: opacity .2s, border-color .2s; }
+  .card.pick.picked { border-color: var(--signal); box-shadow: 0 0 0 2px var(--signal-wash); }
+  .card.pick.dim { opacity: .55; }
+  .card .btn { justify-self: start; margin-top: 4px; font-size: 15px; padding: 8px 14px; }
+  .btn .sub { font-family: var(--mono); font-size: 12px; font-weight: 500; opacity: .8; }
+  details.from-source { font-size: 15px; color: var(--ink-soft); }
+  details.from-source summary { cursor: pointer; color: var(--signal); font-weight: 600; }
+  details.from-source p { margin: 8px 0; }
+  .ticks { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 16px; color: var(--ink-soft); }
+  .ticks li::before { content: "\2713"; color: var(--signal); font-weight: 700; margin-right: 8px; }
+  .ticks.no li::before { content: "\2192"; color: var(--amber); }
+
+  /* the download block, as on the old homepage */
+  .release { background: var(--panel); border: 1px solid var(--signal); border-radius: 18px; padding: 24px 24px 26px; box-shadow: var(--shadow); margin-top: 18px; }
+  .rel-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 0 0 4px; }
+  .rel-ver { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -0.01em; color: var(--signal); }
+  .rel-date { font-family: var(--mono); font-size: 12.5px; color: var(--ink-faint); margin-left: auto; }
+  .rel-note { color: var(--ink-soft); font-size: 15.5px; margin: 0 0 20px; max-width: 62ch; }
+  .dl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; margin: 0 0 16px; }
+  .dl { display: flex; flex-direction: column; gap: 2px; background: var(--panel-2); border: 1px solid var(--line); border-radius: 11px; padding: 13px 15px; color: var(--ink); text-decoration: none; }
+  .dl:hover { border-color: var(--signal); background: var(--signal-wash); }
+  .dl .os { font-size: 15px; font-weight: 650; }
+  .dl .file { font-family: var(--mono); font-size: 11.5px; color: var(--ink-faint); }
+  .rel-foot { font-size: 14.5px; color: var(--ink-soft); margin: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .caveat { padding: 14px 16px; border-radius: 11px; background: var(--amber-wash); border: 1px solid var(--amber); font-size: 15.5px; line-height: 1.6; color: var(--ink); }
+  @media (prefers-reduced-motion: reduce) { .card.pick { transition: none; } }
+</style>
+
+<!-- nav -->
+
+<div class="hero">
+  <div class="wrap">
+    <h1>Start here</h1>
+    <p class="lede">Which sounds most like you? The steps below change to match.</p>
+    <div class="picker" role="group" aria-label="Where you&rsquo;re starting from">
+      <button type="button" data-profile="new" aria-pressed="true"><b>I&rsquo;ve never built an app</b><span>Claude builds it with you, step by step. Then you change it in NodeGX.</span></button>
+      <button type="button" data-profile="play" aria-pressed="false"><b>I want to try ideas with my AI coder</b><span>You use Claude Code, Cline or Mistral Vibe.</span></button>
+      <button type="button" data-profile="business" aria-pressed="false"><b>I&rsquo;m building for a business</b><span>Internal tools, or apps for your customers.</span></button>
+      <button type="button" data-profile="bubble" aria-pressed="false"><b>I&rsquo;m coming from Bubble</b><span>Bring your app&rsquo;s pages and back end across.</span></button>
+    </div>
+  </div>
+</div>
+<div id="steps-start"></div>
+
+<main>
+  <section id="new" data-profiles="new">
+    <div class="wrap">
+      <p class="kicker">Never built an app</p>
+      <h2 class="profile-title">Build your first app with AI</h2>
+      <p class="intro">Never written code? This is for you. Follow the steps in order. We&rsquo;ll tell you what to
+        download, what to click, and what to type.</p>
+      <h3 style="margin:28px 0 0;font-size:20px">Who does what</h3>
+      <div class="who">
+        <div>
+          <h3>You</h3>
+          <p>You have the idea. You answer questions, and you say what you like and what you don&rsquo;t.</p>
+        </div>
+        <div>
+          <h3>Claude</h3>
+          <p>An AI you chat with, in plain English. It asks you questions, then builds the app for you.</p>
+        </div>
+        <div>
+          <h3>NodeGX</h3>
+          <p>A free app for your computer. Your app is built inside it. You can see it there, and change it too.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="steps" data-profiles="new">
+    <div class="wrap">
+      <ol class="steps">
+
+        <li class="step" id="step-1">
+          <div class="step-head"><span class="n" aria-hidden="true">1</span><h3>Download Claude</h3></div>
+          <div class="body">
+            <p>
+              Claude is the AI you&rsquo;ll talk to. Download the Claude app for your computer
+              and sign in. Building apps needs a paid plan. <b>Pro</b> is enough to start.
+            </p>
+            <a class="btn primary" href="https://claude.ai/download">Download Claude</a>
+            <div class="note">
+              <span class="label">Good to know</span>
+              <ul>
+                <li>The Claude app has a <b>Chat</b> tab and a <b>Code</b> tab. For building with NodeGX, always use <b>Code</b>.</li>
+                <li>If it asks you to choose a folder, make a new empty folder called <b>My apps</b> and choose that.</li>
+                <li>Already use a different AI coding tool, like Kimi Code or Cline? That works too. Step 3 shows you how.</li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="step" id="step-2">
+          <div class="step-head"><span class="n" aria-hidden="true">2</span><h3>Download NodeGX</h3></div>
+          <div class="body">
+            <p>
+              NodeGX is free. Choose the version for your computer (Mac, Windows or Linux),
+              install it, and open it.
+            </p>
+            <a class="btn primary" href="#download">Download NodeGX</a>
+          </div>
+        </li>
+
+        <li class="step" id="step-3">
+          <div class="step-head"><span class="n" aria-hidden="true">3</span><h3>Connect Claude to NodeGX</h3></div>
+          <div class="body">
+            <p>In NodeGX, click the blue <b>Connect Claude Code</b> button. That lets Claude build apps in NodeGX.</p>
+            <figure class="shot">
+              <div class="shot-frame">
+                <img src="launcher.webp" width="1121" height="670"
+                     alt="The NodeGX welcome screen. Below 'Welcome to NodeGX' is a box titled 'Build it by describing it' with a blue 'Connect Claude Code' button, which is circled.">
+                <span class="shot-ring" aria-hidden="true"></span>
+              </div>
+              <figcaption>What you see in the middle of NodeGX the first time you open it.</figcaption>
+            </figure>
+            <p>
+              Then go back to Claude and start a <b>new</b> conversation in the Code tab.
+              Claude only sees NodeGX in conversations you start after connecting.
+            </p>
+            <div class="note">
+              <span class="label">Using Kimi Code, Cline or another tool?</span>
+              Click <b>Copy the command instead</b> (next to the button). Paste it into
+              your AI tool and say: &ldquo;Please add this MCP server so you can use NodeGX.&rdquo;
+            </div>
+          </div>
+        </li>
+
+        <li class="step" id="step-4">
+          <div class="step-head"><span class="n" aria-hidden="true">4</span><h3>Tell Claude your idea</h3></div>
+          <div class="body">
+            <p>
+              Copy this message into Claude, then fill in the gaps in your own words.
+              It doesn&rsquo;t need to be perfect. Claude will ask about anything that&rsquo;s missing.
+            </p>
+            <div class="ideas" aria-label="Example ideas">
+              <span class="label">Need an idea?</span>
+              <button class="chip" type="button" data-idea="a sign-up list for my running club, so we know who's coming on Saturday">Running club sign-ups</button>
+              <button class="chip" type="button" data-idea="a booking page for my yoga classes">Class bookings</button>
+              <button class="chip" type="button" data-idea="a list of my plants that reminds me when to water each one">Plant watering</button>
+              <button class="chip" type="button" data-idea="a short quiz my students can take on their phones">Student quiz</button>
+            </div>
+            <div class="say">
+              <div class="say-head">
+                <span class="label">Message 1 &middot; your idea</span>
+                <button class="btn copy" type="button" data-for="msg-idea">Copy</button>
+              </div>
+              <textarea id="msg-idea" rows="14" aria-label="Message 1: your idea" spellcheck="false">Hi Claude! I'd like to build an app in NodeGX, using the NodeGX connection.
+
+About me: I'm new to this. I've never built an app and I don't know how to code. Please use plain words, explain any technical word the first time you use it, and ask me one question at a time.
+
+Before we build anything, help me plan it. Tell me if my idea is too big for a first version.
+
+My idea:
+Who it's for:
+The problem it solves:
+Something like it I've seen: </textarea>
+            </div>
+
+            <p><b>Claude will ask you questions before it builds anything.</b> That&rsquo;s called planning, or &ldquo;scoping&rdquo;. It will probably ask about things like:</p>
+            <ul class="asks">
+              <li>Does anyone need to log in?</li>
+              <li>Who can see what?</li>
+              <li>What does the app need to remember?</li>
+              <li>What do people see the first time, before anything is added?</li>
+              <li>Phone, computer, or both?</li>
+              <li>Who adds, changes or deletes things?</li>
+              <li>Does it send emails, or take payments?</li>
+              <li>What should it <i>not</i> do yet?</li>
+            </ul>
+            <p class="soft">
+              You don&rsquo;t need the answers now. It&rsquo;s fine to say &ldquo;I don&rsquo;t know. What would you suggest?&rdquo;
+            </p>
+
+            <details class="words">
+              <summary>Words Claude might use, in plain English</summary>
+              <dl>
+                <dt>Front end</dt><dd>The part of the app people see and click.</dd>
+                <dt>Back end</dt><dd>The part that works behind the scenes: it saves things and does jobs nobody sees.</dd>
+                <dt>Database</dt><dd>Where the app keeps things, so they&rsquo;re still there tomorrow.</dd>
+                <dt>Logic, workflow</dt><dd>The rules. &ldquo;When someone clicks Book, save it and show a thank-you message.&rdquo;</dd>
+                <dt>Log in, auth</dt><dd>People proving who they are, usually with an email and password.</dd>
+                <dt>Stack</dt><dd>The set of tools an app is built with. With NodeGX, this is already decided for you.</dd>
+                <dt>Hosting, cloud</dt><dd>Renting a computer on the internet that runs your app, so other people can use it.</dd>
+                <dt>Deploy</dt><dd>Putting your app onto that computer.</dd>
+                <dt>Domain</dt><dd>Your app&rsquo;s web address, like myrunningclub.com.</dd>
+                <dt>MCP, connector</dt><dd>How Claude talks to NodeGX. You set this up in step 3.</dd>
+              </dl>
+            </details>
+            <p class="soft">If Claude uses any other word you don&rsquo;t know, ask &ldquo;What does that mean?&rdquo; Every time.</p>
+          </div>
+        </li>
+
+        <li class="step" id="step-5">
+          <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>Ask Claude to build it</h3></div>
+          <div class="body">
+            <p>
+              When Claude sums up the plan and it sounds right, make sure NodeGX is open,
+              then send this:
+            </p>
+            <div class="say">
+              <div class="say-head">
+                <span class="label">Message 2 &middot; build it</span>
+                <button class="btn copy" type="button" data-for="msg-build">Copy</button>
+              </div>
+              <textarea id="msg-build" rows="8" aria-label="Message 2: build it" spellcheck="false">That plan sounds right. Before you build, please show me a mockup of the main screens so I can check they look right.
+
+When I'm happy with the mockup, save it in the project folder and build the app in NodeGX, here on my computer. Tell me what you're doing as you go, in plain words.
+
+When it's finished, open the project in NodeGX (it's open now), and show me the app in my web browser so I can try it.</textarea>
+            </div>
+            <div class="note">
+              <span class="label">Good to know</span>
+              <ul>
+                <li>Claude asks permission before it uses NodeGX. Click <b>Allow</b>.</li>
+                <li>The first version is rarely perfect. That&rsquo;s normal. Tell Claude what you see and what you wanted, like &ldquo;The list shows everyone, but I only want people coming on Saturday.&rdquo;</li>
+              </ul>
+            </div>
+          </div>
+        </li>
+
+        <li class="step" id="step-6">
+          <div class="step-head"><span class="n" aria-hidden="true">6</span><h3>Open your app in NodeGX and make it yours</h3></div>
+          <div class="body">
+            <p>
+              Your app lives in NodeGX. You&rsquo;ll find it on the NodeGX start screen under
+              <b>Recent projects</b>. Open it to see every page Claude built.
+            </p>
+            <p>
+              <b>You can change anything</b>: the words, the colours, the pictures, where things go.
+              Claude won&rsquo;t mind. If you get stuck, go back to Claude and ask for help.
+            </p>
+            <p>After you change something yourself, tell Claude, so it looks again before its next change:</p>
+            <div class="say">
+              <div class="say-head">
+                <span class="label">When you&rsquo;ve made changes</span>
+                <button class="btn copy" type="button" data-for="msg-changed">Copy</button>
+              </div>
+              <textarea id="msg-changed" rows="3" aria-label="Message: I made changes" spellcheck="false">I've changed some things in NodeGX myself. Please look at the project again before you change anything else, so you don't undo my changes.</textarea>
+            </div>
+          </div>
+        </li>
+
+        <li class="step" id="step-7">
+          <div class="step-head"><span class="n" aria-hidden="true">7</span><h3>Put it online (when you&rsquo;re ready)</h3></div>
+          <div class="body">
+            <p>
+              For other people to use your app, it needs to run on a computer that&rsquo;s
+              always on the internet. This is called <b>hosting</b>. Here&rsquo;s roughly what it costs:
+            </p>
+            <div class="costs">
+              <div><span class="what">App that only shows pages</span><span class="where">Nothing saved, no log-ins. Netlify has a free plan.</span><span class="price">free</span></div>
+              <div><span class="what">App that saves things</span><span class="where">Log-ins, bookings, lists. A small rented server from Hetzner, DigitalOcean or Hostinger.</span><span class="price">~$4&ndash;7 / month</span></div>
+              <div><span class="what">Your own web address</span><span class="where">A domain name, like myrunningclub.com.</span><span class="price">~$10&ndash;15 / year</span></div>
+            </div>
+            <div class="note">
+              <span class="label">Don&rsquo;t get caught out</span>
+              <ul>
+                <li>A first app doesn&rsquo;t need anything more expensive than this. If someone offers you a big package, you don&rsquo;t need it.</li>
+                <li>Very cheap prices often mean paying a year or two up front. Check the monthly price, and the price when it renews.</li>
+              </ul>
+            </div>
+            <p>
+              Claude can already help you put a NodeGX app online. Ask: &ldquo;How do I put this
+              app online?&rdquo; You&rsquo;ll need a free GitHub account for this, and
+              <a href="https://learn.nodegx.io/online/github-basics">the NodeGX guide</a> covers the basics.
+              Soon, NodeGX will do this step for you.
+            </p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ====================== Trying ideas with an AI coder ====================== -->
+  <section data-profiles="play" id="play">
+    <div class="wrap">
+      <p class="kicker">Trying ideas</p>
+      <h2 class="profile-title">Build with your AI coder, on parts you can change</h2>
+      <p class="intro">Set up a folder for NodeGX before your AI coder starts. Then say what you want to make. It plans the
+        app with you, builds it from NodeGX parts, and leaves you a project you can open and change.</p>
+      <ol class="steps" style="margin-top:28px">
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">1</span><h3>Install Node.js</h3></div>
+          <div class="body">
+            <p>Node.js runs the setup commands. If you don&rsquo;t have it yet, download and install it.</p>
+            <a class="btn primary" href="https://nodejs.org/">Download Node.js</a>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">2</span><h3>Set up a folder for your AI coder</h3></div>
+          <div class="body">
+            <div class="coders" role="tablist" aria-label="Your AI coder">
+              <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="pane-claude">Claude Code</button>
+              <button type="button" role="tab" id="tab-cline" aria-selected="false" aria-controls="pane-cline">Cline</button>
+              <button type="button" role="tab" id="tab-vibe" aria-selected="false" aria-controls="pane-vibe">Mistral Vibe</button>
+              <button type="button" role="tab" id="tab-desktop" aria-selected="false" aria-controls="pane-desktop">Claude Desktop</button>
+            </div>
+            <div class="pane" role="tabpanel" id="pane-claude" aria-labelledby="tab-claude">
+              <p>In a terminal, run these three lines. When Claude Code asks whether to use the <b>nodegx</b> server, say yes.</p>
+<pre class="cmd">npm create nodegx my-apps
+cd my-apps
+claude</pre>
+            </div>
+            <div class="pane" role="tabpanel" id="pane-cline" aria-labelledby="tab-cline" hidden>
+              <p>In a terminal, run these three lines. The first also adds NodeGX to Cline&rsquo;s list of servers.</p>
+<pre class="cmd">npm create nodegx-cline my-apps
+cd my-apps
+cline</pre>
+              <p class="soft">Tested with the Cline command line. We haven&rsquo;t checked the VS Code extension yet.</p>
+            </div>
+            <div class="pane" role="tabpanel" id="pane-vibe" aria-labelledby="tab-vibe" hidden>
+              <p>In a terminal, run these three lines. The folder is set up for Mistral&rsquo;s Large 4 model.</p>
+<pre class="cmd">npm create nodegx-vibe my-apps
+cd my-apps
+vibe --legacy-harness</pre>
+            </div>
+            <div class="pane" role="tabpanel" id="pane-desktop" aria-labelledby="tab-desktop" hidden>
+              <p>In Claude Desktop, NodeGX Studio will open inside the conversation while Claude builds, with a Hold button
+                to stop it. The install will be one double-click.</p>
+              <a class="btn" href="/#waitlist">Coming soon <span class="sub">notify me</span></a>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">3</span><h3>Say what you want to make</h3></div>
+          <div class="body">
+            <p>A landing page for your band, a habit tracker, a quiz for your class. Your AI coder asks a few questions
+              first. Then it writes a brief and a plan into the project and builds it.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">4</span><h3>See it running</h3></div>
+          <div class="body">
+            <p>Your AI coder tells you the app&rsquo;s folder name. Run this to open it in your browser. The page reloads
+              each time the app changes.</p>
+<pre class="cmd">npx @nodegx/preview my-app --open</pre>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>Change it yourself</h3></div>
+          <div class="body">
+            <p>Every part lists its settings. Open the project in the <a href="#download">NodeGX editor</a> and change
+              anything by hand. Or ask your AI coder to build you an editor of your own, showing only what you want to touch.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">6</span><h3>Take it with you</h3></div>
+          <div class="body">
+            <p>See first what will come across, then write the app as React source. This needs Node.js 22 or later.</p>
+<pre class="cmd">npx @nodegx/export export --dry-run my-app</pre>
+            <p class="caveat"><b>Code export is in alpha.</b> Explore the code and build on it, but don&rsquo;t ship a
+              production app from it yet.</p>
+            <div class="note">
+              <span class="label">Making a game?</span>
+              In the games we&rsquo;ve built, the 3D world is plain code and the menus beside it are NodeGX. That keeps the
+              hard part small for your AI coder. The menus stay easy to change. A kit with what we&rsquo;ve learnt from
+              those games is next.
+            </div>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ====================== For a business ====================== -->
+  <section data-profiles="business" id="business">
+    <div class="wrap">
+      <p class="kicker">For a business</p>
+      <h2 class="profile-title">An app people rely on, and an editor that suits your team</h2>
+      <p class="intro">Claude Code builds the app with you. Then you choose who changes it afterwards and which editor they
+        use. Add the NodeGX backend for accounts and data, then put the app on a server you own.</p>
+      <ol class="steps" style="margin-top:28px">
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">1</span><h3>Choose your editor</h3></div>
+          <div class="body">
+            <p>All three open the same project files, so you can change your mind later. Not sure? Answer one question.</p>
+            <div class="chooser">
+              <p class="q">Who will make the day-to-day changes to this app?</p>
+              <div class="seg" id="who-edits">
+                <button type="button" aria-pressed="false" data-pick="editor">Me or a developer, in detail</button>
+                <button type="button" aria-pressed="false" data-pick="studio">Me, but I don&rsquo;t write code</button>
+                <button type="button" aria-pressed="false" data-pick="own">My team or client, who don&rsquo;t code</button>
+              </div>
+            </div>
+            <div class="cards three">
+              <div class="card pick" id="pick-studio">
+                <div class="card-top"><span class="port">NodeGX Studio</span><span class="state soon">Coming soon</span></div>
+                <h3>Pages, elements and workflows</h3>
+                <p>It suits people who think the way Bubble and n8n work. Design on the real app, draw workflows, set up
+                  data and who can see it, and replay a run step by step.</p>
+                <a class="btn" href="/#waitlist">Coming soon <span class="sub">notify me</span></a>
+                <details class="from-source"><summary>Can&rsquo;t wait? Run it from its source</summary>
+                  <p>You need Node.js 22. In a terminal, run:</p>
+<pre class="cmd">git clone https://github.com/The-Low-Code-Foundation/nodegx-studio
+cd nodegx-studio
+npm install
+npm start</pre></details>
+              </div>
+              <div class="card pick" id="pick-editor">
+                <div class="card-top"><span class="port">The NodeGX editor</span><span class="state now">0.4.3</span></div>
+                <h3>Every detail, in one window</h3>
+                <p>The full editor NodeGX grew from. The page as a tree, the nodes and wires behind it, and the app
+                  running beside them. Click anything in the app and change it.</p>
+                <a class="btn primary" href="#download">Download NodeGX 0.4.3</a>
+              </div>
+              <div class="card pick" id="pick-own">
+                <div class="card-top"><span class="port">Your own editor</span><span class="state now">Today</span></div>
+                <h3>Only the settings your team needs</h3>
+                <p>Claude builds an editor that shows your team only what they should touch. That might be prices,
+                  opening hours or the text on a page. Set up your project in step 2, and the folder includes a guide
+                  Claude follows.</p>
+                <a class="go" href="/your-own-editor/">See editors Claude has built &rarr;</a>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">2</span><h3>Build it with Claude Code</h3></div>
+          <div class="body">
+            <p>You need Node.js and Claude Code. In a terminal, run these three lines. When Claude Code asks whether to
+              use the <b>nodegx</b> server, say yes.</p>
+<pre class="cmd">npm create nodegx my-apps
+cd my-apps
+claude</pre>
+            <p>Tell Claude who uses the app and what they need to do. Then say what it must never do. Claude asks
+              questions first, then writes a brief and a plan into the project before it builds anything.</p>
+            <p>Studio and the NodeGX editor both have a <b>Connect Claude Code</b> button, so Claude can keep building
+              while you watch and change things.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">3</span><h3>Add accounts and data</h3></div>
+          <div class="body">
+            <p>Ask Claude for sign-in and the data your app keeps. It sets up the NodeGX backend for the project, with its
+              tables, its cloud functions and the rules for who can see which rows. The rules are a file in your project
+              that you can read.</p>
+            <a class="go" href="/backend-map/">See who can reach whose data in a real app &rarr;</a>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">4</span><h3>Put it on a server you own</h3></div>
+          <div class="body">
+            <ol class="sub-steps">
+              <li><b>Rent a Linux server</b> running Ubuntu or Debian, with root login. Add a domain name if you want one.</li>
+              <li><b>Let your computer log in to it.</b>
+<pre class="cmd" style="margin-top:8px">ssh-keygen -t ed25519
+ssh-copy-id root@your-server-ip</pre></li>
+              <li><b>Ask Claude to publish.</b> For example: &ldquo;Put this app on root@your-server-ip at
+                app.example.com.&rdquo; Claude sends the app, its backend, its rules and its functions. If the server is
+                missing something, the message says what to install. Publishing again keeps your data.</li>
+            </ol>
+            <p class="caveat"><b>This is new this week.</b> We&rsquo;ve tested it on a test server so far, not yet with a
+              hosting company.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>If you outgrow NodeGX, leave with React</h3></div>
+          <div class="body">
+            <p>When you know you need a framework, one command writes the app as React source. It tells you first what
+              will and won&rsquo;t come across. Code export is in alpha.</p>
+            <a class="go" href="/one-graph/">See it on two apps &rarr;</a>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ====================== Coming from Bubble ====================== -->
+  <section data-profiles="bubble" id="bubble">
+    <div class="wrap">
+      <p class="kicker">Coming from Bubble</p>
+      <h2 class="profile-title">Bring your Bubble app into NodeGX Studio</h2>
+      <p class="intro">Studio works the way a Bubble builder expects: pages, elements and workflows. It imports your
+        app&rsquo;s front end and its back end. The app then runs on your own machine. Claude Code can carry on building it
+        with you.</p>
+      <div class="cards">
+        <div class="card">
+          <span class="port">Comes across</span>
+          <h3>The app you built</h3>
+          <ul class="ticks">
+            <li>Pages, elements and styles</li>
+            <li>Workflows and custom states</li>
+            <li>Data types and option sets</li>
+            <li>Privacy rules</li>
+            <li>Backend workflows, which become cloud functions</li>
+            <li>API Connector calls, without their keys</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="port">Needs you</span>
+          <h3>What you&rsquo;ll redo or check</h3>
+          <ul class="ticks no">
+            <li>Plugins, which arrive as labelled placeholders</li>
+            <li>HTML, video, map, slider, date, file and picture inputs, also as placeholders</li>
+            <li>API keys and passwords, which never come across</li>
+            <li>Your data rows, which are a separate step</li>
+          </ul>
+        </div>
+      </div>
+      <ol class="steps" style="margin-top:36px">
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">1</span><h3>Get NodeGX Studio</h3></div>
+          <div class="body">
+            <p>The download is coming soon.</p>
+            <a class="btn primary" href="/#waitlist">Coming soon <span class="sub">notify me</span></a>
+            <details class="from-source"><summary>Can&rsquo;t wait? Run it from its source</summary>
+              <p>You need Node.js 22. In a terminal, run:</p>
+<pre class="cmd">git clone https://github.com/The-Low-Code-Foundation/nodegx-studio
+cd nodegx-studio
+npm install
+npm start</pre></details>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">2</span><h3>Get your app out of Bubble</h3></div>
+          <div class="body">
+            <p>On the Growth plan or above, go to Settings, then General, then Export application. On another plan, you
+              can save each page&rsquo;s files from Chrome&rsquo;s developer tools instead.
+              <a href="https://github.com/The-Low-Code-Foundation/nodegx-studio/blob/main/docs/IMPORT.md">The import
+              guide</a> shows how.</p>
+            <div class="note"><span class="label">Keep it on your computer</span>Some of these files contain your
+              app&rsquo;s API keys.</div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">3</span><h3>Import it</h3></div>
+          <div class="body">
+            <p>On Studio&rsquo;s welcome screen, choose <b>Import an app</b>. Pick your export file or your folder of page
+              files, then an empty folder for the new project. A large app takes about a minute.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">4</span><h3>Read the import report</h3></div>
+          <div class="body">
+            <p>It sits beside the project and lists every placeholder and anything that needs a decision from you.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>Bring your data across</h3></div>
+          <div class="body">
+            <p>Export your data types as CSV from Bubble&rsquo;s Data tab. Moving the rows in is a separate command for
+              now, described in the import guide. Studio&rsquo;s Data tab then offers to check and load them.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">6</span><h3>Keep building with Claude</h3></div>
+          <div class="body">
+            <p>Studio has a <b>Connect Claude Code</b> button. Ask Claude to rebuild a plugin, wire a page or tidy a
+              workflow, and watch it happen in Studio. When you&rsquo;re ready, Studio publishes to a folder you can host
+              anywhere, with its cloud functions.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ====================== Download ======================
+       RELEASES: since 2026-10-24 the editor download block lives here, on /start/. The homepage forwards
+       /#download to /start/#download, and /build/ forwards to /start/#business. -->
+  <section id="download" data-profiles="new play business">
+    <div class="wrap">
+      <p class="kicker">Download &middot; public alpha</p>
+      <h2>Download NodeGX</h2>
+      <p class="intro">
+        NodeGX is in public alpha: it builds real apps, and it still has rough edges. The
+        <a href="/changelog/">changelog</a> lists what changed in every release and what is
+        known to be broken.
+      </p>
+
+      <div class="release">
+        <div class="rel-head">
+          <span class="rel-ver">0.4.3</span>
+          <span class="rel-date">20 October 2026</span>
+        </div>
+        <p class="rel-note">
+          The backend NodeGX runs on your computer now makes the smaller photos an app shows on its
+          cards and lists. Saving an app sends its cloud functions only to that app&rsquo;s backend, even
+          when another app&rsquo;s backend is running.
+        </p>
+
+        <div class="dl-grid">
+          <a class="dl" href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-mac-arm64.dmg">
+            <span class="os">macOS &mdash; Apple silicon</span>
+            <span class="file">NodeGX-0.4.3-mac-arm64.dmg</span>
+          </a>
+          <a class="dl" href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-mac-x64.dmg">
+            <span class="os">macOS &mdash; Intel</span>
+            <span class="file">NodeGX-0.4.3-mac-x64.dmg</span>
+          </a>
+          <a class="dl" href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-win-x64.exe">
+            <span class="os">Windows &mdash; x64</span>
+            <span class="file">NodeGX-0.4.3-win-x64.exe</span>
+          </a>
+          <a class="dl" href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-linux-x86_64.AppImage">
+            <span class="os">Linux &mdash; AppImage</span>
+            <span class="file">NodeGX-0.4.3-linux-x86_64.AppImage</span>
+          </a>
+        </div>
+
+        <p class="rel-foot">
+          <a href="/changelog/#v0-4-3">What changed in 0.4.3</a>
+          <a href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/tag/v0.4.3">0.4.3 on GitHub</a>
+          <a href="https://github.com/The-Low-Code-Foundation/NodeGX/releases">All releases</a>
+          <a href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-linux-amd64.deb">Linux .deb</a>
+          <a href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-linux-x86_64.rpm">Linux .rpm</a>
+        </p>
+
+        <p class="caveat">
+          <b>Updating from 0.3?</b> The first time 0.4.3 opens a 0.3.0 project, it saves a copy
+          beside it called <code>&lt;project&gt;.before-0.4</code>. Keep it until you&rsquo;re happy
+          with the updated project, because it&rsquo;s the only one 0.3.0 can still open.
+        </p>
+
+        <p class="caveat">
+          <b>macOS</b> is signed and notarised &mdash; no Gatekeeper workaround needed.
+          <b>Windows</b> is not code-signed yet, so SmartScreen warns on first run:
+          <i>More info &rarr; Run anyway</i>. <b>Linux</b> builds are unsigned, as is normal
+          for Linux desktop distribution, and have no in-app updater.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="watch" data-profiles="new play">
+    <div class="wrap">
+      <h2>Prefer to watch first?</h2>
+      <div class="cards">
+        <a class="card" href="https://www.youtube.com/watch?v=Y5NNCgKNU1w">
+          <span class="label">Video</span>
+          <h3>Your first NodeGX lesson, step by step</h3>
+          <p>Follow along as Richard goes through the first lesson built into NodeGX.</p>
+          <span class="go">Watch on YouTube</span>
+        </a>
+        <a class="card" href="https://www.youtube.com/@simple-rick-tutorials">
+          <span class="label">YouTube channel</span>
+          <h3>Simple Rick Tutorials</h3>
+          <p>More videos on building apps with NodeGX and AI.</p>
+          <span class="go">See all videos</span>
+        </a>
+      </div>
+      <p class="soft" style="margin-top:18px">
+        NodeGX also has lessons built in. Open NodeGX and click <b>Learning</b> at the top.
+      </p>
+    </div>
+  </section>
+
+  <section id="guide" data-profiles="new play">
+    <div class="wrap">
+      <h2>Want to learn more?</h2>
+      <p class="intro">
+        The NodeGX guide explains how to build apps with AI and NodeGX. It has two modes:
+      </p>
+      <div class="cards">
+        <a class="card" href="https://learn.nodegx.io/?mode=easy">
+          <span class="label">Easy mode</span>
+          <h3>I&rsquo;m completely new</h3>
+          <p>No technical words without an explanation. Start here if this page was new to you.</p>
+          <span class="go">Open the guide</span>
+        </a>
+        <a class="card" href="https://learn.nodegx.io/?mode=advanced">
+          <span class="label">Advanced mode</span>
+          <h3>I&rsquo;ve built an app before</h3>
+          <p>For people who know the basics of web development and words like front end and API.</p>
+          <span class="go">Open the guide</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section id="help">
+    <div class="wrap">
+      <h2>Stuck? Ask a person</h2>
+      <p class="intro">Everyone gets stuck. No question is too small.</p>
+      <div class="coach">
+        <div class="mono-av" aria-hidden="true">RO</div>
+        <div>
+          <h3>Talk to Richard</h3>
+          <p>
+            Richard Osborne is the main developer of NodeGX, and an experienced app maker
+            and trainer. He coaches people through building their first app.
+          </p>
+          <a class="btn primary" href="https://calendar.app.google/DzBHGrtFyJsS9oLJ7">Book a discovery call</a>
+        </div>
+      </div>
+      <div class="cards">
+        <a class="card" href="https://community.nodegx.io">
+          <span class="label">Community</span>
+          <h3>The NodeGX community</h3>
+          <p>Ask a question and get an answer. You can read it without an account.</p>
+        </a>
+        <a class="card" href="https://discord.gg/dZw4w5pKf9">
+          <span class="label">Chat</span>
+          <h3>Discord</h3>
+          <p>Quick questions, and people building right now.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">NodeGX is free and open source. <a href="/">nodegx.io</a></div>
+</footer>
+
+<script>
+  (function () {
+    function copy(btn, box) {
+      var done = function () { btn.textContent = 'Copied'; setTimeout(function () { btn.textContent = 'Copy'; }, 1800); };
+      var fallback = function () { box.focus(); box.select(); btn.textContent = 'Press Ctrl+C'; };
+      try { navigator.clipboard.writeText(box.value).then(done, fallback); } catch (e) { fallback(); }
+    }
+    document.querySelectorAll('.copy').forEach(function (btn) {
+      btn.addEventListener('click', function () { copy(btn, document.getElementById(btn.dataset.for)); });
+    });
+    var idea = document.getElementById('msg-idea');
+    document.querySelectorAll('.chip').forEach(function (chip) {
+      chip.addEventListener('click', function () {
+        idea.value = idea.value.replace(/My idea:.*$/m, 'My idea: ' + chip.dataset.idea);
+        idea.focus();
+      });
+    });
+  })();
+</script>
+<script>
+  /* The profile picker: elements carry data-profiles; the hash (#new, #play, #business, #bubble) picks one.
+     #download keeps its own hash and shows a profile that has the download block. */
+  (function () {
+    var P = ['new', 'play', 'business', 'bubble'];
+    var btns = document.querySelectorAll('.picker button');
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var current = 'new';
+    function show(p, opts) {
+      opts = opts || {};
+      current = p;
+      btns.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-profile') === p ? 'true' : 'false'); });
+      document.querySelectorAll('[data-profiles]').forEach(function (el) {
+        el.hidden = el.getAttribute('data-profiles').split(' ').indexOf(p) < 0;
+      });
+      if (opts.hash !== false) { try { history.replaceState(null, '', '#' + p); } catch (e) {} }
+      if (opts.scrollTo) {
+        var t = document.getElementById(opts.scrollTo);
+        if (t) t.scrollIntoView({ behavior: still ? 'auto' : 'smooth', block: 'start' });
+      }
+    }
+    function fromHash(first) {
+      var h = location.hash.slice(1);
+      if (P.indexOf(h) >= 0) { show(h, { hash: false, scrollTo: first ? null : 'steps-start' }); return; }
+      if (h === 'download') {
+        var d = document.getElementById('download');
+        if (d && d.hidden) show('new', { hash: false });
+        if (d) setTimeout(function () { d.scrollIntoView({ block: 'start' }); }, 0);
+        return;
+      }
+      if (first) show(current, { hash: false });
+    }
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () { show(b.getAttribute('data-profile'), { scrollTo: 'steps-start' }); });
+    });
+    window.addEventListener('hashchange', function () { fromHash(false); });
+    fromHash(true);
+
+    // the AI coder tabs
+    var tabs = document.querySelectorAll('.coders [role=tab]');
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (o) {
+          var on = o === t;
+          o.setAttribute('aria-selected', on ? 'true' : 'false');
+          document.getElementById(o.getAttribute('aria-controls')).hidden = !on;
+        });
+      });
+    });
+
+    // which editor
+    var who = document.getElementById('who-edits');
+    if (who) who.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      who.querySelectorAll('button').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+      document.querySelectorAll('.card.pick').forEach(function (c) {
+        var on = c.id === 'pick-' + b.getAttribute('data-pick');
+        c.classList.toggle('picked', on); c.classList.toggle('dim', !on);
+      });
+    });
+  })();
+</script>

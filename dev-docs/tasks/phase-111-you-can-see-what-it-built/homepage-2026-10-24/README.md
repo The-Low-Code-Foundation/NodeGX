@@ -57,3 +57,13 @@ comment (line 358). The artifact drafts v3/v4 had it too. The markers are now th
 sections (`id="more"`, `<!-- nav -->`, the old hero) on every assembly.
 
 **Later the same day:** the npm section and the "Public alpha" eyebrow are gone (Richard: "rolled into the paths to start"). 🔴 **The editor download block now lives on `/build/` (`site/build/_page.html`, id `download`); a release edits it THERE.** The homepage forwards `/#download` to `/build/#download`.
+
+## Start here, by profile (built 2026-10-24, NOT deployed: waiting on Richard's go)
+
+Richard: "the 'start here' page … should change the steps depending on your profile, and maybe the options on the homepage
+should lead here?" `start/_page.html` = the old beginner page kept word for word as profile `#new`, plus `#play`, `#business` and
+`#bubble` (from the three path pages), with a picker at the top. Elements carry `data-profiles`, the hash picks one, and without JS
+all four show. The download block moves here (`#download`, shown for new, play and business). The homepage's four path cards link
+to `/start/#…`, `/#download` forwards to `/start/#download`, and `/play/`, `/build/` and `/from-bubble/` become forwarding stubs
+(`pages/*-stub.html`). `start/build.py.proposed` = nodegx-web `ops/build.py` with the new SUBPAGES descriptions. To deploy:
+targeted rsync of index.html, site.css, start/index.html, play/, build/ and from-bubble/ (the recipe above).

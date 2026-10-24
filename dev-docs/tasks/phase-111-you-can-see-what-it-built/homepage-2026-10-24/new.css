@@ -146,7 +146,7 @@
   .checks input { accent-color: var(--signal); width: 16px; height: 16px; margin: 0; }
   .toy-code { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
   .paths-band { background: radial-gradient(circle at 1px 1px, var(--dot) 1.4px, transparent 1.5px); background-size: 24px 24px; }
-  .paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
   .path {
     display: flex; flex-direction: column; gap: 10px; padding: 22px 22px 20px; border-radius: 16px;
     background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); color: inherit;

@@ -1,0 +1,282 @@
+  <!-- ====================== Trying ideas with an AI coder ====================== -->
+  <section data-profiles="play" id="play">
+    <div class="wrap">
+      <p class="kicker">Trying ideas</p>
+      <h2 class="profile-title">Build with your AI coder, on parts you can change</h2>
+      <p class="intro">Set up a folder for NodeGX before your AI coder starts. Then say what you want to make. It plans the
+        app with you, builds it from NodeGX parts, and leaves you a project you can open and change.</p>
+      <ol class="steps" style="margin-top:28px">
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">1</span><h3>Install Node.js</h3></div>
+          <div class="body">
+            <p>Node.js runs the setup commands. If you don&rsquo;t have it yet, download and install it.</p>
+            <a class="btn primary" href="https://nodejs.org/">Download Node.js</a>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">2</span><h3>Set up a folder for your AI coder</h3></div>
+          <div class="body">
+            <div class="coders" role="tablist" aria-label="Your AI coder">
+              <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="pane-claude">Claude Code</button>
+              <button type="button" role="tab" id="tab-cline" aria-selected="false" aria-controls="pane-cline">Cline</button>
+              <button type="button" role="tab" id="tab-vibe" aria-selected="false" aria-controls="pane-vibe">Mistral Vibe</button>
+              <button type="button" role="tab" id="tab-desktop" aria-selected="false" aria-controls="pane-desktop">Claude Desktop</button>
+            </div>
+            <div class="pane" role="tabpanel" id="pane-claude" aria-labelledby="tab-claude">
+              <p>In a terminal, run these three lines. When Claude Code asks whether to use the <b>nodegx</b> server, say yes.</p>
+<pre class="cmd">npm create nodegx my-apps
+cd my-apps
+claude</pre>
+            </div>
+            <div class="pane" role="tabpanel" id="pane-cline" aria-labelledby="tab-cline" hidden>
+              <p>In a terminal, run these three lines. The first also adds NodeGX to Cline&rsquo;s list of servers.</p>
+<pre class="cmd">npm create nodegx-cline my-apps
+cd my-apps
+cline</pre>
+              <p class="soft">Tested with the Cline command line. We haven&rsquo;t checked the VS Code extension yet.</p>
+            </div>
+            <div class="pane" role="tabpanel" id="pane-vibe" aria-labelledby="tab-vibe" hidden>
+              <p>In a terminal, run these three lines. The folder is set up for Mistral&rsquo;s Large 4 model.</p>
+<pre class="cmd">npm create nodegx-vibe my-apps
+cd my-apps
+vibe --legacy-harness</pre>
+            </div>
+            <div class="pane" role="tabpanel" id="pane-desktop" aria-labelledby="tab-desktop" hidden>
+              <p>In Claude Desktop, NodeGX Studio will open inside the conversation while Claude builds, with a Hold button
+                to stop it. The install will be one double-click.</p>
+              <a class="btn" href="/#waitlist">Coming soon <span class="sub">notify me</span></a>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">3</span><h3>Say what you want to make</h3></div>
+          <div class="body">
+            <p>A landing page for your band, a habit tracker, a quiz for your class. Your AI coder asks a few questions
+              first. Then it writes a brief and a plan into the project and builds it.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">4</span><h3>See it running</h3></div>
+          <div class="body">
+            <p>Your AI coder tells you the app&rsquo;s folder name. Run this to open it in your browser. The page reloads
+              each time the app changes.</p>
+<pre class="cmd">npx @nodegx/preview my-app --open</pre>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>Change it yourself</h3></div>
+          <div class="body">
+            <p>Every part lists its settings. Open the project in the <a href="#download">NodeGX editor</a> and change
+              anything by hand. Or ask your AI coder to build you an editor of your own, showing only what you want to touch.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">6</span><h3>Take it with you</h3></div>
+          <div class="body">
+            <p>See first what will come across, then write the app as React source. This needs Node.js 22 or later.</p>
+<pre class="cmd">npx @nodegx/export export --dry-run my-app</pre>
+            <p class="caveat"><b>Code export is in alpha.</b> Explore the code and build on it, but don&rsquo;t ship a
+              production app from it yet.</p>
+            <div class="note">
+              <span class="label">Making a game?</span>
+              In the games we&rsquo;ve built, the 3D world is plain code and the menus beside it are NodeGX. That keeps the
+              hard part small for your AI coder. The menus stay easy to change. A kit with what we&rsquo;ve learnt from
+              those games is next.
+            </div>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ====================== For a business ====================== -->
+  <section data-profiles="business" id="business">
+    <div class="wrap">
+      <p class="kicker">For a business</p>
+      <h2 class="profile-title">An app people rely on, and an editor that suits your team</h2>
+      <p class="intro">Claude Code builds the app with you. Then you choose who changes it afterwards and which editor they
+        use. Add the NodeGX backend for accounts and data, then put the app on a server you own.</p>
+      <ol class="steps" style="margin-top:28px">
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">1</span><h3>Choose your editor</h3></div>
+          <div class="body">
+            <p>All three open the same project files, so you can change your mind later. Not sure? Answer one question.</p>
+            <div class="chooser">
+              <p class="q">Who will make the day-to-day changes to this app?</p>
+              <div class="seg" id="who-edits">
+                <button type="button" aria-pressed="false" data-pick="editor">Me or a developer, in detail</button>
+                <button type="button" aria-pressed="false" data-pick="studio">Me, but I don&rsquo;t write code</button>
+                <button type="button" aria-pressed="false" data-pick="own">My team or client, who don&rsquo;t code</button>
+              </div>
+            </div>
+            <div class="cards three">
+              <div class="card pick" id="pick-studio">
+                <div class="card-top"><span class="port">NodeGX Studio</span><span class="state soon">Coming soon</span></div>
+                <h3>Pages, elements and workflows</h3>
+                <p>It suits people who think the way Bubble and n8n work. Design on the real app, draw workflows, set up
+                  data and who can see it, and replay a run step by step.</p>
+                <a class="btn" href="/#waitlist">Coming soon <span class="sub">notify me</span></a>
+                <details class="from-source"><summary>Can&rsquo;t wait? Run it from its source</summary>
+                  <p>You need Node.js 22. In a terminal, run:</p>
+<pre class="cmd">git clone https://github.com/The-Low-Code-Foundation/nodegx-studio
+cd nodegx-studio
+npm install
+npm start</pre></details>
+              </div>
+              <div class="card pick" id="pick-editor">
+                <div class="card-top"><span class="port">The NodeGX editor</span><span class="state now">0.4.3</span></div>
+                <h3>Every detail, in one window</h3>
+                <p>The full editor NodeGX grew from. The page as a tree, the nodes and wires behind it, and the app
+                  running beside them. Click anything in the app and change it.</p>
+                <a class="btn primary" href="#download">Download NodeGX 0.4.3</a>
+              </div>
+              <div class="card pick" id="pick-own">
+                <div class="card-top"><span class="port">Your own editor</span><span class="state now">Today</span></div>
+                <h3>Only the settings your team needs</h3>
+                <p>Claude builds an editor that shows your team only what they should touch. That might be prices,
+                  opening hours or the text on a page. Set up your project in step 2, and the folder includes a guide
+                  Claude follows.</p>
+                <a class="go" href="/your-own-editor/">See editors Claude has built &rarr;</a>
+              </div>
+            </div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">2</span><h3>Build it with Claude Code</h3></div>
+          <div class="body">
+            <p>You need Node.js and Claude Code. In a terminal, run these three lines. When Claude Code asks whether to
+              use the <b>nodegx</b> server, say yes.</p>
+<pre class="cmd">npm create nodegx my-apps
+cd my-apps
+claude</pre>
+            <p>Tell Claude who uses the app and what they need to do. Then say what it must never do. Claude asks
+              questions first, then writes a brief and a plan into the project before it builds anything.</p>
+            <p>Studio and the NodeGX editor both have a <b>Connect Claude Code</b> button, so Claude can keep building
+              while you watch and change things.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">3</span><h3>Add accounts and data</h3></div>
+          <div class="body">
+            <p>Ask Claude for sign-in and the data your app keeps. It sets up the NodeGX backend for the project, with its
+              tables, its cloud functions and the rules for who can see which rows. The rules are a file in your project
+              that you can read.</p>
+            <a class="go" href="/backend-map/">See who can reach whose data in a real app &rarr;</a>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">4</span><h3>Put it on a server you own</h3></div>
+          <div class="body">
+            <ol class="sub-steps">
+              <li><b>Rent a Linux server</b> running Ubuntu or Debian, with root login. Add a domain name if you want one.</li>
+              <li><b>Let your computer log in to it.</b>
+<pre class="cmd" style="margin-top:8px">ssh-keygen -t ed25519
+ssh-copy-id root@your-server-ip</pre></li>
+              <li><b>Ask Claude to publish.</b> For example: &ldquo;Put this app on root@your-server-ip at
+                app.example.com.&rdquo; Claude sends the app, its backend, its rules and its functions. If the server is
+                missing something, the message says what to install. Publishing again keeps your data.</li>
+            </ol>
+            <p class="caveat"><b>This is new this week.</b> We&rsquo;ve tested it on a test server so far, not yet with a
+              hosting company.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>If you outgrow NodeGX, leave with React</h3></div>
+          <div class="body">
+            <p>When you know you need a framework, one command writes the app as React source. It tells you first what
+              will and won&rsquo;t come across. Code export is in alpha.</p>
+            <a class="go" href="/one-graph/">See it on two apps &rarr;</a>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ====================== Coming from Bubble ====================== -->
+  <section data-profiles="bubble" id="bubble">
+    <div class="wrap">
+      <p class="kicker">Coming from Bubble</p>
+      <h2 class="profile-title">Bring your Bubble app into NodeGX Studio</h2>
+      <p class="intro">Studio works the way a Bubble builder expects: pages, elements and workflows. It imports your
+        app&rsquo;s front end and its back end. The app then runs on your own machine. Claude Code can carry on building it
+        with you.</p>
+      <div class="cards">
+        <div class="card">
+          <span class="port">Comes across</span>
+          <h3>The app you built</h3>
+          <ul class="ticks">
+            <li>Pages, elements and styles</li>
+            <li>Workflows and custom states</li>
+            <li>Data types and option sets</li>
+            <li>Privacy rules</li>
+            <li>Backend workflows, which become cloud functions</li>
+            <li>API Connector calls, without their keys</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="port">Needs you</span>
+          <h3>What you&rsquo;ll redo or check</h3>
+          <ul class="ticks no">
+            <li>Plugins, which arrive as labelled placeholders</li>
+            <li>HTML, video, map, slider, date, file and picture inputs, also as placeholders</li>
+            <li>API keys and passwords, which never come across</li>
+            <li>Your data rows, which are a separate step</li>
+          </ul>
+        </div>
+      </div>
+      <ol class="steps" style="margin-top:36px">
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">1</span><h3>Get NodeGX Studio</h3></div>
+          <div class="body">
+            <p>The download is coming soon.</p>
+            <a class="btn primary" href="/#waitlist">Coming soon <span class="sub">notify me</span></a>
+            <details class="from-source"><summary>Can&rsquo;t wait? Run it from its source</summary>
+              <p>You need Node.js 22. In a terminal, run:</p>
+<pre class="cmd">git clone https://github.com/The-Low-Code-Foundation/nodegx-studio
+cd nodegx-studio
+npm install
+npm start</pre></details>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">2</span><h3>Get your app out of Bubble</h3></div>
+          <div class="body">
+            <p>On the Growth plan or above, go to Settings, then General, then Export application. On another plan, you
+              can save each page&rsquo;s files from Chrome&rsquo;s developer tools instead.
+              <a href="https://github.com/The-Low-Code-Foundation/nodegx-studio/blob/main/docs/IMPORT.md">The import
+              guide</a> shows how.</p>
+            <div class="note"><span class="label">Keep it on your computer</span>Some of these files contain your
+              app&rsquo;s API keys.</div>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">3</span><h3>Import it</h3></div>
+          <div class="body">
+            <p>On Studio&rsquo;s welcome screen, choose <b>Import an app</b>. Pick your export file or your folder of page
+              files, then an empty folder for the new project. A large app takes about a minute.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">4</span><h3>Read the import report</h3></div>
+          <div class="body">
+            <p>It sits beside the project and lists every placeholder and anything that needs a decision from you.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>Bring your data across</h3></div>
+          <div class="body">
+            <p>Export your data types as CSV from Bubble&rsquo;s Data tab. Moving the rows in is a separate command for
+              now, described in the import guide. Studio&rsquo;s Data tab then offers to check and load them.</p>
+          </div>
+        </li>
+        <li class="step">
+          <div class="step-head"><span class="n" aria-hidden="true">6</span><h3>Keep building with Claude</h3></div>
+          <div class="body">
+            <p>Studio has a <b>Connect Claude Code</b> button. Ask Claude to rebuild a plugin, wire a page or tidy a
+              workflow, and watch it happen in Studio. When you&rsquo;re ready, Studio publishes to a folder you can host
+              anywhere, with its cloud functions.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
