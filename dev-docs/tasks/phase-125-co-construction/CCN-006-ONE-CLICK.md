@@ -1,6 +1,7 @@
 # CCN-006 — A stranger's install
 
-**State:** open; the install shape ruled 2026-10-23, the offer of the desktop app built (s9). **After:** CCN-001 AC5.
+**State:** open; the install shape ruled 2026-10-23, the offer of the desktop app built (s9), **the `.mcpb` built and
+driven headless 2026-10-24 (s13 below); Richard's double-click in Claude Desktop is next**. **After:** CCN-001 AC5.
 
 ## The ruling (Richard, 2026-10-23)
 
@@ -57,11 +58,49 @@ offline … A modal? You decide."*
 6. ☐ "Get NodeGX Studio" lands on a page with a notarised download. Waits on `P125-CCN006-NODOWNLOAD`.
 7. ☐ Studio on npm (`@nodegx/studio`, `npx` runnable, vendor/ inside); `@nodegx/mcp` resolving it by
    `require.resolve` first.
-8. ☐ The `.mcpb` Desktop Extension bundling the server, so Claude Desktop installs it by double-click and runs it on
-   its own Node (the Node 16 trap gone).
+8. ◐ The `.mcpb` Desktop Extension bundling the server, so Claude Desktop installs it by double-click and runs it on
+   its own Node (the Node 16 trap gone). **Built and driven headless (s13); the double-click is Richard's.**
 9. ☐ `create-nodegx --desktop` writing the `claude_desktop_config.json` entry with an absolute node path, under the
    same never-overwrite rule the Cline kit has.
 
 The stranger audit's findings on naming and jargon in the packages (`dev-docs/bugs/npmaudit-*`) are the other half
 of the same work. `P125-CCN006-AGENTPILL` (Studio's header says "Connect Claude Code" while an agent in Claude Desktop
 drives the project) is Studio's to fix. `/__nodegx/status` already names the agent.
+
+## s13 (2026-10-24, opennoodl-d7): the `.mcpb`, built and driven headless
+
+**What it is.** `npm run mcpb` in nodegx-studio (`scripts/mcpb.mjs`, commit 09219e6) writes
+`dist/nodegx-<@nodegx/mcp version>.mcpb`. Inside: `studio/` (Studio's `editor/`, `lib/`, `import/*.mjs`, `vendor/`, and
+`npm ci --omit=dev` beside them: the pinned `@nodegx/mcp` 0.2.6, `@nodegx/preview` 0.2.5, `@nodegx/backend-map` 0.1.1)
+and a v0.3 manifest. The server is a `node` server: `${__dirname}/studio/node_modules/@nodegx/mcp/bin/noodl-mcp.js
+--allow-writes` on Desktop's own Node. `NODEGX_STUDIO` = the bundled Studio (so `open_studio` needs no checkout and no
+`@nodegx/studio` on npm); `NODEGX_DEPLOY_CLI` = the bundled preview's engine (so `deploy_to_vm` needs no npx). Packed
+with `@anthropic-ai/mcpb` 2.1.2 through npx (not a Studio dependency). 0.2.6: 24.7 MB packed, 103.9 MB unpacked,
+1,844 files. The packer's default ignore drops 702 files: `.d.ts`, source maps, a `tsconfig`, the lockfile.
+
+**Driven** (the s13 scratchpad's `mcp-client.mjs`, a stdio MCP client), from the UNPACKED `.mcpb`, a fresh HOME, PATH
+`/usr/bin:/bin`, client name `claude-ai` declaring the UI extension:
+- initialize 0.3 s; 119 tools in the first list (Desktop indexes once, s4);
+- `resources/read ui://nodegx/studio.html` valid before any tool call (Desktop prefetches, s7);
+- `open_project` on a copy of the todo template binds; `open_studio` → `http://127.0.0.1:<port>/` serves the bundled
+  Studio (200, the page, 489,419 chars).
+
+**Not driven, and what to look for in Richard's run:**
+1. Double-click `nodegx-0.2.6.mcpb` → Desktop's install sheet → Install. Then a NEW conversation: "Make me a NodeGX app:
+   a tap counter with a reset button." Pass = the panel draws, as with the pasted entry.
+2. **Which Node Desktop runs it on.** A `node` server runs on Desktop's built-in Node unless the person turned that
+   off (Settings → Extensions). The bundle needs Node 20+. `mcp-server-nodegx.log` names the start line; if it says
+   Node 16, the manifest needs `compatibility.runtimes` read by Desktop, or a `binary` server.
+3. **Studio's child process.** `open_studio` starts Studio with `process.execPath`. If Desktop's built-in Node is its
+   Electron binary run as Node, the child inherits `ELECTRON_RUN_AS_NODE` from the environment (studioProcess.ts passes
+   `{ ...process.env }`). If Studio fails to start, that is the first suspect.
+4. Remove the pasted `nodegx` entry from `claude_desktop_config.json` first, or Desktop runs two NodeGX servers.
+
+**Also s13, Studio side:** inside a conversation, Data → Map draws a card with "Open the map ↗" (the host's openLink to
+`/backend-map/`) instead of `#mapframe`, which no host frames (no `frameDomains`). Driven in this phase's fake host from
+a foreign origin: frame hidden, card drawn, `open-link` to `/backend-map/` (4/4). The timeline's screen is a `srcdoc`
+frame and was left alone (not measured in Desktop).
+
+**Left:** AC7 (`@nodegx/studio` on npm, so `@nodegx/mcp` finds Studio by `require.resolve` outside the `.mcpb`) and
+AC9 (`create-nodegx --desktop`). Both matter only for people who paste JSON; the `.mcpb` does not need either. The
+`.mcpb` should be built in CI beside the DMG and linked from nodegx.io's quickstart (lane 7, SEE-009).
