@@ -581,9 +581,26 @@ export class ParseWireRoutes {
     // Record node's Access Control Rules emit this). Shape-validate it.
     const aclError = validateAclShape(body.ACL);
     if (aclError) throw new HttpError(400, `Invalid ACL: ${aclError}`, 123);
+    const acl = ctx.acl('write');
+    // P121-TWO005-ACLNULL: `ACL: null` cannot take a row's ACL off (it never could: it was dropped here and the
+    // write answered 200 with the old ACL kept, so a hidden post stayed hidden). Said in words when the row has one.
+    // A row with none, or one this caller cannot write, goes on as before: nothing to refuse, and nothing revealed.
+    if (body.ACL === null) {
+      const prior = await this.facade
+        .rawFetch(collection, objectId, acl && { ...acl, access: 'write' })
+        .catch(() => null);
+      const held = prior && (prior as { ACL?: unknown }).ACL;
+      if (held && typeof held === 'object' && Object.keys(held).length > 0) {
+        throw new HttpError(
+          400,
+          `A row's ACL can't be removed (ACL: null). To open this ${collection} row to everyone the collection's ` +
+            'rules let read it, write ACL {"*": {"read": true}}; add "write": true for writing too.',
+          123
+        );
+      }
+    }
     if (body.ACL === undefined || body.ACL === null) delete body.ACL;
 
-    const acl = ctx.acl('write');
     assertAccountWrite(collection, body);
     normaliseParseOps(body, 'update');
     const { increments, addRelations, removeRelations, plain } = extractOps(body);
