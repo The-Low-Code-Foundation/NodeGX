@@ -509,8 +509,8 @@
     ]
   },
   {
-    "name": "Outputs.ping.send() alone names a VALUE port, so the call throws: the write before it lands, then Error and Failure — a Run answered failure",
-    "because": "simplejavascript.ts :611-616 (.send is prepared only on a SIGNAL port the model saved), function-ports.ts (`.send()` is not a signal pattern), :653-721 — FIX-016 (P66) measured the same throw",
+    "name": "Outputs.ping.send() alone names a SIGNAL port: the write lands, ping fires, and the run succeeds (v3, P107-S83-SENDFORM)",
+    "because": "simplejavascript.ts :611-616 (.send is prepared on every signal port the model carries), function-ports.ts (`Outputs.x.send()` is a signal pattern since v3; before, it named a value port and the call threw) — FIX-016 (P66) measured the old throw",
     "params": {
       "functionScript": "Outputs.count = 1;\nOutputs.ping.send()"
     },

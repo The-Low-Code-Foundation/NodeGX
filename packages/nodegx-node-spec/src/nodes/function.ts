@@ -238,7 +238,19 @@ const schedule = { scheduled: true } as const;
 export const JavaScriptFunction = defineNode({
   type: 'JavaScriptFunction',
   // v2 (P109 ISL-051, s33): Error cleared to blank text and sent by a run that works and by a new Script (row C146)
-  version: 2,
+  // v3 (P107-S83-SENDFORM): `Outputs.x.send()` names a signal port, as `Outputs.x()` does
+  version: 3,
+  changes: [
+    {
+      version: 3,
+      says:
+        'Code that fires a signal as `Outputs.done.send()` now makes `done` a signal port, and the call fires it (before, `done` was a value port, the call threw "Cannot read properties of undefined (reading \'send\')", and the run reported Error and Failure every time)',
+      row: 'P107-S83-SENDFORM',
+      migration: {
+        none: 'Each before was a throw at every run: no value ever reached a `done` read as a value, so a wire from it carried nothing, and the same wire now carries the signal the code meant'
+      }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/simplejavascript.ts',
   contract:
     'ports from the code and the written lists; when the code runs (the Script — only while Run is not wired, P107-C155 —, Run, a changed ticked input; once a frame); Inputs, this and Noodl as the code sees them; publish on change; signal outputs; Success and Done after an await; a throw, sync or async; a compile failure; no script — FUNCTION_FIXTURES, one per rule',
