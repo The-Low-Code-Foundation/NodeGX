@@ -533,6 +533,9 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       // the tenth tool ("9 tools" → "10 tools", a character resident); here it is beside `open_studio` and
       // `session_status`, its subject, at 0. The door is by name and by the keywords 'changed', 'hold', 'released'.
       'what_changed_since',
+      // P125-PUPPY2 — `release_hold`, the person's next message lifting their hold. Beside its subject, at 0 resident
+      // tokens on the same arithmetic; by name and by 'hold', 'released'.
+      'release_hold',
       // P109 ISL-016 — appended on the arithmetic the notes above record: 0 resident tokens ("8
       // tools" and "9 tools" are the same length). `tests/isl016ProjectSettings.test.ts` measures
       // that and reaches it through `find_tools` by keyword.

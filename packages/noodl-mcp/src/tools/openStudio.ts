@@ -37,12 +37,14 @@
  */
 
 import { spawn } from 'child_process';
+import { randomUUID } from 'crypto';
+import { z } from 'zod';
 
 import type { McpServer, RegisteredResource } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import { clientRendersApps, consumeOpenStudioProxied } from '../clientApps';
 import { ToolError } from '../errors';
-import { oldHoldWords, readHold } from '../hold';
+import { HOLD_FILE, mayRelease, oldHoldWords, readHold, RELEASE_AFTER_REFUSAL_MS } from '../hold';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -214,6 +216,10 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
         ok: true,
         url,
         panel: STUDIO_RESOURCE_URI,
+        // P125-PUPPY2-THREEPANELS — which panel this call drew, read by Studio's bridge from this result: the newest
+        // call's panel is the live one and every older panel in the conversation goes quiet (editor/hosted/hosted.js).
+        panelId: `${Date.now().toString(36)}-${randomUUID().slice(0, 8)}`,
+        issuedAt: Date.now(),
         onScreen: rendersApps ? 'in the conversation' : openedBrowser ? 'in the browser, beside the conversation' : 'not yet',
         projectDir: dir,
         hold: hold.held ? hold : undefined,
@@ -225,6 +231,13 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
               : `Tell the person to open ${url} in a browser: Studio is there. `) +
           // P125 CCN-002 — a hold older than a day is said, with how old it is (`hold.ageHours` in the answer).
           (hold.held ? oldHoldWords(hold) : '') +
+          // P125-PUPPY2 — open_studio is the first call of a turn that changes the app, so this is where the agent
+          // reads that the person's new message can be the release.
+          (hold.held
+            ? 'The person has HOLD on. If their newest message asks you to change the app, that is their release: ' +
+              'call release_hold with their words, then what_changed_since, then build. If it does not ask for a ' +
+              'change (a question, a complaint), answer it and leave the hold on. '
+            : '') +
           (viaProxy
             ? 'You reached open_studio through call_tool, so the host drew no panel; next time call open_studio by ' +
               'its own name and Studio appears inside the conversation. '
@@ -237,6 +250,65 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
           'saying what appeared. A write refused with code `held` means they pressed HOLD — stop and ask. ' +
           'This panel stays where it is for the rest of this turn: do not call open_studio again until the next ' +
           'turn that changes the app, and then call it first.'
+      });
+    })
+  );
+
+  // P125-PUPPY2 (Richard, 2026-10-24): the person's next message asking for a change lifts their hold. Exempt from
+  // the hold (`HOLD_EXEMPT`); guarded by `mayRelease`, which refuses in the turn the hold stopped. Lifted through
+  // Studio when it runs, so its HOLD button flips and says the agent lifted it, and with which words.
+  rec.registerTool(
+    'release_hold',
+    {
+      title: 'Lift the person’s HOLD because their newest message asks for a change',
+      description:
+        'Lift the HOLD the person pressed in Studio, only because their newest message asks you to change the app. ' +
+        'Pass their words. Refused within 30 seconds of a call the hold refused: never in the turn it stopped you.',
+      inputSchema: {
+        words: z.string().min(1).describe('The person’s newest message, or the part of it asking for the change, verbatim.')
+      }
+    },
+    guarded(async (args: { words: string }) => {
+      const dir = binding.require().projectDir;
+      const may = mayRelease(dir);
+      if (!may.released && may.reason === 'not-held') {
+        return jsonResult({ ok: true, released: false, note: 'There is no hold on this project: build.' });
+      }
+      if (!may.released) {
+        throw new ToolError(
+          'held',
+          `Not lifted: the hold refused one of your calls ${may.secondsAgo} seconds ago, so this is the turn it ` +
+            `stopped (the guard is ${RELEASE_AFTER_REFUSAL_MS / 1000} seconds). Stop, tell the person what you were ` +
+            'doing, and ask what they saw. Their next message can be the release.'
+        );
+      }
+      const words = args.words.trim().slice(0, 300);
+      const studio = studioFor(dir);
+      let viaStudio = false;
+      if (studio) {
+        try {
+          const r = await fetch(`${studio.origin}/api/hold`, {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ held: false, by: 'agent', words })
+          });
+          viaStudio = r.ok;
+        } catch {
+          /* Studio gone: the file below */
+        }
+      }
+      const file = path.join(dir, HOLD_FILE);
+      if (fs.existsSync(file)) fs.rmSync(file);
+      return jsonResult({
+        ok: true,
+        released: true,
+        heldSince: may.hold.at,
+        note:
+          (viaStudio
+            ? `Lifted. Studio shows the person that you lifted it, with their words: "${words}". `
+            : 'Lifted (Studio is not running, so the person sees it only in what you say). ') +
+          'Say in your answer that you lifted their hold because they asked for this change. Call ' +
+          'what_changed_since before you write: they may have edited the app in Studio while it was held.'
       });
     })
   );

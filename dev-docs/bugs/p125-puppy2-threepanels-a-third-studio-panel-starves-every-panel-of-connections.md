@@ -1,7 +1,9 @@
 ---
 id: P125-PUPPY2-THREEPANELS
 title: With three Studio panels in a conversation, every panel stops showing the app ("Timed out after 20000 ms waiting for the app to start") and HOLD's request queues — each panel holds two event streams to the one proxy origin, and Chromium allows six connections per host
-status: open
+status: fixed
+commit: nodegx-studio d59eff6 + OpenNoodl (this commit)
+regression: dev-docs/tasks/phase-125-co-construction/tools-one-live-panel-drive.mjs
 severity: high
 area: nodegx-studio panel (`editor/hosted/hosted.js` second EventSource, `editor/studio.html` /api/events), noodl-mcp Studio proxy (one origin for every panel)
 found: P125, Richard's Muddy Paws run in Claude Desktop (Sonnet 5.5), 2026-10-24 12:03–12:15
@@ -49,3 +51,17 @@ two, which come out clean.
 
 The banner's words are misleading too: "waiting for the app to start" points at the project, when the cause is the
 connection. Not closed by the "once per turn" description (58f973f95): three turns that change the app make three panels.
+
+## Fixed (2026-10-24, same day): one live panel — Richard: "close the previous editors and just keep the most recent"
+
+Direction 2 above, with 1 folded in. nodegx-studio d59eff6: the newest `open_studio` call's panel is live (`panelId`,
+`issuedAt` in the call's result; `POST /api/panel`); every older panel closes its stream, disposes the app's frame,
+shrinks to its 45 px strip ("Studio is live in a newer answer below." · Bring it back here) and sends the host
+`ui/notifications/request-teardown`. A panel of an older call that mounts later (a conversation reopened) never
+starts Studio. The bridge's second stream is gone. Fake host, `tools-one-live-panel-drive.mjs`, three panels 6 s apart:
+two quiet with no app frame, the newest takes an outside write, HOLD answers in 21 ms (was stalled), the wake moves the
+live panel; the same with no tool result from the host (the newest MOUNTED panel is live then).
+
+**Not measured in Claude Desktop:** whether it honours `request-teardown` (if not, the quiet strips stay, 45 px each),
+and whether `location.reload()` works for "Bring it back here" on a panel whose Studio had started (the fake host's
+iframe has a URL; Desktop's may be a srcdoc).
