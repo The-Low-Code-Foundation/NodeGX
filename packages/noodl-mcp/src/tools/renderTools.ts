@@ -38,6 +38,16 @@ import { honestySection, projectHonestyOf } from '../honesty';
 const MAX_SCALE = 1;
 const MIN_SCALE = 0.1;
 
+/**
+ * P112 OWN-026 FIX-07 A — said with every pass. Measured in a stranger's build: every drive tried the half it had just
+ * made appear (a setting on, a confirmation armed), none the other half (the setting off and what it governs, the
+ * cancel), and three checks were lost for three changes running. A pass is about the path driven, so it says so.
+ */
+export const BOTH_HALVES =
+  'A pass proves the path you drove. Drive the other half too: a setting switched off as well as on, then read what ' +
+  'it governs (more than once if it picks at random); a limit at its edge and just past it; a confirmation by its ' +
+  'cancel as well as its yes.';
+
 export function registerRenderTools(
   server: McpServer,
   binding: ProjectBinding,
@@ -192,7 +202,9 @@ export function registerRenderTools(
       title: 'Drive a rendered page',
       description:
         'Render this project from disk in a headless browser, run a list of steps on it, and report one row per ' +
-        'step — so you can prove a button, a form or a game WORKS, not just that it draws. Each call is a fresh ' +
+        'step — so you can prove a button, a form or a game WORKS, not just that it draws. Prove both halves: a ' +
+        'setting off as well as on (then read what it governs), a limit at its edge, a confirmation by its cancel. ' +
+        'Each call is a fresh ' +
         'browser: nothing carries over from the last call. Steps (each an object with one verb): {tap: T}, ' +
         '{type: "text", into?: T, replace?: true} (appends to what the field holds unless replace), {key: "Enter"}, ' +
         '{wait_for: {text|testid|selector|url|expression}, timeout_ms?}, {read: {text: T}|{look: T}|{variable: name}|' +
@@ -247,7 +259,7 @@ export function registerRenderTools(
         // The verdict before the JSON, as render_report's is: a caller must not be able to skim past it.
         const headline =
           result.verdict === 'passed'
-            ? `PASSED — ${result.of} of ${result.of} steps.`
+            ? `PASSED — ${result.of} of ${result.of} steps. ${BOTH_HALVES}`
             : `FAILED at step ${failed?.n ?? result.ran} (${failed?.do ?? '?'}): ${failed?.error ?? 'stopped'}. ` +
               `${result.ran - 1} of ${result.of} steps passed before it; the rest did not run.`;
         const caveats = [

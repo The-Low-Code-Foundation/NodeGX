@@ -180,7 +180,10 @@ export const AUTHORING_TRAPS = `THE TRAPS — read these before anything else. E
    Call get_style_vocabulary for what this project actually has.
 7. Verify by looking. Call \`render_report\` when you have written anything visual: it renders the
    project headless and returns the numbers and the screenshots. A graph is a claim; a render is
-   evidence. An image URL that returns 200 can still be a picture of the wrong thing.
+   evidence. An image URL that returns 200 can still be a picture of the wrong thing. Then drive it
+   (\`drive_page\`) both ways: a setting switched off as well as on, then read what it governs; a
+   limit at its edge; a confirmation by its cancel as well as its yes. A drive of only what the build
+   just made appear proves half of it.
 8. ${NODES_BEFORE_CODE}
 9. ${THREE_WAYS_TO_COMPUTE}
 10. ${CODE_STYLE}`;

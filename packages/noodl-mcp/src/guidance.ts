@@ -79,7 +79,7 @@ const MUST_KNOW = [
   'Order: the look (get_style_vocabulary), then the screen list, then create_plan with one operation per component. [design]',
   "A component's inputs are a `Component Inputs` node whose ports are plugged \"output\"; an instance parameter no input declares is dropped without a word. [traps 1–2, interface]",
   'Rows are data: a `Static Data` JSON array, or a Query Records, feeding a `For Each`. Never hand-copied cards. [traps 3]',
-  'Colour and spacing are tokens ("var(--space-4)"), never hex or px. After a visual write, look: render_report, then drive_page. [traps 6–7]',
+  'Colour and spacing are tokens ("var(--space-4)"), never hex or px. After a visual write, look: render_report, then drive_page both ways (a setting off as well as on, a limit at its edge, a confirmation by its cancel). [traps 6–7]',
   'Nodes before code; once a calculation needs code, all of it goes in ONE Function node. [traps 8–9]',
   'The backend keeps users apart (`creatorOwns`): never fetch every row and filter in a Function node; narrow a Query Records on the server with `visualFilter` (example `cloud-query-own-rows`). [backend]',
   "Whose a record is: `owner`, which the backend writes from the creator's session and no page can set. A field the page fills from the User id (an ownerId, a familyId) is the caller's word; to let someone see your records, a cloud function checks `owner` (example `cloud-share-my-records-with-someone`); to let several people change them, a role named from the owner's id, joined only from an invitation's `owner` (example `cloud-members-can-edit-my-records`). [backend]",
