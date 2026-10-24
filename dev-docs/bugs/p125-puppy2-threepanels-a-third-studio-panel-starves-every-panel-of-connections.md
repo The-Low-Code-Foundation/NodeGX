@@ -2,7 +2,7 @@
 id: P125-PUPPY2-THREEPANELS
 title: With three Studio panels in a conversation, every panel stops showing the app ("Timed out after 20000 ms waiting for the app to start") and HOLD's request queues — each panel holds two event streams to the one proxy origin, and Chromium allows six connections per host
 status: fixed
-commit: nodegx-studio d59eff6 + OpenNoodl (this commit)
+commit: nodegx-studio d59eff6 + OpenNoodl 34e81f301
 regression: dev-docs/tasks/phase-125-co-construction/tools-one-live-panel-drive.mjs
 severity: high
 area: nodegx-studio panel (`editor/hosted/hosted.js` second EventSource, `editor/studio.html` /api/events), noodl-mcp Studio proxy (one origin for every panel)
