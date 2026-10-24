@@ -100,7 +100,17 @@ export interface RenderScreenshot {
   name: string;
   mimeType: string;
   base64: string;
+  /** P125-PUPPY2-RENDER1MB — set when the picture was retaken to fit the answer: the first `screens` of `of`. */
+  fit?: { format: 'jpeg'; quality: number; screens: number; of: number; overBudget: boolean };
 }
+
+/**
+ * P125-PUPPY2-RENDER1MB — what the inline pictures may take in all, in base64 characters. Claude refuses a tool
+ * result over 1 MB (`Tool result is too large`), and the report's JSON and words ride beside the pictures, so the
+ * pictures get a little over half of it. Measured: a long landing page's three full-page PNGs at scale 0.4 crossed
+ * the limit in Richard's Muddy Paws run, and the agent went on without its own evidence.
+ */
+export const INLINE_IMAGE_BUDGET = 600_000;
 
 export interface RenderOptions {
   viewports?: string;
@@ -456,7 +466,7 @@ export async function runRenderReport(
      * returns. That is the reason it is worth writing to disk at all.
      */
     if (options.outDir !== undefined) args.push('--out-dir', options.outDir);
-    else args.push('--inline-screenshots');
+    else args.push('--inline-screenshots', '--image-budget', String(INLINE_IMAGE_BUDGET));
     args.push('--scale', String(options.scale ?? 0.4));
   }
   if (options.viewports) args.push('--viewports', options.viewports);

@@ -1944,6 +1944,9 @@ async function withRenderedPage(options, fn) {
  * @param {number} [options.concurrency=PAGE_TABS] FLD-011 — how many tabs the routed-page sweep may
  *   drive at once. `1` is the serial sweep this replaced, navigation for navigation, and is the
  *   baseline every speed claim on this function is measured against.
+ * @param {number} [options.imageBudget]       P125-PUPPY2-RENDER1MB — base64 characters the subject pictures may
+ *   take in all, shared between the viewports. A picture over its share is retaken as a JPEG, then cut to its first
+ *   screens, and carries `fit` saying so. Unset: PNGs as large as the page.
  * @param {string} [options.page]              Measure only this page, named by its `urlPath` (EL-009
  *   AC1/AC3) — `quiz`, `/quiz`, `#quiz` or the component name; `/` is the start page. A path no
  *   router registers is an **actionable throw**, never an empty report. Implies no sweep: the
@@ -1965,10 +1968,13 @@ async function renderReport(options) {
     editorTokens = false,
     renderRoutedPages = true,
     page: requestedPage,
-    concurrency = PAGE_TABS
+    concurrency = PAGE_TABS,
+    imageBudget
   } = options;
 
   const started = Date.now();
+  // P125-PUPPY2-RENDER1MB — the base64 characters every subject picture may take, shared between the viewports.
+  const imageBytesEach = imageBudget ? Math.floor(imageBudget / Math.max(1, viewports.length)) : 0;
 
   // 🔴 EL-009 AC3 — resolved BEFORE the browser starts, on purpose. A typo'd
   // path is a caller error that a disk read can settle, and `render.ts` records
@@ -2050,26 +2056,55 @@ async function renderReport(options) {
      * or **true** for a page that is not the start page. Neither is a thing to
      * be wrong about in a field a filename is keyed on.
      */
-    const capture = async (vp, raw, component, subject, client = page.client) => {
-      const shot = await client.send('Page.captureScreenshot', {
-        format: 'png',
+    // Chrome refuses beyond 16384px; a page taller than that is already the finding.
+    const take = (vp, client, format, height, quality) =>
+      client.send('Page.captureScreenshot', {
+        format,
+        ...(format === 'jpeg' ? { quality } : {}),
         captureBeyondViewport: screenshot === 'full',
         optimizeForSpeed: true,
-        ...(screenshot === 'full'
-          ? {
-              clip: {
-                x: 0,
-                y: 0,
-                width: vp.width,
-                // Chrome refuses beyond 16384px; a page taller than that is
-                // already the finding.
-                height: Math.min(raw.pageHeight, 16384),
-                scale: deviceScaleFactor
-              }
-            }
-          : {})
+        ...(screenshot === 'full' ? { clip: { x: 0, y: 0, width: vp.width, height, scale: deviceScaleFactor } } : {})
       });
-      return { name: vp.name, page: component, subject, mimeType: 'image/png', base64: shot.data };
+    const capture = async (vp, raw, component, subject, client = page.client) => {
+      const fullHeight = Math.min(raw.pageHeight, 16384);
+      const shot = await take(vp, client, 'png', fullHeight);
+      const base = { name: vp.name, page: component, subject };
+      if (!imageBytesEach || shot.data.length <= imageBytesEach) return { ...base, mimeType: 'image/png', base64: shot.data };
+      return { ...base, ...(await fitted(vp, client, fullHeight)) };
+    };
+    /**
+     * P125-PUPPY2-RENDER1MB — a picture that fits the answer. Claude refuses a tool result over 1 MB, and three
+     * full-page PNGs of a long landing page crossed it: the agent retried three times and went on without its own
+     * evidence. Over its share of the budget, a picture is retaken as a JPEG; still over, a full page is cut to its
+     * first screens (whole screens, the top first: the fold is where a person starts) until it fits. `fit` says
+     * what was done, so the answer can say it before the image.
+     */
+    const fitted = async (vp, client, fullHeight) => {
+      const screenHeight = Math.max(1, vp.height);
+      const screens = Math.max(1, Math.ceil(fullHeight / screenHeight));
+      let quality = 70;
+      let height = fullHeight;
+      let shot = await take(vp, client, 'jpeg', height, quality);
+      if (screenshot === 'full' && shot.data.length > imageBytesEach && screens > 1) {
+        // A first guess from the bytes per screen, then one screen fewer at a time.
+        let keep = Math.min(screens - 1, Math.max(1, Math.floor((screens * imageBytesEach) / shot.data.length)));
+        for (;;) {
+          height = Math.min(fullHeight, keep * screenHeight);
+          shot = await take(vp, client, 'jpeg', height, quality);
+          if (shot.data.length <= imageBytesEach || keep === 1) break;
+          keep -= 1;
+        }
+      }
+      if (shot.data.length > imageBytesEach) {
+        quality = 40;
+        shot = await take(vp, client, 'jpeg', height, quality);
+      }
+      const shown = screenshot === 'full' ? Math.min(screens, Math.ceil(height / screenHeight)) : 1;
+      return {
+        mimeType: 'image/jpeg',
+        base64: shot.data,
+        fit: { format: 'jpeg', quality, screens: shown, of: screenshot === 'full' ? screens : 1, overBudget: shot.data.length > imageBytesEach }
+      };
     };
 
     const expression = measureExpression(placeholders, probesFor(subjectComponent));

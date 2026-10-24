@@ -1,7 +1,7 @@
 ---
 id: P125-CCN002-SWIFTARGSNEVER
 title: noodl-mcp's typecheck is red on a committed line of the Swift emitter (`const args = []` is `never[]`)
-status: open
+status: fixed
 severity: medium
 area: export / Swift emitter (modifiers.ts), seen through noodl-mcp's tsc
 found: P125 CCN-002, 2026-10-23 (lane 3)
@@ -20,3 +20,7 @@ runs noodl-mcp's tsc is red for a reason none of its own files carry.
 
 Fix (one line, lane 4's file): `const args: string[] = [];`. Not fixed here because lane 4 is paused by Richard
 (2026-10-23: no session opens on it until he names it).
+
+## Fixed (2026-10-24)
+
+`const args: string[] = []`. `noodl-mcp` and `nodegx-export` typecheck clean (`tsc --noEmit`, exit 0 both).

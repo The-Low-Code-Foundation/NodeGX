@@ -6,8 +6,9 @@ severity: medium
 area: backend / security model (`packages/nodegx-backend/src/security/model.ts`, BAK-003 §5)
 found: P123 s6, 2026-10-17, converting Bubble apps' privacy rules and workflow conditions into `nodegx.security.json` (`dev-docs/tasks/phase-123-open-bubble/import/bubble2nodegx.mjs`, `buildSecurity`)
 evidence: dev-docs/tasks/phase-123-open-bubble/import/IMPORT.md §14 ("creator-only writes"); BAK-003 §5 says a `creatorOwns` row's ACL is `{ "<creatorId>": { read, write } }` and nothing else, so the row is invisible to every other reader; `validateRuleAtom` accepts `public | authenticated | nobody | role:<name> | { path }` and nothing that names the row's own creator
+commit: e67148acd
 ruled: (a), by Richard 2026-10-24 ("Ruling: Do A")
-regression: packages/nodegx-backend/tests/p123-creator-edits.test.ts (12/12; a mutant granting `creator` outright turns 6 red)
+regression: packages/nodegx-backend/tests/p123-creator-edits.test.ts "12/12; a mutant granting `creator` outright turns 6 red"
 ---
 
 A Bubble app's commonest posture is *everyone sees a listing, only the person who made it edits or deletes it*: a

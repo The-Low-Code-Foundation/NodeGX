@@ -25,7 +25,7 @@ import { z } from 'zod';
 import { clientProfile } from '../clientProfile';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
-import { runDrivePage, runRenderReport, type RenderReportPayload } from '../render';
+import { runDrivePage, runRenderReport, type RenderReportPayload, type RenderScreenshot } from '../render';
 import type { RenderLedger } from '../renderVerdict';
 import { guarded, type ToolResult } from './util';
 import { honestySection, projectHonestyOf } from '../honesty';
@@ -177,7 +177,7 @@ export function registerRenderTools(
             // Each image is announced before it arrives, because an agent
             // reading a bare image has no way to know which viewport it is.
             ...screenshots.flatMap((shot) => [
-              { type: 'text' as const, text: `Screenshot — ${shot.name} (${report.viewports[shot.name]?.requested.width}px wide, full page)` },
+              { type: 'text' as const, text: `Screenshot — ${shot.name} (${report.viewports[shot.name]?.requested.width}px wide, ${shotExtent(shot)})` },
               { type: 'image' as const, data: shot.base64, mimeType: shot.mimeType }
             ]),
             // P109 ISL-021 AC6 (s14) — the agent built a form, read this answer four times, then went looking
@@ -285,6 +285,19 @@ export function registerRenderTools(
         };
       }
     )
+  );
+}
+
+/**
+ * P125-PUPPY2-RENDER1MB — what the picture covers, said before it arrives. A picture cut to fit the answer says so
+ * and names the way to see the rest: an agent that reads "full page" over the top third reports the rest as checked.
+ */
+export function shotExtent(shot: RenderScreenshot): string {
+  if (!shot.fit) return 'full page';
+  if (shot.fit.screens >= shot.fit.of) return 'full page, as a JPEG to fit this answer';
+  return (
+    `only the first ${shot.fit.screens} screen${shot.fit.screens === 1 ? '' : 's'} of ${shot.fit.of}, cut to fit this answer — ` +
+    'the rest is measured in the report but not pictured; out_dir writes every page whole'
   );
 }
 

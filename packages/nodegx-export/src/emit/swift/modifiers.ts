@@ -238,7 +238,7 @@ export function swiftStyle(decls: Decl[], role: string, theme: Theme): SwiftStyl
   }
   const frameAlignment = stack?.alignment === '.center' ? '.center' : '.leading';
   if (fixedWidth !== undefined || height !== undefined) {
-    const args = [];
+    const args: string[] = [];
     if (fixedWidth !== undefined) args.push(`width: ${fixedWidth}`);
     if (height !== undefined) args.push(`height: ${height}`);
     box.push(`.frame(${args.join(', ')}, alignment: .topLeading)`);
