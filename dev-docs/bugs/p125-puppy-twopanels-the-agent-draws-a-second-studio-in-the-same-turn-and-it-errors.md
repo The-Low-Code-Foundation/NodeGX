@@ -60,3 +60,9 @@ Re-run on the 00:12 dist: `claude.ai-web.log` shows ONE `oncalltool handler repl
 one `open_studio` (08:46:53); one `resources/read` (06:47:16.706Z, 12 ms after that call). One panel for the whole
 build, so the second panel, and with it the port error, never happened. Part 2 stays unexplained (no words, three
 clean reproductions, s12 above): if a second panel ever errors again, reopen this with its words.
+
+## 2026-10-24 (Muddy Paws run): part 2 probably explained — P125-PUPPY2-THREEPANELS
+
+Three panels from one proxy hold six event streams (two per panel), which is Chromium's per-host limit, and every panel's
+next rebuild times out. Reproduced headless: 2 panels fine, 3 all fail. This run mounted three panels; s12's
+reproductions used two.
