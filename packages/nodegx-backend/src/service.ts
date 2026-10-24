@@ -924,16 +924,29 @@ export class BackendService {
     const fromEnv = process.env[envName];
     if (typeof fromEnv === 'string') return { found: true, value: fromEnv };
 
+    // P112-S13-SECRETPATH — the Error is what a graph may route into a public Response, so it names the secret and
+    // how its owner sets it, and never this machine: the file's path (the home directory, the backend's id) goes to
+    // the backend's own log, once per name, for the person who runs it.
+    const file = path.join(this.options.dataDir, 'secrets.json');
+    if (!this.unprovisionedSecretsLogged.has(name)) {
+      this.unprovisionedSecretsLogged.add(name);
+      logger.warn('secret.not-provisioned', {
+        name,
+        detail: `Add it under the "${FUNCTION_SECRETS_NAMESPACE}" section of ${file}, or set ${envName}.`
+      });
+    }
     return {
       found: false,
       error:
-        `Secret: "${name}" is not provisioned on this machine. ` +
-        `Add it under the "${FUNCTION_SECRETS_NAMESPACE}" section of ` +
-        `${path.join(this.options.dataDir, 'secrets.json')}, or set the ${envName} environment variable. ` +
-        'secrets.json is machine-local and does not travel with a deploy, so a function that works ' +
-        'locally and fails here is usually a secret nobody provisioned on this target.'
+        `Secret: "${name}" is not provisioned on this backend. ` +
+        `Its owner sets it on the backend's Secrets page, or in the ${envName} environment variable. ` +
+        'A secret does not travel with a deploy, so a function that works locally and fails here is usually ' +
+        'a secret nobody set on this backend.'
     };
   }
+
+  /** P112-S13-SECRETPATH — the secret names whose missing file line has been logged, so a busy function logs once. */
+  private readonly unprovisionedSecretsLogged = new Set<string>();
 
   /**
    * The running server's route table (method/pattern/access). The route-walk
