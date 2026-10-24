@@ -6,7 +6,8 @@ def idx(marker):
     for i,l in enumerate(lines):
         if marker in l: return i
     raise SystemExit('missing '+marker)
-npm=idx('npm: the kit'); more=idx('The other pages'); dl=idx('====================== Download')
+npm=idx('<!-- ====================== npm: the kit'); more=idx('<!-- ====================== The other pages'); dl=idx('<!-- ====================== Download')
+assert npm < more < dl, (npm, more, dl)
 npm_block='\n'.join(lines[npm:more]).replace('<p class="kicker">New &middot; on npm</p>','<p class="kicker">Dive deep &middot; on npm</p>')
 rest='\n'.join(lines[dl:]).rstrip('\n')
 page='\n'.join(lines[:573])+'\n'+css+'</style>\n\n'+top+'\n'+npm_block+'\n'+rest+'\n'+js

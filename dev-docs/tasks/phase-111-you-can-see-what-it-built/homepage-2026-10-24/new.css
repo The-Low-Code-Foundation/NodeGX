@@ -184,3 +184,8 @@
   .ticks li::before { content: "\2713"; color: var(--signal); font-weight: 700; margin-right: 8px; }
   .ticks.no li::before { content: "\2192"; color: var(--amber); }
   @media (prefers-reduced-motion: reduce) { .card.pick { transition: none; } }
+  .soon-btn { font-size: 14px; padding: 8px 14px; }
+  .shot-cap .soon-btn { font-family: var(--sans); vertical-align: middle; }
+  details.from-source { margin-top: 10px; font-size: 14px; color: var(--ink-soft); }
+  details.from-source summary { cursor: pointer; color: var(--signal); font-weight: 600; }
+  details.from-source p { margin: 8px 0 0; }

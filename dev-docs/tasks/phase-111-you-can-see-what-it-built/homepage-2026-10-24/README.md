@@ -43,3 +43,15 @@ HEAD's `site/_page.html`) writes `_page.html` plus the artifact copies. Classes 
 DMG is a CI artifact behind a GitHub login; Mac arm64 only). The pages say "no download yet" and give the from-source steps.
 Also: nodegx-studio origin/main is 3 commits behind local (the 0.2.6 pins); `docs/runtime/YOUR-OWN-SERVER.md` is not on NodeGX
 `main` (404), so the build page describes the server steps itself.
+
+## Deployed 2026-10-24 (Richard: "Push it all to the homepage please")
+
+Live on nodegx.io: the homepage plus /play/, /build/ and /from-bubble/. Studio and Claude Desktop show Coming soon buttons that
+go to the mailing list. Deployed by targeted rsync (index.html, site.css, play/, build/, from-bubble/), with no `--delete` and
+no `deploy.sh`: nodegx-web's working tree holds another session's uncommitted edits and untracked live folders (gala, templates,
+map, orbit, backend-map), and `deploy.sh --delete` from a clean copy would remove those folders from the server. Built in a
+`git archive HEAD` scratch copy. First checked that HEAD's build matches the live site byte for byte, and after the push that
+every other page still does. nodegx-web commits: df7c854 (pages) and the follow-up fix.
+🔴 **The first push carried the whole old page below the new one.** `idx('====================== Download')` matched a CSS
+comment (line 358). The artifact drafts v3/v4 had it too. The markers are now the HTML comments only, with an order assert. Count
+sections (`id="more"`, `<!-- nav -->`, the old hero) on every assembly.
