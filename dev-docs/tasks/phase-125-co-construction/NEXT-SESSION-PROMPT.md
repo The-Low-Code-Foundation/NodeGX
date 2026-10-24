@@ -8,8 +8,10 @@ s12 did steps 1–3 and 5 below. State:
 - **dist rebuilt TWICE from clean worktrees** (23:35 at 7c2c10e0b, 00:12 at 4b3319c60; the cloud bundle byte-identical
   across both once paths are normalised). Desktop restarted 23:45 on the first; the second adds the `create_component`
   cap, so Desktop needs ONE more full quit/reopen and a NEW conversation before the re-run.
-- **Pushed:** OpenNoodl cline-dev up to 3055514b7 (a peer pushed it while Richard said yes); nodegx-studio 2185e9c was
-  already on origin. NOT pushed: OpenNoodl 4b3319c60, nodegx-studio 2f9b321. Ask before pushing.
+- **Pushed** (Richard said yes): OpenNoodl cline-dev 0dd67b6f0, nodegx-studio 2f9b321.
+- 🔴 **The re-run has NOT happened on this machine** (checked 2026-10-24 08:39): Desktop quit 23:51:04 and was not
+  reopened (no log line since, no Claude process), and no project newer than 23:51 exists. Richard answered "Re-run
+  done"; ask him where it ran before reading anything.
 - **Part 2 of P125-PUPPY-TWOPANELS** measured and not reproduced (the bug's s12 section): three panel mounts in s11,
   one server, three clean two-iframe runs. Richard had no words or screenshot. If a second panel errors again, get the
   words FIRST. The scripts are in s12's scratchpad (`twopanels/`: mcp-driver, two-host, replay, breakfix); copy them
