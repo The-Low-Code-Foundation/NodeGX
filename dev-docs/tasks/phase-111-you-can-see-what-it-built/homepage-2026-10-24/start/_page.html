@@ -270,7 +270,7 @@
     <h1>Start here</h1>
     <p class="lede">Which sounds most like you? The steps below change to match.</p>
     <div class="picker" role="group" aria-label="Where you&rsquo;re starting from">
-      <button type="button" data-profile="new" aria-pressed="true"><b>I&rsquo;ve never built an app</b><span>Claude builds it with you, step by step. Then you change it in NodeGX.</span></button>
+      <button type="button" data-profile="new" aria-pressed="true"><b>I&rsquo;ve never built an app</b><span>Claude builds it in a chat, with NodeGX Studio open right there for your changes.</span></button>
       <button type="button" data-profile="play" aria-pressed="false"><b>I want to try ideas with my AI coder</b><span>You use Claude Code, Cline or Mistral Vibe.</span></button>
       <button type="button" data-profile="business" aria-pressed="false"><b>I&rsquo;m building for a business</b><span>Internal tools, or apps for your customers.</span></button>
       <button type="button" data-profile="bubble" aria-pressed="false"><b>I&rsquo;m coming from Bubble</b><span>Bring your app&rsquo;s pages and back end across.</span></button>
@@ -283,10 +283,14 @@
   <section id="new" data-profiles="new">
     <div class="wrap">
       <p class="kicker">Never built an app</p>
-      <h2 class="profile-title">Build your first app with AI</h2>
-      <p class="intro">Never written code? This is for you. Follow the steps in order. We&rsquo;ll tell you what to
-        download, what to click, and what to type.</p>
-      <h3 style="margin:28px 0 0;font-size:20px">Who does what</h3>
+      <h2 class="profile-title">Build your first app in a chat with Claude</h2>
+      <p class="intro">Never written code? This is for you. You describe your app to Claude, and NodeGX Studio opens inside
+        the conversation so you can watch it being built and change it yourself.</p>
+      <div class="caveat" style="margin-top:20px"><b>Coming soon.</b> We&rsquo;re finishing the one-click install for
+        Claude Desktop. The steps below show how it will work. Join the list and we&rsquo;ll email you the day it&rsquo;s out.
+        <div style="margin-top:12px"><a class="btn primary" href="/#waitlist">Coming soon <span class="sub">notify me</span></a></div>
+      </div>
+      <h3 style="margin:32px 0 0;font-size:20px">Who does what</h3>
       <div class="who">
         <div>
           <h3>You</h3>
@@ -297,8 +301,8 @@
           <p>An AI you chat with, in plain English. It asks you questions, then builds the app for you.</p>
         </div>
         <div>
-          <h3>NodeGX</h3>
-          <p>A free app for your computer. Your app is built inside it. You can see it there, and change it too.</p>
+          <h3>NodeGX Studio</h3>
+          <p>An editor that opens inside your chat with Claude. You watch your app being built in it. You can change it there yourself.</p>
         </div>
       </div>
     </div>
@@ -312,61 +316,26 @@
           <div class="step-head"><span class="n" aria-hidden="true">1</span><h3>Download Claude</h3></div>
           <div class="body">
             <p>
-              Claude is the AI you&rsquo;ll talk to. Download the Claude app for your computer
-              and sign in. Building apps needs a paid plan. <b>Pro</b> is enough to start.
+              Claude is the AI you&rsquo;ll talk to. Download the Claude app for your computer and sign in. Building an
+              app takes a lot of messages, so we suggest a paid plan. <b>Pro</b> is enough to start.
             </p>
             <a class="btn primary" href="https://claude.ai/download">Download Claude</a>
-            <div class="note">
-              <span class="label">Good to know</span>
-              <ul>
-                <li>The Claude app has a <b>Chat</b> tab and a <b>Code</b> tab. For building with NodeGX, always use <b>Code</b>.</li>
-                <li>If it asks you to choose a folder, make a new empty folder called <b>My apps</b> and choose that.</li>
-                <li>Already use a different AI coding tool, like Kimi Code or Cline? That works too. Step 3 shows you how.</li>
-              </ul>
-            </div>
           </div>
         </li>
 
         <li class="step" id="step-2">
-          <div class="step-head"><span class="n" aria-hidden="true">2</span><h3>Download NodeGX</h3></div>
+          <div class="step-head"><span class="n" aria-hidden="true">2</span><h3>Add NodeGX to Claude</h3></div>
           <div class="body">
-            <p>
-              NodeGX is free. Choose the version for your computer (Mac, Windows or Linux),
-              install it, and open it.
-            </p>
-            <a class="btn primary" href="#download">Download NodeGX</a>
+            <p>One double-click adds NodeGX to the Claude app. Then Claude can build apps with it, right in your chat.</p>
+            <a class="btn primary" href="/#waitlist">Coming soon <span class="sub">notify me</span></a>
           </div>
         </li>
 
         <li class="step" id="step-3">
-          <div class="step-head"><span class="n" aria-hidden="true">3</span><h3>Connect Claude to NodeGX</h3></div>
-          <div class="body">
-            <p>In NodeGX, click the blue <b>Connect Claude Code</b> button. That lets Claude build apps in NodeGX.</p>
-            <figure class="shot">
-              <div class="shot-frame">
-                <img src="launcher.webp" width="1121" height="670"
-                     alt="The NodeGX welcome screen. Below 'Welcome to NodeGX' is a box titled 'Build it by describing it' with a blue 'Connect Claude Code' button, which is circled.">
-                <span class="shot-ring" aria-hidden="true"></span>
-              </div>
-              <figcaption>What you see in the middle of NodeGX the first time you open it.</figcaption>
-            </figure>
-            <p>
-              Then go back to Claude and start a <b>new</b> conversation in the Code tab.
-              Claude only sees NodeGX in conversations you start after connecting.
-            </p>
-            <div class="note">
-              <span class="label">Using Kimi Code, Cline or another tool?</span>
-              Click <b>Copy the command instead</b> (next to the button). Paste it into
-              your AI tool and say: &ldquo;Please add this MCP server so you can use NodeGX.&rdquo;
-            </div>
-          </div>
-        </li>
-
-        <li class="step" id="step-4">
-          <div class="step-head"><span class="n" aria-hidden="true">4</span><h3>Tell Claude your idea</h3></div>
+          <div class="step-head"><span class="n" aria-hidden="true">3</span><h3>Tell Claude your idea</h3></div>
           <div class="body">
             <p>
-              Copy this message into Claude, then fill in the gaps in your own words.
+              Start a new chat, copy this message in, then fill in the gaps in your own words.
               It doesn&rsquo;t need to be perfect. Claude will ask about anything that&rsquo;s missing.
             </p>
             <div class="ideas" aria-label="Example ideas">
@@ -381,7 +350,7 @@
                 <span class="label">Message 1 &middot; your idea</span>
                 <button class="btn copy" type="button" data-for="msg-idea">Copy</button>
               </div>
-              <textarea id="msg-idea" rows="14" aria-label="Message 1: your idea" spellcheck="false">Hi Claude! I'd like to build an app in NodeGX, using the NodeGX connection.
+              <textarea id="msg-idea" rows="14" aria-label="Message 1: your idea" spellcheck="false">Hi Claude! I'd like to build an app with NodeGX.
 
 About me: I'm new to this. I've never built an app and I don't know how to code. Please use plain words, explain any technical word the first time you use it, and ask me one question at a time.
 
@@ -420,65 +389,49 @@ Something like it I've seen: </textarea>
                 <dt>Hosting, cloud</dt><dd>Renting a computer on the internet that runs your app, so other people can use it.</dd>
                 <dt>Deploy</dt><dd>Putting your app onto that computer.</dd>
                 <dt>Domain</dt><dd>Your app&rsquo;s web address, like myrunningclub.com.</dd>
-                <dt>MCP, connector</dt><dd>How Claude talks to NodeGX. You set this up in step 3.</dd>
+                <dt>MCP, connector, extension</dt><dd>How Claude talks to NodeGX. You add it in step 2.</dd>
               </dl>
             </details>
             <p class="soft">If Claude uses any other word you don&rsquo;t know, ask &ldquo;What does that mean?&rdquo; Every time.</p>
           </div>
         </li>
 
-        <li class="step" id="step-5">
-          <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>Ask Claude to build it</h3></div>
+        <li class="step" id="step-4">
+          <div class="step-head"><span class="n" aria-hidden="true">4</span><h3>Watch it being built</h3></div>
           <div class="body">
             <p>
-              When Claude sums up the plan and it sounds right, make sure NodeGX is open,
-              then send this:
+              When Claude&rsquo;s summary of the plan sounds right, ask Claude to build the app. NodeGX Studio opens inside the chat. The app comes together in it a little at a time. Claude asks permission before it uses NodeGX. Click
+              <b>Allow</b>.
             </p>
             <div class="say">
               <div class="say-head">
                 <span class="label">Message 2 &middot; build it</span>
                 <button class="btn copy" type="button" data-for="msg-build">Copy</button>
               </div>
-              <textarea id="msg-build" rows="8" aria-label="Message 2: build it" spellcheck="false">That plan sounds right. Before you build, please show me a mockup of the main screens so I can check they look right.
-
-When I'm happy with the mockup, save it in the project folder and build the app in NodeGX, here on my computer. Tell me what you're doing as you go, in plain words.
-
-When it's finished, open the project in NodeGX (it's open now), and show me the app in my web browser so I can try it.</textarea>
+              <textarea id="msg-build" rows="4" aria-label="Message 2: build it" spellcheck="false">That plan sounds right. Please build it in NodeGX Studio, a little at a time, and tell me what you're doing as you go, in plain words.</textarea>
             </div>
             <div class="note">
-              <span class="label">Good to know</span>
-              <ul>
-                <li>Claude asks permission before it uses NodeGX. Click <b>Allow</b>.</li>
-                <li>The first version is rarely perfect. That&rsquo;s normal. Tell Claude what you see and what you wanted, like &ldquo;The list shows everyone, but I only want people coming on Saturday.&rdquo;</li>
-              </ul>
+              <span class="label">The Hold button</span>
+              If Claude changes something you didn&rsquo;t want, press <b>HOLD</b> at the top of Studio. Claude stops and
+              won&rsquo;t change anything until you press <b>Release</b>. Type what you saw in the box beside it, like
+              &ldquo;you just made the background grey&rdquo;.
             </div>
+          </div>
+        </li>
+
+        <li class="step" id="step-5">
+          <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>Make it yours</h3></div>
+          <div class="body">
+            <p>
+              <b>You can change anything in Studio</b>: the words, the colours, the pictures, where things go. Claude sees
+              what you changed and carries on from there. The first version is rarely perfect. Tell Claude what you see
+              and what you wanted, like &ldquo;The list shows everyone, but I only want people coming on Saturday.&rdquo;
+            </p>
           </div>
         </li>
 
         <li class="step" id="step-6">
-          <div class="step-head"><span class="n" aria-hidden="true">6</span><h3>Open your app in NodeGX and make it yours</h3></div>
-          <div class="body">
-            <p>
-              Your app lives in NodeGX. You&rsquo;ll find it on the NodeGX start screen under
-              <b>Recent projects</b>. Open it to see every page Claude built.
-            </p>
-            <p>
-              <b>You can change anything</b>: the words, the colours, the pictures, where things go.
-              Claude won&rsquo;t mind. If you get stuck, go back to Claude and ask for help.
-            </p>
-            <p>After you change something yourself, tell Claude, so it looks again before its next change:</p>
-            <div class="say">
-              <div class="say-head">
-                <span class="label">When you&rsquo;ve made changes</span>
-                <button class="btn copy" type="button" data-for="msg-changed">Copy</button>
-              </div>
-              <textarea id="msg-changed" rows="3" aria-label="Message: I made changes" spellcheck="false">I've changed some things in NodeGX myself. Please look at the project again before you change anything else, so you don't undo my changes.</textarea>
-            </div>
-          </div>
-        </li>
-
-        <li class="step" id="step-7">
-          <div class="step-head"><span class="n" aria-hidden="true">7</span><h3>Put it online (when you&rsquo;re ready)</h3></div>
+          <div class="step-head"><span class="n" aria-hidden="true">6</span><h3>Put it online (when you&rsquo;re ready)</h3></div>
           <div class="body">
             <p>
               For other people to use your app, it needs to run on a computer that&rsquo;s
@@ -497,10 +450,7 @@ When it's finished, open the project in NodeGX (it's open now), and show me the 
               </ul>
             </div>
             <p>
-              Claude can already help you put a NodeGX app online. Ask: &ldquo;How do I put this
-              app online?&rdquo; You&rsquo;ll need a free GitHub account for this, and
-              <a href="https://learn.nodegx.io/online/github-basics">the NodeGX guide</a> covers the basics.
-              Soon, NodeGX will do this step for you.
+              Once you&rsquo;ve rented a server, ask Claude how to put the app online. Claude walks you through it and sends the app there.
             </p>
           </div>
         </li>
@@ -514,7 +464,7 @@ When it's finished, open the project in NodeGX (it's open now), and show me the 
       <p class="kicker">Trying ideas</p>
       <h2 class="profile-title">Build with your AI coder, on parts you can change</h2>
       <p class="intro">Set up a folder for NodeGX before your AI coder starts. Then say what you want to make. It plans the
-        app with you, builds it from NodeGX parts, and leaves you a project you can open and change.</p>
+        app with you and builds it from NodeGX parts. You don&rsquo;t need an editor today. The app is saved in an open format. Any NodeGX editor can open it later, including one you build yourself.</p>
       <ol class="steps" style="margin-top:28px">
         <li class="step">
           <div class="step-head"><span class="n" aria-hidden="true">1</span><h3>Install Node.js</h3></div>
@@ -576,8 +526,9 @@ vibe --legacy-harness</pre>
         <li class="step">
           <div class="step-head"><span class="n" aria-hidden="true">5</span><h3>Change it yourself</h3></div>
           <div class="body">
-            <p>Every part lists its settings. Open the project in the <a href="#download">NodeGX editor</a> and change
-              anything by hand. Or ask your AI coder to build you an editor of your own, showing only what you want to touch.</p>
+            <p>Every part lists its settings. Change things whenever you&rsquo;re ready. Open the project in
+              NodeGX Studio, the beginner&rsquo;s editor (coming soon), or in the <a href="#download">professional NodeGX
+              editor</a>. Or ask your AI coder to build you an editor of your own, showing only what you want to touch.</p>
           </div>
         </li>
         <li class="step">
@@ -617,14 +568,15 @@ vibe --legacy-harness</pre>
                 <button type="button" aria-pressed="false" data-pick="editor">Me or a developer, in detail</button>
                 <button type="button" aria-pressed="false" data-pick="studio">Me, but I don&rsquo;t write code</button>
                 <button type="button" aria-pressed="false" data-pick="own">My team or client, who don&rsquo;t code</button>
+                <button type="button" aria-pressed="false" data-pick="own">Nobody yet. I want my options open</button>
               </div>
             </div>
             <div class="cards three">
               <div class="card pick" id="pick-studio">
                 <div class="card-top"><span class="port">NodeGX Studio</span><span class="state soon">Coming soon</span></div>
-                <h3>Pages, elements and workflows</h3>
-                <p>It suits people who think the way Bubble and n8n work. Design on the real app, draw workflows, set up
-                  data and who can see it, and replay a run step by step.</p>
+                <h3>The beginner&rsquo;s editor</h3>
+                <p>It works in pages, elements and workflows, the way Bubble and n8n do. It opens inside your chat with Claude, or on
+                  its own. Design on the real app, set up data and who can see it, and replay a run step by step.</p>
                 <a class="btn" href="/#waitlist">Coming soon <span class="sub">notify me</span></a>
                 <details class="from-source"><summary>Can&rsquo;t wait? Run it from its source</summary>
                   <p>You need Node.js 22. In a terminal, run:</p>
@@ -635,17 +587,17 @@ npm start</pre></details>
               </div>
               <div class="card pick" id="pick-editor">
                 <div class="card-top"><span class="port">The NodeGX editor</span><span class="state now">0.4.3</span></div>
-                <h3>Every detail, in one window</h3>
-                <p>The full editor NodeGX grew from. The page as a tree, the nodes and wires behind it, and the app
-                  running beside them. Click anything in the app and change it.</p>
+                <h3>The professional editor</h3>
+                <p>Every detail in one window. The page as a tree, the nodes and wires behind it, and the app running beside
+                  them. Click anything in the app and change it.</p>
                 <a class="btn primary" href="#download">Download NodeGX 0.4.3</a>
               </div>
               <div class="card pick" id="pick-own">
-                <div class="card-top"><span class="port">Your own editor</span><span class="state now">Today</span></div>
-                <h3>Only the settings your team needs</h3>
-                <p>Claude builds an editor that shows your team only what they should touch. That might be prices,
-                  opening hours or the text on a page. Set up your project in step 2, and the folder includes a guide
-                  Claude follows.</p>
+                <div class="card-top"><span class="port">No tool to commit to</span><span class="state now">Today</span></div>
+                <h3>The npm packages, and your own editor</h3>
+                <p>Not ready to pick an editor, or not editing yet? Build with the npm packages in step 2. Your app is saved
+                  in an open format that any NodeGX editor can open later. Claude can also build your team an editor that
+                  shows only what they should touch.</p>
                 <a class="go" href="/your-own-editor/">See editors Claude has built &rarr;</a>
               </div>
             </div>
@@ -794,10 +746,10 @@ npm start</pre></details>
   <!-- ====================== Download ======================
        RELEASES: since 2026-10-24 the editor download block lives here, on /start/. The homepage forwards
        /#download to /start/#download, and /build/ forwards to /start/#business. -->
-  <section id="download" data-profiles="new play business">
+  <section id="download" data-profiles="play business">
     <div class="wrap">
       <p class="kicker">Download &middot; public alpha</p>
-      <h2>Download NodeGX</h2>
+      <h2>Download the NodeGX editor</h2>
       <p class="intro">
         NodeGX is in public alpha: it builds real apps, and it still has rough edges. The
         <a href="/changelog/">changelog</a> lists what changed in every release and what is
@@ -859,7 +811,7 @@ npm start</pre></details>
   </section>
 
 
-  <section id="watch" data-profiles="new play">
+  <section id="watch" data-profiles="play business">
     <div class="wrap">
       <h2>Prefer to watch first?</h2>
       <div class="cards">
@@ -985,7 +937,7 @@ npm start</pre></details>
       if (P.indexOf(h) >= 0) { show(h, { hash: false, scrollTo: first ? null : 'steps-start' }); return; }
       if (h === 'download') {
         var d = document.getElementById('download');
-        if (d && d.hidden) show('new', { hash: false });
+        if (d && d.hidden) show('play', { hash: false });
         if (d) setTimeout(function () { d.scrollIntoView({ block: 'start' }); }, 0);
         return;
       }

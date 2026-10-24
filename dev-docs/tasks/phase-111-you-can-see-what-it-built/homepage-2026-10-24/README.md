@@ -67,3 +67,5 @@ all four show. The download block moves here (`#download`, shown for new, play a
 to `/start/#…`, `/#download` forwards to `/start/#download`, and `/play/`, `/build/` and `/from-bubble/` become forwarding stubs
 (`pages/*-stub.html`). `start/build.py.proposed` = nodegx-web `ops/build.py` with the new SUBPAGES descriptions. To deploy:
 targeted rsync of index.html, site.css, start/index.html, play/, build/ and from-bubble/ (the recipe above).
+
+**Positioning ruled by Richard (2026-10-24):** *NodeGX Studio = the beginner tool* (in Claude Desktop, inside the chat); *the full editor = the professional tool*; *the npm packages and your own editor* = for people who will not commit to a tool, or are not editing now but want to be protected for the future. Start here `#new` is now the Claude Desktop + Studio route (Coming soon; the old editor-based beginner steps are gone from it). Downloads show for `#play` and `#business` only. The hero lost its editor download button.
