@@ -6,6 +6,7 @@ severity: low
 area: mcp / examples (`user-login-flow`, served by `get_example`; its text in `packages/noodl-types/src/node-catalog-enriched.json`)
 found: P121 TWO-003 s3, 2026-10-14
 evidence: dev-docs/tasks/phase-121-a-marketplace-and-a-community/TWO-003-THE-SHOP.md §6.5
+commit: 6cf8857ae
 ---
 
 `get_example user-login-flow` describes Log In as "firing `success` or `failure` (+`error`)". Log In's outputs are

@@ -8,6 +8,7 @@ found: P107 NSP-020 s83, 2026-10-11 — moving the Function spec onto the decide
 evidence: `packages/nodegx-node-spec/scenarios/JavaScriptFunction.json` "Outputs.ping.send() alone names a VALUE port, so the call throws: the write before it lands, then Error and Failure — a Run answered failure" (the golden trace, conforming on the runtime at seed 20737); `functionScriptPortNames('Outputs.count = 1;\nOutputs.ping.send()')` → `{ signals: [], outputs: ['count', 'ping'] }`
 kit: project-contract
 regression: packages/nodegx-project-contract/tests/function-ports-send.test.ts "Outputs.ping.send() is a signal, never also a value"
+commit: e61dbbf6a
 ---
 
 A person writes `Outputs.done.send()` in a Function. The runtime says this is allowed: it attaches `.send` to every

@@ -7,6 +7,7 @@ area: mcp / render_report (`packages/noodl-mcp/src/tools/renderTools.ts`, inline
 found: P125, Richard's Muddy Paws run in Claude Desktop (Sonnet 5.5), 2026-10-24
 evidence: "claude.ai-web.log: '400 POST …/tool_result invalid_request_error' at 12:10:45, 12:10:52, 12:10:59, each 5 s after a nodegx:render_report call (12:10:40, 12:10:47, 12:10:54); the earlier render_report calls (12:10:17, 12:10:31) have none. Richard saw 'Tool result is too large. Maximum size is 1MB'. Sizes NOT measured: render-report.js run by hand (node and ELECTRON_RUN_AS_NODE) printed nothing."
 regression: packages/noodl-mcp/tests/p125Render1mb.test.ts "6/6, real Chrome; its control: the same page with no budget is a PNG over its share"
+commit: 2d0fe7534
 ---
 
 Claude.ai refuses a tool result over 1 MB. By default `render_report` returns the JSON report plus one **full-page**

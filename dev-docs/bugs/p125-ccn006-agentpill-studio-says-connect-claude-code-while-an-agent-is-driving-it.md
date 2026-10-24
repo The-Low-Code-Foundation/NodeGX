@@ -1,11 +1,12 @@
 ---
 id: P125-CCN006-AGENTPILL
 title: Studio's header says "Connect Claude Code" while an agent in Claude Desktop is driving the same project
-status: open
+status: fixed
 severity: low
 area: nodegx-studio `editor/studio.html` `AGENT_PILL` / `loadAgent` (reads `GET /api/agent` = `lib/agent.mjs` stateOf, which looks for `.mcp.json` in the folder)
 found: P125 CCN-006, 2026-10-23 — the companion's drive (`Puppy test 3` copy through the proxy)
 evidence: "Screenshot 1-pill.png in the session's scratchpad: the header reads 'Connect Claude Code' (grey) and the companion's pill at the bottom right reads 'Connected to Claude Code'. `/api/agent` answers from the folder's `.mcp.json` (Claude Code's project registration); Claude Desktop registers the server in its own config, so the folder has none."
+commit: nodegx-studio ba52c0f
 ---
 
 Studio's header item means "is this folder registered with Claude Code". A person reads it as "is an agent connected".
@@ -15,3 +16,11 @@ is fine.
 
 **Proposed:** when the page is served through NodeGX's proxy, `/__nodegx/status` names the agent. Studio's pill can
 read that first ("Claude is working on this") and fall back to `/api/agent` for its own Connect flow.
+
+## Fixed (2026-10-24)
+
+Served through NodeGX's proxy, Studio reads `/__nodegx/status` first: the header pill reads "<agent> is working on
+this" (Claude Desktop's server says "Claude"), and its panel says so above the folder's own Claude Code status. On its
+own, Studio says what it said ("Connect Claude Code" with no `.mcp.json`). Driven in headless Chrome on a copy of Puppy
+Rerun S12, Studio direct and behind a stand-in for the proxy: "Connect Claude Code" / "Claude is working on this".
+`check:editor` 204/204 (its existing pill steps are the direct-mode control). Studio commit not pushed.

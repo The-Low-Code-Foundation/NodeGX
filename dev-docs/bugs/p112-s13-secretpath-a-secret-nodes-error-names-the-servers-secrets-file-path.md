@@ -7,6 +7,7 @@ area: cloud runtime / Secret node (`packages/nodegx-backend/src/service.ts` the 
 found: P112 OWN-015 s13, 2026-10-12
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-015-THE-BACKEND-FROM-NPM.md §6 (the AC3 arm)
 regression: packages/nodegx-backend/tests/cloud-secret-node.test.ts "fails loudly on an unknown name, naming the secret and both places to provision it"
+commit: 3adf25bf3
 ---
 
 With `GOOGLE_TTS_KEY` not yet set, `POST /functions/speak` answered 400 with

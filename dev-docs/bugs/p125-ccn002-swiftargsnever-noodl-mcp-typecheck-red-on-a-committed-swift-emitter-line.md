@@ -6,6 +6,7 @@ severity: medium
 area: export / Swift emitter (modifiers.ts), seen through noodl-mcp's tsc
 found: P125 CCN-002, 2026-10-23 (lane 3)
 evidence: `npx tsc --noEmit -p packages/noodl-mcp/tsconfig.json` → two errors, nothing else
+commit: 2d0fe7534
 ---
 
 `npx tsc --noEmit -p tsconfig.json` in `packages/noodl-mcp` fails with exactly two errors, both outside it:

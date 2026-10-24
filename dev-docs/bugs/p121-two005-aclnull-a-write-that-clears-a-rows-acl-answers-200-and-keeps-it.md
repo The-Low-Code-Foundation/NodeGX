@@ -8,6 +8,7 @@ found: P121 TWO-005 s15, 2026-10-15
 evidence: dev-docs/tasks/phase-121-a-marketplace-and-a-community/TWO-005-THE-COMMUNITY-APP.md §10.4
 kit: core
 regression: packages/nodegx-backend/tests/p121-acl-null.test.ts "on a row with an ACL: refused in words, nothing written, the ACL as it was"
+commit: 3f806139e
 ---
 
 The community template hides a post by writing its row ACL (`{"role:admin": {"read": true}}`, so members stop reading
