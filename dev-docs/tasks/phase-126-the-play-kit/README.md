@@ -95,9 +95,9 @@ the same three angles, at pixel ratio 2. "Looks good" is a judgement made on tha
 | [PLY-007](PLY-007-FIRST-PLAY-MEASURED.md) | first play, measured: a stranger's Claude Code with and without the kit | 001–003 |
 | [PLY-008](PLY-008-THE-GAME-IN-STUDIO-IN-THE-CONVERSATION.md) | the game in Studio inside Claude Desktop: a probe first (does WebGL draw, do keys arrive, does a write reset the game), then the Studio changes, handed to lane 2 | probe: CCN-001 ✅; rest: lane 2 |
 
-**PLY-008's probe comes first, ahead of the lane's priority.** Richard's worry (2026-10-24) is that Studio settles
-into a shape that games can't use. The probe is one sitting, so run it before Studio V1 freezes, and give its results
-to lane 2.
+**PLY-008's probe:** Richard's worry (2026-10-24) is that Studio settles into a shape that games can't use. Asked whether
+to run the probe now, ahead of the lane's priority, he said *"Later"*. It is still one sitting, and its results still go
+to lane 2. Raise it again when Studio V1 nears its freeze.
 
 PLY-001 → 002 → 003 is the base version a stranger can use. PLY-007 can run as soon as those three exist, before the
 NodeGX half. PLY-005 waits for Studio V1 (lane 2) because its claim is a person editing the menus in Studio.
@@ -110,7 +110,17 @@ NodeGX half. PLY-005 waits for Studio V1 (lane 2) because its claim is a person 
 | R2 | 🔴 **the shelf's licence.** This repo is GPL-3.0-only, and so is `@nodegx/three-kit`. A stranger who starts a game from a GPL generator owes GPL on the game when they distribute it. Starting points need to be free of that. | publish the shelf (generators and cards) and the starter as **MIT**, the trap list and skill as **CC BY 4.0**. That needs Richard as the copyright holder of that code (written in this repo for him); upstream Noodl code is not part of it |
 | R3 | where the shelf lives | a **GitHub repo** (`nodegx/shelf`) as the source of truth. A small catalog (name, kind, licence, card URL, size) ships inside `@nodegx/play`, and `npx @nodegx/play add station` copies one entry into the project and pins the commit, the way `npx @nodegx/three-kit add` copies into `noodl_modules/`. Contributions arrive as PRs, so moderation is PR review, a mechanism that already exists. Packages per set (`@nodegx/shelf-space`) only if offline use or size asks for them |
 | R4 | who moderates | Richard first; a second person once PLY-006 has a queue |
-| R5 | the procedure's intake questions | the castle's one-exchange brief (CANON procedure §1), plus three questions about play: *which games did you love, what did you actually do in them, what bored you* (Richard's Threadspace list of 30 items was the best brief we have had) |
+| R5 (open) | the procedure's intake questions | the castle's one-exchange brief (CANON procedure §1), plus three questions about play: *which games did you love, what did you actually do in them, what bored you* (Richard's Threadspace list of 30 items was the best brief we have had) |
+
+**Ruled by Richard, 2026-10-24** (answers to four questions):
+
+- **R1 ✅:** `@nodegx/play` ("Yep").
+- **R2 ✅:** the shelf code is relicensed as **MIT** ("Sure"). The starter is code, so it takes the same. The licence
+  for the skill's and trap list's text (CC BY 4.0 recommended) was not asked separately; confirm it before PLY-001 publishes.
+- **R3 ✅:** a GitHub repo as the shelf's source, with a small catalog in the npm package and entries pulled on demand
+  ("Yep").
+- **PLY-008's probe: later** ("Later"). It no longer runs ahead of the lane's priority.
+- R4 and R5 are still open.
 
 ## Not in it
 

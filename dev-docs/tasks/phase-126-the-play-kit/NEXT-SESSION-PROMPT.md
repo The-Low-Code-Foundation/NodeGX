@@ -6,12 +6,9 @@ board, below lanes 2 and 3. **Do not open this lane while a session is on lane 2
 **Read:** this folder's README (the claim as ruled, what exists on day one, rulings R1–R5), then
 `../phase-118-the-castle-holds/CANON.md` (the procedure the skill carries).
 
-**The one exception to the priority: PLY-008's probe** (a three-kit game in Studio inside Claude Desktop: does it draw,
-do keys arrive, does a write reset it). It is one sitting, Richard's Desktop is needed for the inline answer, and lane 2
-should have the results before Studio V1 freezes. Ask Richard whether to run it now.
-
-**First, ask Richard for R1–R3** (name, licence, where the shelf lives). R2 blocks PLY-003: the repo is GPL-3.0-only, and
-a stranger's game must not inherit that from a starting point.
+**Ruled 2026-10-24:** R1 `@nodegx/play`, R2 the shelf code is MIT, R3 a GitHub repo plus a catalog in the package
+(README "Ruled"). **PLY-008's probe: "Later"**. Don't run it unasked; raise it again when Studio V1 nears its freeze.
+Still open: R4 (moderators), R5 (intake questions), and the licence for the skill's text.
 
 **Then PLY-001** (the skill). It needs no ruling except R2 for its licence line, so it can be drafted while waiting.
 Gather the trap list from the sources PLY-001 names, and read each one where it was measured: memory files and the
