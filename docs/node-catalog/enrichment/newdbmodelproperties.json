@@ -1,6 +1,6 @@
 {
   "typeName": "NewDbModelProperties",
-  "summary": "Create Record: inserts a record into a cloud database class from its property inputs when Do is triggered.",
+  "summary": "Create Record: inserts a record into a cloud database class from its property inputs on Do, with optional access rules (ACL: users, roles).",
   "description": "NewDbModelProperties (Create Record) creates one record in the cloud database class chosen with the `collectionName` (Class) parameter. Each property of the class becomes a value input; when the `store` (Do) signal is triggered, the current input values are sent to the server as a new record. On success the node binds to the new record, outputs its `id`, and fires `done` (Done) followed by `completed`; on failure it fires `failure` with a message on `error`, and `completed` after that too. Optionally, `sourceObjectId` seeds the new record with the data of an existing local object (explicit property inputs win), and Access Control Rules restrict who can read/write the record (defaulting to the creating user when a rule is left unconfigured).",
   "whenToUse": "The write half of every 'add item' flow — forms, quick-add buttons, duplicating a record via `sourceObjectId`. Live Query Records nodes pick the new record up automatically, so no manual re-fetch is needed. To modify an existing record use SetDbModelProperties instead; for a non-cloud (BYOB) backend use noodl.byob.CreateRecord.",
   "ports": {
@@ -9,27 +9,24 @@
     "completed": "Signal; fires after every Do whatever the outcome — wire it to carry on regardless. It never replaces `failure`, which still fires and still carries its reason.",
     "id": "String value; the id of the created record — feed it to a Record node or navigation parameter.",
     "sourceObjectId": "Value input (connections only): id of a local object/record whose data seeds the new record before the property inputs are applied.",
-    "accessControl": "Edit-only list of access rules; each rule expands into its own Target/Read/Write inputs (see runtimeBehavior). With no rules the record gets the class default (public) permissions."
+    "accessControl": "Edit-only list of access rules; each rule expands into its own Target/Read/Write inputs (see runtimeBehavior). With no rules, on the NodeGX backend's default (creator-owned) collections the record is the creator's alone: readable and changeable only by them. Rules you set REPLACE that, so keep one for the creator (target user, the User node's `id` wired into its User Id)."
   },
-  "runtimeBehavior": "Ports are runtime-determined: `collectionName` (Class) is registered as an edit-only enum of the project's classes plus _User/_Role, and each schema property of the chosen class becomes a value input `prop-<name>` typed from the schema. Each entry in the `accessControl` list additionally spawns `acl-<ruleId>-target` (user/everyone/role), then `acl-<ruleId>-userid` or `acl-<ruleId>-role`, plus `acl-<ruleId>-read` and `acl-<ruleId>-write` booleans. An authoring tool should set `collectionName` in parameters and drive `prop-<name>` inputs it knows from the class schema.",
+  "runtimeBehavior": "Ports are runtime-determined: `collectionName` (Class) is registered as an edit-only enum of the project's classes plus _User/_Role, and each schema property of the chosen class becomes a value input `prop-<name>` typed from the schema. Each entry in the `accessControl` list additionally spawns `acl-<ruleId>-target` (user/everyone/role), then `acl-<ruleId>-userid` or `acl-<ruleId>-role`, plus `acl-<ruleId>-read` and `acl-<ruleId>-write` booleans. An authoring tool should set `collectionName` in parameters and drive `prop-<name>` inputs it knows from the class schema. What the rules store is the record's ACL, one key per rule: the user's id, `role:<name>` for a role rule (set `acl-<ruleId>-target` to \"role\" as a parameter, then wire or set `acl-<ruleId>-role` to the role's name without the `role:` prefix), or `*` for everyone; each key holds `{\"read\": true, \"write\": true}`. The backend lets a caller read or change the record only through a key it holds, after the collection's own find/get/update rule. Who joins a role is decided only in a cloud function (Add User To Role).",
   "examples": [
     "cloud-create-record-with-upload",
     "cloud-record-crud",
     "community-simple-audio-recorde",
-    "community-web-rtc-video-record"
+    "community-web-rtc-video-record",
+    "cloud-members-can-edit-my-records"
   ],
   "patterns": [
     "Text Input `text` → `prop-<name>`, Button `onClick` → `store`: the minimal create form.",
-    "`done` → a navigation or Event Sender, with `id` as payload: jump straight to the new record's detail page."
+    "`done` → a navigation or Event Sender, with `id` as payload: jump straight to the new record's detail page.",
+    "Records several people may all change: a rule for the creator and a role rule (`members-of-<ownerId>`), the role joined only in a cloud function that reads an invitation's `owner` (example `cloud-members-can-edit-my-records`). Where only a function should create the records, it creates them as the system and the collection's create rule is \"nobody\"."
   ],
   "antiPatterns": [
     "Re-fetching a Query Records node after `done` — live queries already receive the new record; only re-fetch when the query is not live.",
     "Wiring the User node's `id` into a field of your own (an ownerId, a familyId, a teamId) to say whose the record is. The backend already writes the creator into `owner` from the session and drops an `owner` the page sends; a field the page fills is whatever the caller sent, so anyone signed in can name another id. Read `owner` wherever it is decided who sees the record (example `cloud-share-my-records-with-someone`)."
   ],
-  "relatedNodes": [
-    "SetDbModelProperties",
-    "DeleteDbModelProperties",
-    "DbModel2",
-    "DbCollection2"
-  ]
+  "relatedNodes": ["SetDbModelProperties", "DeleteDbModelProperties", "DbModel2", "DbCollection2"]
 }

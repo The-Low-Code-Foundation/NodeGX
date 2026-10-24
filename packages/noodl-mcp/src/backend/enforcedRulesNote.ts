@@ -14,7 +14,10 @@ export const ENFORCED_RULES_NOTE =
   'creatorOwns: false; one visitors read before signing in needs find and get "public". Every record a signed-in ' +
   "user makes says who made it in owner, written by the backend from their session; a page never sends it, and no " +
   'other field proves whose a record is: a field the page fills from the User id is whatever the caller sent. Where ' +
-  'a cloud function decides who sees what, it checks owner. A value several devices ' +
+  'a cloud function decides who sees what, it checks owner. Records several people may change: a role named from ' +
+  "the owner's id, joined only in a cloud function from an invitation's owner; and a collection only a function " +
+  'should write keeps create "nobody", because a check in a function guards only its own door (example ' +
+  'cloud-members-can-edit-my-records). A value several devices ' +
   'change (a count, a score, a balance) is changed on the server by the amount, never written back whole from what ' +
   'a page holds: Update Record with Add To naming the field and the change (1, -1) wired into it, which updates the ' +
   "record to the server's total (in a script, Noodl.Records.increment); or Update Record with Only If Unchanged. Test as two users: what " +

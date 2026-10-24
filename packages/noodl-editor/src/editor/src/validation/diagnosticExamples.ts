@@ -216,6 +216,17 @@ export const DIAGNOSTIC_EXAMPLES: readonly ExampleCitation[] = [
     code: DiagnosticCode.FunctionTrustsAFieldTheCallerWrote,
     examples: ['cloud-share-my-records-with-someone'],
     why: "a cloud function that returns the records of the shares' owners, never a field the page wrote"
+  },
+  // P112 OWN-026 FIX-06 B — a group joined only through its owner's invitation, written only by a function.
+  {
+    code: DiagnosticCode.RoleNamedByAFieldTheCallerWrote,
+    examples: ['cloud-members-can-edit-my-records'],
+    why: "a cloud function that names the role from the invitation's owner, so an invitation only lets someone into its creator's group"
+  },
+  {
+    code: DiagnosticCode.FunctionGuardsAnOpenCollection,
+    examples: ['cloud-members-can-edit-my-records'],
+    why: 'the records only a function creates, with the collection\'s create rule "nobody": the function runs as the system'
   }
 ];
 

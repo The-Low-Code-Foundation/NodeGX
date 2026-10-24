@@ -72,6 +72,15 @@ A workflow orchestrates; a cloud function computes; a workflow calls cloud funct
   teacher, a coach, a colleague), the page creates a share naming only who it is shared with, and a
   cloud function returns the records of the shares' \`owner\`s (example
   \`cloud-share-my-records-with-someone\`).
+- **Several people who may all change the same records: a role per owner.** The group is one
+  person's, its role named from their id (\`members-of-<ownerId>\`). A cloud function puts a caller in
+  it only from an invitation naming the caller's own address, and the group is the invitation's
+  \`owner\`, never a group field the invitation carries: anyone can create an invitation naming any
+  group. The group's records carry the owner and the role in their access rules (\`role:<name>\`
+  keys), so members change them with Update Record. A record only a function should create (it
+  checks who may) needs the collection's create rule \`"nobody"\`: the function runs as the system
+  and still can, and a check in a function guards only its own door (example
+  \`cloud-members-can-edit-my-records\`).
 - **Change a shared value on the server, by the amount.** A count, score, balance or progress that two
   tabs or devices change is never read into the page, changed, and written back whole: the later
   write erases the earlier. Update Record with \`addTo\` naming the field (\`addTo: "points"\`) and

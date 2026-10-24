@@ -17,17 +17,14 @@
     "completed": "Signal; fires after every attempt, whatever the outcome.",
     "error": "Value; why the last attempt failed."
   },
-  "examples": ["cloud-invite-a-team-member"],
+  "examples": ["cloud-invite-a-team-member", "cloud-members-can-edit-my-records"],
   "patterns": [
-    "Wire straight after Create User in a signup function to put every new account into a default role like `member` — `unchanged` and `done` both mean the account is now in that role, so wiring both to the same next step covers a re-run cleanly."
+    "Wire straight after Create User in a signup function to put every new account into a default role like `member` — `unchanged` and `done` both mean the account is now in that role, so wiring both to the same next step covers a re-run cleanly.",
+    "A group per owner, joined by invitation: the role is named in code from the owner's id (`'members-of-' + invitation.owner`), so `createRole` is on (one name per owner, never typed), and the owner is the invitation's `owner` (the backend's word), never a group field the invitation carries: anyone signed in can create an invitation naming any group (example `cloud-members-can-edit-my-records`)."
   ],
   "antiPatterns": [
     "Wiring a request parameter straight into `userId` (or `role`) on a function anyone may call. That is 'grant any role to any account' with an HTTP endpoint in front of it — give the function a `call` rule (CWF-017) and check inside the graph that the caller is entitled to make this particular grant.",
     "Leaving Create Role If Missing on as a default habit. It turns a mistyped role name into a role that exists, has one member, and is named by no permission rule — a grant that silently never takes effect."
   ],
-  "relatedNodes": [
-    "noodl.cloud.removeuserfromrole",
-    "noodl.cloud.getuserroles",
-    "noodl.cloud.createuser"
-  ]
+  "relatedNodes": ["noodl.cloud.removeuserfromrole", "noodl.cloud.getuserroles", "noodl.cloud.createuser"]
 }

@@ -29,6 +29,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { backendsRoot } from './backend/client';
 import { catalogGeneration, catalogIndex } from './catalog';
 import { KitAwareValidator } from './kitRefusal';
 import {
@@ -182,12 +183,27 @@ export function projectSecurity(store: ProjectStore): FunctionSecurityPolicy | n
  * P112 OWN-026 FIX-05 — the `defaults` and `collections` of the same `nodegx.security.json`: who may
  * write a collection, for `function-trusts-a-field-the-caller-wrote`. `null` (no file, or one that
  * will not parse) reads as "not known", which the check treats as "a caller may write it".
+ *
+ * P112 OWN-026 FIX-06 — with no project file, the rules of the backend the project is bound to
+ * (`metadata.cloudservices.instanceId`, its `security.json`). An agent sets
+ * them with `set_collection_permissions`, which writes the backend's file and never the project's:
+ * without this the checks read "not known" after the agent had locked the collection.
  */
 export function projectCollectionRules(store: ProjectStore): CollectionWriteRules | null {
+  const read = (file: string): CollectionWriteRules | null => {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as CollectionWriteRules;
+      return parsed && typeof parsed === 'object' ? { defaults: parsed.defaults ?? null, collections: parsed.collections ?? null } : null;
+    } catch {
+      return null;
+    }
+  };
+  const own = path.join(store.projectDir, 'nodegx.security.json');
+  if (fs.existsSync(own)) return read(own);
   try {
-    const raw = fs.readFileSync(path.join(store.projectDir, 'nodegx.security.json'), 'utf8');
-    const parsed = JSON.parse(raw) as CollectionWriteRules;
-    return parsed && typeof parsed === 'object' ? { defaults: parsed.defaults ?? null, collections: parsed.collections ?? null } : null;
+    const id: unknown = store.readCloudServices().instanceId;
+    if (typeof id !== 'string' || id === '' || id.includes('/') || id.includes('..')) return null;
+    return read(path.join(backendsRoot(), id, 'security.json'));
   } catch {
     return null;
   }

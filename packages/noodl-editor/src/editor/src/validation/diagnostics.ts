@@ -1025,6 +1025,20 @@ export enum DiagnosticCode {
   FunctionTrustsAFieldTheCallerWrote = 'function-trusts-a-field-the-caller-wrote',
 
   /**
+   * P112 OWN-026 FIX-06 B — a cloud function grants a role (or opens records to one) whose name it builds from
+   * records a caller may create, on no line that reads \`owner\`: anyone can write themselves an invitation into
+   * any group. Info, never blocking. See \`ownerField.ts\`.
+   */
+  RoleNamedByAFieldTheCallerWrote = 'role-named-by-a-field-the-caller-wrote',
+
+  /**
+   * P112 OWN-026 FIX-06 B — a cloud function refuses some callers and creates records in a collection any signed-in
+   * caller may create directly: the check guards the function's door only. Info, never blocking. See
+   * \`ownerField.ts\`.
+   */
+  FunctionGuardsAnOpenCollection = 'function-guards-an-open-collection',
+
+  /**
    * LEG-002 — a run of three or more same-type sibling nodes, none of them
    * named, each of which is something the reader has to go *through*.
    *

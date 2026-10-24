@@ -91,12 +91,156 @@ function serverOnly(rules: CollectionWriteRules | null | undefined, collection: 
   return nobody('create') && nobody('update');
 }
 
+/**
+ * FIX-06 — whether any signed-in caller may create `collection` straight from a page. Not known: yes. A
+ * `"nobody"` rule, or one that names only roles, is a choice that keeps the ordinary caller out.
+ */
+export function callerMayCreate(rules: CollectionWriteRules | null | undefined, collection: string): boolean {
+  if (!rules) return true;
+  const own = rules.collections?.[collection]?.permissions?.['create'];
+  const rule = own !== undefined ? own : rules.defaults?.permissions?.['create'];
+  const atoms = Array.isArray(rule) ? rule : [rule];
+  return !atoms.every((a) => a === 'nobody' || (typeof a === 'string' && a.startsWith('role:')));
+}
+
 export function checkOwnerField(nodes: readonly ParameterizedNode[], options: CheckOwnerFieldOptions): Diagnostic[] {
   const { component, wires, rules } = options;
   if (!wires || wires.length === 0) return [];
   return component.startsWith(CLOUD_COMPONENT_PREFIX)
-    ? functionTrustsAField(nodes, component, wires, rules)
+    ? [
+        ...functionTrustsAField(nodes, component, wires, rules),
+        ...roleNamedByAField(nodes, component, wires, rules),
+        ...functionGuardsAnOpenCollection(nodes, component, wires, rules)
+      ]
     : ownerSentByThePage(nodes, component, wires);
+}
+
+/** The scripts of a component: a Function's and an Expression's text. */
+function scriptsOf(nodes: readonly ParameterizedNode[]): string[] {
+  const texts: string[] = [];
+  for (const n of nodes) {
+    const p = n.parameters ?? {};
+    for (const key of ['functionScript', 'expression']) {
+      if (typeof p[key] === 'string' && p[key] !== '') texts.push(p[key] as string);
+    }
+  }
+  return texts;
+}
+
+/** The collections a script names as the first argument of `Noodl.Records.<method>("X", …)`. */
+function scriptCollections(texts: readonly string[], method: 'query' | 'create'): string[] {
+  const found: string[] = [];
+  const pattern = new RegExp(`Records\\.${method}\\(\\s*['"\`]([^'"\`]+)['"\`]`, 'g');
+  for (const text of texts) for (const m of text.matchAll(pattern)) found.push(m[1]);
+  return found;
+}
+
+const unique = (xs: readonly string[]) => [...new Set(xs.filter((x) => x !== ''))];
+
+const ADD_TO_ROLE = 'noodl.cloud.addusertorole';
+const RESPONSE_TYPE = 'noodl.cloud.response';
+/** A script that opens records to a role: an ACL with a `role:` key. */
+const STAMPS_ROLE_ACL = (text: string) => /\bacl\b/i.test(text) && /['"`]role:/.test(text);
+/** A line that builds a role's name: names a role and joins strings. */
+const BUILDS_A_ROLE = (line: string) => /role/i.test(line) && (/\+/.test(line) || /\$\{/.test(line) || /\.concat\(/.test(line));
+
+/**
+ * FIX-06 B, shape 1: a cloud function that puts the caller in a role (Add User To Role with its `role` wired, or an
+ * ACL with a `role:` key in a script), reads records a caller may create, and builds the role's name on no line that
+ * reads `owner`. Measured: the four test-2 snapshots of the function that let any account join any group fire; the
+ * template functions that grant a role (a fixed name, from collections only a function writes) and the example that
+ * names the group from an invitation's owner are silent.
+ */
+function roleNamedByAField(
+  nodes: readonly ParameterizedNode[],
+  component: string,
+  wires: readonly FunctionWireLike[],
+  rules: CollectionWriteRules | null | undefined
+): Diagnostic[] {
+  const scripts = scriptsOf(nodes);
+  const grant =
+    nodes.find((n) => n.type === ADD_TO_ROLE && wires.some((w) => w.toId === n.id && w.toProperty === 'role')) ??
+    nodes.find((n) => typeof n.parameters?.['functionScript'] === 'string' && STAMPS_ROLE_ACL(n.parameters['functionScript'] as string));
+  if (!grant) return [];
+
+  const read = unique([
+    ...nodes.filter((n) => RECORD_READ_TYPES.has(n.type)).map((n) => String((n.parameters ?? {})['collectionName'] ?? '')),
+    ...scriptCollections(scripts, 'query')
+  ]).filter((c) => callerMayCreate(rules, c));
+  if (read.length === 0) return [];
+
+  const roleLines = scripts.flatMap((s) => s.split('\n')).filter(BUILDS_A_ROLE);
+  if (roleLines.some((line) => NAMES_OWNER.test(line))) return [];
+
+  const what = read.join(', ');
+  return [
+    {
+      code: DiagnosticCode.RoleNamedByAFieldTheCallerWrote,
+      severity: 'info',
+      message:
+        `This function puts a caller in a role, or opens records to one, and it reads ${what}: records any signed-in ` +
+        'caller can create, saying anything they like (another group\'s id, someone else\'s address). No line that ' +
+        'names the role reads "owner", so the group a record leads to is whatever its creator wrote, and anyone can ' +
+        'write themselves an invitation into any group. Name the group from the record\'s "owner", which the backend ' +
+        'writes from its creator\'s session and nobody can change: an invitation then only ever lets someone into the ' +
+        'group of the person who made it (example cloud-members-can-edit-my-records).',
+      location: {
+        component,
+        nodeId: grant.id,
+        nodeType: grant.type,
+        ...(grant.label ? { nodeLabel: grant.label } : {})
+      },
+      suggestion: 'name the role from the record\'s "owner" ("members-of-" + row.owner), never from a field the page wrote'
+    }
+  ];
+}
+
+/**
+ * FIX-06 B, shape 2: a cloud function that answers per caller, refuses some of them (a failure Response), and creates
+ * records in a collection any signed-in caller may create directly. The check guards the function's own door only: the
+ * same record can be posted straight to the collection. Measured: fires on the test-2 function that refused an
+ * uninvited caller while its collection's create rule was open; silent on all 78 template functions.
+ */
+function functionGuardsAnOpenCollection(
+  nodes: readonly ParameterizedNode[],
+  component: string,
+  wires: readonly FunctionWireLike[],
+  rules: CollectionWriteRules | null | undefined
+): Diagnostic[] {
+  const perCaller = nodes.some(
+    (n) =>
+      (n.type === USER_TYPE && wires.some((w) => w.fromId === n.id)) ||
+      (n.type === REQUEST_TYPE && wires.some((w) => w.fromId === n.id && w.fromProperty === REQUEST_CALLER_OUTPUT))
+  );
+  if (!perCaller) return [];
+  const refuses = nodes.some((n) => n.type === RESPONSE_TYPE && (n.parameters ?? {})['status'] === 'failure');
+  if (!refuses) return [];
+  const creates = nodes.filter((n) => n.type === 'NewDbModelProperties' && (n.parameters ?? {})['storeType'] !== 'local');
+  const open = unique([
+    ...creates.map((n) => String((n.parameters ?? {})['collectionName'] ?? '')),
+    ...scriptCollections(scriptsOf(nodes), 'create')
+  ]).filter((c) => callerMayCreate(rules, c));
+  if (open.length === 0) return [];
+
+  const what = open.join(', ');
+  const at = creates.find((n) => open.includes(String((n.parameters ?? {})['collectionName']))) ?? nodes.find((n) => n.type === 'JavaScriptFunction');
+  return [
+    {
+      code: DiagnosticCode.FunctionGuardsAnOpenCollection,
+      severity: 'info',
+      message:
+        `This function decides who may create ${what} (it answers some callers with a failure), but the rules let ` +
+        `any signed-in caller create ${what} directly, past this function, with the same fields. A check in a function ` +
+        `guards only its own door. If only this function should create ${what}, set the create rule to "nobody" ` +
+        '(set_collection_permissions, permissions.create: "nobody"): a cloud function runs as the system and still ' +
+        'can (example cloud-members-can-edit-my-records).',
+      location: {
+        component,
+        ...(at ? { nodeId: at.id, nodeType: at.type, ...(at.label ? { nodeLabel: at.label } : {}) } : {})
+      },
+      suggestion: `set_collection_permissions for ${what} with create: "nobody", so this function is the only way in`
+    }
+  ];
 }
 
 /** Shape 1: a record write whose `prop-X` is the signed-in User's `id`, within {@link MAX_HOPS}. */
