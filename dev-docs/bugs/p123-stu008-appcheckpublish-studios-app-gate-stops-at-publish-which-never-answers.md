@@ -1,7 +1,8 @@
 ---
 id: P123-STU008-APPCHECKPUBLISH
 title: Studio's app gate stops at Publish, which never answers, so check:app reads 26/30 at HEAD
-status: open
+status: fixed
+commit: nodegx-studio d0d16b2 (not reproduced; see the last section)
 severity: medium
 area: nodegx-studio `app/check.mjs` step 3b (STU-008 Publish through the header button)
 found: STU-071 (opennoodl-d7), 2026-10-23 22:40, running check:app before committing
@@ -20,3 +21,9 @@ under the gate's own backends folder. A lead, not a finding: a peer's stuck `edi
 just been killed before the first run.
 
 Next: run 3b with the app's stdout shown (the gate keeps `running.log()`), and read why `studio:publish` rejects.
+
+## 2026-10-24: not reproduced on the 0.2.6 pins (opennoodl-d7)
+
+`check:app` **54/54** at nodegx-studio d0d16b2 (pins @nodegx/mcp 0.2.6, @nodegx/preview 0.2.5, vendor/ at NodeGX
+2cac89c05), run alone under HEAVY.lock with nothing else on the box. The pins are the only change from the 26/30
+trees; the cause was not identified. If 3b stops at Publish again, reopen this with the app's stdout.
