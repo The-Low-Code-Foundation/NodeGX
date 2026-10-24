@@ -24,3 +24,22 @@ The artifact copy also rewrote relative links to `https://nodegx.io/…` and inl
 
 The comment at the top of `new-top.html`. Copy passed the content-authoring offline checks (written, closer, contract,
 opener). The class is `cf`, not `field`: `.field` belongs to the waitlist form and has `flex: 1 1 220px`.
+
+## Round 3 (same day): three paths
+
+Richard: drop "Where the list shows up" and "On the first day"; "Four ways to start … is the 'ok I saw the toys, I'm
+convinced, how the fuck do I start' part" → three paths by profile (trying ideas in Claude/Cline/Vibe; business apps with an
+editor choice + backend; coming from Bubble). Flow: ethos → **Pick your way in** (#paths) → **Not convinced yet?** (#explore)
+→ **Dive deep** (#deep + the npm section) → download (kept in place: release commits edit it) → community → mailing list.
+The #more and #backend-map sections are gone (their links live in #explore/#deep).
+
+New pages, `pages/play.html`, `pages/build.html`, `pages/from-bubble.html`, in the site's `_page.html` shape (title, style
+with `@import url("/site.css")`, `<!-- nav -->`). To publish: copy each to `nodegx-web/site/<play|build|from-bubble>/_page.html`
+and add SUBPAGES entries (and NAV tuples if wanted) in `ops/build.py`. `assemble.py` (run in a folder holding `orig.html` =
+HEAD's `site/_page.html`) writes `_page.html` plus the artifact copies. Classes `cf` and `path-steps`: the site already owns
+`.field` (waitlist) and `.steps` (start page).
+
+🔴 **Blocker for paths 2 and 3: NodeGX Studio has no public download** (no GitHub release, `@nodegx/studio` 404, the notarised
+DMG is a CI artifact behind a GitHub login; Mac arm64 only). The pages say "no download yet" and give the from-source steps.
+Also: nodegx-studio origin/main is 3 commits behind local (the 0.2.6 pins); `docs/runtime/YOUR-OWN-SERVER.md` is not on NodeGX
+`main` (404), so the build page describes the server steps itself.

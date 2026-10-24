@@ -1,0 +1,95 @@
+<title>Coming from Bubble · NodeGX</title>
+<style>
+  @import url("/site.css");
+</style>
+
+<!-- nav -->
+<!-- TRUE AS OF 2026-10-24 (nodegx-studio README, docs/IMPORT.md, app/welcome.html, app/main.cjs importFlow): imports pages,
+     elements, styles, workflows, option sets, data types, privacy rules, backend workflows (→ cloud functions); plugins and
+     HTML/Video/GoogleMap/Slider/Date/File/Picture inputs become placeholders; API Connector keys and passwords never come
+     across; data rows = a separate CLI step (import/data-to-nodegx.mjs). Export = Growth plan and up. No public download. -->
+
+<header class="page-head">
+  <div class="wrap">
+    <p class="kicker">Coming from Bubble</p>
+    <h1>Bring your Bubble app <span class="g">into NodeGX Studio</span></h1>
+    <p class="lede">
+      Studio works the way a Bubble builder expects: pages, elements and workflows. It imports your app&rsquo;s front end
+      and its back end. The app then runs on your own machine. Claude Code can carry on building it with you.
+    </p>
+  </div>
+</header>
+
+<main>
+  <section class="section">
+    <div class="wrap">
+      <p class="kicker">What comes across</p>
+      <h2>Most of your app, and a report on the rest</h2>
+      <div class="cards two">
+        <div class="card">
+          <span class="port">Comes across</span>
+          <h3>The app you built</h3>
+          <ul class="ticks">
+            <li>Pages, elements and styles</li>
+            <li>Workflows and custom states</li>
+            <li>Data types and option sets</li>
+            <li>Privacy rules</li>
+            <li>Backend workflows, which become cloud functions</li>
+            <li>API Connector calls, without their keys</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="port">Needs you</span>
+          <h3>What you&rsquo;ll redo or check</h3>
+          <ul class="ticks no">
+            <li>Plugins, which arrive as labelled placeholders</li>
+            <li>HTML, video, map, slider, date, file and picture inputs, also as placeholders</li>
+            <li>API keys and passwords, which never come across</li>
+            <li>Your data rows, which are a separate step</li>
+          </ul>
+          <p>Every placeholder is listed in an import report saved beside the project.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="kicker">The steps</p>
+      <h2>From Bubble to Studio</h2>
+      <ol class="path-steps">
+        <li><b>Get Studio.</b> There&rsquo;s no download yet. With Node.js 22 installed, run it from its source:
+          <pre class="cmd">git clone https://github.com/The-Low-Code-Foundation/nodegx-studio
+cd nodegx-studio
+npm install
+npm start</pre></li>
+        <li><b>Get your app out of Bubble.</b> On the Growth plan or above, go to Settings, then General, then Export
+          application. On another plan, you can save each page&rsquo;s files from Chrome&rsquo;s developer tools instead.
+          <a href="https://github.com/The-Low-Code-Foundation/nodegx-studio/blob/main/docs/IMPORT.md">The import guide</a>
+          shows how.</li>
+        <li><b>Import it.</b> On Studio&rsquo;s welcome screen, choose Import an app. Pick your export file or your folder of
+          page files, then an empty folder for the new project. A large app takes about a minute.</li>
+        <li><b>Read the import report.</b> It sits beside the project and lists every placeholder and anything that needs
+          a decision from you.</li>
+        <li><b>Bring your data across.</b> Export your data types as CSV from Bubble&rsquo;s Data tab. Moving the rows in
+          is a separate command for now, described in the import guide. Studio&rsquo;s Data tab then offers to check and
+          load them.</li>
+        <li><b>Keep building with Claude.</b> Studio has a Connect Claude Code button. Ask Claude to rebuild a plugin, wire
+          a page or tidy a workflow, and watch it happen in Studio.</li>
+      </ol>
+      <p class="caveat"><b>Keep the export on your computer.</b> Some of these files contain your app&rsquo;s API keys.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap prose">
+      <p class="kicker">Then</p>
+      <h2>Publish your app, or keep it on your machine</h2>
+      <p>
+        Studio publishes to a folder you can host anywhere, with its cloud functions. Publishing to a server of your own
+        is <a href="/build/#server">being finished</a>. You can also run it on your own machine for as long as you like.
+      </p>
+      <p><a href="/studio/">More about Studio &rarr;</a></p>
+    </div>
+  </section>
+</main>

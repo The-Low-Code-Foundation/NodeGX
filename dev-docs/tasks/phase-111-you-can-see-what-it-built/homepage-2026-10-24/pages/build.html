@@ -1,0 +1,144 @@
+<title>Apps for your business · NodeGX</title>
+<style>
+  @import url("/site.css");
+</style>
+
+<!-- nav -->
+<!-- TRUE AS OF 2026-10-24: Studio 0.1, no public download (no GitHub release, @nodegx/studio not on npm); notarised build exists
+     as a CI artifact only; from source = Node 22, npm install, npm start (nodegx-studio README). Editor 0.4.3 downloads on GitHub.
+     Backend: provision_backend inside @nodegx/mcp 0.2.6; deploy_to_vm in 0.2.6, driven against a throwaway VM, not yet a real
+     provider; Studio Publish to a server built, not in a release. Runbook (docs/runtime/YOUR-OWN-SERVER.md) not on NodeGX main. -->
+
+<header class="page-head">
+  <div class="wrap">
+    <p class="kicker">For a business</p>
+    <h1>An app people rely on, <span class="g">and an editor that suits your team</span></h1>
+    <p class="lede">
+      Claude Code builds the app with you. Then you choose who changes it afterwards and which editor they use. Add the NodeGX backend
+      for accounts and data, then put the app on a server you own.
+    </p>
+  </div>
+</header>
+
+<main>
+  <section class="section" id="choose">
+    <div class="wide-wrap">
+      <p class="kicker">Step 1</p>
+      <h2>Choose your editor</h2>
+      <p class="note">All three open the same project files, so you can change your mind later. Not sure? Answer one question.</p>
+
+      <div class="chooser">
+        <p class="q">Who will make the day-to-day changes to this app?</p>
+        <div class="seg" id="who">
+          <button type="button" aria-pressed="false" data-pick="editor">Me or a developer, in detail</button>
+          <button type="button" aria-pressed="false" data-pick="studio">Me, but I don&rsquo;t write code</button>
+          <button type="button" aria-pressed="false" data-pick="own">My team or client, who don&rsquo;t code</button>
+        </div>
+      </div>
+
+      <div class="cards three-up">
+        <div class="card pick" id="pick-studio">
+          <div class="card-top"><span class="port">NodeGX Studio</span><span class="state soon">Early</span></div>
+          <h3>Pages, elements and workflows</h3>
+          <p>It suits people who think the way Bubble and n8n work. Design on the real app, draw workflows, set up data and who
+            can see it, and replay a run step by step.</p>
+          <p class="how"><b>Get it:</b> there&rsquo;s no download yet. With Node.js 22 installed, run it from its source:</p>
+          <pre class="cmd">git clone https://github.com/The-Low-Code-Foundation/nodegx-studio
+cd nodegx-studio
+npm install
+npm start</pre>
+        </div>
+        <div class="card pick" id="pick-editor">
+          <div class="card-top"><span class="port">The NodeGX editor</span><span class="state now">0.4.3</span></div>
+          <h3>Every detail, in one window</h3>
+          <p>The full editor NodeGX grew from. The page as a tree, the nodes and wires behind it, and the app running beside
+            them. Click anything in the app and change it.</p>
+          <p class="how"><b>Get it:</b> download it for Mac, Windows or Linux. The Mac version is signed and notarised.</p>
+          <a class="btn ghost" href="/#download">Download NodeGX 0.4.3</a>
+        </div>
+        <div class="card pick" id="pick-own">
+          <div class="card-top"><span class="port">Your own editor</span><span class="state now">Today</span></div>
+          <h3>Only the settings your team needs</h3>
+          <p>Claude builds an editor that shows your team only what they should touch. That might be prices, opening hours or the text on a page. It reads and writes the same files as the app.</p>
+          <p class="how"><b>Get it:</b> set up your project with <code>npm create nodegx</code> (step 2). The folder
+            includes a guide Claude follows to build your editor.</p>
+          <a class="more" href="/your-own-editor/">See editors Claude has built &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="build">
+    <div class="wrap">
+      <p class="kicker">Step 2</p>
+      <h2>Build it with Claude Code</h2>
+      <ol class="path-steps">
+        <li><b>Set up a folder.</b> You need Node.js and Claude Code. In a terminal, run:
+          <pre class="cmd">npm create nodegx my-apps
+cd my-apps
+claude</pre>
+          When Claude Code asks whether to use the <code>nodegx</code> server, say yes.</li>
+        <li><b>Describe the app.</b> Tell Claude who uses it and what they need to do. Then say what it must never do. Claude asks questions
+          first, then writes a brief and a plan into the project before it builds anything.</li>
+        <li><b>Open it in your editor.</b> Studio and the NodeGX editor both have a Connect Claude Code button, so Claude
+          can keep building while you watch and change things.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="backend">
+    <div class="wrap">
+      <p class="kicker">Step 3</p>
+      <h2>Add accounts and data</h2>
+      <p class="note">
+        Ask Claude for sign-in and the data your app keeps. It sets up the NodeGX backend for the project, with its tables, its cloud functions and the rules for who can see which rows. The rules are a file in your project that you can
+        read. In Studio, the Data tab shows the tables, the rules and the rows.
+      </p>
+      <p style="margin:0"><a href="/backend-map/">See who can reach whose data in a real app &rarr;</a></p>
+    </div>
+  </section>
+
+  <section class="section" id="server">
+    <div class="wrap">
+      <p class="kicker">Step 4</p>
+      <h2>Put it on a server you own</h2>
+      <ol class="path-steps">
+        <li><b>Rent a Linux server</b> running Ubuntu or Debian, with root login. Add a domain name if you want one.</li>
+        <li><b>Let your computer log in to it.</b>
+          <pre class="cmd">ssh-keygen -t ed25519
+ssh-copy-id root@your-server-ip</pre></li>
+        <li><b>Ask Claude to publish.</b> For example: &ldquo;Put this app on root@your-server-ip at app.example.com.&rdquo;
+          Claude sends the app, its backend, its rules and its functions. If the server is missing something, the message
+          says what to install. Publishing again keeps your data.</li>
+      </ol>
+      <p class="caveat"><b>This is new this week.</b> We&rsquo;ve tested it on a test server so far, not yet with a hosting
+        company. Studio&rsquo;s own Publish to a server is built and comes with its next release.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap prose">
+      <p class="kicker">Later</p>
+      <h2>If you outgrow NodeGX, leave with React</h2>
+      <p>
+        When you know you need a framework, one command writes the app as React source. It tells you first what will and
+        won&rsquo;t come across. <b>Code export is in alpha.</b> <a href="/one-graph/">See it on two apps &rarr;</a>
+      </p>
+    </div>
+  </section>
+</main>
+
+<script>
+  (function () {
+    var who = document.getElementById('who');
+    if (!who) return;
+    who.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      who.querySelectorAll('button').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+      document.querySelectorAll('.card.pick').forEach(function (c) {
+        c.classList.toggle('picked', c.id === 'pick-' + b.dataset.pick);
+        c.classList.toggle('dim', c.id !== 'pick-' + b.dataset.pick);
+      });
+    });
+  })();
+</script>

@@ -145,3 +145,42 @@
   .checks label { display: flex; align-items: center; gap: 7px; cursor: pointer; }
   .checks input { accent-color: var(--signal); width: 16px; height: 16px; margin: 0; }
   .toy-code { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .paths-band { background: radial-gradient(circle at 1px 1px, var(--dot) 1.4px, transparent 1.5px); background-size: 24px 24px; }
+  .paths { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+  .path {
+    display: flex; flex-direction: column; gap: 10px; padding: 22px 22px 20px; border-radius: 16px;
+    background: var(--panel); border: 1px solid var(--line); box-shadow: var(--shadow); color: inherit;
+    transition: border-color .15s, transform .15s;
+  }
+  .path:hover { text-decoration: none; border-color: var(--signal); transform: translateY(-2px); }
+  .path:focus-visible { outline: 2px solid var(--signal-bright); outline-offset: 3px; }
+  .path h3 { margin: 0; font-size: 20px; line-height: 1.25; letter-spacing: -0.015em; }
+  .path p { margin: 0; font-size: 15.5px; line-height: 1.55; color: var(--ink-soft); }
+  .path .go { margin-top: auto; padding-top: 6px; font-weight: 700; color: var(--signal); }
+  @media (prefers-reduced-motion: reduce) { .path { transition: none; } .path:hover { transform: none; } }
+  /* path pages: tabs for the AI coder, numbered steps, commands, the editor chooser */
+  .coders { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 16px; }
+  .coders button {
+    font: inherit; font-size: 14.5px; font-weight: 600; padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--panel); color: var(--ink-soft);
+  }
+  .coders button[aria-selected=true] { background: var(--signal); border-color: var(--signal); color: var(--signal-ink); }
+  .pane { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 18px 22px; box-shadow: var(--shadow); }
+  .path-steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 16px; max-width: 70ch; color: var(--ink-soft); }
+  .path-steps li { padding-left: 4px; }
+  .path-steps li::marker { color: var(--signal); font-weight: 700; font-family: var(--mono); }
+  .path-steps b { color: var(--ink); }
+  pre.cmd { margin: 8px 0 4px; }
+  .chooser { margin: 0 0 18px; }
+  .chooser .q { margin: 0 0 8px; font-weight: 650; color: var(--ink); }
+  .chooser .seg button { font-size: 14px; padding: 6px 12px; }
+  .cards.three-up { grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); align-items: start; }
+  .card.pick { transition: opacity .2s, border-color .2s; }
+  .card.pick.picked { border-color: var(--signal); box-shadow: 0 0 0 2px var(--signal-wash), var(--shadow); }
+  .card.pick.dim { opacity: .55; }
+  .card .how { margin-top: 4px; }
+  .card .how b { color: var(--ink); }
+  .ticks { margin: 0; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 15px; color: var(--ink-soft); }
+  .ticks li::before { content: "\2713"; color: var(--signal); font-weight: 700; margin-right: 8px; }
+  .ticks.no li::before { content: "\2192"; color: var(--amber); }
+  @media (prefers-reduced-motion: reduce) { .card.pick { transition: none; } }

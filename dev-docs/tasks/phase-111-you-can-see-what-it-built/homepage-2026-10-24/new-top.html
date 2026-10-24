@@ -46,7 +46,7 @@
     </p>
 
     <div class="cta-row">
-      <a class="btn primary" href="#ways">Four ways to start</a>
+      <a class="btn primary" href="#paths">Pick your way in</a>
       <a class="btn ghost" href="#download">Download NodeGX <span class="sub">0.4.3</span></a>
       <a class="btn ghost" href="start/">Never built an app? Start here</a>
     </div>
@@ -238,81 +238,97 @@
     </div>
   </section>
 
-  <!-- ====================== Four places ====================== -->
-  <section class="section" id="where">
+  <!-- ====================== Paths ====================== -->
+  <section class="section paths-band" id="paths">
     <div class="wrap">
-      <p class="kicker">One rule, four places</p>
-      <h2>Where the list shows up</h2>
-      <div class="cards two">
-        <div class="card">
-          <div class="card-top"><span class="port">The parts</span><span class="state now">Today</span></div>
-          <h3>Every node lists its settings</h3>
-          <p>A NodeGX app is built from parts called nodes. The editor builds its panel from each node&rsquo;s list. Whatever Claude built, you can open and change.</p>
-        </div>
-        <div class="card">
-          <div class="card-top"><span class="port">The conversation</span><span class="state soon">Being finished</span></div>
-          <h3>The editor opens inside your chat</h3>
-          <p>In Claude Desktop, NodeGX Studio opens in the conversation and redraws each time Claude changes the app. Press Hold and Claude stops building until you press Release. Change something yourself and Claude carries on from your change.</p>
-        </div>
-        <div class="card">
-          <div class="card-top"><span class="port">Your own editor</span><span class="state now">Today</span></div>
-          <h3>An editor for just the settings you need</h3>
-          <p>The lists are saved in files a program can read. So Claude can build you an editor that shows only what your client should touch. So far it&rsquo;s made a 3D editor, a children&rsquo;s block editor and a Bubble-style editor this way.</p>
-          <a class="more" href="your-own-editor/">See the editors &rarr;</a>
-        </div>
-        <div class="card">
-          <div class="card-top"><span class="port">3D games</span><span class="state next">Next</span></div>
-          <h3>Models that say what you can change</h3>
-          <p>A spaceship lists its paint and its wing span. A 3D Studio turns them into sliders and handles you drag.</p>
-        </div>
+      <p class="kicker">Convinced?</p>
+      <h2>Pick your way in</h2>
+      <p class="note">Each path has its own page with the steps, in order, for where you are now.</p>
+      <div class="paths">
+        <a class="path" href="play/">
+          <span class="port">Trying ideas</span>
+          <h3>Build a website, app or game with your AI coder</h3>
+          <p>You use Claude Code, Cline or Vibe and want to see what it can make. Add NodeGX to the project before your
+            AI coder starts. It then builds with parts you can open and change.</p>
+          <span class="go">Set up a project &rarr;</span>
+        </a>
+        <a class="path" href="build/">
+          <span class="port">For a business</span>
+          <h3>Internal tools and apps for your customers</h3>
+          <p>You need an app that people will rely on. Choose how you&rsquo;ll edit it: NodeGX Studio, the full editor, or
+            an editor Claude builds for your team. Add the NodeGX backend for accounts, data and your own server.</p>
+          <span class="go">Choose your setup &rarr;</span>
+        </a>
+        <a class="path" href="from-bubble/">
+          <span class="port">Coming from Bubble</span>
+          <h3>Bring your Bubble app across</h3>
+          <p>Download NodeGX Studio and import your app. Studio works the way a Bubble builder expects. Your app runs on your own machine.</p>
+          <span class="go">Import your app &rarr;</span>
+        </a>
       </div>
     </div>
   </section>
 
-  <!-- ====================== What we measured ====================== -->
-  <section class="section" id="agents">
+  <!-- ====================== Explore ====================== -->
+  <section class="section" id="explore">
     <div class="wrap">
-      <p class="kicker">What we measured</p>
-      <h2>On the first day, the two apps look the same</h2>
-      <p class="note">
-        We gave one brief to Claude Code on its own and to Claude Code with NodeGX. The first versions looked alike.
-        The difference is who can change the app afterwards. NodeGX lets the person who asked for the app change it
-        themselves. When you want to leave, one command writes the app as React source.
+      <p class="kicker">Not convinced yet?</p>
+      <h2>See what&rsquo;s been built with it</h2>
+      <div class="cards">
+        <a class="card" href="demos/">
+          <span class="port">Demos</span>
+          <h3>Eight working apps</h3>
+          <p>A maths game, a planning tool, a marketplace and more, each running in your browser.</p>
+        </a>
+        <a class="card" href="your-own-editor/">
+          <span class="port">Your own editor</span>
+          <h3>Editors Claude built from the packages</h3>
+          <p>A 3D editor, a children&rsquo;s block editor and a map of a backend, each built in under a day.</p>
+        </a>
+        <a class="card" href="backend-map/">
+          <span class="port">Backend map</span>
+          <h3>Who can see whose data?</h3>
+          <p>Pick one of a training app&rsquo;s twelve people and see only the rows that come back to them.</p>
+        </a>
+        <a class="card" href="from-code/">
+          <span class="port">From code</span>
+          <h3>A coded game, converted</h3>
+          <p>A game written in plain JavaScript, rebuilt in NodeGX by Claude Code: what came across and what it cost.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== Dive deep ====================== -->
+  <section class="section" id="deep">
+    <div class="wrap">
+      <p class="kicker">Dive deep</p>
+      <h2>Docs, code export and how it&rsquo;s made</h2>
+      <div class="cards">
+        <a class="card" href="https://the-low-code-foundation.github.io/NodeGX/">
+          <span class="port">Docs</span>
+          <h3>Node reference</h3>
+          <p>What every node does, its settings and what it sends on.</p>
+        </a>
+        <a class="card" href="one-graph/">
+          <span class="port">Code export</span>
+          <h3>Leave with React source</h3>
+          <p>Two apps exported as React and as iPhone apps, then tested end to end.</p>
+        </a>
+        <a class="card" href="why/">
+          <span class="port">The comparison</span>
+          <h3>Claude Code on its own and with NodeGX</h3>
+          <p>We built one brief both ways. The first versions look alike. What differs comes later.</p>
+        </a>
+        <a class="card" href="https://github.com/The-Low-Code-Foundation/NodeGX">
+          <span class="port">Source</span>
+          <h3>NodeGX on GitHub</h3>
+          <p>The code, the issues and every release. NodeGX is open source under GPL-3.0.</p>
+        </a>
+      </div>
+      <p class="note" style="margin:22px 0 0">
+        NodeGX is made by <a href="foundation/">the Low Code Foundation</a> and <a href="richard/">Richard Osborne</a>. <a href="origins/">Read where it came from</a>.
       </p>
-      <p style="margin:0"><a href="why/">Read the comparison &rarr;</a></p>
-    </div>
-  </section>
-
-  <!-- ====================== Four ways in ====================== -->
-  <section class="section" id="ways">
-    <div class="wrap">
-      <p class="kicker">Try it</p>
-      <h2>Four ways to start</h2>
-      <div class="cards two">
-        <div class="card">
-          <div class="card-top"><span class="port">The NodeGX editor</span><span class="state now">Today</span></div>
-          <h3>Claude Code builds, you edit the result</h3>
-          <p>Download the original editor, the one NodeGX grew from. Claude Code builds the project and you open it to change anything by hand.</p>
-          <a class="more" href="#download">Download &rarr;</a>
-        </div>
-        <div class="card">
-          <div class="card-top"><span class="port">NodeGX Studio</span><span class="state now">Today</span></div>
-          <h3>An open-source editor shaped like Bubble and n8n</h3>
-          <p>Pages, elements and workflows, on your own machine. Claude Code builds and you edit, the same as in the NodeGX editor.</p>
-          <a class="more" href="studio/">See Studio &rarr;</a>
-        </div>
-        <div class="card">
-          <div class="card-top"><span class="port">npm</span><span class="state now">Today</span></div>
-          <h3>Claude Code builds the app and your own editor</h3>
-          <p>Start from <code>npm create nodegx</code>. Ask Claude Code to build the app, then an editor for its front or back end, shaped however you imagine it.</p>
-          <a class="more" href="#npm">Start from npm &rarr;</a>
-        </div>
-        <div class="card">
-          <div class="card-top"><span class="port">Claude Desktop</span><span class="state soon">Being finished</span></div>
-          <h3>Studio inside the conversation</h3>
-          <p>Add NodeGX to Claude Desktop as a connector, and the editor appears in the chat while Claude builds.</p>
-        </div>
-      </div>
     </div>
   </section>
 

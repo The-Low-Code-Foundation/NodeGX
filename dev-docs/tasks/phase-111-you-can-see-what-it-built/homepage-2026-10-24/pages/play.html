@@ -1,0 +1,139 @@
+<title>Build with your AI coder · NodeGX</title>
+<style>
+  @import url("/site.css");
+</style>
+
+<!-- nav -->
+<!-- TRUE AS OF 2026-10-24: create-nodegx, create-nodegx-cline, create-nodegx-vibe 0.2.6 on npm (packages/create-nodegx bin
+     + READMEs). Cline tested with the Cline CLI only (OWN-020: VS Code extension not measured). Vibe kit = Mistral Large 4,
+     `vibe --legacy-harness`. Claude Desktop .mcpb built, not released (CCN-006). Export: @nodegx/export 0.2.5, Node 22+.
+     Games: P126 is scoped, not built. -->
+
+<header class="page-head">
+  <div class="wrap">
+    <p class="kicker">Trying ideas</p>
+    <h1>Build with your AI coder, <span class="g">on parts you can change</span></h1>
+    <p class="lede">
+      Set up a folder for NodeGX before your AI coder starts. Then say what you want to make. It plans the app with
+      you, builds it from NodeGX parts, and leaves you a project you can open and change.
+    </p>
+  </div>
+</header>
+
+<main>
+  <section class="section">
+    <div class="wrap">
+      <p class="kicker">Before you start</p>
+      <h2>You need Node.js and one AI coder</h2>
+      <p class="note">
+        Node.js runs the setup commands. If you don&rsquo;t have it, install it from
+        <a href="https://nodejs.org/">nodejs.org</a>. Then pick the AI coder you already use.
+      </p>
+      <div class="coders" role="tablist" aria-label="Your AI coder">
+        <button type="button" role="tab" id="tab-claude" aria-selected="true" aria-controls="pane-claude">Claude Code</button>
+        <button type="button" role="tab" id="tab-cline" aria-selected="false" aria-controls="pane-cline">Cline</button>
+        <button type="button" role="tab" id="tab-vibe" aria-selected="false" aria-controls="pane-vibe">Mistral Vibe</button>
+        <button type="button" role="tab" id="tab-desktop" aria-selected="false" aria-controls="pane-desktop">Claude Desktop</button>
+      </div>
+
+      <div class="pane" role="tabpanel" id="pane-claude" aria-labelledby="tab-claude">
+        <ol class="path-steps">
+          <li><b>Set up a folder.</b> In a terminal, run:
+            <pre class="cmd">npm create nodegx my-apps</pre></li>
+          <li><b>Open Claude Code in it.</b>
+            <pre class="cmd">cd my-apps
+claude</pre>
+            When Claude Code asks whether to use the <code>nodegx</code> server, say yes.</li>
+          <li><b>Say what you want to make.</b> A landing page for your band, a habit tracker, a quiz for your class.
+            Claude asks a few questions first, then writes a brief and a plan into the project and builds it.</li>
+        </ol>
+      </div>
+      <div class="pane" role="tabpanel" id="pane-cline" aria-labelledby="tab-cline" hidden>
+        <ol class="path-steps">
+          <li><b>Set up a folder.</b> In a terminal, run:
+            <pre class="cmd">npm create nodegx-cline my-apps</pre>
+            This also adds NodeGX to Cline&rsquo;s list of servers.</li>
+          <li><b>Start Cline in it.</b>
+            <pre class="cmd">cd my-apps
+cline</pre></li>
+          <li><b>Say what you want to make.</b> Cline plans the app with you, then builds it.</li>
+        </ol>
+        <p class="caveat"><b>Tested with the Cline command line.</b> We haven&rsquo;t checked the VS Code extension yet.</p>
+      </div>
+      <div class="pane" role="tabpanel" id="pane-vibe" aria-labelledby="tab-vibe" hidden>
+        <ol class="path-steps">
+          <li><b>Set up a folder.</b> In a terminal, run:
+            <pre class="cmd">npm create nodegx-vibe my-apps</pre>
+            The folder is set up for Mistral&rsquo;s Large 4 model.</li>
+          <li><b>Start Vibe in it.</b>
+            <pre class="cmd">cd my-apps
+vibe --legacy-harness</pre></li>
+          <li><b>Say what you want to make.</b> Vibe plans the app with you, then builds it.</li>
+        </ol>
+      </div>
+      <div class="pane" role="tabpanel" id="pane-desktop" aria-labelledby="tab-desktop" hidden>
+        <p class="note" style="margin:0">
+          <b>Being finished.</b> In Claude Desktop, NodeGX Studio will open inside the conversation while Claude builds,
+          with a Hold button to stop it. The install will be one double-click. Join the
+          <a href="/#waitlist">mailing list</a> to hear when it&rsquo;s out.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <p class="kicker">Once it&rsquo;s built</p>
+      <h2>See it, change it, keep going</h2>
+      <div class="cards">
+        <div class="card">
+          <span class="port">See it</span>
+          <h3>Run it in your browser</h3>
+          <p>Your AI coder tells you the app&rsquo;s folder name. Then run:</p>
+          <pre class="cmd">npx @nodegx/preview my-app --open</pre>
+          <p>The page reloads each time the app changes.</p>
+        </div>
+        <div class="card">
+          <span class="port">Change it</span>
+          <h3>Open it in an editor</h3>
+          <p>Every part lists its settings. Open the project in <a href="/build/">NodeGX Studio or the NodeGX editor</a> and
+            change it by hand. Or ask your AI coder to build you an editor of your own.</p>
+        </div>
+        <div class="card">
+          <span class="port">Take it with you</span>
+          <h3>Leave with React source</h3>
+          <p>See first what will come across, then write the app as React. This needs Node.js 22 or later.</p>
+          <pre class="cmd">npx @nodegx/export export --dry-run my-app</pre>
+          <p class="caveat" style="margin-top:4px"><b>Code export is in alpha.</b></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap prose">
+      <p class="kicker">Games</p>
+      <h2>Games keep their world in code</h2>
+      <p>
+        In the games we&rsquo;ve built, the 3D world is plain code and the menus beside it are NodeGX. That keeps the hard part small for your AI coder. The menus stay easy to change. A kit with what we&rsquo;ve learnt from those
+        games is next.
+      </p>
+      <p><a href="/">Back to the home page &rarr;</a></p>
+    </div>
+  </section>
+</main>
+
+<script>
+  (function () {
+    var tabs = document.querySelectorAll('.coders [role=tab]');
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (o) {
+          var on = o === t;
+          o.setAttribute('aria-selected', on ? 'true' : 'false');
+          document.getElementById(o.getAttribute('aria-controls')).hidden = !on;
+        });
+      });
+    });
+  })();
+</script>
