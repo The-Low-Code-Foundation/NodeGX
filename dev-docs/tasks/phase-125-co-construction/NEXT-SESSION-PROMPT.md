@@ -2,29 +2,19 @@
 
 Read `README.md` here, then the task you take.
 
-## FIRST: Richard's puppy re-run in Desktop, then read it (s12, 2026-10-24 00:15)
+## s12 (2026-10-24): the puppy fixes are DONE and seen in Desktop
 
-s12 did steps 1–3 and 5 below. State:
-- **dist rebuilt TWICE from clean worktrees** (23:35 at 7c2c10e0b, 00:12 at 4b3319c60; the cloud bundle byte-identical
-  across both once paths are normalised). Desktop restarted 23:45 on the first; the second adds the `create_component`
-  cap, so Desktop needs ONE more full quit/reopen and a NEW conversation before the re-run.
-- **Pushed** (Richard said yes): OpenNoodl cline-dev 0dd67b6f0, nodegx-studio 2f9b321.
-- 🔴 **The re-run has NOT happened on this machine** (checked 2026-10-24 08:39): Desktop quit 23:51:04 and was not
-  reopened (no log line since, no Claude process), and no project newer than 23:51 exists. Richard answered "Re-run
-  done"; ask him where it ran before reading anything.
-- **Part 2 of P125-PUPPY-TWOPANELS** measured and not reproduced (the bug's s12 section): three panel mounts in s11,
-  one server, three clean two-iframe runs. Richard had no words or screenshot. If a second panel errors again, get the
-  words FIRST. The scripts are in s12's scratchpad (`twopanels/`: mcp-driver, two-host, replay, breakfix); copy them
-  here if the repro is needed again.
-- **Leftovers done:** `create_component` budgeted (CCN-005 s12), Esc up to a For Each boxes its rows
-  (P125-STU-FOREACHBOX), check:editor's CDP calls time out at 60 s (P125-STU-GATEHANG). Studio check:editor 203/203.
+Richard's re-run (08:46–08:51, Sonnet 5.5, `NodeGX test projects/Puppy Rerun S12`): five bursts, one panel, "it built
+each bit of the site one by one in Studio". P125-PUPPY-ONEAPPLY and -TWOPANELS fixed (part 2, the port error, never
+explained: reopen with its words if a second panel errors). CCN-005 has the measurement. Both repos pushed at
+0dd67b6f0 / 2f9b321; the dist Desktop runs is 00:12 from a clean worktree at 4b3319c60.
 
-**The read after the re-run (step 4 below):** `~/Library/Logs/Claude/mcp-server-nodegx.log` from the restart on (the
-`tools/call` times; params are not logged), `~/Library/Logs/Claude/claude.ai-web.log` (`oncalltool handler replaced`
-= one panel mounted; `tool_approval_gate` names the gated tools), and the project's file times AND folder birth times
-(`stat -f '%SB %Sm %N' -t %H:%M:%S`, a folder's birth = when the component first appeared). Pass = the page shell
-first, then sections arriving across several applies, one panel per turn. Then update CCN-005, P125-PUPPY-ONEAPPLY and
-P125-PUPPY-TWOPANELS from it.
+How the run was read (reuse it): `~/Library/Logs/Claude/claude.ai-web.log` `oncalltool handler replaced` = one panel
+mounted, `tool_approval_gate` names gated tools; `mcp-server-nodegx.log` = call times only (no params, no error flags);
+the project's FOLDER BIRTH times (`stat -f '%SB %Sm %N' -t %H:%M:%S components/*/ components/*/*/`).
+
+**Next, the lane's order:** CCN-003 (show before apply) → CCN-004 → CCN-007. The Studio leftovers from s11 are done
+(P125-STU-FOREACHBOX, P125-STU-GATEHANG); the kit's `elementsOf` copy-box fix (P123-STU031-COPYBOX) is still open.
 
 ## (s11) finish the puppy-run fixes (2026-10-23 late)
 

@@ -1,7 +1,7 @@
 # CCN-005 — Short bursts
 
 **State:** first cut built 2026-10-23 (s11, from Richard's puppy run), `create_component` budgeted s12 (2026-10-24);
-not yet seen in Claude Desktop. **After:** CCN-003.
+SEEN in Claude Desktop 2026-10-24: the puppy page in five bursts, one panel. **After:** CCN-003.
 
 One component per turn, each one rendered, so the person can stop between any two. The budget is in the server:
 a plan with more than N operations staged without an `apply` is refused ("apply what you have; the person is
@@ -48,5 +48,17 @@ turns both new Studio cases red. `stage_plan_operation` is not a way round the p
 The `noodl-mcp` dist Richard's Desktop loads was rebuilt 2026-10-23 23:35 from a clean worktree at 7c2c10e0b (the s11
 cap and words, not this `create_component` cap); Desktop restarted 23:45 and advertises 116 tools.
 
-**Still open:** the per-turn write count measured in Desktop (Richard's re-run); whether DeepSeek keeps to it; CCN-003
-(staged operations drawn in Studio) is the other half of "nothing lands unseen".
+## Seen in Desktop, 2026-10-24 08:46–08:51 (Richard's re-run, Sonnet 5.5, the 00:12 dist)
+
+Same request as s11, new project `NodeGX test projects/Puppy Rerun S12`. Folder birth times: the project 08:46:52,
+then five bursts: 08:48:52 NavBar + Hero, 08:49:39 Puppies + PuppyCard, 08:50:12 HowItWorks + StepItem, 08:50:37
+AdoptCta, 08:51:07 SiteFooter + FooterColumn; one fix to SiteFooter at 08:51:44. 46 tool calls, ONE panel
+(`oncalltool handler replaced` once, 08:47:17, after the one `open_studio`). Richard: *"it built each bit of the site
+one by one in Studio"*; no workflows were made, which he called probably a good thing for a landing page. The first
+section arrived 2 min after the project was created (s11: everything at 3 min 19 s, in one second).
+
+Not measured: whether the model hit a refusal on the way (the log does not carry results' error flags; the bursts
+are at most 2 components each, under the cap, so it may simply have followed `open_studio`'s words).
+
+**Still open:** whether DeepSeek keeps to it; CCN-003 (staged operations drawn in Studio) is the other half of
+"nothing lands unseen".

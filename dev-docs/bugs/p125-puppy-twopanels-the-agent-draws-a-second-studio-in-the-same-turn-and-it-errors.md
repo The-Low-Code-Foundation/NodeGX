@@ -1,7 +1,8 @@
 ---
 id: P125-PUPPY-TWOPANELS
 title: The agent drew a second Studio panel at the end of the same turn, and that second panel showed a port error
-status: open
+status: fixed
+commit: 58f973f95
 severity: medium
 area: mcp / `open_studio` description (`packages/noodl-mcp/src/tools/openStudio.ts`), Studio's panel bridge (nodegx-studio `editor/hosted/`)
 found: P125, Richard's puppy run in Claude Desktop (Sonnet 5.5), 2026-10-23
@@ -52,3 +53,10 @@ channel). The runtime's only "port" error is `Node <x> doesn't have a port named
 wire raised nothing at all (a Component Inputs node takes any port name), so that candidate is untested, not
 excluded: the intermediate writes are gone. **Still open:** the words, if it happens again. Part 1 (the second
 call) is what s11 answered; the re-run on the 2026-10-24 dist says whether one panel per turn holds.
+
+## Fixed (part 1) — seen in Desktop 2026-10-24
+
+Re-run on the 00:12 dist: `claude.ai-web.log` shows ONE `oncalltool handler replaced` (08:47:17), right after the
+one `open_studio` (08:46:53); one `resources/read` (06:47:16.706Z, 12 ms after that call). One panel for the whole
+build, so the second panel, and with it the port error, never happened. Part 2 stays unexplained (no words, three
+clean reproductions, s12 above): if a second panel ever errors again, reopen this with its words.

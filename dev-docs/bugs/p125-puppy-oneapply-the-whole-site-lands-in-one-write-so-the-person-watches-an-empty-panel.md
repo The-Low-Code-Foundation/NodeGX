@@ -1,7 +1,8 @@
 ---
 id: P125-PUPPY-ONEAPPLY
 title: In Claude Desktop the whole site lands in one write at the end, so the person watches an empty Studio for three minutes and cannot stop it between parts
-status: open
+status: fixed
+commit: 58f973f95 + 4b3319c60
 severity: high
 area: mcp / instructions + plan tools (`create_plan` / `stage_plan_operation` / `apply_plan`), seen in Studio inside Claude Desktop
 found: P125, Richard's puppy run in Claude Desktop (Sonnet 5.5), 2026-10-23 17:51–17:55 CEST
@@ -32,3 +33,11 @@ CCN-003 (staged operations drawn in Studio) is the other half.
 Built: s11 (OpenNoodl 58f973f95) `create_plan` refuses more than 3 component operations while Studio runs; s12
 `create_component` is refused when it would leave 3 components this server made that nothing places (CCN-005 s12).
 Open until Richard's re-run in Desktop shows the page arriving section by section.
+
+## Fixed — seen in Desktop 2026-10-24
+
+Richard's re-run on the 00:12 dist ('NodeGX test projects/Puppy Rerun S12', folder birth times): the project at
+08:46:52, then five bursts, each a section with any leaf it needs: 08:48:52 NavBar + Hero, 08:49:39 Puppies + PuppyCard,
+08:50:12 HowItWorks + StepItem, 08:50:37 AdoptCta, 08:51:07 SiteFooter + FooterColumn (one fix to SiteFooter at
+08:51:44). Richard: *"it built each bit of the site one by one in Studio"*. In s11 the same request wrote everything
+in one second after three empty minutes. 46 tool calls, one panel.
