@@ -4,6 +4,32 @@
 [DEP-002](./DEP-002-LOCAL-FULLSTACK-BUNDLE.md) "Session 4". That section is the state; this page is the order of
 work.
 
+## 2026-10-24 (opennoodl-d7): published, and driven from npm
+
+**Item 1 below is done.** Richard published 0.2.6 on 2026-10-23 night: `@nodegx/mcp` 0.2.6, `create-nodegx` 0.2.6,
+`@nodegx/preview` 0.2.5 (its tarball carries `--full-stack`: `dist/backend/folder/start.js`, `dist/backend/vm/provision-app.sh`),
+`@nodegx/backend-map` 0.1.1.
+
+**The stranger's path, driven** against the throwaway VM (image `nodegx-shiptest-vm`, a fresh container, my own key
+added with `docker exec -i`): `@nodegx/mcp@0.2.6` installed from npm into an empty folder, a fresh HOME, no checkout, no
+`NODEGX_DEPLOY_CLI`; a copy of `templates/todo-list` at HEAD; a stdio MCP client calling `find_tools` then
+`call_tool(deploy_to_vm)`:
+- **ship, no domain:** 29.4 s, `engine: "npx"` (the engine fetched by npx), 23 files, the project's rules installed
+  (SB-015, `devOpen: false`), health 200, app 200. On the box: unit active; sign-up 201 with a session; a task with that
+  session 201; a visitor's `_User` 403 and `Task` "Permission denied".
+- **reship with `domain: shiptodo.localhost`:** 6.9 s, rules "unchanged", `url: https://shiptodo.localhost`, Caddy
+  answers https 200 (`--resolve …:8443`), the account logs in and its task is still there.
+- **a folder name with a space** ("Studio Todo"): shipped, 8.8 s.
+- **Studio's Publish → a server of your own** (`publishToServer`, nodegx-studio): shipped with node on PATH (8.8 s);
+  **refused in 0.4 s with Finder's PATH** ("The deploy engine (npx) gave no report", P123-STU071-NONPX); fixed in
+  nodegx-studio ce96af6 (Studio hands the server its own engine), then shipped in 6.4 s, `engine: "env"`.
+- Teardown done (`docker rm -f nodegx-shiptest`).
+
+**Next for lane 5:** (a) a real provider, by Richard (the classifier refuses a real server from this side): the runbook
+[YOUR-OWN-SERVER.md](../../../docs/runtime/YOUR-OWN-SERVER.md) followed by someone who is not us; (b) `nodegx deploy
+--full-stack` at the front door (item 2); (c) the popup (item 3); (d) OWN-016 AC2, the shipped app on Richard's phone.
+`deploy_to_vm`'s npx fallback could say "no npx on this PATH" instead of "gave no report" (noted in NONPX).
+
 **Done:** s1, the backend serves the app on its own origin (`--serve-app`). s2, `nodegx-deploy --full-stack` writes
 one folder (`app/`, `backend/`, `start.js`). s3, `ship-to-vm.sh` + `provision-app.sh` ship that folder to a VM
 (`/opt/<app>`, data in `/var/lib/<app>/data`, Caddy proxies everything but the admin paths); a reship brings the
