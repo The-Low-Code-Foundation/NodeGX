@@ -1,0 +1,175 @@
+<!-- DRAFT 2026-10-24 for Richard's review. Every claim is sourced in OpenNoodl dev-docs:
+     nodes list their settings = the node library and its specs; Studio in Claude Desktop with Hold = P125 CCN-001/002
+     (checkable in Richard's Desktop, install for strangers = CCN-006, not released); own editors = DIRECTION §0 item 1
+     (already on /your-own-editor/); 3D models = P126 PLY-009 (scoped, not built); day one looks the same = OWN-023;
+     skipped instructions = DIRECTION §0 pillar 2 (the stranger rounds). Coiffure: comcoi-v2
+     frontend/src/styles/design-tokens.css, 70 @tweak notes; TASK-2.25 raised xs/sm inside their ranges.
+     TO CONFIRM with Richard: naming Communauté Coiffure in public. -->
+
+<header class="page-head">
+  <div class="wrap">
+    <p class="kicker">Why NodeGX</p>
+    <h1>Your AI builds the app. <span class="g">You can still change it without code.</span></h1>
+    <p class="lede">
+      When Claude builds with NodeGX, every part it uses comes with a list of its settings. NodeGX turns that list
+      into an editor. You can change the app yourself while Claude builds it. A year later, you still can.
+    </p>
+  </div>
+</header>
+
+<main>
+  <section class="section" id="start">
+    <div class="wrap">
+      <p class="kicker">Where it started</p>
+      <h2>A note in the code, and the editor it makes possible</h2>
+      <p class="note">
+        Richard built Communauté Coiffure, an app for independent hairdressers in France, in plain code. He asked
+        Claude to leave a note on every style setting saying how far it may go. The app has 70 of them.
+      </p>
+      <div class="demo">
+        <div class="demo-pane">
+          <p class="demo-label">What Claude writes</p>
+<pre class="demo-code"><span class="c">/* @tweak text-base: range 14px 20px */</span>
+--text-base: <span class="v" id="code-val">16px</span>;</pre>
+        </div>
+        <div class="demo-arrow" aria-hidden="true">&rarr;</div>
+        <div class="demo-pane">
+          <p class="demo-label">What a client can be given</p>
+          <label class="slider-row" for="size">
+            <span>Body text</span>
+            <span class="slider-val" id="size-val">16px</span>
+          </label>
+          <input type="range" id="size" min="14" max="20" step="1" value="16">
+          <div class="slider-ends"><span>14px</span><span>20px</span></div>
+          <p class="sample" id="sample">Your prices this month, and what each service earns you.</p>
+        </div>
+      </div>
+      <p class="after">
+        The note tells Claude the limits. When Claude raised two of the app&rsquo;s font sizes, it
+        stayed inside them. The same note is all an editor needs to give a client a slider that can&rsquo;t go wrong.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="rule">
+    <div class="wrap prose">
+      <p class="kicker">The rule</p>
+      <h2>In NodeGX the list comes with the part</h2>
+      <p>
+        In our tests, AI assistants sometimes skipped instructions that were right in front of them. A note you
+        ask for is a note that can be forgotten. So NodeGX doesn&rsquo;t ask. Claude builds from a fixed set of
+        parts. Each part already carries the list of what a person can change.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="where">
+    <div class="wrap">
+      <p class="kicker">One rule, four places</p>
+      <h2>Where the list shows up</h2>
+      <div class="cards two">
+        <div class="card">
+          <span class="port">The parts</span>
+          <span class="state now">Today</span>
+          <h3>Every node lists its settings</h3>
+          <p>
+            A NodeGX app is built from parts called nodes. Each node lists its settings. For a button,
+            that&rsquo;s its text and its colour. The editor builds its panel from that list. Whatever
+            Claude built, you can open and change.
+          </p>
+        </div>
+        <div class="card">
+          <span class="port">The conversation</span>
+          <span class="state soon">Being finished</span>
+          <h3>The editor opens inside your chat</h3>
+          <p>
+            In Claude Desktop, NodeGX Studio opens in the conversation and redraws each time Claude changes the app.
+            Press Hold and Claude stops building until you press Release. Change something yourself and Claude carries on from
+            your change.
+          </p>
+        </div>
+        <div class="card">
+          <span class="port">Your own editor</span>
+          <span class="state now">Today</span>
+          <h3>An editor for just the settings you need</h3>
+          <p>
+            The lists are saved in files a program can read. So Claude can build you an editor that shows only what
+            your client should touch. So far it&rsquo;s made a 3D editor, a children&rsquo;s block editor and a Bubble-style
+            editor this way.
+          </p>
+          <a class="more" href="https://nodegx.io/your-own-editor/">See the editors &rarr;</a>
+        </div>
+        <div class="card">
+          <span class="port">3D games</span>
+          <span class="state next">Next</span>
+          <h3>Models that say what you can change</h3>
+          <p>
+            We&rsquo;re taking the rule to 3D games written in plain code. A spaceship will list its parts and
+            settings, like its paint and its wing span. A 3D Studio will turn them into sliders and handles you
+            drag, so nobody has to learn 3D modelling software.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="honest">
+    <div class="wrap prose">
+      <p class="kicker">What we measured</p>
+      <h2>On the first day, the two apps look the same</h2>
+      <p>
+        We gave one brief to Claude Code on its own and to Claude Code with NodeGX. The first versions looked
+        alike. The difference is who can change the app afterwards. NodeGX lets the person who asked for the app
+        change it themselves.
+      </p>
+      <p><a href="https://nodegx.io/why/">Read the comparison &rarr;</a></p>
+    </div>
+  </section>
+
+  <section class="section" id="try">
+    <div class="wrap">
+      <p class="kicker">Try it</p>
+      <h2>Four ways in</h2>
+      <div class="cards two">
+        <div class="card">
+          <span class="port">The NodeGX editor</span>
+          <span class="state now">Today</span>
+          <h3>Claude Code builds, you edit the result</h3>
+          <p>
+            Download the original editor, the one NodeGX grew from. Claude Code builds the project and you open
+            it to change anything by hand.
+          </p>
+          <a class="more" href="https://nodegx.io/#download">Download &rarr;</a>
+        </div>
+        <div class="card">
+          <span class="port">NodeGX Studio</span>
+          <span class="state now">Today</span>
+          <h3>An open-source editor shaped like Bubble and n8n</h3>
+          <p>
+            Pages, elements and workflows, on your own machine. Claude Code builds and you edit, the same as in
+            the NodeGX editor.
+          </p>
+          <a class="more" href="https://nodegx.io/studio/">See Studio &rarr;</a>
+        </div>
+        <div class="card">
+          <span class="port">npm</span>
+          <span class="state now">Today</span>
+          <h3>Claude Code builds the app and your own editor</h3>
+          <p>
+            Start from <code>npm create nodegx</code>. Ask Claude Code to build the app, then an editor for its
+            front or back end, shaped however you imagine it.
+          </p>
+          <a class="more" href="https://nodegx.io/#npm">Start from npm &rarr;</a>
+        </div>
+        <div class="card">
+          <span class="port">Claude Desktop</span>
+          <span class="state soon">Being finished</span>
+          <h3>Studio inside the conversation</h3>
+          <p>
+            Add NodeGX to Claude Desktop as a connector, and the editor appears in the chat while Claude builds.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
