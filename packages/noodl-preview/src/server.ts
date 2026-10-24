@@ -236,8 +236,10 @@ export class PreviewServer {
 
     // DEP-001: the deploy page asks for `nodegx-config.json` to re-point its backend. A preview's
     // backend arrives with its build; a stray config file in the project folder must not override
-    // it, so this path is always "no override" (404) and never a project file.
-    if (pathname === '/nodegx-config.json') return this.notFound(res);
+    // it, so this path is always "no override" and never a project file. P112-OWN026-CONFIGFOUROHFOUR:
+    // said as `{}` (the viewer applies nothing from it), not a 404, which every browser logs as a red
+    // console error on every page load, so no previewed app could pass "no console errors".
+    if (pathname === '/nodegx-config.json') return this.sendDynamic(res, '{}', 'application/json; charset=utf-8');
 
     const asset = pathname.slice(1);
     if (DEPLOY_ASSETS.includes(asset)) {
