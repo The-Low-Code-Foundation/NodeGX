@@ -2,7 +2,7 @@
 id: P112-OWN026-ONEHALFDRIVEN
 title: A build that verified by driving the page drove only the half it had just made appear (a setting on, a delete armed), never the setting off and what it governs or the cancel, and nothing at the drive seams asked for the other half
 status: fixed
-commit: PENDING
+commit: 154ea1088
 regression: packages/noodl-mcp/tests/own026BothHalves.test.ts
 severity: medium
 area: kit / verify guidance (`packages/noodl-mcp/src/tools/renderTools.ts` drive_page; `packages/noodl-mcp/src/guidance.ts` readFirst; `prompts/traps.ts` trap 7)

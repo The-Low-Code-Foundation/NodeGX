@@ -2,7 +2,7 @@
 id: P112-OWN026-RULESFROMBACKEND
 title: The write checks read who may write a collection only from the project's nodegx.security.json, which set_collection_permissions never writes, so an agent's locked collection still read as "not known"
 status: fixed
-commit: PENDING
+commit: 34ce426c1
 regression: packages/noodl-mcp/tests/own026GroupWrite.test.ts
 severity: low
 area: noodl-mcp (`packages/noodl-mcp/src/validate.ts` `projectCollectionRules`)

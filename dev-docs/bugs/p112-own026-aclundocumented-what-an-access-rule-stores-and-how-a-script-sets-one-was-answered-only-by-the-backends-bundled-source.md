@@ -2,7 +2,7 @@
 id: P112-OWN026-ACLUNDOCUMENTED
 title: What a record's access rules store (user, role:, *), that rules a page sends replace the creator-only default, and how a cloud function's script sets them were answered only by the backend's bundled source, and Create Record's docs said a record with no rules is public
 status: fixed
-commit: PENDING
+commit: 34ce426c1
 regression: packages/noodl-mcp/tests/own026GroupWrite.test.ts
 severity: medium
 area: kit / node docs (`docs/node-catalog/enrichment/newdbmodelproperties.json`, `setdbmodelproperties.json`, `javascriptfunction.json`, `noodl.cloud.addusertorole.json`)

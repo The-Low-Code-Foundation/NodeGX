@@ -2,7 +2,7 @@
 id: P112-OWN026-OPENCREATEGUARD
 title: A cloud function that refused uninvited callers created its records in a collection any signed-in caller could create into directly, and nothing said the check guarded only the function's own door
 status: fixed
-commit: PENDING
+commit: 34ce426c1
 regression: packages/noodl-editor/tests-unit/validation/ownerFieldGroups.test.ts
 severity: high
 area: validation + doctrine (`packages/noodl-editor/src/editor/src/validation/ownerField.ts`; `packages/noodl-mcp/src/backend/enforcedRulesNote.ts`)

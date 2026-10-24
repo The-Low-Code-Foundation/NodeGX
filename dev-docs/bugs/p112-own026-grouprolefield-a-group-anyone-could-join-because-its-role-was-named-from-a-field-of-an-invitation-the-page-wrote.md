@@ -2,7 +2,7 @@
 id: P112-OWN026-GROUPROLEFIELD
 title: The kit had no shape for "several people may all change these records", so the shortest graph named a group's role from a field of an invitation the page wrote, and any account could join any group
 status: fixed
-commit: PENDING
+commit: 34ce426c1
 regression: packages/noodl-editor/tests-unit/validation/ownerFieldGroups.test.ts
 severity: high
 area: kit / examples + validation (`docs/node-catalog/examples/cloud-members-can-edit-my-records.json`; `packages/noodl-editor/src/editor/src/validation/ownerField.ts`)
