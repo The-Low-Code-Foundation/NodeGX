@@ -57,7 +57,7 @@ npm start</pre></details>
           <p>The full editor NodeGX grew from. The page as a tree, the nodes and wires behind it, and the app running beside
             them. Click anything in the app and change it.</p>
           <p class="how"><b>Get it:</b> download it for Mac, Windows or Linux. The Mac version is signed and notarised.</p>
-          <a class="btn ghost" href="/#download">Download NodeGX 0.4.3</a>
+          <a class="btn ghost" href="#download">Download NodeGX 0.4.3</a>
         </div>
         <div class="card pick" id="pick-own">
           <div class="card-top"><span class="port">Your own editor</span><span class="state now">Today</span></div>
@@ -67,6 +67,73 @@ npm start</pre></details>
             includes a guide Claude follows to build your editor.</p>
           <a class="more" href="/your-own-editor/">See editors Claude has built &rarr;</a>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================== Download ======================
+       RELEASES: since 2026-10-24 the editor download block lives here on /build/, not on the homepage.
+       The homepage forwards /#download to /build/#download, so old links still land. -->
+  <section class="section" id="download">
+    <div class="wrap">
+      <p class="kicker">Download &middot; public alpha</p>
+      <h2>Download NodeGX</h2>
+      <p class="note">
+        NodeGX is in public alpha: it builds real apps, and it still has rough edges. The
+        <a href="/changelog/">changelog</a> lists what changed in every release and what is
+        known to be broken.
+      </p>
+
+      <div class="release">
+        <div class="rel-head">
+          <span class="rel-ver">0.4.3</span>
+          <span class="rel-date">20 October 2026</span>
+        </div>
+        <p class="rel-note">
+          The backend NodeGX runs on your computer now makes the smaller photos an app shows on its
+          cards and lists. Saving an app sends its cloud functions only to that app&rsquo;s backend, even
+          when another app&rsquo;s backend is running.
+        </p>
+
+        <div class="dl-grid">
+          <a class="dl" href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-mac-arm64.dmg">
+            <span class="os">macOS &mdash; Apple silicon</span>
+            <span class="file">NodeGX-0.4.3-mac-arm64.dmg</span>
+          </a>
+          <a class="dl" href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-mac-x64.dmg">
+            <span class="os">macOS &mdash; Intel</span>
+            <span class="file">NodeGX-0.4.3-mac-x64.dmg</span>
+          </a>
+          <a class="dl" href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-win-x64.exe">
+            <span class="os">Windows &mdash; x64</span>
+            <span class="file">NodeGX-0.4.3-win-x64.exe</span>
+          </a>
+          <a class="dl" href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-linux-x86_64.AppImage">
+            <span class="os">Linux &mdash; AppImage</span>
+            <span class="file">NodeGX-0.4.3-linux-x86_64.AppImage</span>
+          </a>
+        </div>
+
+        <p class="rel-foot">
+          <a href="/changelog/#v0-4-3">What changed in 0.4.3</a>
+          <a href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/tag/v0.4.3">0.4.3 on GitHub</a>
+          <a href="https://github.com/The-Low-Code-Foundation/NodeGX/releases">All releases</a>
+          <a href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-linux-amd64.deb">Linux .deb</a>
+          <a href="https://github.com/The-Low-Code-Foundation/NodeGX/releases/download/v0.4.3/NodeGX-0.4.3-linux-x86_64.rpm">Linux .rpm</a>
+        </p>
+
+        <p class="caveat">
+          <b>Updating from 0.3?</b> The first time 0.4.3 opens a 0.3.0 project, it saves a copy
+          beside it called <code>&lt;project&gt;.before-0.4</code>. Keep it until you&rsquo;re happy
+          with the updated project, because it&rsquo;s the only one 0.3.0 can still open.
+        </p>
+
+        <p class="caveat">
+          <b>macOS</b> is signed and notarised &mdash; no Gatekeeper workaround needed.
+          <b>Windows</b> is not code-signed yet, so SmartScreen warns on first run:
+          <i>More info &rarr; Run anyway</i>. <b>Linux</b> builds are unsigned, as is normal
+          for Linux desktop distribution, and have no in-app updater.
+        </p>
       </div>
     </div>
   </section>

@@ -1,3 +1,10 @@
+<script>
+  /* The downloads moved to /build/ on 2026-10-24. Old links to /#download (the nav, other pages) land there. */
+  (function () {
+    function go() { if (location.hash === '#download') location.replace('/build/#download'); }
+    go(); window.addEventListener('hashchange', go);
+  })();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 /* The canon homepage: an illustrated conversation with Studio in it, and three toys where a list of settings

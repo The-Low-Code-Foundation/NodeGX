@@ -10,7 +10,9 @@ npm=idx('<!-- ====================== npm: the kit'); more=idx('<!-- ============
 assert npm < more < dl, (npm, more, dl)
 npm_block='\n'.join(lines[npm:more]).replace('<p class="kicker">New &middot; on npm</p>','<p class="kicker">Dive deep &middot; on npm</p>')
 rest='\n'.join(lines[dl:]).rstrip('\n')
-page='\n'.join(lines[:573])+'\n'+css+'</style>\n\n'+top+'\n'+npm_block+'\n'+rest+'\n'+js
+comm=idx('<!-- ====================== Community')
+rest='\n'.join(lines[comm:]).rstrip('\n')
+page='\n'.join(lines[:573])+'\n'+css+'</style>\n\n'+top+'\n'+rest+'\n'+js
 open(f'{H}/_page.html','w',encoding='utf-8').write(page)
 site_css=page[page.index('<style>')+7:page.index('</style>')]
 LOCAL={'play/':'play.html','build/':'build.html','from-bubble/':'from-bubble.html'}

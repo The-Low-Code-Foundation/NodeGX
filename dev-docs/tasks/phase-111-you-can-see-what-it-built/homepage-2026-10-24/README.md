@@ -55,3 +55,5 @@ every other page still does. nodegx-web commits: df7c854 (pages) and the follow-
 🔴 **The first push carried the whole old page below the new one.** `idx('====================== Download')` matched a CSS
 comment (line 358). The artifact drafts v3/v4 had it too. The markers are now the HTML comments only, with an order assert. Count
 sections (`id="more"`, `<!-- nav -->`, the old hero) on every assembly.
+
+**Later the same day:** the npm section and the "Public alpha" eyebrow are gone (Richard: "rolled into the paths to start"). 🔴 **The editor download block now lives on `/build/` (`site/build/_page.html`, id `download`); a release edits it THERE.** The homepage forwards `/#download` to `/build/#download`.
