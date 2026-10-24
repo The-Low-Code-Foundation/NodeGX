@@ -40,13 +40,18 @@ export function clientLoadsToolsItself(server: McpServer): boolean {
 
 // P125 CCN-001 s4 — `call_tool` proxying `open_studio` says so here, and `open_studio` reads it once: a host that
 // renders MCP Apps drew no panel for a proxied call, so the browser is opened instead of leaving the person with
-// a URL in a result they never see.
-let openStudioProxied = false;
+// a URL in a result they never see. CCN-008 — the same for every tool that draws a panel (`show_mini_editor`).
+export const UI_TOOLS: ReadonlySet<string> = new Set(['open_studio', 'show_mini_editor']);
+const proxied = new Set<string>();
+export function markUiToolProxied(name: string): void {
+  proxied.add(name);
+}
+export function consumeUiToolProxied(name: string): boolean {
+  return proxied.delete(name);
+}
 export function markOpenStudioProxied(): void {
-  openStudioProxied = true;
+  markUiToolProxied('open_studio');
 }
 export function consumeOpenStudioProxied(): boolean {
-  const was = openStudioProxied;
-  openStudioProxied = false;
-  return was;
+  return consumeUiToolProxied('open_studio');
 }

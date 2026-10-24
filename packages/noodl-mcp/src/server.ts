@@ -43,6 +43,7 @@ import { registerReviewTools } from './tools/review';
 import { registerListProjectsTools } from './tools/listProjects';
 import { registerExportReactTools } from './tools/exportReact';
 import { registerOpenInEditorTools } from './tools/openInEditor';
+import { registerMiniEditorTools } from './tools/miniEditor';
 import { registerOpenStudioTools } from './tools/openStudio';
 import { holdGate } from './hold';
 import { clientLoadsToolsItself, clientRendersApps } from './clientApps';
@@ -270,6 +271,9 @@ export function createServer(options: ServerOptions): CreatedServer {
   // person watching is a read-only server's whole point. The resource goes on `server` itself (the recorder
   // forwards `registerTool` only); the tool goes through `rec` like every other.
   registerOpenStudioTools(rec, server, binding, options.studioProxy);
+  // P125 CCN-008 — the mini editor: one part of the app for the person to decide about, the other tool that draws a
+  // panel. Both modes, like `open_studio`: the person's changes go through the proxy, never this server's write gate.
+  registerMiniEditorTools(rec, server, binding, options.studioProxy);
   // FLD-010. Beside HLS-009 because it is the same transport and the same subject — the editor
   // process, not this server's project — and registered in both modes for a stronger reason than
   // `open_in_editor`'s: on a read-only server this is pure observation, and on a read-write one it

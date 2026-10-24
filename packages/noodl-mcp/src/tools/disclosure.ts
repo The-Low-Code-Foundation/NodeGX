@@ -40,7 +40,7 @@ import { getParseErrorMessage, normalizeObjectSchema, safeParseAsync } from '@mo
 import { toJsonSchemaCompat } from '@modelcontextprotocol/sdk/server/zod-json-schema-compat.js';
 import { z } from 'zod';
 
-import { clientRendersApps, markOpenStudioProxied } from '../clientApps';
+import { clientRendersApps, markUiToolProxied, UI_TOOLS } from '../clientApps';
 import { callHint, clientProfile } from '../clientProfile';
 import { ToolError } from '../errors';
 
@@ -641,9 +641,10 @@ export function registerCallTool(server: McpServer, disclosure: ToolDisclosure):
         // s4: not refused — refused, the person got nothing (run 3: the model stopped and asked). The call goes
         // through, `open_studio` opens the browser instead of counting on a panel, and its note says to call it by
         // name next time.
-        if (args.name === 'open_studio' && !args.describe && clientRendersApps(server)) {
-          disclosure.revealNames(['open_studio']);
-          markOpenStudioProxied();
+        // CCN-008 — and the same for `show_mini_editor`, the other tool that draws a panel (`UI_TOOLS`).
+        if (UI_TOOLS.has(args.name) && !args.describe && clientRendersApps(server)) {
+          disclosure.revealNames([args.name]);
+          markUiToolProxied(args.name);
         }
         const schema = handle.inputSchema ? normalizeObjectSchema(handle.inputSchema) ?? handle.inputSchema : undefined;
         const jsonSchema = (): { properties?: Record<string, unknown> } =>

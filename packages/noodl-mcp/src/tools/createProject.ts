@@ -624,7 +624,11 @@ export function completeBind(bind: CreateProjectBinding, projectDir: string): Bi
       ' Before you build a page, call open_studio (find_tools({query: "studio"}) reveals it): it puts the app on' +
       ' the person\'s screen beside this conversation, redrawing as you write, with a HOLD button that refuses' +
       ' your writes until they release it. Call it again, first, in every later turn that changes the app: the' +
-      ' panel sits in the message that called it, and the person reads the newest message.',
+      ' panel sits in the message that called it, and the person reads the newest message.' +
+      // P125 CCN-008 — the smaller panel, said beside the bigger one: what the person decides before the agent builds on it.
+      ' When the person should decide one part before you build on it (the look of a sample button, a hero, each' +
+      ' 3D model), end that turn with show_mini_editor instead: just that part, live, with the settings you choose' +
+      ' for them and an Approve.',
     guidance: bindGuidance(projectDir, bind.deferTools)
   };
 }

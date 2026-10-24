@@ -22,6 +22,9 @@
  * companion.ts) and `POST /__nodegx/open-app`. Studio's page (`GET /`) comes back with the companion added. With a
  * `portFile`, the proxy asks for the port it had last time before taking any free one, so a browser window left
  * open while the host restarted finds it again.
+ *
+ * CCN-008 — the mini editor's paths (`/__nodegx/mini/…`, `miniEditor/http.ts`) are this server's too, answered with
+ * or without a Studio: `setOwnRoutes` puts them in front of the forwarding.
  */
 
 import * as fs from 'fs';
@@ -37,6 +40,8 @@ export interface StudioProxy {
   target(): string | null;
   /** What `/__nodegx/status` reports, and what `POST /__nodegx/open-app` does (true when the app was launched). */
   setCompanion(status: () => CompanionStatus, openApp: () => Promise<boolean>): void;
+  /** P125 CCN-008 — paths this server answers itself (the mini editor's), asked before anything is forwarded. */
+  setOwnRoutes(handle: (req: http.IncomingMessage, res: http.ServerResponse) => boolean): void;
   close(): void;
 }
 
@@ -64,7 +69,9 @@ function lastPort(file: string | undefined): number {
 export function startStudioProxy(options: StudioProxyOptions = {}): Promise<StudioProxy> {
   let target: string | null = null;
   let companion: { status: () => CompanionStatus; openApp: () => Promise<boolean> } | null = null;
+  let ownRoutes: ((req: http.IncomingMessage, res: http.ServerResponse) => boolean) | null = null;
   const server = http.createServer((req, res) => {
+    if (ownRoutes?.(req, res)) return;
     if (req.method === 'OPTIONS') {
       res.writeHead(204, CORS);
       res.end();
@@ -153,6 +160,9 @@ export function startStudioProxy(options: StudioProxyOptions = {}): Promise<Stud
       target: () => target,
       setCompanion: (status, openApp) => {
         companion = { status, openApp };
+      },
+      setOwnRoutes: (handle) => {
+        ownRoutes = handle;
       },
       close: () => server.close()
     };

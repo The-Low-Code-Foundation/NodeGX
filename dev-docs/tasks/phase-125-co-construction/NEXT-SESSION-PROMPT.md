@@ -2,6 +2,23 @@
 
 Read `README.md` here, then the task you take.
 
+## s15 (2026-10-25): CCN-008, a mini editor in the message — BUILT, driven headless, Richard's Desktop run next
+
+Richard (2026-10-24): *"Show the full editor when needed, but be able to show mini custom editors when a button needs
+styling or a hero section needs approval"*; *"especially important for designing three.js games"*; *"Don't cut corners
+on this one, it's a biggie"*. Read [CCN-008](CCN-008-A-MINI-EDITOR-IN-THE-MESSAGE.md) first: rulings R1–R4, the design
+as built, the five things the drives found.
+
+- Built: `show_mini_editor` + `get_mini_editor` (`packages/noodl-mcp/src/tools/miniEditor.ts`, `src/miniEditor/`),
+  the proxy's `/__nodegx/mini/…` paths, the panel. `tests/ccn008MiniEditor.test.ts` 17/17; the drive
+  `tools-mini-editor-drive.mjs` ALL PASS in 2d (the puppy hero) and 3d (the three-in-nodes robot). Surface 8,277/8,280,
+  unchanged.
+- **Next, in order:** (1) rebuild the `noodl-mcp` dist from a CLEAN worktree (the recipe below; never the primary tree)
+  and tell Richard to quit/reopen Claude Desktop and start a NEW conversation; (2) AC6 is his run: a sample button, a
+  hero, a 3D model, one answered late. Read `~/Library/Logs/Claude/claude.ai-web.log` after: does Desktop honour
+  `ui/message` (the Approve becomes his message) or only the `update-model-context` fallback; how tall is the inline
+  panel allowed to be (the hero editor asks ~940 px); (3) then CCN-004 through it (the look accepted in a mini editor).
+
 ## s12 (2026-10-24): the puppy fixes are DONE and seen in Desktop
 
 Richard's re-run (08:46–08:51, Sonnet 5.5, `NodeGX test projects/Puppy Rerun S12`): five bursts, one panel, "it built

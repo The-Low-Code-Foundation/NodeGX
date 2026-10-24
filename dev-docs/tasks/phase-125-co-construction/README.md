@@ -86,6 +86,7 @@ same Studio beside the conversation. Either way the hold holds.
 | [CCN-005](CCN-005-SHORT-BURSTS.md) | One component per turn, rendered; budgets in the server, not advice | ✅ seen in Desktop 2026-10-24: the puppy page in five bursts, one panel (s11 plan cap, s12 `create_component` cap) |
 | [CCN-006](CCN-006-ONE-CLICK.md) | A stranger's install: Studio on npm, a `.mcpb` Desktop Extension, `create-nodegx --desktop` | open |
 | [CCN-007](CCN-007-THE-PERSON-TEST.md) | The test that settles the canon: a non-coder watches two builds (React agent / NodeGX + Studio) and stops one | open; needs Richard |
+| [CCN-008](CCN-008-A-MINI-EDITOR-IN-THE-MESSAGE.md) | A mini editor in the message: one part (a button, a hero, a 3D model) live, with the settings the agent chose, Approve / Not that; stored and reopenable; one live panel with Studio | built 2026-10-25, AC1–AC5 driven headless; **AC6 = Richard's run in Claude Desktop**; the vehicle for CCN-004 and CCN-003 |
 
 ## Decisions taken in CCN-001 (not ruled, state them)
 

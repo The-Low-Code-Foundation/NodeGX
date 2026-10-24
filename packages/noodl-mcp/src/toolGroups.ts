@@ -496,6 +496,11 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'what changed',
       'hold',
       'released',
+      // P125 CCN-008 — `show_mini_editor` / `get_mini_editor`.
+      'mini editor',
+      'approve',
+      'approval',
+      'decide',
       // P109 ISL-016 — `set_project_settings`. The words for what it sets, none of them in the
       // purpose line; matched server-side, never sent.
       'settings',
@@ -536,6 +541,11 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       // P125-PUPPY2 — `release_hold`, the person's next message lifting their hold. Beside its subject, at 0 resident
       // tokens on the same arithmetic; by name and by 'hold', 'released'.
       'release_hold',
+      // P125 CCN-008 — the mini editor (a part of the app for the person to decide about) and the read of their answer.
+      // Appended on the same arithmetic: "18 tools" and "20 tools" are the same length, 0 resident tokens (measured
+      // in tests/ccn008MiniEditor.test.ts via the surface gate's own number).
+      'show_mini_editor',
+      'get_mini_editor',
       // P109 ISL-016 — appended on the arithmetic the notes above record: 0 resident tokens ("8
       // tools" and "9 tools" are the same length). `tests/isl016ProjectSettings.test.ts` measures
       // that and reaches it through `find_tools` by keyword.

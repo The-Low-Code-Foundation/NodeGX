@@ -104,7 +104,11 @@ export const HOLD_EXEMPT: ReadonlySet<string> = new Set([
   'session_status',
   'find_tools',
   'call_tool',
-  'release_hold'
+  'release_hold',
+  // P125 CCN-008 — showing the person a question and reading their answer is how the agent asks "what did you see?";
+  // neither writes the app (the person's changes in a mini editor are theirs, through the proxy).
+  'show_mini_editor',
+  'get_mini_editor'
 ]);
 
 /**

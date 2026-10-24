@@ -78,7 +78,7 @@ export function studioResourceMeta(origin: string | null): Record<string, unknow
 // in a result is not "on screen"; a browser window is.
 
 /** The person's browser, on the platform's own opener. `NODEGX_STUDIO_NO_OPEN` keeps a test from opening windows. */
-function openInBrowser(url: string): boolean {
+export function openInBrowser(url: string): boolean {
   if (process.env.NODEGX_STUDIO_NO_OPEN) return false;
   const cmd = process.platform === 'darwin' ? 'open' : process.platform === 'win32' ? 'cmd' : 'xdg-open';
   const args = process.platform === 'win32' ? ['/c', 'start', '', url] : [url];
@@ -249,7 +249,10 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
           'the same apply (a plan holds at most ' + STUDIO_BURST + ' components while Studio is open), with a line ' +
           'saying what appeared. A write refused with code `held` means they pressed HOLD — stop and ask. ' +
           'This panel stays where it is for the rest of this turn: do not call open_studio again until the next ' +
-          'turn that changes the app, and then call it first.'
+          'turn that changes the app, and then call it first. ' +
+          // P125 CCN-008 — a result field (free on the surface gate): the door to the smaller panel, where it is used.
+          'When the person should decide one part before you go on (a button\'s look, a section, a 3D model), end the ' +
+          'turn with show_mini_editor: that part alone, live, with the settings you choose and Approve / Not that.'
       });
     })
   );
