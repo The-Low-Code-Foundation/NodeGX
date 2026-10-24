@@ -6,6 +6,10 @@ board, below lanes 2 and 3. **Do not open this lane while a session is on lane 2
 **Read:** this folder's README (the claim as ruled, what exists on day one, rulings R1–R5), then
 `../phase-118-the-castle-holds/CANON.md` (the procedure the skill carries).
 
+**The one exception to the priority: PLY-008's probe** (a three-kit game in Studio inside Claude Desktop: does it draw,
+do keys arrive, does a write reset it). It is one sitting, Richard's Desktop is needed for the inline answer, and lane 2
+should have the results before Studio V1 freezes. Ask Richard whether to run it now.
+
 **First, ask Richard for R1–R3** (name, licence, where the shelf lives). R2 blocks PLY-003: the repo is GPL-3.0-only, and
 a stranger's game must not inherit that from a starting point.
 

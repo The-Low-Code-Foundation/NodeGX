@@ -93,6 +93,11 @@ the same three angles, at pixel ratio 2. "Looks good" is a judgement made on tha
 | [PLY-005](PLY-005-THE-PANEL-IS-A-NODEGX-APP.md) | the panel built in NodeGX: the world as one kit node, menus a person tweaks in Studio | 002, lane 2's Studio |
 | [PLY-006](PLY-006-THE-COMMUNITY-SHELF.md) | opt-in sharing of a person's best models, moderator review | 003, 004 |
 | [PLY-007](PLY-007-FIRST-PLAY-MEASURED.md) | first play, measured: a stranger's Claude Code with and without the kit | 001–003 |
+| [PLY-008](PLY-008-THE-GAME-IN-STUDIO-IN-THE-CONVERSATION.md) | the game in Studio inside Claude Desktop: a probe first (does WebGL draw, do keys arrive, does a write reset the game), then the Studio changes, handed to lane 2 | probe: CCN-001 ✅; rest: lane 2 |
+
+**PLY-008's probe comes first, ahead of the lane's priority.** Richard's worry (2026-10-24) is that Studio settles
+into a shape that games can't use. The probe is one sitting, so run it before Studio V1 freezes, and give its results
+to lane 2.
 
 PLY-001 → 002 → 003 is the base version a stranger can use. PLY-007 can run as soon as those three exist, before the
 NodeGX half. PLY-005 waits for Studio V1 (lane 2) because its claim is a person editing the menus in Studio.
