@@ -7,6 +7,7 @@ area: preview server (`packages/noodl-preview/src/server.ts` :237-240, the DEP-0
 found: P112 OWN-026, the graders of t1-nodegx-3 and t2-nodegx-c01, 2026-10-23
 evidence: own026-grades/t2-nodegx-c01/grade.json notes — "Every console error was a 'Failed to load resource' 404 for /nodegx-config.json (27 across the walkthrough)"; t1-nodegx-3's grade, "one or two per page load, coming from the preview server rather than the app"
 regression: packages/noodl-preview/tests/own026-config-not-404.test.ts "answers 200 with an empty object, so the browser logs nothing"
+commit: 8e41f673f
 ---
 
 The viewer asks for `nodegx-config.json` on boot (DEP-001: a deployed app may re-point its backend). The preview
