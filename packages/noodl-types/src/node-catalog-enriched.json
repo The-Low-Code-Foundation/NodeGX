@@ -93807,7 +93807,7 @@
     {
       "id": "user-login-flow",
       "title": "Log in, show the user, log out",
-      "description": "The authentication triangle: Log In takes `username`/`password` values and a `login` signal, firing `success` or `failure` (+`error`). The User node is the session's single source of truth — its `authenticated` boolean and profile outputs update on login/logout, so UI binds to it rather than to the action nodes. Log Out ends the session from anywhere. Gate visible areas on `authenticated`, not on the login node's `success` pulse.",
+      "description": "The authentication triangle: Log In takes `username`/`password` values and a `login` signal, firing `done` or `failure` (+`error`). The User node is the session's single source of truth — its `authenticated` boolean and profile outputs update on login/logout, so UI binds to it rather than to the action nodes. Log Out ends the session from anywhere. Gate visible areas on `authenticated`, not on the login node's `done` pulse.",
       "demonstrates": [
         "net.noodl.user.LogIn",
         "net.noodl.user.LogOut",
