@@ -3,7 +3,7 @@
 // in the backend is undone at the next start). Both, or neither.
 
 import { serializeV2File } from '@nodegx/project-contract/format.js';
-import { OPS, ruleWords, tableRule } from '../public/words.js';
+import { OPS, entryForChange, ruleWords, tableRule } from '../public/words.js';
 
 export const SECURITY_FILE = 'nodegx.security.json';
 
@@ -19,7 +19,7 @@ export function readSecurityFile(files) {
 
 /** The entry a person's choice makes. `read` sets find + get; `change` sets create + update + delete. */
 export function entryFor({ read, change, creatorOwns }) {
-  const permissions = { find: read, get: read, create: change, update: change, delete: change };
+  const permissions = { find: read, get: read, ...entryForChange(change) };
   return { permissions, creatorOwns: !!creatorOwns };
 }
 

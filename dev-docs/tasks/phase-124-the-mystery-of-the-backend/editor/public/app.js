@@ -1557,20 +1557,21 @@ function tablePanel(n) {
 
 function wireTableControls(n) {
   const m = state.map;
-  const choices = W.audienceChoices(m.roles.map((r) => r.name));
+  const roleNames = m.roles.map((r) => r.name);
+  const choicesFor = (field) => (field === 'change' ? W.changeChoices(roleNames) : W.audienceChoices(roleNames));
   const e = state.edit;
   const d = directRead(n.key);
   const cur = { read: d.read, change: W.changeRule(d.rule.permissions), creatorOwns: d.rule.creatorOwns };
   const changed = JSON.stringify(cur.read) !== JSON.stringify(e.read) || JSON.stringify(cur.change) !== JSON.stringify(e.change) || cur.creatorOwns !== e.creatorOwns;
   const pills = (field) =>
-    choices
+    choicesFor(field)
       .map((c) => {
         const on = JSON.stringify(e[field]) === JSON.stringify(c.value);
         const o = W.openness(c.value);
         return `<button class="pill ${on ? 'on' : ''} ${on && o >= 3 ? 'risky' : on && o === 2 ? 'mid' : ''}" data-field="${field}" data-value="${esc(c.value)}" title="${esc(c.long)}">${esc(c.words)}</button>`;
       })
       .join('');
-  const known = (v) => choices.some((c) => JSON.stringify(c.value) === JSON.stringify(v));
+  const known = (v, field = 'read') => choicesFor(field).some((c) => JSON.stringify(c.value) === JSON.stringify(v));
 
   let preview = '';
   if (changed) {
@@ -1598,11 +1599,11 @@ function wireTableControls(n) {
   $('ruleEditor').innerHTML = `
     <p>Looking at rows${known(e.read) ? '' : ` <span class="chip">now: ${esc(W.ruleWords(e.read))}</span>`}</p>
     <div class="choice-group">${pills('read')}</div>
-    <p>Adding, changing or deleting rows${known(e.change) ? '' : ` <span class="chip">now: ${esc(e.change === null ? 'a mixed rule' : W.ruleWords(e.change))}</span>`}</p>
+    <p>Adding, changing or deleting rows${known(e.change, 'change') ? '' : ` <span class="chip">now: ${esc(e.change === null ? 'a mixed rule' : W.ruleWords(e.change))}</span>`}</p>
     <div class="choice-group">${pills('change')}</div>
     <label class="check"><input type="checkbox" id="creatorOwns" ${e.creatorOwns ? 'checked' : ''}> <span>Whoever made a row may always see and change that row</span></label>
     ${preview}
-    <button class="go" id="applyRule" ${changed && e.read != null && e.change != null && known(e.read) && known(e.change) ? '' : 'disabled'}>Make it so</button>
+    <button class="go" id="applyRule" ${changed && e.read != null && e.change != null && known(e.read) && known(e.change, 'change') ? '' : 'disabled'}>Make it so</button>
     ${changed ? '<button class="ghost" id="undoEdit">Never mind</button>' : ''}
     ${d.rule.own && !changed ? '<button class="ghost" id="resetRule">Back to the app’s standard rule</button>' : ''}
     <button class="ghost" id="askBackend">Ask the backend who gets in</button>

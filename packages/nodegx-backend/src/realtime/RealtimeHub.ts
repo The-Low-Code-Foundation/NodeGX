@@ -308,7 +308,7 @@ export class RealtimeHub {
         if (decision.narrow) {
           rejected.push({
             collection,
-            reason: `"${collection}" lets you see rows through a path rule, and live updates cannot follow a path yet — query it instead`
+            reason: `"${collection}" lets you see only some of its rows (a path or "creator" rule), and live updates cannot follow that yet — query it instead`
           });
           continue;
         }

@@ -28,7 +28,10 @@ import { guarded, jsonResult } from './util';
 
 const ruleValue = z
   .union([z.string(), z.array(z.string())])
-  .describe('A permission rule: "public" | "authenticated" | "nobody" | "role:<name>", or an array of those (OR).');
+  .describe(
+    'A permission rule: "public" | "authenticated" | "nobody" | "role:<name>" | "creator" (find, get, update, delete only: ' +
+      'the rows the caller made), or an array of those (OR).'
+  );
 
 const clpShape = z
   .object({

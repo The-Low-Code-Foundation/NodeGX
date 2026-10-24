@@ -11,7 +11,8 @@ export const ENFORCED_RULES_NOTE =
   'record a user creates is read and changed only by that user (creatorOwns), so a query already returns only the ' +
   "signed-in user's own records, with no owner filter needed. Records the backend tools create have no owner: every " +
   'signed-in user reads them. A collection all signed-in users share needs set_collection_permissions with ' +
-  'creatorOwns: false; one visitors read before signing in needs find and get "public". Every record a signed-in ' +
+  'creatorOwns: false; one visitors read before signing in needs find and get "public". One everyone reads but ' +
+  'only the person who made a record changes or deletes: creatorOwns: false, update and delete "creator". Every record a signed-in ' +
   "user makes says who made it in owner, written by the backend from their session; a page never sends it, and no " +
   'other field proves whose a record is: a field the page fills from the User id is whatever the caller sent. Where ' +
   'a cloud function decides who sees what, it checks owner. Records several people may change: a role named from ' +
