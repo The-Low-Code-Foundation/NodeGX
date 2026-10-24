@@ -5,7 +5,9 @@
 ## What
 
 Extract the generators that already look good (README, "What exists on day one") into standalone modules. Each module
-imports only three.js, takes its parameters as one object, and returns a `THREE.Group`. First set, in Richard's order:
+imports only three.js, takes its parameters as one object, and returns a `THREE.Group`. Each one also **names its parts
+and declares its settings** in PLY-009's `model` shape. Today's generators do neither: the frigate takes 2 settings,
+its shape is constants, and no part is named. First set, in Richard's order:
 Minecraft-style people (with looks, animation and the rifle), the castle, the spaceships, the station, asteroids. Then
 the derelict, dressed interior pieces and the Gala's dancers (code only; nothing from the Gala's data).
 

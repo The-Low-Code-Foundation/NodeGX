@@ -33,6 +33,12 @@ Two claims, kept apart:
    person, in Studio. That is the NodeGX claim: *"it opens up the possibility for easier game editing and tweaking in
    the future, not that it makes the development faster."*
 
+3. **A model says what you can change** ([PLY-009](PLY-009-A-MODEL-SAYS-WHAT-YOU-CAN-CHANGE.md), Richard 2026-10-24:
+   *"even 3D games built using nodegx always expose settings in 3D models on purpose, that are then read by the NodeGX
+   3D Studio"*). A model declares its parts and settings the way a node declares its ports, and the 3D Studio builds
+   the person's controls from that declaration: point at a part, nudge its settings, drag a handle bound to a setting,
+   pick from a lineup. It's never CAD. This is the first pillar applied to 3D.
+
 We are **not** claiming that a node graph makes 3D easier for an LLM. OWN-023 round 3 measured the app layer and found a
 tie on Opus and code ahead on DeepSeek. The per-frame game loop stays code.
 
@@ -94,6 +100,7 @@ the same three angles, at pixel ratio 2. "Looks good" is a judgement made on tha
 | [PLY-006](PLY-006-THE-COMMUNITY-SHELF.md) | opt-in sharing of a person's best models, moderator review | 003, 004 |
 | [PLY-007](PLY-007-FIRST-PLAY-MEASURED.md) | first play, measured: a stranger's Claude Code with and without the kit | 001–003 |
 | [PLY-008](PLY-008-THE-GAME-IN-STUDIO-IN-THE-CONVERSATION.md) | the game in Studio inside Claude Desktop: a probe first (does WebGL draw, do keys arrive, does a write reset the game), then the Studio changes, handed to lane 2 | probe: CCN-001 ✅; rest: lane 2 |
+| [PLY-009](PLY-009-A-MODEL-SAYS-WHAT-YOU-CAN-CHANGE.md) | a model says what you can change: a parts-and-settings declaration on every model, and the 3D Studio (stage, point, nudge, handles, lineup) built from it; a playable sketch for Richard first | 003; 008 for Desktop |
 
 **PLY-008's probe:** Richard's worry (2026-10-24) is that Studio settles into a shape that games can't use. Asked whether
 to run the probe now, ahead of the lane's priority, he said *"Later"*. It is still one sitting, and its results still go
