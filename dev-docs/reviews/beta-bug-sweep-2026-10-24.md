@@ -268,3 +268,64 @@ clean · cloud runtime request 135/135, tsc clean · node-spec golden 22/22, cat
 
 **Commits this session:** 8d97498cd, 2a692b8e0, d086cfe1d, eaf767388, 98785a116, 3bf2a53a5, 469b14e03, and the docs
 commit after them.
+
+---
+
+# Session 6, 2026-10-25 (next session reads this first)
+
+Took session 5's "Next" list, all but STRINGREJECT (lane 4, paused; the export matches it on purpose). Seven fixed.
+**Not pushed, not released**, as before.
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| P119-S2-LIVEPATH (medium) | 3cd182bda | a narrowed subscription (path or `creator` rule) is accepted; each create/update is confirmed by the subscriber's own narrowed query (`HubOptions.confirm` → `facade.rawQuery` with `aclFor(…, only)`, the same SQL as `/classes`); a delete is read through the rule's last `{ from, by }` link from the record as it was, `creator` from `owner`; anything else, or a failed check, sends `resync` `"unconfirmed"`; frames keep change order. `REALTIME.md` | `p119-s2-live-path` 10/10 (5 over HTTP on a locked backend, red 5/5; 5 on the hub), 7 mutants red; realtime/ONT-004/ONT-012/FED-005/creator suites 224/224 |
+| P121-TWO004-DETAILFILTER | bf3405090 | `navigateWith`: Detail and Close keep the route's query | `runs-view` (mounted as the App mounts it) red → green, 2 mutants red; admin app 204/204 |
+| P121-TWO005-SIGNUPSWITCH | 981b44515 | `GET /admin/auth` answers `signup: { open, rule }`; closed → the magic-link and provider sign-up switches read off, disabled, "Sign-up is closed on the Permissions page …"; the stored choice is kept | 3 jsdom + 1 real-server case, red 2/3, 2 mutants red; 253/253 |
+| P112-OWN023-NORANGE (medium) | e79a81884 | one `bytes=` range → 206 + `Content-Range`; past the end 416; `Accept-Ranges`; several/malformed/stale `If-Range` → whole file; `createReadStream(key, range?)` on both drivers (S3 signs `Range`). `BACKEND-FILES.md` §Seeking | `p112-own023-no-range` 6/6 (red 6/6), 4 mutants red; file suites 76 (MinIO half skipped). Not on a real iPhone |
+| P112-OWN024-SCHEMAFIRSTSTART | b3e259642 | a push with no answer is retried twice (250 ms, 1 s), looking first whether it landed; a refusal in words is not; what is missing is `schemaProblem` on `backend:status` and a notice on the backend card | tests-main 4 new, red 3/4 on HEAD's source, 2 mutants red; 117/117, editor tsc. Card notice not rendered (the card cannot load under jest) |
+| P124-S1-WRITESHELPER | 16ca9cca2 | both predicates follow a placed `/#__cloud__/` component, each once, never into itself: backend from its bundle, the door from `views` | backend DEF-009 18/18, door 16/16, 5 mutants red (both cycle guards: RangeError); training template 8 → 12 of 27, exactly the row's four |
+| P107-S97-USERIDBOOLEAN | 58c980d43 | census first: 106 saved `userId` wires in 13,839 project files, none into a signal; then `string` in the runtime, spec v3, both catalogs, golden (only `version` moved) | `p107-s97-userid-string` red 2/3 → 3/3; golden --check fresh; conformance on the cloud target; catalogs up to date; 114/114 examples |
+
+## For Richard
+
+1. **Push and release**, as before: 37 rows now on cline-dev. LIVEPATH, NORANGE and SIGNUPSWITCH are backend; the
+   admin-app rows ship in its bundle; SCHEMAFIRSTSTART needs an editor build.
+2. Session 5's DEPLOYLOOPBACK (warn or refuse?) and OWN008-AUDIT (stay on fast-xml-parser 4) stand.
+
+## Next (the Beta walk's next rows, cheapest first)
+
+1. **P109-S41-SUNDAYWEEK** — "the past 7 days" reads back as "this week" on a Sunday; it is also the backend plain
+   suite's standing base red.
+2. **P112-OWN021-EMAILNOTE**, **P121-TWO004-TOASTOVERSAVE** — admin app wording / a toast over a drawer's Save.
+3. **P112-S13-DEPLOYBADJSON** — a malformed nodes.json reports stage `write` and names no file.
+4. **P112-OWN026-DELETELEAVESBYTES** — a deleted record stays readable in the SQLite WAL and freed pages.
+5. **P18-S134-STRINGREJECT** waits for lane 4.
+
+## Traps met
+
+1. 🔴 `Tests: 0 total` from jest is a suite that did not compile (a TS error under ts-jest), not a red: the editor's
+   first "red" for the door was this. Read the tail before calling anything red.
+2. 🔴 The admin app's modal store is global: a jsdom spec that leaves a dialog open hands the next spec its Close
+   button. `closeAllModals()` first.
+3. 🔴 The DEF-009 fixture's arms share the `functions`/`public` class bucket (burst 200): a seventh 40-call arm reddened
+   the opt-out arm at HEAD for the wrong reason. The fixture now writes `ops.json` with room.
+4. macOS has no `timeout`: a mutant run behind it silently did not run (`command not found` swallowed by grep).
+5. `golden.js --check` wants `changes` in rising version order; `--diff` said "No golden trace moved" for a port type
+   change while `--check` said stale (only `version` moved). Read the golden file diff.
+6. The honesty-ledger control in node-spec is red at HEAD under an uncommitted edit of `honesty-ledger.json` (four
+   templates rose); not this session's, and identical with this session's changes undone.
+7. `dev-docs/tasks/phase-119-learn-with-simple-rick/README.md` §2 still says live updates refuse the path rule; a peer
+   had that file open, so it was left. One sentence to change when it is free.
+
+## Gates read (2026-10-25)
+
+backend: live-path 10/10, realtime + rule suites 224/224, files 76 (7 MinIO skips), DEF-009 18/18, declarations
+81/81, admin app 20 suites 253/253, tsc clean · editor: tests-main local-backend + panel 117/117, validator 19 suites
+263/263, Request-node specs 178/178, tsc clean · node-spec 478/478, tsc clean · cloud request 102/102, tsc clean ·
+runtime conformance (Request) green · `catalog:check`, `catalog:merge:check` up to date, `catalog:examples` 114/114 ·
+noodl-mcp tsc clean.
+
+**Commits this session:** 3cd182bda, bf3405090, 981b44515, e79a81884, b3e259642, 16ca9cca2, 58c980d43, and the docs
+commit after them.
