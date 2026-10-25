@@ -29,7 +29,7 @@ import {
   tileOf,
   wizardPayload
 } from '../../src/admin/app/providerWizard';
-import { EmailView, insertToken, templateTitle } from '../../src/admin/app/views/email';
+import { EmailView, emailNotReadyLine, insertToken, templateTitle } from '../../src/admin/app/views/email';
 import { ProviderWizard, SignInView, callbackFor } from '../../src/admin/app/views/signin';
 
 // ------------------------------------------------------------ the backend --
@@ -165,6 +165,24 @@ describe('Email page (BMG-010 §3.1)', () => {
     expect(qa(root, '.drawer-section').map((h) => text(h))).toContain('When someone signs up');
     expect(qa(root, '#signup-policy label.switch').map((l) => text(l).trim())).toEqual(['Send them a verification email', 'They cannot sign in until they have verified']);
     unmount(root);
+  });
+
+  it('P112-OWN021-EMAILNOTE: the page says what to do here, in its own words, not the API’s sentence pointing at this page', async () => {
+    const root = mount(<EmailView params={[]} />);
+    await settle(20);
+    const warn = text(q(root, '.notice.warn'));
+    expect(warn).toBe('Nothing is sent yet. Choose who sends your mail below, then save. Until then, a message your app sends fails, and its run says why.');
+    expect(warn).not.toMatch(/\.\.|Email page|\/_admin/);
+    unmount(root);
+  });
+
+  it('P112-OWN021-EMAILNOTE: one sentence per reason, in the order the backend checks them', () => {
+    const full = { enabled: true, smtp: { host: 'smtp.example.com', port: 587 }, fromAddress: 'hi@example.com' };
+    expect(emailNotReadyLine(full)).toBeNull();
+    expect(emailNotReadyLine({ ...full, smtp: { host: '', port: 587 } })).toMatch(/^Nothing is sent yet\. Choose who sends your mail below/);
+    expect(emailNotReadyLine({ ...full, fromAddress: '' })).toMatch(/^Nothing is sent yet\. Fill in the From address below/);
+    expect(emailNotReadyLine({ ...full, enabled: false })).toMatch(/^Nothing is sent yet\. Turn on “Sending is on” below/);
+    expect(emailNotReadyLine({ enabled: false, smtp: { host: '' }, fromAddress: '' })).toMatch(/Choose who sends your mail/);
   });
 
   it('AC7: no textarea and no separated field on the page itself', async () => {
