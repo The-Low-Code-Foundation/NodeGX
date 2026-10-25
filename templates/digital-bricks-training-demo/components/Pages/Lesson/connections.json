@@ -262,12 +262,6 @@
       "toProperty": "finishState"
     },
     {
-      "fromId": "ls_finish_failed",
-      "fromProperty": "out-state",
-      "toId": "ls_close",
-      "toProperty": "finishState"
-    },
-    {
       "fromId": "ls_finish_call",
       "fromProperty": "out-done",
       "toId": "ls_to_course",

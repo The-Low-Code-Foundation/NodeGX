@@ -247,33 +247,6 @@
           "group": "Outputs"
         }
       ]
-    },
-    {
-      "id": "sr_fail",
-      "type": "JavaScriptFunction",
-      "label": "Not saved: the kit says so, words kept",
-      "x": 1080,
-      "y": 300,
-      "parameters": {
-        "functionScript": "/*\n * THE BACKEND REFUSED OR COULD NOT BE REACHED (TASK-L177). The kit gives the box\n * back with the words still in it and says it could not save. Never a ✓.\n */\nOutputs.status = 'failed:' + String(Inputs.token || '');\n",
-        "runOnChange-in-token": false
-      },
-      "ports": [
-        {
-          "name": "in-token",
-          "plug": "input",
-          "type": "*",
-          "displayName": "token",
-          "group": "Inputs"
-        },
-        {
-          "name": "out-status",
-          "plug": "output",
-          "type": "*",
-          "displayName": "status",
-          "group": "Outputs"
-        }
-      ]
     }
   ],
   "visualRoots": [

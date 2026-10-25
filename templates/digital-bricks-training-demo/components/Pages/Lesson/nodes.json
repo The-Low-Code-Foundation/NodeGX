@@ -654,25 +654,6 @@
           "group": "Outputs"
         }
       ]
-    },
-    {
-      "id": "ls_finish_failed",
-      "type": "JavaScriptFunction",
-      "label": "It could not be marked complete",
-      "x": 1160,
-      "y": 900,
-      "parameters": {
-        "functionScript": "/*\n * IT COULD NOT BE MARKED COMPLETE (TASK-L178). They stay on the lesson, the\n * button comes back and the close says so. The product goes to the course on\n * any error, which leaves somebody believing a step is finished that is not.\n */\nOutputs.state = 'failed';\n"
-      },
-      "ports": [
-        {
-          "name": "out-state",
-          "plug": "output",
-          "type": "*",
-          "displayName": "state",
-          "group": "Outputs"
-        }
-      ]
     }
   ],
   "visualRoots": [

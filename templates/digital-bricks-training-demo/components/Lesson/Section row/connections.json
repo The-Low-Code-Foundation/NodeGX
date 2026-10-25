@@ -118,21 +118,9 @@
       "toProperty": "saveStatus"
     },
     {
-      "fromId": "sr_fail",
-      "fromProperty": "out-status",
-      "toId": "sr_section",
-      "toProperty": "saveStatus"
-    },
-    {
       "fromId": "sr_save",
       "fromProperty": "out-token",
       "toId": "sr_ok",
-      "toProperty": "in-token"
-    },
-    {
-      "fromId": "sr_save",
-      "fromProperty": "out-token",
-      "toId": "sr_fail",
       "toProperty": "in-token"
     }
   ]
