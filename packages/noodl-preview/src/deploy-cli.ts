@@ -25,6 +25,7 @@ import {
   type ViewerBuildReading
 } from './deploy';
 import { FULL_STACK_FLAG, FullStackInstallError, FullStackTargetError } from './fullStack';
+import { isProjectFileError } from './readProject';
 
 /** What the caller reads. One object, one line, nothing else on stdout. */
 export type EngineResult =
@@ -140,7 +141,10 @@ async function main(): Promise<void> {
         ? { ok: false, stage: 'target', message }
         : error instanceof FullStackInstallError
         ? { ok: false, stage: 'runtime', message }
-        : { ok: false, stage: classify(message), message };
+        : // P112-S13-DEPLOYBADJSON: a project file that is not JSON was filed under `write`.
+          isProjectFileError(error)
+          ? { ok: false, stage: 'project', message }
+          : { ok: false, stage: classify(message), message };
   }
 
   // 🔴 The report goes through the real stdout, and stdout STAYS on stderr after it. Work the

@@ -26,7 +26,27 @@ import type {
 
 export type ProjectFormat = 'v2' | 'legacy';
 
-const readJson = <T>(file: string): T => JSON.parse(fs.readFileSync(file, 'utf8')) as T;
+/**
+ * P112-S13-DEPLOYBADJSON — a project file that is not JSON is the PROJECT's problem, and the error names the file.
+ * A bare `JSON.parse` threw "Unexpected token 'b' … is not valid JSON" with no file in it, and `nodegx deploy` filed it
+ * under `write` (a disk problem). Marked by a property, not an Error subclass: `instanceof` on a subclass fails where
+ * this is compiled to ES5, and the deploy engine classifies by {@link isProjectFileError}.
+ */
+const readJson = <T>(file: string): T => {
+  const text = fs.readFileSync(file, 'utf8');
+  try {
+    return JSON.parse(text) as T;
+  } catch (e) {
+    // The parser's own sentence already ends "is not valid JSON"; it gains the file it was about.
+    const why = text.trim() === '' ? 'the file is empty, so it is not valid JSON' : e instanceof Error ? e.message : String(e);
+    throw Object.assign(new Error(`${file.split(path.sep).join('/')}: ${why}`), { projectFile: file });
+  }
+};
+
+/** Did reading the project fail on one of its files (not valid JSON)? */
+export function isProjectFileError(error: unknown): boolean {
+  return !!error && typeof (error as { projectFile?: unknown }).projectFile === 'string';
+}
 
 /**
  * Classifies the target and returns the project directory.
