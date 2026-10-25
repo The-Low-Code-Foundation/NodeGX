@@ -1,11 +1,13 @@
 ---
 id: P123-STU030-SIGNALCAUSE
 title: "Every signal in the runtime trace has cause 0, so what made a step run cannot be read off the trace"
-status: open
+status: fixed
 severity: medium
 area: runtime / the trace buffer (`NodeContext.traceEdgeSend`, `_currentCause`), read by the in-page preview and nodegx-observe
 found: NodeGX Studio STU-030 (phase 123's successor repo, The-Low-Code-Foundation/nodegx-studio), 2026-10-20 — measuring the trace for the run timeline on the todo template
 evidence: nodegx-studio docs/look/stu-030-trace.json (`runB_signals`, `runC_add_a_task.signalChain`); nodegx-studio editor/trace-inventory.mjs reproduces it; docs/SCOPE.md "Done (STU-030)"
+kit: core
+regression: packages/noodl-runtime/test/corpus/p123-signal-cause.test.ts "an action’s Done, reported after an await, names the signal that started the action"
 ---
 
 `TraceEvent.cause` is documented as *"the seq of the event that delivered the input being processed when this one was
@@ -34,3 +36,14 @@ signal sent from inside a scheduled callback runs after that has been reset to 0
 Proposed fix, small-medium: carry the cause into the scheduled callback (capture `_currentCause` when the callback is
 scheduled, restore it while it runs). The gate: a two-step chain (Button → A.done → B) records B's input event with
 A's delivering event as its cause.
+
+**Fixed (2026-10-25, the Beta sweep), for signals:** the cause is carried across the three places it was lost
+(`src/tracecause.ts`, two free functions, one property read when tracing is off). (1) `scheduleAfterInputsHaveUpdated`
+runs its callback under the cause in force when it was scheduled, which is where a Function's Run runs. (2) An outcome
+token (`beginOutcome`) keeps the cause of the signal that started the invocation, and `reportOutcome` sends Done /
+Failure / Unchanged / Completed under it, after an `await` too (the action family: record writes, requests). (3) A
+Function's own script signals (`Outputs.go()`) and its Success go out under the cause of what started the run.
+Graded: `test/corpus/p123-signal-cause.test.ts` 4/4 (the row's gate: a two-step chain names the first step; red 3/4
+with the cause not carried). Not done: VALUES flagged dirty and sent in a later update pass (the 425 of 956 roots)
+are not traced here, nor a node that answers later without the outcome contract. Not re-measured in Studio's
+`trace-inventory.mjs` (needs a preview build that carries this runtime).

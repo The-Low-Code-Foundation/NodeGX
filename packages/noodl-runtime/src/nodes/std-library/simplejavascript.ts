@@ -26,6 +26,7 @@ import {
 import Node = require('../../node');
 import { ScriptFileError, scriptAlias, scriptUsesOf, type ScriptFiles, type ScriptPath } from '../../scriptfiles';
 import { functionScriptPortNames } from '@nodegx/project-contract/function-ports';
+import { currentTraceCause, withTraceCause } from '../../tracecause';
 
 const JavascriptNodeParser = require('../../javascriptnodeparser');
 const { logJavaScriptNodeError, thrownMessage } = require('../../utils');
@@ -637,6 +638,9 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
 
       const inputs = this._internal.inputValues;
       const outputs = this._internal.outputValuesProxy;
+      // P123-STU030-SIGNALCAUSE: what started this run (its Run, or the value that re-ran it), so a
+      // signal the script sends — after an `await` too — and its Success name it in the trace.
+      const runCause = currentTraceCause(this.context);
 
       // Prepare send signal functions
       // P112-OWN020-UNWIREDSIGNAL: the placing's signals, not only the saved ports — see `placingSignalPorts`.
@@ -648,7 +652,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           // would otherwise be told it produced nothing on the very run in which it fired.
           this._internal.outputWrites.add(key.substring('out-'.length));
           publishHeldWrites(this);
-          if (this.hasOutput(key)) this.sendSignalOnOutput(key);
+          if (this.hasOutput(key)) withTraceCause(this.context, runCause, () => this.sendSignalOnOutput(key));
         };
         // The value is both callable and carries `.send`, so user code may write either
         // `Outputs.done()` or `Outputs.done.send()`. Typed at the point the second shape
@@ -694,7 +698,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
             this._internal.lastError = '';
             this.flagOutputDirty('error');
           }
-          this.sendSignalOnOutput('success');
+          withTraceCause(this.context, runCause, () => this.sendSignalOnOutput('success'));
           reportOutcomes(this, tokens, 'done');
         }
       } catch (e) {

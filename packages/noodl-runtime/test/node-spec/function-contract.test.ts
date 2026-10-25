@@ -100,13 +100,14 @@ const PLANTS: Array<{ rule: string; find: string; replace: string; red: string }
   },
   {
     rule: 'a signal output is a function the code calls, and it fires',
-    find: 'if (this.hasOutput(key)) this.sendSignalOnOutput(key);',
+    // P123-STU030-SIGNALCAUSE: the send runs under the run's trace cause; removing the line is still "it never fires".
+    find: 'if (this.hasOutput(key)) withTraceCause(this.context, runCause, () => this.sendSignalOnOutput(key));',
     replace: '',
     red: 'a signal output is a function the code calls'
   },
   {
     rule: 'Success fires when the code has finished',
-    find: "this.sendSignalOnOutput('success');",
+    find: "withTraceCause(this.context, runCause, () => this.sendSignalOnOutput('success'));",
     replace: '',
     red: 'an empty script compiles and runs'
   },

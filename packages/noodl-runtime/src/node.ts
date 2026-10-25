@@ -15,6 +15,7 @@ import { diagnosticsEnabled, setDiagnostic } from './diagnostics';
 import { COMPLETED_PORT, TREAT_UNCHANGED_AS } from './outcome';
 import { runOnChangeInput, runOnChangePortName, runOnValueChange, valueDidChange } from './run-on-value-change';
 import type { NodeRunContext } from './runcontext';
+import { currentTraceCause, withTraceCause } from './tracecause';
 
 /**
  * OBS-003. The port name is appended, so one node with two NaN inputs raises two clearable
@@ -995,7 +996,11 @@ Object.defineProperty(Node.prototype, 'diagnosticsEnabled', {
  * that class unrepresentable rather than merely fixed.
  */
 Node.prototype.beginOutcome = function (inputData) {
-  const token: { reported: undefined; step?: unknown } = { reported: undefined };
+  const token: { reported: undefined; step?: unknown; cause?: number } = { reported: undefined };
+  // P123-STU030-SIGNALCAUSE: the signal that started this invocation, so its outcome — reported
+  // frames later, after a request answers — names it rather than reading as a root.
+  const cause = currentTraceCause(this.context);
+  if (cause) token.cause = cause;
 
   // DEF-004 — one execution step per invocation, on the per-run channel CWF-013 built.
   //
@@ -1086,6 +1091,13 @@ Node.prototype.reportOutcome = function (token, outcome, options) {
   }
   token.reported = outcome;
 
+  // P123-STU030-SIGNALCAUSE: the outcome's signals are sent under the cause of the signal that
+  // began the invocation (`beginOutcome`), restored in the `finally` below.
+  const traceContext = this.context;
+  const tokenCause = (token as { cause?: number }).cause;
+  const causeBefore = traceContext ? traceContext._currentCause : 0;
+  if (tokenCause && traceContext && traceContext.traceEnabled) traceContext._currentCause = tokenCause;
+
   // DEF-004's duplicate guard — see the note in `raiseRuntimeError`. Wraps the WHOLE block
   // rather than only the failure raise, because `outcome/missing-port` and
   // `outcome/missing-completed` raise on this same node for this same invocation, and each would
@@ -1137,6 +1149,7 @@ Node.prototype.reportOutcome = function (token, outcome, options) {
 
   } finally {
     this._raisingForOutcome = false;
+    if (tokenCause && traceContext && traceContext.traceEnabled) traceContext._currentCause = causeBefore;
   }
 
   // DEF-004 — close the step opened in `beginOutcome`, last, once the signals are out.
@@ -1314,7 +1327,16 @@ Node.prototype.queueInput = function (inputName, value, causeSeq) {
 };
 
 Node.prototype.scheduleAfterInputsHaveUpdated = function (callback) {
-  this._afterInputsHaveUpdatedCallbacks.push(callback);
+  // P123-STU030-SIGNALCAUSE: the callback runs after the drain has restored the cause, so it
+  // carries the one in force when it was scheduled — the input that asked for the work.
+  const cause = currentTraceCause(this.context);
+  this._afterInputsHaveUpdatedCallbacks.push(
+    cause
+      ? function (this: RuntimeNode) {
+          return withTraceCause(this.context, cause, () => callback.call(this));
+        }
+      : callback
+  );
   this.flagDirty();
 };
 
