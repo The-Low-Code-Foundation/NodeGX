@@ -47,6 +47,11 @@ export interface AdminAuthDeps {
   /** How the OAuth routes compute a provider's callback URL — reused verbatim so the two cannot disagree. */
   callbackUrl: (providerId: string) => string;
   getLocalUrl: () => string;
+  /**
+   * P121-TWO005-SIGNUPSWITCH: the security policy's `signup` and whether it lets a stranger in. A link, a code or a
+   * provider makes a new account only when its own switch AND this allow it, so the page must say when this does not.
+   */
+  signup?: () => { open: boolean; rule: unknown };
 }
 
 /**
@@ -106,7 +111,9 @@ export class AdminAuthRoutes {
       magicLinkReady: this.deps.auth.config.magicLink.enabled && this.deps.emailConfig.isConfigured(),
       magicLinkNotReadyReason: this.magicLinkNotReadyReason(),
       /** SRK-001: the same compound state for the six-digit code. */
-      emailCodeReady: this.deps.auth.config.emailCode.enabled && this.deps.emailConfig.isConfigured()
+      emailCodeReady: this.deps.auth.config.emailCode.enabled && this.deps.emailConfig.isConfigured(),
+      /** P121-TWO005-SIGNUPSWITCH: the policy every "may create an account" switch is ANDed with (oauth-routes). */
+      signup: this.deps.signup ? this.deps.signup() : { open: true, rule: null }
     });
   }
 

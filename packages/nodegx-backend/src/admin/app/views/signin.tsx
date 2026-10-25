@@ -36,6 +36,7 @@ import {
   stepMissing,
   wizardPayload
 } from '../providerWizard';
+import { type RuleValue, ruleWords, signupChoice } from '../permissionsModel';
 import { navigate } from '../router';
 import { Btn, Card, Check, Chip, Disclosure, Field, Gap, Hint, Notice, Page, Row, Spacer, Sub, Switch, Table, WriteBtn, confirmDestructive, copyText, fail, toast } from '../ui';
 import type { ViewProps } from './index';
@@ -56,6 +57,18 @@ interface AuthData {
   baseUrl?: { url?: string; usedFallback?: boolean; warning?: string };
   magicLinkReady?: boolean;
   magicLinkNotReadyReason?: string;
+  /** The security policy's `signup`, which every "may create an account" switch here is ANDed with. */
+  signup?: { open?: boolean; rule?: RuleValue };
+}
+
+/**
+ * P121-TWO005-SIGNUPSWITCH — the sentence a sign-up switch wears when the policy closes sign-up, or null. The switch
+ * then reads off and cannot be pressed; its stored choice is kept, and counts again once the policy opens.
+ */
+export function signupClosedLine(signup: AuthData['signup']): string | null {
+  if (!signup || signup.open !== false) return null;
+  const who = signupChoice(signup.rule) === 'nobody' ? 'Nobody' : ruleWords(signup.rule);
+  return `Sign-up is closed on the Permissions page: “Who can make an account” is ${who}. Nobody new gets an account this way until it opens.`;
 }
 
 /** The callback URL for an id, from the server's template. */
@@ -176,6 +189,7 @@ export function SignInView({ params }: ViewProps) {
               callbackUrlTemplate={data.callbackUrlTemplate}
               baseUrlWarning={data.baseUrl && data.baseUrl.usedFallback ? data.baseUrl.warning || null : null}
               taken={providers.map((p) => p.id)}
+              signupClosed={signupClosedLine(data.signup)}
               onClose={() => navigate('signin')}
               onSaved={() => {
                 load();
@@ -201,6 +215,7 @@ function PolicyForm({ data, readonly, onSaved }: { data: AuthData; readonly: boo
   const [autoLink, setAutoLink] = useState((config.linking || {}).autoLinkVerifiedEmail !== false);
   const [origins, setOrigins] = useState<string[]>(config.redirectAllowList || []);
   const [idleDays, setIdleDays] = useState(String((config.sessions || {}).idleDays ?? 30));
+  const signupClosed = signupClosedLine(data.signup);
 
   function savePolicy() {
     api('PUT', '/admin/auth', {
@@ -235,10 +250,11 @@ function PolicyForm({ data, readonly, onSaved }: { data: AuthData; readonly: boo
           </Field>
         </div>
         <Row style="margin-top:10px">
-          <Switch checked={magicSignup} disabled={readonly} onChange={setMagicSignup}>
+          <Switch checked={!signupClosed && magicSignup} disabled={readonly || !!signupClosed} onChange={setMagicSignup}>
             An address nobody has used yet may create an account
           </Switch>
         </Row>
+        {signupClosed ? <Hint>{signupClosed}</Hint> : null}
       </Card>
 
       <h2>Where your app lives</h2>
@@ -302,11 +318,13 @@ interface WizardProps {
   /** The base-URL fallback warning, shown BEFORE the callback URL (§5) — or null. */
   baseUrlWarning: string | null;
   taken: string[];
+  /** {@link signupClosedLine}: the policy closes sign-up, so this provider's own switch cannot open it. */
+  signupClosed?: string | null;
   onClose: () => void;
   onSaved: () => void;
 }
 
-export function ProviderWizard({ existing, presets, callbackUrlTemplate, baseUrlWarning, taken, onClose, onSaved }: WizardProps) {
+export function ProviderWizard({ existing, presets, callbackUrlTemplate, baseUrlWarning, taken, signupClosed, onClose, onSaved }: WizardProps) {
   const [step, setStep] = useState<Step>(existing ? 3 : 1);
   const [draft, setDraft] = useState<WizardDraft>(() => (existing ? draftFrom(existing, presets) : draftFor('google', presets.google)));
   const [saving, setSaving] = useState(false);
@@ -497,9 +515,10 @@ export function ProviderWizard({ existing, presets, callbackUrlTemplate, baseUrl
             </div>
           </div>
           <div class="when-body">
-            <Switch checked={draft.allowSignup} onChange={(v) => set({ allowSignup: v })}>
+            <Switch checked={!signupClosed && draft.allowSignup} disabled={!!signupClosed} onChange={(v) => set({ allowSignup: v })}>
               Someone new may create an account by signing in this way
             </Switch>
+            {signupClosed ? <Hint>{signupClosed}</Hint> : null}
             <Switch checked={draft.enabled} onChange={(v) => set({ enabled: v })}>
               Shown on the sign-in page
             </Switch>

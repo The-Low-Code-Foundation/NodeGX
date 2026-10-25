@@ -543,7 +543,9 @@ export class HttpServer {
       sessions: deps.security.sessions,
       emailConfig: deps.emailConfig,
       callbackUrl: (providerId) => this.oauth.callbackUrl(providerId),
-      getLocalUrl: () => this.localUrl()
+      getLocalUrl: () => this.localUrl(),
+      // The same test the link, code and provider routes make (`signupAllowedForAnonymous` above).
+      signup: () => ({ open: ruleAllows(deps.security.config.signup, { kind: 'anonymous' }), rule: deps.security.config.signup })
     });
     this.adminUsers = new AdminUserRoutes({
       facade: deps.facade,
