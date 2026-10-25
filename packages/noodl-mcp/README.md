@@ -11,8 +11,8 @@ and the validator's feedback — never the entire project.*
 
 ## Install
 
-The simplest start is `npm create nodegx my-apps`. It writes one file, `my-apps/.mcp.json`. That file tells Claude Code
-to start this server when you run `claude` in the folder.
+The simplest start is `npm create nodegx my-apps`. It writes `my-apps/.mcp.json`, which tells Claude Code to start this
+server when you run `claude` in the folder, beside short `CLAUDE.md` / `AGENTS.md` notes and the NodeGX skills.
 
 Any other MCP client can start the server itself over stdio:
 
@@ -78,13 +78,15 @@ Drop `--allow-writes` for a read-only server.
 claude mcp add --scope user nodegx-bootstrap -- node <path-to>/noodl-mcp.cjs --allow-writes
 ```
 
-Omit the project directory and the server starts anyway, advertising four tools:
+Omit the project directory and the server starts anyway, advertising seven tools:
 
 | Tool | |
 |---|---|
 | `list_projects` | The NodeGX projects this machine has opened, read from the launcher's own recent-projects list and never written to. **Call this first** when the user talks about their app as something that already exists |
+| `open_project` | Bind this server to a project `list_projects` reported; its tools arrive in the same conversation |
 | `create_project` | Scope an app in conversation, then write the project, its `docs/` and a build plan that is returned but not run |
 | `list_examples`, `get_example` | What a NodeGX graph actually looks like, without needing a project to read |
+| `find_tools`, `call_tool` | Find a tool that is not advertised yet, or call one by name (for a client that does not refresh its tool list) |
 
 Everything else — reading components, authoring, validation, rendering, the backend — is **absent
 from `tools/list`**, not present-and-erroring, because a model calls what it is shown.
@@ -93,9 +95,9 @@ from `tools/list`**, not present-and-erroring, because a model calls what it is 
 `create_project` is a write, and with no project there is nothing to read, so a read-only bootstrap
 server would start, appear connected, and be unable to do the one thing it exists for.
 
-⚠️ **Creating a project does not repoint this server.** The project is written to disk and the
-server stays unbound; register a second server against the new directory to author in it. (BST-002
-is the task that makes the live server bind itself.)
+**Creating or opening a project binds this server to it.** Its tools arrive in the same conversation
+(`notifications/tools/list_changed`), with no second registration and no restart. A server binds once: a second
+`create_project` or `open_project` leaves it on the first project, and says so.
 
 ### Where the bundle is
 
@@ -299,7 +301,8 @@ npm run build --workspace @nodegx/mcp   # esbuild → dist/noodl-mcp.cjs
 
 - File-based only; no live sync with a running editor (a bridge is future work —
   the editor holds its own in-memory state and can overwrite MCP writes on save).
-- No project-level settings/styles/routes writes, asset upload, or model files in v1.
+- No asset upload or model files. Project settings, tokens and element styles are written by `set_project_settings`,
+  `set_project_tokens` and `set_element_style`; a page is registered in the router when it is written.
 - Read-side supports v2 directories only; migrate legacy projects with the editor first.
 - `get_node_type` with several types can exceed an MCP host's tool-result cap
   (~126 KB for 7 types in the SUB-010 demo, and the host's "overflow saved to a

@@ -2,7 +2,7 @@
 id: NPMAUDIT-EXAMPLEINVALID
 title: A shipped example is rejected by the same servers validator
 status: fixed
-commit: PENDING
+commit: 6f17999c1
 severity: medium
 area: mcp / examples
 found: NPMAUDIT stranger audit of the published packages, 2026-10-23

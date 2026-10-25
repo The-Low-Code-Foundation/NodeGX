@@ -652,8 +652,8 @@ export function registerCreateProjectTools(server: McpServer, bind?: CreateProje
         'once a human has reviewed it. Scope the app in conversation with your user FIRST: what it is, who uses ' +
         'it, the records, the pages, what it deliberately will not do, and — the field with the longest shelf ' +
         'life — what you considered and rejected. Anything you did not actually agree belongs in openQuestions, ' +
-        'where it becomes a "> TODO:" for a human, not an invented sentence. Point a new server at the created ' +
-        'directory to build against it.',
+        'where it becomes a "> TODO:" for a human, not an invented sentence. A server with no project binds to the ' +
+        'new one and its authoring tools arrive here; one already serving a project stays on it.',
       inputSchema: scopeSchema
     },
     guarded(async (args: CreateProjectArgs) => {
@@ -726,11 +726,15 @@ export function registerCreateProjectTools(server: McpServer, bind?: CreateProje
         docs: documents.map((d) => d.path),
         rootNodeId: skeleton.rootNodeId,
         plan,
+        // NPMAUDIT-MCPREADME — "start a server against this directory" was said beside `bound: true`; where this
+        // server bound itself, the build happens here, and `bound.note` says the rest.
         note:
           `Project created with an empty App + Home skeleton and ${plan.operations.length} planned operation(s) ` +
-          `that have NOT been run. The plan is also recorded in ${DOC_INITIAL_SCOPE}. To build it, start a ` +
-          'server against this directory with --allow-writes and use create_plan / stage_plan_operation / ' +
-          'apply_plan — reviewing each page against docs/CONVENTIONS.md as you go.',
+          `that have NOT been run. The plan is also recorded in ${DOC_INITIAL_SCOPE}. To build it, ` +
+          (bound?.bound
+            ? 'use create_plan / stage_plan_operation / apply_plan from this conversation'
+            : 'start a server against this directory with --allow-writes and use create_plan / stage_plan_operation / apply_plan') +
+          ' — reviewing each page against docs/CONVENTIONS.md as you go.',
         agentConfig,
         starterAssets: {
           installed: starter.written.length + starter.skipped.length,
