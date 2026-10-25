@@ -674,10 +674,29 @@ export class WorkflowRunner {
    * bundles plus this one, and only a complete success swaps it in. A failure
    * leaves the previous runner serving and the previous file on disk.
    */
-  async loadWorkflow(name: string, exportData: Record<string, unknown>): Promise<{ success: boolean; error?: string }> {
+  async loadWorkflow(
+    name: string,
+    exportData: Record<string, unknown>
+  ): Promise<{ success: boolean; error?: string; conflict?: boolean; replaced?: string[] }> {
     if (!this.cloudRunner) return { success: false, error: 'WorkflowRunner not initialized' };
 
+    // P112-S14-MOVEDDEPLOY: the bundle this project left under another name goes in the same swap.
+    const { replaced, clashes } = bundlesSupersededBy(name, exportData, this.loadedWorkflows);
+    if (clashes.length) {
+      const byBundle = new Map<string, string[]>();
+      for (const c of clashes) byBundle.set(c.bundle, [...(byBundle.get(c.bundle) ?? []), `"${c.component}"`]);
+      const said = [...byBundle].map(([bundle, names]) => `${names.join(', ')} already deployed by the bundle "${bundle}"`);
+      return {
+        success: false,
+        conflict: true,
+        error:
+          `Not deployed: ${said.join('; ')}, and nothing says that bundle is this project's. Rename the function ` +
+          `in one of the two projects, or remove that bundle (DELETE /admin/workflows/<bundle>).`
+      };
+    }
+
     const candidateWorkflows = new Map(this.loadedWorkflows);
+    for (const old of replaced) candidateWorkflows.delete(old);
     candidateWorkflows.set(name, exportData);
 
     let candidateRunner: unknown;
@@ -708,8 +727,21 @@ export class WorkflowRunner {
     // Swap last: from here on the new set is what serves requests.
     this.cloudRunner = candidateRunner;
     this.loadedWorkflows = candidateWorkflows;
-    safeLog(`Workflow updated: ${name} (${candidateWorkflows.size} bundle(s) loaded)`);
-    return { success: true };
+    for (const old of replaced) {
+      try {
+        await fs.unlink(path.join(this.workflowsPath, `${old}.workflow.json`));
+      } catch (e) {
+        // Served no longer, but a restart would load it beside its replacement and refuse both: say so.
+        logger.warn(`Workflow ${name} replaced ${old}, whose file could not be removed`, {
+          workflow: old,
+          error: e instanceof Error ? e.message : String(e)
+        });
+      }
+    }
+    safeLog(
+      `Workflow updated: ${name}${replaced.length ? ` (replacing ${replaced.join(', ')})` : ''} (${candidateWorkflows.size} bundle(s) loaded)`
+    );
+    return replaced.length ? { success: true, replaced } : { success: true };
   }
 
   async deleteWorkflow(name: string): Promise<{ success: boolean; error?: string }> {
@@ -1052,3 +1084,46 @@ export class WorkflowRunner {
     };
   }
 }
+
+/** A bundle's component names. */
+function componentNames(bundle: Record<string, unknown>): string[] {
+  const components = Array.isArray(bundle.components) ? (bundle.components as Array<{ name?: unknown }>) : [];
+  return components.map((c) => c && c.name).filter((n): n is string => typeof n === 'string');
+}
+
+/** `Bonjour` for `Bonjour-9828ff05`: the project's name before the folder hash `cloudBundleNameFrom` appends. */
+function nameBeforeHash(bundleName: string): string {
+  return bundleName.replace(/-[0-9a-f]{8}$/, '');
+}
+
+/**
+ * P112-S14-MOVEDDEPLOY — which loaded bundles a push of `name` replaces, and which it clashes with.
+ *
+ * A bundle is named by its project's folder, so a moved, renamed or copied project pushes under a new name while
+ * its old bundle still defines the same components — and two bundles may not define one component. A pushed
+ * bundle carries its project's id (`projectId`, beside `deployFingerprint`). Another bundle is this project's when
+ * it carries the same id; or, for one deployed before ids travelled, when it carries none, its name is the same
+ * before the hash and it defines one of the same components. Those are replaced. A bundle that defines one of
+ * the same components and is not this project's is a clash: another project's functions are never removed by a
+ * deploy of this one.
+ */
+export function bundlesSupersededBy(
+  name: string,
+  incoming: Record<string, unknown>,
+  loaded: ReadonlyMap<string, Record<string, unknown>>
+): { replaced: string[]; clashes: Array<{ component: string; bundle: string }> } {
+  const projectId = typeof incoming.projectId === 'string' && incoming.projectId ? incoming.projectId : undefined;
+  const mine = new Set(componentNames(incoming));
+  const replaced: string[] = [];
+  const clashes: Array<{ component: string; bundle: string }> = [];
+  for (const [other, bundle] of loaded) {
+    if (other === name) continue;
+    const otherId = typeof bundle.projectId === 'string' && bundle.projectId ? bundle.projectId : undefined;
+    const shared = componentNames(bundle).filter((c) => mine.has(c));
+    const sameProject = projectId && otherId ? otherId === projectId : !otherId && shared.length > 0 && nameBeforeHash(other) === nameBeforeHash(name);
+    if (sameProject) replaced.push(other);
+    else for (const component of shared) clashes.push({ component, bundle: other });
+  }
+  return { replaced, clashes };
+}
+

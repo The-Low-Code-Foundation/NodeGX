@@ -182,6 +182,19 @@ describe('HLS-013 AC3 — the second run says so', () => {
     expect(hashCloudExport(built.bundle)).toBe(result.hash);
     expect(result.hash).not.toBe(hashCloudExport(pushed[0].bundle));
   });
+
+  it('P112-S14-MOVEDDEPLOY: the pushed bundle carries the project id, outside the fingerprint', async () => {
+    const built = parts(['/#__cloud__/saveOrder']);
+    const { transport, pushed } = recordingTransport();
+
+    const withId = await deployCloudBundle(built, 'proj-abc', transport, { projectId: 'p-1' });
+    const without = await deployCloudBundle(built, 'proj-abc', transport, { force: true });
+
+    // The backend replaces the bundle this id left under a moved folder's old name.
+    expect(pushed.map((p) => p.bundle.projectId)).toEqual(['p-1', undefined]);
+    // A copy of a project and the project itself still fingerprint alike.
+    expect(withId.hash).toBe(without.hash);
+  });
 });
 
 describe('HLS-013 — deleting the last cloud function', () => {
@@ -197,6 +210,14 @@ describe('HLS-013 — deleting the last cloud function', () => {
     expect(pushed).toEqual([{ name: 'proj-abc', bundle: { components: [], settings: {}, metadata: {} } }]);
     expect(result.ok).toBe(true);
     expect(result.changed).toBe(true);
+  });
+
+  it('the empty bundle carries the project id too, so a moved project that lost its last function clears the old one', async () => {
+    const { transport, pushed } = recordingTransport();
+
+    await deployCloudBundle(empty, 'proj-abc', transport, { deleteWhenEmpty: true, projectId: 'p-1' });
+
+    expect(pushed[0].bundle).toEqual({ components: [], settings: {}, metadata: {}, projectId: 'p-1' });
   });
 
   it('🔴 pushes NOTHING to a backend that has never served this project', async () => {

@@ -121,7 +121,7 @@ async function main() {
   prepareProjectForCloudExport(project);
 
   const parts = await buildCloudBundlePartsWithKits(project);
-  process.stdout.write(JSON.stringify({ bundleName: cloudBundleName(project), parts }));
+  process.stdout.write(JSON.stringify({ bundleName: cloudBundleName(project), projectId: project.id, parts }));
 }
 
 main().then(

@@ -10,6 +10,7 @@ found: P112 OWN-023 s1, 2026-10-20 — hat X and the NodeGX arm's F4 agent ("eve
 evidence: arm B as built, `sqlite3 local.db "select count(*), sum(audio like '%127.0.0.1%'), sum(cover like '%127.0.0.1%') from Track"` → 14|14|14. NOT measured: whether the kit's deploy rewrites these on the way to a host; whether the agent or the kit chose to store the absolute URL (to read in B's transcript before fixing).
 kit: core
 regression: packages/nodegx-backend/tests/p112-own023-file-url-host.test.ts "an old row with 127.0.0.1 baked in reads back at the VM address — get and find"
+commit: d10742b23
 ---
 
 Carried in OWN-023 arm B's row (C3); not fixed during the study.

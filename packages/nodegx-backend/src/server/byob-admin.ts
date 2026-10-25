@@ -1057,9 +1057,10 @@ export class ByobAdminRoutes {
     if (wiring.refusals.length > 0) {
       throw new HttpError(400, `Not deployed: ${wiring.refusals.join(' ')}`, undefined, { success: false });
     }
-    const result = await runner.loadWorkflow(name, body);
+    const { conflict, ...result } = await runner.loadWorkflow(name, body);
     const warnings = [...(verdict ? [verdict.message] : []), ...wiring.warnings];
-    sendJSON(res, result.success ? 200 : 500, warnings.length ? { ...result, warning: warnings.join('\n\n') } : result);
+    // P112-S14-MOVEDDEPLOY: a component another project's bundle defines is a 409 in words, not a 500.
+    sendJSON(res, result.success ? 200 : conflict ? 409 : 500, warnings.length ? { ...result, warning: warnings.join('\n\n') } : result);
   }
 
   async deleteWorkflow(res: http.ServerResponse, name: string): Promise<void> {

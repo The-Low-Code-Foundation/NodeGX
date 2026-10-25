@@ -120,6 +120,13 @@ export interface CloudDeployOptions {
    * backend is known to have served this project before.
    */
   deleteWhenEmpty?: boolean;
+
+  /**
+   * P112-S14-MOVEDDEPLOY: the project's durable id (`ProjectModel.id`, from the project file). It travels with
+   * the bundle, outside its fingerprint like `deployFingerprint`, so the backend can replace the bundle this
+   * project deployed under its folder's old name rather than refuse both for defining the same functions.
+   */
+  projectId?: string;
 }
 
 /**
@@ -151,10 +158,10 @@ export function hashCloudExport(exportJson: Record<string, unknown> | null): str
  * replaces wholesale — so a re-push without a component is what removes it, and
  * no `deleteWorkflow` call is needed.
  *
- * Keyed on the project **directory**, not an id: `ProjectModel.id` is not in
- * `toJSON()`, so it is regenerated on every open. One backend can serve more
- * than one project, so a constant name would let two projects clobber each
- * other's functions.
+ * Keyed on the project **directory**, so a moved, renamed or copied project
+ * pushes under a new name. The bundle also carries `ProjectModel.id` (read from
+ * the project file since P112), and the backend replaces the bundle that id left
+ * under the old name in the same swap (P112-S14-MOVEDDEPLOY).
  */
 export function cloudBundleNameFrom(projectName: string | undefined, projectDirectory: string | undefined): string {
   const directory = projectDirectory || '';
@@ -204,7 +211,7 @@ export async function deployCloudBundle(
         return { ok: true, bundleName, hash: 'empty', changed: false, functions: [] };
       }
       try {
-        await transport.putBundle(bundleName, { components: [], settings: {}, metadata: {} });
+        await transport.putBundle(bundleName, { components: [], settings: {}, metadata: {}, ...carriedId(options) });
       } catch (e) {
         const reason = e instanceof Error ? e.message : String(e);
         return { ok: false, bundleName, hash: 'empty', changed: false, functions: [], error: reason };
@@ -252,7 +259,7 @@ export async function deployCloudBundle(
     // next run. The backend echoes this field back on `GET /admin/workflows`,
     // which is how a fresh process — with no memory of its own last push — can
     // tell "already deployed" from "deployed just now" (AC3).
-    await transport.putBundle(bundleName, { ...parts.bundle, deployFingerprint: hash });
+    await transport.putBundle(bundleName, { ...parts.bundle, deployFingerprint: hash, ...carriedId(options) });
   } catch (e) {
     const reason = e instanceof Error ? e.message : String(e);
     // 🔴 The bundle is all-or-nothing on the backend (`WorkflowRunner.loadWorkflow`
@@ -277,6 +284,11 @@ export async function deployCloudBundle(
     changed: true,
     functions: [...parts.shipped.map((name) => ({ name, status: 'deployed' as const })), ...failures]
   };
+}
+
+/** `{ projectId }` when the deploy knows its project's id, else nothing (an old bundle shape). */
+function carriedId(options: CloudDeployOptions): { projectId?: string } {
+  return options.projectId ? { projectId: options.projectId } : {};
 }
 
 /**

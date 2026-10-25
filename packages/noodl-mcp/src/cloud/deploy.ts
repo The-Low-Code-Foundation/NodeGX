@@ -71,7 +71,7 @@ export function resolveCloudBundleEntry(): { entry: string | null; probed: strin
 }
 
 /** Build the bundle for one project directory, in a child process. */
-export function buildBundleInChild(projectDir: string): { bundleName: string; parts: CloudBundleParts } {
+export function buildBundleInChild(projectDir: string): { bundleName: string; projectId?: string; parts: CloudBundleParts } {
   const { entry, probed } = resolveCloudBundleEntry();
   if (!entry) {
     throw new ToolError(
@@ -103,7 +103,7 @@ export function buildBundleInChild(projectDir: string): { bundleName: string; pa
   }
 
   try {
-    return JSON.parse(result.stdout) as { bundleName: string; parts: CloudBundleParts };
+    return JSON.parse(result.stdout) as { bundleName: string; projectId?: string; parts: CloudBundleParts };
   } catch {
     throw new ToolError('io-error', 'The cloud-function bundler produced output that was not JSON.');
   }
@@ -146,7 +146,7 @@ export async function deployProjectCloudFunctions(
   client: BackendClient,
   options: { force?: boolean } = {}
 ): Promise<CloudDeployResult> {
-  const { bundleName, parts } = buildBundleInChild(projectDir);
+  const { bundleName, projectId, parts } = buildBundleInChild(projectDir);
   const transport = backendTransport(client);
 
   // 🔴 "Has this backend served this project before?" — asked, not assumed.
@@ -169,7 +169,8 @@ export async function deployProjectCloudFunctions(
 
   return deployCloudBundle(parts, bundleName, transport, {
     force: options.force,
-    deleteWhenEmpty: alreadyServed
+    deleteWhenEmpty: alreadyServed,
+    projectId
   });
 }
 
