@@ -204,3 +204,67 @@ leftovers and four of the sweep's filed rows. **Not pushed, not released**, as b
    MANIFEST missing); the second copy is fine. An instrument fault: the script refused correctly.
 4. macOS has no `timeout`; a test that runs the provision block stubs it.
 5. `addressFile` is called on every Object/Array field of every read now; a pathological value is bounded at 32.
+
+---
+
+# Session 5, 2026-10-25 (next session reads this first)
+
+Session 4's list was down to items that wait on Richard, so this session took the next Beta-walk rows from the ledger
+(`node scripts/bugs.js`): deploy, workflows, the DB from a function, bound keys. Seven fixed, two filed. **Not pushed,
+not released**, as before.
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| P112-S14-KITROOTDEPLOY (high) | 8d97498cd | the hierarchy rule answers a root its catalog cannot resolve (a kit's node) from the file's recorded `visualRoots`, as the export does (GAM-014); `NormComponent.visualRoots` from both loaders. A module's logic node, recorded nowhere, still refused | GAM-014 5/5 (red 5/5 at HEAD on a fresh dist), preview 101/101, nsp-021 11/11 (mutant red; nightbook keeps 26 + 26 — "every unresolved root is unknown" was tried first and lost 3), validator specs 184/184 |
+| P121-TWO003-CLOUDPOINTSTO | 2a692b8e0 | `_noodl_cloudservices.collections()` (live `exportSchemas`); `queryutils.schemaFor` asks it only in the cloud runtime and only when its own metadata lacks the collection | `p121-two003-cloud-points-to` 3/3 (red 2/3 in the row's words; service mutant red), function specs 39 suites 454/454 |
+| P18-S134-REFUSEDFILTERSENDS | d086cfe1d | `records.js` `whereFor`: a refused filter rejects and the store is not asked (query, count, distinct, aggregate) | runtime spec 8/8 (red 4/4); the export spec's pins moved (A7, B2's mask gone, B3) 35/35 |
+| P124-S1-WRITESRECORDSJS | eaf767388 | `graphWritesRecords` reads a script's writing `Records` call; the editor door reads the same list (a copy, held by the DEF-009 parity spec) and names the call | DEF-009 16/16 (a public script writer gets 60/min burst 30; mutant red 2), door 14/14; training template 0 → 8 of 27 write |
+| P124-S2-ACTSASHTTP | 98785a116 | `server/actingSession.ts`: one `sessionForActingKey` for `/mcp` and `POST /functions/<name>`; a bound key's function runs as its person on both | fed-005-mcp-acts-as 13/13 (two mutants red), 44 suites 566/566; `BACKEND-ACCESS-CONTROL.md` says so |
+| P107-S97-NULLBODY | 3bf2a53a5 | where a contract runs, a body that is not an object names no fields: Required → the 400, none → runs. No contract: untouched | CWF-014 59/59 (mutant red); spec v2 + `changes`, scenario renamed + a Required twin, golden read by hand; conformance on the cloud target green |
+| P112-OWN023-DEPLOYLOOPBACK | 469b14e03 | static deploy: `localBackend` in the outcome, the sentence in `warnings`, a stderr line; full-stack untouched | 3/3 on a rebuilt dist (mutant rebuilt, red 2/3), preview 104/104 |
+
+Filed: **P18-S134-STRINGREJECT** (a refused Records filter rejects with a bare string on both arms, so `e.message` is
+undefined in a script; the export matches it on purpose, lane 4 paused), **P124-S1-WRITESHELPER** (four training
+functions write only through `/#__cloud__/shared/Thread`; none public, so the default is unaffected).
+
+## For Richard
+
+1. **Push and release**, as session 4 said: 30 rows now. The preview's `dist/` was rebuilt here (KITROOTDEPLOY,
+   DEPLOYLOOPBACK); Desktop and npm still have neither.
+2. **DEPLOYLOOPBACK: warn or refuse?** Built as a warning (the deploy still answers `ok`). Refusing unless
+   `--backend-url` or `--full-stack` is the row's other option; it changes what a working command does. The shipped
+   training template names `127.0.0.1:8577`, so a static deploy of it now warns.
+3. OWN008-AUDIT's recommendation (stay on fast-xml-parser 4) stands from session 4.
+
+## Next (the Beta walk's remaining rows, measured order)
+
+1. **P119-S2-LIVEPATH** (medium): live updates refused on a collection read through a path rule, so a two-person chat
+   refetches. Size: the hub's matcher (the SQL path's JS twin, as `canReadRecord` is for ACLs) + a property test.
+2. **P121-TWO005-SIGNUPSWITCH**, **P121-TWO004-DETAILFILTER**: the admin app's words lie / a filter drops (small).
+3. **P112-OWN023-NORANGE** (audio seeking on Safari), **P112-OWN024-SCHEMAFIRSTSTART** (a collection lost at start).
+4. **P107-S97-USERIDBOOLEAN** needs a census of saved `userId →` wires first (R22 refuses a dead wire at both doors).
+5. **P124-S1-WRITESHELPER**, **P18-S134-STRINGREJECT** (filed above).
+
+## Traps met
+
+1. 🔴 The editor's validator layer **must not import** `@noodl/backend-contract` (it would pull the runtime's
+   dependencies in, `queryFilterShape.ts`). A shared list lives as two copies held equal by a spec that reads the other
+   file. I built a shared module there first and took it back.
+2. 🔴 `NoodlRuntime.instance` is whichever runtime was constructed last: a failed candidate deploy in `WorkflowRunner`
+   leaves it pointing at a discarded runtime. Anything reading metadata through it inside the backend is exposed;
+   CLOUDPOINTSTO went through `_noodl_cloudservices` for that reason. Not filed (no measured symptom yet).
+3. `golden.js --diff` said "No golden trace moved" for a renamed scenario again (session 1's trap 2). Read the file diff.
+4. `noodl-mcp` `own020CallToolStrip` is red at HEAD since 328f1dd1d (OWN-026 FIX-02's wording); on FIX-05's list.
+5. Plain `grep -c` on `HttpServer.ts` prints nothing (binary): verify a restore with `grep -a`.
+
+## Gates read (2026-10-25)
+
+noodl-preview 17 suites 104/104 (dist rebuilt) · editor validator 31 suites 371/371, nsp-021 11/11, def-009 14/14 ·
+backend: functions/MCP/keys 44 suites 566/566, DEF-009 16/16, tsc clean · runtime filters 96/96, records 14/14, tsc
+clean · cloud runtime request 135/135, tsc clean · node-spec golden 22/22, catalog parity 375/375, `golden.js --check
+--type noodl.cloud.request` fresh · nodegx-export the-noodl-api-travels 35/35 · `noodl-mcp` tsc clean.
+
+**Commits this session:** 8d97498cd, 2a692b8e0, d086cfe1d, eaf767388, 98785a116, 3bf2a53a5, 469b14e03, and the docs
+commit after them.
