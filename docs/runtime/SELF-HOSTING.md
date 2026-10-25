@@ -143,6 +143,12 @@ Caddy, nginx, or your existing reverse proxy in front of `127.0.0.1:8080` and
 let it handle certificates. Because everything is one origin on one port, that
 is a single `reverse_proxy` line.
 
+Your proxy must pass the browser's `Host` header through and say `X-Forwarded-Proto: https`.
+The backend answers every uploaded file's address from those two, so a proxy that sends its
+own host instead makes every picture and download point at that host. Caddy does both by
+default. With nginx, use `proxy_set_header Host $http_host;` (not `$host`, which drops a port)
+and `proxy_set_header X-Forwarded-Proto $scheme;`.
+
 A working Caddyfile — verified against a live backend, including the parts that
 are easy to get wrong (SSE must not be buffered, `/metrics` should not be
 published, and the proxy's `X-Forwarded-For` has to be one the backend

@@ -68,7 +68,9 @@ import * as path from 'path';
 
 import type { RequestContext } from './HttpServer';
 import { HttpError, readRawBody, sendJSON } from './http-util';
+import { requestOrigin } from './static-app';
 import { canAccessRecord, principalKeys } from '../security/model';
+import { fileUrlAt } from '../storage/fileAddress';
 import type { FileSubsystem } from '../storage/FileSubsystem';
 import type { FileRecord } from '../storage/MetadataStore';
 import { sniff } from '../storage/sniff';
@@ -145,15 +147,9 @@ interface ThumbSpec {
 
 export class FileRoutes {
   private readonly thumbsDir: string;
-  private baseUrl: string;
 
-  constructor(private readonly dataDir: string, baseUrl: string, private readonly subsystem: FileSubsystem) {
+  constructor(private readonly dataDir: string, private readonly subsystem: FileSubsystem) {
     this.thumbsDir = path.join(dataDir, 'files', 'thumbs');
-    this.baseUrl = baseUrl;
-  }
-
-  setBaseUrl(url: string): void {
-    this.baseUrl = url;
   }
 
   // ==========================================================================
@@ -220,7 +216,8 @@ export class FileRoutes {
         readers
       });
       sendJSON(ctx.res, 201, {
-        url: `${this.baseUrl}/files/${encodeURIComponent(storedName)}`,
+        // P112-OWN023-FILEURLHOST: the address this upload reached the backend on, not its listen address.
+        url: fileUrlAt(requestOrigin(ctx.req), storedName),
         name: storedName,
         size: record.size,
         contentType: record.contentType
@@ -290,7 +287,7 @@ export class FileRoutes {
     const secret = this.subsystem.getSigningSecret();
     const { exp, sig } = signFileAccess(secret, storedName, ttl);
     sendJSON(ctx.res, 200, {
-      url: `${this.baseUrl}/files/${encodeURIComponent(storedName)}?exp=${exp}&sig=${sig}`,
+      url: `${fileUrlAt(requestOrigin(ctx.req), storedName)}?exp=${exp}&sig=${sig}`,
       expiresAt: new Date(exp * 1000).toISOString(),
       ttlSeconds: ttl
     } satisfies SignedUrlResult);

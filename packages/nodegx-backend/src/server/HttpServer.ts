@@ -29,7 +29,7 @@ import * as http from 'http';
 import * as path from 'path';
 
 import type { BackendServiceOptions } from '../config';
-import type { ServedApp } from './static-app';
+import { requestOrigin, type ServedApp } from './static-app';
 import type { PersistenceHandle } from '../persistence/createAdapter';
 import type { IStorageFacade } from '@noodl/backend-contract';
 import type { AclOption } from '../persistence/AdapterFacade';
@@ -73,6 +73,7 @@ import { AdminAuthRoutes } from './admin-auth';
 import { AdminUserRoutes } from './admin-users';
 import { AdminSecurityRoutes } from './admin-security';
 import { verifyFileAccess } from '../storage/signing';
+import { withFileOrigin } from '../storage/fileAddress';
 import { AdminViewRoutes, ViewsStore } from './admin-views';
 import { AdminSecretsRoutes } from './admin-secrets';
 import { SecretsStore } from '../config/SecretsStore';
@@ -554,7 +555,7 @@ export class HttpServer {
       listIdentities: (ctx, userId) => this.oauth.listIdentities(ctx, userId)
     });
     this.adminViews = new AdminViewRoutes(new ViewsStore(deps.options.dataDir));
-    this.files = new FileRoutes(deps.options.dataDir, `http://127.0.0.1:${deps.options.port}`, deps.files);
+    this.files = new FileRoutes(deps.options.dataDir, deps.files);
     this.fileSubsystem = deps.files;
     this.executions = deps.executions;
     this.adminFiles = new AdminFileRoutes(deps.files, deps.facade);
@@ -1572,7 +1573,8 @@ export class HttpServer {
         res.on('finish', finish);
         res.on('close', finish);
 
-        this.handle(req, res, trace).catch((err) => {
+        // P112-OWN023-FILEURLHOST: every File this request is answered with is addressed where it came in.
+        withFileOrigin(requestOrigin(req), () => this.handle(req, res, trace)).catch((err) => {
           trace.error = err instanceof Error ? err.message : String(err);
           if (err instanceof RuleRefusal) this.noteRefusal(trace, err);
           sendError(res, err);
@@ -1587,7 +1589,6 @@ export class HttpServer {
         this.boundPort = port;
         this.registerMetrics();
         const url = `http://${this.options.host}:${port}`;
-        this.files.setBaseUrl(url);
         resolve({ host: this.options.host, port, url });
       });
     });
@@ -2761,7 +2762,7 @@ export class HttpServer {
 
     // http.ServerResponse structurally satisfies the hub's SSEResponse.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const clientId = this.realtime.addConnection(ctx.res as any, principal, lastEventId);
+    const clientId = this.realtime.addConnection(ctx.res as any, principal, lastEventId, requestOrigin(ctx.req));
     if (clientId === null) {
       // BAK-009: the realtime tier is capped by CONNECTION COUNT rather than
       // request rate (see ops/model). At the cap this is a plain 503 — the

@@ -31,6 +31,7 @@ import * as crypto from 'crypto';
 import { Principal, ClpOp, canReadRecord } from '../security/model';
 import { ChangeAction, ChangeBus, ChangeEvent } from './ChangeBus';
 import { Where, matchesFilter, assertFilterSupported, UnsupportedFilterError } from './filter';
+import { addressFiles } from '../storage/fileAddress';
 
 /** The subset of http.ServerResponse the hub writes to (test-injectable). */
 export interface SSEResponse {
@@ -85,6 +86,8 @@ interface Connection {
   writable: boolean;
   closed: boolean;
   heartbeat: ReturnType<typeof setInterval> | null;
+  /** The address this stream reached the backend on — what its File fields are answered at. */
+  origin?: string;
 }
 
 /**
@@ -182,7 +185,7 @@ export class RealtimeHub {
    * the stream headers go out matters: a client that has already been told
    * `200 text/event-stream` has no way to learn it was rejected.
    */
-  addConnection(res: SSEResponse, principal: Principal, lastEventId?: string): string | null {
+  addConnection(res: SSEResponse, principal: Principal, lastEventId?: string, origin?: string): string | null {
     const cap = this.maxConnections();
     if (cap > 0 && this.connections.size >= cap) return null;
 
@@ -198,7 +201,8 @@ export class RealtimeHub {
       nextId: 1,
       writable: true,
       closed: false,
-      heartbeat: null
+      heartbeat: null,
+      origin
     };
     this.connections.set(clientId, conn);
 
@@ -366,6 +370,8 @@ export class RealtimeHub {
           record = { ...record };
           for (const h of hidden) delete (record as Record<string, unknown>)[h.field];
         }
+        // P112-OWN023-FILEURLHOST: the LISTENER's address, not the writer's — this runs inside the write's request.
+        if (record && typeof record === 'object') record = addressFiles(record, conn.origin);
         this.enqueue(conn, {
           event: 'change',
           data: { action: event.action, collection: event.collection, record }

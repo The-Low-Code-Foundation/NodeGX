@@ -5114,7 +5114,7 @@
         "whenToUse": "Whenever a file handle needs to become a URL or filename. Note the cloudfile→image typecast lets a cloudfile feed an Image `src` directly; reach for Cloud File when you need the URL as a *string* or the file's name.",
         "ports": {
           "file": "The cloudfile value to unwrap.",
-          "url": "The file's public URL as a string.",
+          "url": "The file's URL as a string, for an Image `src` or a link. It's the address the backend answered from, so don't save it into a text property. Save the file itself into a file-typed one.",
           "name": "The stored file's name."
         },
         "examples": [
@@ -37754,7 +37754,8 @@
         ],
         "antiPatterns": [
           "Treating `cloudFile` as set before `done` fired — sequence record writes on the Done signal.",
-          "Setting `private: true` and then binding `cloudFile.url` straight to an Image/link — a private file's plain url 403s for anyone but the uploader; sign it first."
+          "Setting `private: true` and then binding `cloudFile.url` straight to an Image/link — a private file's plain url 403s for anyone but the uploader; sign it first.",
+          "Saving the url of `cloudFile` (or Cloud File's `url`) into a text property. That url names the address the backend was reached at during the upload, which is `127.0.0.1` on your own machine, so it stops working once the app runs on a host. Save the `cloudFile` handle into a file-typed property instead. The NodeGX backend keeps the file's name and fills its address in on every read."
         ],
         "relatedNodes": [
           "Open File Picker",
