@@ -31,10 +31,25 @@ function dismiss(id: number) {
   toasts.set({ items: toasts.get().items.filter((t) => t.id !== id) });
 }
 
+/**
+ * P121-TWO004-TOASTOVERSAVE — how far up the stack must sit to clear an open drawer's or modal's footer, or undefined
+ * when none is open. Toasts stack at the bottom right, which is where every drawer keeps its main button: a toast sat
+ * over Save for 4.5 s, and an error toast, the one read while fixing the form, for 12 s. Read when the stack draws,
+ * because a footer's height is its content's.
+ */
+export function toastLift(): number | undefined {
+  if (typeof document === 'undefined') return undefined;
+  const feet = Array.from(document.querySelectorAll('.drawer-foot, .modal .foot'));
+  if (!feet.length) return undefined;
+  const top = Math.min(...feet.map((f) => f.getBoundingClientRect().top));
+  return Math.max(14, Math.round(window.innerHeight - top + 8));
+}
+
 export function ToastHost() {
   const { items } = useStore(toasts);
+  const lift = items.length ? toastLift() : undefined;
   return (
-    <div id="toasts" aria-live="polite">
+    <div id="toasts" aria-live="polite" style={lift === undefined ? undefined : { bottom: lift + 'px' }}>
       {items.map((t) => (
         <div key={t.id} class={'toast' + (t.kind ? ' ' + t.kind : '')} onClick={() => dismiss(t.id)}>
           {t.message}
