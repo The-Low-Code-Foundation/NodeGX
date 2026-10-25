@@ -12,7 +12,7 @@
  * card sends `['*']` or the sites; an origin without a scheme is refused
  * inline. AC9: no comma-separated or cron text field on any of the six pages.
  */
-import { mount, unmount, change, click, press, settle, q, qa, text, typeInto } from './dom';
+import { mount, unmount, change, click, press, settle, until, q, qa, text, typeInto } from './dom';
 
 import { session } from '../../src/admin/app/api';
 import { ModalHost } from '../../src/admin/app/ui/modal';
@@ -242,7 +242,8 @@ describe('BMG-011 Storage page', () => {
         <FilesView params={[]} />
       </>
     );
-    await settle(30);
+    // The rows, and the uses the page asks for after them.
+    await until(() => !!root.querySelector('table.files tbody tr .uses-cell a'), 'the file list and its uses');
     const rows = qa(root, 'table.files tbody tr');
     expect(rows.map((r) => r.getAttribute('data-file'))).toEqual([TXT_NAME, PNG_NAME]);
     expect(text(rows[0])).toContain('note.txt');
@@ -257,7 +258,7 @@ describe('BMG-011 Storage page', () => {
     click(qa(rows[1], 'button').find((b) => text(b).trim() === 'Delete')!);
     await settle(10);
     click(qa(root, '.modal .foot button').find((b) => text(b).trim() === 'Delete')!);
-    await settle(30);
+    await until(() => /is in use/.test(text(root.querySelector('.modal'))), 'the in-use dialog');
     expect(sent('DELETE', /\/admin\/files\/[^?]+$/).length).toBe(1);
     const dialog = q(root, '.modal');
     expect(text(dialog)).toContain('is in use');
@@ -265,7 +266,7 @@ describe('BMG-011 Storage page', () => {
     const anyway = qa(dialog, 'button').find((b) => /Delete anyway/.test(text(b)))!;
     expect(text(anyway)).toContain('clear 1 field');
     click(anyway);
-    await settle(30);
+    await until(() => sent('DELETE', /clear=1$/).length > 0, 'the delete that clears');
     expect(sent('DELETE', /clear=1$/).length).toBe(1);
     unmount(root);
   });

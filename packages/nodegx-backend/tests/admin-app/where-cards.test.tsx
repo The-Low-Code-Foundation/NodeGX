@@ -13,7 +13,7 @@
  * archives sentence names where they live. AC9 still holds: no comma list
  * and no cron text on either page.
  */
-import { mount, unmount, change, click, settle, q, qa, text, typeInto } from './dom';
+import { mount, unmount, change, click, settle, until, q, qa, text, typeInto } from './dom';
 
 import { session } from '../../src/admin/app/api';
 import { ModalHost } from '../../src/admin/app/ui/modal';
@@ -323,18 +323,17 @@ describe('the Storage page — Move files to the bucket (BMG-015 §7)', () => {
         <ModalHost />
       </div>
     );
-    await settle(20);
+    await until(() => !!root.querySelector('#move-words'), 'the move card');
     expect(text(q(root, '#move-words'))).toBe('2 files are still on this machine. They keep serving from here; new uploads go to the bucket.');
     click(q(root, '#move-start'));
     await settle();
     expect(text(q(root, '.modal'))).toContain('Move 2 files to the bucket?');
     click(qa(root, '.modal .foot button').find((b) => text(b).trim() === 'Move')!);
-    await settle(20);
+    await until(() => !!root.querySelector('#move-progress'), 'the move progress');
     expect(sent('POST', /\/admin\/files\/move$/)).toHaveLength(1);
     expect(q<HTMLProgressElement>(root, '#move-progress').max).toBe(2);
     expect(root.querySelector('#move-start')).toBeNull(); // no second press while it runs
-    await new Promise((r) => setTimeout(r, 1100));
-    await settle(20);
+    await until(() => /2 files moved/.test(text(root.querySelector('#move-words'))), 'the move result', 4000);
     expect(text(q(root, '#move-words'))).toBe('2 files moved to the bucket. Every file is in the bucket.');
     expect(root.querySelector('#move-progress')).toBeNull();
     unmount(root);
