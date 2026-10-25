@@ -1,6 +1,6 @@
 {
   "name": "@nodegx/mcp",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Model Context Protocol server exposing NodeGX (OpenNoodl) v2 projects to external AI agents.",
   "license": "GPL-3.0-only",
   "homepage": "https://nodegx.io",

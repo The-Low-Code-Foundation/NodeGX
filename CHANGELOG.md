@@ -17,6 +17,32 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## npm packages 0.2.7 · 2026-10-25
+
+**Mistral Vibe 3 can build with NodeGX again, and an app your agent builds keeps each person's records to them.**
+
+This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.7.
+`@nodegx/preview` moves to 0.2.6. `@nodegx/export`, `@nodegx/node-spec`, `@nodegx/project-contract` and
+`@nodegx/canvas-look` stay at their versions.
+
+### Fixed
+
+- **Mistral Vibe 3.** Every request from a folder `npm create nodegx-vibe` made was refused ("max_tokens is too
+  large"), so nothing could be built. The folder now caps Mistral Large 4's answers at the most Mistral allows. It also
+  tells you to start with `vibe`; `vibe --legacy-harness` is only for Vibe 2.
+- **A record a cloud function creates for someone is theirs.** Before, a record a function created had no owner, so
+  every signed-in account could read and change it. Now, when a signed-in person's call makes a function create a
+  record, the record is that person's, as it would be if their own page had made it. A function that means to share
+  one says so with its `acl`, or the collection is set to shared.
+- **A double-click is one press when the button calls a cloud function.** It already was when the button saved a
+  record. Now a press that starts a cloud function call is ignored again until the call answers.
+- **Text nobody can read is reported.** `render_report` warns `low-contrast-text` when text is under 3:1 against what
+  is behind it, and `drive_page` can check it on any page: `"expect": { "readable": true }`.
+- **Pages whose address takes a value.** `render_report` no longer says "NOT DONE" for a page like `tables/{childId}`,
+  which it cannot open. It names the page and says how `drive_page` reaches it.
+- **No red console line in the preview.** The preview no longer answers `nodegx-config.json` with a 404, so a
+  previewed app can pass "no console errors".
+
 ## npm packages 0.2.6 · 2026-10-23
 
 **Your agent can put your app, its backend and its data on a server you own.**

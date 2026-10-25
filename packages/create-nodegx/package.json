@@ -1,6 +1,6 @@
 {
   "name": "create-nodegx",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "npm create nodegx — sets a folder up so your AI agent can build NodeGX apps in it.",
   "license": "GPL-3.0-only",
   "homepage": "https://nodegx.io",
