@@ -99,6 +99,19 @@ Linux/macOS/Windows target, sharp's prebuilt binary installs automatically and
 this just works. If it doesn't (an unusual platform, an offline install), the
 backend keeps running — everything except `?thumb=` is unaffected.
 
+The bundled backend (`cli.js`) carries no sharp of its own; each road out puts
+one beside it:
+
+- **The editor** ships its platform's sharp inside the app.
+- **A VM** (`deploy_to_vm`, `provision-app.sh`): the first ship to a server
+  fetches sharp from npm once (about 16 MB) into `/opt/nodegx-native/`, shared
+  by every app on that server, and the service finds it through `NODE_PATH`.
+  The server needs `npm` and the internet for that one fetch. If either is
+  missing, the ship still goes through, its account says
+  `photos: NOT AVAILABLE` with the reason, and the next ship tries again.
+- **The self-host image** (`deploy/Dockerfile.backend`) installs it when the
+  image is built.
+
 ## Storage drivers
 
 | Driver | Config | Notes |

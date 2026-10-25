@@ -21,6 +21,8 @@
 #   /etc/<app>/secrets.env                    (written by ship-to-vm.sh over stdin, never here, never in the folder)
 #   /etc/systemd/system/<app>-backend.service
 #   /etc/caddy/conf.d/<app>.caddy             (unless CADDY=off; deleted again if caddy validate fails)
+#   /opt/nodegx-native/sharp-<version>/       the image module that makes a photo's small versions, fetched from npm
+#                                             the first time any app ships here and shared by every app after
 #
 # and, once Caddy no longer points at it, removes /srv/<app>/ — the site the earlier layout (a site plus a loose
 # cli.js) served from.
@@ -108,6 +110,44 @@ chown -R root:root "$FOLDER"; chmod -R u+rwX,go+rX,go-w "$FOLDER"
 chown root:"$APP_USER" "$SECRETS"; chmod 640 "$SECRETS"
 chown -R "$APP_USER":"$APP_USER" "/var/lib/$APP"; chmod 750 "/var/lib/$APP"
 
+# 🔴 P112-OWN024-DEPLOYNOSHARP (Richard, 2026-10-25: the server fetches it once). A photo's small versions (?thumb=)
+# are made by sharp, a native module the folder does not carry, so without it every thumbnail answers 501 and the
+# marketplace draws its photos broken. It is fetched from npm ONCE per server into a place outside /opt/<app> (which
+# every ship replaces), shared by every app here, and found through the unit's NODE_PATH. A server that cannot fetch
+# it still ships: the app runs, and ?thumb= answers 501 until a later ship can. Pinned to the version the editor's
+# backend ships (the lockfile's; tests/p112-own024-deploy-sharp.test.ts holds the two together).
+SHARP_VERSION=0.33.5
+NATIVE=/opt/nodegx-native
+SHARP_DIR="$NATIVE/sharp-$SHARP_VERSION"
+sharp_loads() { "$NODE" -e 'require(process.argv[1])' "$1/node_modules/sharp" >/dev/null 2>&1; }
+if sharp_loads "$SHARP_DIR"; then
+  echo "    photos: small versions (?thumb=) are made by sharp $SHARP_VERSION, already on this server"
+else
+  mkdir -p "$NATIVE"
+  FETCH="$(mktemp -d "$NATIVE/.sharp-$SHARP_VERSION-XXXXXX")"
+  NPM="$(command -v npm || true)"
+  if [ -z "$NPM" ]; then
+    WHY="this server has no npm"
+  elif ! WHY="$(cd "$FETCH" && npm_config_cache="$FETCH/.cache" timeout 300 "$NPM" install --prefix "$FETCH" --omit=dev \
+      --no-audit --no-fund --loglevel=error --fetch-retries=1 "sharp@$SHARP_VERSION" 2>&1)"; then
+    # npm's last line points at a log in the cache this deletes; the line before it is the reason.
+    WHY="npm could not fetch it ($(echo "$WHY" | grep -v -e '^\s*$' -e 'complete log' | tail -1 | sed 's/^npm error //' || true))"
+  elif ! sharp_loads "$FETCH"; then
+    WHY="it was fetched but does not load on this server: $("$NODE" -e 'require(process.argv[1])' "$FETCH/node_modules/sharp" 2>&1 | grep -m1 -E '^[A-Za-z]*Error' || true)"
+  else
+    WHY=""
+  fi
+  rm -rf "$FETCH/.cache"
+  if [ -z "$WHY" ]; then
+    rm -rf "$SHARP_DIR"; mv "$FETCH" "$SHARP_DIR"; chmod -R go+rX,go-w "$SHARP_DIR"
+    echo "    photos: fetched sharp $SHARP_VERSION from npm for this server's small photo versions (?thumb=), once"
+  else
+    rm -rf "$FETCH"
+    echo "    photos: NOT AVAILABLE: small photo versions (?thumb=) answer 501 until sharp $SHARP_VERSION is on this server," \
+      "and the next ship fetches it again. $WHY. The app runs; uploads and full-size photos work."
+  fi
+fi
+
 cat > "$UNIT" <<UNIT
 [Unit]
 Description=${APP} (NodeGX full-stack folder, P26 DEP-002)
@@ -120,6 +160,7 @@ User=${APP_USER}
 Group=${APP_USER}
 WorkingDirectory=/var/lib/${APP}
 EnvironmentFile=${SECRETS}
+Environment=NODE_PATH=${SHARP_DIR}/node_modules
 ExecStart=${NODE} ${FOLDER}/start.js --port ${PORT} --host 127.0.0.1 --data-dir ${DATA_DIR} --backend-id ${APP} --no-admin
 Restart=always
 RestartSec=3
