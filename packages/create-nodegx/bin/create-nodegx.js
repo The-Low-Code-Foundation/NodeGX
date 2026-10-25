@@ -176,8 +176,12 @@ function writeOpenCodeConfig(dir, platform = process.platform) {
  * - Permissions are by exact tool name (no globs) and an MCP tool defaults to "ask", which `vibe -p` answers "no".
  *   The bootstrap server advertises seven tools, and `call_tool` reaches the rest, so seven entries are the whole list.
  * - The harness can be chosen only with `--legacy-harness` on the command line; the default one hands the model
- *   "The MCP tool returned an error" instead of the server's diagnostics (P112-OWN018-OPAQUEERRORS). The closing
- *   lines say so, and so does this file's header.
+ *   "The MCP tool returned an error" instead of the server's diagnostics (P112-OWN018-OPAQUEERRORS).
+ *
+ * Vibe 3.0.0 (2026-10-19) has one harness, which passes the server's text through, and refuses `--legacy-harness`
+ * (P112-OWN026-VIBE3LEGACY), so the start command is `vibe` and the flag is a note for 2.x. Measured against 3.0.2's
+ * source: a call to `tools.mcp_nodegx.<tool>` is still approved by `[tools.nodegx_<tool>]`, and a Large 4 round
+ * reached NodeGX through the same seven tools.
  * - `thinking = "low"` is Vibe's spelling of `reasoning_effort: "none"`; "high" is Vibe's own default for Mistral's models.
  */
 const VIBE_CONFIG = path.join('.vibe', 'config.toml');
@@ -193,10 +197,11 @@ function renderVibeConfig(platform = process.platform, options = {}) {
   return [
     '# Mistral Vibe settings for this folder, written by `npm create nodegx`. Start Vibe here with:',
     '#',
-    '#   vibe --legacy-harness',
+    '#   vibe',
     '#',
-    "# Vibe's default harness hides a tool's error messages from the model, and NodeGX answers every refused change",
-    '# with what to fix, so the legacy harness builds better apps. Edit anything below; it is never overwritten.',
+    "# On Vibe 2.x, start it with `vibe --legacy-harness` instead: 2.x's default harness hides a tool's error messages",
+    '# from the model, and NodeGX answers every refused change with what to fix. Vibe 3 has one harness, which shows',
+    '# them. Edit anything below; it is never overwritten.',
     '',
     'active_model = "mistral-large-4"',
     ...(options.profile === 'vibe' ? [`default_agent = "${VIBE_AGENT}"`] : []),
@@ -409,7 +414,7 @@ function vibeSentence(result) {
     wrote.length ? `Wrote ${wrote.join(', ')}.` : 'Everything was already there; nothing was replaced.',
     '',
     'Next:',
-    `  1. cd ${here} && vibe --legacy-harness, and trust the folder when it asks.`,
+    `  1. cd ${here} && vibe (Vibe 2.x: vibe --legacy-harness), and trust the folder when it asks.`,
     '  2. Say what you want to build. Mistral Large 4 builds it as a NodeGX app — notes first, then a part at a time,',
     '     checking each thing you asked for in a browser — and tells you what passed. If a build runs long it hands',
     '     over and says what is next: type /clear, then "continue".',
@@ -462,7 +467,7 @@ function sentence(result) {
     '',
     'Next:',
     `  1. Open your agent in ${here === '.' ? 'this folder' : here} (Claude Code: cd ${here} && claude) and accept the "${SERVER_NAME}" server.`,
-    `     Mistral Vibe: cd ${here} && vibe --legacy-harness, and trust the folder when it asks.`,
+    `     Mistral Vibe: cd ${here} && vibe (Vibe 2.x: vibe --legacy-harness), and trust the folder when it asks.`,
     `     OpenCode: cd ${here} && opencode (with Mistral: opencode -m mistral/mistral-large-4).`,
     '  2. Say what you want to build. Your agent talks it through with you, then makes the app in a folder here.',
     `  3. See it: npx ${PREVIEW_PACKAGE} <the app's folder> --open  (any day — it starts the app's backend too)`,

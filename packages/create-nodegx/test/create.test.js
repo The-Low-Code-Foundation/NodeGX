@@ -174,9 +174,11 @@ test('P112 OWN-018: Mistral Vibe gets Large 4, the same pinned server, and permi
   assert.ok(toml.includes(`command = ${JSON.stringify(entry.command)}`));
   assert.ok(toml.includes(`args = [${[...entry.args, ...VIBE_SERVER_FLAGS].map((a) => JSON.stringify(a)).join(', ')}]`));
   for (const tool of VIBE_ALLOWED_TOOLS) assert.match(toml, new RegExp(`^\\[tools\\.nodegx_${tool}\\]\\npermission = "always"$`, 'm'));
-  // The person is told how to start it, and why the harness matters.
-  assert.match(toml, /vibe --legacy-harness/);
-  assert.match(run.stdout, /Mistral Vibe: cd .* && vibe --legacy-harness/);
+  // The person is told how to start it, and why the harness matters. P112-OWN026-VIBE3LEGACY: Vibe 3 refuses
+  // `--legacy-harness`, so the command is plain `vibe` and the flag is a note for 2.x.
+  assert.match(toml, /^#   vibe$/m);
+  assert.match(toml, /On Vibe 2\.x, start it with `vibe --legacy-harness` instead/);
+  assert.match(run.stdout, /Mistral Vibe: cd .* && vibe \(Vibe 2\.x: vibe --legacy-harness\)/);
   assert.match(run.stdout, /Wrote \.vibe\/config\.toml/);
 });
 
@@ -278,7 +280,7 @@ test('P112 OWN-019: the Vibe kit writes only Vibe files — its AGENTS.md, the N
     // Vibe 2.26.1 lists a skill only when its frontmatter name matches its folder (SkillMetadata: lowercase, hyphens).
     assert.match(fs.readFileSync(path.join(dir, '.vibe', 'skills', skill, 'SKILL.md'), 'utf8'), new RegExp(`^---\\nname: ${skill}\\n`));
   }
-  assert.match(run.stdout, /vibe --legacy-harness/);
+  assert.match(run.stdout, /&& vibe \(Vibe 2\.x: vibe --legacy-harness\)/);
   assert.match(run.stdout, /type \/clear, then "continue"/);
 });
 
@@ -418,7 +420,7 @@ test('P112 OWN-019 (R29): `npm create nodegx-vibe` is create-nodegx --vibe, pinn
   const files = (d) => fs.readdirSync(d, { recursive: true }).sort();
   assert.deepEqual(files(dir), files(direct));
   for (const f of files(dir)) if (fs.statSync(path.join(dir, f)).isFile()) assert.equal(fs.readFileSync(path.join(dir, f), 'utf8'), fs.readFileSync(path.join(direct, f), 'utf8'), f);
-  assert.match(run.stdout, /vibe --legacy-harness/);
+  assert.match(run.stdout, /&& vibe \(Vibe 2\.x: vibe --legacy-harness\)/);
 });
 
 /** A run of the kit with its own empty home and none of the person's CLINE_* settings. */
