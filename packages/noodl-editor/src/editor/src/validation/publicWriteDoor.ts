@@ -27,7 +27,8 @@
  *    calls before the graph runs — `security/model.ts::effectiveFunctionRule`),
  *  - the graph contains a record-writing node (see {@link RECORD_WRITE_NODE_TYPES},
  *    each entry re-checked against the catalog so a renamed node type ages out
- *    loudly rather than silently — the `COMMIT_PORTS` idiom),
+ *    loudly rather than silently — the `COMMIT_PORTS` idiom), or a script that
+ *    calls a writing `Records` member ({@link RECORD_WRITE_SCRIPT_MEMBERS}),
  *  - and no `rateLimit` with `ratePerMinute > 0` is configured for the function.
  *
  * Negative arms are the acceptance: the same function WITH a `rateLimit`, and a
@@ -95,6 +96,23 @@ export const RECORD_WRITE_NODE_TYPES: readonly string[] = [
   'RemoveDbModelRelation'
 ];
 
+/**
+ * P124-S1-WRITESRECORDSJS — the `Noodl.Records` members a script writes with. A function that writes from a JavaScript
+ * node is as public a writer as one with a record node, and the backend's default now counts it too. A second copy of
+ * `RECORD_WRITE_SCRIPT_MEMBERS` in `nodegx-backend/src/workflow/functionDeclarations.ts`, held equal by the same spec
+ * as the node list. Read by its text: a call in a comment counts (the safe direction), one through an alias does not.
+ */
+export const RECORD_WRITE_SCRIPT_MEMBERS: readonly string[] = ['create', 'save', 'delete', 'increment', 'addRelation', 'removeRelation'];
+
+const SCRIPT_WRITE_CALL = new RegExp(`\\bRecords\\s*\\.\\s*(${RECORD_WRITE_SCRIPT_MEMBERS.join('|')})\\s*\\(`);
+
+/** The first `Records.<write>(` call a node's script makes (`Records.save`), or undefined. */
+function scriptRecordWrite(node: ParameterizedNode): string | undefined {
+  const script = node.parameters?.['functionScript'];
+  const m = typeof script === 'string' ? SCRIPT_WRITE_CALL.exec(script) : null;
+  return m ? `Records.${m[1]}` : undefined;
+}
+
 /** One function's entry in `nodegx.security.json`'s `functions` block. */
 export interface FunctionSecurityEntry {
   call?: string;
@@ -137,7 +155,9 @@ export function checkPublicWriteDoor(
     RECORD_WRITE_NODE_TYPES.filter((t) => !catalog || catalog.hasType(t))
   );
   const writer = nodes.find((n) => typeof n.type === 'string' && writeTypes.has(n.type));
-  if (!writer) return [];
+  const scripted = writer ? undefined : nodes.map(scriptRecordWrite).find((call) => call !== undefined);
+  if (!writer && !scripted) return [];
+  const writes = writer ? `"${writer.type}"` : `a script calls ${scripted}`;
 
   const limit = entry?.rateLimit;
   if (limit && typeof limit.ratePerMinute === 'number' && limit.ratePerMinute > 0) return [];
@@ -163,7 +183,7 @@ export function checkPublicWriteDoor(
       severity: 'warning',
       message:
         `"${functionName}" accepts unauthenticated calls (its Request node ticks Allow Unauthenticated) and ` +
-        `writes records ("${writer.type}"), and no working rate limit is set for it — ${budget} ` +
+        `writes records (${writes}), and no working rate limit is set for it — ${budget} ` +
         `Add \`"functions": { "${functionName}": { "rateLimit": { "ratePerMinute": 10, "burst": 10 } } }\` to ` +
         "the project's nodegx.security.json (numbers to taste, or 0/0 for no limit at all), or set it on a " +
         `running backend via PUT /admin/permissions/functions/${functionName}.`,

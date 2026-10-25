@@ -140,6 +140,19 @@ describe('DEF-009 — the public write door with no limit is named', () => {
     ).toEqual([]);
   });
 
+  it('P124-S1-WRITESRECORDSJS — a public door that writes from a script fires, and names the call', () => {
+    const graph = (functionScript: string) => [
+      { id: 'req', type: 'noodl.cloud.request', parameters: { allowNoAuth: true } },
+      { id: 'js', type: 'JavaScriptFunction', parameters: { functionScript } },
+      { id: 'res', type: 'noodl.cloud.response' }
+    ];
+    const found = checkPublicWriteDoor(graph("await Noodl.Records.save(Inputs.row);"), { component: DOOR, security: null, catalog: CATALOG });
+    expect(found.map((d) => d.code)).toEqual([DiagnosticCode.PublicWriteDoorUnlimited]);
+    expect(found[0].message).toContain('writes records (a script calls Records.save)');
+    // NEGATIVE beside it: a script that only reads is silence
+    expect(checkPublicWriteDoor(graph("Outputs.rows = await Noodl.Records.query('Notes', {});"), { component: DOOR, security: null, catalog: CATALOG })).toEqual([]);
+  });
+
   it('every record-mutating type fires, not just the insert', () => {
     for (const writeType of RECORD_WRITE_NODE_TYPES) {
       const found = checkPublicWriteDoor(publicWriteGraph(true, writeType), {

@@ -116,6 +116,27 @@ export const RECORD_WRITE_NODE_TYPES: readonly string[] = [
 ];
 
 /**
+ * P124-S1-WRITESRECORDSJS — the `Noodl.Records` members a script writes with (`noodl-runtime/src/api/records.js`).
+ *
+ * A function that writes from a JavaScript node read as read-only: measured on the training product, 0 record nodes
+ * in 27 functions, every write in a script, `writesRecords: false` for all of them, a public `unsubscribe` among
+ * them. 🔴 A second copy again, beside the door's list in `publicWriteDoor.ts`, held equal by the same spec.
+ *
+ * Read by its text, so it is generous on purpose: a call inside a comment or a string counts, which is the safe
+ * direction (the default applies). A call through an alias (`const R = Noodl.Records; R.save(…)`) is not seen.
+ */
+export const RECORD_WRITE_SCRIPT_MEMBERS: readonly string[] = ['create', 'save', 'delete', 'increment', 'addRelation', 'removeRelation'];
+
+const SCRIPT_WRITE_CALL = new RegExp(`\\bRecords\\s*\\.\\s*(${RECORD_WRITE_SCRIPT_MEMBERS.join('|')})\\s*\\(`);
+
+/** The first `Records.<write>(` call a node's script makes (`Records.save`), or undefined. */
+export function scriptRecordWrite(node: Record<string, unknown>): string | undefined {
+  const script = (node.parameters as Record<string, unknown> | null | undefined)?.functionScript;
+  const m = typeof script === 'string' ? SCRIPT_WRITE_CALL.exec(script) : null;
+  return m ? `Records.${m[1]}` : undefined;
+}
+
+/**
  * Does this node tree create, change or delete a record?
  *
  * Recursive for `findRequestNode`'s reason: the export nests children rather
@@ -130,6 +151,9 @@ export const RECORD_WRITE_NODE_TYPES: readonly string[] = [
 export function graphWritesRecords(nodes: Record<string, unknown>[]): boolean {
   for (const node of nodes) {
     if (typeof node.type === 'string' && RECORD_WRITE_NODE_TYPES.includes(node.type)) return true;
+    // P124-S1-WRITESRECORDSJS: a script's `Noodl.Records.save(…)` writes as surely as a node does. The editor's
+    // door reads the same list, so the warning and the default still name one population.
+    if (scriptRecordWrite(node)) return true;
     const children = node.children as Record<string, unknown>[] | undefined;
     if (Array.isArray(children) && graphWritesRecords(children)) return true;
   }

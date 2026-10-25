@@ -59,7 +59,13 @@ import {
   type SecurityConfig
 } from '../src/security/model';
 import { BackendService } from '../src/service';
-import { RECORD_WRITE_NODE_TYPES, declaredFunctionsIn, graphWritesRecords } from '../src/workflow/functionDeclarations';
+import {
+  RECORD_WRITE_NODE_TYPES,
+  RECORD_WRITE_SCRIPT_MEMBERS,
+  declaredFunctionsIn,
+  graphWritesRecords,
+  scriptRecordWrite
+} from '../src/workflow/functionDeclarations';
 
 jest.setTimeout(60000);
 
@@ -87,13 +93,25 @@ const LOCKED_CONFIG = {
   signup: 'public'
 };
 
-/** A cloud component, with or without a write and with or without a public door. */
-function cloudComponent(name: string, allowNoAuth: boolean, writes: boolean) {
+/** A cloud component, with or without a write (a record node, or a script's `Records` call) and a public door. */
+function cloudComponent(name: string, allowNoAuth: boolean, writes: boolean | 'script') {
   const nodes: Record<string, unknown>[] = [
     { id: `${name}-req`, type: 'noodl.cloud.request', x: 0, y: 0, parameters: { allowNoAuth }, ports: [], children: [] },
     { id: `${name}-res`, type: 'noodl.cloud.response', x: 0, y: 400, parameters: {}, ports: [], children: [] }
   ];
-  if (writes) {
+  if (writes === 'script') {
+    // P124-S1-WRITESRECORDSJS: the write is in a script, as every one of the training product's 27 functions
+    // writes. Defined and never called, so the arm grades the declaration, not a run's side effects.
+    nodes.push({
+      id: `${name}-js`,
+      type: 'JavaScriptFunction',
+      x: 0,
+      y: 200,
+      parameters: { functionScript: "async function keep(text) {\n  await Noodl.Records.create('Notes', { text });\n}" },
+      ports: [],
+      children: []
+    });
+  } else if (writes) {
     // Flat, so the fixture is a graph the cloud runtime can actually load — the
     // recursive half of the predicate is graded directly in §7 instead, where a
     // nested tree costs nothing.
@@ -115,9 +133,12 @@ function cloudComponent(name: string, allowNoAuth: boolean, writes: boolean) {
   };
 }
 
+const byNameOf = () => Object.fromEntries(declaredFunctionsIn(WORKFLOW, 'main').map((d) => [d.name, d]));
+
 const WORKFLOW = {
   components: [
     cloudComponent('public-writer', true, true),
+    cloudComponent('script-writer', true, 'script'),
     cloudComponent('no-limit-reader', true, false),
     cloudComponent('private-writer', false, true),
     cloudComponent('opted-out-writer', true, true),
@@ -225,6 +246,15 @@ describe('DEF-009 AC4 — the public-write rate-limit default', () => {
     expect(body).toContain('60/min');
     expect(body).toContain('burst 30');
     expect(body).toContain('public-writer');
+  });
+
+  it('P124-S1-WRITESRECORDSJS: a public function that writes from a script gets the same default', async () => {
+    const statuses = await burst('script-writer', 40);
+    expect(statuses.slice(0, 30).filter((s) => s === 429)).toEqual([]);
+    expect(statuses[30]).toBe(429);
+    const body = refusalBodies.get('script-writer') as string;
+    expect(body).toContain('60/min');
+    expect(body).toContain('burst 30');
   });
 
   // ==========================================================================
@@ -375,6 +405,19 @@ describe('DEF-009 AC4 — the public-write rate-limit default', () => {
     expect(graphWritesRecords([{ type: 'Group', children: [{ type: 'Text' }] }])).toBe(false);
   });
 
+  it('P124-S1-WRITESRECORDSJS: a script that writes is a write; one that only reads is not', () => {
+    const js = (functionScript: string) => [{ type: 'JavaScriptFunction', parameters: { functionScript } }];
+    expect(byNameOf()['script-writer'].writesRecords).toBe(true);
+    for (const member of RECORD_WRITE_SCRIPT_MEMBERS) {
+      expect({ member, writes: graphWritesRecords(js(`await Noodl.Records.${member}(row);`)) }).toEqual({ member, writes: true });
+    }
+    expect(graphWritesRecords(js("const rows = await Noodl.Records.query('Notes', {});\nOutputs.n = rows.length;"))).toBe(false);
+    expect(graphWritesRecords(js("Noodl.Records . save ( row )"))).toBe(true);
+    expect(graphWritesRecords([{ type: 'Group', children: js('await Noodl.Records.delete(row);') }])).toBe(true);
+    expect(scriptRecordWrite({ parameters: { functionScript: 'await Noodl.Records.increment(row, { n: 1 });' } })).toBe('Records.increment');
+    expect(scriptRecordWrite({ parameters: {} })).toBeUndefined();
+  });
+
   it('the door WARNS about exactly the population this default LIMITS', () => {
     // 🔴 Two copies of one list in two packages that cannot import each other.
     // Held equal by reading the other file rather than by hope: the editor's
@@ -405,5 +448,15 @@ describe('DEF-009 AC4 — the public-write rate-limit default', () => {
     // empty array cannot pass for agreement.
     expect(doorTypes.length).toBeGreaterThan(0);
     expect([...doorTypes].sort()).toEqual([...RECORD_WRITE_NODE_TYPES].sort());
+
+    // P124-S1-WRITESRECORDSJS: the script members, the same way.
+    const members = /export const RECORD_WRITE_SCRIPT_MEMBERS: readonly string\[\] = \[([^\]]*)\]/.exec(doorSource);
+    expect(members).not.toBeNull();
+    const doorMembers = (members as RegExpExecArray)[1]
+      .split(',')
+      .map((m) => m.trim().replace(/^'|'$/g, ''))
+      .filter(Boolean);
+    expect(doorMembers.length).toBeGreaterThan(0);
+    expect([...doorMembers].sort()).toEqual([...RECORD_WRITE_SCRIPT_MEMBERS].sort());
   });
 });
