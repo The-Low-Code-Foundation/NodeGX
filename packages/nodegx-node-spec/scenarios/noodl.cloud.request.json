@@ -556,12 +556,37 @@
     }
   },
   {
-    "name": "a JSON null body with a contract declared: refused with the TypeError reading a name off null (P107-S97-NULLBODY — a 500 where the contract promises a 400)",
-    "because": "request.ts :218 JSON.parse('null'); requestContract.ts :294 `body[spec.name]`; measured NSP-022 §6.5",
+    "name": "a JSON null body with a contract declared: no fields, so with nothing Required the function runs (P107-S97-NULLBODY, v2: it threw a TypeError, a 500)",
+    "because": "request.ts :218 JSON.parse('null'); requestContract.ts reads a body that is not an object as no fields (v2)",
     "params": {
       "allowNoAuth": true,
       "params": "total",
       "ptype-total": "number"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {
+        "invocation": {
+          "headers": {},
+          "body": "null"
+        }
+      }
+    }
+  },
+  {
+    "name": "a JSON null body with a Required field: refused with the 400 naming it (P107-S97-NULLBODY, v2)",
+    "because": "request.ts :218 JSON.parse('null'); requestContract.ts reads a body that is not an object as no fields (v2)",
+    "params": {
+      "allowNoAuth": true,
+      "params": "total",
+      "ptype-total": "number",
+      "preq-total": true
     },
     "steps": [
       "settle",

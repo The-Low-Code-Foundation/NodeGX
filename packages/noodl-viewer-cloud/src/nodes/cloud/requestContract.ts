@@ -276,6 +276,7 @@ export function coerce(type: RequestParamType, value: unknown): Coerced {
  * - **Undeclared keys pass through untouched.** A contract types what it names
  *   and says nothing about the rest, so a function that declares one parameter
  *   is not suddenly refusing every other key its caller sends.
+ * - **A body that is not an object names no fields** (P107-S97-NULLBODY).
  * - **`null` is absent.** A caller writing `{"total": null}` means "no value",
  *   and treating it as a type error would refuse the ordinary way a client
  *   serialises an empty field.
@@ -285,8 +286,13 @@ export function coerce(type: RequestParamType, value: unknown): Coerced {
  */
 export function applyRequestContract(
   specs: RequestParamSpec[],
-  body: Record<string, unknown>
+  parsed: unknown
 ): { values: Record<string, unknown>; errors: RequestParamError[] } {
+  // P107-S97-NULLBODY: a body that is not a JSON object (`null`, a number, a string, an array) names none of the
+  // declared fields, so it is read as `{}` here, where a contract runs: a Required field is the 400 `missing` the
+  // contract promises, not the TypeError (a 500) that reading a name off `null` threw. A function that declares no
+  // contract never comes here, and keeps whatever its body parsed to.
+  const body: Record<string, unknown> = parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {};
   const values: Record<string, unknown> = { ...body };
   const errors: RequestParamError[] = [];
 

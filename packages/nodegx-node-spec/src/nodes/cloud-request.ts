@@ -23,8 +23,8 @@
  *     Unauthenticated is set NOW (read when the lookup fails, :234, :236);
  *   - then the CONTRACT (:254-259): when any listed parameter declares a type, Required or a Default (`ptype-`, `preq-`,
  *     `pdef-`), the parsed body is checked and coerced (requestContract.ts `applyRequestContract`); a refused field refuses
- *     the request (`Invalid request body: …`, its fields), and a `null` body refuses it with the `TypeError` reading a name off
- *     `null` throws (P107-S97-NULLBODY);
+ *     the request (`Invalid request body: …`, its fields); a body that is not a JSON object (`null`, a number, a string, an
+ *     array) names no fields there, so a Required one is `missing` (v2; it threw a `TypeError` before, P107-S97-NULLBODY);
  *   - then Origin (:276-277, requestOrigin.ts), Authenticated (:279), one Parameters output per key of what parsed — only the
  *     ones a wire made (:281-283, :200-203 gated on `hasOutput`) — and Received (:284).
  * A refusal is the function's answer (an `answer` `refuse` event); nothing after it in the list above happens.
@@ -167,8 +167,9 @@ function coerce(type: ParamType, value: unknown): Coerced {
   }
 }
 
-/** :286-321 — the body the graph sees, and every reason it should not run. A `null` body throws reading the first name, as the runtime's does. */
-function applyRequestContract(specs: ParamSpec[], body: Record<string, unknown>): { values: Record<string, unknown>; errors: ParamError[] } {
+/** :286-321 — the body the graph sees, and every reason it should not run. A body that is not an object names no fields (v2). */
+function applyRequestContract(specs: ParamSpec[], parsed: unknown): { values: Record<string, unknown>; errors: ParamError[] } {
+  const body: Record<string, unknown> = parsed !== null && typeof parsed === 'object' && !Array.isArray(parsed) ? (parsed as Record<string, unknown>) : {};
   const values: Record<string, unknown> = { ...body };
   const errors: ParamError[] = [];
   for (const spec of specs) {
@@ -336,7 +337,15 @@ HOSTS.push({ invocation: invocations[0], cloudServices: { ...CLOUD, runId: 'run-
 
 export const CloudRequest = defineNode({
   type: 'noodl.cloud.request',
-  version: 1,
+  version: 2,
+  changes: [
+    {
+      version: 2,
+      says: 'A body that is not a JSON object, sent to a function whose parameters declare a contract, names no fields: a Required one refuses the request with the 400 naming it, and with none Required the function runs. It threw a TypeError reading a name off null (a 500)',
+      row: 'P107-S97-NULLBODY (the Beta sweep s5)',
+      migration: { none: 'Nothing a project stores changes: only a caller sending a body that is not an object to a function with a contract gets a different answer' }
+    }
+  ],
   source: 'packages/noodl-viewer-cloud/src/nodes/cloud/request.ts; packages/noodl-viewer-cloud/src/nodes/cloud/requestContract.ts; packages/noodl-viewer-cloud/src/nodes/cloud/requestOrigin.ts; packages/noodl-viewer-cloud/src/services/userservice.js',
   needs: ['host', 'network', 'random'],
   worldPool: {

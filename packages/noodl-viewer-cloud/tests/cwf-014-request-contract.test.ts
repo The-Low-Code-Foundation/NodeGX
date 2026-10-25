@@ -196,6 +196,19 @@ describe('CWF-014: applying a contract to a body', () => {
     ]);
   });
 
+  it('P107-S97-NULLBODY: a body that is not an object names no fields — the 400 the contract promises, not a TypeError', () => {
+    for (const body of [null, 7, 'ab', [1, 2], true]) {
+      expect({ body, errors: applyRequestContract(typed, body).errors }).toEqual({
+        body,
+        errors: [{ name: 'total', code: 'missing', expected: 'number' }]
+      });
+      expect(applyRequestContract(typed, body).values).toEqual({});
+    }
+    // with nothing Required, the function runs on no fields, a default still applied
+    const optional = requestParamSpecs({ params: 'total', 'ptype-total': 'number', 'pdef-total': '7' });
+    expect(applyRequestContract(optional, null)).toEqual({ values: { total: 7 }, errors: [] });
+  });
+
   it('a default is applied when the caller omits the value, through the same coercion', () => {
     const specs = requestParamSpecs({ params: 'total', 'ptype-total': 'number', 'pdef-total': '7' });
     expect(applyRequestContract(specs, {}).values).toEqual({ total: 7 });
