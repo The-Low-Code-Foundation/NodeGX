@@ -110,6 +110,7 @@ import {
 import { REQUEST_ID_HEADER, resolveRequestId } from '../ops/request-id';
 import { SERVICE_VERSION, applyAdminSecurityHeaders, applyCors, serverHeader } from '../ops/headers';
 import { McpRoutes } from './mcp/McpRoutes';
+import { sessionForActingKey } from './actingSession';
 import { metrics, recordRateLimited, recordRequest, registerProcessGauges } from '../ops/metrics';
 import { HttpError, parseURL, readJSONBody, readRawBody, sendError, sendJSON } from './http-util';
 
@@ -2567,15 +2568,23 @@ export class HttpServer {
     // body + headers verbatim (session tokens ride along in headers).
     const body = await readJSONBody(ctx.req);
     const request = { body: JSON.stringify(body), headers: ctx.req.headers as Record<string, unknown> };
-    const invoke = (): Promise<RunnerResponseLike> =>
-      runner.run(
-        name,
-        request,
-        // BAK-009: 'webhook' is the historical trigger type for a direct call
-        // (see RunTriggerContext); what is new is the request id, so the
-        // execution this call creates can be found from the access log.
-        { type: 'webhook', source: `POST /functions/${name}`, requestId: ctx.requestId }
-      );
+    const invoke = async (): Promise<RunnerResponseLike> => {
+      // P124-S2-ACTSASHTTP: a key bound to a person passed the rule gate as them and the run saw nobody. The run is
+      // shown a session for that person, minted and released per run, exactly as the MCP door shows it.
+      const session = await sessionForActingKey(this.facade, ctx.principal);
+      try {
+        return await runner.run(
+          name,
+          session ? { ...request, headers: { ...request.headers, 'x-parse-session-token': session.token } } : request,
+          // BAK-009: 'webhook' is the historical trigger type for a direct call
+          // (see RunTriggerContext); what is new is the request id, so the
+          // execution this call creates can be found from the access log.
+          { type: 'webhook', source: `POST /functions/${name}`, requestId: ctx.requestId }
+        );
+      } finally {
+        if (session) await session.release();
+      }
+    };
 
     // CWF-016. Resolved HERE, beside the security-rule resolution the dispatcher
     // has already done, because the whole point of the endpoint shape is "don't

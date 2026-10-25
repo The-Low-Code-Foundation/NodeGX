@@ -88,7 +88,9 @@ still set an explicit ACL when you need something other than private.
   key sees exactly what that person sees, creates rows they own, and is bound by
   the roles they hold — while the rate limit, the audit trail and revocation
   still name the key. It can only ever take access away: a bound key is allowed
-  what its scopes allow **and** what that user is allowed.
+  what its scopes allow **and** what that user is allowed. A cloud function it
+  calls, over `POST /functions/<name>` or through `/mcp`, runs as that person:
+  its Request node's User Id is theirs.
 
   Unbound, a key with `classes:read` sees **every row** in the collections its
   scopes name, including rows belonging to your users. That is right for bulk

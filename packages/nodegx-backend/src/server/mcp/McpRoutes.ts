@@ -68,6 +68,7 @@ import { assertSeriesWrite, seriesAnswer } from '../series-door';
 import { logger } from '../../ops/logger';
 import { NotWhileItIs } from '../../persistence/onlyWhile';
 import { AUDIT_MCP_TOOL_CALL } from '../../ops/audit-actions';
+import { sessionForActingKey, type ActingSession } from '../actingSession';
 import { buildToolSurface, type FunctionOnSurface, type McpTool, type SchemaColumn } from './toolSurface';
 
 // CWF-014's contract reader, through the same alias WorkflowRunner uses. The
@@ -500,44 +501,9 @@ export class McpRoutes {
     }
   }
 
-  /**
-   * An ephemeral `_Session` for the user a bound key acts as, or null.
-   *
-   * ⚠️ **The token never leaves this process.** It is minted, put in the
-   * request headers the runner passes to the graph, and deleted in a `finally`
-   * — it is not returned to the MCP client and there is no route that would
-   * hand it back. The graph could read it out of `Request.Headers`, which
-   * changes nothing: a cloud function already runs as system with the master
-   * key, so it is strictly more privileged than the session it is being shown.
-   *
-   * 🔴 Released in a `finally`, not after a successful call. A function that
-   * throws or times out must not leave a usable session behind — that would
-   * turn every failing MCP call into a credential leak with a long tail.
-   */
-  private async sessionForGraph(principal: Principal): Promise<{ token: string; release: () => Promise<void> } | null> {
-    if (principal.kind !== 'apiKey' || !principal.actsAs) return null;
-    const token = 'r:' + require('crypto').randomBytes(24).toString('hex');
-    const created = (await this.deps.facade.rawCreate('_Session', {
-      sessionToken: token,
-      userId: principal.actsAs.userId,
-      // One minute is longer than any function this endpoint will wait for and
-      // short enough that a row orphaned by a hard crash is not a live
-      // credential. `sessionExpiryMs` reads an ISO string (server/users.ts).
-      expiresAt: new Date(Date.now() + 60_000).toISOString()
-    })) as Record<string, unknown>;
-    const objectId = String(created.objectId);
-    return {
-      token,
-      release: async () => {
-        try {
-          await this.deps.facade.rawDelete('_Session', objectId);
-        } catch (e) {
-          // The row expires on its own a minute from now; a failed delete is
-          // worth a log line and never worth failing the call the model made.
-          logger.warn('mcp.session-release-failed', { error: e instanceof Error ? e.message : String(e) });
-        }
-      }
-    };
+  /** An ephemeral `_Session` for the user a bound key acts as, or null: the one resolution both doors use. */
+  private sessionForGraph(principal: Principal): Promise<ActingSession | null> {
+    return sessionForActingKey(this.deps.facade, principal);
   }
 }
 
