@@ -9,13 +9,13 @@ and why the scroll check needed the old panel itself as its control.
 
 - **OpenNoodl 6ce8f171b** (panel, spec, http, records, the tool, `project/knownProjects.ts`, list_projects, tests, the
   drive's `buttons` mode); **nodegx-studio 2a5d280** (inline Properties). Ledger: SCROLLJUMP, STAGESCROLL, WHITESWATCH,
-  NOSTATES, NOSHOWBACK, LOSTPROJECT, NOSTYLE, P125-STU-PROPSPIN fixed; **P125-CCN008-APPROVEWARN needs Richard's
-  ruling** (Desktop's caution banner over the Approve prefill: keep `ui/message`, or send it as model context).
-- The `noodl-mcp` dist Desktop runs was rebuilt 09:03 from a clean worktree at 6ce8f171b and smoked as `claude-ai` (126
+  NOSTATES, NOSHOWBACK, LOSTPROJECT, NOSTYLE, P125-STU-PROPSPIN fixed; **P125-CCN008-APPROVEWARN ruled and fixed
+  (234c0fc3c)**: Approve sends the decision as model context; the person sends any line ("go") to wake Claude.
+- The `noodl-mcp` dist Desktop runs was rebuilt 09:28 from a clean worktree at 234c0fc3c and smoked as `claude-ai` (126
   tools; `state`/`scope` on a setting; the panel resource). `~/.noodl/known-projects.json` was seeded with Muddy Paws
   and Puppy Rerun S12 (made before the record existed). NOT pushed (either repo): ask.
 - **Next:** Richard quits/reopens Claude Desktop, NEW conversation: "the button style" again on Muddy Paws (expect
-  `scope: "style"`, the hover row, the result shown after Approve), then AC6's rest: a hero, a 3D model, one answered
+  `scope: "style"`, the hover row; after Approve, no banner: he types "go" and the result is shown), then AC6's rest: a hero, a 3D model, one answered
   late. Note his Muddy Paws NavBar / ClosingCta buttons set their own fill since the first run, so a style change will
   not reach them until the agent drops those (the decision message names them).
 - Leads, unmeasured: Studio's seven `scrollIntoView({ block: 'nearest' })` calls may move the chat inline the same way.

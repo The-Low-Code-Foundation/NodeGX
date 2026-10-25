@@ -151,7 +151,7 @@ is untouched.
   stage, only the robot's objects are drawn, a swatch recolours the body live and in the file, the "Big blue" variant
   scales it ×2 live and in the file, the robot centred and framed (swiftshader).
 - **AC6. Part 1 run (s2).** Measured in Desktop: `ui/message` is honoured as a composer prefill under a caution banner
-  (the person presses send; P125-CCN008-APPROVEWARN, a ruling); the inline panel took the button editor's full height.
+  (the person presses send); ruled the same day: the decision now goes as `ui/update-model-context` and the person sends any line (P125-CCN008-APPROVEWARN); the inline panel took the button editor's full height.
   Still to run: a hero, a 3D model, one answered late.
 - **AC6 (as written).** Richard's run in Claude Desktop: a button styled and a hero approved in mini editors, one 3D model approved;
   he answers one editor late (after a question) by asking for it again. Unmeasured: whether Desktop honours
@@ -204,7 +204,7 @@ variants, changed fill, text colour and radius, and approved. What he found, wha
 | 2 | "scroll over the button preview … white screen"; "should be content height and fit snug" | the preview page stayed scrollable; its white page (and the kit's inline `background: white` on the frame) showed beside the part | nothing in the stage scrolls; the page and frame are see-through and the stage paints what the part sits on; the stage is the part + 20 px | STAGESCROLL |
 | 3 | "font colour … does nothing" | the three text colours offered all resolve to #ffffff; two drew as empty circles (the swatch list keeps one token per colour) | each choice painted with what it resolves to; the agent warned when two paint the same; a token the project lacks is refused (a guard) | WHITESWATCH |
 | 4 | "expected to see the hover and clicked / disabled variants" | the editor drew only the normal look | a "Show it" row (Normal, Hover, Pressed, Disabled) with the runtime's own `setVisualStates`; a setting can be a state's (`state`); a state that overrides a setting is said under it and to the agent | NOSTATES |
-| 5 | Approve → described, not shown; "scary warning" | nothing asked to show it; Desktop's banner on `ui/message` | the message ends "Apply it where it belongs, then show me the result in the app."; notes say open_studio in the same turn | NOSHOWBACK, APPROVEWARN (ruling) |
+| 5 | Approve → described, not shown; "scary warning" | nothing asked to show it; Desktop holds a `ui/message` in the composer under a caution banner | the decision ends "Apply it where it belongs, then show me the result in the app."; notes say open_studio in the same turn; ruled: sent quietly as `ui/update-model-context` (234c0fc3c), the panel says "Send it any message (\"go\" is enough)" | NOSHOWBACK, APPROVEWARN |
 | 6 | the project from another chat not found | list_projects read only the editor's list and the server's folder | every bind remembered in `~/.noodl/known-projects.json`; list_projects reads it | LOSTPROJECT |
 | 7 | "did Claude update the button style?" | no: each button got its own values; `nodegx.styles.json` untouched since 2026-10-24 12:06 | `scope: "style"` writes the Button style (Studio's Styles tab) and drops the part's own value; the decision names who keeps their own | NOSTYLE |
 | 8 | "hide the props panel" inline | the shell reopened it on every redraw of `#right` | opens on a new pick only; "Hide properties" on the strip; a tab on its edge (studio) | P125-STU-PROPSPIN |
