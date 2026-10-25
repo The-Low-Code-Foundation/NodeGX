@@ -5,7 +5,7 @@ status: fixed
 commit: (this session, the Beta sweep s6)
 severity: low
 area: tests / `packages/nodegx-backend/tests/admin-app/where-cards.test.tsx` "with the bucket in use: says how many are still here, asks, starts, shows progress, then what happened"
-found: the Beta sweep s6, 2026-10-25 — `tests/admin-app` + `bmg-010` run seven times in a row: red twice ("nothing matches #move-words"), green alone
+found: the Beta sweep s6, 2026-10-25 — `tests/admin-app` + `bmg-010` run nine times: red three times ("nothing matches #move-words"; the commit message of 4cd97b06d says two in seven, a miscount), green alone
 evidence: `await settle(20)` then `q(root, '#move-words')`; the same shape as P116-S23-STORAGEFLAKE
 regression: packages/nodegx-backend/tests/admin-app/where-cards.test.tsx "with the bucket in use: says how many are still here, asks, starts, shows progress, then what happened"
 ---

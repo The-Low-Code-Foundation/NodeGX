@@ -18,7 +18,7 @@ whole-suite run met it.
 **Fixed (the Beta sweep s6, 2026-10-25).** `tests/admin-app/dom.ts` `until(ready, what, ms = 3000)` settles until the
 thing a step reads is there, and throws naming it when it never comes. AC1 waits for the rows and their uses, then the
 in-use dialog, then the clearing delete, instead of three fixed `settle(30)`s. Its twin in `where-cards.test.tsx`
-(the move card, met red once in seven runs this session) is **BETA-S6-MOVEWORDSFLAKE**, fixed the same way.
+(the move card, red three times in nine runs this session) is **BETA-S6-MOVEWORDSFLAKE**, fixed the same way.
 
 **Graded by an instrument, not by luck:** every mocked fetch delayed 50 ms. HEAD's waits: both cases red; `until`:
 both green. Unslowed: both files 38/38. Other fixed waits in these files are not converted (none measured flaking).
