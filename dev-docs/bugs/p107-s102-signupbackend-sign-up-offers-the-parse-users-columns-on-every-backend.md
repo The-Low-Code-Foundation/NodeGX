@@ -2,7 +2,7 @@
 id: P107-S102-SIGNUPBACKEND
 title: Sign Up draws its property inputs from the Parse `_User` whatever backend is selected — on a Directus backend it offers the built-in's columns, which `directus_users` does not have
 status: fixed
-commit: (this session, the Beta sweep s7)
+commit: c873955f7
 severity: low
 area: packages/noodl-viewer-react/src/nodes/std-library/user/signup.ts `updatePorts` :199-250 (reads `systemCollections` `_User`, Parse type map, no backend); compare user-ports.ts `userSchemaContext` / `userPropertyPorts`, which the User and Set User Properties nodes use
 found: P107 NSP-020 s102, 2026-10-13 — the port-context drive's synthetic two-backend project (`twoBackends`), once Sign Up was added to it while fixing P107-S85-RESTCOLTYPES

@@ -2,7 +2,7 @@
 id: P121-S19-SIGNINRACE
 title: Signing in as the admin over a staff member's session sometimes routes by the old session
 status: fixed
-commit: (this session, the Beta sweep s7)
+commit: 8f1c6e8d9
 severity: medium
 area: template / templates/marketplace `/Pages/SignIn` (`ROUTE_SCRIPT` after Log In `done`); possibly the runtime's Log In
 found: P121 s19, 2026-10-16, `nodegx-backend/tests/two-003-drive.test.ts`

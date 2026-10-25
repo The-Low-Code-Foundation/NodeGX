@@ -2,7 +2,7 @@
 id: BETA-S7-DROPDOWNFIRSTPICK
 title: While a Dropdown shows its placeholder because its value is not in the list, the browser has the first option selected underneath, so picking that option does nothing
 status: fixed
-commit: (this session, the Beta sweep s7)
+commit: 483335262
 severity: medium
 area: viewer / Dropdown (`packages/noodl-viewer-react/src/components/controls/Select/Select.tsx`: `value={options.find(...) ? value : undefined}` and the hidden `<option value="" disabled selected hidden />`)
 found: the Beta sweep s7, 2026-10-25, fixing P121-TWO005-DROPDOWNSTALE (the spec's golden and P109-S21-DROPDOWNEMPTYRESET's scenarios)

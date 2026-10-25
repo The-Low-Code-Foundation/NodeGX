@@ -2,7 +2,7 @@
 id: P121-TWO005-DROPDOWNSTALE
 title: A Dropdown whose Items are wired reports "Option 1" as its Value until someone picks, while the screen shows the placeholder
 status: fixed
-commit: (this session, the Beta sweep s7)
+commit: 33ae2817f
 severity: medium
 area: viewer / Dropdown (`packages/noodl-viewer-react/src/nodes/controls/options.ts`, `initialize`: `this.props.value = this._internal.value = DEFAULT_ITEMS[0].Value`)
 found: P121 TWO-005 s15, 2026-10-15

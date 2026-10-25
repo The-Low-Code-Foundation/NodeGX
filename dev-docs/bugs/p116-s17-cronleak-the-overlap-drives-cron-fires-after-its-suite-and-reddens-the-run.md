@@ -2,7 +2,7 @@
 id: P116-S17-CRONLEAK
 title: In a run of several specs, `fed-004-overlap-drive`'s cron fires after its suite has ended — "Cannot log after tests are done" — and jest exits 1 with every test green
 status: fixed
-commit: (this session, the Beta sweep s7)
+commit: 23149f2a0
 severity: low
 area: tests / FED-004 overlap drive (`packages/nodegx-backend/tests/fed-004-overlap-drive.test.ts`: the `poll` cron trigger outlives `service.stop()`; `src/triggers/scheduler.ts` `CronScheduler.fire` → `WorkflowRunner.run`)
 found: P116 s17, 2026-10-11 (a 53-spec neighbour run in band)

@@ -360,3 +360,74 @@ delete or back up 54 suites 758/758 · runtime, preview, noodl-mcp, admin tsc cl
 **Commits this session:** 3cd182bda, bf3405090, 981b44515, e79a81884, b3e259642, 16ca9cca2, 58c980d43, 3d0abda16
 (docs), 255ca3eca, 5683ca35e, edf459d17, 4cd97b06d, 24a1e30ce, 65cb0bd5a, ad34964ab, ffa6ad30e, 0aad876bb, 22ab9c73c,
 0cb37c654 (docs), 3b0ae571a, 7a2245159, b63d75a03, and the docs commit after them.
+
+---
+
+# Session 7, 2026-10-25 (next session reads this first)
+
+Took session 6's "Next" list (all but ADMINNARROW, which waits on a ruling, and STRINGREJECT, lane 4), then two Dropdown
+rows on the community template's Report form. Six fixed, one half-built. **Not pushed, not released**, as before.
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| P107-S102-SIGNUPBACKEND | c873955f7 | Sign Up's ports come from `user-ports.ts` as Set User Properties': the active backend's accounts table, the Parse browser list or the REST list. No Backend picker; a saved `backendId` is not read (the sign-up always goes to the active backend), in the contract builder too (`NO_BACKEND_INPUT`). Spec v3 | NSP-020 drive: pins out, (A) red 8 on HEAD → green; a new case names the columns drawn on both synthetic projects; 2 mutants red; conformance (Sign Up v3), node-spec 608/608, mcp drawn ports 5/5 |
+| P116-S17-CRONLEAK | 23149f2a0 | the FED-004 drive's teardown waits until the run its boot started is recorded and none is `running` (throws in words at 9 s). `stop()` leaving runs in flight is by design; unchanged | reproduced: HEAD's spec + a 4 s idle spec forced after it (test sequencer) = 8/8 green, three "Cannot log after tests are done", exit 1 → exit 0 |
+| P26-SKELSHIP, engine half (row stays open) | d10ca6164 | `nodegx-deploy` reports `skeletonPages`, a sentence in `warnings` and on stderr when every page is create_project's untouched placeholder (`src/skeleton.ts`, the marker a copy held equal by the spec); ship-to-vm.sh prints every engine warning. A warning, as DEPLOYLOOPBACK | built engine: red on HEAD's (`skeletonPages` undefined) → 3/3, two known-firing arms, a mutant red; preview 19 suites 109/109 |
+| P121-S19-SIGNINRACE | 8f1c6e8d9 | not Log In (it writes the session before `done`): the page-load `/users/me` check with the OLD token, answering after the new sign-in, wrote the old person back (a 209/401 cleared the new session). Both adapters now drop an answer whose session was replaced while it was out, and tell the caller (`SESSION_MOVED_MESSAGE`) | answers held and released in the race's order: Parse wire via the real UserService red 2/4 on HEAD → 4/4; PocketBase red 2/3 → 3/3; runtime backends 410/410, viewer 906/906, User/Log In/Sign Up conform. **Not driven in Chrome**: the reading fits both symptoms, not measured on s19's run |
+| P121-TWO005-DROPDOWNSTALE | 33ae2817f | the placed "Option 1" stays a seed until a Value write or a changing pick; Items that do not offer it clear Value to `''` and send it. Spec v11, two scenarios added, both catalogs | corpus spec red 2/4 → 4/4; conformance 91/91, no survivors. The first build never fired on a page: `Select`'s mount effect calls `valueChanged`; conformance caught it |
+| BETA-S7-DROPDOWNFIRSTPICK (filed and fixed) | 483335262 | with the value in no option, `Select` tells the `<select>` `''` (was `undefined`: the browser's reset selected the first option under the placeholder, so it could not be picked); options compared by the browser's value, the face too. Spec v12 | conformance 91/91, red 4 on HEAD's `Select`; face spec red 2/3 → 3/3 |
+
+Filed, not fixed: **BETA-S7-DROPDOWNFOCUSDIVERGE** (Dropdown conformance diverges on today's generated sequence
+1530142452: Focused where the spec says Blur's Done; red with 8f1c6e8d9's runtime and spec).
+
+## For Richard
+
+1. **Push and release**, as before; six more rows on cline-dev. SIGNINRACE and SIGNUPBACKEND are runtime (viewer bundle),
+   the Dropdown rows are viewer, SKELSHIP is `@nodegx/preview`, CRONLEAK is a test.
+2. **P26-SKELSHIP**: should the deploy engine *refuse* a project nobody has built, as `deploy_to_vm` does? Built as a warning.
+   And should create_project's placeholder speak to a visitor ("This app is being built.")? Studio's own Deploy to folder
+   tab does not run the engine and still says nothing.
+3. Standing: ADMINNARROW (does the admin app owe a phone layout?), DEPLOYLOOPBACK (warn or refuse), OWN008-AUDIT.
+
+## Next
+
+1. P107-S86-STOREDWIRE (medium): Set Object Properties' `stored` wires from before ERG-001 register nothing; a load
+   migration or an alias (the class: a renamed built-in port ships no migration).
+2. BETA-S7-DROPDOWNFOCUSDIVERGE: reproduce with the seed, decide spec or runtime.
+3. P18-S109-MOUNTPULSE (Sign In With's Failure at mount reaches no wire): the runtime half is small, but the export
+   transcribes the runtime's behaviour (`src/lib/signIn.ts`, pinned in its §C), so it moves lane 4's files: wait for lane 4.
+4. The P119 README §2 sentence (session 6 trap 7): a peer still has that file modified.
+5. P18-S134-STRINGREJECT waits for lane 4.
+
+## Traps met
+
+1. 🔴 The full node-spec suite does not finish in a session on this box: `stranger.test.ts` alone took 39 minutes niced
+   (P121-S4-STRANGERSTALL). Run the files that grade the change (ports, catalog parity, golden, spec ledger, types, schema,
+   the batch file) and conformance with `NSP_ONLY`.
+2. 🔴 A corpus spec that does not render React cannot see a component's mount effect: the Dropdown's `Select` calls
+   `valueChanged(props.value)` on mount, which ended the seed before any Items came. Conformance renders in jsdom and caught it.
+3. jest runs a NEW test file first, so an "idle after it" probe ran before the spec it was meant to follow and proved
+   nothing. A `--testSequencer` that sorts the probe last made the leak's window.
+4. A red case that throws before `adapter.dispose()` leaves RestAuthAdapter's refresh timers alive and jest never exits (a
+   300 s hang). Dispose in `afterEach`.
+5. `undefined` is never sent (`node.ts sendValue`), and a new wire is seeded with the source's current value: clearing an
+   output to `undefined` leaves the old value downstream. Clear to `''`.
+6. The node catalogs embed every spec reducer's `says` sentence: changing one makes `catalog:check` stale. `catalog:generate`
+   then `catalog:merge`, and diff both (only your sentences should move).
+7. `nodegx-project-contract` `verbs.test.ts` is red at HEAD (P107-S101-VERBSPECCED, filed); census/honesty in node-spec are
+   red under a peer's uncommitted `census.json` / `honesty-ledger.json` (session 6 trap 6).
+8. Killing the first command of a `;`-chained background job lets the next one start: the project-contract suite ran after I
+   stopped node-spec. Chain with `&&`, or kill the shell.
+
+## Gates read (2026-10-25)
+
+runtime: NSP-020 drive 8/8, backends + ERG-001 + ISL-029 13 suites 410/410, conformance (User v5, Log In v1, Sign Up v3)
+conforms, Dropdown v12 91/91 scenarios (one generated divergence, HEAD's), tsc clean · viewer: user and corpus 66 suites
+906/906, Dropdown suites 122/122, tsc clean · node-spec: ports, catalog parity, golden, types, schema, spec ledger, batch
+records/visual, runner 608/608 then 497/497, tsc clean · `golden.js --check` fresh (Sign Up, Dropdown) · `catalog:check`,
+`catalog:merge:check` up to date · project-contract 363/364 (verbs, HEAD's) · noodl-mcp drawn ports 5/5 · preview 19 suites
+109/109 on a rebuilt dist, tsc clean · backend FED-004 drive 8/8 exit 0.
+
+**Commits this session:** c873955f7, 23149f2a0, d10ca6164, 8f1c6e8d9, 33ae2817f, 483335262, and the docs commit after them.
