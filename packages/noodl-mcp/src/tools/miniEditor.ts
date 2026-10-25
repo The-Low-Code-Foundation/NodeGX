@@ -132,7 +132,7 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
         'scope "style" changes the project\'s style for the type (every Button), which is what "the button style" means. ' +
         'It replaces Studio in the ' +
         'conversation (one live panel): a turn that ends with one needs no open_studio. Call it as the LAST call of your turn, say in a sentence what to look at, and ' +
-        'stop: their answer arrives as their next message ("Approved: …"), and get_mini_editor reads it any time. ' +
+        'stop: their decision ("Approved: …") reaches you as context with their next message, and get_mini_editor reads it any time. ' +
         'reopen: an earlier editor\'s id, to show it again (they asked for it back, or answered something else first).',
       inputSchema: {
         title: z.string().max(60).optional().describe('What it is, e.g. "The hero". Required unless reopen.'),
@@ -263,7 +263,8 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
                 : '') +
           (viaProxy ? 'You reached it through call_tool, so no panel was drawn: call show_mini_editor by name next time. ' : '') +
           'Say in one sentence what to look at and what to decide, then END YOUR TURN: the person decides in the ' +
-          'panel and their answer arrives as their next message. If their next message is about something else, ' +
+          'panel; their decision reaches you as context with their next message (it may be only "go": act on the ' +
+          'decision). If their next message is about something else, ' +
           `answer it and offer this editor again (reopen "${record.id}"). Read their answer with get_mini_editor. ` +
           'When they approve: their changes are already in the files; apply the choice where it belongs, then SHOW the ' +
           'result (open_studio) in that same turn, not only words.' +

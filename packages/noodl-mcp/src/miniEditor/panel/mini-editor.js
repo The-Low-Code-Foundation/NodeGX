@@ -821,27 +821,35 @@ async function decide(outcome) {
   render({ fields: false });
 }
 
-/** The decision goes into the conversation as the person's own message; when the host refuses, into its context. */
+/**
+ * The decision goes to Claude quietly, as the conversation's context (`ui/update-model-context`): Claude reads it with
+ * the person's next message. 🔴 P125-CCN008-APPROVEWARN, ruled by Richard 2026-10-25 ("Send the decision quietly
+ * instead please, nobody needs to see the prompt before sending, they already took the decisions"): sent as a
+ * `ui/message`, Claude Desktop put it in the composer under "Use caution before running this prompt…" for the person to
+ * send. Only a host that takes no context gets the message.
+ */
 async function tell(text) {
   const app = state.app;
   if (!app) return 'saved';
   try {
-    const r = await app.sendMessage({ role: 'user', content: [{ type: 'text', text }] });
-    if (!r || !r.isError) return 'sent';
+    await app.updateModelContext({ content: [{ type: 'text', text }] });
+    return 'context';
   } catch (e) {
     /* the fallback below */
   }
   try {
-    await app.updateModelContext({ content: [{ type: 'text', text }] });
-    return 'context';
+    const r = await app.sendMessage({ role: 'user', content: [{ type: 'text', text }] });
+    if (!r || !r.isError) return 'sent';
   } catch (e) {
-    return 'saved';
+    /* saved in the project all the same */
   }
+  return 'saved';
 }
 
 const SENT_WORDS = {
   sent: 'Sent to Claude.',
-  context: 'Saved. Claude sees it with your next message: send it a line in the chat.',
+  // An app cannot start Claude's turn without a message, so the person sends one: any line will do.
+  context: 'Claude has your decision. Send it any message ("go" is enough) and it carries on.',
   saved: 'Saved in the project. Tell Claude in the chat that you have decided.'
 };
 

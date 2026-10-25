@@ -340,8 +340,12 @@ async function buttonsRun() {
 
   // NOSHOWBACK: Approve asks to see the result, and names the buttons that keep their own fill.
   await inMini(`(document.querySelector('.me-primary').click(), 1)`);
-  await until('Approve sends a message', async () => (Number(await evalTop('window.messages.length')) > 0 ? true : 'none'), 15000);
-  const msg = await evalTop('window.messages[0]?.params?.content?.[0]?.text');
+  // APPROVEWARN (ruled 2026-10-25): the decision goes as context, never as a message Desktop holds under a caution banner.
+  await until('Approve sends the decision as context', async () => (Number(await evalTop('window.contexts.length')) > 0 ? true : 'none'), 15000);
+  const msg = await evalTop('window.contexts[0]?.params?.content?.[0]?.text');
+  check('APPROVEWARN: no ui/message is sent (Desktop would hold it in the composer under a caution banner)', Number(await evalTop('window.messages.length')) === 0);
+  const sentWords = await inMini(`document.querySelector('.me-sent')?.textContent ?? ''`);
+  check('… and the panel tells the person to send Claude any line', /Send it any message/.test(sentWords), sentWords);
   console.log(`      message: ${msg}`);
   check('NOSHOWBACK: the message asks to see the result in the app', /show me the result in the app\.$/.test(msg ?? ''), msg);
   check("NOSTYLE: … says it is the project's style and who keeps their own fill", /That is the project's style now\. These keep their own setting instead: .*nb_cta|Primary action in NavBar/.test(msg ?? ''), msg);
@@ -495,11 +499,12 @@ try {
     await shot('3d-02-after-changes.png');
   }
 
-  // Approve: the decision reaches the conversation as the person's message.
+  // Approve: the decision reaches Claude as context (APPROVEWARN, ruled 2026-10-25), not as a message.
   await inPanelMain('mini1', `(() => { document.querySelector('.me-addnote').click(); const t = document.querySelector('.me-note textarea'); t.value = 'Looks great.'; t.dispatchEvent(new Event('input', { bubbles: true })); document.querySelector('.me-primary').click(); return 'ok'; })()`);
-  await until('Approve sends a ui/message', async () => ((await evalTop('window.messages.length')) > 0 ? true : await evalTop('window.messages.length')));
-  const msg = await evalTop(`window.messages[0] && window.messages[0].params.content[0].text`);
-  check('… worded as the person\'s answer, with what they changed and their note', /^Approved: "The (hero|robot)"/.test(msg ?? '') && (mode === '3d' ? /Body colour/.test(msg) : /Button words "Meet the puppies" → "Book a visit"|Button words Meet the puppies → Book a visit/.test(msg)) && /Looks great\.$/.test(msg), msg);
+  await until('Approve sends the decision as context', async () => ((await evalTop('window.contexts.length')) > 0 ? true : await evalTop('window.contexts.length')));
+  const msg = await evalTop(`window.contexts[0] && window.contexts[0].params.content[0].text`);
+  check('… and no ui/message', Number(await evalTop('window.messages.length')) === 0);
+  check('… worded as the person\'s answer, with what they changed and their note', /^Approved: "The (hero|robot)"/.test(msg ?? '') && (mode === '3d' ? /Body colour/.test(msg) : /Button words "Meet the puppies" → "Book a visit"|Button words Meet the puppies → Book a visit/.test(msg)) && /Looks great\./.test(msg), msg);
   const read = await tool('get_mini_editor', { id });
   check('get_mini_editor reads the decision', read.data.status === 'approved', JSON.stringify(read.data.changed));
   await shot(`${mode}-03-approved.png`);
