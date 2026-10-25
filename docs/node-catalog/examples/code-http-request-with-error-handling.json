@@ -28,7 +28,7 @@
           "type": "Javascript2",
           "label": "Extract headline",
           "parameters": {
-            "code": "script.inputs = { response: 'object' };\nscript.outputs = { headline: 'string' };\nscript.run = function (inputs, outputs) {\n  outputs.headline = inputs.response && inputs.response.items ? inputs.response.items[0].title : '';\n};"
+            "code": "Script.Inputs = { response: 'object' };\nScript.Outputs = { headline: 'string' };\n\n// Each response sets the headline: the first item's title, or nothing when the answer has no items.\nScript.Setters.response = function (response) {\n  Script.setOutputs({ headline: response && response.items && response.items.length ? response.items[0].title : '' });\n};"
           }
         },
         { "id": "failed_gate", "type": "Condition", "label": "Show error" }

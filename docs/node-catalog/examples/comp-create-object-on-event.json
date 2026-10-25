@@ -32,7 +32,7 @@
       "connections": [
         { "fromId": "create_btn", "fromProperty": "onClick", "toId": "make_draft", "toProperty": "new" },
         { "fromId": "make_draft", "fromProperty": "id", "toId": "draft_object", "toProperty": "modelId" },
-        { "fromId": "draft_object", "fromProperty": "title", "toId": "draft_title_text", "toProperty": "text" }
+        { "fromId": "draft_object", "fromProperty": "prop-title", "toId": "draft_title_text", "toProperty": "text" }
       ]
     }
   ]

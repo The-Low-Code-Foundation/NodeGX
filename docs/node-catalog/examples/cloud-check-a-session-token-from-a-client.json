@@ -5,7 +5,7 @@
   "demonstrates": ["noodl.cloud.verifysessiontoken", "noodl.cloud.request", "noodl.cloud.response"],
   "components": [
     {
-      "name": "/Cloud Functions/Check Client Session",
+      "name": "/#__cloud__/Cloud Functions/Check Client Session",
       "nodes": [
         {
           "id": "fn_request",

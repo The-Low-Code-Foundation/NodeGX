@@ -1,7 +1,7 @@
 {
  "id": "community-tiptap-text-editor",
  "title": "A rich-text editor with a toolbar and local drafts",
- "description": "The larger companion to the single-button component: a `Static Data` node holds the list of toolbar commands, a `For Each` draws one button per entry, and the editor itself is mounted by a `JavaScriptFunction` onto a `Group`'s element. Two details are worth more than the editor. The draft is saved to `localStorage` on a `Timer` and read back on mount, which is the whole of 'don't lose my work' and costs two function nodes. And `Model2` plus `SetModelProperties` keep the document in the project's own data model rather than only inside the third-party editor, so something other than the editor can read what was typed. \u26a0\ufe0f The toolbar is driven by data, so adding a command is a row in the `Static Data` node \u2014 not a new button.",
+ "description": "The larger companion to the single-button component: a `Static Data` node holds the list of toolbar commands, a `For Each` draws one button per entry, and the editor itself is mounted by a `JavaScriptFunction` onto a `Group`'s element. Two details are worth more than the editor. The draft is saved to `localStorage` on a `Timer` and read back on mount, which is the whole of 'don't lose my work' and costs two function nodes. And `Model2` plus `SetModelProperties` keep the document in the project's own data model rather than only inside the third-party editor, so something other than the editor can read what was typed. \u26a0\ufe0f The toolbar is driven by data, so adding a command is a row in the `Static Data` node \u2014 not a new button. Each row is the companion example's button component, `/Tiptap text editor r` (`community-tiptap-text-editor-r`): write that one first.",
  "demonstrates": [
   "Boolean",
   "CSS Definition",
@@ -63,7 +63,7 @@
      "type": "For Each",
      "parent": "menu",
      "parameters": {
-      "template": "/#Experiments/experiments/Tiptap editor/Editor button"
+      "template": "/Tiptap text editor r"
      }
     },
     {
@@ -378,7 +378,7 @@
     },
     {
      "fromId": "setmodelproperties",
-     "fromProperty": "stored",
+     "fromProperty": "done",
      "toId": "model2",
      "toProperty": "fetch"
     },

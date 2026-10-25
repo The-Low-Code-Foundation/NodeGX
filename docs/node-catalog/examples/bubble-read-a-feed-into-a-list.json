@@ -51,7 +51,7 @@
           "type": "net.noodl.Log",
           "label": "The server did not answer usably",
           "parameters": {
-            "level": "warning"
+            "level": "warn"
           }
         },
         {
@@ -59,7 +59,7 @@
           "type": "net.noodl.Log",
           "label": "The answer was not a feed",
           "parameters": {
-            "level": "warning"
+            "level": "warn"
           }
         }
       ],

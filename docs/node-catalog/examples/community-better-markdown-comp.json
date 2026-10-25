@@ -38,9 +38,7 @@
       {
        "name": "Clicked",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 0
       }
      ]
@@ -52,135 +50,105 @@
       {
        "name": "text",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "General",
        "index": 2
       },
       {
        "name": "css-class",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "General",
        "index": 1
       },
       {
        "name": "padding top",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Margin and padding",
        "index": 3
       },
       {
        "name": "padding bottom",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Margin and padding",
        "index": 4
       },
       {
        "name": "padding left",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Margin and padding",
        "index": 5
       },
       {
        "name": "padding right",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Margin and padding",
        "index": 6
       },
       {
        "name": "margin top",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Margin and padding",
        "index": 7
       },
       {
        "name": "margin bottom",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Margin and padding",
        "index": 8
       },
       {
        "name": "margin left",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Margin and padding",
        "index": 9
       },
       {
        "name": "margin right",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Margin and padding",
        "index": 10
       },
       {
        "name": "mounted",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "General",
        "index": 0
       },
       {
        "name": "align horizontal",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Other",
        "index": 11
       },
       {
        "name": "align vertical",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Other",
        "index": 12
       },
       {
        "name": "position",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Other",
        "index": 13
       },
       {
        "name": "layout",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "group": "Other",
        "index": 14
       }

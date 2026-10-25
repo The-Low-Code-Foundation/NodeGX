@@ -21,7 +21,10 @@
         {
           "id": "prompt_body",
           "type": "Javascript2",
-          "label": "Build request body"
+          "label": "Build request body",
+          "parameters": {
+            "code": "Script.Inputs = { prompt: 'string', token: 'string' };\nScript.Outputs = { body: 'object', headers: 'object', send: 'signal' };\n\n// Run builds the request from the prompt as it is now, then asks the stream to connect.\n// `token` is the signed-in person's token for your own endpoint, never a provider key in the page.\nScript.Signals.run = function () {\n  Script.setOutputs({\n    body: { stream: true, messages: [{ role: 'user', content: Script.Inputs.prompt || '' }] },\n    headers: { Authorization: 'Bearer ' + (Script.Inputs.token || '') }\n  });\n  Script.Outputs.send();\n};"
+          }
         },
         {
           "id": "chat_stream",
@@ -46,7 +49,18 @@
         {
           "id": "state_label",
           "type": "String Mapper",
-          "label": "State to label"
+          "label": "State to label",
+          "parameters": {
+            "input 0": "connecting",
+            "output 0": "Connecting…",
+            "input 1": "open",
+            "output 1": "Answering",
+            "input 2": "reconnecting",
+            "output 2": "Reconnecting…",
+            "input 3": "error",
+            "output 3": "The stream failed",
+            "defaultMapping": ""
+          }
         }
       ],
       "connections": [
@@ -59,8 +73,8 @@
         { "fromId": "chat_stream", "fromProperty": "text", "toId": "answer_accumulator", "toProperty": "chunk" },
         { "fromId": "chat_stream", "fromProperty": "onMessage", "toId": "answer_accumulator", "toProperty": "add" },
         { "fromId": "answer_accumulator", "fromProperty": "accumulated", "toId": "answer_text", "toProperty": "text" },
-        { "fromId": "chat_stream", "fromProperty": "connectionState", "toId": "state_label", "toProperty": "input" },
-        { "fromId": "state_label", "fromProperty": "output", "toId": "status_text", "toProperty": "text" }
+        { "fromId": "chat_stream", "fromProperty": "connectionState", "toId": "state_label", "toProperty": "inputString" },
+        { "fromId": "state_label", "fromProperty": "mappedString", "toId": "status_text", "toProperty": "text" }
       ]
     }
   ]

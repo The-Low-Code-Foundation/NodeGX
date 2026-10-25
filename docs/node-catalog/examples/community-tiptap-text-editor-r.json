@@ -38,17 +38,13 @@
       {
        "name": "buttonType",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 1
       },
       {
        "name": "editor",
        "plug": "output",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 2
       }
      ]
@@ -94,17 +90,13 @@
       {
        "name": "Success",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 1
       },
       {
        "name": "buttonClicked",
        "plug": "input",
-       "type": {
-        "name": "*"
-       },
+       "type": "*",
        "index": 2
       }
      ]

@@ -5,7 +5,7 @@
   "demonstrates": ["noodl.cloud.removeuserfromrole", "noodl.cloud.updateuser", "noodl.cloud.getuserroles", "noodl.cloud.request"],
   "components": [
     {
-      "name": "/Cloud Functions/Revoke Role",
+      "name": "/#__cloud__/Cloud Functions/Revoke Role",
       "nodes": [
         { "id": "fn_request", "type": "noodl.cloud.request", "label": "Request", "parameters": { "params": "userId,role,revokedBy" } },
         { "id": "revoke", "type": "noodl.cloud.removeuserfromrole", "label": "Take the role away" },

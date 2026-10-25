@@ -70972,7 +70972,10 @@
             {
               "id": "prompt_body",
               "type": "Javascript2",
-              "label": "Build request body"
+              "label": "Build request body",
+              "parameters": {
+                "code": "Script.Inputs = { prompt: 'string', token: 'string' };\nScript.Outputs = { body: 'object', headers: 'object', send: 'signal' };\n\n// Run builds the request from the prompt as it is now, then asks the stream to connect.\n// `token` is the signed-in person's token for your own endpoint, never a provider key in the page.\nScript.Signals.run = function () {\n  Script.setOutputs({\n    body: { stream: true, messages: [{ role: 'user', content: Script.Inputs.prompt || '' }] },\n    headers: { Authorization: 'Bearer ' + (Script.Inputs.token || '') }\n  });\n  Script.Outputs.send();\n};"
+              }
             },
             {
               "id": "chat_stream",
@@ -71000,7 +71003,18 @@
             {
               "id": "state_label",
               "type": "String Mapper",
-              "label": "State to label"
+              "label": "State to label",
+              "parameters": {
+                "input 0": "connecting",
+                "output 0": "Connecting…",
+                "input 1": "open",
+                "output 1": "Answering",
+                "input 2": "reconnecting",
+                "output 2": "Reconnecting…",
+                "input 3": "error",
+                "output 3": "The stream failed",
+                "defaultMapping": ""
+              }
             }
           ],
           "connections": [
@@ -71062,11 +71076,11 @@
               "fromId": "chat_stream",
               "fromProperty": "connectionState",
               "toId": "state_label",
-              "toProperty": "input"
+              "toProperty": "inputString"
             },
             {
               "fromId": "state_label",
-              "fromProperty": "output",
+              "fromProperty": "mappedString",
               "toId": "status_text",
               "toProperty": "text"
             }
@@ -71479,7 +71493,7 @@
     {
       "id": "agent-store-shared-state",
       "title": "Shared state: one store read by two unrelated components",
-      "description": "Two components that are not parent and child, sharing state through a named store instead of prop drilling or a Send/Receive Event pair. Sign In writes `user` with Set Global Store; Header declares the same store by name and renders `state` — no wiring runs between the two components, because naming the store is what connects them. Header also subscribes to just the `user` key, so a write to any other key does not wake it, and uses `previousValue` against `value` to fire only on the signed-out → signed-in transition rather than on every change. Initial State fills gaps without overwriting live state, so Header remounting cannot reset a store Sign In is already using.",
+      "description": "Two components that are not parent and child, sharing state through a named store instead of prop drilling or a Send/Receive Event pair. Sign In writes `user` with Set Global Store; Header declares the same store by name and reads `user` from it — no wiring runs between the two components, because naming the store is what connects them. Header subscribes to just the `user` key, so a write to any other key does not wake it, and puts the value into its greeting through a String Format whose `{user}` tag is the input the wire lands on. The store persists under its storage key, so the greeting survives a reload.",
       "demonstrates": [
         "net.noodl.GlobalStore",
         "net.noodl.GlobalStore.Set",
@@ -71581,7 +71595,10 @@
             {
               "id": "greeting",
               "type": "String Format",
-              "label": "Format greeting"
+              "label": "Format greeting",
+              "parameters": {
+                "format": "Signed in as {user}"
+              }
             }
           ],
           "connections": [
@@ -71589,11 +71606,11 @@
               "fromId": "watch_user",
               "fromProperty": "value",
               "toId": "greeting",
-              "toProperty": "input"
+              "toProperty": "user"
             },
             {
               "fromId": "greeting",
-              "fromProperty": "result",
+              "fromProperty": "formatted",
               "toId": "user_text",
               "toProperty": "text"
             }
@@ -71962,7 +71979,7 @@
               "type": "net.noodl.Log",
               "label": "The provider round trip did not start",
               "parameters": {
-                "level": "warning"
+                "level": "warn"
               }
             },
             {
@@ -72564,7 +72581,7 @@
               "type": "net.noodl.Log",
               "label": "Unreadable due date",
               "parameters": {
-                "level": "warning",
+                "level": "warn",
                 "message": "Invoice row: the due date could not be read as a date."
               }
             }
@@ -72789,7 +72806,7 @@
               "type": "net.noodl.Log",
               "label": "The server did not answer usably",
               "parameters": {
-                "level": "warning"
+                "level": "warn"
               }
             },
             {
@@ -72797,7 +72814,7 @@
               "type": "net.noodl.Log",
               "label": "The answer was not a feed",
               "parameters": {
-                "level": "warning"
+                "level": "warn"
               }
             }
           ],
@@ -72968,7 +72985,7 @@
               "type": "net.noodl.Log",
               "label": "The paste would not parse",
               "parameters": {
-                "level": "warning"
+                "level": "warn"
               }
             }
           ],
@@ -73067,7 +73084,7 @@
               "type": "net.noodl.Log",
               "label": "The server did not answer usably",
               "parameters": {
-                "level": "warning"
+                "level": "warn"
               }
             },
             {
@@ -73075,7 +73092,7 @@
               "type": "net.noodl.Log",
               "label": "Refused or unreadable — read Error Code",
               "parameters": {
-                "level": "warning"
+                "level": "warn"
               }
             }
           ],
@@ -73432,7 +73449,7 @@
       ],
       "components": [
         {
-          "name": "/Cloud Functions/Check Client Session",
+          "name": "/#__cloud__/Cloud Functions/Check Client Session",
           "nodes": [
             {
               "id": "fn_request",
@@ -73536,7 +73553,7 @@
       ],
       "components": [
         {
-          "name": "/Cloud Functions/Verify Inbound",
+          "name": "/#__cloud__/Cloud Functions/Verify Inbound",
           "nodes": [
             {
               "id": "fn_request",
@@ -73844,7 +73861,7 @@
       ],
       "components": [
         {
-          "name": "/Cloud Functions/Delete Account",
+          "name": "/#__cloud__/Cloud Functions/Delete Account",
           "nodes": [
             {
               "id": "fn_request",
@@ -74218,7 +74235,7 @@
       ],
       "components": [
         {
-          "name": "/Cloud Functions/Invite Team Member",
+          "name": "/#__cloud__/Cloud Functions/Invite Team Member",
           "nodes": [
             {
               "id": "fn_request",
@@ -75858,7 +75875,7 @@
       ],
       "components": [
         {
-          "name": "/Cloud Functions/Revoke Role",
+          "name": "/#__cloud__/Cloud Functions/Revoke Role",
           "nodes": [
             {
               "id": "fn_request",
@@ -76446,7 +76463,7 @@
       ],
       "components": [
         {
-          "name": "/Cloud Functions/Issue Partner Token",
+          "name": "/#__cloud__/Cloud Functions/Issue Partner Token",
           "nodes": [
             {
               "id": "fn_request",
@@ -77074,7 +77091,7 @@
       ],
       "components": [
         {
-          "name": "/Cloud Functions/List Role Members",
+          "name": "/#__cloud__/Cloud Functions/List Role Members",
           "nodes": [
             {
               "id": "fn_request",
@@ -77286,7 +77303,7 @@
               "type": "Javascript2",
               "label": "Extract headline",
               "parameters": {
-                "code": "script.inputs = { response: 'object' };\nscript.outputs = { headline: 'string' };\nscript.run = function (inputs, outputs) {\n  outputs.headline = inputs.response && inputs.response.items ? inputs.response.items[0].title : '';\n};"
+                "code": "Script.Inputs = { response: 'object' };\nScript.Outputs = { headline: 'string' };\n\n// Each response sets the headline: the first item's title, or nothing when the answer has no items.\nScript.Setters.response = function (response) {\n  Script.setOutputs({ headline: response && response.items && response.items.length ? response.items[0].title : '' });\n};"
               }
             },
             {
@@ -77602,9 +77619,7 @@
                 {
                   "name": "Clicked",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 0
                 }
               ]
@@ -77616,135 +77631,105 @@
                 {
                   "name": "text",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "General",
                   "index": 2
                 },
                 {
                   "name": "css-class",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "General",
                   "index": 1
                 },
                 {
                   "name": "padding top",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Margin and padding",
                   "index": 3
                 },
                 {
                   "name": "padding bottom",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Margin and padding",
                   "index": 4
                 },
                 {
                   "name": "padding left",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Margin and padding",
                   "index": 5
                 },
                 {
                   "name": "padding right",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Margin and padding",
                   "index": 6
                 },
                 {
                   "name": "margin top",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Margin and padding",
                   "index": 7
                 },
                 {
                   "name": "margin bottom",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Margin and padding",
                   "index": 8
                 },
                 {
                   "name": "margin left",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Margin and padding",
                   "index": 9
                 },
                 {
                   "name": "margin right",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Margin and padding",
                   "index": 10
                 },
                 {
                   "name": "mounted",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "General",
                   "index": 0
                 },
                 {
                   "name": "align horizontal",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Other",
                   "index": 11
                 },
                 {
                   "name": "align vertical",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Other",
                   "index": 12
                 },
                 {
                   "name": "position",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Other",
                   "index": 13
                 },
                 {
                   "name": "layout",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Other",
                   "index": 14
                 }
@@ -77924,17 +77909,13 @@
                 {
                   "name": "Do",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 0
                 },
                 {
                   "name": "JsonArray",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 1
                 }
               ]
@@ -77996,54 +77977,42 @@
                 {
                   "name": "File",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "General",
                   "index": 0
                 },
                 {
                   "name": "Path",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Metadata",
                   "index": 1
                 },
                 {
                   "name": "Name",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Metadata",
                   "index": 2
                 },
                 {
                   "name": "Size in bytes",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Metadata",
                   "index": 3
                 },
                 {
                   "name": "Type",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Metadata",
                   "index": 4
                 },
                 {
                   "name": "Success",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Events",
                   "index": 5
                 }
@@ -78083,18 +78052,14 @@
                 {
                   "name": "Enable File Picker on click",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Dropzone",
                   "index": 0
                 },
                 {
                   "name": "Accepted file types",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Dropzone",
                   "index": 1
                 }
@@ -78126,54 +78091,42 @@
                 {
                   "name": "File",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "General",
                   "index": 0
                 },
                 {
                   "name": "Path",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Metadata",
                   "index": 1
                 },
                 {
                   "name": "Name",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Metadata",
                   "index": 2
                 },
                 {
                   "name": "Size in bytes",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Metadata",
                   "index": 3
                 },
                 {
                   "name": "Type",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Metadata",
                   "index": 4
                 },
                 {
                   "name": "Success",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Events",
                   "index": 5
                 }
@@ -78630,108 +78583,84 @@
                 {
                   "name": "title",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "General search engine",
                   "index": 1
                 },
                 {
                   "name": "description",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "General search engine",
                   "index": 2
                 },
                 {
                   "name": "og:title",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Open Graph",
                   "index": 4
                 },
                 {
                   "name": "og:description",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Open Graph",
                   "index": 5
                 },
                 {
                   "name": "og:image",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Open Graph",
                   "index": 6
                 },
                 {
                   "name": "og:type",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Open Graph",
                   "index": 9
                 },
                 {
                   "name": "og:url (override default)",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Open Graph",
                   "index": 10
                 },
                 {
                   "name": "robots",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "General search engine",
                   "index": 3
                 },
                 {
                   "name": "twitter:title",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Twitter",
                   "index": 11
                 },
                 {
                   "name": "twitter:description",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Twitter",
                   "index": 12
                 },
                 {
                   "name": "twitter:card",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Twitter",
                   "index": 13
                 },
                 {
                   "name": "twitter:image",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "group": "Twitter",
                   "index": 14
                 }
@@ -79238,17 +79167,13 @@
                 {
                   "name": "uploadRecordCreated",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 1
                 },
                 {
                   "name": "absoluteFilePathCreated",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 2
                 }
               ]
@@ -79806,25 +79731,19 @@
                 {
                   "name": "Html Content",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 1
                 },
                 {
                   "name": "Changed",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 2
                 },
                 {
                   "name": "Saved",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 3
                 }
               ]
@@ -79836,17 +79755,13 @@
                 {
                   "name": "Initial Content",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 1
                 },
                 {
                   "name": "Update Content",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 2
                 }
               ]
@@ -79950,7 +79865,7 @@
     {
       "id": "community-tiptap-text-editor",
       "title": "A rich-text editor with a toolbar and local drafts",
-      "description": "The larger companion to the single-button component: a `Static Data` node holds the list of toolbar commands, a `For Each` draws one button per entry, and the editor itself is mounted by a `JavaScriptFunction` onto a `Group`'s element. Two details are worth more than the editor. The draft is saved to `localStorage` on a `Timer` and read back on mount, which is the whole of 'don't lose my work' and costs two function nodes. And `Model2` plus `SetModelProperties` keep the document in the project's own data model rather than only inside the third-party editor, so something other than the editor can read what was typed. ⚠️ The toolbar is driven by data, so adding a command is a row in the `Static Data` node — not a new button.",
+      "description": "The larger companion to the single-button component: a `Static Data` node holds the list of toolbar commands, a `For Each` draws one button per entry, and the editor itself is mounted by a `JavaScriptFunction` onto a `Group`'s element. Two details are worth more than the editor. The draft is saved to `localStorage` on a `Timer` and read back on mount, which is the whole of 'don't lose my work' and costs two function nodes. And `Model2` plus `SetModelProperties` keep the document in the project's own data model rather than only inside the third-party editor, so something other than the editor can read what was typed. ⚠️ The toolbar is driven by data, so adding a command is a row in the `Static Data` node — not a new button. Each row is the companion example's button component, `/Tiptap text editor r` (`community-tiptap-text-editor-r`): write that one first.",
       "demonstrates": [
         "Boolean",
         "CSS Definition",
@@ -80012,7 +79927,7 @@
               "type": "For Each",
               "parent": "menu",
               "parameters": {
-                "template": "/#Experiments/experiments/Tiptap editor/Editor button"
+                "template": "/Tiptap text editor r"
               }
             },
             {
@@ -80327,7 +80242,7 @@
             },
             {
               "fromId": "setmodelproperties",
-              "fromProperty": "stored",
+              "fromProperty": "done",
               "toId": "model2",
               "toProperty": "fetch"
             },
@@ -80465,17 +80380,13 @@
                 {
                   "name": "buttonType",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 1
                 },
                 {
                   "name": "editor",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 2
                 }
               ]
@@ -80521,17 +80432,13 @@
                 {
                   "name": "Success",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 1
                 },
                 {
                   "name": "buttonClicked",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 2
                 }
               ]
@@ -80749,17 +80656,13 @@
                 {
                   "name": "videoURL",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 1
                 },
                 {
                   "name": "uploadId",
                   "plug": "input",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 2
                 }
               ]
@@ -80771,9 +80674,7 @@
                 {
                   "name": "assignmentId",
                   "plug": "output",
-                  "type": {
-                    "name": "*"
-                  },
+                  "type": "*",
                   "index": 1
                 }
               ]
@@ -81447,7 +81348,7 @@
             },
             {
               "fromId": "draft_object",
-              "fromProperty": "title",
+              "fromProperty": "prop-title",
               "toId": "draft_title_text",
               "toProperty": "text"
             }
@@ -81913,7 +81814,7 @@
               "parent": "row",
               "parameters": {
                 "useLabel": true,
-                "labelSpacing": "8px"
+                "labelSpacing": "var(--space-2)"
               }
             },
             {
@@ -83575,7 +83476,7 @@
     {
       "id": "fn-aggregate-stats-function",
       "title": "Server-side aggregation exposed as a cloud function",
-      "description": "Aggregate Records runs count/sum/min/max/average over a database class without transferring the records — it exists only in the cloud runtime, so the idiomatic shape is a small cloud function around it: Request triggers the aggregate's fetch, `fetched` sends the Response, and the aggregate results (outputs generated from the `aggregates` configuration) are returned as response params. The browser calls it like any cloud function and renders the statistic.",
+      "description": "Aggregate Records runs a sum, min, max or average over a number column (or the distinct values of a text column) of a database class without transferring the records — it exists only in the cloud runtime, so the idiomatic shape is a small cloud function around it: Request triggers the aggregate's fetch, `fetched` sends the Response, and each name in `aggregates` gets its own Property and Operation inputs (`aggprop-<name>`, `aggop-<name>`) and its result on `agg-<name>`, returned as a response param. Here that is `totalHours`, the sum of every task's `hours`. There is no count operation: for a count, use Query Records with Fetch total count on. The browser calls the function like any cloud function and renders the statistic.",
       "demonstrates": [
         "noodl.cloud.aggregate",
         "CloudFunction2",
@@ -83595,7 +83496,7 @@
               },
               "children": [
                 "refresh_btn",
-                "count_text"
+                "total_text"
               ]
             },
             {
@@ -83608,9 +83509,9 @@
               }
             },
             {
-              "id": "count_text",
+              "id": "total_text",
               "type": "Text",
-              "label": "Task count",
+              "label": "Total hours",
               "parent": "root"
             },
             {
@@ -83631,8 +83532,8 @@
             },
             {
               "fromId": "call_stats",
-              "fromProperty": "out-taskCount",
-              "toId": "count_text",
+              "fromProperty": "out-totalHours",
+              "toId": "total_text",
               "toProperty": "text"
             }
           ]
@@ -83646,12 +83547,14 @@
               "label": "Request"
             },
             {
-              "id": "count_tasks",
+              "id": "sum_hours",
               "type": "noodl.cloud.aggregate",
-              "label": "Count tasks",
+              "label": "Sum task hours",
               "parameters": {
                 "collectionName": "Task",
-                "aggregates": "taskCount"
+                "aggregates": "totalHours",
+                "aggprop-totalHours": "hours",
+                "aggop-totalHours": "sum"
               }
             },
             {
@@ -83659,7 +83562,7 @@
               "type": "noodl.cloud.response",
               "label": "Response",
               "parameters": {
-                "params": "taskCount"
+                "params": "totalHours"
               }
             },
             {
@@ -83675,29 +83578,29 @@
             {
               "fromId": "fn_request",
               "fromProperty": "receive",
-              "toId": "count_tasks",
+              "toId": "sum_hours",
               "toProperty": "fetch"
             },
             {
-              "fromId": "count_tasks",
-              "fromProperty": "taskCount",
+              "fromId": "sum_hours",
+              "fromProperty": "agg-totalHours",
               "toId": "fn_response",
-              "toProperty": "pm-taskCount"
+              "toProperty": "pm-totalHours"
             },
             {
-              "fromId": "count_tasks",
+              "fromId": "sum_hours",
               "fromProperty": "fetched",
               "toId": "fn_response",
               "toProperty": "send"
             },
             {
-              "fromId": "count_tasks",
+              "fromId": "sum_hours",
               "fromProperty": "error",
               "toId": "fn_fail_response",
               "toProperty": "errorMessage"
             },
             {
-              "fromId": "count_tasks",
+              "fromId": "sum_hours",
               "fromProperty": "failure",
               "toId": "fn_fail_response",
               "toProperty": "send"
@@ -84100,7 +84003,7 @@
       ],
       "components": [
         {
-          "name": "/Cloud Functions/Notify",
+          "name": "/#__cloud__/Cloud Functions/Notify",
           "nodes": [
             {
               "id": "fn_request",
