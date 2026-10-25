@@ -29,6 +29,7 @@ import type {
   NodesV2File,
   ProjectV2File
 } from '../../noodl-editor/src/editor/src/schemas';
+import type { PreviewStatus } from '../src/server';
 
 beforeAll(() => assertPrerequisites());
 
@@ -99,6 +100,17 @@ describe('static render (no editor process)', () => {
     // deployToFolder splits it.
     expect(json.components.map((c: ExportedComponent) => c.name)).toEqual(['/App']);
     expect(Object.keys(json.componentIndex)).toHaveLength(1);
+  });
+
+  // NPMAUDIT-PREVIEWWARNINGS — the fixture's Text carries `textAlign`, which Text does not read: a warning the cli
+  // prints as "! 1 validation warning(s) — rendering anyway". The endpoint said `warnings: []`.
+  it('a good render reports its validation warnings on the state endpoint, as the cli prints them', async () => {
+    const status = await getJson<PreviewStatus>(preview.port, '/__preview/state');
+    if (status.state.kind !== 'ok') throw new Error(`Expected an ok state, got ${status.state.kind}`);
+    const warned = (status.state.report?.diagnostics ?? []).filter((d) => d.severity === 'warning');
+    expect(warned.length).toBeGreaterThan(0);
+    expect(status.state.report?.summary.warnings).toBe(warned.length);
+    expect(status.warnings.some((w) => w.startsWith(`${warned[0].code} in `))).toBe(true);
   });
 
   it('serves the component bundles the runtime lazily fetches', async () => {

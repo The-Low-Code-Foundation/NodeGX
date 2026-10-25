@@ -111,7 +111,7 @@ async function rebuild(server: PreviewServer, dir: string, format: ProjectFormat
 
   switch (result.status) {
     case 'ok':
-      server.setBuild(result.build);
+      server.setBuild(result.build, result.report);
       for (const warning of result.build.warnings) log(`  ! ${warning}`);
       if (result.report.summary.warnings > 0) {
         log(`  ! ${result.report.summary.warnings} validation warning(s) — rendering anyway`);

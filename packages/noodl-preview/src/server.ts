@@ -29,7 +29,8 @@ import type { PreviewReport } from './validate';
 
 /** What the server currently believes about the project on disk. */
 export type PreviewState =
-  | { kind: 'ok' }
+  // NPMAUDIT-PREVIEWWARNINGS: a good build keeps its validation report, so a poller sees the warnings the cli prints.
+  | { kind: 'ok'; report?: PreviewReport }
   | { kind: 'invalid'; report: PreviewReport }
   | { kind: 'error'; message: string };
 
@@ -43,6 +44,18 @@ export interface PreviewStatus {
   hasBuild: boolean;
   warnings: string[];
   projectDir: string;
+}
+
+/**
+ * NPMAUDIT-PREVIEWWARNINGS — the validation warnings of a build that rendered, one line each, as `warnings` carries
+ * them. The cli printed "! 3 validation warning(s) — rendering anyway" while this endpoint said `warnings: []`, so a
+ * tool polling it read a clean project.
+ */
+function validationWarningLines(state: PreviewState): string[] {
+  if (state.kind !== 'ok' || !state.report) return [];
+  return state.report.diagnostics
+    .filter((d) => d.severity === 'warning')
+    .map((d) => `${d.code} in ${d.component}${d.nodeLabel || d.nodeId ? ` (${d.nodeLabel ?? d.nodeId})` : ''}: ${d.message}`);
 }
 
 /** One frame pushed down the SSE channel at `/__preview/events`. */
@@ -158,12 +171,12 @@ export class PreviewServer {
   }
 
   /** Installs a new good build and tells every browser to reload. */
-  setBuild(build: PreviewBuild): void {
+  setBuild(build: PreviewBuild, report?: PreviewReport): void {
     this.build = build;
     this.indexJs = fs
       .readFileSync(deployAssetPath('index.js'), 'utf8')
       .replace(/{{#export#}}/g, JSON.stringify(build.exportJson));
-    this.state = { kind: 'ok' };
+    this.state = report ? { kind: 'ok', report } : { kind: 'ok' };
     this.broadcast({ type: 'reload' });
   }
 
@@ -211,7 +224,7 @@ export class PreviewServer {
       const status: PreviewStatus = {
         state: this.state,
         hasBuild: this.build !== null,
-        warnings: this.build?.warnings ?? [],
+        warnings: [...(this.build?.warnings ?? []), ...validationWarningLines(this.state)],
         projectDir: this.projectDir
       };
       return this.sendJson(res, status);
