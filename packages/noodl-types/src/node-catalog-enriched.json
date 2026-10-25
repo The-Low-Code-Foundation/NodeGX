@@ -69310,7 +69310,7 @@
           "group": "Request",
           "plug": "output",
           "type": {
-            "name": "boolean"
+            "name": "string"
           },
           "isSignal": false,
           "description": "Id of the user the session token resolved to, and blank for an unauthenticated request"

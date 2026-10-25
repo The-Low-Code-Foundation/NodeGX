@@ -126,9 +126,12 @@ export const node = {
         return !!this._internal.authenticated;
       }
     },
+    // P107-S97-USERIDBOOLEAN: an id, so text. It was declared a flag: a wire into a Number read the id as NaN, and the
+    // canvas allowed one into a signal input. Measured before changing it: 106 saved wires from it in 13,839 project
+    // files, none into a signal (the one wire the type change refuses).
     userId: {
       displayName: 'User Id',
-      type: 'boolean',
+      type: 'string',
       group: 'Request',
       description: 'Id of the user the session token resolved to, and blank for an unauthenticated request',
       getter: function () {

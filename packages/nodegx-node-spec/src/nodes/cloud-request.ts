@@ -337,13 +337,19 @@ HOSTS.push({ invocation: invocations[0], cloudServices: { ...CLOUD, runId: 'run-
 
 export const CloudRequest = defineNode({
   type: 'noodl.cloud.request',
-  version: 2,
+  version: 3,
   changes: [
     {
       version: 2,
       says: 'A body that is not a JSON object, sent to a function whose parameters declare a contract, names no fields: a Required one refuses the request with the 400 naming it, and with none Required the function runs. It threw a TypeError reading a name off null (a 500)',
       row: 'P107-S97-NULLBODY (the Beta sweep s5)',
       migration: { none: 'Nothing a project stores changes: only a caller sending a body that is not an object to a function with a contract gets a different answer' }
+    },
+    {
+      version: 3,
+      says: 'User Id is text (it carries the id of the person the session token resolved to). It was declared a flag, so a wire into a Number read the id as NaN and the canvas offered it to a signal input',
+      row: 'P107-S97-USERIDBOOLEAN (the Beta sweep s6)',
+      migration: { none: 'No saved wire stops connecting: measured 106 wires from User Id in 13,839 project files, 70 into script inputs (any type), 35 into text ports, 1 into a record field, none into a signal' }
     }
   ],
   source: 'packages/noodl-viewer-cloud/src/nodes/cloud/request.ts; packages/noodl-viewer-cloud/src/nodes/cloud/requestContract.ts; packages/noodl-viewer-cloud/src/nodes/cloud/requestOrigin.ts; packages/noodl-viewer-cloud/src/services/userservice.js',
@@ -383,7 +389,7 @@ export const CloudRequest = defineNode({
     // :120-128 — its getter, `!!`
     auth: { type: 'boolean', from: (s) => !!s.authenticated, displayName: 'Authenticated', group: 'Request', description: 'Whether the request carried a session token that resolved to a user' },
     // :129-137 — declared `boolean`, carries the id
-    userId: { type: 'boolean', from: (s) => s.authUserId, displayName: 'User Id', group: 'Request', description: 'Id of the user the session token resolved to, and blank for an unauthenticated request' },
+    userId: { type: 'string', from: (s) => s.authUserId, displayName: 'User Id', group: 'Request', description: 'Id of the user the session token resolved to, and blank for an unauthenticated request' },
     // :142-151
     origin: { type: 'string', from: (s) => s.origin, displayName: 'Origin', group: 'Request', description: 'The address the calling app is served from — its Origin header, or this backend’s own host when the caller sent none. Blank when neither is known (a workflow step has no caller). Caller-supplied like every header: right for links sent back to whoever called, not a proof of where the request came from.' }
   }
