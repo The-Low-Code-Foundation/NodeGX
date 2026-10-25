@@ -180,3 +180,6 @@ fixed the same session:
 
 Also measured: a check that passes on a value already there proves nothing (drive 1 typed the label the button already
 had: "Meet the puppies"); the drive now types a new one and asserts the old one is gone.
+
+The dist Claude Desktop runs was rebuilt from a clean worktree at 71dca72c7 (2026-10-25 07:54) and smoked as
+`claude-ai`; OpenNoodl pushed. AC6 is next.

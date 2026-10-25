@@ -13,8 +13,11 @@ as built, the five things the drives found.
   the proxy's `/__nodegx/mini/…` paths, the panel. `tests/ccn008MiniEditor.test.ts` 17/17; the drive
   `tools-mini-editor-drive.mjs` ALL PASS in 2d (the puppy hero) and 3d (the three-in-nodes robot). Surface 8,277/8,280,
   unchanged.
-- **Next, in order:** (1) rebuild the `noodl-mcp` dist from a CLEAN worktree (the recipe below; never the primary tree)
-  and tell Richard to quit/reopen Claude Desktop and start a NEW conversation; (2) AC6 is his run: a sample button, a
+- **Done 2026-10-25 07:54 (Richard: "yes please"):** the `noodl-mcp` dist rebuilt from a clean worktree at 71dca72c7
+  (`kit-extract.cjs` copied), smoked through `bin/noodl-mcp.js` as `claude-ai` (126 tools, both mini editor tools in
+  the first list, the resource valid); OpenNoodl pushed. nodegx-studio is 5 commits ahead of origin, none of them
+  CCN-008's (ask before pushing).
+- **Next, in order:** (1) Richard quits/reopens Claude Desktop and starts a NEW conversation; (2) AC6 is his run: a sample button, a
   hero, a 3D model, one answered late. Read `~/Library/Logs/Claude/claude.ai-web.log` after: does Desktop honour
   `ui/message` (the Approve becomes his message) or only the `update-model-context` fallback; how tall is the inline
   panel allowed to be (the hero editor asks ~940 px); (3) then CCN-004 through it (the look accepted in a mini editor).
