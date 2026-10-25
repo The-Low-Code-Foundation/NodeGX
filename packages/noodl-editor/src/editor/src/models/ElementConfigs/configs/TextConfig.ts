@@ -3,9 +3,11 @@
  *
  * Defines default styles and pre-built variants for the Text node.
  *
- * BUG FIX: Text elements previously defaulted to width: 100% with no flex-shrink,
- * causing them to push sibling elements off-screen in row layouts.
- * Fixed by using width: auto + proper flex participation defaults.
+ * P112-S7-TEXTDEFAULTS: no layout keys. This file used to stamp `width`/`height` "auto", `flexShrink`,
+ * `flexGrow` and `minWidth` "0" as a fix for Texts pushing siblings off-screen in a row. The runtime never
+ * read any of them ("auto" is not a size, so the width setter kept its 100% and raised `not-a-dimension`;
+ * Text has no flex ports), and the editor's validator called them 2 errors and 4 warnings. A Text in a row
+ * already shares it: `Layout.size` turns a percentage width along the row into flex-grow with shrink.
  */
 
 import { ElementConfig } from '../ElementConfigTypes';
@@ -14,13 +16,6 @@ export const TextConfig: ElementConfig = {
   nodeType: 'Text',
 
   defaults: {
-    // BUG FIX: Proper flex participation (was: width: '100%' with no shrink)
-    width: 'auto',
-    height: 'auto',
-    flexShrink: '1',
-    flexGrow: '0',
-    minWidth: '0',
-
     // Typography
     fontFamily: 'var(--font-sans)',
     fontSize: 'var(--text-base)',

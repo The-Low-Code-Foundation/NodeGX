@@ -150,7 +150,7 @@ describe('ElementConfigRegistry.applyDefaults', () => {
     expect(node.parameters['backgroundColor']).toBe('var(--primary)');
     // Base defaults
     expect(node.parameters['borderRadius']).toBe('var(--radius-md)');
-    expect(node.parameters['cursor']).toBe('pointer');
+    expect(node.parameters['paddingTop']).toBe('var(--space-2)');
   });
 
   // P94 STY-002 AC1/AC7 — what a newly created node carries is unchanged **apart from** the
@@ -168,10 +168,10 @@ describe('ElementConfigRegistry.applyDefaults', () => {
 
   it('does not overwrite already-set parameters', () => {
     const node = makeNode();
-    node.parameters['cursor'] = 'default';
+    node.parameters['fontSize'] = '20px';
     ElementConfigRegistry.applyDefaults(node, BUTTON_TYPE);
     // Pre-existing value should be preserved
-    expect(node.parameters['cursor']).toBe('default');
+    expect(node.parameters['fontSize']).toBe('20px');
   });
 
   it('is a no-op for unknown type', () => {

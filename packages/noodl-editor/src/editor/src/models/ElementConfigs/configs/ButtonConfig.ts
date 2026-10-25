@@ -21,15 +21,19 @@ export const ButtonConfig: ElementConfig = {
     fontWeight: 'var(--font-medium)',
     fontFamily: 'var(--font-sans)',
     borderRadius: 'var(--radius-md)',
-    cursor: 'pointer',
     _variant: 'primary'
   },
+
+  // P112-S7-TEXTDEFAULTS: no `cursor` (the Button has no such port) and no `borderWidth: '0'` where the variant
+  // sets no `borderStyle` (the width only applies to a solid, dashed or dotted border). Neither was ever read.
+  // ⚠️ `boxShadow` stays, and is still never read on a dropped Button: the style vocabulary turns it into
+  // `boxShadowEnabled: 'true'` for an agent's Button, so removing it would take the shadow off what agents build.
+  // Whether a dropped Button should wear that shadow too is BETA-S9-BUTTONSHADOW, a ruling.
 
   variants: {
     primary: {
       backgroundColor: 'var(--primary)',
       color: 'var(--primary-foreground)',
-      borderWidth: '0',
       boxShadow: 'var(--shadow-sm)',
       states: {
         hover: { backgroundColor: 'var(--primary-hover)' },
@@ -41,7 +45,6 @@ export const ButtonConfig: ElementConfig = {
     secondary: {
       backgroundColor: 'var(--secondary)',
       color: 'var(--secondary-foreground)',
-      borderWidth: '0',
       boxShadow: 'var(--shadow-sm)',
       states: {
         hover: { backgroundColor: 'var(--secondary-hover)' },
@@ -69,7 +72,6 @@ export const ButtonConfig: ElementConfig = {
     ghost: {
       backgroundColor: 'transparent',
       color: 'var(--foreground)',
-      borderWidth: '0',
       states: {
         hover: { backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' },
         disabled: { opacity: '0.5', cursor: 'not-allowed' }
@@ -79,7 +81,6 @@ export const ButtonConfig: ElementConfig = {
     destructive: {
       backgroundColor: 'var(--destructive)',
       color: 'var(--destructive-foreground)',
-      borderWidth: '0',
       boxShadow: 'var(--shadow-sm)',
       states: {
         hover: { backgroundColor: 'var(--destructive-hover)' },
@@ -94,7 +95,6 @@ export const ButtonConfig: ElementConfig = {
     link: {
       backgroundColor: 'transparent',
       color: 'var(--primary)',
-      borderWidth: '0',
       paddingLeft: '0',
       paddingRight: '0'
     }

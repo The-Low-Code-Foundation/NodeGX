@@ -228,14 +228,11 @@ function toPortParameters(styles: Record<string, string>): Record<string, string
  * Measured against the catalog and the viewer: `Text` has no `flexGrow`/`flexShrink` input and
  * neither node file mentions either word; `Button` and `Checkbox` have no `cursor` input.
  *
- * ⚠️ **These are dead stamps in the product, not only in this document, and that is a separate
- * defect this task does not fix.** `applyDefaults` writes all three onto every `Text`, `Button` and
- * `Checkbox` created on canvas, and they reach real project files — `members area Richard test`
- * carries both `flexShrink` and `cursor` in `nodes.json`, where the runtime drops them. TextConfig
- * even labels its pair *"BUG FIX: Proper flex participation"*, which is a fix that has never
- * applied. Removing them from the configs changes what a newly created node carries and wants a
- * drive to confirm; filed in STY-002 rather than smuggled in here. What this list does is stop the
- * **teaching** of them, which is the half that costs an authoring model real output.
+ * ✅ **The product half is fixed (P112-S7-TEXTDEFAULTS):** the configs no longer stamp any of the
+ * three, so a newly created node carries none of them; `viewer-react`'s
+ * `p112-s7-textdefaults-width-auto.test.ts` measured that the runtime never read them. The set stays
+ * as the guard against the next config that stamps one. Projects made before still carry them in
+ * `nodes.json` (`members area Richard test` has `flexShrink` and `cursor`), where the runtime drops them.
  */
 const NO_SUCH_PORT = new Set(['cursor', 'flexGrow', 'flexShrink']);
 
