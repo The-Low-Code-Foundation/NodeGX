@@ -259,8 +259,12 @@ function reportDurableIdCollisions() {
 
 /**
  * Load-failure toast per the UIX-006 mock: named title, the actual reason, a
- * Show-details action (reveals the folder so the user can fix project.json), and
+ * Show-details action (reveals the folder so the user can fix its files), and
  * the always-present quiet Dismiss. Sticky until dismissed; red only here.
+ *
+ * P112-S11-REFUSALWORDS: only for a failed open the loader did not explain. A refusal it explained (a newer
+ * format, a copy it could not make, the person's own Cancel) reaches `onRefused`, and gets no toast beside it.
+ * It said *"Its project.json is missing"*, which a v2 project, which has no project.json, never is.
  */
 function showLoadFailureToast(projectName: string | undefined, projectDir?: string) {
   const actions = projectDir
@@ -278,7 +282,7 @@ function showLoadFailureToast(projectName: string | undefined, projectDir?: stri
       ]
     : undefined;
 
-  ToastLayer.showError('Its project.json is missing or unreadable. The project stays in your list — fix the file and try again.', {
+  ToastLayer.showError("NodeGX couldn't read this project's files. The project stays in your list — fix them and try again.", {
     title: `Couldn't load "${projectName || 'project'}"`,
     actions
   });
@@ -539,10 +543,11 @@ export function ProjectsPage(props: ProjectsPageProps) {
       const activityId = 'opening-lesson';
       ToastLayer.showActivity('Opening lesson', activityId);
 
-      projectFromDirectory(entry.projectDirectory, (project: TSFixme) => {
+      projectFromDirectory(entry.projectDirectory, (project: TSFixme, refusal) => {
         ToastLayer.hideActivity(activityId);
         if (!project) {
-          ToastLayer.showError('Could not open that lesson. Reset it to pull a fresh copy.');
+          // P112-S11-REFUSALWORDS: the loader already said why.
+          if (!refusal?.explained) ToastLayer.showError('Could not open that lesson. Reset it to pull a fresh copy.');
           return;
         }
         // The id is the register's, not a minted one: it is what the runner
@@ -1304,11 +1309,17 @@ export function ProjectsPage(props: ProjectsPageProps) {
       const activityId = 'opening-project';
       ToastLayer.showActivity('Opening project', activityId);
 
-      const project = await LocalProjectsModel.instance.openProjectFromFolder(direntry);
+      // P112-S11-REFUSALWORDS: a refusal the loader explained is not followed by a second message of ours.
+      let explained = false;
+      const onRefused = () => (explained = true);
+      const project = await LocalProjectsModel.instance.openProjectFromFolder(direntry, { onRefused }).catch((error) => {
+        if (explained) return null;
+        throw error;
+      });
 
       if (!project) {
         ToastLayer.hideActivity(activityId);
-        ToastLayer.showError('Could not open project');
+        if (!explained) ToastLayer.showError('Could not open project');
         return;
       }
 
@@ -1327,11 +1338,11 @@ export function ProjectsPage(props: ProjectsPageProps) {
         return;
       }
 
-      const loaded = await LocalProjectsModel.instance.loadProject(projectEntry);
+      const loaded = await LocalProjectsModel.instance.loadProject(projectEntry, { onRefused });
       ToastLayer.hideActivity(activityId);
 
       if (!loaded) {
-        showLoadFailureToast(project.name, projectEntry.retainedProjectDirectory);
+        if (!explained) showLoadFailureToast(project.name, projectEntry.retainedProjectDirectory);
       } else {
         props.route.router.route({ to: 'editor', project: loaded });
       }
@@ -1400,11 +1411,12 @@ export function ProjectsPage(props: ProjectsPageProps) {
       ToastLayer.showActivity('Opening project', activityId);
 
       try {
-        const loaded = await LocalProjectsModel.instance.loadProject(project);
+        let explained = false;
+        const loaded = await LocalProjectsModel.instance.loadProject(project, { onRefused: () => (explained = true) });
         ToastLayer.hideActivity(activityId);
 
         if (!loaded) {
-          showLoadFailureToast(project.name, project.retainedProjectDirectory);
+          if (!explained) showLoadFailureToast(project.name, project.retainedProjectDirectory);
         } else {
           // Navigate to editor with the loaded project
           props.route.router.route({ to: 'editor', project: loaded });
@@ -1604,11 +1616,12 @@ export function ProjectsPage(props: ProjectsPageProps) {
       ToastLayer.showActivity('Opening project in read-only mode', activityId);
 
       try {
-        const loaded = await LocalProjectsModel.instance.loadProject(project);
+        let explained = false;
+        const loaded = await LocalProjectsModel.instance.loadProject(project, { onRefused: () => (explained = true) });
         ToastLayer.hideActivity(activityId);
 
         if (!loaded) {
-          ToastLayer.showError("Couldn't load project.");
+          if (!explained) ToastLayer.showError("Couldn't load project.");
           return;
         }
 

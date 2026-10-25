@@ -41,3 +41,22 @@ export function describeFormatCopyFailure(reason: string): string {
     `The copy couldn't be made, so the project wasn't opened and nothing in it was changed. (${reason})`
   );
 }
+
+/**
+ * P112-S11-REFUSALWORDS — the refusal shown for a project saved in a format newer than this editor reads.
+ *
+ * It used to say *"saved with a newer version of Noodl"* and link noodl.net, the original product, with no number in
+ * it. This names NodeGX, both formats, and the NodeGX download page (the site forwards `/download` to its download
+ * block, which a release keeps current). The message is HTML: `showErrorModal` renders it.
+ */
+export const NODEGX_DOWNLOAD_URL = 'https://nodegx.io/download';
+
+export function describeNewerFormat(version: unknown, supported: number): { title: string; message: string } {
+  return {
+    title: 'This project needs a newer NodeGX',
+    message:
+      `A newer version of NodeGX saved this project, in project format ${String(version)}. ` +
+      `This version opens formats up to ${supported}, so it has not opened the project or changed it.<br/><br/>` +
+      `<a href="${NODEGX_DOWNLOAD_URL}" target="_blank">Get the latest NodeGX</a> to open it.`
+  };
+}
