@@ -74,14 +74,39 @@ export interface HubOptions {
   maxConnections?: () => number;
   /** Heartbeat comment-frame interval (ms); 0 disables (tests). */
   heartbeatMs?: number;
+  /**
+   * P119-S2-LIVEPATH: how a subscription narrowed by a path or `creator` rule is delivered. Without it such a
+   * subscription is refused, as before.
+   */
+  confirm?: RowConfirm;
+}
+
+/**
+ * P119-S2-LIVEPATH — does `principal`'s own query on `collection`, narrowed to `narrow` the way its rule narrows
+ * `/classes`, return the row `id`? The service answers it with the facade query the routes run, so a change frame and
+ * a query cannot disagree about who sees a row: there is no second matcher to drift.
+ */
+export type RowConfirm = (
+  principal: Principal,
+  collection: string,
+  narrow: Record<string, unknown>,
+  id: string
+) => Promise<boolean>;
+
+/** A subscription as the hub keeps it: what a path or `creator` rule narrows this caller to rides beside it. */
+interface LiveSubscription extends Subscription {
+  narrow?: Record<string, unknown>;
 }
 
 interface Connection {
   clientId: string;
   res: SSEResponse;
   principal: Principal;
-  subscriptions: Subscription[];
+  subscriptions: LiveSubscription[];
   queue: OutFrame[];
+  /** P119-S2-LIVEPATH: frames waiting on a confirmation, delivered in the order their changes happened. */
+  waiting: Promise<void> | null;
+  waitingCount: number;
   nextId: number;
   writable: boolean;
   closed: boolean;
@@ -156,9 +181,11 @@ export class RealtimeHub {
   private readonly heartbeatMs: number;
   private readonly maxConnections: () => number;
   private readonly unsubscribeBus: () => void;
+  private readonly confirm: RowConfirm | undefined;
 
   constructor(bus: ChangeBus, security: HubSecurity, options: HubOptions = {}) {
     this.security = security;
+    this.confirm = options.confirm;
     this.maxQueue = options.maxQueue ?? DEFAULT_MAX_QUEUE;
     this.maxConnections = options.maxConnections ?? (() => 0);
     this.heartbeatMs = options.heartbeatMs ?? DEFAULT_HEARTBEAT_MS;
@@ -202,7 +229,9 @@ export class RealtimeHub {
       writable: true,
       closed: false,
       heartbeat: null,
-      origin
+      origin,
+      waiting: null,
+      waitingCount: 0
     };
     this.connections.set(clientId, conn);
 
@@ -285,7 +314,7 @@ export class RealtimeHub {
     const conn = this.connections.get(clientId);
     if (!conn) return null;
 
-    const accepted: Subscription[] = [];
+    const accepted: LiveSubscription[] = [];
     const rejected: RejectedSubscription[] = [];
 
     for (const sub of requested) {
@@ -300,16 +329,18 @@ export class RealtimeHub {
         rejected.push({ collection, reason: e instanceof UnsupportedFilterError ? e.message : 'invalid filter' });
         continue;
       }
+      let narrow: Record<string, unknown> | undefined;
       if (!this.security.devOpenActive) {
         const decision = this.security.checkClp(conn.principal, collection, 'find');
         if (!decision.allowed) {
           rejected.push({ collection, reason: decision.reason });
           continue;
         }
-        // P116 ONT-004: a path rule narrows rows through a chain the matcher
-        // cannot follow on a change frame. Refused here, by name, rather than
-        // streamed past — a subscriber must never receive what a query excludes.
-        if (decision.narrow) {
+        // P116 ONT-004: a path rule narrows rows through a chain the matcher cannot follow on a change frame.
+        // P119-S2-LIVEPATH: so each change is confirmed by the subscriber's own narrowed query (`confirm`) instead;
+        // a hub given no way to ask still refuses by name rather than streaming past the rule.
+        if (decision.narrow && this.confirm) narrow = decision.narrow;
+        else if (decision.narrow) {
           rejected.push({
             collection,
             reason: `"${collection}" lets you see only some of its rows (a path or "creator" rule), and live updates cannot follow that yet — query it instead`
@@ -334,11 +365,12 @@ export class RealtimeHub {
           continue;
         }
       }
-      accepted.push({ collection, filter: sub.filter });
+      accepted.push(narrow ? { collection, filter: sub.filter, narrow } : { collection, filter: sub.filter });
     }
 
     conn.subscriptions = accepted;
-    return { accepted, rejected };
+    // The rule's narrowing is the hub's to apply, not the client's to read.
+    return { accepted: accepted.map(({ collection, filter }) => ({ collection, filter })), rejected };
   }
 
   // ==========================================================================
@@ -372,13 +404,56 @@ export class RealtimeHub {
         }
         // P112-OWN023-FILEURLHOST: the LISTENER's address, not the writer's — this runs inside the write's request.
         if (record && typeof record === 'object') record = addressFiles(record, conn.origin);
-        this.enqueue(conn, {
-          event: 'change',
-          data: { action: event.action, collection: event.collection, record }
-        });
+        const frame: OutFrame = { event: 'change', data: { action: event.action, collection: event.collection, record } };
+        if (sub.narrow && this.confirm) this.deliverLater(conn, this.narrowedFrame(conn.principal, sub.narrow, event, frame));
+        else if (conn.waitingCount > 0) this.deliverLater(conn, Promise.resolve(frame));
+        else this.enqueue(conn, frame);
         break; // at most one delivery per connection per change
       }
     }
+  }
+
+  /**
+   * P119-S2-LIVEPATH — the frame a narrowed subscriber is owed for one change, or null. A create or update is theirs
+   * when their own narrowed query returns the row. A delete cannot be asked of a query (the row is gone), so it is
+   * read from the record as it was through the rule's last link ({@link deleteChecks}); where that cannot be read,
+   * the subscriber is told to re-query rather than guessed at — the hub's one gap contract.
+   */
+  private async narrowedFrame(
+    principal: Principal,
+    narrow: Record<string, unknown>,
+    event: ChangeEvent,
+    frame: OutFrame
+  ): Promise<OutFrame | null> {
+    const confirm = this.confirm as RowConfirm;
+    if (event.action !== 'delete') return (await confirm(principal, event.collection, narrow, event.id)) ? frame : null;
+    const checks = deleteChecks(narrow, event.collection, event.record);
+    let unread = checks === null;
+    for (const check of checks ?? []) {
+      if (check === true) return frame;
+      if (check === 'unread') unread = true;
+      else if (check !== false && (await confirm(principal, check.collection, check.narrow, check.id))) return frame;
+    }
+    return unread ? { event: 'resync', data: { reason: 'unconfirmed' } } : null;
+  }
+
+  /**
+   * Deliver `decided` once it settles, after every frame already waiting on this connection: confirmations run side
+   * by side, frames leave in the order their changes happened. A confirmation that fails sends a `resync` — the
+   * subscriber re-queries and sees what its rule lets it see — never the frame.
+   */
+  private deliverLater(conn: Connection, decided: Promise<OutFrame | null>): void {
+    conn.waitingCount++;
+    const settled = decided.catch((): OutFrame => ({ event: 'resync', data: { reason: 'unconfirmed' } }));
+    conn.waiting = (conn.waiting ?? Promise.resolve())
+      .then(() => settled)
+      .then((frame) => {
+        if (frame) this.enqueue(conn, frame);
+      })
+      .finally(() => {
+        conn.waitingCount--;
+        if (conn.waitingCount === 0) conn.waiting = null;
+      });
   }
 
   // ==========================================================================
@@ -421,6 +496,67 @@ export class RealtimeHub {
 /** Serialize one frame to the SSE wire, stamping a monotonic per-connection id. */
 function serializeFrame(frame: OutFrame, id: number): string {
   return `id: ${id}\nevent: ${frame.event}\ndata: ${JSON.stringify(frame.data)}\n\n`;
+}
+
+/** A link's value as an id: a pointer, or the id itself. `undefined` for nothing; `null` for a value it cannot read. */
+function linkedId(value: unknown): string | undefined | null {
+  if (value === undefined || value === null || value === '') return undefined;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object' && typeof (value as { objectId?: unknown }).objectId === 'string') {
+    return (value as { objectId: string }).objectId;
+  }
+  return null;
+}
+
+/**
+ * P119-S2-LIVEPATH — how a deleted row is judged against a rule's narrowing, from the record as it was: `true` or
+ * `false` when the record answers it alone, a query to confirm on the collection one link back, or `'unread'` where
+ * neither works (a list or a repeated last hop, a link stored elsewhere). Several narrowings (`$or`) are one each.
+ * `null` when the narrowing is not a shape this knows.
+ *
+ * The last link of a path is the end row's own field naming a row one hop back (`{ from, by }`): the deleted row
+ * was reached exactly when that row is reached by the path without its last hop — the same `$path`, one hop shorter,
+ * narrowing the collection it ends on. Every other narrowing (`creator`'s `owner`) is a condition on the row's own
+ * values, which the record still holds.
+ */
+type DeleteCheck = boolean | 'unread' | { collection: string; narrow: Record<string, unknown>; id: string };
+function deleteChecks(narrow: Record<string, unknown>, collection: string, record: Record<string, unknown>): DeleteCheck[] | null {
+  const keys = Object.keys(narrow);
+  if (keys.length === 1 && keys[0] === '$or' && Array.isArray(narrow.$or)) {
+    const all: DeleteCheck[] = [];
+    for (const one of narrow.$or as Record<string, unknown>[]) all.push(...(deleteChecks(one, collection, record) ?? ['unread']));
+    return all;
+  }
+  if (keys.length === 1 && keys[0] === '$path') {
+    const p = narrow.$path as {
+      from: { collection: string; where?: Record<string, unknown> };
+      hops: Array<Record<string, unknown>>;
+      maxDepth: number;
+    };
+    const last = p.hops[p.hops.length - 1];
+    if (!last || last.repeat || typeof last.by !== 'string' || last.from !== collection) return ['unread'];
+    if (last.where) {
+      try {
+        if (!matchesFilter(last.where as Where, record)) return [false];
+      } catch {
+        return ['unread'];
+      }
+    }
+    const id = linkedId(record[last.by]);
+    if (id === undefined) return [false];
+    if (id === null) return ['unread'];
+    if (p.hops.length === 1) return [{ collection: p.from.collection, narrow: p.from.where ?? {}, id }];
+    const before = p.hops[p.hops.length - 2];
+    const prev = typeof before.from === 'string' ? before.from : typeof before.to === 'string' ? before.to : undefined;
+    if (!prev) return ['unread'];
+    return [{ collection: prev, narrow: { $path: { from: p.from, hops: p.hops.slice(0, -1), maxDepth: p.maxDepth - 1 } }, id }];
+  }
+  if (keys.some((k) => k.startsWith('$'))) return null;
+  try {
+    return [matchesFilter(narrow as Where, record)];
+  } catch {
+    return null;
+  }
 }
 
 /** P116 ONT-012 — does a live filter name `field` anywhere (`$and`/`$or` included)? */

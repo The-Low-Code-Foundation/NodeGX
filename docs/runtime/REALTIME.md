@@ -85,6 +85,15 @@ data: {"action":"create","collection":"Todos","record":{"objectId":"…","title"
   query routes enforce (`canReadRecord`) runs per event per subscriber, so
   realtime can never leak a row a query would hide. (In local `devOpen` mode,
   where queries bypass row ACLs, realtime bypasses them too — for parity.)
+- A collection whose `find` rule lets a person see **only some rows** — a path
+  rule (*"the messages of their own conversations"*) or `"creator"` — streams
+  too. Each create or update is delivered only when the subscriber's own query,
+  narrowed by that rule, returns the row: the same SQL as `/classes`, run once
+  per change per such subscriber. A delete is judged from the row as it was,
+  through the rule's last link (the conversation the message named). Where that
+  cannot be read — a last link followed forwards, a list, a repeated hop — or the
+  check itself fails, the subscriber gets a `resync` (`"unconfirmed"`) instead of
+  the row. Frames still arrive in the order the changes happened.
 
 ## Gaps and reconnection — the honest limits
 
@@ -102,6 +111,8 @@ A `resync` is sent when:
 
 - **Reconnect with a gap** — the connection dropped and reopened (an `EventSource`
   reconnect presents `Last-Event-ID`); events during the gap were not queued.
+- **A change a rule could not confirm** (`unconfirmed`) — see the narrowed
+  collections above.
 - **Slow-client overflow** — a client that stops reading backs up into a
   **bounded per-connection queue**; on overflow the queue is dropped, a single
   `resync` replaces it, and the connection is kept. The server never buffers

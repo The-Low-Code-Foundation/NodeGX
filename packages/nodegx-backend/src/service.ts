@@ -462,9 +462,18 @@ export class BackendService {
     //     events ONCE; the hub fans matching, permission-checked events out over
     //     SSE. WF-005's trigger dispatch will be the bus's second consumer.
     this.changeBus = new ChangeBus(this.persistence.adapter);
+    const facade = this.facade;
+    const security = this.security;
     this.realtime = new RealtimeHub(this.changeBus, this.security, {
       // BAK-009: read live, so raising the cap in ops.json does not need a restart.
-      maxConnections: () => (this.ops ? this.ops.config.rateLimit.realtimeMaxConnections : 0)
+      maxConnections: () => (this.ops ? this.ops.config.rateLimit.realtimeMaxConnections : 0),
+      // P119-S2-LIVEPATH: a narrowed subscriber's change is theirs when the query `/classes` would run for them
+      // returns the row: the same facade read, the same ACL option, the rule's narrowing riding in it.
+      confirm: async (principal, collection, narrow, id) => {
+        const acl = security.aclFor(principal, 'read', { collection, where: narrow }, collection);
+        const found = await facade.rawQuery(collection, { where: { objectId: id }, limit: 1, acl });
+        return found.results.length > 0;
+      }
     });
 
     // 2.6 Triggers (WF-005): the registry loads triggers.json (loud on invalid).
