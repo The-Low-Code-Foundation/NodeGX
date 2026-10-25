@@ -1687,6 +1687,48 @@ async function attachTab({ wsUrl, servePort, settles, label }) {
   };
 }
 
+/** How long Chrome's first page gets to answer once its debugging port is open (P112-OWN026-NESTEDCHROME). */
+const PAGE_ANSWER_MS = Number(process.env.NODEGX_RENDER_PAGE_ANSWER_MS) || 30_000;
+
+/**
+ * P112-OWN026-NESTEDCHROME — the first tab, once it has answered `1`, or an error that says why it never will.
+ *
+ * Inside another macOS sandbox (an agent harness's `sandbox-exec`, a container) Chrome cannot start its own: the
+ * browser process and its debugging port come up, the renderer dies, and every wait on the page ran to the MCP's 240 s
+ * kill, which said only "did not finish". Measured in the OWN-026 lab: the same render takes 8.9 s with Chrome started
+ * `--no-sandbox` through `CHROME_PATH`. `PAGE_ANSWER_MS` is generous for a loaded machine and still an eighth of that.
+ */
+async function pageAnswers(attaching, chromePath) {
+  const neverAnswered = (refused) => {
+    const message =
+      'Chrome started (its debugging port opened) but its page ' +
+      (refused ? `refused the connection (${refused.message || refused}). ` : `never answered within ${Math.round(PAGE_ANSWER_MS / 1000)} s. `) +
+      'That is what Chrome does inside another sandbox (an agent harness that runs commands under sandbox-exec, a ' +
+      'container): its own sandbox cannot start and its pages crash. Run the render outside that sandbox, or set ' +
+      `CHROME_PATH to a script that starts ${chromePath} with --no-sandbox.`;
+    const error = new Error(message);
+    error.problems = [message];
+    error.actionable = true;
+    return error;
+  };
+  if (!attaching) throw neverAnswered();
+  let timer;
+  const deadline = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(neverAnswered()), PAGE_ANSWER_MS);
+  });
+  try {
+    const answered = attaching.then(
+      async (tab) => (await evaluate(tab.client, '1'), tab),
+      (refused) => {
+        throw neverAnswered(refused);
+      }
+    );
+    return await Promise.race([answered, deadline]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function withRenderedPage(options, fn) {
   const { projectDir, backendPort, editorTokens = false, chromeArgs = [], beforeBoot } = options;
 
@@ -1834,7 +1876,10 @@ async function withRenderedPage(options, fn) {
      * a `tab` field; rows from this one do not.
      */
     const settles = [];
-    const main = await attachTab({ wsUrl: target.webSocketDebuggerUrl, servePort, settles });
+    const main = await pageAnswers(
+      target ? attachTab({ wsUrl: target.webSocketDebuggerUrl, servePort, settles }) : undefined,
+      pre.chrome
+    );
     client = main.client;
 
     /**
@@ -2384,6 +2429,7 @@ module.exports = {
   // Exported so a session-teardown hook, a CI step or a spec can reap without
   // starting a drive — the leak outlives the run that caused it.
   reapOrphanedRenderProcesses,
+  pageAnswers,
   routedPages,
   resolvePageRequest,
   reachableComponents,

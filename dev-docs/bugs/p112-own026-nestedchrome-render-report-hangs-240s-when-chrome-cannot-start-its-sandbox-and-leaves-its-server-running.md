@@ -1,10 +1,12 @@
 ---
 id: P112-OWN026-NESTEDCHROME
 title: "Inside a macOS sandbox (sandbox-exec, as agent harnesses run commands), `render_report` and `drive_page` hang for the full 240 s and answer only \"did not finish … and was killed\": Chrome starts but its own sandbox can't, so its renderer crashes and the harness waits forever; the render server it started keeps running after the kill"
-status: open
+status: fixed
+commit: PENDING
 severity: medium
 area: "`@nodegx/mcp` 0.2.5 render harness: `dist/render-harness/measure-from-disk.js` (the Chrome launch: `--headless=new --remote-debugging-port … --disable-gpu`, no `--no-sandbox`, no check that a page target ever answers), `src/render.ts` `spawnRender` (SIGKILLs the harness only, not the `render-from-disk` server or Chrome it started)"
 kit: core
+regression: packages/noodl-mcp/tests/p112NestedChrome.test.ts "the process the harness started is gone with it"
 found: P112 OWN-026 test 1, round t1-nodegx-1, 2026-10-22
 evidence: "dev-docs/tasks/phase-112-your-own-nodegx/own-026/PLAN.md §8 (2026-10-22 14:30); round /Users/Shared/nodegx-lab/own026/t1-nodegx-1.lab-broken-chrome (sittings/1/agent.jsonl: two render_report results 12:05:50 and 12:10:07 UTC, `io-error` \"The render did not finish within 240s and was killed.\"; three `render-from-disk.js` processes 8–17 min old at 12:14 UTC)"
 ---
@@ -37,3 +39,17 @@ Fix, small, either or both:
    harness, so the render server and Chrome go with it.
 
 Workaround: set `CHROME_PATH` to a wrapper that runs Chrome with `--no-sandbox`.
+
+**Fixed (the Beta sweep s8, 2026-10-25), both halves of the small fix.**
+1. `scripts/devtools/render-report.js` `pageAnswers`: once Chrome's port is open, its first page gets `PAGE_ANSWER_MS`
+   (30 s; `NODEGX_RENDER_PAGE_ANSWER_MS` overrides) to attach and answer `1`. If it does not, or refuses the socket, or
+   there is no page target, the render fails as an actionable error: "Chrome started (its debugging port opened) but its
+   page never answered within 30 s. That is what Chrome does inside another sandbox … set CHROME_PATH to a script that
+   starts <chrome> with --no-sandbox." No automatic `--no-sandbox` retry: that is a security choice, left to the person.
+2. `src/render.ts` `spawnRender`: the harness leads its own process group (not on Windows); a timeout sends the group
+   SIGTERM (the harness's own cleanup runs, the server and Chrome stop) and SIGKILL 3 s later, or as soon as the harness
+   has gone, for anything left.
+Graded: `tests/p112NestedChrome.test.ts` 6/6 without a real Chrome (a fake harness that starts a child and hangs; the
+two group cases red on HEAD's `render.ts`, the child surviving); real-Chrome render suites (p125Render1mb, renderTools)
+14/14; mcp tsc clean. Not driven inside `sandbox-exec`. Reaches a stranger with the next `@nodegx/mcp` (the harness ships
+in its `dist/render-harness`).

@@ -2,7 +2,7 @@
 id: NPMAUDIT-MCPREADME
 title: The mcp readme contradicts what the server does
 status: fixed
-commit: PENDING
+commit: 27557936d
 severity: medium
 area: mcp / README
 found: NPMAUDIT stranger audit of the published packages, 2026-10-23

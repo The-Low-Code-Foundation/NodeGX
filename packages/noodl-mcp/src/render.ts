@@ -147,6 +147,9 @@ export interface RenderOptions {
  */
 export const RENDER_TIMEOUT_MS = 240_000;
 
+/** After a timed-out render's SIGTERM, how long its process group gets before SIGKILL. */
+const RENDER_KILL_GRACE_MS = 3_000;
+
 /**
  * Whether a tool may render *without being asked to*.
  *
@@ -374,16 +377,35 @@ function spawnRender(
      * sidecar runs a harness that lives inside `app.asar` with the app's own
      * Electron binary — the variable is what makes that binary a Node.
      */
+    /**
+     * P112-OWN026-NESTEDCHROME — a timeout takes the harness's render server and Chrome down with it. A SIGKILL to the
+     * harness alone skipped its cleanup, and the two it started ran on (three servers 8–17 minutes old in the lab)
+     * until the next render's reaper. So the harness leads its own process group, the group gets SIGTERM (the harness
+     * closes what it opened; the server and Chrome stop on it too), and SIGKILL follows for anything still there.
+     * Not on Windows, where `detached` opens a console and a negative pid means nothing.
+     */
+    const asGroup = process.platform !== 'win32';
     const child = spawn(exec, [entry, ...args], {
       stdio: ['ignore', 'pipe', 'pipe'],
-      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }
+      env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+      detached: asGroup
     });
+    const kill = (signal: NodeJS.Signals) => {
+      try {
+        if (asGroup && child.pid) process.kill(-child.pid, signal);
+        else child.kill(signal);
+      } catch {
+        /* already gone */
+      }
+    };
     let stdout = '';
     let stderr = '';
     let timedOut = false;
+    let hardKill: NodeJS.Timeout | undefined;
     const timer = setTimeout(() => {
       timedOut = true;
-      child.kill('SIGKILL');
+      kill('SIGTERM');
+      hardKill = setTimeout(() => kill('SIGKILL'), RENDER_KILL_GRACE_MS);
     }, timeoutMs);
 
     child.stdout.on('data', (d) => (stdout += d));
@@ -395,6 +417,11 @@ function spawnRender(
     child.on('close', () => {
       clearTimeout(timer);
       if (timedOut) {
+        // the harness is gone; whatever it started is not necessarily, so the SIGKILL still goes to the group
+        if (hardKill) {
+          clearTimeout(hardKill);
+          kill('SIGKILL');
+        }
         reject(new Error(`The render did not finish within ${Math.round(timeoutMs / 1000)}s and was killed.`));
         return;
       }
