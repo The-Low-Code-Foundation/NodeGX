@@ -45,6 +45,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ListProjectsResponse, ProjectListRow } from './responses';
 import { guarded, jsonResult } from './util';
+import { knownProjects, knownProjectsFile } from '../project/knownProjects';
 
 /** Basename `electron-store` gives `new Store({ name: 'recently_opened_project' })`. */
 const STORE_FILENAME = 'recently_opened_project.json';
@@ -204,10 +205,20 @@ export function scanFolderProjects(folder: string = process.cwd()): ProjectListR
 export function scanProjects(candidates?: readonly string[], folder?: string): ProjectScanResult {
   const recent = scanRecentProjects(candidates);
   const seen = new Set(recent.projects.map((p) => p.directory));
-  const projects = [...recent.projects, ...scanFolderProjects(folder).filter((p) => !seen.has(p.directory))].sort((a, b) =>
-    (b.lastOpened ?? '').localeCompare(a.lastOpened ?? '')
-  );
-  return { ...recent, projects };
+  const more: ProjectListRow[] = [];
+  // P125-CCN008-LOSTPROJECT: the projects an agent made or opened, which the editor's list never hears of. When a
+  // directory is in both, the newer opening wins.
+  for (const p of [...knownProjects(), ...scanFolderProjects(folder)]) {
+    if (seen.has(p.directory)) {
+      const row = recent.projects.find((r) => r.directory === p.directory);
+      if (row && p.lastOpened && (row.lastOpened ?? '') < p.lastOpened) row.lastOpened = p.lastOpened;
+      continue;
+    }
+    seen.add(p.directory);
+    more.push(p);
+  }
+  const projects = [...recent.projects, ...more].sort((a, b) => (b.lastOpened ?? '').localeCompare(a.lastOpened ?? ''));
+  return { ...recent, searched: [...recent.searched, knownProjectsFile()], projects };
 }
 
 /**
@@ -283,7 +294,7 @@ export function registerListProjectsTools(server: McpServer, binding?: ProjectBi
       title: 'List NodeGX projects on this machine',
       description:
         'The NodeGX projects this machine has opened, newest first: name, directory, format and when it was ' +
-        'last opened. Read from the launcher\'s recent-projects list and this folder; never written to. Call this ' +
+        'last opened. Read from the launcher\'s list, this folder and the projects made in chats. Call this ' +
         'BEFORE create_project when the user talks about their app as something that already exists — building ' +
         'a second copy beside the real one is not undoable by a tool call, and open_project turns a row of this ' +
         'list into a project this server is serving. An empty list is a valid answer and means this is a fresh ' +

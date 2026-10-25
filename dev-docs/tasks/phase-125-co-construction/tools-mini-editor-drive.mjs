@@ -3,6 +3,7 @@
 //
 //   node tools-mini-editor-drive.mjs 2d <project-copy> <out-dir>   (a copy of a project with Sections/Hero)
 //   node tools-mini-editor-drive.mjs 3d <project-copy> <out-dir>   (a copy of parked/three-in-nodes/fixture + the kit)
+//   node tools-mini-editor-drive.mjs buttons <copy> <out-dir>      (a copy of Richard's Muddy Paws: his AC6 run replayed)
 //
 // Run with the Bash sandbox off (Chrome cannot start its own sandbox inside it). The server is bundled into <out-dir>,
 // never into packages/noodl-mcp/dist (that is the build Claude Desktop runs). Prints one line per check and exits 1
@@ -26,8 +27,8 @@ const { Client } = await req('@modelcontextprotocol/sdk/dist/esm/client/index.js
 const { StdioClientTransport } = await req('@modelcontextprotocol/sdk/dist/esm/client/stdio.js');
 
 const [mode, projectDir, outDir] = process.argv.slice(2);
-if (!['2d', '3d'].includes(mode) || !projectDir || !outDir) {
-  console.log('usage: node tools-mini-editor-drive.mjs 2d|3d <project-copy> <out-dir>');
+if (!['2d', '3d', 'buttons'].includes(mode) || !projectDir || !outDir) {
+  console.log('usage: node tools-mini-editor-drive.mjs 2d|3d|buttons <project-copy> <out-dir>');
   process.exit(2);
 }
 fs.mkdirSync(outDir, { recursive: true });
@@ -73,7 +74,7 @@ const resource = async (uri) => (await client.readResource({ uri })).contents[0]
 
 // ─── The host ────────────────────────────────────────────────────────────────
 const panels = {}; // name -> { html, result }
-const hostHtml = `<!doctype html><body style="margin:0;background:#262624;font:12px monospace;color:#ddd"><pre id="log" style="white-space:pre-wrap;margin:0;padding:6px"></pre><div id="frames"></div><script>
+const hostHtml = `<!doctype html><body style="margin:0;background:#262624;font:12px monospace;color:#ddd"><pre id="log" style="white-space:pre-wrap;margin:0;padding:6px"></pre><div id="frames"></div><div style="height:2400px"></div><script>
 window.results = {}; window.heights = {}; window.messages = []; window.contexts = [];
 window.addPanel = (name, src, result) => {
   window.results[name] = result;
@@ -89,7 +90,7 @@ window.addEventListener('message', (ev) => {
   const reply = (result) => ev.source.postMessage({ jsonrpc: '2.0', id: m.id, result }, '*');
   if (m.method === 'ui/initialize') reply({ protocolVersion: m.params.protocolVersion, hostInfo: { name: 'fake-host', version: '0' }, hostCapabilities: { message: {}, updateModelContext: {} }, hostContext: { displayMode: 'inline', availableDisplayModes: ['inline', 'fullscreen'], theme: 'dark' } });
   else if (m.method === 'ui/notifications/initialized') ev.source.postMessage({ jsonrpc: '2.0', method: 'ui/notifications/tool-result', params: window.results[f.id] }, '*');
-  else if (m.method === 'ui/notifications/size-changed') { window.heights[f.id] = m.params.height; f.style.height = m.params.height + 'px'; }
+  else if (m.method === 'ui/notifications/size-changed') { window.heights[f.id] = m.params.height; (window.heightLog ||= []).push(f.id + ':' + m.params.height); f.style.height = m.params.height + 'px'; }
   else if (m.method === 'ui/message') { window.messages.push({ from: f.id, params: m.params }); log('ui/message from ' + f.id + ': ' + JSON.stringify(m.params)); reply({}); }
   else if (m.method === 'ui/update-model-context') { window.contexts.push({ from: f.id, params: m.params }); reply({}); }
   else if (m.id !== undefined) reply({});
@@ -168,6 +169,185 @@ async function mount(name, uri, result) {
 }
 const MINI_STATE = `JSON.stringify({ id: window.__mini?.id, quiet: window.__mini?.quiet, stage: document.querySelector('.me-stage-note')?.textContent ?? null, hidden: document.querySelector('.me-stage-note')?.hidden, frames: document.querySelectorAll('.me-stage iframe').length, status: window.__mini?.record?.status, error: window.__mini?.error, sent: window.__mini?.sent })`;
 
+// ─── Richard's AC6 run (2026-10-25), replayed on a copy of Muddy Paws ─────────────────────────────────────────────
+async function buttonsRun() {
+  // P125-STU-PROPSPIN: Studio inline — the Properties panel opens on a pick, stays put away through a redraw, opens on
+  // the next pick. The known-firing signal beside "stayed away": #right really redrew (the old shell reopened on that).
+  if (process.env.MINI_DRIVE_CONTROL !== '1') {
+    const studio = await tool('open_studio');
+    check('open_studio answers', !studio.isError, studio.isError ? JSON.stringify(studio.data) : '');
+    await mount('studio1', 'ui://nodegx/studio.html', studio.raw);
+    const side = () => inPanel('studio1', `JSON.stringify({ side: document.documentElement.dataset.side ?? null, hosted: document.documentElement.dataset.hosted ?? null, label: document.getElementById('propsbtn')?.textContent, tab: !!document.getElementById('propsclose') && getComputedStyle(document.getElementById('propsclose')).display })`);
+    await until('Studio draws its tree inline', async () => {
+      const n = await inPanel('studio1', `document.querySelectorAll('#design > aside .row').length`);
+      return typeof n === 'number' && n > 3 ? true : n;
+    }, 90000);
+    await inPanel('studio1', `(document.getElementById('elemsbtn').click(), 1)`);
+    await inPanel('studio1', `([...document.querySelectorAll('#design > aside .row')][2].click(), 1)`);
+    await sleep(800);
+    const s1 = JSON.parse(await side());
+    check('PROPSPIN: a pick opens Properties inline, the strip button says Hide properties, the edge tab shows', s1.hosted === 'inline' && s1.side === 'props' && s1.label === 'Hide properties' && s1.tab === 'block', JSON.stringify(s1));
+    await shot('buttons-00-studio-props.png');
+    await inPanel('studio1', `(document.getElementById('propsclose').click(), 1)`);
+    await sleep(400);
+    const s2 = JSON.parse(await side());
+    check('PROPSPIN: the edge tab puts it away', s2.side === null && s2.label === 'Properties', JSON.stringify(s2));
+    // counted on the DOM: each inPanel call is a fresh isolated world, so a window global would not be read back
+    await inPanel('studio1', `(() => { const r = document.getElementById('right'); r.dataset.mut = '0'; new MutationObserver(() => { r.dataset.mut = String(Number(r.dataset.mut) + 1); }).observe(r, { childList: true }); return 1; })()`);
+    const heroFile = path.join(projectDir, 'components', 'Sections', 'Hero', 'nodes.json');
+    const heroText = fs.readFileSync(heroFile, 'utf8');
+    const hero = JSON.parse(heroText);
+    hero.nodes.find((n) => n.id === 'hero_primary').parameters.label = 'Meet our puppies';
+    fs.writeFileSync(heroFile, JSON.stringify(hero, null, 2));
+    await inPanel('studio1', `(document.getElementById('propsbtn').click(), document.getElementById('propsbtn').click(), 1)`); // open and put away by the strip button
+    await sleep(4000);
+    const s3 = JSON.parse(await side());
+    const redrew = Number(await inPanel('studio1', `document.getElementById('right').dataset.mut`));
+    check('PROPSPIN: put away, it stays away while Studio redraws it (an outside edit)', s3.side === null && redrew > 0, `#right redrew ${redrew}×; ${JSON.stringify(s3)}`);
+    fs.writeFileSync(heroFile, heroText);
+    await inPanel('studio1', `([...document.querySelectorAll('#design > aside .row')][3].click(), 1)`);
+    await sleep(800);
+    const s4 = JSON.parse(await side());
+    check('PROPSPIN: the next pick opens it again', s4.side === 'props', JSON.stringify(s4));
+    await sleep(1500);
+  }
+  const hostScroll = () => evalTop('window.scrollY');
+  const inMini = (expr) => inPanelMain('mini1', expr);
+  const PREVIEW = `window.__mini.preview.frame.contentDocument`;
+  // His call as it was (three text colours that all paint white in Muddy Paws), then the guard beside it.
+  const asRun = {
+    title: 'Hero primary button',
+    ask: "Which button style suits Muddy Paws best? I'll roll the winner out to the nav bar, hero and closing banner.",
+    show: { component: '/Sections/Hero', node: 'hero_primary' },
+    settings: [{ port: 'color', node: 'hero_primary', label: 'Text colour', choices: ['var(--primary-foreground)', 'var(--secondary-foreground)', 'var(--background)'] }]
+  };
+  const replay = await tool('show_mini_editor', asRun);
+  check('WHITESWATCH: his three text colours are said to paint the same white', !replay.isError && /primary-foreground and secondary-foreground and background all paint #ffffff/.test((replay.data.warnings ?? []).join(' ')), JSON.stringify(replay.data.warnings ?? replay.data).slice(0, 200));
+  const refused = await tool('show_mini_editor', { ...asRun, settings: [{ ...asRun.settings[0], choices: ['var(--primary-foreground)', 'var(--brand-ink)'] }] });
+  check('guard: a choice that is no token in the project is refused', refused.isError && /brand-ink\) is not a token/.test(JSON.stringify(refused.data)), JSON.stringify(refused.data).slice(0, 160));
+
+  const args = {
+    title: 'Hero primary button',
+    ask: 'Which button style suits Muddy Paws best?',
+    show: { component: '/Sections/Hero', node: 'hero_primary' },
+    settings: [
+      { port: 'backgroundColor', label: 'Fill colour', scope: 'style', choices: ['var(--primary)', 'var(--primary-hover)', 'var(--secondary)', 'var(--foreground)'] },
+      { port: 'backgroundColor', label: 'Fill on hover', scope: 'style', state: 'hover', choices: ['var(--primary-hover)', 'var(--foreground)'] },
+      { port: 'color', label: 'Text colour', choices: ['var(--primary-foreground)', 'var(--foreground)', 'var(--background)'] },
+      { port: 'borderRadius', label: 'Corner radius', choices: ['var(--radius-full)', 'var(--radius-xl)', 'var(--radius-lg)', 'var(--radius-md)'] },
+      { port: 'boxShadowEnabled', label: 'Lifted shadow', choices: [true, false] }
+    ],
+    variants: [
+      { name: 'Soft pill, lifted', values: { backgroundColor: 'var(--primary)', borderRadius: 'var(--radius-full)', boxShadowEnabled: true } },
+      { name: 'Rounded square', values: { backgroundColor: 'var(--primary)', borderRadius: 'var(--radius-lg)', boxShadowEnabled: false } },
+      { name: 'Tonal, quiet', values: { backgroundColor: 'var(--secondary)', borderRadius: 'var(--radius-full)', boxShadowEnabled: false } }
+    ]
+  };
+  // MINI_DRIVE_CONTROL=1: the drive run from a worktree at the commit before the fix, to show what the old panel did with
+  // the same clicks. The old server has no state or scope, and refuses a port listed twice.
+  if (process.env.MINI_DRIVE_CONTROL === '1') args.settings = args.settings.filter((x) => !x.state).map(({ scope, ...rest }) => rest);
+  const shown = await tool('show_mini_editor', args);
+  check('show_mini_editor answers', !shown.isError, shown.isError ? JSON.stringify(shown.data) : '');
+  if (shown.isError) throw new Error('no editor');
+  console.log(`      warnings: ${JSON.stringify(shown.data.warnings ?? [])}`);
+  const id = shown.data.miniEditorId;
+  await mount('mini1', 'ui://nodegx/mini-editor.html', shown.raw);
+  await until('the mini editor draws the button', async () => {
+    const st = JSON.parse(await inMini(MINI_STATE));
+    return st.id === id && st.frames === 1 && st.hidden === true ? true : st;
+  }, 90000);
+  await sleep(2500);
+  await shot('buttons-01-drawn.png');
+
+  // STAGESCROLL (layout): the stage is the button's height, on the colour behind it, and the frame's page is see-through.
+  const stage = JSON.parse(await inMini(`JSON.stringify((() => { const b = document.querySelector('.me-stage'); const d = ${PREVIEW}; const t = d.querySelector('[data-me-target]'); const r = t.getBoundingClientRect(); return { h: b.clientHeight, bg: getComputedStyle(b).backgroundColor, frame: getComputedStyle(window.__mini.preview.frame).backgroundColor, html: getComputedStyle(d.documentElement).backgroundColor, body: getComputedStyle(d.body).backgroundColor, target: Math.round(r.height), scale: window.__mini.scale }; })())`));
+  check('STAGESCROLL: the stage fits the button (its height + 40 px), not a fixed box', stage.h <= stage.target * stage.scale + 44 && stage.h >= stage.target * stage.scale, JSON.stringify(stage));
+  check('… and stands on the colour behind the button in the app, the frame see-through', stage.bg !== 'rgb(26, 26, 25)' && [stage.frame, stage.html, stage.body].every((c) => c === 'rgba(0, 0, 0, 0)'), JSON.stringify(stage));
+
+  // SCROLLJUMP, with the person's own clicks (CDP mouse events: a click a person makes carries user activation, and a
+  // scroll from a frame of another origin may need it).
+  const realClick = async (finder) => {
+    const f = JSON.parse(await evalTop(`JSON.stringify((() => { const r = document.getElementById('mini1').getBoundingClientRect(); return { x: r.left, y: r.top }; })())`));
+    const e = JSON.parse(await inMini(`JSON.stringify((() => { const el = ${finder}; if (!el) return null; const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })())`));
+    if (!e) throw new Error(`nothing to click: ${finder}`);
+    for (const type of ['mousePressed', 'mouseReleased']) await send('Input.dispatchMouseEvent', { type, x: f.x + e.x, y: f.y + e.y, button: 'left', clickCount: 1 });
+  };
+  const VARIANT = (name) => `[...document.querySelectorAll('.me-variants button')].find((b) => b.textContent === ${JSON.stringify(name)})`;
+  // The instrument is the control run: this drive from a worktree at a0362a33a (MINI_DRIVE_CONTROL=1, the old panel)
+  // reads host scrollY 94 after each of these clicks, Richard's "maybe 100px". An imitation injected into the new panel
+  // does not fire (its page cannot scroll), so it cannot stand in for the old one.
+  await evalTop('window.scrollTo(0, 0)');
+  await evalTop('window.heightLog = []');
+  const clicks = [
+    [VARIANT('Rounded square'), 'a variant'],
+    [`[...document.querySelectorAll('.me-seg button')].find((b) => b.textContent === 'radius-xl')`, 'a corner radius'],
+    [`document.querySelector('[data-key$="hero_primary.color"] .me-swatches button:nth-child(2)')`, 'a text colour']
+  ];
+  for (const [finder, what] of clicks) {
+    await realClick(finder);
+    await sleep(1800);
+    const y = await hostScroll();
+    check(`SCROLLJUMP: picking ${what} leaves the conversation where it was`, y === 0, `host scrollY ${y}`);
+  }
+  console.log(`      the panel's heights over those clicks: ${await evalTop('JSON.stringify(window.heightLog)')}`);
+  const textColour = await inMini(`getComputedStyle(${PREVIEW}.querySelector('[data-me-target]')).color`);
+  check('the picked text colour shows in the live button (foreground)', textColour === 'rgb(15, 23, 42)', textColour);
+  await shot('buttons-02-after-clicks.png');
+
+  // STAGESCROLL (wheel): a wheel over the stage moves nothing inside it.
+  const before = JSON.parse(await inMini(`JSON.stringify({ y: ${PREVIEW}.defaultView.scrollY, top: Math.round(${PREVIEW}.querySelector('[data-me-target]').getBoundingClientRect().top) })`));
+  const at = JSON.parse(await evalTop(`JSON.stringify((() => { const f = document.getElementById('mini1').getBoundingClientRect(); return { x: f.left, y: f.top }; })())`));
+  const inStage = JSON.parse(await inMini(`JSON.stringify((() => { const r = document.querySelector('.me-stage').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })())`));
+  await send('Input.dispatchMouseEvent', { type: 'mouseWheel', x: at.x + inStage.x, y: at.y + inStage.y, deltaX: 0, deltaY: 400 });
+  await sleep(800);
+  const after = JSON.parse(await inMini(`JSON.stringify({ y: ${PREVIEW}.defaultView.scrollY, top: Math.round(${PREVIEW}.querySelector('[data-me-target]').getBoundingClientRect().top) })`));
+  check('STAGESCROLL: a wheel over the stage leaves the button where it is', after.y === before.y && after.top === before.top, `${JSON.stringify(before)} → ${JSON.stringify(after)}; host scrollY ${await hostScroll()}`);
+  await evalTop('window.scrollTo(0, 0)');
+
+  // WHITESWATCH: every swatch paints.
+  const swatches = JSON.parse(await inMini(`JSON.stringify([...document.querySelectorAll('.me-swatches button')].map((b) => getComputedStyle(b).backgroundColor))`));
+  check('WHITESWATCH: every swatch is painted (none transparent)', swatches.length > 0 && swatches.every((c) => !/rgba\(0, 0, 0, 0\)/.test(c)), swatches.join(' '));
+
+  // NOSTATES: the looks, and the runtime's own states drawn on the button.
+  const looks = await inMini(`[...document.querySelectorAll('.me-looks button')].map((b) => b.textContent).join(',')`);
+  check('NOSTATES: the button can be seen Normal, Hover, Pressed, Disabled', looks === 'Normal,Hover,Pressed,Disabled', looks);
+  const look = async (name) => {
+    await inMini(`([...document.querySelectorAll('.me-looks button')].find((b) => b.textContent === ${JSON.stringify(name)}).click(), 1)`);
+    await sleep(700);
+    return JSON.parse(await inMini(`JSON.stringify((() => { const t = ${PREVIEW}.querySelector('[data-me-target]'); const cs = getComputedStyle(t); return { bg: cs.backgroundColor, opacity: cs.opacity }; })())`));
+  };
+  const normal = await look('Normal');
+  const disabled = await look('Disabled');
+  check("NOSTATES: Disabled draws the project's disabled look (opacity 0.5)", disabled.opacity === '0.5', `${JSON.stringify(normal)} → ${JSON.stringify(disabled)}`);
+  await inMini(`(document.querySelector('[data-key$="@hover"] .me-swatches button:nth-child(2)').click(), 1)`);
+  await sleep(1500);
+  const hover = JSON.parse(await inMini(`JSON.stringify((() => { const t = ${PREVIEW}.querySelector('[data-me-target]'); return { look: window.__mini.look, bg: getComputedStyle(t).backgroundColor }; })())`));
+  check('NOSTATES: choosing the hover fill shows the button hovered, in that fill (foreground)', hover.look === 'hover' && hover.bg === 'rgb(15, 23, 42)', JSON.stringify(hover));
+  await shot('buttons-03-hover.png');
+  const back = await look('Normal');
+  check('… and Normal draws it as it is again', back.opacity === '1' && back.bg !== 'rgb(15, 23, 42)', JSON.stringify(back));
+
+  // NOSTYLE: the fill is the project's Button style; the hero button gives up its own fill.
+  await inMini(`(document.querySelector('[data-key$="hero_primary.backgroundColor"] .me-swatches button:nth-child(3)').click(), 1)`);
+  await sleep(1500);
+  const styles = JSON.parse(fs.readFileSync(path.join(projectDir, 'nodegx.styles.json'), 'utf8'));
+  const btnStyle = styles.variants.find((v) => v.typename === 'net.noodl.controls.button' && !v.name);
+  check('NOSTYLE: the fill is written to the Button style in nodegx.styles.json', btnStyle?.parameters?.backgroundColor === 'var(--secondary)' && btnStyle?.stateParameters?.hover?.backgroundColor === 'var(--foreground)', JSON.stringify(btnStyle));
+  const hero = nodesOf('Sections/Hero').find((n) => n.id === 'hero_primary');
+  check('… and the hero button no longer sets its own fill', hero && !('backgroundColor' in (hero.parameters ?? {})), JSON.stringify(hero?.parameters));
+  const liveFill = await inMini(`getComputedStyle(${PREVIEW}.querySelector('[data-me-target]')).backgroundColor`);
+  check('… and the live button shows the new fill', liveFill === 'rgb(100, 116, 139)', liveFill);
+
+  // NOSHOWBACK: Approve asks to see the result, and names the buttons that keep their own fill.
+  await inMini(`(document.querySelector('.me-primary').click(), 1)`);
+  await until('Approve sends a message', async () => (Number(await evalTop('window.messages.length')) > 0 ? true : 'none'), 15000);
+  const msg = await evalTop('window.messages[0]?.params?.content?.[0]?.text');
+  console.log(`      message: ${msg}`);
+  check('NOSHOWBACK: the message asks to see the result in the app', /show me the result in the app\.$/.test(msg ?? ''), msg);
+  check("NOSTYLE: … says it is the project's style and who keeps their own fill", /That is the project's style now\. These keep their own setting instead: .*nb_cta|Primary action in NavBar/.test(msg ?? ''), msg);
+  await shot('buttons-04-approved.png');
+}
+
 try {
   let list;
   for (let t = 0; t < 50; t++) {
@@ -198,6 +378,8 @@ try {
   check('the server says the client renders MCP Apps', /renders MCP Apps: yes/.test(serverLog), serverLog.split('\n').find((l) => /client claude/.test(l))?.slice(0, 90) ?? '');
   check('show_mini_editor and get_mini_editor are in the first tool list (Desktop indexes once)', tools.includes('show_mini_editor') && tools.includes('get_mini_editor'));
 
+  if (mode === 'buttons') await buttonsRun();
+  else {
   // 1. Studio first, as a turn that builds would have it.
   const studio = await tool('open_studio');
   check('open_studio answers', !studio.isError, studio.isError ? JSON.stringify(studio.data) : studio.data.onScreen);
@@ -358,6 +540,7 @@ try {
   await shot(`${mode}-04-whole-conversation.png`);
   const heights = await evalTop('JSON.stringify(window.heights)');
   console.log(`      panel heights: ${heights}`);
+  }
 } catch (e) {
   check('the drive ran', false, e.stack);
 } finally {

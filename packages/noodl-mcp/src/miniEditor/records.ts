@@ -131,16 +131,29 @@ export function changeLines(record: MiniEditorRecord): string[] {
  * What the panel sends into the conversation as the person's message when they decide. Written for the agent to act
  * on and for the person to recognise as theirs: the outcome, what they changed, their note, and the id.
  */
-export function decisionMessage(record: MiniEditorRecord): string {
+export function decisionMessage(record: MiniEditorRecord, extra: { keepingTheirOwn?: string[] } = {}): string {
   const d = record.decision;
   const outcome =
     d?.outcome === 'approved' ? 'Approved' : d?.outcome === 'not-that' ? 'Not that' : d?.outcome === 'done' ? 'Done with' : 'About';
   const lines = changeLines(record);
+  const styled = record.controls.some((c) => c.scope === 'style' && record.changes[c.key]);
+  const keeping = extra.keepingTheirOwn ?? [];
+  // P125-CCN008-NOSHOWBACK (Richard's run, 2026-10-25): after Approve the agent rolled the choice out and described it
+  // in words; he had to ask to see it. The person's message asks for it, in the person's words.
+  const next =
+    d?.outcome === 'not-that'
+      ? ' Show me another option.'
+      : d?.outcome === 'approved' || d?.outcome === 'done'
+        ? ' Apply it where it belongs, then show me the result in the app.'
+        : '';
   return (
     `${outcome}: "${record.title}" (mini editor ${record.id}).` +
     (d?.variant ? ` I picked "${d.variant}".` : '') +
     (lines.length > 0 ? ` I changed: ${lines.join('; ')}.` : ' I changed nothing.') +
-    (d?.note ? ` ${d.note.trim()}` : '')
+    (styled ? ' That is the project\'s style now.' : '') +
+    (styled && keeping.length > 0 ? ` These keep their own setting instead: ${keeping.slice(0, 8).join('; ')}.` : '') +
+    (d?.note ? ` ${d.note.trim()}` : '') +
+    next
   );
 }
 

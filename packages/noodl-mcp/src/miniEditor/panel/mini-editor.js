@@ -263,7 +263,14 @@ function liveSet(control, value) {
   const node = comp && comp.getNodeWithId(id);
   if (!node) return false;
   try {
-    node.setParameter(control.port, value === undefined ? control.default : value);
+    if (control.state) {
+      // A visual state's value: `null` is "as normal" (the state's own value goes). The part shows that state now.
+      node.setParameter(control.port, value === null ? undefined : value, control.state);
+      showLook(control.state);
+    } else {
+      node.setParameter(control.port, value === undefined || value === null ? control.default : value);
+      setTimeout(applyLook, 0);
+    }
     if (state.record.stage.kind === '3d') setTimeout(focus3d, 60);
     else relayout(150);
     return true;
@@ -271,6 +278,57 @@ function liveSet(control, value) {
     return false;
   }
 }
+
+/** The running instances of the part (a placed copy's inner node too: the runtime finds it from the root). */
+function instancesOf(id) {
+  const rt = runtime();
+  const ctx = rt && (rt.context || rt);
+  const top = ctx && ctx.rootComponent;
+  try {
+    return top && top.nodeScope ? top.nodeScope.getNodesWithIdRecursive(id) || [] : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+/**
+ * P125-CCN008-NOSTATES (Richard: "I would have expected to see the hover and clicked / disabled variants"): the part
+ * is drawn in the look the person picked, with the runtime's own visual states, so a hover colour left over from an
+ * earlier edit shows here and not only on the live site. While a look is held the pointer cannot change it.
+ */
+function applyLook() {
+  const stage = state.record && state.record.stage;
+  if (!stage || !stage.target || !stage.states) return;
+  const look = state.look || 'normal';
+  const id = state.rootAlias && state.rootAlias.from === stage.target ? state.rootAlias.to : stage.target;
+  for (const inst of instancesOf(id)) {
+    if (!inst || typeof inst.setVisualStates !== 'function') continue;
+    try {
+      inst.setVisualStates(['__mini']); // a change of states, so the next call reads its values again
+      if (look === 'normal') {
+        inst.setVisualStates([]);
+        if (typeof inst._updateVisualState === 'function') inst._updateVisualState();
+      } else inst.setVisualStates([look]);
+    } catch (e) {
+      /* a node without states draws as it is */
+    }
+  }
+  const doc = state.preview && state.preview.frame && state.preview.frame.contentDocument;
+  const el = doc && doc.querySelector('[data-me-target]');
+  if (el) {
+    if (look === 'normal') el.removeAttribute('data-me-forced');
+    else el.setAttribute('data-me-forced', '');
+  }
+}
+
+function showLook(look) {
+  state.look = look;
+  if (ui && ui.looks) for (const b of ui.looks.querySelectorAll('button')) b.setAttribute('aria-checked', b.dataset.look === look ? 'true' : 'false');
+  applyLook();
+}
+
+const LOOK_WORDS = { normal: 'Normal', hover: 'Hover', pressed: 'Pressed', focused: 'Focused', disabled: 'Disabled' };
+const WHEN_WORDS = { hover: 'on hover', pressed: 'when pressed', focused: 'when focused', disabled: 'when disabled' };
 
 const FOCUS_CSS =
   '[data-me-focus]{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;max-width:none!important;' +
@@ -377,6 +435,7 @@ async function rebuildStage() {
     } else {
       // Fonts and images arrive after the first draw and move the part: measure again as they land.
       for (const ms of [0, 300, 900, 2000]) setTimeout(layout2d, ms);
+      setTimeout(applyLook, 350);
     }
   } catch (e) {
     setStageNote(`The preview did not draw: ${e.message}`);
@@ -392,10 +451,48 @@ async function rebuildStage() {
 const APP_WIDTH = 1100;
 const APP_HEIGHT = 900;
 const STAGE_MAX = 440;
-const STAGE_PAD = 16;
+const STAGE_PAD = 20;
+// Only the part is drawn, on the colour it sits on in the app (the stage paints it: the frame's page is see-through),
+// and nothing in the frame scrolls (P125-CCN008-STAGESCROLL: a wheel over the stage scrolled the app inside it, the
+// part went and a white page was left). 🔴 A frame whose colour scheme differs from the page holding it is painted
+// opaque by the browser, so the frame's page says `normal`, as the frame element does (mini-editor.css).
 const TARGET_CSS =
   'body *{visibility:hidden!important}[data-me-target],[data-me-target] *{visibility:visible!important}' +
-  '*{scrollbar-width:none!important}::-webkit-scrollbar{display:none!important}';
+  '*{scrollbar-width:none!important}::-webkit-scrollbar{display:none!important}' +
+  ':root{color-scheme:normal!important}html,body{background:transparent!important;overflow:hidden!important}' +
+  '[data-me-noscroll]{overflow:hidden!important}[data-me-forced],[data-me-forced] *{pointer-events:none!important}';
+
+/** What the part sits on in the app: the first thing behind it that paints, read before the page is made see-through. */
+function backdropOf(el, win) {
+  for (let p = el.parentElement; p; p = p.parentElement) {
+    const cs = win.getComputedStyle(p);
+    if (cs.backgroundImage && cs.backgroundImage !== 'none') return { image: cs.backgroundImage, color: cs.backgroundColor };
+    if (cs.backgroundColor && !/^(transparent|rgba\(0, 0, 0, 0\))$/.test(cs.backgroundColor)) return { color: cs.backgroundColor };
+  }
+  return { color: '#ffffff' };
+}
+
+/**
+ * The part brought to the top of the frame's page by moving only that page's own scrollers.
+ * 🔴 P125-CCN008-SCROLLJUMP: never `scrollIntoView` here. It scrolls every scrollable box above the element, the
+ * frames above it included, so on every change the person made Desktop's chat moved until the part's top met the top
+ * of the chat (Richard: "the chat scroll jumps down every time").
+ */
+function bringToTop(el, doc) {
+  const win = doc.defaultView;
+  for (let p = el.parentElement; p && p !== doc.body && p !== doc.documentElement; p = p.parentElement) {
+    if (p.scrollHeight <= p.clientHeight + 1 && p.scrollWidth <= p.clientWidth + 1) continue;
+    const cs = win.getComputedStyle(p);
+    if (!/(auto|scroll|hidden|overlay)/.test(`${cs.overflowX} ${cs.overflowY}`)) continue;
+    const pr = p.getBoundingClientRect();
+    const er = el.getBoundingClientRect();
+    p.scrollTop += er.top - pr.top;
+    p.scrollLeft += er.left - pr.left;
+    p.setAttribute('data-me-noscroll', '');
+  }
+  const er = el.getBoundingClientRect();
+  if (er.top < 0 || er.bottom > win.innerHeight) win.scrollTo(win.scrollX, win.scrollY + er.top);
+}
 
 function layout2d() {
   const box = $('.me-stage');
@@ -407,27 +504,35 @@ function layout2d() {
   const target = state.record.stage.target;
   let rect = null;
   if (target) {
-    if (!doc.getElementById('me-target-css')) {
-      const st = doc.createElement('style');
-      st.id = 'me-target-css';
-      st.textContent = TARGET_CSS;
-      doc.head.appendChild(st);
-    }
     const els = (state.preview.elementsOf ? state.preview.elementsOf(target) : []).filter((e) => {
       const r = e.getBoundingClientRect && e.getBoundingClientRect();
       return r && r.width > 0 && r.height > 0;
     });
     const el = els[0];
+    if (el && !doc.getElementById('me-target-css')) {
+      state.backdrop = backdropOf(el, doc.defaultView);
+      const st = doc.createElement('style');
+      st.id = 'me-target-css';
+      st.textContent = TARGET_CSS;
+      doc.head.appendChild(st);
+    }
     for (const x of doc.querySelectorAll('[data-me-target]')) if (x !== el) x.removeAttribute('data-me-target');
     if (el) {
       el.setAttribute('data-me-target', '');
-      el.scrollIntoView({ block: 'start', inline: 'nearest' });
+      if (state.look && state.look !== 'normal') el.setAttribute('data-me-forced', '');
+      bringToTop(el, doc);
       rect = el.getBoundingClientRect();
       state.targetFound = true;
     } else {
       state.targetFound = false;
     }
   }
+  const bd = rect && state.backdrop;
+  box.style.background = bd ? (bd.image ? `${bd.image} center / cover, ${bd.color}` : bd.color) : '';
+  // 🔴 The preview kit gives its frame an inline white background (`noodl-preview` inPage `mountPreview`), which beats
+  // any stylesheet: measured as a white slab beside the part in the first drive of this fix.
+  state.preview.frame.style.background = bd ? 'transparent' : '';
+  state.preview.frame.style.colorScheme = bd ? 'normal' : '';
   let s;
   let tx;
   let ty;
@@ -478,6 +583,7 @@ function commit(control, value, delay) {
 
 function setValue(control, value, { live = true, save = true, delay = 0 } = {}) {
   state.values[control.key] = value;
+  if (control.state && state.look !== control.state) showLook(control.state);
   const took = live ? liveSet(control, value) : true;
   if (save) {
     commit(control, value, delay);
@@ -514,7 +620,7 @@ const isToken = (v) => typeof v === 'string' && /^var\(--[\w-]+\)$/.test(v);
 
 function controlEl(c) {
   const v = state.values[c.key];
-  const wrap = h('div', { class: `me-field me-${c.control}`, 'data-key': c.key });
+  const wrap = h('div', { class: `me-field me-${c.control}${c.state ? ' me-stated' : ''}`, 'data-key': c.key });
   const label = h('label', { class: 'me-label', title: c.description || '' }, c.label, h('span', { class: 'me-flash', 'aria-live': 'polite' }));
   wrap.append(label);
   const id = `f-${c.key.replace(/[^\w]/g, '_')}`;
@@ -644,6 +750,29 @@ function controlEl(c) {
     input.addEventListener('input', () => setValue(c, input.value, { delay: 600 }));
     wrap.append(input);
   }
+  if (c.state) {
+    // A state's value can go: the part then looks as it does normally in that state.
+    const same = v === null || v === undefined;
+    wrap.append(
+      h(
+        'button',
+        {
+          type: 'button',
+          class: 'me-link me-asnormal',
+          'aria-pressed': same ? 'true' : 'false',
+          onclick: () => {
+            setValue(c, null);
+            render();
+          }
+        },
+        same ? `As normal ${WHEN_WORDS[c.state] || c.state}` : 'Back to as normal'
+      )
+    );
+  } else if (c.states && !state.record.controls.some((x) => x.node === c.node && x.port === c.port && x.state)) {
+    // What a state shows instead, when the editor has no setting for it: the person sees why Hover looks different.
+    const shown = Object.entries(c.states).map(([s, val]) => `${LOOK_WORDS[s] || s}: ${typeof val === 'string' ? val.replace(/^var\(--([\w-]+)\)$/, '$1') : JSON.stringify(val)}`);
+    wrap.append(h('p', { class: 'me-stateline', title: 'This look changes it; press the look above the options to see it' }, shown.join(' · ')));
+  }
   return wrap;
 }
 
@@ -736,6 +865,7 @@ function skeleton() {
     head: h('header', { class: 'me-head' }),
     ask: h('p', { class: 'me-ask' }),
     stage: h('div', { class: 'me-stage' }, h('p', { class: 'me-stage-note', hidden: !state.stageNote }, state.stageNote)),
+    looks: h('div', { class: 'me-looks', role: 'radiogroup', 'aria-label': 'Show it as', hidden: true }),
     variants: h('div', { class: 'me-variants', role: 'radiogroup', 'aria-label': 'Options' }),
     fields: h('div', { class: 'me-fields' }),
     changed: h('p', { class: 'me-changed' }),
@@ -744,7 +874,7 @@ function skeleton() {
     err: h('p', { class: 'me-errline', hidden: true }),
     foot: h('footer', { class: 'me-foot' })
   };
-  card.append(ui.head, ui.ask, ui.stage, ui.variants, ui.fields, ui.changed, ui.note, ui.actions, ui.err, ui.foot);
+  card.append(ui.head, ui.ask, ui.stage, ui.looks, ui.variants, ui.fields, ui.changed, ui.note, ui.actions, ui.err, ui.foot);
   root.textContent = '';
   root.append(ui.msg, ui.quiet, card);
 }
@@ -782,6 +912,19 @@ function render(opts) {
   ui.stage.dataset.kind = r.stage.kind;
   fill(ui.head, h('h1', {}, r.title), h('span', { class: `me-chip me-${r.status}` }, OUTCOME_WORDS[r.status] || r.status));
   fill(ui.ask, r.ask);
+  const looks = r.stage.states && r.stage.target ? ['normal'].concat(r.stage.states) : [];
+  ui.looks.hidden = looks.length === 0;
+  fill(
+    ui.looks,
+    h('span', { class: 'me-label' }, 'Show it'),
+    looks.map((l) =>
+      h(
+        'button',
+        { type: 'button', role: 'radio', 'data-look': l, 'aria-checked': (state.look || 'normal') === l ? 'true' : 'false', onclick: () => showLook(l) },
+        LOOK_WORDS[l] || l
+      )
+    )
+  );
   ui.variants.hidden = !(r.variants && r.variants.length);
   fill(
     ui.variants,

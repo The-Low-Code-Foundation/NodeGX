@@ -263,7 +263,10 @@ describe('CCN-008 — a mini editor on a 2D part (demo-app)', () => {
       note: 'Love it.'
     });
     expect(d.body.status).toBe('approved');
-    expect(d.body.message).toMatch(new RegExp(`^Approved: "Decided" \\(mini editor ${shown.miniEditorId}\\)\\. I changed: Title size .* → 40px\\. Love it\\.$`));
+    // P125-CCN008-NOSHOWBACK: the person's message asks to see the result, as Richard had to ask by hand.
+    expect(d.body.message).toMatch(
+      new RegExp(`^Approved: "Decided" \\(mini editor ${shown.miniEditorId}\\)\\. I changed: Title size .* → 40px\\. Love it\\. Apply it where it belongs, then show me the result in the app\\.$`)
+    );
     const again = await call<Shown & { status: string; reopened: boolean }>(s, 'show_mini_editor', { reopen: shown.miniEditorId });
     expect(again.isError).toBe(false);
     expect(again.data).toMatchObject({ miniEditorId: shown.miniEditorId, status: 'approved', reopened: true });
@@ -414,5 +417,174 @@ describe('CCN-008 — a mini editor on a 3D model (three-kit)', () => {
     expect(r.status).toBe(400);
     const ok = await post<{ ok: boolean }>(s, `/__nodegx/mini/e/${d.miniEditorId}/set`, { key: view.body.record.controls[0].key, value: '#3742fa' });
     expect(ok.status).toBe(200);
+  });
+});
+
+/**
+ * Richard's Muddy Paws run in Claude Desktop (2026-10-25), replayed on the demo app made to look like it: a Button on
+ * the project's tokens, a Button style whose hover is red from an earlier edit, and a second Button elsewhere.
+ */
+describe('CCN-008 AC6 findings — the button options run', () => {
+  let s: Session;
+  const homeNodes = () => path.join(s.projectDir, 'components', 'Pages', 'Home', 'nodes.json');
+  type N = { id: string; type: string; label?: string; parent?: string; children?: string[]; parameters?: Record<string, unknown>; stateParameters?: Record<string, Record<string, unknown>> };
+  const readHome = () => JSON.parse(fs.readFileSync(homeNodes(), 'utf8')) as { nodes: N[] };
+  const readStyles = () =>
+    JSON.parse(fs.readFileSync(path.join(s.projectDir, 'nodegx.styles.json'), 'utf8')) as {
+      variants: Array<{ typename: string; name?: string; parameters?: Record<string, unknown>; stateParameters?: Record<string, Record<string, unknown>> }>;
+    };
+
+  beforeAll(async () => {
+    const dir = copyFixture();
+    const projectFile = path.join(dir, 'nodegx.project.json');
+    const project = JSON.parse(fs.readFileSync(projectFile, 'utf8')) as Record<string, unknown>;
+    const token = (name: string, value: string) => ({ name, value, category: 'color-semantic', isCustom: true });
+    project.metadata = {
+      designTokens: {
+        version: 1,
+        customTokens: [
+          token('--primary', '#1d4ed8'),
+          token('--primary-hover', '#1e40af'),
+          token('--primary-foreground', '#ffffff'),
+          token('--background', '#ffffff'),
+          token('--foreground', '#0f172a')
+        ]
+      }
+    };
+    fs.writeFileSync(projectFile, JSON.stringify(project, null, 2));
+    fs.writeFileSync(
+      path.join(dir, 'nodegx.styles.json'),
+      JSON.stringify({
+        $schema: 'https://opennoodl.dev/schemas/styles-v2.json',
+        variants: [{ typename: 'net.noodl.controls.button', parameters: { borderRadius: '8px' }, stateParameters: { hover: { backgroundColor: '#ff0000' } } }]
+      })
+    );
+    const file = path.join(dir, 'components', 'Pages', 'Home', 'nodes.json');
+    const home = JSON.parse(fs.readFileSync(file, 'utf8')) as { nodes: N[] };
+    const btn = home.nodes.find((n) => n.id === 'btn')!;
+    btn.parameters = { ...btn.parameters, color: 'var(--primary-foreground)' };
+    home.nodes.push({ id: 'btn2', type: 'net.noodl.controls.button', label: 'Other Button', parent: btn.parent, parameters: { label: 'Other', backgroundColor: '#00ff00' } });
+    home.nodes.find((n) => n.id === btn.parent)!.children!.push('btn2');
+    fs.writeFileSync(file, JSON.stringify(home, null, 2));
+    s = await connectWithProxy(dir);
+    await reveal(s, 'project');
+  });
+  afterAll(async () => {
+    await s.close();
+  });
+
+  type Ctl = { key: string; port: string; state?: string; value: unknown; swatches?: Array<{ value: string; css: string }>; states?: Record<string, unknown> };
+  const controlsOf = async (id: string) => (await get<{ record: { controls: Ctl[]; stage: { states?: string[] } } }>(s, `/__nodegx/mini/e/${id}`)).body.record;
+
+  it('🔴 P125-CCN008-WHITESWATCH: every colour the agent offers is painted with what it resolves to; two that paint the same are a warning', async () => {
+    const r = await call<Shown & { warnings?: string[] }>(s, 'show_mini_editor', {
+      title: 'Text colour',
+      ask: 'Which text colour?',
+      show: { component: '/Pages/Home', node: 'btn' },
+      settings: [{ port: 'color', label: 'Text colour', choices: ['var(--primary-foreground)', 'var(--background)', 'var(--foreground)'] }]
+    });
+    expect(r.isError).toBe(false);
+    const rec = await controlsOf(r.data.miniEditorId);
+    // the control: in the run, `background` (the second token painting white) was painted "var(--background)": nothing
+    expect(rec.controls[0].swatches!.map((w) => w.css)).toEqual(['#ffffff', '#ffffff', '#0f172a']);
+    expect(r.data.warnings?.join(' ')).toMatch(/Text colour: primary-foreground and background all paint #ffffff/);
+  });
+
+  it('a guard beside WHITESWATCH: a choice that is no token in the project at all is refused, naming the colour tokens it has', async () => {
+    const before = fs.existsSync(path.join(s.projectDir, '.nodegx', 'mini-editors')) ? fs.readdirSync(path.join(s.projectDir, '.nodegx', 'mini-editors')).length : 0;
+    const r = await call<Refusal>(s, 'show_mini_editor', {
+      title: 'x',
+      ask: 'y',
+      show: { component: '/Pages/Home', node: 'btn' },
+      settings: [{ port: 'color', choices: ['var(--primary-foreground)', 'var(--brand-ink)'] }]
+    });
+    expect(r.isError).toBe(true);
+    expect(r.data.error.message).toMatch(/var\(--brand-ink\) is not a token in this project/);
+    expect(r.data.error.message).toMatch(/primary-foreground/);
+    const after = fs.existsSync(path.join(s.projectDir, '.nodegx', 'mini-editors')) ? fs.readdirSync(path.join(s.projectDir, '.nodegx', 'mini-editors')).length : 0;
+    expect(after).toBe(before);
+  });
+
+  it('🔴 P125-CCN008-NOSTATES: a button is staged with its looks, a hover that hides the choice is said, and a hover setting writes the hover', async () => {
+    const plain = await call<Shown & { warnings?: string[]; states?: string[] }>(s, 'show_mini_editor', {
+      title: 'Fill',
+      ask: 'Which fill?',
+      show: { component: '/Pages/Home', node: 'btn' },
+      settings: [{ port: 'backgroundColor', label: 'Fill colour', choices: ['var(--primary)', 'var(--foreground)'] }]
+    });
+    expect(plain.data.states).toEqual(['normal', 'hover', 'pressed', 'disabled']);
+    const rec = await controlsOf(plain.data.miniEditorId);
+    expect(rec.stage.states).toEqual(['hover', 'pressed', 'disabled']);
+    expect(rec.controls[0].states).toEqual({ hover: '#ff0000' }); // the style's red hover, which the node does not override
+    expect(plain.data.warnings?.join(' ')).toMatch(/Fill colour: when hover, .* shows #ff0000 instead/);
+
+    const both = await call<Shown & { warnings?: string[] }>(s, 'show_mini_editor', {
+      title: 'Fill and hover',
+      ask: 'Which fill, and which on hover?',
+      show: { component: '/Pages/Home', node: 'btn' },
+      settings: [
+        { port: 'backgroundColor', label: 'Fill colour', choices: ['var(--primary)', 'var(--foreground)'] },
+        { port: 'backgroundColor', state: 'hover', label: 'Fill on hover', choices: ['var(--primary-hover)', 'var(--foreground)'] }
+      ]
+    });
+    expect(both.isError).toBe(false);
+    expect((both.data.warnings ?? []).join(' ')).not.toMatch(/when hover/);
+    const hover = (await controlsOf(both.data.miniEditorId)).controls.find((c) => c.state === 'hover')!;
+    expect(hover.key).toBe('Pages/Home:btn.backgroundColor@hover');
+    expect(hover.value).toBe('#ff0000');
+    const set = await post<{ value: unknown }>(s, `/__nodegx/mini/e/${both.data.miniEditorId}/set`, { key: hover.key, value: 'var(--primary-hover)' });
+    expect(set.status).toBe(200);
+    expect(readHome().nodes.find((n) => n.id === 'btn')!.stateParameters).toEqual({ hover: { backgroundColor: 'var(--primary-hover)' } });
+    // "as normal": the node's own hover goes, and an empty stateParameters with it
+    await post(s, `/__nodegx/mini/e/${both.data.miniEditorId}/set`, { key: hover.key, value: null });
+    expect(readHome().nodes.find((n) => n.id === 'btn')!.stateParameters).toBeUndefined();
+    // a state on a node that has none is refused
+    const group = await call<Refusal>(s, 'show_mini_editor', { title: 'x', ask: 'y', show: { component: '/Pages/Home', node: 'layout' }, settings: [{ port: 'backgroundColor', state: 'hover' }] });
+    expect(group.data.error.message).toMatch(/not drawn in visual states/);
+  });
+
+  it('🔴 P125-CCN008-NOSTYLE: scope "style" writes the project\'s Button style, drops the part\'s own value, and the decision names who keeps their own', async () => {
+    const nodeOnly = await call<Shown & { warnings?: string[] }>(s, 'show_mini_editor', {
+      title: 'Just this one',
+      ask: '?',
+      show: { component: '/Pages/Home', node: 'btn' },
+      settings: [{ port: 'borderRadius' }]
+    });
+    expect(nodeOnly.data.warnings?.join(' ')).toMatch(/change this one Button only; the project has 2\. .*scope: "style"/);
+
+    // the part sets its own fill, which would beat the style: the style's write takes it off
+    const home = readHome();
+    home.nodes.find((n) => n.id === 'btn')!.parameters!.backgroundColor = 'var(--primary)';
+    fs.writeFileSync(homeNodes(), JSON.stringify(home, null, 2));
+
+    const r = await call<Shown & { warnings?: string[] }>(s, 'show_mini_editor', {
+      title: 'The button style',
+      ask: 'Which button style?',
+      show: { component: '/Pages/Home', node: 'btn' },
+      settings: [
+        { port: 'backgroundColor', label: 'Fill colour', scope: 'style', choices: ['var(--primary)', 'var(--foreground)'] },
+        { port: 'backgroundColor', label: 'Fill on hover', scope: 'style', state: 'hover', choices: ['var(--primary-hover)', 'var(--foreground)'] }
+      ]
+    });
+    expect(r.isError).toBe(false);
+    expect((r.data.warnings ?? []).join(' ')).not.toMatch(/this one Button only/);
+    const rec = await controlsOf(r.data.miniEditorId);
+    const fill = rec.controls.find((c) => !c.state)!;
+    const hover = rec.controls.find((c) => c.state === 'hover')!;
+    expect(fill.value).toBe('var(--primary)'); // what the part shows now: its own value
+    await post(s, `/__nodegx/mini/e/${r.data.miniEditorId}/set`, { key: fill.key, value: 'var(--foreground)' });
+    await post(s, `/__nodegx/mini/e/${r.data.miniEditorId}/set`, { key: hover.key, value: 'var(--primary-hover)' });
+    const style = readStyles().variants.find((v) => v.typename === 'net.noodl.controls.button' && !v.name)!;
+    expect(style.parameters).toEqual({ borderRadius: '8px', backgroundColor: 'var(--foreground)' });
+    expect(style.stateParameters).toEqual({ hover: { backgroundColor: 'var(--primary-hover)' } });
+    const after = readHome().nodes;
+    expect(after.find((n) => n.id === 'btn')!.parameters).not.toHaveProperty('backgroundColor');
+    expect(after.find((n) => n.id === 'btn2')!.parameters!.backgroundColor).toBe('#00ff00'); // the other keeps its own
+    // the panel reads back what the part shows: the style's value now
+    expect((await controlsOf(r.data.miniEditorId)).controls.find((c) => !c.state)!.value).toBe('var(--foreground)');
+
+    const d = await post<{ message: string }>(s, `/__nodegx/mini/e/${r.data.miniEditorId}/decide`, { outcome: 'approved' });
+    expect(d.body.message).toMatch(/That is the project's style now\. These keep their own setting instead: Other Button in Home \(Fill colour\)\./);
+    expect(d.body.message).toMatch(/show me the result in the app\.$/);
   });
 });

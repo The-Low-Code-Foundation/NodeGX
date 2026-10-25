@@ -41,7 +41,7 @@ import { ToolError } from '../errors';
 import { miniEditorRoutes } from '../miniEditor/http';
 import { miniEditorPage } from '../miniEditor/panelSource';
 import { listRecords, newMiniEditorId, readRecord, summarise, updateRecord, writeRecord, type MiniEditorRecord } from '../miniEditor/records';
-import { currentValues, resolveMiniEditor, type MiniEditorInput } from '../miniEditor/spec';
+import { currentValues, resolveMiniEditor, VISUAL_STATES, type MiniEditorInput } from '../miniEditor/spec';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import { ProjectStore } from '../project/ProjectStore';
 import { ensureStudio, findStudio } from '../studio/studioProcess';
@@ -60,7 +60,15 @@ const setting = z.object({
   choices: z.array(z.unknown()).max(24).optional().describe('Only these values (e.g. three colour tokens).'),
   min: z.number().optional(),
   max: z.number().optional(),
-  step: z.number().optional()
+  step: z.number().optional(),
+  state: z
+    .enum(VISUAL_STATES)
+    .optional()
+    .describe('A control\'s look in that state instead of its normal one, e.g. the hover colour of a button.'),
+  scope: z
+    .enum(['node', 'style'])
+    .optional()
+    .describe('"style": change the project\'s style for this element type (every Button that sets nothing itself), not this node only.')
 });
 
 function holdingPage(words: string): string {
@@ -71,7 +79,16 @@ function holdingPage(words: string): string {
 }
 
 function controlsForAgent(record: MiniEditorRecord): Array<Record<string, unknown>> {
-  return record.controls.map((c) => ({ label: c.label, node: c.node, port: c.port, control: c.control, value: c.value }));
+  return record.controls.map((c) => ({
+    label: c.label,
+    node: c.node,
+    port: c.port,
+    ...(c.state ? { state: c.state } : {}),
+    ...(c.scope ? { scope: c.scope } : {}),
+    control: c.control,
+    value: c.value,
+    ...(c.states ? { states: c.states } : {})
+  }));
 }
 
 export function registerMiniEditorTools(rec: McpServer, server: McpServer, binding: ProjectBinding, proxy?: StudioProxy): void {
@@ -110,7 +127,10 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
         'person asks for options or should decide something before you build on it: the look of a sample button, a ' +
         'section, each 3D model in turn. Never draw the options as HTML, a widget or an artifact instead: that is a ' +
         'picture, not their app, and what they pick there changes nothing. The controls come from the part\'s own settings; you choose which, with labels, choices and ranges. ' +
-        'variants: up to 3 named sets of values the person switches between and picks from. It replaces Studio in the ' +
+        'variants: up to 3 named sets of values the person switches between and picks from. A button is shown in its ' +
+        'hover, pressed and disabled looks too: offer those as settings (state) when they change with the normal one. ' +
+        'scope "style" changes the project\'s style for the type (every Button), which is what "the button style" means. ' +
+        'It replaces Studio in the ' +
         'conversation (one live panel): a turn that ends with one needs no open_studio. Call it as the LAST call of your turn, say in a sentence what to look at, and ' +
         'stop: their answer arrives as their next message ("Approved: …"), and get_mini_editor reads it any time. ' +
         'reopen: an earlier editor\'s id, to show it again (they asked for it back, or answered something else first).',
@@ -142,6 +162,7 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
       const dir = binding.require().projectDir;
       const store = new ProjectStore(dir);
       let record: MiniEditorRecord;
+      let warnings: string[] = [];
       if (args.reopen !== undefined) {
         const found = readRecord(dir, args.reopen);
         if (!found) {
@@ -152,6 +173,7 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
         let refreshed = found;
         try {
           const again = resolveMiniEditor(store, found.input);
+          warnings = again.warnings;
           refreshed = updateRecord(dir, found.id, (r) => {
             r.stage = again.stage;
             r.controls = again.controls;
@@ -177,6 +199,7 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
           ...(args.variants ? { variants: args.variants } : {})
         };
         const resolved = resolveMiniEditor(store, input);
+        warnings = resolved.warnings;
         const now = new Date().toISOString();
         record = {
           id: newMiniEditorId(),
@@ -227,6 +250,8 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
         stage: record.stage.nodeName,
         settings: controlsForAgent({ ...record, controls: currentValues(store, record.controls) }),
         ...(record.variants.length ? { variants: record.variants.map((v) => v.name) } : {}),
+        ...(record.stage.states ? { states: ['normal', ...record.stage.states] } : {}),
+        ...(warnings.length ? { warnings } : {}),
         ...(studio === null ? { preview: 'NodeGX Studio is not available, so the panel shows the settings without the live part.' } : {}),
         note:
           (rendersApps
@@ -239,7 +264,10 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
           (viaProxy ? 'You reached it through call_tool, so no panel was drawn: call show_mini_editor by name next time. ' : '') +
           'Say in one sentence what to look at and what to decide, then END YOUR TURN: the person decides in the ' +
           'panel and their answer arrives as their next message. If their next message is about something else, ' +
-          `answer it and offer this editor again (reopen "${record.id}"). Read their answer with get_mini_editor.`
+          `answer it and offer this editor again (reopen "${record.id}"). Read their answer with get_mini_editor. ` +
+          'When they approve: their changes are already in the files; apply the choice where it belongs, then SHOW the ' +
+          'result (open_studio) in that same turn, not only words.' +
+          (warnings.length ? ' Read warnings first: each is something the person would not see.' : '')
       });
     })
   );
@@ -278,7 +306,8 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
             ? `Not answered yet. Offer it again with show_mini_editor({ reopen: "${record.id}" }) when the person is ready.`
             : record.status === 'not-that'
               ? 'They said not that: build what their note says (or ask), then show it again.'
-              : 'Build on their decision. Their changes are already in the project files: re-read the component before you change it.'
+              : 'Build on their decision. Their changes are already in the project files: re-read the component before ' +
+                'you change it. Then show the person the result in the app (open_studio) in the same turn.'
       });
     })
   );

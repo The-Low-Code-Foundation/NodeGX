@@ -28,12 +28,13 @@ import * as fs from 'fs';
 import type * as http from 'http';
 import * as path from 'path';
 
-import type { NodeV2 } from '../editor-deps';
+import type { NodeV2, StylesV2File } from '../editor-deps';
 import { ProjectStore } from '../project/ProjectStore';
 import { findStudio } from '../studio/studioProcess';
+import { STYLES_SCHEMA } from '../tools/elementStyles';
 import { MINI_EDITOR_JS, miniEditorPage } from './panelSource';
 import { decisionMessage, readRecord, updateRecord, type MiniEditorRecord } from './records';
-import { currentValues, refuseValue, type Control } from './spec';
+import { currentValues, refuseValue, styleOf, type Control, type StyleVariant } from './spec';
 
 export const MINI_PREFIX = '/__nodegx/mini/';
 
@@ -129,19 +130,110 @@ export function stageTree(projectDir: string, record: MiniEditorRecord): { files
   return { files, ...(rootAlias ? { rootAlias } : {}) };
 }
 
-/** The person's change, written to the project outside the agent's store. Returns the value as stored. */
+/** `bag[key] = value`, or the key gone for "back to the default / as normal". */
+function put(bag: Record<string, unknown> | undefined, key: string, value: unknown): Record<string, unknown> {
+  const out = { ...(bag ?? {}) };
+  if (value === null || value === undefined) delete out[key];
+  else out[key] = value;
+  return out;
+}
+
+/** A state's bag set or emptied; an empty state is dropped, and so is an empty `stateParameters`. */
+function putState(
+  states: Record<string, Record<string, unknown>> | undefined,
+  state: string,
+  key: string,
+  value: unknown
+): Record<string, Record<string, unknown>> | undefined {
+  const out = { ...(states ?? {}) };
+  const bag = put(out[state], key, value);
+  if (Object.keys(bag).length > 0) out[state] = bag;
+  else delete out[state];
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+/**
+ * The person's change, written to the project outside the agent's store. Returns the value as stored.
+ *
+ * - A node setting: the node's `parameters` (or `stateParameters[state]` for a visual state's value).
+ * - `scope: "style"` (P125-CCN008-NOSTYLE): the style the node wears in `nodegx.styles.json` (its named one, else its
+ *   type's element style, created when there is none), which every node of the type that sets nothing itself
+ *   follows, and which Studio's Styles tab shows. The node's own value for the same setting is dropped in the same
+ *   change: it wins over the style, so keeping it would leave the part the person was looking at unchanged.
+ */
 export function writeSetting(projectDir: string, control: Control, value: unknown): unknown {
   const store = new ProjectStore(projectDir);
   const stored = store.format.readComponent(control.component);
   const files = structuredClone(stored.files);
   const node = (files.nodes.nodes as NodeV2[]).find((n) => n.id === control.node);
   if (!node) throw new Error(`${control.nodeName} is no longer in ${control.legacyName}`);
-  const parameters = { ...(node.parameters ?? {}) };
-  if (value === null || value === undefined) delete parameters[control.port];
-  else parameters[control.port] = value;
-  node.parameters = parameters;
+  const stored_ = value ?? null;
+
+  if (control.scope === 'style') {
+    const styles: StylesV2File = store.readStyles() ?? { $schema: STYLES_SCHEMA };
+    const variants = [...((styles.variants ?? []) as StyleVariant[])];
+    let style = styleOf(variants, node);
+    if (!style) {
+      style = { typename: control.styleType ?? node.type, ...(control.styleName ? { name: control.styleName } : {}), parameters: {} };
+      variants.push(style);
+    }
+    const i = variants.indexOf(style);
+    variants[i] = control.state
+      ? (() => {
+          const next = { ...style, stateParameters: putState(style.stateParameters, control.state, control.port, value) };
+          if (!next.stateParameters) delete next.stateParameters;
+          return next;
+        })()
+      : { ...style, parameters: put(style.parameters, control.port, value) };
+    styles.variants = variants as StylesV2File['variants'];
+    store.writeStyles(styles);
+    // The node's own value goes, so the part shows the style (only if it had one: an untouched component is not rewritten).
+    const had = control.state ? Object.prototype.hasOwnProperty.call(node.stateParameters?.[control.state] ?? {}, control.port) : Object.prototype.hasOwnProperty.call(node.parameters ?? {}, control.port);
+    if (had) {
+      if (control.state) {
+        const next = putState(node.stateParameters, control.state, control.port, null);
+        if (next) node.stateParameters = next;
+        else delete node.stateParameters;
+      } else node.parameters = put(node.parameters, control.port, null);
+      store.writeComponent(stored.key, files);
+    }
+    return stored_;
+  }
+
+  if (control.state) {
+    const next = putState(node.stateParameters, control.state, control.port, value);
+    if (next) node.stateParameters = next;
+    else delete node.stateParameters;
+  } else node.parameters = put(node.parameters, control.port, value);
   store.writeComponent(stored.key, files);
-  return value ?? null;
+  return stored_;
+}
+
+/**
+ * The nodes of a style-scoped setting's type that keep their own value (it wins over the style), other than the part
+ * shown: what the agent and the person should know after the style changed.
+ */
+export function keepingTheirOwn(projectDir: string, controls: Control[]): string[] {
+  const styled = controls.filter((c) => c.scope === 'style');
+  if (styled.length === 0) return [];
+  const store = new ProjectStore(projectDir);
+  const out: string[] = [];
+  for (const row of store.listComponents()) {
+    let nodes: NodeV2[];
+    try {
+      nodes = store.readComponent(row.path).files.nodes.nodes as NodeV2[];
+    } catch {
+      continue;
+    }
+    for (const n of nodes) {
+      const mine = styled.filter((c) => c.styleType === n.type && !(c.node === n.id && c.legacyName === row.legacyName) && (n.variant ?? '') === (c.styleName ?? ''));
+      const kept = mine.filter((c) =>
+        c.state ? Object.prototype.hasOwnProperty.call(n.stateParameters?.[c.state] ?? {}, c.port) : Object.prototype.hasOwnProperty.call(n.parameters ?? {}, c.port)
+      );
+      if (kept.length > 0) out.push(`${n.label ?? n.id} in ${row.legacyName.split('/').pop()} (${[...new Set(kept.map((c) => c.label))].join(', ')})`);
+    }
+  }
+  return out;
 }
 
 function recordChange(record: MiniEditorRecord, control: Control, before: unknown, after: unknown): void {
@@ -252,7 +344,8 @@ export function miniEditorRoutes(projectDir: () => string | undefined, origin: (
         r.status = outcome;
         r.decision = { outcome, at: new Date().toISOString(), ...(note ? { note } : {}), ...(r.variant ? { variant: r.variant } : {}) };
       });
-      return send(res, 200, { ok: true, status: outcome, message: decided ? decisionMessage(decided) : '' });
+      const keeping = decided && outcome !== 'not-that' ? keepingTheirOwn(dir, decided.controls.filter((c) => decided.changes[c.key])) : [];
+      return send(res, 200, { ok: true, status: outcome, message: decided ? decisionMessage(decided, { keepingTheirOwn: keeping }) : '' });
     }
     return send(res, 404, { error: `no mini editor path ${url.pathname}` });
   };
