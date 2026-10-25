@@ -103,12 +103,13 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
   rec.registerTool(
     'show_mini_editor',
     {
-      title: 'Show the person one part of the app to decide about',
+      title: 'Show the person options for one part of the app, live: the real part, not a mock-up',
       description:
         'Show the person one part of the app (a button, a hero, a card, a 3D model) live, with only the settings you ' +
         'choose for them, a question, and Approve / Not that (kind "approve") or Done ("tweak"). Use it whenever the ' +
-        'person should decide something before you build on it: the look of a sample button, a section, each 3D model ' +
-        'in turn. The controls come from the part\'s own settings; you choose which, with labels, choices and ranges. ' +
+        'person asks for options or should decide something before you build on it: the look of a sample button, a ' +
+        'section, each 3D model in turn. Never draw the options as HTML, a widget or an artifact instead: that is a ' +
+        'picture, not their app, and what they pick there changes nothing. The controls come from the part\'s own settings; you choose which, with labels, choices and ranges. ' +
         'variants: up to 3 named sets of values the person switches between and picks from. It replaces Studio in the ' +
         'conversation (one live panel): a turn that ends with one needs no open_studio. Call it as the LAST call of your turn, say in a sentence what to look at, and ' +
         'stop: their answer arrives as their next message ("Approved: …"), and get_mini_editor reads it any time. ' +

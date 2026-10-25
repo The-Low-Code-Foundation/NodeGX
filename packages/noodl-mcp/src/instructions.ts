@@ -225,6 +225,13 @@ export const BOOTSTRAP_INSTRUCTIONS: string =
   'CALL THESE TOOLS THROUGH YOUR MCP CLIENT, never by starting noodl-mcp yourself from a shell or a script: a ' +
   'tool run that way has no host behind it, so it cannot put the app on the person\'s screen (open_studio), and ' +
   'the person cannot stop it. ' +
+  // P125 CCN-008 (2026-10-25, Richard's first run): asked "Can you give me some options for the buttons?" in a NodeGX
+  // conversation, the model drew four HTML mock-ups with Claude Desktop's own visualizer and called no tool here. In
+  // Desktop this server always starts unbound, so this briefing is the only NodeGX text the model holds all
+  // conversation: the door to the real part is said here, or nowhere the model reads before it chooses.
+  'WHEN THE PERSON SHOULD CHOOSE HOW A PART LOOKS (options for the buttons, the hero, a 3D model), show them the ' +
+  'real part with show_mini_editor, its variants being the options they pick from live, never a mock-up drawn as ' +
+  'HTML, a widget or an artifact: a mock-up is not their app, and nothing they pick in it reaches the project. ' +
   // 🔴 F87 — this said "four" and `tools/list` returned five: the four capability
   // tools plus `find_tools`, which stays advertised in this mode. Counted from
   // the manifest now, because the sentence a cold agent reads first is the worst

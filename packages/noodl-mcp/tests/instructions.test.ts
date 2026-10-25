@@ -166,6 +166,25 @@ describe('BST-006 — the unbound briefing', () => {
   it('is a fraction of the bound briefing', () => {
     // Not a budget, a shape check: if this ever approaches the bound text's
     // length, somebody has started teaching authoring here.
-    expect(BOOTSTRAP_INSTRUCTIONS.length).toBeLessThan(golden('deferred').length * 0.7);
+    //
+    // P125-BRIEFSHAPE (settled 2026-10-25, CCN-008): the ceiling was 70% and two P125 sentences took the briefing
+    // past it, neither about authoring: call the tools through your client (CCN-001 s2) and show a look to choose
+    // in a mini editor, not a mock-up (CCN-008). In Claude Desktop the server always starts unbound, so this is the
+    // only NodeGX text the model holds all conversation, and how the person sees and steers the app belongs in it.
+    // The ceiling is restated at 85%, and the intent is now asserted directly below: no authoring tool is named.
+    expect(BOOTSTRAP_INSTRUCTIONS.length).toBeLessThan(golden('deferred').length * 0.85);
+  });
+
+  it('teaches no authoring: it names none of the tools that write a graph', () => {
+    for (const tool of ['create_component', 'update_component', 'create_plan', 'apply_plan', 'stage_plan_operation', 'validate_component']) {
+      expect(BOOTSTRAP_INSTRUCTIONS).not.toContain(tool);
+    }
+  });
+
+  it('CCN-008: a look to choose is shown as the real part (show_mini_editor), never a mock-up', () => {
+    // Richard's first run (2026-10-25): "some options for the buttons" became four HTML mock-ups in Desktop's own
+    // visualizer, and no tool here was called.
+    expect(BOOTSTRAP_INSTRUCTIONS).toContain('show_mini_editor');
+    expect(BOOTSTRAP_INSTRUCTIONS).toMatch(/never a mock-up drawn as HTML, a widget or an artifact/);
   });
 });
