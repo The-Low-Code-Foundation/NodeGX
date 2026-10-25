@@ -100,8 +100,8 @@ describe('P112 OWN-018 — --screenshots-to-files', () => {
 
   it('🟢 control — without the flag, the default still inlines the images, exactly as before', async () => {
     const { res, argv, projectDir } = await render(false);
-    // P112-OWN019 R39: three sizes by default is the one deliberate extra flag.
-    expect(argv).toEqual([projectDir, '--json', '--screenshot', 'full', '--inline-screenshots', '--scale', '0.4', '--viewports', 'desktop,768x1024,phone']);
+    // P112-OWN019 R39: three sizes by default; P125-PUPPY2-RENDER1MB (2d0fe7534): the image budget — the two deliberate extras.
+    expect(argv).toEqual([projectDir, '--json', '--screenshot', 'full', '--inline-screenshots', '--image-budget', '600000', '--scale', '0.4', '--viewports', 'desktop,768x1024,phone']);
     expect(res.content.filter((c) => c.type === 'image')).toHaveLength(1);
   });
 
@@ -118,9 +118,9 @@ describe('P112 OWN-018 — --screenshots-to-files', () => {
   });
 
   it('🔴 an explicit out_dir still wins, and its manifest carries the same sentence', async () => {
-    const mine = fs.mkdtempSync(path.join(os.tmpdir(), 'own018-mine-'));
-    const { argv, text } = await render(true, { out_dir: mine });
-    expect(argv[argv.indexOf('--out-dir') + 1]).toBe(mine);
+    // P112-OWN020-OUTDIRANYWHERE: an explicit out_dir is a folder in the project.
+    const { argv, text, projectDir } = await render(true, { out_dir: '.previews/mine' });
+    expect(argv[argv.indexOf('--out-dir') + 1]).toBe(path.join(projectDir, '.previews', 'mine'));
     expect(text).toContain('uncached until the session is compacted');
   });
 
@@ -131,8 +131,7 @@ describe('P112 OWN-018 — --screenshots-to-files', () => {
   });
 
   it('🔴 the manifest of a caller who chose out_dir on a server WITHOUT the flag is unchanged', async () => {
-    const mine = fs.mkdtempSync(path.join(os.tmpdir(), 'own018-mine-'));
-    const { text } = await render(false, { out_dir: mine });
+    const { text } = await render(false, { out_dir: '.previews/mine' });
     expect(text).toContain('READ the ones you need');
     expect(text).not.toContain('uncached');
   });

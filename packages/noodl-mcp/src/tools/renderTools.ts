@@ -16,6 +16,7 @@
  * @module noodl-mcp/tools/renderTools
  */
 
+import * as fs from 'fs';
 import * as path from 'path';
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
@@ -27,6 +28,7 @@ import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { runDrivePage, runRenderReport, type RenderReportPayload, type RenderScreenshot } from '../render';
 import type { RenderLedger } from '../renderVerdict';
+import { ToolError } from '../errors';
 import { guarded, type ToolResult } from './util';
 import { honestySection, projectHonestyOf } from '../honesty';
 
@@ -133,7 +135,7 @@ export function registerRenderTools(
         // .previews/render rather than images in the response (see ServerOptions.screenshotsToFiles).
         const outDir =
           args.out_dir !== undefined
-            ? path.resolve(args.out_dir)
+            ? screenshotDir(projectDir, args.out_dir)
             : options.screenshotsToFiles && args.screenshot !== 'none'
               ? path.join(projectDir, '.previews', 'render')
               : undefined;
@@ -249,7 +251,7 @@ export function registerRenderTools(
           viewport: args.viewport,
           outDir:
             args.out_dir !== undefined
-              ? path.resolve(args.out_dir)
+              ? screenshotDir(projectDir, args.out_dir)
               : options.screenshotsToFiles
                 ? path.join(projectDir, '.previews', 'drive')
                 : undefined,
@@ -310,6 +312,35 @@ export function shotExtent(shot: RenderScreenshot): string {
  * four is worse than no manifest. A page whose row carries no path is listed as such, because a
  * missing image and an image nobody mentioned look identical to a caller counting pictures.
  */
+/**
+ * P112-OWN020-OUTDIRANYWHERE — where `render_report` and `drive_page` may write screenshots: inside the project, a
+ * relative `out_dir` read against it. Measured: an agent sent `out_dir: "/tmp/opentune-shots"`, the server wrote a PNG
+ * there, and the agent's own folder-sealed file tool could not open it. Every other write this server makes stays in
+ * the project (`ProjectStore`). Compared by real path, so `/var/…` and `/private/var/…` (one folder on macOS) agree, and
+ * a link inside the project that leads out is outside.
+ */
+export function screenshotDir(projectDir: string, outDir: string): string {
+  const resolved = path.resolve(projectDir, outDir);
+  const real = (p: string): string => {
+    const rest: string[] = [];
+    let at = p;
+    while (!fs.existsSync(at)) {
+      const parent = path.dirname(at);
+      if (parent === at) break;
+      rest.unshift(path.basename(at));
+      at = parent;
+    }
+    return path.join(fs.realpathSync(at), ...rest);
+  };
+  const rel = path.relative(real(projectDir), real(resolved));
+  if (rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))) return resolved;
+  throw new ToolError(
+    'invalid-argument',
+    `out_dir "${outDir}" is outside this project (${projectDir}), and screenshots are written only inside it, where your ` +
+      'file tools can open them. Pass a folder in the project (for example ".previews/shots"), or leave out_dir out.'
+  );
+}
+
 function screenshotManifest(report: RenderReportPayload, outDir: string, filesByDefault = false): string {
   const lines: string[] = [];
   let written = 0;
