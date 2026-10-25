@@ -18,7 +18,7 @@ import { api, apiFull, encode } from '../api';
 import { EmptyState, FilterRows } from '../composers';
 import { Cond, FilterField, Group, addDays, describe, midnight, windowRange } from '../filters';
 import { EXECUTION_STATUSES, ExecutionSummary, cellText, executionStatusKind, extractExecutionRows, recordSummary, runStatusWord, stepStatusKind, when } from '../format';
-import { href, navigate } from '../router';
+import { href, navigate, navigateWith } from '../router';
 import { Btn, Chip, ChipKind, Dialog, Disclosure, Gap, Hint, JsonTree, Page, Row, Spacer, Table, WriteBtn, confirmSimple, fail, openModal, toast } from '../ui';
 import { RUN_KINDS } from '../../../execution/kind';
 import type { ViewProps } from './index';
@@ -227,14 +227,15 @@ export function RunsView({ params, query }: ViewProps) {
           (close) => <ExecutionDialog id={id} data={data || {}} close={close} onCancel={canCancel(data || {}) ? () => cancel(data) : undefined} />,
           () => {
             opened.current = null;
-            navigate('runs');
+            // P121-TWO004-DETAILFILTER: back to the list as it was, filter and all.
+            navigateWith('runs', [], query);
           }
         );
       })
       .catch((e) => {
         fail(e);
         opened.current = null;
-        navigate('runs');
+        navigateWith('runs', [], query);
       });
   }
 
@@ -318,7 +319,7 @@ export function RunsView({ params, query }: ViewProps) {
                       Cancel
                     </WriteBtn>
                   ) : null}
-                  <Btn tiny onClick={() => navigate('runs', x.id)}>
+                  <Btn tiny onClick={() => navigateWith('runs', [x.id], query)}>
                     Detail
                   </Btn>
                 </td>

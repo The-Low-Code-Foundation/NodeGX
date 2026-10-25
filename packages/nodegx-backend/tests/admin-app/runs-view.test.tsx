@@ -10,13 +10,14 @@
  * textarea at rest. AC3: the word a cancelled run wears, and which rows may
  * be cancelled. The flat filter rows offer no *or* and no groups.
  */
-import { mount, unmount, settle, q, qa, text } from './dom';
+import { mount, unmount, settle, click, q, qa, text } from './dom';
 
 import { EXECUTION_STATUSES, runStatusWord } from '../../src/admin/app/format';
 import { fieldOps, windowRange, Group } from '../../src/admin/app/filters';
 import { FilterRows } from '../../src/admin/app/composers/FilterRow';
 import { RUN_KINDS } from '../../src/execution/kind';
-import { ModalHost } from '../../src/admin/app/ui/modal';
+import { useRoute } from '../../src/admin/app/router';
+import { ModalHost, closeAllModals } from '../../src/admin/app/ui/modal';
 import { PAGE_SIZE, RunsView, canCancel, groupFromQuery, listQueryString, runsFields, runsQuery } from '../../src/admin/app/views/runs';
 import { WorkflowsView, inferInputs, lastRunWord, startingRows } from '../../src/admin/app/views/workflows';
 
@@ -260,6 +261,63 @@ describe('P121 TWO-004 — a run refused before its first step says why in its D
     expect(band.length).toBe(1);
     expect(text(band[0])).toContain('Why it failed');
     expect(text(band[0])).toContain('HMAC-SHA512 signature mismatch');
+    unmount(root);
+  });
+});
+
+/**
+ * P121-TWO004-DETAILFILTER — from a trigger, "Runs of this trigger" is `#/runs?trigger=<id>`. Pressing Detail went to
+ * `#/runs/<id>` with no query, so the list behind the dialog reloaded with every run, and closing went to `#/runs`.
+ * The page is mounted as the App mounts it (one view, the route's params and query), so the hash is what drives it.
+ */
+describe('P121-TWO004-DETAILFILTER — a run’s Detail keeps the Runs page’s filter', () => {
+  const realFetch = globalThis.fetch;
+  const RUN = { id: 'exec_9', kind: 'function', workflowId: 'paystackEvent', workflowName: 'paystackEvent', triggerType: 'webhook', status: 'error', startedAt: Date.now() - 1000, durationMs: 1, steps: [], metadata: { triggerId: 'trg_9' } };
+  const asked: string[] = [];
+  beforeAll(() => {
+    globalThis.fetch = (async (input: RequestInfo | URL) => {
+      const url = String(input);
+      asked.push(url);
+      const body = url === '/executions/exec_9' ? RUN : url.startsWith('/executions?') ? [RUN] : url.startsWith('/admin/triggers') ? { triggers: [{ id: 'trg_9', name: 'Paystack Ghana' }] } : {};
+      return new Response(JSON.stringify(body), { status: 200, headers: { 'content-type': 'application/json', 'X-Total-Count': '1' } });
+    }) as typeof fetch;
+  });
+  afterAll(() => {
+    globalThis.fetch = realFetch;
+    location.hash = '';
+  });
+  function Routed() {
+    const route = useRoute();
+    return <RunsView params={route.params} query={route.query} />;
+  }
+
+  it('Detail opens with the query kept, the list behind it still filtered, and Close comes back to it', async () => {
+    closeAllModals(); // the spec above leaves its Detail open in the shared store
+    location.hash = '#/runs?trigger=trg_9';
+    const root = mount(
+      <>
+        <Routed />
+        <ModalHost />
+      </>
+    );
+    await settle(50);
+    await settle(50);
+    expect(text(q(root, '#runs-count'))).toMatch(/where trigger is Paystack Ghana/);
+    asked.length = 0;
+    click(q(root, 'tbody tr button'));
+    await settle(50);
+    await settle(50);
+    expect(location.hash).toBe('#/runs/exec_9?trigger=trg_9');
+    expect(asked.filter((u) => u.startsWith('/executions?'))).not.toContain('/executions?limit=' + PAGE_SIZE);
+    expect(text(q(root, '#runs-count'))).toMatch(/where trigger is Paystack Ghana/);
+    const closes = qa(root, 'button').filter((b) => text(b).trim() === 'Close');
+    expect(closes.length).toBe(1);
+    const close = closes[0];
+    click(close!);
+    await settle(50);
+    await settle(50);
+    expect(location.hash).toBe('#/runs?trigger=trg_9');
+    expect(text(q(root, '#runs-count'))).toMatch(/where trigger is Paystack Ghana/);
     unmount(root);
   });
 });
