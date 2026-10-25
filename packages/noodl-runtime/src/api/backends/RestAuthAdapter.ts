@@ -77,7 +77,7 @@ import type {
 import { descriptorFor } from '@noodl/backend-contract';
 
 import { AuthEvents } from './AuthEvents';
-import type { OAuthReturnState } from './ParseAuthAdapter';
+import { SESSION_MOVED_MESSAGE, sessionTokenOf, type OAuthReturnState } from './ParseAuthAdapter';
 import { SessionStore } from './SessionStore';
 import { TokenLifecycleController } from './TokenLifecycle';
 
@@ -1161,6 +1161,12 @@ export class RestAuthAdapter extends AuthEvents implements IAuthAdapter {
       { method, path: this.path(profile, profile.me), token, body: method === 'POST' ? {} : undefined },
       {
         ok: (body) => {
+          // P121-S19-SIGNINRACE — as ParseAuthAdapter.fetchCurrentUser: a sign-in or sign-out landed while this was out,
+          // so the answer is about a session that has been replaced and changes nothing.
+          if (sessionTokenOf(this.getCurrentUser(handle)) !== sessionTokenOf(stored)) {
+            options.error(SESSION_MOVED_MESSAGE);
+            return;
+          }
           // PocketBase's `auth-refresh` doubles as "who am I" and answers with a
           // *new* token, so a `become(token)` on it legitimately replaces the
           // session rather than only describing it.
@@ -1173,6 +1179,10 @@ export class RestAuthAdapter extends AuthEvents implements IAuthAdapter {
           options.success(session);
         },
         fail: (error) => {
+          if (sessionTokenOf(this.getCurrentUser(handle)) !== sessionTokenOf(stored)) {
+            options.error(SESSION_MOVED_MESSAGE);
+            return;
+          }
           // 401/403 is the backend saying this session is over — the REST family's
           // equivalent of Parse's code 209, and handled the same way: clear
           // storage and say the session was lost. A 5xx or a network failure is

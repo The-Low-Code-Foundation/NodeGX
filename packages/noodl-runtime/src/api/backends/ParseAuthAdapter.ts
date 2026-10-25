@@ -225,6 +225,19 @@ export interface ParseAuthAdapterOptions {
   lifecycle?: TokenLifecycle;
 }
 
+/**
+ * P121-S19-SIGNINRACE — what a "who is signed in" check answers when somebody signed in or out while it was out. Its
+ * answer describes a session that has been replaced, so it changes nothing; the caller can ask again. Shared word for
+ * word by `RestAuthAdapter.fetchCurrentUser`.
+ */
+export const SESSION_MOVED_MESSAGE =
+  'Someone signed in or out while this was being checked, so its answer was not used. Check again.';
+
+/** The token a stored session carries, or undefined for nobody. */
+export function sessionTokenOf(session: { sessionToken?: string } | undefined): string | undefined {
+  return session ? session.sessionToken : undefined;
+}
+
 export class ParseAuthAdapter extends AuthEvents implements IAuthAdapter {
   /** BAK-004: the state of a sign-in returning from a provider or a magic link. */
   oauthReturn: OAuthReturnState = { inProgress: false };
@@ -497,15 +510,27 @@ export class ParseAuthAdapter extends AuthEvents implements IAuthAdapter {
   }
 
   fetchCurrentUser(handle: BackendHandle, options: FetchCurrentUserOptions): void {
+    // P121-S19-SIGNINRACE — the session this check is about. A sign-in or sign-out that lands while it is out replaces
+    // that session, and its answer is then about somebody who is no longer here: adopting it put the previous person
+    // back over the one who had just signed in (and a 209 for the old token cleared the new session).
+    const asked = sessionTokenOf(this.getCurrentUser(handle));
     this._makeRequest(handle, '/users/me', {
       method: 'GET',
       sessionToken: options.sessionToken,
       success: (response) => {
+        if (sessionTokenOf(this.getCurrentUser(handle)) !== asked) {
+          options.error(SESSION_MOVED_MESSAGE);
+          return;
+        }
         this.setSession(handle, response);
         this.emitAuthEvent('sessionGained', response);
         options.success(response);
       },
       error: (e) => {
+        if (sessionTokenOf(this.getCurrentUser(handle)) !== asked) {
+          options.error(SESSION_MOVED_MESSAGE);
+          return;
+        }
         // 209 is Parse's "invalid session token".
         if (e.code === 209) {
           // Storage is cleared but no `sessionChanged` is announced, so
