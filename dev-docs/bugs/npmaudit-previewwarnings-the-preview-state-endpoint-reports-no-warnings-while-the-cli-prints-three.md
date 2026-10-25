@@ -2,6 +2,7 @@
 id: NPMAUDIT-PREVIEWWARNINGS
 title: The preview state endpoint reports no warnings while the cli prints three
 status: fixed
+commit: 6a766a382
 severity: low
 area: preview / __preview/state
 found: NPMAUDIT stranger audit of the published packages, 2026-10-23

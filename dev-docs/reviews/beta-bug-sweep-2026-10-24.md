@@ -498,3 +498,92 @@ render suites 14/14, toolDisclosure 18/18 (8,277/8,280), get_component callers 1
 stale until they regenerate), `docs:bubble:check` up to date.
 
 **Commits this session:** 56c37c661, 6f17999c1, 27557936d, d7a9106d6, afcd83169, and the docs commit after them.
+
+---
+
+# Session 9, 2026-10-25 (next session reads this first)
+
+Richard asked for the next two sessions in one. Done: session 8's whole "Next" list (the three editor rows,
+SEE001TIMEOUT, DROPDOWNFOCUSDIVERGE measured) and then the next rows on the Beta's road. Six rows fixed, three filed
+and fixed along the way, two filed open. **Nothing pushed**: `cline-dev` is 12 commits ahead of `origin/cline-dev`.
+
+**The release question, answered:** `@nodegx/mcp@0.2.7` is **not on npm**. The registry's `latest` is 0.2.6 for all
+five packages (`@nodegx/mcp`, `create-nodegx`, `-vibe`, `-cline`, `@nodegx/preview`), read from registry.npmjs.org at
+23:03. `1b1b035dd` bumped the versions and the changelog; nothing was published. So no tarball was built from a stale
+tree. The next publish should be built from a tree that holds everything below.
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| P112-S7-TEXTDEFAULTS | 81cdeee3d | Measured first: `"auto"` is not a size, so Text's width setter kept 100% and raised `not-a-dimension`; Text has no flex ports. The five layout keys go (no rendering change). Grading every config and variant found the class beside it: TextInput `width`/`height` strings, `cursor` on Button/Checkbox, `borderWidth: '0'` with no style. All removed. The style vocabulary stops teaching agents Text `width: "auto"` | `tests/models/PickerLookValidates.test.ts` 28/28 (red on HEAD's configs), viewer-react `p112-s7-textdefaults-width-auto` 4/4, tests-unit neighbours 151/151, mcp vocabulary files 89/89 |
+| P112-S11-REFUSALWORDS | 78f69c4a2 | The modal names NodeGX, both formats, links nodegx.io/download. `projectFromDirectory` hands `{ explained: true }` on every refusal it explained; the launcher's four open paths add their toast only for an unexplained failure; the toast no longer says `project.json` | `tests-unit/p112-s11-refusalwords` red 3/4 on HEAD → 4/4 (real loader, collaborators mocked). Not driven in Electron |
+| P107-S79-SILENTCACHE | 352bcdf6e | The first replacement of a node's saved `dynamicports` is diffed (`portsReplaced.ts`), logged, and a wire left on a dropped or retyped port raises `node-ports-replaced`, re-read in `evaluateHealth` so it clears itself. Later replacements (the person's own edits) are not diffed. Trusting the cache before a viewer stays NSP-020's | `tests-unit/p107-s79-silentcache` red 2/9 on HEAD → 9/9 (real `NodeGraphNode`), 20 neighbour suites 724/727 (the 3 red identically on HEAD) |
+| BETA-S8-SEE001TIMEOUT | 4df2370f8 | Fixed at the cause, not with a timeout: a CPU profile of the one `update_component` (2.5 s): 1.25 s was `suggestType`'s Levenshtein pass per unknown node (149 nodes, 10 names) — memoised per index; 0.97 s was the next row | AC2 3.1 s → 0.66 s, `create_component` 1.57 s → 0.16 s, same machine and load |
+| **BETA-S9-WALKSEEN** (filed, fixed) | 4df2370f8 | A write's project walks read every component through `readComponent`, which snapshots and records SEEN, so after any write `what_changed_since` compared the person's Studio edits against a baseline taken after them and said nothing changed. `ProjectStore.peekComponent` (no snapshot, not seen) for the 13 walks; `read_graph` stays a read | `tests/betaS9WalkSeen` red 2/3 on HEAD → 3/3; the full MCP suite 4,962 passed, its 19 reds identical with every file this session touched put back to 6f74702d1 |
+| NPMAUDIT-PREVIEWWARNINGS | 6a766a382 | A good build keeps its validation report: `/__preview/state` answers `state: { kind: 'ok', report }`, and `warnings` adds one line per validation warning | preview 110/110 on a rebuilt dist; the new case red on a dist built from HEAD's two files |
+| P112-OWN026-FIX03GOLDEN | bd45bb676 | Button v6, Text Input v9 with `repeatWhileSavingChange` (migration: the `repeatWhileSaving` parameter); DbModel2 and SetDbModelProperties v5 entries (migration none, said why); four goldens written | `golden.js --check`: 125 specs fresh, version rule held (was 8 problems); `catalog:check` and `catalog:merge:check` up to date |
+| **BETA-S9-PLANTSTALE** (filed, fixed) | f0fea7a64 | Session 7's Dropdown fixes changed a line `page-model-plants.test.ts` plants on by exact text, so the file stopped loading (Tests: 0) and its 22 guards graded nothing | 22/22 |
+
+Filed, open: **BETA-S9-BUTTONSHADOW** (low, a ruling, below) and **BETA-S9-BUTTONFOCUSSURVIVOR** (low: on today's seed
+20751 one Button `person.focus` swap-branch mutant survives; 58/58 scenarios and 200/200 sequences agree; red at HEAD's
+v5 too). **BETA-S7-DROPDOWNFOCUSDIVERGE** stays open with a measurement: reproduced exactly; the runtime's
+`FocusTracker` checks mounted, never visibility, and jsdom (measured) hands focus to a `<select>` under
+`visibility: hidden`, which a browser refuses. Probably a harness gap, not a product one; one CDP drive settles it.
+
+## For Richard
+
+1. **Push, then publish 0.2.7 (or 0.2.8) from this tree.** Twelve commits wait on `cline-dev`: session 8's four
+   (MCPREADME, NESTEDCHROME, PORTTYPEOBJECT, docs) and session 9's eight. The MCP ships `StyleVocabulary` and the
+   element configs, so TEXTDEFAULTS reaches Claude Desktop agents with it; WALKSEEN and the 4× faster writes too.
+2. **New ruling, BETA-S9-BUTTONSHADOW:** *"A button you drag in has no shadow, but the same button built by Claude has
+   one. Should both have it, or neither?"* (Left as it is; the test allows that one warning by name.)
+3. **Standing rulings:** SKELSHIP (warn or refuse), ADMINNARROW (phone layout?), DEPLOYLOOPBACK (warn or refuse),
+   OWN008-AUDIT (stay on fast-xml-parser 4).
+4. **P112-OWN026-MCPJSONABSPATH needs one measurement on your machine.** The fix that suggests itself (a relative project
+   path in `.mcp.json`) rests on the working directory Claude Code gives a project's stdio server, and Claude Code's MCP
+   docs say neither that nor whether `${CLAUDE_PROJECT_DIR}` expands in args (checked 2026-10-25). Measuring it means
+   approving a throwaway project server, which writes your real `~/.claude.json`, so it was not done here.
+
+## Next
+
+1. MCPJSONABSPATH, after item 4's measurement: a server that prints `process.cwd()` to a file, in a folder with a
+   `.mcp.json`, started once from the folder and once from a subfolder.
+2. DROPDOWNFOCUSDIVERGE: one CDP drive (does a hidden Dropdown take a Focus in Chrome?), then a `_canFocus` that reads
+   visibility (product) or a target that refuses focus to a hidden element (harness).
+3. BUTTONFOCUSSURVIVOR: a hand scenario that focuses a pressed Button as it leaves the page.
+4. The rows waiting on rulings: PILLWRAP and FILLGROW (one ruling for both), BUTTONSHADOW.
+5. P18-S109-MOUNTPULSE and P18-S134-STRINGREJECT still wait for lane 4.
+
+## Traps met
+
+1. 🔴 **A write's validation walk is a read unless it says otherwise.** `ProjectStore.readComponent` snapshots and records
+   SEEN; a walk over the project must use `peekComponent`. Profile before you add a timeout: SEE001TIMEOUT's 12 s was
+   product latency (and hid WALKSEEN).
+2. 🔴 **The style vocabulary is built from the element configs**, so removing a "dead" key can change what agents build.
+   `boxShadow` is never read on a dropped Button but becomes `boxShadowEnabled: 'true'` for an agent's. Diff
+   `buildStyleVocabulary()` before and after a config edit.
+3. 🔴 **An exact-text plant reddens as "failed to run", not as a failure.** A spec edit owes a run of
+   `nodegx-node-spec/tests/page-model-plants.test.ts` (as `function-contract` does for `simplejavascript.ts`).
+4. `git diff --name-only` prints repo-root paths even from a package directory: an A/B swap loop that copies by those
+   paths from inside the package swaps nothing and reads as "no change" (`--relative` fixes it). Check the swap took.
+5. A whole-suite red is graded by putting every touched file back to the session's base and re-running the red files:
+   the MCP's 19 reds were the same 19 both ways (peers' uncommitted template work, known rows).
+6. `spec-census:check` and `docs:nodes:check` are stale at HEAD from other lanes (the census by the export's counts, 33
+   node pages). Regenerating them would sweep other sessions' work into a commit; left alone.
+7. editor `tests/editor-suite/electronAdapter.test.ts` runs only under the Electron `test:ci`; plain jest dies at
+   `bugtracker`'s platform import.
+
+## Gates read (2026-10-25)
+
+editor: PickerLookValidates 28/28, ElementConfigRegistry, tests-unit def-001/sty-002/def-041/aib-001 151/151,
+refusalwords 4/4, own-013 green, silentcache 9/9, 20 NodeGraphNode suites 724/727 (honestyView 3 red on HEAD),
+CatalogIndex neighbours 379/379, tsc and `tsconfig.tests.json` clean; DEF-007 seam red at HEAD (P112-OWN008-TESTMAINRED)
+· viewer-react textdefaults 4/4, button/icon variants 50/50 · mcp full suite 4,962/4,986 (19 red, identical on the
+session's base), walkseen 3/3, see001Honesty 7/7, tsc clean · preview 110/110 on a rebuilt dist, tsc clean ·
+node-spec golden --check clean, golden/ports/draw/batch-records/batch-visual 194/194, page-model-plants 22/22, tsc
+clean · catalog:check and merge:check up to date, docs:bubble:check up to date, spec-ledger:check holds · runtime
+conformance: Text Input v9 conforms; Button v6 one survivor (same at v5); Dropdown reproduces DROPDOWNFOCUSDIVERGE.
+
+**Commits this session:** 81cdeee3d, 78f69c4a2, 352bcdf6e, 4df2370f8, 6a766a382, bd45bb676, f0fea7a64, and the docs
+commit after them.

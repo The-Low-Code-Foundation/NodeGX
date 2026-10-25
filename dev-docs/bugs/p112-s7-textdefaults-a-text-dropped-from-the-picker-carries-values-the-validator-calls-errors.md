@@ -2,6 +2,7 @@
 id: P112-S7-TEXTDEFAULTS
 title: "A Text dropped from the node picker carries layout defaults the editor's own validator calls 2 errors and 4 warnings — width and height \"auto\", flexShrink and flexGrow Text never reads, minWidth \"0\" read as 0%"
 status: fixed
+commit: 81cdeee3d
 severity: medium
 area: editor / element configs (`packages/noodl-editor/src/editor/src/models/ElementConfigs/configs/TextConfig.ts` `defaults`, stamped by `ElementConfigRegistry.applyDefaults` from `NodePicker.utils` `createNodeFunction` and `NodeOperations`)
 kit: editor-suite
@@ -46,8 +47,8 @@ loses exactly those keys, so agents stop being taught Text `width: "auto"` and T
 the write door refuses. **Left:** `boxShadow` on three Button variants, still never read on a dropped Button, because
 the vocabulary turns it into `boxShadowEnabled` for an agent's Button: BETA-S9-BUTTONSHADOW (a ruling).
 
-Graded: `tests/models/PickerLookValidates.test.ts` red 5 of 6 on HEAD's configs → 23/23 (mutant: `width: 'auto'` back
-in TextConfig reddens 12 Text arms); `ElementConfigRegistry.test.ts` (two assertions moved off `cursor`); tests-unit
+Graded: `tests/models/PickerLookValidates.test.ts` red on HEAD's configs (5 of its first 6 arms, before the variants were added)
+→ 28/28 (mutant: `width: 'auto'` back in TextConfig reddens the Text arms); `ElementConfigRegistry.test.ts` (two assertions moved off `cursor`); tests-unit
 def-001, sty-002, def-041, aib-001 151/151; viewer-react button/icon variants 50/50; mcp vocabulary files 89/89; editor
 tsc and `tsconfig.tests.json` clean. Not run: `electronAdapter.test.ts` (Electron `test:ci` only; its picker-look case
 derives the look from `applyDefaults`, so it follows the change).

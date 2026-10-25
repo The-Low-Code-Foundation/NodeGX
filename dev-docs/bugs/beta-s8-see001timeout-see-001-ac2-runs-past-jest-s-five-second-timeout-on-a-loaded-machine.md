@@ -2,6 +2,7 @@
 id: BETA-S8-SEE001TIMEOUT
 title: SEE-001's AC2 (a Function planted through update_component) takes about 12 s on a loaded machine and fails on jest's default 5 s timeout
 status: fixed
+commit: 4df2370f8
 severity: low
 area: tests / `packages/noodl-mcp/tests/see001Honesty.test.ts` AC2 (no per-test timeout; the training template's update_component plus three honesty reads)
 kit: mcp

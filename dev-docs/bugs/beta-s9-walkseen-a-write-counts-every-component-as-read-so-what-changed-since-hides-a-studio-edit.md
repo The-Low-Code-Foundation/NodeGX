@@ -2,6 +2,7 @@
 id: BETA-S9-WALKSEEN
 title: Any MCP write counted every component in the project as read at that moment, so what_changed_since compared the person's Studio edits against a baseline taken after them and said nothing had changed
 status: fixed
+commit: 4df2370f8
 severity: medium
 area: mcp / `packages/noodl-mcp/src/project/ProjectStore.ts` `readComponent` (snapshot + `remember`), called by the write path's project walks (`validate.ts` `authoredProjectViews` and the visual predicate, `project/nodeIds.ts` `idsInUseElsewhere`, `project/pageRegistration.ts`, `tools/author.ts` `projectVisualPredicate`) and nine read-only walks
 kit: mcp

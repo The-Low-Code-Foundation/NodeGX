@@ -2,6 +2,7 @@
 id: P112-S11-REFUSALWORDS
 title: "A project from a newer NodeGX is refused in another product's name, with a link to noodl.net, while a toast beside it says its project.json is missing"
 status: fixed
+commit: 78f69c4a2
 severity: medium
 area: editor / opening a project (`packages/noodl-editor/src/editor/src/models/projectmodel.editor.ts` :87-97; `packages/noodl-editor/src/editor/src/pages/ProjectsPage/ProjectsPage.tsx` `showLoadFailureToast` :265-285, called at :1334 and :1407)
 found: P112 OWN-011 s11, 2026-10-11

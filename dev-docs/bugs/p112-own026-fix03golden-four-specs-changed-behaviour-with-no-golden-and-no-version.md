@@ -2,6 +2,7 @@
 id: P112-OWN026-FIX03GOLDEN
 title: "`golden.js --check` is red on four specs at HEAD: Button and Text Input gained repeatWhileSaving at the same version, and DbModel2 and SetDbModelProperties are at v5 with no `changes` entry and stale goldens"
 status: fixed
+commit: bd45bb676
 severity: medium
 area: node-spec / NSP-010 version rule (`scripts/node-spec/golden.js --check`), the specs `src/nodes/button.ts`, `text-input.ts` (cb7e0d6e4, OWN-026 FIX-03) and the DbModel2 / SetDbModelProperties specs
 found: P107-S83-SENDFORM fix, 2026-10-24, running `node scripts/node-spec/golden.js --check` at cline-dev HEAD (before any of that fix's files): 8 problems over 125 specs

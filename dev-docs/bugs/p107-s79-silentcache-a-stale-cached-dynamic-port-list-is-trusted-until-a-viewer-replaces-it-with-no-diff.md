@@ -2,6 +2,7 @@
 id: P107-S79-SILENTCACHE
 title: A node's cached dynamic ports are trusted as real until a viewer connects, and then replaced with no diff — a wire to a port that no longer exists is found only by the health check, after the fact
 status: fixed
+commit: 352bcdf6e
 severity: medium
 area: editor / dynamic ports cache (`NodeGraphNode.ts` `setDynamicPorts` :883-929, `getPorts` :505-566; `validation/normalize.ts` :67-70; `ProjectExporter.ts` :238-240)
 found: P107 NSP-020 s79, 2026-10-10 — measuring how the editor learns ports before designing `ports(params, context)`

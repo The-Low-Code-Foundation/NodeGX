@@ -2,6 +2,7 @@
 id: BETA-S9-PLANTSTALE
 title: The node-spec page-model plants suite stopped loading after the Beta sweep's s7 Dropdown fixes changed the line one of its plants edits, so 22 guards graded nothing
 status: fixed
+commit: f0fea7a64
 severity: low
 area: tests / `packages/nodegx-node-spec/tests/page-model-plants.test.ts` (the Dropdown plant's exact-text edit of `src/nodes/dropdown.ts`)
 kit: node-spec
