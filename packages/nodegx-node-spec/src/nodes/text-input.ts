@@ -104,6 +104,7 @@ import { defineNode, said, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { FIELD_FOCUS_NOT_MOUNTED, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
+import { repeatWhileSavingChange } from './repeat-while-saving';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
 import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
 
@@ -263,8 +264,8 @@ export const TextInput = defineNode({
   // v6 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v7 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
   // v8 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
-  version: 8,
-  changes: [focusAndIconSourceChange(7), growChange(8)],
+  version: 9,
+  changes: [focusAndIconSourceChange(7), growChange(8), repeatWhileSavingChange(9, 'Enter')],
   diagnostics: { ...focusDiagnostics(FIELD_FOCUS_NOT_MOUNTED), ...iconSourceDiagnostics(), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/controls/text-input.ts',
   needs: ['person'],

@@ -148,6 +148,19 @@ export const UpdateRecord = defineNode({
   // the other properties' save (or alone, when nothing else is sent), so a refused save adds nothing; a value that is not a
   // number fails the save with its sentence. Local only adds the amount to the record held.
   version: 5,
+  // P112-OWN026-FIX03GOLDEN — v5 was made without its entry (the history above is the comment only).
+  changes: [
+    {
+      version: 5,
+      says:
+        'Add To, a new list of properties whose values are amounts: they are sent to the backend as an increment after the ' +
+        'other properties are saved (or alone), so a refused save adds nothing, and a value that is not a number fails the ' +
+        'save with its sentence. Local only adds the amount to the record held',
+      row: 'P112 OWN-026 FIX-03 A',
+      commit: 'cb7e0d6e4',
+      migration: { none: 'Add To is empty on every node built before it, and an empty Add To saves exactly as before' }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/data/setdbmodelpropertiesnode.ts; dbmodelcrudbase.ts',
   needs: ['backend', 'registry'],
   worldPool: {

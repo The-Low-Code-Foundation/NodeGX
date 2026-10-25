@@ -54,6 +54,7 @@ import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
 import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-not-mounted';
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
+import { repeatWhileSavingChange } from './repeat-while-saving';
 import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
 
 type State = {
@@ -104,8 +105,8 @@ export const Button = defineNode({
   // v3 (P109 ISL-031, P107-D30 ruled "Reset and announce"): a control leaving the page (Mounted off) takes Focused, Hover and Pressed with it — each goes false, sent if it was true, with Blurred and Hover End for the ones that were on
   // v4 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
   // v5 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
-  version: 5,
-  changes: [focusAndIconSourceChange(4), growChange(5)],
+  version: 6,
+  changes: [focusAndIconSourceChange(4), growChange(5), repeatWhileSavingChange(6, 'click')],
   diagnostics: { ...focusDiagnostics(controlFocusNotMounted('button')), ...iconSourceDiagnostics(), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/controls/button.ts',
   needs: ['person'],

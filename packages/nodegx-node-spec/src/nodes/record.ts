@@ -197,6 +197,19 @@ export const RecordNode = defineNode({
   // end (no outcome: a bind is not an invocation; a failure is said on Error), and Fetched waits for the answer. v4 bound the
   // empty record create-on-read made and pulsed Fetched over it: a page opened by its own URL showed nothing.
   version: 5,
+  // P112-OWN026-FIX03GOLDEN — v5 was made without its entry (the history above is the comment only).
+  changes: [
+    {
+      version: 5,
+      says:
+        'An Id naming a record nothing in memory holds reads it from the backend at the end of the frame, and Fetched waits ' +
+        'for the answer; a failure is said on Error. Before, the node bound the empty record a read made and pulsed Fetched ' +
+        'over it, so a page opened by its own URL showed nothing',
+      row: 'P112-OWN026-RECORDBYIDMEMORY',
+      commit: 'f3d2a66e9',
+      migration: { none: 'An app whose Ids name records already in memory reads as before; one that opened a record by its Id now shows it' }
+    }
+  ],
   source: 'packages/noodl-runtime/src/nodes/std-library/data/dbmodelnode2.ts; cloudstore.js _fromJSON',
   needs: ['backend', 'registry', 'random'],
   worldPool: { backends: BACKENDS, registries: REGISTRIES },
