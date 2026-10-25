@@ -198,7 +198,7 @@ describe('BMG-002 AC2 — rows and `where` round-trip', () => {
       fromWhere(JSON.parse(JSON.stringify(toWhere(one({ kind: 'cond', field: 'due', op: 'within', value }), FIELDS, now))), FIELDS, now);
     const between = (from: string, to: string) => one({ kind: 'cond', field: 'due', op: 'between', value: from, value2: to });
 
-    it('on a Sunday, "this week" and "the past 7 days" are both Monday to Sunday', () => {
+    it('on a Sunday, “this week” and “the past 7 days” are both Monday to Sunday', () => {
       const sunday = new Date(2026, 9, 25, 12);
       expect(roundTrip('past7', sunday)).toEqual(between('2026-10-19', '2026-10-25'));
       expect(roundTrip('week', sunday)).toEqual(between('2026-10-19', '2026-10-25'));
@@ -206,7 +206,7 @@ describe('BMG-002 AC2 — rows and `where` round-trip', () => {
       for (const w of ['today', 'month', 'past30']) expect(roundTrip(w, sunday)).toEqual(one({ kind: 'cond', field: 'due', op: 'within', value: w }));
     });
 
-    it('on the 30th of a 30-day month, "this month" and "the past 30 days" are both the whole month', () => {
+    it('on the 30th of a 30-day month, “this month” and “the past 30 days” are both the whole month', () => {
       const thirtieth = new Date(2026, 8, 30, 12);
       expect(roundTrip('month', thirtieth)).toEqual(between('2026-09-01', '2026-09-30'));
       expect(roundTrip('past30', thirtieth)).toEqual(between('2026-09-01', '2026-09-30'));

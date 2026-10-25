@@ -6,7 +6,7 @@ commit: (this session, the Beta sweep s6)
 severity: low
 area: backend admin / data page filters (`packages/nodegx-backend/src/admin/app/filters.ts`, `fromWhere`)
 found: P109 s41, 2026-10-11 00:20 CEST (a Sunday), by `tests/bmg-002-filters.test.ts` "due within past7", red at HEAD with or without s41's changes
-regression: packages/nodegx-backend/tests/bmg-002-filters.test.ts "on a Sunday, \"this week\" and \"the past 7 days\" are both Monday to Sunday"
+regression: packages/nodegx-backend/tests/bmg-002-filters.test.ts "on a Sunday, “this week” and “the past 7 days” are both Monday to Sunday"
 evidence: this file; `windowRange` and `fromWhere`'s `$gte,$lt` branch
 ---
 
