@@ -45,10 +45,13 @@
  *    policy file passes `null`, which reads as "no function has an entry".
  *  - Warning severity, never blocking: the limit may legitimately be configured
  *    later, or live only on the running backend.
- *  - A write inside a HELPER this function reaches through `Run Tasks` is not
- *    seen — the predicate is per-graph. The template's own doors all write in
- *    their endpoint graph or are non-public; widening to transitive reach is a
- *    corpus decision for the day a measured instance exists.
+ *  - P124-S1-WRITESHELPER: a write inside a helper this function PLACES (a node
+ *    whose type is another `/#__cloud__/` component) is the function's write,
+ *    when the caller hands over the project's `views` — measured on the
+ *    training product, four functions writing a thread row through
+ *    `/#__cloud__/shared/Thread`. The backend's default follows the same
+ *    instances. Without `views` the door sees one component, as before. A
+ *    helper reached only through `Run Tasks`' template is followed by neither.
  *
  * ## What changed under it, 2026-08-30 (DEF-009 AC4)
  *
@@ -107,7 +110,7 @@ export const RECORD_WRITE_SCRIPT_MEMBERS: readonly string[] = ['create', 'save',
 const SCRIPT_WRITE_CALL = new RegExp(`\\bRecords\\s*\\.\\s*(${RECORD_WRITE_SCRIPT_MEMBERS.join('|')})\\s*\\(`);
 
 /** The first `Records.<write>(` call a node's script makes (`Records.save`), or undefined. */
-function scriptRecordWrite(node: ParameterizedNode): string | undefined {
+function scriptRecordWrite(node: GraphNodeLike): string | undefined {
   const script = node.parameters?.['functionScript'];
   const m = typeof script === 'string' ? SCRIPT_WRITE_CALL.exec(script) : null;
   return m ? `Records.${m[1]}` : undefined;
@@ -134,13 +137,43 @@ export interface CheckPublicWriteDoorOptions {
   security?: FunctionSecurityPolicy | null;
   /** The catalog, used only to age the write-node list loudly. */
   catalog?: CatalogIndex;
+  /** P124-S1-WRITESHELPER: every component's nodes, so a placed cloud helper can be followed. Omitted: one component. */
+  views?: readonly { name: string; nodes: readonly GraphNodeLike[] }[];
+}
+
+/** What the door reads of a node: the views the authoring door hands over carry no ids. */
+type GraphNodeLike = { type: string; parameters?: Readonly<Record<string, unknown>> | null };
+
+/**
+ * The first write in `nodes`, following each placed cloud helper once (`seen`), or undefined. `via` names the helper
+ * the write is in, when it is not in `nodes` itself.
+ */
+function firstWrite(
+  nodes: readonly GraphNodeLike[],
+  writeTypes: ReadonlySet<string>,
+  helpers: ReadonlyMap<string, readonly GraphNodeLike[]>,
+  seen: Set<string>,
+  via?: string
+): { writes: string; via?: string } | undefined {
+  const writer = nodes.find((n) => typeof n.type === 'string' && writeTypes.has(n.type));
+  if (writer) return { writes: `"${writer.type}"`, via };
+  const scripted = nodes.map(scriptRecordWrite).find((call) => call !== undefined);
+  if (scripted) return { writes: `a script calls ${scripted}`, via };
+  for (const n of nodes) {
+    if (typeof n.type !== 'string' || !n.type.startsWith(CLOUD_PREFIX) || seen.has(n.type)) continue;
+    seen.add(n.type);
+    const helper = helpers.get(n.type);
+    const found = helper ? firstWrite(helper, writeTypes, helpers, seen, via ?? n.type) : undefined;
+    if (found) return found;
+  }
+  return undefined;
 }
 
 export function checkPublicWriteDoor(
   nodes: readonly ParameterizedNode[],
   options: CheckPublicWriteDoorOptions
 ): Diagnostic[] {
-  const { component, security, catalog } = options;
+  const { component, security, catalog, views } = options;
   if (security === undefined) return [];
   if (!component.startsWith(CLOUD_PREFIX)) return [];
 
@@ -154,10 +187,10 @@ export function checkPublicWriteDoor(
   const writeTypes = new Set(
     RECORD_WRITE_NODE_TYPES.filter((t) => !catalog || catalog.hasType(t))
   );
-  const writer = nodes.find((n) => typeof n.type === 'string' && writeTypes.has(n.type));
-  const scripted = writer ? undefined : nodes.map(scriptRecordWrite).find((call) => call !== undefined);
-  if (!writer && !scripted) return [];
-  const writes = writer ? `"${writer.type}"` : `a script calls ${scripted}`;
+  const helpers = new Map((views || []).filter((v) => v.name.startsWith(CLOUD_PREFIX)).map((v) => [v.name, v.nodes] as const));
+  const found = firstWrite(nodes, writeTypes, helpers, new Set([component]));
+  if (!found) return [];
+  const writes = found.via ? `${found.writes}, in "${found.via}"` : found.writes;
 
   const limit = entry?.rateLimit;
   if (limit && typeof limit.ratePerMinute === 'number' && limit.ratePerMinute > 0) return [];

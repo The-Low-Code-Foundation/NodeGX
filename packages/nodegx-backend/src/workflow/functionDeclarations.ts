@@ -142,22 +142,46 @@ export function scriptRecordWrite(node: Record<string, unknown>): string | undef
  * Recursive for `findRequestNode`'s reason: the export nests children rather
  * than flattening them, and a write inside a Group is still the graph's write.
  *
- * ⚠️ **Per-graph, exactly like the door's predicate.** A write inside a HELPER
- * this function reaches through `Run Tasks` is not seen here. Widening to
- * transitive reach would make the default apply to more functions than the
- * warning names, and the two must describe the same population — otherwise an
- * author is told one thing and charged another.
+ * P124-S1-WRITESHELPER: given the bundle's other cloud components (`helpers`), a node that PLACES one of them is
+ * followed into it, so a function that writes only inside a shared helper reads as writing — measured on the
+ * training product, four functions writing a thread row through `/#__cloud__/shared/Thread`. Each helper is followed
+ * once (`seen`), so a loop of helpers ends. ⚠️ The editor's door follows the same instances when it is handed the
+ * project's views, so the warning and the default still name one population. A helper reached only through
+ * `Run Tasks`' template is not followed by either.
  */
-export function graphWritesRecords(nodes: Record<string, unknown>[]): boolean {
+export function graphWritesRecords(
+  nodes: Record<string, unknown>[],
+  helpers?: ReadonlyMap<string, Record<string, unknown>[]>,
+  seen: Set<string> = new Set()
+): boolean {
   for (const node of nodes) {
     if (typeof node.type === 'string' && RECORD_WRITE_NODE_TYPES.includes(node.type)) return true;
     // P124-S1-WRITESRECORDSJS: a script's `Noodl.Records.save(…)` writes as surely as a node does. The editor's
     // door reads the same list, so the warning and the default still name one population.
     if (scriptRecordWrite(node)) return true;
+    if (helpers && typeof node.type === 'string' && node.type.startsWith(CLOUD_COMPONENT_PREFIX) && !seen.has(node.type)) {
+      const helper = helpers.get(node.type);
+      seen.add(node.type);
+      if (helper && graphWritesRecords(helper, helpers, seen)) return true;
+    }
     const children = node.children as Record<string, unknown>[] | undefined;
-    if (Array.isArray(children) && graphWritesRecords(children)) return true;
+    if (Array.isArray(children) && graphWritesRecords(children, helpers, seen)) return true;
   }
   return false;
+}
+
+/** P124-S1-WRITESHELPER — a bundle's cloud components by name, for {@link graphWritesRecords} to follow. */
+export function cloudGraphsOf(components: readonly { name?: unknown; nodes?: Record<string, unknown>[] }[]): Map<string, Record<string, unknown>[]> {
+  const graphs = new Map<string, Record<string, unknown>[]>();
+  for (const c of components) {
+    if (typeof c?.name === 'string' && c.name.startsWith(CLOUD_COMPONENT_PREFIX)) graphs.set(c.name, c.nodes || []);
+  }
+  return graphs;
+}
+
+/** Does the cloud component `name` write, its placed helpers included? It is never followed into itself. */
+export function componentWritesRecords(name: string, graphs: ReadonlyMap<string, Record<string, unknown>[]>): boolean {
+  return graphWritesRecords(graphs.get(name) || [], graphs, new Set([name]));
 }
 
 /**
@@ -170,6 +194,7 @@ export function graphWritesRecords(nodes: Record<string, unknown>[]): boolean {
 export function declaredFunctionsIn(exportData: unknown, workflowName: string): FunctionDeclaration[] {
   const components = ((exportData as { components?: BundleComponent[] } | null)?.components || []) as BundleComponent[];
   const found: FunctionDeclaration[] = [];
+  const graphs = cloudGraphsOf(components);
   for (const component of components) {
     if (typeof component?.name !== 'string') continue;
     if (!component.name.startsWith(CLOUD_COMPONENT_PREFIX)) continue;
@@ -180,7 +205,7 @@ export function declaredFunctionsIn(exportData: unknown, workflowName: string): 
       name: component.name.slice(CLOUD_COMPONENT_PREFIX.length),
       workflow: workflowName,
       allowNoAuth: requestNodeAllowsNoAuth(requestNode),
-      writesRecords: graphWritesRecords(component.nodes || [])
+      writesRecords: componentWritesRecords(component.name, graphs)
     });
   }
   return found;

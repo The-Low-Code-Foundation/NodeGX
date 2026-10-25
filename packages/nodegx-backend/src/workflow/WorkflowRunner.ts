@@ -38,7 +38,8 @@ import {
   CLOUD_COMPONENT_PREFIX,
   declaredFunctionsIn,
   findRequestNode,
-  graphWritesRecords,
+  cloudGraphsOf,
+  componentWritesRecords,
   requestNodeAllowsNoAuth
 } from './functionDeclarations';
 // CWF-013 — type-only, from the cloud runtime's own declaration, so the sink this file builds
@@ -1010,10 +1011,8 @@ export class WorkflowRunner {
     for (const exportData of this.loadedWorkflows.values()) {
       const components =
         (exportData.components as { name: string; nodes?: Record<string, unknown>[] }[] | undefined) || [];
-      for (const component of components) {
-        if (component.name !== fullName) continue;
-        if (graphWritesRecords(component.nodes || [])) return true;
-      }
+      // P124-S1-WRITESHELPER: with the bundle's helpers, as `declaredFunctionsIn` reads it.
+      if (components.some((c) => c.name === fullName) && componentWritesRecords(fullName, cloudGraphsOf(components))) return true;
     }
     return false;
   }

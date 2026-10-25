@@ -133,6 +133,32 @@ function cloudComponent(name: string, allowNoAuth: boolean, writes: boolean | 's
   };
 }
 
+/**
+ * P124-S1-WRITESHELPER — the training product's shape: a helper with no Request node writes the row from a script, and
+ * a public endpoint does nothing but place it.
+ */
+const THREAD_HELPER = {
+  name: '/#__cloud__/shared/Thread',
+  nodes: [
+    {
+      id: 'thread-js',
+      type: 'JavaScriptFunction',
+      x: 0,
+      y: 0,
+      parameters: { functionScript: "async function keep(text) {\n  await Noodl.Records.create('Notes', { text });\n}" },
+      ports: [],
+      children: []
+    }
+  ],
+  connections: [],
+  roots: []
+};
+function placingHelper(name: string) {
+  const c = cloudComponent(name, true, false);
+  c.nodes.push({ id: `${name}-thread`, type: THREAD_HELPER.name, x: 0, y: 200, parameters: {}, ports: [], children: [] });
+  return c;
+}
+
 const byNameOf = () => Object.fromEntries(declaredFunctionsIn(WORKFLOW, 'main').map((d) => [d.name, d]));
 
 const WORKFLOW = {
@@ -142,7 +168,9 @@ const WORKFLOW = {
     cloudComponent('no-limit-reader', true, false),
     cloudComponent('private-writer', false, true),
     cloudComponent('opted-out-writer', true, true),
-    cloudComponent('declared-tight', true, true)
+    cloudComponent('declared-tight', true, true),
+    THREAD_HELPER,
+    placingHelper('helper-writer')
   ],
   settings: {},
   metadata: {}
@@ -195,6 +223,12 @@ describe('DEF-009 AC4 — the public-write rate-limit default', () => {
   beforeAll(async () => {
     dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'nodegx-def009-'));
     fs.writeFileSync(path.join(dataDir, 'security.json'), JSON.stringify(LOCKED_CONFIG));
+    // Every call also spends its class's shared bucket (burst 200), and seven arms of 40 outspend it: room enough that
+    // each arm grades its own function's bucket. The refusals' numbers still say which bucket refused.
+    fs.writeFileSync(
+      path.join(dataDir, 'ops.json'),
+      JSON.stringify({ version: 1, rateLimit: { policies: { functions: { ratePerMinute: 600, burst: 1000 }, public: { ratePerMinute: 600, burst: 1000 } } } })
+    );
     fs.mkdirSync(path.join(dataDir, 'workflows'), { recursive: true });
     fs.writeFileSync(path.join(dataDir, 'workflows', 'main.workflow.json'), JSON.stringify(WORKFLOW));
 
@@ -253,6 +287,15 @@ describe('DEF-009 AC4 — the public-write rate-limit default', () => {
     expect(statuses.slice(0, 30).filter((s) => s === 429)).toEqual([]);
     expect(statuses[30]).toBe(429);
     const body = refusalBodies.get('script-writer') as string;
+    expect(body).toContain('60/min');
+    expect(body).toContain('burst 30');
+  });
+
+  it('P124-S1-WRITESHELPER: a public function that writes only through a helper it places gets the same default', async () => {
+    const statuses = await burst('helper-writer', 40);
+    expect(statuses.slice(0, 30).filter((s) => s === 429)).toEqual([]);
+    expect(statuses[30]).toBe(429);
+    const body = refusalBodies.get('helper-writer') as string;
     expect(body).toContain('60/min');
     expect(body).toContain('burst 30');
   });
@@ -416,6 +459,22 @@ describe('DEF-009 AC4 — the public-write rate-limit default', () => {
     expect(graphWritesRecords([{ type: 'Group', children: js('await Noodl.Records.delete(row);') }])).toBe(true);
     expect(scriptRecordWrite({ parameters: { functionScript: 'await Noodl.Records.increment(row, { n: 1 });' } })).toBe('Records.increment');
     expect(scriptRecordWrite({ parameters: {} })).toBeUndefined();
+  });
+
+  it('P124-S1-WRITESHELPER: a write inside a placed helper is the function’s write; a loop of helpers ends', () => {
+    expect(byNameOf()['helper-writer'].writesRecords).toBe(true);
+    expect(byNameOf()['no-limit-reader'].writesRecords).toBe(false);
+    // The helper itself has no Request node: a helper, not an endpoint.
+    expect(byNameOf()['shared/Thread']).toBeUndefined();
+    const helpers = new Map<string, Record<string, unknown>[]>([
+      ['/#__cloud__/a', [{ type: '/#__cloud__/b' }]],
+      ['/#__cloud__/b', [{ type: 'Group', children: [{ type: '/#__cloud__/a' }] }]],
+      ['/#__cloud__/c', [{ type: '/#__cloud__/b' }, { type: 'SetDbModelProperties' }]]
+    ]);
+    expect(graphWritesRecords([{ type: '/#__cloud__/a' }], helpers)).toBe(false);
+    expect(graphWritesRecords([{ type: '/#__cloud__/a' }, { type: '/#__cloud__/c' }], helpers)).toBe(true);
+    // Without the bundle's other components the predicate is per-graph, as before.
+    expect(graphWritesRecords([{ type: '/#__cloud__/c' }])).toBe(false);
   });
 
   it('the door WARNS about exactly the population this default LIMITS', () => {

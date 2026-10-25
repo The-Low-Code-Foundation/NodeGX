@@ -657,7 +657,8 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // INSIDE the check (undefined = do not check, null = no policy file), the
     // same convention as the guards above, but the undefined/null distinction
     // lives with the predicate that needs it.
-    ...checkPublicWriteDoor(nodes, { component, security, catalog }),
+    // P124-S1-WRITESHELPER: the views let it follow a cloud helper the function places, as the backend does.
+    ...checkPublicWriteDoor(nodes, { component, security, catalog, views }),
     // DSG-004 §2.1 — doctrine §7's only mechanical claim, which had no gate.
     // GAM-022 (P78 D50) — Arm B reads the item a `For Each` draws, so it needs the views and whether
     // `template` is wired.
