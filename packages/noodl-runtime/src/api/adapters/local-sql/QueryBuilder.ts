@@ -116,6 +116,12 @@ export interface PathEnv {
   collection: string;
   acl?: AclContext;
   lookup?: CollectionLookup;
+  /**
+   * P123-S6-PATHNOTABLE: set while a collection rule's narrowing is compiled. A path in a rule that goes through a
+   * collection with no table yet (a Moderator table before the first moderator) reaches no rows; a path a person
+   * wrote into their own query through it is still refused by name.
+   */
+  narrowing?: boolean;
 }
 
 /** The env for a `$path` in this query's `where`. */
@@ -401,7 +407,7 @@ export function buildAclPredicate(
       undefined,
       undefined,
       dialect,
-      env ?? { collection: tableName, acl: { access: acl.access, keys: acl.keys } }
+      { ...(env ?? { collection: tableName, acl: { access: acl.access, keys: acl.keys } }), narrowing: true }
     );
     if (narrowing) predicate = `(${predicate} AND ${narrowing})`;
   }
@@ -950,6 +956,27 @@ interface Edge {
  * wrong rows.
  */
 function buildPathSelect(raw: unknown, env: PathEnv, params: unknown[], dialect: SqlDialect): string {
+  const mark = params.length;
+  try {
+    return pathSelect(raw, env, params, dialect);
+  } catch (e) {
+    if (!(e as { noSuchCollection?: boolean })?.noSuchCollection || !env.narrowing) throw e;
+    // P123-S6-PATHNOTABLE: a rule's path through a collection that has no table yet reaches nobody. The parameters
+    // the abandoned walk pushed are taken back, or every later placeholder would read the wrong value.
+    params.length = mark;
+    return 'SELECT CAST(NULL AS TEXT) WHERE 1 = 0';
+  }
+}
+
+/**
+ * A path names a collection that has no table: refused in a query, no rows in a rule (P123-S6-PATHNOTABLE). Marked
+ * by a property, not a subclass: `instanceof` on an Error subclass fails where this file is compiled to ES5.
+ */
+function noSuchCollection(message: string): Error {
+  return Object.assign(new Error(message), { noSuchCollection: true });
+}
+
+function pathSelect(raw: unknown, env: PathEnv, params: unknown[], dialect: SqlDialect): string {
   const path = checkPathShape(raw);
   const lookup = env.lookup;
   if (!lookup) throw new Error('A $path filter needs the schema, and this read was built without one');
@@ -974,7 +1001,7 @@ function buildPathSelect(raw: unknown, env: PathEnv, params: unknown[], dialect:
     return parts.length ? ` AND ${parts.join(' AND ')}` : '';
   };
   const exists = (collection: string): void => {
-    if (!lookup(collection)) throw new Error(`The path goes through "${collection}", and there is no such collection`);
+    if (!lookup(collection)) throw noSuchCollection(`The path goes through "${collection}", and there is no such collection`);
   };
 
   // The start: the rows of `from` the caller may read, narrowed by its where.
@@ -1103,7 +1130,7 @@ function storageOf(
   field: string
 ): { storage: Edge['storage']; targetClass?: string; type?: string } {
   const info = lookup(collection);
-  if (!info) throw new Error(`The path goes through "${collection}", and there is no such collection`);
+  if (!info) throw noSuchCollection(`The path goes through "${collection}", and there is no such collection`);
   const declared = info.properties?.[field];
   const type = declared?.type;
   if (type === 'Pointer') return { storage: 'pointer', targetClass: declared?.targetClass, type };
@@ -1126,7 +1153,7 @@ function resolveEdge(hop: PathHop, current: string, lookup: CollectionLookup, at
         `${at}: "${hop.follow}" on "${current}" is not a declared link (it is ${s.type || 'untyped'}); say which collection it names with "to"`
       );
     }
-    if (!lookup(to)) throw new Error(`${at}: "${hop.follow}" leads to "${to}", and there is no such collection`);
+    if (!lookup(to)) throw noSuchCollection(`${at}: "${hop.follow}" leads to "${to}", and there is no such collection`);
     return { of: current, to, storage: s.storage, field: hop.follow, back: false, where: hop.where, repeat: hop.repeat === true };
   }
   const s = storageOf(lookup, hop.from, hop.by);

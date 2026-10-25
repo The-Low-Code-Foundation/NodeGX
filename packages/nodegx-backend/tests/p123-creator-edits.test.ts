@@ -94,10 +94,7 @@ beforeAll(async () => {
   };
   ada = await signUp('ada');
   bea = await signUp('bea');
-  // A path rule through a collection with no table yet throws in the SQL rather than reaching
-  // nothing (it still refuses). One unrelated Moderator row keeps this file about `creator`.
-  const seed = await call('POST', '/classes/Moderator', { user: null, note: null }, { admin: true });
-  expect(seed.status).toBe(201);
+  // No Moderator row: before the first moderator the path reaches no one (P123-S6-PATHNOTABLE).
 });
 
 describe('P123-S6-CREATOREDITS — the rule value', () => {
