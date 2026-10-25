@@ -157,3 +157,50 @@ nothing, so thumbnails answer 501 on a VM (marketplace photos broken). Either (a
    scratchpad, `NODE_PATH=<repo>/node_modules` for its externals.
 4. `hls013-deploy-cloud-functions` runs against the BUILT `dist/cloud-bundle.cjs` and the backend's `dist/cli.js`:
    green there says nothing about source. Build the bundler into the scratchpad (`node build-cloud-bundle.mjs <out>`).
+
+---
+
+# Session 4, 2026-10-25 (next session reads this first)
+
+Richard ruled DEPLOYNOSHARP (the server fetches sharp once), and it is built and driven. Then the session-3
+leftovers and four of the sweep's filed rows. **Not pushed, not released**, as before.
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| P112-OWN024-DEPLOYNOSHARP (ruled) | 5490a6677 | `provision-app.sh` fetches sharp 0.33.5 (the lockfile's) with npm into `/opt/nodegx-native/sharp-0.33.5/` once per server, keeps it only if it loads, unit `NODE_PATH`; no npm / offline / does not load → the ship carries on and says `photos: NOT AVAILABLE` with npm's reason. `Dockerfile.backend` installs it into `/app`. `docs/runtime/BACKEND-FILES.md` | `tests/p112-own024-deploy-sharp.test.ts` 7/7 (the script's own block run under `set -euo pipefail` with a stand-in npm), 5 mutants red. Driven in the DEP-002 throwaway VM: `?thumb=md` 501 → 200 at 256 px; reship and a second app fetch nothing; offline and no-npm exit 0 and 501. Image built, 200 (501 with its modules hidden) |
+| P112-S14-MOVEDDEPLOY leftover | a069d61f2 | `CloudDeployResult.replaced` through the core and both transports; `deploy_cloud_functions` leads `next` with what it replaced | `p112S14ReplacedNote` 3/3, `hls-013/cloudDeployCore` 18/18, 3 mutants red |
+| P112-OWN023-FILEURLHOST leftover | 3b70b7c57 | `addressFile` walks Arrays and Objects (copy on write, 32 deep), reads and live updates | `p112-own023-file-url-host` 7/7 (red 2/7), 2 mutants red, file + realtime 13 suites |
+| P123-S6-PATHNOTABLE | ec886ad3d | a rule's narrowing compiles a path through a collection with no table to an empty select (params taken back); a person's own `$path` still refused by name. Measured worse than filed: lists were **500**, the maker's too | `p123-s6-path-no-table` 8/8 SQLite + PostgreSQL (red 3/4), 3 mutants red, 18 security/path suites 233, conformance 34/34 |
+| NPMAUDIT-SERVERINFO | fc3c5cba8 | `build-common.mjs` `reportedVersion()`: a `prepack` build stamps `@nodegx/mcp`'s own version, any other the editor's | bundles built to the scratchpad: `initialize` → 0.2.6 / 0.4.3; `npmauditServerInfo` 4/4 |
+| BETA-TPLNEVERERUNS | 036c2ea20 | members-area `firstLine` re-runs on body; the training demo's builder drops `sr_fail` and `ls_finish_failed` (no stand-in can start them), demo regenerated (control: HEAD's builder reproduced it byte for byte) | `function-never-reruns` over every template 0 (2 before); each template's warnings drop by the target only; `check-demo` OK. Not rendered |
+| P124-UILENSNOTE | 9e520abe1 | the map drive waits for the measured "not signed in" lens and asserts the measured sentence | `ui.test.mjs` all passed; map `npm test` "Everything passed" |
+
+## For Richard
+
+1. **Push and release.** 23 rows across the four sessions are on cline-dev (+ studio ba52c0f), none on npm or in
+   Desktop. They reach a person only with a dist rebuild from a clean worktree and the next `@nodegx/mcp`,
+   `@nodegx/preview`, `@nodegx/backend-map` and backend.
+2. **P112-OWN008-AUDIT, measured:** the only advisory against `fast-xml-parser` 4.x is in `XMLBuilder` (the XML
+   writer); nothing in the repo calls it, only `XMLParser`. Moving to 5.x is 1.3 MB / 6 packages and changes the pin
+   every exported app carries (`nodegx-export` `PARSE_DEPENDENCIES`). Recommend: stay on 4 and say why in the row.
+   The `chokidar` 3 → 4 half is mechanical but regenerates the shared `package-lock.json`: the Mac-lockfile recipe,
+   in a session that owns the lockfile.
+
+## Next
+
+1. The two items above.
+2. P26-SKELSHIP's engine half (`nodegx deploy`, Studio's Publish, the visitor wording) stands.
+3. P112-OWN026-FIX03GOLDEN belongs to the OWN-026 lane (its Mistral run was live this session), not this sweep.
+
+## Traps met
+
+1. 🔴 Thumbnails are cached by content hash (`<data>/files/thumbs/<hash>`): a probe that uploads the same image
+   every time reads 200 after sharp is gone. Upload a fresh image per probe.
+2. 🔴 `var=$(… | grep …)` under `set -euo pipefail` EXITS when grep matches nothing. Every such substitution in a
+   provisioning script needs `|| true`, and a test that runs the block under the script's own flags.
+3. The first `docker cp` into a freshly booted systemd container lost files twice (`lchown … no such file`,
+   MANIFEST missing); the second copy is fine. An instrument fault: the script refused correctly.
+4. macOS has no `timeout`; a test that runs the provision block stubs it.
+5. `addressFile` is called on every Object/Array field of every read now; a pathological value is bounded at 32.
