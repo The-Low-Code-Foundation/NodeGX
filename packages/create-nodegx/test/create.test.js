@@ -165,6 +165,8 @@ test('P112 OWN-018: Mistral Vibe gets Large 4, the same pinned server, and permi
   // Pinned, never `mistral-large-latest` (a different, older model on 2026-10-12), and set, so Vibe's routed default
   // (a non-Mistral model) never applies.
   assert.match(toml, /^active_model = "mistral-large-4"$/m);
+  // P112-OWN026-VIBEMAXTOKENS: without a cap Vibe 3 sends max_tokens ≈ the context (985k) and Mistral refuses it
+  assert.match(toml, /^max_output_tokens = 262144$/m);
   assert.match(toml, /^name = "mistral-large-4"$/m);
   // The same registration .mcp.json gets, plus the Vibe profile (OWN-019: worded for a tool list that never changes,
   // and screenshots to files — P112-OWN018-IMAGECACHE: an image in the conversation turns Mistral's cache off).

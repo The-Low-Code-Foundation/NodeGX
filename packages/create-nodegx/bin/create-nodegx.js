@@ -210,6 +210,8 @@ function renderVibeConfig(platform = process.platform, options = {}) {
     'thinking = "high"',
     'thinking_levels = ["low", "high"]',
     'max_context_length = 1000000',
+    // Vibe 3 asks for the leftover context as max_tokens; Mistral allows at most 262,144, and Large 4's thinking counts (P112-OWN026-VIBEMAXTOKENS)
+    'max_output_tokens = 262144',
     'input_price = 1.36',
     'output_price = 4.18',
     'cached_input_price = 0.14',
