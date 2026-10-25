@@ -242,6 +242,8 @@ class LocalSQLAdapter {
   events: AdapterEventEmitter;
   _txnDepth: number;
   _txnChangeBuffer: ChangeEvent[];
+  /** P112-OWN026-DELETELEAVESBYTES: a checkpoint that could not run is said once. */
+  _checkpointWarned = false;
   _persistenceMode: 'unknown' | 'persistent' | 'ephemeral' | 'failed';
   _loadError: (Error & { code?: string }) | null;
   _usingMock: boolean;
@@ -350,6 +352,10 @@ class LocalSQLAdapter {
 
       // Enable WAL mode for better concurrent access
       this.db.pragma('journal_mode = WAL');
+      // P112-OWN026-DELETELEAVESBYTES: a deleted row's content is overwritten with zeros in the pages it leaves, so
+      // "delete for good" is not left readable in the file's free space. The log is the other half:
+      // `_checkpointAfterDelete`.
+      this.db.pragma('secure_delete = ON');
 
       // BCN-003: REGEXP and the two geometry predicates. Registered per
       // connection, before any query can be prepared against it — a query
@@ -833,7 +839,30 @@ class LocalSQLAdapter {
       this._txnChangeBuffer.push(event);
       return;
     }
+    if (event.type === 'delete') this._checkpointAfterDelete();
     this.events.emit(event.type, event);
+  }
+
+  /**
+   * P112-OWN026-DELETELEAVESBYTES — after a delete has committed, copy the log into the database and empty it. In WAL
+   * mode every version of a row written since the last checkpoint is in `local.db-wal`: measured, the deleted child's
+   * name was there 6 to 25 times after the app's delete was complete. `secure_delete` zeroes the pages the row leaves;
+   * this takes the log's copies with them. Called where a delete is known to be committed (the post-commit change tap),
+   * once per delete or once per transaction holding any. A checkpoint that cannot run (a reader holding a snapshot)
+   * leaves the log for the next one and is said once.
+   *
+   * @private
+   */
+  _checkpointAfterDelete(): void {
+    if (this._usingMock || !this.db) return;
+    try {
+      this.db.pragma('wal_checkpoint(TRUNCATE)');
+    } catch (e) {
+      if (!this._checkpointWarned) {
+        this._checkpointWarned = true;
+        console.warn('[LocalSQLAdapter] could not empty the write-ahead log after a delete: ' + (e instanceof Error ? e.message : String(e)));
+      }
+    }
   }
 
   /**
@@ -1467,6 +1496,8 @@ class LocalSQLAdapter {
     if (this._txnDepth === 0 && this._txnChangeBuffer.length > 0) {
       const buffered = this._txnChangeBuffer;
       this._txnChangeBuffer = [];
+      // P112-OWN026-DELETELEAVESBYTES: one checkpoint for the whole committed transaction.
+      if (buffered.some((ev) => ev.type === 'delete')) this._checkpointAfterDelete();
       for (const ev of buffered) this.events.emit(ev.type, ev);
     }
     return result;
