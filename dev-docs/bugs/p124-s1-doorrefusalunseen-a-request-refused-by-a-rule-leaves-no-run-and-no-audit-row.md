@@ -8,6 +8,7 @@ found: P124 s1 (the mystery of the backend), 2026-10-20, on a copy of `templates
 kit: core
 regression: packages/nodegx-backend/tests/p124-s1-door-refusal.test.ts "records an anonymous read of a collection the rule refuses: who, what, which rule"
 evidence: `POST /functions/conceptList` with no credential → 403; `X-Total-Count` on `GET /executions` 2 before and 2 after; `GET /admin/audit` count 37 before and 37 after; no audit action name matches /den|refus|forbid/ (the list: `permissions.*`, `auth.link.credentials-revoked`)
+commit: f4be95651
 ---
 
 A function run that fails INSIDE the function is a run (`status: error`, `errorMessage`), so "what just ran" shows

@@ -56,3 +56,66 @@ nodegx-backend: 14 security suites 261/261, creator 12/12, ACL null 4/4, secrets
 toolDisclosure + backendTools + own026GroupWrite 58/58, render suites 88/88, p125Render1mb 6/6 (Chrome), tsc clean ·
 node-spec: golden + parity 24/24; `golden.js --check` 8 problems, all P112-OWN026-FIX03GOLDEN's · noodl-preview 35/35 ·
 backend-map `rule-change.test.mjs` all passed · Studio `check:data` 80/80, `check:editor` 204/204.
+
+---
+
+# Session 2, 2026-10-25 (next session reads this first)
+
+Picked up "Next, in order" above. Six rows fixed, two new rows filed, one stale test repaired; items 4 and 6 need
+Richard. **Not pushed, not released**, same as session 1.
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| P124-S1-DOORREFUSALUNSEEN | f4be95651 | audit action `access.denied` on every RULE 403 at the door (collection, function call rule / key scope, files, signup): principal, actor, address, target, op, rule, reason, request id; 20 per caller per minute, `notRecordedBefore` after a capped minute | `tests/p124-s1-door-refusal.test.ts` 6/6 (red 5/6 first; cap mutant red) |
+| P116-S17-DOTTEDFILTER | 6f070eed6 | `link.field` compiles to a one-hop `$path` (`QueryBuilder.dottedAsPath`); the facade asks the linked collection's `find` rule and hidden fields; not-a-link / two hops = 400 in words (`isFilterRefusal`); realtime refuses it at subscribe | `tests/p116-s17-dotted-filter.test.ts` 12/12 SQLite + PostgreSQL (red 10/12 hop off; facade mutant red) |
+| P121-TWO003-SCRIPTCOMPILE | 12fad4b2a | rule `function-script-not-compiled` (runtime's own compile + line via `vm`), blocking for authored writes | `tests-unit/p121/function-script-and-reruns.test.ts` 6/6 (red unregistered) |
+| P121-TWO005-NEVERRUNS | 12fad4b2a | rule `function-never-reruns` (warning): Run unwired, every wired input's box unticked | same file; templates corpus: 2 hits → filed **BETA-TPLNEVERERUNS** (not driven) |
+| P123-STU030-SIGNALCAUSE | 7f27ccaf9 | `src/tracecause.ts`: deferred callbacks, outcome tokens and a Function's script signals carry the cause | `test/corpus/p123-signal-cause.test.ts` 4/4 (red 3/4); NOT re-measured in Studio |
+| NPMAUDIT-BACKENDMAPSCREENS | b5495303d | `analyseProject` reads a page's own record nodes into `uses`; screen → table wires, screen panel lines, the person view asks the rule check per use; "A signed-in person"; README generic | `test/screens-from-pages.test.mjs` (todo template: `screens: []` → `['Pages/Todo']`, 28 uses); package `npm test` all parts but `ui.test.mjs`'s lens note, red at HEAD too → filed **P124-UILENSNOTE** |
+| (P107-C162 leftover) | ce4758a1c | `fed-001-feed.test.ts` asserted the old `'KB'`, red at HEAD since dccaa77e0 | 56/56 |
+
+## Item 4 — needs Richard (asked in plain words; not built)
+
+- **P112-OWN023-FILEURLHOST.** Measured: the upload answers `url: <baseUrl>/files/<name>` (`server/files.ts:223`,
+  base = the listen URL, `127.0.0.1:<port>` locally), and a File field is stored as JSON WITH that url
+  (`QueryBuilder` File branch) and read back verbatim; nothing rewrites it on read or at deploy. So both a text
+  column holding the url (arm B) and a proper File field break on a VM. Choices: (a) the backend keeps the file's
+  NAME and fills in the address from wherever it is running each time a File field is read (Parse Server's way;
+  fixes File fields, old rows included; a text column still breaks, so the kit says "store the file"); (b) the deploy
+  rewrites `http://127.0.0.1:<port>/files/` in the copied data to the VM's address (fixes text columns too, once,
+  only on that road; whether deploy copies data at all is NOT measured); (c) both.
+- **P112-OWN024-DEPLOYNOSHARP, P112-S14-MOVEDDEPLOY** not touched. MOVEDDEPLOY's shape (no product choice in it):
+  name the bundle by project id, carry the id in the bundle, and let a deploy replace the bundle the same project
+  deployed under its old path-hash name (old bundles have no id: match by the `safeName-` prefix plus overlapping
+  `#__cloud__` names). Push/replace must be one swap on the backend, or a failed push leaves nothing deployed.
+
+## Item 6 — not cheap after all
+
+- **P112-OWN008-AUDIT:** `fast-xml-parser` has no patched 4.x (4.5.7 is the last); 5.x is the 6-dependency 1.3 MB
+  version P96 R1 ruled out for the browser budget (`noodl-runtime/src/xml.ts` header) — a ruling. `chokidar` 3 → 4
+  (6.0 is latest) fits the preview's watcher (regex `ignored`, no globs), but regenerating `package-lock.json` on a
+  Mac drops other platforms' prebuilts (memory: a lockfile made on a Mac) — do it with that recipe, not `npm i`.
+- **NPMAUDIT-SERVERINFO**, **P26-SKELSHIP**: as in session 1.
+
+## Traps met
+
+1. 🔴 Backend full suite in my sandbox: split it — 252 plain files sandboxed, 49 Chrome files (`*drive*` + anything
+   importing the drive helpers) with the sandbox off. Plain half: only `bmg-002-filters` "due within past7" red =
+   P109-S41-SUNDAYWEEK (any Sunday). Chrome half: `rel002b` + `sbr015` (6 tests) = the known base reds.
+2. Runtime `conformance.test.ts` (all specs) overruns its 30-min `beforeAll` under load and reports ~130 failures;
+   grade the touched nodes with `NSP_ONLY=JavaScriptFunction,Condition` instead (green).
+3. `function-contract.test.ts` plants mutants by EXACT source lines of `simplejavascript.ts`: edit a send line there,
+   update its plant.
+4. A `vm` SyntaxError under jest comes from another realm: read `.stack` by shape, not `instanceof Error`.
+5. Editor `test:main` 11 red files are census drift (HLS-003, DEF-007, HLT-012, SEE-001, EXP-013, HLS-009, CHR-007,
+   EL-009, HLT-013, HLT-021, VFN-011) — VFN-011 checked red with my runtime change made inert. Not filed this session.
+
+## Gates read (2026-10-25)
+
+backend plain 239/240 suites (the Sunday row) · backend Chrome 46/48 (base reds) · runtime 204/207 suites before
+the two fixes, then both green; conformance by node green · editor 598/609 (census drift above) ·
+`catalog:examples` 114/114 · templates `--only` the two new rules: 0 + 2 · backend map `npm test` all but P124-UILENSNOTE.
+
+**Commits this session:** 12fad4b2a, 7f27ccaf9, ce4758a1c, f4be95651, 6f070eed6, b5495303d, and the docs commit after them.

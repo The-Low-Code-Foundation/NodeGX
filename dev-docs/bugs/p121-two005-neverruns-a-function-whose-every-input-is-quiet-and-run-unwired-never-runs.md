@@ -8,6 +8,7 @@ found: P121 TWO-005 s13, 2026-10-15
 evidence: dev-docs/tasks/phase-121-a-marketplace-and-a-community/TWO-005-THE-COMMUNITY-APP.md §8.5
 kit: mcp
 regression: packages/noodl-editor/tests-unit/p121/function-script-and-reruns.test.ts "is warned, naming the inputs and the box to tick"
+commit: 12fad4b2a
 ---
 
 A Function node runs when its Run signal arrives, or when an input whose **Run On Value Change** box is ticked gets a

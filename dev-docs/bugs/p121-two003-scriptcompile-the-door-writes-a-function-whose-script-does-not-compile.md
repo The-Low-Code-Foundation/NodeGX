@@ -8,6 +8,7 @@ found: P121 TWO-003 s4, 2026-10-14
 evidence: dev-docs/tasks/phase-121-a-marketplace-and-a-community/TWO-003-THE-SHOP.md §7.5
 kit: mcp
 regression: packages/noodl-editor/tests-unit/p121/function-script-and-reruns.test.ts "is reported on the node, by name, and blocks a write the agent just made"
+commit: 12fad4b2a
 ---
 
 An agent that writes a Function node with a syntax error in its script is told the write succeeded. The first

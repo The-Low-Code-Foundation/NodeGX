@@ -8,6 +8,7 @@ found: NodeGX Studio STU-030 (phase 123's successor repo, The-Low-Code-Foundatio
 evidence: nodegx-studio docs/look/stu-030-trace.json (`runB_signals`, `runC_add_a_task.signalChain`); nodegx-studio editor/trace-inventory.mjs reproduces it; docs/SCOPE.md "Done (STU-030)"
 kit: core
 regression: packages/noodl-runtime/test/corpus/p123-signal-cause.test.ts "an action’s Done, reported after an await, names the signal that started the action"
+commit: 7f27ccaf9
 ---
 
 `TraceEvent.cause` is documented as *"the seq of the event that delivered the input being processed when this one was

@@ -8,6 +8,7 @@ found: P116 s17, 2026-10-11 (while closing bug P116-S16-INCLUDECLP: checking a d
 evidence: dev-docs/bugs/p116-s16-includeclp-include-reads-a-collection-its-caller-may-not-read.md (the fix note)
 kit: core
 regression: packages/nodegx-backend/tests/p116-s17-dotted-filter.test.ts "the admin: salary.amount > 90000 finds the contract and > 99000 does not — before, both answered []"
+commit: 6f070eed6
 ---
 
 A person's query asks for the contracts whose linked salary is over 90,000. One contract matches. The built-in
