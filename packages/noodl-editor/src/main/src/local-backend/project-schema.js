@@ -99,7 +99,7 @@ async function readProjectSchema(projectDir) {
  *
  * @returns {Promise<{ status: 'none' } | { status: 'applied', created: string[], existing: string[], failed: Array<{ table: string, error: string }> } | { status: 'failed', error: string }>}
  */
-async function applyProjectSchema(request, projectDir) {
+async function applyProjectSchema(request, projectDir, retryDelaysMs = RETRY_DELAYS_MS) {
   let bodies;
   try {
     bodies = await readProjectSchema(projectDir);
@@ -124,15 +124,66 @@ async function applyProjectSchema(request, projectDir) {
       existing.push(body.table);
       continue;
     }
-    try {
-      await request('POST', '/admin/schema', body);
+    const error = await pushTable(request, body, retryDelaysMs);
+    if (error === null) {
       created.push(body.table);
       have.add(body.table);
-    } catch (e) {
-      failed.push({ table: body.table, error: e && e.message ? e.message : String(e) });
-    }
+    } else failed.push({ table: body.table, error });
   }
   return { status: 'applied', created, existing, failed };
 }
 
-module.exports = { SCHEMA_FILE, createBodiesOf, readProjectSchema, applyProjectSchema };
+/**
+ * P112-OWN024-SCHEMAFIRSTSTART — the waits before a push is tried again. On the 0.4.3 Intel build under Rosetta one of
+ * the marketplace's 21 pushes failed with undici's `fetch failed` while the new backend was busy, and the collection was
+ * missing until the next start.
+ */
+const RETRY_DELAYS_MS = [250, 1000];
+
+/** The request never got an answer: undici's generic network error, a timeout, an abort. A refusal in words is not. */
+function isNetworkFailure(e) {
+  if (!e) return false;
+  if (e.name === 'TimeoutError' || e.name === 'AbortError') return true;
+  return e.name === 'TypeError' && /fetch failed/i.test(String(e.message));
+}
+
+/**
+ * Push one table, trying again after a network failure. A push whose answer was lost may have landed, so before each
+ * new try the backend is asked whether the table is there: a table it has is never pushed again (R12: never change one
+ * that exists). Resolves to null when the table is there, or the last error's words.
+ */
+async function pushTable(request, body, delays) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      await request('POST', '/admin/schema', body);
+      return null;
+    } catch (e) {
+      const words = e && e.message ? e.message : String(e);
+      if (!isNetworkFailure(e) || attempt >= delays.length) return words;
+      await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+      try {
+        const live = await request('GET', '/admin/schema');
+        if (((live && live.tables) || []).some((t) => t && t.name === body.table)) return null;
+      } catch (_) {
+        /* the backend is still busy: the next push says so, or lands */
+      }
+    }
+  }
+}
+
+/**
+ * P112-OWN024-SCHEMAFIRSTSTART — what the backend card says when a start left the project's collections short, or
+ * null when nothing is missing. Only the app log said so before, and the card read Running.
+ */
+function schemaProblemSentence(result) {
+  if (!result) return null;
+  if (result.status === 'failed') return `The collections in backend/schema.json were not added: ${result.error}.`;
+  if (result.status !== 'applied' || !result.failed.length) return null;
+  const names = result.failed.map((f) => f.table);
+  const list = names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
+  const why = Array.from(new Set(result.failed.map((f) => f.error))).join('; ');
+  const one = names.length === 1;
+  return `${list} from backend/schema.json ${one ? 'was' : 'were'} not added (${why}). Start the backend again to add ${one ? 'it' : 'them'}.`;
+}
+
+module.exports = { SCHEMA_FILE, RETRY_DELAYS_MS, createBodiesOf, readProjectSchema, applyProjectSchema, schemaProblemSentence };

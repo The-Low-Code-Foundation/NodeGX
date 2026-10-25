@@ -25,7 +25,7 @@ const os = require('os');
 const { ServiceSupervisor } = require('./ServiceSupervisor');
 const { BackendProcessRegistry } = require('./BackendProcessRegistry');
 const workflowProposals = require('./workflow-proposals');
-const { applyProjectSchema } = require('./project-schema');
+const { applyProjectSchema, schemaProblemSentence } = require('./project-schema');
 
 /**
  * Safe console.log wrapper
@@ -603,6 +603,8 @@ class BackendManager {
     // and make one without its indexes. Never fails the start: a backend
     // missing a collection still runs, and the report says which.
     const projectSchema = await applyProjectSchema((method, p, body) => supervisor.request(method, p, body), projectDir);
+    // P112-OWN024-SCHEMAFIRSTSTART: the card says what is still missing, not only the log.
+    supervisor.schemaProblem = schemaProblemSentence(projectSchema);
     if (projectSchema.status === 'failed') safeLog(`Could not add ${id}'s project collections: ${projectSchema.error}`);
     else if (projectSchema.status === 'applied') {
       safeLog(
@@ -681,7 +683,8 @@ class BackendManager {
       persistence: health
         ? health.persistence
         : { mode: 'unknown', persistent: false, ephemeral: false, error: { message: 'health check unreachable' } },
-      workflows: health ? health.workflows : undefined
+      workflows: health ? health.workflows : undefined,
+      ...(supervisor.schemaProblem ? { schemaProblem: supervisor.schemaProblem } : {})
     };
   }
 

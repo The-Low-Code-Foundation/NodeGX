@@ -322,6 +322,24 @@ export function LocalBackendCard({
         </div>
       )}
 
+      {/* P112-OWN024-SCHEMAFIRSTSTART: a collection from the project's schema this start did not add */}
+      {backend.running && backend.schemaProblem && (
+        <div className={css.PersistenceNotice} style={{ color: 'var(--theme-color-notice)' }} data-test="schema-problem">
+          <Icon
+            icon={IconName.WarningTriangle}
+            size={IconSize.Tiny}
+            UNSAFE_style={{ color: 'var(--theme-color-notice)' }}
+          />
+          <Text
+            className={css.PersistenceNoticeText}
+            textType={TextType.Shy}
+            style={{ fontSize: '11px', marginLeft: '6px' }}
+          >
+            {backend.schemaProblem}
+          </Text>
+        </div>
+      )}
+
       {/* Persistence failure — the native SQLite engine could not load */}
       {hasFailed && (
         <div className={css.PersistenceNotice} style={{ color: 'var(--theme-color-danger)' }}>

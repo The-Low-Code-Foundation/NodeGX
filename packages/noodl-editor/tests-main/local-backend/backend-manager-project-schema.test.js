@@ -35,6 +35,12 @@ jest.mock('../../src/main/src/local-backend/ServiceSupervisor', () => ({
       this.requests = [];
       this.readFails = FakeServiceSupervisor.nextReadFails;
       FakeServiceSupervisor.nextReadFails = false;
+      // P112-OWN024-SCHEMAFIRSTSTART: how many times each table's push fails at the network level first.
+      this.dropFirst = { ...FakeServiceSupervisor.nextDropFirst };
+      FakeServiceSupervisor.nextDropFirst = {};
+      // …and how many times a push lands but its answer is lost (a timeout after the write).
+      this.loseAnswer = { ...FakeServiceSupervisor.nextLoseAnswer };
+      FakeServiceSupervisor.nextLoseAnswer = {};
       supervisors.push(this);
     }
     start() {
@@ -59,7 +65,16 @@ jest.mock('../../src/main/src/local-backend/ServiceSupervisor', () => ({
       }
       if (method === 'POST' && p === '/admin/schema' && body.action === 'createTable') {
         if (body.table === 'Refused') throw new Error('the series on "n" must be an object with a format');
+        if (this.dropFirst[body.table] > 0) {
+          this.dropFirst[body.table]--;
+          // undici's generic network error, as the 0.4.3 log read it.
+          throw new TypeError('fetch failed');
+        }
         this.tables.push(body.table);
+        if (this.loseAnswer[body.table] > 0) {
+          this.loseAnswer[body.table]--;
+          throw Object.assign(new Error('The operation was aborted due to timeout'), { name: 'TimeoutError' });
+        }
         return { success: true, created: true };
       }
       throw new Error('unexpected ' + method + ' ' + p);
@@ -106,6 +121,8 @@ describe('P121 R12 — a backend started for a project gets the project’s coll
     supervisors.length = 0;
     ServiceSupervisor.nextTables = [];
     ServiceSupervisor.nextReadFails = false;
+    ServiceSupervisor.nextDropFirst = {};
+    ServiceSupervisor.nextLoseAnswer = {};
     manager = new BackendManager({
       backendsPath: path.join(root, 'backends'),
       registryDeps: { isAlive: () => false, readCommandLine: async () => null, probeHealth: async () => null, kill: () => undefined }
@@ -188,5 +205,42 @@ describe('P121 R12 — a backend started for a project gets the project’s coll
     expect(supervisors).toHaveLength(1);
     expect(supervisors[0].requests).toHaveLength(3);
     expect(second.projectSchema).toBeUndefined();
+  });
+
+  describe('P112-OWN024-SCHEMAFIRSTSTART — a push that fails on the way is tried again, and what is still missing is said', () => {
+    it('a collection whose first push fails at the network level is added on the next try, and reported as added', async () => {
+      giveBackend('b1', 8601);
+      ServiceSupervisor.nextDropFirst = { Payment: 1 };
+      const status = await manager.startBackend('b1', { projectDir: giveProject(pushes) });
+      expect(status.projectSchema).toEqual({ status: 'applied', created: ['Country', 'Payment'], existing: [], failed: [] });
+      expect(supervisors[0].tables).toEqual(['Country', 'Payment']);
+      expect((await manager.getStatus('b1')).schemaProblem).toBeUndefined();
+    });
+
+    it('a refusal in words is not tried again: the backend said no', async () => {
+      giveBackend('b1', 8601);
+      await manager.startBackend('b1', { projectDir: giveProject([{ action: 'createTable', table: 'Refused', columns: [] }]) });
+      expect(supervisors[0].requests.filter(([m]) => m === 'POST')).toHaveLength(1);
+    });
+
+    it('still missing after the tries: the backend card is told which, and to start the backend again', async () => {
+      giveBackend('b1', 8601);
+      ServiceSupervisor.nextDropFirst = { Payment: 9 };
+      const status = await manager.startBackend('b1', { projectDir: giveProject(pushes) });
+      expect(status.projectSchema.failed).toEqual([{ table: 'Payment', error: 'fetch failed' }]);
+      expect(supervisors[0].requests.filter(([m, , b]) => m === 'POST' && b.table === 'Payment')).toHaveLength(3);
+      const card = await manager.getStatus('b1');
+      expect(card.running).toBe(true);
+      expect(card.schemaProblem).toBe('Payment from backend/schema.json was not added (fetch failed). Start the backend again to add it.');
+    });
+
+    it('a push that timed out but landed is not pushed again: the next try finds it there', async () => {
+      giveBackend('b1', 8601);
+      ServiceSupervisor.nextLoseAnswer = { Payment: 1 };
+      const status = await manager.startBackend('b1', { projectDir: giveProject(pushes) });
+      expect(status.projectSchema).toEqual({ status: 'applied', created: ['Country', 'Payment'], existing: [], failed: [] });
+      expect(supervisors[0].requests.filter(([m, , b]) => m === 'POST' && b.table === 'Payment')).toHaveLength(1);
+      expect(supervisors[0].tables).toEqual(['Country', 'Payment']);
+    });
   });
 });

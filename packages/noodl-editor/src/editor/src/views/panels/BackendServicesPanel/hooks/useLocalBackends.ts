@@ -41,6 +41,11 @@ export interface LocalBackendInfo extends LocalBackendMetadata {
   endpoint?: string;
   /** Data-persistence status (persistent vs. ephemeral vs. failed) */
   persistence?: PersistenceStatus;
+  /**
+   * P112-OWN024-SCHEMAFIRSTSTART: the project's `backend/schema.json` collections this start did not add, in a
+   * sentence (main's `schemaProblemSentence`). Absent when nothing is missing.
+   */
+  schemaProblem?: string;
 }
 
 /** Hook return type */
@@ -115,12 +120,14 @@ export function useLocalBackends(): UseLocalBackendsReturn {
             running: boolean;
             port?: number;
             persistence?: PersistenceStatus;
+            schemaProblem?: string;
           }>('backend:status', backend.id);
           return {
             ...backend,
             running: status?.running ?? false,
             endpoint: status?.running && status?.port ? `http://localhost:${status.port}` : undefined,
-            persistence: status?.persistence
+            persistence: status?.persistence,
+            schemaProblem: status?.running ? status.schemaProblem : undefined
           };
         })
       );
