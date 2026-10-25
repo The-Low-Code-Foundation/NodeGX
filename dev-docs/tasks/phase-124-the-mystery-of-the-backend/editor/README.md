@@ -1,8 +1,9 @@
 # Backend map
 
-A map of the training app's backend, on one canvas: the app's **screens** (where people click), the
-**functions** (the only doors to the data, each with its lock), the **tables** (where the data lives,
-each with its shield), the wires between them, and **what just ran**, live.
+A map of a NodeGX app's backend, on one canvas: the app's **screens** (where people click), the
+**functions** (doors to the data, each with its lock), the **tables** (where the data lives, each with
+its shield), the wires between them (a screen that reads or writes records itself is wired straight to
+the table), and **what just ran**, live.
 
 ## Open it
 
@@ -27,15 +28,15 @@ See it without a backend: https://nodegx.io/backend-map/ (a recording).
 - **Click anything.** A table tells you who may open it, which functions reach it and who may run those,
   what's in a row and which tables it points at. A function tells you when it runs ("on Settings,
   pressing “Download my data”"), what it does step by step, which tables it reads or changes, and its
-  last runs. A screen tells you what it asks the backend for.
-- **Look at it as…** someone not signed in, a signed-in learner, or staff: what they can't reach dims.
+  last runs. A screen tells you what it asks the backend for: the functions it runs, and the tables it reads or writes itself.
+- **Look at it as…** someone not signed in, a signed-in person, or staff: what they can't reach dims.
 - **Is it secure?** The card on the left, in sentences. Red and amber lines are the ones to read.
 - **What just ran:** the strip at the bottom. A run lights its function up on the map (green worked, red
   turned away) and sends sparks along its wires.
 - **Change who may open a table:** click the table, choose under "Looking at rows" and "Adding, changing
   or deleting rows", read the sentence that says what it will mean, press **Make it so**. The backend obeys
-  at once, and the same rule is saved in `training/nodegx.security.json` so it holds when the backend
-  restarts. The panel then shows the backend's own answer for a stranger, a learner and staff.
+  at once, and the same rule is saved in the project's `nodegx.security.json` so it holds when the backend
+  restarts. The panel then shows the backend's own answer for a stranger, a signed-in person and staff.
   **Back to the app's standard rule** undoes it the same way.
 
 If someone else changed the rules since you opened the map, the change is refused and nothing is

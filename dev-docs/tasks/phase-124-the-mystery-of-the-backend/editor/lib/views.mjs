@@ -79,7 +79,20 @@ export function makeViews({ be, project, mine }) {
   async function screen(id, screenKey) {
     const { u, w } = await userOf(id);
     const calls = w.app.calls.filter((c) => c.screen === screenKey);
-    if (!calls.length) throw new Error('That screen asks the backend for nothing.');
+    // NPMAUDIT-BACKENDMAPSCREENS: what the screen reads and writes itself, asked of the rules as this person.
+    const ownUses = (w.app.uses ?? []).filter((x) => x.screen === screenKey);
+    if (!calls.length && !ownUses.length) throw new Error('That screen asks the backend for nothing.');
+    const OP = { reads: 'find', creates: 'create', changes: 'update', deletes: 'delete' };
+    const uses = await Promise.all(
+      ownUses.map(async (x) => {
+        try {
+          const r = await be.post('/admin/permissions/check', { principal: { kind: 'user', userId: u.objectId }, collection: x.table, op: OP[x.how] ?? 'find' });
+          return { ...x, allowed: !!r.allowed, reason: r.reason ?? '' };
+        } catch (e) {
+          return { ...x, allowed: null, reason: e.message };
+        }
+      })
+    );
     const byFn = {};
     for (const c of calls) (byFn[c.fn] ??= { fn: c.fn, triggers: [] }).triggers.push({ words: c.trigger.words, kind: c.trigger.kind, inside: c.inside });
     const lid = w.lids[u.objectId];
@@ -113,6 +126,7 @@ export function makeViews({ be, project, mine }) {
         keyName,
         screen: screenKey,
         calls: Object.values(byFn).map((c) => ({ ...c, ...results[c.fn], touches: w.fnByName[c.fn]?.touches ?? [] })),
+        uses,
         extra: results.course && !byFn.course ? [{ fn: 'course', ...results.course, why: 'run first, to know which step they’re on' }] : []
       };
     });

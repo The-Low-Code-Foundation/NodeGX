@@ -15,6 +15,8 @@ const WRITE_NODES = {
   AddDbModelRelation: 'changes',
   RemoveDbModelRelation: 'changes'
 };
+/** The inputs that make a record node act (Query Records' fetch, a write's store / do). */
+const RECORD_ACTIONS = ['fetch', 'refresh', 'store', 'do', 'create', 'save', 'delete', 'run'];
 const RECORD_CALLS = {
   query: 'reads', fetch: 'reads', count: 'reads', aggregate: 'reads', distinct: 'reads', get: 'reads',
   create: 'creates', save: 'changes', update: 'changes', delete: 'deletes', remove: 'deletes'
@@ -115,10 +117,10 @@ function stripType(type) {
  * What makes a call node run, in words: walk the wires back from its `call` input until a button,
  * a screen opening, or a named node is found.
  */
-function triggerOf(callNode, nodesById, conns, part) {
+function triggerOf(callNode, nodesById, conns, part, ports = ['call']) {
   const into = (id) => conns.filter((c) => c.toId === id);
   const seen = new Set([callNode.id]);
-  let frontier = into(callNode.id).filter((c) => c.toProperty === 'call');
+  let frontier = into(callNode.id).filter((c) => ports.includes(c.toProperty));
   for (let depth = 0; depth < 6 && frontier.length; depth++) {
     const next = [];
     for (const c of frontier) {
@@ -236,7 +238,32 @@ export function analyseProject(project, tableNames) {
       }
     }
   }
-  const screens = [...new Set(calls.map((c) => c.screen))].sort();
+  // NPMAUDIT-BACKENDMAPSCREENS: a screen also reaches the backend by reading and writing records itself
+  // (a Query Records on the page, the MCP's canonical `repeater-query-records`), with no cloud function
+  // between. Before, such an app's map had no screens at all. One entry per screen, table and node.
+  const uses = [];
+  for (const c of comps) {
+    if (c.key.startsWith(CLOUD)) continue;
+    const nodes = c.files.nodes.nodes;
+    const conns = c.files.connections.connections || [];
+    const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+    for (const n of nodes) {
+      const p = n.parameters || {};
+      const how = READ_NODES.has(n.type) ? 'reads' : WRITE_NODES[n.type];
+      if (!how || !p.collectionName) continue;
+      const wired = conns.some((x) => x.toId === n.id && RECORD_ACTIONS.includes(x.toProperty));
+      // A query with nothing wired into its fetch runs when its screen opens.
+      const trigger = wired
+        ? triggerOf(n, byId, conns, c.key.split('/').pop(), RECORD_ACTIONS)
+        : how === 'reads'
+          ? { kind: 'open', words: 'opening the screen' }
+          : { kind: 'unknown', words: 'something on the screen (the map could not tell what)' };
+      for (const page of pagesOf(c.key)) {
+        uses.push({ screen: page, inside: c.key === page ? null : c.key, table: p.collectionName, how, label: n.label || '', trigger });
+      }
+    }
+  }
+  const screens = [...new Set([...calls.map((c) => c.screen), ...uses.map((u) => u.screen)])].sort();
 
   return {
     name: project.store.readProjectFile()?.name ?? project.dir,
@@ -246,7 +273,8 @@ export function analyseProject(project, tableNames) {
       return { name: nm, component: k, touches: mergeTouches(ownTouches(byKey[k].files.nodes.nodes, tableNames)) };
     }),
     screens,
-    calls
+    calls,
+    uses
   };
 }
 

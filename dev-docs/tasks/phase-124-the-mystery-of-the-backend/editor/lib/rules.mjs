@@ -139,7 +139,7 @@ export async function samplePeople(be) {
   try {
     const { users } = await be.get('/admin/users?limit=200');
     const plain = users.find((u) => !u.roles?.length && !u.disabled);
-    if (plain) list.push({ words: 'A signed-in learner', principal: { kind: 'user', userId: plain.objectId } });
+    if (plain) list.push({ words: 'A signed-in person', principal: { kind: 'user', userId: plain.objectId } });
     const { roles } = await be.get('/admin/roles');
     for (const r of roles) {
       if (r.users?.[0]) list.push({ words: `Someone in the ${r.name} group`, principal: { kind: 'user', userId: r.users[0] } });

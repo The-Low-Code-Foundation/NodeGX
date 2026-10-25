@@ -103,6 +103,7 @@ export function createEditor(opts) {
       helpers: app.helpers,
       screens: app.screens,
       calls: app.calls,
+      uses: app.uses,
       config: { defaults: config.defaults, collections: config.collections ?? {}, functions: config.functions ?? {}, files: config.files, signup: config.signup },
       fileCollections: file.config?.collections ?? {},
       etag: perms.json.etag,

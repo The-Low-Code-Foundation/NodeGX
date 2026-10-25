@@ -25,7 +25,7 @@ const OPEN_COLORS = ['#45d08a', '#a78bfa', '#fdb022', '#f97066'];
 
 const PEOPLE = {
   anon: { signedIn: false, roles: [], words: 'Someone not signed in' },
-  learner: { signedIn: true, roles: [], words: 'A signed-in learner' },
+  learner: { signedIn: true, roles: [], words: 'A signed-in person' },
   staff: { signedIn: true, roles: null, words: 'Someone in the staff group' }
 };
 
@@ -173,6 +173,8 @@ function layout() {
 
   // Tables, ordered by the functions that touch them; two columns.
   const touchY = {};
+  // NPMAUDIT-BACKENDMAPSCREENS: a screen that reads a table itself pulls it toward the screen.
+  for (const u of m.uses ?? []) (touchY[u.table] ??= []).push([sy[u.screen] ?? 0, 0.5]);
   for (const f of m.functions) {
     for (const t of f.touches) {
       const w = t.hows.includes('mentions') && t.hows.length === 1 ? 0.25 : 1;
@@ -207,6 +209,17 @@ function layout() {
     pairs[id].triggers.push(c);
   }
   edges.push(...Object.values(pairs));
+  // NPMAUDIT-BACKENDMAPSCREENS: the screen's own record nodes, straight to the table, no function between.
+  const direct = {};
+  for (const u of m.uses ?? []) {
+    const id = `s:${u.screen}>t:${u.table}`;
+    if (!byId[`s:${u.screen}`] || !byId[`t:${u.table}`]) continue;
+    direct[id] ??= { id, kind: 'reads', from: `s:${u.screen}`, to: `t:${u.table}`, hows: [], uses: [] };
+    if (!direct[id].hows.includes(u.how)) direct[id].hows.push(u.how);
+    if (u.how !== 'reads') direct[id].kind = 'writes';
+    direct[id].uses.push(u);
+  }
+  edges.push(...Object.values(direct));
   for (const f of m.functions) {
     for (const t of f.touches) {
       if (!byId[`t:${t.table}`]) continue;
@@ -265,7 +278,13 @@ function lensOf(node) {
       const t = R_.tables[node.key];
       return { can: !!t?.reached, direct: !!t?.directly, via: Object.keys(t?.via ?? {}) };
     }
-    if (node.kind === 'screen') return { can: state.map.calls.some((c) => c.screen === node.key && R_.tools.has(c.fn)) };
+    if (node.kind === 'screen') {
+      return {
+        can:
+          state.map.calls.some((c) => c.screen === node.key && R_.tools.has(c.fn)) ||
+          (state.map.uses ?? []).some((u) => u.screen === node.key && R_.tables[u.table]?.directly)
+      };
+    }
     return { can: true };
   }
   const p = person();
@@ -1380,9 +1399,21 @@ function pathwayPanel(n) {
   return `${head}
     <p>What ${esc(firstName(P))} gets on this screen: each function it asks the backend for, run as them, and the real answer, the way the screen lists it.</p>
     ${mineNote(d.keyName, P.name, ran.length)}
-    ${shown.length ? '' : '<div class="verdict warn">Nothing on this screen could be run as them: see why on each function below.</div>'}
+    ${shown.length || !d.calls.length ? '' : '<div class="verdict warn">Nothing on this screen could be run as them: see why on each function below.</div>'}
     ${d.extra.map((c) => callCard({ ...c, triggers: null })).join('')}
-    ${[...d.calls].sort((a, b) => ORDER[a.status] - ORDER[b.status]).map((c) => callCard(c)).join('')}`;
+    ${[...d.calls].sort((a, b) => ORDER[a.status] - ORDER[b.status]).map((c) => callCard(c)).join('')}
+    ${usesSection(d.uses ?? [], P)}`;
+}
+
+/** NPMAUDIT-BACKENDMAPSCREENS: what the screen reads and writes itself, and whether the table's rule lets this person. */
+function usesSection(uses, P) {
+  if (!uses.length) return '';
+  const verdict = (x) => (x.allowed === true ? 'the rule lets them' : x.allowed === false ? 'the rule refuses them' : `could not ask (${x.reason})`);
+  return `<h4>Straight from the tables (no function between)</h4>
+    <ul>${uses
+      .map((x) => `<li>${esc(cap(x.trigger.words))} ${esc(x.how)} ${go(`t:${x.table}`, W.tableWords(x.table))}${x.label ? ` (“${esc(x.label)}”)` : ''}: ${esc(verdict(x))}</li>`)
+      .join('')}</ul>
+    <p style="font-size:12.5px;color:#7d8a98">Asked of the backend's rules as ${esc(P.name)}; nothing is read or written.</p>`;
 }
 
 const SKIP_COLS = new Set(['objectId', 'createdAt', 'updatedAt', 'ACL', 'emailVerified', 'authData', 'sessionToken']);
@@ -1720,11 +1751,18 @@ function fnPanel(n) {
 function screenPanel(n) {
   const m = state.map;
   const calls = m.calls.filter((c) => c.screen === n.key);
+  const uses = (m.uses ?? []).filter((u) => u.screen === n.key);
+  // NPMAUDIT-BACKENDMAPSCREENS: what the screen reads and writes itself, by the table's own rule.
+  const useLine = (u) => {
+    const d = directRead(u.table);
+    const rule = u.how === 'reads' ? d.read : d.change[{ creates: 0, changes: 1, deletes: 2 }[u.how] ?? 1];
+    return `<li>${esc(cap(u.trigger.words))} ${esc(u.how)} ${go(`t:${u.table}`, W.tableWords(u.table))}${u.label ? ` (“${esc(u.label)}”)` : ''} — ${esc(W.ruleWords(rule))} may</li>`;
+  };
   return `
     <div class="kind">Screen</div>
     <h2>${esc(n.title)}</h2>
     <p>What happens on this screen that reaches the backend:</p>
-    <ul>${calls.map((c) => `<li>${esc(cap(c.trigger.words))} runs ${go(`f:${c.fn}`, c.fn)} — ${esc(W.ruleWords(m.functions.find((f) => f.name === c.fn)?.call))} may</li>`).join('')}</ul>
+    <ul>${calls.map((c) => `<li>${esc(cap(c.trigger.words))} runs ${go(`f:${c.fn}`, c.fn)} — ${esc(W.ruleWords(m.functions.find((f) => f.name === c.fn)?.call))} may</li>`).join('')}${uses.map(useLine).join('')}</ul>
   `;
 }
 

@@ -18,6 +18,8 @@ if (run([SUITE, path.join(here, 'suite-adapter-broken.mjs'), copy, path.join(her
   console.log('the control PASSED: the adapter is not being graded');
   bad++;
 } else console.log('(failed, as it must)');
+console.log('\n— a screen that reads its tables itself is a screen (the todo template, read in place) —');
+if (run([path.join(here, 'screens-from-pages.test.mjs')]) !== 0) bad++;
 console.log('\n— changing who may see a table, on a copy and its own backend —');
 if (run([path.join(here, 'rule-change.test.mjs')]) !== 0) bad++;
 console.log('\n— the page, driven in Chrome, on a copy and its own backend —');
