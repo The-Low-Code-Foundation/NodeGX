@@ -98,7 +98,14 @@ import { logger } from '../ops/logger';
 import { clientIp } from '../ops/client-ip';
 import { RateLimiter, classifyRoute, type RateDecision } from '../ops/rate-limit';
 import type { AuditLog } from '../ops/audit';
-import { AUDIT_LOGIN_FAILURE, AUDIT_LOGIN_SUCCESS, auditActionFor, declaredAuditActions } from '../ops/audit-actions';
+import {
+  ACCESS_DENIED_AUDIT_CAP,
+  AUDIT_ACCESS_DENIED,
+  AUDIT_LOGIN_FAILURE,
+  AUDIT_LOGIN_SUCCESS,
+  auditActionFor,
+  declaredAuditActions
+} from '../ops/audit-actions';
 import { REQUEST_ID_HEADER, resolveRequestId } from '../ops/request-id';
 import { SERVICE_VERSION, applyAdminSecurityHeaders, applyCors, serverHeader } from '../ops/headers';
 import { McpRoutes } from './mcp/McpRoutes';
@@ -257,6 +264,21 @@ function segmentsMatch(pattern: string, seg: string[], params?: Record<string, s
 }
 
 /**
+ * P124-S1-DOORREFUSALUNSEEN: the 403 a permission RULE gave at the door, carrying
+ * what it refused (collection or function, op, the rule) for the `access.denied`
+ * audit entry. Every other 403 stays a plain HttpError and writes nothing new.
+ */
+class RuleRefusal extends HttpError {
+  constructor(
+    message: string,
+    readonly target: Record<string, string>,
+    readonly detail: { op: string; rule: unknown; reason?: string }
+  ) {
+    super(403, message, 119);
+  }
+}
+
+/**
  * Per-request state the dispatcher fills in and the access log reads (BAK-009).
  * Deliberately a plain object threaded through `handle()` rather than fields
  * bolted onto `http.IncomingMessage` — the request object belongs to Node.
@@ -407,6 +429,8 @@ export class HttpServer {
   private readonly backups: BackupSubsystem;
   private readonly ops: OpsState;
   private readonly auditLog: AuditLog;
+  /** P124-S1-DOORREFUSALUNSEEN: per caller, this minute's `access.denied` entries and the ones not written. */
+  private readonly deniedAudit = new Map<string, { windowStart: number; written: number; suppressed: number }>();
   /** CWF-016. */
   private readonly idempotency: IdempotencyStore;
   private server: http.Server | null = null;
@@ -1550,6 +1574,7 @@ export class HttpServer {
 
         this.handle(req, res, trace).catch((err) => {
           trace.error = err instanceof Error ? err.message : String(err);
+          if (err instanceof RuleRefusal) this.noteRefusal(trace, err);
           sendError(res, err);
         });
       });
@@ -1751,6 +1776,39 @@ export class HttpServer {
       method: trace.method,
       route: trace.route || undefined
     });
+  }
+
+  /**
+   * P124-S1-DOORREFUSALUNSEEN: make a rule's refusal this request's audit entry,
+   * within the per-caller cap. A request that already carries an action keeps it
+   * (its own entry records the failure). The caller is the principal and actor,
+   * or the address for an anonymous one, which is the bucket a flood comes from.
+   */
+  private noteRefusal(trace: RequestTrace, refusal: RuleRefusal): void {
+    if (trace.auditAction || !this.auditLog.enabled) return;
+    const now = Date.now();
+    const key = `${trace.principal}:${trace.actor || trace.clientIp}`;
+    let bucket = this.deniedAudit.get(key);
+    if (!bucket || now - bucket.windowStart >= 60_000) {
+      if (this.deniedAudit.size > 1000) {
+        for (const [k, b] of this.deniedAudit) if (now - b.windowStart >= 60_000) this.deniedAudit.delete(k);
+      }
+      bucket = { windowStart: now, written: 0, suppressed: bucket?.suppressed ?? 0 };
+      this.deniedAudit.set(key, bucket);
+    }
+    if (bucket.written >= ACCESS_DENIED_AUDIT_CAP) {
+      bucket.suppressed++;
+      return;
+    }
+    bucket.written++;
+    trace.auditAction = AUDIT_ACCESS_DENIED;
+    trace.auditTarget = refusal.target;
+    trace.auditDetail = {
+      ...refusal.detail,
+      ...(trace.functionRun ? { functionRun: trace.functionRun } : {}),
+      ...(bucket.suppressed ? { notRecordedBefore: bucket.suppressed } : {})
+    };
+    bucket.suppressed = 0;
   }
 
   /**
@@ -2157,17 +2215,23 @@ export class HttpServer {
           this.functionAllowsNoAuth(name)
         );
         if (decision.allowed) return;
+        const refused = { op: 'call', rule: decision.rule, reason: decision.reason };
         if (principal.kind === 'apiKey') {
-          throw new HttpError(403, `Permission denied: API key "${principal.name}" cannot call "${name}".`, 119);
+          throw new RuleRefusal(`Permission denied: API key "${principal.name}" cannot call "${name}".`, { function: name }, refused);
         }
-        throw new HttpError(403, `Permission denied for function "${name}".`, 119);
+        throw new RuleRefusal(`Permission denied for function "${name}".`, { function: name }, refused);
       }
 
       case 'files': {
         if (principal.kind === 'admin') return;
+        const fileTarget: Record<string, string> = params.name ? { file: params.name } : {};
         if (principal.kind === 'apiKey') {
           // No key scope covers files in v1 (model doc §6).
-          throw new HttpError(403, 'Permission denied for this file operation.', 119);
+          throw new RuleRefusal('Permission denied for this file operation.', fileTarget, {
+            op: access.op,
+            rule: this.security.config.files[access.op],
+            reason: 'no API key scope covers files'
+          });
         }
         if (ruleAllows(this.security.config.files[access.op], principal)) return;
         // BMG-002: a signed URL IS the credential for reading one file — it is
@@ -2179,16 +2243,26 @@ export class HttpServer {
         // `assertReadable` passes any file without an ACL, so a gate that merely
         // stepped aside for `?sig=` would hand a forged one every public file.
         if (access.op === 'read' && params.name && query.sig && this.signatureAdmits(params.name, query)) return;
-        throw new HttpError(403, 'Permission denied for this file operation.', 119);
+        throw new RuleRefusal('Permission denied for this file operation.', fileTarget, {
+          op: access.op,
+          rule: this.security.config.files[access.op]
+        });
       }
 
       case 'signup': {
         if (principal.kind === 'admin') return;
         if (principal.kind === 'apiKey') {
-          throw new HttpError(403, 'Permission denied: API keys cannot create users.', 119);
+          throw new RuleRefusal('Permission denied: API keys cannot create users.', {}, {
+            op: 'signup',
+            rule: this.security.config.signup,
+            reason: 'API keys cannot create users'
+          });
         }
         if (ruleAllows(this.security.config.signup, principal)) return;
-        throw new HttpError(403, 'Permission denied: signups are disabled on this backend.', 119);
+        throw new RuleRefusal('Permission denied: signups are disabled on this backend.', {}, {
+          op: 'signup',
+          rule: this.security.config.signup
+        });
       }
 
       case 'session':
@@ -2256,7 +2330,11 @@ export class HttpServer {
     if (this.security.devOpenActive) return undefined;
     const decision = this.security.checkClp(principal, collection, op);
     if (!decision.allowed) {
-      throw new HttpError(403, `Permission denied for this operation on "${collection}".`, 119);
+      throw new RuleRefusal(
+        `Permission denied for this operation on "${collection}".`,
+        { collection },
+        { op, rule: decision.rule, reason: decision.reason }
+      );
     }
     return decision;
   }
