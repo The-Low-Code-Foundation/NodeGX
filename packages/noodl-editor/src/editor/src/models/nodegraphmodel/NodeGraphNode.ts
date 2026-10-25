@@ -7,6 +7,7 @@ import { ComponentModel } from '@noodl-models/componentmodel';
 import { NodeGraphModel } from '@noodl-models/nodegraphmodel/NodeGraphModel';
 import { NodeGrapPort } from '@noodl-models/NodeGraphPort';
 import { replaceOrAppendPorts } from '@noodl-models/nodegraphmodel/portOverrides';
+import { diffReplacedPorts, portsReplacedWarning, portTypeName, PortsReplaced } from '@noodl-models/nodegraphmodel/portsReplaced';
 import { NodeLibrary } from '@noodl-models/nodelibrary';
 import { BasicNodeType } from '@noodl-models/nodelibrary/BasicNodeType';
 import { derivedPortsForNode } from '@noodl-models/nodelibrary/dynamicPortRules';
@@ -82,6 +83,14 @@ export class NodeGraphNode extends Model {
   private _label: TSFixme;
   private _type: TSFixme;
   private _ports: TSFixme;
+  /**
+   * P107-S79-SILENTCACHE — `dynamicports` came from the project file and no viewer has announced this node's ports
+   * since. The first `setDynamicPorts` after that is the one that replaces a cache the editor has been trusting, and
+   * is diffed (`portsReplaced.ts`); what it took from a wire stays in `_portsReplaced` for `evaluateHealth` to read.
+   */
+  private _portsFromFile?: boolean;
+  private _portsReplaced?: PortsReplaced;
+  private _portsReplacedWarned?: boolean;
 
   public get variant(): TSFixme {
     if (!this._variant) {
@@ -184,6 +193,7 @@ export class NodeGraphNode extends Model {
       metadata: stripCodeHistoryMetadata(json.metadata),
       diffData: json.diffData
     });
+    node._portsFromFile = Array.isArray(json.dynamicports) && json.dynamicports.length > 0;
     for (const i in json.children) {
       const child = NodeGraphNode.fromJSON(json.children[i]);
       node.addChild(child);
@@ -883,10 +893,13 @@ export class NodeGraphNode extends Model {
 
   // Sets the dynamic instance ports for this node
   setDynamicPorts(ports: NodeGrapPort[], options?: DynamicPortsOptions) {
+    const replacingTheFile = this._portsFromFile === true;
+    this._portsFromFile = false;
     if (portsEqual(ports, this.dynamicports)) {
       return;
     }
 
+    const saved = this.dynamicports;
     this._ports = undefined;
     this.dynamicports = ports;
 
@@ -927,7 +940,55 @@ export class NodeGraphNode extends Model {
       });
     }
 
+    if (replacingTheFile) this.notePortsReplaced(saved, ports, options);
+
     this.notifyListeners('instancePortsChanged');
+  }
+
+  /** P107-S79-SILENTCACHE — the diff of the saved list against the first one a viewer announced. See `portsReplaced.ts`. */
+  private notePortsReplaced(saved: NodeGrapPort[], ports: NodeGrapPort[], options?: DynamicPortsOptions) {
+    const renamed = options && options.renamed ? (options.renamed.length ? options.renamed : [options.renamed]) : [];
+    const renamedAway: string[] = [];
+    each(renamed, (r: DynamicPortsOptions['renamed'][0]) => {
+      each(r.patterns, (p) => renamedAway.push(p.replace('{{*}}', r.before)));
+    });
+
+    const replaced = diffReplacedPorts(saved, ports, renamedAway);
+    if (replaced.dropped.length === 0 && replaced.retyped.length === 0) {
+      this._portsReplaced = undefined;
+    } else {
+      this._portsReplaced = replaced;
+      console.warn(
+        `[ports] ${this.typename} ${this.id}: the preview replaced the ports saved in the project.` +
+          (replaced.dropped.length ? ` Dropped: ${replaced.dropped.join(', ')}.` : '') +
+          (replaced.retyped.length
+            ? ` Retyped: ${replaced.retyped.map((r) => `${r.name} ${r.before} → ${r.after}`).join(', ')}.`
+            : '')
+      );
+    }
+    this.evaluatePortsReplaced();
+  }
+
+  /** Raise, or clear, the warning a replacement still owes, read against the wires and ports as they are now. */
+  private evaluatePortsReplaced() {
+    if (!this._portsReplaced && !this._portsReplacedWarned) return; // every node that was never replaced: no work
+    if (!this.owner || !this.owner.owner) return;
+    const graph = this.owner;
+    const message = portsReplacedWarning(this._portsReplaced, {
+      isWired: (name) =>
+        graph.connections.some(
+          (c) => (c.fromId === this.id && c.fromProperty === name) || (c.toId === this.id && c.toProperty === name)
+        ),
+      typeNow: (name) => {
+        const port = this.getPort(name);
+        return port ? portTypeName(port.type) : undefined;
+      }
+    });
+    WarningsModel.instance.setWarning(
+      { component: this.owner.owner, node: this, key: 'node-ports-replaced' },
+      message ? { message, showGlobally: true, level: 'warning' } : undefined
+    );
+    this._portsReplacedWarned = message !== undefined;
   }
 
   // Apply a patch to this node
@@ -971,6 +1032,9 @@ export class NodeGraphNode extends Model {
     const _this = this;
     if (!this.owner) return; // Not in graph
     if (!this.owner.owner) return; // Not in a component
+
+    // P107-S79-SILENTCACHE — re-read here so the warning clears once the wire is deleted or the port is back.
+    this.evaluatePortsReplaced();
 
     // Missing type
     const missingType = NodeLibrary.instance.typeIsMissing(this.type);
