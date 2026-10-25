@@ -70,9 +70,19 @@ try {
   ok(file.collections.Progress?.permissions?.get === 'role:staff', 'the copy’s nodegx.security.json has it too');
 
   // The lens: look as someone not signed in.
+  // P124-UILENSNOTE: the lens measures now — it runs the backend's functions as that visitor and says what came back,
+  // as people.test.mjs reads it for a named person. Read the note once the run is done, not while it is running.
   await page.click('.lens button[data-lens="anon"]');
+  await page.waitForFunction(() => window.__map.reach && !window.__map.reach.loading && window.__map.reachQueue.length === 0, { timeout: 90000 });
+  const reach = await page.evaluate(() => Object.values(window.__map.reach.tables));
   const note = await page.$eval('#lensNote', (e) => e.innerText);
-  ok(/Someone not signed in can run 1 of 27 functions \(unsubscribe\)/.test(note), `the lens says, in words: “${note.slice(0, 120)}…”`);
+  const reached = reach.reduce((n, t) => n + t.reached, 0);
+  const total = reach.reduce((n, t) => n + (t.total ?? 0), 0);
+  const lit = reach.filter((t) => t.reached).length;
+  ok(
+    new RegExp(`Someone not signed in can reach ${reached} of ${total} rows, in ${lit} of ${reach.length} tables\\. Dark tables: nothing of them reaches anyone not signed in`).test(note),
+    `the lens says, measured: “${note.slice(0, 120)}…”`
+  );
 
   // No JSON on screen.
   const text = await page.evaluate(() => document.body.innerText);
