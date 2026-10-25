@@ -1384,7 +1384,19 @@ export enum DiagnosticCode {
    * P109 ISL-005: a Function's `uses` names two script files with one file name, which would both be
    * `Scripts.<name>`. The runtime refuses the run (`function/script-name-clash`).
    */
-  FunctionUsesScriptNameClash = 'function-uses-script-name-clash'
+  FunctionUsesScriptNameClash = 'function-uses-script-name-clash',
+  /**
+   * Bug P121-TWO003-SCRIPTCOMPILE: a Function's script does not compile (the runtime's own
+   * compile), so every Run fails with `function/script-not-compiled`. Warning, blocking for a
+   * graph an agent just wrote (`AUTHORED_BLOCKING_WARNINGS`).
+   */
+  FunctionScriptNotCompiled = 'function-script-not-compiled',
+  /**
+   * Bug P121-TWO005-NEVERRUNS: nothing re-runs a node when its inputs change — its control signal
+   * is unwired and every wired input has Run On Value Change unticked. A Function runs once at
+   * load, before the values arrive, and never again.
+   */
+  FunctionNeverReruns = 'function-never-reruns'
 }
 
 // ─── Location ─────────────────────────────────────────────────────────────────

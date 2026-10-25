@@ -361,7 +361,11 @@ export const AUTHORED_BLOCKING_WARNINGS: ReadonlySet<string> = new Set([
   // and **no `completed` wires at all**. `completed` is a rare port — authors
   // reach for `done` — so the blast radius of making this blocking is small, and
   // that is a measurement rather than a hope.
-  DiagnosticCode.CompletedCommitsUnchecked
+  DiagnosticCode.CompletedCommitsUnchecked,
+  // Bug P121-TWO003-SCRIPTCOMPILE — the runtime's own compile fails, so every Run fails. No benign
+  // reading for a graph an agent just wrote; the write said nothing before, and the first person
+  // to run the function got "That could not be done."
+  DiagnosticCode.FunctionScriptNotCompiled
 ]);
 
 /** Whether a diagnostic rejects an authored submission. */

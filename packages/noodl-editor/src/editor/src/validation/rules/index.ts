@@ -44,6 +44,8 @@ import { dialogWithoutName } from './dialogWithoutName';
 import { oversizedPage } from './oversizedPage';
 import { unlabelledNode } from './unlabelledNode';
 import { settingsDiagnostic } from './settingsDiagnostic';
+import { functionScriptNotCompiled } from './functionScriptNotCompiled';
+import { functionNeverReruns } from './functionNeverReruns';
 
 export const ALL_RULES: Rule[] = [
   duplicateNodeId,
@@ -95,6 +97,11 @@ export const ALL_RULES: Rule[] = [
   // the first fires on `prep` and never on the `RunTasks` carrying the defect,
   // so this covers a hole in it rather than repeating it.
   completedCommitsUnchecked,
+  // P121 bugs SCRIPTCOMPILE / NEVERRUNS — a Function that can never run, and one that never
+  // re-runs: breakage of the graph's behaviour, so beside the outcome rules and before the
+  // arrangement ones.
+  functionScriptNotCompiled,
+  functionNeverReruns,
   repeatedSiblingSubtree,
   // DEF-025 — beside `repeatedSiblingSubtree` because both read the visual
   // tree's arrangement rather than wires: that one asks whether siblings
@@ -135,6 +142,8 @@ export {
   signalIntoValuePort,
   unwiredOutcome,
   completedCommitsUnchecked,
+  functionScriptNotCompiled,
+  functionNeverReruns,
   repeatedSiblingSubtree,
   labelNotAClickTarget,
   oversizedPage,

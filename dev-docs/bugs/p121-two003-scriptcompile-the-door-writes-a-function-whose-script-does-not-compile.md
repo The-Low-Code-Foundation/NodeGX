@@ -1,11 +1,13 @@
 ---
 id: P121-TWO003-SCRIPTCOMPILE
 title: The MCP door writes a Function whose script does not compile, and says nothing until the function runs
-status: open
+status: fixed
 severity: medium
 area: mcp / authoring validation (Function's `functionScript`; `packages/noodl-editor/src/editor/src/validation/`, which the door runs on every write)
 found: P121 TWO-003 s4, 2026-10-14
 evidence: dev-docs/tasks/phase-121-a-marketplace-and-a-community/TWO-003-THE-SHOP.md §7.5
+kit: mcp
+regression: packages/noodl-editor/tests-unit/p121/function-script-and-reruns.test.ts "is reported on the node, by name, and blocks a write the agent just made"
 ---
 
 An agent that writes a Function node with a syntax error in its script is told the write succeeded. The first
@@ -32,3 +34,10 @@ rest of the first line, leaving `if (/^a:/` open); the write is accepted. Run it
 Fix, proposed: one validation rule that compiles each Function's script the way the runtime does
 (`new AsyncFunction('Inputs', 'Outputs', 'Noodl', 'Component', script)`, `simplejavascript.ts` :944-945, which is
 already a parse-only check) and raises an error with the line, on every write and in `validate_project`. Small.
+
+**Fixed (2026-10-25, the Beta sweep):** a validation rule `function-script-not-compiled`
+(`validation/rules/functionScriptNotCompiled.ts`) compiles each Function's script the way the runtime does (the same
+`AsyncFunction` parameters and code prefix as `simplejavascript.ts` `parseScript`) and reports the error with its line
+(from `vm`, where there is one), on every write and in `validate_project`. A warning with an `AUTHORED_BLOCKING_WARNINGS`
+entry: refused for a graph an agent just wrote, advisory over hand-authored projects. The message names the
+template-literal backslash trap that made the measured one. Graded: `tests-unit/p121/function-script-and-reruns.test.ts`.

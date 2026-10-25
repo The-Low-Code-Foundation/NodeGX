@@ -1,12 +1,13 @@
 ---
 id: P121-TWO005-NEVERRUNS
 title: A Function whose Run is unwired and whose every wired input is set not to run on change can never run, and the door writes it without a word
-status: open
+status: fixed
 severity: medium
 area: editor / validation, as the MCP door runs it (`packages/noodl-editor/src/editor/src/validation/rules/`; nearest rule `signalDrivenStaleInput.ts`, the opposite case)
 found: P121 TWO-005 s13, 2026-10-15
 evidence: dev-docs/tasks/phase-121-a-marketplace-and-a-community/TWO-005-THE-COMMUNITY-APP.md §8.5
 kit: mcp
+regression: packages/noodl-editor/tests-unit/p121/function-script-and-reruns.test.ts "is warned, naming the inputs and the box to tick"
 ---
 
 A Function node runs when its Run signal arrives, or when an input whose **Run On Value Change** box is ticked gets a
@@ -27,3 +28,13 @@ Fix, proposed (small): a validation warning on a JavaScript Function (and any no
 boxes) that has no wire into Run and no wired input with its box ticked: "Nothing can run this Function: Run isn't
 wired and every input is set not to run on change. Wire Run, or tick Run On Value Change on an input." With a
 `suggestedFix` naming the inputs.
+
+**Fixed (2026-10-25, the Beta sweep):** a validation warning `function-never-reruns`
+(`validation/rules/functionNeverReruns.ts`) on a Function (and any node in the run-on-value-change family whose inputs
+the catalog gives a `runOnChange-` twin) with no control signal wired and every WIRED input's box explicitly unticked.
+The measured shape is not quite "never runs": with Run unwired a Function runs once at load (its script setter) and a
+new value never runs it again; the message says so, names the inputs, and suggests the box to tick. Not blocking.
+Over the 19 shipped templates (~14,000 nodes) it fires twice, filed as BETA-TPLNEVERERUNS; 114/114 catalog examples
+stay clean.
+Graded: `tests-unit/p121/function-script-and-reruns.test.ts` (controls: Run wired, one box ticked, absent = ticked, an
+unwired input).
