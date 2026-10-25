@@ -290,7 +290,7 @@ Took session 5's "Next" list, all but STRINGREJECT (lane 4, paused; the export m
 
 ## For Richard
 
-1. **Push and release**, as before: 43 rows now on cline-dev. LIVEPATH, NORANGE and SIGNUPSWITCH are backend; the
+1. **Push and release**, as before: 46 rows now on cline-dev (and three spec repairs). LIVEPATH, NORANGE and SIGNUPSWITCH are backend; the
    admin-app rows ship in its bundle; SCHEMAFIRSTSTART needs an editor build.
 2. Session 5's DEPLOYLOOPBACK (warn or refuse?) and OWN008-AUDIT (stay on fast-xml-parser 4) stand.
 
@@ -309,14 +309,22 @@ Filed, not fixed: **BETA-S6-PICKERFLAKE** (the Picker spec red once in ten admin
 fixed `settle(220)`s), **BETA-S6-CMP004RED** (four parts-shelf round-trip cases red at HEAD, with or without this
 session: an icon missing from the re-export, `install_prefab` refusing, a part's port gone).
 
-## Next (the Beta walk's next rows)
+## Done, third part (that "Next" list)
 
-1. **BETA-S6-CMP004RED** (medium, red at HEAD) — someone should own it; it is the agent's parts shelf.
-2. **P121-TWO004-ADMINNARROW** — the admin app has no narrow layout (below 768 px every page runs off the right).
-3. **P112-OWN020-OUTDIRANYWHERE** — `render_report`'s `out_dir` writes anywhere; every other project-server write stays
-   inside the project.
-4. **BETA-S6-PICKERFLAKE** — needs an instrument that reddens one of its steps first.
-5. **P18-S134-STRINGREJECT** waits for lane 4.
+| row | commit | built | graded |
+|---|---|---|---|
+| BETA-S6-CMP004RED (medium) | 3b0ae571a | three causes outside the cases: `export_to_library` now draws the monogram icon with the checkout's own generator (`make-monogram-icon.js`, now requirable) so an export passes `library:verify-dist`; the three parts' `project.json` re-shipped with `componentType: logic` (P112-S7-LOGICTYPE); the round trip asserts P100 UPG-003's tokens instead of the old text-style merge | parts 21/21, round trip + libraryTools 50/50, `library:icons:check` 84/84; `verify-dist` red only on the modules index (an untracked local `library/modules/nightbook-kit` stops the modules build) |
+| P112-OWN020-OUTDIRANYWHERE (medium) | 7a2245159 | `screenshotDir`: `out_dir` read against the project, refused by name outside it (real paths; an outward link is outside), both tools, before anything runs | 4/4, all red under HEAD's resolution; FLD-011/OWN-018 moved into the project and their argv pins given `--image-budget` (red since this sweep's RENDER1MB); 25 suites 182/182 |
+| BETA-S6-PICKERFLAKE | b63d75a03 | nine waits `until()` what they read; two absence windows kept | instrument (answers +100 ms): HEAD 6/7 red → 7/7 |
+
+## Next
+
+1. **For Richard, a ruling:** P121-TWO004-ADMINNARROW asks whether the admin app owes a phone layout (P104's lane)
+   before anything is built. Measured: below 768 px every page runs off the right (308 px at 390).
+2. The other open Beta-walk rows are a size up or someone else's lane: P26-SKELSHIP's engine half, P107-S102-
+   SIGNUPBACKEND (Sign Up's ports read no backend), P121-S19-SIGNINRACE (template), P116-S17-CRONLEAK (a test leak).
+3. **P18-S134-STRINGREJECT** waits for lane 4.
+4. The P119 README §2 sentence (trap 7).
 
 ## Traps met
 
@@ -351,4 +359,4 @@ delete or back up 54 suites 758/758 · runtime, preview, noodl-mcp, admin tsc cl
 
 **Commits this session:** 3cd182bda, bf3405090, 981b44515, e79a81884, b3e259642, 16ca9cca2, 58c980d43, 3d0abda16
 (docs), 255ca3eca, 5683ca35e, edf459d17, 4cd97b06d, 24a1e30ce, 65cb0bd5a, ad34964ab, ffa6ad30e, 0aad876bb, 22ab9c73c,
-and the docs commit after them.
+0cb37c654 (docs), 3b0ae571a, 7a2245159, b63d75a03, and the docs commit after them.
