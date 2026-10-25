@@ -122,7 +122,8 @@
       "id": "ec0991f9-fbe1-4274-a6e0-6a550d9b934a",
       "description": "The address someone typed, turned into the one you can store and compare: trimmed, lower-cased, unwrapped from mailto: and angle brackets, with its domain and a validity flag.",
       "created": "2026-09-10T19:03:40.049Z",
-      "modifiedBy": "noodl-mcp"
+      "modifiedBy": "noodl-mcp",
+      "componentType": "logic"
     }
   ],
   "settings": {},

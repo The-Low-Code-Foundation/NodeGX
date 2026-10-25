@@ -252,7 +252,11 @@ describe('CMP-004 AC4 — the round trip: A → shelf → B', () => {
     expect(installed.isError).toBe(false);
     expect(installed.data.componentsInstalled).toEqual(expect.arrayContaining(['/Pages/Home', '/Card']));
     expect(installed.data.stylesMerged.colors).toEqual(['Brand Blue']);
-    expect(installed.data.stylesMerged.textStyles).toEqual(['Card Label']);
+    // P100 UPG-003 §6 (8f9f82629): an entry's text style arrives as the project's typography tokens, not as a text
+    // style — converted, so not merged. This case still asserted the merge from before that ruling (BETA-S6-CMP004RED).
+    expect(installed.data.stylesMerged.textStyles).toEqual([]);
+    expect(installed.data.textStylesConverted).toEqual(['Card Label']);
+    expect(installed.data.tokensAdded).toEqual(['--card-label-size']);
     expect(installed.data.stylesMerged.variants).toEqual(['Soft (Group)']);
     expect(installed.data.filesCopied).toEqual(['images/logo.svg']);
   }, 30_000);
@@ -284,7 +288,9 @@ describe('CMP-004 AC4 — the round trip: A → shelf → B', () => {
     expect(root?.parameters?.backgroundImage).toBe('images/logo.svg');
     const text = card.data.nodes.find((n) => n.id === 'card_text');
     expect(text?.parameters?.color).toBe('var(--foreground)');
-    expect(text?.parameters?.textStyle).toBe('Card Label');
+    // The part wears the token its text style became (P100 UPG-003 §6); nothing names the text style any more.
+    expect(text?.parameters?.textStyle).toBeUndefined();
+    expect(text?.parameters?.fontSize).toBe('var(--card-label-size)');
   });
 
   it('🔴 and project B considers it sound: no error diagnostic names what arrived', async () => {

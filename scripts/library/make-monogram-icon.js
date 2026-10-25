@@ -245,4 +245,8 @@ function main() {
   for (const e of targets) write(e, argv.includes('--text') ? textArg : initialsFor(e.lib.label));
 }
 
-main();
+// P85 BETA-S6-CMP004RED: `export_to_library` draws the same placeholder for the entry it writes, so an exported entry
+// passes `library:verify-dist` and matches what `npm run library:icons` would have made. Run directly, this is the CLI.
+if (require.main === module) main();
+
+module.exports = { initialsFor, render };
