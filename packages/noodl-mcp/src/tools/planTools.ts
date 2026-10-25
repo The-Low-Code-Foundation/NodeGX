@@ -691,7 +691,7 @@ export function registerPlanTools(
         // genuinely unreadable, which is a real state and not this one.
         let untouched = false;
         try {
-          untouched = isUntouchedSkeletonPage(store.readComponent(row.entry.path).files.nodes.nodes);
+          untouched = isUntouchedSkeletonPage(store.peekComponent(row.entry.path).files.nodes.nodes);
         } catch {
           untouched = false;
         }

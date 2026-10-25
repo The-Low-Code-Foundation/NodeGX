@@ -619,7 +619,7 @@ function warningsFor(store: ProjectStore, controls: Control[], nodes: Map<string
     let others = 0;
     for (const row of store.listComponents()) {
       try {
-        others += nodesOf(store.readComponent(row.path).files).filter((n) => n.type === type).length;
+        others += nodesOf(store.peekComponent(row.path).files).filter((n) => n.type === type).length;
       } catch {
         /* unreadable: not counted */
       }

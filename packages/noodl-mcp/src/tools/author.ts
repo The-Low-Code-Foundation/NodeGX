@@ -217,7 +217,7 @@ export function nodeIdsOf(files: ComponentFiles): ReadonlySet<string> {
 export function projectVisualPredicate(store: ProjectStore): VisualTypePredicate {
   return makeProjectVisualPredicate((legacyName) => {
     if (!store.resolve(legacyName)) return undefined;
-    return store.readComponent(legacyName).files.nodes.nodes ?? [];
+    return store.peekComponent(legacyName).files.nodes.nodes ?? [];
   });
 }
 

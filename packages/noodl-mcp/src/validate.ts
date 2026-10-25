@@ -137,7 +137,7 @@ export function authoredProjectViews(
       continue;
     }
     try {
-      views.push({ name: row.legacyName, nodes: store.readComponent(row.path).files.nodes.nodes });
+      views.push({ name: row.legacyName, nodes: store.peekComponent(row.path).files.nodes.nodes });
     } catch {
       views.push({ name: row.legacyName, nodes: [] });
     }
@@ -289,7 +289,7 @@ function storeVisualPredicate(store: ProjectStore): VisualTypePredicate {
   return makeProjectVisualPredicate((legacyName) => {
     if (!store.resolve(legacyName)) return undefined;
     try {
-      return store.readComponent(legacyName).files.nodes.nodes ?? [];
+      return store.peekComponent(legacyName).files.nodes.nodes ?? [];
     } catch {
       return undefined;
     }

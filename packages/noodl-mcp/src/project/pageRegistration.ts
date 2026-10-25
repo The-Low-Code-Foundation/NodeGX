@@ -115,7 +115,7 @@ export function registrationComponents(
   for (const row of store.listComponents()) {
     if (seen.has(row.legacyName)) continue;
     try {
-      push(row.legacyName, store.readComponent(row.path).files);
+      push(row.legacyName, store.peekComponent(row.path).files);
     } catch {
       // A component the registry lists but whose files will not read is a
       // problem for the tools that read it, not a reason to refuse to register

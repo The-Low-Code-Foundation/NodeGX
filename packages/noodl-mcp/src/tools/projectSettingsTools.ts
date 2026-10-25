@@ -105,7 +105,7 @@ export function resolveHome(
       knownComponents: known
     });
   }
-  const nodes = store.readComponent(hit.key).files.nodes.nodes ?? [];
+  const nodes = store.peekComponent(hit.key).files.nodes.nodes ?? [];
   const isVisual = projectVisualPredicate(store);
   const roots = nodes.filter((n) => !n.parent && !NOT_AN_EXPORT_ROOT.has(n.type) && isVisual(n.type));
   if (roots.length === 0) {

@@ -208,7 +208,7 @@ function homeOf(
     // The registry's root first, then everything else: the home is almost always there.
     const keys = Object.keys(registry.components).sort((a, b) => Number(b === registryRoot) - Number(a === registryRoot));
     for (const key of keys) {
-      const nodes = store.readComponent(key).files.nodes.nodes ?? [];
+      const nodes = store.peekComponent(key).files.nodes.nodes ?? [];
       if (nodes.some((n) => n.id === rootNodeId)) return { path: key, nodeId: rootNodeId };
     }
     return { nodeId: rootNodeId, missing: true, fix: setHome() };
@@ -482,7 +482,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
 
       for (const row of store.listComponents()) {
         if (args.path_prefix && !row.path.startsWith(args.path_prefix)) continue;
-        const stored = store.readComponent(row.path);
+        const stored = store.peekComponent(row.path);
         for (const node of stored.files.nodes.nodes) {
           if (matches.length >= SEARCH_RESULT_CAP) {
             truncated = true;

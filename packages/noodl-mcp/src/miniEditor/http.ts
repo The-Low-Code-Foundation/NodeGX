@@ -221,7 +221,7 @@ export function keepingTheirOwn(projectDir: string, controls: Control[]): string
   for (const row of store.listComponents()) {
     let nodes: NodeV2[];
     try {
-      nodes = store.readComponent(row.path).files.nodes.nodes as NodeV2[];
+      nodes = store.peekComponent(row.path).files.nodes.nodes as NodeV2[];
     } catch {
       continue;
     }

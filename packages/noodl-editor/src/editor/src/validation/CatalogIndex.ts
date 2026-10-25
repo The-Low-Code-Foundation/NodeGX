@@ -73,6 +73,8 @@ export class CatalogIndex {
   /** The catalog's typecast rows (`@nodegx/project-contract/typecasts`' table, as the runtime published it). */
   private readonly typecasts: readonly Typecast[];
   private readonly allTypeNames: string[];
+  /** {@link suggestType}'s answers, by the unknown name asked about. */
+  private readonly suggestedTypes = new Map<string, string | undefined>();
 
   constructor(private readonly catalog: NodeCatalog) {
     for (const node of catalog.nodes) {
@@ -357,9 +359,16 @@ export class CatalogIndex {
 
   // ── Suggestions (edit distance) ──────────────────────────────────────────────
 
-  /** Nearest authorable catalog type to an unknown type string, if close enough. */
+  /**
+   * Nearest authorable catalog type to an unknown type string, if close enough.
+   *
+   * BETA-S8-SEE001TIMEOUT — memoised: `nearest` is a Levenshtein pass over every catalog type, and `unknownNodeType`
+   * asks once per node, so a project with many nodes of one module type paid it per node on every MCP write (1.25 s of
+   * a 2.6 s `update_component` on the training template). The catalog never changes under an index.
+   */
   suggestType(unknown: string): string | undefined {
-    return nearest(unknown, this.allTypeNames);
+    if (!this.suggestedTypes.has(unknown)) this.suggestedTypes.set(unknown, nearest(unknown, this.allTypeNames));
+    return this.suggestedTypes.get(unknown);
   }
 
   /**

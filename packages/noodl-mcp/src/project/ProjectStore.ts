@@ -428,6 +428,22 @@ export class ProjectStore {
     return stored;
   }
 
+  /**
+   * BETA-S9-WALKSEEN — a component's files for a check that walks the project (validation, id deconfliction, a search,
+   * a page list), NOT a read on the agent's behalf: no drift snapshot, no revision hash, and not remembered as seen.
+   * The walks used `readComponent`, so every write counted every component as read at that moment, and
+   * `what_changed_since` compared the person's Studio edits against a baseline taken after them. An unknown name is
+   * refused exactly as `readComponent` refuses it.
+   */
+  peekComponent(input: string): Omit<StoredComponent, 'revision'> {
+    return this.viaFormat(() => {
+      const hit = this.format.resolve(input);
+      if (!hit) return this.format.readComponent(input); // throws the read's own unknown-component refusal
+      const files = this.format.filesOf(hit.key, hit.entry);
+      return { key: hit.key, entry: hit.entry, legacyName: files.component.path ?? '/' + hit.key, files };
+    }, input);
+  }
+
   private remember(key: string, files: ComponentFiles, revision: string): void {
     this.seen.set(key, { files: structuredClone(files), revision, at: new Date().toISOString() });
   }

@@ -34,7 +34,7 @@ export function unplacedAfter(store: ProjectStore, created: Iterable<string>, le
     if (row.legacyName === legacyName) continue;
     exists.add(row.legacyName);
     try {
-      scan(row.legacyName, store.readComponent(row.legacyName).files);
+      scan(row.legacyName, store.peekComponent(row.legacyName).files);
     } catch {
       /* an unreadable component places nothing; validation reports it elsewhere */
     }

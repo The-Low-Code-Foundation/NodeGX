@@ -88,7 +88,7 @@ function buildGraph(store: ProjectStore): ExplainGraph {
   const components: GraphComponent[] = [];
   for (const row of store.listComponents()) {
     try {
-      const stored = store.readComponent(row.path);
+      const stored = store.peekComponent(row.path);
       components.push(graphComponentFromFiles(stored.legacyName, stored.files));
     } catch {
       // A component the registry lists but whose files will not read is a

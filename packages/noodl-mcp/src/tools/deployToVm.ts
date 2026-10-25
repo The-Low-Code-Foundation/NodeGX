@@ -191,12 +191,12 @@ export interface DeployToVmRequest {
  * could not tell whether the deploy had worked. The pages (components with a `Page` node) when every one is that
  * untouched placeholder; empty when any page has been built, or there are none (the engine refuses that itself).
  */
-export function untouchedSkeletonPages(store: Pick<ProjectStore, 'listComponents' | 'readComponent'>): string[] {
+export function untouchedSkeletonPages(store: Pick<ProjectStore, 'listComponents' | 'peekComponent'>): string[] {
   const pages: string[] = [];
   for (const row of store.listComponents()) {
     let nodes;
     try {
-      nodes = store.readComponent(row.path).files.nodes.nodes;
+      nodes = store.peekComponent(row.path).files.nodes.nodes;
     } catch {
       continue;
     }
