@@ -80,6 +80,7 @@ import {
 import { describeDevelopmentEngine, readViewerBuild, type ViewerBuildReading } from './viewerBuild';
 import { describeWireHealth, readWireHealth, type WireHealthReading } from './wireHealth';
 import { loopbackBackendWarning } from './projectExport';
+import { skeletonWarning, untouchedSkeletonPages } from './skeleton';
 
 /**
  * The editor's runtime folder, addressed from **this file** rather than from the working
@@ -205,6 +206,11 @@ export interface DeployOutcome {
    * (`http://127.0.0.1:<port>`), so no visitor can reach it. Its sentence is in `warnings`. Absent otherwise.
    */
   localBackend?: string;
+  /**
+   * P26-SKELSHIP — the pages, when every page is still create_project's untouched placeholder (skeleton.ts). Its
+   * sentence is in `warnings`. Absent when anything is built.
+   */
+  skeletonPages?: string[];
   /** P26 DEP-002 — present on a `--full-stack` deploy: the backend, the functions and the rules it carries. */
   fullStack?: FullStackReading;
 }
@@ -320,6 +326,10 @@ export async function deployProject(options: {
   const loopback = fullStack ? undefined : loopbackBackendWarning({ cloudservices });
   const localBackend = loopback ? { endpoint: String(cloudservices?.endpoint), warning: loopback } : undefined;
 
+  // P26-SKELSHIP — read on the model that was published, so the sentence is about what visitors get.
+  const skeletonPages = untouchedSkeletonPages(project);
+  const skeleton = skeletonWarning(skeletonPages);
+
   // A full-stack folder's site is its `app/`.
   const roots = readDeployedRoots(fullStack ? path.join(options.outDir, 'app') : options.outDir);
   return {
@@ -340,6 +350,7 @@ export async function deployProject(options: {
     engine,
     wires,
     ...(localBackend ? { localBackend: localBackend.endpoint } : {}),
+    ...(skeleton ? { skeletonPages } : {}),
     // EXP-017 AC4 — a duplicate the copy step could not leave out reaches the person through the
     // same channel every other deploy warning does, rather than only the editor's console.
     warnings: [
@@ -347,6 +358,7 @@ export async function deployProject(options: {
       // P112-OWN023-DEPLOYLOOPBACK — a static site cannot reach a backend on the builder's machine. A full-stack
       // folder carries its backend, and the backend serves the app with its own address in place of this one.
       ...(localBackend ? [localBackend.warning] : []),
+      ...(skeleton ? [skeleton] : []),
       ...describeWireHealth(wires),
       ...copyReport.duplicatesKept.map(
         (kept) =>

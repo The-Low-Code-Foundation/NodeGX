@@ -159,6 +159,12 @@ async function main(): Promise<void> {
     const sentence = result.warnings.find((w) => w.includes(result.localBackend as string));
     if (sentence) process.stderr.write(`\nnodegx-deploy: ${sentence}\n`);
   }
+  // P26-SKELSHIP — the same for a project nobody has built: the folder is a complete app whose only page tells every
+  // visitor to review a plan in docs/.
+  if (result.ok && result.skeletonPages) {
+    const sentence = result.warnings.find((w) => w.startsWith('Nothing is built in this project yet'));
+    if (sentence) process.stderr.write(`\nnodegx-deploy: ${sentence}\n`);
+  }
   process.exitCode = 0;
 }
 

@@ -69,6 +69,8 @@ node -e '
     process.exit(1);
   }
   console.log("    " + r.projectName + ", build " + full.buildId + ", " + r.written.length + " files");
+  // P26-SKELSHIP, P112-OWN023-DEPLOYLOOPBACK: what the engine published but warned about, said before the box is touched.
+  for (const w of r.warnings || []) console.log("    ! " + w);
   console.log("    cloud functions: " + (full.uses.functions.length ? full.uses.functions.join(", ") : "none"));
   console.log("    access rules: " + (full.rules ? "the project'"'"'s own (they replace the server'"'"'s when they changed)" : "none in the project: the server keeps its own (the enforced defaults on a first ship)"));
 ' "$WORK/deploy.json"

@@ -34,3 +34,18 @@ with the text changed). 🔴 Reshipping lingo with `deploy_to_vm` now needs `all
 
 **Still open:** the engine (`nodegx-deploy`, which Studio's Publish and `ship-to-vm.sh` use) ships it without a word;
 and whether the placeholder should speak to a visitor ("This app is being built.") is Richard's wording ruling.
+
+**Engine half built 2026-10-25 (the Beta sweep s7), as a warning.** `nodegx-deploy` (so `nodegx deploy` and
+ship-to-vm.sh) reads the published model with the same exact rule (noodl-preview `src/skeleton.ts`: the marker is a
+copy, held equal to createProject.ts's by the spec, since the two packages do not import each other). When every page is
+the untouched placeholder the outcome carries `skeletonPages`, `warnings` carries "Nothing is built in this project yet:
+Home is still the placeholder create_project wrote, whose sentence is addressed to the agent, and it is what every
+visitor will see. It was published as it is; build the app, then deploy again.", and the CLI says it on stderr.
+ship-to-vm.sh now prints every engine warning (this and DEPLOYLOOPBACK's) before it touches the box. Graded on the built
+engine (`tests/p26-skelship-engine.test.ts`): red on HEAD's engine (`skeletonPages` undefined), 3/3 after, with two
+known-firing arms (the fixture as written; the placeholder with one more node); a mutant without the exact two-node rule
+reddens the second. Preview 19 suites 109/109.
+
+**Still open:** Studio's own Deploy to folder tab calls `deployToFolder` directly, not this engine, so it says nothing
+(the row's area line was wrong about that). For Richard: whether the engine should **refuse** as `deploy_to_vm` does
+(built as a warning, like DEPLOYLOOPBACK), and the placeholder's wording for a visitor.
