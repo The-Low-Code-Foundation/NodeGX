@@ -157,6 +157,26 @@ describe('P112-OWN023-FILEURLHOST — a File field is answered at the address it
     expect(plain.json.audio).toBe(row.baked);
   });
 
+  it('a File inside an Array or Object field is answered at the address too, at any depth', async () => {
+    const two = await upload('back.png');
+    const baked2 = `http://127.0.0.1:8584/files/${encodeURIComponent(two.name)}`;
+    const elsewhere = { __type: 'File', name: 'x.png', url: 'https://cdn.example.org/assets/x.png' };
+    const row = await laptopRow('Gallery', {
+      photos: [{ __type: 'File', name: two.name, url: baked2 }, elsewhere, 'a caption'],
+      meta: { hero: { __type: 'File', name: two.name, url: baked2 }, pages: [{ scan: { __type: 'File', name: two.name, url: baked2 } }] }
+    });
+
+    const got = await call<Record<string, any>>('GET', `/classes/Gallery/${row.id}`, undefined, VM);
+    expect(got.status).toBe(200);
+    expect(got.json.photos).toEqual([{ __type: 'File', name: two.name, url: at(VM_ORIGIN, two.name) }, elsewhere, 'a caption']);
+    expect(got.json.meta.hero.url).toBe(at(VM_ORIGIN, two.name));
+    expect(got.json.meta.pages[0].scan.url).toBe(at(VM_ORIGIN, two.name));
+
+    // Read only: what is stored keeps the url it was saved with.
+    const local = await call<Record<string, any>>('GET', `/classes/Gallery/${row.id}`);
+    expect(local.json.meta.hero.url).toBe(at(`http://127.0.0.1:${port}`, two.name));
+  });
+
   it('a signed url is minted at the address it was asked on', async () => {
     const file = await upload('private.png', { ...VM, 'x-nodegx-file-private': 'true' });
     const signed = await call<SignedUrlResult>('GET', `/files/${encodeURIComponent(file.name)}/sign`, undefined, VM);
@@ -174,9 +194,10 @@ describe('P112-OWN023-FILEURLHOST — a File field is answered at the address it
       });
       expect(sub.status).toBe(200);
 
-      const row = await laptopRow('Live');
+      const row = await laptopRow('Live', { extra: [{ __type: 'File', name: 'n.png', url: 'http://127.0.0.1:8584/files/n.png' }] });
       const change = await stream.waitFor('change', (d) => d.record.objectId === row.id);
       expect((change.data.record.cover as { url: string }).url).toBe(at(VM_ORIGIN, row.name));
+      expect((change.data.record.extra as Array<{ url: string }>)[0].url).toBe(at(VM_ORIGIN, 'n.png'));
     } finally {
       stream.close();
     }

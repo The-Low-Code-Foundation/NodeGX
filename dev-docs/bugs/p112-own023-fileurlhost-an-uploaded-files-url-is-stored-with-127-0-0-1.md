@@ -38,3 +38,10 @@ SELF-HOSTING.md says what an outside proxy must pass. Graded: `tests/p112-own023
 before; mutants red: no request address, the writer's address on a live update, every File rewritten);
 `deploy-assets.test.ts` gains the header check (red on HEAD's nginx.conf). Not done: a File nested inside an Object
 or Array column keeps its stored url; not driven on a real VM.
+
+**Leftover closed (2026-10-25, the Beta sweep s4): a File nested in an Array or Object field.** `addressFile` walks
+Arrays and Objects (copy on write, 32 levels), so a gallery's `[File, …]` or a `{hero: File, pages: [{scan: File}]}`
+is answered at the request's address too, on reads and in live updates; a CDN File and a caption beside them are
+left as they are, and nothing stored changes. Graded: `p112-own023-file-url-host` 7/7 (+1 test, the live-update
+test +1 assertion; both red before); two mutants red (depth 0, no Array walk); file + realtime neighbours 13
+suites, 120 passed; tsc clean.

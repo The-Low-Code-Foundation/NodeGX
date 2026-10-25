@@ -53,19 +53,44 @@ function isOwnFileUrl(url: string, name: string): boolean {
   }
 }
 
+/** Deeper than any field a person builds; a bound so a pathological value cannot make a read recurse without end. */
+const MAX_DEPTH = 32;
+
 /**
- * `value` with its url filled in from `origin`, when it is one of this backend's
- * File values; any other value, unchanged.
+ * `value` with the url of every one of this backend's File values in it filled in
+ * from `origin`: the value itself, or one held anywhere inside an Array or Object
+ * field (a gallery's photos, a page's scans). Copy on write: a value with no File
+ * in it is returned as it is, and nothing stored is changed.
  */
 export function addressFile(value: unknown, origin: string | undefined): unknown {
-  if (!origin || !value || typeof value !== 'object' || Array.isArray(value)) return value;
-  const v = value as Record<string, unknown>;
-  if (v.__type !== 'File' || typeof v.name !== 'string' || !v.name) return value;
-  if (typeof v.url === 'string' && v.url && !isOwnFileUrl(v.url, v.name)) return value;
-  return { ...v, url: fileUrlAt(origin, v.name) };
+  return origin ? addressAt(value, origin, 0) : value;
 }
 
-/** A record with every top-level File field addressed at `origin` (the realtime frame's shape). */
+function addressAt(value: unknown, origin: string, depth: number): unknown {
+  if (!value || typeof value !== 'object' || depth > MAX_DEPTH) return value;
+  if (Array.isArray(value)) {
+    let out: unknown[] | null = null;
+    value.forEach((item, i) => {
+      const addressed = addressAt(item, origin, depth + 1);
+      if (addressed !== item) (out ??= value.slice())[i] = addressed;
+    });
+    return out ?? value;
+  }
+  const v = value as Record<string, unknown>;
+  if (v.__type === 'File') {
+    if (typeof v.name !== 'string' || !v.name) return value;
+    if (typeof v.url === 'string' && v.url && !isOwnFileUrl(v.url, v.name)) return value;
+    return { ...v, url: fileUrlAt(origin, v.name) };
+  }
+  let out: Record<string, unknown> | null = null;
+  for (const [key, item] of Object.entries(v)) {
+    const addressed = addressAt(item, origin, depth + 1);
+    if (addressed !== item) (out ??= { ...v })[key] = addressed;
+  }
+  return out ?? value;
+}
+
+/** A record with every File in it addressed at `origin` (the realtime frame's shape). */
 export function addressFiles(record: Record<string, unknown>, origin: string | undefined): Record<string, unknown> {
   if (!origin) return record;
   let out: Record<string, unknown> | null = null;
