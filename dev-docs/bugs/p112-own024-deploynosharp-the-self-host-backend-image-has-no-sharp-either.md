@@ -19,3 +19,13 @@ inside the image (`npm install --omit=dev sharp@0.33.5` in the Dockerfile, or a 
 like `thumb-smoke.js` against the built image.
 
 Not urgent while putting an app on the internet isn't covered (TWO-011); it belongs to that story's ACs.
+
+**Read 2026-10-25 (the Beta sweep): the VM road has the same gap, and it is the Beta's road.** `deploy_to_vm` ships
+the full-stack folder `noodl-preview/src/fullStack.ts` writes: `backend/cli.js` (+ LICENSE), `start.js`, `app/`, a
+`package.json` with no dependencies. `deploy/vm/provision-app.sh` runs `node /opt/<app>/start.js` and installs
+nothing. So on a VM every `?thumb=` answers 501, as in the Docker image. Not driven on a VM. Needs a ruling before
+building: (a) the provision script installs `sharp@0.33.5` into `/opt/<app>/backend/` on the box at each ship (needs
+npm and network there; one pinned line), or (b) the folder carries Linux prebuilds for x64 and arm64 (no network on
+the box; 16.5 MB per architecture unpacked, 33 MB for both, in every folder for every app, thumbnails or not; measured
+with `npm view @img/sharp-libvips-linux-x64@1.0.4 dist.unpackedSize` and the three like it). The Docker image is the same
+choice with musl.

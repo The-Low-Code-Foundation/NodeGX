@@ -119,3 +119,41 @@ the two fixes, then both green; conformance by node green · editor 598/609 (cen
 `catalog:examples` 114/114 · templates `--only` the two new rules: 0 + 2 · backend map `npm test` all but P124-UILENSNOTE.
 
 **Commits this session:** 12fad4b2a, 7f27ccaf9, ce4758a1c, f4be95651, 6f070eed6, b5495303d, and the docs commit after them.
+
+---
+
+# Session 3, 2026-10-25 (next session reads this first)
+
+Built item 4 as ruled, and MOVEDDEPLOY. DEPLOYNOSHARP needs a ruling. **Not pushed, not released**, as before.
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| P112-OWN023-FILEURLHOST (ruled a) | d10742b23 | each request carries its own address (`requestOrigin`, `AsyncLocalStorage`, `src/storage/fileAddress.ts`); `toWire` answers a File's url from its name there; upload + signed urls use it; realtime uses the LISTENER's address; a File stored elsewhere (CDN) and a url in a text field are left alone. `deploy/nginx.conf`: `Host $http_host` (keeps a port), passes an outer `X-Forwarded-Proto` on. Kit: an Upload File anti-pattern and Cloud File's `url` port. SELF-HOSTING.md: what an outside proxy must pass | `tests/p112-own023-file-url-host.test.ts` 6/6 (4 red before; 3 mutants red); `deploy-assets.test.ts` header check (red on HEAD's conf; old vs new conf measured in `nginx:1.29-alpine` with a header echo); backend plain half 226/227 (the Sunday row); `catalog:merge:check` up to date |
+| P112-S14-MOVEDDEPLOY | 94d344dc8 | no rename: both doors push `projectId` with the bundle (outside its fingerprint); `WorkflowRunner.loadWorkflow` replaces in the same swap a bundle that is this project's (same id, or no id + same name before the hash + a shared component) and removes its file; any other clash is a 409 naming the bundle | `tests/p112-s14-moved-deploy.test.ts` 5/5 (all red before; 3 mutants red); `hls-013/cloudDeployCore` 15/15; backend workflow/deploy suites 34/34; MCP deploy suites 5/5. Driven: scratchpad MCP bundler + `deployCloudBundle` + a backend from source on `d40-wizard-drive` and a copy; renamed copy: the id replaced it, the no-id control refused |
+
+## For Richard: P112-OWN024-DEPLOYNOSHARP is on the Beta's road too
+
+Read, not driven: `deploy_to_vm`'s folder ships `backend/cli.js` with no `sharp`, and `provision-app.sh` installs
+nothing, so thumbnails answer 501 on a VM (marketplace photos broken). Either (a) the provision script installs
+`sharp@0.33.5` on the box at each ship (needs npm and network there), or (b) every folder carries Linux prebuilds
+(33 MB for x64 + arm64, measured from npm). The row has both.
+
+## Next
+
+1. The DEPLOYNOSHARP ruling, then build it.
+2. MOVEDDEPLOY leftover: the MCP tool's result does not say what was replaced (the backend answers `replaced`).
+3. FILEURLHOST leftover: a File nested in an Object or Array column keeps its stored url.
+4. Items 6 and 7 from session 2 stand (OWN008-AUDIT ruling, SERVERINFO build decision, SKELSHIP engine half).
+5. None of the 18 rows reaches Desktop or npm until a dist rebuild from a clean worktree and a release.
+
+## Traps met
+
+1. 🔴 zsh does not split `$L` holding a list of test files: jest got one pattern and ran **0** suites with exit 1.
+   Use `${=L}` (command substitution `$(…)` does split).
+2. `nginx` `$host` drops the port; `$http_host` keeps it. `X-Forwarded-Proto $scheme` overwrites an outer proxy's `https`.
+3. An esbuild bundle of backend source needs `--loader:.html=text` (the admin UI is `require`d) and, run from the
+   scratchpad, `NODE_PATH=<repo>/node_modules` for its externals.
+4. `hls013-deploy-cloud-functions` runs against the BUILT `dist/cloud-bundle.cjs` and the backend's `dist/cli.js`:
+   green there says nothing about source. Build the bundler into the scratchpad (`node build-cloud-bundle.mjs <out>`).

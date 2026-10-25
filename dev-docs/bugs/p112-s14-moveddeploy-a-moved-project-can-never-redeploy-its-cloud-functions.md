@@ -8,6 +8,7 @@ found: P112 OWN-015 s14, 2026-10-12
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-015-THE-BACKEND-FROM-NPM.md §7 (round 2)
 kit: core
 regression: packages/nodegx-backend/tests/p112-s14-moved-deploy.test.ts "moved again: the bundle with the same id goes, even with no function in common"
+commit: 94d344dc8
 ---
 
 The cloud bundle is named `<project name>-<FNV-1a of the project's folder path>`. The backend a project uses is found
