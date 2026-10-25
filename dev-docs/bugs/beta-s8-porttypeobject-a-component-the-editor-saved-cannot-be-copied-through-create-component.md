@@ -2,7 +2,7 @@
 id: BETA-S8-PORTTYPEOBJECT
 title: A component the editor saved, read with get_component and written back with create_component, is refused by the tool's argument schema — its ports are typed { "name": "*" } and the schema takes only a string
 status: fixed
-commit: PENDING
+commit: afcd83169
 severity: medium
 area: mcp / `packages/noodl-mcp/src/vocabulary.ts` `portSchema` (`type: z.string()` from `AUTHORED_PORT_FIELDS`); `src/tools/read.ts` `get_component` (hands node `ports` back as saved)
 kit: mcp

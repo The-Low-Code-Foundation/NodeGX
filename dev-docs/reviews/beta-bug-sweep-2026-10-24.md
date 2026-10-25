@@ -431,3 +431,70 @@ records/visual, runner 608/608 then 497/497, tsc clean · `golden.js --check` fr
 109/109 on a rebuilt dist, tsc clean · backend FED-004 drive 8/8 exit 0.
 
 **Commits this session:** c873955f7, 23149f2a0, d10ca6164, 8f1c6e8d9, 33ae2817f, 483335262, and the docs commit after them.
+
+---
+
+# Session 8, 2026-10-25 (next session reads this first)
+
+Opened with Richard's question: how many sessions until the important Beta bugs (with the Claude Desktop integration)
+are cleared? Answered: about two fixing sessions and one release session, the release being the real gate. Then took
+STOREDWIRE (session 7's first item) and the medium rows a Claude Desktop user meets through the MCP. Five ledger rows
+fixed, one filed and fixed, one flake filed.
+
+**Pushed by a peer, mid-session:** `1b1b035dd chore(release): npm 0.2.7` pushed `cline-dev` up to and including
+STOREDWIRE (56c37c661) and EXAMPLEINVALID (6f17999c1). Whether the 0.2.7 tarballs carry them depends on the dist each
+was built from: not measured. MCPREADME, NESTEDCHROME, PORTTYPEOBJECT and this docs commit are **not pushed**.
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| P107-S86-STOREDWIRE | 56c37c661 | not one rename but 41 outputs on 39 types (catalog at 7cb235279 vs HEAD). `@nodegx/project-contract/renamed-ports`, read by `NodeScope.addConnection`/`removeConnection` (a wire from a port the node lacks connects to its new name: every running app), editor `applyPatches` (renames on open) and `nonexistentPort` ("It was renamed …"). Reused names (Run Tasks `done`, Global Store Set / Action Dispatcher `completed`) left | runtime corpus red 3/5 → 5/5, mutant red; contract 89/89; editor 6/6; mcp 4/4; runtime 96 suites 1060; viewer corpus 63/63. Census: **367 dead wires in 6 of 54** local test projects, now live |
+| NPMAUDIT-EXAMPLEINVALID | 6f17999c1 | 28 examples fixed (String Format, Log `warn`, a Script on a non-existent API and one with no code, String Mapper ports, Aggregate's `agg-` and no count, `prop-title`, `stored`, a foreign For Each row, 8 cloud names outside `#__cloud__`, 58 `{name:"*"}` port types) | `tests/npmauditExampleInvalid.test.ts` writes **every** example dependency-first: 102 accepted, red 25 on HEAD; 12 named as context. `catalog:examples` 114/114, merge:check, `docs:bubble:check` |
+| NPMAUDIT-MCPREADME | 27557936d | `create_project` description and note say the server binds; `--help` in `src/usage.ts`, counts from `TOOL_GROUPS`; package README corrected; cmp007's key list takes `icon` (red since s6's CMP004RED) | 3/3 + neighbours 37/37; surface 8,277/8,280 unchanged |
+| P112-OWN026-NESTEDCHROME | d7a9106d6 | harness `pageAnswers`: 30 s for Chrome's first page, then an actionable "another sandbox … CHROME_PATH --no-sandbox" error; `spawnRender` kills the harness's process group (SIGTERM, SIGKILL after 3 s) | 6/6 with a fake harness (group cases red on HEAD); real-Chrome render suites 14/14. Not driven under `sandbox-exec` |
+| BETA-S8-PORTTYPEOBJECT (filed, fixed) | afcd83169 | `get_component` hands a `{name}`-only port type back as the string the write takes. Left: richer types (enum options, units) | red 2/2 on HEAD → 2/2; get_component callers 190/191 |
+
+Filed, not fixed: **BETA-S8-SEE001TIMEOUT** (low; SEE-001 AC2 ~12 s under load vs jest's 5 s).
+
+## For Richard
+
+1. **Push and release** the three unpushed fixes (MCP: README/description, render timeouts, get_component). The `.mcpb`
+   for Claude Desktop needs the next `@nodegx/mcp` and a version bump; check what 0.2.7's tarball was built from.
+2. Standing rulings: SKELSHIP (warn or refuse), ADMINNARROW (phone layout?), DEPLOYLOOPBACK (warn or refuse), OWN008-AUDIT.
+
+## Next
+
+1. The editor rows a Beta builder meets: P107-S79-SILENTCACHE (cached dynamic ports trusted, replaced with no diff),
+   P112-S7-TEXTDEFAULTS (a picked Text carries defaults the validator calls errors), P112-S11-REFUSALWORDS (a newer
+   project refused in another product's name).
+2. BETA-S7-DROPDOWNFOCUSDIVERGE (low): reproduce with the seed.
+3. P18-S109-MOUNTPULSE and P18-S134-STRINGREJECT wait for lane 4. The exporter does not read `renamed-ports` either.
+4. BETA-S8-SEE001TIMEOUT: an explicit timeout, or find where AC2's 12 s go.
+
+## Traps met
+
+1. 🔴 **viewer-react compiles the runtime to ES5 in jest, and ts-jest's TS error reached every case as an EMPTY
+   failure** (46 suites, 630 tests, no message). Cause: `[...new Set(...)]` in a module the runtime imports. Runtime and
+   viewer `tsc` were clean. A/B with HEAD's file found it; a probe `require` printed the TSError. A module the runtime
+   imports: no Set/Map spread or iteration.
+2. 🔴 A peer edited `docs/node-catalog/enrichment/newdbmodelproperties.json` mid-session, so `catalog:merge` folded their
+   sentence into my enriched catalog. Stripped the one string, verified the diff was examples-only, committed. After
+   any `catalog:merge`, `git status docs/node-catalog/enrichment`.
+3. The runtime's full jest prints nothing for 20+ minutes (conformance's long setup): run `test/corpus test/nodes
+   test/models` and friends, not the whole package.
+4. A census over `~/Documents` reads iCloud placeholders (it can download them, and it crawled for 10 minutes). Census
+   named project folders only.
+5. `get_example` reads the ENRICHED catalog, not `docs/`: an example edit is invisible to MCP tests until `catalog:merge`.
+6. `cli.ts` runs `main()` on import: a test cannot read its help text without moving it out (`src/usage.ts`).
+
+## Gates read (2026-10-25)
+
+contract renamed-ports 89/89, tsc clean · runtime corpus/nodes/models 96 suites 1060/1060, tsc clean · viewer corpus 63
+suites 893/893, tsc clean · cloud tsc clean · editor p107-s86 6/6, nsp-020 + neighbours 492/492, tsc clean; DEF-007 seam
+red at HEAD (P112-OWN008-TESTMAINRED) · mcp: example gate 103/103, MCPREADME 3/3, NESTEDCHROME 6/6, PORTTYPEOBJECT 2/2,
+render suites 14/14, toolDisclosure 18/18 (8,277/8,280), get_component callers 190/191 (SEE-001 AC2 load), tsc clean ·
+`catalog:examples` 114/114, `catalog:merge:check` up to date (with the peer's enrichment edit uncommitted it will read
+stale until they regenerate), `docs:bubble:check` up to date.
+
+**Commits this session:** 56c37c661, 6f17999c1, 27557936d, d7a9106d6, afcd83169, and the docs commit after them.
