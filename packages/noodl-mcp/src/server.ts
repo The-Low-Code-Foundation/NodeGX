@@ -69,7 +69,8 @@ import type { ReproducibleOutput } from './project/writeClock';
  *
  * `build.mjs` now defines `__NODEGX_APP_VERSION__` from `noodl-editor`'s version at bundle time,
  * so the server reports the release it shipped inside. That cannot drift, because nobody has to
- * remember to bump it.
+ * remember to bump it. A build for npm (`prepack`) reports `@nodegx/mcp`'s own version instead, the one
+ * `--version` prints (NPMAUDIT-SERVERINFO, `build-common.mjs` `reportedVersion`).
  *
  * ⚠️ `typeof` rather than a bare reference on purpose: under ts-jest and `npx tsx` the identifier
  * is genuinely undeclared, and `typeof` on an undeclared name is the one form that does not throw.
