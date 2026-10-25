@@ -53,7 +53,9 @@ function lookPayload(poverty: RenderFindingPayload[]): Record<string, unknown> {
  */
 export function completionPayload(state: RenderState | (RenderVerdict & { looked?: boolean })): Record<string, unknown> {
   const look = lookPayload(state.poverty ?? []);
-  if (state.done) return { done: true, doneBecause: state.reason, ...look };
+  // P112-OWN026-ROUTEPARAMNOTDONE: named on either verdict, because a render that could not open them never looked.
+  const unopened = state.parameterPages?.length ? { pagesNeedingARouteParameter: state.parameterPages } : {};
+  if (state.done) return { done: true, doneBecause: state.reason, ...look, ...unopened };
   return {
     ...look,
     done: false,
@@ -69,6 +71,7 @@ export function completionPayload(state: RenderState | (RenderVerdict & { looked
           ...(state.blocking.length > MAX_LISTED ? { mustFixMore: state.blocking.length - MAX_LISTED } : {})
         }
       : {}),
-    ...(state.unmeasuredPages.length > 0 ? { pagesNobodyLookedAt: state.unmeasuredPages } : {})
+    ...(state.unmeasuredPages.length > 0 ? { pagesNobodyLookedAt: state.unmeasuredPages } : {}),
+    ...unopened
   };
 }

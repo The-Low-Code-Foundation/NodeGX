@@ -114,6 +114,50 @@ describe('VIB-007 M1 §1 — the verdict grades what the harness graded', () => 
     expect(verdict.done).toBe(false);
     expect(verdict.unmeasuredPages).toEqual([{ component: '/Pages/Admin', reason: 'no route resolved to it' }]);
   });
+
+  describe('P112-OWN026-ROUTEPARAMNOTDONE — a page whose address takes a parameter', () => {
+    const PARAM = {
+      component: '/Pages/Table Picker',
+      measured: false,
+      urlPath: 'tables/{childId}',
+      unreachable: 'its urlPath "tables/{childId}" takes a route parameter, which this harness has no value for'
+    };
+
+    it('does not make a clean render NOT DONE, and is still named with the tool that reaches it', () => {
+      const report = {
+        ...CLEAN_REPORT,
+        pages: [{ component: '/Pages/Home', measured: true }, PARAM]
+      } as unknown as RenderReportPayload;
+
+      const verdict = verdictFor(report);
+      expect(verdict.done).toBe(true);
+      expect(verdict.unmeasuredPages).toEqual([]);
+      expect(verdict.parameterPages).toEqual([
+        { component: '/Pages/Table Picker', reason: PARAM.unreachable, urlPath: 'tables/{childId}' }
+      ]);
+      expect(verdict.reason).not.toContain('Fix them');
+      expect(verdict.reason).toContain('/Pages/Table Picker ("tables/{childId}")');
+      expect(verdict.reason).toContain('drive_page');
+      expect(verdict.reason).toContain('{navigate: "/tables/<a real childId>"}');
+    });
+
+    it('🔴 control: beside a page that IS fixable, the verdict is still NOT DONE, and only that page is the fix', () => {
+      const report = {
+        ...CLEAN_REPORT,
+        pages: [
+          { component: '/Pages/Home', measured: true },
+          PARAM,
+          { component: '/Pages/Admin', measured: false, unreachable: 'its Page node sets no urlPath, so there is no URL to navigate to' }
+        ]
+      } as unknown as RenderReportPayload;
+
+      const verdict = verdictFor(report);
+      expect(verdict.done).toBe(false);
+      expect(verdict.unmeasuredPages.map((p) => p.component)).toEqual(['/Pages/Admin']);
+      expect(verdict.parameterPages.map((p) => p.component)).toEqual(['/Pages/Table Picker']);
+      expect(verdict.reason).toMatch(/^NOT DONE — 1 routed page nobody looked at: \/Pages\/Admin .*Fix them and render again\. 1 page takes a route parameter/);
+    });
+  });
 });
 
 describe('VIB-007 M1 §2 — the ledger expires when the project moves', () => {
