@@ -185,9 +185,37 @@ describe('BMG-002 AC2 — rows and `where` round-trip', () => {
     expect([...offered].filter((o) => !tested.has(o))).toEqual([]);
   });
 
+  // P109-S41-SUNDAYWEEK: a fixed Wednesday, on which no two date windows are the same range. Read on a Sunday, "this
+  // week" and "the past 7 days" ARE the same range, and the arms below say what that reads back as.
+  const WEDNESDAY = new Date(2026, 9, 21, 12);
   it.each(everyOperator('p1').map((c) => [c.field + ' ' + c.op + ' ' + (c.value || (c.values || []).join('|')), c]))('%s', (_, c) => {
-    const where = toWhere(one(c as Cond), FIELDS, NOW);
-    expect(fromWhere(JSON.parse(JSON.stringify(where)), FIELDS, NOW)).toEqual(one(c as Cond));
+    const where = toWhere(one(c as Cond), FIELDS, WEDNESDAY);
+    expect(fromWhere(JSON.parse(JSON.stringify(where)), FIELDS, WEDNESDAY)).toEqual(one(c as Cond));
+  });
+
+  describe('P109-S41-SUNDAYWEEK — two windows that are the same range read back as the dates, not as one of them', () => {
+    const roundTrip = (value: string, now: Date) =>
+      fromWhere(JSON.parse(JSON.stringify(toWhere(one({ kind: 'cond', field: 'due', op: 'within', value }), FIELDS, now))), FIELDS, now);
+    const between = (from: string, to: string) => one({ kind: 'cond', field: 'due', op: 'between', value: from, value2: to });
+
+    it('on a Sunday, "this week" and "the past 7 days" are both Monday to Sunday', () => {
+      const sunday = new Date(2026, 9, 25, 12);
+      expect(roundTrip('past7', sunday)).toEqual(between('2026-10-19', '2026-10-25'));
+      expect(roundTrip('week', sunday)).toEqual(between('2026-10-19', '2026-10-25'));
+      // The other three are still their own window that day.
+      for (const w of ['today', 'month', 'past30']) expect(roundTrip(w, sunday)).toEqual(one({ kind: 'cond', field: 'due', op: 'within', value: w }));
+    });
+
+    it('on the 30th of a 30-day month, "this month" and "the past 30 days" are both the whole month', () => {
+      const thirtieth = new Date(2026, 8, 30, 12);
+      expect(roundTrip('month', thirtieth)).toEqual(between('2026-09-01', '2026-09-30'));
+      expect(roundTrip('past30', thirtieth)).toEqual(between('2026-09-01', '2026-09-30'));
+    });
+
+    it('the day after, each is its own window again', () => {
+      const monday = new Date(2026, 9, 26, 12);
+      for (const w of ['today', 'week', 'month', 'past7', 'past30']) expect(roundTrip(w, monday)).toEqual(one({ kind: 'cond', field: 'due', op: 'within', value: w }));
+    });
   });
 
   it('keeps groups, and nested groups, and the and/or of each', () => {
@@ -207,7 +235,7 @@ describe('BMG-002 AC2 — rows and `where` round-trip', () => {
         }
       ]
     };
-    expect(fromWhere(toWhere(g, FIELDS, NOW), FIELDS, NOW)).toEqual(g);
+    expect(fromWhere(toWhere(g, FIELDS, WEDNESDAY), FIELDS, WEDNESDAY)).toEqual(g);
   });
 
   it('turns a hand-written $and/$or filter into rows', () => {
