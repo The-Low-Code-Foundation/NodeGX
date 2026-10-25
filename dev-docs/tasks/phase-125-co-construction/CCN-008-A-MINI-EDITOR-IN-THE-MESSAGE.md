@@ -1,6 +1,8 @@
 # CCN-008 — A mini editor in the message
 
-**State:** s1 built and driven headless (2026-10-25): AC1–AC5 ✅ in a fake host; **AC6 is Richard's run in Claude Desktop**, after a `noodl-mcp` dist rebuild. **Lane:** 3 (P125). **Serves:** CCN-004 (look first) and CCN-003 (show
+**State:** s1 built and driven headless (2026-10-25): AC1–AC5 ✅ in a fake host. **AC6 part 1 run by Richard in Claude
+Desktop (2026-10-25 08:12, Muddy Paws button): the editor drew live and Approve reached the chat; he found eight things,
+all fixed and driven in s2.** AC6's rest (a hero, a 3D model, one answered late) is his next run, on the s2 dist. **Lane:** 3 (P125). **Serves:** CCN-004 (look first) and CCN-003 (show
 before apply) as their vehicle; PLY-009 (a model says what you can change) inside Claude Desktop.
 
 > "Right now when Claude builds in Desktop and uses the NodeGX connector, you by default get the full NodeGX Studio
@@ -148,7 +150,10 @@ is untouched.
 - **AC5. ✅ s1.** On the three-in-nodes fixture's Robot (a 3D Group of three meshes): the Scene runs paused in the
   stage, only the robot's objects are drawn, a swatch recolours the body live and in the file, the "Big blue" variant
   scales it ×2 live and in the file, the robot centred and framed (swiftshader).
-- **AC6.** Richard's run in Claude Desktop: a button styled and a hero approved in mini editors, one 3D model approved;
+- **AC6. Part 1 run (s2).** Measured in Desktop: `ui/message` is honoured as a composer prefill under a caution banner
+  (the person presses send; P125-CCN008-APPROVEWARN, a ruling); the inline panel took the button editor's full height.
+  Still to run: a hero, a 3D model, one answered late.
+- **AC6 (as written).** Richard's run in Claude Desktop: a button styled and a hero approved in mini editors, one 3D model approved;
   he answers one editor late (after a question) by asking for it again. Unmeasured: whether Desktop honours
   `ui/message` (the fallback is `ui/update-model-context`), how tall it lets an inline panel be (the hero editor asks
   for ~940 px), and the real-GPU feel of the 3D stage.
@@ -156,6 +161,10 @@ is untouched.
 ## How to run it
 
 - Server: `npx jest --config packages/noodl-mcp/jest.config.js --runInBand tests/ccn008MiniEditor.test.ts` (17).
+- Richard's AC6 run replayed (s2), sandbox off: `node tools-mini-editor-drive.mjs buttons <copy of Muddy Paws> <out>`
+  with `NODEGX_KNOWN_PROJECTS=<scratch file>` (so the copy is not added to his project list). Studio's Properties
+  panel inline, then the button editor: stage, scroll, swatches, looks, style, the message. Its control is the same
+  drive from a worktree at a0362a33a with `MINI_DRIVE_CONTROL=1` (the old panel): host scrollY 94 after each click.
 - The panel, end to end, sandbox off (Chrome): copy a project with `Sections/Hero` (the puppy re-run) or the
   three-in-nodes fixture with `library/modules/three-kit/project/noodl_modules/three-kit` added, then
   `node tools-mini-editor-drive.mjs 2d|3d <copy> <out-dir>` here. It bundles the server from `src` into `<out-dir>`
@@ -183,3 +192,39 @@ had: "Meet the puppies"); the drive now types a new one and asserts the old one 
 
 The dist Claude Desktop runs was rebuilt from a clean worktree at 71dca72c7 (2026-10-25 07:54) and smoked as
 `claude-ai`; OpenNoodl pushed. AC6 is next.
+
+### s2 (2026-10-25) — Richard's first Desktop run (AC6 part 1), eight findings, all fixed
+
+His Muddy Paws conversation: "options for the buttons" drew the mini editor (MOCKUP's fix seen working), he switched
+variants, changed fill, text colour and radius, and approved. What he found, what it was, what changed:
+
+| # | Richard | Measured cause | Fix | Bug |
+|---|---|---|---|---|
+| 1 | "the chat scroll jumps down every time" | `layout2d` called `scrollIntoView`, which scrolls every box above the part, the frames above it included | `bringToTop` moves only the preview page's own scrollers | SCROLLJUMP |
+| 2 | "scroll over the button preview … white screen"; "should be content height and fit snug" | the preview page stayed scrollable; its white page (and the kit's inline `background: white` on the frame) showed beside the part | nothing in the stage scrolls; the page and frame are see-through and the stage paints what the part sits on; the stage is the part + 20 px | STAGESCROLL |
+| 3 | "font colour … does nothing" | the three text colours offered all resolve to #ffffff; two drew as empty circles (the swatch list keeps one token per colour) | each choice painted with what it resolves to; the agent warned when two paint the same; a token the project lacks is refused (a guard) | WHITESWATCH |
+| 4 | "expected to see the hover and clicked / disabled variants" | the editor drew only the normal look | a "Show it" row (Normal, Hover, Pressed, Disabled) with the runtime's own `setVisualStates`; a setting can be a state's (`state`); a state that overrides a setting is said under it and to the agent | NOSTATES |
+| 5 | Approve → described, not shown; "scary warning" | nothing asked to show it; Desktop's banner on `ui/message` | the message ends "Apply it where it belongs, then show me the result in the app."; notes say open_studio in the same turn | NOSHOWBACK, APPROVEWARN (ruling) |
+| 6 | the project from another chat not found | list_projects read only the editor's list and the server's folder | every bind remembered in `~/.noodl/known-projects.json`; list_projects reads it | LOSTPROJECT |
+| 7 | "did Claude update the button style?" | no: each button got its own values; `nodegx.styles.json` untouched since 2026-10-24 12:06 | `scope: "style"` writes the Button style (Studio's Styles tab) and drops the part's own value; the decision names who keeps their own | NOSTYLE |
+| 8 | "hide the props panel" inline | the shell reopened it on every redraw of `#right` | opens on a new pick only; "Hide properties" on the strip; a tab on its edge (studio) | P125-STU-PROPSPIN |
+
+Runtime precedence, read for #4 (`react-component-node.ts` `getParametersForStates`): the style's state value, then the
+node's own NORMAL value over it, then the node's own state value over both. So a red hover on the node beats any new
+fill; a red hover on the style is hidden by a fill the node sets itself.
+
+Gates: `tests/ccn008MiniEditor.test.ts` 21/21 (four new: WHITESWATCH, the guard, NOSTATES, NOSTYLE),
+`tests/p125KnownProjects.test.ts` 3/3, neighbours 148/148 in 13 suites, surface 8,277 / 8,280 unchanged, `tsc --noEmit`
+clean. The drive (`buttons`) ALL PASS; its control on the old panel reads 94 px of chat scroll per click, a 400 px
+wheel scroll inside the stage and three transparent swatches.
+
+🔴 Learned: a check that cannot fire proves nothing. The first SCROLLJUMP check passed with synthetic clicks; an
+imitation of the old `scrollIntoView` injected into the NEW panel did not move the host either (its page no longer
+scrolls). Only the old panel itself, run from a worktree, showed the 94 px. And a probe of nested frames showed current
+Chrome scrolls the top page from a cross-origin, sandboxed frame with or without a gesture.
+
+Leads, not measured: Studio has seven `scrollIntoView({ block: 'nearest' })` calls (tree pick, back-link, timeline);
+inline in a chat each can move the conversation when the element is outside the chat's view. The NavBar and closing
+banner buttons in Richard's Muddy Paws now set their own fill, so a Button style change will not reach them until the
+agent drops those (the decision message names them).
+

@@ -2,6 +2,24 @@
 
 Read `README.md` here, then the task you take.
 
+## s16 (2026-10-25): AC6 part 1 — Richard's first mini editor run in Desktop; his eight findings fixed, driven, dist rebuilt
+
+Read [CCN-008](CCN-008-A-MINI-EDITOR-IN-THE-MESSAGE.md) "s2": the table of the eight, the runtime's state precedence,
+and why the scroll check needed the old panel itself as its control.
+
+- **OpenNoodl 6ce8f171b** (panel, spec, http, records, the tool, `project/knownProjects.ts`, list_projects, tests, the
+  drive's `buttons` mode); **nodegx-studio 2a5d280** (inline Properties). Ledger: SCROLLJUMP, STAGESCROLL, WHITESWATCH,
+  NOSTATES, NOSHOWBACK, LOSTPROJECT, NOSTYLE, P125-STU-PROPSPIN fixed; **P125-CCN008-APPROVEWARN needs Richard's
+  ruling** (Desktop's caution banner over the Approve prefill: keep `ui/message`, or send it as model context).
+- The `noodl-mcp` dist Desktop runs was rebuilt 09:03 from a clean worktree at 6ce8f171b and smoked as `claude-ai` (126
+  tools; `state`/`scope` on a setting; the panel resource). `~/.noodl/known-projects.json` was seeded with Muddy Paws
+  and Puppy Rerun S12 (made before the record existed). NOT pushed (either repo): ask.
+- **Next:** Richard quits/reopens Claude Desktop, NEW conversation: "the button style" again on Muddy Paws (expect
+  `scope: "style"`, the hover row, the result shown after Approve), then AC6's rest: a hero, a 3D model, one answered
+  late. Note his Muddy Paws NavBar / ClosingCta buttons set their own fill since the first run, so a style change will
+  not reach them until the agent drops those (the decision message names them).
+- Leads, unmeasured: Studio's seven `scrollIntoView({ block: 'nearest' })` calls may move the chat inline the same way.
+
 ## s15 (2026-10-25): CCN-008, a mini editor in the message — BUILT, driven headless, Richard's Desktop run next
 
 Richard (2026-10-24): *"Show the full editor when needed, but be able to show mini custom editors when a button needs

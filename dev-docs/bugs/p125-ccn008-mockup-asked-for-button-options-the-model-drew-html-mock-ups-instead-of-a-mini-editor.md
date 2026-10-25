@@ -7,6 +7,9 @@ area: mcp / the briefing (BOOTSTRAP_INSTRUCTIONS) and show_mini_editor's descrip
 found: P125 CCN-008 AC6, Richard's first run in Claude Desktop, 2026-10-25 08:03
 evidence: ~/Library/Logs/Claude/claude.ai-web.log 08:03:54 `visualize:read_me`, 08:04:09 `visualize:show_widget`; no `nodegx:` tool after 2026-10-24 12:12
 kit: mcp
+commit: a0362a33a
+regression: packages/noodl-mcp/tests/instructions.test.ts
+seen: Richard's next conversation (2026-10-25 08:12, 'Muddy Paws project button options') answered the same ask with show_mini_editor
 ---
 
 Richard, in the Muddy Paws conversation (built 2026-10-24 on the old server), after reopening Claude Desktop on the
