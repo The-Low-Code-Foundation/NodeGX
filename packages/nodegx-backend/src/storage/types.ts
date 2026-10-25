@@ -32,6 +32,12 @@ export interface StoredEntry {
   modified: Date | null;
 }
 
+/** Bytes `start` to `end` of an object, both included (HTTP's `bytes=start-end`). */
+export interface ByteRange {
+  start: number;
+  end: number;
+}
+
 export interface StorageDriver {
   readonly kind: 'local' | 's3';
 
@@ -41,8 +47,11 @@ export interface StorageDriver {
   /** Read the full object. Throws if absent. */
   get(key: string): Promise<Buffer>;
 
-  /** A readable stream of the object, for large-file serving without buffering the whole thing. */
-  createReadStream(key: string): NodeJS.ReadableStream;
+  /**
+   * A readable stream of the object, for large-file serving without buffering the whole thing. With `range`, only
+   * those bytes (P112-OWN023-NORANGE: an audio player seeks by asking for a slice).
+   */
+  createReadStream(key: string, range?: ByteRange): NodeJS.ReadableStream;
 
   /** Delete the object. Not an error if already absent (idempotent, matches the old FileRoutes.delete). */
   delete(key: string): Promise<void>;

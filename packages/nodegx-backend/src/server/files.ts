@@ -76,6 +76,7 @@ import type { FileRecord } from '../storage/MetadataStore';
 import { sniff } from '../storage/sniff';
 import { signFileAccess, verifyFileAccess } from '../storage/signing';
 import { renderThumbnail, TransformUnavailableError, type FitMode } from '../storage/transform';
+import type { ByteRange } from '../storage/types';
 
 /**
  * The 201 body of `POST /files/:name` — the Parse-compatible upload result.
@@ -260,13 +261,28 @@ export class FileRoutes {
     // BMG-015: the driver the row names, not the current one — a file uploaded
     // before the switch to a bucket still lives on this machine.
     const driver = this.subsystem.driverFor(record);
-    ctx.res.writeHead(200, {
+    const headers: Record<string, string | number> = {
       'Content-Type': record.contentType,
       'Content-Length': record.size,
       ETag: etag,
       'Cache-Control': record.private ? 'private, no-store' : 'public, max-age=31536000, immutable',
-    });
-    const stream = driver.createReadStream(record.key);
+      'Accept-Ranges': 'bytes'
+    };
+    // P112-OWN023-NORANGE: an audio player seeks by asking for a slice, and Safari plays nothing from a server that
+    // will not give one. An `If-Range` naming another version gets the whole of this one.
+    const ifRange = ctx.req.headers['if-range'];
+    const range = ifRange === undefined || ifRange === etag ? parseByteRange(ctx.req.headers.range, record.size) : null;
+    if (range === 'unsatisfiable') {
+      ctx.res.writeHead(416, { 'Content-Range': `bytes */${record.size}`, ETag: etag, 'Accept-Ranges': 'bytes' });
+      ctx.res.end();
+      return;
+    }
+    if (range) {
+      headers['Content-Length'] = range.end - range.start + 1;
+      headers['Content-Range'] = `bytes ${range.start}-${range.end}/${record.size}`;
+    }
+    ctx.res.writeHead(range ? 206 : 200, headers);
+    const stream = range ? driver.createReadStream(record.key, range) : driver.createReadStream(record.key);
     stream.on('error', (e: Error) => {
       // Headers are already sent; the best we can do is end the connection loudly in the log.
       // eslint-disable-next-line no-console
@@ -418,4 +434,26 @@ export class FileRoutes {
 
     sendJSON(ctx.res, 200, {});
   }
+}
+
+/**
+ * P112-OWN023-NORANGE — one `Range: bytes=…` against a file of `size` bytes: the bytes it names (the end clamped to
+ * the file), `'unsatisfiable'` when it starts past the end, or null when there is no range this answers: none, another
+ * unit, several ranges, or a malformed one. A null serves the whole file, which RFC 9110 allows for all of those.
+ */
+export function parseByteRange(header: string | string[] | undefined, size: number): ByteRange | 'unsatisfiable' | null {
+  if (typeof header !== 'string') return null;
+  const m = /^\s*bytes\s*=\s*(\d*)\s*-\s*(\d*)\s*$/i.exec(header);
+  if (!m || (m[1] === '' && m[2] === '')) return null;
+  if (m[1] === '') {
+    // A suffix: the last n bytes.
+    const n = Number(m[2]);
+    if (n === 0 || size === 0) return 'unsatisfiable';
+    return { start: Math.max(0, size - n), end: size - 1 };
+  }
+  const start = Number(m[1]);
+  const end = m[2] === '' ? Infinity : Number(m[2]);
+  if (end < start) return null;
+  if (start >= size) return 'unsatisfiable';
+  return { start, end: Math.min(end, size - 1) };
 }

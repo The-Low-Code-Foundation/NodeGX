@@ -35,6 +35,14 @@ backend's card → **Manage data & settings**), or via MCP (`get_backend_file_co
 | Content-type allow list | none (allow all) | When set, ONLY these sniffed types may be uploaded. |
 | Signed URL TTL | 300s | See "Private files" below. |
 
+## Seeking: byte ranges
+
+`GET /files/:name` answers one `Range: bytes=…` with `206` and that slice (`bytes=500-599`, `bytes=900-`, `bytes=-50`),
+and says `Accept-Ranges: bytes` on the whole file. An audio or video player seeks this way, and Safari will not play
+media from a server that does not. A range that starts past the end is `416` with `Content-Range: bytes */<size>`.
+Several ranges, a malformed one, or an `If-Range` naming another version get the whole file. A file in a bucket is
+read as the same slice from the bucket. Thumbnails are whole images and are not ranged.
+
 ## Private files and signed URLs
 
 A file is **public** by default (WF-004's original behavior — anyone who

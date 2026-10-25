@@ -19,7 +19,7 @@ import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
-import type { StorageDriver, StorageStat, StoredEntry } from './types';
+import type { ByteRange, StorageDriver, StorageStat, StoredEntry } from './types';
 
 export class LocalDriver implements StorageDriver {
   readonly kind = 'local' as const;
@@ -54,8 +54,8 @@ export class LocalDriver implements StorageDriver {
     return fs.readFileSync(this.resolve(this.fromPosix(key)));
   }
 
-  createReadStream(key: string): NodeJS.ReadableStream {
-    return fs.createReadStream(this.resolve(this.fromPosix(key)));
+  createReadStream(key: string, range?: ByteRange): NodeJS.ReadableStream {
+    return fs.createReadStream(this.resolve(this.fromPosix(key)), range ? { start: range.start, end: range.end } : undefined);
   }
 
   async delete(key: string): Promise<void> {
