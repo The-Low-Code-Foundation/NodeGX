@@ -12,7 +12,8 @@
  * too. The types come from the catalog (which carries the runtime export's own child/parent fields, including
  * `Component Children`'s `haveComponentChildren`) and, for a component instance, from that component's own graph.
  * A type neither resolves (a kit not loaded, a missing component) is skipped: `unknown-node-type` and
- * `unresolved-component-ref` own those.
+ * `unresolved-component-ref` own those. At a component's root, such a type answers from the `visualRoots` its file
+ * recorded, as the export does.
  *
  * Where the editor raises both "cannot be a child" and "its parent does not hold it" on one node, this reports the
  * first only: one node, one thing to move.
@@ -30,6 +31,9 @@ import {
 import { Diagnostic, DiagnosticCode } from '../diagnostics';
 import { NormComponent, NormNode, refToPath } from '../model';
 import { Rule, RuleContext } from './types';
+
+/** An unresolved root the file recorded as visual. Its real category is unknown here; a kit's drawn node is Visual. */
+const RECORDED_VISUAL_ROOT: HierarchyType = { allowAsChild: true, category: 'Visual' };
 
 /** Resolves a node type for the rule: the catalog's answer, a component instance's derived one, or `undefined`. */
 export function hierarchyTyper(ctx: Pick<RuleContext, 'catalog' | 'project'>): (typeName: string) => HierarchyType | undefined {
@@ -53,8 +57,13 @@ export function hierarchyTyper(ctx: Pick<RuleContext, 'catalog' | 'project'>): (
     const childIds = new Set(component.nodes.flatMap((n) => n.children));
     const roots = component.nodes.filter((n) => n.parent === undefined && !childIds.has(n.id));
     const known = (n: NormNode) => typeOf(n.type);
+    // P112-S14-KITROOTDEPLOY — a root whose type does not resolve (a kit's node: the catalog never carries one)
+    // answers from the file, as the export does (`NodeGraphModel.isVisualRoot`, GAM-014): it draws when the
+    // `visualRoots` the file recorded lists it. Read as "draws nothing", a page placing a kit-rooted component
+    // was refused by `nodegx deploy`. A logic module's node is recorded nowhere and still draws nothing.
+    const rootType = (n: NormNode) => known(n) ?? (component.visualRoots?.includes(n.id) ? RECORDED_VISUAL_ROOT : undefined);
     const derived = componentHierarchyType(
-      roots.map(known).filter((t): t is HierarchyType => !!t),
+      roots.map(rootType).filter((t): t is HierarchyType => !!t),
       component.nodes.map(known).filter((t): t is HierarchyType => !!t)
     );
     inFlight.delete(typeName);

@@ -115,6 +115,11 @@ export interface NormComponent {
   name: string;
   nodes: NormNode[];
   connections: NormConnection[];
+  /**
+   * The visual roots the file recorded, when it recorded any. Written by a process that knew every type (the door,
+   * an editor save), so it answers for a root whose type this one cannot resolve (P112-S14-KITROOTDEPLOY).
+   */
+  visualRoots?: string[];
 }
 
 export interface NormProject {
