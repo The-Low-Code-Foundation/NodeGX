@@ -231,6 +231,11 @@ export interface RunTriggerContext {
    * listener must treat "not called" as a normal outcome, not an error.
    */
   onStarted?(executionId: string): void;
+  /**
+   * P112-OWN026-OPENSTAT — the signed-in person who called the function (a session, or a key bound to a person), so a
+   * record the run creates for them is theirs. Absent for a schedule, a trigger, a workflow step or an anonymous call.
+   */
+  callerUserId?: string;
 }
 
 /** One loaded bundle, and the fingerprint of the deploy that put it here. */
@@ -812,12 +817,15 @@ export class WorkflowRunner {
       safeLog(`Executing function: ${functionName}`);
       // HLT-023: inside `within`, every loopback request the graph makes carries this run's id,
       // so it is charged to the run and not to the operator's `data:admin` bucket.
-      const response = await this.functionRuns.within<RunnerResponse>(functionName, () =>
-        this.cloudRunner.run(functionName, request, {
-          timeoutMs,
-          // CWF-013: this is what gives a `Log` node in the graph somewhere to go.
-          runContext: this.createRunContext(functionName, execLogger, trigger, executionId)
-        })
+      const response = await this.functionRuns.within<RunnerResponse>(
+        functionName,
+        () =>
+          this.cloudRunner.run(functionName, request, {
+            timeoutMs,
+            // CWF-013: this is what gives a `Log` node in the graph somewhere to go.
+            runContext: this.createRunContext(functionName, execLogger, trigger, executionId)
+          }),
+        trigger?.callerUserId
       );
       const duration = Date.now() - startTime;
       safeLog(`Function ${functionName} completed in ${duration}ms`);

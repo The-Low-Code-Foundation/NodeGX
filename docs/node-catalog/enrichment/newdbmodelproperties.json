@@ -22,7 +22,7 @@
   "patterns": [
     "Text Input `text` → `prop-<name>`, Button `onClick` → `store`: the minimal create form.",
     "`done` → a navigation or Event Sender, with `id` as payload: jump straight to the new record's detail page.",
-    "Records several people may all change: a rule for the creator and a role rule (`members-of-<ownerId>`), the role joined only in a cloud function that reads an invitation's `owner` (example `cloud-members-can-edit-my-records`). Where only a function should create the records, it creates them as the system and the collection's create rule is \"nobody\"."
+    "Records several people may all change: a rule for the creator and a role rule (`members-of-<ownerId>`), the role joined only in a cloud function that reads an invitation's `owner` (example `cloud-members-can-edit-my-records`). Where only a function should create the records, it creates them as the system and the collection's create rule is \"nobody\". A record it creates while a signed-in person's call runs is that person's (P112-OWN026-OPENSTAT); to share one, the function passes `acl` with `'*'`."
   ],
   "antiPatterns": [
     "Re-fetching a Query Records node after `done` — live queries already receive the new record; only re-fetch when the query is not live.",

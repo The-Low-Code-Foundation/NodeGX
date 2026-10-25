@@ -18,7 +18,8 @@ export const ENFORCED_RULES_NOTE =
   'a cloud function decides who sees what, it checks owner. Records several people may change: a role named from ' +
   "the owner's id, joined only in a cloud function from an invitation's owner; and a collection only a function " +
   'should write keeps create "nobody", because a check in a function guards only its own door (example ' +
-  'cloud-members-can-edit-my-records). A value several devices ' +
+  "cloud-members-can-edit-my-records). A record a function creates while a signed-in user's call runs is that " +
+  'user\'s, as if their page had made it; to share one, the function passes acl with "*". A value several devices ' +
   'change (a count, a score, a balance) is changed on the server by the amount, never written back whole from what ' +
   'a page holds: Update Record with Add To naming the field and the change (1, -1) wired into it, which updates the ' +
   "record to the server's total (in a script, Noodl.Records.increment); or Update Record with Only If Unchanged. Test as two users: what " +

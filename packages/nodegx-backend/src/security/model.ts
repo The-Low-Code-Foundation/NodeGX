@@ -116,6 +116,15 @@ export function rulePrincipal(principal: Principal): Principal {
 }
 
 /**
+ * P112-OWN026-OPENSTAT — the signed-in person a call to a function is made by (a session, or a key bound to a person),
+ * whose record a creator-owned collection's create inside that run becomes. An admin, an unbound key or nobody: none.
+ */
+export function callerUserIdOf(principal: Principal): string | undefined {
+  const subject = rulePrincipal(principal);
+  return subject.kind === 'user' ? subject.userId : undefined;
+}
+
+/**
  * The principal-key set used in ACL matching — the exact strings that may
  * appear as keys of a record's ACL object. Everyone holds '*'.
  *

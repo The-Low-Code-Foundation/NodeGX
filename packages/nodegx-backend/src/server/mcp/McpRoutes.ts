@@ -62,7 +62,7 @@ import type { RequestContext } from '../HttpServer';
 import type { SecurityState } from '../../security/state';
 import type { WorkflowRunner } from '../../workflow/WorkflowRunner';
 import type { AuditLog } from '../../ops/audit';
-import { dropCallerOwner, type Principal } from '../../security/model';
+import { callerUserIdOf, dropCallerOwner, type Principal } from '../../security/model';
 import { HttpError, readJSONBody, sendJSON } from '../http-util';
 import { assertSeriesWrite, seriesAnswer } from '../series-door';
 import { logger } from '../../ops/logger';
@@ -477,7 +477,7 @@ export class McpRoutes {
           body: JSON.stringify(args),
           headers: session ? { 'x-parse-session-token': session.token } : {}
         },
-        { type: 'webhook', source: `POST /mcp (${functionName})`, requestId: ctx.requestId }
+        { type: 'webhook', source: `POST /mcp (${functionName})`, requestId: ctx.requestId, callerUserId: callerUserIdOf(ctx.principal) }
       );
       const text = typeof response.body === 'string' ? response.body : JSON.stringify(response.body);
       if (response.statusCode >= 400) {

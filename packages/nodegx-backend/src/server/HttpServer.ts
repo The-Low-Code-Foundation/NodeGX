@@ -40,7 +40,7 @@ import type { IdempotencyStore } from '../execution/IdempotencyStore';
 import { buildRunPayload } from '../workflow/runPayload';
 import type { WorkflowRunner } from '../workflow/WorkflowRunner';
 import { DEFAULT_FUNCTION_TIMEOUT_MS } from '../workflow/WorkflowRunner';
-import { RUN_HEADER } from '../workflow/FunctionRuns';
+import { RUN_HEADER, type FunctionRun } from '../workflow/FunctionRuns';
 import type { SecurityState } from '../security/state';
 import type { SearchState } from '../search/SearchState';
 import type { RealtimeHub, Subscription } from '../realtime/RealtimeHub';
@@ -57,6 +57,7 @@ import {
   ownerFieldIsTheApps,
   ruleAllows,
   rulePrincipal,
+  callerUserIdOf,
   validateAclShape,
   type AccessDecision
 } from '../security/model';
@@ -2099,7 +2100,7 @@ export class HttpServer {
         if (decision?.narrow) narrowings.set(collection, { collection, where: decision.narrow });
         else narrowings.delete(collection);
       },
-      stampCreate: (collection, data) => this.stampCreate(principal, collection, data),
+      stampCreate: (collection, data) => this.stampCreate(principal, collection, data, run),
       audit: (detail) => {
         // BMG-014: a handler that establishes WHO the caller is after the
         // credential step (the manager's password login) names the actor here.
@@ -2355,7 +2356,7 @@ export class HttpServer {
    * `owner` is dropped. Before, a shared collection kept whatever `owner` the
    * page sent, so the one field that looked like the server's word wasn't.
    */
-  private stampCreate(principal: Principal, collection: string, data: Record<string, unknown>): void {
+  private stampCreate(principal: Principal, collection: string, data: Record<string, unknown>, run?: FunctionRun): void {
     const aclError = validateAclShape(data.ACL);
     if (aclError) throw new HttpError(400, `Invalid ACL: ${aclError}`, 123);
     if (data.ACL === undefined || data.ACL === null) delete data.ACL;
@@ -2399,6 +2400,21 @@ export class HttpServer {
       if (data.ACL === undefined) {
         data.ACL = { [owner.userId]: { read: true, write: true } };
       }
+    }
+    // P112-OWN026-OPENSTAT (Richard 2026-10-25: the caller owns it). A function writes as the system, so a record it
+    // created had no ACL, and a record with no ACL is every signed-in account's to read and overwrite: Mistral's
+    // times-table app recorded each child's answers from a function, and any family could read and wipe every
+    // family's. Inside a run a signed-in person started, a creator-owned collection's record is that person's, as it
+    // would be had their own page created it. A function shares one by saying so — an `acl` of its own ('*' for
+    // everyone), or a collection whose rules set creatorOwns false. `owner` stays as it was: the system made it.
+    if (
+      owner.kind !== 'user' &&
+      run?.callerUserId &&
+      data.ACL === undefined &&
+      this.security.creatorOwns(collection) &&
+      !isSystemCollection(collection)
+    ) {
+      data.ACL = { [run.callerUserId]: { read: true, write: true } };
     }
   }
 
@@ -2581,7 +2597,7 @@ export class HttpServer {
           // BAK-009: 'webhook' is the historical trigger type for a direct call
           // (see RunTriggerContext); what is new is the request id, so the
           // execution this call creates can be found from the access log.
-          { type: 'webhook', source: `POST /functions/${name}`, requestId: ctx.requestId }
+          { type: 'webhook', source: `POST /functions/${name}`, requestId: ctx.requestId, callerUserId: callerUserIdOf(ctx.principal) }
         );
       } finally {
         if (session) await session.release();

@@ -30,6 +30,11 @@ export interface FunctionRun {
   readonly functionName: string;
   /** Loopback requests this run has made so far. */
   requests: number;
+  /**
+   * P112-OWN026-OPENSTAT — the signed-in person whose call started this run, when one did. A record the run creates
+   * into a creator-owned collection, with no access rule of its own, is theirs (`HttpServer.stampCreate`).
+   */
+  readonly callerUserId?: string;
 }
 
 export class FunctionRuns {
@@ -37,8 +42,13 @@ export class FunctionRuns {
   private readonly context = new AsyncLocalStorage<FunctionRun>();
 
   /** Run `body` as one function run: its loopback requests carry the run's id until it settles. */
-  async within<T>(functionName: string, body: () => Promise<T>): Promise<T> {
-    const run: FunctionRun = { id: randomBytes(16).toString('hex'), functionName, requests: 0 };
+  async within<T>(functionName: string, body: () => Promise<T>, callerUserId?: string): Promise<T> {
+    const run: FunctionRun = {
+      id: randomBytes(16).toString('hex'),
+      functionName,
+      requests: 0,
+      ...(callerUserId ? { callerUserId } : {})
+    };
     this.live.set(run.id, run);
     try {
       return await this.context.run(run, body);
