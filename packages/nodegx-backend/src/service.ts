@@ -617,7 +617,10 @@ export class BackendService {
       masterKey: this.security.adminToken,
       // HLT-023: the clients stamp each loopback request with the run it belongs to
       // (`X-NodeGX-Run`), so it is charged to that run instead of to `data:admin`.
-      currentRunId: () => (this.runner ? this.runner.functionRuns.currentRunId() : undefined)
+      currentRunId: () => (this.runner ? this.runner.functionRuns.currentRunId() : undefined),
+      // P121-TWO003-CLOUDPOINTSTO: a deployed bundle carries no collection schema, so a `pointsTo` filter in a
+      // function's script had nothing to translate against. Read live, and only when that filter asks.
+      collections: () => (this.facade && this.facade.schemaManager ? this.facade.schemaManager.exportSchemas() : [])
     };
 
     // 4.5 The Send Email node (BAK-002, noodl-viewer-cloud) runs INSIDE this

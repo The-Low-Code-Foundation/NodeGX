@@ -1,3 +1,5 @@
+/// <reference path="../globals.d.ts" />
+// P121-TWO003-CLOUDPOINTSTO: `hostCollection` reads the cloud-runtime globals; see ParseWireAdapter for why this line.
 /**
  * The boundary between the runtime's filter call sites and the pure translators.
  *
@@ -116,8 +118,9 @@ function schemaFor(collectionName: string | undefined): FilterSchema | undefined
   try {
     collection = CloudStore._collections[collectionName];
   } catch (e) {
-    return undefined;
+    collection = undefined;
   }
+  if (!collection) collection = hostCollection(collectionName);
   if (!collection) return undefined;
   if (collection.schema) return { collection: collectionName, properties: collection.schema.properties };
   // `dbCollections` metadata comes in two shapes: a Parse-era entry carries
@@ -134,6 +137,24 @@ function schemaFor(collectionName: string | undefined): FilterSchema | undefined
     return { collection: collectionName, properties };
   }
   return undefined;
+}
+
+/**
+ * P121-TWO003-CLOUDPOINTSTO — inside nodegx-backend, the backend's own schema for a collection.
+ *
+ * A deployed function bundle carries `metadata: {}`, so its runtime has no `dbCollections` and a `pointsTo` filter
+ * in a function's script was refused, on the server that holds the schema. The service hands it over live on
+ * `_noodl_cloudservices` (as it does the run id), so a collection made after the functions loaded is known too.
+ * Asked only when the runtime's own metadata has no such collection. The identifiers stay bare (ParseWireAdapter).
+ */
+function hostCollection(collectionName: string) {
+  if (typeof _noodl_cloud_runtime_version === 'undefined' || typeof _noodl_cloudservices === 'undefined') return undefined;
+  if (!_noodl_cloudservices || typeof _noodl_cloudservices.collections !== 'function') return undefined;
+  try {
+    return (_noodl_cloudservices.collections() || []).find((c) => c && c.name === collectionName);
+  } catch (e) {
+    return undefined;
+  }
 }
 
 /**

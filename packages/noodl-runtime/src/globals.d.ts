@@ -41,5 +41,10 @@ declare const _noodl_cloudservices:
        * Absent on a runtime that is not nodegx-backend's.
        */
       currentRunId?: () => string | undefined;
+      /**
+       * P121-TWO003-CLOUDPOINTSTO: the backend's own collection schemas, read live. A deployed bundle carries no
+       * `dbCollections`, so a function's `pointsTo` filter had no schema to translate against. Absent elsewhere.
+       */
+      collections?: () => Array<{ name: string; columns?: Array<{ name: string; type?: string; targetClass?: string }> }>;
     }
   | undefined;
