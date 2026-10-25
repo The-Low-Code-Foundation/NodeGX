@@ -56123,11 +56123,12 @@
         ],
         "items": [
           "nothing handed (undefined): the list it has stays",
+          "the value is still the placed node's seed and the list does not offer it: the list is kept, and the value is cleared to '' and sent",
           "otherwise: the list is kept as handed and drawn at the next paint; the value stays, so a list handed again keeps the pick"
         ],
         "value": [
           "null: ignored",
-          "the value it already holds, as text: nothing",
+          "the value it already holds, as text: nothing (it is no longer the seed)",
           "a change: kept as text, Value follows, and the list selects it at the next paint if it names an option — Changed does not fire (only a person's pick fires it)"
         ],
         "mounted": [

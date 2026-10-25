@@ -24708,5 +24708,53 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Value written as the seed's own text, then Items without it: the written value is kept and nothing is sent; a fresh one's seed, by contrast, is cleared to '' (P121-TWO005-DROPDOWNSTALE)",
+    "because": "P121-TWO005-DROPDOWNSTALE (v11): only the placed node's unwritten seed is cleared when Items do not offer it; a Value somebody wrote is theirs, even when it is the same text as the seed",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "Option 1"
+      },
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "Label": "Small",
+            "Value": "s"
+          },
+          {
+            "Label": "Large",
+            "Value": "l"
+          }
+        ]
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Value written null is ignored, so the placed seed is still a seed: Items without it clear Value to '' and send it (P121-TWO005-DROPDOWNSTALE)",
+    "because": "options.ts Value `set`: null has no toString and returns before anything is kept (:182-184), so `valueIsSeed` stays; v11 clears an unoffered seed",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": null
+      },
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "Label": "Small",
+            "Value": "s"
+          }
+        ]
+      },
+      "settle"
+    ]
   }
 ]

@@ -106,6 +106,8 @@ const OptionsNode = {
      * `set`, and the runtime never calls a port's `set` for an unauthored default.
      */
     this.props.value = this._internal.value = DEFAULT_ITEMS[0].Value;
+    // P121-TWO005-DROPDOWNSTALE — true while that value is still the seed (nobody wrote Value or picked); see the Items `set`
+    this._internal.valueIsSeed = true;
     // P107-C71 (P109 ISL-031, ruled "Fix it now"): bumped by every write of the value — a pick and the Value input — so the
     // <select> redraws the node's value even when React's last render already held that value
     this.props.valueWrites = 0;
@@ -118,6 +120,8 @@ const OptionsNode = {
       this.props.value = this._internal.value = value;
       this.props.valueWrites++;
       if (changed) {
+        // only a change ends the seed: `Select`'s mount effect reports the value it shows through here too
+        this._internal.valueIsSeed = false;
         this.flagOutputDirty('value');
         this.sendSignalOnOutput('onChange');
       }
@@ -175,6 +179,24 @@ const OptionsNode = {
 
         this.props.items = optionItems(this._internal.items);
 
+        /**
+         * P121-TWO005-DROPDOWNSTALE. The seed exists so a freshly placed Dropdown shows a real option and the graph agrees
+         * with the screen. When Items replaces the default list and the seed is none of the new options, the `<select>`
+         * shows the placeholder while Value still said "Option 1": a form that checks "was anything chosen?" sent it (the
+         * community template's Report page). So an unoffered seed is cleared, and Value says so. `''`, not `undefined`:
+         * `undefined` is never sent (`sendValue`), and a wire made earlier already holds the seed.
+         */
+        if (this._internal.valueIsSeed) {
+          const offered = this.props.items;
+          const seed = this._internal.value;
+          if (!Array.isArray(offered) || !offered.some((item) => item && item.Value === seed)) {
+            this._internal.valueIsSeed = false;
+            this.props.value = this._internal.value = '';
+            this.props.valueWrites++;
+            this.flagOutputDirty('value');
+          }
+        }
+
         this.forceUpdate();
       }
     },
@@ -200,6 +222,7 @@ const OptionsNode = {
 
         const changed = value !== this._internal.value;
         this.props.value = this._internal.value = value;
+        this._internal.valueIsSeed = false;
         this.props.valueWrites++;
 
         if (changed) {
