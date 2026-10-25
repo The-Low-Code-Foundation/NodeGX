@@ -290,17 +290,32 @@ Took session 5's "Next" list, all but STRINGREJECT (lane 4, paused; the export m
 
 ## For Richard
 
-1. **Push and release**, as before: 37 rows now on cline-dev. LIVEPATH, NORANGE and SIGNUPSWITCH are backend; the
+1. **Push and release**, as before: 43 rows now on cline-dev. LIVEPATH, NORANGE and SIGNUPSWITCH are backend; the
    admin-app rows ship in its bundle; SCHEMAFIRSTSTART needs an editor build.
 2. Session 5's DEPLOYLOOPBACK (warn or refuse?) and OWN008-AUDIT (stay on fast-xml-parser 4) stand.
 
-## Next (the Beta walk's next rows, cheapest first)
+## Done, second half (the list this section first named)
 
-1. **P109-S41-SUNDAYWEEK** — "the past 7 days" reads back as "this week" on a Sunday; it is also the backend plain
-   suite's standing base red.
-2. **P112-OWN021-EMAILNOTE**, **P121-TWO004-TOASTOVERSAVE** — admin app wording / a toast over a drawer's Save.
-3. **P112-S13-DEPLOYBADJSON** — a malformed nodes.json reports stage `write` and names no file.
-4. **P112-OWN026-DELETELEAVESBYTES** — a deleted record stays readable in the SQLite WAL and freed pages.
+| row | commit | built | graded |
+|---|---|---|---|
+| P109-S41-SUNDAYWEEK | 255ca3eca, 5683ca35e | a `{$gte,$lt}` range reads back as a window only when exactly one window has it; a tie (Sunday: week = past7; the 30th of a 30-day month: month = past30) reads back as `between` | red at HEAD today (a Sunday) in the row's words; spec round-trips on a fixed Wednesday and pins both ties and the day after; 45/45. The backend plain suite's Sunday base red is gone |
+| P112-OWN021-EMAILNOTE | edf459d17 | `emailNotReadyLine`: the Email page says each reason in its own words ("Nothing is sent yet. Choose who sends your mail below, then save."); the API sentence is unchanged | red 2/2 → green |
+| P116-S23-STORAGEFLAKE + filed BETA-S6-MOVEWORDSFLAKE | 4cd97b06d, 24a1e30ce | `tests/admin-app/dom.ts` `until(ready, what)`; the two Storage cases wait for what they read | instrument: every mocked fetch delayed 50 ms — HEAD's waits red, `until` green |
+| P121-TWO004-TOASTOVERSAVE | ad34964ab | `toastLift()`: the stack sits 8 px above the highest open `.drawer-foot` / `.modal .foot`, read when it draws | red 2/3 → 3/3 (rect stubbed in jsdom; not driven in a browser) |
+| P112-S13-DEPLOYBADJSON | 0aad876bb | the project reader names the file in a parse error and marks it (`projectFile`); the deploy engine files it under `project` | built dist: red 2/2 (`stage: write`) → green; preview 106/106 |
+| P112-OWN026-DELETELEAVESBYTES (medium) | 22ab9c73c | `secure_delete = ON` at connect; `wal_checkpoint(TRUNCATE)` after each committed delete (post-commit tap, once per transaction) | real backend, every file of the data folder: red 3/3 (`local.db-wal`: 6) → green, control beside; each half alone red (`local.db` 2 / WAL 4); 54 suites 758/758 |
+
+Filed, not fixed: **BETA-S6-PICKERFLAKE** (the Picker spec red once in ten admin-app runs, not caught again; eleven
+fixed `settle(220)`s), **BETA-S6-CMP004RED** (four parts-shelf round-trip cases red at HEAD, with or without this
+session: an icon missing from the re-export, `install_prefab` refusing, a part's port gone).
+
+## Next (the Beta walk's next rows)
+
+1. **BETA-S6-CMP004RED** (medium, red at HEAD) — someone should own it; it is the agent's parts shelf.
+2. **P121-TWO004-ADMINNARROW** — the admin app has no narrow layout (below 768 px every page runs off the right).
+3. **P112-OWN020-OUTDIRANYWHERE** — `render_report`'s `out_dir` writes anywhere; every other project-server write stays
+   inside the project.
+4. **BETA-S6-PICKERFLAKE** — needs an instrument that reddens one of its steps first.
 5. **P18-S134-STRINGREJECT** waits for lane 4.
 
 ## Traps met
@@ -318,6 +333,11 @@ Took session 5's "Next" list, all but STRINGREJECT (lane 4, paused; the export m
    templates rose); not this session's, and identical with this session's changes undone.
 7. `dev-docs/tasks/phase-119-learn-with-simple-rick/README.md` §2 still says live updates refuse the path rule; a peer
    had that file open, so it was left. One sentence to change when it is free.
+8. 🔴 A jest run piped into `grep` inside an `&&` chain does not gate the commit after it: EMAILNOTE was committed past
+   a red `where-cards` (a flake, as it turned out). Read the count before the commit, or gate on jest's own exit.
+9. A flake is graded by an instrument, not by reruns: delaying every mocked fetch by 50 ms turned the Storage cases red
+   on HEAD every time, which is what `until()` was then measured against.
+10. The deploy engine exits 0 whenever it said something; `stage` in its JSON is the contract (`deploy-cli.ts` header).
 
 ## Gates read (2026-10-25)
 
@@ -325,7 +345,10 @@ backend: live-path 10/10, realtime + rule suites 224/224, files 76 (7 MinIO skip
 81/81, admin app 20 suites 253/253, tsc clean · editor: tests-main local-backend + panel 117/117, validator 19 suites
 263/263, Request-node specs 178/178, tsc clean · node-spec 478/478, tsc clean · cloud request 102/102, tsc clean ·
 runtime conformance (Request) green · `catalog:check`, `catalog:merge:check` up to date, `catalog:examples` 114/114 ·
-noodl-mcp tsc clean.
+noodl-mcp tsc clean. Second half: admin app 18 suites 212/212 (four reruns: one Picker flake, filed) ·
+`bmg-002-filters` 45/45 · preview 18 suites 106/106 on a rebuilt dist · runtime SQL adapter 129/129 · backend suites that
+delete or back up 54 suites 758/758 · runtime, preview, noodl-mcp, admin tsc clean.
 
-**Commits this session:** 3cd182bda, bf3405090, 981b44515, e79a81884, b3e259642, 16ca9cca2, 58c980d43, and the docs
-commit after them.
+**Commits this session:** 3cd182bda, bf3405090, 981b44515, e79a81884, b3e259642, 16ca9cca2, 58c980d43, 3d0abda16
+(docs), 255ca3eca, 5683ca35e, edf459d17, 4cd97b06d, 24a1e30ce, 65cb0bd5a, ad34964ab, ffa6ad30e, 0aad876bb, 22ab9c73c,
+and the docs commit after them.
