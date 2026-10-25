@@ -12,3 +12,12 @@ kit: backend
 ---
 
 Carried in OWN-023 arm B's row (C3); not fixed during the study.
+
+**Measured 2026-10-25 (the Beta sweep):** the upload answers `url: <baseUrl>/files/<name>` (`nodegx-backend/src/server/files.ts`
+:223, base = the listen URL), and a File field is stored as JSON with that url (`QueryBuilder` File branch) and read
+back verbatim. Nothing rewrites it on read or at deploy, so a proper File field breaks on a VM too, not only a text
+column holding the url.
+
+**Ruled by Richard, 2026-10-25:** the backend fills the address in. A File field keeps the file's name; every read
+answers the url from wherever the backend is running now (old rows included, since the name is in them). A url pasted
+into a plain text field is not rescued: the kit says to keep a file in a File field. Not built yet.

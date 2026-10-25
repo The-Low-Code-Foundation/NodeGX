@@ -76,7 +76,7 @@ Richard. **Not pushed, not released**, same as session 1.
 | NPMAUDIT-BACKENDMAPSCREENS | b5495303d | `analyseProject` reads a page's own record nodes into `uses`; screen → table wires, screen panel lines, the person view asks the rule check per use; "A signed-in person"; README generic | `test/screens-from-pages.test.mjs` (todo template: `screens: []` → `['Pages/Todo']`, 28 uses); package `npm test` all parts but `ui.test.mjs`'s lens note, red at HEAD too → filed **P124-UILENSNOTE** |
 | (P107-C162 leftover) | ce4758a1c | `fed-001-feed.test.ts` asserted the old `'KB'`, red at HEAD since dccaa77e0 | 56/56 |
 
-## Item 4 — needs Richard (asked in plain words; not built)
+## Item 4 — FILEURLHOST RULED 2026-10-25: "the backend fills the address in" (option a below); NOT built — next
 
 - **P112-OWN023-FILEURLHOST.** Measured: the upload answers `url: <baseUrl>/files/<name>` (`server/files.ts:223`,
   base = the listen URL, `127.0.0.1:<port>` locally), and a File field is stored as JSON WITH that url
