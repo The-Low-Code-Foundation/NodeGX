@@ -153,6 +153,14 @@ export function refuseHiddenNamed(
       }
       if (key.startsWith('$')) continue;
       check(c, key, 'filter by');
+      // P116-S17-DOTTEDFILTER: `salary.amount` follows the link one hop, as a `$path` does, so the
+      // linked collection answers by its own rule and its own hidden fields.
+      const dot = key.indexOf('.');
+      const linked = dot > 0 && c !== undefined ? targetOf(c, key.slice(0, dot)) : undefined;
+      if (linked) {
+        mayRead(linked, 'find', 'filter by a field of');
+        check(linked, key.slice(dot + 1), 'filter by');
+      }
       // A sub-query inside an operator (`$inQuery`, `$select`) names fields of its own collection.
       if (value && typeof value === 'object') {
         for (const inner of Object.values(value as Record<string, unknown>)) {

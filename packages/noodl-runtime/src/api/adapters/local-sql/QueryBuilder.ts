@@ -546,6 +546,14 @@ export function buildWhereClause(
       continue;
     }
 
+    // P116-S17-DOTTEDFILTER: `salary.amount` is a field of the linked record. Read as one column it
+    // compiled to `NULL > ?` and answered no rows, silently; it is the one-hop `$path` it means.
+    if (key.includes('.')) {
+      const idCol = tableAlias ? `${tableAlias}."objectId"` : '"objectId"';
+      conditions.push(`${idCol} IN (${buildPathSelect(dottedAsPath(key, condition, env), env!, params, dialect)})`);
+      continue;
+    }
+
     // Handle field conditions
     const col = columnRef(key, scope, tableAlias);
 
@@ -997,6 +1005,40 @@ function buildPathSelect(raw: unknown, env: PathEnv, params: unknown[], dialect:
     frontier = edge.repeat ? repeatedHop(edge, frontier, left, guards, params, dialect) : oneHop(edge, frontier, guards, dialect);
   }
   return frontier;
+}
+
+/** P116-S17-DOTTEDFILTER: how a refused dotted filter begins, so the backend answers it 400 (the caller's to fix), not 500. */
+export const FILTER_REFUSAL = 'The built-in backend cannot filter on ';
+export function isFilterRefusal(message: string): boolean {
+  return message.includes(FILTER_REFUSAL);
+}
+
+/**
+ * P116-S17-DOTTEDFILTER — a filter on a linked record's field (`salary.amount`, the one-hop paths
+ * the editor offers in a filter) as the `$path` it means: the rows of the linked collection that
+ * match, followed back to the records that link to them. So the caller's row ACL applies at the hop
+ * as on any path, and the facade asks the linked collection's own rule. Anything else with a dot (a
+ * field that is not a link, two links deep) is refused by name, never read as a column that does
+ * not exist.
+ */
+function dottedAsPath(key: string, condition: unknown, env: PathEnv | undefined): PathShape {
+  const refuse = (why: string): never => {
+    throw new Error(`${FILTER_REFUSAL}"${key}": ${why}`);
+  };
+  const [link, field, ...deeper] = key.split('.');
+  if (!link || !field || deeper.length) {
+    refuse('a filter follows one link, written "link.field"; for a longer way through the links, use a path filter');
+  }
+  if (!env?.lookup) refuse('this read was built without the schema, so the link cannot be followed');
+  const declared = env!.lookup!(env!.collection)?.properties?.[link];
+  if ((declared?.type !== 'Pointer' && declared?.type !== 'Relation') || !declared.targetClass) {
+    refuse(`"${link}" is not a link to another collection${declared?.type ? ` (it is ${declared.type})` : ''}`);
+  }
+  return {
+    from: { collection: declared!.targetClass!, where: { [field]: condition } },
+    hops: [{ from: env!.collection, by: link }],
+    maxDepth: 1
+  };
 }
 
 /** Shape and bounds, checked before the schema is consulted. The contract's `pathProblem` says the same things. */

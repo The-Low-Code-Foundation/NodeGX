@@ -279,6 +279,9 @@ export function matchesFilter(where: Where | null | undefined, record: Record<st
     if (key === '$relatedTo') {
       throw new UnsupportedFilterError('$relatedTo cannot be evaluated for a realtime filter');
     }
+    if (isLinkedField(key)) {
+      throw new UnsupportedFilterError(`"${key}" (a linked record's field) cannot be evaluated for a realtime filter`);
+    }
 
     const fieldValue = record[key];
 
@@ -325,6 +328,13 @@ export function assertFilterSupported(where: Where | null | undefined): void {
       // of this one does not carry.
       throw new UnsupportedFilterError('$path is not supported in realtime subscription filters');
     }
+    if (isLinkedField(key)) {
+      // P116-S17-DOTTEDFILTER: `salary.amount` is a one-hop path now (the query follows the link),
+      // and a change frame of this collection does not carry the linked record either.
+      throw new UnsupportedFilterError(
+        `"${key}" filters by a linked record's field, which is not supported in realtime subscription filters`
+      );
+    }
     if ((key === '$and' || key === '$or') && Array.isArray(condition)) {
       for (const sub of condition) assertFilterSupported(sub as Where);
       continue;
@@ -342,6 +352,11 @@ export function assertFilterSupported(where: Where | null | undefined): void {
       }
     }
   }
+}
+
+/** P116-S17-DOTTEDFILTER: `link.field`, a field of the record a link names. */
+function isLinkedField(key: string): boolean {
+  return !key.startsWith('$') && key.includes('.');
 }
 
 /**
