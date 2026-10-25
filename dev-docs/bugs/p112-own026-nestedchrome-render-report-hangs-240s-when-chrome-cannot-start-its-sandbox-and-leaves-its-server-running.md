@@ -2,7 +2,7 @@
 id: P112-OWN026-NESTEDCHROME
 title: "Inside a macOS sandbox (sandbox-exec, as agent harnesses run commands), `render_report` and `drive_page` hang for the full 240 s and answer only \"did not finish … and was killed\": Chrome starts but its own sandbox can't, so its renderer crashes and the harness waits forever; the render server it started keeps running after the kill"
 status: fixed
-commit: PENDING
+commit: d7a9106d6
 severity: medium
 area: "`@nodegx/mcp` 0.2.5 render harness: `dist/render-harness/measure-from-disk.js` (the Chrome launch: `--headless=new --remote-debugging-port … --disable-gpu`, no `--no-sandbox`, no check that a page target ever answers), `src/render.ts` `spawnRender` (SIGKILLs the harness only, not the `render-from-disk` server or Chrome it started)"
 kit: core

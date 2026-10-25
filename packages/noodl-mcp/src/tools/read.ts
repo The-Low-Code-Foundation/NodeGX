@@ -151,6 +151,19 @@ export function kitsReport(): ProjectKitsReport | undefined {
  * rewords it here, at the MCP edge. Each swap throws if its sentence is gone (`swapAll`), so an edit to the doctrine
  * fails a test instead of silently dropping the variant.
  */
+/**
+ * BETA-S8-PORTTYPEOBJECT — a port type the editor saved as `{ name: "*" }` is handed back as `"*"`, the shape the write
+ * tools take, so a component read here can be written again ("make another one like this"). A type carrying more than
+ * its name (an enum's options, a number's units) is kept whole: dropping the rest would lose it.
+ */
+function writablePorts<P extends { type?: unknown }>(ports: P[] | undefined): P[] | undefined {
+  if (!Array.isArray(ports)) return ports;
+  return ports.map((port) => {
+    const t = port.type as { name?: unknown } | null | undefined;
+    return t && typeof t === 'object' && typeof t.name === 'string' && Object.keys(t).length === 1 ? { ...port, type: t.name } : port;
+  });
+}
+
 function forClient(text: string, which: 'traps' | 'design'): string {
   const { staticToolList, imagesCostly } = clientProfile();
   const swaps: Array<readonly [string, string]> = [];
@@ -412,7 +425,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         type: c.type,
         description: c.description,
         displayName: c.displayName,
-        ports: c.ports,
+        ports: c.ports && { ...c.ports, inputs: writablePorts(c.ports.inputs), outputs: writablePorts(c.ports.outputs) },
         revision: stored.revision,
         // LEG-001 — the other direction of the one mapping. A comment is stored
         // in the metadata bag and authored flat, so it is surfaced flat: an agent
@@ -422,7 +435,10 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         // of the returned bag, so a read-modify-write hands back one comment
         // rather than two copies of it, and the fold on the way in puts it back
         // exactly where it was.
-        nodes: stored.files.nodes.nodes.map((n) => unfoldNodeComment(n)),
+        nodes: stored.files.nodes.nodes.map((n) => {
+          const node = unfoldNodeComment(n);
+          return Array.isArray(node.ports) ? { ...node, ports: writablePorts(node.ports) } : node;
+        }),
         visualRoots,
         ...(derived && visualRoots.length > 0 ? { visualRootsDerived: true } : {}),
         comments: stored.files.nodes.comments,
