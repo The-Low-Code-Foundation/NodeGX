@@ -117,10 +117,11 @@ export function backendTransport(client: BackendClient): CloudDeployTransport {
   return {
     putBundle: async (name, bundle) => {
       const res = await client.request('PUT', `/admin/workflows/${encodeURIComponent(name)}`, bundle);
-      const body = res.json as { success?: boolean; error?: string } | null;
+      const body = res.json as { success?: boolean; error?: string; replaced?: string[] } | null;
       if (body && body.success === false) {
         throw new Error(body.error || 'The backend rejected the function bundle.');
       }
+      return { replaced: body?.replaced };
     },
 
     /**
@@ -172,6 +173,20 @@ export async function deployProjectCloudFunctions(
     deleteWhenEmpty: alreadyServed,
     projectId
   });
+}
+
+/**
+ * P112-S14-MOVEDDEPLOY: the sentence a deploy that replaced an old bundle leads its `next` with, or '' when it
+ * replaced none. Without it the agent reads a plain success and never learns the backend dropped a bundle.
+ */
+export function replacedNote(result: Pick<CloudDeployResult, 'bundleName' | 'replaced'>): string {
+  const old = result.replaced ?? [];
+  if (!old.length) return '';
+  const names = old.map((n) => `"${n}"`).join(', ');
+  return (
+    `This push replaced ${names}: the bundle${old.length > 1 ? 's' : ''} this project deployed under its folder's ` +
+    `earlier name (it was moved, renamed or copied since). Its functions are served from "${result.bundleName}" now. `
+  );
 }
 
 export { cloudBundleNameFrom };

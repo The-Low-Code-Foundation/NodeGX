@@ -41,3 +41,11 @@ id on both pushes. Driven: a scratchpad build of the MCP bundler on `d40-wizard-
 original. With the copy renamed as well, the id replaced it; with no id, the push was refused and the original kept
 serving. Not done: the MCP tool's result does not yet say what was replaced (the backend answers `replaced`), and
 nothing reaches a stranger until `@nodegx/mcp` and the backend are released.
+
+**Leftover closed (2026-10-25, the Beta sweep s4): the deploy says what it replaced.** The backend's `replaced`
+(the old bundle names) now travels through the shared deploy core (`CloudDeployResult.replaced`, both the push and
+the empty bundle) and both transports, and `deploy_cloud_functions` leads its `next` with "This push replaced
+"<old>": the bundle this project deployed under its folder's earlier name … served from "<new>" now." Graded:
+`noodl-mcp/tests/p112S14ReplacedNote.test.ts` 3/3 and `hls-013/cloudDeployCore` 18/18 (+3); three mutants red
+(push path, transport, empty path); `noodl-mcp` tsc clean. The editor shows nothing new (its result is read for
+`ok` only).

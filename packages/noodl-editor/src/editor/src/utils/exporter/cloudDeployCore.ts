@@ -73,6 +73,11 @@ export interface CloudDeployResult {
   functions: CloudFunctionOutcome[];
   /** Set when the push itself failed — as opposed to individual functions failing to build. */
   error?: string;
+  /**
+   * P112-S14-MOVEDDEPLOY: the bundles this push replaced — the ones this project deployed under its folder's old
+   * name before it was moved, renamed or copied. Absent when it replaced none (or the backend predates the answer).
+   */
+  replaced?: string[];
 }
 
 /**
@@ -82,8 +87,11 @@ export interface CloudDeployResult {
  * Both end at `PUT /admin/workflows/<name>`.
  */
 export interface CloudDeployTransport {
-  /** Push the bundle. Resolve on success; throw with a readable message on failure. */
-  putBundle(bundleName: string, bundle: Record<string, unknown>): Promise<void>;
+  /**
+   * Push the bundle. Resolve on success (with the backend's `replaced`, when it answered one); throw with a
+   * readable message on failure.
+   */
+  putBundle(bundleName: string, bundle: Record<string, unknown>): Promise<void | PushAnswer>;
 
   /**
    * The fingerprint the backend is already serving for this bundle, or `null`
@@ -94,6 +102,11 @@ export interface CloudDeployTransport {
    * asked would be a fresh success wearing AC3's clothes.
    */
   readServingHash?(bundleName: string): Promise<string | null>;
+}
+
+/** What a successful push may answer: the old bundles of this project the backend replaced in the same swap. */
+export interface PushAnswer {
+  replaced?: string[];
 }
 
 export interface CloudDeployOptions {
@@ -210,13 +223,14 @@ export async function deployCloudBundle(
       if (!options.deleteWhenEmpty) {
         return { ok: true, bundleName, hash: 'empty', changed: false, functions: [] };
       }
+      let answer: void | PushAnswer;
       try {
-        await transport.putBundle(bundleName, { components: [], settings: {}, metadata: {}, ...carriedId(options) });
+        answer = await transport.putBundle(bundleName, { components: [], settings: {}, metadata: {}, ...carriedId(options) });
       } catch (e) {
         const reason = e instanceof Error ? e.message : String(e);
         return { ok: false, bundleName, hash: 'empty', changed: false, functions: [], error: reason };
       }
-      return { ok: true, bundleName, hash: 'empty', changed: true, functions: [] };
+      return { ok: true, bundleName, hash: 'empty', changed: true, functions: [], ...replacedBy(answer) };
     }
 
     return {
@@ -252,6 +266,7 @@ export async function deployCloudBundle(
     }
   }
 
+  let answer: void | PushAnswer;
   try {
     // 🔴 The fingerprint travels WITH the bundle, and is deliberately not part of
     // what was fingerprinted: `hashCloudExport` ran over the bundle as built, and
@@ -259,7 +274,7 @@ export async function deployCloudBundle(
     // next run. The backend echoes this field back on `GET /admin/workflows`,
     // which is how a fresh process — with no memory of its own last push — can
     // tell "already deployed" from "deployed just now" (AC3).
-    await transport.putBundle(bundleName, { ...parts.bundle, deployFingerprint: hash, ...carriedId(options) });
+    answer = await transport.putBundle(bundleName, { ...parts.bundle, deployFingerprint: hash, ...carriedId(options) });
   } catch (e) {
     const reason = e instanceof Error ? e.message : String(e);
     // 🔴 The bundle is all-or-nothing on the backend (`WorkflowRunner.loadWorkflow`
@@ -282,8 +297,15 @@ export async function deployCloudBundle(
     bundleName,
     hash,
     changed: true,
-    functions: [...parts.shipped.map((name) => ({ name, status: 'deployed' as const })), ...failures]
+    functions: [...parts.shipped.map((name) => ({ name, status: 'deployed' as const })), ...failures],
+    ...replacedBy(answer)
   };
+}
+
+/** `{ replaced }` when the push answered a non-empty list of bundle names, else nothing. */
+function replacedBy(answer: void | PushAnswer): { replaced?: string[] } {
+  const names = answer && Array.isArray(answer.replaced) ? answer.replaced.filter((n) => typeof n === 'string') : [];
+  return names.length ? { replaced: names } : {};
 }
 
 /** `{ projectId }` when the deploy knows its project's id, else nothing (an old bundle shape). */

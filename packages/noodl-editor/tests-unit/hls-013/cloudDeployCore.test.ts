@@ -235,6 +235,33 @@ describe('HLS-013 — deleting the last cloud function', () => {
   });
 });
 
+describe('P112-S14-MOVEDDEPLOY — a push says which old bundle of this project it replaced', () => {
+  const answering = (answer: unknown): CloudDeployTransport => ({
+    putBundle: async () => answer as void,
+    readServingHash: async () => null
+  });
+
+  it('carries the backend\'s `replaced` into the result', async () => {
+    const result = await deployCloudBundle(parts(['/#__cloud__/a']), 'shop-1234abcd', answering({ replaced: ['shop-9876fedc'] }));
+    expect(result).toMatchObject({ ok: true, changed: true, replaced: ['shop-9876fedc'] });
+  });
+
+  it('and on the empty bundle a moved project that lost its last function pushes', async () => {
+    const empty: CloudBundleParts = { bundle: null, shipped: [], failures: [] };
+    const result = await deployCloudBundle(empty, 'shop-1234abcd', answering({ replaced: ['shop-9876fedc'] }), {
+      deleteWhenEmpty: true
+    });
+    expect(result.replaced).toEqual(['shop-9876fedc']);
+  });
+
+  it('says nothing when nothing was replaced, or the backend predates the answer', async () => {
+    for (const answer of [undefined, {}, { replaced: [] }, { replaced: 'shop-9876fedc' }]) {
+      const result = await deployCloudBundle(parts(['/#__cloud__/a']), 'shop-1234abcd', answering(answer));
+      expect(result).not.toHaveProperty('replaced');
+    }
+  });
+});
+
 describe('HLS-013 — the bundle name is one rule, not two', () => {
   it('is keyed on the DIRECTORY, so two projects on one backend cannot clobber each other', () => {
     const a = cloudBundleNameFrom('Site', '/Users/x/projects/site-a');

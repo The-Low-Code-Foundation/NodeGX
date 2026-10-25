@@ -42,7 +42,7 @@ import {
   stopBackend
 } from '../backend/provision';
 import { reapOrphanedBackends } from '../backend/reaper';
-import { deployProjectCloudFunctions } from '../cloud/deploy';
+import { deployProjectCloudFunctions, replacedNote } from '../cloud/deploy';
 import { listRuntimeRecords, ownerIsLive } from '../backend/runtimeRecord';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
@@ -213,9 +213,11 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
         endpoint: `http://127.0.0.1:${client.descriptor.port}`,
         // 🔴 Deploying is not answering. The task this closes says so explicitly,
         // and an agent that stops at `ok: true` has verified the weaker claim.
-        next: result.ok
-          ? 'Call one of these functions over HTTP to confirm it answers — deploying and answering are two claims.'
-          : 'Read `functions` for the ones that failed and why; the named function is the thing to fix.'
+        next:
+          replacedNote(result) +
+          (result.ok
+            ? 'Call one of these functions over HTTP to confirm it answers — deploying and answering are two claims.'
+            : 'Read `functions` for the ones that failed and why; the named function is the thing to fix.')
       });
     })
   );

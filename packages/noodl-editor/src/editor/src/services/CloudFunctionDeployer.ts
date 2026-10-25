@@ -137,7 +137,7 @@ class CloudFunctionDeployerImpl {
 
     const transport: CloudDeployTransport = {
       putBundle: async (name, workflow) => {
-        const result = await invokeIPC<{ success?: boolean; error?: string }>('backend:update-workflow', {
+        const result = await invokeIPC<{ success?: boolean; error?: string; replaced?: string[] }>('backend:update-workflow', {
           backendId,
           name,
           workflow
@@ -145,6 +145,7 @@ class CloudFunctionDeployerImpl {
         if (result && result.success === false) {
           throw new Error(result.error || 'The backend rejected the function bundle.');
         }
+        return { replaced: result?.replaced };
       },
       // The editor's own memory of what it last pushed to THIS backend. It is a
       // legitimate answer to "what is it serving" only because the editor is the
