@@ -27,6 +27,22 @@ export const PREVIEW_EXPORT_OPTIONS: ExportToJSONOptions = {
 const LOOPBACK = /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?(\/|$)/i;
 
 /**
+ * P112-OWN023-DEPLOYLOOPBACK — the sentence a static deploy owes when the app's backend is on this computer, or
+ * undefined. The deploy copies `cloudservices.endpoint` into the bundle as written, so every visitor's copy asks
+ * `http://127.0.0.1:<port>`, their own machine, and only the builder (whose backend is running) sees it work.
+ */
+export function loopbackBackendWarning(metadata: Record<string, unknown> | undefined): string | undefined {
+  const endpoint = (metadata?.cloudservices as { endpoint?: unknown } | undefined)?.endpoint;
+  if (typeof endpoint !== 'string' || !LOOPBACK.test(endpoint)) return undefined;
+  return (
+    `This app talks to a backend on this computer (${endpoint}), and the deployed copy will ask each visitor's own ` +
+    'computer for it, so its records, sign-in and functions will not work for anyone else. Put the backend on a ' +
+    'server first (deploy_to_vm, or nodegx-deploy --full-stack, ships both), or point the project at a backend ' +
+    'others can reach, then deploy again.'
+  );
+}
+
+/**
  * The export options for one project: {@link PREVIEW_EXPORT_OPTIONS}, except that a backend on THIS machine is kept.
  *
  * P112-S14-NOBACKEND. `provision_backend` binds a project to a local backend (`http://127.0.0.1:<port>`), and on the

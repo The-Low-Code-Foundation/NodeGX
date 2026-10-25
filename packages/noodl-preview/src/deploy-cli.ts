@@ -149,6 +149,12 @@ async function main(): Promise<void> {
   // "Skipping auto-save" line used to arrive on stdout after the report (DEP-002 s2, measured). A
   // caller parsing stdout as one JSON object got two lines.
   realWrite(JSON.stringify(result) + '\n');
+  // P112-OWN023-DEPLOYLOOPBACK — the one warning a person at a terminal must not miss: the folder looks finished,
+  // and the app in it cannot reach its backend from anyone else's computer.
+  if (result.ok && result.localBackend) {
+    const sentence = result.warnings.find((w) => w.includes(result.localBackend as string));
+    if (sentence) process.stderr.write(`\nnodegx-deploy: ${sentence}\n`);
+  }
   process.exitCode = 0;
 }
 

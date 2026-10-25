@@ -79,6 +79,7 @@ import {
 } from './loader';
 import { describeDevelopmentEngine, readViewerBuild, type ViewerBuildReading } from './viewerBuild';
 import { describeWireHealth, readWireHealth, type WireHealthReading } from './wireHealth';
+import { loopbackBackendWarning } from './projectExport';
 
 /**
  * The editor's runtime folder, addressed from **this file** rather than from the working
@@ -199,6 +200,11 @@ export interface DeployOutcome {
    */
   wires: WireHealthReading;
   warnings: string[];
+  /**
+   * P112-OWN023-DEPLOYLOOPBACK — the backend address the published app names when it is on this computer
+   * (`http://127.0.0.1:<port>`), so no visitor can reach it. Its sentence is in `warnings`. Absent otherwise.
+   */
+  localBackend?: string;
   /** P26 DEP-002 — present on a `--full-stack` deploy: the backend, the functions and the rules it carries. */
   fullStack?: FullStackReading;
 }
@@ -308,6 +314,12 @@ export async function deployProject(options: {
     if (stage) fs.rmSync(stage.stage, { recursive: true, force: true });
   }
 
+  // P112-OWN023-DEPLOYLOOPBACK — a static site cannot reach a backend on the builder's machine. A full-stack folder
+  // carries its backend, and the backend serves the app with its own address in place of this one.
+  const cloudservices = project.getMetaData('cloudservices') as { endpoint?: unknown } | undefined;
+  const loopback = fullStack ? undefined : loopbackBackendWarning({ cloudservices });
+  const localBackend = loopback ? { endpoint: String(cloudservices?.endpoint), warning: loopback } : undefined;
+
   // A full-stack folder's site is its `app/`.
   const roots = readDeployedRoots(fullStack ? path.join(options.outDir, 'app') : options.outDir);
   return {
@@ -327,10 +339,14 @@ export async function deployProject(options: {
     blank: gradeRoots(roots),
     engine,
     wires,
+    ...(localBackend ? { localBackend: localBackend.endpoint } : {}),
     // EXP-017 AC4 — a duplicate the copy step could not leave out reaches the person through the
     // same channel every other deploy warning does, rather than only the editor's console.
     warnings: [
       ...warnings,
+      // P112-OWN023-DEPLOYLOOPBACK — a static site cannot reach a backend on the builder's machine. A full-stack
+      // folder carries its backend, and the backend serves the app with its own address in place of this one.
+      ...(localBackend ? [localBackend.warning] : []),
       ...describeWireHealth(wires),
       ...copyReport.duplicatesKept.map(
         (kept) =>
