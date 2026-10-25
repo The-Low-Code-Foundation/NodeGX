@@ -41,6 +41,30 @@ export interface SelectProps extends Noodl.ReactProps {
   valueWrites?: number;
 }
 
+/**
+ * The value the browser gives an option (HTML `option.value`): its Value as text, or, with none, its label's text with the
+ * whitespace collapsed. The node spec's `optionsOf` reads it the same way.
+ */
+function domValueOf(item: { Value?: unknown; Label?: unknown }): string {
+  if (item.Value === undefined || item.Value === null || typeof item.Value === 'boolean') {
+    const label = item.Label;
+    return (label === undefined || label === null || typeof label === 'boolean' ? '' : String(label)).replace(/[ \t\n\f\r]+/g, ' ').trim();
+  }
+  return String(item.Value);
+}
+
+/**
+ * BETA-S7-DROPDOWNFIRSTPICK — whether an option carries this value, as the browser compares them. The `<select>` is told the
+ * node's value while one does, and `''` otherwise, which keeps the hidden empty option selected under the placeholder. It
+ * was told `undefined` there: uncontrolled, the browser's reset selected the first enabled option when the selected one left
+ * the list, the face still drew the placeholder, and a person picking that first option picked what was already selected,
+ * so no `change` came and nothing happened.
+ */
+function offersValue(items: SelectProps['items'], value: unknown): boolean {
+  if (!items || typeof value !== 'string') return false;
+  return items.some((item) => item !== null && item !== undefined && domValueOf(item) === value);
+}
+
 export function Select(props: SelectProps) {
   const [value, setValue] = useState(props.value);
 
@@ -60,7 +84,10 @@ export function Select(props: SelectProps) {
   }
 
   // Hide label if there is no selected value, of if value is not in the items array
-  const selectedIndex = !props.items || value === undefined ? -1 : props.items.findIndex((i) => i.Value === value);
+  // BETA-S7-DROPDOWNFIRSTPICK: by the browser's value, as the `<select>` is told it — a picked option whose Value is a number
+  // reads back as text ("3"), and the face compared it with the number and fell back to the placeholder
+  const selectedIndex =
+    !props.items || value === undefined ? -1 : props.items.findIndex((i) => i !== null && i !== undefined && domValueOf(i) === value);
 
   const { height, ...otherStyles } = style;
 
@@ -210,7 +237,7 @@ export function Select(props: SelectProps) {
       <select
         {...inputProps}
         disabled={!props.enabled}
-        value={options.find((i) => i.props.value === value) ? value : undefined}
+        value={offersValue(props.items, value) ? value : ''}
         {...Utils.controlEvents(props)}
         onChange={(e) => {
           setValue(e.target.value);

@@ -125,7 +125,8 @@ export const Dropdown = defineNode({
   // v9 (NSP-019 R35): a Focus that finds the node off the page shows as its warning until a Focus reaches it, and an Icon Source that is not an icon shows as one until an icon or nothing arrives (`diagnostics`)
   // v10 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
   // v11 (P121-TWO005-DROPDOWNSTALE): Items that do not offer the placed node's seed ("Option 1") clear it to '' and send Value
-  version: 11,
+  // v12 (BETA-S7-DROPDOWNFIRSTPICK): with the value in no option, the element keeps its hidden empty option selected, so every option is a pick
+  version: 12,
   // NSP-010 — v7 is the spec correcting itself, not the runtime changing
   changes: [
     {
@@ -155,6 +156,15 @@ export const Dropdown = defineNode({
       row: 'P121-TWO005-DROPDOWNSTALE',
       migration: {
         none: 'Only a value the screen never showed changes: the placeholder was already drawn, and the community template, which met it, already set Value to \'\' itself. No stored project changes'
+      }
+    },
+    {
+      version: 12,
+      says:
+        'While the Dropdown shows its placeholder because its value is in no option, choosing the first option now chooses it: Value and Changed. Before, the list underneath had already selected that first option (the browser does when the selected option leaves the list, or when options arrive in an empty one), so choosing it did nothing and the placeholder stayed. Every other option was already a pick',
+      row: 'BETA-S7-DROPDOWNFIRSTPICK',
+      migration: {
+        none: 'A pick that did nothing now does what the person asked; nothing an app could rely on, and no stored project changes'
       }
     }
   ],
@@ -549,10 +559,9 @@ function optionsOf(items: unknown): Option[] {
  *   - Enabled and Visible are painted onto the element; Enable Label changes nothing here (v2; the runtime's rebuild was row C80, fixed in P109 ISL-031).
  *   - Mounted off: the element leaves with the keyboard it held; Mounted on: Did Mount, a fresh element on the node's value — a
  *     person's pick included, and nothing on the wire (v3, R14; the runtime took the author's Value back until P109 ISL-031, row D34).
- *   - the selection: the element is told the node's value while it names an option (:210); otherwise the browser keeps what it
- *     had — a fresh element selects the hidden empty option (:217), and a selected option that left the list hands the selection
- *     to the first enabled option (HTML's reset; the hidden one is disabled) — with none, the element selects nothing, and the
- *     next option to arrive is selected as it arrives (v7, P109-S21-DROPDOWNEMPTYRESET).
+ *   - the selection: the element is told the node's value while an option carries it, and '' otherwise, which selects the
+ *     hidden empty option (v12, BETA-S7-DROPDOWNFIRSTPICK: until then the browser kept what it had, and a selected option that
+ *     left the list handed the selection to the first enabled option, under the placeholder).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
   const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
@@ -571,15 +580,10 @@ function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; e
   const value = s.value;
   const options = optionsOf(s.items);
   const inList = value !== undefined && options.some((o) => o.value === value);
-  const firstEnabled = options.find((o) => !o.disabled)?.value ?? null;
-  let dom = s.domSelected;
-  if (fresh) dom = inList ? (value as string) : '';
-  else if (inList) dom = value as string;
-  // a selected option that left the list: HTML's reset selects the first enabled option, and with none, nothing (the hidden one is disabled)
-  else if (dom !== '' && dom !== null && !options.some((o) => o.value === dom)) dom = firstEnabled;
-  // an option arriving in a `<select>` that selects nothing is selected as it arrives (P109-S21-DROPDOWNEMPTYRESET); the
-  // fresh element's hidden option carries `selected`, so '' is a selection and keeps it
-  else if (dom === null) dom = firstEnabled;
+  // v12 (BETA-S7-DROPDOWNFIRSTPICK): the element is told the node's value while an option carries it and '' otherwise
+  // (Select.tsx `offersValue`), so with none it keeps the hidden empty option selected. Until v12 it was told nothing there,
+  // and HTML's reset handed the selection to the first enabled option, which a person then could not pick (v7's model)
+  const dom = inList ? (value as string) : '';
   if (dom !== s.domSelected) set.domSelected = dom;
   return { set, send: [], emit };
 }

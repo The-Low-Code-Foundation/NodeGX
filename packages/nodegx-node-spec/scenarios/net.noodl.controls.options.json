@@ -138,8 +138,8 @@
     ]
   },
   {
-    "name": "Items written with the current Value absent: nothing on the wire, and the new list hands the selection to its first option — a pick of it raises only Focused; a pick of 'l': Value 'l', Changed; Items written again: the pick stays, nothing on the wire, and the new list, which lacks it, hands the selection to its first enabled option — a pick of it raises nothing, a pick of 'c' fires Changed",
-    "because": "R14 (2026-10-05): a dropdown handed its Items again keeps the pick; HTML's reset hands the selection to the first enabled option when the selected one leaves the list; on the runtime the component's effect takes the author's Value back with Changed (was row D34, fixed in P109 ISL-031). v2's name said a pick of 's' sent Value 's' with Changed — 's' was the option the new list had already selected, and nothing was sent",
+    "name": "Items written with the current Value absent: nothing on the wire, the placeholder stays selected, and a pick of the first option 's' sends it with Changed; a pick of 'l': Value 'l', Changed; Items written again without it: the value stays, nothing on the wire, the placeholder is selected again, and a pick of the first enabled option 'a' sends it with Changed, as 'c' does",
+    "because": "R14 (2026-10-05): a dropdown handed its Items again keeps the pick; HTML's reset hands the selection to the first enabled option when the selected one leaves the list; on the runtime the component's effect takes the author's Value back with Changed (was row D34, fixed in P109 ISL-031). v2's name said a pick of 's' sent Value 's' with Changed — 's' was the option the new list had already selected, and nothing was sent — v12 (BETA-S7-DROPDOWNFIRSTPICK): the element is told '' while the value is in no option, so the hidden empty option stays selected and the first option is a pick",
     "steps": [
       "settle",
       {
@@ -360,8 +360,8 @@
     ]
   },
   {
-    "name": "the selected option leaves the list: the browser hands the selection to the first enabled option of the new list while the node keeps its value — picking that first option raises nothing, picking another fires Changed",
-    "because": "Select.tsx :210 — the shown value names no option, so React lets the element go and HTML's reset selects the first non-disabled option (the hidden empty one is disabled); options.ts :109-116",
+    "name": "the selected option leaves the list: the node keeps its value, the element selects its hidden empty option, and picking the first option of the new list fires Changed, as picking another does",
+    "because": "Select.tsx :210 — the shown value names no option, so React lets the element go and HTML's reset selects the first non-disabled option (the hidden empty one is disabled); options.ts :109-116 — v12 (BETA-S7-DROPDOWNFIRSTPICK): the element is told '' while the value is in no option, so the hidden empty option stays selected and the first option is a pick",
     "steps": [
       "settle",
       {
@@ -22958,8 +22958,8 @@
     ]
   },
   {
-    "name": "Items written an empty list, then a list of one: the browser selects 'x' as it arrives, since nothing was selected, so choosing 'x' is no change — no Value, no Changed",
-    "because": "P109-S21-DROPDOWNEMPTYRESET (ISL-045): the empty list took the selected option away and the hidden one is disabled, so nothing was selected; HTML's selectedness setting algorithm then selects the first enabled option inserted into a <select> that selects nothing (Select.tsx :220 the hidden option, :213 value={undefined} while Value names no option)",
+    "name": "Items written an empty list, then a list of one: the element keeps its hidden empty option selected, so choosing 'x' sends it with Changed",
+    "because": "P109-S21-DROPDOWNEMPTYRESET (ISL-045): the empty list took the selected option away and the hidden one is disabled, so nothing was selected; HTML's selectedness setting algorithm then selects the first enabled option inserted into a <select> that selects nothing (Select.tsx :220 the hidden option, :213 value={undefined} while Value names no option) — v12 (BETA-S7-DROPDOWNFIRSTPICK): the element is told '' while the value is in no option, so the hidden empty option stays selected and the first option is a pick",
     "params": {},
     "steps": [
       "settle",
