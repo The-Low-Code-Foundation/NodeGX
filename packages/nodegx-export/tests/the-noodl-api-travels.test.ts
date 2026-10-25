@@ -148,7 +148,7 @@ describe('§A the emitted app runs the Noodl Desk as the runtime runs it, signed
     });
 
     it(`A3 ${name}: the wire — every request the export sends, the runtime sends, in order, with the same body`, () => {
-      const runtime = out(arms.runtime).requests[0].filter((r) => !isUsersMe(r) && !isRefusedFilterQuery(r));
+      const runtime = out(arms.runtime).requests[0].filter((r) => !isUsersMe(r));
       expect(out(arms.exported).requests[0]).toEqual(runtime);
       expect(runtime.length).toBe(11);
     });
@@ -173,10 +173,10 @@ describe('§A the emitted app runs the Noodl Desk as the runtime runs it, signed
     expect(out(signedIn.exported).readings[0][3][6]).toBe('3');
   });
 
-  it('A7 the runtime\'s two requests the export does not send, pinned: its session check, and the query after a refused filter', () => {
+  it('A7 the runtime\'s one request the export does not send, pinned: its session check; the refused filter sends nothing on either arm (P18-S134-REFUSEDFILTERSENDS, fixed)', () => {
     const runtime = out(signedIn.runtime).requests[0];
     expect(runtime.filter(isUsersMe)).toHaveLength(1);
-    expect(runtime.filter(isRefusedFilterQuery)).toEqual([{ method: 'POST', path: '/classes/Task', body: { _method: 'GET', where: {} }, appId: NOODL_DESK_APP_ID, signedIn: true }]);
+    expect(runtime.filter(isRefusedFilterQuery)).toHaveLength(0);
     expect(out(signedOut.runtime).requests[0].filter(isUsersMe)).toHaveLength(0);
     expect(out(signedIn.exported).requests[0].filter((r) => isUsersMe(r) || isRefusedFilterQuery(r))).toHaveLength(0);
   });
@@ -249,22 +249,21 @@ describe('§B the members, one call at a time: the running app\'s own against th
       expect(mout(arms.exported).outcomes).toEqual(mout(arms.runtime).outcomes);
     });
 
-    it(`B2 ${name}: every call sends the same requests, but the runtime's query after a filter it refused (P18-S134-REFUSEDFILTERSENDS)`, () => {
+    it(`B2 ${name}: every call sends the same requests, a refused filter's included (P18-S134-REFUSEDFILTERSENDS, fixed)`, () => {
       const runtime = mout(arms.runtime).requests;
       const exported = mout(arms.exported).requests;
       arms.calls.forEach((_c, i) => {
-        const extra = runtime[i].filter((r) => isEmptyQuery(r) && (mout(arms.runtime).outcomes[i] as { string?: unknown }).string !== undefined);
-        expect({ i, sent: exported[i] }).toEqual({ i, sent: runtime[i].filter((r) => !isUsersMe(r) && !extra.includes(r)) });
+        expect({ i, sent: exported[i] }).toEqual({ i, sent: runtime[i].filter((r) => !isUsersMe(r)) });
       });
     });
   }
 
-  it('B3 the refused filters, counted: each is rejected with the translator\'s words, and the runtime sends an empty query anyway', () => {
+  it('B3 the refused filters, counted: each is rejected with the translator\'s words, and neither arm sends a query for it', () => {
     const arms = members['signed in'];
     const refused = mout(arms.runtime).outcomes.map((o, i) => ({ o: o as { string?: string }, i })).filter(({ o, i }) => o.string !== undefined && arms.calls[i].member === 'query');
     expect(refused.length).toBe(12);
     for (const { i } of refused) {
-      expect(mout(arms.runtime).requests[i].filter(isEmptyQuery)).toHaveLength(1);
+      expect(mout(arms.runtime).requests[i].filter(isEmptyQuery)).toHaveLength(0);
       expect(mout(arms.exported).requests[i]).toHaveLength(0);
     }
   });

@@ -10,17 +10,31 @@ function createRecordsAPI(modelScope) {
     return _cloudstore;
   };
 
+  // P18-S134-REFUSEDFILTERSENDS: `convertFilterOp` reports a refused filter through `error` and then returns `{}`.
+  // Sending that would ask the store for every row, so a refused filter answers `undefined` here and the call
+  // stops after rejecting in the translator's words — as the exported app does.
+  const whereFor = (className, query, reject) => {
+    let refused = false;
+    const where = QueryUtils.convertFilterOp(query || {}, {
+      collectionName: className,
+      error: (e) => {
+        refused = true;
+        reject(e);
+      },
+      modelScope
+    });
+    return refused ? undefined : { where };
+  };
+
   return {
     async query(className, query, options) {
       if (typeof className === "undefined") throw new Error("'className' is undefined");
       return new Promise((resolve, reject) => {
+        const filter = whereFor(className, query, reject);
+        if (!filter) return;
         cloudstore().query({
           collection: className,
-          where: QueryUtils.convertFilterOp(query || {}, {
-            collectionName: className,
-            error: (e) => reject(e),
-            modelScope
-          }),
+          where: filter.where,
           limit: options ? options.limit : undefined,
           sort: options ? options.sort : undefined,
           skip: options ? options.skip : undefined,
@@ -46,15 +60,11 @@ function createRecordsAPI(modelScope) {
     async count(className, query) {
       if (typeof className === "undefined") throw new Error("'className' is undefined");
       return new Promise((resolve, reject) => {
+        const filter = query ? whereFor(className, query, reject) : { where: undefined };
+        if (!filter) return;
         cloudstore().count({
           collection: className,
-          where: query
-            ? QueryUtils.convertFilterOp(query || {}, {
-                collectionName: className,
-                error: (e) => reject(e),
-                modelScope
-              })
-            : undefined,
+          where: filter.where,
           success: (count) => {
             resolve(count);
           },
@@ -68,16 +78,12 @@ function createRecordsAPI(modelScope) {
     async distinct(className, property, query) {
       if (typeof className === "undefined") throw new Error("'className' is undefined");
       return new Promise((resolve, reject) => {
+        const filter = query ? whereFor(className, query, reject) : { where: undefined };
+        if (!filter) return;
         cloudstore().distinct({
           collection: className,
           property,
-          where: query
-            ? QueryUtils.convertFilterOp(query || {}, {
-                collectionName: className,
-                error: (e) => reject(e),
-                modelScope
-              })
-            : undefined,
+          where: filter.where,
           success: (results) => {
             resolve(results);
           },
@@ -91,16 +97,12 @@ function createRecordsAPI(modelScope) {
     async aggregate(className, group, query) {
       if (typeof className === "undefined") throw new Error("'className' is undefined");
       return new Promise((resolve, reject) => {
+        const filter = query ? whereFor(className, query, reject) : { where: undefined };
+        if (!filter) return;
         cloudstore().aggregate({
           collection: className,
           group,
-          where: query
-            ? QueryUtils.convertFilterOp(query || {}, {
-                collectionName: className,
-                error: (e) => reject(e),
-                modelScope
-              })
-            : undefined,
+          where: filter.where,
           success: (results) => {
             resolve(results);
           },
