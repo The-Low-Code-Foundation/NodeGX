@@ -78,6 +78,8 @@ lines to the checklist and go on.
 `drive_page` starts from the app's start page (leave out `page`): tap, wait, then read the text, a variable, or what a
 person sees of a thing by its label — `{ "read": { "look": "Lisbon" }, "expect": { "backgroundName": "green" } }`. A
 read answers what a screenshot would; each screenshot you open makes every later step of the session cost more.
+Whether a person can read a thing is a look too: `"expect": { "readable": true }` passes at 3:1 contrast or more
+against what is painted behind it, and `render_report` warns `low-contrast-text` on the pages it opens.
 A look waits for things to settle, so it can't see the moment a screen appears. For that line, `watch` right after
 the tap that changes the screen, on EVERY answer of the new screen: `{ "watch": { "look": ["Sydney", "Canberra",
 "Melbourne"] }, "for_ms": 2000, "expect": { "never": { "backgroundName": "green" } } }` lists every state each one

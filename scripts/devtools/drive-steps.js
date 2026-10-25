@@ -62,8 +62,10 @@
  *                                        { "stub": "/path" } or { "expression": "js" }; with `expect` the step passes only when the
  *                                        value equals V, or contains V.contains. { "look": T } is what a person
  *                                        sees of T (P112 OWN-019): { text, visible, opacity, background,
- *                                        backgroundName, color, colorName } — the box around T's text, its
- *                                        painted background and a plain colour word ("green", "red", "white"…);
+ *                                        backgroundName, color, colorName, contrast, readable } — the box around
+ *                                        T's text, its painted background, a plain colour word ("green", "red",
+ *                                        "white"…), and WCAG contrast against the ground composited behind the text
+ *                                        (readable = at least 3:1; both null over a picture — P112-OWN019-LOOKBLIND);
  *                                        its `expect` names only the fields that matter ({ "backgroundName":
  *                                        "green" }). What the run has seen SO FAR:
  *                                        { "console_errors": true } (the page's errors and throws), { "network_errors":
@@ -424,7 +426,32 @@ function lookExpression(target) {
     const r = box.getBoundingClientRect();
     const visible = r.width > 0 && r.height > 0 && st.visibility !== 'hidden' && st.display !== 'none' && opacity > 0.05;
     const color = getComputedStyle(leaf).color;
-    return { text: label, visible, opacity: Math.round(opacity * 100) / 100, background: painted, backgroundName: name(painted), color, colorName: name(color) };
+    // P112-OWN019-LOOKBLIND — can a person read it: WCAG contrast of the ink (faded by every ancestor's opacity) against
+    // the ground composited from the text outwards (white under all of them, as a browser paints). null, never a guess,
+    // where a picture or gradient is behind the text or it casts a shadow. The same reading as render_report's
+    // low-contrast-text, so a page behind a sign-in can be checked from a drive.
+    let contrast = null;
+    const ink = rgba(getComputedStyle(leaf).webkitTextFillColor) || rgba(color);
+    if (ink && ink.a > 0 && (getComputedStyle(leaf).textShadow || 'none') === 'none') {
+      const over = (t, u) => ({ r: t.r * t.a + u.r * (1 - t.a), g: t.g * t.a + u.g * (1 - t.a), b: t.b * t.a + u.b * (1 - t.a), a: 1 });
+      const lum = (c) => { const f = (x) => { const v = x / 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+      const stack = [];
+      let picture = false;
+      for (let e = leaf; e; e = e.parentElement) {
+        const cs = getComputedStyle(e);
+        if (cs.backgroundImage && cs.backgroundImage !== 'none' && !/^url\\("data:image\\/svg/.test(cs.backgroundImage)) { picture = true; break; }
+        const bg = rgba(cs.backgroundColor);
+        if (bg && bg.a > 0) { stack.push(bg); if (bg.a >= 0.999) break; }
+      }
+      if (!picture) {
+        let ground = { r: 255, g: 255, b: 255, a: 1 };
+        while (stack.length) ground = over(stack.pop(), ground);
+        const fg = over({ r: ink.r, g: ink.g, b: ink.b, a: ink.a * opacity }, ground);
+        const x = lum(fg), y = lum(ground);
+        contrast = Math.round(((Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)) * 100) / 100;
+      }
+    }
+    return { text: label, visible, opacity: Math.round(opacity * 100) / 100, background: painted, backgroundName: name(painted), color, colorName: name(color), contrast, readable: contrast === null ? null : contrast >= 3 };
   })()`;
 }
 

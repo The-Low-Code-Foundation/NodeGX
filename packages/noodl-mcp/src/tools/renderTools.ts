@@ -211,7 +211,7 @@ export function registerRenderTools(
         '{type: "text", into?: T, replace?: true} (appends to what the field holds unless replace), {key: "Enter"}, ' +
         '{wait_for: {text|testid|selector|url|expression}, timeout_ms?}, {read: {text: T}|{look: T}|{variable: name}|' +
         '{storage: key}|{url: true}|{stub: path}|{expression}, expect?: value|{contains}} — {look: T} is what a person ' +
-        'sees once it settles: {visible, backgroundName: "green", colorName, …}, and its expect names only what ' +
+        'sees once it settles: {visible, backgroundName: "green", colorName, readable, …}, and its expect names only what ' +
         'matters ({backgroundName: "green"}) — or, as lists so far, ' +
         '{console_errors: true}|{network_errors: true}|{other_origins: true} (expect [] = none yet), {navigate: "/route"}, ' +
         '{viewport: "phone"|"390x844"}, {screenshot: name}, {seed_storage: {key: value}} or {seed_storage: "key", ' +
