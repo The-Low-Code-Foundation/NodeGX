@@ -6,6 +6,7 @@
  */
 import NoodlRuntime from '@noodl/runtime';
 import NodeCtor from '@noodl/runtime/src/node';
+import * as pressGuard from '@noodl/runtime/src/pressguard';
 
 import CloudFunction2Module from '../src/nodes/std-library/data/cloudfunction2';
 
@@ -238,4 +239,88 @@ test('doCall with no editorConnection but valid cloudServices reaches the reques
     delete (globalThis as { XMLHttpRequest?: unknown }).XMLHttpRequest;
     delete (globalThis as { localStorage?: unknown }).localStorage;
   }
+});
+
+/**
+ * P112-OWN026-DOUBLEPRESSFN — FIX-03's press guard held a press across a record write, and not across a function
+ * call: Large 4's Answer button reached `RecordAnswer` through a Function and this node, and a double-click recorded
+ * the answer twice (POST {correct: true}, then POST {correct: false}, both before either answered — t1-nodegx-1's
+ * t3b-net.json). A call the press starts now holds the press's keys until the backend answers, and for at least
+ * DOUBLE_PRESS_MS after the press, as a record write does.
+ */
+describe('P112-OWN026-DOUBLEPRESSFN — a press that calls a cloud function is taken once', () => {
+  let pending: { answer(status: number, body: string): void }[] = [];
+  beforeEach(() => {
+    pressGuard.resetPressGuard();
+    pending = [];
+    (NoodlRuntime as { instance?: unknown }).instance = {
+      getMetaData: () => ({ appId: 'app-id', endpoint: 'https://backend.example' })
+    };
+    class FakeXHR {
+      onreadystatechange: (() => void) | null = null;
+      readyState = 0;
+      status = 0;
+      response = '';
+      open() {}
+      setRequestHeader() {}
+      send() {
+        // The backend answers later, when the test says so — a real request is in flight across a double-click.
+        pending.push({
+          answer: (status, body) => {
+            this.readyState = 4;
+            this.status = status;
+            this.response = body;
+            this.onreadystatechange && this.onreadystatechange();
+          }
+        });
+      }
+    }
+    (globalThis as { XMLHttpRequest?: unknown }).XMLHttpRequest = FakeXHR;
+    (globalThis as { localStorage?: unknown }).localStorage = {};
+  });
+  afterEach(() => {
+    cleanupTerminalXHR();
+    pressGuard.resetPressGuard();
+  });
+
+  /** A press on `keys`, whose update calls the function. */
+  function pressThatCalls(keys: object[]) {
+    const instance = makeDeployShapedInstance();
+    pressGuard.notePress(keys);
+    pressGuard.beginPressUpdate();
+    try {
+      (instance.scheduleCall as () => void)();
+    } finally {
+      pressGuard.endPressUpdate();
+    }
+    return instance;
+  }
+
+  test('🔴 the press is held while the call is in flight, and after it answers only until the double-press time', () => {
+    const keys = [{}];
+    pressThatCalls(keys);
+    expect(pending).toHaveLength(1);
+    // A second click a moment later — and long after, while the backend still has not answered.
+    expect(pressGuard.isPressHeld(keys)).toBe(true);
+    expect(pressGuard.isPressHeld(keys, Date.now() + pressGuard.DOUBLE_PRESS_MS + 1000)).toBe(true);
+
+    pending[0].answer(200, JSON.stringify({ result: { ok: true } }));
+    expect(pressGuard.isPressHeld(keys, Date.now() + pressGuard.DOUBLE_PRESS_MS + 10)).toBe(false);
+  });
+
+  test('a call that fails releases the press too — a dead backend never leaves the button dead', () => {
+    const keys = [{}];
+    const instance = pressThatCalls(keys);
+    pending[0].answer(0, '');
+    expect(instance.signalsSent).toEqual(['failure', 'completed']);
+    expect(pressGuard.isPressHeld(keys, Date.now() + pressGuard.DOUBLE_PRESS_MS + 10)).toBe(false);
+  });
+
+  test('control: a call no press started holds nothing', () => {
+    const keys = [{}];
+    const instance = makeDeployShapedInstance();
+    (instance.scheduleCall as () => void)();
+    expect(pending).toHaveLength(1);
+    expect(pressGuard.isPressHeld(keys)).toBe(false);
+  });
 });

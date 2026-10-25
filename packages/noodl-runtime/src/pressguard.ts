@@ -16,6 +16,8 @@
  *   while it runs (`cloudstore.js`'s six write methods: every Record node and `Noodl.Records`
  *   call goes through them) holds the keys until the backend has answered, and for at least
  *   {@link DOUBLE_PRESS_MS} after the press — a localhost backend answers inside a double-click.
+ *   So does a cloud function call (the Cloud Function nodes and `Noodl.CloudFunctions.run`,
+ *   P112-OWN026-DOUBLEPRESSFN): a function that records an answer is a write the page cannot see.
  * - A press on a held key is ignored. A press that started no write holds nothing: a Button
  *   that navigates, counts or opens a popup is untouched.
  *

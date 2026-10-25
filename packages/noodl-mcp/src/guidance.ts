@@ -84,7 +84,7 @@ const MUST_KNOW = [
   'The backend keeps users apart (`creatorOwns`): never fetch every row and filter in a Function node; narrow a Query Records on the server with `visualFilter` (example `cloud-query-own-rows`). [backend]',
   "Whose a record is: `owner`, which the backend writes from the creator's session and no page can set. A field the page fills from the User id (an ownerId, a familyId) is the caller's word; to let someone see your records, a cloud function checks `owner` (example `cloud-share-my-records-with-someone`); to let several people change them, a role named from the owner's id, joined only from an invitation's `owner` (example `cloud-members-can-edit-my-records`). [backend]",
   'A value several devices change (a count, score, balance, progress) is changed on the server by the amount: Update Record with `addTo` naming the field and the change (1, -1) wired into it, no script (example `cloud-shared-counter`). Never read it into the page and write it back whole. [backend]',
-  "A press that saves is taken once by the runtime: a Button's Click or a Text Input's On Enter is ignored while a save it started waits. Controls wired to the same node share that, so wire a Button and its field's Enter into the SAME node, never two. [backend]",
+  "A press that saves is taken once by the runtime: a Button's Click or a Text Input's On Enter is ignored while a save or a cloud function call it started waits. Controls wired to the same node share that, so wire a Button and its field's Enter into the SAME node, never two. [backend]",
   "A page can be opened by its own URL (a reload, a shared link): check it that way in drive_page, not only by arriving from another page — whatever the page holds in memory is gone then. [backend]"
 ];
 
