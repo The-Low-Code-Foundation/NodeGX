@@ -58,9 +58,9 @@ type SetUserState = {
 };
 
 /** user-ports.ts :187-195 `USER_INPUT_IGNORE_PARSE_BROWSER` — the accounts columns a browser cannot write on the Parse wire. */
-const USER_INPUT_IGNORE_PARSE_BROWSER = ['authData', 'createdAt', 'updatedAt', 'email', 'username', 'emailVerified', 'password'];
+export const USER_INPUT_IGNORE_PARSE_BROWSER = ['authData', 'createdAt', 'updatedAt', 'email', 'username', 'emailVerified', 'password'];
 /** user-ports.ts :213-215 `USER_INPUT_IGNORE_REST` — the columns a REST backend owns, then the two with their own ports. */
-const USER_INPUT_IGNORE_REST = [...REST_USER_READONLY_FIELDS, 'username', 'email', 'tfa_secret'];
+export const USER_INPUT_IGNORE_REST = [...REST_USER_READONLY_FIELDS, 'username', 'email', 'tfa_secret'];
 
 const failures = (n: number) => Array.from({ length: n }, () => ({ port: 'store' as const, outcome: 'failure' as const, error: SET_USER_PROPERTIES_ERROR_CODE }));
 const dones = (n: number) => Array.from({ length: n }, () => ({ port: 'store' as const, outcome: 'done' as const }));

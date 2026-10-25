@@ -72,8 +72,8 @@ export function userClassName(context: Readonly<PortContext>): string | undefine
 }
 
 /**
- * NSP-020 s84 — user-ports.ts `userSchemaContext` / `userPropertyPorts`: the accounts class (`userClassName`; Sign Up names
- * `_User`, which it reads whatever the backend) as the project's schema holds it, its columns in order less the ones `ignore`
+ * NSP-020 s84 — user-ports.ts `userSchemaContext` / `userPropertyPorts`: the accounts class (`userClassName`; Sign Up too
+ * since P107-S102-SIGNUPBACKEND) as the project's schema holds it, its columns in order less the ones `ignore`
  * names, every Relation column and the hidden `ACL` (`shouldShowField` on every wire since P107-S84-USERACL, ruled R29: before,
  * the Parse wire drew `prop-ACL`).
  */

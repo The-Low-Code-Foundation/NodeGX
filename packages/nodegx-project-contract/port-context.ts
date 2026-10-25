@@ -139,7 +139,9 @@ export function portContextReader(project: PortProject, options: PortContextOpti
     if (wiredOutputs.length) context.wiredOutputs = wiredOutputs;
 
     if (backends.length) context.backends = backends.map((b) => ({ ...b }));
-    const schema = schemaFor(project.metadata, node.parameters ?? {});
+    // signup.ts `updatePorts` (P107-S102-SIGNUPBACKEND): Sign Up has no Backend input and always signs up on the active
+    // backend, so a saved `backendId` does not pick its schema
+    const schema = schemaFor(project.metadata, NO_BACKEND_INPUT.includes(node.type) ? {} : (node.parameters ?? {}));
     if (schema) context.schema = schema;
     if (stacks.length) context.stacks = stacks;
     if (routers.length) context.routers = routers;
@@ -149,6 +151,9 @@ export function portContextReader(project: PortProject, options: PortContextOpti
     return context;
   };
 }
+
+/** The schema-reading types with no Backend input: their ports come from the active backend whatever a saved param says. */
+const NO_BACKEND_INPUT: readonly string[] = ['net.noodl.user.SignUp'];
 
 function unique(names: string[]): string[] {
   return [...new Set(names)];
