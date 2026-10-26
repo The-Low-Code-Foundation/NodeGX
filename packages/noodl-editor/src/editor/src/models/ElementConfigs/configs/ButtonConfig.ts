@@ -26,15 +26,19 @@ export const ButtonConfig: ElementConfig = {
 
   // P112-S7-TEXTDEFAULTS: no `cursor` (the Button has no such port) and no `borderWidth: '0'` where the variant
   // sets no `borderStyle` (the width only applies to a solid, dashed or dotted border). Neither was ever read.
-  // ⚠️ `boxShadow` stays, and is still never read on a dropped Button: the style vocabulary turns it into
-  // `boxShadowEnabled: 'true'` for an agent's Button, so removing it would take the shadow off what agents build.
-  // Whether a dropped Button should wear that shadow too is BETA-S9-BUTTONSHADOW, a ruling.
+  // BETA-S9-BUTTONSHADOW (ruled 2026-10-26, "both have it"): the filled looks turn the Button's own shadow on, the
+  // shadow an agent's Button has always had. They said `boxShadow: 'var(--shadow-sm)'`, which no port reads, so a
+  // dropped Button had none while the style vocabulary turned it on (as the string `'true'`, an error) for an agent's.
+  // Every door that reads this file (the picker's drop, the shipped Looks, the vocabulary) now copies the same port.
+  // ⚠️ Wearing the `--shadow-sm` token instead (`boxShadowSource: 'token'` + `boxShadowToken`) was built and measured:
+  // three looks' worth took `get_style_vocabulary`'s prompt to 4,403 of 4,400, and in the defaults the two token
+  // ports are dead on the flat looks (the validator's `inactive-conditional-parameter`).
 
   variants: {
     primary: {
       backgroundColor: 'var(--primary)',
       color: 'var(--primary-foreground)',
-      boxShadow: 'var(--shadow-sm)',
+      boxShadowEnabled: true,
       states: {
         hover: { backgroundColor: 'var(--primary-hover)' },
         active: { transform: 'scale(0.98)' },
@@ -45,7 +49,7 @@ export const ButtonConfig: ElementConfig = {
     secondary: {
       backgroundColor: 'var(--secondary)',
       color: 'var(--secondary-foreground)',
-      boxShadow: 'var(--shadow-sm)',
+      boxShadowEnabled: true,
       states: {
         hover: { backgroundColor: 'var(--secondary-hover)' },
         active: { transform: 'scale(0.98)' },
@@ -81,7 +85,7 @@ export const ButtonConfig: ElementConfig = {
     destructive: {
       backgroundColor: 'var(--destructive)',
       color: 'var(--destructive-foreground)',
-      boxShadow: 'var(--shadow-sm)',
+      boxShadowEnabled: true,
       states: {
         hover: { backgroundColor: 'var(--destructive-hover)' },
         disabled: { opacity: '0.5', cursor: 'not-allowed' }

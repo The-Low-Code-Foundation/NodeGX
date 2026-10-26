@@ -18,12 +18,18 @@ export interface StateStyles {
 }
 
 /**
+ * One base value: a CSS-ish string, or a real boolean for a node's on/off port (`boxShadowEnabled`). A boolean port
+ * takes `true`, never `'true'`: the validator calls the string an error, because `'false'` is truthy.
+ */
+export type StyleValue = string | boolean;
+
+/**
  * A named style variant for a node type.
  * Contains base CSS property overrides and optional interaction state styles.
  */
 export interface VariantConfig {
   /** Base CSS properties for this variant (camelCase keys). */
-  [property: string]: string | StateStyles | undefined;
+  [property: string]: StyleValue | StateStyles | undefined;
   /** Interaction state style overrides. */
   states?: StateStyles;
 }
@@ -50,7 +56,7 @@ export interface ElementConfig {
    * values as the node's own and writes no marker — the `Preset` row that needed one is gone, and
    * a node's styles are either its own or a Look's.
    */
-  defaults: Record<string, string>;
+  defaults: Record<string, StyleValue>;
 
   /**
    * Named style variants. Keys are variant names (e.g. 'primary', 'card').
@@ -64,7 +70,7 @@ export interface ElementConfig {
  */
 export interface ResolvedVariant {
   /** Flat CSS properties for the default (non-interacting) state. */
-  baseStyles: Record<string, string>;
+  baseStyles: Record<string, StyleValue>;
   /** Interaction state style overrides. */
   states: StateStyles;
 }

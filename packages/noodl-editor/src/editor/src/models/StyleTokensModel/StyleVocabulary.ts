@@ -50,6 +50,7 @@
  */
 
 import { ElementConfigRegistry } from '../ElementConfigs/ElementConfigRegistry';
+import type { StyleValue } from '../ElementConfigs/ElementConfigTypes';
 import { shippedLooksFor, stripPresetMarkers } from '../Looks/looks';
 import { buildEffectiveTokens, MetaDataSource, readStoredTokens } from './ProjectTokenCss';
 import { formatCompositionValue, STYLE_COMPOSITIONS, VocabComposition } from './StyleCompositions';
@@ -94,7 +95,7 @@ export interface VocabLook {
    * factored costs less than it did before this task. An agent must copy the defaults *and* these;
    * both halves are in the same block and the prompt text says so.
    */
-  parameters: Record<string, string>;
+  parameters: Record<string, StyleValue>;
 }
 
 /**
@@ -109,7 +110,7 @@ export interface VocabLook {
 export interface VocabElement {
   nodeType: string;
   /** What every node of this type gets on creation, and the floor each Look sits on. */
-  defaults: Record<string, string>;
+  defaults: Record<string, StyleValue>;
   /** The shipped Looks for this type, in the order the config declares them. */
   looks: VocabLook[];
 }
@@ -178,11 +179,11 @@ const RAW_SCALE_CATEGORIES = new Set<TokenCategory>(['color-palette']);
  * is passed through untouched rather than filtered against a hardcoded port
  * list, which would go stale the moment a port is added.
  */
-function toPortParameters(styles: Record<string, string>): Record<string, string> {
-  const out: Record<string, string> = {};
+function toPortParameters(styles: Record<string, StyleValue>): Record<string, StyleValue> {
+  const out: Record<string, StyleValue> = {};
 
   for (const [key, value] of Object.entries(styles)) {
-    if (key === 'padding' || key === 'margin') {
+    if ((key === 'padding' || key === 'margin') && typeof value === 'string') {
       // `2px 4px` → top/bottom, left/right. CSS's 1–4 value box shorthand.
       const parts = value.trim().split(/\s+/);
       const [top, right, bottom, left] =
@@ -201,11 +202,18 @@ function toPortParameters(styles: Record<string, string>): Record<string, string
     }
 
     if (key === 'boxShadow') {
-      // There is no shorthand port. Turning the shadow on gets the runtime's
-      // own subtle default; the components stay available for a node that wants
-      // to be specific. Emitting the token here would set a *colour* port to a
-      // full shadow value, which is what the authored pages ended up doing.
-      out.boxShadowEnabled = 'true';
+      // There is no shorthand port (the shipped configs no longer use this key:
+      // the Button's looks set `boxShadowEnabled` itself). A token shadow is worn
+      // through the shadow's token mode; anything else turns the shadow on with
+      // the runtime's own subtle default. Emitting the value into
+      // `boxShadowColor` would set a *colour* port to a full shadow, which is what
+      // the authored pages once did. BETA-S9-BUTTONSHADOW: a real `true`, never
+      // `'true'`, which the validator calls an error.
+      out.boxShadowEnabled = true;
+      if (typeof value === 'string' && /^var\(--[\w-]+\)$/.test(value.trim())) {
+        out.boxShadowSource = 'token';
+        out.boxShadowToken = value.trim();
+      }
       continue;
     }
 
@@ -281,10 +289,10 @@ export function buildStyleVocabulary(
     // That is what `shippedLook` builds and what `copy this Look into the project` must store.
     // **Here the two halves are reported separately**, because repeating the defaults under each of
     // 22 Looks cost 900 prompt tokens of pure duplication on a surface with 290 to spare.
-    const defaults = toPortParameters(stripPresetMarkers(config.defaults) as Record<string, string>);
+    const defaults = toPortParameters(stripPresetMarkers(config.defaults) as Record<string, StyleValue>);
     const looks: VocabLook[] = shippedLooksFor(config).map((look) => {
-      const delta: Record<string, string> = {};
-      const full = toPortParameters(look.parameters as Record<string, string>);
+      const delta: Record<string, StyleValue> = {};
+      const full = toPortParameters(look.parameters as Record<string, StyleValue>);
       for (const [key, value] of Object.entries(full)) {
         if (defaults[key] !== value) delta[key] = value;
       }

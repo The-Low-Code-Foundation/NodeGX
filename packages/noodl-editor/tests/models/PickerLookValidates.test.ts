@@ -13,13 +13,15 @@
  * TextInput's `width: '100%'` / `height: 'auto'` strings (2 errors), `cursor` on Button and Checkbox and `boxShadow` on
  * five Button variants (no such ports), `borderWidth: '0'` with no border style. All removed but one; none was read.
  *
- * ⚠️ The one left: `boxShadow` on three Button variants. The style vocabulary turns it into `boxShadowEnabled` for
- * an agent's Button, so removing it would change what agents build; BETA-S9-BUTTONSHADOW asks whether a dropped
- * Button should wear that shadow too. It is allowed by name and asserted to STILL fire, so it cannot hide anything.
+ * BETA-S9-BUTTONSHADOW (ruled 2026-10-26, "both have it"): the last one, `boxShadow` on three Button variants, became
+ * the Button's own `boxShadowEnabled: true`. The second describe holds the three doors that read the configs to one
+ * shadow, and grades every Look the vocabulary teaches through the same validator (it taught `'true'`, an error).
  * Mutant: put `width: 'auto'` back in `TextConfig.defaults` → the Text arm reddens naming `invalid-parameter-value`.
  */
 
 import { ElementConfigRegistry } from '../../src/editor/src/models/ElementConfigs/ElementConfigRegistry';
+import { shippedLook } from '../../src/editor/src/models/Looks/looks';
+import { buildStyleVocabulary } from '../../src/editor/src/models/StyleTokensModel/StyleVocabulary';
 import { SemanticValidator } from '../../src/editor/src/validation/SemanticValidator';
 import { fromLegacyProject } from '../../src/editor/src/validation/normalize';
 
@@ -28,6 +30,10 @@ function pageWith(type: string, variant?: string) {
   const node = { id: 'picked', type, parameters: {} as Record<string, unknown>, children: [] as never[] };
   ElementConfigRegistry.applyDefaults(node, type);
   if (variant) ElementConfigRegistry.applyVariant(node, type, variant);
+  return pageAround(node);
+}
+
+function pageAround(node: { id: string; type: string; parameters: Record<string, unknown>; children: never[] }) {
   return {
     parameters: node.parameters,
     project: {
@@ -44,11 +50,19 @@ function pageWith(type: string, variant?: string) {
   };
 }
 
-/**
- * Ruling pending, by (type, port, code): see the header. Every Button case carries it, because the picker stamps the
- * default `primary` first and a later variant without a `boxShadow` of its own leaves that one in place.
- */
-const AWAITING_BUTTONSHADOW = 'net.noodl.controls.button/boxShadow/unknown-parameter';
+/** Errors and warnings the validator raises on the node with id `picked`, as readable lines. */
+function complaints(project: ReturnType<typeof pageAround>['project']): string[] {
+  return new SemanticValidator()
+    .validate(fromLegacyProject(project))
+    .diagnostics.filter((d) => d.location.nodeId === 'picked' && (d.severity === 'error' || d.severity === 'warning'))
+    .map((d) => `${d.severity} ${d.code} ${d.location.port ?? ''}: ${d.message}`);
+}
+
+const BUTTON = 'net.noodl.controls.button';
+const SHADOW_KEYS = ['boxShadow', 'boxShadowEnabled', 'boxShadowSource', 'boxShadowToken'];
+const shadowOf = (parameters: Record<string, unknown>) =>
+  Object.fromEntries(SHADOW_KEYS.filter((k) => parameters[k] !== undefined).map((k) => [k, parameters[k]]));
+const ON = { boxShadowEnabled: true };
 
 describe('P112-S7-TEXTDEFAULTS — the picker look validates clean', () => {
   const types = ElementConfigRegistry.getAll().map((c) => c.nodeType);
@@ -69,12 +83,7 @@ describe('P112-S7-TEXTDEFAULTS — the picker look validates clean', () => {
       const { parameters, project } = pageWith(type, variant);
       // The look arrived, so an empty list below is not a node with no parameters.
       expect(Object.keys(parameters).length).toBeGreaterThan(0);
-      const all = new SemanticValidator()
-        .validate(fromLegacyProject(project))
-        .diagnostics.filter((d) => d.location.nodeId === 'picked' && (d.severity === 'error' || d.severity === 'warning'));
-      const awaited = (d: (typeof all)[number]) => `${type}/${d.location.port}/${d.code}` === AWAITING_BUTTONSHADOW;
-      expect(all.filter((d) => !awaited(d)).map((d) => `${d.severity} ${d.code} ${d.location.port ?? ''}: ${d.message}`)).toEqual([]);
-      expect(all.filter(awaited).length).toBe(AWAITING_BUTTONSHADOW.startsWith(`${type}/`) ? 1 : 0);
+      expect(complaints(project)).toEqual([]);
     });
   }
 
@@ -84,4 +93,43 @@ describe('P112-S7-TEXTDEFAULTS — the picker look validates clean', () => {
     expect(parameters.color).toBe('var(--foreground)');
     for (const key of ['width', 'height', 'flexShrink', 'flexGrow', 'minWidth']) expect(parameters[key]).toBeUndefined();
   });
+});
+
+describe('BETA-S9-BUTTONSHADOW — a dropped Button and an agent\'s wear the same shadow', () => {
+  const vocabulary = buildStyleVocabulary();
+  const button = vocabulary.elements.find((e) => e.nodeType === BUTTON);
+
+  it('the picker drops a Button with its own shadow port on, a real true', () => {
+    expect(shadowOf(pageWith(BUTTON).parameters)).toEqual(ON);
+  });
+
+  it('the vocabulary teaches an agent the same shadow for the default look', () => {
+    const primary = button?.looks.find((l) => l.id === 'primary');
+    expect(primary).toBeDefined();
+    expect(shadowOf({ ...button?.defaults, ...primary?.parameters })).toEqual(shadowOf(pageWith(BUTTON).parameters));
+  });
+
+  it('a shipped Look a person copies in carries it too', () => {
+    const config = ElementConfigRegistry.get(BUTTON);
+    expect(config).toBeDefined();
+    if (!config) return;
+    expect(shadowOf(shippedLook(config, 'primary')?.parameters ?? {})).toEqual(ON);
+    for (const flat of ['outline', 'ghost', 'link']) expect(shadowOf(shippedLook(config, flat)?.parameters ?? {})).toEqual({});
+  });
+
+  // Every Look the vocabulary teaches, written as an agent is told to (defaults, then the Look), through the
+  // validator. It taught `boxShadowEnabled: 'true'`, which the boolean check calls an error.
+  for (const element of vocabulary.elements) {
+    for (const look of element.looks) {
+      it(`${element.nodeType} / ${look.id}: what the vocabulary teaches validates clean`, () => {
+        const node = {
+          id: 'picked',
+          type: element.nodeType,
+          parameters: { ...element.defaults, ...look.parameters } as Record<string, unknown>,
+          children: [] as never[]
+        };
+        expect(complaints(pageAround(node).project)).toEqual([]);
+      });
+    }
+  }
 });
