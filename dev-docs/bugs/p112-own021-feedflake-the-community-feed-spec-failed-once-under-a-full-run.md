@@ -20,3 +20,9 @@ is a guess, not a measurement.
 
 **To pick up:** run the 37 suites together again, unfiltered (`--verbose`), and read which test and why. If it
 is the burst, the spec needs a bound on what a slow box may leave, not the product.
+
+**Measured 2026-10-26 (the Beta sweep s11), the test named:** run whole, the file went red twice in three runs, on
+the same test both times: `hearts › a burst of taps by one person counts once, however many rows the race leaves`,
+at `expect(b.json.result?.hearts.hearted).toBe(true)` (received `undefined`: one of the five concurrent `heartPost`
+calls answered without a `hearts` result). So the flake is that five-way burst, not the whole spec. Not graded
+further here; a `-t` rerun of that one test is not a reading (it skips the earlier tests that make its rows).
