@@ -21,7 +21,7 @@ import { bootstrapNodeLibrary } from './headless';
 import { describeAccess, lanAddress, resolveAccess, shareUrl } from '../../nodegx-export/src/serve/access';
 
 import { assertDeployAssets, loadPreview, resolveTarget, type ProjectFormat } from './loader';
-import { keepOwnBackend, type OwnBackend } from './ownBackend';
+import { keepOwnBackend, namedBackend, type OwnBackend } from './ownBackend';
 import { PreviewServer } from './server';
 import { startWatching } from './watcher';
 
@@ -34,6 +34,7 @@ Options:
   --port <n>        Port to listen on (default 8575, 0 for any free port).
   --host <addr>     Address to bind (default 127.0.0.1). Any address but loopback also turns
                     on the token: the printed URL carries it, and without it nothing is served.
+                    A phone on the same Wi-Fi then reaches the app's own backend through it too.
   --token <t>       Use this token rather than minting one.
   --debounce <ms>   Quiet period before rebuilding after a change (default 120).
   --no-watch        Render once and serve; do not watch for changes.
@@ -170,7 +171,9 @@ async function main(): Promise<void> {
   // re-opened by a config nobody read.
   const shared = args.host !== '127.0.0.1' && args.host !== 'localhost';
   const access = resolveAccess({ share: shared, host: args.host, token: args.token });
-  const server = new PreviewServer({ projectDir: dir, port: args.port, host: args.host, access });
+  // P112-OWN023-PHONEPREVIEW: a shared page reaches its backend through the preview (server.ts BACKEND_PREFIX).
+  const backendPort = format === 'v2' ? namedBackend(dir)?.port : undefined;
+  const server = new PreviewServer({ projectDir: dir, port: args.port, host: args.host, access, backendPort });
   let port: number;
   try {
     port = await server.listen();

@@ -15,6 +15,9 @@ and builds it. To see it running:
 npx @nodegx/preview my-apps/<your app> --open
 ```
 
+To try it on your phone, on the same Wi-Fi: add `--host 0.0.0.0`, and open the address it prints on the phone. The
+address carries a token, so nobody else on the network can open it without being handed the whole link.
+
 The command writes `my-apps/.mcp.json`, which gives your agent the NodeGX server (`@nodegx/mcp`, pinned to the
 version this release was made with), a short `CLAUDE.md` and `AGENTS.md` that tell the agent apps here are NodeGX
 apps, the same server for Mistral Vibe (`.vibe/config.toml`) and OpenCode (`opencode.json`), and one skill,

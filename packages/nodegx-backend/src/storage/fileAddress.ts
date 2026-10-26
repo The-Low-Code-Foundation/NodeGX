@@ -38,18 +38,34 @@ export function currentFileOrigin(): string | undefined {
   return origins.getStore();
 }
 
+/**
+ * A path a proxy can serve this backend under: `/one` or `/one/two`, each segment plain characters and never `.` or
+ * `..` (P112-OWN023-PHONEPREVIEW). Anything else is not a prefix.
+ */
+export function isPlainPathPrefix(prefix: string): boolean {
+  if (!prefix.startsWith('/')) return false;
+  const segments = prefix.slice(1).split('/');
+  return segments.every((s) => /^[A-Za-z0-9._~-]+$/.test(s) && s !== '.' && s !== '..');
+}
+
 /** Where this backend serves the stored file `name` when reached at `origin`. */
 export function fileUrlAt(origin: string, name: string): string {
   return `${origin}/files/${encodeURIComponent(name)}`;
 }
 
-/** Is `url` this backend's own address for `name` — any host, the path `/files/<name>`? */
+/**
+ * Is `url` this backend's own address for `name` — any host, the path `/files/<name>`, or that path under the prefix a
+ * proxy serves this backend at (P112-OWN023-PHONEPREVIEW: a photo uploaded from a phone through a shared preview is
+ * stored as `…/__nodegx/backend/files/<name>`, and must read back at the laptop's own address later)?
+ */
 function isOwnFileUrl(url: string, name: string): boolean {
+  const own = `/files/${encodeURIComponent(name)}`;
+  const ownPath = (p: string) => p === own || (p.endsWith(own) && isPlainPathPrefix(p.slice(0, -own.length)));
   try {
-    return new URL(url).pathname === `/files/${encodeURIComponent(name)}`;
+    return ownPath(new URL(url).pathname);
   } catch {
     // A relative or unparseable url names no other host.
-    return url.split('?')[0] === `/files/${encodeURIComponent(name)}`;
+    return ownPath(url.split('?')[0]);
   }
 }
 

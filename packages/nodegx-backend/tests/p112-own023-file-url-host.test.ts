@@ -132,6 +132,29 @@ describe('P112-OWN023-FILEURLHOST — a File field is answered at the address it
     expect(served.status).toBe(200);
   });
 
+  // P112-OWN023-PHONEPREVIEW — a preview shared on the Wi-Fi carries this backend under a path on its own address.
+  const PHONE = { host: '192.168.1.158:5102', 'x-forwarded-prefix': '/__nodegx/backend' };
+  const PHONE_ORIGIN = 'http://192.168.1.158:5102/__nodegx/backend';
+
+  it('reached through a proxy at a path, an upload answers that path, so the url leads back through the proxy', async () => {
+    const phone = await upload('photo.png', PHONE);
+    expect(phone.url).toBe(at(PHONE_ORIGIN, phone.name));
+    // a prefix that is not a plain path is ignored, as a Host that is not a plain host is
+    for (const prefix of ['//elsewhere.example', '/a b', 'nope', '/../x']) {
+      const odd = await upload('photo.png', { host: '192.168.1.158:5102', 'x-forwarded-prefix': prefix });
+      expect(`${prefix} → ${odd.url}`).toBe(`${prefix} → ${at('http://192.168.1.158:5102', odd.name)}`);
+    }
+  });
+
+  it('a photo stored from the phone reads back at the laptop address once the preview is gone', async () => {
+    const phone = await upload('snap.png', PHONE);
+    const row = await call<{ objectId: string }>('POST', '/classes/Snap', { photo: { __type: 'File', name: phone.name, url: phone.url } }, PHONE);
+    expect(row.status).toBe(201);
+    const local = await call<Record<string, { url: string }>>('GET', `/classes/Snap/${row.json.objectId}`);
+    expect(local.json.photo.url).toBe(at(`http://127.0.0.1:${port}`, phone.name));
+    expect((await fetch(local.json.photo.url)).status).toBe(200);
+  });
+
   it('a file saved on one address reads back at whichever address asks next', async () => {
     const file = await upload('fresh.png', VM);
     const created = await call<{ objectId: string }>(

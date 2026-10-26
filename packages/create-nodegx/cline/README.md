@@ -15,6 +15,9 @@ Then say what you want to build, in a paragraph. Cline talks it through with you
 npx @nodegx/preview my-apps/<your app> --open
 ```
 
+To try it on your phone, on the same Wi-Fi: add `--host 0.0.0.0`, and open the address it prints on the phone. The
+address carries a token, so nobody else on the network can open it without being handed the whole link.
+
 We tested it with the Cline command line (3.0.71) and DeepSeek V4.1 Flash on ClinePass:
 
 ```

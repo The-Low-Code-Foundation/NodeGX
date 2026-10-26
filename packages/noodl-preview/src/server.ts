@@ -19,7 +19,7 @@ import * as fs from 'fs';
 import * as http from 'http';
 import * as path from 'path';
 
-import { type Access, authoriseRequest, resolveAccess } from '../../nodegx-export/src/serve/access';
+import { type Access, authoriseRequest, resolveAccess, TOKEN_COOKIE, TOKEN_HEADER } from '../../nodegx-export/src/serve/access';
 
 import { buildIgnoreMatcher } from '@noodl-utils/compilation/build/ignore';
 
@@ -76,7 +76,24 @@ export interface PreviewServerOptions {
    * no gate, which is what `resolveAccess()` returns for an empty request.
    */
   access?: Access;
+  /**
+   * P112-OWN023-PHONEPREVIEW — the port of the app's own backend on this machine (`namedBackend`), when the project
+   * names one. A shared preview carries it under {@link BACKEND_PREFIX} and tells the page so; see `handle`.
+   */
+  backendPort?: number;
 }
+
+/**
+ * P112-OWN023-PHONEPREVIEW — where a shared preview carries the app's backend, on its own address.
+ *
+ * Shared on the Wi-Fi (`--host`), the page reached a phone and still called its backend at `127.0.0.1:<port>`, which on
+ * a phone is the phone: no records, no sign-in. So the preview answers the page's `nodegx-config.json` (DEP-001, the
+ * deploy's own re-pointing) with this path on the address the page came from, and forwards it to the backend. It sits
+ * behind the preview's own gate, the token cookie the page already holds, so sharing opens nothing on the network that
+ * the shared page did not; the backend itself stays on loopback. Not on a preview that is not shared: there the page
+ * and the backend are on the same machine and the address it was built with is right.
+ */
+export const BACKEND_PREFIX = '/__nodegx/backend';
 
 const MIME: Record<string, string> = {
   '.html': 'text/html; charset=utf-8',
@@ -219,6 +236,11 @@ export class PreviewServer {
 
     if (pathname === '/__preview/events') return this.serveEvents(req, res);
 
+    const backendPort = this.sharedBackendPort();
+    if (backendPort && (pathname === BACKEND_PREFIX || pathname.startsWith(BACKEND_PREFIX + '/'))) {
+      return this.proxyToBackend(req, res, backendPort);
+    }
+
     // Machine-readable status: what the CLI polls in --once mode and tests read.
     if (pathname === '/__preview/state') {
       const status: PreviewStatus = {
@@ -252,7 +274,12 @@ export class PreviewServer {
     // it, so this path is always "no override" and never a project file. P112-OWN026-CONFIGFOUROHFOUR:
     // said as `{}` (the viewer applies nothing from it), not a 404, which every browser logs as a red
     // console error on every page load, so no previewed app could pass "no console errors".
-    if (pathname === '/nodegx-config.json') return this.sendDynamic(res, '{}', 'application/json; charset=utf-8');
+    // P112-OWN023-PHONEPREVIEW: shared, the one thing it says is where the backend is, on the address the page came from.
+    if (pathname === '/nodegx-config.json') {
+      const origin = backendPort ? pageOrigin(req) : null;
+      const config = origin ? { cloudservices: { endpoint: origin + BACKEND_PREFIX } } : {};
+      return this.sendDynamic(res, JSON.stringify(config), 'application/json; charset=utf-8');
+    }
 
     const asset = pathname.slice(1);
     if (DEPLOY_ASSETS.includes(asset)) {
@@ -315,6 +342,49 @@ export class PreviewServer {
     });
   }
 
+  /** The backend port a SHARED preview carries, else undefined. */
+  private sharedBackendPort(): number | undefined {
+    return this.access.shared && this.options.backendPort ? this.options.backendPort : undefined;
+  }
+
+  /**
+   * P112-OWN023-PHONEPREVIEW — one request on to the backend on loopback, streamed both ways (its realtime channel is a
+   * long `text/event-stream`). The backend is told where the page reached it (`Host`, `X-Forwarded-Prefix`), so a
+   * File's url it answers with leads back through here; the preview's own token is not passed on.
+   */
+  private proxyToBackend(req: http.IncomingMessage, res: http.ServerResponse, port: number): void {
+    const raw = req.url ?? '/';
+    const rest = raw.slice(BACKEND_PREFIX.length) || '/';
+    const headers: http.OutgoingHttpHeaders = { ...req.headers };
+    delete headers[TOKEN_HEADER];
+    const cookie = withoutCookie(req.headers.cookie, TOKEN_COOKIE);
+    if (cookie) headers.cookie = cookie;
+    else delete headers.cookie;
+    headers['x-forwarded-prefix'] = BACKEND_PREFIX;
+    headers['x-forwarded-proto'] = 'http';
+    const peer = req.socket.remoteAddress;
+    if (peer) headers['x-forwarded-for'] = peer;
+
+    const upstream = http.request(
+      { host: '127.0.0.1', port, method: req.method, path: rest.startsWith('/') ? rest : '/' + rest, headers },
+      (answer) => {
+        res.writeHead(answer.statusCode ?? 502, answer.headers);
+        answer.pipe(res);
+      }
+    );
+    upstream.on('error', (err) => {
+      if (res.headersSent) {
+        res.destroy(err);
+        return;
+      }
+      res.writeHead(502, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' });
+      res.end(`The app's backend on this computer (port ${port}) did not answer: ${err.message}\n`);
+    });
+    // a client gone (a closed tab, an EventSource closed) ends the upstream request too
+    res.on('close', () => upstream.destroy());
+    req.pipe(upstream);
+  }
+
   private sendJson(res: http.ServerResponse, body: unknown): void {
     this.sendDynamic(res, JSON.stringify(body, null, 2), 'application/json; charset=utf-8');
   }
@@ -363,4 +433,20 @@ export class PreviewServer {
     res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' });
     res.end('Not found');
   }
+}
+
+/** `http://host:port` as the page asked for it, or null when `Host` is not a plain host[:port]. */
+function pageOrigin(req: http.IncomingMessage): string | null {
+  const host = String(req.headers.host || '');
+  return /^[A-Za-z0-9.\-[\]:]+$/.test(host) ? `http://${host}` : null;
+}
+
+/** A `Cookie` header with one cookie taken out, or undefined when nothing is left. */
+function withoutCookie(header: string | undefined, name: string): string | undefined {
+  if (!header) return undefined;
+  const kept = header
+    .split(';')
+    .map((part) => part.trim())
+    .filter((part) => part && part.split('=')[0].trim() !== name);
+  return kept.length ? kept.join('; ') : undefined;
 }

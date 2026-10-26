@@ -28,6 +28,8 @@ import * as fs from 'fs';
 import type * as http from 'http';
 import * as path from 'path';
 
+import { isPlainPathPrefix } from '../storage/fileAddress';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const deployServe = require('../../../noodl-viewer-react/static/deploy/serve.js') as {
   createStaticHandler: (root: string, opts?: { deployConfig?: unknown }) => (req: http.IncomingMessage, res: http.ServerResponse) => void;
@@ -89,7 +91,15 @@ export function openServedApp(dir: string): ServedApp {
   };
 }
 
-/** `http://host:port` as the browser asked it, `https` when a proxy says it terminated TLS. */
+/**
+ * `http://host:port` as the browser asked it, `https` when a proxy says it terminated TLS, and the path a proxy says it
+ * serves this backend under (`X-Forwarded-Prefix`), so a File's url leads back through that proxy.
+ *
+ * P112-OWN023-PHONEPREVIEW: a preview shared on the Wi-Fi carries its app's backend under `/__nodegx/backend` on its
+ * own address (the phone cannot reach this machine's loopback); without the prefix a photo's url would name the
+ * preview's own `/files/…`, which it does not serve. Like `Host`, the header only shapes the answer to the request that
+ * sent it, so it needs no trust list; anything but a plain path is ignored.
+ */
 export function requestOrigin(req: http.IncomingMessage): string {
   const forwarded = String(req.headers['x-forwarded-proto'] || '')
     .split(',')[0]
@@ -99,5 +109,7 @@ export function requestOrigin(req: http.IncomingMessage): string {
   // A Host that is not a plain host[:port] cannot be an origin; fall back to the socket's own.
   const host = String(req.headers.host || '');
   const safeHost = /^[A-Za-z0-9.\-[\]:]+$/.test(host) ? host : `127.0.0.1:${req.socket.localPort}`;
-  return `${proto}://${safeHost}`;
+  const prefix = String(req.headers['x-forwarded-prefix'] || '').replace(/\/+$/, '');
+  const safePrefix = isPlainPathPrefix(prefix) ? prefix : '';
+  return `${proto}://${safeHost}${safePrefix}`;
 }

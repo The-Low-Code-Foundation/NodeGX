@@ -98,4 +98,6 @@ When the app needs an API key, don't ask me to paste it into the chat. Call `set
 tell me where to paste it in the project's `.env` file.
 
 To see an app: `npx @nodegx/preview <the app's folder> --open` — it starts the app's own backend too, when it has
-one on this computer, so it is also how the app opens again another day. Tell me that line when you finish.
+one on this computer, so it is also how the app opens again another day. To try it on a phone on the same Wi-Fi,
+add `--host 0.0.0.0` and open the address it prints on the phone (the link carries the preview's token). Tell me
+that line when you finish.

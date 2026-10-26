@@ -18,6 +18,9 @@ running:
 npx @nodegx/preview my-apps/<your app> --open
 ```
 
+To try it on your phone, on the same Wi-Fi: add `--host 0.0.0.0`, and open the address it prints on the phone. The
+address carries a token, so nobody else on the network can open it without being handed the whole link.
+
 The command writes `.vibe/config.toml` (Large 4, the NodeGX server, the NodeGX agent as the default), the NodeGX agent
 and its skills under `.vibe/`, and an `AGENTS.md` written for Large 4. It is
 [`create-nodegx`](https://www.npmjs.com/package/create-nodegx) with its Vibe profile: the same server, the same app

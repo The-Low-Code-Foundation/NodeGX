@@ -58,6 +58,8 @@ test('P112-S14-NOTNODEGX: the agent notes say an app here is a NodeGX app, and h
   assert.match(AGENT_NOTE, /Don't\nwrite a separate web server/);
   assert.match(AGENT_NOTE, /`set_function_secret` without a value/);
   assert.match(AGENT_NOTE, /`\.env` file/);
+  // P112-OWN023-PHONEPREVIEW: how the app opens on a phone
+  assert.match(AGENT_NOTE, /add `--host 0\.0\.0\.0` and open the address it prints on the phone/);
   // P112 OWN-023 round 3: the note names the page a stranger reads instead of the JSON, pinned to the same server
   // version as `.mcp.json`, so the command resolves to a server that has the flag.
   assert.match(AGENT_NOTE, new RegExp(`\`npx -y ${MCP_PACKAGE.replace('/', '\\/')}@${MCP_VERSION.replace(/\\./g, '\\.')} <the app's folder> --graph\``));

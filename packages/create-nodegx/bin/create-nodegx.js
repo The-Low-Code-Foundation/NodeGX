@@ -41,7 +41,8 @@ const AGENT_NOTE = [
   "and tell me where to paste it in the project's `.env` file.",
   '',
   `To see an app: \`npx ${PREVIEW_PACKAGE} <the app's folder> --open\` — it starts the app's own backend too, when it`,
-  'has one on this computer, so it is also how the app opens again another day.',
+  'has one on this computer, so it is also how the app opens again another day. To try it on a phone on the same',
+  "Wi-Fi, add `--host 0.0.0.0` and open the address it prints on the phone (the link carries the preview's token).",
   '',
   // P112 OWN-023 round 3: two strangers handed an app with no docs each wrote Python over the component JSON to
   // list nodes and wires before reading anything. The page they wrote for themselves ships; read it, not the JSON.
