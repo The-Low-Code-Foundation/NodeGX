@@ -716,3 +716,12 @@ the bundles carry no 4.5.7 sentence. create-* tarballs are byte-identical to the
 **Publish = Richard's terminal (OTP):** `scripts/own/publish-npm.sh ../OpenNoodl-worktrees/npm-0.2.7b-tarballs`. After:
 read each version's shasum from the registry's full document against `SHASUMS.txt`, then deploy nodegx-web for the
 changelog page. The P127 peer's `@nodegx/backend-map` 0.1.2 is a separate publish, also on his OTP.
+
+**Published 2026-10-26** (Richard's terminal, three runs): node-spec 0.2.1 12:49 UTC, project-contract 0.2.2 12:53, preview
+0.2.7 13:01, mcp 0.2.7 13:08, the three create-* after. Every version `latest`, every shasum equal to `SHASUMS.txt`. Each
+new version sat in npm's automated review ("Validating") first: 26 min for node-spec, 6½ for mcp, so the script's old
+5-minute wait stopped two runs (now 45 min, 9375de15c). From the registry: a fresh install of the four kit packages
+audits 0; stranger-render on `@nodegx/mcp@0.2.7` "DONE — clean"; `npm create nodegx@0.2.7` pins mcp 0.2.7. The changelog
+page (adds 0.2.6, never deployed, and 0.2.7) is built in a scratch copy of nodegx-web, diffed against the live page
+(additions only); its upload is Richard's, because `deploy.sh` would ship nodegx-web's stale tracked files and its
+`rsync --delete` would take down live folders that exist only untracked on the laptop (`gala/`, `map/`, `orbit/`, …).
