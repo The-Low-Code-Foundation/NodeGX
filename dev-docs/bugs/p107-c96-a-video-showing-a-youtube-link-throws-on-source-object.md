@@ -26,3 +26,9 @@ settle throws. Or place it with the link, let it draw, then write Source Object:
 
 **Proposed fix.** In `setSourceObject`, return when `this.video` is not set (an embed has no media element to give a stream to).
 When it is fixed, remove the scenarios' `row` fields and the C96 entry from KNOWN_ROWS in the same commit.
+
+**Measured 2026-10-26 (the Beta sweep s11): the row's scenario no longer fires on the runtime.** `NSP_ONLY=Video`
+conformance at HEAD 656f5e938: "row C96 — Source Object placed with an embed" passes, and the known-rows test is red
+for that ("close the row or drop the mark"). Not graded further: which change made it stop, and whether Source Object
+written after the first draw still throws, decide whether the row closes.
+
