@@ -21,6 +21,8 @@ import { z } from 'zod';
 import { BackendClient, listBackends, requireBackend } from '../backend/client';
 import { ENFORCED_RULES_NOTE, OPEN_RULES_NOTE } from '../backend/enforcedRulesNote';
 import { ensureEnvPlaceholder, readEnvSecret } from '../backend/envSecret';
+import { PROJECT_AUTOMATIONS_FILE } from '../../../nodegx-backend/src/automations/shape';
+import { patchAutomations, patchRules, PROJECT_RULES_FILE, writeBoth } from '../backend/projectFiles';
 import { writeProposal } from '../backend/workflowProposals';
 import { ToolError } from '../errors';
 import type { ProjectBinding } from '../project/ProjectBinding';
@@ -590,6 +592,32 @@ export function registerBackendReadTools(server: McpServer): void {
 }
 
 export function registerBackendWriteTools(server: McpServer, binding?: ProjectBinding): void {
+  /** P127 BKO-001: the backend's whole rules config, from which a project's file is made or patched. */
+  async function permissionsConfig(client: BackendClient): Promise<Record<string, unknown>> {
+    const { json } = await client.request('GET', '/admin/permissions');
+    return ((json as { config?: Record<string, unknown> }).config ?? {}) as Record<string, unknown>;
+  }
+  /** One collection's rule as the backend holds it, or null (it follows the defaults). For undo. */
+  async function collectionRule(client: BackendClient, collection: string): Promise<Record<string, unknown> | null> {
+    const config = await permissionsConfig(client);
+    return ((config.collections as Record<string, Record<string, unknown>>) ?? {})[collection] ?? null;
+  }
+  /** A trigger as the backend holds it, or null. For undo and for the project's copy. */
+  async function storedTrigger(client: BackendClient, id: string): Promise<Record<string, unknown> | null> {
+    const { status, json } = await client.request('GET', `/admin/triggers/${encodeURIComponent(id)}`, undefined, [404]);
+    return status === 404 ? null : ((json as { trigger?: Record<string, unknown> }).trigger ?? null);
+  }
+  /** Keep one trigger in the project's nodegx.automations.json as the backend now holds it (null: removed). */
+  const keepTrigger = (client: BackendClient, id: string, undo: () => Promise<void>, write: () => Promise<unknown>) =>
+    writeBoth({
+      binding,
+      client,
+      fileName: PROJECT_AUTOMATIONS_FILE,
+      write,
+      mirror: async (dir) => patchAutomations(dir, 'trigger', id, await storedTrigger(client, id)),
+      undo
+    });
+
   server.registerTool(
     'set_collection_permissions',
     {
@@ -610,12 +638,24 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       const body: Record<string, unknown> = {};
       if (permissions !== undefined) body.permissions = permissions;
       if (creatorOwns !== undefined) body.creatorOwns = creatorOwns;
-      const { json } = await client.request(
-        'PUT',
-        `/admin/permissions/collections/${encodeURIComponent(collection)}`,
-        body
-      );
-      return jsonResult(json);
+      const route = `/admin/permissions/collections/${encodeURIComponent(collection)}`;
+      const before = await collectionRule(client, collection);
+      // P127 BKO-001: the rule is kept in the project's nodegx.security.json too, or it never leaves this machine.
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_RULES_FILE,
+        write: async () => (await client.request('PUT', route, body)).json,
+        mirror: async (dir) => {
+          const config = await permissionsConfig(client);
+          patchRules(dir, collection, (config.collections as Record<string, Record<string, unknown>>)?.[collection] ?? null, config);
+        },
+        undo: async () => {
+          if (before) await client.request('PUT', route, before);
+          else await client.request('DELETE', route);
+        }
+      });
+      return jsonResult({ ...(answer as object), project });
     })
   );
 
@@ -659,11 +699,19 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, collection }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request(
-        'DELETE',
-        `/admin/permissions/collections/${encodeURIComponent(collection)}`
-      );
-      return jsonResult(json);
+      const route = `/admin/permissions/collections/${encodeURIComponent(collection)}`;
+      const before = await collectionRule(client, collection);
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_RULES_FILE,
+        write: async () => (await client.request('DELETE', route)).json,
+        mirror: async (dir) => patchRules(dir, collection, null, await permissionsConfig(client)),
+        undo: async () => {
+          if (before) await client.request('PUT', route, before);
+        }
+      });
+      return jsonResult({ ...(answer as object), project });
     })
   );
 
@@ -978,8 +1026,22 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, ...body }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request('POST', '/admin/triggers', body);
-      return jsonResult(json);
+      let id = (body as { id?: string }).id;
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_AUTOMATIONS_FILE,
+        write: async () => {
+          const { json } = await client.request('POST', '/admin/triggers', body);
+          id = (json as { trigger?: { id?: string } }).trigger?.id ?? id;
+          return json;
+        },
+        mirror: (dir, json) => patchAutomations(dir, 'trigger', id!, (json as { trigger: Record<string, unknown> }).trigger),
+        undo: async () => {
+          await client.request('DELETE', `/admin/triggers/${encodeURIComponent(id!)}`);
+        }
+      });
+      return jsonResult({ ...(answer as object), project });
     })
   );
 
@@ -996,8 +1058,17 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, id, ...body }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request('PUT', `/admin/triggers/${encodeURIComponent(id)}`, body);
-      return jsonResult(json);
+      const route = `/admin/triggers/${encodeURIComponent(id)}`;
+      const before = await storedTrigger(client, id);
+      const { answer, project } = await keepTrigger(
+        client,
+        id,
+        async () => {
+          if (before) await client.request('PUT', route, before);
+        },
+        async () => (await client.request('PUT', route, body)).json
+      );
+      return jsonResult({ ...(answer as object), project });
     })
   );
 
@@ -1014,8 +1085,17 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, id, enabled }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request('POST', `/admin/triggers/${encodeURIComponent(id)}/enabled`, { enabled });
-      return jsonResult(json);
+      const route = `/admin/triggers/${encodeURIComponent(id)}/enabled`;
+      const before = await storedTrigger(client, id);
+      const { answer, project } = await keepTrigger(
+        client,
+        id,
+        async () => {
+          if (before) await client.request('POST', route, { enabled: before.enabled !== false });
+        },
+        async () => (await client.request('POST', route, { enabled })).json
+      );
+      return jsonResult({ ...(answer as object), project });
     })
   );
 
@@ -1045,8 +1125,17 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, id }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request('DELETE', `/admin/triggers/${encodeURIComponent(id)}`);
-      return jsonResult(json);
+      const before = await storedTrigger(client, id);
+      const { answer, project } = await keepTrigger(
+        client,
+        id,
+        async () => {
+          // A webhook comes back with a new secret: delete took the old one with it.
+          if (before) await client.request('POST', '/admin/triggers', before);
+        },
+        async () => (await client.request('DELETE', `/admin/triggers/${encodeURIComponent(id)}`)).json
+      );
+      return jsonResult({ ...(answer as object), project });
     })
   );
 
@@ -1266,8 +1355,25 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
   }) {
     const { client, body, propose, note, method, routePath } = args;
     if (!propose) {
-      const { json } = await client.request(method, routePath, body);
-      return jsonResult(json);
+      // P127 BKO-001: written straight to the project's backend, it is kept in nodegx.automations.json too.
+      let id = args.workflowId || (body.id as string | undefined);
+      const before = method === 'PUT' && id ? await currentWorkflow(client, id) : null;
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_AUTOMATIONS_FILE,
+        write: async () => {
+          const { json } = await client.request(method, routePath, body);
+          id = (json as { workflow?: { id?: string } }).workflow?.id ?? id;
+          return json;
+        },
+        mirror: (dir, json) => patchAutomations(dir, 'workflow', id!, (json as { workflow: Record<string, unknown> }).workflow),
+        undo: async () => {
+          if (before) await client.request('PUT', `/admin/workflow-defs/${encodeURIComponent(id!)}`, before);
+          else await client.request('DELETE', `/admin/workflow-defs/${encodeURIComponent(id!)}`);
+        }
+      });
+      return jsonResult({ ...(answer as object), project });
     }
 
     const workflowId = args.workflowId || (body.id as string | undefined);
@@ -1484,8 +1590,18 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, id }) => {
       const client = await requireBackend(backendId);
-      const { json } = await client.request('DELETE', `/admin/workflow-defs/${encodeURIComponent(id)}`);
-      return jsonResult(json);
+      const before = await currentWorkflow(client, id);
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_AUTOMATIONS_FILE,
+        write: async () => (await client.request('DELETE', `/admin/workflow-defs/${encodeURIComponent(id)}`)).json,
+        mirror: (dir) => patchAutomations(dir, 'workflow', id, null),
+        undo: async () => {
+          if (before) await client.request('POST', '/admin/workflow-defs', before);
+        }
+      });
+      return jsonResult({ ...(answer as object), project });
     })
   );
 

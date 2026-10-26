@@ -38,28 +38,25 @@
  */
 
 import * as fs from 'fs';
-import * as path from 'path';
 
-import type { TriggerDef, TriggerInput, TriggerRegistry } from '../triggers/registry';
+import type { TriggerInput, TriggerRegistry } from '../triggers/registry';
 import { validateTriggerDef, validateTriggerInput } from '../triggers/registry';
 import type { WorkflowRegistry } from '../workflow/WorkflowRegistry';
 import { validateWorkflowDefinition } from '../workflow/WorkflowEngine';
 import { migrateDefinition } from '../workflow/steps/migrate';
-import type { WorkflowDefinition, WorkflowInput } from '../workflow/types';
+import type { WorkflowDefinition } from '../workflow/types';
+import {
+  automationsFromBackend,
+  diffAutomations as diffShapes,
+  ProjectAutomations,
+  projectAutomationsPath,
+  ProjectTrigger,
+  projectTrigger,
+  ProjectWorkflow,
+  projectWorkflow as shapeWorkflow
+} from './shape';
 
-/** The project-root file. */
-export const PROJECT_AUTOMATIONS_FILE = 'nodegx.automations.json';
-
-/** A trigger as the project keeps it: the write shape, with its id, and never a secret. */
-export type ProjectTrigger = Omit<TriggerInput, 'secret'> & { id: string };
-/** A workflow as the project keeps it: the write shape, with its id. */
-export type ProjectWorkflow = WorkflowInput & { id: string };
-
-export interface ProjectAutomations {
-  version: 1;
-  workflows: ProjectWorkflow[];
-  triggers: ProjectTrigger[];
-}
+export * from './shape';
 
 export class ProjectAutomationsError extends Error {
   readonly code: string;
@@ -70,79 +67,17 @@ export class ProjectAutomationsError extends Error {
   }
 }
 
-export function projectAutomationsPath(projectDir: string): string {
-  return path.join(projectDir, PROJECT_AUTOMATIONS_FILE);
-}
-
-const DEFAULT_MAX_BODY_BYTES = 1024 * 1024;
 /** The workflow registry's id rule (`WorkflowRegistry.ts` ID_RE), checked here so a bad id is named before a start. */
 const WORKFLOW_ID_RE = /^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/;
 
-/** Keep only the keys that are set, so `undefined` and absent compare equal and never reach the file. */
-function defined<T extends Record<string, unknown>>(obj: T): T {
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(obj)) if (v !== undefined) out[k] = v;
-  return out as T;
-}
-
-/**
- * A trigger in the form the project keeps, from either a stored `TriggerDef` or
- * a hand-written entry, with the defaults the registry fills in written out.
- * Both sides of a comparison go through here, so a file that leaves a default
- * implicit does not read as different from the backend that filled it in.
- */
-export function projectTrigger(t: TriggerDef | ProjectTrigger): ProjectTrigger {
-  const base = defined({
-    id: t.id,
-    type: t.type,
-    name: t.name,
-    enabled: t.enabled !== undefined ? t.enabled : true,
-    target: t.target ? defined({ kind: t.target.kind, name: t.target.name }) : t.target,
-    responseMode: t.responseMode,
-    responseTimeoutMs: t.responseTimeoutMs
-  }) as ProjectTrigger;
-  if (t.type === 'schedule' && t.schedule) {
-    base.schedule = defined({
-      cron: t.schedule.cron,
-      missedFirePolicy: t.schedule.missedFirePolicy || 'skip',
-      overlapPolicy: t.schedule.overlapPolicy,
-      payload: t.schedule.payload
-    });
-  } else if (t.type === 'webhook' && t.webhook) {
-    base.webhook = {
-      slug: t.webhook.slug,
-      scheme: t.webhook.scheme || 'hmac-sha256',
-      maxBodyBytes: t.webhook.maxBodyBytes || DEFAULT_MAX_BODY_BYTES
-    };
-  } else if (t.type === 'db-change' && t.dbChange) {
-    base.dbChange = { collection: t.dbChange.collection, actions: [...t.dbChange.actions] };
-  }
-  return base;
-}
-
-/** A workflow in the form the project keeps, migrated to this backend's step vocabulary, defaults written out. */
+/** A hand-written or stored workflow, migrated to this backend's step vocabulary, in the project's form. */
 export function projectWorkflow(w: WorkflowDefinition | ProjectWorkflow): ProjectWorkflow {
-  const m = migrateDefinition({ ...w }) as ProjectWorkflow;
-  return defined({
-    id: w.id,
-    name: m.name,
-    entry: m.entry,
-    concurrency: m.concurrency && m.concurrency >= 1 ? m.concurrency : 1,
-    timeoutMs: m.timeoutMs,
-    stepTimeoutMs: m.stepTimeoutMs,
-    steps: m.steps
-  }) as ProjectWorkflow;
+  return shapeWorkflow(migrateDefinition({ ...w }) as ProjectWorkflow);
 }
 
-const byId = (a: { id: string }, b: { id: string }) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
-
-/** The file a backend's automations make, sorted by id so a diff shows decisions, not order. */
-export function automationsFromBackend(workflows: WorkflowDefinition[], triggers: TriggerDef[]): ProjectAutomations {
-  return {
-    version: 1,
-    workflows: workflows.map(projectWorkflow).sort(byId),
-    triggers: triggers.map(projectTrigger).sort(byId)
-  };
+/** `diffAutomations`, with the project's workflows migrated first, so an old step kind is not a difference. */
+export function diffAutomations(project: ProjectAutomations, backend: ProjectAutomations): string[] {
+  return diffShapes({ ...project, workflows: project.workflows.map(projectWorkflow) }, backend);
 }
 
 /** Every reason the entries are not valid, in the words the backend's own validators use. */
@@ -227,27 +162,6 @@ export function readProjectAutomations(projectDir: string): ProjectAutomations |
   }
   const p = parsed as Partial<ProjectAutomations>;
   return { version: 1, workflows: p.workflows || [], triggers: p.triggers || [] };
-}
-
-/**
- * How a project's file and a backend's automations differ, one sentence each,
- * empty when they agree. Read from the project's side: "only in the project"
- * is what a backend made from it would gain.
- */
-export function diffAutomations(project: ProjectAutomations, backend: ProjectAutomations): string[] {
-  const out: string[] = [];
-  const compare = <T extends { id: string }>(kind: string, ours: T[], theirs: T[], norm: (x: T) => T) => {
-    const a = new Map(ours.map((x) => [x.id, JSON.stringify(norm(x))]));
-    const b = new Map(theirs.map((x) => [x.id, JSON.stringify(norm(x))]));
-    for (const id of [...a.keys()].sort()) {
-      if (!b.has(id)) out.push(`${kind} "${id}" is in the project, not on the backend`);
-      else if (a.get(id) !== b.get(id)) out.push(`${kind} "${id}" differs between the project and the backend`);
-    }
-    for (const id of [...b.keys()].sort()) if (!a.has(id)) out.push(`${kind} "${id}" is on the backend, not in the project`);
-  };
-  compare('workflow', project.workflows, backend.workflows, projectWorkflow);
-  compare('trigger', project.triggers, backend.triggers, projectTrigger);
-  return out;
 }
 
 export type ProjectAutomationsOutcome =
