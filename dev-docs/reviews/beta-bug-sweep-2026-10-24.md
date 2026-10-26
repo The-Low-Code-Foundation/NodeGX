@@ -635,3 +635,69 @@ and said "Let's rock out". Built: four of them whole and one in part. One is mea
 4. The in-page preview's ok result dropped the validation report it had; Studio's problem box showed errors only.
 5. Base reds, identical with this session's files swapped back: editor tests-unit 11 suites / 24 tests; mcp 8 / 12
    (P127 peer edits in `noodl-mcp` give tsc errors in nodegx-backend and preview's dep-002 test, not this session's).
+
+# Session 11, 2026-10-26 (next session reads this first)
+
+Session 10's first item (OWN008-AUDIT) done, then four more rows on the Beta's road, and a bug found on the way.
+**Nothing pushed**: `cline-dev` is 44 commits ahead of `origin/cline-dev` (a P127 peer committed beside this session).
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| P112-OWN008-AUDIT (ruled: remove the warnings) | 0d822ff67 | `fast-xml-parser` 4.5.7 → 5.11.2 in all four places at once: runtime, node-spec and editor `^5.11.2`, the export's `PARSE_DEPENDENCIES`, the Swift export's carried parser (regenerated from 5.x's own `lib/fxparser.min.js`: 5.x has no CommonJS `src/` and exports no `./package.json`) | 31 documents × 8 option sets: 240/248 identical, the rest one kind (5.x expands `&hellip;`). Viewer bundle +13.8 KB gzipped (built twice, 4.5.7 aliased in). node-spec packed from this tree + the registry's mcp, preview, project-contract: **npm audit 0** |
+| **BETA-S11-ENTITYCAP** (filed, fixed) | 0d822ff67 | 4.5.7 refused any document with more than 1,000 escaped characters (`&amp;`, `&#169;`): a blog feed of about 150 posts read as `xml/parse-failed` | `beta-s11-entitycap` red 2/2 on 4.5.7, green on 5; fed-001 43/43, Parse XML and Parse Feed conform, backend feed suites green |
+| P112-OWN021-FEEDFLAKE | e9e48ccca | Not the product: five concurrent `heartPost` calls keep 1 or 2 rows (count by person stays 1, by design), and the spec asserted exactly one | every burst response logged over 13 runs; 8/8 green after; the six heartPost mutants red |
+| P123-STU031-COPYBOX | f107a9cb6 | The kit's `elementsOf` follows a copy's `getRoots()` (`src/inPage/drawnElements.ts`) | real component instances (corpus harness): red 2/5 with the roots branch out, 5/5 |
+| P107-C98 (HIGH) | 0388d02ca | A Video's Volume is held at 0 or 1, a non-number plays at 1 (`playableVolume`); the C98 row marks, withheld values and known row gone | jsdom's own setter, each refused value shown to throw first, 13/13; Video conformance's two reds identical with HEAD's files (VIDEOEMBEDSEED, C96 below) |
+| P123-STU015-BASEURL | 2bb610716 | `base-path.ts`: the base comes off on read and goes on an absolute path on write, path mode only, in the Page Router, Page Stack, Navigate To Path and `navigateToPath`. An app's own path navigations now work in the preview Studio road-tests in | real router methods over a jsdom `location`: red 4/8 on HEAD's files (the base cases only), 8/8; 15 navigation suites 186/186; Router, Page Stack, both navigates conform 11/11 |
+
+Measured, left open: **P107-C96**'s scenario no longer fires on the runtime (its known-rows check is red at HEAD for it).
+
+## For Richard
+
+1. **Push and publish.** 44 commits. 🔴 `@nodegx/node-spec` must be published at a NEW version for the audit to read
+   0 for a stranger: the registry's 0.2.0 depends on `^4.5.7`, and project-contract 0.2.1 asks for `^0.2.0`.
+2. **A question, P121-TWO003-GROUPKEYBOARD:** *"A card made from a Group that opens something on Click can't be
+   reached with the Tab key. Should a Group with Click wired become keyboard-reachable by itself (Tab stops on it,
+   Enter or Space clicks it), or should it be a setting the builder turns on?"* (Either one changes the Group, Text
+   and Image specs; a warning while building is the cheap first half either way.)
+3. Standing: the engine CLI's full-stack default (session 10), MCPJSONABSPATH's measurement on your machine.
+
+## Next
+
+1. GROUPKEYBOARD once ruled.
+2. C96: which change made its scenario stop firing; close the row or narrow it.
+3. Session 10's list stands: DEPLOYLOOPBACK's third-party half (editor + agents, off the Beta walk),
+   DROPDOWNFOCUSDIVERGE (one CDP drive), BUTTONFOCUSSURVIVOR.
+4. Open rows still on the walk, not taken: P112-OWN023-PHONEPREVIEW (a phone on the Wi-Fi gets a page whose backend is
+   127.0.0.1), P112-OWN023-KEYNEEDSAGENT (measure first whether the preview's backend reads the app's `.env`).
+
+## Traps met
+
+1. 🔴 **The runtime's node-spec target compiles viewer files with the runtime's tsconfig**, where the bare `Noodl`
+   global is not declared. A new viewer module that names it fails every spec's setup: EMPTY failures, no TS error
+   printed, and a viewer `tsc` that is clean. Read `globalThis.Noodl`, and run `NSP_ONLY=` conformance after any new
+   viewer module.
+2. 🔴 **Specs cite viewer files by line** (`router.tsx :923`, `Video.tsx :236-305`, the runtime's `xml.ts :146`). Put
+   a new helper at the end of the file, use a spare blank line for an import, and compare each cited line against
+   `git show HEAD:` before committing. All held this session.
+3. 🔴 **`jest -t` is not a rerun of one test in a spec whose tests share state**: it skips the setup tests and reads
+   as a different failure (FEEDFLAKE's first reading was that).
+4. `grep -rl` skipped `fed-001-feed.test.ts` (it holds a NUL byte) and then `golden.js --help` RAN the writer: there
+   is no help flag.
+5. `fast-xml-parser` 5 exports no `./package.json`: `require.resolve('fast-xml-parser/package.json')` throws.
+6. A dependency bump writes `package-lock.json`, which a peer had open: the commit carries only this session's delta
+   (diff against a copy taken before `npm install`, patched onto HEAD's lock, committed through a temporary index).
+
+## Gates read (2026-10-26)
+
+runtime: fed-001 + entitycap 43/43, tsc clean; conformance `NSP_ONLY` ParseXML/ParseFeed green, Video 2 reds identical
+on HEAD, Router/Page Stack/both navigates 11/11 · export: the-parsers + Swift s9 54/54, tsc clean · node-spec: golden
+--check fresh, golden/runner/draw 107/107; honesty (5 templates) and honesty-ledger red at HEAD from template drift (a
+peer has the ledger open); bundle-size over budget before this (P107-SIZE) · backend: cloud-feed-nodes 12/12, feed
+suites green but the burst (fixed) · preview: copybox 5/5; tsc's two dep-002 errors are a peer's P127 work · viewer:
+c98 13/13, baseurl 8/8, navigation suites 186/186, tsc clean, prod viewer bundle builds.
+
+**Commits this session:** 0d822ff67, 5a2d85a56, e9e48ccca, 656f5e938, f107a9cb6, 9e99e8ae3, 0388d02ca, 4aa8029a2,
+2bb610716, f2b0a8754, and the docs commit after them.
