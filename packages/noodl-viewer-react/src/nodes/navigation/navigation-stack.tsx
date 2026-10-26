@@ -22,7 +22,7 @@ import { Noodl, Slot } from '../../types';
 import NavigationHandler, { StackNavigateArgs } from './navigation-handler';
 import Transitions from './transitions';
 import type Transition from './transitions/transition';
-
+import { envBaseUrl, pathUnderBase, pathWithinApp } from './base-path';
 
 /** P107-C124 — `decodeURIComponent`, keeping the text as written on a malformed escape (router.tsx `_decodePathSegment`). */
 function decodeOrKeep(text: string): string {
@@ -778,11 +778,11 @@ const PageStack = {
         }
         return hash;
       } else {
-        // Use url as path
-        let path = location.pathname;
-        if (path) {
-          if (path[0] === '/') path = path.substring(1);
-        }
+        // Use url as path, the base the app is served under taken off as the Page Router takes it (P123-STU015-BASEURL):
+        // this cut only the "/", so under "/runtime/" it read "runtime/sign-in" while the Router read "sign-in".
+        // `base-path.ts` holds both directions; the hash path never carries the base.
+        const baseUrl = envBaseUrl();
+        const path = pathWithinApp(location.pathname, baseUrl);
         return path;
       }
     },
@@ -882,7 +882,7 @@ const PageStack = {
         let urlPath, hashPath;
         const navigationPathType = NoodlRuntime.instance.getProjectSettings()['navigationPathType'];
         if (navigationPathType === undefined || navigationPathType === 'hash') hashPath = url.path;
-        else urlPath = url.path;
+        else urlPath = pathUnderBase(url.path, envBaseUrl()); // P123-STU015-BASEURL
 
         // P107-C122 — encoded, as the Page Router writes its query: a value with &, #, + or a space came back different, and one
         // with % emptied the stack at the next reset

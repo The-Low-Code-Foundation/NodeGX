@@ -1,3 +1,4 @@
+import { envBaseUrl, pathUnderBase } from '../nodes/navigation/base-path';
 import { RouterHandler } from '../nodes/navigation/router-handler';
 
 const NoodlRuntime = require('@noodl/runtime');
@@ -65,7 +66,8 @@ const navigation: NavigationApi = {
     let hashPath: string, urlPath: string;
     const navigationPathType = NoodlRuntime.instance.getProjectSettings()['navigationPathType'];
     if (navigationPathType === undefined || navigationPathType === 'hash') hashPath = path;
-    else urlPath = path;
+    // P123-STU015-BASEURL: an absolute path goes under the base the app is served under, which the routers take off
+    else urlPath = pathUnderBase(path, envBaseUrl());
 
     const query = [];
     if (options && options.query !== undefined) {
