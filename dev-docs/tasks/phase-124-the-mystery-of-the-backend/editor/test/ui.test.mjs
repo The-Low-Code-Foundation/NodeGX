@@ -84,6 +84,27 @@ try {
     `the lens says, measured: “${note.slice(0, 120)}…”`
   );
 
+  // P127 BKO-004: a function's panel offers "Open its steps" only inside a frame (Studio's Data → Map), and pressing it
+  // tells the page around it which function; the map on its own has no Studio to open it in, and says nothing of it.
+  {
+    const alone = await browser.newPage();
+    await alone.goto(url + '#f:course', { waitUntil: 'networkidle0' });
+    await alone.waitForFunction(() => document.getElementById('panelBody')?.dataset.node === 'f:course', { timeout: 20000 });
+    ok(!(await alone.$('#panelBody [data-open-steps]')), 'on its own, course’s panel has no “Open its steps”');
+    await alone.close();
+    const outer = await browser.newPage();
+    await outer.setViewport({ width: 1680, height: 1000 });
+    await outer.setContent(`<iframe id="m" src="${url}#f:course" style="width:1600px;height:900px;border:0"></iframe><script>window.__got = []; addEventListener('message', (e) => { if (e.source === document.getElementById('m').contentWindow) __got.push(e.data); });</script>`);
+    const frame = await (await outer.waitForSelector('#m')).contentFrame();
+    await frame.waitForSelector('#panelBody [data-open-steps]', { visible: true, timeout: 20000 });
+    await new Promise((r) => setTimeout(r, 600)); // the panel slides in
+    await frame.click('#panelBody [data-open-steps]');
+    await outer.waitForFunction(() => window.__got.length > 0, { timeout: 5000 }).catch(() => {});
+    const got = await outer.evaluate(() => window.__got);
+    ok(got.length === 1 && got[0]?.nodegx === 'open-function' && got[0]?.component === '__cloud__/course', `inside a frame, “Open its steps” tells the page around it: ${JSON.stringify(got)}`);
+    await outer.close();
+  }
+
   // No JSON on screen.
   const text = await page.evaluate(() => document.body.innerText);
   ok(!/[{[]\s*"/.test(text), 'no JSON anywhere on screen');

@@ -1008,6 +1008,9 @@ function renderPanel() {
     if (g) g.scrollTop = grid;
   }
   for (const a of $('panelBody').querySelectorAll('[data-go]')) a.onclick = () => focusOn(a.dataset.go);
+  // P127 BKO-004: inside Studio (Data → Map is a frame), a function opens as its graph on Studio's Workflow. Studio
+  // checks the message came from its own map frame; a map on its own (no parent) draws no such link
+  for (const a of $('panelBody').querySelectorAll('[data-open-steps]')) a.onclick = () => window.parent.postMessage({ nodegx: 'open-function', component: a.dataset.openSteps }, '*');
   for (const b of $('panelBody').querySelectorAll('[data-row]')) b.onclick = () => openRecord(n.key, b.dataset.row);
   for (const b of $('panelBody').querySelectorAll('[data-as]')) b.onclick = () => setPerson(b.dataset.as);
   if ($('findReach')) $('findReach').onclick = () => findReach();
@@ -1797,6 +1800,7 @@ function fnPanel(n) {
   return `
     <div class="kind">Function</div>
     <h2>${esc(f.name)}</h2>
+    ${window.parent !== window && f.component ? `<p><a data-open-steps="${esc(f.component)}" title="Open it in Studio's Workflow, drawn step by step">Open its steps ↗</a></p>` : ''}
     <p>${f.deployed ? 'Live on the backend.' : '<b>Not live on the backend</b>: it is in the app, but the backend doesn’t have it. Your agent can deploy it.'} Changes to a function’s steps only reach the backend when they’re deployed.</p>
     ${verdict}
     <h4>When it runs</h4>

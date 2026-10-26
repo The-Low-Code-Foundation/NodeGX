@@ -31,13 +31,23 @@ people, groups and tables (`lib/people.mjs`, `projectTables`), draws a table the
 source, and says no training word. `test/any-app.test.mjs` (in `npm test`) 38/38; the whole suite 104 checks; the
 training copy unchanged. The session log in BKO-003 has the mutants and the recording control.
 
-**Next, in order:**
-0.1.2 is published and Studio pins it (nodegx-studio `3931ddf`; `check:hosted` 9/9, `check:data` 80/80). BKO-003 is
-done.
+## s4 (2026-10-26): BKO-004 built
 
-1. **BKO-002 AC2**, Claude Desktop (the Studio it runs now carries both BKO-002 and the 0.1.2 map, after a restart). It waits on Richard: Desktop must run a Studio carrying `f50fb31` and a
+A cloud function opens as its graph on Workflow → **On the backend**, from a step that runs it, from a helper it
+places, and (with the map 0.1.3) from the map's panel; it says what it reads and writes and its last run. Read only.
+Gates: Studio `check:functions` (fngraph 695/695, Chrome 46/46), `check:hosted` 16/16, the whole `check` list green;
+six mutants red. The session log in BKO-004 has it all. Filed: **P127-BKO004-FNSTEPS** (a function's run records no
+nodes, so its steps cannot be lit).
+
+**Next, in order:**
+
+1. **BKO-005**, workflows and triggers drawn: it reads `nodegx.automations.json` (BKO-001) and puts them under
+   "On the backend" beside the functions (`renderFnList` in `studio.html`, `functionList` in `editor/fngraph.mjs`).
+2. **Richard:** publish `@nodegx/backend-map` 0.1.3 (the map's "Open its steps"; `cd
+   dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm publish --access public`), then Studio's pin
+   and `vendor/NODEGX.json`'s record move to 0.1.3 together (`npm run check:vendor` says if one is left behind).
+3. **BKO-002 AC2 and BKO-004 AC3 in Claude Desktop**: both need Desktop to run a Studio carrying today's commits and a
    `noodl-mcp` carrying `837b4ece8`. Ask before rebuilding anything.
-3. BKO-004 / BKO-005 (they read BKO-001's file shape, which has landed).
 4. Later: **BKO-001 AC5**, a real ship to the throwaway VM, with the release.
 
 **Not live for Richard yet:** Claude Desktop runs the `noodl-mcp` dist and the Studio it finds. A provisioned backend
