@@ -29,14 +29,34 @@ Reuse its decisions, not a new grammar:
 3. **A first start seeds from it** when the data dir has none, and refuses loudly on an invalid file, exactly like
    `applyProjectPolicy`. `--project-dir` already reaches the backend for this.
 4. **Every write the agent makes goes to both**: `create_/update_/delete_backend_workflow`, `create_/update_/
-   delete_backend_trigger`, `set_backend_trigger_enabled`. File first, then backend. If the backend refuses, the file
-   is put back and the refusal is returned. This is the map's `/api/table-rule` rule: both or neither.
+   delete_backend_trigger`, `set_backend_trigger_enabled`. **Backend first** (it validates), then the file patched
+   by id. If the file cannot be written, the backend is put back and the refusal is returned. This is the map's rule
+   (`editor/lib/rules.mjs` `setTableRule`): both or neither. The file is created when the project has none.
+4b. **Rules too** (found while scoping, P127-BKO001-BACKENDONLY): `set_collection_permissions` and its clear write
+   only the backend, so an agent-built app has no `nodegx.security.json` (measured in OWN-026 test 2). They now patch
+   the project's rules file by collection, the same way. Enforcement (`set_backend_enforcement`) stays a backend
+   switch. It is not copied into the file, because `start.js` refuses a ship whose rules are switched off.
 5. **Drift is said, not hidden.** An existing backend whose workflows or triggers differ from the file (made before
    this change, or edited on the admin page) is reported by `get_project_info` / `session_status` with both ways to
    agree, as Studio's Data tab does for a field.
 6. **They travel.** `deploy_to_vm` and `nodegx-deploy --full-stack` ship the file and the target backend loads it.
    `what_changed_since` lists a change to it. The publish ignores that missed `nodegx.security.json`
    (P123-STU008-BACKENDPUBLIC) do not miss this file.
+
+## Design decisions read from the code (s1)
+
+- The file holds the backends' **write** shapes, not their stored ones: `WorkflowInput` (`workflow/types.ts`) and
+  `TriggerInput` (`triggers/registry.ts`). Timestamps, `status` (last fired, fire count) and the routes' decorations
+  (`effectiveOverlapPolicy`, `scheduleWords`) are left out, so a run never changes git.
+- Seeding goes through `WorkflowRegistry.upsert` and `TriggerRegistry.upsert`, not a raw file copy. That way a
+  webhook seeded onto a fresh backend gets a secret minted the way a new one does (`registry.ts:726`), and every
+  definition is checked by the same validator. A seeded webhook's new secret is named in the start log, because the
+  sender needs it. `update_backend_trigger` with `rotateSecret` is how the person reads one.
+- A seed happens only when the backend has **no** workflows and **no** triggers. When both sides have some and they
+  differ, that is drift, reported and never merged.
+- The deploy follows `start.js`'s rules pattern: ship `backend/nodegx.automations.json`, decide install / replace /
+  unchanged by checksum (`deployed-automations.json`), move the old `triggers.json` and `workflow-defs/` aside on
+  replace, and let the backend seed from `--project-dir`.
 
 ## Acceptance
 
