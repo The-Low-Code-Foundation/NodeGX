@@ -33,11 +33,15 @@ for name in nodegx-node-spec nodegx-project-contract nodegx-canvas-look nodegx-p
   # 2026-10-14 (npm 0.2.0): npm can STAGE a publish (staged publishing, GA May 2026) instead of making it live, and
   # create-nodegx then pins an MCP version nobody can install. Wait until the registry serves each one, with the
   # tested shasum, before the next; stop rather than publish create-nodegx over a version that isn't there.
+  # 2026-10-26 (npm 0.2.7): npm now runs an automated review on a new version before it serves it. The package page shows
+  # it as "Validating"; `npm stage list` shows nothing; a re-publish answers E409 "Cannot publish over previously staged
+  # version". @nodegx/node-spec@0.2.1 stayed there for more than 15 minutes, so the wait is 45 minutes and says what it is.
   want=$(shasum "$tgz" | cut -c1-40)
-  for i in $(seq 1 30); do
+  for i in $(seq 1 270); do
     got=$(registry_shasum "${pkg%@*}" "${pkg##*@}")
     [ "$got" = "$want" ] && { echo "live: $pkg"; break; }
-    [ "$i" = 30 ] && { echo "STOP: $pkg is not live after 5 min (staged? run: npx npm@11.15.0 stage list). Nothing after it was published." >&2; exit 1; }
+    [ "$i" = 270 ] && { echo "STOP: $pkg is not live after 45 min. Look at its page on npmjs.com: \"Validating\" is npm's review (wait, then run this again, which skips what is live); \"staged\" needs: npx npm@11.15.0 stage list. Nothing after it was published." >&2; exit 1; }
+    [ $((i % 30)) = 0 ] && echo "  waiting for $pkg: $((i / 6)) min (npm's page says \"Validating\" while its review runs)"
     sleep 10
   done
 done
