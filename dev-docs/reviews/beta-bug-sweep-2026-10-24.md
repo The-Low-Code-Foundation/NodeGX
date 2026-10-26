@@ -728,3 +728,44 @@ page (adds 0.2.6, never deployed, and 0.2.7) is built in a scratch copy of nodeg
 Richard uploaded that one file (`rsync` to `nexus:`, his key; the bare IP gets no key from `~/.ssh/config`). Live
 `/changelog/` md5 equals the built file and carries the 0.2.6 and 0.2.7 sections; `/`, `/gala/`, `/map/`, `/orbit/`,
 `/backend-map/` and `/templates/rocket-school/` still answer 200.
+
+# Session 12, 2026-10-26 (next session reads this first)
+
+Richard ruled GROUPKEYBOARD ("for accessibility yes, absolutely, we must have interactive elements available to screen
+readers that tab through the page"), then "carry on". Three rows built, one closed on the way. **Nothing pushed.**
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **P121-TWO003-GROUPKEYBOARD** (ruled: automatic) | ae80457b3 | `noodl-viewer-react/src/keyboard-click.ts`: while a visual node's Click has a wire (Group, Text, Image, Circle, Video share one Click), its element gets `tabindex="0"` + `role="button"` where it has neither and is not natively interactive; Enter clicks, Space clicks on keyup, through `el.click()` so Click Bubbling and the rest apply; a key already cancelled (a Draggable's Space, `drag-drop.ts` capture) or pressed on a field inside is left alone; the last wire off gives back only what was added; the controls' focus ring. Found on the way: **`defineNode` dropped a signal output's first/last-connection hooks** (now passed through; no signal declared one before) | `two003-groupkeyboard` 17/17 on real Text and Image nodes (corpus harness, React into jsdom, real KeyboardEvents); seven mutants each red on their row; viewer + runtime tsc clean; FH-015, HLT-017, DEF-029, focus ring, GAM-027 86/86; NSP_ONLY Group/Text/Image/Circle conform |
+| **P107-C96** | 4768d4b15 | Why it stopped firing: built-in nodes now draw inside `KitNodeBoundary`, so the throw no longer blanked the page, but the Video still showed nothing (the YouTube player lost). `setSourceObject` returns with no `<video>` (same line: spec citations hold); C96 leaves `KNOWN_ROWS`, its scenarios lose `row` + "the runtime throws" (golden: names only) | `p107-c96-source-object-on-an-embed` 4/4 (asserts the `<iframe>` is drawn; guard out → the two C96 rows red, control and file twin green); Video conformance today 200/200, 0 divergences (was 1), known rows green |
+| **P112-OWN023-PHONEPREVIEW** | a57e899fa | Shared preview (`--host`) with a backend on this machine: answers `nodegx-config.json` (DEP-001) with `<page's address>/__nodegx/backend` and streams that path to the backend on loopback, behind its own token gate (token not passed on). Backend `requestOrigin` honours `X-Forwarded-Prefix` (plain path, no `.`/`..`); `fileAddress` knows its url under a prefix. Kit docs + `--host` help say how | preview 8/8, backend file-url-host 9/9, create-nodegx 34/34 (six mutants red); **drive** with a real backend from this Mac's Wi-Fi address 13/13 (records, a photo whose url opens, realtime stream); backend file suites 58/58 |
+
+**P107-S92-VIDEOEMBEDSEED closed: it was C96.** The four seeds it recorded red (20737–20740: 2, 3, 2, 1 divergences)
+read 0 after the fix; at 20738 with the guard taken out its exact three seeds come back.
+
+## For Richard
+
+1. **Push and publish.** The viewer (GROUPKEYBOARD, C96) reaches Studio and the npm kit through `@nodegx/preview`;
+   PHONEPREVIEW is preview + backend + create-nodegx. None of it is in 0.2.7.
+2. Standing: the engine CLI's full-stack default (session 10), MCPJSONABSPATH on your machine.
+
+## Next
+
+1. P112-OWN023-KEYNEEDSAGENT (measure first whether the preview's backend reads the app's `.env`).
+2. A card that is a button with a Button inside it is "nested interactive" (axe): a build-time note is the candidate
+   (GROUPKEYBOARD bug file, "Left").
+3. Session 10's list: DROPDOWNFOCUSDIVERGE (one CDP drive), BUTTONFOCUSSURVIVOR, DEPLOYLOOPBACK's third-party half.
+
+## Traps met
+
+1. 🔴 **`defineNode` registers a signal output with a bare getter**: `onFirstConnectionAdded`/`onLastConnectionRemoved`
+   on a signal never ran (fixed). A value output always kept them.
+2. 🔴 **A boundary can turn a known row silent without fixing it**: C96's throw was caught by `KitNodeBoundary`, the
+   conformance face saw no throw, the person still lost the player. Grade the consequence (the `<iframe>`), not the throw.
+3. 🔴 **ugrep skipped `HttpServer.ts`** and `withFileOrigin` read as "never called": confirm an absence with
+   `git grep` or Python before acting on it.
+4. A backend test list built from a grep caught `ac2-page-editor-drag-drive` (Chrome): it hung 10 minutes. Filter out
+   drives/Chrome specs; macOS has no `timeout`.
+5. The preview's tests run `dist/noodl-preview.cjs`: rebuild after every source edit, mutants included.
