@@ -25,3 +25,13 @@ unpacked), in `nodegx-node-spec`, `noodl-runtime` and `noodl-editor`, and the pi
 measure what 5.x adds to the runtime's **browser bundle** (unpacked size is not that) against P96 R1's budget, and ask
 whether `@nodegx/node-spec` needs the parser at all. Done = `npm audit` on a fresh install of the kit packages reads 0.
 Lockfile: the Mac-lockfile recipe, in a session that owns it.
+
+**Measured 2026-10-26, a fresh install from the registry** (`npm i @nodegx/mcp @nodegx/preview @nodegx/node-spec
+@nodegx/project-contract` = 0.2.6 / 0.2.6 / 0.2.0 / 0.2.1, then `npm audit --json`): **3 moderate, 0 high**, and all
+three are ONE advisory, GHSA-gh4j-gqv2-49f6 "fast-xml-parser XMLBuilder: XML Comment and CDATA Injection via Unescaped
+Delimiters" (`<5.7.0`), counted at `fast-xml-parser`, `@nodegx/node-spec` and `@nodegx/project-contract`. The `chokidar`
+3 → `braces` highs are gone without a change here: a fresh resolve takes a patched `braces`. So the work is
+`fast-xml-parser` only. It is pinned to 4.5.7 on purpose in four places that must move together: `noodl-runtime/src/xml.ts`
+(the XML node), `nodegx-node-spec/src/nodes/xml.ts` (its spec; scenarios pin the parse shape), `nodegx-export`
+`PARSE_DEPENDENCIES` (the pin every exported app's package.json carries, so an exported app's own `npm audit` says the
+same), and the Swift export's carried copy (`emit/swift/client.ts` `FXP_JS`, lane 4, paused).

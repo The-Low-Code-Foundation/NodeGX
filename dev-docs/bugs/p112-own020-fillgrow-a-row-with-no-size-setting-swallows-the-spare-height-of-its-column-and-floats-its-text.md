@@ -1,7 +1,9 @@
 ---
 id: P112-OWN020-FILLGROW
 title: "A Group with no size setting fills its parent (flex 100), so a small header row inside a full-height column swallows the spare height and floats its text far above the content below; nothing warns the agent"
-status: needs-ruling
+status: fixed
+commit: ef0e90f79
+regression: packages/noodl-editor/tests-unit/p112-own020-filltraps/layoutFillTraps.test.ts "fires on CGQ1’s header row, from the row"
 phase: P112
 task: OWN-020
 severity: medium
@@ -32,3 +34,5 @@ content stack; the kit's style guidance (headers, pills and labels take contentH
 
 **Ruled by Richard, 2026-10-26:** warn and teach, no default change; it must demonstrably work for a person in Studio.
 The ruling and its done-condition are written in full on P112-OWN020-PILLWRAP.
+
+Fixed with P112-OWN020-PILLWRAP (ef0e90f79; Studio 8bc0b53): the whole account is written there.

@@ -51,3 +51,20 @@ the full-stack backend answers it per request with the request's origin (`nodegx
 (Supabase, PocketBase, Directus, custom), any route that writes one, and the default flip to full stack. A full-stack
 deploy ships the backend, its functions and its rules; `data/` (records, uploads) is made on the box and never written
 by a deploy, so local test rows do not travel.
+
+**Built so far for the ruling (2026-10-26):**
+- **Studio** (9ac8eaf): Publish's first question defaults to "A Server of Your Own", which ships the backend, data and
+  functions, when the backend runs on this computer. The folder route keeps its "works on this computer only"
+  question.
+- **The editor's Deploy to folder** (097216d30): writes the front end only, so it now asks "Deploy the front end only",
+  naming the routes that ship both.
+- **`deploy_to_vm` and ship-to-vm.sh** were already full stack.
+
+**Not done, on purpose:** the `nodegx-deploy` CLI's default stays static. Studio's folder publish and `nodegx deploy`
+both spawn it with no flag, and an engine refuses a flag it does not know (`unexpected argument`), so flipping its
+default (with a `--frontend-only` opt-out) breaks whichever of the three programs updates first. It keeps its loopback
+warning.
+
+**Still open:** the third-party half (a "live address" per Backend Services entry, written into `nodegx-config.json`,
+which `deploy-config.ts` already merges as `backendServices`; a per-type sentence; a reachability check after
+deploying). Studio has no third-party backends, so this is the editor's and agents' and is off the Beta walk.
