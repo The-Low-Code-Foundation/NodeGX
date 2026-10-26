@@ -30,6 +30,7 @@ import { injectIntoTemplate } from '@nodegx/module-inject';
 import type { PreviewReport } from '../validate';
 import { pageFromFiles, type DeployTemplate, type InPagePage } from './exportInPage';
 import { armed, TRACE_OWNER } from './armTrace';
+import { drawnElements } from './drawnElements';
 import { kitTags } from './kits';
 
 export { exportInPage, importInputFromFiles, pageFromFiles } from './exportInPage';
@@ -98,7 +99,7 @@ export interface Preview {
    * The elements a visual node draws in the app on screen, by its id in the project's files (the trace's
    * `fromNode` / `toNode`). More than one when the node is inside a component placed several times or a
    * repeated row; none for a node that draws nothing (logic) or is not mounted. What lets a home-made editor
-   * point from a card to the part of the screen it makes.
+   * point from a card to the part of the screen it makes. For a copy of a component, the elements its roots draw.
    */
   elementsOf(nodeId: string): HTMLElement[];
   dispose(): void;
@@ -316,9 +317,8 @@ export async function mountPreview(container: HTMLElement, options: PreviewOptio
     elementsOf(nodeId) {
       const root = current ? runtimeOf(current)?.context?.rootComponent : undefined;
       if (!root) return [];
-      return (root.nodeScope.getNodesWithIdRecursive(nodeId) as TSFixme[])
-        .map((node) => (typeof node.getDOMElement === 'function' ? node.getDOMElement() : null))
-        .filter((el): el is HTMLElement => !!el);
+      // A copy of a component draws through its roots (P123-STU031-COPYBOX).
+      return drawnElements(root.nodeScope.getNodesWithIdRecursive(nodeId) as TSFixme[]);
     },
     dispose() {
       if (pump) clearInterval(pump);
