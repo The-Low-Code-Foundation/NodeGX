@@ -701,3 +701,18 @@ c98 13/13, baseurl 8/8, navigation suites 186/186, tsc clean, prod viewer bundle
 
 **Commits this session:** 0d822ff67, 5a2d85a56, e9e48ccca, 656f5e938, f107a9cb6, 9e99e8ae3, 0388d02ca, 4aa8029a2,
 2bb610716, f2b0a8754, and the docs commit after them.
+
+## The npm 0.2.7 re-cut (2026-10-26, after session 11)
+
+Richard said "let's push to npm". Release commit 541f6d3e0 (pushed with the 45 before it): `@nodegx/preview` 0.2.7,
+`@nodegx/node-spec` 0.2.1, `@nodegx/project-contract` 0.2.2; mcp and the three create-* stay 0.2.7 (never published);
+export and canvas-look stay. The 0.2.7 changelog section rewritten for everything since the first cut. Packed in the
+worktree `OpenNoodl-worktrees/npm-0.2.7b` at that commit (every build link into primary removed first, primary's dist
+untouched), tarballs and `SHASUMS.txt` in `OpenNoodl-worktrees/npm-0.2.7b-tarballs`. Graded from the tarballs, outside
+the checkout: fresh install of the four kit packages **npm audit 0**; stranger-kit 16 CJS + 2 ESM entries, types under
+node/bundler/node16; stranger-render "DONE — clean"; stranger-backend every step; file lists equal to the first cut's;
+the bundles carry no 4.5.7 sentence. create-* tarballs are byte-identical to the first cut's.
+
+**Publish = Richard's terminal (OTP):** `scripts/own/publish-npm.sh ../OpenNoodl-worktrees/npm-0.2.7b-tarballs`. After:
+read each version's shasum from the registry's full document against `SHASUMS.txt`, then deploy nodegx-web for the
+changelog page. The P127 peer's `@nodegx/backend-map` 0.1.2 is a separate publish, also on his OTP.
