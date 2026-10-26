@@ -67,6 +67,24 @@ export {
   applyProjectPolicy,
   describeProjectPolicyOutcome
 } from './security/projectPolicy';
+// P127 BKO-001 — the project's workflows and triggers (nodegx.automations.json).
+export {
+  PROJECT_AUTOMATIONS_FILE,
+  ProjectAutomations,
+  ProjectAutomationsError,
+  ProjectAutomationsOutcome,
+  ProjectTrigger,
+  ProjectWorkflow,
+  automationsFromBackend,
+  describeProjectAutomationsOutcome,
+  diffAutomations,
+  projectAutomationsPath,
+  projectTrigger,
+  projectWorkflow,
+  readProjectAutomations,
+  seedProjectAutomations,
+  validateProjectAutomations
+} from './automations/projectAutomations';
 // WF-005 — triggers (schedule / webhook / db-change).
 export { SecretsStore, WEBHOOK_SECRETS_NAMESPACE } from './config/SecretsStore';
 export {

@@ -35,6 +35,7 @@ import { WorkflowRunner } from './workflow/WorkflowRunner';
 import { scanDeployedFunctions } from './workflow/functionDeclarations';
 import { WorkflowSubsystem } from './workflow/WorkflowSubsystem';
 import { SecurityState, SecurityStartupError } from './security/state';
+import { describeProjectAutomationsOutcome, seedProjectAutomations } from './automations/projectAutomations';
 import { applyProjectPolicy, describeProjectPolicyOutcome } from './security/projectPolicy';
 import { functionRateLimitAnnouncement, functionTimeoutMs } from './security/model';
 import { SearchState, SearchStartupError } from './search/SearchState';
@@ -490,6 +491,23 @@ export class BackendService {
       bus: this.changeBus,
       secrets: new SecretsStore(this.options.dataDir)
     });
+
+    // 2.61 P127 BKO-001: the project's workflows and triggers, if it ships them
+    //      and this backend has none yet. After both registries exist (seeding
+    //      goes through their upserts, which validate and mint webhook secrets)
+    //      and before the scheduler starts, so a seeded schedule is scheduled.
+    //      An invalid file throws, as an invalid nodegx.security.json does.
+    const automationsNotice = describeProjectAutomationsOutcome(
+      seedProjectAutomations({
+        projectDir: this.options.projectDir,
+        workflows: this.workflows.registry,
+        triggers: this.triggers.registry
+      })
+    );
+    if (automationsNotice) {
+      // eslint-disable-next-line no-console
+      console.warn(automationsNotice);
+    }
 
     // 2.65 Backups (BAK-007): the backup subsystem constructs its OWN CronScheduler
     //      the SAME way TriggerSubsystem does — ONE scheduler class, two consumers.
