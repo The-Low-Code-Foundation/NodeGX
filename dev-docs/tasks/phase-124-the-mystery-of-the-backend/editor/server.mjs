@@ -13,11 +13,12 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { look, wireColors } from '@nodegx/canvas-look';
-import { openProject, analyseProject, tableLinks } from './lib/project.mjs';
+import { openProject, analyseProject, tableLinks, projectTables } from './lib/project.mjs';
 import { backend, BackendError } from './lib/backend.mjs';
 import { setTableRule, entryFor, readSecurityFile, dryRuns, Refusal, SECURITY_FILE } from './lib/rules.mjs';
 import { makeViews } from './lib/views.mjs';
-import { KEY_SUFFIX, asPerson, learnerIds } from './lib/asperson.mjs';
+import { KEY_SUFFIX, asPerson } from './lib/asperson.mjs';
+import { personColumns, personKeys, idOf } from './lib/people.mjs';
 import { projectBackend } from './lib/discover.mjs';
 import { loadWorld, personReach, anonymousReach } from './lib/reach.mjs';
 
@@ -65,12 +66,15 @@ export function createEditor(opts) {
   async function buildMap() {
     const health = await be.health();
     if (!health) throw new BackendError(0, `The backend at ${be.base} isn’t answering. Is it running?`);
+    // BKO-003: each source fails alone and the map says which; one failed call no longer blanks the map.
+    const problems = [];
+    const ask = (what, p, fallback) => p.catch((e) => (problems.push({ what, words: e.message }), fallback));
     const [schema, perms, fnPerms, roles, users, triggers, audit] = await Promise.all([
-      be.get('/admin/schema'),
-      be.getWithHeaders('/admin/permissions'),
-      be.get('/admin/permissions/functions'),
-      be.get('/admin/roles'),
-      be.get('/admin/users?limit=200'),
+      ask('tables', be.get('/admin/schema'), { tables: [] }),
+      ask('rules', be.getWithHeaders('/admin/permissions'), { json: { config: {}, etag: null } }),
+      ask('functions', be.get('/admin/permissions/functions'), { functions: [] }),
+      ask('groups', be.get('/admin/roles'), { roles: [] }),
+      ask('people', be.get('/admin/users?limit=200'), { users: [], total: null }),
       be.get('/admin/triggers').catch(() => ({ triggers: [] })),
       be.get('/admin/audit?limit=12').catch(() => ({ entries: [] }))
     ]);
@@ -82,18 +86,29 @@ export function createEditor(opts) {
     const tableNames = schema.tables.map((t) => t.name);
     const app = analyseProject(project, tableNames);
     const file = readSecurityFile(project.files);
-    const config = perms.json.config;
+    const config = perms.json.config ?? {};
     const deployed = Object.fromEntries(fnPerms.functions.map((f) => [f.name, f]));
+    // A table the project has and the backend doesn't (yet): drawn, and said so.
+    const onBackend = new Set(tableNames);
+    const missing = [...projectTables(project, file.config, app)].filter(([name]) => !onBackend.has(name));
+    const declared = missing.map(([name, t]) => ({ name, columns: t.columns ?? [], indexes: [] }));
+    const column = (c) => ({ name: c.name, type: c.type, ...(c.targetClass ? { targetClass: c.targetClass } : {}) });
     return {
       app: { name: app.name, folder: opts.project },
       backend: { name: health.backendName, url: be.base, enforced: !!health.security?.enforced, devOpen: !!health.security?.devOpen },
-      tables: schema.tables.map((t, i) => ({
-        name: t.name,
-        rows: t.name === '_User' ? users.total ?? users.users.length : counts[i],
-        columns: t.columns.map((c) => ({ name: c.name, type: c.type })),
-        keys: (t.indexes || []).filter((x) => x.unique).map((x) => x.fields)
-      })),
-      links: tableLinks(schema.tables),
+      problems,
+      tables: [
+        ...schema.tables.map((t, i) => ({
+          name: t.name,
+          rows: t.name === '_User' ? users.total ?? users.users.length : counts[i],
+          columns: t.columns.map(column),
+          keys: (t.indexes || []).filter((x) => x.unique).map((x) => x.fields),
+          people: personColumns(t)
+        })),
+        ...missing.map(([name, t]) => ({ name, rows: null, columns: (t.columns ?? []).map(column), keys: [], people: personColumns({ columns: t.columns ?? [] }), notOnBackend: true, from: t.from }))
+      ],
+      links: tableLinks([...schema.tables, ...declared]),
+      personKeys: [...personKeys(schema.tables)],
       functions: app.functions.map((f) => ({
         ...f,
         deployed: !!deployed[f.name]?.deployed,
@@ -109,19 +124,19 @@ export function createEditor(opts) {
       etag: perms.json.etag,
       fileStamp: file.stamp,
       securityFile: SECURITY_FILE,
-      roles: rolesIn(roles.roles, config),
-      people: users.total ?? users.users.length,
+      roles: rolesIn(roles.roles, config, file.config),
+      people: problems.some((p) => p.what === 'people') ? null : users.total ?? users.users.length,
       triggers: triggers.triggers ?? [],
       audit: (audit.entries ?? []).map((e) => ({ at: e.at, action: e.action, outcome: e.outcome, target: e.target })),
       look: { colors: look.colors.dark, signal: wireColors('signal', 'dark'), data: wireColors('data', 'dark') }
     };
   }
 
-  /** The backend's groups, plus any group the rules name that has no members yet. */
-  function rolesIn(backendRoles, config) {
+  /** The backend's groups, plus any group the backend's rules or the app's rules file names that has no members yet. */
+  function rolesIn(backendRoles, ...configs) {
     const out = backendRoles.map((r) => ({ name: r.name, members: r.users.length }));
     const named = new Set();
-    JSON.stringify(config, (k, v) => (typeof v === 'string' && v.startsWith('role:') && named.add(v.slice(5)), v));
+    for (const config of configs) JSON.stringify(config ?? {}, (k, v) => (typeof v === 'string' && v.startsWith('role:') && named.add(v.slice(5)), v));
     for (const n of named) if (!out.some((r) => r.name === n)) out.push({ name: n, members: 0 });
     return out;
   }
@@ -165,12 +180,15 @@ export function createEditor(opts) {
     const results = table === '_User' ? (await be.get('/admin/users?limit=500')).users : (await be.get(`/api/${encodeURIComponent(table)}?limit=500`)).results;
     const keys = (t.indexes ?? []).filter((i) => i.unique && i.fields.length === 1).map((i) => i.fields[0]);
     const words = ['subject', 'title', 'name', 'projectName', 'label', 'email', 'username', 'body', 'content'];
+    // BKO-003: an app whose rows have none of those words is labelled by its first text column
+    const firstText = t.columns.find((c) => c.type === 'String' && !/Id$|^(ACL|owner|objectId)$/.test(c.name) && !words.includes(c.name))?.name;
+    const people = personColumns(t).map((c) => c.name);
     return results.map((r) => {
-      const w = words.map((k) => r[k]).find((v) => typeof v === 'string' && v.trim());
+      const w = [...words, firstText].map((k) => k && r[k]).find((v) => typeof v === 'string' && v.trim());
       // a row told apart only by several columns together reads as those values: "l-marie · what-the-web-is"
       const multi = (t.indexes ?? []).find((i) => i.unique && i.fields.length > 1);
       const key = keys.map((k) => r[k]).find((v) => typeof v === 'string') ?? (multi ? multi.fields.map((f) => r[f]).filter((v) => v !== null && v !== undefined).join(' · ') : undefined);
-      const owner = ['learnerId', 'userId', 'authorUserId'].map((k) => r[k]).find(Boolean);
+      const owner = people.map((k) => idOf(r[k])).find(Boolean);
       const cells = {};
       for (const c of t.columns) {
         const v = r[c.name];
@@ -189,8 +207,8 @@ export function createEditor(opts) {
     if (worldCache && Date.now() - worldCache.at < 15_000) return worldCache;
     const world = await loadWorld(be);
     const app = analyseProject(project, world.schema.tables.map((t) => t.name));
-    const [lids, perms] = await Promise.all([learnerIds(be), be.get('/admin/permissions')]);
-    worldCache = { at: Date.now(), world, app, lids, config: perms.config };
+    const perms = await be.get('/admin/permissions');
+    worldCache = { at: Date.now(), world, app, config: perms.config };
     return worldCache;
   }
   async function reachOf(personId, emit) {
@@ -204,7 +222,7 @@ export function createEditor(opts) {
     }
     const user = w.world.rowsByTable._User.find((u) => u.objectId === personId);
     if (!user) throw new Refusal('No such person in the backend.');
-    return personReach({ be, ap, app: w.app, world: w.world, config: w.config, user, lids: w.lids, emit });
+    return personReach({ be, ap, app: w.app, world: w.world, config: w.config, user, emit });
   }
   async function everyone(emit) {
     const w = await reachWorld();

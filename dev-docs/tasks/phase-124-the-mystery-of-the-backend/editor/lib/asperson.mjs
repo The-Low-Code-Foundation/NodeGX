@@ -117,18 +117,6 @@ export function asPerson(be, opts = {}) {
   return { withKey, sweep, mine, live };
 }
 
-/** Everyone's learner id, from the people's profiles: what a screen gets from "who is signed in". */
-export async function learnerIds(be) {
-  const out = {};
-  try {
-    const { results } = await be.get('/api/LearnerProfile?limit=1000');
-    for (const r of results ?? []) if (r.userId && r.learnerId) out[r.userId] = r.learnerId;
-  } catch {
-    /* an app without learner profiles */
-  }
-  return out;
-}
-
 /** Every string in an answer, for finding one row's ids in it. */
 export function containsAny(value, needles) {
   const text = JSON.stringify(value ?? null);

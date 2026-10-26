@@ -23,11 +23,9 @@ const COLORS = {
 };
 const OPEN_COLORS = ['#45d08a', '#a78bfa', '#fdb022', '#f97066'];
 
-const PEOPLE = {
-  anon: { signedIn: false, roles: [], words: 'Someone not signed in' },
-  learner: { signedIn: true, roles: [], words: 'A signed-in person' },
-  staff: { signedIn: true, roles: null, words: 'Someone in the staff group' }
-};
+// BKO-003: the kinds of person "Look at it as" offers are the app's own: anyone signed in, and one per
+// group its rules name (lens 'kind:signedIn', 'kind:role:<name>'). A real person is lens 'person'.
+const KIND = 'kind:';
 
 const state = {
   map: null,
@@ -107,25 +105,45 @@ async function load(keepView) {
   if (!state.people.length) {
     try {
       state.people = (await api('api/people')).people;
-      $('personPick').innerHTML =
-        '<option value="">A real person…</option>' +
-        state.people.map((p) => `<option value="${esc(p.id)}">${esc(p.name)}${p.roles.length ? ` (${esc(p.roles.join(', '))})` : ''}</option>`).join('');
     } catch {
       /* the map still works without them */
     }
   }
   const m = state.map;
+  R.setPersonKeys(m.personKeys);
+  fillPicker();
   $('appName').textContent = `${m.app.name} — backend map`;
+  const live = m.tables.filter((t) => !t.notOnBackend).length;
+  const notYet = m.tables.length - live;
   $('backendLine').innerHTML =
     (m.backend.recordedAt
       ? `<span class="ok">●</span> A recording, made ${esc(new Date(m.backend.recordedAt).toLocaleDateString(undefined, { dateStyle: 'medium' }))} · `
       : `<span class="${m.backend.enforced && !m.backend.devOpen ? 'ok' : 'bad'}">●</span> ${esc(m.backend.name)} is running · `) +
-    `${m.tables.length} tables · ${m.functions.length} functions · ${m.people} people`;
+    `${plural(live, 'table')}${notYet ? ` (and ${notYet} in the app, not on the backend yet)` : ''} · ${plural(m.functions.length, 'function')} · ${m.people == null ? 'people unknown' : plural(m.people, 'person', 'people')}` +
+    ((m.problems ?? []).length ? ` · <span class="bad">couldn’t read its ${esc(m.problems.map((p) => p.what).join(', '))}</span>` : '');
   layout();
   if (!keepView) fit();
   renderSecure();
   renderLensNote();
   if (state.selected && state.byId[state.selected]) renderPanel();
+}
+
+/** "Look at it as": the kinds of person this app's rules know, then its real people. */
+function fillPicker() {
+  const roles = (state.map?.roles ?? []).map((r) => r.name);
+  const kinds = [[`${KIND}signedIn`, 'Anyone signed in'], ...roles.map((r) => [`${KIND}role:${r}`, `Someone in the ${r} group`])];
+  const opt = (v, words) => `<option value="${esc(v)}">${esc(words)}</option>`;
+  const pick = $('personPick');
+  const was = pick.value;
+  pick.innerHTML =
+    '<option value="">A person…</option>' +
+    `<optgroup label="A kind of person">${kinds.map(([v, w]) => opt(v, w)).join('')}</optgroup>` +
+    `<optgroup label="A real person">${
+      state.people.length
+        ? state.people.map((p) => opt(p.id, `${p.name}${p.roles.length ? ` (${p.roles.join(', ')})` : ''}`)).join('')
+        : '<option disabled>Nobody has an account yet</option>'
+    }</optgroup>`;
+  if ([...pick.options].some((o) => o.value === was)) pick.value = was;
 }
 
 // ───────────────────────────── layout ─────────────────────────────
@@ -189,6 +207,18 @@ function layout() {
   };
   const tables = [...m.tables].sort((a, b) => tb(a) - tb(b) || a.name.localeCompare(b.name));
   tables.forEach((t, i) => add({ id: `t:${t.name}`, kind: 'table', key: t.name, table: t, title: W.tableWords(t.name), x: 1110 + (i % 2) * 280, y: Math.floor(i / 2) * 76 + (i % 2) * 38, w: 240, h: 58 }));
+
+  // BKO-003: a column the app doesn't have (no screens, no functions) leaves no hole: the next one moves up to the
+  // gap the full map keeps between those two. With all four the places are the ones above.
+  const GAP = { screen: 100, fn: 200, table: 180 };
+  let cursor = null;
+  for (const kind of ['person', 'screen', 'fn', 'table']) {
+    const col = nodes.filter((n) => n.kind === kind);
+    if (!col.length) continue;
+    const left = Math.min(...col.map((n) => n.x));
+    if (cursor !== null) col.forEach((n) => (n.x += cursor + (GAP[kind] ?? 180) - left));
+    cursor = Math.max(...col.map((n) => n.x + n.w));
+  }
 
   // Centre each column on y = 0.
   for (const kind of ['person', 'screen', 'fn', 'table']) {
@@ -256,9 +286,11 @@ function fit() {
 // ───────────────────────────── what is lit ─────────────────────────────
 
 function person() {
-  const p = PEOPLE[state.lens];
-  if (!p) return null;
-  return { ...p, roles: p.roles ?? (state.map?.roles ?? []).map((r) => r.name) };
+  if (!state.lens.startsWith(KIND)) return null;
+  const kind = state.lens.slice(KIND.length);
+  if (kind === 'signedIn') return { signedIn: true, roles: [], words: 'Anyone signed in' };
+  const role = kind.slice('role:'.length);
+  return { signedIn: true, roles: [role], words: `Someone in the ${role} group` };
 }
 
 function directRead(table) {
@@ -293,9 +325,12 @@ function lensOf(node) {
   if (node.kind === 'fn') return { can: W.passes(node.fn.call, p) };
   if (node.kind === 'table') {
     const d = directRead(node.key);
-    const direct = W.passes(d.read, p) || d.change.some((r) => W.passes(r, p)) || (d.rule.creatorOwns && p.signedIn);
+    const reads = W.passes(d.read, p);
+    const writes = d.change.some((r) => W.passes(r, p));
+    // "makers see their own": in, but to the rows they made only
+    const ownOnly = !reads && d.rule.creatorOwns && p.signedIn;
     const via = state.map.functions.filter((f) => W.passes(f.call, p) && f.touches.some((t) => t.table === node.key));
-    return { can: direct || via.length > 0, direct, via };
+    return { can: reads || writes || ownOnly || via.length > 0, direct: reads || writes || ownOnly, reads, writes, ownOnly, via };
   }
   return { can: true };
 }
@@ -582,6 +617,7 @@ function drawNode(n, now, rel) {
   if (lens && !lens.can && !rel) alpha = 0.22;
   if (state.lit && !rel) alpha = state.lit.has(n.id) ? 1 : n.kind === 'person' ? 0.4 : 0.16;
   if (state.search && !matchesSearch(n) && !rel) alpha = Math.min(alpha, 0.2);
+  if (n.kind === 'table' && n.table.notOnBackend) alpha *= 0.7;
   ctx.globalAlpha = alpha;
 
   const color = n.kind === 'person' ? COLORS.person : n.kind === 'screen' ? COLORS.screen : n.kind === 'fn' ? fnColor(n.fn) : COLORS.table;
@@ -617,7 +653,7 @@ function drawNode(n, now, rel) {
   ctx.shadowBlur = 0;
   ctx.lineWidth = sel ? 2.4 : 1.2;
   ctx.strokeStyle = sel || hov ? color : '#33323d';
-  if (n.kind === 'fn' && !n.fn.deployed) ctx.setLineDash([5, 4]);
+  if ((n.kind === 'fn' && !n.fn.deployed) || (n.kind === 'table' && n.table.notOnBackend)) ctx.setLineDash([5, 4]);
   ctx.stroke();
   ctx.setLineDash([]);
 
@@ -763,6 +799,13 @@ function clip(text, max) {
   return t + '…';
 }
 
+/** A person's row in the app's profile table, in words ("learner id l-marie"), when the app has one. */
+function profileWords(p) {
+  // a recording made before BKO-003 carries `learnerId` where a person now has `profile`
+  const keys = Object.entries(p.profile?.keys ?? (p.learnerId ? { learnerId: p.learnerId } : {}));
+  return keys.map(([k, v]) => `${R.words(k).toLowerCase()} ${v}`).join(' · ');
+}
+
 function subtitle(n) {
   const m = state.map;
   if (n.kind === 'person') {
@@ -770,16 +813,20 @@ function subtitle(n) {
     const ev = state.everyone?.byId?.[p.id];
     if (ev) return `reaches ${ev.reachedRows} of ${ev.totalRows} rows`;
     if (state.reach?.id === p.id && state.reach.summary) return `reaches ${state.reach.summary.reachedRows} of ${state.reach.summary.totalRows} rows`;
-    return p.roles.length ? `the ${p.roles.join(', ')} group` : p.learnerId ? `learner · ${p.learnerId}` : 'no learner profile';
+    return p.roles.length ? `the ${p.roles.join(', ')} group` : profileWords(p) || 'signed in, in no group';
   }
   if (n.kind === 'screen') {
     const fns = new Set(m.calls.filter((c) => c.screen === n.key).map((c) => c.fn));
-    return `asks ${fns.size} function${fns.size === 1 ? '' : 's'}`;
+    // a screen that reads and writes its tables itself (Query Records, Create Record) asks no function
+    const own = new Set((m.uses ?? []).filter((u) => u.screen === n.key).map((u) => u.table));
+    if (!fns.size && own.size) return `uses ${own.size} table${own.size === 1 ? '' : 's'} itself`;
+    return `asks ${fns.size} function${fns.size === 1 ? '' : 's'}${own.size ? `, uses ${own.size} table${own.size === 1 ? '' : 's'} itself` : ''}`;
   }
   if (n.kind === 'fn') {
     if (!n.fn.deployed) return 'not live on the backend';
     return `${W.ruleWords(n.fn.call)} may run it`;
   }
+  if (n.table.notOnBackend) return 'not on the backend yet';
   const d = directRead(n.key);
   const rows = n.table.rows == null ? '' : `${n.table.rows} row${n.table.rows === 1 ? '' : 's'} · `;
   const open = Math.max(W.openness(d.read), ...d.change.map(W.openness));
@@ -794,6 +841,8 @@ function renderSecure() {
   const add = (level, html) => lines.push({ level, html });
   if (m.backend.enforced && !m.backend.devOpen) add('good', '<b>The backend enforces its rules.</b> Nothing gets in without passing them.');
   else add('bad', '<b>The backend is NOT enforcing its rules</b> right now: everything is open.');
+  for (const p of m.problems ?? []) add('bad', `<b>Couldn’t read the backend’s ${esc(p.what)}</b>, so the map leaves ${p.what === 'rules' ? 'every rule below unchecked' : 'that part out'}: ${esc(p.words)}`);
+  if (!m.screens.length && !m.functions.length) add('info', '<b>The app reads and writes no table yet.</b> Once a screen or a function uses one, it shows here.');
 
   const openTables = m.tables
     .map((t) => ({ t, d: directRead(t.name) }))
@@ -815,7 +864,8 @@ function renderSecure() {
     };
     add('warn', `<b>${kinds.public.length} function${kinds.public.length === 1 ? '' : 's'} anyone can run without signing in:</b> ${kinds.public.map(what).join(', ')}. Click it to check it only does what it should.`);
   }
-  add('info', `<b>${kinds.authenticated.length}</b> functions need someone signed in; <b>${kinds.role.length}</b> only the ${esc((m.roles[0]?.name) ?? 'staff')} group${kinds.nobody.length ? `; <b>${kinds.nobody.length}</b> nobody` : ''}.`);
+  if (m.functions.length)
+    add('info', `<b>${kinds.authenticated.length}</b> functions need someone signed in${kinds.role.length ? `; <b>${kinds.role.length}</b> only ${m.roles.length === 1 ? `the ${esc(m.roles[0].name)} group` : 'one group or another'}` : ''}${kinds.nobody.length ? `; <b>${kinds.nobody.length}</b> nobody` : ''}.`);
 
   const unsaved = Object.keys({ ...m.config.collections, ...m.fileCollections }).filter(
     (t) => JSON.stringify(m.config.collections[t] ?? null) !== JSON.stringify(m.fileCollections[t] ?? null)
@@ -825,7 +875,7 @@ function renderSecure() {
 
   const notLive = m.functions.filter((f) => !f.deployed);
   if (notLive.length) add('warn', `<b>Not live:</b> ${notLive.map((f) => esc(f.name)).join(', ')} ${notLive.length === 1 ? 'is' : 'are'} in the app but not on the backend.`);
-  if (m.config.signup === 'nobody' || m.config.signup == null) add('good', 'Nobody can make their own account: people are added by staff.');
+  if (m.config.signup === 'nobody' || m.config.signup == null) add('good', 'Nobody can make their own account: people are added by whoever runs the backend.');
   else add('warn', `${esc(W.ruleWords(m.config.signup))} can make an account.`);
   const fl = m.config.files ?? {};
   if (['upload', 'read', 'delete'].every((k) => W.openness(fl[k] ?? 'nobody') === 0)) add('good', 'Nobody can upload or read files directly.');
@@ -867,14 +917,20 @@ function renderLensNote() {
   const m = state.map;
   const fns = m.functions.filter((f) => W.passes(f.call, p));
   const tables = state.nodes.filter((n) => n.kind === 'table').map((n) => [n, lensOf(n)]);
-  const direct = tables.filter(([, l]) => l.direct);
+  const read = tables.filter(([, l]) => l.reads);
+  const own = tables.filter(([, l]) => l.ownOnly);
+  const write = tables.filter(([, l]) => l.writes);
   const via = tables.filter(([, l]) => !l.direct && l.via.length);
+  const names = (list) => (list.length ? ` (${list.map(([n]) => esc(n.title)).join(', ')})` : '');
+  const parts = [
+    ...(m.functions.length ? [`run <b>${fns.length}</b> of ${m.functions.length} functions${fns.length && fns.length <= 4 ? ` (${fns.map((f) => esc(f.name)).join(', ')})` : ''}`] : []),
+    `read <b>${read.length}</b> table${read.length === 1 ? '' : 's'} directly${names(read)}`,
+    ...(own.length ? [`see only the rows they made in <b>${own.length}</b> more${names(own)}`] : []),
+    ...(write.length ? [`add or change rows directly in <b>${write.length}</b>${names(write)}`] : []),
+    ...(m.functions.length ? [`reach <b>${via.length}</b> more only through those functions, which choose the rows in their own code`] : [])
+  ];
   el.classList.remove('hidden');
-  el.innerHTML =
-    `<b>${esc(p.words)}</b> can run <b>${fns.length}</b> of ${m.functions.length} functions` +
-    `${fns.length && fns.length <= 4 ? ` (${fns.map((f) => esc(f.name)).join(', ')})` : ''}, ` +
-    `open <b>${direct.length}</b> table${direct.length === 1 ? '' : 's'} directly${direct.length ? ` (${direct.map(([n]) => esc(n.title)).join(', ')})` : ''}, ` +
-    `and reach <b>${via.length}</b> more only through those functions, which choose the rows in their own code. Dim means out of reach.`;
+  el.innerHTML = `<b>${esc(p.words)}</b> can ${parts.slice(0, -1).join(', ')}${parts.length > 1 ? ', and ' : ''}${parts.at(-1)}. Dim means out of reach.`;
 }
 
 // ───────────────────────────── the side panel ─────────────────────────────
@@ -898,7 +954,7 @@ function select(id) {
     const d = directRead(n.key);
     state.edit = { table: n.key, read: d.read, change: W.changeRule(d.rule.permissions), creatorOwns: d.rule.creatorOwns };
     if (state.record && state.record.table !== n.key) state.record = null;
-    if (!state.rows[n.key]) loadRows(n.key);
+    if (!state.rows[n.key] && !n.table.notOnBackend) loadRows(n.key);
   }
   if (before !== id) {
     if (n?.kind !== 'screen') state.pathway = null;
@@ -979,13 +1035,13 @@ const firstName = (p) => p.name.split(' ')[0];
 function setLens(lens) {
   state.lens = lens;
   for (const o of document.querySelectorAll('.lens button[data-lens]')) o.classList.toggle('on', o.dataset.lens === lens || (lens === 'person' && o.dataset.lens === 'anon' && state.reach && !state.reach.id));
-  $('personPick').classList.toggle('on', lens === 'person' && !!state.reach?.id);
+  $('personPick').classList.toggle('on', (lens === 'person' && !!state.reach?.id) || lens.startsWith(KIND));
   if (lens !== 'person') {
     state.person = null;
     state.pathway = null;
     state.reach = null;
     state.reachQueue = [];
-    $('personPick').value = '';
+    $('personPick').value = lens.startsWith(KIND) ? lens : '';
   }
   computeOverlay();
   renderLensNote();
@@ -1009,7 +1065,7 @@ async function setPerson(id) {
     readers: [],
     changers: [],
     fns: {},
-    tables: Object.fromEntries(state.map.tables.map((t) => [t.name, { reached: 0, total: t.rows ?? 0, directly: false, via: {} }])),
+    tables: Object.fromEntries(state.map.tables.filter((t) => !t.notOnBackend).map((t) => [t.name, { reached: 0, total: t.rows ?? 0, directly: false, via: {} }])),
     rowIds: {},
     runs: 0,
     refused: 0,
@@ -1304,7 +1360,7 @@ const STATUS_WORDS = { ran: 'ran as them', refused: 'refused', 'not-allowed': 'n
 function mineNote(keyName, person, count) {
   const at = state.map?.backend?.recordedAt;
   if (at)
-    return `<div class="mine-note">These answers come from <b>real runs</b>${count ? ` (${count})` : ''}, made by this map as ${esc(person)} on a copy of the training app’s backend and recorded on ${esc(new Date(at).toLocaleDateString(undefined, { dateStyle: 'long' }))}. The map only runs a function that reads; one that changes anything is listed as not run. Nothing you do here reaches any backend.</div>`;
+    return `<div class="mine-note">These answers come from <b>real runs</b>${count ? ` (${count})` : ''}, made by this map as ${esc(person)} on a copy of ${esc(state.map.app.name)}’s backend and recorded on ${esc(new Date(at).toLocaleDateString(undefined, { dateStyle: 'long' }))}. The map only runs a function that reads; one that changes anything is listed as not run. Nothing you do here reaches any backend.</div>`;
   return `<div class="mine-note">These are <b>real runs</b>${count ? ` (${count})` : ''}, made just now by this map as ${esc(person)}, through the backend’s MCP door with a key named <b>${esc(keyName)}</b>. The key was deleted straight after. Each run shows in “What just ran”, marked as the map’s. The map only runs a function that reads; one that changes anything is listed as not run.</div>`;
 }
 
@@ -1331,11 +1387,11 @@ function personPanel(n) {
   const p = n.person;
   const R_ = state.reach?.id === p.id ? state.reach : null;
   const head = `<div class="kind">Person · what they can reach</div><h2>${esc(p.name)}</h2>
-    <p>${p.email ? esc(p.email) + ' · ' : ''}${p.roles.length ? `in the <b>${esc(p.roles.join(', '))}</b> group` : 'no group'}${p.learnerId ? ` · learner <b>${esc(p.learnerId)}</b>` : ''}</p>`;
+    <p>${p.email ? esc(p.email) + ' · ' : ''}${p.roles.length ? `in the <b>${esc(p.roles.join(', '))}</b> group` : 'no group'}${profileWords(p) ? ` · ${esc(profileWords(p))}` : ''}</p>`;
   if (!R_) return head + `<p><span class="spinner"></span>Starting…</p>`;
   return head + reachBody(R_, firstName(p)) + `
     <h4>Next</h4>
-    <p><b>Click a screen</b> to see exactly what ${esc(firstName(p))} gets there. <b>Click a table</b> to see which of its rows are ${esc(firstName(p))}’s to see.</p>
+    <p>${state.map.screens.length ? `<b>Click a screen</b> to see exactly what ${esc(firstName(p))} gets there. ` : ''}<b>Click a table</b> to see which of its rows are ${esc(firstName(p))}’s to see.</p>
     <button class="go" id="compareHere">Who sees how much? Compare everyone</button>
     <button class="ghost" id="stopPerson">Stop looking as ${esc(firstName(p))}</button>`;
 }
@@ -1359,17 +1415,21 @@ function reachBody(R_, who) {
     ${status}
     <div class="verdict pink"><div class="big-number">${got} <small>of ${total} rows (${pct(got, total)}%)</small></div>
       ${esc(who)} can reach rows in <b>${reached.length}</b> of ${tables.length} tables${R_.loading ? ' so far' : ''}. ${
-        reached.length < tables.length ? `The other ${out.length} stay dark: nothing of theirs comes back to ${esc(who)}.` : ''
+        reached.length < tables.length ? `The other ${out.length} ${out.length === 1 ? 'stays' : 'stay'} dark: nothing of ${out.length === 1 ? 'it' : 'theirs'} comes back to ${esc(who)}.` : ''
       }</div>
     ${reached.length ? `<h4>What reaches ${esc(who)}</h4><div class="bars">${reached.map(bar).join('')}</div>` : ''}
     ${out.length ? `<h4>Out of reach (${out.length})</h4><p class="out-of-reach">${out.map(([t]) => go(`t:${t}`, W.tableWords(t))).join(', ')}</p>` : ''}
     <h4>How the map knows</h4>
-    <p style="font-size:12.5px">It ran, as ${esc(who)}, every function the backend lets them run that only reads (${plural(R_.runs, 'real run')}${R_.refused ? `, ${R_.refused} refused` : ''}). When an answer showed them something they could click (a step, a learner), it asked again the way the app would. Then it looked for every row of every table in what came back, by its ids. A table lights up only if rows of it came back.</p>
+    ${
+      state.map.functions.length
+        ? `<p style="font-size:12.5px">It ran, as ${esc(who)}, every function the backend lets them run that only reads (${plural(R_.runs, 'real run')}${R_.refused ? `, ${R_.refused} refused` : ''}). When an answer showed them something they could click (a row’s id), it asked again the way the app would. Then it looked for every row of every table in what came back, by its ids. A table lights up only if rows of it came back.</p>`
+        : `<p style="font-size:12.5px">The app has no function, so this is the backend’s own rule check for each table, asked as ${esc(who)}: a table lights up when its rule lets them open it.</p>`
+    }
     ${capped.length ? `<p style="font-size:12.5px">${capped.map((f) => `<b>${esc(f.fn)}</b> could be asked ${f.possible} ways; the map asked ${f.runs + f.refused}`).join('; ')}. So this is <b>at least</b> what they reach.</p>` : ''}
     ${(R_.summary?.functions ?? []).filter((f) => f.gaveUp).map((f) => `<p style="font-size:12.5px"><b>${esc(f.fn)}</b> turned the map away ${f.refused} times in a row, so it stopped asking.</p>`).join('')}
     ${R_.changers.length ? `<h4>What they can change (never run here)</h4><ul>${R_.changers.map((c) => `<li>${go(`f:${c.fn}`, c.fn)}${c.writes?.length ? ` changes ${c.writes.map((t) => esc(W.tableWords(t))).join(', ')}` : ''}</li>`).join('')}</ul><p style="font-size:12px;color:#7d8a98">A function that changes data is never run by the map, so what it would hand back isn’t counted.</p>` : ''}
     ${R_.notAllowed?.length ? `<h4>Turned away from (${R_.notAllowed.length})</h4><p class="out-of-reach">${R_.notAllowed.map((f) => go(`f:${f}`, f)).join(', ')}</p>` : ''}
-    ${R_.summary?.keyName ? mineNote(R_.summary.keyName, R_.name, R_.runs + R_.refused) : ''}`;
+    ${R_.summary?.keyName && R_.runs + R_.refused ? mineNote(R_.summary.keyName, R_.name, R_.runs + R_.refused) : ''}`;
 }
 
 function everyonePanel() {
@@ -1384,7 +1444,7 @@ function everyonePanel() {
     ${ev.error ? `<div class="verdict bad">${esc(ev.error)}</div>` : ''}
     ${ev.loading ? `<p><span class="spinner"></span>Measuring… ${ev.list.length} of ${state.people.length + 1} so far.</p>` : ''}
     <div class="bars">${list.map(row).join('')}</div>
-    <p style="font-size:12.5px;color:#7d8a98">Click anyone to watch their rows reach them on the map. Purple is the staff group.</p>`;
+    <p style="font-size:12.5px;color:#7d8a98">Click anyone to watch their rows reach them on the map. Purple: someone in a group.</p>`;
 }
 
 function pathwayPanel(n) {
@@ -1431,7 +1491,9 @@ function rowsSection(n) {
   else {
     const cols = [];
     const sample = rows[0].cells ?? {};
-    const prefer = ['learnerId', 'conceptId', 'status', 'kind', 'email', 'title', 'name', 'subject', 'position', 'attempt', 'state'];
+    // the columns that point at another table first (a person, a step), then the plain words
+    const linking = state.map.links.filter((l) => l.from === n.key).map((l) => l.column);
+    const prefer = [...linking, 'status', 'kind', 'email', 'title', 'name', 'subject', 'position', 'attempt', 'state'];
     for (const c of prefer) if (c in sample && !cols.includes(c)) cols.push(c);
     for (const c of Object.keys(sample)) if (cols.length < 4 && !SKIP_COLS.has(c) && !cols.includes(c) && !/Id$/.test(c)) cols.push(c);
     const shown = cols.slice(0, 4);
@@ -1551,12 +1613,14 @@ function tablePanel(n) {
   const open = Math.max(W.openness(d.read), ...d.change.map(W.openness));
 
   let verdict;
-  if (open === 0 && !d.rule.creatorOwns)
+  if (t.notOnBackend)
+    verdict = `<div class="verdict info"><b>Not on the backend yet.</b> The app has it (${esc(t.from.join('; '))}); the backend makes the table when its first row is saved. Its rule: reading — ${esc(W.ruleWords(d.read))}; changing — ${esc(W.changeWords(d.rule.permissions))}.</div>`;
+  else if (open === 0 && !d.rule.creatorOwns)
     verdict = `<div class="verdict good"><b>Sealed.</b> Nobody can open this table directly. Its rows are reached only through ${users.length ? `${users.length} function${users.length === 1 ? '' : 's'}` : 'no function at all'}, and each function decides in its own code whose rows to hand back.</div>`;
   else if (open >= 3)
     verdict = `<div class="verdict bad"><b>Open to anyone at all.</b> Someone not even signed in can ${W.openness(d.read) >= 3 ? 'read every row' : 'change rows'} directly, without any function checking.</div>`;
   else
-    verdict = `<div class="verdict warn"><b>Partly open.</b> Reading directly: ${esc(W.ruleWords(d.read))}. Changing directly: ${esc(W.ruleWords(W.changeRule(d.rule.permissions) ?? d.change))}.${d.rule.creatorOwns ? ' And whoever made a row may always read and change that row.' : ''}</div>`;
+    verdict = `<div class="verdict warn"><b>Partly open.</b> Reading directly: ${esc(W.ruleWords(d.read))}. Changing directly: ${esc(W.changeWords(d.rule.permissions))}.${d.rule.creatorOwns ? ' And whoever made a row may always read and change that row.' : ''}</div>`;
 
   const fnLine = (f) => {
     const x = f.touches.find((y) => y.table === t.name);
@@ -1566,23 +1630,23 @@ function tablePanel(n) {
   return `
     <div class="kind">Table</div>
     <h2>${esc(n.title)}</h2>
-    <p><b>${t.rows ?? '?'}</b> row${t.rows === 1 ? '' : 's'} now · ${t.columns.length} things in each row${d.rule.own ? '' : ' · uses the app’s standard rule'}</p>
+    <p>${t.notOnBackend ? (t.columns.length ? `${plural(t.columns.length, 'thing')} in each row, as the app declares it` : 'What a row holds is known once the first one is saved') : `<b>${t.rows ?? '?'}</b> row${t.rows === 1 ? '' : 's'} now · ${plural(t.columns.length, 'thing')} in each row`}${d.rule.own ? '' : ' · uses the app’s standard rule'}</p>
     ${verdict}
-    ${rowsSection(n)}
+    ${t.notOnBackend ? '' : rowsSection(n)}
     <h4>Who may open it directly</h4>
     <div id="ruleEditor"></div>
     <h4>Which functions name it in their code</h4>
     ${users.length ? `<ul>${readers.map(fnLine).join('')}${users.filter((f) => !readers.includes(f)).map(fnLine).join('')}</ul>` : '<p>No function uses it.</p>'}
     ${users.length ? '<p style="font-size:12px;color:#7d8a98">Naming a table is not handing its rows to everyone who may run the function: the function’s own code chooses whose rows come back. Look as a real person to see which rows do.</p>' : ''}
-    <h4>What’s in a row</h4>
+    ${t.columns.length ? `<h4>What’s in a row</h4>
     <div class="chips">${t.columns.map((c) => `<span class="chip ${keys.has(c.name) ? 'key' : ''}" title="${esc(typeWords(c.type))}">${esc(c.name)} · ${esc(typeWords(c.type))}</span>`).join('')}</div>
-    <p style="font-size:12px;color:#7d8a98">Green: no two rows may share it.</p>
+    <p style="font-size:12px;color:#7d8a98">Green: no two rows may share it.</p>` : ''}
     ${outLinks.length || inLinks.length ? `<h4>Linked tables</h4>
     <ul>
       ${outLinks.map((l) => `<li>Each row points at ${go(`t:${l.to}`, W.tableWords(l.to))} by its <b>${esc(l.column)}</b></li>`).join('')}
       ${inLinks.map((l) => `<li>${go(`t:${l.from}`, W.tableWords(l.from))} rows point here by their <b>${esc(l.column)}</b></li>`).join('')}
     </ul>
-    <p style="font-size:12px;color:#7d8a98">These links are read from the column names (a “conceptId” points at the table whose key is conceptId). The backend itself doesn’t declare them.</p>` : ''}
+    ${[...outLinks, ...inLinks].some((l) => l.byName) ? `<p style="font-size:12px;color:#7d8a98">${[...outLinks, ...inLinks].every((l) => l.byName) ? 'These links are' : 'Some of these links are'} read from the column names (a column called “<i>name</i>Id” points at the table whose key it is): the backend itself doesn’t declare ${[...outLinks, ...inLinks].every((l) => l.byName) ? 'them' : 'those'}.</p>` : ''}` : ''}
   `;
 }
 
@@ -1630,7 +1694,7 @@ function wireTableControls(n) {
   $('ruleEditor').innerHTML = `
     <p>Looking at rows${known(e.read) ? '' : ` <span class="chip">now: ${esc(W.ruleWords(e.read))}</span>`}</p>
     <div class="choice-group">${pills('read')}</div>
-    <p>Adding, changing or deleting rows${known(e.change, 'change') ? '' : ` <span class="chip">now: ${esc(e.change === null ? 'a mixed rule' : W.ruleWords(e.change))}</span>`}</p>
+    <p>Adding, changing or deleting rows${known(e.change, 'change') ? '' : ` <span class="chip">now: ${esc(e.change === null ? W.changeWords(d.rule.permissions) : W.ruleWords(e.change))}</span>`}</p>
     <div class="choice-group">${pills('change')}</div>
     <label class="check"><input type="checkbox" id="creatorOwns" ${e.creatorOwns ? 'checked' : ''}> <span>Whoever made a row may always see and change that row</span></label>
     ${preview}
@@ -1915,14 +1979,19 @@ function tipFor(n) {
   }
   if (n.kind === 'table') {
     const d = directRead(n.key);
-    return `<b>${esc(n.title)}</b><br>${n.table.rows ?? '?'} rows.<br>Directly: reading — ${esc(W.ruleWords(d.read))}; changing — ${esc(W.ruleWords(W.changeRule(d.rule.permissions) ?? d.change))}.<br>Click to see or change who may.`;
+    return `<b>${esc(n.title)}</b><br>${n.table.notOnBackend ? 'Not on the backend yet.' : `${n.table.rows ?? '?'} rows.`}<br>Directly: reading — ${esc(W.ruleWords(d.read))}; changing — ${esc(W.changeWords(d.rule.permissions))}.<br>Click to see or change who may.`;
   }
   const fns = new Set(state.map.calls.filter((c) => c.screen === n.key).map((c) => c.fn));
   return `<b>${esc(n.title)}</b><br>Asks ${[...fns].map(esc).join(', ')}.`;
 }
 
 for (const b of document.querySelectorAll('.lens button[data-lens]')) b.onclick = () => (b.dataset.lens === 'anon' ? setPerson(null) : setLens(b.dataset.lens));
-$('personPick').onchange = (e) => (e.target.value ? setPerson(e.target.value) : setLens('all'));
+$('personPick').onchange = (e) => {
+  const v = e.target.value;
+  if (!v) setLens('all');
+  else if (v.startsWith(KIND)) setLens(v);
+  else setPerson(v);
+};
 $('compareBtn').onclick = () => compareEveryone();
 $('search').addEventListener('input', (e) => (state.search = e.target.value.trim()));
 $('search').addEventListener('keydown', (e) => {
@@ -1961,3 +2030,5 @@ if (location.hash.length > 1) focusOn(decodeURIComponent(location.hash.slice(1))
 // every minute: the backend limits admin requests, and the people questions need their share
 setInterval(() => load(true), 60000);
 window.__map = state;
+// for the drives: the words the canvas draws, which no DOM query can read
+window.__canvasWords = () => state.nodes.map((n) => `${n.title} — ${subtitle(n)}`);

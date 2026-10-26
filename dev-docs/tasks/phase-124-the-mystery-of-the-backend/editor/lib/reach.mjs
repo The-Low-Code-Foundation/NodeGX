@@ -2,12 +2,13 @@
 //
 // A table lights up for a person only when rows of it come back to them. The map runs, as them, every
 // function they may run that only reads; it reads the answers; and it follows what they were shown the
-// way the app's next click would (a learner id in the roster → that learner's programme). Every row of
+// way the app's next click would (a person's id in a list → that person's rows). Every row of
 // every table is then looked for in what came back, by its ids. Nothing is guessed from the code: a
 // function that names twenty tables but hands back one person's rows lights up that person's rows.
 
-import { runnable, personName, learnerIds } from './asperson.mjs';
+import { runnable, personName } from './asperson.mjs';
 import { rulesOff } from './rules.mjs';
+import { personKeys, profilesFrom, signedInContext } from './people.mjs';
 
 /** How many different ways one function is asked, per person, at most. Said on screen when it bites. */
 export const MAX_ASKS = 16;
@@ -21,7 +22,7 @@ const TOKEN_SPLIT = /[^A-Za-z0-9_\-.@]+/;
  * unique key (a learner id, a conversation id), and for a table whose rows are told apart only by
  * several columns together (a learner's progress on a step), those columns as one key.
  */
-export function rowIndex(tables, rowsByTable) {
+export function rowIndex(tables, rowsByTable, people = personKeys(tables)) {
   const single = new Map(); // value → [{ table, id }]
   const keyFields = new Set(); // column names that tell a row apart on their own
   const multi = []; // { table, fields, byKey: Map }
@@ -53,12 +54,13 @@ export function rowIndex(tables, rowsByTable) {
       }
       multi.push({ table: t.name, fields: i.fields, byKey });
     }
-    // A table with one row per person (a learner's one learning path): learnerId → pathId. Only a
-    // person's id, and only when no two of at least three rows share it: a concept with one row here by
-    // chance must not read as "whoever saw the concept saw the row".
+    // A table with one row per person (a learner's one learning path): learnerId → pathId. Only a column
+    // that names a person (`people`, read from the schema: lib/people.mjs), and only when no two of at
+    // least three rows share it: a concept with one row here by chance must not read as "whoever saw the
+    // concept saw the row".
     const key = ones.find((f) => f !== 'email' && f !== 'username' && f !== 'objectId');
     if (key && rows.length >= 3) {
-      for (const c of ['learnerId', 'userId']) {
+      for (const c of people) {
         if (c === key || !(c in rows[0])) continue;
         const vals = rows.map((r) => r[c]);
         if (vals.some((v) => typeof v !== 'string') || new Set(vals).size !== vals.length) continue;
@@ -109,7 +111,7 @@ export function rowsIn(value, index, base = {}) {
   walk(
     value,
     (ctx, own) => {
-      // a key the answer named under another name (session.id → sessionId) or that it implies (learnerId → pathId)
+      // a key the answer named under another name (session.id → sessionId) or that it implies (a person's id → their row)
       for (const [f, v] of Object.entries(own)) if (index.keyFields.has(f) && typeof v === 'string') for (const hit of index.single.get(v) ?? []) add(hit.table, hit.id);
       for (const m of index.multi) {
         if (m.fields.some((f) => ctx[f] === undefined || ctx[f] === null)) continue;
@@ -174,7 +176,7 @@ export async function loadWorld(be) {
       rowsByTable[t.name] = results ?? [];
     })
   );
-  return { schema, rowsByTable, index: rowIndex(schema.tables, rowsByTable) };
+  return { schema, rowsByTable, index: rowIndex(schema.tables, rowsByTable), profiles: profilesFrom(schema.tables, rowsByTable) };
 }
 
 /**
@@ -183,13 +185,13 @@ export async function loadWorld(be) {
  *   { type: 'skip', fn, why, writes }          { type: 'done', summary }
  * Every run is real, read-only, as them, and marked as the map's.
  */
-export async function personReach({ be, ap, app, world, config, user, lids, emit = () => {} }) {
+export async function personReach({ be, ap, app, world, config, user, emit = () => {} }) {
   const fnByName = Object.fromEntries(app.functions.map((f) => [f.name, f]));
   const { index } = world;
   const name = personName(user);
-  const lid = lids[user.objectId];
+  const profile = world.profiles?.[user.objectId] ?? null;
   // What the app knows about whoever is signed in, before they have been shown anything.
-  const base = { userId: user.objectId, ...(lid ? { learnerId: lid } : {}) };
+  const base = Object.fromEntries(Object.entries(signedInContext(user, profile)).map(([k, c]) => [k, c.value]));
 
   const reached = {}; // table → Map(objectId → [{ fn, args }])
   const byFn = {}; // fn → { runs, refused, rows: { table → count }, asked, possible }
@@ -289,7 +291,7 @@ export async function personReach({ be, ap, app, world, config, user, lids, emit
       tables[t.name] = { reached: m?.size ?? 0, total: index.total[t.name], directly: !!direct[t.name], via };
     }
     const summary = {
-      person: { id: user.objectId, name, roles: user.roles ?? [], learnerId: lid ?? null },
+      person: { id: user.objectId, name, roles: user.roles ?? [], profile },
       keyName: k.keyName,
       tools: allowed.map((f) => f.name),
       readers: readers.map((f) => f.name),
@@ -313,7 +315,7 @@ export async function anonymousReach({ be, app, world, config }) {
   const tables = {};
   for (const t of world.schema.tables) tables[t.name] = { reached: direct[t.name] ? world.index.total[t.name] : 0, total: world.index.total[t.name], directly: direct[t.name], via: {} };
   return {
-    person: { id: null, name: 'Someone not signed in', roles: [], learnerId: null },
+    person: { id: null, name: 'Someone not signed in', roles: [], profile: null },
     tools: open.map((f) => f.name),
     readers: [],
     changers: open.map((f) => ({ fn: f.name, why: runnable(f, { description: '' }).ok ? 'it can’t be run as nobody from here' : runnable(f, { description: '' }).why, writes: [] })),
@@ -355,4 +357,3 @@ async function directly(be, world, config, principal) {
   return out;
 }
 
-export { learnerIds };

@@ -97,6 +97,7 @@ canvas#map.pointing { cursor: pointer; }
 .verdict.good { background: rgba(69, 208, 138, 0.12); border: 1px solid rgba(69, 208, 138, 0.35); }
 .verdict.warn { background: rgba(253, 176, 34, 0.12); border: 1px solid rgba(253, 176, 34, 0.4); }
 .verdict.bad { background: rgba(249, 112, 102, 0.12); border: 1px solid rgba(249, 112, 102, 0.45); }
+.verdict.info { background: rgba(125, 138, 152, 0.12); border: 1px dashed rgba(125, 138, 152, 0.5); }
 .choice-group { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
 .pill.on { background: var(--blue); border-color: var(--blue); color: #08131f; font-weight: 600; }
 .pill.on.risky { background: var(--red); border-color: var(--red); }

@@ -3,8 +3,13 @@
 
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
-const TITLE_KEYS = ['title', 'subject', 'name', 'projectName', 'label', 'displayName', 'email', 'username', 'heading', 'text', 'body', 'conceptId', 'learnerId', 'id'];
+const TITLE_KEYS = ['title', 'subject', 'name', 'projectName', 'label', 'displayName', 'email', 'username', 'heading', 'text', 'body'];
 const FACT_KEYS = ['kind', 'state', 'status', 'authorRole', 'body', 'at', 'when', 'dueAt', 'endsOn', 'completedAt', 'count', 'unread', 'version', 'position'];
+/** Columns that name a person (the map's `personKeys`): a title of last resort, after the thing's own id. */
+let PERSON_KEYS = new Set();
+export function setPersonKeys(keys) {
+  PERSON_KEYS = new Set(keys ?? []);
+}
 const ISO = /^\d{4}-\d{2}-\d{2}(T[\d:.]+Z?)?$/;
 
 export function words(key) {
@@ -28,7 +33,10 @@ const has = (v, needles) => needles.length && needles.some((n) => JSON.stringify
 
 function titleOf(o) {
   for (const k of TITLE_KEYS) if (typeof o[k] === 'string' && o[k].trim()) return [k, o[k]];
-  return [null, null];
+  // no words: the thing's own id ("conceptId", "orderId"), then a bare id
+  const ids = Object.keys(o).filter((k) => /[a-z]Id$/.test(k) && k !== 'objectId' && typeof o[k] === 'string' && o[k].trim());
+  const own = ids.find((k) => !PERSON_KEYS.has(k)) ?? (typeof o.id === 'string' && o.id.trim() ? 'id' : ids[0] ?? null);
+  return own ? [own, o[own]] : [null, null];
 }
 
 function item(o, needles, depth) {

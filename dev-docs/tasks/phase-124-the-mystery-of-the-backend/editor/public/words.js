@@ -35,12 +35,14 @@ export function entryForChange(change) {
 
 /** One rule value in words. A list means any one of them is enough. */
 export function ruleWords(rule) {
-  if (Array.isArray(rule)) return rule.length ? rule.map(ruleWords).join(' or ') : 'Nobody';
+  // the same words once: find and get both "Anyone signed in" read as one
+  if (Array.isArray(rule)) return rule.length ? [...new Set(rule.map(ruleWords))].join(' or ') : 'Nobody';
   if (rule === 'public') return 'Anyone at all';
   if (rule === 'authenticated') return 'Anyone signed in';
   if (rule === 'nobody' || rule == null) return 'Nobody';
   if (rule === CREATOR_CHANGE) return 'Only the person who made it';
   if (typeof rule === 'string' && rule.startsWith('role:')) return `The ${rule.slice(5)} group`;
+  if (isPath(rule)) return 'Only people the row is linked to';
   return 'A rule the map doesn’t know';
 }
 
@@ -51,6 +53,7 @@ export function openness(rule) {
   if (rule === 'authenticated') return 2;
   if (rule === CREATOR_CHANGE) return 1;
   if (typeof rule === 'string' && rule.startsWith('role:')) return 1;
+  if (isPath(rule)) return 1;
   return 0;
 }
 
@@ -62,8 +65,13 @@ export function passes(rule, person) {
   // Their own rows only, but a person who is signed in does get past it.
   if (rule === CREATOR_CHANGE) return person.signedIn;
   if (typeof rule === 'string' && rule.startsWith('role:')) return person.signedIn && person.roles.includes(rule.slice(5));
+  // some rows only, the ones linked to them, but a signed-in person gets past it
+  if (isPath(rule)) return person.signedIn;
   return false;
 }
+
+/** A rule that lets a signed-in person in to the rows a chain of links leads to from them (the backend's path rule). */
+const isPath = (rule) => !!rule && typeof rule === 'object' && !Array.isArray(rule) && 'path' in rule;
 
 /** A table's rule as the backend applies it: its own entry, or the defaults. */
 export function tableRule(config, table) {
@@ -84,6 +92,24 @@ export function changeRule(perms) {
   if (same(perms, { ...perms, ...entryForChange(CREATOR_CHANGE) })) return CREATOR_CHANGE;
   return same(perms.create, perms.update) && same(perms.update, perms.delete) ? perms.create : null;
 }
+/**
+ * Adding, changing and deleting in words: one rule when the three agree, else who does which
+ * ("Anyone signed in adds and changes; nobody deletes"), never the same words twice.
+ */
+export function changeWords(perms) {
+  const one = changeRule(perms);
+  if (one !== null) return ruleWords(one);
+  const groups = [];
+  for (const [op, verb] of [['create', 'adds'], ['update', 'changes'], ['delete', 'deletes']]) {
+    const who = ruleWords(perms[op]);
+    const g = groups.find((x) => x.who === who);
+    if (g) g.verbs.push(verb);
+    else groups.push({ who, verbs: [verb] });
+  }
+  const line = groups.map((g) => `${g.who.charAt(0).toLowerCase()}${g.who.slice(1)} ${g.verbs.join(' and ')}`).join('; ');
+  return line.charAt(0).toUpperCase() + line.slice(1);
+}
+
 function same(a, b) {
   return JSON.stringify(a) === JSON.stringify(b);
 }

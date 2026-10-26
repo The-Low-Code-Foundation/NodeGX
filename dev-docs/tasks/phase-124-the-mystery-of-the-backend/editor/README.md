@@ -29,14 +29,20 @@ See it without a backend: https://nodegx.io/backend-map/ (a recording).
   what's in a row and which tables it points at. A function tells you when it runs ("on Settings,
   pressing “Download my data”"), what it does step by step, which tables it reads or changes, and its
   last runs. A screen tells you what it asks the backend for: the functions it runs, and the tables it reads or writes itself.
-- **Look at it as…** someone not signed in, a signed-in person, or staff: what they can't reach dims.
+- **Look at it as…** someone not signed in, anyone signed in, or someone in one of the groups the app's rules name
+  (read from the backend and from `nodegx.security.json`): what they can't reach dims, and a note says what they may
+  read, see of their own, and add or change.
+- **Any app.** A table the app has and the backend doesn't yet (a screen writes it, the rules file names it; a
+  backend makes a table when its first row lands) is drawn dashed and says so. Links come from the schema's
+  Pointer columns first, then from `…Id` column names, and the panel says which. If the backend refuses one
+  question (its groups, its people), the rest of the map still draws and the header says what it couldn't read.
 - **Is it secure?** The card on the left, in sentences. Red and amber lines are the ones to read.
 - **What just ran:** the strip at the bottom. A run lights its function up on the map (green worked, red
   turned away) and sends sparks along its wires.
 - **Change who may open a table:** click the table, choose under "Looking at rows" and "Adding, changing
   or deleting rows", read the sentence that says what it will mean, press **Make it so**. The backend obeys
   at once, and the same rule is saved in the project's `nodegx.security.json` so it holds when the backend
-  restarts. The panel then shows the backend's own answer for a stranger, a signed-in person and staff.
+  restarts. The panel then shows the backend's own answer for a stranger, a signed-in person and each group.
   **Back to the app's standard rule** undoes it the same way.
 
 If someone else changed the rules since you opened the map, the change is refused and nothing is
@@ -44,7 +50,7 @@ written; the map reloads so you can choose again.
 
 ## Looking as a real person
 
-- **Pick a person**: click them in the People column, or choose them in "A real person…" at the top.
+- **Pick a person**: click them in the People column, or choose them under "A real person" at the top.
   The backend itself says what they may run and which tables they could open directly. Pink wires
   are theirs. Nothing runs to show this.
 - **Follow a pathway**: with a person picked, click a screen. Each function that screen asks for is
@@ -63,8 +69,10 @@ question and deleted straight after, and its secret is never shown or saved. Eve
 ## What one person can reach (round 3)
 
 - **Pick a person** and the map measures, for real, which rows reach them: it runs as them every function they may
-  run that only reads, follows what came back the way the app would (a learner id in the roster → that learner's
-  programme), and finds every row of every table in the answers. The runs play out on the map: a table lights up,
+  run that only reads, follows what came back the way the app would (a person's id in a list → that person's rows),
+  and finds every row of every table in the answers. What it knows about whoever is signed in is their id, plus the
+  key of their row in any table with one row per person (`lib/people.mjs`: a column that names a person and no two
+  rows share). The runs play out on the map: a table lights up,
   counts up and fills its pink bar only when rows of it come back. Tables nothing came back from stay dark.
   `lib/reach.mjs`; `POST /api/as/everything` streams one JSON line per run. `{ "person": null }` is someone not
   signed in.

@@ -26,5 +26,7 @@ console.log('\n— the page, driven in Chrome, on a copy and its own backend —
 if (run([path.join(here, 'ui.test.mjs')]) !== 0) bad++;
 console.log('\n— round 2: real people, a pathway, one row’s reach (Chrome, a copy with the app’s whole world) —');
 if (run([path.join(here, 'people.test.mjs')]) !== 0) bad++;
+console.log('\n— any app, not only the training app: the todo template, a site with no data, a backend with a Pointer and one group (Chrome, copies) —');
+if (run([path.join(here, 'any-app.test.mjs')]) !== 0) bad++;
 console.log(bad ? `\n${bad} part(s) FAILED` : '\nEverything passed.');
 process.exit(bad ? 1 : 0);

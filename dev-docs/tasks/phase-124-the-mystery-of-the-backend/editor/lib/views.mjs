@@ -4,7 +4,8 @@
 //   recordReach(T, id)   who can reach one row, directly or through which function, and who can't
 
 import { analyseProject } from './project.mjs';
-import { asPerson, personName, runnable, argsFor, learnerIds, containsAny } from './asperson.mjs';
+import { asPerson, personName, runnable, argsFor, containsAny } from './asperson.mjs';
+import { profilesOf, signedInContext } from './people.mjs';
 
 const pool = async (items, n, fn) => {
   const out = new Array(items.length);
@@ -28,12 +29,12 @@ export function makeViews({ be, project, mine }) {
     if (cache && Date.now() - cache.at < 15_000) return cache;
     const [schema, { users }] = await Promise.all([be.get('/admin/schema'), be.get('/admin/users?limit=500')]);
     const app = analyseProject(project, schema.tables.map((t) => t.name));
-    const lids = await learnerIds(be);
-    cache = { at: Date.now(), schema, users, app, lids, fnByName: Object.fromEntries(app.functions.map((f) => [f.name, f])) };
+    const profiles = await profilesOf(be, schema);
+    cache = { at: Date.now(), schema, users, app, profiles, fnByName: Object.fromEntries(app.functions.map((f) => [f.name, f])) };
     return cache;
   }
 
-  const personOut = (u, w) => ({ id: u.objectId, name: personName(u), email: u.email ?? null, roles: u.roles ?? [], learnerId: w.lids[u.objectId] ?? null, disabled: !!u.disabled });
+  const personOut = (u, w) => ({ id: u.objectId, name: personName(u), email: u.email ?? null, roles: u.roles ?? [], profile: w.profiles[u.objectId] ?? null, disabled: !!u.disabled });
 
   async function people() {
     const w = await world();
@@ -95,11 +96,10 @@ export function makeViews({ be, project, mine }) {
     );
     const byFn = {};
     for (const c of calls) (byFn[c.fn] ??= { fn: c.fn, triggers: [] }).triggers.push({ words: c.trigger.words, kind: c.trigger.kind, inside: c.inside });
-    const lid = w.lids[u.objectId];
     return ap.withKey(u, async (k) => {
       const tools = await k.tools();
       const toolOf = Object.fromEntries(tools.map((t) => [t.name, t]));
-      const context = { learnerId: lid ? { value: lid, from: 'who is signed in (their learner profile)' } : undefined };
+      const context = signedInContext(u, w.profiles[u.objectId]);
       const results = {};
       const runOne = async (fn, extra) => {
         const tool = toolOf[fn];

@@ -278,6 +278,44 @@ export function analyseProject(project, tableNames) {
   };
 }
 
+/** A project's own list of classes: a bare array, `{results}` (Parse `GET /schemas`) or `{tables}` (our backend). */
+function classList(data) {
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.results)) return data.results;
+  if (Array.isArray(data?.tables)) return data.tables;
+  return [];
+}
+
+/** A declared class's columns, whichever of the three shapes it was written in. */
+function declaredColumns(c) {
+  if (Array.isArray(c.columns)) return c.columns.filter((x) => x?.name).map((x) => ({ name: x.name, type: x.type ?? null, ...(x.targetClass ? { targetClass: x.targetClass } : {}) }));
+  const fields = c.fields ?? c.schema?.properties ?? {};
+  return Object.entries(fields).map(([name, f]) => ({ name, type: f?.type ?? null, ...(f?.targetClass ? { targetClass: f.targetClass } : {}) }));
+}
+
+/**
+ * P127 BKO-003: the tables the PROJECT says it has, whether or not the backend has them yet: the classes it
+ * declares (`metadata.dbCollections`), the tables its rules file names, and the tables its screens and
+ * functions read and write. name → { columns (declared, or null when only named), from: [words] }.
+ * A backend makes a table when its first row lands, so a fresh one lacks most of these.
+ */
+export function projectTables(project, rulesConfig, app) {
+  const out = new Map();
+  const add = (name, from, columns = null) => {
+    if (typeof name !== 'string' || !name || name.startsWith('_')) return;
+    const t = out.get(name) ?? { columns: null, from: [] };
+    if (!t.from.includes(from)) t.from.push(from);
+    if (columns?.length && !t.columns) t.columns = columns;
+    out.set(name, t);
+  };
+  const metadata = project.store.readProjectFile()?.metadata ?? {};
+  for (const c of classList(metadata.dbCollections)) add(c.className ?? c.name, 'the app declares it', declaredColumns(c));
+  for (const name of Object.keys(rulesConfig?.collections ?? {})) add(name, 'the rules file names it');
+  for (const u of app.uses ?? []) add(u.table, u.how === 'reads' ? 'a screen reads it' : 'a screen writes it');
+  for (const f of app.functions ?? []) for (const t of f.touches) if (t.hows.some((h) => h !== 'mentions')) add(t.table, `${f.name} uses it`);
+  return out;
+}
+
 /**
  * Links between tables, read from the column names: a column called `conceptId` points at the
  * table whose one unique key is `conceptId`. `userId`, `…UserId` and `createdBy` point at the people.
