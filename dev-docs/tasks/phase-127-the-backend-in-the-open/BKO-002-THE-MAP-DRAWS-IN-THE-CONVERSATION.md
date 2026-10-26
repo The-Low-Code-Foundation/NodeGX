@@ -44,3 +44,43 @@ Keep the card as the fallback for a host that refuses `document.write` frames, a
 3. Studio on its own (not in a conversation) is unchanged: `check:data`, `check:app` green.
 4. `@nodegx/backend-map` published with the header and Studio's pin bumped. This needs Richard's OTP: ask, do not
    work around.
+
+## Session log
+
+### s2 (2026-10-26): measured, fixed, and built in the fake host
+
+**The measurement first** (Studio `editor/hosted-check.mjs`, new, `npm run check:hosted`). It copies the todo
+template and starts its backend with Studio's own "Start a backend". A host of its own on another port serves Studio's
+`/panel` with the CSP the MCP Apps host builds from `studioResourceMeta` (connect / resource / base-uri = Studio,
+`frame-src 'none'`). It is driven in headless Chrome. Before any change: **Privacy FAIL**, "Failed to fetch
+dynamically imported module: …/backend-map/words.js". Filed and fixed as **P127-BKO002-HOSTEDPRIVACY**. The map showed
+the card.
+
+**Built (nodegx-studio `f50fb31`):**
+- `serve.mjs` sets Studio's CORS headers before it hands `/backend-map/*` to the map's handler. **AC4 is replaced**,
+  not deferred: the header stays out of `@nodegx/backend-map` itself. Run on its own (`npx @nodegx/backend-map`) the
+  map holds the backend's admin credential on a loopback port, and `Access-Control-Allow-Origin: *` there would let
+  any page in the person's browser read it and change rules. Studio already answers `*` on loopback for the panel
+  (STU-070), so the exposure is only where it already was. No publish, no OTP. Richard can overrule.
+- `hosted.js` takes over `#mapframe`'s `src` setter. It writes Studio's `/backend-map/` into a **src-less** frame
+  with `<base href=Studio/backend-map/>`, so the frame is the panel's own origin and `frame-src` never applies (the
+  preview's way). `#t:<type>` is set by `history.replaceState` against the frame's own URL. **A bare hash resolves
+  against `<base>`, Studio's origin, and is refused**, measured: the first run read `href` with no hash. Each new
+  focus is a fresh frame, so the old map's 4-second poll goes with it. The window card is the fallback, with the
+  reason. `studio.html` is untouched (a peer had an open edit in it).
+
+Graded: `check:hosted` **9/9**: Privacy lists the types and says Task's rule in the map's words; Map shows the frame,
+not the card; the map draws ("Todo list backend is running · 2 tables"); "See it on the map" opens it on Task with its
+story up; the runs feed answers. Mutants: no CORS = 3 red (Privacy and both map lines); no src-less frame = 2 red.
+Studio on its own unchanged: `check:data` 80/80, `check:app` 54/54. Screens: Studio `docs/look/bko-002-*.png`.
+
+**Against the acceptance list:** AC1 ✅ in the fake host. "A run pulses" is graded as the runs feed answering
+inside the frame; no run was made, because the todo app has no cloud function. **AC2 open**: Claude Desktop, a new
+conversation. It needs the Studio that Desktop's `noodl-mcp` starts to carry `f50fb31`; ask Richard, then read
+`claude.ai-web.log` for CSP refusals. One thing the fake host cannot show is whether Claude's CSP allows the inline
+`replaceState` script in a written frame. The panel's own inline scripts run there, so it should. AC3 ✅. AC4
+replaced (above).
+
+**Found for BKO-003** (written there): the map draws the training app's `LearnerProfile` table for the todo app, and
+a table in the project and not yet on the backend has no node, so `#t:` on it opens nothing. The gate puts a Task row on
+the backend first for that reason.

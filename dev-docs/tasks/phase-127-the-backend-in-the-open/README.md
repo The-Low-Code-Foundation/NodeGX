@@ -18,16 +18,16 @@ Every part of a full-stack NodeGX app, front end, data, privacy, server logic an
 files and can be drawn**, in Studio and in Studio inside the conversation, **for any app the agent builds**, not only
 the templates. That is pillar one (DIRECTION §0: *the blueprint stays open*) applied to the backend.
 
-## Where it stood on 2026-10-26 (read from the code, nothing driven)
+## Where it stood on 2026-10-26 (read from the code, nothing driven; updated as tasks land)
 
 | part | in the project's files? | drawn in Studio? |
 |---|---|---|
 | tables and fields | ✅ `dbCollections` | ✅ Data types, App data |
-| privacy rules | ✅ `nodegx.security.json` (seeds a backend on first start; Studio writes both) | ✅ in a window; **in the conversation probably broken**: the map's answers carry no CORS (unrun) |
+| privacy rules | ✅ `nodegx.security.json` (seeds a backend on first start; Studio writes both; the agent's tool too since BKO-001) | ✅ in a window; in the conversation **was broken** (measured, P127-BKO002-HOSTEDPRIVACY), fixed in the fake host s2 |
 | cloud functions | ✅ `__cloud__/` node graphs | ❌ a step says "Runs on the backend"; the graph is never opened |
-| backend workflows (WF-001) | ❌ the backend's data dir only (`workflow-defs/`) | ❌ |
-| triggers: schedule, webhook, row change (WF-005) | ❌ the backend's `triggers.json` only | ❌ (the map fetches `/admin/triggers` and never draws it) |
-| the map | n/a | ⚠️ draws a small app, but a dozen places assume the training app; in the conversation a card, not the map |
+| backend workflows (WF-001) | ✅ `nodegx.automations.json` since BKO-001 (drift reported, AC6) | ❌ |
+| triggers: schedule, webhook, row change (WF-005) | ✅ `nodegx.automations.json` since BKO-001 | ❌ (the map fetches `/admin/triggers` and never draws it) |
+| the map | n/a | ⚠️ draws a small app, but a dozen places assume the training app (BKO-003); in the conversation it draws since BKO-002 s2 (fake host; Desktop unrun) |
 
 Where those facts come from:
 - **Workflows and triggers.** The agent writes them over `/admin/workflow-defs` and `/admin/triggers`

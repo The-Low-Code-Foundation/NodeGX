@@ -18,6 +18,15 @@
 | `E/server.mjs:68-76` | `Promise.all` with no catch: one failed call blanks the map and retries every 4 s | each source fails alone and says which |
 | `app.js:156-191` | four fixed columns | fine as a default; check it on 2, 8 and 26 tables |
 
+**Seen in BKO-002's gate (s2, 2026-10-26, the todo copy, Studio's pinned 0.1.1):**
+- `window.__map.byId` held `t:_User` and **`t:LearnerProfile`**, a training-app table the todo app never had. The
+  header said "3 tables" where the backend has two.
+- A type in the project and not yet on the backend (Task, before its first row) has no node, so Privacy's "See it on
+  the map" opens the map on nothing (`focusOn` returns silently). That is AC3.
+- Task's story read "Changing directly: Anyone signed in or Anyone signed in or Nobody" (one rule per operation, not
+  merged) and "1 things in each row". Studio `docs/look/bko-002-map-on-task.png`.
+- Studio's `editor/hosted-check.mjs` is a ready harness for this task: it draws the map for any template copy.
+
 Studio pins **0.1.1**, which is older than the source. The installed copy still says "A signed-in learner"
 (SCOPE.md:1454).
 

@@ -117,3 +117,30 @@ meant exactly this.
 
 **Also not covered yet:** a proposal accepted in the old editor's Workflows panel, and an edit on the backend's
 admin page, write the backend only. Both show up as drift once AC6 reports it.
+
+### s2 (2026-10-26): AC6 built
+
+`837b4ece8` (noodl-mcp): `backend/automationsDrift.ts` reads the project's `nodegx.automations.json`, asks the
+project's bound backend for its workflows and triggers, and compares them with `diffAutomations`. `get_project_info`
+and `session_status` both carry it as `automations`:
+- `agree` (with the counts);
+- `drift`, with one sentence per difference and both ways to agree. **To keep the project's**, the create / update /
+  delete tools with the file's entries. **To keep the backend's**, write the backend's own definition back through
+  the tools (`update_backend_workflow` with what `get_backend_workflow` returns; `set_backend_trigger_enabled` with
+  a trigger's current state). Every one of those writes the file from the backend's answer, so no new tool was needed;
+- `unknown` with the reason (not running, not on this machine, no answer in 2 s, a file that is not JSON). It never
+  says `agree` without having read the backend. It is absent when there is nothing to compare: no file and no bound
+  backend, or no file and a backend that cannot be read.
+
+No tool description changed (the surface budget). A known blind spot, written in the module: a hand-written file
+that still holds the old `retry` step kind reads as "differs", because the step migration needs the executor, which
+noodl-mcp cannot load.
+
+Graded: `p127ProjectFiles` 10/10, three new cases against a real backend. A trigger written straight to
+`/admin/triggers` (the admin page's path) and one changed there are named in both tools. Keeping the backend's through
+the named tools gives `agree`, and the file then holds the backend's cron. A backend not on this machine is
+`unknown`. Mutant (differences always empty): the drift case red. The 24 specs that read either tool: 284/285. The one
+red is `cmp001InterfaceDoctrine`'s corpus publish rate (38 against 35 counted), from the example corpus, which this
+does not touch.
+
+**AC6 ✅.** Left: **AC5** (the VM, with the release).

@@ -7,7 +7,7 @@ severity: high
 area: noodl-mcp (`src/tools/backendTools.ts` set_collection_permissions, create_/update_/delete_backend_workflow, create_/update_/delete_backend_trigger, set_backend_trigger_enabled); noodl-preview (`src/fullStack.ts` finishFullStack); nodegx-backend (`deploy/folder/start.js`)
 found: P127 s1, 2026-10-26, scoping the backend in the open (Richard: "I want people to be able to play with it to make whatever they want")
 evidence: rules MEASURED in P112 OWN-026 test 2 (P112-OWN026-RULESFROMBACKEND, t2-nodegx-c11…c15: no project rules file, the rules only in `~/.noodl/backends/*/security.json`). Workflows and triggers READ, not driven: the tools write `/admin/workflow-defs` and `/admin/triggers` only; finishFullStack ships `nodegx.security.json` and the cloud-function bundle and nothing else, so start.js has no rules to install (`none`) and no automations at all
-regression: packages/noodl-mcp/tests/p127ProjectFiles.test.ts; packages/nodegx-backend/tests/p127-project-automations.test.ts; packages/nodegx-backend/tests/dep-002-full-stack-folder.test.ts "P127 BKO-001"; packages/noodl-preview/tests/dep-002-full-stack-deploy.test.ts "P127 BKO-001"
+regression: packages/noodl-mcp/tests/p127ProjectFiles.test.ts
 owner: P127 BKO-001
 ---
 
@@ -26,3 +26,5 @@ from both files, the deploy ships both, and a difference between a file and its 
 
 Fixed in code, P127 s1 (commits above). Not yet driven on the throwaway VM (BKO-001 AC5), and not live in Claude
 Desktop until the noodl-mcp dist and the backend bundle are rebuilt or released.
+
+Also graded by `packages/nodegx-backend/tests/p127-project-automations.test.ts`, `packages/nodegx-backend/tests/dep-002-full-stack-folder.test.ts` "P127 BKO-001" and `packages/noodl-preview/tests/dep-002-full-stack-deploy.test.ts` "P127 BKO-001" (the ledger takes one `regression:` path).
