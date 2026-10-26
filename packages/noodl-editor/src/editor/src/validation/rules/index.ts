@@ -46,6 +46,7 @@ import { unlabelledNode } from './unlabelledNode';
 import { settingsDiagnostic } from './settingsDiagnostic';
 import { functionScriptNotCompiled } from './functionScriptNotCompiled';
 import { functionNeverReruns } from './functionNeverReruns';
+import { contentRowSplitsItsChildren, rowOfWordsFillsItsColumn } from './layoutFillTraps';
 
 export const ALL_RULES: Rule[] = [
   duplicateNodeId,
@@ -115,6 +116,10 @@ export const ALL_RULES: Rule[] = [
   // against the shipped corpus before they were written — this one is 0 hits
   // on all ten templates.
   dialogWithoutName,
+  // P112-OWN020-PILLWRAP / FILLGROW (ruled 2026-10-26: warn and teach) — a node with no size setting fills its parent,
+  // read from the arrangement like the two above, and live so a person sees it while editing.
+  contentRowSplitsItsChildren,
+  rowOfWordsFillsItsColumn,
   oversizedPage,
   // LEG-002 — last, and deliberately: it is the only rule in the set that
   // reports a matter of legibility rather than of correctness, and a reader

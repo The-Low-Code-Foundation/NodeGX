@@ -158,7 +158,9 @@ export const STYLE_COMPOSITIONS: VocabComposition[] = [
     nodeType: 'Group',
     group: 'spine',
     description:
-      'The one centred container inside a band. Content that touches the viewport edge is the loudest sign nobody designed the page.',
+      // P112-OWN020-FILLGROW (ruled 2026-10-26: warn and teach): a header row inside it with no sizeMode took 251 px of a
+      // quiz screen for 17 px of words. `row-of-words-fills-its-column` is the warning; this sentence is the teaching.
+      'The one centred container inside a band. Content that touches the viewport edge is the loudest sign nobody designed the page. A row of words inside it (a header, a meta line) takes sizeMode contentHeight, or it swallows the spare height.',
     parameters: {
       width: GROUP,
       sizeMode: 'contentHeight',
@@ -459,7 +461,9 @@ export const STYLE_COMPOSITIONS: VocabComposition[] = [
     nodeType: 'Group',
     group: 'surface',
     description:
-      'A pill: the smallest designed object a page can carry, and the cheapest way to stop a hero reading as a bare heading. contentSize so it hugs its words, radius-full, and a columnGap so a glyph beside a label is not touching it. Over a gradient ground use it as written; on the page background swap the fill to var(--surface) and the border to var(--border).',
+      // P112-OWN020-PILLWRAP (ruled 2026-10-26: warn and teach): two Texts with no sizeMode split CGQ1's pill in equal
+      // halves and "5 questions" wrapped. `content-row-splits-its-children` is the warning; this sentence is the teaching.
+      'A pill: the smallest designed object a page can carry, and the cheapest way to stop a hero reading as a bare heading. contentSize so it hugs its words, and the Texts inside contentSize too, or they split it in equal halves and the longer one wraps. radius-full, and a columnGap so a glyph beside a label is not touching it. Over a gradient ground use it as written; on the page background swap the fill to var(--surface) and the border to var(--border).',
     parameters: {
       sizeMode: 'contentSize',
       flexDirection: 'row',

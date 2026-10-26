@@ -27,6 +27,7 @@
 
 import { injectIntoTemplate } from '@nodegx/module-inject';
 
+import type { PreviewReport } from '../validate';
 import { pageFromFiles, type DeployTemplate, type InPagePage } from './exportInPage';
 import { armed, TRACE_OWNER } from './armTrace';
 import { kitTags } from './kits';
@@ -63,7 +64,12 @@ export interface TraceBatch {
 }
 
 export type PreviewStatus =
-  | { status: 'ok'; warnings: string[]; exportMs: number; frameMs: number }
+  /**
+   * `report` is the validation a good build passed (warnings and info only; an error stops the build). P112-OWN020: an
+   * editor beside the app (Studio) shows a person its layout warnings from it, which `warnings` (the export's own
+   * sentences) does not carry.
+   */
+  | { status: 'ok'; warnings: string[]; report: PreviewReport; exportMs: number; frameMs: number }
   | Exclude<InPagePage, { status: 'ok' }>;
 
 export interface PreviewOptions {
@@ -287,7 +293,7 @@ export async function mountPreview(container: HTMLElement, options: PreviewOptio
     next.style.visibility = '';
     current?.remove();
     current = next;
-    return { status: 'ok', warnings: page.warnings, exportMs, frameMs };
+    return { status: 'ok', warnings: page.warnings, report: page.report, exportMs, frameMs };
   }
 
   return {

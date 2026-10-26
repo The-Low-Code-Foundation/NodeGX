@@ -914,6 +914,24 @@ export enum DiagnosticCode {
   ColumnChildrenSplitAFixedHeight = 'column-children-split-a-fixed-height',
 
   /**
+   * P112-OWN020-PILLWRAP (ruled 2026-10-26: warn and teach, and make sure it works) — a row that sizes to its content
+   * holding two or more children with no width of their own. A child of a row with a percentage width grows
+   * (`layout.ts`: flexGrow = the percentage), and every Text and Group says `width: 100%` unless told otherwise, so the
+   * children take equal shares of the row and the longer words wrap although they would fit. Measured on CGQ1's start
+   * pill at 390 px: a 213 px row, two Texts at 69.7 px each, "5 questions" on two lines. Fires from the row, as a
+   * warning, in `ALL_RULES`, so the Problems panel says it while a person edits. See `rules/layoutFillTraps.ts`.
+   */
+  ContentRowSplitsItsChildren = 'content-row-splits-its-children',
+
+  /**
+   * P112-OWN020-FILLGROW (ruled with PILLWRAP) — a row of words with no height of its own, in a column with room to
+   * spare. A Group says `height: 100%` unless told otherwise, which in a column means "grow", so the row takes all the
+   * spare height and its words float in the middle of a tall empty band. Measured on CGQ1's quiz header: 251 px tall
+   * for 17 px of text. Fires on the row, as a warning, in `ALL_RULES`. See `rules/layoutFillTraps.ts`.
+   */
+  RowOfWordsFillsItsColumn = 'row-of-words-fills-its-column',
+
+  /**
    * DEF-024 (P78 D36) — a `mounted`/`visible` input whose every writer is a
    * constant-condition `Condition`, and the only value those writers can push
    * is `true`: the element can be shown but never put away again within a page
