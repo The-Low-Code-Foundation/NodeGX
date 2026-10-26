@@ -17,18 +17,27 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
-## npm packages 0.2.7 · 2026-10-25
+## npm packages 0.2.7 · 2026-10-26
 
-**Mistral Vibe 3 can build with NodeGX again, and an app your agent builds keeps each person's records to them.**
+**Your agent now keeps your app's workflows and triggers in the project's own files.**
 
 This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.7.
-`@nodegx/preview` moves to 0.2.6. `@nodegx/export`, `@nodegx/node-spec`, `@nodegx/project-contract` and
-`@nodegx/canvas-look` stay at their versions.
+`@nodegx/preview` moves to 0.2.7, `@nodegx/node-spec` to 0.2.1 and `@nodegx/project-contract` to 0.2.2.
+`@nodegx/export` and `@nodegx/canvas-look` stay at their versions.
+
+### New
+
+- **Workflows and triggers are kept in the project.** The access rules, workflows and triggers your agent sets up
+  are now written into the project folder, in `nodegx.security.json` and `nodegx.automations.json`. The backend
+  still holds them too. A backend starts from those files. A full-stack deploy takes them to the server.
+  `get_project_info` says when the backend and the files differ.
+- **Layout tips while building.** A box with no size setting can stretch to fill its parent. A pill then wraps onto
+  two lines, or a row of words becomes a tall band. Your agent is now told when a write does this, and how to fix it.
 
 ### Changed
 
-- **An app with nothing built yet can be deployed.** `deploy_to_vm` used to refuse it. Now it ships, and the result
-  says first that a visitor will see only the placeholder page. A new project's placeholder reads "Lingo — this app
+- **An app with nothing built yet can be deployed.** `deploy_to_vm` used to refuse it. Now it ships. The result says
+  first that a visitor will see only the placeholder page. A new project's placeholder reads "Lingo — this app
   is being built." It used to tell the agent to read the plan.
 
 ### Fixed
@@ -37,17 +46,39 @@ This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create
   large"), so nothing could be built. The folder now caps Mistral Large 4's answers at the most Mistral allows. It also
   tells you to start with `vibe`; `vibe --legacy-harness` is only for Vibe 2.
 - **A record a cloud function creates for someone is theirs.** Before, a record a function created had no owner, so
-  every signed-in account could read and change it. Now, when a signed-in person's call makes a function create a
-  record, the record is that person's, as it would be if their own page had made it. A function that means to share
+  every signed-in account could read and change it. Now a record a function creates during a signed-in
+  person's call is that person's. It's treated as if their own page had made it. A function that means to share
   one says so with its `acl`, or the collection is set to shared.
 - **A double-click is one press when the button calls a cloud function.** It already was when the button saved a
   record. Now a press that starts a cloud function call is ignored again until the call answers.
+- **No `npm audit` warnings on install.** Installing the kit printed three moderate warnings. All three were one
+  advisory in the XML parser, which moves to version 5.
+- **Long feeds can be read.** Parse XML and Parse Feed refused any document with more than a thousand escaped
+  characters, such as `&amp;`. A blog feed of about 150 posts was enough to be refused.
+- **Writes are quicker.** A component write that took 2.5 seconds on a large project now takes 0.7.
+- **`what_changed_since` sees your edits again.** After any write by the agent, it said nothing had changed, even
+  when you had edited the app in Studio since.
+- **A wire saved before an output was renamed connects again.** It used to connect to nothing. It now connects to the
+  output's new name.
+- **`Outputs.done.send()` works in a Function.** Calling `.send()` on a signal output threw an error. It now sends the
+  signal.
+- **A Video's Volume can't blank the page.** A Volume outside 0 to 1, such as 50 from a Slider, blanked the whole
+  page. It's now held at 0 or 1.
+- **Going to a page by its path works in the preview.** There, going to a path such as `/sign-in` led to the start page.
+  A reload of an app deployed in a sub-folder asked the server for an address outside the app. Both are fixed.
+- **The style guide your agent reads matches the checker.** It no longer suggests a Text width of "auto", which the
+  checker rejects. A Button you drag in now has the same shadow as one your agent builds.
+- **`get_component` hands back port types the write tools take.** Before, the write tools could refuse a port type it had
+  reported.
+- **A render that cannot start Chrome says why.** It now answers within 30 seconds and leaves nothing running.
 - **Text nobody can read is reported.** `render_report` warns `low-contrast-text` when text is under 3:1 against what
   is behind it, and `drive_page` can check it on any page: `"expect": { "readable": true }`.
 - **Pages whose address takes a value.** `render_report` no longer says "NOT DONE" for a page like `tables/{childId}`,
   which it cannot open. It names the page and says how `drive_page` reaches it.
 - **No red console line in the preview.** The preview no longer answers `nodegx-config.json` with a 404, so a
-  previewed app can pass "no console errors".
+  previewed app can pass "no console errors". Its state endpoint now also lists the build's warnings.
+- **For editors built from the kit.** The in-page preview's `elementsOf()` returned nothing for a copy of a
+  component. It now returns the elements the copy draws.
 
 ## npm packages 0.2.6 · 2026-10-23
 

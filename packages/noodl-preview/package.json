@@ -1,6 +1,6 @@
 {
   "name": "@nodegx/preview",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "Standalone live-preview harness: renders a NodeGX (OpenNoodl) v2 project in a browser with no editor process, and reloads it when the files on disk change.",
   "license": "GPL-3.0-only",
   "homepage": "https://nodegx.io",
