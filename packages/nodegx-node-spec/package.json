@@ -58,7 +58,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "fast-xml-parser": "^4.5.7"
+    "fast-xml-parser": "^5.11.2"
   },
   "devDependencies": {
     "@types/jest": "^29.0.1",

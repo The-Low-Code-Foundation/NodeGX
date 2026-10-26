@@ -471,7 +471,7 @@ describe('EXP-011 §75 §B — the translation', () => {
     expect(page).toContain("import { parseXml, parseXmlFailure } from '../lib/parse';");
     // `@`, `''`, `true`, 5 MB: initialize's, and the catalog's declared defaults agree with them node by node.
     expect(page).toContain("parseXml('<a href=\"x\">hi</a>', '@', '', true, 5242880, 'error')");
-    expect(manifestOf(app).dependencies['fast-xml-parser']).toBe('4.5.7');
+    expect(manifestOf(app).dependencies['fast-xml-parser']).toBe('5.11.2');
     expect(app.files[PARSE_LIB_PATH]).toContain("import { XMLParser } from 'fast-xml-parser';");
     // Sorted with the rest, so the manifest is stable across exports.
     expect(Object.keys(manifestOf(app).dependencies)).toEqual([...Object.keys(manifestOf(app).dependencies)].sort());
@@ -489,7 +489,7 @@ describe('EXP-011 §75 §B — the translation', () => {
     const page = notesFile(app);
     expect(page).toContain("parseFeed('<rss/>', 5242880, 'feedTitle')");
     expect(page).toContain("parseFeed('<rss/>', 5242880, 'kind')");
-    expect(manifestOf(app).dependencies['fast-xml-parser']).toBe('4.5.7');
+    expect(manifestOf(app).dependencies['fast-xml-parser']).toBe('5.11.2');
   });
 
   it('a wired text translates, and reports the one divergence where a later arrival can exist', () => {
@@ -572,7 +572,7 @@ describe('EXP-011 §75 §C — sheet-desk, a project a person could have built, 
     // EXP-022 S9 (P18-S106-PARSERAISE): each parser's raise earns its failure helper; To CSV raises nothing.
     expect(home).toContain("import { parseCsv, parseCsvFailure, parseFeed, parseFeedFailure, parseXml, parseXmlFailure, toCsv } from '../lib/parse';");
     expect(app.files[PARSE_LIB_PATH]).toBeDefined();
-    expect(manifestOf(app).dependencies['fast-xml-parser']).toBe('4.5.7');
+    expect(manifestOf(app).dependencies['fast-xml-parser']).toBe('5.11.2');
   });
 
   it('the CSV rows render as one row component each, and the counts are numbers a Text prints', () => {

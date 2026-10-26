@@ -3,9 +3,11 @@
  * export's `src/lib/parse.ts` imports `{ XMLParser }` from it, at the version `PARSE_DEPENDENCIES` pins, and the Swift app
  * runs that module in its JavaScriptCore context. A second XML parser would be a second answer.
  *
- * Only `XMLParser` and what it requires travel (its validator and builder are not imported), each file as the package
- * ships it, CommonJS, under its own path. The test makes it again from the installed package and fails when the two
- * differ, and fails when the installed version is not the pinned one.
+ * Only `XMLParser` travels (its validator and builder are not imported): since 5.x the package ships it as one
+ * self-contained file, `lib/fxparser.min.js` (its dependencies bundled in, no `require`), carried as it ships under its
+ * own path. 4.x shipped loose CommonJS files under `src/`, which 5.x replaced with ES modules, so the walk that carried
+ * those went with it. The test makes it again from the installed package and fails when the two differ, and fails when
+ * the installed version is not the pinned one.
  *
  *   cd packages/nodegx-export && npx ts-node --transpile-only -O '{"module":"commonjs"}' tests/helpers/swift-fxp-js.ts
  *
@@ -17,41 +19,39 @@ import * as path from 'path';
 
 import { PARSE_DEPENDENCIES } from '../../src/emit/parseLib';
 
-/** The package's root, as the exporter's own tests resolve it. */
+/** The package's root, as the exporter's own tests resolve it. 5.x exports no `./package.json`, so from its main file. */
 export function fxpRoot(): string {
-  return path.dirname(require.resolve('fast-xml-parser/package.json'));
+  let dir = path.dirname(require.resolve('fast-xml-parser'));
+  while (!fs.existsSync(path.join(dir, 'package.json'))) dir = path.dirname(dir);
+  return dir;
 }
 
-/** `fast-xml-parser/src/xmlparser/XMLParser.js` and every file it requires, transitively; `strnum` by its main file. */
+/** The installed package's version, read from its `package.json`. */
+export function fxpVersion(root = fxpRoot()): string {
+  return JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf-8')).version as string;
+}
+
+/** `fast-xml-parser/lib/fxparser.min.js`, the package's own parser-only build, and the name the web export imports. */
 export function fxpJs(root = fxpRoot()): string {
-  const version = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf-8')).version as string;
+  const version = fxpVersion(root);
   if (version !== PARSE_DEPENDENCIES['fast-xml-parser']) {
     throw new Error(`fast-xml-parser ${version} is installed; the web export pins ${PARSE_DEPENDENCIES['fast-xml-parser']}`);
   }
-  const strnum = require.resolve('strnum', { paths: [root] });
-  const nameOf = (file: string): string => (file === strnum ? 'strnum' : `fast-xml-parser/${path.relative(root, file).replace(/\.js$/, '')}`);
-  const seen = new Map<string, string>();
-  const queue = [path.join(root, 'src', 'xmlparser', 'XMLParser.js')];
-  while (queue.length > 0) {
-    const file = queue.shift()!;
-    const name = nameOf(file);
-    if (seen.has(name)) continue;
-    const text = fs.readFileSync(file, 'utf-8');
-    const body = text.replace(/\brequire\(\s*(['"])([^'"]+)\1\s*\)/g, (_m, _q, spec: string) => {
-      const dep = spec === 'strnum' ? strnum : require.resolve(path.resolve(path.dirname(file), spec));
-      queue.push(dep);
-      return `__require(${JSON.stringify(nameOf(dep))})`;
-    });
-    seen.set(name, [`__define(${JSON.stringify(name)}, function (exports, __require, module) {`, body.trimEnd(), '});'].join('\n'));
-  }
-  const files = [...seen.keys()].sort().map((name) => seen.get(name)!);
-  // What the web export imports: `{ XMLParser }` from the package.
-  const alias = [
+  const file = path.join(root, 'lib', 'fxparser.min.js');
+  const text = fs.readFileSync(file, 'utf-8').replace(/\n\/\/# sourceMappingURL=\S+\s*$/, '');
+  if (/\brequire\(/.test(text)) throw new Error(`${file} requires another module; it no longer travels as one file`);
+  const name = 'fast-xml-parser/lib/fxparser.min';
+  // What the web export imports: `{ XMLParser }` from the package. The build's UMD wrapper hands `{ default: XMLParser }`.
+  return [
+    `// fast-xml-parser ${version} (its XMLParser, lib/fxparser.min.js, its dependencies bundled in), as the package ships it.`,
+    `__define(${JSON.stringify(name)}, function (exports, __require, module) {`,
+    text.trimEnd(),
+    '});',
     '__define("fast-xml-parser", function (exports, __require) {',
-    '  exports.XMLParser = __require("fast-xml-parser/src/xmlparser/XMLParser");',
-    '});'
+    `  exports.XMLParser = __require(${JSON.stringify(name)}).default;`,
+    '});',
+    ''
   ].join('\n');
-  return `// fast-xml-parser ${version} (its XMLParser and what that requires, strnum included), as the package ships it.\n${files.join('\n')}\n${alias}\n`;
 }
 
 /** The module `src/emit/swift/fxpJs.ts`. */

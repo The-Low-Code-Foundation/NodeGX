@@ -27,7 +27,7 @@ import { emitSwiftApp } from '../src/emit/swift/emitSwift';
 import { clientModulesJs } from '../src/emit/swift/client';
 import { FXP_JS } from '../src/emit/swift/fxpJs';
 import { HOST_JS } from '../src/emit/swift/scripts';
-import { fxpJs, fxpRoot } from './helpers/swift-fxp-js';
+import { fxpJs, fxpRoot, fxpVersion } from './helpers/swift-fxp-js';
 import { drivenInputs, graphComponent, probeProject } from './helpers/node-spec-target';
 
 const catalog = loadCatalog();
@@ -62,10 +62,10 @@ function host(files: Record<string, string>): vm.Context {
 
 describe('§A fast-xml-parser travels as a constant, and only where a carried module imports it', () => {
   it('A1 the constant is the installed package read now, at the version the web export pins: a different package turns this red', () => {
-    expect(require(`${fxpRoot()}/package.json`).version).toBe(PARSE_DEPENDENCIES['fast-xml-parser']);
+    expect(fxpVersion(fxpRoot())).toBe(PARSE_DEPENDENCIES['fast-xml-parser']);
     expect(FXP_JS).toBe(fxpJs());
     expect(FXP_JS).toContain('__define("fast-xml-parser", function (exports, __require) {');
-    expect(FXP_JS).toContain('__define("strnum", function (exports, __require, module) {');
+    expect(FXP_JS).toContain('__define("fast-xml-parser/lib/fxparser.min", function (exports, __require, module) {');
   });
 
   it('A2 a parser scenario carries the parsers, the error channel and the XML parser; a scenario with neither carries none', () => {

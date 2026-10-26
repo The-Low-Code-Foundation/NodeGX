@@ -17,7 +17,7 @@
  *   no Items, Count 0, no Error — Failure Contract §2), the setters' fallbacks (`delimiter || ','`,
  *   `!!hasHeader`, a `stringlist` Columns split on commas and trimmed), rows-of-cells written cell for cell.
  * - `noodl-runtime/src/xml.ts` — `scanForHostileConstructs` (the two refusals, sentences verbatim) and
- *   `parseXML` over **`fast-xml-parser` at the interpreter's own pin, 4.5.7**, with the interpreter's own
+ *   `parseXML` over **`fast-xml-parser` at the interpreter's own pin, 5.11.2**, with the interpreter's own
  *   options. 🔴 The one third-party dependency an emitted lib has ever declared: FED-001 R1 took the library
  *   over a hand-rolled scanner for the runtime (entity expansion is a denial-of-service hole, not a wrong
  *   answer), and a transcription of an XML parser would be a second parser that drifts — so
@@ -54,10 +54,12 @@ export function isParseHelper(fn: string): fn is ParseHelper {
 
 /**
  * The npm dependency the exported app takes on when XML is parsed — the interpreter's own pin
- * (`noodl-runtime/package.json`, `xml.ts`'s module comment measured 4.5.7 at 230 KB unpacked with one dep
- * against 5.x's 1.3 MB with six). Exact, not a caret, so the exported app and the interpreter read one parser.
+ * (`noodl-runtime/package.json`; `xml.ts`'s module comment says why 5.x and what it costs). Exact, not a caret,
+ * so the exported app and the interpreter read one parser. 4.5.7 until 2026-10-26: P112-OWN008-AUDIT (its
+ * advisory reached every exported app's own `npm audit`) and BETA-S11-ENTITYCAP (it refused a feed past a
+ * thousand `&amp;`s).
  */
-export const PARSE_DEPENDENCIES: Readonly<Record<string, string>> = { 'fast-xml-parser': '4.5.7' };
+export const PARSE_DEPENDENCIES: Readonly<Record<string, string>> = { 'fast-xml-parser': '5.11.2' };
 
 /** Which helpers need {@link PARSE_DEPENDENCIES}. `parseCsv` and `toCsv` need nothing. */
 export const PARSE_HELPERS_NEEDING_DEPENDENCY: ReadonlySet<string> = new Set(['parseXml', 'parseFeed']);
@@ -179,7 +181,7 @@ export function parseLibSource(): string {
     "// an XML <guid>0123</guid> stays \"0123\"), and NOTHING HERE THROWS — a document that cannot be read answers",
     "// through its Error output, because a graph has nowhere to catch an exception and neither does a page.",
     "//",
-    "// XML is read by fast-xml-parser 4.5.7 — the library the interpreter itself uses, at the version it pins —",
+    "// XML is read by fast-xml-parser 5.11.2 — the library the interpreter itself uses, at the version it pins —",
     "// because a second XML parser is a second answer. CSV is the interpreter's own tokeniser, transcribed.",
     "//",
     "// Where the two deliberately differ, and it is one place: on a FAILED parse the interpreter keeps the",
