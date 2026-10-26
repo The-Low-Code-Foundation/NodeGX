@@ -27,7 +27,7 @@ the templates. That is pillar one (DIRECTION §0: *the blueprint stays open*) ap
 | cloud functions | ✅ `__cloud__/` node graphs | ❌ a step says "Runs on the backend"; the graph is never opened |
 | backend workflows (WF-001) | ✅ `nodegx.automations.json` since BKO-001 (drift reported, AC6) | ❌ |
 | triggers: schedule, webhook, row change (WF-005) | ✅ `nodegx.automations.json` since BKO-001 | ❌ (the map fetches `/admin/triggers` and never draws it) |
-| the map | n/a | ⚠️ draws a small app, but a dozen places assume the training app (BKO-003); in the conversation it draws since BKO-002 s2 (fake host; Desktop unrun) |
+| the map | n/a | ✅ reads any app since BKO-003 s3 (in the package; Studio still pins 0.1.1 until the publish); in the conversation it draws since BKO-002 s2 (fake host; Desktop unrun) |
 
 Where those facts come from:
 - **Workflows and triggers.** The agent writes them over `/admin/workflow-defs` and `/admin/triggers`

@@ -23,12 +23,18 @@ full-stack deploy carries them. Bug P127-BKO001-BACKENDONLY is fixed in code.
   `npm run check:hosted` (9/9). AC4 was replaced: the CORS header stays in Studio, not the map package (the reason
   is in BKO-002's log).
 
+## s3 (2026-10-26): BKO-003 built in the package
+
+The map made a `LearnerProfile` table in every app's backend (its "who is signed in" read the training app's table,
+and the backend makes a table on a query): **P127-BKO003-PROFILEWRITE**, fixed. The map now reads the app's own
+people, groups and tables (`lib/people.mjs`, `projectTables`), draws a table the backend lacks, survives one failed
+source, and says no training word. `test/any-app.test.mjs` (in `npm test`) 38/38; the whole suite 104 checks; the
+training copy unchanged. The session log in BKO-003 has the mutants and the recording control.
+
 **Next, in order:**
-1. **BKO-003**, the map reads any app. Studio's `editor/hosted-check.mjs` is a ready harness (a template copy, its
-   backend, the map drawn). It is measured already: the todo app's map draws the training app's `LearnerProfile`, a
-   project table missing from the backend has no node, and the rule words repeat ("Anyone signed in or Anyone signed
-   in or Nobody"). The source is `dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor/`. Studio pins 0.1.1, so
-   a publish and a pin bump close it (Richard's OTP).
+1. **Publish `@nodegx/backend-map` 0.1.2 and bump Studio's pin** (Richard's OTP: ask, never work around). Until
+   then Studio runs 0.1.1, which still makes LearnerProfile in any app's backend when Map or Privacy opens. After
+   the bump: Studio's `npm run check:hosted` (its Privacy and map lines read this map).
 2. **BKO-002 AC2**, Claude Desktop. It waits on Richard: Desktop must run a Studio carrying `f50fb31` and a
    `noodl-mcp` carrying `837b4ece8`. Ask before rebuilding anything.
 3. BKO-004 / BKO-005 (they read BKO-001's file shape, which has landed).
