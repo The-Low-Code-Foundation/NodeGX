@@ -725,3 +725,6 @@ audits 0; stranger-render on `@nodegx/mcp@0.2.7` "DONE — clean"; `npm create n
 page (adds 0.2.6, never deployed, and 0.2.7) is built in a scratch copy of nodegx-web, diffed against the live page
 (additions only); its upload is Richard's, because `deploy.sh` would ship nodegx-web's stale tracked files and its
 `rsync --delete` would take down live folders that exist only untracked on the laptop (`gala/`, `map/`, `orbit/`, …).
+Richard uploaded that one file (`rsync` to `nexus:`, his key; the bare IP gets no key from `~/.ssh/config`). Live
+`/changelog/` md5 equals the built file and carries the 0.2.6 and 0.2.7 sections; `/`, `/gala/`, `/map/`, `/orbit/`,
+`/backend-map/` and `/templates/rocket-school/` still answer 200.
