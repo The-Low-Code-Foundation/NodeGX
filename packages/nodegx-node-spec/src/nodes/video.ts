@@ -42,8 +42,8 @@
  *     refuses, and nothing changes — the runtime throws (row **C99**); on an embed, any value changes nothing — the runtime throws
  *     (row **C96**).
  *   - **Volume, Poster, Controls** are drawn and read by no output. A Volume outside 0 to 1 is look like any other here — the
- *     runtime throws while React draws it and the page goes blank (row **C98**). Face choice: a person using the browser's own
- *     controls is not an act.
+ *     runtime holds it at 0 or 1 and plays a non-number at 1 (C98, fixed: it threw and blanked the page). Face choice: a
+ *     person using the browser's own controls is not an act.
  */
 
 import { defineNode, said, type Patch } from '../spec';

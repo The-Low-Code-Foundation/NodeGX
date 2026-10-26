@@ -108835,7 +108835,7 @@
     ]
   },
   {
-    "name": "row C98 — Volume 2 is look: nothing on the wire (the runtime throws while React draws it, and the page goes blank)",
+    "name": "C98 — Volume 2 is look: nothing on the wire, and the page stays (the video plays at 1)",
     "because": "Video.tsx :236-305; video-embed.ts youtubeId/vimeoId; media-fragment.ts withMediaFragment",
     "params": {
       "src": "clip.mp4"
@@ -108847,11 +108847,10 @@
         "value": 2
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C98"
+    ]
   },
   {
-    "name": "row C98 — placed with Volume 50: nothing (the runtime throws at its first frame)",
+    "name": "C98 — placed with Volume 50: nothing on the wire, and the page stays (the video plays at 1)",
     "because": "Video.tsx :236-305; video-embed.ts youtubeId/vimeoId; media-fragment.ts withMediaFragment",
     "params": {
       "src": "clip.mp4",
@@ -108860,8 +108859,7 @@
     "steps": [
       "settle",
       "settle"
-    ],
-    "row": "NSP-016 §6 C98"
+    ]
   },
   {
     "name": "C98's twin: Volume 0.5, 0, '0.5' and null draw at that volume and send nothing",

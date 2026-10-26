@@ -70,7 +70,7 @@ class CachedVideo extends React.PureComponent<CachedVideoProps> {
     if (this.video) {
       this.video.muted = this.props.muted;
       this.video.loop = this.props.loop;
-      this.video.volume = this.props.volume;
+      this.video.volume = playableVolume(this.props.volume);
       this.video.autoplay = this.props.autoplay;
       this.video.controls = this.props.controls;
     }
@@ -305,4 +305,16 @@ export class Video extends React.Component<VideoProps> {
       />
     );
   }
+}
+
+/**
+ * P107-C98 — the volume a `<video>` takes. Its setter throws outside 0 to 1 (IndexSizeError) and for anything that is not a
+ * finite number (TypeError), in React's commit, so a Volume of 50 (a Slider's default range) or an empty value unmounted
+ * the whole page. Held at 0 or 1; a value that is not a number plays at the default 1. What the setter accepted before
+ * (0.5, "0.5", null as 0) plays as it did.
+ */
+export function playableVolume(value: unknown): number {
+  const n = typeof value === 'number' ? value : Number(value);
+  if (Number.isNaN(n)) return 1;
+  return Math.min(1, Math.max(0, n));
 }
