@@ -1,7 +1,9 @@
 ---
 id: P121-TWO003-GROUPKEYBOARD
 title: A Group (or Text, or Image) that answers a click can't be reached from the keyboard, so a whole card that opens something works only with a pointer
-status: open
+status: fixed
+commit: ae80457b3
+regression: packages/noodl-viewer-react/tests/two003-groupkeyboard.test.tsx "Enter sends Click once, and the keydown is cancelled"
 severity: medium
 area: runtime / Group (and every visual node with Click: Text, Image); `noodl-viewer-react/src/components/visual/Group/Group.tsx`
 found: P121 TWO-003 s5, 2026-10-14
@@ -35,3 +37,31 @@ absolute; inset: 0`, transparent, its label the photo's description drawn in tra
 and a screen reader names it. The drive checks each tile holds a `BUTTON` with `tabIndex` 0 and clicks the photo's by
 its label (`two-005-profile-drive.test.ts`). It takes four lines of CSS a builder would have to invent; a
 focusable Group, or an Image with Click that is a button, would need none.
+
+**Ruled 2026-10-26 (Richard), asked:** *"Should a Group with Click wired become keyboard-reachable by itself (Tab stops on
+it, Enter or Space clicks it), or should it be a setting the builder turns on?"* **Answer:** *"For accessibility yes,
+absolutely, we must have interactive elements available to screen readers that tab through the page."* So automatic.
+
+**Fixed 2026-10-26 (the Beta sweep s12, ae80457b3), as ruled.** `noodl-viewer-react/src/keyboard-click.ts`: while a visual
+node's Click output has a wire, its element gets `tabindex="0"` and `role="button"` (only where it has neither already,
+and never on a native `<button>`, link, field or `<video controls>`), Enter clicks it and Space clicks it on the way up,
+through the element's own `click()` so Click Bubbling and the rest apply unchanged. A key something else already
+cancelled is left to it (a Draggable keeps Space: `drag-drop.ts` runs first, capture phase); a key on a field inside the
+element is the field's. Taking the last wire off gives back only what was added. Kept in step by the Click output's
+first/last-connection hooks (a wire made while the preview runs, no repaint) and by `setDOMElement` (a new element).
+The controls' focus ring (`[data-ndl-keyboard-click]:focus-visible`, `--ring`). One shared Click, so Group, Text,
+Image, Circle and Video all have it.
+
+Found on the way: **`defineNode` dropped a SIGNAL output's `onFirstConnectionAdded` / `onLastConnectionRemoved`**
+(`nodedefinition.ts`, the signal branch registered a bare getter); a value output kept them. No signal declared one
+before, so nothing else moves.
+
+Graded: `tests/two003-groupkeyboard.test.tsx` 17/17 on real Text and Image nodes (corpus harness, the runtime's own
+`connectInput`, React into jsdom, real `KeyboardEvent`s); seven mutants each red on their own row (no sync on a new
+element 6 red; signal hooks dropped 2; own role overwritten 1; `defaultPrevented` ignored 1; key target ignored 1;
+native treated as plain 1; Space on keydown 1). Not graded here: the ring painting and the Tab order (a browser reading).
+
+Left: **a card that is a button with a Button inside it** is "nested interactive" (axe `nested-interactive`): both
+are reachable, but some screen readers read the inner one poorly. The marketplace's Button-over-name workaround has the
+same shape. A build-time note is the candidate if it matters. The node specs model no wired Click (the conformance
+harness intercepts signals, it wires nothing), so they still say a Group takes the keyboard only when Draggable.
