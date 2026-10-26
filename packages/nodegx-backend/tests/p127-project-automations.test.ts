@@ -269,3 +269,21 @@ describe('BKO-001 — a service started for a project', () => {
     }
   });
 });
+
+describe('BKO-001 — the rules notice on a start that names the project for its automations', () => {
+  it('is silent when the backend’s rules are the project’s, and still loud when they differ', () => {
+    const { applyProjectPolicy, describeProjectPolicyOutcome } = require('../src/security/projectPolicy');
+    const policy = { version: 1, devOpen: false, defaults: { permissions: { find: 'authenticated', get: 'authenticated', create: 'authenticated', update: 'authenticated', delete: 'authenticated' }, creatorOwns: true }, collections: {}, functions: {}, files: { upload: 'authenticated', read: 'public', delete: 'nobody' }, signup: 'public' };
+    const projectDir = tmp('same-rules-project');
+    fs.writeFileSync(path.join(projectDir, 'nodegx.security.json'), JSON.stringify(policy, null, 2));
+    const dataDir = tmp('same-rules-data');
+    fs.writeFileSync(path.join(dataDir, 'security.json'), JSON.stringify(policy));
+    const same = applyProjectPolicy({ projectDir, dataDir });
+    expect(same).toMatchObject({ status: 'backend-already-configured', same: true });
+    expect(describeProjectPolicyOutcome(same)).toBeNull();
+    fs.writeFileSync(path.join(dataDir, 'security.json'), JSON.stringify({ ...policy, signup: 'nobody' }));
+    const differs = applyProjectPolicy({ projectDir, dataDir });
+    expect(differs).toMatchObject({ same: false });
+    expect(describeProjectPolicyOutcome(differs)).toMatch(/never overwritten/);
+  });
+});

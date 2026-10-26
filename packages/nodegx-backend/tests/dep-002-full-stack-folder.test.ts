@@ -357,3 +357,91 @@ describe("DEP-002 s3 — a deploy brings the project's access rules (Richard, 20
     }
   });
 });
+
+describe("P127 BKO-001 — a deploy brings the project's workflows and triggers", () => {
+  const AUTOMATIONS = JSON.stringify({
+    version: 1,
+    workflows: [],
+    triggers: [{ id: 'daily', type: 'schedule', target: { kind: 'function', name: 'remind' }, schedule: { cron: '0 9 * * *' } }]
+  });
+  const data = (outDir: string, ...parts: string[]) => path.join(outDir, 'data', ...parts);
+  const ship = (outDir: string, text: string) => fs.writeFileSync(path.join(outDir, 'backend', 'nodegx.automations.json'), text);
+  /** What the real backend does with --project-dir on a data folder with no automations: load them. */
+  const backendLoads = (outDir: string, started: string[] | null) => {
+    if (started && started.includes('--project-dir') && !fs.existsSync(data(outDir, 'triggers.json'))) {
+      fs.writeFileSync(data(outDir, 'triggers.json'), JSON.stringify({ version: 1, triggers: [{ id: 'daily' }] }));
+      fs.mkdirSync(data(outDir, 'workflow-defs'), { recursive: true });
+    }
+  };
+  /** The rules' stand-in: installs them on a start told the project folder, so a restart reads "unchanged". */
+  const backendInstallsRules = (outDir: string, started: string[] | null) => {
+    if (started && started.includes('--project-dir') && !fs.existsSync(data(outDir, 'security.json'))) {
+      fs.copyFileSync(path.join(outDir, 'backend', 'nodegx.security.json'), data(outDir, 'security.json'));
+    }
+  };
+
+  it('installs them on the first start; a restart with the same ones leaves the backend alone', () => {
+    const { outDir } = pack();
+    ship(outDir, AUTOMATIONS);
+    const first = start(outDir);
+    expect(first.run.status).toBe(0);
+    expect(first.run.stdout).toContain("workflows and triggers: installing this deploy's backend/nodegx.automations.json");
+    expect(first.started).toContain('--project-dir');
+    expect(fs.existsSync(data(outDir, 'deployed-automations.json'))).toBe(true);
+    backendLoads(outDir, first.started);
+    backendInstallsRules(outDir, first.started);
+    const again = start(outDir);
+    expect(again.run.stdout).toContain('workflows and triggers: unchanged');
+    expect(again.started).not.toContain('--project-dir');
+  });
+
+  it("replaces them with a deploy's changed ones, keeping the previous files beside them and the webhook secrets in place", () => {
+    const { outDir } = pack();
+    ship(outDir, AUTOMATIONS);
+    const first = start(outDir);
+    backendLoads(outDir, first.started);
+    backendInstallsRules(outDir, first.started);
+    fs.writeFileSync(data(outDir, 'workflow-defs', 'old.workflow-def.json'), '{}');
+    const secrets = data(outDir, 'secrets.json');
+    fs.writeFileSync(secrets, JSON.stringify({ webhooks: { hook: 'whsec_keep' } }));
+    ship(outDir, AUTOMATIONS.replace('0 9 * * *', '0 10 * * *'));
+    const { run, started } = start(outDir);
+    expect(run.status).toBe(0);
+    expect(run.stdout).toMatch(/workflows and triggers: replaced .*the previous ones are kept as .*triggers\.json\.before-.* and .*workflow-defs\.before-/);
+    expect(started).toContain('--project-dir');
+    expect(fs.existsSync(data(outDir, 'triggers.json'))).toBe(false); // the backend loads the deploy's
+    expect(fs.existsSync(data(outDir, 'workflow-defs'))).toBe(false);
+    const kept = fs.readdirSync(data(outDir)).filter((f) => f.includes('.before-'));
+    expect(kept.filter((f) => f.startsWith('triggers.json.before-'))).toHaveLength(1);
+    expect(kept.filter((f) => f.startsWith('workflow-defs.before-'))).toHaveLength(1);
+    expect(JSON.parse(fs.readFileSync(secrets, 'utf8'))).toEqual({ webhooks: { hook: 'whsec_keep' } });
+  });
+
+  it("says when a deploy carries none, and leaves the backend's own", () => {
+    const { outDir } = pack();
+    const { run } = start(outDir);
+    expect(run.stdout).toContain('workflows and triggers: this deploy carries none');
+  });
+
+  it('--check says what a start would do with them, writing nothing', () => {
+    const { outDir } = pack();
+    ship(outDir, AUTOMATIONS);
+    const dataDir = data(outDir);
+    fs.mkdirSync(dataDir, { recursive: true });
+    const { run, started } = start(outDir, ['--check', '--data-dir', dataDir]);
+    expect(run.status).toBe(0);
+    expect(run.stdout).toContain('[check] workflows and triggers: installing');
+    expect(started).toBeNull();
+    expect(fs.existsSync(data(outDir, 'deployed-automations.json'))).toBe(false);
+  });
+
+  it('refuses a deploy whose file is not JSON, and changes nothing in the data', () => {
+    const { outDir } = pack();
+    ship(outDir, '{ nope');
+    const { run, started } = start(outDir);
+    expect(run.status).not.toBe(0);
+    expect(run.stderr + run.stdout).toMatch(/nodegx\.automations\.json\) are not valid JSON/);
+    expect(started).toBeNull();
+    expect(fs.existsSync(data(outDir, 'deployed-automations.json'))).toBe(false);
+  });
+});

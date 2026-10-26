@@ -12,7 +12,8 @@ import { buildIgnoreMatcher } from '../../src/editor/src/utils/compilation/build
 describe('P123-STU008-BACKENDPUBLIC — the default deploy rules', () => {
   it.each([true, false])('🔴 excludes the access policy and backend/ (v2 project: %s)', (isV2Project) => {
     const matcher = buildIgnoreMatcher({ isV2Project, ignoreFileContent: null });
-    for (const file of ['nodegx.security.json', 'backend/schema.json', 'backend/seed/members.json']) {
+    // P127 BKO-001: nodegx.automations.json, the workflows and triggers, is the backend's too.
+    for (const file of ['nodegx.security.json', 'nodegx.automations.json', 'backend/schema.json', 'backend/seed/members.json']) {
       expect(matcher.match(file).ignored).toBe(true);
     }
   });

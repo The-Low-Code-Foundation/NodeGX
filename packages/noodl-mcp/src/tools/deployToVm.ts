@@ -277,7 +277,7 @@ export interface DeployToVmResult {
   url: string | null;
   /** With no domain: the one command that shows the app on this machine. */
   see?: string;
-  build: { projectName: string; buildId: string; files: number; functions: string[]; rules: 'project' | 'server'; engine: EngineCommand['via'] };
+  build: { projectName: string; buildId: string; files: number; functions: string[]; rules: 'project' | 'server'; automations: 'project' | 'none' | 'not reported'; engine: EngineCommand['via'] };
   /** provision-app.sh's own lines: what it installed and which access rules are in force. */
   provision: string[];
   /** The names of the function secrets sent (never the values). */
@@ -305,6 +305,8 @@ interface EngineReport {
     functionFailures: { name: string; reason: string }[];
     uses: { functions: string[] };
     rules: unknown;
+    /** P127 BKO-001: the project's workflows and triggers went in. Absent from an engine older than that. */
+    automations?: boolean;
   };
 }
 
@@ -473,6 +475,8 @@ export async function deployToVm(request: DeployToVmRequest, deps: DeployDeps): 
         files: Array.isArray(report.written) ? report.written.length : 0,
         functions: full.uses.functions,
         rules: full.rules ? 'project' : 'server',
+        // An engine from before P127 BKO-001 cannot say, and its folder carries none.
+        automations: full.automations === undefined ? 'not reported' : full.automations ? 'project' : 'none',
         engine: deps.engine.via
       },
       provision: provisionLines,

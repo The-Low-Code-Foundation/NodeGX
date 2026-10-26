@@ -32,6 +32,11 @@
  *      (`security.json.before-<time>`) and the backend installs the project's. A restart, or a deploy
  *      with the same rules, leaves `data/security.json` as it is (Richard, 2026-10-23: a reship
  *      brings the project's rules; an edit made on the server lasts until the project's change).
+ *   4b. Installs the project's workflows and triggers (`backend/nodegx.automations.json`, P127
+ *      BKO-001) by the same rule: on a first start, and after a deploy that changed them, the
+ *      backend's `data/triggers.json` and `data/workflow-defs/` are moved aside (`.before-<time>`) and
+ *      the backend loads the project's. Webhook secrets stay in `data/secrets.json`, so a sender's
+ *      secret survives a reship. A restart, or a deploy with the same ones, leaves them as they are.
  *   5. Refuses rules that are switched off (`"devOpen": true`), which is how a development backend's
  *      data arrives — and the backend's own interlock only refuses that on a public bind, while this
  *      app is usually behind a proxy on 127.0.0.1. Refused before anything in the data is changed.
@@ -58,6 +63,13 @@ const BACKEND_RULES = 'security.json';
 /** Which rules the last deploy installed (their checksum), in the data folder. */
 const RULES_MARKER = 'deployed-rules.json';
 const WORKFLOW_SUFFIX = '.workflow.json';
+/** The project's workflows and triggers (P127 BKO-001). */
+const AUTOMATIONS_FILE = 'nodegx.automations.json';
+/** The backend's own copies of them, in the data folder. */
+const BACKEND_TRIGGERS = 'triggers.json';
+const BACKEND_WORKFLOWS = 'workflow-defs';
+/** Which automations the last deploy installed (their checksum), in the data folder. */
+const AUTOMATIONS_MARKER = 'deployed-automations.json';
 
 /** The Node this app needs, and the one property that decides it. */
 const NODE_NEEDED = '22.13';
@@ -240,6 +252,74 @@ function planRules(dataDir) {
   return { action, current, shipped, config, sha256 };
 }
 
+/**
+ * What to do with the project's workflows and triggers: the same four answers as `planRules`. The
+ * backend has some when it has a `triggers.json` or any workflow definition.
+ */
+function planAutomations(dataDir) {
+  const shipped = path.join(BACKEND, AUTOMATIONS_FILE);
+  const triggers = path.join(dataDir, BACKEND_TRIGGERS);
+  const workflows = path.join(dataDir, BACKEND_WORKFLOWS);
+  if (!fs.existsSync(shipped)) return { action: 'none', triggers, workflows };
+  const bytes = fs.readFileSync(shipped);
+  try {
+    JSON.parse(bytes.toString('utf8'));
+  } catch (error) {
+    fail(
+      `This deploy's workflows and triggers (backend/${AUTOMATIONS_FILE}) are not valid JSON: ${error.message}. Deploy the project again.`
+    );
+  }
+  const sha256 = crypto.createHash('sha256').update(bytes).digest('hex');
+  let installed = null;
+  try {
+    installed = JSON.parse(fs.readFileSync(path.join(dataDir, AUTOMATIONS_MARKER), 'utf8')).sha256;
+  } catch {
+    installed = null;
+  }
+  const hasSome = fs.existsSync(triggers) || (fs.existsSync(workflows) && fs.readdirSync(workflows).length > 0);
+  let action = 'replace';
+  if (!hasSome) action = 'install';
+  else if (installed === sha256) action = 'unchanged';
+  return { action, triggers, workflows, sha256 };
+}
+
+/** Carry out the plan. Returns where the previous ones were moved, when they were. */
+function applyAutomations(plan, dataDir) {
+  if (plan.action !== 'install' && plan.action !== 'replace') return [];
+  const moved = [];
+  if (plan.action === 'replace') {
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    for (const from of [plan.triggers, plan.workflows]) {
+      if (!fs.existsSync(from)) continue;
+      const to = `${from}.before-${stamp}`;
+      fs.renameSync(from, to);
+      moved.push(to);
+    }
+  }
+  fs.writeFileSync(
+    path.join(dataDir, AUTOMATIONS_MARKER),
+    JSON.stringify({ sha256: plan.sha256, installedAt: new Date().toISOString() }, null, 2) + '\n'
+  );
+  return moved;
+}
+
+function describeAutomations(plan, moved) {
+  switch (plan.action) {
+    case 'none':
+      return "[start] workflows and triggers: this deploy carries none; the backend's own run\n";
+    case 'unchanged':
+      return '[start] workflows and triggers: unchanged (this deploy\'s are the ones already installed)\n';
+    case 'install':
+      return `[start] workflows and triggers: installing this deploy's backend/${AUTOMATIONS_FILE}\n`;
+    default:
+      return (
+        `[start] workflows and triggers: replaced with this deploy's backend/${AUTOMATIONS_FILE}` +
+        (moved.length ? `; the previous ones are kept as ${moved.join(' and ')}` : '') +
+        '\n'
+      );
+  }
+}
+
 /** Carry out the plan. Returns where the previous rules were moved, when they were. */
 function applyRules(plan, dataDir) {
   if (plan.action !== 'install' && plan.action !== 'replace') return null;
@@ -339,6 +419,10 @@ async function main() {
       const plan = planRules(dataDir);
       refuseDevOpen(plan);
       process.stdout.write(describeRules(plan, `${plan.current}.before-<time>`).replace('[start]', '[check]'));
+      const automationsPlan = planAutomations(dataDir);
+      process.stdout.write(
+        describeAutomations(automationsPlan, [`${BACKEND_TRIGGERS}.before-<time>`, `${BACKEND_WORKFLOWS}.before-<time>`]).replace('[start]', '[check]')
+      );
       process.exit(0);
     }
     port = await choosePort(argv, process.env);
@@ -349,8 +433,10 @@ async function main() {
   fs.mkdirSync(dataDir, { recursive: true });
   const rules = planRules(dataDir);
   refuseDevOpen(rules);
+  const automations = planAutomations(dataDir);
   const movedTo = applyRules(rules, dataDir);
   process.stdout.write(describeRules(rules, movedTo));
+  process.stdout.write(describeAutomations(automations, applyAutomations(automations, dataDir)));
   const functions = installFunctions(dataDir);
   process.stdout.write(
     functions.length
@@ -361,7 +447,9 @@ async function main() {
   const args = ['serve', '--data-dir', dataDir, '--port', String(port), '--serve-app', APP, '--enforce-rules'];
   // The backend installs the project's rules only when it has none, and says so loudly when it
   // does not — so it is told about them only on a start that installs them.
-  if (rules.action === 'install' || rules.action === 'replace') args.push('--project-dir', BACKEND);
+  // The same for the workflows and triggers, which it loads only into a backend that has none.
+  const installs = (plan) => plan.action === 'install' || plan.action === 'replace';
+  if (installs(rules) || installs(automations)) args.push('--project-dir', BACKEND);
   const name = appName();
   if (name) args.push('--backend-name', name);
   args.push(...withoutOwnArgs(argv));

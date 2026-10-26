@@ -7,6 +7,7 @@
  *     backend/cli.js          the backend this installation ships (`resolveServiceEntry`)
  *     backend/workflows/      the project's cloud functions, built by the editor's own builder
  *     backend/nodegx.security.json   the project's access rules, when it has them
+ *     backend/nodegx.automations.json  its workflows and triggers, when it has them (P127 BKO-001)
  *     start.js, start.sh, start.cmd  the launcher (nodegx-backend `deploy/folder/`)
  *     MANIFEST.json           every file above, with its checksum (`package-deploy.js`)
  *     DEPLOY.md, package.json
@@ -53,6 +54,8 @@ export const FULL_STACK_FLAG = '--full-stack';
 
 /** The project's access rules: `nodegx.security.json` at its root (SB-015). */
 const POLICY_FILE = 'nodegx.security.json';
+/** The project's workflows and triggers: `nodegx.automations.json` at its root (P127 BKO-001). */
+const AUTOMATIONS_FILE = 'nodegx.automations.json';
 
 /** What a full-stack deploy reports beside the usual outcome. */
 export interface FullStackReading {
@@ -64,6 +67,8 @@ export interface FullStackReading {
   functionFailures: { name: string; reason: string }[];
   /** The project ships its own access rules, and they are in `backend/`. */
   rules: boolean;
+  /** The project ships its own workflows and triggers, and they are in `backend/`. */
+  automations: boolean;
   buildId: string;
   artifactDigest: string;
 }
@@ -217,6 +222,11 @@ export async function finishFullStack(
   const policy = path.join(options.projectDir, POLICY_FILE);
   const rules = fs.existsSync(policy);
   if (rules) backendFiles[POLICY_FILE] = policy;
+  // Its workflows and triggers: before P127 BKO-001 they existed only in the local backend's data, so a
+  // shipped app ran without its schedules (P127-BKO001-BACKENDONLY).
+  const automationsFile = path.join(options.projectDir, AUTOMATIONS_FILE);
+  const automations = fs.existsSync(automationsFile);
+  if (automations) backendFiles[AUTOMATIONS_FILE] = automationsFile;
 
   // The cloud functions: the bundle the editor's Deploy button and `deploy_cloud_functions` push,
   // written as the file the backend writes when it is pushed (`<name>.workflow.json`, with its
@@ -276,6 +286,7 @@ export async function finishFullStack(
       uses,
       functionFailures: parts.failures.map((failure) => ({ ...failure, name: functionName(failure.name) })),
       rules,
+      automations,
       buildId: manifest.buildId,
       artifactDigest: manifest.artifactDigest
     }

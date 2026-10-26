@@ -130,6 +130,8 @@ export const DEFAULT_IGNORE_ENTRIES: readonly DefaultIgnoreEntry[] = [
   // policy and the backend's schema, seed data, fixtures and proposed triggers. Anchored to the project root, so an
   // asset folder that happens to be called `backend` deeper down still ships.
   { pattern: '/nodegx.security.json', reason: "the backend's access policy: read by the backend, not the app" },
+  // P127 BKO-001: the backend's workflows and triggers, read by the backend the same way.
+  { pattern: '/nodegx.automations.json', reason: "the backend's workflows and triggers: read by the backend, not the app" },
   { pattern: '/backend/', reason: "the backend's own files: schema, seed data, fixtures, triggers" },
 
   // Legacy project source. Already excluded before DEP-008, kept by name.

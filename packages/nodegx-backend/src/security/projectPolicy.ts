@@ -114,8 +114,12 @@ export type ProjectPolicyOutcome =
   | { status: 'no-project-dir' }
   /** The project has no policy file. The ordinary case, and a no-op. */
   | { status: 'no-policy-file'; policyPath: string }
-  /** The backend already has a `security.json`, which is never edited. */
-  | { status: 'backend-already-configured'; policyPath: string; backendPath: string }
+  /**
+   * The backend already has a `security.json`, which is never edited. `same`: it says what the
+   * project's says (P127 BKO-001: a deploy names the project folder for its workflows and triggers on a
+   * start whose rules are unchanged, and a correct, identical policy is nothing to warn about).
+   */
+  | { status: 'backend-already-configured'; policyPath: string; backendPath: string; same: boolean }
   /** Written. */
   | { status: 'applied'; policyPath: string; backendPath: string; config: SecurityConfig };
 
@@ -188,7 +192,13 @@ export function applyProjectPolicy(args: { projectDir?: string | null; dataDir: 
 
   const backendPath = path.join(args.dataDir, BACKEND_POLICY_FILE);
   if (fs.existsSync(backendPath)) {
-    return { status: 'backend-already-configured', policyPath, backendPath };
+    let same = false;
+    try {
+      same = JSON.stringify(JSON.parse(fs.readFileSync(backendPath, 'utf-8'))) === JSON.stringify(config);
+    } catch {
+      same = false;
+    }
+    return { status: 'backend-already-configured', policyPath, backendPath, same };
   }
 
   fs.mkdirSync(args.dataDir, { recursive: true });
@@ -218,6 +228,7 @@ export function describeProjectPolicyOutcome(outcome: ProjectPolicyOutcome): str
           : ' — enforcement is ON (devOpen: false), locally as well as deployed.')
       );
     case 'backend-already-configured':
+      if (outcome.same) return null;
       return (
         `[nodegx-backend] SB-015: this project ships a security policy (${outcome.policyPath}) but the backend ` +
         `already has its own (${outcome.backendPath}), which is never overwritten. The running policy is the ` +
