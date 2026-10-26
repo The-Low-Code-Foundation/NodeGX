@@ -106,9 +106,11 @@ app, and the backend's storage makes any table a query names (`autoCreateTables`
   with the release.
 
 **Against the acceptance list:** AC1 ✅ (the third app is a stand-in shaped like the agent's output, not an agent
-run; BKO-006's stranger rounds are the real one). AC2 ✅. AC3 ✅. AC4 ✅ (above). **AC5 half**: the package's tests
-pass; **the publish and Studio's pin bump wait on Richard's OTP.** Until then Studio still runs 0.1.1, which makes
-LearnerProfile in any app's backend when its map or Privacy is opened.
+run; BKO-006's stranger rounds are the real one). AC2 ✅. AC3 ✅. AC4 ✅ (above). **AC5 ✅**: the package's tests
+pass; **0.1.2 published by Richard** (`c26b8bc30`; the registry listed it after ~70 s and served the tarball after
+~5 min) and **Studio pins it** (nodegx-studio `3931ddf`). Graded twice: first in a scratch clone of Studio with the
+packed tarball, then on the real install: `check:hosted` 9/9 (the todo map: "2 tables (and 9 in the app, not on the
+backend yet)", where 0.1.1 said 3), `check:data` 80/80. A running Studio picks it up when it restarts.
 
 **Left, on purpose:** `views.mjs`'s `course` pre-run (a function named `course` whose screens need `conceptId`: run
 it first and take the step marked `now`). It never fires in an app without that function, so no training word

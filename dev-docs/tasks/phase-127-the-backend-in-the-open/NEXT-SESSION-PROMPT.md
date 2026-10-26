@@ -32,10 +32,10 @@ source, and says no training word. `test/any-app.test.mjs` (in `npm test`) 38/38
 training copy unchanged. The session log in BKO-003 has the mutants and the recording control.
 
 **Next, in order:**
-1. **Publish `@nodegx/backend-map` 0.1.2 and bump Studio's pin** (Richard's OTP: ask, never work around). Until
-   then Studio runs 0.1.1, which still makes LearnerProfile in any app's backend when Map or Privacy opens. After
-   the bump: Studio's `npm run check:hosted` (its Privacy and map lines read this map).
-2. **BKO-002 AC2**, Claude Desktop. It waits on Richard: Desktop must run a Studio carrying `f50fb31` and a
+0.1.2 is published and Studio pins it (nodegx-studio `3931ddf`; `check:hosted` 9/9, `check:data` 80/80). BKO-003 is
+done.
+
+1. **BKO-002 AC2**, Claude Desktop (the Studio it runs now carries both BKO-002 and the 0.1.2 map, after a restart). It waits on Richard: Desktop must run a Studio carrying `f50fb31` and a
    `noodl-mcp` carrying `837b4ece8`. Ask before rebuilding anything.
 3. BKO-004 / BKO-005 (they read BKO-001's file shape, which has landed).
 4. Later: **BKO-001 AC5**, a real ship to the throwaway VM, with the release.

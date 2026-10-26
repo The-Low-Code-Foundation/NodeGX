@@ -2,7 +2,7 @@
 id: P127-BKO003-PROFILEWRITE
 title: Opening the backend map on any app makes an empty LearnerProfile table in that app's backend, and the map then draws the training app's table on it
 status: fixed
-commit: 7aef5ea32
+commit: 7aef5ea32 (published as @nodegx/backend-map 0.1.2, c26b8bc30; nodegx-studio 3931ddf pins it)
 severity: medium
 area: "@nodegx/backend-map 0.1.1 (`lib/asperson.mjs` `learnerIds`: `GET /api/LearnerProfile?limit=1000` with the admin credential, called by `views.world()` and the reach world); the backend's storage makes a table on a query (`LocalSQLAdapter._ensureTable`, `autoCreateTables`)"
 found: P127 s3, 2026-10-26, measuring BKO-003 before building it (BKO-002's gate had seen `t:LearnerProfile` on the todo copy's map)
