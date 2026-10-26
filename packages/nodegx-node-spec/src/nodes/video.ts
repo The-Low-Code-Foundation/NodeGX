@@ -39,8 +39,8 @@
  *   - **Source Object** (video.ts :35-47, Video.tsx :129-134) — a camera's stream; no scenario can hold one, so what it is graded on
  *     is what is NOT a stream. Null changes nothing (the element has none). Nothing (`undefined`) is null to the browser, and the
  *     node writes it: the `<video>` loads its Source again, and the component forgets it had loaded. Any other value the browser
- *     refuses, and nothing changes — the runtime throws (row **C99**); on an embed, any value changes nothing — the runtime throws
- *     (row **C96**).
+ *     refuses, and nothing changes — the runtime throws (row **C99**); on an embed, any value changes nothing (C96, fixed: it threw
+ *     and the player was replaced by nothing).
  *   - **Volume, Poster, Controls** are drawn and read by no output. A Volume outside 0 to 1 is look like any other here — the
  *     runtime holds it at 0 or 1 and plays a non-number at 1 (C98, fixed: it threw and blanked the page). Face choice: a
  *     person using the browser's own controls is not an act.
@@ -543,7 +543,7 @@ export const Video = defineNode({
     autoplay: (_s, v) => ({ says: 'always: drawn at the next paint, and read as a load completes — on, a video that may play (Muted, or a person has acted on the page) and that Pause or Reset has not stopped since the load began starts by itself: On Can Play, then On Play', set: { autoplay: v }, send: [] }),
     loop: (_s, v) => ({ says: 'always: drawn at the next paint, and read as the video reaches its end — on, it goes back to the start and plays on; off, it pauses there (On Pause)', set: { loop: v }, send: [] }),
     // :35-47 — on the component, or waiting for it with the actions (`sourceObject`: only a `<video>` takes one, and only nothing is
-    // seen to change it; C96, C99 on the runtime)
+    // seen to change it; C99 on the runtime)
     srcObject: (s, v) => {
       if (!s.onPage) return said('off the page: waits for the element behind the actions already waiting, in order, and is written at the paint that puts the video there (at most 16 wait, and the oldest is pushed out)', toPatch(waitFor(s, { srcObject: v })));
       if (s.kind !== 'video' || v !== undefined) return { says: 'null (what it already has), a value that is not a stream, or anything on an embedded player: nothing changes — a live stream itself plays in place of Source, and no scenario holds one', set: {}, send: [], emit: [] };
@@ -931,7 +931,7 @@ function ranOnVideo(at: Readonly<State>, op: Action, want: Act): Act {
 }
 
 /**
- * Video.tsx :129-134 `setSourceObject`. Only a `<video>` takes one (C96: the runtime throws on an embed); null is what it has; nothing
+ * Video.tsx :129-134 `setSourceObject`. Only a `<video>` takes one (an embed has none: C96, fixed); null is what it has; nothing
  * is null to the browser, so it loads its Source again and the component forgets it had loaded; any other value the browser refuses
  * (C99: the runtime throws).
  */

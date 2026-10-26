@@ -108650,7 +108650,7 @@
     ]
   },
   {
-    "name": "row C96 — Source Object null on an embed changes nothing (the runtime throws: no <video>)",
+    "name": "C96 — Source Object null on an embed changes nothing (there is no <video> to give it to)",
     "because": "video.ts :35-47; Video.tsx :129-134 setSourceObject; HTML srcObject (WebIDL MediaProvider?)",
     "params": {
       "src": "https://youtu.be/dQw4w9WgXcQ"
@@ -108662,11 +108662,10 @@
         "value": null
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C96"
+    ]
   },
   {
-    "name": "row C96 — Source Object placed with an embed: nothing (the runtime throws inside its first draw)",
+    "name": "C96 — Source Object placed with an embed: nothing, and the player is drawn",
     "because": "video.ts :35-47; Video.tsx :129-134 setSourceObject; HTML srcObject (WebIDL MediaProvider?)",
     "params": {
       "src": "https://youtu.be/dQw4w9WgXcQ",
@@ -108675,8 +108674,7 @@
     "steps": [
       "settle",
       "settle"
-    ],
-    "row": "NSP-016 §6 C96"
+    ]
   },
   {
     "name": "C96's twin: Source Object null on a video file changes nothing on both targets",

@@ -73,7 +73,7 @@ const heldAt = (d: Divergence, port: string): unknown => {
  */
 /**
  * NSP-016 §6 C96–C100 (s54) — the Video. Each throw is narrowed by the message the runtime throws with and the input that leads to it:
- *   - C96: Source Object on an embed — `setSourceObject` reads `this.video.srcObject`, and an embed has no `<video>` (`reading 'srcObject'`);
+ *   - C96 (Source Object on an embed threw: an embed has no `<video>`) was fixed in the Beta sweep s12;
  *   - C97: Play or Restart on an embed once the component has seen a `<video>` load — `startPlayback` calls `this.video.play()` (`reading 'play'`);
  *   - C98 (a Volume outside 0 to 1, or not a number, threw in the element's setter) was fixed in the Beta sweep s11;
  *   - C99: a Source Object that is not a stream — the browser's setter refuses it (TypeError); withheld below too;
@@ -81,7 +81,6 @@ const heldAt = (d: Divergence, port: string): unknown => {
  *     difference is such an output on the REFERENCE's side, and the Source last held names a file, not an embed.
  */
 const threwWith = (d: Divergence, text: string) => d.difference.threw !== undefined && d.difference.threw.includes(text);
-const sourceObjectOnEmbed = (d: Divergence) => threwWith(d, "reading 'srcObject'") && (d.params.srcObject !== undefined || 'srcObject' in d.params || d.reference.some((e) => e.t === 'set' && e.port === 'srcObject'));
 const playOnEmbed = (d: Divergence) => threwWith(d, "reading 'play'");
 const sourceObjectNotAStream = (d: Divergence) => threwWith(d, "Failed to set the 'srcObject' property");
 const EMBED = [/youtu\.be\/[A-Za-z0-9_-]{6,}/i, /(?:youtube\.com|youtube-nocookie\.com)\/(?:watch\?(?:[^#]*&)?v=|embed\/|v\/|shorts\/)[A-Za-z0-9_-]{6,}/i, /vimeo\.com\/(?:video\/|channels\/[^/]+\/)?\d+/i];
@@ -116,7 +115,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s54 — the Video's own rows (C96–C100). The Text, Shape, Image and Group carry none: their C79 (Pointer Events written after Opacity
   // 0 let the invisible element take the pointer) was fixed in P109 ISL-031, the C86–C90 and C95 of the Group in ISL-038
   Video: [
-    { row: 'NSP-016 §6 C96 — Source Object on an embed: the runtime throws (no `<video>`)', matches: sourceObjectOnEmbed },
     { row: 'NSP-016 §6 C97 — Play or Restart on an embed after a `<video>` loaded: the runtime throws', matches: playOnEmbed },
     { row: 'NSP-016 §6 C99 — a Source Object that is not a stream: the browser refuses it and the node throws', matches: sourceObjectNotAStream },
     { row: 'NSP-016 §6 C100 — a Video playing a file fires no pointer output and takes no file drop', matches: videoFileTakesNoPointer }

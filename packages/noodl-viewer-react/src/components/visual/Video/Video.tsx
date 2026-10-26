@@ -127,7 +127,7 @@ export class Video extends React.Component<VideoProps> {
   }
 
   setSourceObject(src) {
-    if (this.video.srcObject !== src) {
+    if (this.video && this.video.srcObject !== src) { // P107-C96 — an embed has no <video> to give a stream to
       this.video.srcObject = src;
       this.canPlay = false; //wait for can play event
     }
