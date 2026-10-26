@@ -9,7 +9,7 @@ import {
   previewProjectFileExclusions,
   ProjectCopyReport
 } from '@noodl-utils/compilation/build/copy';
-import { deployOrAsk } from '@noodl-utils/compilation/build/deploy-skeleton';
+import { deployOrAsk, localBackendQuestion } from '@noodl-utils/compilation/build/deploy-skeleton';
 import { chooseDeployFolder, deployFolderName, PROJECT_FILES } from '@noodl-utils/compilation/build/deploy-target';
 import { createEditorCompilation } from '@noodl-utils/compilation/compilation.editor';
 
@@ -140,23 +140,29 @@ export function DeployToFolderTab() {
   }
 
   /**
-   * P26-SKELSHIP (ruled 2026-10-26: "a loud warning everywhere but the option to push ahead anyway"): an app nobody
-   * has built yet is asked about before the folder is chosen, and deploys if the person says so.
+   * P26-SKELSHIP and P112-OWN023-DEPLOYLOOPBACK (ruled 2026-10-26: "a loud warning everywhere but the option to push
+   * ahead anyway"): an app nobody has built yet, and one whose backend runs on this computer, are asked about before
+   * the folder is chosen, and deploy if the person says so.
    */
   function onPickFolderClicked() {
-    deployOrAsk(ProjectModel.instance, {
-      deploy: pickFolderAndDeploy,
-      ask: (question, deployAnyway) => {
-        PopupLayer.instance.hidePopup();
-        DialogLayerModel.instance.showConfirm({
-          id: 'deploy-nothing-built',
-          title: 'Nothing is built in this app yet',
-          text: question,
-          confirmText: 'Deploy anyway',
-          onConfirm: deployAnyway
-        });
-      }
-    });
+    deployOrAsk(
+      ProjectModel.instance,
+      {
+        deploy: pickFolderAndDeploy,
+        ask: (question, goAhead) => {
+          PopupLayer.instance.hidePopup();
+          DialogLayerModel.instance.showConfirm({
+            id: 'deploy-question',
+            title: question.title,
+            text: question.text,
+            confirmText: question.confirmText,
+            onConfirm: goAhead
+          });
+        }
+      },
+      // P112-OWN023-DEPLOYLOOPBACK: this tab writes the front end only, so a backend on this computer is asked about.
+      [localBackendQuestion(cloudServices?.endpoint)]
+    );
   }
 
   function pickFolderAndDeploy() {

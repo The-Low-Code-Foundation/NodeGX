@@ -90,20 +90,47 @@ export function skeletonWarning(pages: readonly string[]): string | undefined {
   );
 }
 
+/** One thing a deploy route asks before it writes anything, and the button that goes ahead. */
+export interface DeployQuestion {
+  title: string;
+  text: string;
+  confirmText: string;
+}
+
 /**
- * A deploy route's one decision (ruled 2026-10-26: "a loud warning everywhere but the option to push ahead anyway"):
- * an app with something built deploys at once; an unbuilt one is asked about, and deploys only when the person says so.
- * Answers whether it asked.
+ * P112-OWN023-DEPLOYLOOPBACK (ruled 2026-10-26: "when the DB is local, then you push to a VM, you push the DB too", and a
+ * warning when they don't): a route that writes the front end only, for an app whose backend runs on this computer.
+ * Undefined when the endpoint is anywhere else.
+ */
+export function localBackendQuestion(endpoint: string | undefined): DeployQuestion | undefined {
+  if (!endpoint || !/^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?(\/|$)/i.test(endpoint)) return undefined;
+  return {
+    title: 'This app’s backend runs on this computer',
+    text:
+      `The deployed app will look for its backend at ${endpoint}, which is each visitor’s own computer, so its ` +
+      'records, sign-in and functions will work for no one else. This folder holds the front end only. To put the ' +
+      'backend where others can reach it too, publish to a server from NodeGX Studio, ask your agent to deploy_to_vm, ' +
+      'or run nodegx-deploy with --full-stack. Deploy the front end only?',
+    confirmText: 'Deploy the front end only'
+  };
+}
+
+/**
+ * A deploy route's decision (ruled 2026-10-26: "a loud warning everywhere but the option to push ahead anyway"): with
+ * nothing to ask it deploys at once; otherwise each question is asked in turn (an unbuilt app first, then `more`), and
+ * it deploys only once the person has gone ahead on every one. Answers whether it asked.
  */
 export function deployOrAsk(
   project: SkeletonProjectLike,
-  route: { deploy: () => void; ask: (question: string, deployAnyway: () => void) => void }
+  route: { deploy: () => void; ask: (question: DeployQuestion, goAhead: () => void) => void },
+  more: readonly (DeployQuestion | undefined)[] = []
 ): boolean {
-  const question = skeletonQuestion(untouchedSkeletonPages(project));
-  if (!question) {
-    route.deploy();
-    return false;
-  }
-  route.ask(question, route.deploy);
-  return true;
+  const unbuilt = skeletonQuestion(untouchedSkeletonPages(project));
+  const questions = [
+    ...(unbuilt ? [{ title: 'Nothing is built in this app yet', text: unbuilt, confirmText: 'Deploy anyway' }] : []),
+    ...more.filter((q): q is DeployQuestion => q !== undefined)
+  ];
+  const next = (i: number): void => (i < questions.length ? route.ask(questions[i], () => next(i + 1)) : route.deploy());
+  next(0);
+  return questions.length > 0;
 }
