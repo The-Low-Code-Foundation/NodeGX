@@ -587,3 +587,51 @@ conformance: Text Input v9 conforms; Button v6 one survivor (same at v5); Dropdo
 
 **Commits this session:** 81cdeee3d, 78f69c4a2, 352bcdf6e, 4df2370f8, 6a766a382, bd45bb676, f0fea7a64, and the docs
 commit after them.
+
+# Session 10, 2026-10-26 (next session reads this first)
+
+Richard ruled all six open questions, every ruling written into its row with the question it answered (a9664e4f7),
+and said "Let's rock out". Built: four of them whole and one in part. One is measured and left for its own session.
+**Nothing pushed**: `cline-dev` is 28 commits ahead of `origin/cline-dev`, `nodegx-studio` 9 ahead of `origin/main`.
+
+## Done
+
+| row | commits | built | graded |
+|---|---|---|---|
+| BETA-S9-BUTTONSHADOW (ruled: both have it) | c60cb1d53 | The filled Button looks set `boxShadowEnabled: true` (config values may be booleans), so the picker's drop, the shipped Looks and the vocabulary copy one port. Found on the way: the vocabulary taught `'true'`, which the validator calls an error. The `--shadow-sm` token was built and measured: 4,403 of the vocabulary prompt's 4,400 | PickerLookValidates 53/53 (red 13 on base), mcp style suites 89/89, prompt 4,361 |
+| P26-SKELSHIP (ruled: warn loudly everywhere, never refuse) | a27fc8977, Studio 6030a59 | Placeholder reads "Lingo — this app is being built." (the old sentence still recognised); the reading moves to the editor (`deploy-skeleton.ts`); `deploy_to_vm` ships with `warnings` first; editor Deploy to folder and Studio Publish ask "Deploy/Publish anyway"; the engine CLI printed nothing for the new sentence (prefix match) and now prints the one it made | editor 11/11, engine 7/7 on a rebuilt dist, mcp 45/45, Studio check:unbuilt 17/17 |
+| P112-OWN023-DEPLOYLOOPBACK (ruled: full stack by default, warn when not) — **part** | Studio 9ac8eaf, 097216d30 | Studio Publish defaults to "A Server of Your Own" when the backend is local; the editor's Deploy to folder asks "Deploy the front end only". Engine CLI default NOT flipped (Studio and `nodegx deploy` call it with no flag; an engine refuses an unknown flag) | editor tests-unit 11/11, Studio 17/17 |
+| P112-OWN020-PILLWRAP + FILLGROW (ruled: warn and teach, make sure it works) | ef0e90f79, Studio 8bc0b53 | Two live rules in ALL_RULES (Problems panel + agent writes), guidance in `badge`/`shell`, the in-page preview passes its report on, Studio lists both under the app with a fix button | rules 11/11; 196-project calibration (2 / 33 hits, 0 templates); CGQ1 rendered: pill 2 lines → 1, header 251/296 px → 17; Studio check:layouttips 10/10 round-trips NodeGX's validator |
+| P121-TWO004-ADMINNARROW (ruled: not for Beta) | a9664e4f7 | Row stays open, after the Beta | — |
+
+## For Richard
+
+1. **Push and publish**: 28 + 9 commits. Studio's layout tips need the in-page preview from ef0e90f79 (vendor refresh
+   after the next `@nodegx/preview`); with an older one they show nothing.
+2. **The engine CLI's default** (above): flipping it needs Studio and `nodegx deploy` to pass `--frontend-only` in the
+   same release as the engine that knows it. Say if you want that done anyway.
+3. **OWN008-AUDIT is one advisory, not six**: a fresh install today reads 3 moderate (the fxp XMLBuilder advisory,
+   counted three times); the chokidar highs went by themselves. Removing it means fxp 4.5.7 → 5 in the runtime's XML
+   node, its spec and the pin every exported app carries, together.
+
+## Next
+
+1. OWN008-AUDIT: install fxp 5.11.2 in a scratch, run the XML node's spec scenarios against both versions, then move
+   runtime + node-spec + `PARSE_DEPENDENCIES` together and measure the runtime bundle growth; the Swift `FXP_JS` holds
+   only XMLParser (no advisory) and is lane 4's.
+2. DEPLOYLOOPBACK's third-party half (editor + agents only): a live address per Backend Services entry, written into
+   `nodegx-config.json` (`deploy-config.ts` already merges `backendServices`), a per-type sentence, a reachability check.
+3. Session 9's Next list stands: MCPJSONABSPATH (your machine), DROPDOWNFOCUSDIVERGE (one CDP drive),
+   BUTTONFOCUSSURVIVOR.
+
+## Traps met
+
+1. 🔴 **A static layout rule cannot know whether the page is shorter than the screen.** Neither `bodyScroll` nor
+   `minHeight` separated the measured bands from the quiet hits. Render before believing a calibration.
+2. 🔴 **The validator's layout checks in `layoutInertCombination.ts` reach agents only**; the Problems panel runs
+   `ALL_RULES`. A rule a person must see goes there.
+3. 🔴 **An engine flag is a contract with every caller**: `nodegx-deploy` refuses an unknown argument, so a new default
+   with an opt-out flag breaks whichever caller updates first.
+4. The in-page preview's ok result dropped the validation report it had; Studio's problem box showed errors only.
+5. Base reds, identical with this session's files swapped back: editor tests-unit 11 suites / 24 tests; mcp 8 / 12
+   (P127 peer edits in `noodl-mcp` give tsc errors in nodegx-backend and preview's dep-002 test, not this session's).
