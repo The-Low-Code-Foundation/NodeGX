@@ -1,10 +1,12 @@
 ---
 id: P26-SKELSHIP
 title: A deploy ships a project nobody has built, and its public page tells visitors "Review the plan in docs/ and start when you are ready"
-status: open
+status: fixed
+commit: a27fc8977
 severity: low
 area: preview / nodegx-deploy (and deploy_to_vm, ship-to-vm.sh)
 found: P26 DEP-002 s4, 2026-10-23 (Richard, looking at https://lingo.nodegx.io)
+regression: packages/noodl-editor/tests-unit/p26-skelship/deploySkeleton.test.ts "an unbuilt one is asked about, deploys nothing until the answer, and deploys on \"Deploy anyway\""
 evidence: curl https://lingo.nodegx.io/ — the page is create_project's skeleton; noodl-mcp/src/tools/createProject.ts SKELETON_PLACEHOLDER_MARKER
 ---
 
@@ -56,3 +58,18 @@ but the option to push ahead anyway". So: every route warns loudly and ships —
 (`allow_empty` goes, or becomes a no-op), the engine keeps its warning, and Studio's Deploy to folder tab (which says
 nothing today) warns with a way to go ahead. The visitor wording ("This app is being built.") was asked in the same
 message and not answered.
+
+**Fixed as ruled (a27fc8977; Studio 6030a59).** Every route warns and ships; none refuses.
+- **Wording:** create_project's Home reads "Lingo — this app is being built.". The earlier sentence is still read as the
+  placeholder (`LEGACY_SKELETON_PLACEHOLDER_MARKERS`).
+- **One reading:** `deploy-skeleton.ts` in the editor; the engine re-exports it; create_project and Studio hold copies
+  that their tests compare by text.
+- **`deploy_to_vm`:** `allow_empty` is gone. The result carries the engine's `warnings`, and `next` tells the agent to
+  say them first.
+- **Editor Deploy to folder:** asks "Deploy anyway" before the folder is chosen (`deployOrAsk`).
+- **Studio Publish:** asks "Publish Anyway" before either route, and both done windows show the warnings.
+- **Engine CLI:** prints the sentence it made. It matched the old words, so the new sentence would have been silent.
+
+Graded: editor `tests-unit/p26-skelship` 8/8; preview engine 7/7 on a rebuilt dist (with the earlier sentence); mcp
+dep002 + skeletonCreate + toolDisclosure 45/45; Studio `check:unbuilt` 14/14; editor and preview tsc clean. Not driven:
+the editor's confirm and Studio's windows on screen (both read from source by their checks).
