@@ -44,7 +44,7 @@ import mergeDeep from './mergedeep';
 import NodeSharedPortDefinitions from './node-shared-port-definitions';
 import transitionParameter from './node-transitions';
 import type Styles from './styles';
-
+import { syncKeyboardClick } from './keyboard-click';
 // ===========================================================================
 // The React node-definition API
 //
@@ -2067,8 +2067,8 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           runScrollIntoView(this);
         }
         if (element) syncDataAttributesOnElement(this);
-        // P107-C77 — a Draggable node's new element (a remount, a new Tag) takes the keyboard too.
-        if (element) dragElementChanged(this, element as HTMLElement);
+        if (element) dragElementChanged(this, element as HTMLElement); // P107-C77 — a Draggable's new element (a remount, a new Tag) takes the keyboard too
+        syncKeyboardClick(this); // P121-TWO003-GROUPKEYBOARD — so does the element of a node whose Click is wired, and an old one gives it back
       },
       /**
        * NDA-012 (Visual) check A3 — run an imperative action on the inner React component,
