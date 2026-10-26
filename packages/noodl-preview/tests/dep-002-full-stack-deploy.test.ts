@@ -188,6 +188,7 @@ describe('DEP-002 s2 — a project with no rules of its own', () => {
     const { report } = deploy(projectDir, outDir);
     expect(report.ok).toBe(true);
     expect(report.fullStack?.rules).toBe(false);
+    expect(report.fullStack?.automations).toBe(false);
     expect(report.fullStack?.uses).toEqual({ records: true, users: true, files: false, functions: [] });
     expect(fs.existsSync(path.join(outDir, 'backend', 'nodegx.security.json'))).toBe(false);
     expect(fs.existsSync(path.join(outDir, 'backend', 'workflows'))).toBe(false);
@@ -209,5 +210,23 @@ describe('DEP-002 s2 — without --full-stack nothing changes', () => {
     expect(JSON.parse(read(outDir, 'package.json')).scripts).toEqual({ start: 'node serve.js' });
     expect(fs.existsSync(path.join(outDir, 'nodegx-config.json'))).toBe(true);
     expect(fs.existsSync(path.join(outDir, 'start.js'))).toBe(false);
+  });
+});
+
+describe("P127 BKO-001 — a project's workflows and triggers", () => {
+  it('are carried beside the backend, never in the app', () => {
+    const projectDir = copyTemplate('todo-list', 'automations');
+    const automations = JSON.stringify({
+      version: 1,
+      workflows: [],
+      triggers: [{ id: 'daily', type: 'schedule', target: { kind: 'function', name: 'remind' }, schedule: { cron: '0 9 * * *' } }]
+    });
+    fs.writeFileSync(path.join(projectDir, 'nodegx.automations.json'), automations);
+    const outDir = path.join(work, 'automations', 'folder');
+    const { report } = deploy(projectDir, outDir);
+    expect(report.ok).toBe(true);
+    expect(report.fullStack?.automations).toBe(true);
+    expect(read(outDir, 'backend', 'nodegx.automations.json')).toBe(automations);
+    expect(fs.existsSync(path.join(outDir, 'app', 'nodegx.automations.json'))).toBe(false);
   });
 });
