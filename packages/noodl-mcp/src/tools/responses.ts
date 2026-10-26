@@ -12,6 +12,7 @@
  * than silently at the consumer.
  */
 
+import type { AutomationsDrift } from '../backend/automationsDrift';
 import type { ComponentHonestyPayload, ProjectHonestyPayload } from '../honesty';
 import type { CloudDeployNote } from './cloudDeployNote';
 import type { RunOnChangeTickedSummary } from '../project/runOnChangePins';
@@ -190,6 +191,11 @@ export interface ProjectInfoResponse {
    * promise). The rule is `@nodegx/node-spec`'s `honesty.ts`.
    */
   honesty?: ProjectHonestyPayload;
+  /**
+   * P127 BKO-001 AC6 — whether the project's backend holds what `nodegx.automations.json` says, with both ways
+   * to agree when it does not. Absent when there is neither a file nor a backend to compare.
+   */
+  automations?: AutomationsDrift;
 }
 
 export interface ProjectKitsReport {

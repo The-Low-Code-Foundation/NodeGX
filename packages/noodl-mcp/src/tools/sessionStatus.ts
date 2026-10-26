@@ -40,6 +40,7 @@ import * as path from 'path';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { automationsDriftOf } from '../backend/automationsDrift';
 import { readHold, type Hold } from '../hold';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import { findRelayToken, relayPort } from './openInEditor';
@@ -375,11 +376,13 @@ export function registerSessionStatusTools(server: McpServer, binding?: ProjectB
       inputSchema: sessionStatusSchema
     },
     guarded(async (args: { directory?: string }) => {
-      const status = await askEditorForStatus(args.directory);
+      const [status, automations] = await Promise.all([askEditorForStatus(args.directory), automationsDriftOf(binding)]);
       const holds = holdsFor(binding, args.directory);
-      if (holds.length === 0) return jsonResult(status);
+      // P127 BKO-001 AC6 — the backend's automations against the project's file, beside who is here.
+      const withDrift = automations ? { ...status, automations } : status;
+      if (holds.length === 0) return jsonResult(withDrift);
       return jsonResult({
-        ...status,
+        ...withDrift,
         hold: holds.length === 1 ? holds[0] : holds,
         note:
           'The person pressed HOLD in Studio: every tool on that project is refused until they release it. Do not ' +

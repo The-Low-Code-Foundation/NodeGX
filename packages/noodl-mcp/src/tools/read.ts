@@ -43,6 +43,7 @@ import { SECTION_FIELDS, parseSection, readFirst, sectionsTail, splitSection } f
 import { projectVisualPredicate } from './author';
 import { readVisualRoots } from '../visualRoots';
 import { drawnPortsFor } from '../specPorts';
+import { automationsDriftOf } from '../backend/automationsDrift';
 import { componentHonestyOf, componentHonestyPayload, projectHonestyOf, projectHonestyPayload } from '../honesty';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -258,9 +259,11 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         'the guidance, led by `readFirst`. `section` returns one guidance section alone. Call this first.',
       inputSchema: { section: z.string().optional() }
     },
-    guarded((args: { section?: string } = {}) => {
+    guarded(async (args: { section?: string } = {}) => {
       const store = binding.require();
       if (args.section !== undefined) return jsonResult(guidanceSection(args.section, options.allowWrites));
+      // P127 BKO-001 AC6 — absent unless there is a file or a backend to compare.
+      const automations = await automationsDriftOf(binding);
       const project = store.readProjectFile();
       const registry = store.readRegistry();
       const routes = store.readRoutes();
@@ -340,6 +343,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
           : {}),
         // P111 SEE-001 — the honesty number, always (R2). A result field: no resident-surface cost.
         honesty: projectHonestyPayload(projectHonestyOf(store)),
+        ...(automations ? { automations } : {}),
         ...(options.allowWrites ? { moreGuidance: sectionsTail() } : {})
       };
       if (!options.allowWrites) return jsonResult(payload);

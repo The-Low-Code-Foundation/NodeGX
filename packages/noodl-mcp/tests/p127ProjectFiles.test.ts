@@ -14,6 +14,9 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+import * as net from 'net';
+
+import { BackendClient, listBackends } from '../src/backend/client';
 import { connect, TestSession, call, reveal } from './helpers';
 
 const BACKEND_CLI = path.join(__dirname, '..', '..', 'nodegx-backend', 'dist', 'cli.js');
@@ -216,5 +219,77 @@ describeOrSkip('P127 BKO-001 — the agent’s backend writes reach the project�
     } finally {
       bindProject(projectDir, ID, backend.port);
     }
+  });
+
+  describe('AC6 — a backend that went its own way is named, with both ways to agree', () => {
+    type Drift = { state: string; backend: string | null; differences?: string[]; toKeepTheProjects?: string; toKeepTheBackends?: string; reason?: string };
+    const prevRelayPort = process.env.NODEGX_RELAY_PORT;
+
+    beforeAll(async () => {
+      await reveal(session, 'project');
+      // session_status asks an editor first: point it at a port nobody listens on, never at a real editor.
+      const probe = net.createServer();
+      await new Promise<void>((resolve) => probe.listen(0, '127.0.0.1', resolve));
+      process.env.NODEGX_RELAY_PORT = String((probe.address() as net.AddressInfo).port);
+      await new Promise<void>((resolve) => probe.close(() => resolve()));
+    });
+
+    afterAll(() => {
+      if (prevRelayPort === undefined) delete process.env.NODEGX_RELAY_PORT;
+      else process.env.NODEGX_RELAY_PORT = prevRelayPort;
+    });
+
+    let dailyId = '';
+    const drift = async (tool: 'get_project_info' | 'session_status') =>
+      (await call<{ automations?: Drift }>(session, tool, {})).data.automations;
+
+    it('🔴 a trigger made on the backend alone, and one changed there, read as drift in get_project_info and session_status', async () => {
+      // The admin page's path: straight to the backend, no tool, so the file is not told.
+      const client = new BackendClient(listBackends().find((b) => b.id === ID)!);
+      const daily = readJson(automations).triggers.find((t: { type: string }) => t.type === 'schedule');
+      await client.request('PUT', `/admin/triggers/${encodeURIComponent(daily.id)}`, {
+        ...daily,
+        schedule: { ...daily.schedule, cron: '30 7 * * *' }
+      });
+      dailyId = daily.id;
+      const other = (await call<{ triggers: { id: string; target: { name: string } }[] }>(session, 'list_backend_triggers')).data.triggers.find(
+        (t) => t.target.name === 'other'
+      )!;
+
+      for (const tool of ['get_project_info', 'session_status'] as const) {
+        const said = await drift(tool);
+        expect(said?.state).toBe('drift');
+        expect(said?.backend).toBe(ID);
+        expect(said?.differences).toEqual(
+          expect.arrayContaining([
+            `trigger "${daily.id}" differs between the project and the backend`,
+            `trigger "${other.id}" is on the backend, not in the project`
+          ])
+        );
+        expect(said?.toKeepTheProjects).toMatch(/update_/);
+        expect(said?.toKeepTheBackends).toMatch(/set_backend_trigger_enabled/);
+      }
+    });
+
+    it('keeping the backend’s, through the tools the answer names, makes them agree', async () => {
+      const { triggers } = (await call<{ triggers: { id: string; enabled: boolean }[] }>(session, 'list_backend_triggers')).data;
+      for (const t of triggers) {
+        expect((await call(session, 'set_backend_trigger_enabled', { id: t.id, enabled: t.enabled !== false })).isError).toBe(false);
+      }
+      const said = await drift('get_project_info');
+      expect(said?.state).toBe('agree');
+      expect(readJson(automations).triggers.find((t: { id: string }) => t.id === dailyId).schedule.cron).toBe('30 7 * * *');
+    });
+
+    it('a backend that cannot be read is "unknown", never "agree"', async () => {
+      bindProject(projectDir, 'not_on_this_machine', backend.port);
+      try {
+        const said = await drift('get_project_info');
+        expect(said?.state).toBe('unknown');
+        expect(said?.reason).toMatch(/not on this machine/);
+      } finally {
+        bindProject(projectDir, ID, backend.port);
+      }
+    });
   });
 });
