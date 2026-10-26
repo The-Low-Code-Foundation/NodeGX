@@ -49,3 +49,10 @@ reddens the second. Preview 19 suites 109/109.
 **Still open:** Studio's own Deploy to folder tab calls `deployToFolder` directly, not this engine, so it says nothing
 (the row's area line was wrong about that). For Richard: whether the engine should **refuse** as `deploy_to_vm` does
 (built as a warning, like DEPLOYLOOPBACK), and the placeholder's wording for a visitor.
+
+**Ruled by Richard, 2026-10-26.** Asked: *"Should the deploy refuse a project nobody has built yet, or warn?"* Answer:
+"refusing is the wrong tactic, in case someone wants to deploy just to health check or test … a loud warning everywhere
+but the option to push ahead anyway". So: every route warns loudly and ships — `deploy_to_vm` stops refusing
+(`allow_empty` goes, or becomes a no-op), the engine keeps its warning, and Studio's Deploy to folder tab (which says
+nothing today) warns with a way to go ahead. The visitor wording ("This app is being built.") was asked in the same
+message and not answered.

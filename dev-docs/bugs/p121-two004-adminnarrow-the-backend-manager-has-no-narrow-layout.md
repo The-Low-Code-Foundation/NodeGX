@@ -25,3 +25,7 @@ panned.
 Nobody has said the admin app must work on a phone. A builder sets up a backend on a computer, and the editor opens
 the admin app in its own window. But a builder checking a refused payment from their phone would meet this. Ruling
 wanted on whether the admin app owes a phone layout (P104's lane).
+
+**Ruled by Richard, 2026-10-26: not for the Beta.** Asked: *"Does the backend admin app need to work on a phone?"*
+Answer: "Not for beta. If they want a mobile backend viewer they can ask Claude to build a custom one". Row stays open,
+after the Beta.

@@ -1,7 +1,7 @@
 ---
 id: P112-OWN023-DEPLOYLOOPBACK
 title: "A static deploy of an app bound to a local backend points the public build at `http://127.0.0.1:<port>` (the visitor's own machine) and says nothing"
-status: fixed
+status: open
 commit: (this session, the Beta sweep s5)
 severity: medium
 area: deploy / `@nodegx/preview` 0.2.4 `nodegx-deploy` (the project's `metadata.cloudservices.endpoint` is copied into the bundle as written; `projectExport.ts` `LOOPBACK` is used only for the preview's export options)
@@ -36,3 +36,18 @@ The shipped `templates/digital-bricks-training` names `http://127.0.0.1:8577`, s
 **Graded.** `tests/p112-own023-deploy-loopback.test.ts` 3/3 against a rebuilt `dist/nodegx-deploy.cjs` (loopback and
 localhost warn on all three channels; a reachable endpoint and none deploy with no such sentence); the mutant with no
 warning computed, rebuilt, red 2/3. Preview suite 17 suites 104/104, tsc clean.
+
+**Ruled by Richard, 2026-10-26.** Asked: *"A deploy whose app still talks to a backend on your own computer: warn, or
+refuse?"* Answer, verbatim in substance: when the project has a NodeGX backend, **deploy full stack by default** ("when
+you're building locally and the DB is local, then you push to a VM, you push the DB too"). When the person opts out, or
+the backend is someone else's (a local Supabase), **warn**: "Your backend is local, make sure you have a production one".
+He asked for something cleverer than a bare warning for third-party backends, since "we can't push every backend in the
+world to a VM": his idea, VM-side values the deployed app picks up so it stops pointing at localhost. Status reopened.
+
+Measured for that (2026-10-26): the mechanism exists. DEP-001's `nodegx-config.json` is fetched beside the page and
+merged over the baked `cloudservices` **and** `backendServices` (`noodl-viewer-react/src/deploy-config.ts:25, 91-131`);
+the full-stack backend answers it per request with the request's origin (`nodegx-backend/src/server/static-app.ts`);
+`serve.js` takes `NODEGX_CLOUDSERVICES_ENDPOINT`. Missing: a production address for a `backendServices` entry
+(Supabase, PocketBase, Directus, custom), any route that writes one, and the default flip to full stack. A full-stack
+deploy ships the backend, its functions and its rules; `data/` (records, uploads) is made on the box and never written
+by a deploy, so local test rows do not travel.

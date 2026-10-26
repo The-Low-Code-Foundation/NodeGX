@@ -37,3 +37,10 @@ Fix options (Richard rules which):
 3. Kit: the style guidance says texts in rows take `sizeMode: contentSize`. Cheapest, but only reaches agents that read
    it, and leaves the trap for people in the editor.
 Related: P18-S110-NOWRAP (the export's content-size Text wraps), P112-OWN019-LETTEREDGE, P112-OWN019-LAPTOPGAPS.
+
+**Ruled by Richard, 2026-10-26, for this row and P112-OWN020-FILLGROW together.** Asked: *"A box or text with no size
+setting fills the space it's given: change the default, warn and teach, or guidance only?"* Answer: **warn and teach**
+(options 2 and 3, no default change), "but make sure it works because adding texts with default sizing and seeing them
+have weird layout used to drive me nuts". So the done-condition is a person's, not an agent's: the warning must reach a
+person in Studio as well as `validate_project` / `render_report`, and it is graded on CGQ1's two screens (the pill and
+the quiz header) with the one-line fix applied and re-rendered.

@@ -19,3 +19,6 @@ Studio gain a shadow), or (b) neither wears it (drop `boxShadow`: agents' Button
 `PickerLookValidates.test.ts` allows this one warning by name and asserts it still fires.
 
 **Plain words:** *"A button you drag in has no shadow, but the same button built by Claude has one. Should both have it, or neither?"*
+
+**Ruled by Richard, 2026-10-26: both have it** ((a): `boxShadowEnabled: 'true'` in the three variants, so a dropped
+Button wears the shadow an agent's already does). `PickerLookValidates.test.ts` then drops its allowance for the warning.

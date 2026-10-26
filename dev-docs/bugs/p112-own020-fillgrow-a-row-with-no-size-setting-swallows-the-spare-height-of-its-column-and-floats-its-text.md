@@ -29,3 +29,6 @@ stacks. GLM-5.3 hit both in one app, rendered it and reported it verified.
 Fix options (Richard rules, together with PILLWRAP): a render_report finding "a container far taller than its content"
 (slack ratio) and "a short text wrapped with room to spare"; a validate hint on a no-sizeMode Group inside a
 content stack; the kit's style guidance (headers, pills and labels take contentHeight / contentSize); or a default change.
+
+**Ruled by Richard, 2026-10-26:** warn and teach, no default change; it must demonstrably work for a person in Studio.
+The ruling and its done-condition are written in full on P112-OWN020-PILLWRAP.
