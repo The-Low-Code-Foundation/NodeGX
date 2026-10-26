@@ -25,6 +25,12 @@ This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create
 `@nodegx/preview` moves to 0.2.6. `@nodegx/export`, `@nodegx/node-spec`, `@nodegx/project-contract` and
 `@nodegx/canvas-look` stay at their versions.
 
+### Changed
+
+- **An app with nothing built yet can be deployed.** `deploy_to_vm` used to refuse it. Now it ships, and the result
+  says first that a visitor will see only the placeholder page. A new project's placeholder reads "Lingo — this app
+  is being built." It used to tell the agent to read the plan.
+
 ### Fixed
 
 - **Mistral Vibe 3.** Every request from a folder `npm create nodegx-vibe` made was refused ("max_tokens is too

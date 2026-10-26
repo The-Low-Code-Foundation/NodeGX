@@ -3,9 +3,10 @@
  *
  * lingo.nodegx.io served create_project's placeholder ("Lingo — nothing built yet. Review the plan in docs/ and start
  * when you are ready."), a sentence to the agent, and the person could not tell whether the deploy had worked.
- * `deploy_to_vm` refuses it; this engine (Studio's Publish, `nodegx deploy`, ship-to-vm.sh) answered `ok: true` with
- * no word. Now the outcome names the pages (`skeletonPages`), its sentence is in `warnings`, and the CLI says it on
- * stderr. Known-firing beside the absences: the same fixture as shipped (a page somebody wrote), and the placeholder
+ * This engine (Studio's Publish, `nodegx deploy`, ship-to-vm.sh, `deploy_to_vm`) answered `ok: true` with no word. Now
+ * the outcome names the pages (`skeletonPages`), its sentence is in `warnings`, and the CLI says it on stderr. Ruled
+ * 2026-10-26: never refused, and the placeholder speaks to a visitor ("Lingo — this app is being built."); a project
+ * made with the earlier sentence is still read as the placeholder. Known-firing beside the absences: the same fixture as shipped (a page somebody wrote), and the placeholder
  * with one more node beside it, deploy with no such warning, so the sentence is about the placeholder.
  *
  * ⚠️ Grades `dist/nodegx-deploy.cjs`, a build artefact: rebuild it (`npm run build`) after editing the source.
@@ -15,12 +16,21 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
-import { SKELETON_PLACEHOLDER_MARKER } from '../src/skeleton';
+// The engine's `src/skeleton.ts` re-exports these through the editor's `@noodl-utils` alias, which this jest does not map.
+import {
+  LEGACY_SKELETON_PLACEHOLDER_MARKERS,
+  SKELETON_PLACEHOLDER_MARKER
+} from '../../noodl-editor/src/editor/src/utils/compilation/build/deploy-skeleton';
 
 const PKG_ROOT = path.resolve(__dirname, '..');
 const ENGINE_BUNDLE = path.join(PKG_ROOT, 'dist/nodegx-deploy.cjs');
 const FIXTURE_PROJECT = path.join(PKG_ROOT, 'tests/fixtures/hello-world');
-const SOURCES = ['src/deploy.ts', 'src/deploy-cli.ts', 'src/skeleton.ts'].map((f) => path.join(PKG_ROOT, f));
+const SOURCES = [
+  'src/deploy.ts',
+  'src/deploy-cli.ts',
+  'src/skeleton.ts',
+  '../noodl-editor/src/editor/src/utils/compilation/build/deploy-skeleton.ts'
+].map((f) => path.join(PKG_ROOT, f));
 const HOME_NODES = 'components/__page__/Home/nodes.json';
 
 let work: string;
@@ -38,12 +48,12 @@ afterAll(() => {
 });
 
 /** The fixture, its Home page's Text set to `text` (the placeholder when `skeleton`), and `extra` more nodes on it. */
-function deployWith(name: string, home: { skeleton: boolean; extra?: boolean }) {
+function deployWith(name: string, home: { skeleton: boolean; extra?: boolean; marker?: string }) {
   const projectDir = path.join(work, name, 'project');
   fs.cpSync(FIXTURE_PROJECT, projectDir, { recursive: true });
   const file = path.join(projectDir, HOME_NODES);
   const nodes = JSON.parse(fs.readFileSync(file, 'utf8'));
-  if (home.skeleton) nodes.nodes.find((n: { type: string }) => n.type === 'Text').parameters.text = `Hello Preview${SKELETON_PLACEHOLDER_MARKER}`;
+  if (home.skeleton) nodes.nodes.find((n: { type: string }) => n.type === 'Text').parameters.text = `Hello Preview${home.marker ?? SKELETON_PLACEHOLDER_MARKER}`;
   if (home.extra) {
     nodes.nodes.find((n: { type: string }) => n.type === 'Page').children.push('built');
     nodes.nodes.push({ id: 'built', type: 'Text', label: 'Built', parent: 'page', parameters: { text: 'Lessons' } });
@@ -56,13 +66,16 @@ function deployWith(name: string, home: { skeleton: boolean; extra?: boolean }) 
   return { report, stderr: run.stderr };
 }
 
-const SENTENCE = 'Nothing is built in this project yet';
+const SENTENCE = 'Nothing is built in this app yet';
 
 describe('P26-SKELSHIP — the engine half', () => {
-  test('the marker is the one create_project writes (the two packages do not import each other)', () => {
+  test('the markers are the ones create_project writes and reads (the two packages do not import each other)', () => {
     const writer = fs.readFileSync(path.join(PKG_ROOT, '../noodl-mcp/src/tools/createProject.ts'), 'utf8');
     const declared = /export const SKELETON_PLACEHOLDER_MARKER =\s*'([^']*)'/.exec(writer);
     expect(declared?.[1]).toBe(SKELETON_PLACEHOLDER_MARKER);
+    const legacy = /export const LEGACY_SKELETON_PLACEHOLDER_MARKERS[^=]*=\s*\[([^\]]*)\]/.exec(writer);
+    const legacyMarkers = [...(legacy?.[1] ?? '').matchAll(/'([^']*)'/g)].map((m) => m[1]);
+    expect(legacyMarkers).toEqual([...LEGACY_SKELETON_PLACEHOLDER_MARKERS]);
   });
 
   test('🔴 an untouched skeleton: published, and the pages, the sentence and the stderr line all say so', () => {
@@ -70,8 +83,15 @@ describe('P26-SKELSHIP — the engine half', () => {
     expect(report.ok).toBe(true);
     expect(report.skeletonPages).toEqual(['Home']);
     const warning = (report.warnings as string[]).find((w) => w.startsWith(SENTENCE));
-    expect(warning).toContain('Home is still the placeholder create_project wrote');
+    expect(warning).toContain('Home is still the placeholder page a new project starts with');
     expect(stderr).toContain(`nodegx-deploy: ${warning}`);
+  });
+
+  test('a project made with the earlier sentence (to the agent) is read as the placeholder too', () => {
+    for (const marker of LEGACY_SKELETON_PLACEHOLDER_MARKERS) {
+      const { report } = deployWith(`legacy-${LEGACY_SKELETON_PLACEHOLDER_MARKERS.indexOf(marker)}`, { skeleton: true, marker });
+      expect(report.skeletonPages).toEqual(['Home']);
+    }
   });
 
   test('a page somebody wrote, and the placeholder with a node added: published with no such word (known-firing arms)', () => {

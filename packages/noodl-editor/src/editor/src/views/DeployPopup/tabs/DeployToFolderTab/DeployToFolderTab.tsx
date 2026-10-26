@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { filesystem } from '@noodl/platform';
 
+import { DialogLayerModel } from '@noodl-models/DialogLayerModel';
 import { ProjectModel } from '@noodl-models/projectmodel';
 import { getCloudServices } from '@noodl-models/projectmodel.editor';
 import {
@@ -8,6 +9,7 @@ import {
   previewProjectFileExclusions,
   ProjectCopyReport
 } from '@noodl-utils/compilation/build/copy';
+import { deployOrAsk } from '@noodl-utils/compilation/build/deploy-skeleton';
 import { chooseDeployFolder, deployFolderName, PROJECT_FILES } from '@noodl-utils/compilation/build/deploy-target';
 import { createEditorCompilation } from '@noodl-utils/compilation/compilation.editor';
 
@@ -137,7 +139,27 @@ export function DeployToFolderTab() {
     ProjectModel.instance.setSetting('deployRenderingMode', mode);
   }
 
+  /**
+   * P26-SKELSHIP (ruled 2026-10-26: "a loud warning everywhere but the option to push ahead anyway"): an app nobody
+   * has built yet is asked about before the folder is chosen, and deploys if the person says so.
+   */
   function onPickFolderClicked() {
+    deployOrAsk(ProjectModel.instance, {
+      deploy: pickFolderAndDeploy,
+      ask: (question, deployAnyway) => {
+        PopupLayer.instance.hidePopup();
+        DialogLayerModel.instance.showConfirm({
+          id: 'deploy-nothing-built',
+          title: 'Nothing is built in this app yet',
+          text: question,
+          confirmText: 'Deploy anyway',
+          onConfirm: deployAnyway
+        });
+      }
+    });
+  }
+
+  function pickFolderAndDeploy() {
     const activityId = 'deploying-project';
 
     filesystem

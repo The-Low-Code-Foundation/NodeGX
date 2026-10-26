@@ -97,9 +97,21 @@ export const SKELETON_COMPONENTS: ReadonlySet<string> = new Set(['/App', '/Pages
  * The marker lives next to the writer that emits it so a reworded placeholder
  * changes both in one edit, which is the only thing keeping
  * {@link isUntouchedSkeletonPage} from going quietly stale.
+ *
+ * P26-SKELSHIP (ruled 2026-10-26): the sentence speaks to a visitor, because a
+ * deploy of an untouched project puts it in front of every one. It used to say
+ * "— nothing built yet. Review the plan in docs/ and start when you are ready.",
+ * an instruction to the agent; projects made then still carry it, so that
+ * sentence is still read as the placeholder. The deploy routes read both through
+ * the editor's copy (`deploy-skeleton.ts`), held equal to these by
+ * noodl-preview's `tests/p26-skelship-engine.test.ts`.
  */
-export const SKELETON_PLACEHOLDER_MARKER =
-  ' — nothing built yet. Review the plan in docs/ and start when you are ready.';
+export const SKELETON_PLACEHOLDER_MARKER = ' — this app is being built.';
+
+/** The placeholder sentences earlier versions wrote, still recognised as untouched. */
+export const LEGACY_SKELETON_PLACEHOLDER_MARKERS: readonly string[] = [
+  ' — nothing built yet. Review the plan in docs/ and start when you are ready.'
+];
 
 /** As much of a stored node as {@link isUntouchedSkeletonPage} reads. */
 interface SkeletonNodeLike {
@@ -123,7 +135,10 @@ export function isUntouchedSkeletonPage(nodes: readonly SkeletonNodeLike[]): boo
   const text = nodes.find((n) => n.type === 'Text');
   if (!page || !text) return false;
   const value = text.parameters?.['text'];
-  return typeof value === 'string' && value.endsWith(SKELETON_PLACEHOLDER_MARKER);
+  return (
+    typeof value === 'string' &&
+    [SKELETON_PLACEHOLDER_MARKER, ...LEGACY_SKELETON_PLACEHOLDER_MARKERS].some((marker) => value.endsWith(marker))
+  );
 }
 
 function newId(): string {

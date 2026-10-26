@@ -19,6 +19,7 @@ import {
   describeSshFailure,
   resolveDeployEngine,
   resolveProvisionScript,
+  skeletonShippedSentence,
   untouchedSkeletonPages,
   type DeployDeps,
   type DeployToVmRequest,
@@ -307,24 +308,31 @@ describe('DEP-002 s4 — the tool on the server', () => {
   });
 });
 
-describe('P26-SKELSHIP — a project with nothing built is not shipped', () => {
-  it('refuses before the box is touched, naming the placeholder pages and the way on', async () => {
+describe('P26-SKELSHIP — a project with nothing built ships, and the result says so first (ruled 2026-10-26)', () => {
+  it('ships it, with the sentence in warnings and the next step telling the agent to say it', async () => {
     const box = fakeBox();
-    const err = await deployToVm(request({ skeletonPages: ['Pages/Home'] }), box.deps).catch((e) => e);
-    expect(err).toBeInstanceOf(ToolError);
-    expect(err.message).toMatch(/^Nothing is built in this project yet: Pages\/Home is still the placeholder/);
-    expect(err.message).toMatch(/nothing was sent/);
-    expect(err.message).toMatch(/allow_empty/);
-    expect(box.calls).toHaveLength(0);
+    const result = await deployToVm(request({ skeletonPages: ['Pages/Home'] }), box.deps);
+    expect(box.remotes().some((r) => r.includes('bash -s'))).toBe(true);
+    expect(result.warnings).toEqual([skeletonShippedSentence(['Pages/Home'])]);
+    expect(result.warnings[0]).toMatch(/^Nothing is built in this app yet: Pages\/Home is still the placeholder page/);
+    expect(result.next).toMatch(/^Before anything else, tell the person what each line of `warnings` says\. /);
   });
 
-  it('ships it with allow_empty, and ships a built project without asking (control)', async () => {
-    const fixture = fakeBox();
-    await deployToVm(request({ skeletonPages: ['Pages/Home'], allowEmpty: true }), fixture.deps);
-    expect(fixture.remotes().some((r) => r.includes('bash -s'))).toBe(true);
+  it('passes the engine\'s warnings on, and says the placeholder once when the engine said it', async () => {
+    const engineSaid = 'Nothing is built in this app yet: Home is still the placeholder page a new project starts with, and it is all a visitor will see. It was deployed anyway; build the app, then deploy again.';
+    const box = fakeBox({
+      engine: ok(JSON.stringify({ ...REPORT, skeletonPages: ['Home'], warnings: [engineSaid, 'A wire went nowhere.'] }) + '\n')
+    });
+    const result = await deployToVm(request({ skeletonPages: ['Pages/Home'] }), box.deps);
+    expect(result.warnings).toEqual([engineSaid, 'A wire went nowhere.']);
+  });
+
+  it('a built project ships with no warnings and the usual next step (control)', async () => {
     const built = fakeBox();
-    await deployToVm(request({ skeletonPages: [] }), built.deps);
+    const result = await deployToVm(request({ skeletonPages: [] }), built.deps);
     expect(built.remotes().some((r) => r.includes('bash -s'))).toBe(true);
+    expect(result.warnings).toEqual([]);
+    expect(result.next).not.toMatch(/warnings/);
   });
 
   it('reads the pages: every one the untouched placeholder, or any one built', () => {

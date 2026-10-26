@@ -26,6 +26,7 @@ import {
 } from './deploy';
 import { FULL_STACK_FLAG, FullStackInstallError, FullStackTargetError } from './fullStack';
 import { isProjectFileError } from './readProject';
+import { skeletonWarning } from './skeleton';
 
 /** What the caller reads. One object, one line, nothing else on stdout. */
 export type EngineResult =
@@ -159,11 +160,11 @@ async function main(): Promise<void> {
     const sentence = result.warnings.find((w) => w.includes(result.localBackend as string));
     if (sentence) process.stderr.write(`\nnodegx-deploy: ${sentence}\n`);
   }
-  // P26-SKELSHIP — the same for a project nobody has built: the folder is a complete app whose only page tells every
-  // visitor to review a plan in docs/.
+  // P26-SKELSHIP — the same for a project nobody has built: the folder is a complete app whose only page is the
+  // placeholder. The sentence is the one `warnings` carries, made by the same function, never matched by its words.
   if (result.ok && result.skeletonPages) {
-    const sentence = result.warnings.find((w) => w.startsWith('Nothing is built in this project yet'));
-    if (sentence) process.stderr.write(`\nnodegx-deploy: ${sentence}\n`);
+    const sentence = skeletonWarning(result.skeletonPages);
+    if (sentence && result.warnings.includes(sentence)) process.stderr.write(`\nnodegx-deploy: ${sentence}\n`);
   }
   process.exitCode = 0;
 }

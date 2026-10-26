@@ -181,8 +181,6 @@ export interface DeployToVmRequest {
   secretsFile?: string;
   /** The project's pages when every one is still create_project's placeholder (P26-SKELSHIP); empty otherwise. */
   skeletonPages?: string[];
-  /** Ship a project with nothing built anyway (a test fixture). */
-  allowEmpty?: boolean;
 }
 
 /**
@@ -190,6 +188,8 @@ export interface DeployToVmRequest {
  * nothing built yet. Review the plan in docs/ and start when you are ready.", a sentence to the agent, and the person
  * could not tell whether the deploy had worked. The pages (components with a `Page` node) when every one is that
  * untouched placeholder; empty when any page has been built, or there are none (the engine refuses that itself).
+ * Ruled 2026-10-26: the project still ships ("in case someone wants to deploy just to health check or test"), and the
+ * result's `warnings` says so.
  */
 export function untouchedSkeletonPages(store: Pick<ProjectStore, 'listComponents' | 'peekComponent'>): string[] {
   const pages: string[] = [];
@@ -205,6 +205,15 @@ export function untouchedSkeletonPages(store: Pick<ProjectStore, 'listComponents
     pages.push(row.path);
   }
   return pages;
+}
+
+/** What the result says when an engine too old to say it shipped a project with nothing built (P26-SKELSHIP). */
+export function skeletonShippedSentence(pages: readonly string[]): string {
+  const named = pages.length === 1 ? `${pages[0]} is` : `${pages.join(', ')} are`;
+  return (
+    `Nothing is built in this app yet: ${named} still the placeholder page a new project starts with, and it is all a ` +
+    'visitor will see. It was deployed anyway; build the app, then deploy again.'
+  );
 }
 
 const APP_RE = /^[a-z][a-z0-9-]{1,30}$/;
@@ -275,6 +284,11 @@ export interface DeployToVmResult {
   secrets: string[];
   health: number;
   appStatus: number;
+  /**
+   * What the deploy warned about, each a sentence for the person: the engine's `warnings` (a page nobody has built, a
+   * wire that went nowhere), and P26-SKELSHIP's own when the engine predates it. Empty when nothing did.
+   */
+  warnings: string[];
   next: string;
 }
 
@@ -284,6 +298,8 @@ interface EngineReport {
   message?: string;
   projectName?: string;
   written?: unknown[];
+  warnings?: string[];
+  skeletonPages?: string[];
   fullStack?: {
     buildId: string;
     functionFailures: { name: string; reason: string }[];
@@ -322,15 +338,6 @@ export interface DeployDeps {
 
 export async function deployToVm(request: DeployToVmRequest, deps: DeployDeps): Promise<DeployToVmResult> {
   checkRequest(request);
-  if (request.skeletonPages?.length && !request.allowEmpty) {
-    throw fail(
-      'build',
-      `Nothing is built in this project yet: ${request.skeletonPages.join(', ')} ${request.skeletonPages.length === 1 ? 'is' : 'are'} still the placeholder create_project wrote, ` +
-        'whose sentence is addressed to the agent and would be every visitor\'s first page. Build the app first; nothing was sent. ' +
-        '(A test fixture can ship as it is with allow_empty.)',
-      { skeletonPages: request.skeletonPages }
-    );
-  }
   const { app, port, host, domain } = request;
   const secrets = secretsEnv(request.secretsFile);
   const sshArgs = ['-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', '-o', 'StrictHostKeyChecking=accept-new'];
@@ -451,6 +458,10 @@ export async function deployToVm(request: DeployToVmRequest, deps: DeployDeps): 
     }
 
     const provisionLines = lines(provisioned.stdout).filter((l) => l.startsWith('    ') || l.startsWith('==>')).map((l) => l.trim());
+    // P26-SKELSHIP (ruled 2026-10-26): never refused, said loudly. The engine says it from 0.2.7 on; an older one does
+    // not, so the pages read here before the build say it instead.
+    const warnings = [...(report.warnings ?? [])];
+    if (request.skeletonPages?.length && !report.skeletonPages) warnings.unshift(skeletonShippedSentence(request.skeletonPages));
     const result: DeployToVmResult = {
       ok: true,
       app,
@@ -468,9 +479,10 @@ export async function deployToVm(request: DeployToVmRequest, deps: DeployDeps): 
       secrets: secrets.names,
       health,
       appStatus,
-      next: domain
+      warnings,
+      next: (warnings.length ? 'Before anything else, tell the person what each line of `warnings` says. ' : '') + (domain
         ? `Open https://${domain} (its DNS must point at ${host.replace(/^.*@/, '')}; Caddy fetches the certificate on the first visit). Ship again with the same app and port to update it: the data stays.`
-        : 'It answers on the box only (no domain). Give the person the "see" command to look at it; ship again with a domain once its DNS points at the box.'
+        : 'It answers on the box only (no domain). Give the person the "see" command to look at it; ship again with a domain once its DNS points at the box.')
     };
     if (!domain) {
       result.see = `ssh ${request.sshPort ? `-p ${request.sshPort} ` : ''}-L ${port}:127.0.0.1:${port} ${host}   then open http://localhost:${port}`;
@@ -503,7 +515,6 @@ const deployToVmSchema = {
   ssh_key: z.string().optional().describe('An ssh identity file, if not ssh\'s default.'),
   ssh_port: z.number().int().optional().describe('The server\'s ssh port, if not 22.'),
   backend_id: z.string().optional().describe('The local backend whose function secrets travel (default: the one this project is bound to).'),
-  allow_empty: z.boolean().optional().describe('Ship even though no page is built yet (a test fixture). Default: refused.')
 };
 
 interface DeployToVmArgs {
@@ -514,7 +525,6 @@ interface DeployToVmArgs {
   ssh_key?: string;
   ssh_port?: number;
   backend_id?: string;
-  allow_empty?: boolean;
 }
 
 export function registerDeployToVmTools(server: McpServer, binding: ProjectBinding): void {
@@ -549,8 +559,7 @@ export function registerDeployToVmTools(server: McpServer, binding: ProjectBindi
             sshKey: a.ssh_key,
             sshPort: a.ssh_port,
             secretsFile: boundBackendSecrets(binding, a.backend_id),
-            skeletonPages: untouchedSkeletonPages(store),
-            allowEmpty: a.allow_empty
+            skeletonPages: untouchedSkeletonPages(store)
           },
           { run: runProcess, tar: tarStream, engine: resolveDeployEngine(), provisionScript: resolveProvisionScript(), progress }
         );
