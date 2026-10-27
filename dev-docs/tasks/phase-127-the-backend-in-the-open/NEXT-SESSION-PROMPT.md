@@ -241,8 +241,14 @@ works 14/14 on a lab copy, two grader mutants red). EMPTYSTATEREFUSED and DUPERO
    `readAutoRun` already does; in `fnCard`, give `.ran` to each step's node and `.refused` to a failed one; add a
    hosted-check line. First `stat` `editor/studio.html` and read `git diff` in nodegx-studio. If a peer is in it,
    commit through a temporary index.
+   **Done 2026-10-27 (P128 Beta round):** nodegx-studio `62dd153` (STU-085): `readFnRun` reads the run's steps,
+   `.ran` on each node it acted in, `.refused` ("failed here") on the one it failed in, the start card refused when no
+   node ran; `check:hosted` 29/29 (two new lines), `check:functions` 695/695 + 46/46. Row fixed (`c3a729018`).
 3. After Richard publishes the map 0.1.4: move Studio's pin and `vendor/NODEGX.json` together (`npm run check:vendor`
    says if one is left behind), and add a hosted-check line saying the map draws triggers inside the conversation.
+   **Done 2026-10-27 (P128 Beta round):** 0.1.4 on the registry (shasum `9057fe4f…`); nodegx-studio `8afa284` moves the
+   pin, the lock and `vendor/NODEGX.json` together (`check:vendor` PASS); `check:hosted` 36/36 with the new line (the
+   map draws trigger `g:task-added`, edges `fires>f:List Role Members` and `watches>t:Task`, inside the conversation).
 4. When the next `@nodegx/mcp` after 0.2.9 is cut (by whoever Richard names release owner), it carries `d12e0b042`.
    Grade it from the tarball: `set_function_permissions` is present in `noodl-mcp.cjs`, and the control (0.2.9's
    tarball) counts 0.

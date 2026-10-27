@@ -194,6 +194,11 @@ for the project; an empty dir for HOME.
    draft-release mechanism in nodegx-studio `75c8d63`, or nodegx.io). Also the bundle's own sheet: `scripts/mcpb.mjs`
    `long_description` names `@nodegx/mcp 0.2.7` and `nodegx-studio 0.1.0`, jargon to a non-coder (not filed; one copy
    fix). Deploy only on R's yes.
+   **Done 2026-10-27 (Beta round), not deployed:** nodegx-web `d632286` (Desktop's warning verbatim first, why that is
+   normal, the source on GitHub, then `releases/latest/download/nodegx-0.2.9-darwin-{arm64,x64}.mcpb` on nodegx-studio,
+   names from `scripts/mcpb.mjs:124`); the sheet is three canon passages and one line of ours (nodegx-studio `be28603`,
+   `mcpb validate` passes, ships at the next `npm run mcpb`). The links 404 until a release carries the files:
+   P128-S3B-MCPBNORELEASE. GitHub hosting was R's lean, to confirm.
 8. **A — first contact that never relies on search** (UNFINDABLE part 1): the Beta email
    (`dev-docs/reviews/the-three-surfaces-audit-2026-10-27-assets/brevo-studio-beta-email.md`) and the video's
    description say *"paste https://nodegx.io/start into Claude"* (with the scheme: a bare `nodegx.io/start` failed
@@ -206,6 +211,7 @@ for the project; an empty dir for HOME.
 10. **A — P128-S3-SIZEMSG** (low): `parameterValues.ts:235` names the `var(--token)` form; a refused `var(--x)` inside a
     calc suggests the token, not 16px; grep the specs that pin the old text. **R —** whether a refused write should
     reach the host as `isError` (honest for the agent, red "Error" blocks for the person).
+    **Agent half done 2026-10-27:** `13b51ddb0` (spec 3/3; 0.2.9 still gives the old sentence). `isError` stays R's.
 11. **A — watch P128-S3-SIGNBROKEN:** `npm view @anthropic-ai/mcpb version` above 2.1.2 → the re-measure in the bug.
 12. **R — his Desktop, when the runs are done.** It has the test extension and no checkout server; the old `nodegx`
     entry is backed up at `~/Library/Application Support/Claude/claude_desktop_config.before-mcpb-run-2026-10-27.json`.
@@ -255,7 +261,7 @@ table in SCOPE under STU-082.
 - **For S5 and after.** Use `askName`/`askSure` for any new question, never a native dialog (a host's frame answers
   none). Whether Claude Desktop offers `downloadFile` is unmeasured: the next AC8 run should press Export once.
 
-### [ ] S5 — STU-083 Help and CPY-002: the canon drawn in Studio
+### [x] S5 — STU-083 Help and CPY-002: the canon drawn in Studio
 **Files.** `editor/studio.html`: a Help entry in the rail (not a main tab: under the ⋯ menu and a `?` in the hosted
 strip) drawing `docs/CANON.md` as served by `editor/serve.mjs` from the vendored kit (`vendor/` carries the NodeGX
 checkout: add `docs/CANON.md` to what `npm run vendor` copies, so Studio ships the canon it quotes), with the three
@@ -264,6 +270,17 @@ nodegx.io/your-own-editor); `app/welcome.html` one line and the hosted strip's s
 canon's "When it's finished" paragraph; the Option sets empty state in the person's terms (a language, a status).
 **AC.** Help opens in the desktop app and in the fake host and shows the canon's headings; the links are the canon's;
 `check:editor`, `check:hosted` green; a picture in `docs/look/`.
+
+- **Landed (2026-10-27, Beta round Track A, nodegx-studio `decabe3`; no `.mcpb` rebuilt).** Help is a `?` in the rail,
+  an item in the ⋯ menu and a `?` in the hosted strip; it draws the canon's seven person-facing headings from
+  `vendor/docs/CANON.md` (`npm run vendor` copies it, `GET /api/canon`), "Get the tools" carries the canon's three links
+  as buttons. The welcome and the strip quote "Change a heading, a font, a button colour or a translation yourself."
+  under canon markers; the Option sets empty state names a language and a status.
+- **Gates.** `check:editor` 217/217 (4 new), `check:hosted` 32/32 (3 new), `check:app` 66/66 (2d: Help in the desktop
+  app), `check:vendor` PASS; `canon-check` passes on welcome.html, hosted.js, studio.html and fails on a "color" copy.
+  Final sweep on `fcdd55e`: editor 217, hosted 36, app 67, data 80, timeline 53 (a 25/27 first: P128-BETA-TIMELINERECFLAKE).
+- **For Richard.** The welcome/strip sentence, the Option sets wording, and Help leaving out "For the agent" and "Waits
+  on" are his to rule. Help's "for your computer" button lands on /start, "coming soon" until the new /start ships.
 
 ### [x] S6 — STU-084 Wiring and P125-MUDDY-DEADCHIP: the wiring underneath (done by Beta sweep s22, 2026-10-27, Richard's yes)
 **Files.** `editor/studio.html`: a read-only canvas of the current page's whole graph drawn with `@nodegx/canvas-look`
@@ -293,7 +310,7 @@ green with the new checks; a picture in `docs/look/`.
   `node packages/noodl-mcp/scripts/pin-studio-vocabulary.mjs`. Filed P128-S6-OPTSETFLAKE (check:hosted's New option
   set, intermittent on both arms). Whether Desktop takes `ui/message` is unmeasured.
 
-### [ ] S7 — STU-080 Preview
+### [x] S7 — STU-080 Preview
 **Files.** `editor/serve.mjs`: `GET /app` serving a one-page HTML that loads `/preview.js`, fetches `/api/project`,
 mounts with `NodegxPreview.mountPreview` full-window and re-mounts on each `/api/events` message (debounced);
 `editor/hosted/hosted.js`: **Preview ↗** beside Window ↗ opening `ORIGIN + '/app'` via `app.openLink`; the desktop
@@ -301,9 +318,18 @@ app's header gets the same button.
 **AC.** A headline changed in Studio inside the fake host changes in the `/app` tab without a reload (driven with
 `editor/cdp.mjs`); `check:hosted`, `check:app` green.
 
+- **Landed (2026-10-27, Beta round Track A, nodegx-studio `b332a15`).** `GET /app` mounts the preview full window and
+  redraws on each `/api/events` message (debounced); `/api/project?look=1` reads without touching Studio's record.
+  **Preview ↗** beside Window ↗ in the hosted strip (`ui/open-link`) and in the desktop app's header.
+- **Gates.** `check:hosted` 35/35 with the AC: `/app` in a second tab drew Sign in, a headline typed in the frame reached
+  it as draw #2 with a marker set before still there (no reload). `check:app` 67/67 (button present, `/app` 200; not
+  pressed: it opens a real browser); editor 217, data 80, timeline 53.
+- **Next.** At 1600 px the header has 8 px to spare with Preview ↗, so the ⋯ fold can flip with the pill's length: a
+  candidate cause of TIMELINERECFLAKE, not established.
+
 ## Repo C — nodegx-web
 
-### [ ] S8 — CPY-001 and SEE-009's download block: one ladder on the site
+### [x] S8 — CPY-001 and SEE-009's download block: one ladder on the site
 **Files.** `site/_page.html` (the hero stays; "Pick your way in" and the Price list picture name the part in the
 chat, Studio and the NodeGX editor by the canon's names; a "Which AI coder" line from the canon), `site/start/_page.html`
 ("Choose your editor" = the three ways, the canon's table; the download block says Beta on the day Richard names,
@@ -313,6 +339,16 @@ paragraph), `site/why/_page.html` (the cheaper-model sentence from the canon's l
 S3 reads. Build with `ops/build.py`; deploy only on Richard's yes.
 **AC.** A text extract of the four pages (the audit's python snippet) shows the three names and no other; S3's check
 passes on the site pages; Richard reads it.
+
+- **Landed (2026-10-27, Beta round Track C, nodegx-web `4f875d6`; NOT deployed).** Home: the card under "Pick your way
+  in" and a "Three ways to touch your app" strip (the three names, the floor, the first two sentences of "Which AI
+  coder"); /start: "Choose your editor" is the canon's table and floor; /studio: "What Studio doesn't edit, and where
+  it is" carries the Wiring paragraph whole; /why: the canon's cheaper-models sentence replaces "choose by price".
+- **Gates.** The audit had no python snippet, so `extract.py` was written: "professional editor" 2→0, "beginner's
+  editor" 2→0, "second editor" 1→0, "mini/full editor" 0→0, the three names on all four pages. `canon-check` on the four
+  built pages exits 0 (49 quotes); a one-word change to a copy of the canon fails all four.
+- **Open.** "Richard reads it" is his, and two rulings: the cheaper-models sentence sits on the canon's "Waits on" list;
+  the homepage still says the Desktop install is "coming soon" until the `.mcpb` release. Upload list: Handoffs below.
 
 ---
 
@@ -324,6 +360,20 @@ stranger (P125 CCN-007) on steps 1–7; then the cut and the Brevo email
 resolved). Lane 9's SCHEDULEAUTH ruling and `@nodegx/mcp` 0.2.8 are not this phase's and stay first on the board.
 
 ## Handoffs (each session writes three lines under its box above, and the newest here)
+
+- 2026-10-27 night, **the Beta round** (`BETA-ROUND-PROMPT.md`: one orchestrator, three subagents). S5, S7, S8 ticked;
+  S3b steps 7 and 10 done (agent halves); PREVIEWCUT fixed without a ruling (`0b4898515`: `_meta
+  ["anthropic/maxResultSizeChars"]` 120,000 on `get_project_info` and `call_tool`, only for client `claude-code`; Claude
+  Code's limit is 50,000 characters; 2,362 → 62,079 characters arrive); OPTSETSUNKNOWN fixed, SURFACESUNSAID open for
+  its Sonnet round (no owner); `findStudio` resolves `@nodegx/studio` (`e0801764e`), and `@nodegx/studio` 0.1.0 is packed
+  (`~/vscode_projects/OpenNoodl-worktrees/nodegx-studio-pack/nodegx-studio-0.1.0.tgz`, 2,108,434 bytes, sha1
+  `4eada0d006c0fa512de71f46a9f9fdf284fc68f4`), not published. noodl-mcp dist rebuilt (22:19); no `.mcpb` rebuilt.
+  nodegx-web upload list (build from `git archive d632286`, never the working tree): `index.html`, `site.css`,
+  `why/index.html` now; `start/index.html`, `studio/index.html` wait on a nodegx-studio release (or `start/` at
+  `4f875d6` without the links). Traps: a temp-index commit leaves the real index at the old blobs (`MM`, or a staged `D`
+  for a new file), so `git reset -q -- <paths>` after; macOS has no `timeout` (exit 127: use `perl -e 'alarm shift; exec
+  @ARGV' 60 …`); `packages/noodl-mcp/build.mjs` runs only from its own directory; Studio installed from npm finds its
+  kit hoisted beside it (STUDIOHOISTED); the npm route still installs no Studio beside `@nodegx/mcp`.
 
 - 2026-10-27, S3b steps 1–3: see the block under S3b's AC. Traps: a release ruling can be overtaken inside the hour:
   read `npm view @nodegx/mcp dist-tags` right before you pack and again before you ask, and `git log` for a peer's
