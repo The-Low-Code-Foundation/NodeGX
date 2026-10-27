@@ -249,7 +249,7 @@ canon's "When it's finished" paragraph; the Option sets empty state in the perso
 **AC.** Help opens in the desktop app and in the fake host and shows the canon's headings; the links are the canon's;
 `check:editor`, `check:hosted` green; a picture in `docs/look/`.
 
-### [ ] S6 — STU-084 Wiring and P125-MUDDY-DEADCHIP: the wiring underneath
+### [ ] S6 — STU-084 Wiring and P125-MUDDY-DEADCHIP: the wiring underneath (taken by Beta sweep s22, 2026-10-27, Richard's yes)
 **Files.** `editor/studio.html`: a read-only canvas of the current page's whole graph drawn with `@nodegx/canvas-look`
 the way `editor/fngraph.mjs` draws a cloud function (BKO-004), reached from a quiet "Wiring" link in the Design tab's
 footer and from the chip: `sourceChip`'s fall-through (2975–2982) becomes a clickable chip opening a card (the node's

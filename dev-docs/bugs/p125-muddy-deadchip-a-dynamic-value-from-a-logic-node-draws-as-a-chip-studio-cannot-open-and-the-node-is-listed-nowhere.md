@@ -6,7 +6,7 @@ severity: medium
 area: "nodegx-studio `editor/studio.html` `sourceChip` 2975–2982 (custom states, option sets, page data and composed expressions get a kind; everything else falls through to a plain `chip` span with no onclick), `isHelperNode` 3488, the element tree (visual nodes only)"
 found: Richard's Muddy Paws Shelter run in Claude Desktop, 2026-10-27 (his point 3, the screenshot: the chip under the headline's Text; the video at 22:30, "I'm not finding it yet")
 evidence: dev-docs/reviews/the-three-surfaces-audit-2026-10-27.md §1.3 — READ: the fall-through branch of `sourceChip` builds a span with no handler; the source is reachable only as an entry in the bolt menu's "logic" group, never as a thing to open; the full NodeGX editor shows the same node and its wires (the video, 27:00)
-owner: none
+owner: "Beta sweep s22 (2026-10-27), as P128 S6, on Richard's yes"
 task: STU-081 (proposed in the audit §4): a chip outside Studio's vocabulary opens a card naming the node and its type, saying Studio does not draw it, with the NodeGX editor's download and "ask the agent"; a "Logic on this page" list under the element tree
 launch: beta
 ---
