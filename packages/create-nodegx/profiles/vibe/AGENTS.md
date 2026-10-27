@@ -95,7 +95,8 @@ Your tool list will not change in a session. Every `nodegx` tool that is not in 
 arguments first. A new session is not bound to the project: `open_project` it first.
 
 When the app needs an API key, don't ask me to paste it into the chat. Call `set_function_secret` without a value and
-tell me where to paste it in the project's `.env` file.
+tell me where to paste it in the project's `.env` file. The app reads the key from that file as soon as I save it, so
+there is nothing for you to load afterwards.
 
 To see an app: `npx @nodegx/preview <the app's folder> --open` — it starts the app's own backend too, when it has
 one on this computer, so it is also how the app opens again another day. To try it on a phone on the same Wi-Fi,

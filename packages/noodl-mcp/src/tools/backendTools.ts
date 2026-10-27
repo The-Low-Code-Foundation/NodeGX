@@ -882,9 +882,10 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         'Store a credential (an API key, a token) on a running backend for cloud functions to read with a Secret ' +
         'node of the same name. It lands in the backend\'s secrets.json, never in the project or the page, and is ' +
         'never echoed. LEAVE OUT `value` (the person\'s way, P112-S14-PERSONKEY): the first call adds `NAME=` to ' +
-        "the project's .env and tells you what to say; once the person has pasted the key there and saved, call it " +
-        'again and it goes from the file to the backend without entering this conversation. Never open .env ' +
-        'yourself, and never ask for a key in the chat.',
+        "the project's .env and tells you what to say. The app's backend reads that line itself whenever a function " +
+        'asks, so once the person has pasted the key and saved, the feature works with nothing more to call; ' +
+        'calling it again only checks the line is filled (for an older backend it also sends the key there). ' +
+        'Never open .env yourself, and never ask for a key in the chat.',
       inputSchema: {
         backendId: z.string().optional(),
         name: z.string().describe('The name a Secret node asks for, e.g. "GOOGLE_TTS_KEY". Letters, digits, _ . -'),
@@ -907,6 +908,10 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       const reading = readEnvSecret(projectDir, name);
       if (reading.state !== 'filled') {
         const { file } = ensureEnvPlaceholder(projectDir, name);
+        // P112-OWN023-KEYNEEDSAGENT: the backend reads the line itself, so the person needs no agent to switch the
+        // feature on. Only a backend that answers and says it reads no project's file (an older one) still needs
+        // the second call.
+        const reads = await backendReadsProjectEnv(backendId);
         return jsonResult({
           set: false,
           waitingForPerson: true,
@@ -914,12 +919,40 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
           line: `${name}=`,
           tellThePerson:
             `Open the file ".env" in your project folder (${file}). On the line ${name}=, paste your key right ` +
-            'after the = sign, with no spaces, then save the file and tell me you are done. The file stays on ' +
-            'your computer: it is never published and git ignores it.',
-          next: `When the person says it is done, call set_function_secret { name: "${name}" } again (no value).`
+            'after the = sign, with no spaces, then save the file' +
+            (reads === false
+              ? ' and tell me you are done.'
+              : '. Your app reads the key from that file as soon as you save it: there is nothing to restart, and ' +
+                'you do not need me for it. To change the key later, change that line and save.') +
+            ' The file stays on your computer: it is never published and git ignores it.',
+          next:
+            reads === false
+              ? `When the person says it is done, call set_function_secret { name: "${name}" } again (no value).`
+              : `Nothing more to call: the app's backend reads ${name} from .env whenever a function asks. ` +
+                `set_function_secret { name: "${name}" } again (no value) only checks that the line is filled.`
         });
       }
       const client = await requireBackend(backendId);
+      const listing = await secretsListing(client);
+      if (Array.isArray(listing?.projectEnvFile) && listing.projectEnvFile.includes(name)) {
+        // No copy into secrets.json: a copy would outlive the line (an emptied line would keep answering with the
+        // old key), and the backend already answers from the file.
+        return jsonResult({
+          set: true,
+          name,
+          from: reading.file,
+          characters: reading.value.length,
+          readFromFile: true,
+          ...(listing.secrets?.some((s) => s.name === name)
+            ? {
+                olderCopy:
+                  `The backend also holds a stored ${name} from an earlier call. The .env line wins while it is ` +
+                  "filled; the backend's Secrets page deletes the stored copy."
+              }
+            : {}),
+          note: 'The backend reads this key from .env whenever a function asks. The value did not pass through this conversation.'
+        });
+      }
       const { json } = await client.request('PUT', `/admin/secrets/${encodeURIComponent(name)}`, {
         value: reading.value
       });
@@ -1981,4 +2014,36 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
       return jsonResult(json);
     })
   );
+}
+
+/** The fields of `GET /admin/secrets` this file reads. `projectEnvFile` is absent from a backend older than P112-OWN023-KEYNEEDSAGENT. */
+interface SecretsListing {
+  secrets?: Array<{ name: string }>;
+  projectEnvFile?: string[] | null;
+}
+
+async function secretsListing(client: BackendClient): Promise<SecretsListing | null> {
+  try {
+    const { json } = await client.request('GET', '/admin/secrets');
+    return json && typeof json === 'object' ? (json as SecretsListing) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * P112-OWN023-KEYNEEDSAGENT — does the app's backend read the project's `.env` itself? `false` only when one answers
+ * and says it does not (an older backend, or one started without the project); `undefined` when none answers, which
+ * reads as yes: the backend that starts for this project (the preview's, `provision_backend`'s) is started beside it.
+ */
+async function backendReadsProjectEnv(backendId: string | undefined): Promise<boolean | undefined> {
+  let client: BackendClient;
+  try {
+    client = await requireBackend(backendId);
+  } catch {
+    return undefined;
+  }
+  const listing = await secretsListing(client);
+  if (!listing) return undefined;
+  return Array.isArray(listing.projectEnvFile);
 }

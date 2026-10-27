@@ -4,8 +4,10 @@
  *
  * Richard's ruling (2026-10-12): a person who isn't technical should never paste a terminal command or a key into
  * the chat. The agent asks for the key by name; `set_function_secret` (no `value`) writes `NAME=` into the
- * project's `.env`. The person pastes the key right after the `=` and saves, and the next `set_function_secret`
- * reads it from the file and sends it to the backend. Neither result carries the value, only its length.
+ * project's `.env`. The person pastes the key right after the `=` and saves. A backend started beside the project
+ * reads that line itself whenever a function asks (P112-OWN023-KEYNEEDSAGENT, `nodegx-backend/src/config/
+ * projectEnvFile.ts`), so saving is the whole job; for an older backend that does not, the next
+ * `set_function_secret` reads it from the file and sends it. Neither result carries the value, only its length.
  *
  * `.env` never leaves the machine: the deploy ignores it by default (`ignore.ts`, "environment / credential file")
  * and this module adds it to the project's `.gitignore`.
@@ -16,7 +18,11 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
-export const ENV_FILE = '.env';
+import { PROJECT_ENV_FILE, findEnvValue } from '../../../nodegx-backend/src/config/projectEnvFile';
+
+export { findEnvValue };
+
+export const ENV_FILE = PROJECT_ENV_FILE;
 
 const HEADER =
   '# Keys for this app\'s cloud functions. Paste each key right after its = sign, on the same line, and save.\n' +
@@ -25,22 +31,6 @@ const HEADER =
 export type EnvSecretReading =
   | { state: 'no-file' | 'no-line' | 'empty'; file: string }
   | { state: 'filled'; file: string; value: string };
-
-/** `NAME=value` from `.env` text, the way a person writes it: optional `export `, optional quotes, spaces trimmed. */
-export function findEnvValue(text: string, name: string): string | undefined {
-  for (const raw of text.split(/\r?\n/)) {
-    const line = raw.trim();
-    if (!line || line.startsWith('#')) continue;
-    const m = /^(?:export\s+)?([A-Za-z0-9_.-]+)\s*=(.*)$/.exec(line);
-    if (!m || m[1] !== name) continue;
-    let value = m[2].trim();
-    if (value.length >= 2 && (value[0] === '"' || value[0] === "'") && value[value.length - 1] === value[0]) {
-      value = value.slice(1, -1);
-    }
-    return value;
-  }
-  return undefined;
-}
 
 export function readEnvSecret(projectDir: string, name: string): EnvSecretReading {
   const file = path.join(projectDir, ENV_FILE);

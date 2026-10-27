@@ -214,7 +214,7 @@ describeOrSkip('AAQ-011/F13 provisioning — a real backend, end to end', () => 
     expect(ownedBackendIds()).toHaveLength(1);
   });
 
-  it('P112-S14-PERSONKEY: asks for the key in .env, then sends it from the file — the value is in no result', async () => {
+  it('P112-S14-PERSONKEY + OWN023-KEYNEEDSAGENT: asks for the key in .env, which the backend then reads itself — the value is in no result', async () => {
     const KEY = 'own015-canary-' + Math.random().toString(36).slice(2);
     const provisioned = JSON.parse(await callRawText(session, 'provision_backend', { name: 'App backend' }));
     expect(provisioned.provisioned).toBe(true);
@@ -223,6 +223,10 @@ describeOrSkip('AAQ-011/F13 provisioning — a real backend, end to end', () => 
     const ask = JSON.parse(await callRawText(session, 'set_function_secret', { name: 'GEMINI_API_KEY' }));
     expect(ask).toMatchObject({ set: false, waitingForPerson: true, line: 'GEMINI_API_KEY=' });
     expect(ask.tellThePerson).toContain('right after the = sign');
+    // KEYNEEDSAGENT: the person switches the feature on by saving; the agent is not a step.
+    expect(ask.tellThePerson).toContain('as soon as you save it');
+    expect(ask.tellThePerson).not.toContain('tell me you are done');
+    expect(ask.next).toMatch(/^Nothing more to call/);
     expect(fs.readFileSync(path.join(projectDir, '.env'), 'utf8')).toContain('GEMINI_API_KEY=\n');
 
     // 2. Asked again before the person has pasted: still waiting, nothing sent.
@@ -235,13 +239,16 @@ describeOrSkip('AAQ-011/F13 provisioning — a real backend, end to end', () => 
 
     const sentText = await callRawText(session, 'set_function_secret', { name: 'GEMINI_API_KEY' });
     const sent = JSON.parse(sentText);
-    expect(sent).toMatchObject({ set: true, name: 'GEMINI_API_KEY', characters: KEY.length });
+    expect(sent).toMatchObject({ set: true, name: 'GEMINI_API_KEY', characters: KEY.length, readFromFile: true });
     // The claim: the value is in nothing the agent was shown…
     expect(sentText).not.toContain(KEY);
-    expect(await callRawText(session, 'list_function_secrets', {})).not.toContain(KEY);
-    // …and it reached the backend's own store (the known-firing control for the search above).
+    const listedText = await callRawText(session, 'list_function_secrets', {});
+    expect(listedText).not.toContain(KEY);
+    // …and the backend reads it from the file (the known-firing control for the search above): no copy in its store,
+    // which would outlive the line. A function receiving it is nodegx-backend's p112-own023-keyneedsagent spec.
+    expect(JSON.parse(listedText).projectEnvFile).toEqual(['GEMINI_API_KEY']);
     const secrets = JSON.parse(fs.readFileSync(path.join(root, provisioned.backendId, 'secrets.json'), 'utf8'));
-    expect(secrets.functions.GEMINI_API_KEY).toBe(KEY);
+    expect(secrets.functions?.GEMINI_API_KEY).toBeUndefined();
   });
 
   it('stops a backend it owns, and drops the record with it', async () => {

@@ -583,7 +583,7 @@ export class HttpServer {
     // over a path, deliberately stateless, so sharing an instance would buy
     // nothing and threading one through HttpServerDeps would only add a way for
     // a caller to pass a store pointed somewhere else.
-    this.adminSecrets = new AdminSecretsRoutes(new SecretsStore(deps.options.dataDir));
+    this.adminSecrets = new AdminSecretsRoutes(new SecretsStore(deps.options.dataDir), deps.options.projectDir);
     this.adminTriggers = new AdminTriggerRoutes(deps.triggers);
     this.adminWorkflows = new AdminWorkflowRoutes(
       () => deps.workflows,

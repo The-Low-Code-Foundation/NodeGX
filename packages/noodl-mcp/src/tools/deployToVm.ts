@@ -16,8 +16,8 @@
  *     in `dist/backend/vm/`; ship-to-vm.sh reads it from the checkout). Its refusals (a port taken, rules switched
  *     off, no Node 22.13) are returned verbatim, because they are the product's own account of what it found;
  *   - the function secrets travel as the script sends them: read from the project's local backend
- *     (`set_function_secret` stored them), written to the box over ssh's stdin, never to a file, an argument list or
- *     the folder.
+ *     (`set_function_secret` stored them) and the project's `.env` (its filled lines win, as they do locally),
+ *     written to the box over ssh's stdin, never to a file, an argument list or the folder.
  *
  * ## 🔴 What an agent's ssh cannot do that a person's can
  *
@@ -44,6 +44,7 @@ import type { Readable } from 'stream';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
+import { projectEnvSecret, projectEnvSecretNames } from '../../../nodegx-backend/src/config/projectEnvFile';
 import { backendsRoot } from '../backend/client';
 import { ToolError } from '../errors';
 import type { ProjectBinding } from '../project/ProjectBinding';
@@ -243,15 +244,23 @@ export function checkRequest(request: DeployToVmRequest): void {
   }
 }
 
-/** `NODEGX_SECRET_<NAME>=value` lines, the backend's environment fallback (SecretsStore), as ship-to-vm.sh writes them. */
-export function secretsEnv(secretsFile: string | undefined): { names: string[]; text: string } {
-  if (!secretsFile || !fs.existsSync(secretsFile)) return { names: [], text: '' };
+/**
+ * `NODEGX_SECRET_<NAME>=value` lines, the backend's environment fallback (SecretsStore), as ship-to-vm.sh writes them.
+ *
+ * P112-OWN023-KEYNEEDSAGENT: the local backend answers a function from the project's `.env` first, so a key the
+ * person pasted there (and never copied anywhere) travels too, and a filled line wins over a stored copy of the same
+ * name — the box answers with the key this computer answers with. The values go over ssh's stdin; the file does not.
+ */
+export function secretsEnv(secretsFile: string | undefined, projectDir?: string): { names: string[]; text: string } {
   let functions: Record<string, unknown> = {};
-  try {
-    functions = (JSON.parse(fs.readFileSync(secretsFile, 'utf8')).functions ?? {}) as Record<string, unknown>;
-  } catch (error) {
-    throw new ToolError('invalid-argument', `${secretsFile} is not JSON (${(error as Error).message}); nothing was shipped.`);
+  if (secretsFile && fs.existsSync(secretsFile)) {
+    try {
+      functions = (JSON.parse(fs.readFileSync(secretsFile, 'utf8')).functions ?? {}) as Record<string, unknown>;
+    } catch (error) {
+      throw new ToolError('invalid-argument', `${secretsFile} is not JSON (${(error as Error).message}); nothing was shipped.`);
+    }
   }
+  for (const name of projectEnvSecretNames(projectDir)) functions[name] = projectEnvSecret(projectDir, name);
   const names: string[] = [];
   let text = '';
   for (const [name, value] of Object.entries(functions)) {
@@ -341,7 +350,7 @@ export interface DeployDeps {
 export async function deployToVm(request: DeployToVmRequest, deps: DeployDeps): Promise<DeployToVmResult> {
   checkRequest(request);
   const { app, port, host, domain } = request;
-  const secrets = secretsEnv(request.secretsFile);
+  const secrets = secretsEnv(request.secretsFile, request.projectDir);
   const sshArgs = ['-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15', '-o', 'StrictHostKeyChecking=accept-new'];
   if (request.sshKey) sshArgs.push('-i', request.sshKey);
   if (request.sshPort) sshArgs.push('-p', String(request.sshPort));

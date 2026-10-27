@@ -48,6 +48,7 @@ import {
   FUNCTION_SECRET_NAME_PATTERN,
   functionSecretEnvName
 } from './config/SecretsStore';
+import { PROJECT_ENV_FILE, projectEnvSecret } from './config/projectEnvFile';
 import { OpsState } from './ops/OpsState';
 import { logger } from './ops/logger';
 import type { SettingsReload } from './server/admin-backups';
@@ -727,7 +728,7 @@ export class BackendService {
       // thing that holds a SecretsStore, and it deliberately stays that way — the scrubber
       // exposes `scrub(text)` and nothing that hands a value back, so this is not a way around
       // SecretsStore's missing bulk read (CWF-009 design question 4).
-      scrubSecretValues: new SecretValueScrubber(new SecretsStore(this.options.dataDir)),
+      scrubSecretValues: new SecretValueScrubber(new SecretsStore(this.options.dataDir), this.options.projectDir),
       // PRD-002: a `Log` node's message and data are bounded AFTER that scrub, live.
       getRecordBounds: () => ({
         maxValueBytes: this.ops!.config.executions.maxValueBytes,
@@ -918,11 +919,15 @@ export class BackendService {
   /**
    * The Secret node's actual read path (CWF-009).
    *
-   * Two doors, in this order, and no third:
+   * Three doors, in this order:
    *
-   *   1. `<dataDir>/secrets.json`, `functions` namespace — the store convention
+   *   1. A filled `NAME=value` line in the project's `.env` (`--project-dir`),
+   *      read on every lookup (P112-OWN023-KEYNEEDSAGENT, config/projectEnvFile.ts).
+   *      First because it is the file the person edits: a key they change there
+   *      must not be shadowed by an older copy in the store.
+   *   2. `<dataDir>/secrets.json`, `functions` namespace — the store convention
    *      (config/SecretsStore.ts). Machine-local, mode 0600, never deployed.
-   *   2. `NODEGX_SECRET_<NAME>` in the environment — for deploy targets that
+   *   3. `NODEGX_SECRET_<NAME>` in the environment — for deploy targets that
    *      provision env vars rather than a data directory. Adds a door and not
    *      an exposure: `process.env` is already fully readable from inside any
    *      cloud function.
@@ -947,6 +952,9 @@ export class BackendService {
       };
     }
 
+    const fromProjectEnv = projectEnvSecret(this.options.projectDir, name);
+    if (fromProjectEnv !== undefined) return { found: true, value: fromProjectEnv };
+
     const stored = new SecretsStore(this.options.dataDir).get(FUNCTION_SECRETS_NAMESPACE, name);
     if (typeof stored === 'string') return { found: true, value: stored };
 
@@ -958,18 +966,22 @@ export class BackendService {
     // how its owner sets it, and never this machine: the file's path (the home directory, the backend's id) goes to
     // the backend's own log, once per name, for the person who runs it.
     const file = path.join(this.options.dataDir, 'secrets.json');
+    const projectDir = this.options.projectDir;
     if (!this.unprovisionedSecretsLogged.has(name)) {
       this.unprovisionedSecretsLogged.add(name);
       logger.warn('secret.not-provisioned', {
         name,
-        detail: `Add it under the "${FUNCTION_SECRETS_NAMESPACE}" section of ${file}, or set ${envName}.`
+        detail:
+          (projectDir ? `Fill the line ${name}= in ${path.join(projectDir, PROJECT_ENV_FILE)}, add` : 'Add') +
+          ` it under the "${FUNCTION_SECRETS_NAMESPACE}" section of ${file}, or set ${envName}.`
       });
     }
     return {
       found: false,
       error:
         `Secret: "${name}" is not provisioned on this backend. ` +
-        `Its owner sets it on the backend's Secrets page, or in the ${envName} environment variable. ` +
+        (projectDir ? `Its owner pastes it after ${name}= in the app's ${PROJECT_ENV_FILE} file, sets it` : 'Its owner sets it') +
+        ` on the backend's Secrets page, or in the ${envName} environment variable. ` +
         'A secret does not travel with a deploy, so a function that works locally and fails here is usually ' +
         'a secret nobody set on this backend.'
     };

@@ -8,7 +8,7 @@ import { useEffect, useState } from 'preact/hooks';
 
 import { api, encode, useSession } from '../api';
 import { EmptyState } from '../composers';
-import { SecretListing, canSaveSecret, describeDeleteOutcome, environmentOnlyVariables, envNameForSecret, secretNameProblem } from '../secretsModel';
+import { DeleteOutcome, SecretListing, canSaveSecret, describeDeleteOutcome, environmentOnlyVariables, envNameForSecret, secretNameProblem } from '../secretsModel';
 import { ActionCell, Btn, Card, Chip, Dialog, Field, Gap, Hint, Notice, Page, Row, Spacer, Sub, Table, WriteBtn, confirmDestructive, fail, openModal, toast } from '../ui';
 import type { ViewProps } from './index';
 
@@ -16,6 +16,8 @@ interface SecretsData {
   namespace: string;
   secrets: SecretListing[];
   environment: string[];
+  /** The names the app's `.env` fills (they win over this page); null or absent when the backend reads no project's file. */
+  projectEnvFile?: string[] | null;
   readable: boolean;
   envPrefix: string;
 }
@@ -47,7 +49,7 @@ export function SecretsView(_props: ViewProps) {
       'Every Secret node asking for "' + s.name + '" fires its failure output from the next run. This cannot be undone: the value is not kept anywhere else.',
       s.name,
       () => {
-        api<{ name: string; existed: boolean; stillResolvesFromEnvironment: boolean; envName: string }>('DELETE', '/admin/secrets/' + encode(s.name))
+        api<DeleteOutcome>('DELETE', '/admin/secrets/' + encode(s.name))
           .then((outcome) => {
             const said = describeDeleteOutcome(outcome);
             toast(said.message, said.severity);
@@ -59,6 +61,7 @@ export function SecretsView(_props: ViewProps) {
   }
 
   const envOnly = data ? environmentOnlyVariables(data.secrets, data.environment) : [];
+  const fromProjectEnv = (data && data.projectEnvFile) || [];
 
   return (
     <Page title="Secrets" subtitle="Keys and passwords your cloud functions read with a Secret node. A value is typed once and never shown again.">
@@ -114,6 +117,20 @@ export function SecretsView(_props: ViewProps) {
                   </span>
                 ))}
                 {'. A function resolves those too; to change one, change the environment and restart.'}
+              </Notice>
+            </div>
+          ) : null}
+          {fromProjectEnv.length ? (
+            <div style="margin-top:12px">
+              <Notice>
+                {'Read from the .env file in the app’s folder: '}
+                {fromProjectEnv.map((v, i) => (
+                  <span key={v}>
+                    {i ? ', ' : ''}
+                    <code>{v}</code>
+                  </span>
+                ))}
+                {'. That file wins over a value of the same name set here; to change one, edit its line and save the file — nothing to restart.'}
               </Notice>
             </div>
           ) : null}
