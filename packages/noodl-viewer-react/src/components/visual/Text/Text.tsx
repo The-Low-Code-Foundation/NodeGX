@@ -41,6 +41,12 @@ export function renderableText(value: unknown): string {
   return value === null || value === undefined ? '' : String(value);
 }
 
+/**
+ * P18-S112-FLEXELLIPSIS — the line an Ellipsis Text draws its words in: a flex item that shrinks to the box and draws the
+ * "…". It clips as the element does (`hidden` unless the author chose an Overflow), so an author's own Overflow stays theirs.
+ */
+const ELLIPSIS_LINE: React.CSSProperties = { minWidth: 0, textOverflow: 'ellipsis', whiteSpace: 'nowrap' };
+
 export function Text(props: TextProps) {
   // React.ElementType collapses the intrinsic-elements union; with the ref prop added,
   // the raw union exceeds the compiler's representation limit (TS2590).
@@ -101,7 +107,15 @@ const defaultsClass = layerDefaults(style);
       {...PointerListeners(props)}
       style={style}
     >
-      {renderableText(props.text)}
+      {style.textOverflow === 'ellipsis' ? (
+        // P18-S112-FLEXELLIPSIS — the Text is `display: flex` (its default CSS, which Text Vertical Align's `alignItems`
+        // needs), so its words were an anonymous flex item and `text-overflow` on the element drew no "…": Ellipsis
+        // looked the same as Clip. The words go in a block of their own that may shrink to the box and draws the "…";
+        // the element keeps its flex, so both alignments still place them.
+        <span style={{ ...ELLIPSIS_LINE, overflow: style.overflow }}>{renderableText(props.text)}</span>
+      ) : (
+        renderableText(props.text)
+      )}
     </Component>
   );
 }
