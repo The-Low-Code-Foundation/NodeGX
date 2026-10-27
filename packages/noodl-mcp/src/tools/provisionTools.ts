@@ -67,6 +67,41 @@ const collectionSchema = z.object({
     )
 });
 
+/** The tables `metadata.dbCollections` declares, as the backend's createTable takes them (`_User` and the like are the backend's own). */
+function declaredCollections(projectFile: unknown): { name: string; columns: { name: string; type: string }[] }[] {
+  const tables = (projectFile as { metadata?: { dbCollections?: unknown } } | undefined)?.metadata?.dbCollections;
+  if (!Array.isArray(tables)) return [];
+  return tables
+    .filter((t): t is { name: string; columns?: unknown } => !!t && typeof t.name === 'string' && !t.name.startsWith('_'))
+    .map((t) => ({
+      name: t.name,
+      columns: (Array.isArray(t.columns) ? t.columns : [])
+        .filter((c): c is { name: string; type: string } => !!c && typeof c.name === 'string' && typeof c.type === 'string')
+        .filter((c) => !['objectId', 'createdAt', 'updatedAt', 'ACL'].includes(c.name))
+        .map((c) => ({ name: c.name, type: c.type }))
+    }));
+}
+
+/**
+ * P127-BKO006-TABLESNOTINFILES: the backend's tables, kept in `metadata.dbCollections` — the value the editor's
+ * SchemaHandler caches there on open (`decideSchemaCache`: the backend's `tables` array whole), and the one place a
+ * project's schema lives in its files. Before this only an editor or Studio wrote it, so an agent-built app's tables
+ * and their columns were on the backend alone. A failed read leaves the file as it was and says so.
+ */
+async function keepTablesInProject(store: ProjectStore, backendId: string): Promise<{ file: string; written: boolean; tables?: string[]; reason?: string }> {
+  const file = 'nodegx.project.json → metadata.dbCollections';
+  try {
+    const client = await requireBackend(backendId);
+    const { json } = await client.request('GET', '/admin/schema');
+    const tables = (json as { tables?: unknown })?.tables;
+    if (!Array.isArray(tables)) return { file, written: false, reason: 'the backend answered no tables' };
+    store.writeMetadata('dbCollections', tables, 'tables');
+    return { file, written: true, tables: tables.map((t: { name?: string }) => String(t?.name)) };
+  } catch (error) {
+    return { file, written: false, reason: error instanceof Error ? error.message : String(error) };
+  }
+}
+
 export function registerProvisionTools(server: McpServer, binding: ProjectBinding): void {
   server.registerTool(
     'provision_backend',
@@ -127,9 +162,13 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
       // is not written at all.
       const identity = ensureProjectId(store.projectDir);
       const projectFile = store.readProjectFile();
+      // P127-BKO006-TABLESNOTINFILES: the project's own tables seed the backend too (the files are the truth, R1),
+      // the agent's named ones winning where both name a table
+      const named = args.collections ?? [];
+      const collections = [...named, ...declaredCollections(projectFile).filter((c) => !named.some((n) => n.name === c.name))];
       const result = await provisionBackend({
         name: args.name,
-        collections: args.collections ?? [],
+        collections,
         projectId: identity.id ?? projectFile?.id,
         projectDir: store.projectDir,
         identity: { reason: identity.reason, minted: identity.outcome === 'minted' }
@@ -144,6 +183,7 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
         },
         true // the refusal above is the gate; by here the decision is made
       );
+      const tables = await keepTablesInProject(store, result.backendId);
 
       return jsonResult({
         provisioned: true,
@@ -169,6 +209,7 @@ export function registerProvisionTools(server: McpServer, binding: ProjectBindin
         reuseVerdict: result.reuseVerdict,
         ...(result.reuseNote ? { reuseNote: result.reuseNote } : {}),
         boundTo: 'nodegx.project.json → metadata.cloudservices',
+        project: tables,
         note:
           'The project is bound. Record/User nodes will now resolve prop-* ports from this backend, and the ' +
           'backend tools (permissions, roles, keys, workflows) target it without a backendId. It stops when ' +

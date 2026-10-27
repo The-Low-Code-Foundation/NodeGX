@@ -23,6 +23,7 @@ import { ENFORCED_RULES_NOTE, OPEN_RULES_NOTE } from '../backend/enforcedRulesNo
 import { ensureEnvPlaceholder, readEnvSecret } from '../backend/envSecret';
 import { PROJECT_AUTOMATIONS_FILE } from '../../../nodegx-backend/src/automations/shape';
 import { patchAutomations, patchRules, PROJECT_RULES_FILE, writeBoth } from '../backend/projectFiles';
+import { resolveFunctionName } from '../backend/functionTarget';
 import { writeProposal } from '../backend/workflowProposals';
 import { ToolError } from '../errors';
 import type { ProjectBinding } from '../project/ProjectBinding';
@@ -1059,6 +1060,8 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, ...body }) => {
       const client = await requireBackend(backendId);
+      const resolved = await resolveFunctionTarget(client, body.target);
+      body.target = resolved.target;
       let id = (body as { id?: string }).id;
       const { answer, project } = await writeBoth({
         binding,
@@ -1074,7 +1077,7 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
           await client.request('DELETE', `/admin/triggers/${encodeURIComponent(id!)}`);
         }
       });
-      return jsonResult({ ...(answer as object), project });
+      return jsonResult({ ...(answer as object), project, ...(resolved.note ? { targetResolved: resolved.note } : {}), ...(resolved.warning ? { warning: resolved.warning } : {}) });
     })
   );
 
@@ -1091,6 +1094,8 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     },
     guarded(async ({ backendId, id, ...body }) => {
       const client = await requireBackend(backendId);
+      const resolved = await resolveFunctionTarget(client, body.target);
+      body.target = resolved.target;
       const route = `/admin/triggers/${encodeURIComponent(id)}`;
       const before = await storedTrigger(client, id);
       const { answer, project } = await keepTrigger(
@@ -1101,7 +1106,7 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         },
         async () => (await client.request('PUT', route, body)).json
       );
-      return jsonResult({ ...(answer as object), project });
+      return jsonResult({ ...(answer as object), project, ...(resolved.note ? { targetResolved: resolved.note } : {}), ...(resolved.warning ? { warning: resolved.warning } : {}) });
     })
   );
 
@@ -1129,6 +1134,30 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         async () => (await client.request('POST', route, { enabled })).json
       );
       return jsonResult({ ...(answer as object), project });
+    })
+  );
+
+  // P127-BKO006-NOFIRE: the backend had "Test fire" (`POST /admin/triggers/:id/fire`) and the agent had no way to it.
+  // The book club's agent re-timed its Monday schedule to every minute to see it run, which wrote the project's file
+  // twice and left the person's real schedule depending on it remembering to put it back.
+  server.registerTool(
+    'fire_backend_trigger',
+    {
+      title: 'Fire a backend trigger now',
+      description:
+        'Run a trigger once, now, as if it had fired (a test fire), and return how it ended and what its function or ' +
+        'workflow answered. Changes no schedule and writes nothing to the project: use it to see a schedule, a ' +
+        'webhook or a row-change trigger work, instead of re-timing it.',
+      inputSchema: {
+        backendId: z.string().optional(),
+        id: z.string().describe('The trigger id'),
+        payload: z.record(z.unknown()).optional().describe('What the fire carries (a webhook body, a row); default {}')
+      }
+    },
+    guarded(async ({ backendId, id, payload }) => {
+      const client = await requireBackend(backendId);
+      const { json } = await client.request('POST', `/admin/triggers/${encodeURIComponent(id)}/fire`, payload ?? {});
+      return jsonResult(json);
     })
   );
 
@@ -1320,6 +1349,21 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         'vocabulary is served per backend and versions differ, which is why it is served rather than bundled.',
       { unknown, served }
     );
+  }
+
+  /** P127-BKO006-TRIGGERNAME: a function target read against what the backend serves (`resolveFunctionName`). */
+  async function resolveFunctionTarget(
+    client: BackendClient,
+    target: { kind: 'function' | 'workflow'; name: string }
+  ): Promise<{ target: { kind: 'function' | 'workflow'; name: string }; note?: string; warning?: string }> {
+    if (target.kind !== 'function') return { target };
+    const { json } = await client.request('GET', '/admin/permissions/functions');
+    const served = ((json as { functions?: { name?: unknown }[] })?.functions ?? []).map((f) => f.name).filter((n): n is string => typeof n === 'string');
+    const found = resolveFunctionName(target.name, served);
+    if (found.kind === 'ambiguous') throw new ToolError('invalid-argument', found.message, { asked: target.name, matches: found.matches });
+    if (found.kind === 'resolved') return { target: { ...target, name: found.name }, note: found.note };
+    if (found.kind === 'unknown') return { target, warning: found.warning };
+    return { target };
   }
 
   /** The definition currently on the backend, or null when there is none. */

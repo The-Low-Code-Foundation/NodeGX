@@ -260,9 +260,17 @@ export class ProjectStore {
    * file's metadata bag if absent. Passing `null` clears the overrides.
    */
   writeDesignTokens(key: string, data: unknown): void {
+    this.writeMetadata(key, data, 'tokens');
+  }
+
+  /**
+   * One key of `nodegx.project.json → metadata`, written atomically; `null` or `undefined` removes it. `what` names
+   * the thing being kept, for the refusal when there is no project file.
+   */
+  writeMetadata(key: string, data: unknown, what = key): void {
     const p = this.projectFilePath;
     if (!fs.existsSync(p)) {
-      throw new ToolError('not-found', `Missing nodegx.project.json in ${this.projectDir}; cannot store tokens.`);
+      throw new ToolError('not-found', `Missing nodegx.project.json in ${this.projectDir}; cannot store ${what}.`);
     }
     const project = readJson<ProjectV2File & { metadata?: Record<string, unknown> }>(p);
     const metadata = { ...(project.metadata ?? {}) };

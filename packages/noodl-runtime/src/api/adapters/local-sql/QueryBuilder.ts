@@ -400,12 +400,17 @@ export function buildAclPredicate(
   // keys so no reader can apply one without the other. Scoped to its own
   // collection — a path rule on Person says nothing about an included Account.
   if (acl.only && acl.only.collection === tableName) {
+    // P127-BKO006-OWNERCOLUMN: a rule narrows on a column a new table may not have yet (`owner` arrives with the first
+    // row an owner makes). Read against the columns the table has now, it is `NULL = ?` and reaches nobody, as a
+    // rule's path through a table that does not exist yet does (P123-S6-PATHNOTABLE); unread, it was
+    // `no such column: "owner"` and every list of a "creator" table failed until someone had written to it.
+    const present = env?.lookup?.(tableName)?.present;
     const narrowing = buildWhereClause(
       acl.only.where,
       params,
       undefined,
       undefined,
-      undefined,
+      present ? { present } : undefined,
       dialect,
       { ...(env ?? { collection: tableName, acl: { access: acl.access, keys: acl.keys } }), narrowing: true }
     );

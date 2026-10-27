@@ -111,4 +111,11 @@ describe('NPMAUDIT-EXAMPLEINVALID — every example the server teaches, the writ
   it.each(examples.map((e) => e.id).filter((id) => !CONTEXT[id]))('%s', async (id) => {
     expect(await refusals(id)).toEqual([]);
   });
+
+  // P127-BKO006-CRUDIDSOURCE: the context excuses the ports the project lacks, not a value a port never offers. The
+  // book club's agent copied cloud-record-crud's `idSource: "value"`, which this file let through as context.
+  it.each(Object.keys(CONTEXT))('%s is refused for its context only, never for a value its ports do not offer', async (id) => {
+    const lines = (await refusals(id)).flatMap((r) => r.split(' | '));
+    expect(lines.filter((l) => l.includes('[invalid-parameter-value]'))).toEqual([]);
+  });
 });

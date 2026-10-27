@@ -184,6 +184,24 @@ function withCap<T>(p: Promise<T>, ms: number): Promise<Settled<T>> {
   });
 }
 
+/**
+ * P127-BKO006-SCHEDULEREASON: what the function said when it refused, for the fire's record. The book club's schedule
+ * read "Target returned HTTP 500" and nothing else; the function had said why (it takes no call without a signed-in
+ * person, and a schedule has none), and the agent had to guess it. `: <its error>`, or nothing when it said nothing.
+ */
+function reasonIn(body: string | undefined): string {
+  if (!body) return '';
+  let said: unknown = body;
+  try {
+    const parsed = JSON.parse(body) as { error?: unknown; message?: unknown };
+    said = parsed?.error ?? parsed?.message ?? '';
+  } catch {
+    /* plain text */
+  }
+  const text = (typeof said === 'string' ? said : JSON.stringify(said)).trim();
+  return text ? `: ${text.length > 300 ? text.slice(0, 300) + '…' : text}` : '';
+}
+
 function nowIso(): string {
   return new Date().toISOString();
 }
@@ -253,7 +271,7 @@ export class TriggerDispatcher {
         ok,
         at: nowIso(),
         statusCode: response.statusCode,
-        error: ok ? undefined : `Target returned HTTP ${response.statusCode}`
+        error: ok ? undefined : `Target returned HTTP ${response.statusCode}${reasonIn(response.body)}`
       };
     } catch (e) {
       // run() already logs its own failure record; we only record status here.

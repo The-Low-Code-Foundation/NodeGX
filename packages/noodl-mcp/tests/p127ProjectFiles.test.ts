@@ -100,7 +100,7 @@ describeOrSkip('P127 BKO-001 — the agent’s backend writes reach the project�
 
   it('a schedule the agent adds is in nodegx.automations.json, with no run state', async () => {
     expect(fs.existsSync(automations)).toBe(false);
-    const made = await call<{ trigger: { id: string }; project: { written: boolean; file: string } }>(session, 'create_backend_trigger', {
+    const made = await call<{ trigger: { id: string }; project: { written: boolean; file: string }; warning?: string }>(session, 'create_backend_trigger', {
       type: 'schedule',
       name: 'Every day at 9',
       target: { kind: 'function', name: 'sendReminders' },
@@ -108,6 +108,8 @@ describeOrSkip('P127 BKO-001 — the agent’s backend writes reach the project�
     });
     expect(made.isError).toBe(false);
     expect(made.data.project).toEqual({ file: 'nodegx.automations.json', written: true });
+    // P127-BKO006-TRIGGERNAME: nothing called sendReminders is deployed here, so the answer says it will fail
+    expect(made.data.warning).toMatch(/No function called "sendReminders" is on this backend yet/);
     const file = readJson(automations);
     expect(file.triggers).toEqual([
       {
@@ -120,6 +122,14 @@ describeOrSkip('P127 BKO-001 — the agent’s backend writes reach the project�
       }
     ]);
     expect(JSON.stringify(file)).not.toMatch(/createdAt|updatedAt|status|fireCount/);
+
+    // P127-BKO006-NOFIRE: the agent fires it once, now, without re-timing it; the project's file is not touched
+    const before = fs.readFileSync(automations, 'utf-8');
+    const fired = await call<{ fired: boolean; result: { ok: boolean; error?: string } }>(session, 'fire_backend_trigger', { id: made.data.trigger.id });
+    expect(fired.isError).toBe(false);
+    expect(fired.data.fired).toBe(true);
+    expect(fired.data.result).toMatchObject({ ok: false, error: expect.stringMatching(/"sendReminders" not found/) });
+    expect(fs.readFileSync(automations, 'utf-8')).toBe(before);
   });
 
   it('turning it off and changing its time follow into the file', async () => {
