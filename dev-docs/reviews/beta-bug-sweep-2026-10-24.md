@@ -859,3 +859,45 @@ bug's proposal is unmeasured, for a one-or-two-frame flash.
 4. `docs-site/docs/nodes` was stale at HEAD in 37 pages (whole spec sources embedded); `generate-node-docs.js` would
    sweep all of them into a commit. Not regenerated.
 5. `honesty-ledger.test` red: four templates' numbers ROSE with a peer's open `honesty-ledger.json` — not this session's.
+
+# Session 15, 2026-10-27 (next session reads this first)
+
+"Continue" from the Session 14 list. **Nothing pushed.**
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **P123-STU032-TEXTFLASH** | 5ca3c4c0a | Measured in Studio first: a scratch copy of its timeline check that prints the frame copies (`-assets/textflash-studio-timeline-probe.mjs`), served with `serve.mjs --runtime <dir>`. On the vendored 0.2.7 and on HEAD's viewer built into the scratchpad, the todo list's row was inserted as "TextTextTextLabel", with one frame copy holding four defaults (2 of 2). The cause: a row's inputs reach its nodes through its Component Inputs, which queue the value onto each wired node, so they took it at the next frame, after `addChild`. `foreach.tsx` `addItem` now runs the row's own waiting nodes (`settleRow`: in passes, nothing outside the row) before For Each Actions' Added and before `addChild`. Settled after Added, five For Each scenarios (C128, C142) heard Added early | spec 6/6 (4 red with HEAD's file); Studio with the fixed viewer: the row was inserted as "1Read the run timeline✓", no frame copy held a default (3 of 3), the check passed 53/53; viewer jest 168; For Each conformance 305/305, mutants 320/320 (seed 20753) and 343/343 (seed 13); editor sb-018 15/15 |
+| **P121-TWO003-SCROLLINTOVIEW** | 76d065077 | **The port existed.** Scroll Into View has been on every visual node since P109 ISL-009 (10-02), before the row was filed. The marketplace's `/Admin/Tabs` stopped reading `scrollLeft` from DOM code: on the bar's Did Mount, `TABS_SHOW` sends the current tab its Scroll Into View (Nearest). Template regenerated through the write door, which caught my unprefixed `out-` wires first | enquire drive (Chrome, 390 + 1024): Shelves' tab on screen, nothing scrolled down; without the six wires the Shelves arm is red; two003 142/142 |
+| **P112-OWN023-NOANCESTOR** | 6f056818f | Reproduced on a copy of the F2 app with its backend (`-assets/noancestor-f2-drive.mjs`). Genre picks 2.5 s apart logged nothing on HEAD or 0.2.2; picks 15–75 ms apart logged it on HEAD in 3 of 3 runs and on 0.2.2 in 1 of 1. Not the settings change: a row the Repeater deleted before its deferred parent lookup ran still ran it. The callback now skips a deleted node | Chrome: 0 of 3 with the fix; spec 4/4 (the mechanism arm red with HEAD's file; the harness can't show the miss itself, see trap 3); viewer jest 169, tsc clean |
+
+## For Richard
+
+1. **Push and publish** (sessions 12–15). TEXTFLASH and NOANCESTOR change the viewer: a list's row now takes its
+   values before it is first drawn, so the nodes inside a row run in `addItem` instead of at the next frame (Added
+   still waits for the frame). Studio picks this up only through a kit release (its `vendor/`).
+2. Standing: DEPLOYLOOPBACK's third-party half (your OK), the engine CLI's full-stack default, MCPJSONABSPATH on your
+   machine.
+
+## Next
+
+1. Beta-walk rows from `node scripts/bugs.js`, not lane-owned: P112-OWN023-RESUMEUNBOUND (measure first), P107-C100
+   (Video takes no pointer events), P107-S89-NIGHTBOOK (26 red nodes in a shipped template).
+
+## Traps met
+
+1. 🔴 **A fixture that "has the shape" can miss the defect.** isl003's three cards and a `Noodl.Arrays` refill both
+   drew their rows holding the values at HEAD. Studio's todo row (a Button, nested Groups, a query) showed the flash
+   every time. That difference is not explained. Measure the case the row names before building a fixture.
+2. 🔴 **Reached through a race, fast input is the arm.** NOANCESTOR stayed silent with picks 2.5 s apart on both
+   versions, and fired every run at 15–75 ms. A slow drive's clean result says nothing about a timing row.
+3. 🔴 **The corpus harness clears a deleted row's roots**, so `parentComponentOf` falls back to `parentNodeScope` and
+   finds the list. In Chrome the walk climbs the visual tree past it. A harness green on a walk over a deleted row is
+   not the browser's answer.
+4. Settling a row moved For Each Actions' Added earlier, and five hand scenarios caught it. Run the node's
+   conformance after any change to row timing, not only the viewer suite.
+5. Studio's `serve.mjs` takes `--runtime <dir>`: a scratch viewer build can be graded in Studio without touching its
+   `vendor/`.
+6. `nodegx-backend serve --help` starts a server; it does not print help. Stopped by its own pid; a peer's backend
+   (pid 24520) was left alone.
