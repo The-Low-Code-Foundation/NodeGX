@@ -10,8 +10,10 @@
  * Where Studio is: `NODEGX_STUDIO` names its folder; otherwise the sibling checkout the developers of both keep;
  * otherwise the installed desktop app, which carries the same `editor/` unpacked in its resources (P128-S3-
  * NOSTUDIOFORTHEEDITOR: the editor's Connect Claude Code registers this server with neither of the first two, so a
- * person who downloaded the editor was told "not installed" with Studio sitting in /Applications). Studio is not on
- * npm yet (its README says so); when it is, the fourth candidate is `require.resolve`.
+ * person who downloaded the editor was told "not installed" with Studio sitting in /Applications); otherwise the npm
+ * package `@nodegx/studio` installed beside this one (CCN-006 AC7: `require.resolve`, so `npx -p @nodegx/studio -p
+ * @nodegx/mcp …`, a global install of both, or a dependency finds it). The package carries `editor/` at its root,
+ * as the `.mcpb` stages it; not the Electron app, which stays the download.
  *
  * ⚠️ The child is `node editor/serve.mjs <project> --port 0` on this process's own `execPath`, stdout piped: the
  * port is the ONLY thing read off it, and only until the ready line arrives. Nothing in Studio's output reaches
@@ -49,13 +51,45 @@ export function studioInApp(appPath: string): string {
     : path.join(path.dirname(appPath), 'resources', 'app');
 }
 
-/** Studio's folder, or `null` with the reason. */
-export function findStudio(): { dir: string } | { dir: null; reason: string } {
+/** The npm package's name: Studio's `editor/`, `lib/`, `import/` and `vendor/`, as the `.mcpb` stages them. */
+export const STUDIO_PACKAGE = '@nodegx/studio';
+
+/**
+ * The folder of an installed `@nodegx/studio`, resolved the way Node resolves a dependency of this module (or from
+ * `searchPaths`, for a spec that installs one in a temporary folder); `undefined` when there is none.
+ */
+export function studioFromPackage(searchPaths?: string[]): string | undefined {
+  const resolve = (id: string) => (searchPaths ? require.resolve(id, { paths: searchPaths }) : require.resolve(id));
+  try {
+    return path.dirname(resolve(`${STUDIO_PACKAGE}/package.json`));
+  } catch {
+    // A package whose `exports` leaves out `./package.json` refuses that id (ERR_PACKAGE_PATH_NOT_EXPORTED): resolve
+    // its entry instead and walk up to the manifest that names it.
+    try {
+      let dir = path.dirname(resolve(STUDIO_PACKAGE));
+      for (;;) {
+        const manifest = path.join(dir, 'package.json');
+        if (fs.existsSync(manifest) && JSON.parse(fs.readFileSync(manifest, 'utf8')).name === STUDIO_PACKAGE) return dir;
+        const up = path.dirname(dir);
+        if (up === dir) return undefined;
+        dir = up;
+      }
+    } catch {
+      return undefined;
+    }
+  }
+}
+
+/** Studio's folder, or `null` with the reason. `packageSearchPaths` is for specs; see {@link studioFromPackage}. */
+export function findStudio(options: { packageSearchPaths?: string[] } = {}): { dir: string } | { dir: null; reason: string } {
   const app = findStudioApp();
   const candidates = [
     process.env.NODEGX_STUDIO,
     path.join(os.homedir(), 'vscode_projects', 'nodegx-studio'),
-    app ? studioInApp(app.path) : undefined
+    app ? studioInApp(app.path) : undefined,
+    // CCN-006 AC7 — fourth, as planned: the app and the package hold the same `editor/`, and an explicit or
+    // developer's Studio wins over either.
+    studioFromPackage(options.packageSearchPaths)
   ].filter((c): c is string => typeof c === 'string' && c.length > 0);
   for (const dir of candidates) {
     if (fs.existsSync(path.join(dir, 'editor', 'serve.mjs'))) return { dir };
