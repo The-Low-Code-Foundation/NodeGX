@@ -45,6 +45,7 @@ const PLACES = [
   { place: 'README.md', headings: [FOR] },
   { place: 'packages/noodl-mcp/README.md', headings: [FOR] },
   { place: 'packages/create-nodegx/README.md', headings: [FOR] },
+  { place: 'docs-site/docs/three-ways.md', headings: [WAYS, WIRING, WHICH] },
   {
     place: 'packages/noodl-core-ui/src/preview/launcher/Launcher/components/ConnectAgentCard/ConnectAgentCard.tsx',
     headings: [],

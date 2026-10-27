@@ -3,7 +3,7 @@ title: Getting started
 sidebar_position: 1
 ---
 
-*Describes NodeGX 0.1.0.*
+*Describes NodeGX 0.1.0.* This page is about the NodeGX editor, one of [three ways to use NodeGX](./three-ways.md). If you have never built an app, start at [learn.nodegx.io](https://learn.nodegx.io/) instead.
 
 This walks you through building a real, working two-page app with data, using only the
 editor — no code required, though nothing here stops you from adding some later. It assumes
