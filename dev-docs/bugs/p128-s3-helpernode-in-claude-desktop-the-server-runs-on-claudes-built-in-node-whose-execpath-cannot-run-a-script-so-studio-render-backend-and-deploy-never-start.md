@@ -52,3 +52,9 @@ files red before.
 **Left (not this row):** `@nodegx/mcp` 0.2.8 on npm so the published `.mcpb` is built from it (Richard's yes); the
 darwin-x64 and win32 bundles (`--node`; Windows needs `node.exe` and is not built); signing the `.mcpb`; the bundle is
 62.1 MB, up from 25.1.
+
+**Measured (P127 s9, 2026-10-27), on "Left":** the published `@nodegx/mcp` 0.2.8 does NOT carry this fix. It was cut
+at `dfdc9e25e`, before `560ee23d9`. In its tarball (shasum `e85c6f95…`, the registry's) `dist/noodl-mcp.cjs` counts
+`NODEGX_NODE` 0, `scriptRuntime` 0 and `NODEGX_SERVER_NAME` 0, with `startedByApp` 5 beside them (a fix known to be in
+0.2.8). A `.mcpb` built by `npm run mcpb` from Studio's pin (now 0.2.8) still fails as this row describes. It needs
+`--mcp-tarball` from a pack at `560ee23d9` or later, or a 0.2.9.

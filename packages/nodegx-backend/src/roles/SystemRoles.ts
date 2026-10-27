@@ -361,10 +361,12 @@ export class SystemRoles {
     }
 
     const roles = await this.rolesForUser(userId);
+    // P127-BKO006-NOROLESFAILS: no `error` with Unchanged. Nothing failed, and the node's spec puts a reason on Error
+    // with Failure only. The node fills Error from this field, so the sentence used to arrive on a failure Response's
+    // message wired from Error, and a customer refused by the author's own check read "That user is in no roles."
     return {
       outcome: roles.length > 0 ? 'done' : 'unchanged',
       code: roles.length > 0 ? undefined : 'role/no-roles',
-      error: roles.length > 0 ? undefined : 'That user is in no roles.',
       userId,
       roles
     };
@@ -461,8 +463,8 @@ export class SystemRoles {
 
     return {
       outcome: all.length > 0 ? 'done' : 'unchanged',
+      // no `error` with Unchanged, as `list` above (NOROLESFAILS)
       code: all.length > 0 ? undefined : 'role/no-members',
-      error: all.length > 0 ? undefined : `The role "${name}" has no members.`,
       role: name,
       userIds: present,
       users,
