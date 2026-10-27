@@ -17,6 +17,19 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## npm packages 0.2.9 · 2026-10-27
+
+**For the NodeGX extension in Claude Desktop: Studio and the app's render now start.**
+
+This release is `@nodegx/mcp` 0.2.9. The other packages stay at their versions. `npm create nodegx` still sets up
+`@nodegx/mcp` 0.2.8. In Claude Code the two are the same.
+
+### Fixed
+
+- **In Claude Desktop, Studio opens and the app renders.** Desktop runs an extension on a Node of its own that can't
+  start Studio, the render, the backend or a deploy. The NodeGX extension now brings its own Node. All four run on it.
+- **The server gives Claude Desktop the extension's name.** It answered `noodl-mcp` to an extension called `nodegx`.
+
 ## npm packages 0.2.8 · 2026-10-27
 
 **What your agent sets up for an app's backend is kept in the project. Jobs the app runs by itself now work.**
