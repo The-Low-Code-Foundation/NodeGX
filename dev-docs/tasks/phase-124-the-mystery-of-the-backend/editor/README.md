@@ -29,6 +29,11 @@ See it without a backend: https://nodegx.io/backend-map/ (a recording).
   what's in a row and which tables it points at. A function tells you when it runs ("on Settings,
   pressing “Download my data”"), what it does step by step, which tables it reads or changes, and its
   last runs. A screen tells you what it asks the backend for: the functions it runs, and the tables it reads or writes itself.
+- **What the backend starts by itself.** A schedule, a change to a table's rows or a webhook is drawn under the
+  screens ("On its own"), wired in yellow to each function it runs (for a workflow, each function its steps run) and,
+  for a row change, to its table. Its panel says when it runs, what it runs, who it counts as, and its last run. It
+  reads the backend's triggers and the project's `nodegx.automations.json`: one only in the file is drawn dashed and
+  says it isn't on the backend yet; one only on the backend says the files don't have it.
 - **Look at it as…** someone not signed in, anyone signed in, or someone in one of the groups the app's rules name
   (read from the backend and from `nodegx.security.json`): what they can't reach dims, and a note says what they may
   read, see of their own, and add or change.

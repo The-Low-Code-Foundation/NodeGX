@@ -1,6 +1,6 @@
 {
   "name": "@nodegx/backend-map",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Your NodeGX app's backend as a map: its screens, cloud functions and tables, and who can reach which rows, measured by running its functions as each person.",
   "license": "GPL-3.0-only",
   "homepage": "https://nodegx.io/backend-map/",

@@ -19,7 +19,11 @@ const COLORS = {
   writes: '#fdb022',
   mentions: '#7d8a98',
   links: '#a78bfa',
-  person: '#f776c4'
+  person: '#f776c4',
+  // P127 BKO-005: what the backend starts by itself, and its wires (to the functions it runs, to the table it watches)
+  trigger: '#f2c94c',
+  fires: '#f2c94c',
+  watches: '#f2c94c'
 };
 const OPEN_COLORS = ['#45d08a', '#a78bfa', '#fdb022', '#f97066'];
 
@@ -153,6 +157,32 @@ function screenWords(key) {
   return key.split('/').pop();
 }
 
+/** BKO-005: when a trigger runs, in a person's words. A schedule's are the backend's own (`scheduleWords`), never glossed here. */
+const ACTION_WORDS = { create: 'made', update: 'changed', delete: 'deleted' };
+function triggerWords(t) {
+  if (t.type === 'schedule') return t.scheduleWords ?? (t.cron ? `On the schedule ${t.cron}` : 'On a schedule');
+  if (t.type === 'db-change') {
+    const acts = t.actions.map((a) => ACTION_WORDS[a] ?? a);
+    const said = acts.length > 1 ? `${acts.slice(0, -1).join(', ')} or ${acts[acts.length - 1]}` : acts[0] ?? 'changed';
+    return `When a row of ${W.tableWords(t.table ?? '?')} is ${said}`;
+  }
+  if (t.type === 'webhook') return t.hook ? `When a webhook arrives at …/${t.hook}` : 'When a webhook arrives';
+  return 'When it is asked';
+}
+/** The block's title when the trigger has no name of its own: short, so it fits; the sentence is in its panel. */
+function triggerTitle(t) {
+  if (t.name) return t.name;
+  if (t.type === 'schedule') return t.scheduleWords ?? (t.cron ? `Schedule ${t.cron}` : 'A schedule');
+  if (t.type === 'db-change') {
+    const table = W.tableWords(t.table ?? '?');
+    if (t.actions.length === 1 && t.actions[0] === 'create') return `A new ${table}`;
+    return `${table} ${t.actions.map((a) => ACTION_WORDS[a] ?? a).join(' or ') || 'changed'}`;
+  }
+  if (t.type === 'webhook') return t.hook ? `Webhook …/${t.hook}` : 'A webhook';
+  return 'When it is asked';
+}
+const triggersOf = (fn) => (state.map.triggers ?? []).filter((t) => t.fns.includes(fn));
+
 function callKind(rule) {
   if (Array.isArray(rule)) return rule.map(callKind).sort((a, b) => order(b) - order(a))[0] ?? 'nobody';
   if (rule === 'public') return 'public';
@@ -174,13 +204,21 @@ function layout() {
   state.people.forEach((p, i) => add({ id: `p:${p.id}`, kind: 'person', key: p.id, person: p, title: p.name, x: -300, y: i * 66, w: 200, h: 46 }));
   m.screens.forEach((s, i) => add({ id: `s:${s}`, kind: 'screen', key: s, title: screenWords(s), x: 0, y: i * 84, w: 200, h: 56 }));
   const sy = Object.fromEntries(nodes.map((n) => [n.key, n.y]));
+  // BKO-005: what the backend starts by itself sits under the screens, in their column (its own heading above it)
+  const ty0 = m.screens.length ? m.screens.length * 84 + 76 : 0;
+  (m.triggers ?? []).forEach((t, i) =>
+    add({ id: `g:${t.id}`, kind: 'trigger', col: 'screen', key: t.id, trigger: t, title: triggerTitle(t), x: 0, y: ty0 + i * 84, w: 230, h: 56 })
+  );
+  if ($('legendFires')) $('legendFires').hidden = !(m.triggers ?? []).length;
 
   // Functions, ordered by the screens that call them.
   const callersOf = {};
   for (const c of m.calls) (callersOf[c.fn] ??= new Set()).add(c.screen);
+  const callerY = { ...sy };
+  for (const n of nodes) if (n.kind === 'trigger') for (const fn of n.trigger.fns) ((callersOf[fn] ??= new Set()).add(n.id), (callerY[n.id] = n.y));
   const fns = [...m.functions].sort((a, b) => bary(a) - bary(b) || a.name.localeCompare(b.name));
   function bary(f) {
-    const ys = [...(callersOf[f.name] ?? [])].map((s) => sy[s]);
+    const ys = [...(callersOf[f.name] ?? [])].map((s) => callerY[s]);
     return ys.length ? ys.reduce((p, q) => p + q, 0) / ys.length : 1e6;
   }
   // two staggered columns, so the map is wide rather than tall
@@ -212,8 +250,9 @@ function layout() {
   // gap the full map keeps between those two. With all four the places are the ones above.
   const GAP = { screen: 100, fn: 200, table: 180 };
   let cursor = null;
+  const colOf = (n) => n.col ?? n.kind;
   for (const kind of ['person', 'screen', 'fn', 'table']) {
-    const col = nodes.filter((n) => n.kind === kind);
+    const col = nodes.filter((n) => colOf(n) === kind);
     if (!col.length) continue;
     const left = Math.min(...col.map((n) => n.x));
     if (cursor !== null) col.forEach((n) => (n.x += cursor + (GAP[kind] ?? 180) - left));
@@ -222,7 +261,7 @@ function layout() {
 
   // Centre each column on y = 0.
   for (const kind of ['person', 'screen', 'fn', 'table']) {
-    const col = nodes.filter((n) => n.kind === kind);
+    const col = nodes.filter((n) => colOf(n) === kind);
     if (!col.length) continue;
     const top = Math.min(...col.map((n) => n.y));
     const bottom = Math.max(...col.map((n) => n.y + n.h));
@@ -257,6 +296,12 @@ function layout() {
       const kind = writes ? 'writes' : t.hows.includes('reads') ? 'reads' : 'mentions';
       edges.push({ id: `f:${f.name}>t:${t.table}`, kind, from: `f:${f.name}`, to: `t:${t.table}`, hows: t.hows, via: t.via });
     }
+  }
+  // BKO-005: a trigger's wires: to each function it runs (`fire`), and to the table whose change starts it
+  for (const n of nodes) {
+    if (n.kind !== 'trigger') continue;
+    for (const fn of n.trigger.fns) if (byId[`f:${fn}`]) edges.push({ id: `${n.id}>f:${fn}`, kind: 'fires', from: n.id, to: `f:${fn}` });
+    if (n.trigger.table && byId[`t:${n.trigger.table}`]) edges.push({ id: `${n.id}>t:${n.trigger.table}`, kind: 'watches', from: n.id, to: `t:${n.trigger.table}` });
   }
   const seenLink = new Set();
   for (const l of m.links) {
@@ -341,7 +386,7 @@ function related(id) {
   if (!n) return set;
   const out = (from) => state.edges.filter((e) => e.from === from);
   const inn = (to) => state.edges.filter((e) => e.to === to);
-  if (n.kind === 'screen') {
+  if (n.kind === 'screen' || n.kind === 'trigger') {
     for (const e of out(id)) {
       set.add(e.to).add(e.id);
       for (const e2 of out(e.to)) if (e2.kind !== 'links') set.add(e2.to).add(e2.id);
@@ -473,6 +518,7 @@ function draw(now) {
   const heads = [
     ['person', 'PEOPLE', 'the real ones, from the database'],
     ['screen', 'THE APP’S SCREENS', 'where people click'],
+    ['trigger', 'ON ITS OWN', 'what the backend starts by itself'],
     ['fn', 'FUNCTIONS', 'the doors to the data, with their locks'],
     ['table', 'TABLES', 'where the data lives']
   ];
@@ -511,7 +557,7 @@ function draw(now) {
     ctx.globalAlpha = alpha;
     ctx.strokeStyle = COLORS[e.kind];
     ctx.lineWidth = e.kind === 'writes' ? 2.4 : 1.6;
-    ctx.setLineDash(e.kind === 'mentions' ? [2, 5] : e.kind === 'links' ? [6, 5] : []);
+    ctx.setLineDash(e.kind === 'mentions' ? [2, 5] : e.kind === 'links' || e.kind === 'watches' ? [6, 5] : []);
     ctx.beginPath();
     ctx.moveTo(p[0], p[1]);
     ctx.bezierCurveTo(p[2], p[3], p[4], p[5], p[6], p[7]);
@@ -520,8 +566,9 @@ function draw(now) {
       // a gentle flow along the lit wires
       ctx.setLineDash([]);
       for (let k = 0; k < 3; k++) {
-        const t = ((now / 2400 + k / 3) % 1);
-        const [x, y] = bez(p, t);
+        const f = (now / 2400 + k / 3) % 1;
+        // a row change starts the trigger: its flow runs from the table back to it
+        const [x, y] = bez(p, e.kind === 'watches' ? 1 - f : f);
         ctx.globalAlpha = 0.9;
         ctx.fillStyle = COLORS[e.kind];
         ctx.beginPath();
@@ -618,9 +665,11 @@ function drawNode(n, now, rel) {
   if (state.lit && !rel) alpha = state.lit.has(n.id) ? 1 : n.kind === 'person' ? 0.4 : 0.16;
   if (state.search && !matchesSearch(n) && !rel) alpha = Math.min(alpha, 0.2);
   if (n.kind === 'table' && n.table.notOnBackend) alpha *= 0.7;
+  if (n.kind === 'trigger' && (n.trigger.notOnBackend || !n.trigger.enabled)) alpha *= 0.7;
   ctx.globalAlpha = alpha;
 
-  const color = n.kind === 'person' ? COLORS.person : n.kind === 'screen' ? COLORS.screen : n.kind === 'fn' ? fnColor(n.fn) : COLORS.table;
+  const color =
+    n.kind === 'person' ? COLORS.person : n.kind === 'screen' ? COLORS.screen : n.kind === 'fn' ? fnColor(n.fn) : n.kind === 'trigger' ? COLORS.trigger : COLORS.table;
   const sel = state.selected === n.id, hov = state.hover === n.id;
 
   // a run's flash
@@ -643,7 +692,7 @@ function drawNode(n, now, rel) {
   }
 
   // glow
-  if (sel || hov || (lens && lens.can && n.kind !== 'screen')) {
+  if (sel || hov || (lens && lens.can && n.kind !== 'screen' && n.kind !== 'trigger')) {
     ctx.shadowColor = lens && lens.direct ? '#f97066' : color;
     ctx.shadowBlur = sel ? 28 : 18;
   }
@@ -653,7 +702,7 @@ function drawNode(n, now, rel) {
   ctx.shadowBlur = 0;
   ctx.lineWidth = sel ? 2.4 : 1.2;
   ctx.strokeStyle = sel || hov ? color : '#33323d';
-  if ((n.kind === 'fn' && !n.fn.deployed) || (n.kind === 'table' && n.table.notOnBackend)) ctx.setLineDash([5, 4]);
+  if ((n.kind === 'fn' && !n.fn.deployed) || (n.kind === 'table' && n.table.notOnBackend) || (n.kind === 'trigger' && n.trigger.notOnBackend)) ctx.setLineDash([5, 4]);
   ctx.stroke();
   ctx.setLineDash([]);
 
@@ -687,6 +736,26 @@ function drawNode(n, now, rel) {
     ctx.beginPath();
     ctx.arc(ix + 3, iy + 1, 1.8, 0, Math.PI * 2);
     ctx.fill();
+  } else if (n.kind === 'trigger') {
+    // a clock face for a schedule; a bolt for a row change or a webhook
+    if (n.trigger.type === 'schedule') {
+      ctx.beginPath();
+      ctx.arc(ix, iy, 10, 0, Math.PI * 2);
+      ctx.moveTo(ix, iy - 6);
+      ctx.lineTo(ix, iy);
+      ctx.lineTo(ix + 5, iy + 3);
+      ctx.stroke();
+    } else {
+      ctx.beginPath();
+      ctx.moveTo(ix + 3, iy - 11);
+      ctx.lineTo(ix - 6, iy + 2);
+      ctx.lineTo(ix, iy + 2);
+      ctx.lineTo(ix - 3, iy + 11);
+      ctx.lineTo(ix + 6, iy - 2);
+      ctx.lineTo(ix, iy - 2);
+      ctx.closePath();
+      ctx.stroke();
+    }
   } else {
     // a stack of discs
     for (let k = 0; k < 3; k++) {
@@ -700,10 +769,11 @@ function drawNode(n, now, rel) {
   const small = n.h < 50;
   ctx.fillStyle = '#ffffff';
   ctx.font = '600 14px Inter, system-ui, sans-serif';
-  ctx.fillText(clip(n.title, n.w - (n.kind === 'person' ? 56 : 80)), n.x + 44, n.y + (small ? 20 : 24));
+  const room = n.w - (n.kind === 'person' || n.kind === 'trigger' ? 56 : 80);
+  ctx.fillText(clip(n.title, room), n.x + 44, n.y + (small ? 20 : 24));
   ctx.font = '12px Inter, system-ui, sans-serif';
   ctx.fillStyle = '#c4cedb';
-  ctx.fillText(clip(subtitle(n), n.w - (n.kind === 'person' ? 56 : 80)), n.x + 44, n.y + (small ? 36 : 42));
+  ctx.fillText(clip(subtitle(n), room), n.x + 44, n.y + (small ? 36 : 42));
 
   // a word above the block, from a person's pathway ("REACHES IT", "RAN", …)
   const tag = state.tags?.[n.id];
@@ -825,6 +895,13 @@ function subtitle(n) {
   if (n.kind === 'fn') {
     if (!n.fn.deployed) return 'not live on the backend';
     return `${W.ruleWords(n.fn.call)} may run it`;
+  }
+  if (n.kind === 'trigger') {
+    const t = n.trigger;
+    if (t.notOnBackend) return 'not on the backend yet';
+    if (!t.enabled) return 'off';
+    if (t.lastResult) return `last ran ${W.ago(Date.parse(t.lastResult.at))}${t.lastResult.ok ? '' : ': it failed'}`;
+    return 'has not run yet';
   }
   if (n.table.notOnBackend) return 'not on the backend yet';
   const d = directRead(n.key);
@@ -994,6 +1071,8 @@ function renderPanel() {
         : tablePanel(n)
       : n.kind === 'fn'
       ? fnPanel(n)
+      : n.kind === 'trigger'
+      ? triggerPanel(n)
       : state.pathway?.screen === n.key
       ? pathwayPanel(n)
       : screenPanel(n);
@@ -1795,6 +1874,7 @@ function fnPanel(n) {
     nobody: `<div class="verdict good"><b>Nobody may run this</b> from outside.</div>`
   }[k];
   const used = m.calls.filter((c) => c.fn === f.name);
+  const ownRuns = triggersOf(f.name);
   const myRuns = state.runs.filter((r) => r.name === f.name).slice(0, 6);
   const steps = f.steps.filter((s) => !/^steps?$/i.test(s)).slice(0, 14);
   return `
@@ -1804,7 +1884,7 @@ function fnPanel(n) {
     <p>${f.deployed ? 'Live on the backend.' : '<b>Not live on the backend</b>: it is in the app, but the backend doesn’t have it. Your agent can deploy it.'} Changes to a function’s steps only reach the backend when they’re deployed.</p>
     ${verdict}
     <h4>When it runs</h4>
-    ${used.length ? `<ul>${used.map((c) => `<li>On ${go(`s:${c.screen}`, screenWords(c.screen))}: ${esc(c.trigger.words)}${c.inside ? ` <span style="color:#7d8a98">(in “${esc(c.inside.split('/').pop())}”)</span>` : ''}</li>`).join('')}</ul>` : '<p>No screen of the app asks for it. It is called from outside the app: a script, an email link or an assistant.</p>'}
+    ${used.length || ownRuns.length ? `<ul>${used.map((c) => `<li>On ${go(`s:${c.screen}`, screenWords(c.screen))}: ${esc(c.trigger.words)}${c.inside ? ` <span style="color:#7d8a98">(in “${esc(c.inside.split('/').pop())}”)</span>` : ''}</li>`).join('')}${ownRuns.map((t) => `<li>${go(`g:${t.id}`, triggerWords(t))}${t.workflow ? `, in the workflow “${esc(t.workflow.name)}”` : ''}${t.enabled ? '' : ' (turned off)'}</li>`).join('')}</ul>` : '<p>No screen of the app asks for it, and the backend doesn’t start it by itself. It is called from outside the app: a script, an email link or an assistant.</p>'}
     <h4>The data it touches</h4>
     ${f.touches.length ? `<ul>${f.touches.map((x) => `<li>${x.hows.map((h) => esc(W.HOW_WORDS[h])).join(', ')} ${go(`t:${x.table}`, W.tableWords(x.table))}${x.via.length ? ` <span style="color:#7d8a98">(through ${esc(x.via.join(', '))})</span>` : ''}</li>`).join('')}</ul>` : '<p>It touches no table the map can see.</p>'}
     ${f.touches.some((x) => x.hows.includes('mentions')) ? '<p style="font-size:12px;color:#7d8a98">“Names” means the table’s name is in its code but the map can’t read for sure what it does with it.</p>' : ''}
@@ -1813,6 +1893,39 @@ function fnPanel(n) {
     ${f.helpers.length ? `<p style="font-size:12px;color:#7d8a98">Uses the shared parts: ${f.helpers.map(esc).join(', ')}.</p>` : ''}
     <h4>Its last runs</h4>
     ${myRuns.length ? `<ul>${myRuns.map((r) => `<li>${esc(W.ago(r.startedAt))}: ${esc(W.runWords(r))}${r.durationMs != null ? ` (${r.durationMs} ms)` : ''}</li>`).join('')}</ul>` : '<p>None in the recent runs.</p>'}
+  `;
+}
+
+function triggerPanel(n) {
+  const t = n.trigger;
+  const fnLine = (name) => {
+    const f = state.map.functions.find((x) => x.name === name);
+    return `<li>${go(`f:${name}`, name)}${f ? ` — ${esc(W.ruleWords(f.call))} may run it` : ''}</li>`;
+  };
+  // P127 SCHEDULEAUTH (Richard, 2026-10-27): a run the app starts by itself counts as the app; a webhook is a visitor
+  const asWhom =
+    t.type === 'webhook'
+      ? 'Whoever sends the webhook counts as a visitor: a function only signed-in people may run turns it away.'
+      : 'It counts as the app, so it may run a function only signed-in people may run, with nobody signed in.';
+  const last = t.lastResult
+    ? `${esc(W.ago(Date.parse(t.lastResult.at)))}: ${t.lastResult.ok ? 'it worked' : `it failed${t.lastResult.error ? ` (${esc(t.lastResult.error)})` : ''}`}`
+    : null;
+  return `
+    <div class="kind">Runs on its own</div>
+    <h2>${esc(n.title)}</h2>
+    <p>${esc(triggerWords(t))}.</p>
+    ${t.notOnBackend ? '<div class="verdict bad"><b>Not on the backend yet.</b> It is in the app’s files; a backend started from them has it.</div>' : ''}
+    ${t.notInFile ? '<div class="verdict bad"><b>Only on the backend.</b> The app’s files don’t have it, so a new backend or a ship won’t either. Your agent can write it into the project.</div>' : ''}
+    ${!t.enabled ? '<p><b>Turned off.</b> It won’t run until it is turned on.</p>' : ''}
+    ${t.table ? `<h4>What starts it</h4><ul><li>A change to ${go(`t:${t.table}`, W.tableWords(t.table))}</li></ul>` : ''}
+    <h4>What it runs</h4>
+    ${t.workflow ? `<p>The workflow “${esc(t.workflow.name)}”, ${t.workflow.steps} step${t.workflow.steps === 1 ? '' : 's'}. The functions its steps run:</p>` : ''}
+    ${t.workflowMissing ? `<p>The workflow “${esc(t.target.name)}”, which the map can’t find on the backend or in the app’s files.</p>` : ''}
+    ${t.fns.length ? `<ul>${t.fns.map(fnLine).join('')}</ul>` : t.workflowMissing ? '' : '<p>No function the map can see.</p>'}
+    ${t.unresolved.length ? `<p>${t.unresolved.map((u) => `“${esc(u)}”`).join(', ')}: no function of the app has that name.</p>` : ''}
+    <p style="font-size:12px;color:#7d8a98">${asWhom}</p>
+    <h4>Its last run</h4>
+    <p>${last ?? (t.notOnBackend ? 'None: it isn’t on the backend.' : 'It hasn’t run yet.')}</p>
   `;
 }
 
@@ -1980,6 +2093,10 @@ function tipFor(n) {
   if (n.kind === 'fn') {
     const f = n.fn;
     return `<b>${esc(f.name)}</b><br>${esc(W.ruleWords(f.call))} may run it.<br>Touches ${f.touches.length} table${f.touches.length === 1 ? '' : 's'}. Click for the whole story.`;
+  }
+  if (n.kind === 'trigger') {
+    const t = n.trigger;
+    return `<b>${esc(triggerWords(t))}</b><br>${t.notOnBackend ? 'Not on the backend yet. ' : !t.enabled ? 'Turned off. ' : ''}Runs ${t.fns.length ? t.fns.map(esc).join(', ') : 'no function the map can see'}${t.workflow ? `, in the workflow “${esc(t.workflow.name)}”` : ''}. Click for the whole story.`;
   }
   if (n.kind === 'table') {
     const d = directRead(n.key);

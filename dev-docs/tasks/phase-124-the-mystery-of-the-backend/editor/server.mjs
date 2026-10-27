@@ -18,6 +18,7 @@ import { backend, BackendError } from './lib/backend.mjs';
 import { setTableRule, entryFor, readSecurityFile, dryRuns, Refusal, SECURITY_FILE } from './lib/rules.mjs';
 import { makeViews } from './lib/views.mjs';
 import { KEY_SUFFIX, asPerson } from './lib/asperson.mjs';
+import { triggerFlows, readAutomationsFile } from './lib/triggers.mjs';
 import { personColumns, personKeys, idOf } from './lib/people.mjs';
 import { projectBackend } from './lib/discover.mjs';
 import { loadWorld, personReach, anonymousReach } from './lib/reach.mjs';
@@ -69,13 +70,14 @@ export function createEditor(opts) {
     // BKO-003: each source fails alone and the map says which; one failed call no longer blanks the map.
     const problems = [];
     const ask = (what, p, fallback) => p.catch((e) => (problems.push({ what, words: e.message }), fallback));
-    const [schema, perms, fnPerms, roles, users, triggers, audit] = await Promise.all([
+    const [schema, perms, fnPerms, roles, users, triggers, workflows, audit] = await Promise.all([
       ask('tables', be.get('/admin/schema'), { tables: [] }),
       ask('rules', be.getWithHeaders('/admin/permissions'), { json: { config: {}, etag: null } }),
       ask('functions', be.get('/admin/permissions/functions'), { functions: [] }),
       ask('groups', be.get('/admin/roles'), { roles: [] }),
       ask('people', be.get('/admin/users?limit=200'), { users: [], total: null }),
       be.get('/admin/triggers').catch(() => ({ triggers: [] })),
+      be.get('/admin/workflow-defs').catch(() => ({ workflows: [] })),
       be.get('/admin/audit?limit=12').catch(() => ({ entries: [] }))
     ]);
     const counts = await Promise.all(
@@ -126,7 +128,8 @@ export function createEditor(opts) {
       securityFile: SECURITY_FILE,
       roles: rolesIn(roles.roles, config, file.config),
       people: problems.some((p) => p.what === 'people') ? null : users.total ?? users.users.length,
-      triggers: triggers.triggers ?? [],
+      // BKO-005: what the backend starts by itself, from the backend and the project's automations file
+      triggers: triggerFlows({ backend: triggers.triggers ?? [], workflows: workflows.workflows ?? [], file: readAutomationsFile(project.files), functions: app.functions.map((f) => f.name) }),
       audit: (audit.entries ?? []).map((e) => ({ at: e.at, action: e.action, outcome: e.outcome, target: e.target })),
       look: { colors: look.colors.dark, signal: wireColors('signal', 'dark'), data: wireColors('data', 'dark') }
     };

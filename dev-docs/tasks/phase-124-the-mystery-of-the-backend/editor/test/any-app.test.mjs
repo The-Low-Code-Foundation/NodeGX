@@ -22,8 +22,11 @@ import { freePort, stop, makeCopy, startBackend, adminClient, hashTree } from '.
 const here = path.dirname(fileURLToPath(import.meta.url));
 const CHROME = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const TODO = process.env.TODO_LIST ?? path.resolve(here, '..', '..', '..', '..', '..', 'templates', 'todo-list');
-// Muddy Paws is Richard's project; a copy is made and the original is checked untouched at the end
-const SITE = process.env.MUDDY_PAWS ?? path.resolve(here, '..', '..', '..', '..', '..', '..', 'NodeGX test projects', 'Muddy Paws');
+// Muddy Paws is Richard's project; a copy is made and the original is checked untouched at the end. It is not on every
+// computer (gone from Richard's on 2026-10-27), so the landing-pages template, the same shape (pages, no table, no
+// function, no rules file), stands in for it
+const MUDDY = path.resolve(here, '..', '..', '..', '..', '..', '..', 'NodeGX test projects', 'Muddy Paws');
+const SITE = process.env.MUDDY_PAWS ?? (fs.existsSync(MUDDY) ? MUDDY : path.resolve(here, '..', '..', '..', '..', '..', 'templates', 'landing-pages'));
 // the training app's own words: none may reach the page of an app that isn't it
 const TRAINING = /\b(learners?|staff|training|courses?|concepts?|cohorts?|programmes?)\b/i;
 

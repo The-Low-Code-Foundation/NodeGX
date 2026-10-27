@@ -28,5 +28,7 @@ console.log('\n— round 2: real people, a pathway, one row’s reach (Chrome, a
 if (run([path.join(here, 'people.test.mjs')]) !== 0) bad++;
 console.log('\n— any app, not only the training app: the todo template, a site with no data, a backend with a Pointer and one group (Chrome, copies) —');
 if (run([path.join(here, 'any-app.test.mjs')]) !== 0) bad++;
+console.log('\n— what the backend starts by itself, drawn: its triggers wired to their functions and tables (a members-area copy, Chrome) —');
+if (run([path.join(here, 'triggers.test.mjs')]) !== 0) bad++;
 console.log(bad ? `\n${bad} part(s) FAILED` : '\nEverything passed.');
 process.exit(bad ? 1 : 0);
