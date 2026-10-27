@@ -7,8 +7,11 @@
  * finds it, starts it on a loopback port of the kernel's choosing, reads the port off its ready line, keeps one
  * per project directory, and stops it when this server stops.
  *
- * Where Studio is: `NODEGX_STUDIO` names its folder; otherwise the sibling checkout the developers of both keep.
- * Studio is not on npm yet (its README says so); when it is, the third candidate is `require.resolve`.
+ * Where Studio is: `NODEGX_STUDIO` names its folder; otherwise the sibling checkout the developers of both keep;
+ * otherwise the installed desktop app, which carries the same `editor/` unpacked in its resources (P128-S3-
+ * NOSTUDIOFORTHEEDITOR: the editor's Connect Claude Code registers this server with neither of the first two, so a
+ * person who downloaded the editor was told "not installed" with Studio sitting in /Applications). Studio is not on
+ * npm yet (its README says so); when it is, the fourth candidate is `require.resolve`.
  *
  * ⚠️ The child is `node editor/serve.mjs <project> --port 0` on this process's own `execPath`, stdout piped: the
  * port is the ONLY thing read off it, and only until the ready line arrives. Nothing in Studio's output reaches
@@ -20,6 +23,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+import { findStudioApp, STUDIO_DOWNLOAD_URL } from './studioApp';
+
 export interface StudioInstance {
   projectDir: string;
   origin: string;
@@ -30,21 +35,31 @@ export interface StudioInstance {
 const running = new Map<string, StudioInstance & { child: ChildProcess }>();
 let exitHookInstalled = false;
 
+/** What a person without Studio is told: where to get it, never an environment variable they cannot act on. */
+export const STUDIO_NOT_INSTALLED = `NodeGX Studio is not installed on this machine. Get it from ${STUDIO_DOWNLOAD_URL} and ask again.`;
+
+/**
+ * Where the desktop app keeps Studio's own files: electron-builder packs them unpacked (`asar: false`) as
+ * `Contents/Resources/app` in the macOS bundle, and as `resources/app` beside the executable elsewhere.
+ */
+export function studioInApp(appPath: string): string {
+  return process.platform === 'darwin'
+    ? path.join(appPath, 'Contents', 'Resources', 'app')
+    : path.join(path.dirname(appPath), 'resources', 'app');
+}
+
 /** Studio's folder, or `null` with the reason. */
 export function findStudio(): { dir: string } | { dir: null; reason: string } {
+  const app = findStudioApp();
   const candidates = [
     process.env.NODEGX_STUDIO,
-    path.join(os.homedir(), 'vscode_projects', 'nodegx-studio')
+    path.join(os.homedir(), 'vscode_projects', 'nodegx-studio'),
+    app ? studioInApp(app.path) : undefined
   ].filter((c): c is string => typeof c === 'string' && c.length > 0);
   for (const dir of candidates) {
     if (fs.existsSync(path.join(dir, 'editor', 'serve.mjs'))) return { dir };
   }
-  return {
-    dir: null,
-    reason:
-      'NodeGX Studio is not installed on this machine (set NODEGX_STUDIO to its folder; ' +
-      `looked in ${candidates.map((c) => `"${c}"`).join(', ') || 'nowhere'}).`
-  };
+  return { dir: null, reason: STUDIO_NOT_INSTALLED };
 }
 
 /** The Studio for a project: the one already running, or a new one. */

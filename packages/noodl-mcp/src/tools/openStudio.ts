@@ -51,7 +51,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { panelHtml } from '../studio/panelHtml';
-import { ensureStudio, findStudio, type StudioInstance, studioFor } from '../studio/studioProcess';
+import { ensureStudio, findStudio, STUDIO_NOT_INSTALLED, type StudioInstance, studioFor } from '../studio/studioProcess';
 import type { StudioProxy } from '../studio/studioProxy';
 import { STUDIO_BURST } from './planTools';
 import { guarded, jsonResult } from './util';
@@ -137,8 +137,7 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
         const text =
           panelFromInstall(proxy.origin) ??
           holdingPage(
-            'NodeGX Studio is not installed on this machine (set NODEGX_STUDIO to its folder). ' +
-              'The agent can still build; ask it for the app\'s URL once it has rendered something.'
+            STUDIO_NOT_INSTALLED + ' The agent can still build; ask it for the app\'s URL once it has rendered something.'
           );
         return { contents: [{ uri: uri.href, mimeType: MIME, text, _meta: studioResourceMeta(proxy.origin) }] };
       }
