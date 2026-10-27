@@ -87,7 +87,7 @@ the tables, now kept in `metadata.dbCollections` by `provision_backend`. Eight d
   `aa9f30cdd` / `7083a8595`), census and honesty ledgers (a peer's working-tree edits), `isl040-sessions`
   (`actingSession.ts` is a second `_Session` writer since P124).
 
-## s8 (2026-10-27): npm 0.2.8 cut, packed and graded; waiting on Richard's publish
+## s8 (2026-10-27): npm 0.2.8 cut, re-cut with DUPEROLE, graded; waiting on Richard's publish
 
 Richard: "First: cut npm 0.2.8". Before the cut, **P128-S2-EMPTYSTATEREFUSED fixed** (`6cdafc718`, this lane's row:
 the `ui-empty-state` example taught the wire COMPVISIBLE refuses; now a Group's `mounted`. `npmauditExampleInvalid`
@@ -100,7 +100,7 @@ match). Gates before: create-nodegx 34/34, publishable.js 6/0, bugs.js gate 0 bl
 
 Packed in the worktree `OpenNoodl-worktrees/npm-0.2.8` at `1d4592272`, every linked build output replaced by a real
 folder first (primary's dist untouched, mtimes read before and after); `check-pack-paths` passed (mcp 133 files,
-preview 30). Tarballs and `SHASUMS.txt` in `OpenNoodl-worktrees/npm-0.2.8-tarballs`:
+preview 30). The FIRST cut's tarballs, superseded below (folder now `npm-0.2.8-tarballs-SUPERSEDED`):
 
 | tarball | shasum (sha1) | bytes |
 |---|---|---|
@@ -123,17 +123,58 @@ step (the 400 names the `.env` line); `nodegx-deploy --full-stack` on a todo-lis
 `/health`, `nodegx-config.json`, the licence 200, a sign-up 201, a clean stop; `create-nodegx my-apps` pins
 `@nodegx/mcp@0.2.8` (5 places).
 
-**Publish = Richard's terminal (OTP):** `scripts/own/publish-npm.sh ../OpenNoodl-worktrees/npm-0.2.8-tarballs`
+**Superseded before any publish.** Grading the expenses lab found **P127-S8-DUPEROLE**: its Join Group fired Add User
+To Role twice in one run, the backend made `members-of-<owner>` twice, and a member removed by name kept reading the
+group's expenses (two "success" answers, 4 of 4 rows). Fixed in `a766daec1` (`RoleStore`: one queue per role name per
+storage; `find` merges a name's rows into the oldest). Richard: "Hold, re-cut with fix". The first tarballs were moved
+to `npm-0.2.8-tarballs-SUPERSEDED` (the old publish line now skips everything). **Re-cut `dfdc9e25e`** (pushed): the
+fix, plus what Beta sweep s19 had committed into shipped code since (FIRSTWRITE, SIGNINWITHERRORKEPT, FANOUT,
+NOSTUDIOFORTHEEDITOR), each named in the changelog. FIRSTWRITE also moved `@nodegx/export`'s source; export stays 0.2.5.
+Packed in `OpenNoodl-worktrees/npm-0.2.8b`, tarballs in `npm-0.2.8b-tarballs`:
+
+| tarball | shasum (sha1) | bytes |
+|---|---|---|
+| `nodegx-node-spec-0.2.2.tgz` | `dfcb202d017bf327f058d71b9265c0e89696ad7d` | 6,479,764 |
+| `nodegx-preview-0.2.8.tgz` | `b175e2c8ab9835ad2827a5ee020f52442b2937bc` | 6,250,734 |
+| `nodegx-mcp-0.2.8.tgz` | `e85c6f95b861d6e44eb9aad1a355ec481a1cbbb4` | 12,424,948 |
+| `create-nodegx-0.2.8.tgz` | `52ce66adac9341b8f7cc116b0fa0e28a4b9c2b0c` | 43,751 |
+| `create-nodegx-vibe-0.2.8.tgz` | `b84670cd6772f172a5e724a7786e9df1445f5b07` | 13,815 |
+| `create-nodegx-cline-0.2.8.tgz` | `1f177f1c2f6d2278ce3afda69157d3bdbd712d00` | 14,064 |
+
+The re-cut's grade, the same as the first plus: `createIfAbsent` 0→2 in mcp's and preview's backend (still the same
+`cli.js`), FIRSTWRITE's `heldChangesQueued` 0→3 in the preview runtime, FANOUT's rule and example 0→4 in mcp; audit 0,
+stranger-kit, -render "DONE — clean", -backend every step, the full-stack deploy served (200s, sign-up 201, clean
+stop). On a copy of the expenses lab with this backend, bob reads **0 rows** after one removal (the first cut: 4) and
+the two roles are one.
+
+**Publish = Richard's terminal (OTP):** `scripts/own/publish-npm.sh ../OpenNoodl-worktrees/npm-0.2.8b-tarballs`
 (node-spec, preview, mcp, then the three create-*; it skips what is live and waits out npm's review). After: read each
-shasum from the registry's full document against the table, `npm create nodegx@0.2.8` pins mcp 0.2.8, Studio's pins
-move to mcp/preview 0.2.8 with `vendor/NODEGX.json`, `automations-drive.mjs` joins Studio's `check`, and the
+shasum from the registry's full document against the table above, `npm create nodegx@0.2.8` pins mcp 0.2.8, Studio's
+pins move to mcp/preview 0.2.8 with `vendor/NODEGX.json`, `automations-drive.mjs` joins Studio's `check`, and the
 changelog page (nodegx-web, Richard's upload).
 
 🔴 My first grade printed four NO probes that were my script's: `probe()` set `v=yes`, which overwrote the loop's
 `v`, so every probe after the first read a folder that does not exist and counted 0 in both versions. A probe that
 reads 0 in the control too is reading nothing; the live stranger-backend run had already shown the new `.env` sentence.
 
-**Next, in order (s8):**
+Also s8: **SBR015MUTANTSTALE fixed** (`528124d16`: UNWIREDSIGNAL made an undeclared `Outputs.built()` callable on purpose,
+so arm M now breaks the script; 10/10, an inert mutant reds the row's five). **The grader drives a group-only rule**
+(`c282d833c`: a row whose ACL names a role, read by a member put in it and refused to a signed-in outsider; `--no-render`;
+works 14/14 on a lab copy, two grader mutants red). EMPTYSTATEREFUSED and DUPEROLE above.
+
+**Next, in order (s9):**
+
+1. **After Richard publishes 0.2.8** (`npm-0.2.8b-tarballs`): shasums from the registry against the table, `npm create
+   nodegx@0.2.8` pins mcp 0.2.8, Studio's pins and `vendor/NODEGX.json` to 0.2.8, `automations-drive.mjs` into
+   Studio's `check`, the changelog page (Richard's upload). If he has not, ask; never re-pack 0.2.8 once any of it is live.
+2. **Richard's fourth brief in Claude Desktop**, from the `.mcpb` (BKO-002 AC2, BKO-004 AC3, BKO-005 AC1 ride along).
+   Ask before rebuilding the Desktop dist. Keep the lab and the transcripts this time (NOROLESFAILS needs them).
+3. Open rows: NOROLESFAILS only with a kept lab; FNSTEPS (low, feature-sized, a function's run records no node steps).
+4. BKO-005's map half (a trigger on the map; a map publish). BKO-001 AC5 is in effect done by `travel.mjs`: fold it in.
+5. Re-run `grade.mjs` on all three s6 labs (copies) with the published 0.2.8: "open" should read full now
+   (TABLESNOTINFILES), and the group drive runs wherever a row names a role.
+
+**Older order (s7 → s8), kept for the record:**
 
 1. **Cut npm 0.2.8, once P128 settles** (Richard, 2026-10-27: "Wait for P128 to settle"; ask him whether it has
    before cutting). There is no separate backend bundle: `@nodegx/mcp`'s `prepack` copies the backend in
