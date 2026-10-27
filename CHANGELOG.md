@@ -41,6 +41,9 @@ This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create
   of the same key on the backend's Secrets page.
 - **A phone on your Wi-Fi gets the app's data.** A preview shared with `--host` now carries the app's backend with it.
   Before, a phone opened the page but asked itself for the data.
+- **Your agent is warned when two Conditions read each other's change.** Two Conditions can run on one signal while
+  one changes what the other reads. The second then always sees the change, however they're wired.
+  `get_example('score-then-move-on')` shows how to chain them so it decides first.
 
 ### Changed
 
@@ -59,6 +62,9 @@ This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create
 
 ### Fixed
 
+- **Someone removed from a group no longer keeps seeing it.** When an app put two people in a group at the same
+  moment, the backend could make the group's role twice. Removing someone then said it worked. They could still read
+  the group's rows. A role is now made once. A backend that already holds two of one name puts them back together.
 - **A User node now works inside a cloud function.** Its Fetch asked the backend for an address it didn't serve. It
   now gets the person who made the call.
 - **A table only its creator can read lists before its first row.** It used to fail with "no such column owner".
@@ -82,6 +88,11 @@ This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create
 - **A Video keeps its YouTube or Vimeo player** when a Source Object arrives. A Video playing a file now fires Click,
   Hover and Pointer and takes a dropped file.
 - **A Text set to Ellipsis draws the "…".**
+- **A Function's signal carries the last value its code set.** A script that cleared a value and then set it sent the
+  cleared one with its signal. A Send button's first press could show nothing.
+- **Sign In With clears its Error when a sign-in works.** A label wired to Error kept showing the last failure.
+- **`open_studio` finds the installed Studio app.** It said Studio wasn't installed when the app was in Applications. A
+  computer without it is told where to download it.
 - **For editors built from the kit.** In `@nodegx/node-spec` 0.2.2, Visible reaches six controls at once. The Request
   node's spec says a run the app starts by itself counts as the app.
 
