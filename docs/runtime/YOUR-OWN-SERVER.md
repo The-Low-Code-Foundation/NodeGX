@@ -2,7 +2,10 @@
 
 <!-- P26 lane 5's runbook (BOARD §2). Written 2026-10-23 to the content-authoring skill; offline checks clean but for
      three false alarms. Needs a NodeGX release carrying deploy_to_vm and @nodegx/preview's --full-stack before a
-     stranger can follow it from npm. Not yet followed end to end on a fresh server. -->
+     stranger can follow it from npm. Not yet followed end to end on a fresh server. 2026-10-27: steps 3 and 4 ran
+     verbatim (as cloud-init) on a fresh Hetzner cx23, Ubuntu 24.04: Node v22.23.4, Caddy 2.11.7 active, the import
+     line in; steps 1–2 (ssh-copy-id) skipped (the key went in at creation); publish not yet run on it. -->
+
 
 You can run a NodeGX app on a Linux server you rent. Anyone with its web address can then use it. The app, its data
 and its cloud functions all run on that server. They start again by themselves when the server restarts. You set the

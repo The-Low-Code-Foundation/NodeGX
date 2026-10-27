@@ -73,6 +73,17 @@ be stale, correct it here rather than implementing around the description.
 
 ## Log
 
+- **2026-10-27 — a real provider: the Beta test server (lane 5, "a real provider by Richard with the runbook").**
+  `nodegx-beta-test`, Hetzner cx23 (2 vCPU / 4 GB, nbg1, Ubuntu 24.04), **159.69.221.184**, no-DNS address
+  `159-69-221-184.sslip.io` (resolves). Made with `hcloud` from `HETZNER_API_KEY_STUDIO` in `.env`, ssh key
+  `richard` (`~/.ssh/id_ed25519`), labels `purpose=nodegx-beta-test`. The runbook's steps 3–4 ran verbatim at first
+  boot (cloud-init); the result is served at `http://159.69.221.184/nodegx-ready.txt`: Node v22.23.4, rsync 3.2.7,
+  Caddy 2.11.7 active, `import /etc/caddy/conf.d/*` present. Nothing deployed yet: the first publish is Richard's
+  Claude Desktop run (`"Put this app on root@159.69.221.184 at 159-69-221-184.sslip.io"`). 🔴 Hetzner's Primary IP
+  limit is per ACCOUNT, not per project (a fresh project refused with zero IPs until Richard raised it). 🔴 The key
+  in `.env` at creation listed nexus-1 too: the server shares nexus-1's project, so that token can delete the live
+  site's server; `hcloud server delete nodegx-beta-test` by NAME only. Costs ~€4/month until deleted.
+
 - **2026-10-23 — DEP-002 s2: the folder (lane 5).** `nodegx-deploy --full-stack`: `app/`, `backend/`
   (bundle, cloud functions, rules), `start.js`/`.sh`/`.cmd`, `MANIFEST.json`, a generated DEPLOY.md
   that leads with who can read the data; `data/` is never written by a deploy. Packaged by
