@@ -374,6 +374,17 @@ resolved). Lane 9's SCHEDULEAUTH ruling and `@nodegx/mcp` 0.2.8 are not this pha
   for a new file), so `git reset -q -- <paths>` after; macOS has no `timeout` (exit 127: use `perl -e 'alarm shift; exec
   @ARGV' 60 …`); `packages/noodl-mcp/build.mjs` runs only from its own directory; Studio installed from npm finds its
   kit hoisted beside it (STUDIOHOISTED); the npm route still installs no Studio beside `@nodegx/mcp`.
+  **Next, agent, in order:** (1) 🔴 nodegx-web's `/start` links name `nodegx-0.2.9-darwin-*.mcpb`, but Studio still
+  pins `@nodegx/mcp` 0.2.8, so a release built today names its files `nodegx-0.2.8-*`: re-pin Studio to 0.2.9 (vendor/
+  with it, `check:vendor`) or fix MCPBNORELEASE first (CI attaches both `.mcpb` with version-free names, and the links
+  move to those). (2) TIMELINERECFLAKE: measure the header's 8 px fold. (3) SURFACESUNSAID's Sonnet round
+  (`s1/round.mjs`, then `--again s1/prompt-2.txt`, `open_studio` first) on the rebuilt dist. (4) S3b step 11 (watch
+  SIGNBROKEN), step 9's re-run a week after the deploy. Then the gate below.
+  **Waits on Richard:** publish `@nodegx/studio` (`npm publish …/nodegx-studio-pack/nodegx-studio-0.1.0.tgz --access
+  public`; push nodegx-studio `62dd153..fcdd55e` first); deploy the nodegx-web list above from `git archive`; a
+  nodegx-studio GitHub release carrying the `.mcpb` (and confirm GitHub as the host); who cuts the next `@nodegx/mcp`
+  (it carries PREVIEWCUT, SIZEMSG, findStudio, `d12e0b042`) and whether that route registers `npx -p @nodegx/studio -p
+  @nodegx/mcp` or makes Studio a dependency (NOSTUDIOFORTHEEDITOR); wording: S5's three, S8's two; `isError` (S3b 10).
 
 - 2026-10-27, S3b steps 1–3: see the block under S3b's AC. Traps: a release ruling can be overtaken inside the hour:
   read `npm view @nodegx/mcp dist-tags` right before you pack and again before you ask, and `git log` for a peer's
