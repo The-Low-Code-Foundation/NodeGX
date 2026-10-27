@@ -16,6 +16,7 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
+import { cronWords } from '../../../nodegx-backend/src/triggers/cronWords';
 import type { ComponentFiles } from '../graph';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import type { SeenChange } from '../project/ProjectStore';
@@ -127,6 +128,61 @@ export function describeChange(change: SeenChange): ComponentChange {
   };
 }
 
+type Entry = { id: string; name?: string; [k: string]: unknown };
+function entriesOf(text: string | null, kind: 'triggers' | 'workflows'): Map<string, Entry> {
+  if (text === null) return new Map();
+  try {
+    const list = (JSON.parse(text) as Record<string, unknown>)[kind];
+    return new Map((Array.isArray(list) ? (list as Entry[]) : []).map((e) => [e.id, e]));
+  } catch {
+    return new Map();
+  }
+}
+const when = (t: Entry) => {
+  const cron = (t.schedule as { cron?: string } | undefined)?.cron;
+  return cron ? `${cronWords(cron) ?? 'on a schedule'} (${cron})` : '';
+};
+
+/**
+ * P127 BKO-005 — how `nodegx.automations.json` changed since this server last saw it, a sentence per trigger or workflow:
+ * turned on or off, a schedule moved (in the backend's own words for a cron), added, removed, otherwise changed. Studio
+ * writes the backend and the file together, so the file says what the person did. Unreadable now: said once.
+ */
+export function describeAutomationsChange(before: string | null, now: string | null): string[] {
+  if (now !== null) {
+    try {
+      JSON.parse(now);
+    } catch {
+      return ['nodegx.automations.json is not readable JSON now: read it before changing a trigger or a workflow.'];
+    }
+  }
+  const out: string[] = [];
+  const label = (kind: string, e: Entry) => `${kind} "${e.name ?? e.id}"${e.name ? ` (${e.id})` : ''}`;
+  const [tb, tn] = [entriesOf(before, 'triggers'), entriesOf(now, 'triggers')];
+  for (const [id, t] of tn) {
+    const was = tb.get(id);
+    if (!was) {
+      out.push(`${label('trigger', t)} was added`);
+      continue;
+    }
+    const changes: string[] = [];
+    if ((was.enabled !== false) !== (t.enabled !== false)) changes.push(t.enabled === false ? 'turned off' : 'turned on');
+    if (when(was) !== when(t)) changes.push(`moved from ${when(was) || 'no schedule'} to ${when(t) || 'no schedule'}`);
+    const rest = (e: Entry) => JSON.stringify({ ...e, enabled: undefined, schedule: { ...(e.schedule as object), cron: undefined } });
+    if (rest(was) !== rest(t)) changes.push('its other settings changed');
+    if (changes.length) out.push(`${label('trigger', t)} was ${changes.join(', and ')}`);
+  }
+  for (const [id, t] of tb) if (!tn.has(id)) out.push(`${label('trigger', t)} was removed`);
+  const [wb, wn] = [entriesOf(before, 'workflows'), entriesOf(now, 'workflows')];
+  for (const [id, w] of wn) {
+    const was = wb.get(id);
+    if (!was) out.push(`${label('workflow', w)} was added`);
+    else if (JSON.stringify(was) !== JSON.stringify(w)) out.push(`${label('workflow', w)} was changed`);
+  }
+  for (const [id, w] of wb) if (!wn.has(id)) out.push(`${label('workflow', w)} was removed`);
+  return out;
+}
+
 export function registerWhatChangedTools(server: McpServer, binding: ProjectBinding): void {
   server.registerTool(
     'what_changed_since',
@@ -134,19 +190,25 @@ export function registerWhatChangedTools(server: McpServer, binding: ProjectBind
       title: 'What did the person change?',
       description:
         'What changed in the project since you last read each component: nodes added, removed and edited, ' +
-        'wires added and removed. Call it after a hold is released or a write is refused as changed on disk.',
+        'wires added and removed; and backend triggers or workflows the person changed. Call it after a hold is ' +
+        'released or a write is refused as changed on disk.',
       inputSchema: {}
     },
     guarded(() => {
       const store = binding.require();
       const { changed, deleted, added, unchanged } = store.changesSinceSeen();
       const components = changed.map(describeChange);
-      const nothing = components.length === 0 && deleted.length === 0 && added.length === 0;
+      // BKO-005: told once; the file as it is now is what the agent has seen
+      const since = store.automationsSinceSeen();
+      const automations = since ? describeAutomationsChange(since.before, since.now) : [];
+      store.markAutomationsSeen();
+      const nothing = components.length === 0 && deleted.length === 0 && added.length === 0 && automations.length === 0;
       return jsonResult({
         changed: components,
         deleted,
         added,
         unchanged,
+        ...(automations.length > 0 ? { automations } : {}),
         note: nothing
           ? unchanged === 0
             ? 'You have not read any component yet, so there is nothing to compare: get_component reads one.'
@@ -154,7 +216,11 @@ export function registerWhatChangedTools(server: McpServer, binding: ProjectBind
           : 'Tell the person, in a sentence, what you see they changed, and build on it rather than undoing it. ' +
             'Re-read a component with get_component before you change it, and pass its revision as if_revision: ' +
             'then a write is refused if they change it again meanwhile.' +
-            (added.length > 0 ? ' `added` are components that appeared since this server opened the project.' : '')
+            (added.length > 0 ? ' `added` are components that appeared since this server opened the project.' : '') +
+            (automations.length > 0
+              ? ' `automations` are the backend triggers and workflows changed in nodegx.automations.json; Studio changes ' +
+                'the backend with the file, so list_backend_triggers already agrees.'
+              : '')
       });
     })
   );

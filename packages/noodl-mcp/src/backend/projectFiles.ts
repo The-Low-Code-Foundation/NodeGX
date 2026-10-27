@@ -135,6 +135,8 @@ export async function writeBoth<T>(args: {
   undo: () => Promise<void>;
 }): Promise<{ answer: T; project: ProjectFileNote }> {
   const target = projectOf(args.binding, args.client);
+  // BKO-005: a change the person made in the file that the agent has not been told of yet stays to be told
+  const unseen = args.fileName === PROJECT_AUTOMATIONS_FILE && 'projectDir' in target ? args.binding?.peek()?.automationsSinceSeen() : null;
   const answer = await args.write();
   if (!('projectDir' in target)) {
     return { answer, project: { file: args.fileName, written: false, reason: target.reason } };
@@ -157,5 +159,7 @@ export async function writeBoth<T>(args: {
           : 'and putting the backend back failed too: the backend now has a change the project does not.')
     );
   }
+  // BKO-005: the agent's own change is not one for `what_changed_since` to report back to it
+  if (args.fileName === PROJECT_AUTOMATIONS_FILE && !unseen) args.binding?.peek()?.markAutomationsSeen();
   return { answer, project: { file: args.fileName, written: true } };
 }

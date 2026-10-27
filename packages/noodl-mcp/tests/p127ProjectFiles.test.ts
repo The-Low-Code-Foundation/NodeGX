@@ -292,4 +292,69 @@ describeOrSkip('P127 BKO-001 — the agent’s backend writes reach the project�
       }
     });
   });
+
+  describe('BKO-005 — a trigger the person changes in Studio is told to the agent by what_changed_since', () => {
+    type Said = { automations?: string[]; note: string };
+    const changed = async () => (await call<Said>(session, 'what_changed_since', {})).data;
+    /** What Studio's POST /api/automations/trigger does (nodegx-studio editor/serve.mjs setTrigger): the backend, then the file's entry by id. */
+    async function studio(id: string, change: { enabled?: boolean; cron?: string }) {
+      const client = new BackendClient(listBackends().find((b) => b.id === ID)!);
+      const path_ = `/admin/triggers/${encodeURIComponent(id)}`;
+      if (change.cron) {
+        const { json } = await client.request('GET', path_);
+        const was = (json as { trigger: { schedule: object } }).trigger;
+        await client.request('PUT', path_, { ...was, schedule: { ...was.schedule, cron: change.cron } });
+      } else await client.request('POST', `${path_}/enabled`, { enabled: change.enabled });
+      const file = readJson(automations);
+      const t = file.triggers.find((x: { id: string }) => x.id === id);
+      if (change.cron) t.schedule.cron = change.cron;
+      else t.enabled = change.enabled;
+      fs.writeFileSync(automations, JSON.stringify(file, null, 2) + '\n');
+    }
+    // the first schedule in the file, as the tests before left it; said as the agent's answer says a trigger
+    let daily: { id: string; name?: string; schedule: { cron: string } };
+    const who = () => `trigger "${daily.name ?? daily.id}"${daily.name ? ` (${daily.id})` : ''}`;
+
+    beforeAll(async () => {
+      daily = readJson(automations).triggers.find((t: { type: string }) => t.type === 'schedule');
+      await changed(); // whatever came before is told
+    });
+
+    it('the agent’s own writes are not told back to it', async () => {
+      expect((await call(session, 'set_backend_trigger_enabled', { id: daily.id, enabled: true })).isError).toBe(false);
+      expect((await changed()).automations).toBeUndefined();
+    });
+
+    it('turned off in Studio: what_changed_since says so, once, and list_backend_triggers agrees', async () => {
+      await studio(daily.id, { enabled: false });
+      const said = await changed();
+      expect(said.automations).toEqual([`${who()} was turned off`]);
+      expect(said.note).toMatch(/list_backend_triggers already agrees/);
+      const listed = (await call<{ triggers: { id: string; enabled: boolean }[] }>(session, 'list_backend_triggers')).data.triggers;
+      expect(listed.find((t) => t.id === daily.id)?.enabled).toBe(false);
+      expect((await changed()).automations).toBeUndefined();
+    });
+
+    it('moved to 10:00 in Studio: said in the schedule’s words, and the backend agrees', async () => {
+      const from = daily.schedule.cron;
+      expect(from).toMatch(/^\d+ \d+ \* \* \*$/);
+      await studio(daily.id, { cron: '0 10 * * *' });
+      const [m, h] = from.split(' ').map(Number);
+      const at = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      expect((await changed()).automations).toEqual([`${who()} was moved from Every day at ${at} (${from}) to Every day at 10:00 (0 10 * * *)`]);
+      const listed = (await call<{ triggers: { id: string; schedule?: { cron: string } }[] }>(session, 'list_backend_triggers')).data.triggers;
+      expect(listed.find((t) => t.id === daily.id)?.schedule?.cron).toBe('0 10 * * *');
+    });
+
+    it('🔴 a change the person made is still told after the agent writes another trigger', async () => {
+      await studio(daily.id, { enabled: true });
+      const made = await call(session, 'create_backend_trigger', {
+        type: 'schedule',
+        target: { kind: 'function', name: 'weekly' },
+        schedule: { cron: '0 8 * * 1', missedFirePolicy: 'skip' }
+      });
+      expect(made.isError).toBe(false);
+      expect((await changed()).automations).toEqual(expect.arrayContaining([`${who()} was turned on`]));
+    });
+  });
 });

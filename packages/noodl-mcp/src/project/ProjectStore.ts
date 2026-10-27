@@ -143,6 +143,29 @@ export class ProjectStore {
     } catch {
       this.keysAtOpen = undefined;
     }
+    this.automationsSeen = this.automationsText();
+  }
+
+  /**
+   * P127 BKO-005 — `nodegx.automations.json` as this server last saw it: when it opened the project, and after each of
+   * the agent's own backend writes kept there (`writeBoth`). Studio turns a trigger off or moves its time in the same
+   * file, and `what_changed_since` says what it sees against this.
+   */
+  private automationsSeen: string | null;
+
+  private automationsText(): string | null {
+    const file = path.join(this.projectDir, 'nodegx.automations.json');
+    return fs.existsSync(file) ? fs.readFileSync(file, 'utf-8') : null;
+  }
+
+  markAutomationsSeen(): void {
+    this.automationsSeen = this.automationsText();
+  }
+
+  /** The file then and now, or null when it is as this server last saw it. */
+  automationsSinceSeen(): { before: string | null; now: string | null } | null {
+    const now = this.automationsText();
+    return now === this.automationsSeen ? null : { before: this.automationsSeen, now };
   }
 
   /**
