@@ -2939,7 +2939,9 @@ export const ANNOUNCEMENT_ROW_NODES = [
       // ⚠️ **A word boundary, not `slice(0, 120)`.** Cutting mid-word reads as a
       // rendering fault rather than as an excerpt, and it is three lines to do
       // properly.
-      'runOnChange-in-body': false,
+      //
+      // ✅ Re-runs when the body changes (BETA-TPLNEVERERUNS): a row whose announcement is edited shows the new first line.
+      'runOnChange-in-body': true,
       functionScript:
         'if (Inputs.body === undefined) return;\n' +
         "const flat = String(Inputs.body || '').replace(/\\s+/g, ' ').trim();\n" +
