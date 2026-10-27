@@ -273,7 +273,41 @@ export const BOOTSTRAP_INSTRUCTIONS: string =
  * promise tools "arriving" said the way they reach it: through `call_tool` (census #11–13). Each swap names the
  * sentence it replaces and throws if it is gone, so an edit above cannot silently stop the variant applying.
  */
-export function bootstrapInstructions(): string {
+export function bootstrapInstructions(folderProjects: ReadonlyArray<FolderProject> = []): string {
+  return withFolderProjects(clientBootstrap(), folderProjects);
+}
+
+/** A project found in the folder the server was started in (`scanFolderProjects`). */
+export interface FolderProject {
+  name: string;
+  directory: string;
+}
+
+/**
+ * P112-OWN023-RESUMEUNBOUND — the projects already in the folder the client started this server in, named before
+ * "TWO WAYS ON". A resumed Claude Code session starts every server fresh, so one that `create_project` bound in the
+ * last conversation comes back with seven tools; the gala's arm B read that as "the connection to the NodeGX server
+ * dropped … reconnect it with /mcp" ($4.00 for a reply that did nothing) and called `open_project` only on the next.
+ * `list_projects` already found the sub-folder project (OWN-011); nothing told the agent to look. Not a bind: a server
+ * binds once, so binding the folder's project on start would leave "make me a new app" with nowhere to author.
+ */
+export function withFolderProjects(briefing: string, folderProjects: ReadonlyArray<FolderProject>): string {
+  if (folderProjects.length === 0) return briefing;
+  const shown = folderProjects.slice(0, 5).map((p) => `"${p.name}" (${p.directory})`);
+  const more = folderProjects.length > shown.length ? ` and ${folderProjects.length - shown.length} more` : '';
+  const one = folderProjects.length === 1;
+  const sentence =
+    `THIS FOLDER ALREADY HOLDS ${one ? 'A NODEGX PROJECT' : `${folderProjects.length} NODEGX PROJECTS`}: ` +
+    `${shown.join(', ')}${more}. Every new or resumed conversation starts this server unbound, so these few tools ` +
+    'are the normal start, not a dropped connection, and reconnecting gives the same ones: to carry on with ' +
+    (one ? 'that app, call open_project with its directory' : 'one of them, call open_project with the directory of the one the person means') +
+    ' before anything else. ';
+  const at = briefing.indexOf('TWO WAYS ON: ');
+  if (at < 0) throw new Error('withFolderProjects: the briefing lost "TWO WAYS ON: "');
+  return briefing.slice(0, at) + sentence + briefing.slice(at);
+}
+
+function clientBootstrap(): string {
   if (!clientProfile().staticToolList) return BOOTSTRAP_INSTRUCTIONS;
   return swapAll(BOOTSTRAP_INSTRUCTIONS, [
     [

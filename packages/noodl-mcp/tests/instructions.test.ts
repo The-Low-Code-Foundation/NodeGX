@@ -19,6 +19,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -186,5 +187,44 @@ describe('BST-006 — the unbound briefing', () => {
     // visualizer, and no tool here was called.
     expect(BOOTSTRAP_INSTRUCTIONS).toContain('show_mini_editor');
     expect(BOOTSTRAP_INSTRUCTIONS).toMatch(/never a mock-up drawn as HTML, a widget or an artifact/);
+  });
+});
+
+describe('P112-OWN023-RESUMEUNBOUND — a resumed session is told the app already in its folder', () => {
+  // The gala's arm B: `create_project` built `gala-app` in a sub-folder of the session's folder, the person said
+  // "done", the resumed session's server started unbound with seven tools, and the agent said the connection had
+  // dropped. The briefing is all it read before choosing; the project was one `list_projects` away.
+  const sessionFolder = (): string => fs.mkdtempSync(path.join(os.tmpdir(), 'resumeunbound-'));
+
+  it('names the sub-folder project, says the unbound start is normal, and sends it to open_project first', async () => {
+    const folder = sessionFolder();
+    const app = path.join(folder, 'gala-app');
+    fs.cpSync(copyFixture(), app, { recursive: true });
+    const served = await instructionsOf({ allowWrites: true, startFolder: folder });
+    expect(served).toContain(`THIS FOLDER ALREADY HOLDS A NODEGX PROJECT: `);
+    expect(served).toContain(`(${app})`);
+    expect(served).toMatch(/not a dropped connection, and reconnecting gives the same ones/);
+    expect(served).toMatch(/call open_project with its directory before anything else/);
+    // Before the two exits, so it is read before create_project is.
+    expect(served.indexOf('THIS FOLDER ALREADY HOLDS')).toBeLessThan(served.indexOf('TWO WAYS ON'));
+    // Everything else is the briefing it was.
+    expect(served.replace(/THIS FOLDER ALREADY HOLDS[^]*?before anything else\. /, '')).toBe(BOOTSTRAP_INSTRUCTIONS);
+  });
+
+  it('names a started-in project folder itself', async () => {
+    const app = copyFixture();
+    expect(await instructionsOf({ allowWrites: true, startFolder: app })).toContain(`(${app})`);
+  });
+
+  it('counts several and asks for the one the person means', async () => {
+    const folder = sessionFolder();
+    for (const name of ['one', 'two']) fs.cpSync(copyFixture(), path.join(folder, name), { recursive: true });
+    const served = await instructionsOf({ allowWrites: true, startFolder: folder });
+    expect(served).toContain('THIS FOLDER ALREADY HOLDS 2 NODEGX PROJECTS: ');
+    expect(served).toContain('the directory of the one the person means');
+  });
+
+  it('says nothing new in a folder with no project', async () => {
+    expect(await instructionsOf({ allowWrites: true, startFolder: sessionFolder() })).toBe(BOOTSTRAP_INSTRUCTIONS);
   });
 });

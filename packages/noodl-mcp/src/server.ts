@@ -40,7 +40,7 @@ import { registerOpenProjectTools } from './tools/openProject';
 import { registerProvisionTools } from './tools/provisionTools';
 import { registerDeployToVmTools } from './tools/deployToVm';
 import { registerReviewTools } from './tools/review';
-import { registerListProjectsTools } from './tools/listProjects';
+import { registerListProjectsTools, scanFolderProjects } from './tools/listProjects';
 import { registerExportReactTools } from './tools/exportReact';
 import { registerOpenInEditorTools } from './tools/openInEditor';
 import { registerMiniEditorTools } from './tools/miniEditor';
@@ -124,6 +124,12 @@ export interface ServerOptions {
    * server (`--profile vibe` from the Vibe kit), never by the model; `undefined` is the default (Claude Code's).
    */
   profile?: ClientProfileName;
+  /**
+   * P112-OWN023-RESUMEUNBOUND — the folder the client started this server in (the CLI passes its cwd). Unbound, the
+   * projects in it (`scanFolderProjects`) are named in the briefing, so a resumed session finds the app its last
+   * conversation built. Absent (every test, a library caller), nothing is scanned.
+   */
+  startFolder?: string;
 }
 
 export interface CreatedServer {
@@ -181,7 +187,7 @@ export function createServer(options: ServerOptions): CreatedServer {
       // MCP has no "instructions changed" notification. See that module.
       instructions:
         store === null
-          ? bootstrapInstructions()
+          ? bootstrapInstructions(options.startFolder === undefined ? [] : scanFolderProjects(options.startFolder))
           : projectInstructions({ projectDir: store.projectDir, allowWrites: options.allowWrites, deferTools })
     }
   );

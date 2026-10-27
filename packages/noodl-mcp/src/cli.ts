@@ -130,6 +130,8 @@ async function main(): Promise<void> {
       screenshotsToFiles,
       profile: profileName,
       studioProxy,
+      // P112-OWN023-RESUMEUNBOUND — the folder the client opened, so an unbound briefing can name the app already in it.
+      startFolder: process.cwd(),
       ...(reproducible ? { reproducible } : {})
     });
     // CCN-006 — what a browser window of Studio reads to offer the desktop app (studio/companion.ts).
