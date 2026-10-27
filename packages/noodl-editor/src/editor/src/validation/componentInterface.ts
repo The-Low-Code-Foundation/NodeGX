@@ -247,6 +247,29 @@ function describeMissingInterface(target: string, iface: ComponentInterface, par
 }
 
 /**
+ * Bug P127-BKO006-COMPVISIBLE — what to do instead of showing or hiding a placed component directly.
+ *
+ * A component instance has no `visible` or `mounted` of its own, and an agent gating a private screen
+ * on sign-in reaches for exactly those two. The measured stranger found the answer only from a
+ * screenshot (the screen showed under the sign-in card): wrap the instance in a Group and gate that.
+ * Said wherever the door refuses one of the two names on an instance, as a parameter or a wire.
+ */
+export const SHOW_HIDE_PORTS: readonly string[] = ['visible', 'mounted'];
+
+export function showHideHint(port: string): string {
+  if (!SHOW_HIDE_PORTS.includes(port)) return '';
+  return (
+    ' A placed component has no Visible or Mounted of its own. To show it only sometimes, put it inside a Group ' +
+    "and set or wire that Group's mounted (mounted takes it off the page; visible hides it and keeps its space); " +
+    'for a screen that must not be seen first, give the Group mounted: false so it starts hidden.'
+  );
+}
+
+/** The wrapper, as a suggestion. */
+export const SHOW_HIDE_SUGGESTION =
+  "Put the instance inside a Group and set or wire the Group's mounted (mounted: false to start hidden).";
+
+/**
  * Instance parameters against the target component's real interface.
  *
  * Two diagnostics, and which one fires is decided by whether the component has
@@ -308,7 +331,8 @@ export function checkInstanceInterfaces(
           `and this one declares ${iface.inputs.length}: ${iface.inputs
             .slice(0, MAX_ALTERNATIVES)
             .map((n) => `"${n}"`)
-            .join(', ')}. The value is discarded.`,
+            .join(', ')}. The value is discarded.` +
+          showHideHint(parameter),
         location: {
           component,
           nodeId: node.id,
@@ -317,7 +341,7 @@ export function checkInstanceInterfaces(
           port: parameter,
           plug: 'input'
         },
-        suggestion: nearest(parameter, [...iface.inputs]),
+        suggestion: SHOW_HIDE_PORTS.includes(parameter) ? SHOW_HIDE_SUGGESTION : nearest(parameter, [...iface.inputs]),
         alternatives: iface.inputs.slice(0, MAX_ALTERNATIVES)
       });
     }
@@ -334,7 +358,8 @@ export function checkInstanceInterfaces(
           .slice(0, MAX_ALTERNATIVES)
           .map((n) => `"${n}"`)
           .join(', ')}. Every instance renders identically, showing the component's placeholder content.` +
-        describeMissingInterface(target, iface, parameters),
+        describeMissingInterface(target, iface, parameters) +
+        showHideHint(parameters.find((p) => SHOW_HIDE_PORTS.includes(p)) ?? ''),
       location: { component, nodeId: node.id, nodeType: node.type, nodeLabel: node.label },
       suggestion:
         `Add a Component Inputs node to ${target} with ports ${parameters
