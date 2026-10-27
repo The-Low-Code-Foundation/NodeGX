@@ -379,8 +379,9 @@ export const STEP_KIND_SPECS: Record<StepKind, StepKindSpec> = {
     paramMapping: CALL_FUNCTION_MAPPING,
     routes: [],
     output:
-      "The function's parsed 2xx response body. A non-2xx response or a missing function is a step FAILURE. " +
-      'With the retry policy ON, the output also carries `attempts` and `retried`.',
+      "The function's parsed 2xx response body. A NodeGX function answers `{ result: … }` (its Response node's " +
+      'values), so the next step reads them as `previous.result.<name>`. A non-2xx response or a missing function ' +
+      'is a step FAILURE. With the retry policy ON, the output also carries `attempts` and `retried`.',
     notes: [
       'Runs through the unlogged WorkflowRunner.invokeFunction, so the engine writes the only execution record.',
       "The request body is the run payload, then this step's params, then `previous` — in that order, so a mapped " +
