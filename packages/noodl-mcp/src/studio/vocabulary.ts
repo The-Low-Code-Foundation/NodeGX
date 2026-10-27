@@ -9,9 +9,9 @@
  * result, `notDrawnInStudio`, with the canon's rule 4 and its offer sentence. **Never a refusal** (canon rule 4: "Never
  * refuse to build it"; ruled by Richard, audit §10.3).
  *
- * ⚠️ **The list is pinned from Studio's source, and S6 replaces it.** Studio's own vocabulary file
- * (`nodegx-studio/editor/vocabulary.json`, STU-084) does not exist yet; until it does, this is what
- * `nodegx-studio/editor/studio.html` draws as of `668212a`:
+ * **The lists are Studio's own** (P128 S6, STU-084): `nodegx-studio/editor/vocabulary.json`, which studio.html reads,
+ * pinned here as `studioVocabulary.ts` by `scripts/pin-studio-vocabulary.mjs`; `tests/p128StudioVocabulary.test.ts`
+ * fails when the pin drifts from Studio's file. What they say, as S2 first read it from `studio.html` at `668212a`:
  * - **elements**: `isVisualType` (1468) — a Visual-category type, `Group`/`Text`/`Page`/`For Each`/`Component
  *   Children`, any `net.noodl.controls.*` / `net.noodl.visual.*`, and a component instance that draws;
  * - **steps**: `ACTIONS` (4468), minus `JavaScriptFunction`, whose script Studio shows one line of and never edits
@@ -40,40 +40,31 @@
 import type { ComponentFiles } from '../graph';
 import { CANON_OFFER, canonRule } from '../surfaces';
 import type { VisualTypePredicate } from '../visualRoots';
+import { STUDIO_VOCABULARY as V } from './studioVocabulary';
 
-/** Types Studio draws as elements whatever the catalog says (`studio.html` 1468). */
-const ELEMENT_TYPES: ReadonlySet<string> = new Set(['Group', 'Text', 'Page', 'For Each', 'Component Children']);
-const ELEMENT_PREFIXES = ['net.noodl.controls.', 'net.noodl.visual.'];
+/** Types Studio draws as elements whatever the catalog says (`vocabulary.json` `elements`). */
+const ELEMENT_TYPES: ReadonlySet<string> = new Set<string>(V.elements.types);
+const ELEMENT_PREFIXES: readonly string[] = V.elements.prefixes;
 
 /**
- * Studio's workflow steps (`ACTIONS`, `studio.html` 4468), as type names. `JavaScriptFunction` is in Studio's menu
- * ("Run JavaScript") and left out here: Studio places it and never edits its script.
+ * Studio's workflow steps (its action menu, `vocabulary.json` `steps.menu`), as type names: each row's type and, for the
+ * three rows Studio names by display name (`Send Event`…), the type it places (`steps.aliases`). `@refresh` is Studio's
+ * own, not a node; `JavaScriptFunction` (`steps.notEdited`) is in the menu ("Run JavaScript") and left out here: Studio
+ * places it and never edits its script.
  */
-export const STUDIO_STEP_TYPES: readonly string[] = [
-  'RouterNavigate',
-  'NewDbModelProperties',
-  'SetDbModelProperties',
-  'DeleteDbModelProperties',
-  'Set Variable',
-  'Condition',
-  'net.noodl.user.LogIn',
-  'net.noodl.user.LogOut',
-  'net.noodl.user.SignUp',
-  'Timer',
-  // Studio's rows say these by display name; the types they mean follow each.
-  'Send Event',
-  'Event Sender',
-  'Navigate To Path',
-  'PageStackNavigateToPath',
-  'Show Popup',
-  'NavigationShowPopup'
-];
+const ALIASES: Record<string, string> = Object.fromEntries(Object.entries(V.steps.aliases).filter(([k]) => !k.startsWith('$')));
+const NOT_EDITED: readonly string[] = V.steps.notEdited;
+export const STUDIO_STEP_TYPES: readonly string[] = V.steps.menu
+  .map(([type]) => type as string)
+  .filter((type) => !type.startsWith('@') && !NOT_EDITED.includes(type))
+  .flatMap((type) => (ALIASES[type] ? [type, ALIASES[type]] : [type]));
 const STEP_TYPES: ReadonlySet<string> = new Set(STUDIO_STEP_TYPES);
 
 /** A component's interface: Studio reads these as the instance's ports. */
-const INTERFACE_TYPES: ReadonlySet<string> = new Set(['Component Inputs', 'Component Outputs']);
+const INTERFACE_TYPES: ReadonlySet<string> = new Set<string>(V.interface.types);
 
-const OPTION_SETS = '/Option sets/';
+const OPTION_SETS = `/${V.optionSet.prefix}`;
+const OPTION_SET_INSIDES: ReadonlySet<string> = new Set<string>(V.optionSet.insides);
 
 /** One node a write placed that Studio does not edit. */
 export interface NotDrawnInStudio {
@@ -94,11 +85,14 @@ export function studioEdits(node: AnyNode, inComponent: string, isVisual: Visual
   // a component instance that draws, or a Visual-category type (kit types included: the catalog carries the overlay)
   if (isVisual(type)) return true;
   if (STEP_TYPES.has(type) || INTERFACE_TYPES.has(type)) return true;
-  if (inComponent.startsWith(OPTION_SETS) && type === 'Static Data') return true;
+  if (inComponent.startsWith(OPTION_SETS) && OPTION_SET_INSIDES.has(type)) return true;
+  // the value sources Studio chips (`sources.kinds`): by a type prefix, or by a metadata key (with a type when named)
   const m = node.metadata ?? {};
-  if (m.customState) return true;
-  if (type === 'Expression' && (m.composedFor || m.rule)) return true;
-  if (m.pageData || m.pageDataRecord || m.pageDataShown || m.pageDataAsk) return true;
+  for (const k of V.sources.kinds as readonly { typePrefix?: string; type?: string; metadata?: readonly string[] }[]) {
+    if (k.typePrefix && type.startsWith(k.typePrefix)) return true;
+    if (k.type && type !== k.type) continue;
+    if ((k.metadata ?? []).some((key) => m[key])) return true;
+  }
   return false;
 }
 

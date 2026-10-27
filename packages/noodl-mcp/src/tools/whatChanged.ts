@@ -14,6 +14,9 @@
  * @module tools/whatChanged
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
+
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 
 import { cronWords } from '../../../nodegx-backend/src/triggers/cronWords';
@@ -183,6 +186,38 @@ export function describeAutomationsChange(before: string | null, now: string | n
   return out;
 }
 
+/**
+ * P128 S6 (STU-084) — "Ask the agent" on a part Studio does not edit. Studio writes the person's question into
+ * `.nodegx-questions.json` in the project (a dotfile, as the hold is: Studio's store and watcher skip it); this server
+ * reports each one once, the first time `what_changed_since` runs after it was asked. Inside a host that takes a message
+ * from Studio, the question also arrived in the conversation as the person's own.
+ */
+export const QUESTIONS_FILE = '.nodegx-questions.json';
+export interface StudioQuestion {
+  id: string;
+  at: string;
+  component: string;
+  node: string;
+  label?: string;
+  type?: string;
+  text: string;
+}
+const questionsSeen = new WeakMap<object, Set<string>>();
+export function questionsSinceSeen(store: { projectDir: string }): StudioQuestion[] {
+  let all: StudioQuestion[] = [];
+  try {
+    const file = JSON.parse(fs.readFileSync(path.join(store.projectDir, QUESTIONS_FILE), 'utf-8')) as { questions?: unknown };
+    if (Array.isArray(file.questions)) all = file.questions.filter((q): q is StudioQuestion => !!q && typeof (q as StudioQuestion).id === 'string' && typeof (q as StudioQuestion).text === 'string');
+  } catch {
+    return [];
+  }
+  const seen = questionsSeen.get(store) ?? new Set<string>();
+  questionsSeen.set(store, seen);
+  const fresh = all.filter((q) => !seen.has(q.id));
+  for (const q of fresh) seen.add(q.id);
+  return fresh.map(({ id, at, component, node, label, type, text }) => ({ id, at, component, node, ...(label ? { label } : {}), ...(type ? { type } : {}), text }));
+}
+
 export function registerWhatChangedTools(server: McpServer, binding: ProjectBinding): void {
   server.registerTool(
     'what_changed_since',
@@ -190,8 +225,9 @@ export function registerWhatChangedTools(server: McpServer, binding: ProjectBind
       title: 'What did the person change?',
       description:
         'What changed in the project since you last read each component: nodes added, removed and edited, ' +
-        'wires added and removed; and backend triggers or workflows the person changed. Call it after a hold is ' +
-        'released or a write is refused as changed on disk.',
+        'wires added and removed; backend triggers or workflows the person changed; and questions they asked you from ' +
+        "Studio about a part it does not edit. Call it after a hold is released, a write is refused as changed on disk, " +
+        'or the person says they asked you something in Studio.',
       inputSchema: {}
     },
     guarded(() => {
@@ -202,13 +238,15 @@ export function registerWhatChangedTools(server: McpServer, binding: ProjectBind
       const since = store.automationsSinceSeen();
       const automations = since ? describeAutomationsChange(since.before, since.now) : [];
       store.markAutomationsSeen();
-      const nothing = components.length === 0 && deleted.length === 0 && added.length === 0 && automations.length === 0;
+      const questions = questionsSinceSeen(store);
+      const nothing = components.length === 0 && deleted.length === 0 && added.length === 0 && automations.length === 0 && questions.length === 0;
       return jsonResult({
         changed: components,
         deleted,
         added,
         unchanged,
         ...(automations.length > 0 ? { automations } : {}),
+        ...(questions.length > 0 ? { questions } : {}),
         note: nothing
           ? unchanged === 0
             ? 'You have not read any component yet, so there is nothing to compare: get_component reads one.'
@@ -220,6 +258,10 @@ export function registerWhatChangedTools(server: McpServer, binding: ProjectBind
             (automations.length > 0
               ? ' `automations` are the backend triggers and workflows changed in nodegx.automations.json; Studio changes ' +
                 'the backend with the file, so list_backend_triggers already agrees.'
+              : '') +
+            (questions.length > 0
+              ? ' `questions` the person asked you from Studio about a part it does not edit (component and node name it): ' +
+                'answer each in plain words, what it is and what it does on that page, then offer the two ways to change it.'
               : '')
       });
     })
