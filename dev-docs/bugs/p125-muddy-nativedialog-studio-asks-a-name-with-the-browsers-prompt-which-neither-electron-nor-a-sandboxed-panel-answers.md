@@ -6,7 +6,7 @@ severity: high
 area: "nodegx-studio `editor/studio.html` (`#newoptset` 5431, New attribute 5468, `#newtype` 4649, New style 5489 and 5504 call `prompt()`; nine `confirm()` calls 4716–5534); the gates stub both (`editor/check.mjs:481,496,499,514`, `editor/data-check.mjs:170`)"
 found: Richard's Muddy Paws Shelter run in Claude Desktop, 2026-10-27 (his point 2: "When I click 'add' in option sets, I can't add, nothing happens")
 evidence: dev-docs/reviews/the-three-surfaces-audit-2026-10-27.md §1.2 — READ: five prompt() and nine confirm() call sites; the fake host grants `allow-scripts allow-same-origin allow-forms` and no `allow-modals` (`dev-docs/tasks/phase-125-co-construction/tools-fake-host.mjs:13`), under which prompt() is null and confirm() false; Electron documents prompt() as unsupported, and both the desktop Studio and Claude Desktop are Electron; the gates pass because they replace window.prompt before clicking
-owner: none
+owner: "Beta sweep s21 (2026-10-27), as P128 S4, on Richard's yes"
 launch: beta
 ---
 

@@ -131,9 +131,94 @@ on each (run it, revert).
   "it opens Studio in a browser window beside the chat" is false for a stranger until it is fixed. The welcome line
   and the README sentences after the quote are composed by S3, not ruled: Richard reads them.
 
+### [ ] S3b — the stranger's install: from Richard's AC8 run to a download a stranger can take
+**Why.** Richard asked (2026-10-27) what it takes for a fresh Claude Desktop where a person says "I like NodeGX,
+let's use that" and gets there without a million downloads, a virus scare or "forget it, use React". His run of the
+`.mcpb` in his own Desktop ([CCN-006-AC8-RUN-2026-10-27.md](../phase-125-co-construction/CCN-006-AC8-RUN-2026-10-27.md),
+the table is the record) found the walls; this box is the path through them, in order. Read each row's bug file
+before its step, and its `owner:` line: Beta sweep s19/s20 sessions took three of these rows the same afternoon.
+
+**Done and seen working (Desktop, Richard's Mac, 2026-10-27).** P128-S3-HELPERNODE: Desktop runs a `node` extension
+on its built-in Node, an Electron utility process whose `execPath` ("Claude Helper (Plugin)") refuses to run a
+script, so Studio, the render, the backend and deploy never started. Fixed by a bundled Node: `scriptRuntime()`
+(noodl-mcp `560ee23d9`) + nodegx-studio `2b445fa` (`node/bin/node`, v22.22.0, signed by the Node.js Foundation,
+`NODEGX_NODE`). On `nodegx-0.2.8-darwin-arm64.mcpb` (a local pack of that tree, 62.1 MB): Studio up in the
+conversation, `ps` showed Studio and the render harness on `…/Claude Extensions/…nodegx/node/bin/node`; step 4 passed
+(Richard's own change in Studio kept, the agent carried on from it). noodl-mcp 5053 pass / 11 fail, all red before.
+**Written, not seen in Desktop:** the backend and deploy on the bundled Node (backend provisioned only under the
+stand-in, deploy not driven); P128-S3-NAMEMISMATCH (s20, `e03258b33` + studio `a1b019e`, graded on the handshake
+only); UNFINDABLE's robots/sitemap/llms.txt (nodegx-web `3af9be4`, not deployed).
+
+**Settled, where the plan of record was wrong.** (1) A headless drive on a real `node` (CCN-006 s13, and this
+session's first) cannot see Desktop's Node: always drive under `s3/as-desktop.cjs`, with the 0.2.7 bundle as the
+control (it must fail on exit 64). (2) HELPERNODE's own Proposed (worker threads) was not built: the backend outlives
+the server and is tracked by pid, the render harness kills its process group; a bundled Node changes nothing for the
+children. (3) The extensions directory is not a route: it takes no `.mcpb`, and a plugin's local server is "Ignored"
+in Chat (claude.com/docs/directory/publish, /docs/plugins/platform-support). (4) Signing is not a route today
+(P128-S3-SIGNBROKEN: mcpb 2.1.2 writes a malformed zip; the warning is about Anthropic's verification, not ours).
+
+**The tools** (`s3/`): `drive-mcpb.mjs` (an unpacked `.mcpb` as Desktop starts it; `PRELOAD=…/as-desktop.cjs`,
+`BACKEND=1`), `startup.mjs` (what the server hands a `claude-ai` client at start), `as-desktop.cjs` + the fake
+`Claude Helper (Plugin)` (exit 64). Unpack a bundle with `unzip -q <file> -d <empty dir>`; copy `templates/todo-list`
+for the project; an empty dir for HOME.
+
+**The steps, in order.** R = Richard's; A = an agent alone.
+1. **R — rule the release.** The prepared npm 0.2.8 (`dfdc9e25e`, `OpenNoodl-worktrees/npm-0.2.8b-tarballs/`, not
+   published) predates `560ee23d9` and `e03258b33`: a `.mcpb` built from it is broken in Desktop again. Re-cut 0.2.8
+   from HEAD (recommended; nothing of 0.2.8 is published) or publish it and cut 0.2.9 with the two fixes. The release
+   recipe and its gates are in `dfdc9e25e`'s message and P127's NEXT-SESSION-PROMPT.
+2. **A — re-cut** into `npm-0.2.8c-tarballs/` with the same gates (create-nodegx 34/34, `publishable.js`, `bugs.js gate`
+   core/preview/mcp/node-spec, `canon:check`). Prove the pack carries both fixes: `tar -xOzf nodegx-mcp-0.2.8.tgz
+   package/dist/noodl-mcp.cjs | grep -c 'NODEGX_NODE\|NODEGX_SERVER_NAME'` (both present).
+3. **A — the test `.mcpb` from that pack** (nodegx-studio, Node 22: `~/.nvm/versions/node/v22.22.0/bin`):
+   `node scripts/mcpb.mjs --mcp-tarball <…/nodegx-mcp-0.2.8.tgz>`. Drive it under the stand-in: `open_studio` 200,
+   `render_report` DONE, `BACKEND=1` provisions; `initialize` says `"name":"nodegx"` (NAMEMISMATCH); the 0.2.7 bundle
+   fails the same three (the control). Copy it to `/Users/Shared/`.
+4. **R — the count (NAMEMISMATCH).** Double-click the step-3 file over the installed test build; quit Desktop and
+   reopen; then 4 fresh chats, each "Make me a NodeGX app: a tap counter with a reset button." Count the chats with no
+   tool call (`grep -c tools/call ~/Library/Logs/Claude/mcp-server-nodegx.log` before and after each). Before the fix:
+   1 silent of 3. Also ask: how many Allow prompts a build costs, and which choice (never measured; all 122 tools
+   default to "Needs approval").
+5. **R — publish** (his yes, the release recipe). **A —** pin Studio to the published version (`package.json` +
+   `npm install` for the lock), Studio's gates per its `docs/NEXT-SESSION-PROMPT.md`, then the real bundle with no
+   `--mcp-tarball`; drive it as in step 3.
+6. **A — the other Macs.** `node scripts/mcpb.mjs --node darwin-x64` (built in, not yet run); drive the x64 bundle
+   under Rosetta (`arch -x86_64`) if this Mac has it. **Windows** is not built: `bundleNode()` throws for win32 (needs
+   the `node-v22.22.0-win-x64.zip`, `node.exe`, `NODEGX_NODE` ending `.exe`) and a Windows machine to run it on (R: is
+   there one?).
+7. **A — the download a stranger finds** (S8 + CCN-006 AC6, nodegx-web): /start's path 1 links the `.mcpb` per Mac
+   (Apple silicon / Intel) instead of *"coming soon … join the waitlist"*; Studio's *"run it from source … git clone"*
+   leaves path 1; a line before the download says what Desktop will show (*"Installing will grant this extension
+   access to everything on your computer. Any developer information shown has not been verified by Anthropic"*) and why
+   that is normal for an extension from a website, with the source on GitHub. Where the file is hosted is R's call (the
+   draft-release mechanism in nodegx-studio `75c8d63`, or nodegx.io). Also the bundle's own sheet: `scripts/mcpb.mjs`
+   `long_description` names `@nodegx/mcp 0.2.7` and `nodegx-studio 0.1.0`, jargon to a non-coder (not filed; one copy
+   fix). Deploy only on R's yes.
+8. **A — first contact that never relies on search** (UNFINDABLE part 1): the Beta email
+   (`dev-docs/reviews/the-three-surfaces-audit-2026-10-27-assets/brevo-studio-beta-email.md`) and the video's
+   description say *"paste https://nodegx.io/start into Claude"* (with the scheme: a bare `nodegx.io/start` failed
+   Claude's first fetch). R rules the words.
+9. **R — be findable** (UNFINDABLE part 2): deploy nodegx-web `3af9be4` (`deploy.sh` ships the working tree, which
+   holds others' uncommitted pages: deploy from a clean checkout of the commit); Google Search Console and Bing
+   Webmaster Tools (a DNS TXT record each); nodegx-studio's GitHub "About" website field (empty); a few links in (the
+   video, a Show HN). **A —** re-run step 0 (an incognito chat, "I'd like to build an app with NodeGX. How do I
+   start?") a week after, and write the reply into the bug.
+10. **A — P128-S3-SIZEMSG** (low): `parameterValues.ts:235` names the `var(--token)` form; a refused `var(--x)` inside a
+    calc suggests the token, not 16px; grep the specs that pin the old text. **R —** whether a refused write should
+    reach the host as `isError` (honest for the agent, red "Error" blocks for the person).
+11. **A — watch P128-S3-SIGNBROKEN:** `npm view @anthropic-ai/mcpb version` above 2.1.2 → the re-measure in the bug.
+12. **R — his Desktop, when the runs are done.** It has the test extension and no checkout server; the old `nodegx`
+    entry is backed up at `~/Library/Application Support/Claude/claude_desktop_config.before-mcpb-run-2026-10-27.json`.
+    Restoring it beside the extension runs two NodeGX servers: uninstall the extension first (Settings → Extensions),
+    quit Desktop, then an agent copies the backup back.
+
+**AC.** A stranger's path measured end to end on the published bundle: step 0 answers with nodegx.io (or the copy
+hands the link), /start offers one download for their Mac, the install sheet is the only warning and /start named it
+first, Studio comes up in the first chat, and the count in step 4 is 0 silent of 4.
+
 ## Repo B — nodegx-studio (`main`)
 
-### [ ] S4 — P125-MUDDY-NATIVEDIALOG and STU-082, the sandbox census
+### [~] S4 — P125-MUDDY-NATIVEDIALOG and STU-082, the sandbox census — TAKEN by Beta sweep s21 (2026-10-27, Richard's yes): skip to S5
 **Files.** `editor/studio.html`: replace the 5 `prompt()` (4649, 5431, 5468, 5489, 5504) with Studio's own inline
 name field (a popover with one input and Create, Enter and Esc) and the 9 `confirm()` (4716–5534) with its own
 confirm card; `editor/check.mjs` and `editor/data-check.mjs`: remove the `window.prompt`/`window.confirm` stubs and
@@ -198,6 +283,14 @@ stranger (P125 CCN-007) on steps 1–7; then the cut and the Brevo email
 resolved). Lane 9's SCHEDULEAUTH ruling and `@nodegx/mcp` 0.2.8 are not this phase's and stay first on the board.
 
 ## Handoffs (each session writes three lines under its box above, and the newest here)
+
+- 2026-10-27, S3 follow-up (the AC8 run with Richard): S3b above is the plan; the run's table is
+  `../phase-125-co-construction/CCN-006-AC8-RUN-2026-10-27.md`. Traps: Claude Code's shell here has
+  `ELECTRON_RUN_AS_NODE=1`, so the repo's Electron runs as plain Node unless started with `env -u ELECTRON_RUN_AS_NODE`;
+  Desktop's extension server is not a process you can `ps` by name (it is a "Claude Helper (Plugin) --type=utility"),
+  its children are (`ps … | grep -F 'Claude Extensions'`); `mcp-server-nodegx.log` keeps message ids and times, never
+  bodies (a 20 s call after the panel's `resources/read` was `open_studio` timing out); the first chat after a
+  Desktop restart may get no tools (step 3b). Richard's Desktop is in the test state (S3b step 12).
 
 - 2026-10-27, S3: see the lines under S3. Traps: a script outside the repo (the scratchpad) cannot `import
   'esbuild'`; resolve it with `createRequire(<repo>/package.json)`. Rendering a core-ui component outside webpack hits
