@@ -2,7 +2,7 @@ import React from 'react';
 
 import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
-import PointerListeners from '../../../pointerlisteners';
+import PointerListeners, { type PointerListeners as PointerListenerHandlers } from '../../../pointerlisteners';
 import { startSeconds, withMediaFragment } from '../../../media-fragment';
 import { resolveVideoEmbed } from '../../../video-embed';
 import { Noodl } from '../../../types';
@@ -42,7 +42,7 @@ export interface VideoProps extends Noodl.ReactProps {
  */
 const SILENT_PLAY_REJECTIONS = ['AbortError'];
 
-export interface CachedVideoProps {
+export interface CachedVideoProps extends PointerListenerHandlers {
   className?: string;
   style?: React.CSSProperties;
 
@@ -100,7 +100,6 @@ class CachedVideo extends React.PureComponent<CachedVideoProps> {
         {...videoProps}
         playsInline={true}
         src={src}
-        {...PointerListeners(this.props)}
         ref={(video) => {
           this.video = video;
           this.props.innerRef(video);
@@ -269,6 +268,10 @@ export class Video extends React.Component<VideoProps> {
     return (
       <CachedVideo
         {...props.dom}
+        // P107-C100 — the listeners are worked out HERE, where the node's `pointer`, `noodlNode`, `blockTouch` and
+        // `clickBubbling` are. `CachedVideo` is handed `dom` and three callbacks, so its own `PointerListeners(this.props)`
+        // found none of them: a video file fired no Click, Hover or Pointer output and took no file drop.
+        {...PointerListeners(this.props)}
         className={withDefaultsClass(props.className, defaultsClass)}
         style={style}
         innerRef={(video) => {
