@@ -7,7 +7,7 @@ area: "nodegx-studio `scripts/mcpb.mjs` (`manifest.name: 'nodegx'`); `packages/n
 found: P128 S3 follow-up, 2026-10-27, looking for why step 3b of Richard's AC8 run had no tool calls
 evidence: "Step 3b: Desktop listed the server's tools twice after the restart (`mcp-server-nodegx.log` 16:06:19Z) and 0 `tools/call` reached it; the model answered from general knowledge. Steps 3 and 3c, same names, did call. anthropics/claude-code#70397 (Desktop 1.14271.0, Windows, closed not planned, locked): \"Claude Desktop binds an extension's tools to the chat model only when the manifest's top-level `name` is identical to the `serverInfo.name` the server returns from `initialize`\" — the reporter's A/B, not confirmed by Anthropic; they also saw a matched extension go quiet in a later chat until disable→enable or a relaunch. Not measured here: one 3b against two working chats does not separate this from timing or the model's choice."
 launch: beta
-owner: none
+owner: Beta sweep s20 (2026-10-27)
 ---
 
 A hypothesis with a cheap test, not a finding yet. If it holds, some strangers install NodeGX, ask for an app and
