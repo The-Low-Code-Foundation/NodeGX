@@ -1,13 +1,14 @@
 // P127 BKO-006 the grader's half for one brief: `node grade.mjs <labRoot> <brief> [--mcp <noodl-mcp.cjs>]`.
 //
 // After round.mjs has run (and torn down what the stranger left running), this starts the stranger's own backend again
-// from its data dir in the lab and grades two of BKO-006's four:
+// from its data dir in the lab and grades two of BKO-006's four (`--no-render` leaves out render_report's Chrome):
 //
 //   open   every table (and its columns), rule, cloud function, workflow and trigger the backend has is in the project's
 //          files: metadata.dbCollections, nodegx.security.json, components/__cloud__, nodegx.automations.json
 //   works  two people sign up; a visitor is refused every table that is not public; in a table whose rows their maker
-//          owns, a row one person makes is not seen by the other; each trigger, fired by hand, ends ok; render_report
-//          (the published server, as the stranger had it) is clean
+//          owns, a row one person makes is not seen by the other; in a table whose rows the app made for a group (an ACL
+//          naming a role, not everyone), a member of that role reads the row and a signed-in outsider does not;
+//          each trigger, fired by hand, ends ok; render_report (the published server, as the stranger had it) is clean
 //
 // "Drawn" is Studio's `editor/brief-check.mjs` (this writes its --expect), "travels" is the VM ship. Writes
 // <labRoot>/out/<brief>/grade.json and prints one line per check. Run with the Bash sandbox off (render_report's Chrome).
@@ -18,6 +19,7 @@ import { spawn } from 'node:child_process';
 
 const [labRoot, name] = process.argv.slice(2);
 const mcpAt = process.argv.includes('--mcp') ? process.argv[process.argv.indexOf('--mcp') + 1] : null;
+const noRender = process.argv.includes('--no-render');
 const LAB = path.join(labRoot, 'lab', name);
 const OUT = path.join(labRoot, 'out', name);
 const app = fs.readdirSync(LAB, { withFileTypes: true }).filter((e) => e.isDirectory() && fs.existsSync(path.join(LAB, e.name, 'nodegx.project.json'))).map((e) => path.join(LAB, e.name));
@@ -89,13 +91,15 @@ try {
 
   // ---- works
   const people = [];
+  const ids = [];
   const run = Date.now().toString(36); // a grade may run again on the same backend
-  for (const who of ['ada', 'bo']) {
+  for (const who of ['ada', 'bo', 'cy']) {
     const u = await call('POST', '/users', { username: `${who}-${run}@example.com`, email: `${who}-${run}@example.com`, password: 'grade-Pass-1234' });
     people.push(u.body?.sessionToken);
+    ids.push(u.body?.objectId);
     ok(u.status < 300 && u.body?.sessionToken, 'works', `${who} signs up and has a session`, u);
   }
-  const [A, B] = people.map(as);
+  const [A, B, C] = people.map(as);
   const visitor = as(null);
   const rules = security ?? { defaults: {}, collections: {} };
   const effective = (n) => ({ ...(rules.defaults ?? {}), ...(rules.collections?.[n] ?? {}), permissions: { ...(rules.defaults?.permissions ?? {}), ...(rules.collections?.[n]?.permissions ?? {}) } });
@@ -115,6 +119,33 @@ try {
       await admin('DELETE', `/classes/${n}/${made.body.objectId}`);
     }
   }
+  // A group-only rule (the expenses brief's "only the members of a group see that group's expenses"). Apps keep it in the
+  // rows, not in nodegx.security.json: a row the app made carries an ACL naming a role (`role:members-of-<owner>`) and
+  // not everyone. So: one such row per table, from what the app itself stored; Bo is put in that role through the admin
+  // door, standing in for the app's own join step; Cy, signed in and in no group, is the outsider. Bo reading the row is
+  // the known-firing signal beside Cy's refusal (a refusal alone would also be read by a grader that reads nothing).
+  const aclOf = (r) => (typeof r.ACL === 'string' ? JSON.parse(r.ACL) : r.ACL) ?? {};
+  const groupRows = [];
+  for (const t of beTables) {
+    const n = tableName(t);
+    const rows = (await admin('GET', `/classes/${n}?limit=1000`)).body?.results ?? [];
+    const row = rows.find((r) => { const acl = aclOf(r); return !acl['*']?.read && Object.keys(acl).some((k) => k.startsWith('role:') && acl[k]?.read); });
+    if (row) groupRows.push({ n, id: row.objectId, role: Object.keys(aclOf(row)).find((k) => k.startsWith('role:') && aclOf(row)[k].read).slice(5) });
+  }
+  record.groupRows = groupRows;
+  for (const g of groupRows) {
+    const joined = await admin('POST', `/admin/roles/${encodeURIComponent(g.role)}/users`, { userId: ids[1] });
+    ok(joined.status < 300, 'works', `Bo is put in ${g.role}, as the app's join would (${g.n})`, joined);
+    const member = await B('GET', `/classes/${g.n}/${g.id}`);
+    ok(member.status < 300 && member.body?.objectId === g.id, 'works', `a member of ${g.role} reads the ${g.n} row made for that group`, member);
+    const memberList = await B('GET', `/classes/${g.n}?limit=1000`);
+    ok((memberList.body?.results ?? []).some((x) => x.objectId === g.id), 'works', `…and finds it in a list of ${g.n}`, memberList.status);
+    const outsider = await C('GET', `/classes/${g.n}/${g.id}`);
+    ok(outsider.status >= 400 || outsider.body?.objectId !== g.id, 'works', `a signed-in outsider is refused that ${g.n} row`, outsider);
+    const outsiderList = await C('GET', `/classes/${g.n}?limit=1000`);
+    ok(outsiderList.status < 500 && !(outsiderList.body?.results ?? []).some((x) => x.objectId === g.id), 'works', `…and does not find it in a list of ${g.n}`, outsiderList.status);
+    await admin('DELETE', `/admin/roles/${encodeURIComponent(g.role)}/users/${encodeURIComponent(ids[1])}`);
+  }
   for (const t of beTriggers) {
     const fired = await admin('POST', `/admin/triggers/${encodeURIComponent(t.id)}/fire`, {});
     let last = null;
@@ -123,9 +154,11 @@ try {
     ok(fired.status < 300 && res && !/fail|error/i.test(JSON.stringify(res.status ?? res.outcome ?? res)), 'works', `the trigger ${t.name ?? t.id}, fired by hand, ends ok`, { fired: fired.body, res });
     record[`fired:${t.id}`] = { fired: fired.body, res };
   }
-  const rr = await renderReport();
-  record.render = rr;
-  ok(rr && rr.ok, 'works', 'render_report on the app is clean', rr);
+  if (!noRender) {
+    const rr = await renderReport();
+    record.render = rr;
+    ok(rr && rr.ok, 'works', 'render_report on the app is clean', rr);
+  }
 } catch (e) {
   ok(false, 'grade', 'the grade ran to the end', e.stack);
 } finally {

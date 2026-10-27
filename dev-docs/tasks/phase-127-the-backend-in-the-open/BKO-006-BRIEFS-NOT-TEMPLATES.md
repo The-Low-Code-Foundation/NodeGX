@@ -58,9 +58,12 @@ turn ends (a preview it leaves running keeps `claude -p` up; a turn's end is not
 
 Every "open" miss is the same one: the app's tables were on the backend only (TABLESNOTINFILES, fixed in source after
 the runs; the strangers ran the published 0.2.7). Every rule, function, trigger and workflow the three agents made was
-in the files, drawn inside the conversation, and on the VM after a ship. What the grade does not yet check: a
-group-only rule (the expenses brief's "only a group's members see it") is not driven; `works` drives the
-creator-owned tables and a visitor's refusal.
+in the files, drawn inside the conversation, and on the VM after a ship. `works` drives the creator-owned tables and a
+visitor's refusal, and since s8 a group-only rule (the expenses brief's "only a group's members see it"): a row the
+app made whose ACL names a role and not everyone is read by a person put in that role and refused to a signed-in
+outsider, by id and in a list. On a copy of the expenses lab, with the 0.2.8 tarball's backend: works 14/14; never
+joining the member reds the member's two checks, joining the outsider too reds the outsider's two. Driving it found
+**P127-S8-DUPEROLE** (two rows of one role name; a member removed by name kept reading the group's expenses).
 
 **Filed and fixed this session** (each with its test and a mutant that turns it red):
 - P127-BKO006-TABLESNOTINFILES — `provision_backend` writes the backend's tables into `metadata.dbCollections` and
