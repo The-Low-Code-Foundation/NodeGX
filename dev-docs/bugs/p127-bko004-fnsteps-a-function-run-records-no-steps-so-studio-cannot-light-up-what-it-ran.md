@@ -1,13 +1,13 @@
 ---
 id: P127-BKO004-FNSTEPS
 title: Studio says a cloud function's last run in a line but does not light the nodes it ran, though the backend records them by node id
-status: open
+status: fixed
 severity: low
 area: "nodegx-studio editor/studio.html `readFnRun` (reads the run LIST, `GET /executions?kind=function`, never the run itself) and `fnCard` (no lit class). NOT the backend: a function run records one step per action by node id, and `GET /executions/<id>` serves them (measured P127 s10)"
 found: P127 BKO-004, 2026-10-26, building "the last run lit up" for a function's graph (STU-026 s22 lights a page workflow's last run from the runtime's own trace in the preview frame; a function runs on the backend, where no such trace is kept)
 evidence: "READ (no drive): `WorkflowRunner.ts` ~780–830 starts one execution per function call and logs no step per node; the admin Runs page shows `steps` only for a backend workflow's runs. MEASURED in Studio's hosted-check (BKO-004): after one call of an agent-made function, `GET /executions?kind=function&name=…` gives one row (startedAt, status, durationMs, errorMessage) and nothing that names a node."
-regression: none yet — the day a function run records its nodes, nodegx-studio `editor/hosted-check.mjs` "after one call on the backend, its last run is said" grows a "the steps it ran are lit" line
-owner: none (Beta sweep s18 read it and left it: feature-sized, the cloud runner noting each node plus Studio lighting them; P127 BKO-005 reads the same records for workflows and triggers; take it there if a lit run is wanted for both)
+regression: nodegx-studio `editor/hosted-check.mjs` ("a call turned away at the door … lights the start refused" and "called by someone signed in, the steps it ran are lit")
+owner: P128 Beta round, Track A (fixed, nodegx-studio 62dd153)
 launch: beta
 ---
 
@@ -34,3 +34,10 @@ What is left is Studio's half only, small: in `readFnRun`, after the newest run 
 node ids and the failed one; in `fnCard`, give those cards the page workflow's `.ran` (and the failed one `.refused`), the
 Request card too when the run exists; `hosted-check.mjs` "after one call on the backend, its last run is said" grows "the
 steps it ran are lit". Not built in s10: a peer was editing `studio.html` at the time.
+
+**Fixed, P128 Beta round Track A (2026-10-27, nodegx-studio 62dd153, STU-085).** `readFnRun` reads the newest run's
+record (`/api/backend/executions/<id>`) and `lightFnRun` gives each node it acted in `.ran` and the one it failed in
+`.refused`; the Request card is lit when the run exists and refused when the call was turned away before any node
+acted. `check:hosted` 29/29 with two new lines (not run against the old studio.html: nothing there set either class on a function's card, so both would wait out and fail): a call not signed in
+lights only the start, refused; a signed-in call lights exactly the backend's record (`members:error`,
+`fail_response:success` → `members` refused, `fail_response` ran). Studio only: no `@nodegx/mcp` or backend change.
