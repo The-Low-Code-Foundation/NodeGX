@@ -7,6 +7,7 @@ area: "nodegx-backend `TriggerDispatcher.fire` → `runner.run(targetName, { bod
 found: P127 BKO-006, 2026-10-27, the book club brief
 evidence: "MEASURED in the transcript and the grade: the Monday digest's function (allowNoAuth false) was refused at every fire (HTTP 500); the agent set allowNoAuth true and added a rate limit, and the grade's by-hand fire then ended ok. The function that writes the club's digest is now callable by anyone who can reach the backend."
 owner: P127 s7
+commit: 3e86bd685
 kit: core
 regression: packages/nodegx-backend/tests/p127-schedule-auth.test.ts
 ruling: "Richard, 2026-10-27, asked 'what should a run the app starts by itself count as?' with today's harm (2 of 3 agents opened a function to the internet): 'Counts as the app' — schedules, row changes and Studio's run-now pass signed-in-only with nobody signed in; webhooks and direct calls stay visitors"
@@ -47,6 +48,7 @@ Graded: `p127-schedule-auth.test.ts` 7/7 (a schedule's own catch-up fire, run no
 Studio all run the function; a webhook, a webhook-started workflow, a direct call, and a direct call that claims the
 mark in a header and the body are all refused). Nine mutants, every one red. Conformance on `noodl.cloud.request`
 green, and red with the runtime line reverted. SCHEDULEREASON's test now grades its refusal on a webhook, since
-"run now" no longer refuses.
+"run now" no longer refuses. CWF-017's `security-functions.test.ts` asserted a workflow run from Studio was refused by
+the graph's port; it now asserts it runs (the s7 docs commit: the first commit missed that file).
 
 Not live until the backend bundle and `@nodegx/mcp` are released (0.2.8).

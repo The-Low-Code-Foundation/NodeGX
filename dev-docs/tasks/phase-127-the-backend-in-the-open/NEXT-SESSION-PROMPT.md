@@ -63,7 +63,44 @@ the tables, now kept in `metadata.dbCollections` by `provision_backend`. Eight d
 412a19833; Studio 668212a, which also moved Studio's pins to the published 0.2.7 / 0.1.3); eight open rows filed
 (`node scripts/bugs.js --from P127`).
 
-**Next, in order (s7):**
+## s7 (2026-10-27): SCHEDULEAUTH ruled and built; CLOUDUSERNODE fixed; NOROLESFAILS measured
+
+- **SCHEDULEAUTH.** Richard was asked what a run the app starts by itself should count as (two of three strangers had
+  opened a weekly job's function to the internet). He ruled **"counts as the app"**: a schedule, a row change and
+  Studio's run-now (a trigger's or a workflow's) pass a function's "signed in only" with nobody signed in; a webhook, a
+  direct call and the MCP door stay visitors. Built in `3e86bd685`: `nodegx-backend/src/workflow/startedByApp.ts`, the
+  dispatcher and the workflow engine mark the in-process request `startedByApp` (never a header or a body field), the
+  Request node reads it; Request spec v4 with two scenarios; the description in the runtime, the spec, both catalogs,
+  the editor's library and `create_backend_trigger`. `p127-schedule-auth.test.ts` 7/7, nine mutants red, conformance
+  red with the runtime line reverted.
+- **CLOUDUSERNODE fixed.** Reproduced first, word for word: a User node's Fetch inside a function asks
+  `GET /users/<id>` with the app's key, which the backend did not serve. It is now `GET /classes/_User/:id` under that
+  path, behind the same `data` gate (`a73312163`). `p127-cloud-user-node.test.ts` with rules enforced; two mutants red.
+  `ops-rate-limit`'s reviewed route tally moves `data` 19 → 20.
+- **NOROLESFAILS does not reproduce at HEAD** (`p127-no-roles.test.ts`; the row has the four shapes measured). The
+  round's transcripts were not kept, so the agent's graph cannot be read. 🔴 Keep the lab next round.
+- Filed: **P127-S7-SBR015MUTANTSTALE** (SBR-015's broken copy no longer breaks; 5 red checks before this session).
+- 🔴 My SCHEDULEAUTH commit missed `security-functions.test.ts` (CWF-017 asserted a run from Studio was refused); found
+  by the wider run and updated in the s7 docs commit. Run the whole backend suite after a behaviour change, not only
+  the files named after it.
+- Seen red and not this lane's: node-spec's stranger hash gate for `dropdown.ts` and the Options scenario (since
+  `aa9f30cdd` / `7083a8595`), census and honesty ledgers (a peer's working-tree edits), `isl040-sessions`
+  (`actingSession.ts` is a second `_Session` writer since P124).
+
+**Next, in order (s8):**
+
+1. **Richard publishes `@nodegx/mcp` 0.2.8 and the backend bundle** with s6's and s7's fixes (TABLESNOTINFILES makes
+   "open" pass for a stranger; SCHEDULEAUTH and CLOUDUSERNODE are in the backend). Then `automations-drive.mjs` joins
+   Studio's `check`.
+2. **Richard's fourth brief in Claude Desktop**, from the `.mcpb` (BKO-002 AC2, BKO-004 AC3, BKO-005 AC1 ride along).
+   Ask before rebuilding the Desktop dist.
+3. The open rows (`node scripts/bugs.js --from P127`): ROLESNOTINFILES, FNSTEPS, S7-SBR015MUTANTSTALE; NOROLESFAILS
+   only with a kept lab. RUNONCHANGEGUESS, COMPVISIBLE, DRIVEHALFRUN and EMPTYSTARTPAGE were fixed by the Beta sweep
+   s17 (L3) the same afternoon (`30cb6671c`, `79cbc4674`, `4bf7e4664`, `809c2c231`).
+4. The grader: drive a group-only rule (the expenses brief's) in `grade.mjs`.
+5. BKO-005's map half (a trigger on the map; a map publish). BKO-001 AC5 is in effect done by `travel.mjs`: fold it in.
+
+**Older order (s6 → s7), kept for the record:**
 
 1. **Richard rules SCHEDULEAUTH** (2 of 3 strangers opened a scheduled function to anyone, because a schedule runs as
    a visitor). Recommendation in the row: schedules and row changes run as the backend; webhooks stay visitors.
