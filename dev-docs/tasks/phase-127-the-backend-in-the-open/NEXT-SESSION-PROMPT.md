@@ -195,18 +195,28 @@ works 14/14 on a lab copy, two grader mutants red). EMPTYSTATEREFUSED and DUPERO
    `0cfb274e8c67842eff7dbea5a0fd0c17`.
 2. Publish the map: `cd dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm publish --access public`
    (0.1.4). Then Studio's pin and `vendor/NODEGX.json` move to 0.1.4 together.
-3. The Desktop brief (item 1 below) needs a choice: a `.mcpb` built with `--mcp-tarball` from a pack of HEAD, or
-   a 0.2.9 with HELPERNODE and NAMEMISMATCH.
+3. **Open, asked at the end of s9: cut 0.2.9 now, or wait?** Richard: "will more be coming? … maybe we're publishing a
+   bit too frequently and need to collaborate more?" Measured then (HEAD `628bb3ad3`): only three shipped commits
+   since the 0.2.8 cut (HELPERNODE `560ee23d9`, NAMEMISMATCH `e03258b33` still open on Richard's fresh-chat count,
+   NOROLESFAILS `722da9c33`). P128 rows still open in shipped code: PREVIEWCUT (noodl-mcp), NOSTUDIOFORTHEEDITOR
+   (noodl-mcp, create-nodegx), OPTSETSHAPE (noodl-viewer-react); a peer had an uncommitted `create-nodegx.js` edit
+   (since 14:53). **Recommendation given: hold 0.2.9.** One lane owns releases; other lanes add their shipped fixes to
+   a "rides the next release" list on the board; cut at most once a day, when that list's rows are closed and no
+   session has open edits in shipped packages. The Desktop brief needs no npm release: a `.mcpb` built with
+   `--mcp-tarball` from a pack of HEAD (how HELPERNODE was tried in Desktop on 10-27). **Not ruled yet: ask him.**
 
 **Next, in order (s10):**
 
-1. **Richard's fourth brief in Claude Desktop**, from a `.mcpb` that carries HELPERNODE (see above; ask which).
+1. **Ask Richard about 0.2.9 and the release owner** (For Richard, 3). Do NOT cut or pack 0.2.9 in this lane unless he
+   names it the release owner.
+2. **Richard's fourth brief in Claude Desktop**, from a `.mcpb` built with `--mcp-tarball` from a pack of HEAD (it
+   carries HELPERNODE; ask before rebuilding anything Desktop runs).
    BKO-002 AC2, BKO-004 AC3 and BKO-005 AC1 ride along. Keep the lab and the transcript.
-2. After the map's 0.1.4 publish: Studio's pin and `vendor/NODEGX.json` (`npm run check:vendor` says if one is left),
+3. After the map's 0.1.4 publish: Studio's pin and `vendor/NODEGX.json` (`npm run check:vendor` says if one is left),
    and the hosted map draws triggers inside the conversation (add a line to `hosted-check`).
-3. **FNLIMITFILEONLY**: a tool that writes a function's rule to both, or the backend reloading the file. Ask Richard
+4. **FNLIMITFILEONLY**: a tool that writes a function's rule to both, or the backend reloading the file. Ask Richard
    which if it is not obvious from R1.
-4. FNSTEPS (low, feature-sized).
+5. FNSTEPS (low, feature-sized).
 
 **Older order (s8 → s9), kept for the record:**
 
