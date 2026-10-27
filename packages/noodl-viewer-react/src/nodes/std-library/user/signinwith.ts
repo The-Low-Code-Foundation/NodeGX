@@ -223,7 +223,8 @@ const SignInWithNodeDefinition: NodeDefinitionOptions = {
         // password (see BACKEND-AUTH.md). It is the one thing a sign-in can
         // succeed at while still needing to tell the user something.
         this._internal.notice = state.notice;
-        this._internal.error = undefined;
+        // P109-S24-SIGNINWITHERRORKEPT (ruled 2026-10-27 "Blank text, like magic link"): blank is SENT, `undefined` never was.
+        this._internal.error = '';
         this.flagOutputDirty('notice');
         this.flagOutputDirty('error');
         // Last, after the values it is about.
