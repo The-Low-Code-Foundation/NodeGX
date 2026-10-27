@@ -46,6 +46,7 @@ import { unlabelledNode } from './unlabelledNode';
 import { settingsDiagnostic } from './settingsDiagnostic';
 import { functionScriptNotCompiled } from './functionScriptNotCompiled';
 import { functionNeverReruns } from './functionNeverReruns';
+import { functionRunOnChangeUnknown } from './functionRunOnChangeUnknown';
 import { contentRowSplitsItsChildren, rowOfWordsFillsItsColumn } from './layoutFillTraps';
 import { clickAreaHoldsAControl } from './clickAreaHoldsAControl';
 
@@ -104,6 +105,7 @@ export const ALL_RULES: Rule[] = [
   // arrangement ones.
   functionScriptNotCompiled,
   functionNeverReruns,
+  functionRunOnChangeUnknown,
   repeatedSiblingSubtree,
   // DEF-025 — beside `repeatedSiblingSubtree` because both read the visual
   // tree's arrangement rather than wires: that one asks whether siblings
@@ -153,6 +155,7 @@ export {
   completedCommitsUnchecked,
   functionScriptNotCompiled,
   functionNeverReruns,
+  functionRunOnChangeUnknown,
   repeatedSiblingSubtree,
   labelNotAClickTarget,
   clickAreaHoldsAControl,

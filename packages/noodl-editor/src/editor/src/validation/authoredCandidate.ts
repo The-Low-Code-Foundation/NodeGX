@@ -365,7 +365,11 @@ export const AUTHORED_BLOCKING_WARNINGS: ReadonlySet<string> = new Set([
   // Bug P121-TWO003-SCRIPTCOMPILE — the runtime's own compile fails, so every Run fails. No benign
   // reading for a graph an agent just wrote; the write said nothing before, and the first person
   // to run the function got "That could not be done."
-  DiagnosticCode.FunctionScriptNotCompiled
+  DiagnosticCode.FunctionScriptNotCompiled,
+  // Bug P127-BKO006-RUNONCHANGEGUESS — a `runOnChange-` name a Function does not have is never read
+  // (2,805 right and 5 wrong over 2,718 Functions, all five agent-written); the message names the
+  // right one.
+  DiagnosticCode.FunctionRunOnChangeUnknown
 ]);
 
 /** Whether a diagnostic rejects an authored submission. */

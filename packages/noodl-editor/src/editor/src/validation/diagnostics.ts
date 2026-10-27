@@ -1423,7 +1423,14 @@ export enum DiagnosticCode {
    * is unwired and every wired input has Run On Value Change unticked. A Function runs once at
    * load, before the values arrive, and never again.
    */
-  FunctionNeverReruns = 'function-never-reruns'
+  FunctionNeverReruns = 'function-never-reruns',
+  /**
+   * Bug P127-BKO006-RUNONCHANGEGUESS: a Function has a `runOnChange-` setting that is not
+   * `runOnChange-in-<input>`, the only names its Run On Value Change boxes have. Nothing reads it,
+   * and the input it meant still runs the Function. Warning, blocking for a graph an agent just
+   * wrote (`AUTHORED_BLOCKING_WARNINGS`).
+   */
+  FunctionRunOnChangeUnknown = 'function-run-on-change-unknown'
 }
 
 // ─── Location ─────────────────────────────────────────────────────────────────
