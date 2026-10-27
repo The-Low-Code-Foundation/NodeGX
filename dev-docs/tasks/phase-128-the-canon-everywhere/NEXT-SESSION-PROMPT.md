@@ -218,7 +218,7 @@ first, Studio comes up in the first chat, and the count in step 4 is 0 silent of
 
 ## Repo B — nodegx-studio (`main`)
 
-### [~] S4 — P125-MUDDY-NATIVEDIALOG and STU-082, the sandbox census — TAKEN by Beta sweep s21 (2026-10-27, Richard's yes): skip to S5
+### [x] S4 — P125-MUDDY-NATIVEDIALOG and STU-082, the sandbox census (done by Beta sweep s21, 2026-10-27, Richard's yes)
 **Files.** `editor/studio.html`: replace the 5 `prompt()` (4649, 5431, 5468, 5489, 5504) with Studio's own inline
 name field (a popover with one input and Create, Enter and Esc) and the 9 `confirm()` (4716–5534) with its own
 confirm card; `editor/check.mjs` and `editor/data-check.mjs`: remove the `window.prompt`/`window.confirm` stubs and
@@ -228,6 +228,16 @@ driven once in the fake host; each that dies gets Studio's own control and a `ch
 **AC.** New option set, attribute, data type and style work in `npm start` (Electron) and in the fake host; a delete
 asks in Studio's card; `check:editor`, `check:data`, `check:hosted`, `check:app` green with the stubs gone; the census
 table in SCOPE under STU-082.
+
+- **Landed (2026-10-27, nodegx-studio 97574ac).** `askName` (a field under what was pressed) and `askSure` (a card over
+  the page, Cancel focused on a delete) replace all 5 `prompt()` and 9 `confirm()`; the gates' stubs are gone. Census
+  in SCOPE STU-082: Export's `<a download>` saved nothing in the frame while saying "exported"; inside a host it goes
+  to `ui/download-file` (`window.__hostSave` in hosted.js; the fake host now offers and records it). Import opens.
+  Filed and fixed: P128-S4-STYLEDELETE (Delete style never deleted). Filed: P128-S4-HOSTEDPUSHSTATE (low, open).
+- **Gates.** `check:hosted` 25/25 (the new section red at HEAD, 2 of 21), `check:app` 64/64 (new 2c: all four in
+  Electron), `check:editor` 204/204, `check:data` 80/80, `check:timeline` 53/53. No `.mcpb` packed.
+- **For S5 and after.** Use `askName`/`askSure` for any new question, never a native dialog (a host's frame answers
+  none). Whether Claude Desktop offers `downloadFile` is unmeasured: the next AC8 run should press Export once.
 
 ### [ ] S5 — STU-083 Help and CPY-002: the canon drawn in Studio
 **Files.** `editor/studio.html`: a Help entry in the rail (not a main tab: under the ⋯ menu and a `?` in the hosted

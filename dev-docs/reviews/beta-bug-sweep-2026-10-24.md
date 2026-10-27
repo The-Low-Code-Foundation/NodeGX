@@ -23,7 +23,7 @@ the files they touch, so one session reads one surface once.
 
 | # | session | rows | the files | state |
 |---|---|---|---|---|
-| L1 | **Studio's dialogs and chips** | P125-MUDDY-NATIVEDIALOG (high: New option set / attribute / data type / style do nothing in the app; deletes refuse in the panel), P125-MUDDY-DEADCHIP | nodegx-studio `editor/studio.html` (5 `prompt()`, 9 `confirm()`; `sourceChip`); the gates stub both (`editor/check.mjs`, `editor/data-check.mjs`), so grade in the Electron app | **P128's, not this sweep's** (s17): NATIVEDIALOG is P128 S4 (Studio's own name field and confirm card), DEADCHIP is P128 S6 (Wiring). Both committed by P128 (5fb0e70ed) and tagged `launch: beta` in s17 |
+| L1 | **Studio's dialogs and chips** | P125-MUDDY-NATIVEDIALOG (high: New option set / attribute / data type / style do nothing in the app; deletes refuse in the panel), P125-MUDDY-DEADCHIP | nodegx-studio `editor/studio.html` (5 `prompt()`, 9 `confirm()`; `sourceChip`); the gates stub both (`editor/check.mjs`, `editor/data-check.mjs`), so grade in the Electron app | **s21**: NATIVEDIALOG ✅ fixed (nodegx-studio 97574ac, taken as P128 S4 on Richard's yes: Studio's own name field and card, the census, Export inside a host; in Desktop with the next `.mcpb`). DEADCHIP stays P128 S6 (Wiring) |
 | L2 | **What the agent is told** | P125-MUDDY-OPTSETSUNKNOWN (high), P125-MUDDY-SURFACESUNSAID (high) | noodl-mcp `src/instructions.ts`, `src/guidance.ts`, the seeded `CLAUDE.md` / `CONVENTIONS.md`; the MCP tool-surface budget gate | **P128's** (s17): both `owner: P128-S2`; S1 (0be3a25e9) landed the `surfaces` section, AC3 open; S2 = the option-set example, validator hint, write note |
 | L3 | **The write door's privacy checks** | P127-BKO006-COMPVISIBLE (a private screen shows under the sign-in card), P127-BKO006-RUNONCHANGEGUESS, P127-BKO006-EMPTYSTARTPAGE, P127-BKO006-DRIVEHALFRUN | editor validation as the MCP door runs it (`noodl-editor` validator, `pageRegistration.ts`), noodl-mcp `drive_page` | ✅ **done s17**: RUNONCHANGEGUESS 30cb6671c, COMPVISIBLE 79cbc4674, DRIVEHALFRUN 4bf7e4664, EMPTYSTARTPAGE 809c2c231; all four reach an agent with the next `@nodegx/mcp` dist. NOROLESFAILS left to P127 |
 | L4 | **Getting Studio** | P125-CCN006-NODOWNLOAD (no desktop download on nodegx.io/studio/), P125-CCN006-NOSCHEME | nodegx-studio `app/main.cjs`, `package.json` `build.protocols`; nodegx-web `site/studio/` | **s18**: NOSCHEME ✅ fixed (Studio 75c8d63: a `nodegx-studio://` link opens its folder, cold or running; driven on the packaged Mac build). NODOWNLOAD built up to Richard: Studio 75c8d63 (draft release on a `v*` tag, no release without the Apple secrets), nodegx-web 1439284 (Download on /studio/, **not deployed**), `STUDIO_DOWNLOAD_URL` → `/studio/#download` (fc5a17515). **Waits on Richard:** Apple secrets → tag + publish the draft → deploy the site |
@@ -1166,3 +1166,51 @@ L8 in the plan. P128 S3 was live in both rows' area (Richard's AC8 run). I claim
 2. A peer read my uncommitted `build.py` within two minutes and wrote it into the row. An owner line, committed,
    is what stops two sessions building one row. Claim it before you build.
 
+
+---
+
+# Session 21, 2026-10-27 (next session reads this first)
+
+`--launch beta` had 11 rows, all already in the plan. Every row was waiting on Richard or a lane. The lane rows'
+owners were re-measured: NATIVEDIALOG (high, `owner: none`) still reproduced at nodegx-studio HEAD (5 `prompt()`, 9
+`confirm()`), and its box, P128 S4, was unstarted. Richard said yes to the sweep taking it. Claimed in its file and in
+P128's box first (8f93ba504). **Nothing pushed, no `.mcpb` packed.** `--launch beta` now lists 10.
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **P125-MUDDY-NATIVEDIALOG** (as P128 S4) | nodegx-studio 97574ac | `askName` (a field under what was pressed) and `askSure` (a card over the page, Cancel focused on a delete) replace every `prompt()` and `confirm()`; the gates' stubs gone | the new `check:hosted` section red at HEAD in the fake host's sandboxed frame (nothing asked, nothing made), green after; `check:app` 64/64 with a new section doing New type, option set, attribute and style and their deletes in the real Electron window; `check:hosted` 25/25, `check:editor` 204/204, `check:data` 80/80, `check:timeline` 53/53 |
+| **STU-082** (the sandbox census, P128 S4's other half) | same | Export inside a host goes to the host's `ui/download-file` (`window.__hostSave`), or a sentence says why not | a census probe drove each action in the frame and, as the control, in Studio opened directly: Export downloaded directly and **saved nothing in the frame while its toast said "exported"**; Import's chooser opened in both. Table in nodegx-studio `docs/SCOPE.md` STU-082 |
+| **P128-S4-STYLEDELETE** (filed and fixed) | same | Delete style kept every style (`x !== v` on a freshly parsed file) | `check:app` 2c red, then green |
+| Make a live database (no row: introduced and fixed here) | same | `currentTarget` read after the new await was null | `check:data` STU-065 red, then green |
+
+Filed: **P128-S4-HOSTEDPUSHSTATE** (low, open): in the hosted panel the app preview's router pushes a URL on Studio's
+origin and throws `SecurityError`. Seen only in the census, and its consequence for the person is not measured.
+
+## For Richard
+
+1. Standing from s12–s20: push and publish; the nodegx-web deploy; NAMEMISMATCH's count. Add nodegx-studio 97574ac to
+   the push.
+2. NATIVEDIALOG reaches Claude Desktop only in a `.mcpb` packed from nodegx-studio 97574ac or later. P128 S3b's step 3
+   packs one: it will carry this. When you run it, press Data → App data → Export once. Whether Desktop offers
+   `downloadFile` has not been measured: if it does not, Export says to open Studio with Window ↗.
+
+## Next
+
+1. `--launch beta` again. What's left: DEADCHIP (P128 S6), L2's two rows (P128 S2 ticked its box but left both rows
+   open; SURFACESUNSAID's AC3 is a Sonnet round nobody has re-run), and the rest waits on Richard. A sweep session could
+   take S6 on the same terms as S4: its own box, claimed first, Richard's yes.
+
+## Traps met
+
+1. 🔴 **A claim commit swept a peer's 95 lines.** P128's prompt was clean at `git status` and a peer wrote S3b into it
+   12 seconds before my temp-index commit. `git diff --cached --stat` showed 95 lines, and I committed anyway. Gate a
+   claim commit on the staged numstat being the lines you wrote. After a temp-index commit, `git reset -q -- <paths>`
+   the real index, or it holds the old blob staged against the new HEAD.
+2. 🔴 **An `await` put in front of old code nulls `event.currentTarget`.** `makeLive(e)` read it after the new question.
+   Turning a sync `confirm()` into an awaited card means reading every handler for event use after the await.
+3. A gate that stubs a browser API never reaches code behind it: Delete style had been dead since it was written, and
+   no gate had ever pressed it.
+4. The fake MCP Apps host serves the panel from its own origin, so it cannot grade a cross-origin permission (the
+   clipboard). Sandbox flags (modals, downloads) it does grade. Chrome runs in my Bash sandbox for these Studio gates.
