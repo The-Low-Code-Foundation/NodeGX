@@ -1,7 +1,7 @@
 ---
 id: P109-S18-REFRESHROWSTATE
 title: A For Each Refresh rebuilds every row, so each row's own state starts empty even when its record did not change
-status: needs-ruling
+status: wontfix
 phase: P109
 task: ISL-004
 severity: low
@@ -9,6 +9,7 @@ area: runtime / For Each (noodl-viewer-react/src/nodes/std-library/data/foreach.
 found: P109 ISL-004, session 18, 2026-10-05 (ruling 2's investigation, asked for by Richard)
 evidence: dev-docs/tasks/phase-109-the-defects-the-island-found/ISL-004-A-COMPONENT-KEEPS-ITS-OWN-STATE.md §8 s18; scripts/devtools/drive-isl004-remount.js on a deploy of packages/noodl-mcp/tests/isl004Remount.ts
 launch: beta
+reason: "Ruled by Richard 2026-10-27: Refresh means start the rows again; its port already says it discards row state, and no project on this machine wires a list's Refresh"
 ---
 
 A page with a For Each over two rows (ids `isl004-row-1`, `isl004-row-2`), each row a `Tally` component that keeps its
@@ -26,3 +27,10 @@ empty is what every UI framework does with a removed row. The agent doctrine now
 
 **For a ruling:** keep it (and say so on the Refresh port), or make Refresh reuse the rows whose id is still in the list,
 as an items write already does.
+
+**Ruled by Richard, 2026-10-27 (Beta sweep s19): "Keep it, close the row".** Asked: *"Pressing a list's Refresh
+rebuilds every row … The Refresh port's description already says it discards row state. No project on this machine
+wires a list's Refresh. What should happen?"* — keep it and close / keep unchanged rows. Measured before asking: the
+port reads *"Rebuilds every item from the current Items, discarding any state the item components held"*
+(`foreach.tsx`); 13 project files under `~/vscode_projects` wire a `refresh` input and every one feeds a component of
+the project's own (`/Logic/Todo data`, `/Shared/EngineFeed`…), none a For Each.

@@ -2,6 +2,7 @@
 id: P18-S119-FIRSTWRITE
 title: A Function that writes an output twice and then fires a signal hands the signal's target the first value, not the last
 status: fixed
+commit: c92a376fa
 severity: low
 area: runtime / Function signal outputs (C7 lockstep, GAM-011)
 found: P18 session 119, 2026-10-16, measuring what a Function's own signal chain reads before translating it (lane 6)

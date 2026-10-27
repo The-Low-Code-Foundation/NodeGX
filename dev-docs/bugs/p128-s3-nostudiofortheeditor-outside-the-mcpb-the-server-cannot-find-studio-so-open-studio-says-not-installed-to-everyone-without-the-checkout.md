@@ -1,14 +1,14 @@
 ---
 id: P128-S3-NOSTUDIOFORTHEEDITOR
 title: "Outside the `.mcpb`, the server cannot find Studio: `findStudio` looks only at `$NODEGX_STUDIO` and `~/vscode_projects/nodegx-studio`, and neither the npm route (`create-nodegx`, every agent it sets up) nor the editor's Connect Claude Code sets the variable, so `open_studio` says \"NodeGX Studio is not installed\" to everyone who does not have our checkout"
-status: fixed
+status: open
 severity: high
 area: "`packages/noodl-mcp/src/studio/studioProcess.ts` `findStudio` (the two candidates); `packages/create-nodegx/bin/create-nodegx.js` `serverEntry` (`npx -y @nodegx/mcp@<v> --allow-writes`, no env) for Claude Code, Cline, Mistral Vibe and OpenCode; the editor's registration (`packages/noodl-editor/src/editor/src/pages/ProjectsPage/useConnectAgent.ts` → `connectBootstrapServer`); `@nodegx/studio` is not on npm (nodegx-studio `package.json` is `private: true`)"
 found: P128 S3 (CPY-003), 2026-10-27, checking the claim in the editor's new welcome line before keeping it; widened the same day when Richard asked what a fresh Claude Desktop install takes
 evidence: "MEASURED by reading: `findStudio` candidates are `[process.env.NODEGX_STUDIO, path.join(os.homedir(), 'vscode_projects', 'nodegx-studio')]` (studioProcess.ts:35-37); `@nodegx/mcp` 0.2.7 has no dependencies; `npm view @nodegx/studio` is a 404; create-nodegx.js:365-368 registers `npx -y @nodegx/mcp@0.2.7 --allow-writes` with no env; `grep -rln NODEGX_STUDIO` finds it set only by nodegx-studio's `scripts/mcpb.mjs` and `app/main.cjs`. MEASURED the other side: the unpacked `nodegx-0.2.7.mcpb` under an empty HOME and PATH `/usr/bin:/bin` serves its bundled Studio (`open_studio` 200, 526,365 chars), so the `.mcpb` is the one install that works for a stranger today. Not driven: the npm route on a machine without the checkout."
 launch: beta
 regression: packages/noodl-mcp/tests/p128NoStudioForTheEditor.test.ts
-owner: Beta sweep s19 (2026-10-27)
+owner: "the app half built by Beta sweep s19 (0b98c2f84); the npm half is CCN-006 AC7 (P125)"
 task: CCN-006 AC7
 ---
 
@@ -31,7 +31,7 @@ have `@nodegx/mcp` resolve it with `require.resolve` first, either as a dependen
 `open_studio`; `findStudio` also takes the installed Studio desktop app's resources (the companion's
 `findStudioApp` finds the app). The not-installed sentence names nodegx.io/start, never an environment variable.
 
-**Built s19 (launch plan L7).** `findStudio`'s third candidate is the installed desktop app (`findStudioApp`, where
+**Built s19 (launch plan L7), the second half of Proposed only.** `findStudio`'s third candidate is the installed desktop app (`findStudioApp`, where
 its installers put it), whose `Contents/Resources/app` (macOS) or `resources/app` holds Studio's `editor/` unpacked
 (`asar: false`). Measured first: the packaged build's `editor/serve.mjs` runs on plain Node 22 and serves the page.
 The not-installed sentence is `STUDIO_NOT_INSTALLED`, naming `STUDIO_DOWNLOAD_URL` instead of an environment
@@ -41,3 +41,7 @@ variable, in `findStudio` and `open_studio`'s holding page. The npm-package cand
   but for P128's own `p128OptionSet.test.ts` (red at HEAD, filed P128-S2-OPTSETTSC).
 - Reaches a stranger with the next `@nodegx/mcp` (and the editor's bundled copy of it), and once the download exists
   (P125-CCN006-NODOWNLOAD, Richard's three steps). Not driven through the editor's Connect.
+- **Still open, so the row stays open:** the first half (publish `@nodegx/studio`, `require.resolve` it first). Until
+  then a person on the npm route or the editor's Connect gets Studio only by installing the desktop app, and is told
+  where. The widened title (the npm route, severity high) arrived from P125/P128 (215801ab5) while this was built.
+  The sentence names `STUDIO_DOWNLOAD_URL` (`/studio/#download`, set by s18), not `/start`, so it lands on the download.

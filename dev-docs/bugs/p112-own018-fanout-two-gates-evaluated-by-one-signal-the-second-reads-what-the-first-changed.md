@@ -2,6 +2,7 @@
 id: P112-OWN018-FANOUT
 title: "Two Conditions evaluated by one signal: the second reads the state the first one's On True has already changed — Mistral's quiz scored each answer against the NEXT question's correct answer (all five right → 1)"
 status: fixed
+commit: 8cf4b320e
 severity: medium
 area: runtime / signal fan-out and update order (Condition `eval` with `runOnChange-condition: false`, a sibling gate's chain changing its condition's inputs in the same frame); kit guidance either way
 found: P112 OWN-018 s2, 2026-10-13 (Mistral Large 4 in OpenCode, quiz run 4; tarballs tgz6 at d787c2220)

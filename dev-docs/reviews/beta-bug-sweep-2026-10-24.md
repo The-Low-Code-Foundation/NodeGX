@@ -29,7 +29,8 @@ the files they touch, so one session reads one surface once.
 | L4 | **Getting Studio** | P125-CCN006-NODOWNLOAD (no desktop download on nodegx.io/studio/), P125-CCN006-NOSCHEME | nodegx-studio `app/main.cjs`, `package.json` `build.protocols`; nodegx-web `site/studio/` | **s18**: NOSCHEME ✅ fixed (Studio 75c8d63: a `nodegx-studio://` link opens its folder, cold or running; driven on the packaged Mac build). NODOWNLOAD built up to Richard: Studio 75c8d63 (draft release on a `v*` tag, no release without the Apple secrets), nodegx-web 1439284 (Download on /studio/, **not deployed**), `STUDIO_DOWNLOAD_URL` → `/studio/#download` (fc5a17515). **Waits on Richard:** Apple secrets → tag + publish the draft → deploy the site |
 | L5 | **Runtime rows an app hits** | P18-S109-MOUNTPULSE (Sign In With: a cancel never fires Failure), P109-F03 (two lists sharing row ids show each other's rows), P109-F11 (a Group's inline defaults beat a CSS Class); P109-S24-SIGNINWITHERRORKEPT here once ruled (same node) | noodl-viewer-react `signinwith.ts`, `foreach`, `react-component-node` | ✅ **s18** (fc5a17515): MOUNTPULSE **does not reproduce in the runtime** (a late wire catches a signal sent earlier in the update; regression + control), it is the export's: re-filed as an export row, `launch: beta` off. F03 and F11 were ruled and built in P109 (ISL-003, ISL-008) and left `scheduled`: closed, regressions green. SIGNINWITHERRORKEPT stays on R |
 | L6 | **The backend in the project's files, and the run timeline** | P127-BKO006-ROLESNOTINFILES, P127-BKO004-FNSTEPS (Studio can't light up which steps a function ran), P104-BMG018-SEARCH | nodegx-backend `WorkflowRunner`, noodl-mcp `create_backend_role`, the backend manager's link picker | **s18**: ROLESNOTINFILES ✅ (b0b82b694: the manager's Roles page names a role the rules use and the backend lacks, with *Make staff*). FNSTEPS read and handed back to P127 (feature-sized: the runner noting each node + Studio lighting them). SEARCH stays BMG-018's (Richard: 0.3.1) |
-| R | **Rulings for Richard** (one page, plain words, any session can put it to him) | P112-OWN018-FANOUT, P18-S119-FIRSTWRITE, P109-S18-REFRESHROWSTATE, P109-S24-SIGNINWITHERRORKEPT, NPMAUDIT-LICENCE (which licence a deployed app's runtime is under); standing: DEPLOYLOOPBACK's third-party half | — | waiting on Richard |
+| R | **Rulings for Richard** (one page, plain words, any session can put it to him) | P112-OWN018-FANOUT, P18-S119-FIRSTWRITE, P109-S18-REFRESHROWSTATE, P109-S24-SIGNINWITHERRORKEPT, NPMAUDIT-LICENCE (which licence a deployed app's runtime is under); standing: DEPLOYLOOPBACK's third-party half | — | ✅ **s19, all five ruled and built**: FANOUT "teach it and warn" 8cf4b320e; FIRSTWRITE "the last value" c92a376fa (runtime + both exports); SIGNINWITHERRORKEPT "blank text" ac33256ac; REFRESHROWSTATE "keep it, close" (wontfix); LICENCE holder "The NodeGX contributors", the site's line in nodegx-web 290a7ba (**not deployed**). DEPLOYLOOPBACK's third-party half still stands |
+| L7 | **Studio from the agent's server** (filed since: P128 S3) | P128-S3-NOSTUDIOFORTHEEDITOR (widened by P125/P128 to the npm route too, high) | noodl-mcp `src/studio/studioProcess.ts`, `src/tools/openStudio.ts` | **s19**: the app half built (0b98c2f84: `findStudio` takes the installed desktop app; the not-installed sentence names the download; driven on the packaged Mac build). Row stays open: publishing `@nodegx/studio` is CCN-006 AC7 (P125) |
 
 Not in the plan (off the walk): code export (lane 4, paused), WebSocket / Server-Sent Events, Video C97/C99, template,
 lab, test and CI rows. Move one in only if a session measures it on the walk.
@@ -1070,3 +1071,56 @@ handed back to P127, owner none). **P104-BMG018-SEARCH** stays BMG-018's (Richar
 4. A ledger row can outlive its fix: F03 and F11 sat `scheduled` for three weeks after P109 ruled and built them.
    Read the row's task file before building.
 5. `bugs.js check`: no `studio` kit, and a `regression:` path must exist in this repo: name a Studio gate in prose.
+
+---
+
+# Session 19, 2026-10-27 (next session reads this first)
+
+The R page, then the one row filed since (L7). Every ruling was re-measured at HEAD before it was asked, and asked in
+plain words; Richard ruled all five as recommended. **Nothing pushed, nothing deployed, no dist rebuilt.**
+`--launch beta` lists 9 (was 13).
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **P112-OWN018-FANOUT** ("Teach it and warn") | 8cf4b320e | Measured in the runtime first: the reader gate sees the writer's change **whichever order** the two Evaluates are wired in, from outside a frame or inside one; only the chain (reader's Done → writer's Evaluate) decides first. Editor warning `condition-reads-a-siblings-change` (ALL_RULES); Condition's anti-pattern corrected to that; example `score-then-move-on`, attached to the warning | runtime pin 8/8; rule 8/8, each exclusion's mutant reddens its test; **calibrated** over 260 local projects (789 Conditions): the first cut had 41 hits, all false (the todo template's States dispatcher ×6, the rocket race linked through Play again), 0 after walking only through logic nodes and leaving a States dispatcher out; `catalog:examples` 116/116, the example rewired the broken way fails with the warning; validator suites 160/160 |
+| **P18-S119-FIRSTWRITE** ("The last value") | c92a376fa | A Function holds a changed output, the latest write winning, and sends it before the next signal or when the run's synchronous part returns (a change after an `await` on a microtask). nodegx-export's runner and its Swift copy the same; C7 and the Function spec say it (spec stays v3: a lone node's trace already showed one send) | regression 5/5, HEAD 4 red (the separating case green on both); s119 probe: 8 old cases byte-identical, the 3 this row is about read the last value; runtime Function files 223/223, C7 pairing, conformance; viewer ES5 5/5; export 135/135 (+7 Swift-gated skips), tsc clean |
+| **P109-S24-SIGNINWITHERRORKEPT** ("Blank text") | ac33256ac | `''` on a succeeded return; spec Sign In With v4. The golden showed one reachable case the row called unreachable (a failed Do on a page whose return then succeeds) | conforms; HEAD's `undefined` does not; viewer sign-in 9/9 |
+| **P109-S18-REFRESHROWSTATE** ("Keep it, close") | (docs) | wontfix: the Refresh port already says it; 13 project files wire a `refresh`, none into a For Each | — |
+| **NPMAUDIT-LICENCE** (holder: "The NodeGX contributors") | nodegx-web 290a7ba | nodegx.io's home line: the tools GPL-3.0, the runtime MIT, the app the builder's (offline `written` check clean) | **not deployed**; the export's generated source is lane 4's |
+| **P128-S3-NOSTUDIOFORTHEEDITOR** (L7, app half) | 0b98c2f84 | `findStudio` takes the installed desktop app's `Resources/app` (its `serve.mjs` runs on plain Node); the sentence names the download, not `NODEGX_STUDIO` | 4/4 incl. a drive of the s18 packaged Mac build; HEAD 3 red; neighbours 41/41. **Open**: `@nodegx/studio` on npm is CCN-006 AC7 |
+
+Filed: **P128-S2-OPTSETTSC** (noodl-mcp `tsc` red at HEAD on P128's `p128OptionSet.test.ts`, P128's file). Also fixed on
+the way: HLS-001's export golden had been red since s11's fast-xml-parser 5 pin (sheet-desk's two hashes, counted).
+
+## For Richard
+
+1. Standing: push and publish (sessions 12–19); Studio's download, s18's three steps; DEPLOYLOOPBACK's third-party half.
+2. 🔴 The licence line and the Download section both go live only with a nodegx-web deploy, and `deploy.sh` ships the
+   whole working tree (s18's warning still holds: others' uncommitted pages are in it).
+
+## Next
+
+1. `--launch beta`: L1/L2 rows are P128's (NATIVEDIALOG, DEADCHIP, OPTSETSUNKNOWN, SURFACESUNSAID); NODOWNLOAD waits
+   on Richard; NOSTUDIOFORTHEEDITOR's npm half is CCN-006 AC7; FNSTEPS P127's; SEARCH BMG-018's (0.3.1); LICENCE's Beta
+   half is the site deploy. **No sweep row is left that a session can build without a lane or Richard.** A bug-list
+   session's use now: re-run `--launch beta` for rows filed since, and re-measure any lane row whose owner went quiet.
+
+## Traps met
+
+1. 🔴 **A new validator rule is noise until it is calibrated, and the first cut was 41/41 false.** A dispatcher (one
+   pulse into many gates on the `at-` states of one States node) and a walk through a component instance's outputs
+   (a results screen's Play again, a later press) both read as "one gate changes what another reads". Walk only
+   through catalog-known, non-visual nodes. Calibrate over the local projects BEFORE committing a rule that ships in
+   ALL_RULES: 6 false warnings would have sat on the todo template a Beta person opens first.
+2. 🔴 **A project scan that reads `~/Documents` can hang at 0% CPU** (macOS privacy). Leave it out; and macOS has no
+   `timeout`, so `timeout N cmd` fails at once and reads as "the command produced nothing".
+3. 🔴 **jest's `process.env` is a copy: setting `HOME` never reaches `os.homedir()`,** and `jest.spyOn` cannot redefine
+   a namespace import. `jest.mock('os', …)` with a `mock`-prefixed variable.
+4. A row can widen under you: P128 renamed and widened NOSTUDIOFORTHEEDITOR (npm route, high) between my read and my
+   commit. Re-read the row before setting `fixed`; it went back to open with the split stated.
+5. A committed probe can lack the cases its `.out` holds (s119's `sigprobe.js`): re-run it before quoting it.
+6. A behaviour change in the runtime's Function is a change in nodegx-export's runner too (its lib says "together or
+   not at all"), and the runner's text is pinned three ways: a differential test, a Swift copy regenerated from it,
+   and HLS-001's byte golden. Count each moved hash.

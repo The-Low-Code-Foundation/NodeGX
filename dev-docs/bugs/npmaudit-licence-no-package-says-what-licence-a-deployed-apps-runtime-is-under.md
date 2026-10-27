@@ -39,3 +39,14 @@ Measured: `tests-unit/p123/deploy-licence-notice.test.ts` 3/3 and `deploy-guide.
 
 **Still open:** nodegx.io's "GPL-3.0" tag (`nodegx-web` `site/_page.html`; another session has that repo's working
 tree open, and a push there deploys), and `@nodegx/export`'s generated source (lane 4, paused).
+
+**Ruled by Richard, 2026-10-27 (Beta sweep s19): the holder is "The NodeGX contributors".** Asked: *"Three packages
+that never had a licence file … now ship an MIT licence … It reads 'Copyright (c) The NodeGX contributors'. The
+original runtime's licence says 'Future Platforms AB', but they did not write these three. Whose name goes on
+them?"* — the NodeGX contributors / Richard Osborne. The three files stand as written.
+
+**s19:** nodegx.io's line now says the split (nodegx-web 290a7ba, `site/_page.html`: "The tools are open source
+under GPL-3.0. The runtime your app runs on is MIT. The app itself is yours."; the offline `written` check clean).
+**Not deployed:** it goes live with the next nodegx-web deploy, which waits on Richard (s18's warning: `deploy.sh`
+rsyncs the whole working tree, with others' uncommitted pages in it). Left: `@nodegx/export`'s generated source
+(lane 4, paused). The Beta half closes when the site is deployed.
