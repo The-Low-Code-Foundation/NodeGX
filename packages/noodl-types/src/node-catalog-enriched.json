@@ -51302,7 +51302,7 @@
           "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
         ],
         "visible": [
-          "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
+          "always: shown or hidden at once, its space kept; hidden, a Focus does not reach it"
         ]
       },
       "warnings": {
@@ -53520,7 +53520,7 @@
           "always: the page, or the scrolling Group holding it, scrolls until the box can be seen"
         ],
         "visible": [
-          "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
+          "always: shown or hidden at once, its space kept; hidden, a Focus does not reach it"
         ]
       },
       "warnings": {
@@ -56156,7 +56156,7 @@
           "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
         ],
         "visible": [
-          "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
+          "always: shown or hidden at once, its space kept; hidden, a Focus does not reach it"
         ]
       },
       "warnings": {
@@ -58360,7 +58360,7 @@
           "always: the page, or the scrolling Group holding it, scrolls until the button can be seen"
         ],
         "visible": [
-          "always: shown or hidden at the next paint, its space kept; hidden, it takes no click and a Focus does not reach it"
+          "always: shown or hidden at once, its space kept; hidden, it takes no click and a Focus does not reach it"
         ]
       },
       "warnings": {
@@ -60786,7 +60786,7 @@
           "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
         ],
         "visible": [
-          "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
+          "always: shown or hidden at once, its space kept; hidden, a Focus does not reach it"
         ]
       },
       "warnings": {
@@ -63679,7 +63679,7 @@
           "always: the size it holds now, a bare number read in the unit it held; drawn at the next paint"
         ],
         "visible": [
-          "always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it"
+          "always: shown or hidden at once, its space kept; hidden, a Focus does not reach it"
         ],
         "opacity": [
           "always: how see-through it is; at exactly 0 it takes no pointer, and an act goes to what is behind it"

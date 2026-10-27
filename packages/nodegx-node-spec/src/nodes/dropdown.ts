@@ -59,6 +59,7 @@ import { controlFocusNotMounted, focusDiagnostics, focusMissed } from './focus-n
 import { focusAndIconSourceChange, iconSourceDiagnostics } from './icon-source';
 import { dataAttributeInput, dataAttributeNames } from './data-attributes';
 import { growChange, sizeAtDefault, sizeReducer, wiredGrowDiagnostic, withGrow, type Sizes } from './wired-grow';
+import { visibleAtOnceChange } from './visible-at-once';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` */
@@ -126,7 +127,8 @@ export const Dropdown = defineNode({
   // v10 (NSP-019 R38): a wired Width in a row, or a wired Height in a column, that is a percent shows as its warning (wired-grow.ts)
   // v11 (P121-TWO005-DROPDOWNSTALE): Items that do not offer the placed node's seed ("Option 1") clear it to '' and send Value
   // v12 (BETA-S7-DROPDOWNFIRSTPICK): with the value in no option, the element keeps its hidden empty option selected, so every option is a pick
-  version: 12,
+  // v13 (BETA-S7-DROPDOWNFOCUSDIVERGE, the spec correcting itself): Visible reaches the element at once, so a Focus in the same frame meets it (visible-at-once.ts)
+  version: 13,
   // NSP-010 — v7 is the spec correcting itself, not the runtime changing
   changes: [
     {
@@ -166,7 +168,8 @@ export const Dropdown = defineNode({
       migration: {
         none: 'A pick that did nothing now does what the person asked; nothing an app could rely on, and no stored project changes'
       }
-    }
+    },
+    visibleAtOnceChange(13)
   ],
   diagnostics: { ...focusDiagnostics(controlFocusNotMounted('dropdown')), ...iconSourceDiagnostics(), ...wiredGrowDiagnostic },
   source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
@@ -430,8 +433,9 @@ export const Dropdown = defineNode({
     // NSP-019 R38 — node.ts :446-458, react-component-node.ts :706-753 (wired-grow.ts)
     width: sizeReducer('width'),
     height: sizeReducer('height'),
-    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
-    visible: (_s, v) => ({ says: 'always: shown or hidden at the next paint, its space kept; hidden, a Focus does not reach it', set: { visible: !!v }, send: [] })
+    // node-shared-port-definitions.ts :374-388 — written onto the element at once, so a Focus in the same frame meets it
+    // (visible-at-once.ts)
+    visible: (_s, v) => ({ says: 'always: shown or hidden at once, its space kept; hidden, a Focus does not reach it', set: { visible: !!v, pageVisible: !!v }, send: [] })
   },
   {
     // react-component-node.ts :785-830 `DATA_ATTRIBUTES_RULE` — one string input per name the Data Attributes list names, written

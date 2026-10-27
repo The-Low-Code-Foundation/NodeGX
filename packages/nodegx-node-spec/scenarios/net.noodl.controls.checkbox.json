@@ -3049,5 +3049,55 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Visible: placed hidden, then Visible on and a Focus in the same frame — the checkbox is shown at once, so the Focus reaches it: Focused true and Focused fires (Done)",
+    "because": "node-shared-port-definitions.ts :374-388 → react-component-node.ts `setStyle` / `removeStyle`: `visibility` is written onto the element on the spot, and a browser's `focus()` reads the style as it stands (Chrome 156, measured). BETA-S7-DROPDOWNFOCUSDIVERGE: the spec said the next paint until this version",
+    "params": {
+      "visible": false
+    },
+    "steps": [
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible: placed hidden and painted, then Visible on and a Focus in the same frame — the Focus reaches the checkbox (Done, Focused)",
+    "because": "node-shared-port-definitions.ts :374-388 → react-component-node.ts `setStyle` / `removeStyle`: `visibility` is written onto the element on the spot, and a browser's `focus()` reads the style as it stands (Chrome 156, measured). BETA-S7-DROPDOWNFOCUSDIVERGE: the spec said the next paint until this version",
+    "params": {
+      "visible": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible: on the page, then Visible off and a Focus in the same frame — the checkbox is hidden at once, so the Focus does nothing (Done, no Focused)",
+    "because": "node-shared-port-definitions.ts :374-388 → react-component-node.ts `setStyle` / `removeStyle`: `visibility` is written onto the element on the spot, and a browser's `focus()` reads the style as it stands (Chrome 156, measured). BETA-S7-DROPDOWNFOCUSDIVERGE: the spec said the next paint until this version",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
   }
 ]
