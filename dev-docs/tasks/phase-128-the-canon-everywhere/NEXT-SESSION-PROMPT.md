@@ -265,7 +265,7 @@ canon's "When it's finished" paragraph; the Option sets empty state in the perso
 **AC.** Help opens in the desktop app and in the fake host and shows the canon's headings; the links are the canon's;
 `check:editor`, `check:hosted` green; a picture in `docs/look/`.
 
-### [ ] S6 — STU-084 Wiring and P125-MUDDY-DEADCHIP: the wiring underneath (taken by Beta sweep s22, 2026-10-27, Richard's yes)
+### [x] S6 — STU-084 Wiring and P125-MUDDY-DEADCHIP: the wiring underneath (done by Beta sweep s22, 2026-10-27, Richard's yes)
 **Files.** `editor/studio.html`: a read-only canvas of the current page's whole graph drawn with `@nodegx/canvas-look`
 the way `editor/fngraph.mjs` draws a cloud function (BKO-004), reached from a quiet "Wiring" link in the Design tab's
 footer and from the chip: `sourceChip`'s fall-through (2975–2982) becomes a clickable chip opening a card (the node's
@@ -277,6 +277,21 @@ tell S2 (its pinned copy goes).
 **AC.** On Muddy Paws Shelter's Home, the headline's chip opens the card, Wiring shows the page with the `/Components/T`
 instance selected, and the States node in `Wording` is reachable the same way; the canvas takes no edits; `check:editor`
 green with the new checks; a picture in `docs/look/`.
+
+- **Landed (2026-10-27, nodegx-studio 53ef270, NodeGX f093b6068).** The chip opens the part's card; "Logic on this
+  page" under the element tree; **Wiring** draws the page whole, read only, in `@nodegx/canvas-look`'s look
+  (`editor/wiring.mjs`), the part selected, a placed component opening into its own wiring; the notice quotes the canon
+  under a `<!-- canon: -->` marker. `editor/vocabulary.json` (studio.html reads it, `/api/vocabulary`, in the package);
+  S2's hand-pinned lists now read a generated copy (`src/studio/studioVocabulary.ts`, `scripts/pin-studio-vocabulary.mjs`)
+  with a drift test. "Ask the agent" → `.nodegx-questions.json` → `what_changed_since` `questions` (and `ui/message` in a
+  host that takes one). **Dist rebuilt; no `.mcpb`.** STU-084 in nodegx-studio `docs/SCOPE.md`.
+- **Gates.** AC on a copy of Muddy Paws (the project is gone from disk): the headline's chip → card → Home with the
+  Wording instance selected → Wording's States node; no file changed. `check:editor` 213/213 (9 new, red at HEAD),
+  `check:hosted` 27/27, `check:app` 64/64, `check:data` 80/80, `check:timeline` 53/53, `wiring-check` 6636/6636;
+  `canon-check studio.html` passes; noodl-mcp `p128StudioVocabulary` 5/5, full suite 5060 pass / 14 fail, none from this change (the 8 in the suites it could reach are identical on HEAD's source; the rest a peer's untracked nightbook template and Chrome/Docker/dist suites). Pictures `docs/look/stu-084-*.png`.
+- **For S7 and after.** A Studio list of what it edits is `editor/vocabulary.json`: change it there, then
+  `node packages/noodl-mcp/scripts/pin-studio-vocabulary.mjs`. Filed P128-S6-OPTSETFLAKE (check:hosted's New option
+  set, intermittent on both arms). Whether Desktop takes `ui/message` is unmeasured.
 
 ### [ ] S7 — STU-080 Preview
 **Files.** `editor/serve.mjs`: `GET /app` serving a one-page HTML that loads `/preview.js`, fetches `/api/project`,

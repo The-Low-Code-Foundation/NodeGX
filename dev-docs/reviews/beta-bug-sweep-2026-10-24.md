@@ -23,7 +23,7 @@ the files they touch, so one session reads one surface once.
 
 | # | session | rows | the files | state |
 |---|---|---|---|---|
-| L1 | **Studio's dialogs and chips** | P125-MUDDY-NATIVEDIALOG (high: New option set / attribute / data type / style do nothing in the app; deletes refuse in the panel), P125-MUDDY-DEADCHIP | nodegx-studio `editor/studio.html` (5 `prompt()`, 9 `confirm()`; `sourceChip`); the gates stub both (`editor/check.mjs`, `editor/data-check.mjs`), so grade in the Electron app | **s21**: NATIVEDIALOG ✅ fixed (nodegx-studio 97574ac, taken as P128 S4 on Richard's yes: Studio's own name field and card, the census, Export inside a host; in Desktop with the next `.mcpb`). DEADCHIP stays P128 S6 (Wiring) |
+| L1 | **Studio's dialogs and chips** | P125-MUDDY-NATIVEDIALOG (high: New option set / attribute / data type / style do nothing in the app; deletes refuse in the panel), P125-MUDDY-DEADCHIP | nodegx-studio `editor/studio.html` (5 `prompt()`, 9 `confirm()`; `sourceChip`); the gates stub both (`editor/check.mjs`, `editor/data-check.mjs`), so grade in the Electron app | **s21**: NATIVEDIALOG ✅ fixed (nodegx-studio 97574ac, taken as P128 S4 on Richard's yes: Studio's own name field and card, the census, Export inside a host; in Desktop with the next `.mcpb`). **s22**: DEADCHIP ✅ fixed as P128 S6 on Richard's yes (nodegx-studio 53ef270 + f093b6068: the chip opens a card, "Logic on this page", the wiring underneath read only, Studio's vocabulary one file; in Desktop with the next `.mcpb`) |
 | L2 | **What the agent is told** | P125-MUDDY-OPTSETSUNKNOWN (high), P125-MUDDY-SURFACESUNSAID (high) | noodl-mcp `src/instructions.ts`, `src/guidance.ts`, the seeded `CLAUDE.md` / `CONVENTIONS.md`; the MCP tool-surface budget gate | **P128's** (s17): both `owner: P128-S2`; S1 (0be3a25e9) landed the `surfaces` section, AC3 open; S2 = the option-set example, validator hint, write note |
 | L3 | **The write door's privacy checks** | P127-BKO006-COMPVISIBLE (a private screen shows under the sign-in card), P127-BKO006-RUNONCHANGEGUESS, P127-BKO006-EMPTYSTARTPAGE, P127-BKO006-DRIVEHALFRUN | editor validation as the MCP door runs it (`noodl-editor` validator, `pageRegistration.ts`), noodl-mcp `drive_page` | ✅ **done s17**: RUNONCHANGEGUESS 30cb6671c, COMPVISIBLE 79cbc4674, DRIVEHALFRUN 4bf7e4664, EMPTYSTARTPAGE 809c2c231; all four reach an agent with the next `@nodegx/mcp` dist. NOROLESFAILS left to P127 |
 | L4 | **Getting Studio** | P125-CCN006-NODOWNLOAD (no desktop download on nodegx.io/studio/), P125-CCN006-NOSCHEME | nodegx-studio `app/main.cjs`, `package.json` `build.protocols`; nodegx-web `site/studio/` | **s18**: NOSCHEME ✅ fixed (Studio 75c8d63: a `nodegx-studio://` link opens its folder, cold or running; driven on the packaged Mac build). NODOWNLOAD built up to Richard: Studio 75c8d63 (draft release on a `v*` tag, no release without the Apple secrets), nodegx-web 1439284 (Download on /studio/, **not deployed**), `STUDIO_DOWNLOAD_URL` → `/studio/#download` (fc5a17515). **Waits on Richard:** Apple secrets → tag + publish the draft → deploy the site |
@@ -1214,3 +1214,49 @@ origin and throws `SecurityError`. Seen only in the census, and its consequence 
    no gate had ever pressed it.
 4. The fake MCP Apps host serves the panel from its own origin, so it cannot grade a cross-origin permission (the
    clipboard). Sandbox flags (modals, downloads) it does grade. Chrome runs in my Bash sandbox for these Studio gates.
+
+---
+
+# Session 22, 2026-10-27 (next session reads this first)
+
+`--launch beta` had 10 rows, all in the plan; every row but one waited on Richard or a lane. That one,
+P125-MUDDY-DEADCHIP (`owner: none`), still reproduced at nodegx-studio HEAD (`sourceChip`'s fall-through, no handler),
+and its box, P128 S6, was unstarted. Richard: *"Take the whole S6"*. Claimed first (82c8a9a46). **Nothing pushed, no
+`.mcpb` packed; `@nodegx/mcp`'s dist rebuilt in the checkout, not published.**
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **P125-MUDDY-DEADCHIP** (as P128 S6, STU-084) | nodegx-studio 53ef270 | the chip names a part Studio does not edit and opens its card (Wiring · Get the editor · Ask the agent); "Logic on this page" under the element tree; **the wiring underneath**: the page drawn whole, read only, in `@nodegx/canvas-look`'s look (`editor/wiring.mjs`), the part selected, a placed component opening into its own wiring; `editor/vocabulary.json`, which studio.html reads | `check:editor` 213/213 (9 new, red at HEAD: list `[]`, no chip), `check:hosted` 27/27 (link via `ui/open-link`, question via `ui/message`), `check:app` 64/64, `check:data` 80/80, `check:timeline` 53/53, `wiring-check` 6636/6636 over 968 template components (3 mutants red); on a copy of Muddy Paws: the headline's chip → card → Home with `wording` selected → Wording's States; no file changed |
+| Studio's vocabulary in `@nodegx/mcp` (S2's "S6 replaces it") | f093b6068 | `src/studio/studioVocabulary.ts` pinned from Studio's file (`scripts/pin-studio-vocabulary.mjs`); `vocabulary.ts` reads its lists from it; `what_changed_since` reports a question asked from Studio once (`.nodegx-questions.json`) | `p128StudioVocabulary` 5/5 (pin drift and a never-seen mutant red), `p128OptionSet` 14/14 on the read lists, neighbours 53/53, resident surface 8276 tokens unchanged; full suite: 5060 pass / 14 fail, none from this change (the 8 in the suites it could reach are identical on HEAD's source; the rest a peer's untracked nightbook template and Chrome/Docker/dist suites); dist rebuilt |
+
+Filed: **P128-S6-OPTSETFLAKE** (low, open): `check:hosted`'s New option set (s21's own check) asked and not made in
+four runs of six, on both arms (with and without the fake host's new `message` capability).
+
+## For Richard
+
+1. Standing from s12–s21: push and publish; the nodegx-web deploy; NAMEMISMATCH's count. Add nodegx-studio
+   53ef270 to the push.
+2. When the next `.mcpb` is packed (P128 S3b's step 3 packs one), open Muddy Paws (or any app the agent built with a
+   States node) in Desktop: the headline's chip, then **Wiring**. Whether Desktop takes `ui/message` is not measured:
+   if it does, "Ask the agent" lands in the conversation; if not, the toast says to tell the agent.
+
+## Next
+
+1. `--launch beta` again. Left: L2's two rows (P128 S2 ticked its box, the rows stay open until S1's AC3 Sonnet round
+   is re-run, about $5), and the rest waits on Richard. Nothing buildable is left in the plan without him or a lane.
+
+## Traps met
+
+1. 🔴 **`Math.max(Infinity, floor)` is Infinity.** A "no anchor, put it at the bottom" sentinel of `Infinity` sorted
+   right and then became the card's y: 412 template components drew a card at y = ∞, and `no overlap` stayed green
+   (every comparison with Infinity is false). A layout check needs "every card is somewhere" (finite x, y, size) beside
+   "no two overlap".
+2. 🔴 **zsh does not split `$FILES`.** A save-aside / swap-to-HEAD / restore loop over a list in a variable ran once on
+   the whole string: nothing was saved, `&&` stopped the swap, and the "HEAD" gate ran on my tree. Read the output of
+   a swap before trusting the arm it claims. (Memory has it; it bit again.)
+3. A `git archive` copy of nodegx-studio is not a clean control for its gates (`check.mjs`'s Repeat While Saving and
+   `hosted-check`'s map step fail there and not in the checkout). A/B in place, file by file, by explicit paths.
+4. Muddy Paws Shelter is gone from `NodeGX test projects` (P127-S9-MUDDYPAWSGONE); copies live in other sessions'
+   scratchpads (`find /private/tmp -maxdepth 8 -name Wording`). A gate must build its own shape, as `check.mjs` now does.
