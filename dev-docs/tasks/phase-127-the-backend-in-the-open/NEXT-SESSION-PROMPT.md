@@ -87,6 +87,52 @@ the tables, now kept in `metadata.dbCollections` by `provision_backend`. Eight d
   `aa9f30cdd` / `7083a8595`), census and honesty ledgers (a peer's working-tree edits), `isl040-sessions`
   (`actingSession.ts` is a second `_Session` writer since P124).
 
+## s8 (2026-10-27): npm 0.2.8 cut, packed and graded; waiting on Richard's publish
+
+Richard: "First: cut npm 0.2.8". Before the cut, **P128-S2-EMPTYSTATEREFUSED fixed** (`6cdafc718`, this lane's row:
+the `ui-empty-state` example taught the wire COMPVISIBLE refuses; now a Group's `mounted`. `npmauditExampleInvalid`
+116/116, red with HEAD's catalog). Release commit **`1d4592272`** (pushed with the 50 before it): `@nodegx/mcp`, the
+three create-* and `@nodegx/preview` at 0.2.8, `@nodegx/node-spec` 0.2.2 (Request spec v4, the six controls'
+Visible); project-contract, export and canvas-look stay (nothing they ship from moved since `541f6d3e0`). The lockfile
+is HEAD's with four version lines (a peer's working-tree lockfile edit is not in it; its four lines were moved to
+match). Gates before: create-nodegx 34/34, publishable.js 6/0, bugs.js gate 0 blockers on five kits, canon:check
+16/16, changelog through the offline copy checks.
+
+Packed in the worktree `OpenNoodl-worktrees/npm-0.2.8` at `1d4592272`, every linked build output replaced by a real
+folder first (primary's dist untouched, mtimes read before and after); `check-pack-paths` passed (mcp 133 files,
+preview 30). Tarballs and `SHASUMS.txt` in `OpenNoodl-worktrees/npm-0.2.8-tarballs`:
+
+| tarball | shasum (sha1) | bytes |
+|---|---|---|
+| `nodegx-node-spec-0.2.2.tgz` | `00825cda607020c6399b142973f7238ff93ed13f` | 6,478,038 |
+| `nodegx-preview-0.2.8.tgz` | `25e84daea9c33a3aa6f12ff1a9e7eeb30fcc5fda` | 6,245,365 |
+| `nodegx-mcp-0.2.8.tgz` | `0856abb26305675407578839781c66e75b06167d` | 12,421,505 |
+| `create-nodegx-0.2.8.tgz` | `52ce66adac9341b8f7cc116b0fa0e28a4b9c2b0c` | 43,751 |
+| `create-nodegx-vibe-0.2.8.tgz` | `b84670cd6772f172a5e724a7786e9df1445f5b07` | 13,815 |
+| `create-nodegx-cline-0.2.8.tgz` | `1f177f1c2f6d2278ce3afda69157d3bdbd712d00` | 14,064 |
+
+Graded from the tarballs, outside the checkout, HOME empty: file lists equal to 0.2.7's (node-spec adds
+`visible-at-once.d.ts` and its map); each fix counted in 0.2.7's tarball and 0.2.8's (0.2.7 is the control):
+`startedByApp` 0→10, `users/:id` 12→13, `alsoInProjectEnvFile` 0→1, ROLESNOTINFILES's sentence 0→1, the same
+`cli.js` byte for byte in mcp and preview; `data-ndl-keyboard-click` 0→2 in both viewers; `emptyWrap` 0→4 and
+`option-set` 0→2 in `noodl-mcp.cjs`; `function-run-on-change-unknown`, `fire_backend_trigger`,
+`click-area-holds-a-control` new; no `/Users/` in either bundle. A fresh install of mcp, preview, node-spec and the
+published project-contract 0.2.2 / canvas-look 0.1.0: **npm audit 0**, project-contract resolves node-spec 0.2.2.
+stranger-kit 16 CJS + 2 ESM, types under node/bundler/node16; stranger-render "DONE — clean"; stranger-backend every
+step (the 400 names the `.env` line); `nodegx-deploy --full-stack` on a todo-list copy exit 0, `start.js` `/`,
+`/health`, `nodegx-config.json`, the licence 200, a sign-up 201, a clean stop; `create-nodegx my-apps` pins
+`@nodegx/mcp@0.2.8` (5 places).
+
+**Publish = Richard's terminal (OTP):** `scripts/own/publish-npm.sh ../OpenNoodl-worktrees/npm-0.2.8-tarballs`
+(node-spec, preview, mcp, then the three create-*; it skips what is live and waits out npm's review). After: read each
+shasum from the registry's full document against the table, `npm create nodegx@0.2.8` pins mcp 0.2.8, Studio's pins
+move to mcp/preview 0.2.8 with `vendor/NODEGX.json`, `automations-drive.mjs` joins Studio's `check`, and the
+changelog page (nodegx-web, Richard's upload).
+
+🔴 My first grade printed four NO probes that were my script's: `probe()` set `v=yes`, which overwrote the loop's
+`v`, so every probe after the first read a folder that does not exist and counted 0 in both versions. A probe that
+reads 0 in the control too is reading nothing; the live stranger-backend run had already shown the new `.env` sentence.
+
 **Next, in order (s8):**
 
 1. **Cut npm 0.2.8, once P128 settles** (Richard, 2026-10-27: "Wait for P128 to settle"; ask him whether it has

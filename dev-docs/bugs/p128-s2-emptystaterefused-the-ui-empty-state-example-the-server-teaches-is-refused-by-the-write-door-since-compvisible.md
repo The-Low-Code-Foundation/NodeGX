@@ -2,6 +2,7 @@
 id: P128-S2-EMPTYSTATEREFUSED
 title: "The `ui-empty-state` example the server teaches is refused by its own write door since COMPVISIBLE (`79cbc4674`): it wires `mounted` into a placed `/Components/EmptyState`, which now errors `connection-unknown-instance-port`"
 status: fixed
+commit: 6cdafc718
 severity: medium
 area: "docs/node-catalog/examples/ui-empty-state.json (`/Pages/Orders`, node `empty`); the rule from `79cbc4674` fix(p127 bko-006 compvisible)"
 found: P128 S2, 2026-10-27, the full noodl-mcp suite after S2's change (S2 adds only info diagnostics and a result note; this error is the instance-port rule)
