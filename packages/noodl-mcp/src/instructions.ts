@@ -76,7 +76,9 @@ export function projectInstructions(options: ProjectInstructionOptions): string 
     // which `toolDisclosure.test.ts`'s own header says there must not be. The division
     // that works, from SBR-013: `instructions` carries the ORDER, and the free channel
     // (a tool's RESULT) carries the detail.
-    '. Start with get_project_info. ' +
+    // P128 S1 (CCN-009) — the pointer at the canon, paid for inside this text (3 tokens of headroom, measured
+    // 8,277/8,280): the PAGES paragraph's "re-registering an already-listed page is a no-op" clause went for it.
+    '. Start with get_project_info (its "surfaces" section: what the person sees). ' +
     // LAS-006 §4. The order was the finding: both measured models planned
     // correctly and then built something the plan never described, because
     // nothing in the tool shape asked for the tree first. This paragraph now
@@ -138,7 +140,7 @@ export function projectInstructions(options: ProjectInstructionOptions): string 
     'renders blank without a `Page` node at its root — so build pages around a `Page` node, and ' +
     'aim RouterNavigate.target at a component legacyName ("/Pages/Home"), never at an invented URL path. ' +
     'Writing a page registers it in the project router for you (reported as `registeredPages`); you do not ' +
-    'need to edit the router yourself, and re-registering an already-listed page is a no-op. ' +
+    'need to edit the router yourself. ' +
     'For a multi-component build use create_plan / stage_plan_operation / apply_plan — nothing touches ' +
     'disk until the one apply — and pass its `scroll` argument ("page" or "app"), because the underlying ' +
     'default clips every page at the viewport with no scrollbar. ' +

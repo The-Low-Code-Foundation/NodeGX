@@ -80,6 +80,7 @@ import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { studioFor } from '../studio/studioProcess';
 import { STUDIO_BURST } from '../studio/burst';
+import { handoverFor } from '../surfaces';
 
 // P125-PUPPY-ONEAPPLY (CCN-005) — the cap lives in studio/burst.ts, beside create_component's; exported here as before.
 export { STUDIO_BURST };
@@ -1140,6 +1141,8 @@ export function registerPlanTools(
       // process, it threw, or it was never wanted — all arrive as the same
       // honest "nobody has looked at this".
       const completion = completionPayload(ledger.state(store.projectDir));
+      // P128 S1 (CCN-009) — canon rule 3: the apply that builds the scope's last page says to hand over, once.
+      const handover = handoverFor(store);
 
       return jsonResult({
         applied,
@@ -1162,6 +1165,7 @@ export function registerPlanTools(
         // was the last thing in the response, which is how it got read as a
         // verdict on the page.
         ...completion,
+        ...(handover ? { handover } : {}),
         note: 'Plan applied and discarded. Re-read components with get_component for fresh revisions.'
       });
     })

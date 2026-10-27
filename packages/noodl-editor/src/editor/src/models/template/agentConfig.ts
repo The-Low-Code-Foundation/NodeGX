@@ -27,12 +27,14 @@
  * callers supply three primitives. That also makes the whole thing testable
  * against an in-memory host, which is how the copy is asserted.
  *
- * ⚠️ **This module imports nothing.** It is reached from `noodl-mcp` by relative
- * path through `editor-deps`, and anything from `@noodl/platform` or Electron
- * would break that bundle.
+ * ⚠️ **This module imports nothing but `../canon`, which imports nothing.** It is
+ * reached from `noodl-mcp` by relative path through `editor-deps`, and anything
+ * from `@noodl/platform` or Electron would break that bundle.
  *
  * @module noodl-editor/models/template/agentConfig
  */
+
+import { CANON } from '../canon';
 
 /** Project-relative paths this module writes. Exported so callers can report them. */
 export const AGENT_CONFIG_PATHS = Object.freeze({
@@ -198,6 +200,35 @@ function commandLine(registration: AgentServerRegistration): string {
   return env.join('') + [quote(registration.command), ...args].join(' ');
 }
 
+/**
+ * P128 S1 (CCN-009) — "Where the person sees this app": the three surfaces, a fixed list, and the offer for a part
+ * Studio does not edit. Agent-agnostic (this is AGENTS.md too). The two quotes are `docs/CANON.md` through the pinned
+ * copy, each under the `<!-- canon: <heading> -->` marker `scripts/canon-check.mjs` reads; the quoted block is the
+ * lines after the marker up to the next blank line, a verbatim run of that canon section.
+ */
+function whereThePersonSeesIt(): string[] {
+  const rules = 'For the agent (the rules, not copy)';
+  const fixedList = CANON[rules].split(/\n(?=\d+\. )/).find((r) => r.startsWith('5. '));
+  const offer = /\*"[^*]+"\*/.exec(CANON['The wiring underneath'])?.[0];
+  if (!fixedList || !offer) throw new Error('docs/CANON.md lost rule 5 or the offer sentence; see models/canon.ts');
+  return [
+    '## Where the person sees this app',
+    '',
+    'The person this app is for may not read code. They see it in NodeGX Studio (inside the conversation where ' +
+      'the agent app can show it, otherwise in its own window), or one part at a time in a mini editor when there ' +
+      'is something to decide; the NodeGX editor shows every node and wire. The authoring server\'s ' +
+      '`get_project_info` section `surfaces` has the whole of it.',
+    '',
+    `<!-- canon: ${rules} -->`,
+    fixedList,
+    '',
+    'A part Studio does not edit (a `States` node, a script, a function\'s insides) is still built; say so, and offer:',
+    '',
+    '<!-- canon: The wiring underneath -->',
+    offer
+  ];
+}
+
 function renderAgentNote(options: AgentConfigOptions, audience: 'claude' | 'agents'): string {
   const { projectName, serverName, summary, hasDocs, registration } = options;
 
@@ -248,6 +279,8 @@ function renderAgentNote(options: AgentConfigOptions, audience: 'claude' | 'agen
       ''
     );
   }
+
+  lines.push(...whereThePersonSeesIt(), '');
 
   if (hasDocs) {
     lines.push(

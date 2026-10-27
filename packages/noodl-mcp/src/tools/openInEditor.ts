@@ -52,6 +52,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
 import { ToolError } from '../errors';
+import { EDITOR_DOWNLOAD } from '../surfaces';
 import { userDataCandidates } from './listProjects';
 import { guarded, jsonResult } from './util';
 
@@ -148,14 +149,24 @@ interface RelayPeer {
  * `editor` receives every project export on the relay; this one receives only what is addressed
  * to it, which for a tool that sends one message and waits for one reply is the whole traffic.
  */
+/**
+ * P128 S1 (CCN-009) — what to do when the person has no NodeGX editor: the canon's download, then Connect Claude. Said
+ * in both refusals, because "Start NodeGX" is no help to someone who never installed it.
+ */
+const NOT_INSTALLED =
+  `If the person does not have the NodeGX editor, it is a free download (${EDITOR_DOWNLOAD}); once it is open they ` +
+  'press Connect Claude in it, and you call this again.';
+
 async function askEditorToOpen(directory: string): Promise<OpenInEditorResponse> {
   const lookup = findRelayToken();
   if (!lookup.token) {
     throw new ToolError(
       'not-found',
       'No NodeGX relay token was found, which almost always means the editor is not running on this ' +
-        'machine. Start NodeGX and try again. (The editor mints a token per launch and writes it to its ' +
-        'user-data directory; set NODEGX_RELAY_TOKEN to override.)',
+        'machine. Start NodeGX and try again. ' +
+        NOT_INSTALLED +
+        ' (The editor mints a token per launch and writes it to its user-data directory; set NODEGX_RELAY_TOKEN ' +
+        'to override.)',
       { searched: lookup.searched }
     );
   }
@@ -211,7 +222,8 @@ async function askEditorToOpen(directory: string): Promise<OpenInEditorResponse>
         error: new ToolError(
           'not-found',
           `Nothing is listening on the NodeGX relay at ${address}. Start NodeGX, or — if it is running on ` +
-            'another port — set NOODLPORT to the port it was launched with.'
+            'another port — set NOODLPORT to the port it was launched with. ' +
+            NOT_INSTALLED
         )
       });
     });
@@ -338,7 +350,10 @@ export function registerOpenInEditorTools(server: McpServer): void {
       description:
         'Ask the NodeGX editor the user already has open to open a project, so they can see what you built ' +
         'without clicking anything. Use it after create_project, or after editing a project the user is not ' +
-        'currently looking at. Requires NodeGX to be running on this machine. Opening a project makes the ' +
+        'currently looking at. Requires NodeGX to be running on this machine. ' +
+        // P128 S1 (CCN-009) — the other surfaces and the download, one clause (a deferred tool: 0 resident tokens).
+        'It shows every node and wire, which Studio (open_studio) and a mini editor (show_mini_editor) do not; ' +
+        `not installed, the person downloads it (${EDITOR_DOWNLOAD}) and presses Connect Claude. Opening a project makes the ` +
         'editor write its agent config (.mcp.json, CLAUDE.md) into it if missing, exactly as a person opening ' +
         'it would. Opening one the editor already has open is a no-op that brings the window to the front.',
       inputSchema: openInEditorSchema

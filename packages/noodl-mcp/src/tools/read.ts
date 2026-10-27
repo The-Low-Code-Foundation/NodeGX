@@ -45,6 +45,7 @@ import { readVisualRoots } from '../visualRoots';
 import { drawnPortsFor } from '../specPorts';
 import { automationsDriftOf } from '../backend/automationsDrift';
 import { componentHonestyOf, componentHonestyPayload, projectHonestyOf, projectHonestyPayload } from '../honesty';
+import { SURFACES_DOCTRINE_MD } from '../surfaces';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { kitDiagnostics } = require('@nodegx/kit-catalog');
@@ -224,7 +225,8 @@ function guidanceTexts(): Record<SectionName, string> {
     authoring: DECOMPOSITION_DOCTRINE_MD,
     interface: INTERFACE_DOCTRINE_MD,
     design: forClient(DESIGN_DOCTRINE_MD, 'design'),
-    backend: BACKEND_DOCTRINE_MD
+    backend: BACKEND_DOCTRINE_MD,
+    surfaces: SURFACES_DOCTRINE_MD
   };
 }
 
@@ -320,7 +322,10 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
               // same measured reason. The instructions cannot carry it (surface
               // budget) and it corrects a claim the two doctrines above make
               // that is false on a cloud graph.
-              backendDoctrine: guidance.backend
+              backendDoctrine: guidance.backend,
+              // P128 S1 (CCN-009) — the canon: which surface the person sees, what Studio does not edit, a
+              // fixed list as an option set. Nothing the agent read named Studio or the NodeGX editor (audit §1.4).
+              surfacesDoctrine: guidance.surfaces
             }
           : {}),
         // CN-003 — absent unless there is something to report; see `kitsReport`.

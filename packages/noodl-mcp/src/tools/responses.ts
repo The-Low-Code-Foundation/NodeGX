@@ -144,6 +144,12 @@ export interface ProjectInfoResponse {
    * budget gate rules the `instructions` channel out.
    */
   backendDoctrine?: string;
+  /**
+   * P128 S1 (CCN-009) — `docs/CANON.md` for the agent: the three surfaces the person sees (the part in the chat,
+   * Studio, the NodeGX editor), the wiring Studio does not edit and the offer sentence, and the canon's five rules
+   * (option sets, the hand-over). Same read-write gate; built in `src/surfaces.ts` from the pinned canon.
+   */
+  surfacesDoctrine?: string;
   /** P112-OWN026-GUIDANCECUT — the last field, so the end a middle cut keeps says how to fetch what it took. */
   moreGuidance?: string;
   /**

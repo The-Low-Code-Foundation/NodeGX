@@ -131,7 +131,10 @@ export function registerMiniEditorTools(rec: McpServer, server: McpServer, bindi
         'hover, pressed and disabled looks too: offer those as settings (state) when they change with the normal one. ' +
         'scope "style" changes the project\'s style for the type (every Button), which is what "the button style" means. ' +
         'It replaces Studio in the ' +
-        'conversation (one live panel): a turn that ends with one needs no open_studio. Call it as the LAST call of your turn, say in a sentence what to look at, and ' +
+        'conversation (one live panel): a turn that ends with one needs no open_studio. ' +
+        // P128 S1 (CCN-009) — the other surfaces, one clause (a deferred tool: 0 resident tokens).
+        'Studio (open_studio) is where they change the app day to day, the NodeGX editor (open_in_editor) every node. ' +
+        'Call it as the LAST call of your turn, say in a sentence what to look at, and ' +
         'stop: their decision ("Approved: …") reaches you as context with their next message, and get_mini_editor reads it any time. ' +
         'reopen: an earlier editor\'s id, to show it again (they asked for it back, or answered something else first).',
       inputSchema: {

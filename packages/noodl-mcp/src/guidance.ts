@@ -23,7 +23,9 @@ export const SECTION_FIELDS = {
   authoring: 'authoringDoctrine',
   interface: 'interfaceDoctrine',
   design: 'designDoctrine',
-  backend: 'backendDoctrine'
+  backend: 'backendDoctrine',
+  // P128 S1 (CCN-009) — the canon: the three surfaces, what Studio does not edit, option sets, the hand-over.
+  surfaces: 'surfacesDoctrine'
 } as const;
 export type SectionName = keyof typeof SECTION_FIELDS;
 
@@ -32,7 +34,8 @@ const SECTION_ABOUT: Record<SectionName, string> = {
   authoring: 'what becomes a component',
   interface: "what goes on a component's interface",
   design: 'the look, the screens, layout, type, colour, responsive',
-  backend: 'users, shared values, cloud functions, auth, what a deployed graph does differently'
+  backend: 'users, shared values, cloud functions, auth, what a deployed graph does differently',
+  surfaces: 'where the person sees the app, what Studio does not edit, a fixed list, the hand-over (the canon)'
 };
 
 /**
@@ -77,6 +80,10 @@ export function parseSection(section: string): { name: SectionName; part: number
  */
 const MUST_KNOW = [
   'Order: the look (get_style_vocabulary), then the screen list, then create_plan with one operation per component. [design]',
+  // P128 S1 (CCN-009) — the line is the session plan's, word for word (Muddy Paws: typed `fr`/`en`, a States node).
+  // SECOND, not last: Claude Code saves a result over its limit to a file and shows the agent its first 2 KB
+  // (P128-S1-PREVIEWCUT); at the end of this list two Sonnet rounds never saw it.
+  'The person sees the app in Studio unless you showed a mini editor; a fixed list (a language, a status) is a Static Data node in its own component under `Option sets/`, never typed strings; a part Studio does not draw is said so, with the editor named and the two ways offered. [surfaces]',
   "A component's inputs are a `Component Inputs` node whose ports are plugged \"output\"; an instance parameter no input declares is dropped without a word. [traps 1–2, interface]",
   'Rows are data: a `Static Data` JSON array, or a Query Records, feeding a `For Each`. Never hand-copied cards. [traps 3]',
   'Colour and spacing are tokens ("var(--space-4)"), never hex or px. After a visual write, look: render_report, then drive_page both ways (a setting off as well as on, a limit at its edge, a confirmation by its cancel). [traps 6–7]',

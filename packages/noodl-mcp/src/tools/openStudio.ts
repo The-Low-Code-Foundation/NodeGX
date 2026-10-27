@@ -44,6 +44,7 @@ import type { McpServer, RegisteredResource } from '@modelcontextprotocol/sdk/se
 
 import { clientRendersApps, consumeOpenStudioProxied } from '../clientApps';
 import { ToolError } from '../errors';
+import { EDITOR_DOWNLOAD } from '../surfaces';
 import { HOLD_FILE, mayRelease, oldHoldWords, readHold, RELEASE_AFTER_REFUSAL_MS } from '../hold';
 import type { ProjectBinding } from '../project/ProjectBinding';
 import * as fs from 'fs';
@@ -177,7 +178,10 @@ export function registerOpenStudioTools(rec: McpServer, server: McpServer, bindi
         'ONCE per turn, as the turn\'s FIRST call, in every turn in which you change the app: never again later in ' +
         'the same turn and never to finish it, because each call draws another Studio in the conversation. ' +
         'Studio has a HOLD button: while it is pressed, every write you make is refused with code `held` — stop and ' +
-        'ask them what they saw. A later call starts no second Studio: the same one answers, at the same URL.',
+        'ask them what they saw. A later call starts no second Studio: the same one answers, at the same URL. ' +
+        // P128 S1 (CCN-009) — the other surfaces, one clause (a deferred tool: 0 resident tokens).
+        'One decision is a mini editor (show_mini_editor); a part Studio does not edit (a States node, a script) ' +
+        `is in the NodeGX editor (open_in_editor; ${EDITOR_DOWNLOAD}): say so, get_project_info section "surfaces".`,
       inputSchema: {},
       _meta: { ui: { resourceUri: STUDIO_RESOURCE_URI }, 'ui/resourceUri': STUDIO_RESOURCE_URI }
     },

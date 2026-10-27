@@ -452,6 +452,10 @@ export {
 // result rides free (see the module header).
 export { BACKEND_DOCTRINE_MD } from '../../noodl-editor/src/editor/src/models/AiAssistant/authoring/prompts/backend';
 
+// P128 S1 (CCN-009) — the canon (`docs/CANON.md`), pinned word for word; imports nothing, same rule as above.
+export { CANON } from '../../noodl-editor/src/editor/src/models/canon';
+export type { CanonHeading } from '../../noodl-editor/src/editor/src/models/canon';
+
 // ─── Project review (AIX-010) ─────────────────────────────────────────────────
 // The pure half of the docs retrofit only. `review/assembleProject`,
 // `review/pageMap`, `review/selection` and `review/prompts` import nothing
