@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "This is a helper executable and cannot be launched directly; it requires a --type argument from the browser process." >&2
+exit 64
