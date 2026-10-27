@@ -227,6 +227,12 @@ export const DIAGNOSTIC_EXAMPLES: readonly ExampleCitation[] = [
     code: DiagnosticCode.FunctionGuardsAnOpenCollection,
     examples: ['cloud-members-can-edit-my-records'],
     why: 'the records only a function creates, with the collection\'s create rule "nobody": the function runs as the system'
+  },
+  // P112-OWN018-FANOUT (ruled 2026-10-27 "Teach it and warn") — the warning carries the chained shape.
+  {
+    code: DiagnosticCode.ConditionReadsASiblingsChange,
+    examples: ['score-then-move-on'],
+    why: "the press evaluating the gate that reads, and that gate's Done evaluating the gate that moves on, so the score is decided first"
   }
 ];
 

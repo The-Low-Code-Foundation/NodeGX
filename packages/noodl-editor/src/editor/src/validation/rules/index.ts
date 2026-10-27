@@ -47,6 +47,7 @@ import { settingsDiagnostic } from './settingsDiagnostic';
 import { functionScriptNotCompiled } from './functionScriptNotCompiled';
 import { functionNeverReruns } from './functionNeverReruns';
 import { functionRunOnChangeUnknown } from './functionRunOnChangeUnknown';
+import { conditionReadsASiblingsChange } from './conditionReadsASiblingsChange';
 import { contentRowSplitsItsChildren, rowOfWordsFillsItsColumn } from './layoutFillTraps';
 import { clickAreaHoldsAControl } from './clickAreaHoldsAControl';
 
@@ -106,6 +107,9 @@ export const ALL_RULES: Rule[] = [
   functionScriptNotCompiled,
   functionNeverReruns,
   functionRunOnChangeUnknown,
+  // P112-OWN018-FANOUT (ruled 2026-10-27 "Teach it and warn") — beside the Function rules: what a graph's signals do in
+  // what order, read from the wires. Two gates off one signal, one changing what the other reads.
+  conditionReadsASiblingsChange,
   repeatedSiblingSubtree,
   // DEF-025 — beside `repeatedSiblingSubtree` because both read the visual
   // tree's arrangement rather than wires: that one asks whether siblings
@@ -156,6 +160,7 @@ export {
   functionScriptNotCompiled,
   functionNeverReruns,
   functionRunOnChangeUnknown,
+  conditionReadsASiblingsChange,
   repeatedSiblingSubtree,
   labelNotAClickTarget,
   clickAreaHoldsAControl,

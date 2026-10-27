@@ -1437,7 +1437,12 @@ export enum DiagnosticCode {
    * and the input it meant still runs the Function. Warning, blocking for a graph an agent just
    * wrote (`AUTHORED_BLOCKING_WARNINGS`).
    */
-  FunctionRunOnChangeUnknown = 'function-run-on-change-unknown'
+  FunctionRunOnChangeUnknown = 'function-run-on-change-unknown',
+  /**
+   * Bug P112-OWN018-FANOUT (ruled "Teach it and warn"): two Conditions evaluated by one signal, where one's On True or
+   * On False changes what the other reads; the reader sees the change whichever order they are wired in. Warning.
+   */
+  ConditionReadsASiblingsChange = 'condition-reads-a-siblings-change'
 }
 
 // ─── Location ─────────────────────────────────────────────────────────────────
