@@ -190,6 +190,63 @@ describeOrSkip('P127 BKO-001 — the agent’s backend writes reach the project�
     expect(readJson(rules).collections.Books).toBeUndefined();
   });
 
+  // P127-S9-FNLIMITFILEONLY: two strangers were told to write a function's rate limit into the rules file by
+  // hand; the running backend never loaded it. The tool writes both, and the backend is what is measured.
+  it('🔴 a function’s rate limit the agent sets is on the running backend AND in nodegx.security.json; a reset takes it out of both', async () => {
+    const client = new BackendClient(listBackends().find((b) => b.id === ID)!);
+    const onBackend = async () =>
+      ((await client.request('GET', '/admin/permissions')).json as { config: { functions: Record<string, unknown> } }).config.functions['Send Reminder'];
+    expect(await onBackend()).toBeUndefined();
+
+    const set = await call<{ project: { written: boolean }; warning?: string }>(session, 'set_function_permissions', {
+      function: 'Send Reminder',
+      rateLimit: { ratePerMinute: 120, burst: 60 }
+    });
+    expect(set.isError).toBe(false);
+    expect(set.data.project).toEqual({ file: 'nodegx.security.json', written: true });
+    expect(set.data.warning).toMatch(/No function called "Send Reminder" is on this backend yet/);
+    expect(await onBackend()).toEqual({ rateLimit: { ratePerMinute: 120, burst: 60 } });
+    // what the backend's limiter resolves for it, not only what its config holds
+    const listed = (await client.request('GET', '/admin/permissions/functions')).json as {
+      functions: { name: string; effectiveRateLimit: unknown; rateLimitSource: string }[];
+    };
+    expect(listed.functions.find((f) => f.name === 'Send Reminder')).toMatchObject({
+      effectiveRateLimit: { ratePerMinute: 120, burst: 60 },
+      rateLimitSource: 'declared'
+    });
+    expect(readJson(rules).functions['Send Reminder']).toEqual({ rateLimit: { ratePerMinute: 120, burst: 60 } });
+
+    // a second field merges; null puts one back to the default
+    expect((await call(session, 'set_function_permissions', { function: 'Send Reminder', call: 'authenticated' })).isError).toBe(false);
+    expect(readJson(rules).functions['Send Reminder']).toEqual({ rateLimit: { ratePerMinute: 120, burst: 60 }, call: 'authenticated' });
+    expect((await call(session, 'set_function_permissions', { function: 'Send Reminder', rateLimit: null })).isError).toBe(false);
+    expect(await onBackend()).toEqual({ call: 'authenticated' });
+    expect(readJson(rules).functions['Send Reminder']).toEqual({ call: 'authenticated' });
+
+    const both = await call(session, 'set_function_permissions', { function: 'Send Reminder', reset: true, call: 'public' });
+    expect(both.isError).toBe(true);
+    expect((await call(session, 'set_function_permissions', { function: 'Send Reminder', reset: true })).isError).toBe(false);
+    expect(await onBackend()).toBeUndefined();
+    expect(readJson(rules).functions?.['Send Reminder']).toBeUndefined();
+  });
+
+  it('🔴 both or neither: a function’s rule the file cannot take is taken off the backend again', async () => {
+    const client = new BackendClient(listBackends().find((b) => b.id === ID)!);
+    const before = fs.readFileSync(rules, 'utf-8');
+    const blocker = `${rules}.tmp-${process.pid}`;
+    fs.mkdirSync(blocker);
+    try {
+      const refused = await call(session, 'set_function_permissions', { function: 'Weekly Digest', rateLimit: { ratePerMinute: 10, burst: 10 } });
+      expect(refused.isError).toBe(true);
+      expect(JSON.stringify(refused.data)).toMatch(/put back as it was/);
+    } finally {
+      fs.rmSync(blocker, { recursive: true, force: true });
+    }
+    const config = (await client.request('GET', '/admin/permissions')).json as { config: { functions: Record<string, unknown> } };
+    expect(config.config.functions['Weekly Digest']).toBeUndefined();
+    expect(fs.readFileSync(rules, 'utf-8')).toBe(before);
+  });
+
   it('🔴 both or neither: when the file cannot be written, the backend is put back', async () => {
     const before = fs.readFileSync(automations, 'utf-8');
     const listBefore = await call<{ triggers: { id: string }[] }>(session, 'list_backend_triggers');

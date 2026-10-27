@@ -38,9 +38,11 @@ describe('DEF-009 — the public write door with no limit is named', () => {
     expect(found).toHaveLength(1);
     expect(found[0].code).toBe(DiagnosticCode.PublicWriteDoorUnlimited);
     // The message must name the mechanism — the whole defect is that nobody was
-    // told there was one. Both settable surfaces, by name.
+    // told there was one. P127-S9-FNLIMITFILEONLY: the way named writes BOTH (the file and the running
+    // backend); a hand edit of the file, which the message once said to make, never reached the backend.
     expect(found[0].message).toContain('nodegx.security.json');
-    expect(found[0].message).toContain('/admin/permissions/functions/submitContactForm');
+    expect(found[0].message).toContain('set_function_permissions { "function": "submitContactForm"');
+    expect(found[0].message).not.toMatch(/^.*Add `"functions"/);
     expect(found[0].location).toMatchObject({ nodeId: 'req', port: 'allowNoAuth' });
   });
 

@@ -660,6 +660,59 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
     })
   );
 
+  // P127-S9-FNLIMITFILEONLY: a function's rule had no tool, so agents wrote the rules file by hand and the
+  // running backend never loaded it. The same both-or-neither write as a collection's.
+  server.registerTool(
+    'set_function_permissions',
+    {
+      title: 'Set a cloud function rule',
+      description:
+        "Set who may call a cloud function, its rate limit, its time limit or runs-as, on the running backend and " +
+        "in the project's nodegx.security.json together. A null field goes back to the default; reset removes the rule.",
+      inputSchema: {
+        backendId: z.string().optional(),
+        function: z.string().describe('The cloud function, by name'),
+        call: ruleValue.optional(),
+        rateLimit: z
+          .object({ ratePerMinute: z.number().min(0), burst: z.number().min(0) })
+          .nullable()
+          .optional()
+          .describe('Per caller; 0/0 = no limit'),
+        timeoutMs: z.number().min(0).nullable().optional().describe('0 = no limit'),
+        runAs: z.literal('system').nullable().optional(),
+        reset: z.boolean().optional()
+      }
+    },
+    guarded(async ({ backendId, function: asked, call, rateLimit, timeoutMs, runAs, reset }) => {
+      const client = await requireBackend(backendId);
+      const { target, note, warning } = await resolveFunctionTarget(client, { kind: 'function', name: asked });
+      const name = target.name;
+      const body: Record<string, unknown> = {};
+      if (call !== undefined) body.call = call;
+      if (rateLimit !== undefined) body.rateLimit = rateLimit;
+      if (timeoutMs !== undefined) body.timeoutMs = timeoutMs;
+      if (runAs !== undefined) body.runAs = runAs;
+      if (reset && Object.keys(body).length > 0) {
+        throw new ToolError('invalid-argument', 'Send reset alone, or the fields to set: reset removes the whole rule.');
+      }
+      const route = `/admin/permissions/functions/${encodeURIComponent(name)}`;
+      const ruleOf = async () => (((await permissionsConfig(client)).functions as Record<string, Record<string, unknown>>) ?? {})[name] ?? null;
+      const before = await ruleOf();
+      const { answer, project } = await writeBoth({
+        binding,
+        client,
+        fileName: PROJECT_RULES_FILE,
+        write: async () => (await client.request(reset ? 'DELETE' : 'PUT', route, reset ? undefined : body)).json,
+        mirror: async (dir) => patchRules(dir, name, await ruleOf(), await permissionsConfig(client), 'functions'),
+        undo: async () => {
+          if (before && Object.keys(before).length > 0) await client.request('PUT', route, before);
+          else await client.request('DELETE', route);
+        }
+      });
+      return jsonResult({ ...(answer as object), project, ...(note ? { note } : {}), ...(warning ? { warning } : {}) });
+    })
+  );
+
   // P112 OWN-026 FIX-01 (P112-OWN023-NOENFORCETOOL): an agent that read `enforced: false` from
   // get_backend_permissions had no way to turn the rules on, and built on an open backend.
   server.registerTool(

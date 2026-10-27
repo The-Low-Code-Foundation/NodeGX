@@ -217,9 +217,10 @@ export function checkPublicWriteDoor(
       message:
         `"${functionName}" accepts unauthenticated calls (its Request node ticks Allow Unauthenticated) and ` +
         `writes records (${writes}), and no working rate limit is set for it — ${budget} ` +
-        `Add \`"functions": { "${functionName}": { "rateLimit": { "ratePerMinute": 10, "burst": 10 } } }\` to ` +
-        "the project's nodegx.security.json (numbers to taste, or 0/0 for no limit at all), or set it on a " +
-        `running backend via PUT /admin/permissions/functions/${functionName}.`,
+        `Set it with set_function_permissions { "function": "${functionName}", "rateLimit": { "ratePerMinute": 10, ` +
+        '"burst": 10 } } (numbers to taste, or 0/0 for no limit at all), which writes the running backend and ' +
+        "the project's nodegx.security.json together. A hand edit of that file reaches no backend that is " +
+        'already running.',
       location: {
         component,
         nodeId: request.id,

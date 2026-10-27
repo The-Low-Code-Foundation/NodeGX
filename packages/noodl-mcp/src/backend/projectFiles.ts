@@ -101,7 +101,8 @@ export function patchAutomations(
 }
 
 /**
- * Set (entry) or remove (null) one collection's rule in `nodegx.security.json`. A project with no
+ * Set (entry) or remove (null) one collection's rule in `nodegx.security.json` (or, with `section`
+ * "functions", one cloud function's: P127-S9-FNLIMITFILEONLY). A project with no
  * rules file gets one made from the backend's whole policy, with `devOpen` false: the switch is the
  * backend's (`set_backend_enforcement`), and a deploy refuses rules that are switched off.
  */
@@ -109,15 +110,16 @@ export function patchRules(
   projectDir: string,
   collection: string,
   entry: Record<string, unknown> | null,
-  backendConfig: Record<string, unknown>
+  backendConfig: Record<string, unknown>,
+  section: 'collections' | 'functions' = 'collections'
 ): { file: string; before: string | null } {
   const file = path.join(projectDir, PROJECT_RULES_FILE);
   const before = readText(file);
   const base = before ? (JSON.parse(before) as Record<string, unknown>) : { ...backendConfig, devOpen: false };
-  const collections = { ...((base.collections as Record<string, unknown>) ?? {}) };
-  if (entry) collections[collection] = entry;
-  else delete collections[collection];
-  writeAtomic(file, serializeV2File({ ...base, collections }, before));
+  const rules = { ...((base[section] as Record<string, unknown>) ?? {}) };
+  if (entry) rules[collection] = entry;
+  else delete rules[collection];
+  writeAtomic(file, serializeV2File({ ...base, [section]: rules }, before));
   return { file, before };
 }
 

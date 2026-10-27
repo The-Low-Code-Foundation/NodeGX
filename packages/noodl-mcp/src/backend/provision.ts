@@ -878,8 +878,9 @@ export async function provisionBackend(request: ProvisionRequest): Promise<Provi
         warnings.push(
           `This project ships a security policy (nodegx.security.json) but backend "${started.name}" is ` +
             `running a different one, and an existing security.json is never overwritten. The backend's policy ` +
-            `is what is enforced. Compare ${projectPolicy} with ${backendPolicy} and copy it across ` +
-            `deliberately if the project's is the one you want.`
+            `is what is enforced. Compare ${projectPolicy} with ${backendPolicy}; to bring the project's ` +
+            `across, set each differing rule with set_collection_permissions or set_function_permissions, ` +
+            `which write the backend and the file together.`
         );
       }
     }
