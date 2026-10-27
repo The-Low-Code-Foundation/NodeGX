@@ -36,3 +36,12 @@ It then read the page correctly, and the page itself is the next wall:
 So handing Claude the link works, and what it then reads must offer the one download. That is CCN-006 AC6 and S8's
 download block (the `.mcpb` linked from /start, signed): the copy to say is "paste https://nodegx.io/start into
 Claude", with the scheme.
+
+**Two routes measured closed (2026-10-27).** (1) The directory: `claude.com/docs/directory/publish` says "the directory
+no longer accepts local MCP servers packaged as desktop extensions (MCPB)", and a plugin bundle's local MCP server is
+"Ignored" in Chat (`claude.com/docs/plugins/platform-support`): only a remote server works there, and NodeGX's must be
+local. A directory listing cannot put NodeGX in a stranger's Desktop chat. (2) Search: a web search for `NodeGX`, and
+for `"NodeGX" Low Code Foundation github app builder`, returns Victron, Nodezilla and other projects; not nodegx.io and
+not the public GitHub repo. So the copy half (hand Claude the link) is the only thing that works this week; the
+findable half (sitemap, robots, a webmaster submission, links in) is days to weeks. A nodegx-web session had
+robots.txt and sitemap.xml in `ops/build.py`, uncommitted, at 17:19 the same day.
