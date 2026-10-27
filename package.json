@@ -31,6 +31,7 @@
     "tsfixme:report": "node scripts/tsfixme-ratchet.js --report",
     "colors": "node scripts/hex-color-ratchet.js",
     "vocabulary": "node scripts/vocabulary-ratchet.js",
+    "canon:check": "node scripts/canon-check.mjs",
     "renderer-errors": "node scripts/renderer-errors/run.js",
     "vocabulary:verbose": "node scripts/vocabulary-ratchet.js --verbose",
     "colors:baseline": "node scripts/hex-color-ratchet.js --update",

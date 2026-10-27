@@ -1,6 +1,9 @@
 # create-nodegx
 
-Sets a folder up so your AI agent can build [NodeGX](https://nodegx.io) apps in it.
+<!-- canon: What NodeGX is for -->
+Your AI coder can already build you a whole app. NodeGX is about what happens around that.
+
+This command sets a folder up so your AI coder can build [NodeGX](https://nodegx.io) apps in it.
 
 ```
 npm create nodegx my-apps

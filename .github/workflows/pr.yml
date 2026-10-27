@@ -113,6 +113,13 @@ jobs:
       # nearly all of them Electron's `sandbox:` option — and prints every string
       # it declines to count, with the rule that excused it, for a reviewer.
       - run: npm run vocabulary
+      # A gate at zero (P128 CPY-004): every place that explains NodeGX quotes
+      # docs/CANON.md under a `<!-- canon: <heading> -->` marker, word for word.
+      # The READMEs are read from disk; the seeded CLAUDE.md / AGENTS.md are
+      # rendered by the editor's own agentConfig.ts and read as a project gets
+      # them, and the pinned copy the MCP server quotes is diffed whole. A
+      # place that lost its marker fails like one whose wording drifted.
+      - run: npm run canon:check
       # Same shape for raw px font sizes (CHR-002): the chrome has a type scale
       # (R1, phase 92: 11/12/13/15/20 + 26) as --font-size-* tokens, and a
       # `font-size` or `font:` shorthand in px is a size that scale cannot reach.

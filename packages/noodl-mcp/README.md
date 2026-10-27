@@ -1,9 +1,11 @@
 # @nodegx/mcp — NodeGX MCP Server
 
-A [Model Context Protocol](https://modelcontextprotocol.io) server that exposes
-NodeGX (OpenNoodl) **v2 project directories** to external AI agents: open,
-inspect, author and validate projects programmatically — no editor process, no
-whole-project context.
+<!-- canon: What NodeGX is for -->
+Your AI coder can already build you a whole app. NodeGX is about what happens around that.
+
+This package is the [Model Context Protocol](https://modelcontextprotocol.io) server your AI coder builds NodeGX
+apps with: it opens, reads, authors and validates a project's files (no editor process, no whole-project context)
+and shows the person Studio and the part to decide inside the conversation.
 
 The design goal (Phase 13, Gate G1): *an agent can author a correct new page
 having read only that page's parent, the relevant slice of the node catalog,

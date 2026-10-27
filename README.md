@@ -2,8 +2,11 @@
 
 [![PR](https://github.com/The-Low-Code-Foundation/NodeGX/actions/workflows/pr.yml/badge.svg?branch=cline-dev)](https://github.com/The-Low-Code-Foundation/NodeGX/actions/workflows/pr.yml)
 
-NodeGX is a visual, node-based app builder — design the UI, wire up logic, and connect
-a backend without hand-writing the plumbing. It's a fork of [Noodl](https://noodl.net)
+<!-- canon: What NodeGX is for -->
+Your AI coder can already build you a whole app. NodeGX is about what happens around that.
+
+This repository is NodeGX itself: the visual editor, the runtime and the backend NodeGX apps run on, and
+`@nodegx/mcp`, the server your AI coder builds them with. It's a fork of [Noodl](https://noodl.net)
 (GPL-3.0), continued and extended by The Low Code Foundation after the original project
 stopped shipping.
 

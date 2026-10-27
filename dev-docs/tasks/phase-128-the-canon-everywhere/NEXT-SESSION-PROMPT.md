@@ -104,7 +104,7 @@ the two-literals case in Muddy Paws Shelter returns the suggestion; gates green;
   `--again s1/prompt-2.txt`, is the measurement. Filed: P128-S2-OPTSETSHAPE (Studio's `display` rows vs the
   Dropdown's `Label`/`Value`: S4 or S6 rules the row shape), P128-S2-ACTIONNAMES (read only). S6: export type names.
 
-### [ ] S3 — CPY-003 and CPY-004: the READMEs, the editor's welcome line, the canon check
+### [x] S3 — CPY-003 and CPY-004: the READMEs, the editor's welcome line, the canon check
 **Files.** `packages/noodl-mcp/README.md`, `packages/create-nodegx/README.md`, `README.md` (the first paragraph is
 `docs/CANON.md` "What NodeGX is for", first paragraph, verbatim, then the package's own job in one sentence);
 `packages/noodl-editor` welcome (one line: NodeGX Studio exists for the day-to-day, and Connect Claude walks you from
@@ -114,6 +114,22 @@ its quote; the check fails when the quoted block differs from the canon's; wired
 the repo already runs for docs (say which).
 **AC.** The check passes on the three READMEs and S1's seed paragraph; a one-word change to the canon makes it fail
 on each (run it, revert).
+
+- **Landed (2026-10-27).** `scripts/canon-check.mjs` (`npm run canon:check`, wired into the PR workflow's Lint job;
+  the root has no `npm run check`): a register of places → headings; markdown/HTML places are read for
+  `<!-- canon: -->` quotes, the seed is rendered by bundling the editor's `agentConfig.ts` with esbuild, the pin
+  (`models/canon.ts`) is diffed whole; wrapping, `*`, backticks, tags and curly quotes are not words, every word is.
+  The three READMEs open with the canon's first paragraph + one sentence each; the launcher's Connect card has the
+  Studio line, made of three registered canon phrases. Extra files as arguments (`node scripts/canon-check.mjs
+  site/_page.html`) are S8's hook; `--canon=<copy>` reads a changed canon without touching the shared one.
+- **Gates.** 16 quotes pass. A one-word change in a copy of the canon, three ways ("around"→"after", rule 5's
+  "several"→"many", the offer's "It's"→"It is"; plus the Studio phrase): exit 1, each failing exactly its places
+  (4, 3, 3, 2). Synthetic site HTML: passes, and fails on "whole"→"full". see001Honesty + p128CanonPin 16/16,
+  create-nodegx 34/34. No dist rebuild needed (the MCP README ships on the next publish; nothing in `src/` changed).
+- **For S4 and after.** Filed P128-S3-NOSTUDIOFORTHEEDITOR (launch: beta): the editor's Connect Claude Code registers
+  a server whose `findStudio` only knows `$NODEGX_STUDIO` and our checkout path, so the card's (and the canon's)
+  "it opens Studio in a browser window beside the chat" is false for a stranger until it is fixed. The welcome line
+  and the README sentences after the quote are composed by S3, not ruled: Richard reads them.
 
 ## Repo B — nodegx-studio (`main`)
 
@@ -182,6 +198,11 @@ stranger (P125 CCN-007) on steps 1–7; then the cut and the Brevo email
 resolved). Lane 9's SCHEDULEAUTH ruling and `@nodegx/mcp` 0.2.8 are not this phase's and stay first on the board.
 
 ## Handoffs (each session writes three lines under its box above, and the newest here)
+
+- 2026-10-27, S3: see the lines under S3. Traps: a script outside the repo (the scratchpad) cannot `import
+  'esbuild'`; resolve it with `createRequire(<repo>/package.json)`. Rendering a core-ui component outside webpack hits
+  `require.context` in the icon set: stub the button. `findStudio` finds Studio only on our machines (the bug above),
+  so a stranger-facing claim about `open_studio` needs the `.mcpb` or `NODEGX_STUDIO` behind it.
 
 - 2026-10-27, S2: see the lines under S2 and `s2/RESULTS.md`. Traps: `render_report` takes no page argument (it
   renders every routed page), and it caught a defect in the first draft of the example (a Text reading an unset
