@@ -39,7 +39,30 @@ Gates: Studio `check:functions` (fngraph 695/695, Chrome 46/46), `check:hosted` 
 six mutants red. The session log in BKO-004 has it all. Filed: **P127-BKO004-FNSTEPS** (a function's run records no
 nodes, so its steps cannot be lit).
 
-**Next, in order:**
+## s5 (2026-10-27): BKO-005 built
+
+Workflow → **On the backend** lists the triggers and workflows in `nodegx.automations.json` above the functions, in a
+person's words (a schedule in the backend's own cron words). A trigger opens as a flow into what it starts; a workflow
+as its steps left to right, error routes red, each function step opening the function, the last run lit step by step.
+A trigger's On/Off and a daily schedule's time are changed in Studio on the backend and in the file together
+(`POST /api/automations/trigger`), and the agent's `what_changed_since` now answers `automations` with what the person
+changed. Studio `4dc3310`; noodl-mcp `962f1716c`. The session log in BKO-005 has the grades and mutants.
+Fixed on the way: **P127-BKO005-QUIETHOVER**.
+
+🔴 The drive (`check:automations`) needs an agent server with BKO-001: the published `@nodegx/mcp` 0.2.6 has none. It
+ran with `NODEGX_MCP=<scratch>/noodl-mcp.cjs`, built from this checkout by `esbuild` with `build-common.mjs` and another
+`outfile` (never `dist/`, which Desktop runs). It joins `check` once `@nodegx/mcp` is republished.
+
+**Next, in order (s6):**
+
+1. **BKO-006**, three briefs no template covers, built by an agent, every part in the files and drawn.
+2. **Richard:** publish `@nodegx/backend-map` 0.1.3 (Studio's pin and `vendor/NODEGX.json` move together), and a
+   `@nodegx/mcp` carrying BKO-001 and BKO-005 (then `automations-drive.mjs` goes into Studio's `check`).
+3. **Desktop:** BKO-002 AC2, BKO-004 AC3 and BKO-005 AC1 inside a real conversation, after the rebuild Richard approves.
+4. BKO-005's map half: a backend trigger drawn on the map, wired to its table and its function (`fire`); a map publish.
+5. Later: BKO-001 AC5 (the VM).
+
+**Older order (s4), kept for the record:**
 
 1. **BKO-005**, workflows and triggers drawn: it reads `nodegx.automations.json` (BKO-001) and puts them under
    "On the backend" beside the functions (`renderFnList` in `studio.html`, `functionList` in `editor/fngraph.mjs`).
