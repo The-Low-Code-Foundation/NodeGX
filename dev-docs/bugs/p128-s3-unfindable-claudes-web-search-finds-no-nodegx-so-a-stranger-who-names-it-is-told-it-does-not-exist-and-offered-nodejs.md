@@ -45,3 +45,14 @@ for `"NodeGX" Low Code Foundation github app builder`, returns Victron, Nodezill
 not the public GitHub repo. So the copy half (hand Claude the link) is the only thing that works this week; the
 findable half (sitemap, robots, a webmaster submission, links in) is days to weeks. A nodegx-web session had
 robots.txt and sitemap.xml in `ops/build.py`, uncommitted, at 17:19 the same day.
+
+**The findable half's three files, built (Beta sweep s20, 2026-10-27; nodegx-web 3af9be4, NOT deployed).**
+`ops/build.py` writes `site/robots.txt` (everything allowed, the sitemap named) and `site/sitemap.xml` (the homepage
+and the 12 subpages in `SUBPAGES`, less the three that only say a page moved) whenever it builds with the site's
+address, which `deploy.sh` always passes. `site/llms.txt` is by hand: what NodeGX is, and "read
+https://nodegx.io/start/ first" with the four profiles in the picker's own words. It promises no download, so it stays
+true before and after S8. A HEAD build and this build differ by those three files only. Left: the deploy (Richard;
+`deploy.sh` ships the working tree, and nodegx-web has others' uncommitted and untracked pages in it), a webmaster
+submission (Richard's accounts), nodegx-studio's GitHub "About" website (empty; NodeGX's says nodegx.io, and the
+published npm packages already link it), and the copy half (P128 S8, CCN-006 AC6). Re-measure step 0 after indexing.
+

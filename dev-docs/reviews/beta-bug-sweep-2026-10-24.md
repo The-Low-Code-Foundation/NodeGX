@@ -31,6 +31,7 @@ the files they touch, so one session reads one surface once.
 | L6 | **The backend in the project's files, and the run timeline** | P127-BKO006-ROLESNOTINFILES, P127-BKO004-FNSTEPS (Studio can't light up which steps a function ran), P104-BMG018-SEARCH | nodegx-backend `WorkflowRunner`, noodl-mcp `create_backend_role`, the backend manager's link picker | **s18**: ROLESNOTINFILES ✅ (b0b82b694: the manager's Roles page names a role the rules use and the backend lacks, with *Make staff*). FNSTEPS read and handed back to P127 (feature-sized: the runner noting each node + Studio lighting them). SEARCH stays BMG-018's (Richard: 0.3.1) |
 | R | **Rulings for Richard** (one page, plain words, any session can put it to him) | P112-OWN018-FANOUT, P18-S119-FIRSTWRITE, P109-S18-REFRESHROWSTATE, P109-S24-SIGNINWITHERRORKEPT, NPMAUDIT-LICENCE (which licence a deployed app's runtime is under); standing: DEPLOYLOOPBACK's third-party half | — | ✅ **s19, all five ruled and built**: FANOUT "teach it and warn" 8cf4b320e; FIRSTWRITE "the last value" c92a376fa (runtime + both exports); SIGNINWITHERRORKEPT "blank text" ac33256ac; REFRESHROWSTATE "keep it, close" (wontfix); LICENCE holder "The NodeGX contributors", the site's line in nodegx-web 290a7ba (**not deployed**). DEPLOYLOOPBACK's third-party half still stands |
 | L7 | **Studio from the agent's server** (filed since: P128 S3) | P128-S3-NOSTUDIOFORTHEEDITOR (widened by P125/P128 to the npm route too, high) | noodl-mcp `src/studio/studioProcess.ts`, `src/tools/openStudio.ts` | **s19**: the app half built (0b98c2f84: `findStudio` takes the installed desktop app; the not-installed sentence names the download; driven on the packaged Mac build). Row stays open: publishing `@nodegx/studio` is CCN-006 AC7 (P125) |
+| L8 | **First contact in Claude Desktop** (filed since: P128 S3's AC8 run) | P128-S3-UNFINDABLE (high: Claude's search finds no NodeGX), P128-S3-NAMEMISMATCH (the `.mcpb`'s name and the server's differ; tools listed, none called) | nodegx-web `ops/build.py`, `site/llms.txt`; noodl-mcp `src/server.ts`; nodegx-studio `scripts/mcpb.mjs` | **s20**: UNFINDABLE's three files built (nodegx-web 3af9be4, **not deployed**); its copy half is P128 S8 / CCN-006 AC6. NAMEMISMATCH built (e03258b33, nodegx-studio a1b019e), graded on the handshake; open until Richard's fresh-chat count in Desktop on a `.mcpb` packed from e03258b33 or later |
 
 Not in the plan (off the walk): code export (lane 4, paused), WebSocket / Server-Sent Events, Video C97/C99, template,
 lab, test and CI rows. Move one in only if a session measures it on the walk.
@@ -1124,3 +1125,44 @@ the way: HLS-001's export golden had been red since s11's fast-xml-parser 5 pin 
 6. A behaviour change in the runtime's Function is a change in nodegx-export's runner too (its lib says "together or
    not at all"), and the runner's text is pinned three ways: a differential test, a Swift copy regenerated from it,
    and HLS-001's byte golden. Count each moved hash.
+
+---
+
+# Session 20, 2026-10-27 (next session reads this first)
+
+`--launch beta` had 10 rows. One was filed since s19 (UNFINDABLE), and P128 S3 filed one more during the session
+(NAMEMISMATCH). Both are on the walk's first step, Claude Desktop before and at install, so they make a new session
+L8 in the plan. P128 S3 was live in both rows' area (Richard's AC8 run). I claimed NAMEMISMATCH in its file
+(3223af940) before building it. **Nothing pushed, nothing deployed, no dist or `.mcpb` rebuilt.**
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **P128-S3-UNFINDABLE** (the findable half's files) | nodegx-web 3af9be4 | `ops/build.py` writes `robots.txt` and `sitemap.xml` from `SUBPAGES` (13 pages; the three "moved" stubs left out) on any build with the site's address; `site/llms.txt` by hand, sending an AI to /start/ with the picker's four profiles, and promising no download | a full build of a HEAD copy vs a copy with the change: three new files, nothing else; sitemap parses; copy through the offline `written`/`closer`/`contract`/`opener` checks (one false alarm: "From code to NodeGX" is a page title). Live today: all three 404 until a deploy |
+| **P128-S3-NAMEMISMATCH** (built, not counted) | e03258b33, nodegx-studio a1b019e | `serverInfo.name` = `NODEGX_SERVER_NAME` when set, else `noodl-mcp`; `mcpb.mjs` sets it from the manifest's own `name` constant | handshake test 3/3, HEAD reds the set arm; noodl-mcp `tsc --noEmit` clean but for OPTSETTSC's two (P128's file). No stage build: `dist/mcpb-stage/` is the peer's |
+
+## For Richard
+
+1. nodegx-web deploy: llms.txt, robots.txt and sitemap.xml go live with it (with s18's Download section and s19's
+   licence line). 🔴 `deploy.sh` ships the working tree. nodegx-web has untracked folders that are 404 live today
+   (`lab/`, `templates/`), plus a peer's staged `demos/_page.html`: they would go live too.
+2. After the deploy: submit the sitemap in Google Search Console and Bing Webmaster Tools (your accounts), and put
+   nodegx.io in nodegx-studio's GitHub "About" website (empty; NodeGX's already says it).
+3. NAMEMISMATCH's count: on the next test `.mcpb` (packed from e03258b33 or later), several fresh chats with the same
+   sentence, counting the ones with no tool call.
+
+## Next
+
+1. `--launch beta` again. L8's rows wait on Richard (the deploy, the count) and P128 S8 (the /start copy). The rest
+   stand as s19 left them: no sweep row a session can build without a lane or Richard.
+
+## Traps met
+
+1. 🔴 **nodegx-web's working tree holds older copies of 11 built pages than HEAD** (`index.html` files dated 10-22 vs
+   commits of 10-24). Running `ops/build.py` in that checkout regenerates them and every peer's `index.html` edit
+   with them. Build in a copy (`git archive HEAD | tar -x -C <scratch>`, overlay your files) and commit only your
+   paths through a temporary index (`demos/_page.html` is staged by someone else).
+2. A peer read my uncommitted `build.py` within two minutes and wrote it into the row. An owner line, committed,
+   is what stops two sessions building one row. Claim it before you build.
+
