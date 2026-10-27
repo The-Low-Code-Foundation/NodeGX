@@ -385,6 +385,11 @@ resolved). Lane 9's SCHEDULEAUTH ruling and `@nodegx/mcp` 0.2.8 are not this pha
   nodegx-studio GitHub release carrying the `.mcpb` (and confirm GitHub as the host); who cuts the next `@nodegx/mcp`
   (it carries PREVIEWCUT, SIZEMSG, findStudio, `d12e0b042`) and whether that route registers `npx -p @nodegx/studio -p
   @nodegx/mcp` or makes Studio a dependency (NOSTUDIOFORTHEEDITOR); wording: S5's three, S8's two; `isError` (S3b 10).
+  **Later the same night (Richard's yes):** `@nodegx/studio` 0.1.0 published by Richard (shasum = the pack's);
+  nodegx-studio pushed and **`v0.1.0` released, latest**, with both `.mcpb` on published 0.2.9 (MCPBNORELEASE's entry has
+  the measurements); /start's and /studio's five links answer 200. The site's five files were NOT uploaded: the
+  classifier refused `ssh` to nexus-1 ("Production Reads") even with his yes. His one command:
+  `bash <scratchpad>/orch/web/upload-five.sh` (built from `git archive d632286`, md5-checked, backs up the live five).
 
 - 2026-10-27, S3b steps 1–3: see the block under S3b's AC. Traps: a release ruling can be overtaken inside the hour:
   read `npm view @nodegx/mcp dist-tags` right before you pack and again before you ask, and `git log` for a peer's

@@ -27,3 +27,18 @@ attach a copy under a version-free name too (`nodegx-darwin-arm64.mcpb`, `nodegx
 link `latest/download/nodegx-darwin-arm64.mcpb` and never change. Then /start's two hrefs drop the version (one
 line each). Drive the x64 bundle under Rosetta before the release is published. Richard rules whether the
 download is hosted on GitHub (he leaned that way on 2026-10-27) before any of this.
+
+## 2026-10-27 23:20: the first release carries both, by hand (Richard's yes)
+
+nodegx-studio `v0.1.0` (tag at `fcdd55e`, the commit `@nodegx/studio` 0.1.0 was packed from) is published and
+*latest*: CI run 40591777931 green on all three systems (the DMG notarised), then
+`nodegx-0.2.9-darwin-{arm64,x64}.mcpb` built here with `--mcp-tarball` on the PUBLISHED 0.2.9 tarball (sha1
+`5549d6f7…`; Studio's own pin, 0.2.8, lacks HELPERNODE) and attached with `gh release upload`. All five
+`releases/latest/download/…` links /start and /studio name answer 200; the arm64 file downloaded back has the built
+sha1 `bcd7997e83deecfe57f1fd437d27d246296a383d` (x64 `8680d91a131c1372b218fb93e47fb276b5b62673`). Both bundles driven
+with `s3/drive-mcpb.mjs`: arm64 under `as-desktop.cjs` (initialize `nodegx` 0.2.9, 123 tools, `open_studio` 200,
+`render_report` DONE, `provision_backend` ok); x64 on its own bundled node under `arch -x86_64` (the same, except
+`render_report`: "Chrome never opened a debugging port", and Chrome started `arch -x86_64` alone opens no port in 25 s
+here either, so that is this Mac's Rosetta, not the bundle; a real Intel Mac is still unmeasured).
+**Still open:** items 1 and 2 above. CI does not attach the `.mcpb`, and the next release built on another
+`@nodegx/mcp` changes the names /start links to.
