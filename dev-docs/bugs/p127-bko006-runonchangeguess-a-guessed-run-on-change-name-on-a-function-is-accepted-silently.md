@@ -8,6 +8,7 @@ found: P127 BKO-006, 2026-10-27, the book club brief (REPORT.md item 5)
 evidence: "MEASURED in the transcript: update_component wrote `runOnChange-title`, `-author`, `-rating`, `-status` on a Function with inputs title/author/rating/status; the write was accepted with no diagnostic, and the node still ran on every keystroke (the agent saw a false 'type the title' hint and replaced it with a Condition). READ: the runtime's port is runOnChange-in-title."
 kit: mcp
 owner: none
+launch: beta
 ---
 
 What a person sees: an Add form that loses what was typed, and an agent that gives up on the Function node. The

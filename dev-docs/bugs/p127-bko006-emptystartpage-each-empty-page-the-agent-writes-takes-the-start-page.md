@@ -7,6 +7,7 @@ area: "editor `pageRegistration.ts` `nextStartPage`: an empty start page counts 
 found: P127 BKO-006, 2026-10-27, the book club brief (REPORT.md item 3)
 evidence: "MEASURED in the transcript: create_component Pages/Club (a stub) answered startPage /Pages/Club, then Pages/My Books (a stub) answered startPage /Pages/My Books, 'The app opens on My Books.' The agent wrote stubs first because a Navigate to a page that does not exist is refused (REPORT item 7), then reset the start page by hand."
 owner: none
+launch: beta
 ---
 
 Said in the answer, so not silent, but the two rules together make an agent that links pages move home twice. A

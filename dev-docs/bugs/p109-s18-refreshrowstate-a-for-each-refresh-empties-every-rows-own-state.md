@@ -8,6 +8,7 @@ severity: low
 area: runtime / For Each (noodl-viewer-react/src/nodes/std-library/data/foreach.tsx, the `refresh` op's full teardown)
 found: P109 ISL-004, session 18, 2026-10-05 (ruling 2's investigation, asked for by Richard)
 evidence: dev-docs/tasks/phase-109-the-defects-the-island-found/ISL-004-A-COMPONENT-KEEPS-ITS-OWN-STATE.md §8 s18; scripts/devtools/drive-isl004-remount.js on a deploy of packages/noodl-mcp/tests/isl004Remount.ts
+launch: beta
 ---
 
 A page with a For Each over two rows (ids `isl004-row-1`, `isl004-row-2`), each row a `Tally` component that keeps its

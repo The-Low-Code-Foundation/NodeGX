@@ -8,6 +8,7 @@ severity: low
 area: viewer / Sign In With (`signinwith.ts` `applyReturn`, the succeeded branch)
 found: P109 s24 (ISL-030, while fixing P107-D25), 2026-10-06
 evidence: read, not measured — `applyReturn` sets `_internal.error = undefined` and flags Error on a succeeded return, the shape P107-D25 had on Request Magic Link; the spec models it the same way (`user-handovers.ts` `applyReturn`: "Error cleared (never sent: C3)")
+launch: beta
 ---
 
 P107-D25 was ruled 2026-10-05 "Clear it to blank text" for Request Magic Link, and fixed in P109 ISL-030 (s24). Sign In With

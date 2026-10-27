@@ -8,6 +8,7 @@ severity: medium
 area: runtime / For Each (Repeater) + Model
 found: P106 IG-006 §7 s2 lane C, 2026-09-29 (audit P109 F03)
 evidence: dev-docs/tasks/phase-109-the-defects-the-island-found/AUDIT-2026-10-01.md §1 F03; ISL-003 §2; dev-docs/tasks/phase-106-the-island-grows/IG-006-OLIVE-READS.md:166-167
+launch: beta
 ---
 
 Five lesson cards all showed one card's lines. Each card's list used ids `l0, l1…`; a row is a Noodl Object that is

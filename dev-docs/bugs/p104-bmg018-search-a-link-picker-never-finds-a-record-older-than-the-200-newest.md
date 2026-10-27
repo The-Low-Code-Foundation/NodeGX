@@ -8,6 +8,7 @@ severity: medium
 area: backend / manager (link pickers)
 found: P104 BMG-013 drive (Richard), s18, 2026-09-27; re-read at HEAD 2026-10-01
 evidence: dev-docs/tasks/phase-104-the-backend-manager/BMG-018-THE-SEARCH-FIELD.md §2
+launch: beta
 ---
 
 In the backend manager, typing into a Pointer or Relation field (and the filter row's *is / is not*, and

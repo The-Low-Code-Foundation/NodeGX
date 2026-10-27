@@ -6,6 +6,7 @@ severity: low
 area: runtime / Function signal outputs (C7 lockstep, GAM-011)
 found: P18 session 119, 2026-10-16, measuring what a Function's own signal chain reads before translating it (lane 6)
 evidence: dev-docs/tasks/phase-18-code-export-v2/s119-fnchain-measure/sigprobe.js and sigprobe.out (the runtime's own Function node into a recorder that reads its value input at the pulse, and again after inputs have updated); dev-docs/tasks/phase-18-code-export-v2/s119-pulse-drive/ (in a running app: the same empty Send shows nothing the first time and the sentence the second)
+launch: beta
 ---
 
 `Outputs.a = ''; if (bad) Outputs.a = 'Please fill it in'; Outputs.go();` delivers `''` to whatever `go` runs, both

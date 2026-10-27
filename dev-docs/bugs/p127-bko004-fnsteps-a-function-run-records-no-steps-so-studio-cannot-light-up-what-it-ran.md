@@ -8,6 +8,7 @@ found: P127 BKO-004, 2026-10-26, building "the last run lit up" for a function's
 evidence: "READ (no drive): `WorkflowRunner.ts` ~780–830 starts one execution per function call and logs no step per node; the admin Runs page shows `steps` only for a backend workflow's runs. MEASURED in Studio's hosted-check (BKO-004): after one call of an agent-made function, `GET /executions?kind=function&name=…` gives one row (startedAt, status, durationMs, errorMessage) and nothing that names a node."
 regression: none yet — the day a function run records its nodes, nodegx-studio `editor/hosted-check.mjs` "after one call on the backend, its last run is said" grows a "the steps it ran are lit" line
 owner: none (P127 BKO-005 reads the same records for workflows and triggers; take it there if a lit run is wanted for both)
+launch: beta
 ---
 
 What a person sees: on Workflow → On the backend, a function says its last run in a line ("● Last run 22:21 ·

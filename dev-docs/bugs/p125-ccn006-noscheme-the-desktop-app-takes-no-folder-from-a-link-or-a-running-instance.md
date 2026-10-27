@@ -6,6 +6,7 @@ severity: medium
 area: nodegx-studio `app/main.cjs` (no `setAsDefaultProtocolClient`, no `open-url`, no `second-instance`), `package.json` `build.protocols`
 found: P125 CCN-006, 2026-10-23 — building the offer of the desktop app in a browser window of Studio (`packages/noodl-mcp/src/studio/companion.ts`)
 evidence: "`grep -n 'setAsDefaultProtocolClient\\|open-url\\|second-instance' app/main.cjs` finds nothing; the folder comes only from argv (`projectArg`, main.cjs:24). macOS `open -a <app> --args <dir>` on a running app only brings it to the front, so `launchStudioApp` uses `open -n` (a second instance)."
+launch: beta
 ---
 
 When the agent's host quits, the browser window of Studio still knows the project's folder but has no server left to

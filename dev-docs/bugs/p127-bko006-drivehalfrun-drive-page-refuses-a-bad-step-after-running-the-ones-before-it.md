@@ -7,6 +7,7 @@ area: "noodl-mcp drive_page: a step's shape is checked when it is reached, not b
 found: P127 BKO-006, 2026-10-27, the shared-expenses brief (REPORT.md item 13)
 evidence: "REPORTED by the stranger, not yet re-measured: one run was rejected for a bad step after its earlier steps had already created the Alice account (a duplicated test lunch is the trace)."
 owner: none
+launch: beta
 ---
 
 To measure: a drive whose third step has an unknown key; does the sign-up in step 1 happen?

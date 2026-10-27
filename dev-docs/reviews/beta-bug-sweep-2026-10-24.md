@@ -4,6 +4,36 @@ Richard asked for the outstanding bugs worth fixing before the Beta (his definit
 builds a simple app in Studio, edits workflows and the DB, privacy rules, road tests it, deploys to a VM). The ledger
 had 219 open rows; about 20 sit on that walk. This session fixed 10 and ruled one (Richard: P123-S6-CREATOREDITS (a)).
 
+## Before the Beta launch: the session plan (Richard, 2026-10-27 — read this first)
+
+Richard: *"every time I start a session on the bug list before the beta launch … target these bugs or any new ones
+discovered that impact the launch … break them into sessions to try to pool them together"*. Until the launch, **a
+bug-list session takes its work from this table**, not from a session's "Next" or the wider ledger. Rows are pooled by
+the files they touch, so one session reads one surface once.
+
+**At the start of every session:**
+1. `node scripts/bugs.js --launch beta`. Any row there that is not in the table below was filed since: put it in the
+   session whose files it touches (or a new session at the end), then go on.
+2. Take the first session below that is not done, in order. A row in a lane's own phase (P125, P127) may be that lane's
+   live work: read its owner line and the lane's handoff first, and `git status` its bug file (untracked or modified =
+   someone is on it).
+3. When you file a row that would stop or spoil the walk, give it `launch: beta` and add it here
+   (`dev-docs/bugs/README.md`, "Bugs the Beta launch waits on").
+4. Finish by marking the session's rows here (commit, or why not) and writing the session's account below as usual.
+
+| # | session | rows | the files | state |
+|---|---|---|---|---|
+| L1 | **Studio's dialogs and chips** | P125-MUDDY-NATIVEDIALOG (high: New option set / attribute / data type / style do nothing in the app; deletes refuse in the panel), P125-MUDDY-DEADCHIP | nodegx-studio `editor/studio.html` (5 `prompt()`, 9 `confirm()`; `sourceChip`); the gates stub both (`editor/check.mjs`, `editor/data-check.mjs`), so grade in the Electron app | open. ⚠️ Both bug files are untracked, filed by a P125 session 10-27 11:16: check that lane first, and tag them `launch: beta` once committed |
+| L2 | **What the agent is told** | P125-MUDDY-OPTSETSUNKNOWN (high), P125-MUDDY-SURFACESUNSAID (high) | noodl-mcp `src/instructions.ts`, `src/guidance.ts`, the seeded `CLAUDE.md` / `CONVENTIONS.md`; the MCP tool-surface budget gate | open; untracked bug files as L1 |
+| L3 | **The write door's privacy checks** | P127-BKO006-COMPVISIBLE (a private screen shows under the sign-in card), P127-BKO006-RUNONCHANGEGUESS, P127-BKO006-EMPTYSTARTPAGE, P127-BKO006-DRIVEHALFRUN | editor validation as the MCP door runs it (`noodl-editor` validator, `pageRegistration.ts`), noodl-mcp `drive_page` | open; P127's rows. P127-BKO006-NOROLESFAILS: P127 s7 measured it does not reproduce at HEAD; left to that lane |
+| L4 | **Getting Studio** | P125-CCN006-NODOWNLOAD (no desktop download on nodegx.io/studio/), P125-CCN006-NOSCHEME | nodegx-studio `app/main.cjs`, `package.json` `build.protocols`; nodegx-web `site/studio/` | open. A push of nodegx-web is a deploy: Richard's OK before the page goes live |
+| L5 | **Runtime rows an app hits** | P18-S109-MOUNTPULSE (Sign In With: a cancel never fires Failure), P109-F03 (two lists sharing row ids show each other's rows), P109-F11 (a Group's inline defaults beat a CSS Class); P109-S24-SIGNINWITHERRORKEPT here once ruled (same node) | noodl-viewer-react `signinwith.ts`, `foreach`, `react-component-node` | open |
+| L6 | **The backend in the project's files, and the run timeline** | P127-BKO006-ROLESNOTINFILES, P127-BKO004-FNSTEPS (Studio can't light up which steps a function ran), P104-BMG018-SEARCH | nodegx-backend `WorkflowRunner`, noodl-mcp `create_backend_role`, the backend manager's link picker | open; overlaps lane 9 (P127): check its handoff |
+| R | **Rulings for Richard** (one page, plain words, any session can put it to him) | P112-OWN018-FANOUT, P18-S119-FIRSTWRITE, P109-S18-REFRESHROWSTATE, P109-S24-SIGNINWITHERRORKEPT, NPMAUDIT-LICENCE (which licence a deployed app's runtime is under); standing: DEPLOYLOOPBACK's third-party half | — | waiting on Richard |
+
+Not in the plan (off the walk): code export (lane 4, paused), WebSocket / Server-Sent Events, Video C97/C99, template,
+lab, test and CI rows. Move one in only if a session measures it on the walk.
+
 ## Done: built, and how far driven
 
 | row | commit | built | driven |
@@ -928,8 +958,8 @@ unmerged branch `origin/tpl011-desk1` (P78). The fix belongs on that branch.
 
 ## Next
 
-1. Beta-walk rows from `node scripts/bugs.js`, not lane-owned: P18-S109-MOUNTPULSE (Sign In With: a cancel at the
-   provider never fires Failure), P107-C158 (WebSocket Auto Connect), P107-C156/C157 (Server-Sent Events).
+1. **Superseded the same day:** the session plan at the top of this file ("Before the Beta launch", L1–L6 and R).
+   Start at L1.
 
 ## Traps met
 

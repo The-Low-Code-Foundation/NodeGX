@@ -6,6 +6,7 @@ severity: medium
 area: runtime / Sign In With
 found: P18 EXP-011 §79, session 109, 2026-10-15
 evidence: dev-docs/tasks/phase-18-code-export-v2/EXP-011-PICKER-COVERAGE.md §79.3 (finding 2); packages/nodegx-export/tests/the-sign-in-with.test.ts §C "a provider error: raised and shown at mount with no pulse"
+launch: beta
 ---
 
 A person presses "Sign in with Google", then Cancel on Google's screen. They come back to the app with

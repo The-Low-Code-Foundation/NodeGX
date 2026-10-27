@@ -6,6 +6,7 @@ severity: medium
 area: runtime / signal fan-out and update order (Condition `eval` with `runOnChange-condition: false`, a sibling gate's chain changing its condition's inputs in the same frame); kit guidance either way
 found: P112 OWN-018 s2, 2026-10-13 (Mistral Large 4 in OpenCode, quiz run 4; tarballs tgz6 at d787c2220)
 evidence: dev-docs/tasks/phase-112-your-own-nodegx/OWN-018-A-STRANGER-ON-MISTRAL.md §14
+launch: beta
 ---
 
 Mistral's `Pages/Home` (run 4): the reveal pause's `timerFinished` → `eval` on two gates, wired in this order:
