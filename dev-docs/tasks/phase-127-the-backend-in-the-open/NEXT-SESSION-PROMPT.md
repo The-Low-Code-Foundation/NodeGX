@@ -89,9 +89,18 @@ the tables, now kept in `metadata.dbCollections` by `provision_backend`. Eight d
 
 **Next, in order (s8):**
 
-1. **Richard publishes `@nodegx/mcp` 0.2.8 and the backend bundle** with s6's and s7's fixes (TABLESNOTINFILES makes
-   "open" pass for a stranger; SCHEDULEAUTH and CLOUDUSERNODE are in the backend). Then `automations-drive.mjs` joins
-   Studio's `check`.
+1. **Cut npm 0.2.8, once P128 settles** (Richard, 2026-10-27: "Wait for P128 to settle"; ask him whether it has
+   before cutting). There is no separate backend bundle: `@nodegx/mcp`'s `prepack` copies the backend in
+   (`build-backend-copy.mjs`), so one mcp release carries s6's and s7's fixes (TABLESNOTINFILES makes "open" pass for
+   a stranger; SCHEDULEAUTH, CLOUDUSERNODE). Nothing is cut yet: Richard ran `publish-npm.sh` on a folder that did not
+   exist and it skipped every package. The recipe is the 0.2.7 re-cut's (`dev-docs/reviews/beta-bug-sweep-2026-10-24.md`
+   "The npm 0.2.7 re-cut") and the 0.2.6 cut's (phase-26 NEXT-SESSION-PROMPT, `2cac89c05`): a release commit (mcp and
+   the three create-* to 0.2.8, any package whose shipped code moved, the lockfile's version lines only, CHANGELOG
+   through the copy checks), **ask Richard before pushing**, pack in a clean worktree at the pushed commit (linked
+   `dist/` replaced by real folders, `check-pack-paths` must pass), grade the tarballs outside the checkout, write
+   `SHASUMS.txt`, then hand him `scripts/own/publish-npm.sh ../OpenNoodl-worktrees/npm-0.2.8-tarballs`. Check first
+   whether node-spec (Request spec v4) and preview (the full-stack deploy carries the backend) must move too. After
+   the publish, `automations-drive.mjs` joins Studio's `check`.
 2. **Richard's fourth brief in Claude Desktop**, from the `.mcpb` (BKO-002 AC2, BKO-004 AC3, BKO-005 AC1 ride along).
    Ask before rebuilding the Desktop dist.
 3. The open rows (`node scripts/bugs.js --from P127`): ROLESNOTINFILES, FNSTEPS, S7-SBR015MUTANTSTALE; NOROLESFAILS
