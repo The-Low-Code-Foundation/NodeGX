@@ -51,6 +51,7 @@ import type { ProjectBinding } from '../project/ProjectBinding';
 import type { ProjectStore } from '../project/ProjectStore';
 import { isUntouchedSkeletonPage } from './createProject';
 import { guarded, jsonResult } from './util';
+import { scriptRuntime } from '../scriptRuntime';
 
 // ─── the pieces it runs ────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -76,13 +77,13 @@ export function resolveDeployEngine(env: NodeJS.ProcessEnv = process.env, fromDi
     if (!fs.existsSync(override)) {
       throw new ToolError('invalid-argument', `${ENGINE_ENV} is set to ${override}, and there is nothing there. Unset it, or point it at a built nodegx-deploy.cjs.`);
     }
-    return { command: process.execPath, args: [override], via: 'env' };
+    return { command: scriptRuntime(), args: [override], via: 'env' };
   }
   // A checkout: `packages/noodl-mcp/dist/` (the bundle) and `packages/noodl-mcp/src/tools/` (ts-jest) both reach
   // `packages/noodl-preview/dist/`. In an npm install neither exists, and npx is the honest answer.
   for (const up of [['..', '..'], ['..', '..', '..']]) {
     const candidate = path.resolve(fromDir, ...up, 'noodl-preview', 'dist', 'nodegx-deploy.cjs');
-    if (fs.existsSync(candidate)) return { command: process.execPath, args: [candidate], via: 'checkout' };
+    if (fs.existsSync(candidate)) return { command: scriptRuntime(), args: [candidate], via: 'checkout' };
   }
   const pkg = env[PREVIEW_PKG_ENV] || '@nodegx/preview@latest';
   return {

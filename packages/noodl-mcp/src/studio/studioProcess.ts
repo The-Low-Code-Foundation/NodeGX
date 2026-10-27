@@ -24,6 +24,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 import { findStudioApp, STUDIO_DOWNLOAD_URL } from './studioApp';
+import { scriptRuntime } from '../scriptRuntime';
 
 export interface StudioInstance {
   projectDir: string;
@@ -73,7 +74,7 @@ export async function ensureStudio(projectDir: string): Promise<StudioInstance> 
   if (found.dir === null) throw new Error(found.reason);
   const entry = path.join(found.dir, 'editor', 'serve.mjs');
 
-  const child = spawn(process.execPath, [entry, key, '--port', '0'], {
+  const child = spawn(scriptRuntime(), [entry, key, '--port', '0'], {
     stdio: ['ignore', 'pipe', 'pipe'],
     cwd: found.dir,
     env: { ...process.env }

@@ -30,6 +30,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { ToolError } from './errors';
+import { scriptRuntime } from './scriptRuntime';
 
 /** One thing the render found wrong, in the render's own vocabulary. */
 export interface RenderFindingPayload {
@@ -296,7 +297,7 @@ export function findAppElectronBinary(fromDir: string): string | null {
 
 export function resolveRenderCli(fromDir: string = __dirname): ResolvedRenderCli {
   const probed: string[] = [];
-  const exec = process.execPath;
+  const exec = scriptRuntime();
   const push = (p: string): string | null => {
     probed.push(p);
     return fs.existsSync(p) ? p : null;
@@ -577,7 +578,7 @@ export interface DriveOptions {
  */
 export function resolveDriveCli(): { entry: string | null; exec: string; probed: string[] } {
   const override = process.env.NODEGX_DRIVE_CLI;
-  if (override) return { entry: fs.existsSync(override) ? override : null, exec: process.execPath, probed: [override] };
+  if (override) return { entry: fs.existsSync(override) ? override : null, exec: scriptRuntime(), probed: [override] };
   const render = resolveRenderCli();
   if (!render.entry) return { entry: null, exec: render.exec, probed: render.probed };
   const sibling = path.join(path.dirname(render.entry), 'drive-steps.js');

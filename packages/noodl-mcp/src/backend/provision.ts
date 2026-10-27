@@ -75,6 +75,7 @@ import {
   processIsAlive,
   writeRuntimeRecord
 } from './runtimeRecord';
+import { scriptRuntime } from '../scriptRuntime';
 
 const READY_PREFIX = 'NODEGX_BACKEND_READY ';
 const READY_TIMEOUT_MS = 30_000;
@@ -501,7 +502,7 @@ export async function startBackend(
   // data dir has a security.json: a reused or adopted backend keeps whatever it has (see `rules` below).
   args.push('--enforce-rules');
 
-  const child = spawn(process.execPath, args, { stdio: ['ignore', 'pipe', 'pipe'], detached: false });
+  const child = spawn(scriptRuntime(), args, { stdio: ['ignore', 'pipe', 'pipe'], detached: false });
   const logRing: string[] = [];
   const appendLog = (stream: string, chunk: Buffer) => {
     for (const line of chunk.toString().split('\n')) {

@@ -29,6 +29,7 @@ import {
 } from '../../../noodl-editor/src/editor/src/utils/exporter/cloudDeployCore';
 import type { BackendClient } from '../backend/client';
 import { ToolError } from '../errors';
+import { scriptRuntime } from '../scriptRuntime';
 
 /** A big graph is a big bundle; the site-builder's is comfortably over a megabyte. */
 const BUNDLE_MAX_BUFFER = 64 * 1024 * 1024;
@@ -82,7 +83,7 @@ export function buildBundleInChild(projectDir: string): { bundleName: string; pr
     );
   }
 
-  const result = spawnSync(process.execPath, [entry, projectDir], {
+  const result = spawnSync(scriptRuntime(), [entry, projectDir], {
     encoding: 'utf8',
     maxBuffer: BUNDLE_MAX_BUFFER,
     timeout: BUNDLE_TIMEOUT_MS,
