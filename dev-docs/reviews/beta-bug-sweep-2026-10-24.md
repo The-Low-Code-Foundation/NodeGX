@@ -901,3 +901,44 @@ bug's proposal is unmeasured, for a one-or-two-frame flash.
    `vendor/`.
 6. `nodegx-backend serve --help` starts a server; it does not print help. Stopped by its own pid; a peer's backend
    (pid 24520) was left alone.
+
+# Session 16, 2026-10-27 (next session reads this first)
+
+"Continue" from the Session 15 list. **Nothing pushed.**
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **P112-OWN023-RESUMEUNBOUND** | 34bbee2f1 | The bug's second proposal, not the first: a server binds once, so binding the folder's project on start would leave "make me a new app" nowhere to author. The CLI passes its cwd (`startFolder`); unbound, `createServer` runs `scanFolderProjects` (OWN-011: the folder or one sub-folder) and the briefing says, before "TWO WAYS ON", `THIS FOLDER ALREADY HOLDS A NODEGX PROJECT: "<name>" (<dir>)`, that a new or resumed conversation always starts unbound (not a dropped connection, reconnecting gives the same tools), and to call open_project with it first. Several are counted, five named | 4 new specs in `instructions.test.ts` (a folder with none = the briefing byte for byte); the CLI itself built to the scratchpad, `initialize` over stdio from a folder holding `gala-app` in a sub-folder and from an empty one; 83 tests over instructions/openProject/own019/agentConfig; tsc clean. Not graded: a live model reading it |
+| **P107-C100** | 266777587 | `Video.render` works out `PointerListeners(this.props)` (where `pointer`, `noodlNode`, `blockTouch`, `clickBubbling` live) and hands them to `CachedVideo`, as the embed path did. All 1,200 scenarios marked C100 came out of `Video.json` and the KNOWN_ROWS entry and its predicate went. **The predicted C79 did not come back** (ISL-031's render covers the Video) | Video conformance CONFORMS at seed 20753, 0 divergences, mutants 2783/2791; viewer Video jest 56; `spec-disagreements.json` regenerated (2f81e75e8; it still listed C96, C98, S97-NULLBODY as open) |
+| **P18-S112-FLEXELLIPSIS** | 9a918f6fc | An Ellipsis Text draws its words in a span (`min-width: 0`, `text-overflow: ellipsis`, `nowrap`, and the element's own overflow, so an author's Overflow stays theirs). Clip and the default render as before | Chrome, s112's `wrap-desk` through `render-from-disk.js` with a scratch viewer: HEAD "an ellipsis line th", fixed "an ellipsis line …"; every Text box unchanged; short centred and right/bottom Ellipsis Texts at the same pixel; a long centred one started 44 px left of its box on HEAD. Text conformance 1272/1272; 3 new specs in `def031-text-overflow.test.tsx` |
+| **P18-EXP022-S4-FIRSTPRESS** (wontfix: does not reproduce) | 3154726bb | Re-measured with a scratch copy of the s4 drive at its own D4 timing: the first press closed the task 4 of 4, on the 10-22 bundle it was filed on and on HEAD's. The field sends its Value per keystroke; OK is `disabled` until the frame after the keystroke (read 5 ms after: disabled; 300 ms: enabled), so only a press inside that frame is lost | readings in the bug file |
+
+Not taken: **P107-S89-NIGHTBOOK**. `templates/nightbook` and the `tpl011*` tests are untracked here: a copy of the
+unmerged branch `origin/tpl011-desk1` (P78). The fix belongs on that branch.
+
+## For Richard
+
+1. **Push and publish** (sessions 12–16). This session changes the viewer twice (a Video playing a file now fires its
+   pointer outputs and takes a dropped file; an Ellipsis Text draws the "…") and the MCP's unbound briefing. Studio picks
+   the viewer up only through a kit release.
+2. Standing: DEPLOYLOOPBACK's third-party half (your OK), the engine CLI's full-stack default, MCPJSONABSPATH on your
+   machine.
+
+## Next
+
+1. Beta-walk rows from `node scripts/bugs.js`, not lane-owned: P18-S109-MOUNTPULSE (Sign In With: a cancel at the
+   provider never fires Failure), P107-C158 (WebSocket Auto Connect), P107-C156/C157 (Server-Sent Events).
+
+## Traps met
+
+1. 🔴 **A row's prediction about a fix is a hypothesis too.** C100's file said fixing it would uncover C79 on the Video
+   (measured in memory in s54). It did not: ISL-031 had fixed C79 for every visual node since. Run the conformance.
+2. 🔴 **A probe between two acts changes their timing.** FIRSTPRESS's `disabled` read sat between the typing and the
+   press and gave the button the frame it needed; the clean result had to be re-read with the probe off.
+3. A scratch viewer in `render-from-disk.js`: a wrapper that sets `require('…/harness-paths.js').VIEWER_DIR.path =
+   process.env.VIEWER` before requiring `render-from-disk.js`. A viewer prod build
+   with `OUT_PATH=<scratch>` takes ~17 s.
+4. `spec-disagreements.js` reads the ledger: run it after closing any `kit: node-spec` row with a scenario regression,
+   or the editor's Try panel keeps the row open.
