@@ -495,6 +495,76 @@ function matches(value, expected) {
 }
 
 /** Run every step until one fails. Returns the rows. */
+/** A `watch` step's parts, or a usage error naming what is wrong with it. */
+function watchShape(step, n) {
+  const w = step.watch && typeof step.watch === 'object' ? step.watch : {};
+  if (w.look === undefined) throw new UsageError(`Step ${n}: watch takes { look: T } or { look: [T, T, …] }.`);
+  // P112-OWN019-WATCHINSIDE — Large 4 wrote `{ watch: { look: [...], for_ms: 3000, expect: { never: … } } }` and
+  // both were dropped without a word: six "never green" watches passed with green in their own states (s8, AC3).
+  // Either place is read; a key the watch does not know is refused, never ignored.
+  const unknown = Object.keys(w).filter((k) => !['look', 'for_ms', 'expect'].includes(k));
+  if (unknown.length) throw new UsageError(`Step ${n}: watch does not take ${unknown.map((k) => JSON.stringify(k)).join(', ')} — it takes look, for_ms and expect.`);
+  if (step.expect !== undefined && w.expect !== undefined) throw new UsageError(`Step ${n}: give watch one expect, beside it or inside it, not both.`);
+  const many = Array.isArray(w.look);
+  const targets = many ? w.look : [w.look];
+  if (targets.length === 0 || targets.length > 8) throw new UsageError(`Step ${n}: watch looks at 1 to 8 targets.`);
+  return {
+    many,
+    targets,
+    forMs: Math.min(10000, Math.max(100, Number(step.for_ms ?? w.for_ms ?? 1500))),
+    expect: step.expect !== undefined ? step.expect : w.expect,
+    expr: `Promise.all([${targets.map((t) => lookExpression(t)).join(', ')}])`
+  };
+}
+
+/**
+ * Bug P127-BKO006-DRIVEHALFRUN — a step's shape, checked before the run starts.
+ *
+ * Every check here used to happen when the run reached the step, so a drive refused at step 13 (`read: { text_contains }`)
+ * had already typed an address and pressed "Create account": the refused drive made an account, and the next drive's
+ * sign-up failed on it. The same builders the run uses are called here without a page; what needs the page (a target
+ * that is not there, an edit on a saved value that does not exist) is still the run's to find.
+ */
+function checkStep(step, n, { outDir } = {}) {
+  const verb = verbOf(step, n);
+  const at = (fn) => {
+    try {
+      return fn();
+    } catch (error) {
+      if (!error.usage) throw new UsageError(`Step ${n}: ${error instanceof Error ? error.message : String(error)}`);
+      throw error.message.startsWith('Step ') ? error : new UsageError(`Step ${n}: ${error.message}`);
+    }
+  };
+  if (verb === 'tap') at(() => finder(step.tap));
+  else if (verb === 'type') {
+    if (typeof step.type !== 'string') throw new UsageError(`Step ${n}: type takes a string.`);
+    if (step.into !== undefined) at(() => finder(step.into));
+  } else if (verb === 'key') {
+    if (!KEYS[step.key]) throw new UsageError(`Step ${n}: key "${step.key}" is not one of ${Object.keys(KEYS).join(', ')}.`);
+  } else if (verb === 'wait_for') at(() => waitExpression(step.wait_for));
+  else if (verb === 'read') {
+    const r = step.read && typeof step.read === 'object' ? step.read : null;
+    if (!r || !RUN_READS.some((k) => r[k] !== undefined)) at(() => readExpression(step.read));
+  } else if (verb === 'navigate') {
+    if (typeof step.navigate !== 'string') throw new UsageError(`Step ${n}: navigate takes a route string.`);
+  } else if (verb === 'watch') watchShape(step, n);
+  else if (verb === 'viewport') at(() => parseViewports(String(step.viewport)));
+  else if (verb === 'screenshot') {
+    if (!outDir) throw new UsageError(`Step ${n}: screenshot needs --out-dir (render_report's out_dir rule).`);
+  } else if (verb === 'seed_storage') {
+    const seed = step.seed_storage;
+    if (typeof seed === 'string') {
+      if (typeof step.edit !== 'string') throw new UsageError(`Step ${n}: seed_storage "${seed}" edits a saved value and needs edit: "js that changes v".`);
+    } else if (!seed || typeof seed !== 'object' || Array.isArray(seed)) {
+      throw new UsageError(`Step ${n}: seed_storage takes { key: value } or a key with edit: "js that changes v".`);
+    }
+  } else if (verb === 'stub_route') parseStub(step, n);
+  else if (verb === 'reduced_motion') {
+    if (typeof step.reduced_motion !== 'boolean') throw new UsageError(`Step ${n}: reduced_motion takes true or false.`);
+  }
+  return verb;
+}
+
 async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network, beforeBoot = 0 }) {
   const rows = [];
   const pendingSeeds = [];
@@ -650,23 +720,10 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network
         }
         row.url = await evaluate('location.pathname + location.hash');
       } else if (verb === 'watch') {
-        const w = step.watch && typeof step.watch === 'object' ? step.watch : {};
-        if (w.look === undefined) throw new UsageError(`Step ${i + 1}: watch takes { look: T } or { look: [T, T, …] }.`);
-        // P112-OWN019-WATCHINSIDE — Large 4 wrote `{ watch: { look: [...], for_ms: 3000, expect: { never: … } } }` and
-        // both were dropped without a word: six "never green" watches passed with green in their own states (s8, AC3).
-        // Either place is read; a key the watch does not know is refused, never ignored.
-        const unknown = Object.keys(w).filter((k) => !['look', 'for_ms', 'expect'].includes(k));
-        if (unknown.length) throw new UsageError(`Step ${i + 1}: watch does not take ${unknown.map((k) => JSON.stringify(k)).join(', ')} — it takes look, for_ms and expect.`);
-        if (step.expect !== undefined && w.expect !== undefined) throw new UsageError(`Step ${i + 1}: give watch one expect, beside it or inside it, not both.`);
-        const forMs = Math.min(10000, Math.max(100, Number(step.for_ms ?? w.for_ms ?? 1500)));
-        const expect = step.expect !== undefined ? step.expect : w.expect;
         // P112-OWN019-WATCHONE — a list watches every target on every tick. R3 (s5) proved "nothing left over" on
         // Canberra while the last question's green landed, by position, on Sydney: one target proves nothing about
         // the rest. One target keeps the answer it always had (a list of states); a list answers per target.
-        const many = Array.isArray(w.look);
-        const targets = many ? w.look : [w.look];
-        if (targets.length === 0 || targets.length > 8) throw new UsageError(`Step ${i + 1}: watch looks at 1 to 8 targets.`);
-        const expr = `Promise.all([${targets.map((t) => lookExpression(t)).join(', ')}])`;
+        const { many, targets, forMs, expect, expr } = watchShape(step, i + 1);
         // The fields a person tells apart; a look's box geometry moves with layout and is not a different state.
         const keyOf = (v) => (v && typeof v === 'object' ? JSON.stringify({ text: v.text, visible: v.visible, backgroundName: v.backgroundName, colorName: v.colorName, opacity: v.opacity === undefined ? undefined : Math.round(v.opacity * 10) / 10 }) : 'null');
         const states = targets.map(() => []);
@@ -753,8 +810,8 @@ async function main() {
     return i === -1 ? undefined : argv[i + 1];
   };
   const projectDir = argv.find((a, i) => !a.startsWith('--') && !VALUE_FLAGS.has(argv[i - 1]));
-  const usage = (message) => {
-    process.stdout.write(JSON.stringify({ error: { message, problems: [message], actionable: true } }));
+  const usage = (message, problems = [message]) => {
+    process.stdout.write(JSON.stringify({ error: { message, problems, actionable: true } }));
     process.exit(2);
   };
   if (!projectDir) usage('drive-steps.js <project-dir> --steps <json|@file> [--page p] [--viewport v] [--out-dir d]');
@@ -765,11 +822,22 @@ async function main() {
     if (!raw) throw new UsageError('--steps is required: a JSON array of steps.');
     steps = JSON.parse(raw.startsWith('@') ? fs.readFileSync(raw.slice(1), 'utf8') : raw);
     if (!Array.isArray(steps) || steps.length === 0) throw new UsageError('--steps must be a non-empty JSON array.');
-    steps.forEach((s, i) => {
-      if (verbOf(s, i + 1) === 'stub_route') parseStub(s, i + 1);
-    });
   } catch (error) {
     usage(error.message);
+  }
+  // Every step's shape before the first one runs (P127-BKO006-DRIVEHALFRUN), each problem named at once.
+  const problems = [];
+  steps.forEach((step, i) => {
+    try {
+      checkStep(step, i + 1, { outDir: flag('--out-dir') });
+    } catch (error) {
+      if (!error.usage) throw error;
+      problems.push(error.message);
+    }
+  });
+  if (problems.length) {
+    problems.push('No step ran: every step is checked before the first one does.');
+    usage(problems.join(' '), problems);
   }
 
   let viewport;
@@ -836,4 +904,4 @@ async function main() {
 
 if (require.main === module) main();
 
-module.exports = { runSteps, locateExpression, routeStubs, networkLog, parseStub, VERBS };
+module.exports = { runSteps, checkStep, locateExpression, routeStubs, networkLog, parseStub, VERBS };
