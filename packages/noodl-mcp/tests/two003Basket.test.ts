@@ -261,6 +261,9 @@ const CHECKS: Record<string, (s: Record<string, string>) => Promise<void>> = {
     expect(g.out.shelf).toEqual({ name: 'Cars', id: 'cars' });
     const tabs = await run(s.TABS_LOOK, { on: 'rates' });
     expect([tabs.out.rates, tabs.out.sellers]).toEqual(['mk-tab mk-tab-on', 'mk-tab']);
+    // P121-TWO003-SCROLLINTOVIEW: this page's tab, and only it, is told to Scroll Into View.
+    expect((await run(s.TABS_SHOW, { on: 'shelves' })).fired).toEqual(['shelves']);
+    expect((await run(s.TABS_SHOW, {})).fired).toEqual([]);
   }
 };
 

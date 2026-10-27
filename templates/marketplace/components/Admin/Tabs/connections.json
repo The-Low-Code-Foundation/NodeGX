@@ -10,6 +10,54 @@
       "toProperty": "in-on"
     },
     {
+      "fromId": "tbIn",
+      "fromProperty": "on",
+      "toId": "tbShow",
+      "toProperty": "in-on"
+    },
+    {
+      "fromId": "tbRoot",
+      "fromProperty": "didMount",
+      "toId": "tbShow",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tbShow",
+      "fromProperty": "out-sellers",
+      "toId": "tb_sellers",
+      "toProperty": "scrollIntoView"
+    },
+    {
+      "fromId": "tbShow",
+      "fromProperty": "out-orders",
+      "toId": "tb_orders",
+      "toProperty": "scrollIntoView"
+    },
+    {
+      "fromId": "tbShow",
+      "fromProperty": "out-enquiries",
+      "toId": "tb_enquiries",
+      "toProperty": "scrollIntoView"
+    },
+    {
+      "fromId": "tbShow",
+      "fromProperty": "out-pay",
+      "toId": "tb_pay",
+      "toProperty": "scrollIntoView"
+    },
+    {
+      "fromId": "tbShow",
+      "fromProperty": "out-rates",
+      "toId": "tb_rates",
+      "toProperty": "scrollIntoView"
+    },
+    {
+      "fromId": "tbShow",
+      "fromProperty": "out-shelves",
+      "toId": "tb_shelves",
+      "toProperty": "scrollIntoView"
+    },
+    {
       "fromId": "tbLook",
       "fromProperty": "out-sellers",
       "toId": "tb_sellers",

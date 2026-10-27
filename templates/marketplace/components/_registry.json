@@ -334,8 +334,8 @@
     "Admin/Tabs": {
       "path": "Admin/Tabs",
       "type": "visual",
-      "nodeCount": 15,
-      "connectionCount": 13,
+      "nodeCount": 16,
+      "connectionCount": 21,
       "modified": "2026-10-14T00:00:00.000Z",
       "created": "2026-10-14T00:00:00.000Z"
     },
@@ -582,7 +582,7 @@
   },
   "stats": {
     "totalComponents": 72,
-    "totalNodes": 1016,
-    "totalConnections": 1049
+    "totalNodes": 1017,
+    "totalConnections": 1057
   }
 }
