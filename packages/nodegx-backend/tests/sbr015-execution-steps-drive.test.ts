@@ -25,7 +25,7 @@
  * | arm | the one variable | what the table must show |
  * |---|---|---|
  * | **A — success** | `withFlag` declares its `out-built` signal port | every action node, none failed |
- * | **M — failure** | that one port declaration is **removed** | `withFlag` recorded as FAILED, by name and with a reason, and everything downstream of it ABSENT |
+ * | **M — failure** | that one call in its script names no function (`Outputs.built()` → `Inputs.sections.built()`) | `withFlag` recorded as FAILED, by name and with a reason, and everything downstream of it ABSENT |
  *
  * 🔴 **Arm A is what makes arm M's absences readable.** An absence on its own is equally good
  * evidence for *"the recorder does not cover that node"* and for *"that node never ran"* — two
@@ -49,6 +49,13 @@
  * failure mode of these nodes is `Outputs.built is not a function` when a custom signal port was
  * not declared… That is precisely the error these edges would have named."* This file is that
  * sentence, measured.
+ *
+ * 🔴 **P127-S7-SBR015MUTANTSTALE (2026-10-27): removing the port no longer breaks anything.** P112-OWN020-UNWIREDSIGNAL
+ * (`3026899d4`) gives a Function loaded from disk a callable for every `Outputs.x()` its code names, declared or not,
+ * so `Outputs.built()` with `out-built` deleted ran, the page published and arm M read as arm A (five checks red). That
+ * fix is right, so the instrument moves: the mutant now writes the same failure into the script itself, at the same
+ * line. `Inputs.sections.built()` throws `… is not a function` where the signal was sent, and the node fires
+ * `failure` as it did before. One variable still: the script text, nothing else.
  *
  * ⚠️ **What this instrument CANNOT see**, stated rather than left for a later reader to find. A
  * step is written by `beginOutcome` (an action invocation) or by `raiseRuntimeError` (`node.ts`,
@@ -106,7 +113,7 @@ const EMPTY: Arm = { http: 0, body: null, runId: '', runStatus: '', steps: [], s
 interface BundleShape {
   components: Array<{
     name?: string;
-    nodes?: Array<{ id: string; ports?: Array<{ name: string }> }>;
+    nodes?: Array<{ id: string; ports?: Array<{ name: string }>; parameters?: Record<string, unknown> }>;
   }>;
 }
 
@@ -118,7 +125,7 @@ const bundleNodeIds = new Set<string>();
 
 let armA: Arm = EMPTY;
 let armM: Arm = EMPTY;
-/** 🔴 The mutant's own receipt: how many port declarations it actually removed. */
+/** 🔴 The mutant's own receipt: how many scripts it actually broke. */
 let mutantRemoved = -1;
 /** D34's reading, taken on the way past and reported rather than owned here. */
 let goneArm: Arm = EMPTY;
@@ -255,23 +262,25 @@ function bundleIdFor(legacyName: string, authoredId: string): string {
 }
 
 /**
- * Remove `withFlag`'s `out-built` signal port declaration, and report how many it removed.
+ * Break `withFlag`'s one `Outputs.built()` call into a call of something that is not a function, and report how many
+ * scripts it broke.
  *
  * 🔴 **The count is the mutant's receipt.** A mutation that silently matched nothing leaves the
  * arm identical to the control, and the pair then reads as *"the failure was not recorded"* when
- * in fact no failure was ever caused — an instrument answering a question nobody asked.
+ * in fact no failure was ever caused — an instrument answering a question nobody asked. (The port deletion this
+ * replaced kept its receipt at 1 and still caused nothing: a receipt says the edit landed, the arm-M checks say it broke.)
  */
-function dropBuiltPort(b: BundleShape): number {
-  let removed = 0;
+function breakBuiltCall(b: BundleShape): number {
+  let broken = 0;
   for (const component of b.components || []) {
     for (const node of component.nodes || []) {
-      if (node.id !== 'withFlag' || !node.ports) continue;
-      const before = node.ports.length;
-      node.ports = node.ports.filter((p) => p.name !== 'out-built');
-      removed += before - node.ports.length;
+      const script = node.parameters?.functionScript;
+      if (node.id !== 'withFlag' || typeof script !== 'string' || !script.includes('Outputs.built();')) continue;
+      node.parameters = { ...node.parameters, functionScript: script.replace('Outputs.built();', 'Inputs.sections.built();') };
+      broken += 1;
     }
   }
-  return removed;
+  return broken;
 }
 
 describe('SBR-015 AC4 — a failed publish and a successful one, told apart in the log', () => {
@@ -287,11 +296,11 @@ describe('SBR-015 AC4 — a failed publish and a successful one, told apart in t
     }
 
     armA = await publishOnce('control');
-    armM = await publishOnce('mutant', dropBuiltPort);
+    armM = await publishOnce('mutant', breakBuiltCall);
 
     /* eslint-disable no-console */
     console.log(describeArm('ARM A — control', armA));
-    console.log(describeArm(`ARM M — mutant (out-built removed from ${mutantRemoved} node)`, armM));
+    console.log(describeArm(`ARM M — mutant (Outputs.built() broken in ${mutantRemoved} script)`, armM));
     console.log(`\n[SBR-015 AC4] arm A body=${JSON.stringify(armA.body)}`);
     console.log(`[SBR-015 AC4] arm M body=${JSON.stringify(armM.body)}`);
     console.log(
@@ -314,7 +323,7 @@ describe('SBR-015 AC4 — a failed publish and a successful one, told apart in t
     if (projectDir) fs.rmSync(projectDir, { recursive: true, force: true });
   });
 
-  it('the mutant edited exactly the one port declaration it names', () => {
+  it('the mutant broke exactly the one script it names', () => {
     expect(mutantRemoved).toBe(1);
   });
 
