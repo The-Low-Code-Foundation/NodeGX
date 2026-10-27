@@ -16,7 +16,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 /** Where a person without the app gets it. */
-export const STUDIO_DOWNLOAD_URL = 'https://nodegx.io/studio/';
+export const STUDIO_DOWNLOAD_URL = 'https://nodegx.io/studio/#download';
 
 /** The URL scheme the desktop app registers, so a page with no server left can still hand it a folder. */
 export const STUDIO_URL_SCHEME = 'nodegx-studio';
@@ -62,7 +62,9 @@ export function findStudioApp(): StudioAppInstall | null {
 
 /**
  * Opens `projectDir` in the desktop app. `-n` on macOS: a running Studio ignores `--args` when it is only brought
- * to the front, so a second instance is what gets the folder (until the app takes a folder from `open-url`).
+ * to the front, so a second instance carries the folder, hands it to the running one (its single-instance lock) and
+ * quits. A link (`nodegx-studio://open?dir=`, the app's `open-url`) does the same without a process, for a page
+ * that has no server left to run this.
  * `NODEGX_STUDIO_NO_OPEN` keeps a test from launching anything; it answers false, as a failed launch does.
  */
 export function launchStudioApp(app: StudioAppInstall, projectDir: string): Promise<boolean> {

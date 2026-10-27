@@ -1,12 +1,14 @@
 ---
 id: P125-CCN006-NOSCHEME
 title: The Studio desktop app registers no nodegx-studio:// link and a running app ignores a folder handed to it, so a browser window whose agent has gone cannot open its folder in the app
-status: open
+status: fixed
 severity: medium
 area: nodegx-studio `app/main.cjs` (no `setAsDefaultProtocolClient`, no `open-url`, no `second-instance`), `package.json` `build.protocols`
 found: P125 CCN-006, 2026-10-23 — building the offer of the desktop app in a browser window of Studio (`packages/noodl-mcp/src/studio/companion.ts`)
 evidence: "`grep -n 'setAsDefaultProtocolClient\\|open-url\\|second-instance' app/main.cjs` finds nothing; the folder comes only from argv (`projectArg`, main.cjs:24). macOS `open -a <app> --args <dir>` on a running app only brings it to the front, so `launchStudioApp` uses `open -n` (a second instance)."
 launch: beta
+owner: Beta sweep s18 (2026-10-27)
+commit: nodegx-studio 75c8d63
 ---
 
 When the agent's host quits, the browser window of Studio still knows the project's folder but has no server left to
@@ -18,3 +20,22 @@ folder's location.
 **Proposed (Studio repo):** `build.protocols: [{ name: 'NodeGX Studio', schemes: ['nodegx-studio'] }]`; in main.cjs,
 `app.setAsDefaultProtocolClient('nodegx-studio')`, `open-url` and `second-instance` handlers that open the folder from
 `?dir=`, and `requestSingleInstanceLock()` so `launchStudioApp` can drop `-n`.
+
+**Fixed (Beta sweep s18, 2026-10-27; nodegx-studio 75c8d63, not pushed).** Re-measured first: half was already done.
+STU-009 (Studio's tabs) gave the app `requestSingleInstanceLock` and a `second-instance` handler, so a second launch
+already handed its folder to the running app. The link was the missing half. `build.protocols` declares the scheme
+(electron-builder writes `CFBundleURLTypes`, which NodeGX's `declaresScheme` reads, so the companion now sends the
+link); `open-url` takes it on macOS (before `ready` when the link starts the app); Windows and Linux take it from
+the command line of a cold start or a second launch; a packaged app calls `setAsDefaultProtocolClient`. Only an
+absolute `dir` is taken, and a folder with no `nodegx.project.json` gets the app's "That folder is not a NodeGX
+project" dialog.
+
+**Graded.** `check:app`: a second launch carrying the link opens the folder (with a space in its name) in a tab of
+the running Studio; a link that starts the app opens its folder; a relative `dir` opens the welcome screen.
+**Driven on macOS** with the packaged build (`npm run dist`, ad hoc): `open 'nodegx-studio://open?dir=…'` with the
+app closed started it on that project; a second link with it running opened the second folder as a tab in the same
+process (one app, two editor servers). Trap: a shell with `ELECTRON_RUN_AS_NODE=1` (VS Code's) makes `open` start the
+app as plain Node, which exits at once; a browser following the link does not carry it.
+
+`launchStudioApp` keeps `-n`: the second instance hands its folder over through the lock and quits. The link reaches
+a person only with a Studio release (P125-CCN006-NODOWNLOAD).
