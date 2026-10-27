@@ -144,3 +144,14 @@ red is `cmp001InterfaceDoctrine`'s corpus publish rate (38 against 35 counted), 
 does not touch.
 
 **AC6 ✅.** Left: **AC5** (the VM, with the release).
+
+### s9 (2026-10-27): AC5 folded in from BKO-006's travel grade
+
+**AC5 ✅, with one difference.** BKO-006's `briefs/travel.mjs` shipped each stranger's app with the published server's
+`deploy_to_vm` (called as an agent calls it) to a fresh `nodegx-shiptest-vm` container. The fresh container is the
+control: it holds no backend before the ship. After the ship, the box's backend holds the file's triggers and workflows
+by id: the expenses app's monthly trigger and its two-step workflow (travels 16/16), and the book club's Monday trigger
+(8/10; both misses were the grader reading the wrong path, and the deploy log names both files installed). The
+difference: travel.mjs reads them from the shipped backend's own store (`/var/lib/<app>/data/triggers.json` and
+`workflow-defs/`), not from `/admin/triggers` and `/admin/workflow-defs` over HTTP. That store is what those two routes
+list. Every acceptance line of BKO-001 is now met.

@@ -85,3 +85,35 @@ says so and goes in `check` with the next `@nodegx/mcp`.
 table and its function (`fire`) is a backend-map change and another publish (after 0.1.3). A webhook's and a row
 change's settings are the agent's to change (only on/off and a daily time are Studio's). The scratch noodl-mcp build
 for the drive also carried a peer's uncommitted `backendTools.ts` edits.
+
+### s9 (2026-10-27): the map's half — @nodegx/backend-map 0.1.4, to publish
+
+**As built** (`772eee594`). A trigger is a block under the screens on the map, in their column, with its own heading
+("On its own · what the backend starts by itself"). A clock face marks a schedule and a bolt marks a row change or a
+webhook. Yellow wires (`fires`) run to each function it runs. A workflow has no block on the map, so its trigger is
+wired to each function its steps name (full name, or a short name only one function has: the backend's own rule,
+TRIGGERNAME). A row change has a dashed wire (`watches`) to its table, and its flow runs from the table back. A trigger
+with no name of its own is titled short ("A new Member Request", the schedule's words, "Webhook …/leave"). Its panel
+gives the sentence ("When a row of Member Request is made."), what starts it, what it runs (the workflow, its step
+count, each function and who may run it), who it counts as (SCHEDULEAUTH: the app; a webhook's sender: a visitor) and
+its last run. A function's panel lists the triggers that run it under "When it runs". The legend gains "the backend
+starts it" when the app has a trigger.
+
+`lib/triggers.mjs` reads both sources, as BKO-003 does for tables: the backend's `/admin/triggers` (its schedule words,
+its on/off, its last run) and `/admin/workflow-defs`, and the project's `nodegx.automations.json`. A trigger only in
+the file is drawn dashed: "not on the backend yet". Its schedule is said as the cron, never glossed (the backend never
+saw it, so it has no words for it). A trigger only on the backend says the files don't have it.
+
+**Graded.** `test/triggers.test.mjs` (in the map's `npm test`): 13 checks on `triggerFlows` and 17 driving the map in
+Chrome on a members-area copy. The copy's backend is seeded from the file (a named daily schedule and a row change
+starting a two-step workflow). After it starts, one trigger is added to the file only and a webhook is made on the
+backend only, and the daily one is fired (it fails: the copy's functions are not deployed, and the map says so). 30/30.
+Six mutants, each red. The rest of the map's `npm test`: all passed once MUDDYPAWSGONE was fixed (below).
+Pictures: `look/bko-005-map-triggers.png`, `look/bko-005-map-trigger-panel.png`.
+
+**Against "and on the map":** ✅ in the map's own server. Studio draws the map from its pinned
+`@nodegx/backend-map`, so the trigger blocks reach Studio's Data → Map once Richard publishes 0.1.4 and Studio's pin
+and `vendor/NODEGX.json` move with it.
+
+Filed and fixed: **P127-S9-MUDDYPAWSGONE**. The map's any-app test copied Richard's Muddy Paws project, which is no
+longer on disk; it now falls back to `templates/landing-pages`.

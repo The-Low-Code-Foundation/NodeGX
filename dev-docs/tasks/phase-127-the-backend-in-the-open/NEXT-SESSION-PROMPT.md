@@ -162,7 +162,53 @@ so arm M now breaks the script; 10/10, an inert mutant reds the row's five). **T
 (`c282d833c`: a row whose ACL names a role, read by a member put in it and refused to a signed-in outsider; `--no-render`;
 works 14/14 on a lab copy, two grader mutants red). EMPTYSTATEREFUSED and DUPEROLE above.
 
-**Next, in order (s9):**
+## s9 (2026-10-27): 0.2.8 live and graded; Studio on it; the map draws triggers; NOROLESFAILS fixed
+
+- **npm 0.2.8 is live** (Richard's terminal, 16:01–16:49 UTC). Every shasum read from the registry's full document
+  equals the s8 table (node-spec 0.2.2, preview, mcp, the three create-*), each `latest`. `npm create nodegx@0.2.8`
+  in an empty folder, HOME empty, pins `@nodegx/mcp@0.2.8` in all five places.
+- 🔴 **0.2.8 does not carry P128-S3-HELPERNODE or NAMEMISMATCH** (`560ee23d9`, `e03258b33`, both after the cut at
+  `dfdc9e25e`): its `noodl-mcp.cjs` counts `NODEGX_NODE` / `scriptRuntime` / `NODEGX_SERVER_NAME` 0, `startedByApp` 5.
+  Studio's `.mcpb` takes the pinned mcp, so a `.mcpb` for Claude Desktop still needs `--mcp-tarball` from a pack at
+  `560ee23d9`+, or a 0.2.9. Written on HELPERNODE's row.
+- **Studio `b6d0331`** (not pushed): mcp and preview 0.2.8, `vendor/` at `dfdc9e25e` (built from the clean release
+  worktree), `automations-drive.mjs` in `check`. The whole list green in a clean Studio worktree (drive 29/29 on the
+  kit's own server); hosted-check red once on a click race, then 19/19 twice. A peer (STU-082) was editing Studio at
+  the time: committed by pathspec.
+- **The changelog page is built** for Richard's upload: `../OpenNoodl-worktrees/npm-0.2.8b-changelog/index.html`
+  (md5 `0cfb274e8c67842eff7dbea5a0fd0c17`), from nodegx-web's HEAD in a scratch copy. Diffed against the live page:
+  0 lines removed, 87 added (the 0.2.8 section and its index link). nodegx-web's own tree is stale (Oct 21–22): never
+  `deploy.sh` from it.
+- **BKO-005's map half** (`772eee594`, `@nodegx/backend-map` 0.1.4, to publish): triggers drawn on the map, wired to
+  their functions and tables; `test/triggers.test.mjs` 30/30, six mutants red. Fixed on the way:
+  **P127-S9-MUDDYPAWSGONE** (any-app copied a project no longer on disk). **BKO-001 AC5** folded in from travel.mjs.
+- **NOROLESFAILS fixed** (`722da9c33`): the lab and transcripts in `/private/tmp/bko006` were kept after all. Get
+  User Roles filled Error on Unchanged, and that text replaced the author's own refusal. Measured on 0.2.7 and 0.2.8
+  with a control; the backend sends no error with Unchanged now (list, members).
+- **The three labs re-graded on 0.2.8** (copies, `provision_backend` through the published server first): open
+  16/16, 9/9, 9/9 (s6: 10/13, 5/7, 5/7); works 14/14, 8/8, 7/7. Filed **P127-S9-FNLIMITFILEONLY** (open): a
+  function's rate limit written into the rules file never reaches the running backend.
+
+**For Richard (s9):**
+1. Upload the changelog page: `rsync ../OpenNoodl-worktrees/npm-0.2.8b-changelog/index.html
+   nexus:/srv/nodegx/site/changelog/index.html`, then `curl -s https://nodegx.io/changelog/ | md5` should read
+   `0cfb274e8c67842eff7dbea5a0fd0c17`.
+2. Publish the map: `cd dev-docs/tasks/phase-124-the-mystery-of-the-backend/editor && npm publish --access public`
+   (0.1.4). Then Studio's pin and `vendor/NODEGX.json` move to 0.1.4 together.
+3. The Desktop brief (item 1 below) needs a choice: a `.mcpb` built with `--mcp-tarball` from a pack of HEAD, or
+   a 0.2.9 with HELPERNODE and NAMEMISMATCH.
+
+**Next, in order (s10):**
+
+1. **Richard's fourth brief in Claude Desktop**, from a `.mcpb` that carries HELPERNODE (see above; ask which).
+   BKO-002 AC2, BKO-004 AC3 and BKO-005 AC1 ride along. Keep the lab and the transcript.
+2. After the map's 0.1.4 publish: Studio's pin and `vendor/NODEGX.json` (`npm run check:vendor` says if one is left),
+   and the hosted map draws triggers inside the conversation (add a line to `hosted-check`).
+3. **FNLIMITFILEONLY**: a tool that writes a function's rule to both, or the backend reloading the file. Ask Richard
+   which if it is not obvious from R1.
+4. FNSTEPS (low, feature-sized).
+
+**Older order (s8 → s9), kept for the record:**
 
 1. **After Richard publishes 0.2.8** (`npm-0.2.8b-tarballs`): shasums from the registry against the table, `npm create
    nodegx@0.2.8` pins mcp 0.2.8, Studio's pins and `vendor/NODEGX.json` to 0.2.8, `automations-drive.mjs` into

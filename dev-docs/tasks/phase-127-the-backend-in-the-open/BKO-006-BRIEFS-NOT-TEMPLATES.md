@@ -95,3 +95,28 @@ edits). Runtime adapters 341/341.
 tables, fixed in source (TABLESNOTINFILES, test and mutant) and live for a stranger with the next `@nodegx/mcp`; every
 other failure is a filed row with an owner or "none". Not done: Richard's fourth brief in Claude Desktop (the second
 half of the acceptance).
+
+### s9 (2026-10-27): the three labs re-graded on the published 0.2.8; NOROLESFAILS read from the kept lab
+
+The round's lab and transcripts were kept after all (`/private/tmp/bko006/{lab,out}`), against s7's note. Copies of
+all three, each reopened the way an agent would: `provision_backend` (name "App backend", its own) through the
+published `@nodegx/mcp` 0.2.8 (installed from the registry, HOME in the lab copy). Then `grade.mjs --no-render --mcp`
+with that server's backend:
+
+| brief | provision: metadata.dbCollections | open (s6) | open (0.2.8) | works |
+|---|---|---|---|---|
+| shared expenses | 0 → 4 (Expense, Invite, Reminder, _User) | 10/13 | **16/16** | 14/14 |
+| book club | 0 → 3 (Book, Digest, _User) | 5/7 | **9/9** | 8/8 |
+| repair shop | 0 → 3 (Job, Notice, _User) | 5/7 | **9/9** | 7/7 |
+
+TABLESNOTINFILES holds for a stranger's app built on 0.2.7: one `provision_backend` on 0.2.8 puts its tables in its
+files, and "open" reads full in all three.
+
+Found on the way: **P127-S9-FNLIMITFILEONLY** (open, low). Two agents wrote a function's rate limit into
+`nodegx.security.json`, as the editor's PublicWriteDoorUnlimited warning tells them to; the running backend never
+loads it. 0.2.8's provision now says the policies differ. **P127-BKO006-NOROLESFAILS fixed** (`722da9c33`): read from
+the kept transcript, Get User Roles' Error carried "That user is in no roles." on Unchanged, and that text took the
+place of the agent's own refusal. The row has the version table.
+
+Not done: Richard's fourth brief in Claude Desktop (the acceptance's second half). A `.mcpb` from the 0.2.8 pin lacks
+P128-S3-HELPERNODE's fix (measured), so it needs `--mcp-tarball` from a pack at `560ee23d9` or later, or a 0.2.9.
