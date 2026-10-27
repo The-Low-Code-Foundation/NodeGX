@@ -39,6 +39,8 @@ const resolvedTargets = new ResolvedTargetReporter();
 
 /** `this` inside the Parent Component Object node. */
 interface ParentComponentObjectInstance extends NodeInstance {
+  /** Set by `Node._onNodeDeleted`. */
+  _deleted?: boolean;
   _internal: {
     /** Latest value of each `value-…` input, keyed without the prefix. */
     inputValues: Record<string, unknown>;
@@ -169,6 +171,9 @@ const ParentComponentObject: NodeDefinitionOptions = {
    */
   nodeScopeDidInitialize(this: ParentComponentObjectInstance) {
     this.context.scheduleAfterUpdate(() => {
+      // P112-OWN023-NOANCESTOR: a list's row taken away before this ran (a filter changed fast) has no parent left
+      // to find, and is gone: nothing to say.
+      if (this._deleted) return;
       this._internal.resolutionIsLoud = true;
       this.onComponentStateNodesChanged();
     });
