@@ -1108,7 +1108,7 @@ const pointerProbe = (name: string, property: string, operator: string) => ({
     ]
   });
 
-describe('SB-004 §7 — a `points to` filter cannot narrow inside a cloud function', () => {
+describe('SB-004 §7 — a `points to` filter inside a cloud function never widens', () => {
   let dataDir: string;
   let service: BackendService;
   let base = '';
@@ -1166,18 +1166,22 @@ describe('SB-004 §7 — a `points to` filter cannot narrow inside a cloud funct
     expect(res.json.result?.n).toBe(2);
   });
 
-  it('the POINTER arm with no schema fails LOUDLY — never a success carrying every row', async () => {
+  it('the POINTER arm with no schema in the bundle NARROWS — never a success carrying every row', async () => {
     // DEF-012 inverted this pin. As authored by SB-004 §7 this arm asserted the
     // defect (`200`, n === 3 — every row in the class, answered as a success,
     // which is how publishing one page opened every Section on the site). The
-    // meaning, not the number: a filter that cannot be translated must not
-    // widen — the node fails, and the graph's own failure route answers.
+    // meaning, not the number: a filter must not widen.
+    //
+    // P121-TWO003-CLOUDPOINTSTO (2026-10-25) then gave the cloud runtime the
+    // backend's own schema (`_noodl_cloudservices.collections()`), so on this
+    // backend the bundle's empty metadata no longer leaves the filter without
+    // one: it narrows to the two rows on `mine`. A runtime with no schema at all
+    // still refuses rather than widen — `noodl-runtime/test/queryutils.test.ts`.
     const res = await client.post<{ result?: { n?: number }; error?: string }>('/functions/byPointer', {
       pageId: mine
     });
-    expect(res.status).toBe(400);
-    expect(res.json.result).toBeUndefined();
-    expect(res.json.error).toBe('the query itself failed');
+    expect(res.status).toBe(200);
+    expect(res.json.result?.n).toBe(2);
   });
 });
 
