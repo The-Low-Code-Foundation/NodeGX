@@ -205,7 +205,49 @@ works 14/14 on a lab copy, two grader mutants red). EMPTYSTATEREFUSED and DUPERO
    session has open edits in shipped packages. The Desktop brief needs no npm release: a `.mcpb` built with
    `--mcp-tarball` from a pack of HEAD (how HELPERNODE was tried in Desktop on 10-27). **Not ruled yet: ask him.**
 
-**Next, in order (s10):**
+## s10 (2026-10-27, from 19:22): FNLIMITFILEONLY fixed; FNSTEPS re-measured; the release is a peer's
+
+- **0.2.9 was not this lane's to ask.** Richard ruled it to P128 S3b in the same minute s9 wrote the question:
+  "Cut 0.2.9 now, mcp only". That session cut `@nodegx/mcp` 0.2.9 (`9cbf7383a`, then `b90ecd53c`, which adds
+  NOROLESFAILS to the changelog, NOT pushed), graded it into `../OpenNoodl-worktrees/npm-0.2.9-tarballs`, and built a
+  test `.mcpb` at `/Users/Shared/nodegx-0.2.9-darwin-arm64.mcpb`. Its publish waits on Richard's release-owner ruling
+  (`d598d25cc`). `npm view @nodegx/mcp dist-tags` read `latest: 0.2.8` at 19:22.
+- **The s9 changelog page is up:** `curl -s https://nodegx.io/changelog/ | md5` = `0cfb274e8c67842eff7dbea5a0fd0c17`.
+- **The map 0.1.4 is not published** (`npm view @nodegx/backend-map version` = 0.1.3 at 19:22).
+- **FNLIMITFILEONLY fixed** (`d12e0b042`), taken from R1 as built with no new ruling. Every agent write already goes
+  backend first, then file (`writeBoth`), and a backend that reloaded the file would overwrite Studio's and the admin
+  page's edits, which SB-015 deliberately never does. New deferred tool `set_function_permissions` (backend group;
+  resident surface 8,276 with it and without it, 4 under the bar): call / rateLimit / timeoutMs / runAs, null back to
+  the default, `reset` removes the rule, backend and `nodegx.security.json` both or neither. PublicWriteDoorUnlimited
+  names it (and says a hand edit reaches no running backend); provision's policy-drift warning names both rule tools.
+  `p127ProjectFiles` 16/16 on a real backend, including the limiter's own `effectiveRateLimit` 120/60 `declared`; three
+  mutants red; editor `def-009` 16/16; `def009PublicWriteDoorDrive` 2/2; `toolDisclosure` 18/18. **Not in 0.2.9** (cut
+  before it): it rides the next release.
+- **FNSTEPS re-measured** (`edd969319`): the row's backend half was a READ, and it was wrong. A function run has written
+  one step per action, by node id, since DEF-004 (2026-09), and `GET /executions/<id>` serves those steps (new case in
+  `def004-execution-steps.test.ts`, 10/10). Only Studio's half is left (the row says where). Not built: a peer was
+  editing `studio.html` (wiring work, untracked `editor/wiring*.mjs`) through the whole session.
+- noodl-mcp's `tsc --noEmit` has 2 errors, both in `tests/p128OptionSet.test.ts`. That is P128-S2-OPTSETTSC, already
+  filed, and the count is the same with this session's files at HEAD.
+
+**Next, in order (s11):**
+
+1. **Richard's fourth brief in Claude Desktop.** The `.mcpb` to use is P128's 0.2.9 test build
+   (`/Users/Shared/nodegx-0.2.9-darwin-arm64.mcpb`, which carries HELPERNODE and NAMEMISMATCH), or one built with
+   `--mcp-tarball` from a pack of HEAD if `set_function_permissions` should be in the run. Ask Richard which; ask
+   before rebuilding anything Desktop runs. BKO-002 AC2, BKO-004 AC3 and BKO-005 AC1 ride along. Keep the lab and the
+   transcript.
+2. **FNSTEPS, Studio half** (small, written in the row). In `readFnRun`, fetch `/api/backend/executions/<run.id>` as
+   `readAutoRun` already does; in `fnCard`, give `.ran` to each step's node and `.refused` to a failed one; add a
+   hosted-check line. First `stat` `editor/studio.html` and read `git diff` in nodegx-studio. If a peer is in it,
+   commit through a temporary index.
+3. After Richard publishes the map 0.1.4: move Studio's pin and `vendor/NODEGX.json` together (`npm run check:vendor`
+   says if one is left behind), and add a hosted-check line saying the map draws triggers inside the conversation.
+4. When the next `@nodegx/mcp` after 0.2.9 is cut (by whoever Richard names release owner), it carries `d12e0b042`.
+   Grade it from the tarball: `set_function_permissions` is present in `noodl-mcp.cjs`, and the control (0.2.9's
+   tarball) counts 0.
+
+**Older order (s9 → s10), kept for the record:**
 
 1. **Ask Richard about 0.2.9 and the release owner** (For Richard, 3). Do NOT cut or pack 0.2.9 in this lane unless he
    names it the release owner.

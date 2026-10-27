@@ -23,7 +23,7 @@ the templates. That is pillar one (DIRECTION §0: *the blueprint stays open*) ap
 | part | in the project's files? | drawn in Studio? |
 |---|---|---|
 | tables and fields | ✅ `dbCollections` (the editor's and Studio's; an agent's only since BKO-006 s6: P127-BKO006-TABLESNOTINFILES) | ✅ Data types, App data |
-| privacy rules | ✅ `nodegx.security.json` (seeds a backend on first start; Studio writes both; the agent's tool too since BKO-001) | ✅ in a window; in the conversation **was broken** (measured, P127-BKO002-HOSTEDPRIVACY), fixed in the fake host s2 |
+| privacy rules | ✅ `nodegx.security.json` (seeds a backend on first start; Studio writes both; the agent's tool too since BKO-001, and for a function's rule since s10: `set_function_permissions`, P127-S9-FNLIMITFILEONLY) | ✅ in a window; in the conversation **was broken** (measured, P127-BKO002-HOSTEDPRIVACY), fixed in the fake host s2 |
 | cloud functions | ✅ `__cloud__/` node graphs | ❌ a step says "Runs on the backend"; the graph is never opened |
 | backend workflows (WF-001) | ✅ `nodegx.automations.json` since BKO-001 (drift reported, AC6) | ❌ |
 | triggers: schedule, webhook, row change (WF-005) | ✅ `nodegx.automations.json` since BKO-001 | ❌ (the map fetches `/admin/triggers` and never draws it) |
