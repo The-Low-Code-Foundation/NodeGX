@@ -180,7 +180,9 @@ export function createServer(options: ServerOptions): CreatedServer {
   if (store !== null) installProjectOverlay(store.projectDir);
 
   const server = new McpServer(
-    { name: 'noodl-mcp', version: PKG_VERSION },
+    // P128-S3-NAMEMISMATCH — the `.mcpb` sets NODEGX_SERVER_NAME to its manifest's `name`: a Claude Desktop report
+    // says an extension's tools reach the chat only when the two match. Every other client is told `noodl-mcp`.
+    { name: process.env.NODEGX_SERVER_NAME || 'noodl-mcp', version: PKG_VERSION },
     {
       // BST-006 — both briefings live in `./instructions`, because this string
       // is sent exactly once per session and can never be revised afterwards:
