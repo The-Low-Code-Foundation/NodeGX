@@ -266,7 +266,8 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     elementCalls: FOCUS_CALLS
   },
   'net.noodl.controls.options': {
-    node: [...CONTROL_NODE, 'value', 'items', ...GROW.node],
+    // `seeded` (v11, P121-TWO005-DROPDOWNSTALE) is options.ts `_internal.valueIsSeed`: the node's own bookkeeping
+    node: [...CONTROL_NODE, 'value', 'items', 'seeded', ...GROW.node],
     attr: { onPage, pageEnabled, pageVisible },
     // the selection shows the Value wherever the list offers it (v3, R14); otherwise it is the browser's (dropdown.ts `painted`)
     held: { elementFocused: keyboard, domSelected: { shows: (s) => (s.onPage && offers(s.items, s.value) ? s.value : KEEP) } },
