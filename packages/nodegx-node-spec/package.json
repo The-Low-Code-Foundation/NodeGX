@@ -1,6 +1,6 @@
 {
   "name": "@nodegx/node-spec",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Each NodeGX node's behaviour written once, as an executable spec (pure reducers), plus the interpreter that runs a spec as a node and records a JSON trace, and the conformance runner that grades any target against it. Phase 107 (NSP-001); a browser entry and a build since phase 112 (OWN-002). No dependency on the runtime, the editor, React or Node \u2014 `@nodegx/node-spec` runs in a page; `@nodegx/node-spec/node` adds the scenario files on disk.",
   "author": "The Low Code Foundation <contact@thelowcodefoundation.com>",
   "license": "MIT",

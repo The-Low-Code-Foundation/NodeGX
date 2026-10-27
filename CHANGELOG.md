@@ -17,6 +17,74 @@ Each NodeGX release links to its page on GitHub, where you can download it.
   (dev-docs/guidelines/RELEASE-PROCESS.md, step 10).
 -->
 
+## npm packages 0.2.8 · 2026-10-27
+
+**What your agent sets up for an app's backend is kept in the project. Jobs the app runs by itself now work.**
+
+This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create-nodegx-cline` at 0.2.8.
+`@nodegx/preview` moves to 0.2.8 and `@nodegx/node-spec` to 0.2.2. `@nodegx/project-contract`, `@nodegx/export` and
+`@nodegx/canvas-look` stay at their versions.
+
+### New
+
+- **Your agent knows where you see your app.** You see it in three places: the part in the chat, NodeGX Studio and the
+  NodeGX editor. `get_project_info` has a section on them. The three tools that open them name each other. If Studio
+  is open, your agent is told when it adds a part Studio doesn't edit.
+- **Option sets.** `get_example('option-set')` shows a list of languages kept as an option set. A Dropdown on the
+  page reads it. Your agent is pointed to it when it types the same list in as loose words.
+- **Your agent hears what you changed in Studio.** Turn a trigger off or move its time in Studio, and
+  `what_changed_since` tells your agent the next time it asks.
+- **Run a trigger once.** `fire_backend_trigger` runs a trigger without waiting for its schedule. The schedule and
+  the project stay as they were.
+- **A key in your app's `.env` works straight away.** Paste an API key into the project's `.env` file and the app's
+  cloud functions use it on their next call. There's no agent step and no restart. The line in `.env` wins over a copy
+  of the same key on the backend's Secrets page.
+- **A phone on your Wi-Fi gets the app's data.** A preview shared with `--host` now carries the app's backend with it.
+  Before, a phone opened the page but asked itself for the data.
+
+### Changed
+
+- **A job the app starts by itself counts as the app.** A schedule, a change to a row and Studio's Run now can call a
+  function set to "signed in only", with nobody signed in. A webhook and a direct call from outside still count as a
+  visitor. Before, a scheduled job was refused, so two agents in three opened the function to everyone to make it run.
+- **The tables your agent makes are kept in the project.** `provision_backend` writes them into the project file. A
+  new backend starts with them.
+- **Anything you can click can be reached with the keyboard.** A box, a text or a picture with its Click wired now
+  takes Tab and presses with Enter or Space. A screen reader calls it a button. A clickable card that holds its own
+  buttons or fields leaves Tab to those. Your agent is told when it builds one.
+- **A wire into a placed component's Visible is refused.** A placed component has no Visible or Mounted of its own, so
+  the wire did nothing and the screen behind it still showed. The refusal says to wrap the component in a Group.
+- **`drive_page` checks every step before the first one runs.** A drive it refuses no longer leaves the page half
+  driven.
+
+### Fixed
+
+- **A User node now works inside a cloud function.** Its Fetch asked the backend for an address it didn't serve. It
+  now gets the person who made the call.
+- **A table only its creator can read lists before its first row.** It used to fail with "no such column owner".
+- **A workflow reads a function's answer.** Its call-function step now says a NodeGX function answers `{ result: … }`,
+  read as `previous.result.<name>`. An agent read `previous.items` and its monthly run failed.
+- **A trigger finds its function by its short name.** A name that matches two functions is refused. A run the backend
+  refuses keeps the function's reason.
+- **The backend's Roles page names a role your rules use that the backend lacks.** A button next to it makes the role.
+  Before, a backend started from the project's files said "No roles yet".
+- **A backend export leaves out password hashes.** `GET /admin/export` no longer includes the backend's own `_`
+  fields.
+- **A Function's run-on-change setting gets its right name.** An agent wrote `runOnChange-title` where the setting is
+  `runOnChange-in-title`. The Function then ran on every keystroke. Your agent is now told the right name.
+- **A placeholder page no longer becomes the start page.** An agent that wrote empty pages first, to fill in later,
+  moved the app's start to each one in turn.
+- **A resumed Claude Code session finds its app.** A server with no project open names the project already in its
+  folder. It also tells your agent that seven tools is the normal start, not a lost connection.
+- **A list row shows its own words from the start.** For one frame a new row showed its Text elements' default words.
+- **Deleting a list row straight after adding it no longer logs an error** ("No ancestor component has a Component
+  Object node").
+- **A Video keeps its YouTube or Vimeo player** when a Source Object arrives. A Video playing a file now fires Click,
+  Hover and Pointer and takes a dropped file.
+- **A Text set to Ellipsis draws the "…".**
+- **For editors built from the kit.** In `@nodegx/node-spec` 0.2.2, Visible reaches six controls at once. The Request
+  node's spec says a run the app starts by itself counts as the app.
+
 ## npm packages 0.2.7 · 2026-10-26
 
 **Your agent now keeps your app's workflows and triggers in the project's own files.**
