@@ -159,7 +159,8 @@ export const node = {
       type: 'boolean',
       displayName: 'Allow Unauthenticated',
       default: false,
-      description: 'Whether a request with no valid session token is allowed to run this function at all',
+      description:
+        'Whether a request with no valid session token is allowed to run this function at all. A run the app starts itself — a schedule, a row change, a run from Studio — is always allowed and sees nobody signed in; a webhook is a request like any other',
       set: function (value) {
         this._internal.allowNoAuth = value;
       }
@@ -236,7 +237,12 @@ export const node = {
           // User could not be fetched
           if (!this._internal.allowNoAuth) throw Error('Unauthenticated requests not accepted.');
         }
-      } else if (!this._internal.allowNoAuth) throw Error('Unauthenticated requests not accepted.');
+      } else if (!this._internal.allowNoAuth && req.startedByApp !== true) {
+        // P127-BKO006-SCHEDULEAUTH (Richard's ruling, 2026-10-27): a run the app started itself counts as the app, so a
+        // weekly job can run a members-only function without that function being opened to everyone. Nobody is signed
+        // in: `authenticated` stays false and `userId` blank.
+        throw Error('Unauthenticated requests not accepted.');
+      }
 
       // CWF-014 — the request contract, enforced BEFORE the graph runs.
       //

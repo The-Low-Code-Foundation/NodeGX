@@ -69257,7 +69257,7 @@
           },
           "isSignal": false,
           "default": false,
-          "description": "Whether a request with no valid session token is allowed to run this function at all"
+          "description": "Whether a request with no valid session token is allowed to run this function at all. A run the app starts itself — a schedule, a row change, a run from Studio — is always allowed and sees nobody signed in; a webhook is a request like any other"
         },
         {
           "name": "params",

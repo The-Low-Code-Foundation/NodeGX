@@ -30,6 +30,7 @@
 import type { ExecutionHistory } from '../execution/ExecutionStore';
 import type { StepExecutor, StepExecContext, StepExecResult } from './StepExecutor';
 import { StepExecutionError, normalizeStepReturn } from './StepExecutor';
+import { runStartedByApp } from './startedByApp';
 import { rawParamNames, validateStepShape } from './steps/kinds';
 import { collectValuePaths, exceedsValueDepth, MAX_VALUE_DEPTH, resolveStepParams } from './steps/values';
 import type {
@@ -540,7 +541,16 @@ export class WorkflowEngine {
 
         const timeoutMs = step.timeoutMs && step.timeoutMs > 0 ? step.timeoutMs : def.stepTimeoutMs || 0;
         try {
-          const ctx: StepExecContext = { workflow: def, step, input, scope, upstream, signal };
+          const ctx: StepExecContext = {
+            workflow: def,
+            step,
+            input,
+            scope,
+            upstream,
+            signal,
+            // P127-BKO006-SCHEDULEAUTH: a run the app started itself lets its function steps past "signed in only".
+            ...(runStartedByApp(opts.trigger.type) ? { startedByApp: true } : {})
+          };
           const result = await this.runStepGuarded(ctx, timeoutMs, signal);
           const output = result.output;
           if (stepId) logger?.completeNode(stepId, true, output);

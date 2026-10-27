@@ -95,7 +95,7 @@ export async function invokeWithRetryPolicy(
     if (ctx.signal.aborted) break;
 
     try {
-      const output = await invokeCloudFunction(getRunner, ref, { ...ctx.input, attempt });
+      const output = await invokeCloudFunction(getRunner, ref, { ...ctx.input, attempt }, ctx.startedByApp);
       return { ...output, attempts: attempt, retried: attempt > 1 };
     } catch (e) {
       lastError = e instanceof Error ? e : new Error(String(e));

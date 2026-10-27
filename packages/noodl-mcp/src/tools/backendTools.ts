@@ -1055,7 +1055,8 @@ export function registerBackendWriteTools(server: McpServer, binding?: ProjectBi
         'Add an automation trigger to a running backend (WF-005): a cron schedule, an incoming webhook, or a ' +
         'db-change event, each invoking a designated cloud function. For a webhook, the per-hook secret is ' +
         'returned EXACTLY ONCE (store it now) — point the sender at POST /hooks/<backendId>/<slug> with an ' +
-        'X-Hub-Signature-256 HMAC (or the token scheme). The definition is persisted and deploys with the backend.',
+        'X-Hub-Signature-256 HMAC (or the token scheme). The definition is persisted and deploys with the backend. ' +
+        'A schedule or db-change run counts as the app: it passes a signed-in-only function, nobody signed in. A webhook does not.',
       inputSchema: { backendId: z.string().optional(), ...triggerFields }
     },
     guarded(async ({ backendId, ...body }) => {

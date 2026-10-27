@@ -20,7 +20,9 @@
  *     (userservice.js :57-76 — before s97 the first three were never answered and the function waited for its timeout,
  *     P107-S97-USERSMEHANG, fixed);
  *   - a failed lookup, or no token at all, refuses the request — `Unauthenticated requests not accepted.` — unless Allow
- *     Unauthenticated is set NOW (read when the lookup fails, :234, :236);
+ *     Unauthenticated is set NOW (read when the lookup fails, :234, :236); with no token, a run the app started itself (the
+ *     backend's in-process `startedByApp: true` — a schedule, a row change, a run from Studio; never a header or a body
+ *     field) is not refused and runs with nobody signed in (v4, :240-245, Richard's ruling P127-BKO006-SCHEDULEAUTH);
  *   - then the CONTRACT (:254-259): when any listed parameter declares a type, Required or a Default (`ptype-`, `preq-`,
  *     `pdef-`), the parsed body is checked and coerced (requestContract.ts `applyRequestContract`); a refused field refuses
  *     the request (`Invalid request body: …`, its fields); a body that is not a JSON object (`null`, a number, a string, an
@@ -325,7 +327,10 @@ const invocations: HostScript['invocation'][] = [
   { headers: { 'X-Parse-Session-Token': 't1', origin: 'null', host: 'h' } },
   { headers: { 'x-parse-session-token': 't1' }, body: '{"a":null}', at: 100 },
   { headers: { host: 'internal:8577', 'x-forwarded-host': 'public.example.com', 'x-forwarded-proto': 'https, http' }, body: '{"total":"7"}' },
-  { headers: { origin: ['https://app.example.com/', 'https://b.example'], 'x-forwarded-proto': 'jAvascript', host: 'h' }, body: '{}' }
+  { headers: { origin: ['https://app.example.com/', 'https://b.example'], 'x-forwarded-proto': 'jAvascript', host: 'h' }, body: '{}' },
+  { headers: {}, body: '{"total":3}', startedByApp: true },
+  { headers: { 'x-parse-session-token': 't1' }, body: '{}', startedByApp: true },
+  { headers: { startedbyapp: 'true' }, body: '{"startedByApp":true}' }
 ];
 const CLOUD = { appId: 'app', masterKey: 'mk', endpoint: 'https://be.example' };
 const HOSTS: HostScript[] = [{}];
@@ -337,7 +342,7 @@ HOSTS.push({ invocation: invocations[0], cloudServices: { ...CLOUD, runId: 'run-
 
 export const CloudRequest = defineNode({
   type: 'noodl.cloud.request',
-  version: 3,
+  version: 4,
   changes: [
     {
       version: 2,
@@ -350,6 +355,12 @@ export const CloudRequest = defineNode({
       says: 'User Id is text (it carries the id of the person the session token resolved to). It was declared a flag, so a wire into a Number read the id as NaN and the canvas offered it to a signal input',
       row: 'P107-S97-USERIDBOOLEAN (the Beta sweep s6)',
       migration: { none: 'No saved wire stops connecting: measured 106 wires from User Id in 13,839 project files, 70 into script inputs (any type), 35 into text ports, 1 into a record field, none into a signal' }
+    },
+    {
+      version: 4,
+      says: 'A run the app starts itself — a schedule, a row change, a run from Studio — is not refused when Allow Unauthenticated is off: it runs with nobody signed in. It was refused, so a weekly job could only run a function opened to everyone. A webhook and a direct call are refused as before',
+      row: 'P127-BKO006-SCHEDULEAUTH (Richard ruled 2026-10-27: a run the app starts itself counts as the app)',
+      migration: { none: 'Nothing a project stores changes: only a run the backend marks as started by the app gets a different answer, and it gets the one its author had to open the function to everyone to get' }
     }
   ],
   source: 'packages/noodl-viewer-cloud/src/nodes/cloud/request.ts; packages/noodl-viewer-cloud/src/nodes/cloud/requestContract.ts; packages/noodl-viewer-cloud/src/nodes/cloud/requestOrigin.ts; packages/noodl-viewer-cloud/src/services/userservice.js',
@@ -378,7 +389,7 @@ export const CloudRequest = defineNode({
 
   inputs: {
     // :154-163 — held raw, read when the request comes and again when its lookup fails
-    allowNoAuth: { type: 'boolean', default: false, coerce: 'none', displayName: 'Allow Unauthenticated', group: 'General', description: 'Whether a request with no valid session token is allowed to run this function at all', examples: [true, false, 'false', 1] },
+    allowNoAuth: { type: 'boolean', default: false, coerce: 'none', displayName: 'Allow Unauthenticated', group: 'General', description: 'Whether a request with no valid session token is allowed to run this function at all. A run the app starts itself — a schedule, a row change, a run from Studio — is always allowed and sees nobody signed in; a webhook is a request like any other', examples: [true, false, 'false', 1] },
     // :164-172 — held raw
     params: { type: 'stringlist', coerce: 'none', editOnly: true, group: 'Parameters', description: 'Names to pull out of the request body, each becoming an output — and a Type, Required and Default row to declare what it is', examples: ['total', 'total,a', 'a,0', '0,1', ''] }
   },
@@ -427,7 +438,8 @@ export const CloudRequest = defineNode({
         }
         const waiting = { params, headers: req.headers };
         if (!token) {
-          if (!i.allowNoAuth) return { send: [], answers: [{ op: 'refuse', reason: UNAUTHENTICATED }] }; // :236
+          // :240-245 — v4, P127-BKO006-SCHEDULEAUTH: the backend's mark on a run the app started itself, never a header or the body
+          if (!i.allowNoAuth && req.startedByApp !== true) return { send: [], answers: [{ op: 'refuse', reason: UNAUTHENTICATED }] };
           return proceed(s, params, req.headers, i, w, { set: {}, send: [] });
         }
         const cloud = w.hostCloud();

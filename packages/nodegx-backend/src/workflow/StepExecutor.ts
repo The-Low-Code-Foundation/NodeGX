@@ -71,6 +71,11 @@ export interface StepExecContext {
    * the durability/cancellation honesty notes in the semantics doc).
    */
   signal: AbortSignal;
+  /**
+   * P127-BKO006-SCHEDULEAUTH: the run was started by the app itself (a schedule, a row change, a run from Studio), so
+   * a function step passes its Request node's "signed in only" check. Absent for a webhook's run.
+   */
+  startedByApp?: boolean;
 }
 
 /**
@@ -183,7 +188,7 @@ export class FunctionStepExecutor implements StepExecutor {
     if (retryPolicyActive(ctx.step.params as Record<string, unknown> | undefined)) {
       return invokeWithRetryPolicy(this.getRunner, name, ctx);
     }
-    return invokeCloudFunction(this.getRunner, name, ctx.input);
+    return invokeCloudFunction(this.getRunner, name, ctx.input, ctx.startedByApp);
   }
 }
 
@@ -201,7 +206,8 @@ export class FunctionStepExecutor implements StepExecutor {
 export async function invokeCloudFunction(
   getRunner: () => WorkflowRunner | null,
   name: string,
-  input: Record<string, unknown>
+  input: Record<string, unknown>,
+  startedByApp?: boolean
 ): Promise<Record<string, unknown>> {
   const runner = getRunner();
   if (!runner) throw new StepExecutionError('Workflow runner is not ready', 503);
@@ -211,7 +217,8 @@ export async function invokeCloudFunction(
 
   const response = await runner.invokeFunction(name, {
     body: JSON.stringify(input),
-    headers: {}
+    headers: {},
+    ...(startedByApp ? { startedByApp: true } : {})
   });
 
   let parsed: unknown = {};

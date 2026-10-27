@@ -2147,7 +2147,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       } else {
         const { at, request } = w.host.invocation;
         w.clock.schedule(at, () => {
-          const req = 'body' in request ? { headers: { ...request.headers }, body: request.body } : { headers: { ...request.headers } };
+          const req: Record<string, unknown> = 'body' in request ? { headers: { ...request.headers }, body: request.body } : { headers: { ...request.headers } };
+          if (request.startedByApp === true) req.startedByApp = true; // P127-BKO006-SCHEDULEAUTH, as the backend hands it
           (node as unknown as { sendRequest(r: unknown): Promise<void> }).sendRequest(req).catch((e: { message?: unknown; fields?: unknown }) => {
             w.host.refuse();
             st.frame.location.push(invocationEvent(e && e.fields !== undefined ? { op: 'refuse', reason: String(e.message), fields: e.fields } : { op: 'refuse', reason: String(e && e.message) }));

@@ -128,11 +128,13 @@
  *               installs (with `currentRunId()` answering `runId` when the script names one). The cloud user service reads
  *               it to look the caller up — a plain `fetch` to `<endpoint>/users/me`, so it travels on NETWORK above and is
  *               answered by the network's rules. Absent: not installed.
- *             `invocation` `{ at?, headers?, body?, settledAt? }` — the node is part of a function a request reached. The
+ *             `invocation` `{ at?, headers?, body?, startedByApp?, settledAt? }` — the node is part of a function a request reached. The
  *               component is built before the request is handed (index.ts :284-323), so from the mount every Response node
  *               holds the request's two callbacks: `_requestIsOpen()` and `_sendResponseCallback(payload)`. At `at` ms
  *               on the clock (absent: 1 — a world timer, never before 1) the Request node is handed `{ headers, body }`
- *               (`sendRequest`; `headers` absent is `{}`, `body` absent is none). The request is OPEN until it is
+ *               (`sendRequest`; `headers` absent is `{}`, `body` absent is none; `startedByApp: true` rides along when the
+ *               script sets it — the backend's mark on a run the app started itself, a schedule, a row change, a run
+ *               from Studio, P127-BKO006-SCHEDULEAUTH). The request is OPEN until it is
  *               answered: a Response's callback while it is open delivers the payload (returns `true`) and settles it; a
  *               refusal (`sendRequest` rejecting) settles it; `settledAt` settles it from elsewhere — another Response, or
  *               the runner's timeout. Once settled, `_requestIsOpen()` is `false` and the callback returns `false`.
@@ -676,6 +678,8 @@ export interface InvocationScript {
   headers?: Record<string, unknown>;
   /** The request's body, as the process hands it (the raw text); absent: none. */
   body?: unknown;
+  /** P127-BKO006-SCHEDULEAUTH: the backend's in-process mark that the app started this run itself; absent: not set. */
+  startedByApp?: boolean;
   /** ms on the clock another Response, or the runner's timeout, settles the request at; absent: never. */
   settledAt?: number;
 }
@@ -684,6 +688,8 @@ export interface InvocationScript {
 export interface InvocationRequest {
   headers: Record<string, unknown>;
   body?: unknown;
+  /** P127-BKO006-SCHEDULEAUTH: a run the app started itself (InvocationScript.startedByApp). */
+  startedByApp?: true;
 }
 
 /** HOST above, THE INVOCATION: a function's answer, as recorded (trace.ts `answer`). */
@@ -738,7 +744,9 @@ export class WorldHost {
       const at = inv.at ?? 1;
       if (!(at >= 1)) throw new Error(`world: a request is handed at ≥ 1 ms on the clock, not ${JSON.stringify(inv.at)} (HOST, THE INVOCATION)`);
       if (inv.settledAt !== undefined && !(inv.settledAt >= 1)) throw new Error(`world: a request is settled from elsewhere at ≥ 1 ms on the clock, not ${JSON.stringify(inv.settledAt)} (HOST, THE INVOCATION)`);
-      this.invocation = { at, request: 'body' in inv ? { headers: { ...(inv.headers ?? {}) }, body: inv.body } : { headers: { ...(inv.headers ?? {}) } } };
+      const request: InvocationRequest = 'body' in inv ? { headers: { ...(inv.headers ?? {}) }, body: inv.body } : { headers: { ...(inv.headers ?? {}) } };
+      if (inv.startedByApp === true) request.startedByApp = true;
+      this.invocation = { at, request };
       if (inv.settledAt !== undefined) clock.schedule(inv.settledAt, () => void (this.settled = true));
     } else this.invocation = undefined;
     this.rules = [...(script.answers ?? [])];

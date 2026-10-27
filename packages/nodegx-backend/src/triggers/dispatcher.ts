@@ -56,6 +56,7 @@ import type { WorkflowRunner, RunTriggerContext } from '../workflow/WorkflowRunn
 import type { WorkflowSubsystem } from '../workflow/WorkflowSubsystem';
 import type { TriggerDef, TriggerResult, TriggerRegistry, TriggerSkip } from './registry';
 import { DEFAULT_RESPONSE_TIMEOUT_MS } from './registry';
+import { runStartedByApp } from '../workflow/startedByApp';
 
 /**
  * FED-004 — the disposition a skipped fire's execution record carries, in ONE
@@ -261,7 +262,12 @@ export class TriggerDispatcher {
     try {
       const response = await runner.run(
         targetName,
-        { body: JSON.stringify(payload), headers: headers || {} },
+        {
+          body: JSON.stringify(payload),
+          headers: headers || {},
+          // P127-BKO006-SCHEDULEAUTH: a schedule, a row change or Studio's "run now" counts as the app; a webhook does not.
+          ...(runStartedByApp(triggerType) ? { startedByApp: true } : {})
+        },
         { type: triggerType, source, triggerId: trigger.id, requestId, onStarted: input.onStarted }
       );
       statusCode = response.statusCode;

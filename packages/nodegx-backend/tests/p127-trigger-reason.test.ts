@@ -4,6 +4,9 @@
  * BKO-006's book club: a Monday schedule ran a function that takes no call without a signed-in person. A schedule has
  * none, so every fire was refused, and the trigger's last result read "Target returned HTTP 500" and nothing else. The
  * agent guessed the cause and made the function public. The function had said why; the record now keeps it.
+ *
+ * Since P127-BKO006-SCHEDULEAUTH a schedule (and Studio's "run now") counts as the app and is no longer refused, so
+ * the refusal graded here is a webhook's: anyone with the link is still a visitor.
  */
 import * as fs from 'fs';
 import * as os from 'os';
@@ -54,16 +57,20 @@ describe('P127-BKO006-SCHEDULEREASON — a refused fire keeps the function’s r
     fs.rmSync(dataDir, { recursive: true, force: true });
   });
 
-  it('fired, the schedule is refused, and its last result says what the function said', async () => {
-    const made = await req<{ trigger: { id: string } }>('POST', '/admin/triggers', {
-      type: 'schedule',
-      name: 'Monday digest',
+  it('fired, a webhook is refused, and its last result says what the function said', async () => {
+    const made = await req<{ trigger: { id: string }; secret: string }>('POST', '/admin/triggers', {
+      type: 'webhook',
+      name: 'Digest hook',
       target: { kind: 'function', name: 'Cloud Functions/Weekly Digest' },
-      schedule: { cron: '0 8 * * 1', missedFirePolicy: 'skip' }
+      webhook: { slug: 'digest', scheme: 'token' }
     });
     expect(made.status).toBe(201);
     const id = made.json.trigger.id;
-    await req('POST', `/admin/triggers/${id}/fire`, {});
+    await fetch(`${base}/hooks/backend_p127reason/digest`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-webhook-token': made.json.secret },
+      body: '{}'
+    });
     const got = await req<{ trigger: { status: { lastResult: { ok: boolean; error?: string } } } }>('GET', `/admin/triggers/${id}`);
     const last = got.json.trigger.status.lastResult;
     expect(last.ok).toBe(false);

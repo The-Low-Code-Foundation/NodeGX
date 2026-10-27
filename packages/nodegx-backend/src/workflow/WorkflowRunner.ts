@@ -196,6 +196,11 @@ export interface RunnerResponse {
 export interface RunnerRequest {
   body?: string;
   headers?: Record<string, unknown>;
+  /**
+   * P127-BKO006-SCHEDULEAUTH: the app started this run itself (a schedule, a row change, a run from Studio), so the
+   * Request node lets it past "signed in only" with nobody signed in. In process only — see `startedByApp.ts`.
+   */
+  startedByApp?: boolean;
 }
 
 /**

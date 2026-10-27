@@ -172,11 +172,12 @@ export class ForEachStepExecutor implements StepExecutor {
         if (ctx.signal.aborted) return;
         const { item, index } = selected[slot];
         try {
-          results[slot] = await invokeCloudFunction(this.deps.getRunner, ref, {
-            ...ctx.input,
-            [itemKey]: item,
-            [indexKey]: index
-          });
+          results[slot] = await invokeCloudFunction(
+            this.deps.getRunner,
+            ref,
+            { ...ctx.input, [itemKey]: item, [indexKey]: index },
+            ctx.startedByApp
+          );
         } catch (e) {
           const message = e instanceof Error ? e.message : String(e);
           errors.push({ index, message });

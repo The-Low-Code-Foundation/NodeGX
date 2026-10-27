@@ -45,6 +45,59 @@
     }
   },
   {
+    "name": "no session token, Allow Unauthenticated off, and the app started the run itself (a schedule, a row change, a run from Studio): it runs with nobody signed in — Authenticated false, the wired parameter, Received",
+    "because": "request.ts :240-245 (v4): the backend's in-process `startedByApp` (nodegx-backend startedByApp.ts); Richard's ruling P127-BKO006-SCHEDULEAUTH",
+    "params": {
+      "params": "total"
+    },
+    "wiredOutputs": [
+      "pm-total"
+    ],
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {
+        "invocation": {
+          "headers": {},
+          "body": "{\"total\":3}",
+          "startedByApp": true
+        }
+      }
+    }
+  },
+  {
+    "name": "a caller cannot claim it: `startedbyapp` as a header and `startedByApp` in the body are refused like any request with no token",
+    "because": "request.ts :240 reads the handed request's own field, which the backend sets in process and no route copies from a caller",
+    "params": {
+      "params": "total"
+    },
+    "wiredOutputs": [
+      "pm-total"
+    ],
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "host": {
+        "invocation": {
+          "headers": {
+            "startedbyapp": "true"
+          },
+          "body": "{\"startedByApp\":true,\"total\":3}"
+        }
+      }
+    }
+  },
+  {
     "name": "a token but no cloud services in the process: the lookup fails at once — refused with Allow Unauthenticated off",
     "because": "userservice.js :33-36 'No active cloud service'; request.ts :232-234",
     "params": {
