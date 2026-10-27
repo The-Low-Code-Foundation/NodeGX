@@ -23,9 +23,9 @@ the files they touch, so one session reads one surface once.
 
 | # | session | rows | the files | state |
 |---|---|---|---|---|
-| L1 | **Studio's dialogs and chips** | P125-MUDDY-NATIVEDIALOG (high: New option set / attribute / data type / style do nothing in the app; deletes refuse in the panel), P125-MUDDY-DEADCHIP | nodegx-studio `editor/studio.html` (5 `prompt()`, 9 `confirm()`; `sourceChip`); the gates stub both (`editor/check.mjs`, `editor/data-check.mjs`), so grade in the Electron app | open. ⚠️ Both bug files are untracked, filed by a P125 session 10-27 11:16: check that lane first, and tag them `launch: beta` once committed |
-| L2 | **What the agent is told** | P125-MUDDY-OPTSETSUNKNOWN (high), P125-MUDDY-SURFACESUNSAID (high) | noodl-mcp `src/instructions.ts`, `src/guidance.ts`, the seeded `CLAUDE.md` / `CONVENTIONS.md`; the MCP tool-surface budget gate | open; untracked bug files as L1 |
-| L3 | **The write door's privacy checks** | P127-BKO006-COMPVISIBLE (a private screen shows under the sign-in card), P127-BKO006-RUNONCHANGEGUESS, P127-BKO006-EMPTYSTARTPAGE, P127-BKO006-DRIVEHALFRUN | editor validation as the MCP door runs it (`noodl-editor` validator, `pageRegistration.ts`), noodl-mcp `drive_page` | open; P127's rows. P127-BKO006-NOROLESFAILS: P127 s7 measured it does not reproduce at HEAD; left to that lane |
+| L1 | **Studio's dialogs and chips** | P125-MUDDY-NATIVEDIALOG (high: New option set / attribute / data type / style do nothing in the app; deletes refuse in the panel), P125-MUDDY-DEADCHIP | nodegx-studio `editor/studio.html` (5 `prompt()`, 9 `confirm()`; `sourceChip`); the gates stub both (`editor/check.mjs`, `editor/data-check.mjs`), so grade in the Electron app | **P128's, not this sweep's** (s17): NATIVEDIALOG is P128 S4 (Studio's own name field and confirm card), DEADCHIP is P128 S6 (Wiring). Both committed by P128 (5fb0e70ed) and tagged `launch: beta` in s17 |
+| L2 | **What the agent is told** | P125-MUDDY-OPTSETSUNKNOWN (high), P125-MUDDY-SURFACESUNSAID (high) | noodl-mcp `src/instructions.ts`, `src/guidance.ts`, the seeded `CLAUDE.md` / `CONVENTIONS.md`; the MCP tool-surface budget gate | **P128's** (s17): both `owner: P128-S2`; S1 (0be3a25e9) landed the `surfaces` section, AC3 open; S2 = the option-set example, validator hint, write note |
+| L3 | **The write door's privacy checks** | P127-BKO006-COMPVISIBLE (a private screen shows under the sign-in card), P127-BKO006-RUNONCHANGEGUESS, P127-BKO006-EMPTYSTARTPAGE, P127-BKO006-DRIVEHALFRUN | editor validation as the MCP door runs it (`noodl-editor` validator, `pageRegistration.ts`), noodl-mcp `drive_page` | ✅ **done s17**: RUNONCHANGEGUESS 30cb6671c, COMPVISIBLE 79cbc4674, DRIVEHALFRUN 4bf7e4664, EMPTYSTARTPAGE 809c2c231; all four reach an agent with the next `@nodegx/mcp` dist. NOROLESFAILS left to P127 |
 | L4 | **Getting Studio** | P125-CCN006-NODOWNLOAD (no desktop download on nodegx.io/studio/), P125-CCN006-NOSCHEME | nodegx-studio `app/main.cjs`, `package.json` `build.protocols`; nodegx-web `site/studio/` | open. A push of nodegx-web is a deploy: Richard's OK before the page goes live |
 | L5 | **Runtime rows an app hits** | P18-S109-MOUNTPULSE (Sign In With: a cancel never fires Failure), P109-F03 (two lists sharing row ids show each other's rows), P109-F11 (a Group's inline defaults beat a CSS Class); P109-S24-SIGNINWITHERRORKEPT here once ruled (same node) | noodl-viewer-react `signinwith.ts`, `foreach`, `react-component-node` | open |
 | L6 | **The backend in the project's files, and the run timeline** | P127-BKO006-ROLESNOTINFILES, P127-BKO004-FNSTEPS (Studio can't light up which steps a function ran), P104-BMG018-SEARCH | nodegx-backend `WorkflowRunner`, noodl-mcp `create_backend_role`, the backend manager's link picker | open; overlaps lane 9 (P127): check its handoff |
@@ -972,3 +972,48 @@ unmerged branch `origin/tpl011-desk1` (P78). The fix belongs on that branch.
    with `OUT_PATH=<scratch>` takes ~17 s.
 4. `spec-disagreements.js` reads the ledger: run it after closing any `kit: node-spec` row with a scenario regression,
    or the editor's Try panel keeps the row open.
+
+# Session 17, 2026-10-27 (next session reads this first)
+
+The launch plan, first session not done. **L1 and L2 belong to P128** (its S4/S6 and S1/S2 name the same rows, and S1
+has landed), so this session took **L3**, the write door's four P127 rows, all owner-less (P127's own s8 list puts them
+after two steps that wait on Richard). Claimed by owner line first. **Nothing pushed; no dist rebuilt.**
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **P127-BKO006-RUNONCHANGEGUESS** | 30cb6671c | rule `function-run-on-change-unknown`: a `runOnChange-` parameter on a Function that is not `runOnChange-in-…` is named with the right name (the nearest script input when it is not one); warning, blocking for an authored write. The runtime builds a Function's boxes from its `in-` inputs only, so there is no benign case | census 2,718 Function nodes: 2,805 right, 5 wrong (all agent-written, OWN-019 driftwood); editor spec 3/3, 2 red unregistered; the door refuses the guessed write and takes the corrected one. The `run` description still names no parameter (a spec sentence + both catalogs, for the half the row calls optional) |
+| **P127-BKO006-COMPVISIBLE** | 79cbc4674 | Re-measured first: a `visible`/`mounted` parameter on an instance was already refused; a **wire** into one was refused when the component declared any input and **accepted clean when it declared none** (the transcript's exact write, read from `/private/tmp/bko006/out/expenses/agent.jsonl`). `connectionTargets.ts` now reports it; every refusal of the two names on an instance says to wrap it in a Group and gate the Group's mounted, `mounted: false` to start hidden | census: 0 such wires in 243 local projects (9,833 wires into instances) + 2 templates, a planted copy found; door 3/3, measured arm red with HEAD's file; DEF-002 + phase-55 72/72 (DEF-002's "says nothing" arm rewritten as the reporting arm) |
+| **P127-BKO006-DRIVEHALFRUN** | 4bf7e4664 | `drive-steps.js` `checkStep`: the run's own builders over every step before Chrome starts, every bad step named at once, then "No step ran" | 3/3 without a browser, all red with HEAD's runner (its door arm ran step 1 in Chrome before refusing); a well-formed step of every verb and read form passes; isl021 no-browser 3/3 |
+| **P127-BKO006-EMPTYSTARTPAGE** | 809c2c231 | an empty page being written never takes home off a placeholder; the first written page that is not empty does, once. Not the row's proposal ("only `create_project`'s page"): nothing records that page | editor 39/39 (two arms red with HEAD); door 2/2 (HEAD: the second stub takes home); 35 template/registration door suites, only tpl011 red |
+
+Also: the four P125-MUDDY rows tagged `launch: beta` (they were untracked when the plan was written). `--launch beta`
+lists 17 again: 13 left from the plan's 17, plus these four.
+
+## For Richard
+
+1. **Push and publish** (sessions 12–17). This session is all in `@nodegx/mcp` (the editor's validation and page
+   registration ride inside it, and `drive-steps.js` ships in `dist/render-harness/`): an agent sees none of it until
+   the next dist.
+2. Standing: DEPLOYLOOPBACK's third-party half, the engine CLI's full-stack default, MCPJSONABSPATH, and the R page.
+
+## Next
+
+1. **L4 (Getting Studio)**, unless P128 has started it: NODOWNLOAD and NOSCHEME. A nodegx-web push is a deploy, so the
+   page waits on Richard's yes. P128 S8 also edits `site/start/` and `site/studio/`: read its box first.
+2. Then L5, L6.
+
+## Traps met
+
+1. 🔴 **An empty file list widens jest to the whole repo.** `L=$(grep -l … tests/*.test.ts)` came back empty
+   (zsh: no matches) and `npx jest --runInBand ${=L}` ran every suite in the checkout, Chrome drives included.
+   Guard the count before the run: `[ "$N" -gt 5 ] || exit 1`. It regenerated two template folders byte for byte
+   (no diff) and left no process.
+2. 🔴 **The door rewrites some step shapes before the runner sees them** (`argumentAliases.ts`: `wait_for:
+   { text_contains }` → `{ text }`), so a runner-level test of a transcript's steps must hand them over as the door
+   does. `read: { text_contains }` has no alias; it is the shape the stranger wrote.
+3. A rule that skips a case "because another rule reports it" needs that other rule read: `interfaceless-instance`
+   reads parameters only, so the wire it was trusted with went through both.
+4. A transcript beats a report: COMPVISIBLE's "the door passes it" was true only for one of four shapes, and only the
+   transcript said which.

@@ -8,6 +8,7 @@ found: Richard's Muddy Paws Shelter run in Claude Desktop, 2026-10-27 (his point
 evidence: dev-docs/reviews/the-three-surfaces-audit-2026-10-27.md §1.3 — READ: the fall-through branch of `sourceChip` builds a span with no handler; the source is reachable only as an entry in the bolt menu's "logic" group, never as a thing to open; the full NodeGX editor shows the same node and its wires (the video, 27:00)
 owner: none
 task: STU-081 (proposed in the audit §4): a chip outside Studio's vocabulary opens a card naming the node and its type, saying Studio does not draw it, with the NodeGX editor's download and "ask the agent"; a "Logic on this page" list under the element tree
+launch: beta
 ---
 
 Not a wrong graph: every node is valid NodeGX and the full editor draws it. The defect is that Studio shows the value

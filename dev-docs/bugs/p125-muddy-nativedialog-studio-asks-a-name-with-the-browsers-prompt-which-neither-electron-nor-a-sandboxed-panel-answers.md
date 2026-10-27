@@ -7,6 +7,7 @@ area: "nodegx-studio `editor/studio.html` (`#newoptset` 5431, New attribute 5468
 found: Richard's Muddy Paws Shelter run in Claude Desktop, 2026-10-27 (his point 2: "When I click 'add' in option sets, I can't add, nothing happens")
 evidence: dev-docs/reviews/the-three-surfaces-audit-2026-10-27.md §1.2 — READ: five prompt() and nine confirm() call sites; the fake host grants `allow-scripts allow-same-origin allow-forms` and no `allow-modals` (`dev-docs/tasks/phase-125-co-construction/tools-fake-host.mjs:13`), under which prompt() is null and confirm() false; Electron documents prompt() as unsupported, and both the desktop Studio and Claude Desktop are Electron; the gates pass because they replace window.prompt before clicking
 owner: none
+launch: beta
 ---
 
 Fix (words): Studio's own inline name field and confirm card, the way it already draws popovers and menus; no native

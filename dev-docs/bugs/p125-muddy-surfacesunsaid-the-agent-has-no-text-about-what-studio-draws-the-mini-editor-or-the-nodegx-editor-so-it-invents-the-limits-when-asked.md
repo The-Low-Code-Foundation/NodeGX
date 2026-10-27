@@ -8,6 +8,7 @@ found: Richard's Muddy Paws Shelter run in Claude Desktop, 2026-10-27 (his point
 evidence: dev-docs/reviews/the-three-surfaces-audit-2026-10-27.md §1.4 (the table of what each text names) and §3 — READ: each surface tool's description names at most one other surface and none names the download; `grep -ri 'option set' packages/noodl-mcp/src` is empty; the seeded docs of Muddy Paws Shelter contain neither "Studio" nor "option set"
 owner: P128-S2
 task: CCN-009 and CCN-010 (proposed in the audit §4)
+launch: beta
 ---
 
 The ethos at stake (Richard): a person who meets a part they cannot see concludes "another tool where parts of the

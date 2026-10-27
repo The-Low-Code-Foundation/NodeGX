@@ -8,6 +8,7 @@ found: Richard's Muddy Paws Shelter run in Claude Desktop, 2026-10-27 (his point
 evidence: dev-docs/reviews/the-three-surfaces-audit-2026-10-27.md §1.3 — MEASURED: `grep -ri 'option set' packages/noodl-mcp/src` finds 0 files; `NodeGX test projects/Muddy Paws Shelter` has no `Option sets/` component, a `Variable2` named `language`, two `Set Variable` steps typing the literals, `/Components/T` with the Expression `lang === 'fr' && fr ? fr : en`, and a `States` node with 18 parameters in `/Components/Wording`; the agent's reply says "NodeGX has no option-set type"
 owner: P128-S2
 task: CCN-009 (proposed in the audit §4), OWN-027 for the example and the validator's suggestion
+launch: beta
 ---
 
 Fix (words): a `surfaces` guidance section and one MUST_KNOW line in `get_project_info` that say what an option set
