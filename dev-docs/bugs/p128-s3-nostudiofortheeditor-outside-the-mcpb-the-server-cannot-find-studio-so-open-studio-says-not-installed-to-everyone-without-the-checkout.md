@@ -7,8 +7,8 @@ area: "`packages/noodl-mcp/src/studio/studioProcess.ts` `findStudio` (the two ca
 found: P128 S3 (CPY-003), 2026-10-27, checking the claim in the editor's new welcome line before keeping it; widened the same day when Richard asked what a fresh Claude Desktop install takes
 evidence: "MEASURED by reading: `findStudio` candidates are `[process.env.NODEGX_STUDIO, path.join(os.homedir(), 'vscode_projects', 'nodegx-studio')]` (studioProcess.ts:35-37); `@nodegx/mcp` 0.2.7 has no dependencies; `npm view @nodegx/studio` is a 404; create-nodegx.js:365-368 registers `npx -y @nodegx/mcp@0.2.7 --allow-writes` with no env; `grep -rln NODEGX_STUDIO` finds it set only by nodegx-studio's `scripts/mcpb.mjs` and `app/main.cjs`. MEASURED the other side: the unpacked `nodegx-0.2.7.mcpb` under an empty HOME and PATH `/usr/bin:/bin` serves its bundled Studio (`open_studio` 200, 526,365 chars), so the `.mcpb` is the one install that works for a stranger today. Not driven: the npm route on a machine without the checkout."
 launch: beta
-regression: packages/noodl-mcp/tests/p128NoStudioForTheEditor.test.ts
-owner: "the app half built by Beta sweep s19 (0b98c2f84); the npm half is CCN-006 AC7 (P125)"
+regression: packages/noodl-mcp/tests/p128NoStudioForTheEditor.test.ts (the app); packages/noodl-mcp/tests/p128StudioFromNpm.test.ts (the npm package)
+owner: "the app half built by Beta sweep s19 (0b98c2f84); the find half by the P128 Beta round Track B (e0801764e); the package by Track A (nodegx-studio fcdd55e, not published); the install that puts both together: nobody yet"
 task: CCN-006 AC7
 ---
 
@@ -45,3 +45,27 @@ variable, in `findStudio` and `open_studio`'s holding page. The npm-package cand
   then a person on the npm route or the editor's Connect gets Studio only by installing the desktop app, and is told
   where. The widened title (the npm route, severity high) arrived from P125/P128 (215801ab5) while this was built.
   The sentence names `STUDIO_DOWNLOAD_URL` (`/studio/#download`, set by s18), not `/start`, so it lands on the download.
+
+## 2026-10-27 night, P128 Beta round Track B: the server finds the npm package (e0801764e); the npm route still does not install it
+
+**Built.** `findStudio`'s fourth candidate (after `NODEGX_STUDIO`, the checkout and the app, as `studioProcess.ts`
+planned it): `require.resolve('@nodegx/studio/package.json')` from the server's own module, so a `@nodegx/studio`
+installed beside `@nodegx/mcp` is found; a package whose `exports` leaves out `./package.json` (Node refuses that id
+with ERR_PACKAGE_PATH_NOT_EXPORTED, measured) is found from its entry. Spec `tests/p128StudioFromNpm.test.ts` builds a
+stub package in a temp dir (nothing outside the repo): 5/5, with `p128NoStudioForTheEditor` and `p128OptionSet` 23/23.
+
+**Measured on Track A's real tarball** (`OpenNoodl-worktrees/nodegx-studio-pack/nodegx-studio-0.1.0.tgz`, 2,108,434
+bytes, sha1 4eada0d0…, nodegx-studio fcdd55e): `npm install` of it into an empty folder adds 35 packages, among them
+`@nodegx/mcp` **0.2.8** (Studio's own dependency). With an empty HOME and `NODEGX_STUDIO_APP=none`, on a
+`templates/todo-list` copy: that install's own 0.2.8 server answers `open_studio` "NodeGX Studio is not installed on
+this machine" with Studio beside it; the same install with HEAD's dist in `node_modules/@nodegx/mcp` starts the
+package's Studio, GET / **200**.
+
+**Still open, so the row stays open.** (1) `@nodegx/studio` is not published (Richard's line, from Track A). (2) The
+next `@nodegx/mcp` must carry e0801764e (0.2.9 does not), and Studio's pin on `@nodegx/mcp` (0.2.8) moves to it.
+(3) **Nothing installs the two together on the npm route:** create-nodegx registers `npx -y @nodegx/mcp@<v>
+--allow-writes` (`serverEntry`), which never fetches `@nodegx/studio`, so a stranger from `npm create nodegx` is still
+told "not installed". The choices: create-nodegx registers `npx -y -p @nodegx/studio@<v> -p @nodegx/mcp@<v>
+noodl-mcp --allow-writes`, or `@nodegx/mcp` lists `@nodegx/studio` as a dependency (a cycle: Studio depends on
+`@nodegx/mcp`; and 35 packages for every install). Unowned; the release session that publishes both decides it.
+
