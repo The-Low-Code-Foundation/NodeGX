@@ -65,3 +65,8 @@ Left: **a card that is a button with a Button inside it** is "nested interactive
 are reachable, but some screen readers read the inner one poorly. The marketplace's Button-over-name workaround has the
 same shape. A build-time note is the candidate if it matters. The node specs model no wired Click (the conformance
 harness intercepts signals, it wires nothing), so they still say a Group takes the keyboard only when Draggable.
+
+**The "Left" above, ruled and built (2026-10-27): P121-TWO003-NESTEDBUTTON (01554fe3e).** Richard ruled "inner
+controls win": an element whose Click is wired is not made a button while it holds a control or another Tab stop, and
+a validator info (`click-area-holds-a-control`) tells the maker. On the way, a Click wired only into a component output
+the placement never uses no longer counts (rocket-school's "The face" picture was a dead Tab stop).

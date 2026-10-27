@@ -779,22 +779,24 @@ read 0 after the fix; at 20738 with the guard taken out its exact three seeds co
 | row | commit | built | graded |
 |---|---|---|---|
 | **P112-OWN023-KEYNEEDSAGENT** | ba145da11 | Measured first: the backend never read the project's `.env`. Its doors were `secrets.json` (the agent's second `set_function_secret` copy) and `NODEGX_SECRET_*`, so a preview restart did nothing, and the copy outlived the line. Now `nodegx-backend/src/config/projectEnvFile.ts` makes a filled `NAME=value` line in the project's `.env` the FIRST door, read on every lookup (`--project-dir`: preview, editor, `provision_backend`). An empty placeholder never answers. The scrubber redacts those values, the admin listing and Secrets page name them, and the not-provisioned error names the line. `set_function_secret` tells the person the key works as soon as they save, and makes no copy. `deploy_to_vm` carries the `.env` values; create-nodegx's agent note follows | backend spec 7/7 on a real service + real function call (3 mutants red); admin route + page 35/35; mcp `provision` on the rebuilt BUILT backend + `own015EnvSecret` 26/26, a fake older backend still gets the copy (3 mutants red); backend specs touching secrets/projectDir 412/414 (rel002b Chrome base red; sb004 below); mcp budget gates 172/172; create-nodegx 34/34; tsc clean |
+| **P121-TWO003-NESTEDBUTTON** (ruled: inner controls win) | 01554fe3e | Reach counted first: 299 click-wired areas holding a control in 66 local projects. Measured in Chrome (fixture built for it, viewer built fresh into the scratchpad: the preview serves `noodl-editor/src/external/deploy/noodl.deploy.js`, which predates GROUPKEYBOARD): the cake card read as ONE button "Lemon cake £4.00 — … Add to basket", and the settings backdrop drew a focus ring round the whole sheet and closed it on Enter (screenshot `beta-bug-sweep-2026-10-24-assets/nestedbutton-scrim-focused.png`). Asked Richard with that, and he ruled. `keyboard-click.ts`: no button while it holds a Tab stop (a MutationObserver keeps it in step). A Click counts only when it reaches something, so a wire into an unused component output counts as no wire (rocket-school/star-class "The face" picture: a dead Tab stop that would have hidden the menu Header). Validator info `click-area-holds-a-control`, worded through the content-authoring checks | viewer 27/27, rule 11/11 (5 mutants red); Chrome: fixture Tab order tile (the control) → Add to basket → field → Save → Close; rocket-school game screen menu Button, progress card, 4 game cards, no dead stop; templates 24 notes; editor tests-unit = base 11 + hlt-021 (green alone); NSP_ONLY visual nodes 11 passed; mcp validator specs green |
+| **BETA-TPLNEVERERUNS** leftover | 086d26a6a | My s4 fix edited members-area's committed template only. Its generator still wrote `false`, so tpl001 was red from s4 on. The generator now writes `true` | tpl001 82/82 |
 | **P121-TWO003-SB004PIN** (filed + fixed) | d582a7f37 | sb004's POINTER arm read 400-expected/200-received. Probed: `n: 2`, the right two rows of three. CLOUDPOINTSTO (2a692b8e0, s5) gave the cloud runtime the backend's schema, so the "no schema" refusal is unreachable here. s5's function-suite list missed this file. Pin now asserts the narrowing; the no-schema refusal stays graded in `noodl-runtime/test/queryutils.test.ts` | sb004 48/48; red at HEAD with s13's files swapped back (not this change) |
 
 ## For Richard
 
 1. **Push and publish** (sessions 12 + 13). KEYNEEDSAGENT changes the backend (reaches the preview and `@nodegx/mcp`
    through their bundled backend), mcp and create-nodegx. None of it is in 0.2.7.
-2. One choice made without you, say if you want it the other way: **the `.env` line wins over a value set on the
+2. **NESTEDBUTTON is built as you ruled.** Planning's sheet backdrops and the marketplace cards now leave Tab to what
+   they hold, and the editor and agents see a note where a clicked area holds a control (24 on the templates).
+3. One choice made without you, say if you want it the other way: **the `.env` line wins over a value set on the
    backend's Secrets page** for the same name, so a key changed in the file is never shadowed by an old copy. The page
    says which names the file holds and that it wins.
-3. Standing: the engine CLI's full-stack default (session 10), MCPJSONABSPATH on your machine.
+4. Standing: the engine CLI's full-stack default (session 10), MCPJSONABSPATH on your machine.
 
 ## Next
 
-1. A card that is a button with a Button inside it is "nested interactive" (axe): a build-time note is the candidate
-   (GROUPKEYBOARD bug file, "Left").
-2. Session 10's list: DROPDOWNFOCUSDIVERGE (one CDP drive), BUTTONFOCUSSURVIVOR, DEPLOYLOOPBACK's third-party half.
+1. Session 10's list: DROPDOWNFOCUSDIVERGE (one CDP drive), BUTTONFOCUSSURVIVOR, DEPLOYLOOPBACK's third-party half.
 
 ## Traps met
 
@@ -804,4 +806,13 @@ read 0 after the fix; at 20738 with the guard taken out its exact three seeds co
 2. A peer was editing `noodl-mcp/src` (`projectFiles.ts`, `ProjectStore.ts`, `whatChanged.ts`) during this session:
    the commit went through a temporary index with the 16 paths named, and the real index's only staged entry stayed the
    peer's `dev-docs/parked/README.md`.
+4. 🔴 **The preview serves the EDITOR's deploy bundle** (`noodl-editor/src/external/deploy/noodl.deploy.js`, built
+   2026-10-22): a Chrome drive of a viewer change through the checkout's preview reads the OLD viewer ("marked 0").
+   Build the viewer into the scratchpad (`OUT_PATH=<scratch> npx webpack --config webpack-configs/webpack.deploy.prod.js`
+   in noodl-viewer-react), copy `noodl-preview/dist` beside it as `dist/external`, run that copy with `NODE_PATH` set
+   to the checkout's `node_modules`. The shared bundle stays untouched.
+5. 🔴 **A fix to a shipped template must also go into its generator**: tpl001 regenerates members-area from
+   `noodl-mcp/tests/tpl001Components.ts` and compares bytes. A hand edit to the template alone stays red (s4 → s13).
+6. A census by node shape over-counts what the runtime does: "Click wired" included wires into a component output that
+   no placement uses. Follow the wire to something that acts before calling an element pressable.
 3. `node --test test/` in create-nodegx reads as "1 fail, 0 pass": its runner is plain `node --test` (`npm test`), 34/34.

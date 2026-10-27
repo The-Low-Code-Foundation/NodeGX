@@ -8,6 +8,7 @@ area: templates (`templates/members-area` `/Members/AnnouncementRow` node `first
 found: the Beta sweep, 2026-10-25 — the first corpus run of the new `function-never-reruns` rule (bug P121-TWO005-NEVERRUNS)
 evidence: `npx ts-node -P ./scripts/tsconfig.json ./scripts/validate-project.ts templates/* --only function-never-reruns` → 2 warnings over ~14,000 nodes in 19 templates, these two
 kit: core
+regression: packages/noodl-mcp/tests/tpl001Template.test.ts "regenerating from the component sets reproduces every committed byte"
 ---
 
 `firstLine` ("The first line of the body, and only the first") takes `body` from the row's Component Inputs with
@@ -38,3 +39,8 @@ committed demo byte for byte; the new one drops those two nodes and their three 
 validation against HEAD's copies: the demo 68 → 67 warnings and members-area 3 → 2, the only one gone each time
 the target; 0 errors both. `check-demo.mjs` OK. Not driven: neither template rendered.
 
+
+**Left behind, found and fixed in Beta sweep s13 (086d26a6a).** The fix above edited the committed members-area
+template only. Its generator (`noodl-mcp/tests/tpl001Components.ts`) still wrote `runOnChange-in-body: false`, so
+tpl001's "regenerating reproduces every committed byte" read red from 036c2ea20 on. The generator now writes `true`;
+tpl001 82/82.
