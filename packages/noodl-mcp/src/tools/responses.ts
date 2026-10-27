@@ -547,7 +547,8 @@ export interface CreateComponentResponse
     BackendDisclosureSummary,
     CloudDeployNote,
     VisualRootsSummary,
-    RunOnChangeTickedSummary {
+    RunOnChangeTickedSummary,
+    StudioNoteSummary {
   created: string;
   legacyName: string;
   type: string;
@@ -561,6 +562,16 @@ export interface CreateComponentResponse
   planAdvisory?: string;
 }
 
+/**
+ * P128 S2 (CCN-010) — present only while Studio is open for the project and the write placed nodes Studio does not
+ * edit (`studio/vocabulary.ts`). A note, never a refusal: the write happened.
+ */
+export interface StudioNoteSummary {
+  notDrawnInStudio?: Array<{ component?: string; node: string; type: string; label?: string }>;
+  /** The canon's rule 4 and its offer sentence, for what the agent tells the person. */
+  studioNote?: string;
+}
+
 export interface UpdateComponentResponse
   extends WriteHonestySummary,
     WriteValidationSummary,
@@ -569,7 +580,8 @@ export interface UpdateComponentResponse
     BackendDisclosureSummary,
     CloudDeployNote,
     VisualRootsSummary,
-    RunOnChangeTickedSummary {
+    RunOnChangeTickedSummary,
+    StudioNoteSummary {
   updated: string;
   revision: string;
   /** Present for the `operations` form; absent for `set`. */

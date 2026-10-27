@@ -68,7 +68,7 @@ import { KitAwareValidator } from '../kitRefusal';
 import { ToolError } from '../errors';
 import { automaticRenderDisabled, runRenderReport } from '../render';
 import type { RenderLedger, RenderVerdict } from '../renderVerdict';
-import { drawsSomething } from '../visualRoots';
+import { drawsSomething, makeProjectVisualPredicate } from '../visualRoots';
 import { completionPayload } from './completion';
 import type { ComponentFiles } from '../graph';
 import { reconcileHierarchy } from '../graph';
@@ -81,6 +81,7 @@ import type { ProjectStore } from '../project/ProjectStore';
 import { studioFor } from '../studio/studioProcess';
 import { STUDIO_BURST } from '../studio/burst';
 import { handoverFor } from '../surfaces';
+import { type NotDrawnInStudio, notDrawnInStudio, notDrawnPayload } from '../studio/vocabulary';
 
 // P125-PUPPY-ONEAPPLY (CCN-005) — the cap lives in studio/burst.ts, beside create_component's; exported here as before.
 export { STUDIO_BURST };
@@ -1081,6 +1082,31 @@ export function registerPlanTools(
       // group to roll back and therefore optimises for the opposite failure) —
       // a doc that names a component the component write then failed on would
       // be the more misleading leftover of the two.
+      // P128 S2 (CCN-010) — while the person watches in Studio, the nodes this plan introduces that Studio does not
+      // edit, read before the writes (an update's baseline is the file it replaces) with the plan's own components
+      // resolvable. A note on the result, never a refusal.
+      const notDrawn: NotDrawnInStudio[] = [];
+      if (studioFor(store.projectDir) !== null) {
+        const stagedByName = new Map<string, ComponentFiles>();
+        for (const op of componentOps) {
+          const files = serverPlan.staged.get(op.id);
+          if (files) stagedByName.set(pathToLegacyName(op.target), files);
+        }
+        const isVisual = makeProjectVisualPredicate((name) => {
+          const staged = stagedByName.get(name);
+          if (staged) return staged.nodes.nodes ?? [];
+          return store.resolve(name) ? store.peekComponent(name).files.nodes.nodes ?? [] : undefined;
+        });
+        const resolves = (name: string) => stagedByName.has(name) || store.resolve(name) !== undefined;
+        for (const op of componentOps) {
+          const files = serverPlan.staged.get(op.id);
+          if (!files) continue;
+          const baseline = op.kind === 'create' ? undefined : store.readComponent(op.target).files;
+          const component = pathToLegacyName(op.target);
+          for (const row of notDrawnInStudio(component, files, baseline, isVisual, resolves)) notDrawn.push({ component, ...row });
+        }
+      }
+
       const applied: Array<{ operation: string; target: string; revision: string }> = [];
       const ticked: TickedBox[] = [];
       for (const op of componentOps) {
@@ -1165,6 +1191,7 @@ export function registerPlanTools(
         // was the last thing in the response, which is how it got read as a
         // verdict on the page.
         ...completion,
+        ...notDrawnPayload(notDrawn),
         ...(handover ? { handover } : {}),
         note: 'Plan applied and discarded. Re-read components with get_component for fresh revisions.'
       });

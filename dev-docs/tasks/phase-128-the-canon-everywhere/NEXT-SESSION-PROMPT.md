@@ -74,7 +74,7 @@ carries `handover`. (5) Every noodl-mcp gate green; the briefing budget test say
   fresh lab, then `--again s1/prompt-2.txt`. The pinned Studio vocabulary should name what `surfaces.ts`'s lead lists
   (a `States` node, a Function/Script, an Expression Studio's composer did not make, a placed logic component).
 
-### [ ] S2 — OWN-027 and CCN-010: the option-set example, the validator's hint, the write note
+### [x] S2 — OWN-027 and CCN-010: the option-set example, the validator's hint, the write note
 **Files.** `packages/noodl-mcp` examples (`get_example('option-set')`: the component under `Option sets/`, a page
 with a dropdown fed by it and a Set Variable step choosing one; `list_examples` lists it); `src/validate.ts` (a
 suggestion, never an error, when two `Set Variable` steps in a project type the same literal into the same variable:
@@ -87,6 +87,22 @@ types Studio's palette lists, the source kinds in `valueSources`) in `src/studio
 replaces it.
 **AC.** The example renders in `render_report`; the Muddy Paws `Wording` write returns the note with `States` named;
 the two-literals case in Muddy Paws Shelter returns the suggestion; gates green; dist rebuilt.
+
+- **Landed (2026-10-27).** `get_example('option-set')` (`docs/node-catalog/examples/option-set.json`, merged into the
+  enriched catalog: `/Option sets/Languages` = Static Data `{Label, Value}` → Component Outputs `items`/`count`; a page
+  whose Dropdown reads it and whose Set Variable takes the picked Value, no literal); `fixed-list-as-literals` (info,
+  `src/validate.ts`, on writes and both validate tools); `notDrawnInStudio` + `studioNote` (canon rule 4 + the offer,
+  quoted) on `create_component`, `update_component` and `apply_plan` while Studio runs for the project, naming only
+  the nodes the write introduced, never a refusal (`src/studio/vocabulary.ts`, pinned from `studio.html` at `668212a`:
+  S6 replaces it). **Dist rebuilt** (14:21); the mcpb is not.
+- **Gates.** All four ACs met on the dist against a Muddy Paws copy (`s2/ac.mjs`, `s2/RESULTS.md`): Header → 1 info
+  with the suggestion; Wording → `[Variable2, States]` + note, none without Studio; example render DONE, `drive_page`
+  4/4 (options `English|Français`, a pick stores `fr`). Spec `p128OptionSet` 14/14; catalog:examples 115/115,
+  merge:check clean; noodl-mcp 5044 pass / 12 fail in 8 files: S1's 5 HEAD reds + 2 peer TPL-011 + `npmauditExampleInvalid`
+  › ui-empty-state, refused by the rule `79cbc4674` COMPVISIBLE added (P128-S2-EMPTYSTATEREFUSED, not S2's).
+- **For S3 and after.** S1's AC3 is still un-re-measured: a Sonnet round that calls `open_studio` first, then
+  `--again s1/prompt-2.txt`, is the measurement. Filed: P128-S2-OPTSETSHAPE (Studio's `display` rows vs the
+  Dropdown's `Label`/`Value`: S4 or S6 rules the row shape), P128-S2-ACTIONNAMES (read only). S6: export type names.
 
 ### [ ] S3 — CPY-003 and CPY-004: the READMEs, the editor's welcome line, the canon check
 **Files.** `packages/noodl-mcp/README.md`, `packages/create-nodegx/README.md`, `README.md` (the first paragraph is
@@ -166,6 +182,11 @@ stranger (P125 CCN-007) on steps 1–7; then the cut and the Brevo email
 resolved). Lane 9's SCHEDULEAUTH ruling and `@nodegx/mcp` 0.2.8 are not this phase's and stay first on the board.
 
 ## Handoffs (each session writes three lines under its box above, and the newest here)
+
+- 2026-10-27, S2: see the lines under S2 and `s2/RESULTS.md`. Traps: `render_report` takes no page argument (it
+  renders every routed page), and it caught a defect in the first draft of the example (a Text reading an unset
+  variable draws "Text": dead-placeholder-text); `drive_page` has no select verb, so a dropdown pick is a `read`
+  `expression` through `HTMLSelectElement.prototype`'s value setter plus a `change` event.
 
 - 2026-10-27, S1: see the three lines under S1 and `s1/RESULTS.md`. Traps for the next sessions: a stranger round
   fenced with `Read(//Users/**)` cannot read its own saved long results (P128-S1-FENCEDRESULTS; BKO-006's runner has

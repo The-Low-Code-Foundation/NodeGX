@@ -281,7 +281,101 @@ export function preconditionDiagnostics(
     // P109 ISL-005 — a Function's `uses` against the files in scripts/, read from disk now.
     scripts: listScriptPaths(store.projectDir),
     catalog: catalogIndex()
-  }).concat(detachedVisualDiagnostics(legacyName, candidate, storeVisualPredicate(store)));
+  })
+    .concat(detachedVisualDiagnostics(legacyName, candidate, storeVisualPredicate(store)))
+    .concat(fixedListDiagnostics(store, legacyName, candidate, views));
+}
+
+/** The OWN-027 suggestion, as the P128 plan words it. */
+export const FIXED_LIST_SUGGESTION = "a fixed list is an option set, see get_example('option-set')";
+
+type StepNode = { id?: string; type: string; label?: string; parameters?: Record<string, unknown> | null };
+
+/** A `Set Variable` that types a string into a named variable: its Value is a parameter and nothing is wired into it. */
+function typedLiteral(node: StepNode, wiredValue: (id: string) => boolean): { variable: string; value: string } | null {
+  if (node.type !== 'Set Variable') return null;
+  const p = node.parameters ?? {};
+  const setWith = p.setWith;
+  if (setWith !== undefined && setWith !== 'string') return null;
+  if (typeof p.name !== 'string' || p.name === '' || typeof p.value !== 'string' || p.value === '') return null;
+  if (node.id !== undefined && wiredValue(node.id)) return null;
+  return { variable: p.name, value: p.value };
+}
+
+/**
+ * P128 S2 (OWN-027) — two `Set Variable` steps typing literals into one variable are a fixed list, written as strings.
+ *
+ * Muddy Paws Shelter (audit §1.3): `Set language to English` and `Set language to French` in `/Components/Header`,
+ * `"en"` and `"fr"` typed into `language`, read back by a `/Components/T` Expression per text. Canon rule 5 says what it
+ * is instead: a `Static Data` node in its own component under `Option sets/<Name>`, the choice taken from the list.
+ *
+ * Counted over the whole project (a second step typing into the same variable may be on another page), reported on
+ * the component being judged, once per variable, at its first such step. `info` with the suggestion, never an error
+ * or a blocking warning: the graph works, and a person may want two buttons that each say one word. A Value wired from
+ * somewhere is not a literal and is not counted; another component's wires are read from disk, so a component this
+ * same plan creates is read as having none.
+ */
+export function fixedListDiagnostics(
+  store: ProjectStore,
+  legacyName: string,
+  candidate: ComponentFiles,
+  views: readonly ComponentNodesView[]
+): Diagnostic[] {
+  const wiredIn = (connections: readonly { toId: string; toProperty: string }[] | undefined) => {
+    const ids = new Set((connections ?? []).filter((c) => c.toProperty === 'value').map((c) => c.toId));
+    return (id: string) => ids.has(id);
+  };
+  const own = new Map<string, Array<{ node: StepNode; value: string }>>();
+  const ownWired = wiredIn(candidate.connections.connections);
+  for (const node of (candidate.nodes.nodes ?? []) as StepNode[]) {
+    const lit = typedLiteral(node, ownWired);
+    if (!lit) continue;
+    if (!own.has(lit.variable)) own.set(lit.variable, []);
+    own.get(lit.variable)!.push({ node, value: lit.value });
+  }
+  if (own.size === 0) return [];
+
+  const elsewhere = new Map<string, Array<{ component: string; label?: string; value: string }>>();
+  for (const view of views) {
+    if (view.name === legacyName) continue;
+    if (!view.nodes.some((n) => n.type === 'Set Variable')) continue;
+    let wired = (_id: string) => false;
+    try {
+      if (store.resolve(view.name)) wired = wiredIn(store.peekComponent(view.name).files.connections.connections);
+    } catch {
+      /* unreadable on disk: read as having no wires */
+    }
+    for (const node of view.nodes as readonly StepNode[]) {
+      const lit = typedLiteral(node, wired);
+      if (!lit || !own.has(lit.variable)) continue;
+      if (!elsewhere.has(lit.variable)) elsewhere.set(lit.variable, []);
+      elsewhere.get(lit.variable)!.push({ component: view.name, label: node.label, value: lit.value });
+    }
+  }
+
+  const out: Diagnostic[] = [];
+  for (const [variable, steps] of own) {
+    const others = elsewhere.get(variable) ?? [];
+    const count = steps.length + others.length;
+    if (count < 2) continue;
+    const values = [...new Set([...steps.map((s) => s.value), ...others.map((o) => o.value)])];
+    const named = [
+      ...steps.map((s) => `"${s.node.label ?? s.node.id}"`),
+      ...others.map((o) => `"${o.label ?? 'a step'}" in ${o.component}`)
+    ];
+    const first = steps[0].node;
+    out.push({
+      code: DiagnosticCode.FixedListAsLiterals,
+      severity: 'info',
+      message:
+        `${count} Set Variable steps type ${values.map((v) => `"${v}"`).join(', ')} into the variable "${variable}" ` +
+        `(${named.join(', ')}): a fixed list written as strings, so the next value means another step and another ` +
+        'literal, and NodeGX Studio has no list to show the person.',
+      location: { component: legacyName, nodeId: first.id, nodeType: first.type, nodeLabel: first.label },
+      suggestion: FIXED_LIST_SUGGESTION
+    });
+  }
+  return out;
 }
 
 /** "Does a node of this type draw?", with the project's components resolved — `projectVisualPredicate`'s answer. */

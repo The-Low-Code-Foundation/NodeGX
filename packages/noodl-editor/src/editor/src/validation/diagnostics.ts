@@ -84,6 +84,13 @@ export enum DiagnosticCode {
    */
   DetachedVisualNode = 'detached-visual-node',
   /**
+   * P128 S2 (OWN-027): two or more `Set Variable` steps in the project type string literals into the same variable
+   * (Muddy Paws Shelter's `fr` and `en` into `language`), which is a fixed list the project does not have: the next
+   * value means another step and another literal. `info`, a suggestion pointing at `get_example('option-set')`, never
+   * a failure. From the agent server's precondition checks.
+   */
+  FixedListAsLiterals = 'fixed-list-as-literals',
+  /**
    * P107 R23: a node sits where the editor does not let it sit in the visual tree — a logic node (or a component with
    * no visual root) inside another node, a child its parent does not hold, children under a node that holds none, or
    * visual roots of different categories. `error`, as the editor marks it (`@nodegx/project-contract/hierarchy`).

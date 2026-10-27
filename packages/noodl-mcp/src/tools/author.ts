@@ -29,6 +29,7 @@ import { pathToLegacyName, toPathForm, validateComponentPath } from '../paths';
 import { withAuthoredScriptPorts } from '../scriptPorts';
 import { STUDIO_BURST, unplacedAfter } from '../studio/burst';
 import { studioFor } from '../studio/studioProcess';
+import { notDrawnInStudio, notDrawnPayload } from '../studio/vocabulary';
 import {
   componentIsPage,
   registerPages,
@@ -214,6 +215,21 @@ export function nodeIdsOf(files: ComponentFiles): ReadonlySet<string> {
  * visual roots of its own, so a page whose top-level node is `/Components/NavBar`
  * needs the project to answer at all — the catalog has never heard of it.
  */
+/**
+ * P128 S2 (CCN-010) — `notDrawnInStudio` and its note on a write, when Studio is open for this project; otherwise
+ * nothing. `studio/vocabulary.ts` says what Studio edits and why the note is never a refusal.
+ */
+export function studioNotePayload(
+  store: ProjectStore,
+  legacyName: string,
+  candidate: ComponentFiles,
+  baseline: ComponentFiles | undefined
+): ReturnType<typeof notDrawnPayload> {
+  if (studioFor(store.projectDir) === null) return {};
+  const rows = notDrawnInStudio(legacyName, candidate, baseline, projectVisualPredicate(store), (name) => store.resolve(name) !== undefined);
+  return notDrawnPayload(rows);
+}
+
 export function projectVisualPredicate(store: ProjectStore): VisualTypePredicate {
   return makeProjectVisualPredicate((legacyName) => {
     if (!store.resolve(legacyName)) return undefined;
@@ -652,7 +668,9 @@ export function registerAuthorTools(
           // a card" is how a page stops being the thing anybody renders.
           ...(drawsSomething(candidate) ? completionPayload(ledger.state(store.projectDir)) : {}),
           // P111 SEE-001 — the component's number with its script named, and the project's after this write
-          ...writeHonestyPayload(store, legacyName)
+          ...writeHonestyPayload(store, legacyName),
+          // P128 S2 (CCN-010) — while the person watches in Studio, the nodes it does not edit, named; never a refusal
+          ...studioNotePayload(store, legacyName, candidate, undefined)
         };
         return jsonResult(payload);
       }
@@ -823,7 +841,9 @@ export function registerAuthorTools(
           ...visualRootsPayload(candidate, args.set?.visual_roots),
           ...(drawsSomething(candidate) ? completionPayload(ledger.state(store.projectDir)) : {}),
           // P111 SEE-001 — the component's number with its script named, and the project's after this write
-          ...writeHonestyPayload(store, stored.legacyName)
+          ...writeHonestyPayload(store, stored.legacyName),
+          // P128 S2 (CCN-010) — the nodes this write introduced that Studio does not edit, while Studio is open
+          ...(unchanged ? {} : studioNotePayload(store, stored.legacyName, candidate, baseline))
         };
         return jsonResult(payload);
       }
