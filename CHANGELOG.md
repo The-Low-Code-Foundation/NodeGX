@@ -93,6 +93,9 @@ This release is `@nodegx/mcp`, `create-nodegx`, `create-nodegx-vibe` and `create
 - **Sign In With clears its Error when a sign-in works.** A label wired to Error kept showing the last failure.
 - **`open_studio` finds the installed Studio app.** It said Studio wasn't installed when the app was in Applications. A
   computer without it is told where to download it.
+- **In Claude Desktop, Studio opens and the app renders.** Desktop runs an extension on a Node of its own that can't
+  start Studio, the render, the backend or a deploy. The NodeGX extension now brings its own Node. All four run on it.
+- **The server gives Claude Desktop the extension's name.** It answered `noodl-mcp` to an extension called `nodegx`.
 - **For editors built from the kit.** In `@nodegx/node-spec` 0.2.2, Visible reaches six controls at once. The Request
   node's spec says a run the app starts by itself counts as the app.
 
