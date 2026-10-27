@@ -117,6 +117,9 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
+/** The first `var(--name)` inside a longer value, for a refusal that can point at the token it already names. */
+const TOKEN_IN_VALUE = /var\(--[A-Za-z0-9_-]+\)/;
+
 /**
  * A design-token reference. Legal wherever the value ends up as a CSS value:
  * the authoring prompt instructs the model to write these for colour, spacing,
@@ -230,10 +233,17 @@ function unitsFormat(type: PortTypeShape): WireFormat {
           suggestion: JSON.stringify({ value: Number(parsed[1]), unit: parsed[2] })
         };
       }
+      // P128-S3-SIZEMSG — name all three forms the check above accepts. A token inside an expression ("calc(var(--x)
+      // * 1.8)") is refused, and the stock 16 sent the agent asked for "bigger" to vw next: suggest its own token.
+      const token = typeof value === 'string' ? TOKEN_IN_VALUE.exec(value)?.[0] : undefined;
       return {
         severity: 'error',
-        message: `expects a number or { "value", "unit" } object. Got ${describeValue(value)}.`,
-        suggestion: JSON.stringify({ value: 16, unit })
+        message:
+          `expects a number, a { "value", "unit" } object or a var(--token) reference. Got ${describeValue(value)}.` +
+          (token
+            ? ` This port takes a token alone, not inside an expression: use ${token}, or add a token that holds the size you want.`
+            : ''),
+        suggestion: JSON.stringify(token ?? { value: 16, unit })
       };
     }
   };
