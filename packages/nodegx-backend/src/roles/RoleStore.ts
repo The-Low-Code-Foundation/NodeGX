@@ -76,14 +76,62 @@ export function asRole(row: Record<string, unknown>): RoleRecord {
   return role;
 }
 
+/**
+ * P127-S8-DUPEROLE — one queue per role name, per storage. Four `RoleStore`s wrap one facade (the cloud nodes, the two
+ * admin doors, the dashboard), so the queue belongs to the facade, not to an instance.
+ */
+const nameQueues = new WeakMap<IStorageFacade, Map<string, Promise<unknown>>>();
+
 /** The role table and its membership junction. One reader, two callers. */
 export class RoleStore {
   constructor(private readonly facade: IStorageFacade) {}
 
-  /** The role with this name, or null. Never throws for "no such role". */
-  async find(name: string): Promise<RoleRecord | null> {
-    const { results } = await this.facade.rawQuery('_Role', { where: { name }, limit: 1 });
-    return results.length === 0 ? null : asRole(results[0]);
+  /**
+   * Run `work` after every earlier call queued on this role name has finished. `ensure` looks for a role and then
+   * makes it; two of those for one name in the same moment (one function run firing Add User To Role twice) both
+   * found nothing and both made one, so the backend held two rows of one name.
+   */
+  private serial<T>(name: string, work: () => Promise<T>): Promise<T> {
+    let queues = nameQueues.get(this.facade);
+    if (!queues) nameQueues.set(this.facade, (queues = new Map()));
+    const before = queues.get(name) ?? Promise.resolve();
+    const run = before.then(work, work);
+    const settled = run.catch(() => undefined);
+    queues.set(name, settled);
+    void settled.then(() => {
+      if (queues!.get(name) === settled) queues!.delete(name);
+    });
+    return run;
+  }
+
+  /**
+   * The role with this name, or null. Never throws for "no such role".
+   *
+   * 🔴 P127-S8-DUPEROLE: a name held by more than one row (made before `ensure` was queued) is put back to one here:
+   * every member moves into the oldest row and the others go. Every add, remove and list by name comes through this
+   * read, and with `limit: 1` it reached one row of several, so a person in another row could never be removed by name
+   * and kept every read the role grants.
+   */
+  find(name: string): Promise<RoleRecord | null> {
+    return this.serial(name, () => this.findOne(name));
+  }
+
+  private async findOne(name: string): Promise<RoleRecord | null> {
+    const { results } = await this.facade.rawQuery('_Role', { where: { name }, limit: 100 });
+    if (results.length <= 1) return results.length === 0 ? null : asRole(results[0]);
+    const rows = results.map(asRole).sort((x, y) => (x.createdAt ?? '').localeCompare(y.createdAt ?? '') || x.objectId.localeCompare(y.objectId));
+    const [keep, ...extra] = rows;
+    for (const other of extra) {
+      for (const userId of this.members(other)) {
+        await this.facade.addRelation('_Role', keep.objectId, 'users', userId);
+      }
+      if (!keep.description && other.description) {
+        keep.description = other.description;
+        await this.describe(keep, keep.description);
+      }
+      await this.remove(other);
+    }
+    return keep;
   }
 
   /** Every role, in storage order. PRD-001 §3.3: a registry authorization is computed from. */
@@ -106,11 +154,18 @@ export class RoleStore {
     await this.facade.rawSave('_Role', role.objectId, { description: description || null });
   }
 
-  /** The role, creating it if it is not there. `created` says which happened. */
-  async ensure(name: string): Promise<{ role: RoleRecord; created: boolean }> {
-    const existing = await this.find(name);
-    if (existing) return { role: existing, created: false };
-    return { role: await this.create(name), created: true };
+  /** The role, creating it if it is not there. `created` says which happened. One at a time per name. */
+  ensure(name: string): Promise<{ role: RoleRecord; created: boolean }> {
+    return this.serial(name, async () => {
+      const existing = await this.findOne(name);
+      if (existing) return { role: existing, created: false };
+      return { role: await this.create(name), created: true };
+    });
+  }
+
+  /** A new role, or null when one of that name is already there. The admin door's create, one at a time per name. */
+  createIfAbsent(name: string, description?: string): Promise<RoleRecord | null> {
+    return this.serial(name, async () => ((await this.findOne(name)) ? null : this.create(name, description)));
   }
 
   /**
