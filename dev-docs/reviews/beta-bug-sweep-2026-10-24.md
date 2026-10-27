@@ -816,3 +816,46 @@ read 0 after the fix; at 20738 with the guard taken out its exact three seeds co
 6. A census by node shape over-counts what the runtime does: "Click wired" included wires into a component output that
    no placement uses. Follow the wire to something that acts before calling an element pressable.
 3. `node --test test/` in create-nodegx reads as "1 fail, 0 pass": its runner is plain `node --test` (`npm test`), 34/34.
+
+# Session 14, 2026-10-27 (next session reads this first)
+
+"Continue" from the Session 13 list. **Nothing pushed.**
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **BETA-S9-BUTTONFOCUSSURVIVOR** | 87f0df29b | Two hand scenarios reach the surviving branch on every seed: a finger held on an unfocused Button (touch), Mounted off and a person's Focus in one frame, a Focus signal after as the reader; the mouse twin under Keeps Focus | runtime conformance at 20751: 697/706 → CONFORMS 60/60, 698/706 (8 declared); each scenario alone kills it; seeds 13, 20731, 20734, 20738 conform |
+| **BETA-S7-DROPDOWNFOCUSDIVERGE** | aa9f30cdd | **The spec was wrong, on six controls.** s9's "jsdom gap" did not hold (the target already refuses focus to a hidden element, `node-spec-target.ts` :494-501). Shrunk: placed hidden, Visible on + Focus in one frame. The spec said Visible waits for the next paint; the runtime writes `visibility` onto the element on the spot (`setStyle`/`removeStyle`), and Chrome 156 (raw CDP) takes focus on a just-shown `<select>` and refuses a hidden one. 18/18 diverged across Button, Checkbox, Dropdown, Radio Button, Slider, Text Input. Spec only: `visible` sets `pageVisible` with it; each version +1 with one shared change (`visible-at-once.ts`, migration none); 3 hand scenarios each; catalogs regenerated (six `says` lines) | the six CONFORM at seeds 20751 and 13; golden fresh, no trace moved; node-spec spec-edit files green; tsc clean |
+| **BETA-S14-SLIDERFOCUSSURVIVOR** (filed, fixed) | aa9f30cdd | Two seed-20751 Slider survivors on `person.touch` (focused, unhovered, Mounted off + a pointer act in one frame), red at HEAD too: the unhovered twin of an existing scenario | 789/796 → 86/86, 900/906 |
+| **BETA-S14-SEEDEDPAGEMODEL** (filed, fixed) | 7083a8595 | node-spec `page-model.test` red since DROPDOWNSTALE (s7): `seeded` never classified. Named as node bookkeeping | page-model 20/20 (red with HEAD's dropdown files too) |
+
+Left: **TEXTFLASH** read, not taken: `foreach.tsx` `addItem` sets the row's inputs and then `addChild` renders, and
+the values reach the inner Text nodes on the runtime's next update; the fix moves every list's row timing and the
+bug's proposal is unmeasured, for a one-or-two-frame flash.
+
+## For Richard
+
+1. **Push and publish** (sessions 12–14). This session is node-spec only (no runtime change): `@nodegx/node-spec`
+   needs a new version for the six control specs to reach the kit.
+2. **DEPLOYLOOPBACK's third-party half still waits on your OK** (the "live address" per Backend Services entry in
+   `nodegx-config.json`, proposed 10-26). Off the Beta walk: Studio has no third-party backends.
+3. Standing: the engine CLI's full-stack default (session 10), MCPJSONABSPATH on your machine.
+
+## Next
+
+1. The list Session 10 started is done except the item waiting on Richard. Next Beta-walk rows from `node scripts/bugs.js`:
+   P123-STU032-TEXTFLASH (measure in Studio first), P121-TWO003-SCROLLINTOVIEW, P112-OWN023-NOANCESTOR. P127-* rows
+   belong to the P127 lane.
+
+## Traps met
+
+1. 🔴 **A hypothesis measured on raw jsdom says nothing about the harness's jsdom**: the runtime target patches
+   `focus()` to refuse hidden elements (s43). Probe the target, not the library.
+2. 🔴 **A runtime style port may skip the render**: `setStyle` writes most untagged styles onto the element on the spot;
+   only margins (with a % size), position/flexDirection/clip, pointerEvents, an opacity 0↔non-0 flip and tagged styles
+   wait for a render. A spec that says "at the next paint" for a style must check that list.
+3. CDP focus in headless Chrome fires no focus events until `Emulation.setFocusEmulationEnabled` (activeElement moves anyway).
+4. `docs-site/docs/nodes` was stale at HEAD in 37 pages (whole spec sources embedded); `generate-node-docs.js` would
+   sweep all of them into a commit. Not regenerated.
+5. `honesty-ledger.test` red: four templates' numbers ROSE with a peer's open `honesty-ledger.json` — not this session's.
