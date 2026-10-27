@@ -769,3 +769,39 @@ read 0 after the fix; at 20738 with the guard taken out its exact three seeds co
 4. A backend test list built from a grep caught `ac2-page-editor-drag-drive` (Chrome): it hung 10 minutes. Filter out
    drives/Chrome specs; macOS has no `timeout`.
 5. The preview's tests run `dist/noodl-preview.cjs`: rebuild after every source edit, mutants included.
+
+# Session 13, 2026-10-27 (next session reads this first)
+
+"Continue" from the Session 12 list. **Nothing pushed.**
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **P112-OWN023-KEYNEEDSAGENT** | ba145da11 | Measured first: the backend never read the project's `.env`. Its doors were `secrets.json` (the agent's second `set_function_secret` copy) and `NODEGX_SECRET_*`, so a preview restart did nothing, and the copy outlived the line. Now `nodegx-backend/src/config/projectEnvFile.ts` makes a filled `NAME=value` line in the project's `.env` the FIRST door, read on every lookup (`--project-dir`: preview, editor, `provision_backend`). An empty placeholder never answers. The scrubber redacts those values, the admin listing and Secrets page name them, and the not-provisioned error names the line. `set_function_secret` tells the person the key works as soon as they save, and makes no copy. `deploy_to_vm` carries the `.env` values; create-nodegx's agent note follows | backend spec 7/7 on a real service + real function call (3 mutants red); admin route + page 35/35; mcp `provision` on the rebuilt BUILT backend + `own015EnvSecret` 26/26, a fake older backend still gets the copy (3 mutants red); backend specs touching secrets/projectDir 412/414 (rel002b Chrome base red; sb004 below); mcp budget gates 172/172; create-nodegx 34/34; tsc clean |
+| **P121-TWO003-SB004PIN** (filed + fixed) | d582a7f37 | sb004's POINTER arm read 400-expected/200-received. Probed: `n: 2`, the right two rows of three. CLOUDPOINTSTO (2a692b8e0, s5) gave the cloud runtime the backend's schema, so the "no schema" refusal is unreachable here. s5's function-suite list missed this file. Pin now asserts the narrowing; the no-schema refusal stays graded in `noodl-runtime/test/queryutils.test.ts` | sb004 48/48; red at HEAD with s13's files swapped back (not this change) |
+
+## For Richard
+
+1. **Push and publish** (sessions 12 + 13). KEYNEEDSAGENT changes the backend (reaches the preview and `@nodegx/mcp`
+   through their bundled backend), mcp and create-nodegx. None of it is in 0.2.7.
+2. One choice made without you, say if you want it the other way: **the `.env` line wins over a value set on the
+   backend's Secrets page** for the same name, so a key changed in the file is never shadowed by an old copy. The page
+   says which names the file holds and that it wins.
+3. Standing: the engine CLI's full-stack default (session 10), MCPJSONABSPATH on your machine.
+
+## Next
+
+1. A card that is a button with a Button inside it is "nested interactive" (axe): a build-time note is the candidate
+   (GROUPKEYBOARD bug file, "Left").
+2. Session 10's list: DROPDOWNFOCUSDIVERGE (one CDP drive), BUTTONFOCUSSURVIVOR, DEPLOYLOOPBACK's third-party half.
+
+## Traps met
+
+1. 🔴 **A correct fix can turn an old pin red in a file the grading list never named**: CLOUDPOINTSTO's s5 run graded
+   "39 suites that run functions" and sb004 was not one. When a fix makes a refusal unreachable, `git grep` the refusal's
+   own words in the tests, not only the files that matched the list.
+2. A peer was editing `noodl-mcp/src` (`projectFiles.ts`, `ProjectStore.ts`, `whatChanged.ts`) during this session:
+   the commit went through a temporary index with the 16 paths named, and the real index's only staged entry stayed the
+   peer's `dev-docs/parked/README.md`.
+3. `node --test test/` in create-nodegx reads as "1 fail, 0 pass": its runner is plain `node --test` (`npm test`), 34/34.
