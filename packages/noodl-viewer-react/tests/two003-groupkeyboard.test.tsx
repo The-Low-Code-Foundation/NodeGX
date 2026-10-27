@@ -37,6 +37,7 @@ g.navigator = dom.window.navigator;
 g.HTMLElement = dom.window.HTMLElement;
 g.Element = dom.window.Element;
 g.Node = dom.window.Node;
+g.MutationObserver = dom.window.MutationObserver; // what keeps "what it holds wins" in step, as in a browser
 g.requestAnimationFrame = (cb: () => void) => setTimeout(cb, 0);
 g.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -48,7 +49,7 @@ const ImageModule = require('../src/nodes/visual/image').default;
 const CircleModule = require('../src/nodes/visual/circle').default;
 const VideoModule = require('../src/nodes/visual/video').default;
 const NodeSharedPortDefinitions = require('../src/node-shared-port-definitions').default;
-const { KEYBOARD_CLICK_HOOKS } = require('../src/keyboard-click');
+const { KEYBOARD_CLICK_HOOKS, clickIsWired } = require('../src/keyboard-click');
 /* eslint-enable @typescript-eslint/no-var-requires */
 
 interface VisualNode extends NodeInstance {
@@ -238,6 +239,118 @@ describe('only while Click is wired', () => {
     expect(old.hasAttribute('role')).toBe(false);
     expect(old.hasAttribute('tabindex')).toBe(false);
     next.remove();
+  });
+});
+
+/** MutationObserver callbacks run after the current task's microtasks. */
+const settle = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+describe('what it holds wins (P121-TWO003-NESTEDBUTTON, ruled: inner controls win)', () => {
+  const isButton = (el: HTMLElement) => el.getAttribute('role') === 'button' && el.getAttribute('tabindex') === '0';
+
+  it('a card already holding a Button is not made a button; its Click still answers a pointer', async () => {
+    const v = await build(TextModule, { wired: false });
+    const add = dom.window.document.createElement('button');
+    add.textContent = 'Add to basket';
+    v.el().appendChild(add);
+    v.wire();
+    expect(isButton(v.el())).toBe(false);
+    expect(v.el().hasAttribute('data-ndl-keyboard-click')).toBe(false);
+    v.key('Enter');
+    expect(v.clicks()).toBe(0);
+    v.el().click();
+    expect(v.clicks()).toBe(1);
+    add.remove();
+  });
+
+  it('a field arriving inside later takes the button back off; the last one leaving gives it again', async () => {
+    const v = await build(TextModule, { wired: true });
+    expect(isButton(v.el())).toBe(true);
+    const field = dom.window.document.createElement('input');
+    v.el().appendChild(field);
+    await settle();
+    expect(v.el().hasAttribute('tabindex')).toBe(false);
+    expect(v.el().hasAttribute('role')).toBe(false);
+    v.key('Enter');
+    expect(v.clicks()).toBe(0);
+    field.remove();
+    await settle();
+    expect(isButton(v.el())).toBe(true);
+    v.key('Enter');
+    expect(v.clicks()).toBe(1);
+  });
+
+  it('a Click-wired element inside (a Tab stop of its own) wins over the one around it', async () => {
+    const v = await build(TextModule, { wired: true });
+    const inner = dom.window.document.createElement('div');
+    v.el().appendChild(inner);
+    await settle();
+    expect(isButton(v.el())).toBe(true);
+    inner.setAttribute('tabindex', '0');
+    await settle();
+    expect(isButton(v.el())).toBe(false);
+    inner.remove();
+  });
+
+  it('what is not a Tab stop does not count: tabindex -1, a hidden input, a link with no href', async () => {
+    const v = await build(TextModule, { wired: true });
+    const quiet = dom.window.document.createElement('div');
+    quiet.innerHTML = '<span tabindex="-1">x</span><input type="hidden"><a>no href</a>';
+    v.el().appendChild(quiet);
+    await settle();
+    expect(isButton(v.el())).toBe(true);
+    quiet.remove();
+  });
+
+  it('the last wire taken off stops watching: a control arriving after gives nothing back', async () => {
+    const v = await build(TextModule, { wired: true });
+    v.unwire();
+    const field = dom.window.document.createElement('input');
+    v.el().appendChild(field);
+    field.remove();
+    await settle();
+    expect(v.el().hasAttribute('tabindex')).toBe(false);
+    expect(v.el().hasAttribute('role')).toBe(false);
+  });
+});
+
+describe('a Click whose only wire leaves the component unused (P121-TWO003-NESTEDBUTTON)', () => {
+  // The runtime's shapes: an output's wires, a Component Outputs node, the instance it hands its value to.
+  const output = (connections: Array<{ node: unknown; inputPortName: string }>) => ({
+    connections,
+    hasConnections: () => connections.length > 0
+  });
+  const owner = (outputs: Record<string, ReturnType<typeof output>>, internal: Record<string, unknown> = {}) => ({
+    hasOutput: (name: string) => name in outputs,
+    getOutput: (name: string) => outputs[name],
+    _internal: internal
+  });
+  const componentOutputs = (o: unknown) => ({ name: 'Component Outputs', nodeScope: { componentOwner: o } });
+  const picture = (to: unknown) => ({ getDOMElement: () => null, hasOutput: () => true, getOutput: () => output([{ node: to, inputPortName: 'tapped' }]) });
+  const somethingThatActs = { name: 'Condition' };
+
+  it('into an output the placement never uses: not wired (no dead Tab stop)', () => {
+    expect(clickIsWired(picture(componentOutputs(owner({ tapped: output([]) }))))).toBe(false);
+  });
+
+  it('(twin) into an output the placement takes further: wired', () => {
+    expect(clickIsWired(picture(componentOutputs(owner({ tapped: output([{ node: somethingThatActs, inputPortName: 'eval' }]) }))))).toBe(true);
+  });
+
+  it('two components up, unused at the top: not wired; used at the top: wired', () => {
+    const top = (used: boolean) => owner({ chosen: output(used ? [{ node: somethingThatActs, inputPortName: 'eval' }] : []) });
+    const middle = (used: boolean) => owner({ tapped: output([{ node: componentOutputs(top(used)), inputPortName: 'chosen' }]) });
+    expect(clickIsWired(picture(componentOutputs(middle(false))))).toBe(false);
+    expect(clickIsWired(picture(componentOutputs(middle(true))))).toBe(true);
+  });
+
+  it('an instance a repeater made hands its outputs on without wires: wired', () => {
+    expect(clickIsWired(picture(componentOutputs(owner({ tapped: output([]) }, { creatorCallbacks: {} }))))).toBe(true);
+  });
+
+  it('a wire to anything else, or a shape this cannot read: wired, as before', () => {
+    expect(clickIsWired(picture(somethingThatActs))).toBe(true);
+    expect(clickIsWired(picture(componentOutputs(undefined)))).toBe(true);
   });
 });
 

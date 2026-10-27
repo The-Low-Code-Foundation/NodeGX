@@ -47,6 +47,7 @@ import { settingsDiagnostic } from './settingsDiagnostic';
 import { functionScriptNotCompiled } from './functionScriptNotCompiled';
 import { functionNeverReruns } from './functionNeverReruns';
 import { contentRowSplitsItsChildren, rowOfWordsFillsItsColumn } from './layoutFillTraps';
+import { clickAreaHoldsAControl } from './clickAreaHoldsAControl';
 
 export const ALL_RULES: Rule[] = [
   duplicateNodeId,
@@ -116,6 +117,9 @@ export const ALL_RULES: Rule[] = [
   // against the shipped corpus before they were written — this one is 0 hits
   // on all ten templates.
   dialogWithoutName,
+  // P121-TWO003-NESTEDBUTTON (ruled 2026-10-27) — beside the two above: what a keyboard and a screen reader reach, read
+  // from the arrangement. An info, live, so the Problems panel and an agent's write both say it.
+  clickAreaHoldsAControl,
   // P112-OWN020-PILLWRAP / FILLGROW (ruled 2026-10-26: warn and teach) — a node with no size setting fills its parent,
   // read from the arrangement like the two above, and live so a person sees it while editing.
   contentRowSplitsItsChildren,
@@ -151,6 +155,7 @@ export {
   functionNeverReruns,
   repeatedSiblingSubtree,
   labelNotAClickTarget,
+  clickAreaHoldsAControl,
   oversizedPage,
   unlabelledNode
 };

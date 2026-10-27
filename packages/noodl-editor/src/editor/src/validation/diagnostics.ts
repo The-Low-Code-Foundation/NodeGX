@@ -932,6 +932,15 @@ export enum DiagnosticCode {
   RowOfWordsFillsItsColumn = 'row-of-words-fills-its-column',
 
   /**
+   * P121-TWO003-NESTEDBUTTON (ruled 2026-10-27: "inner controls win") — an element whose Click is wired, holding a
+   * Button, a field or another wired Click. The viewer does not make it a button to the keyboard (a button around
+   * buttons read in Chrome as one button carrying every word inside), so its own Click answers a pointer only. An
+   * **info**, in `ALL_RULES`: correct when the Click does what an inner control does, a missing Button when not. See
+   * `rules/clickAreaHoldsAControl.ts`.
+   */
+  ClickAreaHoldsAControl = 'click-area-holds-a-control',
+
+  /**
    * DEF-024 (P78 D36) — a `mounted`/`visible` input whose every writer is a
    * constant-condition `Condition`, and the only value those writers can push
    * is `true`: the element can be shown but never put away again within a page

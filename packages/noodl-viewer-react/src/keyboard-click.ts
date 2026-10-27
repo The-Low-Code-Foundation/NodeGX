@@ -20,6 +20,14 @@
  *   how a Draggable card keeps Space for picking it up: `drag-drop.ts` listens on the document in the capture phase
  *   and runs first. A key pressed inside the element (a field in a card) is the field's, not the card's.
  * - **The focus ring** is the controls' ring (`assets/style.css`, `[data-ndl-keyboard-click]:focus-visible`).
+ * - **What it holds wins** (P121-TWO003-NESTEDBUTTON, ruled 2026-10-27, "inner controls win"): an element that has a
+ *   button, a field, a link or anything else Tab stops on inside it is NOT made a button. Measured in Chrome, a card
+ *   holding an "Add to basket" Button read as one button named "Lemon cake £4.00 — … Add to basket", and the backdrop
+ *   behind a settings sheet (Click = close) took a focus ring around the whole sheet, read as one button carrying every
+ *   word of it, and closed the sheet on Enter. Tab reaches the inner controls instead. Kept in step while the element
+ *   is marked: a control that appears inside later (a repeater filling, a sheet's content mounting) takes the button
+ *   back off, and the last one leaving gives it again. The validator says so to the maker
+ *   (`click-area-holds-a-control`): a Click that does something no inner control does needs its own Button.
  *
  * Why at the element and not in render: a wire made in the editor while the preview runs does not re-render the node
  * (the same reason `pointerlisteners.ts` reads the wire at click time), so the answer is kept in step by the Click
@@ -28,11 +36,24 @@
  * @module noodl-viewer-react/keyboard-click
  */
 
+/** An output as the runtime keeps it: its wires, each to a node's input. */
+interface OutputLike {
+  hasConnections(): boolean;
+  connections?: Array<{ node?: unknown; inputPortName?: string }>;
+}
+
 /** The slice of a visual node this module touches. */
 export interface KeyboardClickNode {
   getDOMElement(): HTMLElement | null;
   hasOutput(name: string): boolean;
-  getOutput(name: string): { hasConnections(): boolean };
+  getOutput(name: string): OutputLike;
+}
+
+/** The slice of a component instance a Component Outputs node hands its value to. */
+interface ComponentOwnerLike {
+  hasOutput?(name: string): boolean;
+  getOutput?(name: string): OutputLike;
+  _internal?: { creatorCallbacks?: unknown };
 }
 
 /** Marks an element this module made keyboard-pressable, for the focus ring. */
@@ -43,6 +64,20 @@ interface Marked {
   added: string[];
   onKeyDown: (e: KeyboardEvent) => void;
   onKeyUp: (e: KeyboardEvent) => void;
+  /** Watches what the element holds, so a control arriving inside takes the button back off. */
+  observer: MutationObserver | null;
+}
+
+/**
+ * Something inside an element that is already reachable and pressable: a control, a link, a field, anything with its
+ * own Tab stop (another Click-wired element marked by this module included). `tabindex="-1"` is not a Tab stop.
+ */
+const PRESSABLE_INSIDE =
+  'button, input:not([type="hidden"]), select, textarea, summary, a[href], area[href], video[controls], audio[controls], ' +
+  '[contenteditable=""], [contenteditable="true"], [tabindex]:not([tabindex="-1"])';
+
+function holdsPressable(el: HTMLElement): boolean {
+  return el.querySelector(PRESSABLE_INSIDE) !== null;
 }
 
 const marked = new WeakMap<KeyboardClickNode, Marked>();
@@ -50,7 +85,31 @@ const marked = new WeakMap<KeyboardClickNode, Marked>();
 /** The node's Click output has at least one wire. */
 export function clickIsWired(node: KeyboardClickNode): boolean {
   if (!node.hasOutput('onClick')) return false;
-  return node.getOutput('onClick').hasConnections();
+  return reachesSomething(node.getOutput('onClick'), 0);
+}
+
+/**
+ * Whether a press on this output does anything: some wire reaches a node that acts. A wire into a component's own
+ * Component Outputs counts only when the place the component is used takes that output further
+ * (P121-TWO003-NESTEDBUTTON: rocket-school's Header holds "The face", whose picture's Click goes to a `Tapped` output
+ * the Header never uses. The picture was a Tab stop that did nothing, and with "inner controls win" it hid the Header,
+ * the one that opens the menu.) An instance a repeater or Run Tasks made hands its outputs on without wires
+ * (`creatorCallbacks`), so its outputs count. Anything this cannot read counts, as before.
+ */
+function reachesSomething(output: OutputLike, depth: number): boolean {
+  if (!output.hasConnections()) return false;
+  if (!Array.isArray(output.connections)) return true;
+  return output.connections.some((c) => !goesNowhere(c, depth));
+}
+
+function goesNowhere(connection: { node?: unknown; inputPortName?: string }, depth: number): boolean {
+  const target = connection.node as { name?: string; nodeScope?: { componentOwner?: ComponentOwnerLike } } | undefined;
+  if (!target || target.name !== 'Component Outputs' || typeof connection.inputPortName !== 'string') return false;
+  const owner = target.nodeScope?.componentOwner;
+  if (!owner || depth > 16 || owner._internal?.creatorCallbacks) return false;
+  if (typeof owner.hasOutput !== 'function' || typeof owner.getOutput !== 'function') return false;
+  if (!owner.hasOutput(connection.inputPortName)) return true;
+  return !reachesSomething(owner.getOutput(connection.inputPortName), depth + 1);
 }
 
 /**
@@ -75,22 +134,6 @@ function isOwnKey(el: HTMLElement, e: KeyboardEvent): boolean {
 }
 
 function mark(el: HTMLElement): Marked {
-  const added: string[] = [];
-  if (!isNativelyInteractive(el)) {
-    if (!el.hasAttribute('tabindex')) {
-      el.setAttribute('tabindex', '0');
-      added.push('tabindex');
-    }
-    if (!el.hasAttribute('role')) {
-      el.setAttribute('role', 'button');
-      added.push('role');
-    }
-  }
-  if (added.length) {
-    el.setAttribute(KEYBOARD_CLICK_ATTRIBUTE, '');
-    added.push(KEYBOARD_CLICK_ATTRIBUTE);
-  }
-
   // A Space press is armed on the way down and clicks on the way up, as a `<button>` does; Enter clicks at once.
   let spaceArmed = false;
   const onKeyDown = (e: KeyboardEvent) => {
@@ -110,19 +153,57 @@ function mark(el: HTMLElement): Marked {
     spaceArmed = false;
     if (armed && e.target === el && !e.defaultPrevented) el.click();
   };
-  // Only where this module made the element pressable: a native control presses itself, and one with its own tabindex or
-  // role was made pressable by whoever gave it those.
-  if (added.length) {
-    el.addEventListener('keydown', onKeyDown);
-    el.addEventListener('keyup', onKeyUp);
+  const m: Marked = { el, added: [], onKeyDown, onKeyUp, observer: null };
+  if (isNativelyInteractive(el)) return m;
+  refresh(m);
+  if (typeof MutationObserver !== 'undefined') {
+    m.observer = new MutationObserver(() => refresh(m));
+    m.observer.observe(el, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['tabindex', 'contenteditable', 'href', 'controls', 'type']
+    });
   }
-  return { el, added, onKeyDown, onKeyUp };
+  return m;
+}
+
+/** Make the element a button, or give that back, by what it holds now. Changes nothing when it already agrees. */
+function refresh(m: Marked): void {
+  const { el } = m;
+  const want = !holdsPressable(el);
+  if (want && !m.added.length) {
+    if (!el.hasAttribute('tabindex')) {
+      el.setAttribute('tabindex', '0');
+      m.added.push('tabindex');
+    }
+    if (!el.hasAttribute('role')) {
+      el.setAttribute('role', 'button');
+      m.added.push('role');
+    }
+    // Only where this module made the element pressable: one with its own tabindex or role was made pressable by
+    // whoever gave it those.
+    if (m.added.length) {
+      el.setAttribute(KEYBOARD_CLICK_ATTRIBUTE, '');
+      m.added.push(KEYBOARD_CLICK_ATTRIBUTE);
+      el.addEventListener('keydown', m.onKeyDown);
+      el.addEventListener('keyup', m.onKeyUp);
+    }
+  } else if (!want && m.added.length) {
+    giveBack(m);
+  }
+}
+
+function giveBack(m: Marked): void {
+  for (const name of m.added) m.el.removeAttribute(name);
+  m.added = [];
+  m.el.removeEventListener('keydown', m.onKeyDown);
+  m.el.removeEventListener('keyup', m.onKeyUp);
 }
 
 function unmark(m: Marked): void {
-  for (const name of m.added) m.el.removeAttribute(name);
-  m.el.removeEventListener('keydown', m.onKeyDown);
-  m.el.removeEventListener('keyup', m.onKeyUp);
+  m.observer?.disconnect();
+  giveBack(m);
 }
 
 /**
