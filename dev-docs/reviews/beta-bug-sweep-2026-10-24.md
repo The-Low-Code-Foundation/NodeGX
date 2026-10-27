@@ -26,9 +26,9 @@ the files they touch, so one session reads one surface once.
 | L1 | **Studio's dialogs and chips** | P125-MUDDY-NATIVEDIALOG (high: New option set / attribute / data type / style do nothing in the app; deletes refuse in the panel), P125-MUDDY-DEADCHIP | nodegx-studio `editor/studio.html` (5 `prompt()`, 9 `confirm()`; `sourceChip`); the gates stub both (`editor/check.mjs`, `editor/data-check.mjs`), so grade in the Electron app | **P128's, not this sweep's** (s17): NATIVEDIALOG is P128 S4 (Studio's own name field and confirm card), DEADCHIP is P128 S6 (Wiring). Both committed by P128 (5fb0e70ed) and tagged `launch: beta` in s17 |
 | L2 | **What the agent is told** | P125-MUDDY-OPTSETSUNKNOWN (high), P125-MUDDY-SURFACESUNSAID (high) | noodl-mcp `src/instructions.ts`, `src/guidance.ts`, the seeded `CLAUDE.md` / `CONVENTIONS.md`; the MCP tool-surface budget gate | **P128's** (s17): both `owner: P128-S2`; S1 (0be3a25e9) landed the `surfaces` section, AC3 open; S2 = the option-set example, validator hint, write note |
 | L3 | **The write door's privacy checks** | P127-BKO006-COMPVISIBLE (a private screen shows under the sign-in card), P127-BKO006-RUNONCHANGEGUESS, P127-BKO006-EMPTYSTARTPAGE, P127-BKO006-DRIVEHALFRUN | editor validation as the MCP door runs it (`noodl-editor` validator, `pageRegistration.ts`), noodl-mcp `drive_page` | ✅ **done s17**: RUNONCHANGEGUESS 30cb6671c, COMPVISIBLE 79cbc4674, DRIVEHALFRUN 4bf7e4664, EMPTYSTARTPAGE 809c2c231; all four reach an agent with the next `@nodegx/mcp` dist. NOROLESFAILS left to P127 |
-| L4 | **Getting Studio** | P125-CCN006-NODOWNLOAD (no desktop download on nodegx.io/studio/), P125-CCN006-NOSCHEME | nodegx-studio `app/main.cjs`, `package.json` `build.protocols`; nodegx-web `site/studio/` | open. A push of nodegx-web is a deploy: Richard's OK before the page goes live |
-| L5 | **Runtime rows an app hits** | P18-S109-MOUNTPULSE (Sign In With: a cancel never fires Failure), P109-F03 (two lists sharing row ids show each other's rows), P109-F11 (a Group's inline defaults beat a CSS Class); P109-S24-SIGNINWITHERRORKEPT here once ruled (same node) | noodl-viewer-react `signinwith.ts`, `foreach`, `react-component-node` | open |
-| L6 | **The backend in the project's files, and the run timeline** | P127-BKO006-ROLESNOTINFILES, P127-BKO004-FNSTEPS (Studio can't light up which steps a function ran), P104-BMG018-SEARCH | nodegx-backend `WorkflowRunner`, noodl-mcp `create_backend_role`, the backend manager's link picker | open; overlaps lane 9 (P127): check its handoff |
+| L4 | **Getting Studio** | P125-CCN006-NODOWNLOAD (no desktop download on nodegx.io/studio/), P125-CCN006-NOSCHEME | nodegx-studio `app/main.cjs`, `package.json` `build.protocols`; nodegx-web `site/studio/` | **s18**: NOSCHEME ✅ fixed (Studio 75c8d63: a `nodegx-studio://` link opens its folder, cold or running; driven on the packaged Mac build). NODOWNLOAD built up to Richard: Studio 75c8d63 (draft release on a `v*` tag, no release without the Apple secrets), nodegx-web 1439284 (Download on /studio/, **not deployed**), `STUDIO_DOWNLOAD_URL` → `/studio/#download` (fc5a17515). **Waits on Richard:** Apple secrets → tag + publish the draft → deploy the site |
+| L5 | **Runtime rows an app hits** | P18-S109-MOUNTPULSE (Sign In With: a cancel never fires Failure), P109-F03 (two lists sharing row ids show each other's rows), P109-F11 (a Group's inline defaults beat a CSS Class); P109-S24-SIGNINWITHERRORKEPT here once ruled (same node) | noodl-viewer-react `signinwith.ts`, `foreach`, `react-component-node` | ✅ **s18** (fc5a17515): MOUNTPULSE **does not reproduce in the runtime** (a late wire catches a signal sent earlier in the update; regression + control), it is the export's: re-filed as an export row, `launch: beta` off. F03 and F11 were ruled and built in P109 (ISL-003, ISL-008) and left `scheduled`: closed, regressions green. SIGNINWITHERRORKEPT stays on R |
+| L6 | **The backend in the project's files, and the run timeline** | P127-BKO006-ROLESNOTINFILES, P127-BKO004-FNSTEPS (Studio can't light up which steps a function ran), P104-BMG018-SEARCH | nodegx-backend `WorkflowRunner`, noodl-mcp `create_backend_role`, the backend manager's link picker | **s18**: ROLESNOTINFILES ✅ (b0b82b694: the manager's Roles page names a role the rules use and the backend lacks, with *Make staff*). FNSTEPS read and handed back to P127 (feature-sized: the runner noting each node + Studio lighting them). SEARCH stays BMG-018's (Richard: 0.3.1) |
 | R | **Rulings for Richard** (one page, plain words, any session can put it to him) | P112-OWN018-FANOUT, P18-S119-FIRSTWRITE, P109-S18-REFRESHROWSTATE, P109-S24-SIGNINWITHERRORKEPT, NPMAUDIT-LICENCE (which licence a deployed app's runtime is under); standing: DEPLOYLOOPBACK's third-party half | — | waiting on Richard |
 
 Not in the plan (off the walk): code export (lane 4, paused), WebSocket / Server-Sent Events, Video C97/C99, template,
@@ -1017,3 +1017,56 @@ lists 17 again: 13 left from the plan's 17, plus these four.
    reads parameters only, so the wire it was trusted with went through both.
 4. A transcript beats a report: COMPVISIBLE's "the door passes it" was true only for one of four shapes, and only the
    transcript said which.
+
+# Session 18, 2026-10-27 (next session reads this first)
+
+The launch plan's L4, L5 and L6, in order. P128's S8 (the site's `start/` and `studio/`) had not begun, so L4 took
+the site half too. Every row claimed in its owner line first. **Nothing pushed, nothing deployed, no dist rebuilt.**
+`--launch beta` lists 12 (was 17).
+
+## Done
+
+| row | commit | built | graded |
+|---|---|---|---|
+| **P125-CCN006-NOSCHEME** | Studio 75c8d63 | Re-measured first: STU-009 had already given the app its single-instance lock and `second-instance`, so a running app took a folder from a second launch. Built the link: `build.protocols` (the Info.plist's `CFBundleURLTypes`, which NodeGX's companion reads before it sends the link), `open-url` (before `ready` when the link starts the app), the link from argv on Windows/Linux, `setAsDefaultProtocolClient` when packaged; absolute `dir` only | `check:app` 57/57 (3 new); HEAD's `main.cjs`: exactly those 3 red. **Driven** on the packaged Mac build: a link with Studio closed started it on the project; a second link opened its folder as a tab in the same process |
+| **P125-CCN006-NODOWNLOAD** | Studio 75c8d63, nodegx-web 1439284, fc5a17515 | Studio had no tag and no release (CI kept the installers as expiring workflow artifacts). Version-less installer names; a `release` job makes a **draft** release on a `v*` tag matching package.json, failing on a missing installer; on a tag the Mac leg refuses to build without the Apple secrets. `/studio/` gets a Download section (`#download`, the hero's first button); `STUDIO_DOWNLOAD_URL` points there | local `npm run dist` made `NodeGX-Studio-mac-arm64.dmg/.zip`; the page at 1280 and 500 px; copy through the offline `written`/`contract` checks. **Still open**: waits on Richard (below) |
+| **P18-S109-MOUNTPULSE** | fc5a17515 | **Does not reproduce in the runtime.** A probe in a real component (`createCorpusGraph`): a provider error settled before Sign In With is made reaches the wired Failure once. `sendSignalOnOutput` keeps the signal for the update and `connectInput` replays it to a later wire. The loss lives in nodegx-export: its §C harness drops a pre-wire pulse and its lib transcribes that (`applyReturn(s, current, false)`). Re-filed as an export row (P18, paused); `launch: beta` off. An adapter-side "announced" fix was built first and taken out when the A/B read the same on HEAD | `p18-s109-mountpulse.test.ts` 2/2: one Failure, one raise; the control clears the replay and gets none |
+| **P109-F03**, **P109-F11** | fc5a17515 (ledger) | Ruled and built in P109 (ISL-003 ce172ea43 "each list keeps its rows"; ISL-008 3e2b700bf "stylesheet beats defaults"); the rows were left `scheduled` | their regressions at HEAD with the sign-in suites: 143/143 |
+| **P127-BKO006-ROLESNOTINFILES** | b0b82b694 | The rules in the files already name `role:staff`; a server started from them lacks the role, and its Roles page said "No roles yet". It now names each role the rules use that the backend lacks, with *Make staff* | admin specs 7/7 (4 new; page arm red with the notice removed); neighbours 39/39 |
+
+Read and left: **P127-BKO004-FNSTEPS** (feature-sized: the cloud runner noting each node + Studio lighting them;
+handed back to P127, owner none). **P104-BMG018-SEARCH** stays BMG-018's (Richard scheduled it for 0.3.1).
+
+## For Richard
+
+1. **Studio's download, three steps, in order:** (1) the five Apple secrets in nodegx-studio's repository settings
+   (CSC_LINK, CSC_KEY_PASSWORD, APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID); (2) push nodegx-studio and tag
+   `v0.1.0`, then publish the draft the workflow makes; (3) deploy nodegx-web once `curl -sIL` on the three links on
+   /studio/ reads 200 (before (2) they are 404s). No Intel Mac build; Windows unsigned (the page says both).
+2. 🔴 **Before any nodegx-web deploy:** `deploy.sh` rsyncs the working tree's `site/` with `--delete`. That tree holds
+   uncommitted `changelog/_page.html` and `demos/_page.html` edits (Oct 21–22), stale generated `index.html` files and
+   untracked folders (`gala/`, `map/`, `orbit/`, `templates/`…). Whatever is there goes live.
+3. Standing: push and publish (sessions 12–18); DEPLOYLOOPBACK's third-party half; the R page.
+
+## Next
+
+1. The plan's L1/L2 are P128's. L3–L6 are done or wait on Richard. What is left on `--launch beta` is the R page
+   (FANOUT, FIRSTWRITE, REFRESHROWSTATE, SIGNINWITHERRORKEPT, NPMAUDIT-LICENCE), NODOWNLOAD's three steps, FNSTEPS
+   (P127), SEARCH (BMG-018). A bug-list session's best use now: put the R page to Richard, then any new row.
+2. MOUNTPULSE's export fix, when lane 4 resumes: read at mount with the listeners, and make §C's harness replay a
+   pre-wire signal as `connectInput` does.
+
+## Traps met
+
+1. 🔴 **The shell's `ELECTRON_RUN_AS_NODE=1` (VS Code's) rides `open` into a launched app.** The packaged Studio
+   started as plain Node and quit at once ("bad option: --smoke"), and the link drive read as "nothing happens".
+   `unset ELECTRON_RUN_AS_NODE` before `open`/a gate; a browser following the link does not carry it.
+2. 🔴 **The viewer type-checks runtime imports against `noodl-runtime/dist-types`, not the source.** A new field on a
+   runtime type is "TS2339 does not exist" in a viewer spec until `npm run build:types` in noodl-runtime
+   (`emitDeclarationOnly` into the gitignored `dist-types`; safe). Rebuild it again after reverting.
+3. 🔴 **A bug's mechanism argued from a harness is the harness's.** MOUNTPULSE's "a pulse in initialize reaches no
+   wire" was the export differential's model; the runtime replays it (`connectInput` + `_signalsSentThisUpdate`).
+   A probe in `createCorpusGraph` with a wired probe node, A/B'd on HEAD, settled it in minutes.
+4. A ledger row can outlive its fix: F03 and F11 sat `scheduled` for three weeks after P109 ruled and built them.
+   Read the row's task file before building.
+5. `bugs.js check`: no `studio` kit, and a `regression:` path must exist in this repo: name a Studio gate in prose.
