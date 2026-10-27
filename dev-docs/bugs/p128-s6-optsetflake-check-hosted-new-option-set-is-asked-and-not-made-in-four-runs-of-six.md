@@ -15,7 +15,7 @@ the sandboxed frame. The next session that runs check:hosted reads the toast and
 instrumented line beside the `ok`) before calling it either.
 
 **Measured and fixed, P128 Beta round Track A (2026-10-27).** The gate now records what the panel showed when the
-check misses. It missed in two of five runs on 62dd153's tree; the miss (`hosted-5`) read: the field closed, the toast
+check misses. It missed in three of the session's first five runs (the second, third and fifth); the fifth, instrumented, read: the field closed, the toast
 *"Priorities is an option set: a component the page loads as plain JSON"*, the list *"Priorities · 0 option(s)"*, the
 set's own page drawn. So the set was made every time and Studio said so; the gate read
 `components/Option sets/Priorities/nodes.json` the moment the page drew, before Studio's save (`persist()`, after the
