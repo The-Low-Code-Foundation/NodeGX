@@ -2912,5 +2912,67 @@
     "steps": [
       "settle"
     ]
+  },
+  {
+    "name": "a finger held on the button with the keyboard elsewhere, then Mounted off and a person's Focus in the same frame: the act's paint takes the element — Pointer Down, Will Unmount, no Focused, and Pressed never shows (on and off in one frame) — so a Focus signal after it is Unchanged",
+    "because": "the paint inside the act unmounts before the act meets the page (node-spec-target.ts PERSON; P109 ISL-031, D30: controls/utils.ts `_leftPage`). Seed 20751 left this branch of `person.focus` ungraded (BETA-S9-BUTTONFOCUSSURVIVOR): a held, unfocused button is a touch, or a press under Keeps Focus — the Focus signal is the reader: a button still on the page would take it",
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Keeps Focus on: a mouse press held on the button (the keyboard stays where it was), then Mounted off and a person's Focus in the same frame: Pointer Down, Will Unmount, no Focused; a Focus signal after it is Unchanged",
+    "because": "the held twin of the scenario before, reached by a mouse: Button.tsx :117-129 (R26) keeps the keyboard off the button on the press",
+    "params": {
+      "keepsFocus": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
   }
 ]
