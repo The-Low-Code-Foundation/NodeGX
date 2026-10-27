@@ -216,6 +216,22 @@ for the project; an empty dir for HOME.
 hands the link), /start offers one download for their Mac, the install sheet is the only warning and /start named it
 first, Studio comes up in the first chat, and the count in step 4 is 0 silent of 4.
 
+- **Steps 1–3 (2026-10-27, evening).** R ruled "re-cut 0.2.8 from HEAD" at 17:45; he published `npm-0.2.8b-tarballs`
+  in the same hour (registry `@nodegx/mcp@0.2.8` = `e85c6f95`, 0.2.8b's: no HELPERNODE, no NAMEMISMATCH), so the re-cut
+  died (`f04de6a5d`, reverted in the changelog by `dcbd27451`; nothing packed from it). R then ruled **"cut 0.2.9 now,
+  mcp only"**: release `9cbf7383a` + changelog `b90ecd53c` (**neither pushed**), packed in `OpenNoodl-worktrees/npm-0.2.9`,
+  `npm-0.2.9-tarballs/nodegx-mcp-0.2.9.tgz` sha1 `5549d6f784d04085830e08ec8dc8100f151e0915`, 12,425,606 bytes.
+  Graded against the published 0.2.8: same 134-file list; four files differ (`noodl-mcp.cjs`, `backend/cli.js`, two
+  `package.json`); `NODEGX_NODE` 0→4, `NODEGX_SERVER_NAME` 0→2; `cli.js` is exactly NOROLESFAILS (`722da9c33`, two
+  `error:` lines out), so 0.2.9 carries it and the changelog says so; audit 0; `initialize` = `noodl-mcp 0.2.9`, and
+  `nodegx 0.2.9` with the variable; stranger-render "DONE"; stranger-backend every step. **Step 3:**
+  `/Users/Shared/nodegx-0.2.9-darwin-arm64.mcpb` (sha1 `32b45102…`, 62.1 MB) under `as-desktop.cjs`, `BACKEND=1`:
+  `initialize` `nodegx`, `open_studio` 200, `render_report` DONE, `provision_backend` ok; the 0.2.7 control fails
+  all three on exit 64. **Open before step 5:** P127 s9 (`8a089a6de`, 19:21, after R's 0.2.9 ruling) recommends
+  *hold 0.2.9, one lane owns releases, at most one cut a day*, after R asked "maybe we're publishing a bit too
+  frequently?". R rules which stands and who owns releases; the publish line, if yes:
+  `scripts/own/publish-npm.sh ../OpenNoodl-worktrees/npm-0.2.9-tarballs` after the push.
+
 ## Repo B — nodegx-studio (`main`)
 
 ### [x] S4 — P125-MUDDY-NATIVEDIALOG and STU-082, the sandbox census (done by Beta sweep s21, 2026-10-27, Richard's yes)
@@ -293,6 +309,12 @@ stranger (P125 CCN-007) on steps 1–7; then the cut and the Brevo email
 resolved). Lane 9's SCHEDULEAUTH ruling and `@nodegx/mcp` 0.2.8 are not this phase's and stay first on the board.
 
 ## Handoffs (each session writes three lines under its box above, and the newest here)
+
+- 2026-10-27, S3b steps 1–3: see the block under S3b's AC. Traps: a release ruling can be overtaken inside the hour:
+  read `npm view @nodegx/mcp dist-tags` right before you pack and again before you ask, and `git log` for a peer's
+  release thought (P127 s9 had the same question open). A pack's "only X moved" diff decays too: re-run
+  `git diff <last cut>..<release> -- packages/` at the release commit, not at the start (NOROLESFAILS landed between).
+  The `initialize` probe needs `--allow-writes` with no project, or the server exits and the probe reads nothing.
 
 - 2026-10-27, S3 follow-up (the AC8 run with Richard): S3b above is the plan; the run's table is
   `../phase-125-co-construction/CCN-006-AC8-RUN-2026-10-27.md`. Traps: Claude Code's shell here has
