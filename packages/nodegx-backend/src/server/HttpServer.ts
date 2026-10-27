@@ -126,6 +126,8 @@ export type RouteAccess =
   | { kind: 'admin' }
   /** CLP-gated data operation. `collectionParam` names the captured segment. */
   | { kind: 'data'; op: ClpOp | 'byBody'; collectionParam: string }
+  /** The same gate on a route that names its collection in the path (`GET users/:id` is `_User`). */
+  | { kind: 'data'; op: ClpOp; collection: string }
   /** Batch data route — the handler enforces per contained operation via ctx.checkData. */
   | { kind: 'data-perOp' }
   /** Function call — per-function rule / key scopes. */
@@ -843,6 +845,19 @@ export class HttpServer {
       { method: 'POST', pattern: 'logout', access: { kind: 'session' }, handler: (ctx) => users.logout(ctx.req, ctx.res) },
       { method: 'POST', pattern: 'users', access: { kind: 'signup' }, handler: (ctx) => users.signup(ctx.req, ctx.res) },
       { method: 'GET', pattern: 'users/me', access: { kind: 'session' }, handler: (ctx) => users.me(ctx.req, ctx.res) },
+      {
+        // P127-BKO006-CLOUDUSERNODE: the cloud runtime's user service reads the signed-in caller by id (a User node's
+        // Fetch inside a function), and this answered 404. It is `GET /classes/_User/:id` — the same gate, the same
+        // read, the same fields stripped — under the path the Parse-shaped clients ask on. After `users/me`, which
+        // wins on its exact segment.
+        method: 'GET',
+        pattern: 'users/:id',
+        access: { kind: 'data', op: 'get', collection: '_User' },
+        handler: (ctx) => {
+          ctx.params.collection = '_User';
+          return parse.classGet(ctx);
+        }
+      },
       {
         method: 'PUT',
         pattern: 'users/:id',
@@ -2200,7 +2215,7 @@ export class HttpServer {
 
     switch (access.kind) {
       case 'data': {
-        const collection = params[access.collectionParam];
+        const collection = 'collection' in access ? access.collection : params[access.collectionParam];
         const op: ClpOp =
           access.op === 'byBody' ? (body && body._method === 'GET' ? 'find' : 'create') : access.op;
         const decision = this.assertDataAccess(principal, collection, op);

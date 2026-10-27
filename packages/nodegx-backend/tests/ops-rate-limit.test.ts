@@ -301,10 +301,13 @@ describe('BAK-009 rate limiting over real sockets', () => {
     // are steps in obtaining a session, so `auth`, in AUTH_PATTERNS beside the
     // magic link's; each handler adds per-caller and per-address buckets on
     // top. Counted — 17 → 19.
+    // P127-BKO006-CLOUDUSERNODE moved `data` by 1: `GET users/:id`, the read a User node's Fetch makes inside a cloud
+    // function. It is `GET classes/_User/:id` under another path, behind the same `data` gate, so it spends the `data`
+    // budget the record read spends. Counted — 19 → 20.
     expect(counts).toEqual({
       admin: 102,
       auth: 19,
-      data: 19,
+      data: 20,
       files: 4,
       functions: 1,
       hooks: 1,
