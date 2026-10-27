@@ -96,4 +96,6 @@ Lines above are said as true today. These wait on something before they are quot
 
 - "NodeGX Studio for your computer" and the one-file install: the download page and the release cut (audit §8, B9 and B13).
 - "a Linux server you rent, over SSH": stays SSH until lane 5 lands a provider from a key (DEP-003).
+- "Claude Code and Cline open Studio in a browser window beside the chat": true only with the `.mcpb` or Studio's
+  app on the machine, until `@nodegx/studio` is on npm and the server finds it (P128-S3-NOSTUDIOFORTHEEDITOR).
 - the cheaper-model sentence: the OWN-026 measurements continue (Mistral resumes 1 November); the figures are in the audit §10.

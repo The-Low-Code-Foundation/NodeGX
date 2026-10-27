@@ -67,6 +67,16 @@ The stranger audit's findings on naming and jargon in the packages (`dev-docs/bu
 of the same work. `P125-CCN006-AGENTPILL` (Studio's header says "Connect Claude Code" while an agent in Claude Desktop
 drives the project) is Studio's to fix. `/__nodegx/status` already names the agent.
 
+## 2026-10-27 (P128 S3, on Richard's ask): 0.2.7 rebuilt, and the run written down
+
+`nodegx-0.2.7.mcpb` (25.1 MB, unsigned: `mcpb verify` says "Extension is not signed"). Driven as s13 did, from the
+unpacked bundle, an empty HOME and PATH `/usr/bin:/bin`, client `claude-ai` with the UI extension: initialize 260 ms;
+`open_project` on a copy of `templates/todo-list` binds (122 tools); `open_studio` → `http://127.0.0.1:<port>/` 200,
+526,365 chars, title "NodeGX Studio"; `ui://nodegx/studio.html` 526,843 chars; no process left after close. AC8's
+double-click is written as [CCN-006-FRESH-ACCOUNT-CHECKLIST.md](CCN-006-FRESH-ACCOUNT-CHECKLIST.md): a new macOS
+user, so the checkout cannot stand in for the bundle. Outside the `.mcpb`, no install finds Studio
+(P128-S3-NOSTUDIOFORTHEEDITOR, AC7's row).
+
 ## s13 (2026-10-24, opennoodl-d7): the `.mcpb`, built and driven headless
 
 **What it is.** `npm run mcpb` in nodegx-studio (`scripts/mcpb.mjs`, commit 09219e6) writes
