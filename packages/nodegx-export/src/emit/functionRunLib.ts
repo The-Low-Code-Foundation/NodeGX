@@ -24,8 +24,10 @@
  *   body that awaits returns at its first `await`; `settled` is its promise, which the chain after Success waits on. What
  *   it writes and sends after that `await` is `late`, as above.
  *
- * 🔴 **The first value, not the last.** `Outputs.a = ''; Outputs.a = 'x'; Outputs.go();` hands `go`'s target `''`, as the
- * runtime does today (P18-S119-FIRSTWRITE, needs a ruling). Change it here and in the runtime together, or not at all.
+ * - P18-S119-FIRSTWRITE (ruled by Richard 2026-10-27, "The last value"): the runtime's proxy HOLDS a changed value and
+ *   sends it once, the latest write winning, before the next signal or when the body's synchronous part returns. So
+ *   `Outputs.a = ''; Outputs.a = 'x'; Outputs.go();` hands `go`'s target `'x'`; only a signal between two writes queues two.
+ *   Changed here and in the runtime together (`simplejavascript.ts` `holdChange`).
  */
 
 /** Where the module lands in the exported app. */
@@ -39,7 +41,8 @@ export function functionRunLibSource(): string {
  * A Function node's run, as the running app's Function node publishes it.
  *
  * The body writes \`Outputs.x = …\` and sends \`Outputs.go()\`. A write is published only when the value changes, and a
- * write of the value already held is published with the next signal. Each signal is a pulse its chain acts on after the
+ * write of the value already held is published with the next signal. A value changed twice before a signal is published
+ * once, with the last write. Each signal is a pulse its chain acts on after the
  * body, reading the outputs in step with the pulse: the k-th pulse reads the k-th value published since the run began,
  * or the last one when there are fewer, or what the output last sent when this run published nothing.
  */
@@ -94,6 +97,7 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<str
   const before: Record<string, unknown> = { ...delivered };
   const published: Record<string, unknown[]> = {};
   const held = new Set<string>();
+  const changed = new Set<string>();
   const sent: string[] = [];
   let returned = false;
   const publish = (name: string, value: unknown) => {
@@ -104,6 +108,8 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<str
   const signals: Record<string, unknown> = {};
   for (const signal of node.signals) {
     const send = () => {
+      changed.forEach((name) => publish(name, current[name]));
+      changed.clear();
       held.forEach((name) => publish(name, current[name]));
       held.clear();
       if (returned) {
@@ -121,16 +127,26 @@ export function runFunction<I, O>(body: (inputs: I, outputs: O, self: Record<str
       if (value !== current[key]) {
         current[key] = value;
         held.delete(key);
+        if (!returned) {
+          changed.add(key);
+          return true;
+        }
         publish(key, value);
-        if (returned && value !== undefined) node.late?.({ outputs: node.outputs, pulses: [] });
+        if (value !== undefined) node.late?.({ outputs: node.outputs, pulses: [] });
       } else {
         held.add(key);
       }
       return true;
     }
   });
-  const finished = body(inputs, outputs as unknown as O, node.self, node.component);
-  returned = true;
+  let finished: unknown;
+  try {
+    finished = body(inputs, outputs as unknown as O, node.self, node.component);
+  } finally {
+    changed.forEach((name) => publish(name, current[name]));
+    changed.clear();
+    returned = true;
+  }
   const count: Record<string, number> = {};
   const pulses = sent.map((signal) => {
     const k = (count[signal] = (count[signal] ?? 0) + 1);

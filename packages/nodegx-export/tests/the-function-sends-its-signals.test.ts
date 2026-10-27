@@ -169,13 +169,13 @@ describe('§A — a pulse reads what the runtime\'s own Function hands its targe
     expect(exportArm(CASES[i])).toEqual(RUNTIME[i]);
   });
 
-  it('control: the cases tell lockstep from "the run\'s last values" — that model is wrong on exactly the six lockstep cases', () => {
+  it('control: the cases tell lockstep from "the run\'s last values" — that model is wrong on exactly the five lockstep cases', () => {
     const differ = CASES.filter((c, i) => JSON.stringify(lastValueArm(c)) !== JSON.stringify(RUNTIME[i])).map((c) => c.name);
     expect(differ).toEqual([
       'a write after the signal (the pulse reads the first)',
       'a signal sent twice, a write before each',
       'two signals, a write between them (the second still reads the first)',
-      'one output written twice before the signal (P18-S119-FIRSTWRITE)',
+      // P18-S119-FIRSTWRITE, ruled "The last value": a value written twice before the signal now reads as the last write
       'a held write queues ahead of a later one (the first pulse reads the held value)',
       'undefined is never sent (C3)'
     ]);

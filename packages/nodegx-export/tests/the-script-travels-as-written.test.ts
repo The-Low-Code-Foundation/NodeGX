@@ -172,7 +172,7 @@ describe('§B what is emitted', () => {
     expect(lib).toContain('return { signals, outputs: {}, delivered: {}, self: {}, ...(component !== undefined ? { component } : {}) };');
     // Session 134 (EXP-019 slice 1b): the run keeps what the body returns, its promise where it awaits.
     // Session 135 (EXP-020 slice 2): and the component's scope, fourth, for a body that reads `Component.Object`.
-    expect(lib).toContain('const finished = body(inputs, outputs as unknown as O, node.self, node.component);');
+    expect(lib).toContain('finished = body(inputs, outputs as unknown as O, node.self, node.component);');
   });
 });
 

@@ -29,7 +29,9 @@
  *     (not in v1 — no fixture reads them).
  *   - WHAT COMES OUT (:275-308): `Outputs.y = v` sends `out-y` only when `v !==` the value it last wrote — the same value written again
  *     is HELD (sent after all if the same run fires a signal, GAM-011 :237-244 — invisible to a lone node, whose trace never repeats an
- *     unchanged value; graded through the graph). A signal output is a function on `Outputs` (`Outputs.z()` or `Outputs.z.send()`),
+ *     unchanged value; graded through the graph). A CHANGED value is held too and sent once, with the latest write, before the next
+ *     signal the code fires or when the synchronous part returns (P18-S119-FIRSTWRITE, ruled "The last value"; graded through the
+ *     graph by noodl-runtime `test/p18-s119-firstwrite.test.ts` — a lone node's trace, which this model plays, already showed one send). A signal output is a function on `Outputs` (`Outputs.z()` or `Outputs.z.send()`),
  *     prepared before the code runs for every signal port the node has (:600-618); calling it fires at once.
  *   - WHEN IT FINISHES (:633-652): the code is an `async` function, awaited — Success fires when it has finished, then Done answers
  *     each Run that asked. Both co-fire on a Run; a run nobody asked for (the Script, an input) fires Success alone.
