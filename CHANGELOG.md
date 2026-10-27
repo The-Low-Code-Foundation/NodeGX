@@ -22,13 +22,16 @@ Each NodeGX release links to its page on GitHub, where you can download it.
 **For the NodeGX extension in Claude Desktop: Studio and the app's render now start.**
 
 This release is `@nodegx/mcp` 0.2.9. The other packages stay at their versions. `npm create nodegx` still sets up
-`@nodegx/mcp` 0.2.8. In Claude Code the two are the same.
+`@nodegx/mcp` 0.2.8.
 
 ### Fixed
 
 - **In Claude Desktop, Studio opens and the app renders.** Desktop runs an extension on a Node of its own that can't
   start Studio, the render, the backend or a deploy. The NodeGX extension now brings its own Node. All four run on it.
 - **The server gives Claude Desktop the extension's name.** It answered `noodl-mcp` to an extension called `nodegx`.
+- **A person in no group gets the app's own refusal.** Get User Roles and List Users In Role filled Error when nobody
+  was in the group. A function that answered with Error then said "That user is in no roles." instead of its author's
+  words. Error is now empty there.
 
 ## npm packages 0.2.8 · 2026-10-27
 
