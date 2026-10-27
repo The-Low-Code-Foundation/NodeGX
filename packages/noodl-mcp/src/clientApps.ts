@@ -55,3 +55,51 @@ export function markOpenStudioProxied(): void {
 export function consumeOpenStudioProxied(): boolean {
   return consumeUiToolProxied('open_studio');
 }
+
+/**
+ * P128-S1-PREVIEWCUT — the answer the agent must read whole, whole in Claude Code too.
+ *
+ * Claude Code (measured in 2.1.251's own code, `Az=50000`, and its MCP docs, "MCP output limits and warnings") saves a
+ * text result over **50,000 characters** to a file and shows the agent a 2,000-character preview of the JSON-escaped
+ * content. `get_project_info` is ~62,000 (`templates/todo-list`), so a Claude Code agent got `readFirst.note` and
+ * MUST_KNOW lines 1–7 and never the `sections` index (P128 S1's rounds, and the haiku drive that measured this fix).
+ * Its documented door: `_meta["anthropic/maxResultSizeChars"]` on the tool's `tools/list` entry raises that tool's
+ * threshold, to a hard ceiling of 500,000. `call_tool` carries it as well, because that is how the measured round
+ * reached `get_project_info`.
+ *
+ * Set only for a client that says it is Claude Code, so every other client (Cline, Claude Desktop's `claude-ai` and
+ * `local-agent-mode-*`, Vibe) gets a `tools/list` byte for byte what it got before; the result itself is unchanged
+ * for everyone. Costs nothing on the resident budget: the gate bills name, description and schema, and Claude Code
+ * reads `_meta` itself rather than sending it to the model.
+ */
+export const RESULT_SIZE_META_KEY = 'anthropic/maxResultSizeChars';
+
+/** Twice today's `get_project_info`, so the guidance can grow before it is cut again; far under the 500,000 ceiling. */
+export const WHOLE_RESULT_CHARS = 120_000;
+
+/** The tools whose answer is read whole: the orientation the instructions say to call first, and the door to it. */
+export const WHOLE_RESULT_TOOLS: readonly string[] = ['get_project_info', 'call_tool'];
+
+export function clientIsClaudeCode(server: McpServer): boolean {
+  const name = server.server.getClientVersion()?.name ?? '';
+  return name === 'claude-code' || name.startsWith('claude-code');
+}
+
+/**
+ * At `initialize`: raise Claude Code's save-to-file threshold on {@link WHOLE_RESULT_TOOLS}, or take the key away for
+ * any other client (a second client can initialise on the same transport). Assigned, not `update()`d: the list is not
+ * yet read, so no `list_changed` is owed.
+ */
+export function applyResultSizeMeta(
+  server: McpServer,
+  handleFor: (name: string) => { _meta?: Record<string, unknown> } | undefined
+): void {
+  const claudeCode = clientIsClaudeCode(server);
+  for (const name of WHOLE_RESULT_TOOLS) {
+    const handle = handleFor(name);
+    if (!handle) continue;
+    const { [RESULT_SIZE_META_KEY]: _dropped, ...rest } = handle._meta ?? {};
+    const next = claudeCode ? { ...rest, [RESULT_SIZE_META_KEY]: WHOLE_RESULT_CHARS } : rest;
+    handle._meta = Object.keys(next).length > 0 ? next : undefined;
+  }
+}

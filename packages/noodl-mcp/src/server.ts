@@ -46,7 +46,7 @@ import { registerOpenInEditorTools } from './tools/openInEditor';
 import { registerMiniEditorTools } from './tools/miniEditor';
 import { registerOpenStudioTools } from './tools/openStudio';
 import { holdGate } from './hold';
-import { clientLoadsToolsItself, clientRendersApps } from './clientApps';
+import { applyResultSizeMeta, clientLoadsToolsItself, clientRendersApps } from './clientApps';
 import type { StudioProxy } from './studio/studioProxy';
 import { registerSessionStatusTools } from './tools/sessionStatus';
 import { registerWhatChangedTools } from './tools/whatChanged';
@@ -229,6 +229,8 @@ export function createServer(options: ServerOptions): CreatedServer {
     const who = server.server.getClientVersion();
     const loadsItself = clientLoadsToolsItself(server);
     const advertised = loadsItself ? disclosure.advertiseEverything() : [];
+    // P128-S1-PREVIEWCUT — Claude Code alone: `get_project_info` arrives whole, not as a 2 KB preview of a saved file.
+    applyResultSizeMeta(server, (name) => disclosure.handleFor(name));
     process.stderr.write(
       `noodl-mcp: client ${who ? `${who.name} ${who.version}` : 'unknown'}; renders MCP Apps: ` +
         `${clientRendersApps(server) ? 'yes' : 'no'}; loads tools itself: ${loadsItself ? 'yes' : 'no'}` +
