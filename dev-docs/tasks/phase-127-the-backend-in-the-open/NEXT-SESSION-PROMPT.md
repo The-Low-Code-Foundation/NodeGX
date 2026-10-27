@@ -53,7 +53,36 @@ Fixed on the way: **P127-BKO005-QUIETHOVER**.
 ran with `NODEGX_MCP=<scratch>/noodl-mcp.cjs`, built from this checkout by `esbuild` with `build-common.mjs` and another
 `outfile` (never `dist/`, which Desktop runs). It joins `check` once `@nodegx/mcp` is republished.
 
-**Next, in order (s6):**
+## s6 (2026-10-27): BKO-006, the three briefs run and graded
+
+The round is [`briefs/`](briefs/) (BKO-006's session log says how to run it). Three Opus strangers, each given only a
+brief and `npm create nodegx@0.2.7`, built a book club, a repair shop's job board and a team's shared expenses with
+sign-in, private rows, cloud functions and (two of three) a trigger; ~$6 and 20–40 min each. Graded: works, drawn
+inside the conversation (Studio `editor/brief-check.mjs`) and shipped to a throwaway VM, all green; "open" missed only
+the tables, now kept in `metadata.dbCollections` by `provision_backend`. Eight defects fixed (NodeGX 2fde69490,
+412a19833; Studio 668212a, which also moved Studio's pins to the published 0.2.7 / 0.1.3); eight open rows filed
+(`node scripts/bugs.js --from P127`).
+
+**Next, in order (s7):**
+
+1. **Richard rules SCHEDULEAUTH** (2 of 3 strangers opened a scheduled function to anyone, because a schedule runs as
+   a visitor). Recommendation in the row: schedules and row changes run as the backend; webhooks stay visitors.
+2. **Richard publishes `@nodegx/mcp` 0.2.8** with today's fixes (TABLESNOTINFILES is the one that makes "open" pass
+   for a stranger), and the backend with it; then `automations-drive.mjs` can join Studio's `check` (it needs BKO-005's
+   `what_changed_since`, which 0.2.7 lacks).
+3. **Richard's fourth brief in Claude Desktop**, from the `.mcpb` (BKO-006's second half; BKO-002 AC2, BKO-004 AC3,
+   BKO-005 AC1 ride along). Ask before rebuilding the Desktop dist.
+4. The open rows with no owner, worst first: CLOUDUSERNODE, NOROLESFAILS, RUNONCHANGEGUESS (2 of 3), COMPVISIBLE and
+   DRIVEHALFRUN (re-measure first: reported only), EMPTYSTARTPAGE, ROLESNOTINFILES.
+5. The grader: drive a group-only rule (the expenses brief's) in `grade.mjs`.
+6. BKO-005's map half (a trigger on the map; a map publish). Later: BKO-001 AC5 is in effect done by `travel.mjs`
+   (three apps, their rules, functions, triggers and workflows on a VM) — fold it in when the task file is next read.
+
+🔴 Traps met: a stranger's `--open` opens a browser on Richard's screen (the runner shims `open`); `claude -p` stays up
+while a preview it started runs, and a turn's end is not the run's end; zsh does not split `$VAR` into paths (use an
+array); the noodl-mcp suite takes ~16 min and has 8 red files at HEAD that are not this lane's.
+
+**Older order (s6), kept for the record:**
 
 1. **BKO-006**, three briefs no template covers, built by an agent, every part in the files and drawn.
 2. **Richard:** publish `@nodegx/backend-map` 0.1.3 (Studio's pin and `vendor/NODEGX.json` move together), and a

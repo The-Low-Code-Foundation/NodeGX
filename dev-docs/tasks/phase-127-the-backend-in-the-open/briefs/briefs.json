@@ -1,0 +1,8 @@
+{
+  "frame": "I'm not a coder. Build me an app with NodeGX, here in this folder. {brief} Run it on this computer with its backend so I can try it. Please just build it without waiting for me to answer questions: decide on your defaults and push to the end. When you're done, write ./REPORT.md: what you built, how I open it again, and every place NodeGX got in your way or where you had to work around it.",
+  "briefs": {
+    "bookclub": "It's for our book club. People sign in, add the books they're reading and rate them. Each person sees only their own reading list, but everyone sees the club's top five. Every Monday morning it should put together a weekly digest of what the club read and how they rated it.",
+    "repairs": "It's a job board for my small repair shop. Customers sign in and book a repair. My staff move each job through its stages (booked, in the workshop, ready to collect, collected). A customer sees only their own jobs. When a job is marked ready, the customer should get a notice, like a text message, inside the app (no real texting yet).",
+    "expenses": "It's for sharing expenses in a team. Members log what they paid, and the app works out who owes whom. Only the members of a group see that group's expenses. On the first of every month it should remind everyone to settle up."
+  }
+}
