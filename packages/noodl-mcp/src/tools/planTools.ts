@@ -55,7 +55,6 @@ import {
   dedupeDiagnostics,
   diagnosticKey,
   DocPathError,
-  formatDiagnosticLine,
   isBlockingForAuthoredOutput,
   normalizeV2Component,
   SCHEMA_IDS,
@@ -85,7 +84,7 @@ import { type NotDrawnInStudio, notDrawnInStudio, notDrawnPayload } from '../stu
 
 // P125-PUPPY-ONEAPPLY (CCN-005) — the cap lives in studio/burst.ts, beside create_component's; exported here as before.
 export { STUDIO_BURST };
-import { authoredProjectViews, foldSkipNotes, preconditionDiagnostics } from '../validate';
+import { authoredProjectViews, foldSkipNotes, formatRefusalLine, preconditionDiagnostics } from '../validate';
 import type { WriteValidation } from '../validate';
 import { drawnPortCheck } from '../specPorts';
 import type { WriteValidationSummary } from './responses';
@@ -536,7 +535,7 @@ function validateStaged(
 
   return {
     ok: errors.length === 0 && contract.length === 0,
-    errors: [...errors.map(formatDiagnosticLine), ...contract],
+    errors: [...errors.map(formatRefusalLine), ...contract],
     blocking: errors,
     warnings: diagnostics.filter((d) => d.severity === 'warning').length,
     // Exactly `successPayload`'s filter in author.ts — the two doors decide
@@ -928,7 +927,7 @@ export function registerPlanTools(
             // LAS-007 — the recipe travels with the refusal. This is the moment
             // the audit measured a mid-tier model getting stuck for seven turns
             // beside recipes it never fetched.
-            { readable: validation.errors, ...examplesBlock(examples.attach(validation.blocking)) }
+            { readable: validation.errors, blocking: validation.blocking, ...examplesBlock(examples.attach(validation.blocking)) }
           );
         }
 
@@ -1052,7 +1051,7 @@ export function registerPlanTools(
             'validation-failed',
             `Operation ${op.id} ("${op.target}") no longer validates — the project changed since staging. ` +
               'Nothing was written.',
-            { readable: validation.errors, ...examplesBlock(examples.attach(validation.blocking)) }
+            { readable: validation.errors, blocking: validation.blocking, ...examplesBlock(examples.attach(validation.blocking)) }
           );
         }
         surviving.push(...validation.diagnostics);

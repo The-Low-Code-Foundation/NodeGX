@@ -939,6 +939,16 @@ export enum DiagnosticCode {
   RowOfWordsFillsItsColumn = 'row-of-words-fills-its-column',
 
   /**
+   * P112 OWN-028 AC3 (P112-OWN027-NOSHELLGATE) — a band whose content is not inside one shell. The style vocabulary
+   * says it in prose (the `band` composition: "a band always holds exactly one shell, and a band whose content is not
+   * inside one runs edge to edge"), and a 2B model building the tree never reads that sentence: Gemma 4 E2B built 13
+   * sections over two runs with no shell, and the page's words started at x = 0 of a 1280 px window. A **warning**, in
+   * `ALL_RULES`, on the band Group. The render-side twin is render_report's `text-at-viewport-edge`. See
+   * `rules/bandWithoutShell.ts`.
+   */
+  BandWithoutShell = 'band-without-shell',
+
+  /**
    * P121-TWO003-NESTEDBUTTON (ruled 2026-10-27: "inner controls win") — an element whose Click is wired, holding a
    * Button, a field or another wired Click. The viewer does not make it a button to the keyboard (a button around
    * buttons read in Chrome as one button carrying every word inside), so its own Click answers a pointer only. An

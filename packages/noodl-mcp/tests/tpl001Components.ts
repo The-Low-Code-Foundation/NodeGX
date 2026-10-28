@@ -423,6 +423,25 @@ const HERO_HEAD = { ...composition('sectionHead'), paddingBottom: 'var(--space-6
 // decoration.
 
 /**
+ * An `imageGround` at a FIXED height, in the key order this template was generated with.
+ *
+ * P112 OWN-028 made the composition `contentHeight` + `minHeight 520` (a fixed box packed to its foot spilled upward
+ * over the band above). This template's bands hold one short block of copy, were sized by rendering them, and its
+ * artefact is compared byte for byte, so they keep the explicit height they shipped with rather than drifting to a
+ * 520px floor. Rebuilt key by key, not spread-and-override: the committed JSON carries `height` third.
+ */
+function pinnedImageGround(image: string, height: number): Record<string, unknown> {
+  const { width, sizeMode: _sizeMode, minHeight: _minHeight, ...rest } = composition('imageGround') as Record<string, unknown>;
+  return {
+    width,
+    sizeMode: 'explicit',
+    height: { value: height, unit: 'px' },
+    ...rest,
+    backgroundImage: `noodl_modules/starter-imagery/${image}`
+  };
+}
+
+/**
  * The photograph a landing hero stands on, with the scrim that keeps type legible.
  *
  * ⚠️ **`people-coffee-shop`, and `people-meeting` was tried first and rendered
@@ -438,11 +457,7 @@ const HERO_HEAD = { ...composition('sectionHead'), paddingBottom: 'var(--space-6
  * in the frame sits in the weakest part of it, which is what the first render
  * showed: legible, but only because the panel carried its own glass.
  */
-const HERO_GROUND = {
-  ...composition('imageGround'),
-  backgroundImage: 'noodl_modules/starter-imagery/people-coffee-shop.webp',
-  height: { value: 560, unit: 'px' }
-};
+const HERO_GROUND = pinnedImageGround('people-coffee-shop.webp', 560);
 
 /**
  * A shell inside an `imageGround`.
@@ -493,11 +508,7 @@ const HERO_SHELL = {
  * above a form pushes the first field under the fold at 900px tall — measured on
  * the `preview` viewport, which is the shortest of the four.
  */
-const JOIN_GROUND = {
-  ...composition('imageGround'),
-  backgroundImage: 'noodl_modules/starter-imagery/people-meeting.webp',
-  height: { value: 300, unit: 'px' }
-};
+const JOIN_GROUND = pinnedImageGround('people-meeting.webp', 300);
 
 /**
  * The ground a PUBLIC page's bands stand on.
@@ -1363,11 +1374,7 @@ const AT_FORM_MEASURE = {
  * `JOIN_GROUND` records why: a form page repeating the hero's own photograph
  * reads as a page that failed to load its own.
  */
-const bandGround = (image: string) => ({
-  ...composition('imageGround'),
-  backgroundImage: `noodl_modules/starter-imagery/${image}`,
-  height: { value: 300, unit: 'px' }
-});
+const bandGround = (image: string) => pinnedImageGround(image, 300);
 
 const PAGE_SHELL = {
   width: { value: 100, unit: '%' },

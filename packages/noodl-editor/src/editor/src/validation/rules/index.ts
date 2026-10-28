@@ -49,6 +49,7 @@ import { functionNeverReruns } from './functionNeverReruns';
 import { functionRunOnChangeUnknown } from './functionRunOnChangeUnknown';
 import { conditionReadsASiblingsChange } from './conditionReadsASiblingsChange';
 import { contentRowSplitsItsChildren, rowOfWordsFillsItsColumn } from './layoutFillTraps';
+import { bandWithoutShell } from './bandWithoutShell';
 import { clickAreaHoldsAControl } from './clickAreaHoldsAControl';
 
 export const ALL_RULES: Rule[] = [
@@ -130,6 +131,8 @@ export const ALL_RULES: Rule[] = [
   // read from the arrangement like the two above, and live so a person sees it while editing.
   contentRowSplitsItsChildren,
   rowOfWordsFillsItsColumn,
+  // P112 OWN-028 AC3 — beside the two above: a band's content outside a shell, read from the arrangement, live.
+  bandWithoutShell,
   oversizedPage,
   // LEG-002 — last, and deliberately: it is the only rule in the set that
   // reports a matter of legibility rather than of correctness, and a reader

@@ -517,9 +517,18 @@ export const STYLE_COMPOSITIONS: VocabComposition[] = [
     // composition: it is what makes a headline readable on a photograph nobody
     // has seen yet.
     //
-    // ⚠️ `sizeMode: explicit` + `height` are load-bearing, not decoration. A band
-    // whose only child is a heading collapses to the heading's height and the
-    // picture becomes a stripe.
+    // ⚠️ `minHeight` is load-bearing, not decoration. A band whose only child is
+    // a heading collapses to the heading's height and the picture becomes a
+    // stripe.
+    //
+    // 🔴 **A FLOOR, not a fixed height — P112 OWN-028 (`P112-OWN027-IMAGEGROUNDSPILL`).**
+    // This was `sizeMode: 'explicit'` + `height: 520px`. Packed to the END of a
+    // fixed box, content taller than the box overflows UPWARD, out of the top of
+    // the band and over the band above: Gemma 4 E4B and LFM3 each put a headline,
+    // a line and a card grid in one (OWN-027 v2b), and the cards sat on the hero's
+    // headline. `contentHeight` + `minHeight` is the same 520px photograph when it
+    // holds a headline and grows DOWN when it holds more. TPL-003 had already
+    // made exactly this repair at its point of use (`IMAGE_GROUND`).
     //
     // 🔴 **The `shell` you put inside it carries `sizeMode: 'contentHeight'` —
     // and until FLD-005 it did not.** Measured, not predicted: the first render
@@ -541,11 +550,11 @@ export const STYLE_COMPOSITIONS: VocabComposition[] = [
     nodeType: 'Group',
     group: 'spine',
     description:
-      'A photograph as a section ground with a scrim over it, so text stays readable whatever the picture is. Set backgroundImage to a project asset; the gradient is drawn on top of it. backgroundColor is the fallback ground while the image loads or if it is empty.',
+      'A photograph as a section ground with a scrim over it, so text stays readable whatever the picture is. Set backgroundImage to a project asset; the gradient is drawn on top of it. backgroundColor is the fallback ground while the image loads or if it is empty. It is at least 520px tall (minHeight) and grows downward with what it holds; its copy sits at the foot, where the scrim is darkest. For a taller or shorter photograph change minHeight, not height.',
     parameters: {
       width: GROUP,
-      sizeMode: 'explicit',
-      height: { value: 520, unit: 'px' },
+      sizeMode: 'contentHeight',
+      minHeight: { value: 520, unit: 'px' },
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'flex-end',

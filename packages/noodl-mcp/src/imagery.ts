@@ -65,7 +65,19 @@ export interface ImageryReport {
   total: number;
   /** Anything wrong, never silent. */
   warnings: string[];
+  /** How to spend the photographs; present when there are any. */
+  rule?: string;
 }
+
+/**
+ * P112 OWN-028 AC5 (`P112-OWN027-ONEDOG`, ruled R1 2026-10-28: "Keep one dog, add a sentence"). Each subject holds one
+ * photograph of each thing — one dog among the animals — so a card row that gives every card a photo of its subject
+ * shows the same picture three times, and a stranger reads that as a template nobody finished (OWN-027 arm C: the
+ * hero and all three "Meet the puppies" cards were animal-dog).
+ */
+export const IMAGERY_RULE =
+  'Each file is one photo: use it once per page. Never repeat a file across a row of cards; give the cards icons (or ' +
+  'different subjects) instead.';
 
 const EMPTY: ImageryReport = { moduleDir: MODULE_DIR, subjects: [], total: 0, warnings: [] };
 
@@ -124,7 +136,7 @@ export function readImagery(projectDir: string | undefined): ImageryReport {
     total++;
   }
 
-  return { moduleDir: MODULE_DIR, subjects: [...bySubject.values()], total, warnings };
+  return { moduleDir: MODULE_DIR, subjects: [...bySubject.values()], total, warnings, ...(total > 0 ? { rule: IMAGERY_RULE } : {}) };
 }
 
 /**
@@ -149,7 +161,8 @@ export function renderImagery(report: ImageryReport): string {
       'landing page with no photograph is not finished. Image `src` / Group `backgroundImage` = ' +
       `"${report.moduleDir}/<name>.webp" (e.g. work-welder.webp).`,
     '  Already cropped: ground/texture are 16:9 band grounds, the rest 4:3 tiles, avatars 256px ' +
-      'squares framed on the face. Pick by SUBJECT.'
+      'squares framed on the face. Pick by SUBJECT. ' +
+      IMAGERY_RULE
   ];
 
   for (const s of report.subjects) {

@@ -26,7 +26,7 @@ import {
   type VocabProjectLook
 } from '../editor-deps';
 import { ToolError } from '../errors';
-import { readIconSets, renderIconSets } from '../iconSets';
+import { glyphPages, readIconSets, renderIconSets } from '../iconSets';
 import { readImagery, renderImagery } from '../imagery';
 import { readElementStyles } from './elementStyles';
 import { applyPresetFonts } from '../presetFontFiles';
@@ -128,17 +128,23 @@ export function registerStyleReadTools(server: McpServer, binding: ProjectBindin
         'radius, borders, shadows), its Looks and the Look library, and named COMPOSITIONS — ready-made ' +
         'parameter sets for a card, shell, section head, buttons and type ramp, each naming its recipe — plus ' +
         'installed icon sets (with a copyable iconIconSource value) and bundled stock photos. Use a token in a ' +
-        'node parameter as "var(--token-name)", never raw hex or px. detail: "prompt" for a compact block, ' +
-        '"full" (default) for JSON. Built-in presets are listed too.',
+        'node parameter as "var(--token-name)", never raw hex or px. detail: "prompt" (text) or "full" (JSON, ' +
+        'default); glyphs_page N: page N of all icon names. Built-in presets are listed too.',
       inputSchema: {
-        detail: z
-          .enum(['full', 'prompt'])
-          .optional()
-          .describe('full = structured JSON (default); prompt = compact text block')
+        // P112 OWN-028 AC6 — the describe() strings went into the description above, which said them already: the
+        // resident surface (`toolDisclosure`, 8,280) had no room for the two paging inputs otherwise.
+        detail: z.enum(['full', 'prompt']).optional(),
+        // P112 OWN-028 AC6 (R2) — every glyph name, a page at a time (wrapping), for a client that picks from a list.
+        // Bare numbers on purpose (each schema keyword is resident-surface tokens); `glyphPages` floors and clamps them.
+        glyphs_page: z.number().optional(),
+        glyphs_per_page: z.number().optional()
       }
     },
-    guarded((args: { detail?: 'full' | 'prompt' }) => {
+    guarded((args: { detail?: 'full' | 'prompt'; glyphs_page?: number; glyphs_per_page?: number }) => {
       const store = binding.require();
+      if (args.glyphs_page !== undefined) {
+        return jsonResult({ glyphPages: glyphPages(store.projectDir, args.glyphs_page, args.glyphs_per_page) });
+      }
       const vocab = buildStyleVocabulary(store.designTokenMetaSource(), readProjectLooks(store));
 
       // VIB-003. Read here rather than inside `buildStyleVocabulary`: that function is pure and

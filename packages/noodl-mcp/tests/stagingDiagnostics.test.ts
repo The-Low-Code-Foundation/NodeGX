@@ -134,6 +134,38 @@ describe('LAS-002 — every authoring door returns the warning text', () => {
     expect(text).toContain('Repeater');
   });
 
+  /**
+   * P112 OWN-028 AC1 (`P112-OWN027-WARNBLOCKS`) — the word and the outcome agree. The trio is refused by a
+   * warning-severity rule, and the refusal used to print its one reason as `WARN [repeated-sibling-subtree]`: a client
+   * that triages by severity (OWN-027's harness) read a refusal as advice and skipped the section.
+   */
+  it('a staging refusal says BLOCKS for the warning that refused it, and lists it in details.blocking', async () => {
+    const plan = await planFor('Pages/Trio');
+    const res = await call<{ error: { code: string; details: { readable: string[]; blocking: Array<{ code: string; severity: string }> } } }>(
+      session,
+      'stage_plan_operation',
+      { plan_id: plan.planId, operation_id: plan.operations[0].id, nodes: trioOfSiblings(), visual_roots: ['page'] }
+    );
+
+    expect(res.isError).toBe(true);
+    expect(res.data.error.code).toBe('validation-failed');
+    const { readable, blocking } = res.data.error.details;
+    const line = readable.find((l) => l.includes('[repeated-sibling-subtree]'));
+    expect(line).toMatch(/^BLOCKS \[repeated-sibling-subtree\]/);
+    // Nothing that refused the write is labelled advice.
+    expect(readable.filter((l) => l.startsWith('WARN '))).toEqual([]);
+    expect(blocking.map((d) => d.code)).toContain('repeated-sibling-subtree');
+
+    // The direct door, the same words.
+    const direct = await call<{ error: { details: { readable: string[] } } }>(session, 'create_component', {
+      path: 'Pages/TrioDirect',
+      nodes: trioOfSiblings(),
+      visual_roots: ['page']
+    });
+    expect(direct.isError).toBe(true);
+    expect(direct.data.error.details.readable.some((l) => l.startsWith('BLOCKS [repeated-sibling-subtree]'))).toBe(true);
+  });
+
   it('stage_plan_operation returns a surviving warning as an object, not a count', async () => {
     const plan = await planFor('Pages/Untokenised');
     const res = await call<StageResponse>(session, 'stage_plan_operation', {

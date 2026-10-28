@@ -17,7 +17,6 @@ import type { ComponentV2File, ConnectionsV2File, ConnectionV2, NodesV2File, Nod
 import {
   foldNodeComment,
   planCreationDefaults,
-  formatDiagnosticLine,
   inferComponentType,
   layoutAuthoredNodes,
   positionsUnchangedFrom
@@ -54,7 +53,7 @@ import { backendRevealPayload } from './disclosure';
 import { cloudDeployPayload } from './cloudDeployNote';
 import type { PlanRegistry } from './planTools';
 import type { WriteValidation } from '../validate';
-import { foldSkipNotes, validateCandidate, validateDeletion } from '../validate';
+import { foldSkipNotes, formatRefusalLine, validateCandidate, validateDeletion } from '../validate';
 import { CREATE_COMPONENT_SHAPE, NODE_COMMENT_ARG, connectionInputSchema, nodeSchema, portSchema } from '../vocabulary';
 import { wireTextSchema } from '../wireText';
 import type { VisualTypePredicate } from '../visualRoots';
@@ -445,7 +444,7 @@ function backfillIds(files: ComponentFiles, derivedId: string): void {
 
 function rejectWith(validation: WriteValidation, intent: string, budget: ExampleBudget): never {
   const lines = [
-    ...validation.newErrors.map(formatDiagnosticLine),
+    ...validation.newErrors.map(formatRefusalLine),
     ...(validation.structural ?? []).flatMap((f) => f.errors.map((e) => `SCHEMA ${f.file} ${e.path}: ${e.message}`))
   ];
   const details: ValidationFailureDetails = {

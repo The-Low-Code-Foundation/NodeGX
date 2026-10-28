@@ -42,6 +42,7 @@ import {
   derivedPortIndices,
   DiagnosticCode,
   diagnosticKey,
+  formatDiagnosticLine,
   isBlockingForAuthoredOutput,
   SCHEMA_IDS,
   SchemaValidator,
@@ -590,6 +591,21 @@ const FOLD_LEAD: Record<string, (n: number) => string> = {
 function namedParameters(message: string): string {
   const m = /^Parameters? ((?:"[^"]*"(?:, )?)+) on /.exec(message);
   return m ? ` ${m[1]}` : '';
+}
+
+/**
+ * P112 OWN-028 AC1 (`P112-OWN027-WARNBLOCKS`) — a refusal's line says what the diagnostic DID, not the severity it
+ * was written with.
+ *
+ * `AUTHORED_BLOCKING_WARNINGS` refuses a write on a handful of warnings (`repeated-sibling-subtree` among them), and
+ * the refusal printed them as `WARN [code] …` — so its only reason read as advice. OWN-027's harness triaged
+ * rejections by severity, found no `error`, and skipped three runs' list sections and with them the whole apply. A
+ * model reading the same text gets the same mixed message. A warning that refused the write is printed `BLOCKS`; an
+ * error keeps `ERROR`, which already means "refused".
+ */
+export function formatRefusalLine(diagnostic: Diagnostic): string {
+  const line = formatDiagnosticLine(diagnostic);
+  return diagnostic.severity === 'error' ? line : line.replace(/^[A-Z]+ /, 'BLOCKS ');
 }
 
 /**
