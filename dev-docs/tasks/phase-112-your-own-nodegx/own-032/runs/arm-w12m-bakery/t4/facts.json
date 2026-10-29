@@ -1,0 +1,128 @@
+{
+ "htmlMs": 919,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Maison Levain: Artisanal baking from our",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Maison Levain: Artisanal baking from our",
+     "left": 0,
+     "right": 873
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1250
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain: Artisanal baking from our",
+     "x": 0,
+     "y": 0,
+     "w": 407,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 21,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:59502/",
+   "blank": false,
+   "words": 9,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Maison Levain: Artisanal baking from our",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Maison Levain: Artisanal baking from our",
+     "left": 0,
+     "right": 40
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 360
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Maison Levain: Artisanal baking from our",
+     "x": 0,
+     "y": 0,
+     "w": 350,
+     "h": 42,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 42,
+     "w": 30,
+     "h": 21,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:59502/",
+   "blank": false,
+   "words": 9,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 3172
+}

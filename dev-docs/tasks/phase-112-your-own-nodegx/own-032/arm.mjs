@@ -479,7 +479,7 @@ try {
       T.shot = { desktop: `t${turn}/desktop.png`, phone: `t${turn}/phone.png`, facts: `t${turn}/facts.json`, ms: shot.ms };
       findings = findingsFrom(shot, state.nodes);
       // blankRetry: a shot still blank after the retries, with words in the tree, measured nothing; it cannot end the run
-      if (RULES.blankRetry && state.nodes.some((x) => KINDS[kindOf(x)].words) && ['desktop', 'phone'].some((w) => shot[w].checks?.blank)) T.blank = ['desktop', 'phone'].filter((w) => shot[w].checks?.blank);
+      if (RULES.blankRetry && state.nodes.some((x) => KINDS[kindOf(x)].words) && ['desktop', 'phone'].some((w) => shot[w].checks?.words === 0)) T.blank = ['desktop', 'phone'].filter((w) => shot[w].checks?.words === 0);
       if (LOOK !== 'script') {
         T.look = [];
         for (const w of ['desktop', 'phone']) {

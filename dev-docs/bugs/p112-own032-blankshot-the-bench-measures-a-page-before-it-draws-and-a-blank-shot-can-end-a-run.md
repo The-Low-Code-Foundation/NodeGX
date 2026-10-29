@@ -1,7 +1,8 @@
 ---
 id: P112-OWN032-BLANKSHOT
 title: The OWN-032 bench sometimes measures a page before it draws, and a blank shot can end an arm run "clean"
-status: open
+status: fixed
+commit: b3a553ac4 (retry + endGate guard, behind blankRetry); tightened to words === 0 in the 8b commit
 severity: medium
 area: dev tooling / OWN-032 bench (bench.mjs) and arm (arm.mjs endGate)
 found: P112 OWN-032 s4, 2026-10-29
@@ -27,3 +28,7 @@ same tree clean, so that end happened to be right, but it was not measured.
 - `openBench(dir, { retryBlank: true })` measures a blank page again, up to 3 times, `settleMs` apart, and records
   `retries`;
 - a shot still blank after that, with words in the tree, is ledgered as `blank` and cannot end the run.
+
+**Seen working (8b):** w12m-bakery t13's desktop shot read 0 words, and one retry later read 21. No w12 shot stayed
+blank with words in the tree. The retry and the guard ask for `words === 0`: look.mjs's own `blank` means fewer than
+5 words, which every early turn with a placeholder trips.

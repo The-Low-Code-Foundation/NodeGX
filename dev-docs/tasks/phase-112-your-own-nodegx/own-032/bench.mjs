@@ -112,7 +112,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // A bench that stays open. `shoot(outDir)` reloads the page and writes desktop.png / phone.png, returning the facts
 // and the CHECKS of look.mjs at each width. `close()` ends the Chrome and the server.
-// retryBlank (s4): a page that reads blank (no words) is measured again, up to 3 times, settleMs apart. 11 of 1003 arm
+// retryBlank (s4): a page with no words on it (look.mjs `words` 0; its `blank` means fewer than 5) is measured again, up to 3 times, settleMs apart. 11 of 1003 arm
 // shots had one width blank while the other had words; w11m-jazz's LAST shot was one, so endGate ended the run on a
 // picture with nothing in it to find fault with (P112-OWN032-BLANKSHOT). Off by default so old runs replay unchanged.
 export async function openBench(dir, { settleMs = 700, retryBlank = false } = {}) {
@@ -142,7 +142,7 @@ export async function openBench(dir, { settleMs = 700, retryBlank = false } = {}
       await page.client.send('Page.reload', { ignoreCache: true });
       await wait(settleMs);
       let facts = await page.evaluate(FACTS), checks = await page.evaluate(CHECKS), retries = 0;
-      while (retryBlank && checks.blank && retries < 3) { retries++; await wait(settleMs); facts = await page.evaluate(FACTS); checks = await page.evaluate(CHECKS); }
+      while (retryBlank && checks.words === 0 && retries < 3) { retries++; await wait(settleMs); facts = await page.evaluate(FACTS); checks = await page.evaluate(CHECKS); }
       const h = await page.evaluate(HEIGHT);
       await page.client.send('Emulation.setDeviceMetricsOverride', { width, height: h, deviceScaleFactor: 1, mobile: name === 'phone' });
       await wait(150);

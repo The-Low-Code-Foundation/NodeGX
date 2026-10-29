@@ -432,3 +432,43 @@ It did not reproduce in 50 idle shots of the same tree.
 The fix is the `blankRetry` switch: the bench measures a blank page again, up to 3 times, and a shot still blank with
 words in the tree cannot end a run. From 8b on, every run has it on. The w10 and w11 runs were measured without it on
 both sides.
+
+### 8b. A headline too long for its column (`shortHeadline`)
+
+**The change:** with roles, a headline at display-md (the smallest headline size) that still breaks onto 3 or more
+lines on a desktop gets a write fix: "make the headline n01 shorter (8 words, it breaks onto 4 lines on a desktop)".
+The rewrite prompt adds: "write it again in at most max(3, ⌊2n/k⌋) words", which is 4 for bakery and 5 for jazz.
+
+**The control:** the w11 runs. w12 = w11's edit + `shortHeadline` + `blankRetry` (`runs/w12.edit.json`). Where a w12
+run parts from w11 before the new finding first appears, the cause is the retry, and the facts' `retries` show it.
+
+**Pre-registered (before any w12 run):**
+- the fix appears on m-bakery and m-jazz only (their w11 headlines are 8 words on 4 and 3 lines);
+- both rewrites keep the name ("Maison Levain", "The Blue Room") in the headline;
+- both end with the headline on at most 2 lines;
+- neither run grows by more than 3 turns;
+- the other four runs end on the same tree as w11.
+
+**Result (`w12*`, `node compare.mjs w11 w12`):**
+
+| run | turns | the finding | the rewrite | the end |
+|---|---|---|---|---|
+| **m-bakery** | 24 → 25 | t21 (8 words, 4 lines) | t22: **"Maison Levain: Artisanal baking."** 4 words, **2 lines** | same measures (the kit's contrast) |
+| **m-jazz** | 21 → 22 | t18 (8 words, 3 lines) | t19: **"The Blue Room: Jazz Evening"** 5 words, **2 lines** | clean |
+| s-bakery, s-jazz, m-plumber, s-plumber | unchanged | never | — | the same tree as w11 |
+
+**Against the pre-registration:** ✅ on every line. The fix appears on the two runs only, both rewrites keep the
+name, both headlines end on 2 lines, each run grows by 1 turn, and the other four end on w11's tree.
+
+**What the name test did not catch:** the jazz rewrite dropped "on 14 November", and the date is now nowhere in
+that hero. The request named it. The trap is wider than the name: a shortened headline can drop any fact the request
+gave. A candidate for later: the rewrite prompt says "keep the name and any date", or a check that every name and
+date in the request is somewhere in the hero's words. Not run here.
+
+**The retry, seen working in an arm run:** w12m-bakery t13's desktop shot read blank and, one retry later, read 21
+words. No w12 shot stayed blank with words in the tree.
+
+**A correction to the guard, before 8c:** look.mjs's `blank` means fewer than 5 words on the page, not "nothing
+drew". So early turns with a three-word placeholder tripped the retry (3 × 700 ms each) and the `blank` mark. Neither
+changed a finding, because a retry re-measures a page that has already settled. The retry and the guard now ask for
+`words === 0`, which picks out exactly the same 11 shots of 1003 as "one width blank while the other has words".
