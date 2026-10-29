@@ -122,7 +122,8 @@ export const SETTINGS = {
     colours: { say: 'its colours', options: { 'brand fill, white words': { backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }, 'white fill, brand words': { backgroundColor: 'var(--background)', color: 'var(--primary)' } } },
     size: { say: 'how big it is', options: { small: { paddingLeft: sp(3), paddingRight: sp(3), paddingTop: sp(1), paddingBottom: sp(1), fontSize: 'var(--text-sm)' }, medium: { paddingLeft: sp(4), paddingRight: sp(4), paddingTop: sp(2), paddingBottom: sp(2), fontSize: 'var(--text-sm)' }, large: { paddingLeft: sp(6), paddingRight: sp(6), paddingTop: sp(3), paddingBottom: sp(3), fontSize: 'var(--text-base)' } } },
     corners: { say: 'how round its corners are', options: { slightly: { borderRadius: 'var(--radius-md)' }, pill: { borderRadius: 'var(--radius-full)' } } },
-    'self align': { say: 'where it sits inside its parent', options: { 'parent decides': { alignSelf: undefined }, start: { alignSelf: 'flex-start' }, centre: { alignSelf: 'center' }, end: { alignSelf: 'flex-end' } } }
+    'self align': { say: 'where it sits inside its parent', options: { 'parent decides': { alignSelf: undefined }, start: { alignSelf: 'flex-start' }, centre: { alignSelf: 'center' }, end: { alignSelf: 'flex-end' } } },
+    ...(EDIT.rules?.rhythm ? { 'space above': { say: 'extra space between it and the part above it', options: { none: { marginTop: undefined }, small: { marginTop: { value: 8, unit: 'px' } } } } } : {})
   }
 };
 const kindOf = (n) => Object.keys(KINDS).find((k) => KINDS[k].type === n.type);
@@ -207,8 +208,12 @@ async function judge(q, png) {
 //                 falls inside the band, the arm stops before turn 1 and returns "ask: clean or bold?" — in the product,
 //                 the client asks the person. 8d: E2B puts every request that NAMES a look at ≤ 0.001 or ≥ 0.91, and
 //                 20 plain ones at 0.11–0.70, so the band decides "did they say?", not "which way do they lean"
+//   rhythm        (stylish) the words column keeps its lines close: a medium gap (16 px) and 8 px more above the button
+//                 (Richard, 8c: of four spacings of w8s-puppy, "medium looks best overall"; the arm's "huge" 48 px
+//                 held the small line as far from the headline as the line from the button). Two `only` fixes; the
+//                 button's "space above" setting exists only with this switch
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false, endGate: false, addWhileMissing: false, shortHeadline: false, blankRetry: false, rhythm: false }, ...(EDIT.rules || {}) };
 // roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
 // the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
 // fix went to the other Text, so the hero ended with two headlines and no line under them)
@@ -298,6 +303,11 @@ export function findingsFrom(shot, nodes) {
       if (h !== undefined && currentOf(nodes[h], 'weight') !== 'bold') res.push({ check: 'headlineWeight', say: `The headline ${name(h)} is not bold: the look asked for has a big, heavy headline.`, fix: { node: h, setting: 'weight', only: ['bold'], say: `make ${name(h)} bold (the look asked for has a heavy headline; now: ${currentOf(nodes[h], 'weight')})` } });
       if (btn !== undefined && currentOf(nodes[btn], 'corners') !== 'pill') res.push({ check: 'buttonShape', say: `The button ${name(btn)} has square-ish corners: the look asked for has a pill button.`, fix: { node: btn, setting: 'corners', only: ['pill'], say: `make ${name(btn)} a pill (now: ${currentOf(nodes[btn], 'corners')})` } });
       if (eb !== undefined && currentOf(nodes[eb], 'style') !== 'small capitals') res.push({ check: 'eyebrowStyle', say: `${ROLE_SAY.eyebrow} ${name(eb)} looks like ordinary words: it should be small capitals.`, fix: { node: eb, setting: 'style', only: ['small capitals'], say: `make ${name(eb)} small capitals (it is the small line above the headline; now: ${currentOf(nodes[eb], 'style')})` } });
+      const col = h !== undefined ? nodes[h].parent : undefined;
+      if (RULES.rhythm && col !== undefined && col !== root && kindOf(nodes[col]) === 'Group') {
+        if (currentOf(nodes[col], 'gap') !== 'medium') res.push({ check: 'rhythm', say: `The words column ${name(col)} spaces its lines ${currentOf(nodes[col], 'gap')}: the look asked for keeps them close together.`, fix: { node: col, setting: 'gap', only: ['medium'], say: `give ${name(col)} a medium gap (the look keeps the lines of the words close together; now: ${currentOf(nodes[col], 'gap')})` } });
+        if (btn !== undefined && nodes[btn].parent === col && currentOf(nodes[btn], 'space above') !== 'small') res.push({ check: 'rhythmButton', say: `The button ${name(btn)} sits as close to the line above it as the lines sit to each other.`, fix: { node: btn, setting: 'space above', only: ['small'], say: `give ${name(btn)} a little space above (it sits as close as the lines do; now: ${currentOf(nodes[btn], 'space above')})` } });
+      }
       if (eb !== undefined && h !== undefined && nodes[eb].parent === nodes[h].parent && leaves[leaves.indexOf(h) - 1] !== eb) res.push({ check: 'eyebrowOrder', say: `${ROLE_SAY.eyebrow} ${name(eb)} is not straight above the headline.`, fix: { act: { kind: 'move', node: eb, into: nodes[h].parent, before: h }, say: `move ${name(eb)} straight above the headline ${name(h)}` } });
     }
   }

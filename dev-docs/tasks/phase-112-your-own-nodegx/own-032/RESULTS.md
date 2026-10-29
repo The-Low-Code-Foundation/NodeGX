@@ -583,3 +583,49 @@ forest, a stand-in (no runner photo in the library).
   ≥ 0.91, so the final harness's band becomes **0.1–0.9**. On the 36 requests measured, that asks 20 of 20 plain ones
   and 0 of 16 that name a look. The edge, to watch: §7a's "puppy … modern style" (0.86) and "a page for my jazz
   night" (0.88) would also ask, while "family bakery in Lyon, warm colours" (0.99) would not.
+
+### 8g. The stylish rhythm in the arm (`rhythm`), the final harness
+
+**The change (stylish only):** once the headline is in a words column, two findings, each with a fix that offers one
+value:
+- the words column's gap is medium (16 px);
+- the button has "space above: small" (8 px), a Button setting that exists only with this switch.
+
+`runs/w15.edit.json` = w14 + `rhythm` + `askBand [0.1, 0.9]` (8d's ruling).
+
+**The control:** the five stylish runs of the final harness without it: w12s-bakery, w12s-jazz, w12s-plumber,
+w14s-running, w14s-pottery.
+
+**Pre-registered (before any w15 run):**
+- all five end with the words column at 16 / 16 / 24 px (small line → headline → line → button) on a desktop;
+- no run grows by more than 3 turns;
+- no run ends with a finding its control did not have.
+
+**Result (`w15s-*`):** ✅ on every line.
+
+| run | turns (control → w15) | words column (desktop) | left at the end |
+|---|---|---|---|
+| s-bakery | 32 → 33 | 48/48/48 → **16/16/24** | the same 3 kit contrasts |
+| s-jazz | 32 → 33 | → **16/16/24** | nothing |
+| s-plumber | 32 → 33 | → **16/16/24** | nothing |
+| s-running | 35 → 36 | → **16/16/24** | the same 3 kit contrasts |
+| s-pottery | 32 → 33 | → **16/16/24** | nothing |
+
+Each run parts from its control late (t30–t32), once the words column exists. It takes the gap fix there and the
+button fix as its last step, so each costs one turn. The model takes both fixes every time, since each offers only
+one value.
+
+**Seen, not graded:** s-running's headline "RUN. EXPLORE. CONNECT." leaves out "Park Runners" in both w14 and w15. The
+small line says "Saturday Morning Running Club", so the club's name is nowhere in that hero. This is the same family
+as 8b's lost date: a check that every name and date in the request appears somewhere in the hero would catch both.
+
+### 8h. Where s4 leaves the arm
+
+The final harness is `runs/w15.edit.json`. Every switch is off by default, so every earlier run replays.
+- **minimal:** w12 for bakery, jazz and plumber, and w14 for running and pottery. Clean except the kit's
+  white-on-amber and white-on-green.
+- **stylish:** w15 for all five briefs. Clean except the same kit contrasts, with the words-column spacing Richard
+  picked.
+- **a request that names no look:** asks "clean or bold?" (band 0.1–0.9).
+
+The page is updated (same URL): https://claude.ai/artifact/2M1WenHSVPsUE21P3N1NcB.
