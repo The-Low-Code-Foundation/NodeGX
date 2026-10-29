@@ -524,3 +524,62 @@ Inside the band the arm stops before turn 1, ledgers `{ ask: 'clean or bold?' }`
 time, whatever band is picked. The choices are to ask whenever the request names no look, which is honest because
 E2B's lean on a plain request is near a coin and flips with the option order, or to build a default look and offer
 the other one after.
+
+### 8e. A third look? Not run
+
+The handoff gated this on 1–4 landing. They did not all land:
+- 8c waits on Richard's eye;
+- 8d failed its pre-registration.
+
+So no probe was run. The method is ready if Richard wants it (`lookq.mjs`'s `LOOKS` + probe-look's both-orders loop,
+8 requests per look). 8d bears on it: E2B separates looks that are NAMED sharply, so a third named look may well
+separate. A plain request will not lean toward it.
+
+### 8f. Held-out briefs: running and pottery (`w14*`)
+
+**Benches:**
+- `own-032-bench-running` from `own-029-G-running-r4`;
+- `own-032-bench-pottery` from `own-029-G-pottery-r1`, OWN-029's kept round. The handoff said r2, but r1 and r2 tie
+  at 0.034 and every other bench was made from the kept round.
+
+**Goals:**
+- the names come from OWN-029's cards: "Park Runners" and "Potter Portfolio";
+- the library has no runner photo (OWN-029 found the same), so running's photo is `ground-forest-fog.webp`, a stand-in;
+- the four requests, one calm and one bold per brief, are in `run-set.sh` and the ledgers.
+
+**The final harness (`runs/w14.edit.json`):** w12 (8a's `addWhileMissing`, 8b's `shortHeadline`, `blankRetry`) +
+`askBand [0.3, 0.7]`. No rhythm change: 8c waits on Richard.
+
+**Pre-registered (before any w14 run):**
+- `lookq` hears all 4 right, and none asks;
+- every run ends by `endGate` with every part there, inside 40 turns;
+- the only finding left is the kit's contrast, and only where the theme's primary is green or warm
+  (P112-OWN030-PRIMARYCONTRAST): running's green primary may fail with white words, as bakery's amber did.
+
+**Result (`w14*`):**
+
+| run | heard (P stylish) | turns | free moves | left at the end |
+|---|---|---|---|---|
+| m-running | minimal (0.001) | 23 | 1 | "Run Now" contrast 3.30: white on the green primary (the kit) |
+| s-running | stylish (1.00) | 35 | 2 | 3.30 × 3: the small line (on the gradient's bright green), the sentence (cautious, see below), the white pill's green words |
+| m-pottery | minimal (0.00) | 23 | 1 | nothing |
+| s-pottery | stylish (0.997) | 32 | 1 | nothing |
+
+**Against the pre-registration:** ✅ on every line. All 4 heard right and none asked; all ended by `endGate`, every
+part there, in 23–35 turns; the only finding left is the kit's, on the green brief.
+
+The bench reads a gradient by its worst colour stop. So s-running's sentence, which sits over the dark end, measures
+3.30 cautiously, while the small line really sits on the bright green. Added to P112-OWN030-PRIMARYCONTRAST: two of
+six briefs (bakery and running, in both looks) now end with only that open.
+
+**Words to look at, not measured:** pottery's buttons say "Create" and "Create Now". running's photo is a misty
+forest, a stand-in (no runner photo in the library).
+
+### Richard's rulings on 8c and 8d (2026-10-29, late)
+
+- **8c, the words column rhythm:** *"Medium looks best overall, pairs second, the others weirdly spaced."* → the
+  stylish look learns `medium`: one 16 px gap in the words column and 8 px more before the button (8g).
+- **8d, a request that names no look:** **ask the person.** E2B puts every request that names a look at ≤ 0.001 or
+  ≥ 0.91, so the final harness's band becomes **0.1–0.9**. On the 36 requests measured, that asks 20 of 20 plain ones
+  and 0 of 16 that name a look. The edge, to watch: §7a's "puppy … modern style" (0.86) and "a page for my jazz
+  night" (0.88) would also ask, while "family bakery in Lyon, warm colours" (0.99) would not.

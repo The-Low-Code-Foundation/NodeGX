@@ -1,0 +1,166 @@
+{
+ "htmlMs": 373,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Saturday Morning Running Club",
+     "ratio": 3.3
+    },
+    {
+     "text": "Run, explore, and connect with your comm",
+     "ratio": 3.3
+    },
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Saturday Morning Running Club",
+     "x": 48,
+     "y": 96,
+     "w": 253,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "x": 48,
+     "y": 160,
+     "w": 1149,
+     "h": 196,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Run, explore, and connect with your comm",
+     "x": 48,
+     "y": 404,
+     "w": 600,
+     "h": 22,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 48,
+     "y": 474,
+     "w": 75,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63292/",
+   "blank": false,
+   "words": 23,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 973
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [
+    {
+     "text": "Saturday Morning Running Club",
+     "ratio": 3.3
+    },
+    {
+     "text": "Run, explore, and connect with your comm",
+     "ratio": 3.3
+    },
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Saturday Morning Running Club",
+     "x": 48,
+     "y": 96,
+     "w": 253,
+     "h": 16,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "RUN. EXPLORE. CONNECT. PARK RUNNERS.",
+     "x": 48,
+     "y": 160,
+     "w": 296,
+     "h": 147,
+     "lines": 3
+    },
+    {
+     "kind": "words",
+     "text": "Run, explore, and connect with your comm",
+     "x": 48,
+     "y": 355,
+     "w": 276,
+     "h": 66,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 48,
+     "y": 469,
+     "w": 75,
+     "h": 35,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63292/",
+   "blank": false,
+   "words": 23,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [
+    {
+     "text": "Button",
+     "ratio": 3.3
+    }
+   ],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 984
+ },
+ "ms": 3063
+}

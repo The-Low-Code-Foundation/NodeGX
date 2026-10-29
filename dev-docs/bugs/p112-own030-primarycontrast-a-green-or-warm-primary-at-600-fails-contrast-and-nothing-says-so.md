@@ -33,3 +33,11 @@ on `--gradient-spotlight`. Its bright end is the primary, so the small line, the
 3.16–3.19. That is the same pair from the other side: white on amber-600. The arm cannot reach it (no token is on its
 menu), so a 2B builder spent 15 turns making settings that changed nothing. The same fix covers both: a darker
 primary, or a contrast finding on the primary pair.
+
+**Seen again, 2026-10-29 (OWN-032 s4, `runs/arm-w14m-running`, `runs/arm-w14s-running`, held out):**
+- the green running theme gives the same pair at 3.30 in both looks: the minimal button ("Run Now", white on green),
+  and in the stylish hero the small line, the sentence and the white pill's green words;
+- the bench reads a gradient by its worst stop, so the sentence's 3.30 is cautious: it sits over the gradient's dark
+  end. The small line really sits on the bright green.
+
+That makes two of six briefs (bakery and running, in both looks) where the arm ends with only this open.

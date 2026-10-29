@@ -1,0 +1,124 @@
+{
+ "htmlMs": 93,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Potter Portfolio",
+     "b": "Discover handcrafted bowls and weekend p",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Create",
+     "x": 48,
+     "y": 32,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 48,
+     "y": 81,
+     "w": 444,
+     "h": 85,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Discover handcrafted bowls and weekend p",
+     "x": 48,
+     "y": 166,
+     "w": 567,
+     "h": 18,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63896/",
+   "blank": false,
+   "words": 13,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 433
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Potter Portfolio",
+     "b": "Discover handcrafted bowls and weekend p",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "button",
+     "text": "Create",
+     "x": 48,
+     "y": 32,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Potter Portfolio",
+     "x": 48,
+     "y": 81,
+     "w": 227,
+     "h": 43,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Discover handcrafted bowls and weekend p",
+     "x": 48,
+     "y": 124,
+     "w": 266,
+     "h": 54,
+     "lines": 3
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63896/",
+   "blank": false,
+   "words": 13,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 546
+ },
+ "ms": 2303
+}

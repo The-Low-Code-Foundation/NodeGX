@@ -1,0 +1,166 @@
+{
+ "htmlMs": 191,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Handmade pottery for mindful moments.",
+     "b": "Text",
+     "gap": 0
+    },
+    {
+     "a": "Text",
+     "b": "Button",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Handmade pottery for mindful moments.",
+     "left": 0,
+     "right": 986
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 1250
+    },
+    {
+     "text": "Button",
+     "left": 0,
+     "right": 1203
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Handmade pottery for mindful moments.",
+     "x": 0,
+     "y": 0,
+     "w": 295,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 18,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 0,
+     "y": 36,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63896/",
+   "blank": false,
+   "words": 7,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Handmade pottery for mindful moments.",
+     "b": "Text",
+     "gap": 0
+    },
+    {
+     "a": "Text",
+     "b": "Button",
+     "gap": 0
+    }
+   ],
+   "atEdge": [
+    {
+     "text": "Handmade pottery for mindful moments.",
+     "left": 0,
+     "right": 96
+    },
+    {
+     "text": "Text",
+     "left": 0,
+     "right": 360
+    },
+    {
+     "text": "Button",
+     "left": 0,
+     "right": 313
+    }
+   ],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Handmade pottery for mindful moments.",
+     "x": 0,
+     "y": 0,
+     "w": 295,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 0,
+     "y": 18,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Button",
+     "x": 0,
+     "y": 36,
+     "w": 77,
+     "h": 33,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:63896/",
+   "blank": false,
+   "words": 7,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2330
+}

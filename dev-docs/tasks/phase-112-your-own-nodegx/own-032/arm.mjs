@@ -49,7 +49,10 @@ export const GOALS = {
   puppy: { name: 'Puppy Haven', about: 'a puppy adoption site; blue, modern', photo: 'animal-dog.webp', want: 'a headline, one line under it, a button, and a photo on the right' },
   bakery: { name: 'Maison Levain', about: 'a family bakery in Lyon; warm colours', photo: 'food-bread.webp', want: 'a headline, one line under it, a button, and a photo on the right' },
   jazz: { name: 'The Blue Room', about: 'a jazz evening on 14 November; dark and elegant', photo: 'people-cafe.webp', want: 'a headline, one line under it, a button, and a photo on the right' },
-  plumber: { name: 'Dupont Plumbing', about: 'a plumbing business; trustworthy, blue', photo: 'work-welder.webp', want: 'a headline, one line under it, a button, and a photo on the right' }
+  plumber: { name: 'Dupont Plumbing', about: 'a plumbing business; trustworthy, blue', photo: 'work-welder.webp', want: 'a headline, one line under it, a button, and a photo on the right' },
+  // s4 held-out briefs (8f): names from OWN-029's cards; the library has no runner photo, so running gets a park-like ground
+  running: { name: 'Park Runners', about: 'a Saturday morning running club in the park; energetic, green', photo: 'ground-forest-fog.webp', want: 'a headline, one line under it, a button, and a photo on the right' },
+  pottery: { name: 'Potter Portfolio', about: 'a potter who sells handmade bowls and teaches weekend classes', photo: 'work-potter.webp', want: 'a headline, one line under it, a button, and a photo on the right' }
 };
 const GOAL = { ...GOALS[opt('--brief', 'puppy')] };
 // s3, the look the person asked for (probe-look.mjs: E2B names it in 16 of 16 requests that say it). `minimal` is w6's
