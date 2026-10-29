@@ -1,0 +1,130 @@
+{
+ "htmlMs": 221,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Reliable Plumbing",
+     "x": 567,
+     "y": 96,
+     "w": 145,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Your Trusted Local Plumbing Experts",
+     "x": 97,
+     "y": 118,
+     "w": 1101,
+     "h": 205,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Serving our community with dependable, p",
+     "x": 385,
+     "y": 335,
+     "w": 515,
+     "h": 50,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Request Call-Back",
+     "x": 554,
+     "y": 414,
+     "w": 172,
+     "h": 41,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61343/",
+   "blank": false,
+   "words": 23,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 551
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Reliable Plumbing",
+     "x": 122,
+     "y": 96,
+     "w": 145,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Your Trusted Local Plumbing Experts",
+     "x": 26,
+     "y": 123,
+     "w": 345,
+     "h": 96,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Serving our community with dependable, p",
+     "x": 31,
+     "y": 235,
+     "w": 333,
+     "h": 80,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Request Call-Back",
+     "x": 109,
+     "y": 343,
+     "w": 172,
+     "h": 41,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61343/",
+   "blank": false,
+   "words": 23,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 3,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 481
+ },
+ "ms": 2703
+}

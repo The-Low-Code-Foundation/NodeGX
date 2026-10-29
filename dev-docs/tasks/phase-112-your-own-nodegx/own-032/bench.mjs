@@ -58,6 +58,9 @@ export const FACTS = `(() => {
   const say = (e) => e.textContent.trim().replace(/\\s+/g, ' ').slice(0, 40);
   const textLeaves = [...document.body.querySelectorAll('*')].filter((e) => [...e.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim()) && shown(e));
   // a text leaf's own box can be wider than its words: measure the words with a range
+  // how many lines a block of words wraps to: the distinct tops of its line boxes (w5-t16a: a display-lg headline in
+  // half a desktop broke one word to a line, and nothing measured it)
+  const linesOf = (e) => { const r = document.createRange(); r.selectNodeContents(e); return new Set([...r.getClientRects()].filter((x) => x.width > 1).map((x) => Math.round(x.top))).size || 1; };
   const inkOf = (e) => { const r = document.createRange(); r.selectNodeContents(e); const b = r.getBoundingClientRect(); return b.width ? b : e.getBoundingClientRect(); };
   const buttons = [...document.querySelectorAll('button')].filter(shown);
   const blocks = [...textLeaves.filter((e) => !e.closest('button')).map((e) => ({ kind: 'words', el: e, r: e.getBoundingClientRect(), ink: inkOf(e), text: say(e) })),
@@ -92,7 +95,7 @@ export const FACTS = `(() => {
     const px = parseFloat(s.fontSize), large = px >= 24 || (px >= 18.66 && +s.fontWeight >= 700), worst = Math.min(...gs.map((g) => ratio(fg, g)));
     if (worst < (large ? 3 : 4.5)) lowContrast.push({ text: b.text, ratio: +worst.toFixed(2) }); }
   const overflowX = Math.max(0, document.scrollingElement.scrollWidth - document.scrollingElement.clientWidth, ...[...document.body.querySelectorAll('*')].filter((e) => /auto|scroll/.test(getComputedStyle(e).overflowX)).map((e) => e.scrollWidth - e.clientWidth));
-  return { width: W, touching, atEdge, photoCut, buttonWide, unaligned, lowContrast, overflowX, blocks: blocks.map((b) => ({ kind: b.kind, text: b.text, x: Math.round(b.ink.left), y: Math.round(b.ink.top), w: Math.round(b.ink.width), h: Math.round(b.ink.height) })) };
+  return { width: W, touching, atEdge, photoCut, buttonWide, unaligned, lowContrast, overflowX, blocks: blocks.map((b) => ({ kind: b.kind, text: b.text, x: Math.round(b.ink.left), y: Math.round(b.ink.top), w: Math.round(b.ink.width), h: Math.round(b.ink.height), lines: b.kind === 'words' ? linesOf(b.el) : 1 })) };
 })()`;
 
 // the bottom of what is drawn: the lowest element with a background, a picture, words or a control. The window is

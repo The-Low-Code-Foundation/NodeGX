@@ -1,0 +1,17 @@
+{
+ "seed": 32,
+ "key": {
+  "bakery": {
+   "A": "composition",
+   "B": "arm"
+  },
+  "jazz": {
+   "A": "composition",
+   "B": "arm"
+  },
+  "plumber": {
+   "A": "composition",
+   "B": "arm"
+  }
+ }
+}

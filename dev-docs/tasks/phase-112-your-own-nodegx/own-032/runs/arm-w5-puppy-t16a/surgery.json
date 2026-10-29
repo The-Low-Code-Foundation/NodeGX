@@ -1,0 +1,47 @@
+{
+ "from": "w5-puppy",
+ "turn": 16,
+ "key": "move",
+ "note": "wrap step: a word part straight in the Columns is put in a Group of its own; the empty-parts removal waits while photoRight/together is open (w5 looped add-Columns/remove 9 times).",
+ "change": {
+  "none": "the same step asked again, with nothing changed"
+ },
+ "inherited": {
+  "wordsTemperature": 0,
+  "rules": {
+   "missingFirst": true,
+   "markMissing": true,
+   "namedGoal": true,
+   "legalOnly": true,
+   "fixMenu": true,
+   "goalLine": true,
+   "ownerNamed": true,
+   "shapeChecks": true,
+   "roles": true
+  }
+ },
+ "args": [
+  "arm.mjs",
+  "--run",
+  "w5-puppy-t16a",
+  "--brief",
+  "puppy",
+  "--turns",
+  "30",
+  "--look",
+  "script",
+  "--model",
+  "gemma4:e2b-it-qat",
+  "--judge",
+  "gemma4:e4b-it-qat",
+  "--bench",
+  "/Users/richardosborne/vscode_projects/NodeGX test projects/own-032-bench-puppy",
+  "--replay",
+  "w5-puppy",
+  "--upto",
+  "16",
+  "--edit",
+  "/Users/richardosborne/vscode_projects/OpenNoodl/dev-docs/tasks/phase-112-your-own-nodegx/own-032/runs/arm-w5-puppy-t16a/edit.json"
+ ],
+ "at": "2026-10-29T15:13:01.974Z"
+}

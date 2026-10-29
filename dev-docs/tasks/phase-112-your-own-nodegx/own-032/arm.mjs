@@ -160,11 +160,24 @@ async function judge(q, png) {
 //                 the words column, move the photo in beside it, move the headline, the line, the button into the words
 //                 column, in that order), and, once the photo is on the right, one fix that removes the empty parts. w4-puppy: every part and every
 //                 spacing right by turn 12, then 15 turns of empty Columns, because no action could move a part
+//   roles         each part is told what it is when added (the headline, the line under it, the button, the photo) and
+//                 keeps it through moves; the outline and the "write" prompt say it, and the shape checks read roles,
+//                 never document order (w4-t15a: a move swapped texts[0]/[1], the size fix went to the other Text, and
+//                 the hero ended with two headlines). With roles: the headline must be display-md or bigger and break
+//                 onto at most 2 lines on a desktop; the line must be smaller than the headline; the line and the button
+//                 must be in the words column ("together"); a word part straight in the Columns is wrapped in a Group
+//                 ("wrap"); placeholder words become a write fix. w6-puppy: done at turn 24, every check clean
 //   goalLine      once no part is missing, the findings open with "Every part of the goal is there…"
 //   ownerNamed    a spacing finding names the part that owns the space and its setting now (s1's outline probe: E2B
 //                 finds parts, never which part owns a space): "n00 (the whole section) has padding left and right: none"
 // The touching / edge thresholds are not rules: bench.mjs FACTS fixes them (4 px, 8 px), and probe-vision's key with them.
-const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false }, ...(EDIT.rules || {}) };
+const RULES = { ...{ emptyParts: true, unchanged: true, missingFirst: false, markMissing: false, namedGoal: false, lastSteps: true, ownerNamed: false, legalOnly: false, fixMenu: false, goalLine: false, shapeChecks: false, roles: false }, ...(EDIT.rules || {}) };
+// roles (s2, after w4-t15a): each part is told what it is when it is added, and keeps it through moves and removes;
+// the shape checks read the roles, never the document order (t15a: a move made the headline texts[1], and the size
+// fix went to the other Text, so the hero ended with two headlines and no line under them)
+const ROLE_SAY = { headline: 'the headline', line: 'the line under the headline', button: 'the button', photo: 'the photo' };
+const roleFor = (n, kind) => { const has = (r) => n.some((x) => x.role === r); if (kind === 'Text') return !has('headline') ? 'headline' : !has('line') ? 'line' : ''; if (kind === 'Button') return has('button') ? '' : 'button'; if (kind === 'Image') return has('photo') ? '' : 'photo'; return ''; };
+const byRole = (n, r) => { const i = n.findIndex((x) => x.role === r); return i < 0 ? undefined : i; };
 const missingKinds = (nodes) => { const k = nodes.map(kindOf); return [...(k.filter((x) => x === 'Text').length < 2 ? ['Text'] : []), ...(k.includes('Button') ? [] : ['Button']), ...(k.includes('Image') ? [] : ['Image'])]; };
 export function findingsFrom(shot, nodes) {
   const out = [];
@@ -206,8 +219,18 @@ export function findingsFrom(shot, nodes) {
     const order = []; const walk = (i) => { order.push(i); kidsOf(nodes, i).forEach(walk); }; walk(root);
     const leaves = order.filter((i) => ['Text', 'Button', 'Image'].includes(kindOf(nodes[i])));
     const texts = leaves.filter((i) => kindOf(nodes[i]) === 'Text'), img = leaves.find((i) => kindOf(nodes[i]) === 'Image');
-    const h = texts[0], line = texts[1];
-    const big = ['text-xl', 'display-sm', 'display-md', 'display-lg'];
+    const h = RULES.roles ? byRole(nodes, 'headline') : texts[0], line = RULES.roles ? byRole(nodes, 'line') : texts[1];
+    const btn = RULES.roles ? byRole(nodes, 'button') : leaves.find((i) => kindOf(nodes[i]) === 'Button');
+    // with roles a hero headline is a display size (t15a ended at text-xl, ~20px: it read as ordinary words)
+    const big = RULES.roles ? ['display-md', 'display-lg'] : ['text-xl', 'display-sm', 'display-md', 'display-lg'];
+    const SIZES = Object.keys(SETTINGS.Text.size.options);
+    if (RULES.roles && h !== undefined && line !== undefined) {
+      const sz = (i) => SIZES.indexOf(currentOf(nodes[i], 'size'));
+      // only above text-base: at text-base the headline's own size finding is the one to fix (and nothing is smaller)
+      const hb = shot.desktop.facts.blocks?.find((b) => b.kind === 'words' && b.text === String(nodes[h].params.text ?? '').trim().replace(/\s+/g, ' ').slice(0, 40));
+      if (hb && hb.lines >= 3 && sz(h) > SIZES.indexOf(big[0])) res.push({ check: 'headlineWraps', say: `On a desktop, the headline ${name(h)} breaks onto ${hb.lines} lines: it is too big for its column.`, fix: { node: h, setting: 'size', smaller: true, floor: big[0], say: `make ${name(h)} a little smaller (it breaks onto ${hb.lines} lines on a desktop; now: ${currentOf(nodes[h], 'size')})` } });
+      if (sz(line) >= sz(h) && sz(line) > SIZES.indexOf('text-base')) res.push({ check: 'lineSize', say: `The line under the headline (${name(line)}) is as big as the headline: they read as two headlines.`, fix: { node: line, setting: 'size', smaller: true, say: `make ${name(line)} smaller than the headline (it reads as a second headline; now: ${currentOf(nodes[line], 'size')})` } });
+    }
     if (h !== undefined && !big.some((t) => nodes[h].params.fontSize === `var(--${t})`)) res.push({ check: 'hierarchy', say: `The headline ${name(h)} is the size of ordinary words (${currentOf(nodes[h], 'size')}): it does not stand out.`, fix: { node: h, setting: 'size', bigger: true, say: `make ${name(h)} bigger (the headline does not stand out; now: ${currentOf(nodes[h], 'size')})` } });
     if (kindOf(nodes[root]) === 'Group' && !nodes[root].params.paddingTop) res.push({ check: 'airY', say: `The section ${name(root)} has no space above and below its parts: the words touch its top.`, fix: { node: root, setting: 'padding top and bottom', say: `give ${name(root)} padding top and bottom (no space above and below; now: ${currentOf(nodes[root], 'padding top and bottom')})` } });
     if (h !== undefined && line !== undefined && leaves[leaves.indexOf(h) + 1] !== line) res.push({ check: 'order', say: `The line under the headline (${name(line)}) is not straight under it: ${name(leaves[leaves.indexOf(h) + 1])} comes between them.` });
@@ -216,18 +239,20 @@ export function findingsFrom(shot, nodes) {
       const cols = up2(img).find((c) => kindOf(nodes[c]) === 'Columns' && up2(h).includes(c));
       const kids = cols === undefined ? [] : kidsOf(nodes, cols);
       const side = (i) => kids.findIndex((k) => k === i || up2(i).includes(k));
-      if (cols === undefined || side(h) !== 0 || side(img) !== 1) res.push({ check: 'photoRight', say: `The photo ${name(img)} is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.`, fix: structureStep(nodes, root, [h, line, leaves.find((i) => kindOf(nodes[i]) === 'Button')], img) });
+      const words = [h, line, btn];
+      if (cols === undefined || side(h) !== 0 || side(img) !== 1) res.push({ check: 'photoRight', say: `The photo ${name(img)} is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.`, fix: structureStep(nodes, root, words, img) });
+      else if (RULES.roles && words.some((x) => x !== undefined && side(x) !== 0)) { const out = words.filter((x) => x !== undefined && side(x) !== 0); res.push({ check: 'together', say: `${out.map((x) => `${ROLE_SAY[nodes[x].role]} ${name(x)}`).join(' and ')} ${out.length > 1 ? 'are' : 'is'} not in the words column, beside the photo.`, fix: structureStep(nodes, root, words, img) }); }
     }
   }
   if (!missing.length && RULES.goalLine) res.unshift({ check: 'goalMet', say: 'Every part of the goal is there. What is left is how it looks: the findings below.' });
   if (missing.length) res.unshift({ check: 'goal', say: `Not there yet: ${missing.map((s) => (RULES.namedGoal ? `${s} (${KIND_OF[s]})` : s)).join(', ')}.` });
   if (RULES.emptyParts) {
     const empty = nodes.map((n, i) => i).filter((i) => KINDS[kindOf(nodes[i])].holds && !nodes.some((m) => m.parent === i));
-    if (empty.length) res.push({ check: 'empty', fix: empty.some((i) => i !== root) && !res.some((f) => f.check === 'photoRight') ? { act: { kind: 'remove', nodes: empty.filter((i) => i !== root) }, say: `remove the empty parts ${empty.filter((i) => i !== root).map(name).join(', ')} (they show nothing)` } : undefined, say: `${empty.map(name).join(', ')} ${empty.length > 1 ? 'are' : 'is'} empty: ${empty.length > 1 ? 'they show' : 'it shows'} nothing until something is put inside.` });
+    if (empty.length) res.push({ check: 'empty', fix: empty.some((i) => i !== root) && !res.some((f) => f.check === 'photoRight' || f.check === 'together') ? { act: { kind: 'remove', nodes: empty.filter((i) => i !== root) }, say: `remove the empty parts ${empty.filter((i) => i !== root).map(name).join(', ')} (they show nothing)` } : undefined, say: `${empty.map(name).join(', ')} ${empty.length > 1 ? 'are' : 'is'} empty: ${empty.length > 1 ? 'they show' : 'it shows'} nothing until something is put inside.` });
   }
   if (RULES.unchanged && shot.unchanged) res.push({ check: 'unchanged', say: 'Your last step changed nothing a person can see, on a desktop or on a phone.' });
   const unwritten = nodes.map((n, i) => ({ n, i })).filter(({ n }) => (n.params.text === 'Text' || n.params.label === 'Button'));
-  if (unwritten.length) res.push({ check: 'words', say: `Still holding placeholder words: ${unwritten.map(({ i }) => name(i)).join(', ')}.` });
+  if (unwritten.length) res.push({ check: 'words', say: `Still holding placeholder words: ${unwritten.map(({ i }) => name(i)).join(', ')}.`, fix: RULES.roles ? { node: unwritten[0].i, setting: 'words', write: true, say: `write the words of ${name(unwritten[0].i)} (it still says "${unwritten[0].n.params.text ?? unwritten[0].n.params.label}")` } : undefined });
   return res;
 }
 
@@ -235,10 +260,13 @@ export function findingsFrom(shot, nodes) {
 // the tree is in a shape these steps do not cover; each step is one action the model can take or leave
 function structureStep(nodes, root, words, img) {
   const under = (x, a) => { for (let q = x; q !== undefined && q >= 0; q = nodes[q].parent) if (q === a) return true; return false; };
-  const C = kidsOf(nodes, root).find((i) => kindOf(nodes[i]) === 'Columns' && kidsOf(nodes, i).every((k) => kindOf(nodes[k]) === 'Group' || k === img));
+  // a Columns whose first column is a word part itself (w5: the headline straight in a Columns, beside the photo) is the
+  // one to finish: wrap that part in a Group, so the line and the button can join it (roles only; before, no step fit)
+  const C = kidsOf(nodes, root).find((i) => kindOf(nodes[i]) === 'Columns' && kidsOf(nodes, i).every((k) => kindOf(nodes[k]) === 'Group' || k === img || (RULES.roles && words.includes(k))));
   if (C === undefined) return { act: { kind: 'add', what: 'Columns', inside: root }, say: `add a Columns inside ${name(root)}, to put the words and the photo side by side` };
   const [c1, c2] = kidsOf(nodes, C);
   if (c1 === undefined) return { act: { kind: 'add', what: 'Group', inside: C }, say: `add a Group inside ${name(C)} as its first column, for the words` };
+  if (RULES.roles && words.includes(c1)) return { act: { kind: 'wrap', node: c1 }, say: `put ${name(c1)} in a Group of its own, so the words column of ${name(C)} can hold the line and the button too` };
   if (c1 === img || kindOf(nodes[c1]) !== 'Group' || under(img, c1)) return undefined;
   if (!under(img, C)) {
     if (c2 === undefined) return { act: { kind: 'move', node: img, into: C }, say: `move the photo ${name(img)} into ${name(C)} as its second column, beside the words` };
@@ -254,7 +282,7 @@ function structureStep(nodes, root, words, img) {
 // fixed-width names: with n1 / n10 / n11 the grammar decides between them a token AFTER the model's choice, and the
 // odds read as three-way ties (w2-puppy: twelve refused "add inside n1" while n10 and n11 sat empty)
 const name = (i) => `n${String(i).padStart(2, '0')}`;
-const tree = (nodes) => (nodes.length ? outline(nodes.map((n) => ({ ...n, role: '' }))).replace(/#(\d+) /g, (m, d) => `${name(Number(d))} `).replace(/ "" /g, ' ') : '(nothing yet: the section is empty)');
+const tree = (nodes) => (nodes.length ? outline(nodes.map((n) => ({ ...n, role: RULES.roles ? ROLE_SAY[n.role] || '' : '' }))).replace(/#(\d+) /g, (m, d) => `${name(Number(d))} `).replace(/ "" /g, ' ') : '(nothing yet: the section is empty)');
 function context(state, turn, findings) {
   const intro = EDIT.intro || `GOAL: a hero section for "${GOAL.name}" (${GOAL.about}): ${GOAL.want}. It must look right on a desktop and on a phone.`;
   const last = state.history.slice(-4).map((h) => `- turn ${h.turn}: ${h.say}${h.legal === false ? ' (REFUSED)' : ''}`).join('\n');
@@ -277,12 +305,13 @@ async function decide(state, turn, findings, T) {
   const move = await choose('move', `${ctx}\n\n${EDIT.menuWording || 'What do you do next? Pick one:'}\n${menu}`, moves.map((_, i) => String(i + 1)), T);
   const m = moves[Number(move) - 1]?.[0];
   if (m === 'fix' && moves[Number(move) - 1][2].act) { const f = moves[Number(move) - 1][2]; return { ...f.act, via: 'fix', say: `${f.say.replace(/ \(.*\)$/, '')} (a fix from the menu)` }; }
+  if (m === 'fix' && moves[Number(move) - 1][2].write) { const i = moves[Number(move) - 1][2].node; const text = await words('write.text', writeAsk(ctx, n, i), kindOf(n[i]) === 'Button' ? 30 : 140, T); return { kind: 'write', node: i, text, via: 'fix', say: `wrote ${name(i)}: "${text}" (a fix from the menu)` }; }
   if (m === 'fix') {
     // a fix offers only values that change something: never the current one, and never "none" for a fault of too
     // little space (t14a: "set gap of n00 to none" 16 times, P(none) 1.00, "none" listed first and equal to "not set")
     const f = moves[Number(move) - 1][2], k = kindOf(n[f.node]), now = currentOf(n[f.node], f.setting);
     const all = Object.keys(SETTINGS[k][f.setting].options);
-    const opts = f.bigger ? all.slice(all.indexOf(now) + 1) : all.filter((o) => o !== now && !(o === 'none' && f.setting !== 'self align'));
+    const opts = f.bigger ? all.slice(all.indexOf(now) + 1) : f.smaller ? all.slice(all.indexOf(f.floor || 'text-base'), all.indexOf(now)).reverse() : all.filter((o) => o !== now && !(o === 'none' && f.setting !== 'self align'));
     const why = f.say.match(/\(([^;]*);/)?.[1];
     const value = await choose('set.value', `${ctx}\n\nYou are fixing this: ${why}. You are changing "${f.setting}" of ${name(f.node)} (${k}): ${SETTINGS[k][f.setting].say}. It is now: ${now}. Change it to:`, opts, T);
     return { kind: 'set', node: f.node, setting: f.setting, value, via: 'fix', say: `set ${f.setting} of ${name(f.node)} to ${value} (a fix from the menu)` };
@@ -314,10 +343,12 @@ async function decide(state, turn, findings, T) {
   if (m === 'write') {
     const node = await choose('write.node', `${ctx}\n\nYou are writing words. For which part? (A Text or a Button.)`, writable.map(name), T);
     const i = Number(String(node).slice(1)), k = kindOf(n[i]);
-    const text = await words('write.text', `${ctx}\n\nWrite the words of ${node} (${k}) for "${GOAL.name}". ${k === 'Button' ? 'Two to four words, a verb first.' : 'One headline or one sentence: what a visitor reads, never a description of the page.'}`, k === 'Button' ? 30 : 140, T);
+    const text = await words('write.text', writeAsk(ctx, n, i), k === 'Button' ? 30 : 140, T);
     return { kind: 'write', node: i, text, say: `wrote ${node}: "${text}"` };
   }
 }
+
+const writeAsk = (ctx, n, i) => { const k = kindOf(n[i]); return `${ctx}\n\nWrite the words of ${name(i)} (${k}) for "${GOAL.name}". ${k === 'Button' ? 'Two to four words, a verb first.' : RULES.roles && n[i].role === 'headline' ? 'This is the headline: three to seven words a visitor reads first, never a description of the page.' : RULES.roles && n[i].role === 'line' ? 'This is the line under the headline: one sentence of ten to twenty words that says what a visitor gets here. It must not repeat the headline.' : 'One headline or one sentence: what a visitor reads, never a description of the page.'}`; };
 
 function apply(state, a) {
   const n = state.nodes;
@@ -330,7 +361,7 @@ function apply(state, a) {
     if (a.inside === -1 && n.length) return 'The section already exists; add parts inside it.';
     if (a.inside >= 0 && !KINDS[kindOf(n[a.inside])]?.holds) return `${name(a.inside)} is a ${kindOf(n[a.inside])}; only a Group or Columns can hold parts.`;
     if (a.inside >= 0 && kindOf(n[a.inside]) === 'Columns' && n.filter((x) => x.parent === a.inside).length >= 2) return `${name(a.inside)} (Columns) already holds its two columns.`;
-    n.push({ type: KINDS[a.what].type, role: '', parent: a.inside, params: KINDS[a.what].make() });
+    n.push({ type: KINDS[a.what].type, role: RULES.roles ? roleFor(n, a.what) : '', parent: a.inside, params: KINDS[a.what].make() });
   }
   if (a.kind === 'move') {
     const under = (x, y) => { for (let q = x; q !== undefined && q >= 0; q = n[q].parent) if (q === y) return true; return false; };
@@ -339,6 +370,12 @@ function apply(state, a) {
     if (under(a.into, a.node)) return `${name(a.into)} is inside ${name(a.node)}.`;
     if (kindOf(n[a.into]) === 'Columns' && n.filter((x, j) => x.parent === a.into && j !== a.node).length >= 2) return `${name(a.into)} (Columns) already holds its two columns.`;
     n[a.node].parent = a.into; n[a.node].seq = Math.max(...n.map((x, j) => x.seq ?? j)) + 1;
+  }
+  if (a.kind === 'wrap') {
+    // a new Group takes the part's place among its siblings, and the part goes inside it
+    if (n[a.node]?.parent === -1) return 'The section itself cannot be wrapped.';
+    n.push({ type: KINDS.Group.type, role: '', parent: n[a.node].parent, seq: n[a.node].seq ?? a.node, params: KINDS.Group.make() });
+    n[a.node].parent = n.length - 1; n[a.node].seq = Math.max(...n.map((x, j) => x.seq ?? j)) + 1;
   }
   if (a.kind === 'remove') {
     if (a.nodes.some((i) => n[i].parent === -1 || n.some((x) => x.parent === i))) return 'Only an empty part can be removed.';

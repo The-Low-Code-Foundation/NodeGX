@@ -25,6 +25,22 @@ are on disk only.
   a fork while another model is loaded.
 - Next: Richard's pokes (step 3), each recorded in the RESULTS §5 table.
 
+## s2b status (2026-10-29 evening, Opus session opennoodl-9f)
+
+- **The puppy hero is solved at the arm level.** `w6-puppy` is done at turn 24 with every check clean
+  (`runs/arm-w6-puppy/t23/`). The `roles` switch made the difference: the checks read what each part IS, plus
+  `wrap`, placeholder words as a write fix, and a headline-wraps check fed by line counts from bench.mjs. RESULTS §5c
+  has rows t15a, w5, w5-t16a and w6.
+- **AC5 has run:** w6-bakery, w6-jazz and w6-plumber were all done by the model in 22–25 turns, measures clean except
+  the kit's bakery button contrast. RESULTS §6.
+- **Waiting on Richard:** the blind page https://claude.ai/artifact/XoSSP3TPGwqbhnAhu7vcEP. Read his picks with
+  ArtifactData `list` on `ac5` and `ac4`, the key is `runs/ac5-w6/blind-key.json`, then grade the pre-registered
+  prediction in §6 (the composition wins ≥ 2 of 3, because the arm has no ground, display font or eyebrow).
+- **Next, if the prediction holds:** add ground, display font and eyebrow as findings with fixes, and test on running and pottery
+  (held out). If AC4 and AC5 pass, OWN-033 stitching. Separately, fold the menu lessons into OWN-031 `build_app`,
+  but that is the other session's lane: ask first.
+- Goose now starts with `~/.config/goose/start-goose.sh` (own-030/goose/FINDINGS.md, last section).
+
 ## s2, as it was planned
 
 1. **Show Richard the viewer first** (build order step 2; he has not seen it yet). He may change what it shows.

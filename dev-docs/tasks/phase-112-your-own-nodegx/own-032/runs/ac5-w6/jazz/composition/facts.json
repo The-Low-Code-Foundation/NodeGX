@@ -1,0 +1,148 @@
+{
+ "htmlMs": 245,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Elegant Jazz Evening",
+     "x": 554,
+     "y": 96,
+     "w": 172,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "An Evening of Sophisticated Jazz at The ",
+     "x": 91,
+     "y": 120,
+     "w": 1118,
+     "h": 295,
+     "lines": 3
+    },
+    {
+     "kind": "words",
+     "text": "Immerse yourself in timeless melodies fo",
+     "x": 385,
+     "y": 429,
+     "w": 515,
+     "h": 50,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Jazz Evening: 14 November at The Blue Ro",
+     "x": 454,
+     "y": 504,
+     "w": 372,
+     "h": 21,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Purchase Tickets",
+     "x": 558,
+     "y": 553,
+     "w": 164,
+     "h": 41,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61307/",
+   "blank": false,
+   "words": 33,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 4,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 690
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Elegant Jazz Evening",
+     "x": 109,
+     "y": 96,
+     "w": 172,
+     "h": 15,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "An Evening of Sophisticated Jazz at The ",
+     "x": 29,
+     "y": 123,
+     "w": 340,
+     "h": 184,
+     "lines": 4
+    },
+    {
+     "kind": "words",
+     "text": "Immerse yourself in timeless melodies fo",
+     "x": 29,
+     "y": 324,
+     "w": 336,
+     "h": 50,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Jazz Evening: 14 November at The Blue Ro",
+     "x": 37,
+     "y": 398,
+     "w": 321,
+     "h": 50,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Purchase Tickets",
+     "x": 113,
+     "y": 477,
+     "w": 164,
+     "h": 41,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61307/",
+   "blank": false,
+   "words": 33,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 4,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 614
+ },
+ "ms": 2978
+}

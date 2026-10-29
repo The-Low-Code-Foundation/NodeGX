@@ -45,3 +45,19 @@ traffic with a stdio spy between Goose and the server.
 - `tests/p125GooseNoEval.test.ts`: 6 tests.
 - Goose runs a separate bundle, `dist/noodl-mcp-goose.cjs` (built by esbuild with the package's `build-common.mjs`);
   the shared `dist/noodl-mcp.cjs` is untouched.
+
+## Row 9, fixed on the machine (2026-10-29 16:06, OWN-032 s2 session, Richard: "Goose is your playground")
+
+- Goose 1.57.0 scans `~/.agents/skills`, `<config>/skills`, `~/.claude/skills` and `~/.config/agents/skills`
+  (`crates/goose/src/skills/mod.rs`). The home is `dirs::home_dir()`, which reads `HOME`. Nothing in the config turns
+  the scan off, so the Skills switch never could.
+- Goose Desktop gives its server `HOME = process.env.HOME` (app.asar, `Qt`). So **`start-goose.sh`** starts the app with
+  `open -a Goose --env HOME=~/.goose-home`. That folder links every top-level entry of the real home except `.claude`.
+  `Library` is a link, so the keychain and Application Support are the real ones, and no keychain dialog appeared.
+  `.config` and `.local` are links too, so the config, sessions and logs are the same.
+- Measured with `goose skills list`: 22 skills (Richard's, 14.5k characters) with the real home; 2 built-ins
+  (`goose-doc-guide`, `web-search`, 104 description tokens) under `~/.goose-home`. `goose serve` runs with
+  `HOME=/Users/richardosborne/.goose-home` (read from `ps eww`).
+- `nodegx-launch.sh` now exports the real `HOME` first, so NodeGX and its Chrome are unchanged.
+- Starting Goose from the Dock gives back the real home. Use `~/.config/goose/start-goose.sh`. Copies of both scripts
+  sit beside this file.

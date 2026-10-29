@@ -243,4 +243,42 @@ from t7a on.
 | `…-t14a` | t8a, turn 14 | `fixMenu`, `goalLine`, `ownerNamed`, `emptyParts` off | A fix picked on every turn, but the value was **"none" 16 times** (P 1.00): "none" listed first, and equal to the "(not set)" it already was. |
 | `…-t14a-t14a` | t14a, turn 14 | a fix offers only values that change something, and says what it fixes | padding left/right `large` (turn 14), gap `huge` (15): **the measures went clean** and it said **done** at turn 30. The picture is not a hero: a body-size headline at the top edge, the line under it after the photo, the photo below the words. Nothing measured those. |
 | `w4-puppy` | fresh, every switch | + `shapeChecks`: headline size, space above/below, order, photo on the right (from the tree) | Four fixes taken by turn 12 (padding, gap, headline `text-xl`, padding top/bottom `huge`). Then 15 turns of adding Columns: the right idea for "photo not on the right", but **no action could move a part**. |
-| `w4-puppy-t15a` | w4, turn 15 | `move` / `remove` actions; "photo on the right" offers the next structural step | (waiting on Ollama) |
+| `w4-puppy-t15a` | w4, turn 15 | `move` / `remove` actions; "photo on the right" offers the next structural step | **E2B took every structural step offered**: added a Columns (t15), a words Group (16), moved the photo beside it (17), moved the headline in (19), removed five empty parts (28), and said **done** at turn 29 with one finding left. The photo is on the right at desktop and stacks on a phone. **Still not a hero:** two Texts both `text-xl` and both headlines ("Find Your Perfect Puppy" / "Find Your Forever Friend"), no line under the headline, the button and the second Text outside the words column. The checks were the hole: they named the headline by document ORDER, so after the move at t19 the size fix went to the other Text (t20); `text-xl` counted as big; "photo on the right" looked at the headline and the photo only. |
+| `w5-puppy` | fresh, every switch + **`roles`** | roles (see `arm.mjs` header): the checks read what each part IS, not where it sits; headline ≥ display-md; the line smaller; line and button in the words column | The roles worked: headline `display-lg`, a real sentence under it, a Button. Then **9 turns of a harness loop**: the headline sat straight in the Columns (no Group), so "photo right" passed, "together" offered "add a Columns", and the empty-parts fix removed it the next turn. My bug, not the model's. |
+| `w5-puppy-t16a` | w5, turn 16 | **`wrap`**: a word part straight in the Columns goes into a Group of its own; empty parts are not removed while a structure fix is open | wrap (t16), line and button moved into the words column (t20, t22), **done at turn 23**. Left: the button still said "Button" (placeholder words were a finding, not a fix), and `display-lg` broke the headline one word to a line on a desktop. |
+| **`w6-puppy`** | fresh, every switch | placeholder words become a write fix; `bench.mjs` counts each text block's lines; a headline breaking onto 3+ lines on a desktop is a fix (smaller, never below display-md) | **Done at turn 24, every check clean, 2½ min.** "Find Your Perfect Puppy Today" at display-md on two lines, a sentence under it, "Adopt Now", the photo on the right; on a phone the words, the button, then the photo. Every structural and spacing step after turn 12 was a fix the model picked from the menu. Nits I see: the gap between the headline and the line is wider than between the line and the button; the line could be grey. **The AC4 candidate** (`runs/arm-w6-puppy/t23/`). |
+
+## 6. AC4 and AC5 (s2, 2026-10-29 evening)
+
+**The harness for both:** `arm.mjs` with every switch on (`runs/arm-w6-*/edit.json`: words at T 0, `missingFirst`,
+`markMissing`, `namedGoal`, `legalOnly`, `fixMenu`, `goalLine`, `ownerNamed`, `shapeChecks`, `roles`). It was tuned on
+puppy only (w1–w6), then run UNCHANGED on bakery, jazz and plumber. Each brief has its own bench, made from that brief's
+kept OWN-029 G round (bakery r3, jazz r3, plumber r4), so its theme and tokens are the composition hero's.
+
+| run | turns | done by the model | findings left |
+|---|---|---|---|
+| `w6-puppy` | 24 | yes | none |
+| `w6-bakery` | 25 | yes | "Bake Now" contrast 3.19: the kit's white on the bakery primary (P112-OWN030-PRIMARYCONTRAST, already filed); buttons have no colour setting on the arm's menu |
+| `w6-jazz` | 22 | yes | none |
+| `w6-plumber` | 22 | yes | none |
+
+All four reach every part and clean measures with no help. Every structural step after the parts exist is a fix the
+model picked from the menu.
+
+**The blind pairs:** `ac5.mjs w6` renders each brief's composition hero (the kept G round's `tree.json`, first section)
+and the arm's last tree on the same bench (`runs/ac5-w6/<brief>/{composition,arm}/`). The page is
+https://claude.ai/artifact/XoSSP3TPGwqbhnAhu7vcEP, with the `db` capability: `ac5/<brief>` holds `{pick: A|B|same, why, at}`,
+and `ac4/puppy` holds `{pick: perfect|almost|no, why, at}`. The key is `runs/ac5-w6/blind-key.json` (seed 32). It
+never goes on the page.
+
+**Pre-registered before Richard ranks (Opus, having seen the pictures):** the composition hero wins at least 2 of 3,
+so **AC5 fails as the task wrote it.** The arm's heroes are clean: the photo on the right, a display headline, a
+sentence, a button, the right air. But they are plain. None of the composition's three richer moves is on the arm's
+menu:
+- a ground on the section (gradient or brand colour);
+- the theme's display font for the headline (the arm's Text keeps the body font);
+- an eyebrow line above the headline.
+
+Jazz and plumber's composition heroes have no photo at all, so those two pairs also compare two different goals.
+If this holds, the next step is to add those three moves as findings with fixes, then test on the two briefs not yet
+used here (running, pottery), not on these three.

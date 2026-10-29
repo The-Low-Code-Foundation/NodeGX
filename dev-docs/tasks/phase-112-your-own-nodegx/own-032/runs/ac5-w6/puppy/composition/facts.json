@@ -1,0 +1,226 @@
+{
+ "htmlMs": 248,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [
+    {
+     "lefts": [
+      82,
+      87,
+      268,
+      100,
+      100,
+      100,
+      100
+     ],
+     "mids": [
+      348,
+      342,
+      340,
+      119,
+      118,
+      128,
+      195
+     ]
+    }
+   ],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Companion",
+     "x": 82,
+     "y": 83,
+     "w": 531,
+     "h": 242,
+     "lines": 3
+    },
+    {
+     "kind": "words",
+     "text": "Discover loving, ready-to-play puppies w",
+     "x": 87,
+     "y": 330,
+     "w": 511,
+     "h": 53,
+     "lines": 2
+    },
+    {
+     "kind": "button",
+     "text": "Adopt a Puppy",
+     "x": 268,
+     "y": 411,
+     "w": 143,
+     "h": 43,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Name",
+     "x": 100,
+     "y": 470,
+     "w": 37,
+     "h": 19,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Email",
+     "x": 100,
+     "y": 563,
+     "w": 35,
+     "h": 19,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Message",
+     "x": 100,
+     "y": 656,
+     "w": 56,
+     "h": 19,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Start Your Application",
+     "x": 100,
+     "y": 749,
+     "w": 189,
+     "h": 43,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61228/",
+   "blank": false,
+   "words": 26,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 5,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 888
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [
+    {
+     "lefts": [
+      56,
+      37,
+      123,
+      24,
+      24,
+      24,
+      24
+     ],
+     "mids": [
+      195,
+      197,
+      195,
+      43,
+      42,
+      52,
+      119
+     ]
+    }
+   ],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Find Your Perfect Puppy Companion",
+     "x": 56,
+     "y": 89,
+     "w": 277,
+     "h": 85,
+     "lines": 2
+    },
+    {
+     "kind": "words",
+     "text": "Discover loving, ready-to-play puppies w",
+     "x": 37,
+     "y": 186,
+     "w": 321,
+     "h": 83,
+     "lines": 3
+    },
+    {
+     "kind": "button",
+     "text": "Adopt a Puppy",
+     "x": 123,
+     "y": 296,
+     "w": 143,
+     "h": 43,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Name",
+     "x": 24,
+     "y": 355,
+     "w": 37,
+     "h": 19,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Email",
+     "x": 24,
+     "y": 448,
+     "w": 35,
+     "h": 19,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Message",
+     "x": 24,
+     "y": 541,
+     "w": 56,
+     "h": 19,
+     "lines": 1
+    },
+    {
+     "kind": "button",
+     "text": "Start Your Application",
+     "x": 24,
+     "y": 634,
+     "w": 189,
+     "h": 43,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:61228/",
+   "blank": false,
+   "words": 26,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 5,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 1
+  },
+  "height": 1089
+ },
+ "ms": 2938
+}

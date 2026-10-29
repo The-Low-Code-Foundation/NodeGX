@@ -1,0 +1,106 @@
+{
+ "htmlMs": 374,
+ "desktop": {
+  "facts": {
+   "width": 1280,
+   "touching": [
+    {
+     "a": "Expert Plumbing Services You Can Trust",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services You Can Trust",
+     "x": 48,
+     "y": 0,
+     "w": 291,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 18,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:60792/",
+   "blank": false,
+   "words": 7,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "phone": {
+  "facts": {
+   "width": 390,
+   "touching": [
+    {
+     "a": "Expert Plumbing Services You Can Trust",
+     "b": "Text",
+     "gap": 0
+    }
+   ],
+   "atEdge": [],
+   "photoCut": [],
+   "buttonWide": [],
+   "unaligned": [],
+   "lowContrast": [],
+   "overflowX": 0,
+   "blocks": [
+    {
+     "kind": "words",
+     "text": "Expert Plumbing Services You Can Trust",
+     "x": 48,
+     "y": 0,
+     "w": 291,
+     "h": 18,
+     "lines": 1
+    },
+    {
+     "kind": "words",
+     "text": "Text",
+     "x": 48,
+     "y": 18,
+     "w": 30,
+     "h": 18,
+     "lines": 1
+    }
+   ]
+  },
+  "checks": {
+   "url": "http://127.0.0.1:60792/",
+   "blank": false,
+   "words": 7,
+   "overflowX": 0,
+   "smallText": [],
+   "lowContrast": [],
+   "unknownGround": 0,
+   "clipped": [],
+   "brokenImages": [],
+   "sections": 0
+  },
+  "height": 120
+ },
+ "ms": 2848
+}

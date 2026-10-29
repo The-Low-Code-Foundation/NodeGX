@@ -1,0 +1,2815 @@
+{
+ "title": "Puppy Haven: the hero, turn by turn (w6-puppy)",
+ "run": "w6-puppy",
+ "request": "a headline, one line under it, a button, and a photo on the right — for Puppy Haven, a puppy adoption site; blue, modern",
+ "model": "gemma4:e2b-it-qat",
+ "judge": null,
+ "harness": "arm.mjs, look=script",
+ "summary": {
+  "builderCalls": 49,
+  "reviewerCalls": 0
+ },
+ "steps": [
+  {
+   "actor": "builder",
+   "round": 1,
+   "roundTitle": "Turn 1",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\n(nothing yet: the section is empty)\n\nWHAT THE LAST LOOK FOUND:\n- nothing wrong.\n\nThis is turn 1 of 30.\n\nWhat do you do next? Pick one:\n1. add a part (a Group, Columns, Text, Image or Button) inside a part\n2. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.962
+    },
+    {
+     "label": "2",
+     "p": 0.038
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 7153,
+   "tokensIn": 187,
+   "tokensOut": 8
+  },
+  {
+   "actor": "builder",
+   "round": 1,
+   "roundTitle": "Turn 1",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\n(nothing yet: the section is empty)\n\nWHAT THE LAST LOOK FOUND:\n- nothing wrong.\n\nThis is turn 1 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Group",
+     "p": 0.818
+    },
+    {
+     "label": "Columns",
+     "p": 0.148
+    },
+    {
+     "label": "Text",
+     "p": 0.024
+    },
+    {
+     "label": "Image",
+     "p": 0.005
+    },
+    {
+     "label": "Button",
+     "p": 0.004
+    }
+   ],
+   "answer": {
+    "pick": "Group"
+   },
+   "ms": 1088,
+   "tokensIn": 211,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 1,
+   "roundTitle": "Turn 1",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Group as the whole section.",
+    "nodes": "n00 Group [stacked, width 100%]"
+   },
+   "pictures": [
+    {
+     "src": "t1/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t1/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t1/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "n00 is empty: it shows nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 2.6 s."
+  },
+  {
+   "actor": "builder",
+   "round": 2,
+   "roundTitle": "Turn 2",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n00 is empty: it shows nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n\nThis is turn 2 of 30.\n\nWhat do you do next? Pick one:\n1. give n00 padding top and bottom (no space above and below; now: (not set))\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. undo your last step\n5. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "2",
+     "p": 0.946
+    },
+    {
+     "label": "1",
+     "p": 0.04
+    },
+    {
+     "label": "3",
+     "p": 0.012
+    },
+    {
+     "label": "4",
+     "p": 0.002
+    },
+    {
+     "label": "5",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "2"
+   },
+   "ms": 1586,
+   "tokensIn": 317,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 2,
+   "roundTitle": "Turn 2",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n00 is empty: it shows nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n\nThis is turn 2 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Columns",
+     "p": 0.659
+    },
+    {
+     "label": "Text",
+     "p": 0.238
+    },
+    {
+     "label": "Group",
+     "p": 0.099
+    },
+    {
+     "label": "Image",
+     "p": 0.003
+    },
+    {
+     "label": "Button",
+     "p": 0.002
+    }
+   ],
+   "answer": {
+    "pick": "Columns"
+   },
+   "ms": 1523,
+   "tokensIn": 301,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 2,
+   "roundTitle": "Turn 2",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n00 is empty: it shows nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n\nThis is turn 2 of 30.\n\nYou are adding a Columns. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 0)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n00",
+     "p": 1
+    }
+   ],
+   "answer": {
+    "pick": "n00"
+   },
+   "ms": 1520,
+   "tokensIn": 269,
+   "tokensOut": 10
+  },
+  {
+   "actor": "script",
+   "round": 2,
+   "roundTitle": "Turn 2",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Columns inside n00.",
+    "nodes": "n00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]"
+   },
+   "pictures": [
+    {
+     "src": "t2/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t2/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t2/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "n01 is empty: it shows nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Your last step changed nothing a person can see, on a desktop or on a phone.",
+     "repair": "unchanged"
+    }
+   ],
+   "note": "Rendered in 2.7 s."
+  },
+  {
+   "actor": "builder",
+   "round": 3,
+   "roundTitle": "Turn 3",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n01 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n\nThis is turn 3 of 30.\n\nWhat do you do next? Pick one:\n1. give n00 padding top and bottom (no space above and below; now: (not set))\n2. remove the empty parts n01 (they show nothing)\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "3",
+     "p": 0.913
+    },
+    {
+     "label": "1",
+     "p": 0.055
+    },
+    {
+     "label": "2",
+     "p": 0.016
+    },
+    {
+     "label": "4",
+     "p": 0.011
+    },
+    {
+     "label": "5",
+     "p": 0.003
+    },
+    {
+     "label": "6",
+     "p": 0.002
+    }
+   ],
+   "answer": {
+    "pick": "3"
+   },
+   "ms": 1898,
+   "tokensIn": 394,
+   "tokensOut": 14
+  },
+  {
+   "actor": "builder",
+   "round": 3,
+   "roundTitle": "Turn 3",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n01 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n\nThis is turn 3 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Text",
+     "p": 0.889
+    },
+    {
+     "label": "Group",
+     "p": 0.079
+    },
+    {
+     "label": "Columns",
+     "p": 0.02
+    },
+    {
+     "label": "Image",
+     "p": 0.007
+    },
+    {
+     "label": "Button",
+     "p": 0.005
+    }
+   ],
+   "answer": {
+    "pick": "Text"
+   },
+   "ms": 2513,
+   "tokensIn": 363,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 3,
+   "roundTitle": "Turn 3",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a headline (a Text), a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The section n00 has no space above and below its parts: the words touch its top.\n- n01 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n\nThis is turn 3 of 30.\n\nYou are adding a Text. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 1)\n- n01 (Columns, holding 0)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n01",
+     "p": 0.736
+    },
+    {
+     "label": "n00",
+     "p": 0.264
+    }
+   ],
+   "answer": {
+    "pick": "n01"
+   },
+   "ms": 2136,
+   "tokensIn": 343,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 3,
+   "roundTitle": "Turn 3",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Text inside n01.",
+    "nodes": "n00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Text\""
+   },
+   "pictures": [
+    {
+     "src": "t3/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t3/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t3/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "On both, \"Text\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).",
+     "repair": "atEdge"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "Still holding placeholder words: n02.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 3.8 s."
+  },
+  {
+   "actor": "builder",
+   "round": 4,
+   "roundTitle": "Turn 4",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- On both, \"Text\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- Still holding placeholder words: n02.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n\nThis is turn 4 of 30.\n\nWhat do you do next? Pick one:\n1. give n00 padding left and right (words are at the edge of the screen; now: (not set))\n2. make n02 bigger (the headline does not stand out; now: text-base)\n3. give n00 padding top and bottom (no space above and below; now: (not set))\n4. write the words of n02 (it still says \"Text\")\n5. add a part (a Group, Columns, Text, Image or Button) inside a part\n6. change one setting of a part\n7. write the words of a Text or a Button\n8. undo your last step\n9. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "4",
+     "p": 0.844
+    },
+    {
+     "label": "1",
+     "p": 0.067
+    },
+    {
+     "label": "8",
+     "p": 0.025
+    },
+    {
+     "label": "2",
+     "p": 0.023
+    },
+    {
+     "label": "7",
+     "p": 0.018
+    },
+    {
+     "label": "3",
+     "p": 0.009
+    },
+    {
+     "label": "6",
+     "p": 0.008
+    },
+    {
+     "label": "5",
+     "p": 0.006
+    },
+    {
+     "label": "9",
+     "p": 0.001
+    }
+   ],
+   "answer": {
+    "pick": "4"
+   },
+   "ms": 2399,
+   "tokensIn": 522,
+   "tokensOut": 14
+  },
+  {
+   "actor": "builder",
+   "round": 4,
+   "roundTitle": "Turn 4",
+   "key": "write.text",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- On both, \"Text\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- Still holding placeholder words: n02.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n\nThis is turn 4 of 30.\n\nWrite the words of n02 (Text) for \"Puppy Haven\". This is the headline: three to seven words a visitor reads first, never a description of the page.",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "Find Your Perfect Puppy Today"
+   },
+   "ms": 2191,
+   "tokensIn": 402,
+   "tokensOut": 16
+  },
+  {
+   "actor": "script",
+   "round": 4,
+   "roundTitle": "Turn 4",
+   "key": "write",
+   "did": {
+    "say": "Did it: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu).",
+    "nodes": "n00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\""
+   },
+   "pictures": [
+    {
+     "src": "t4/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t4/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t4/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "On both, \"Find Your Perfect Puppy Today\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).",
+     "repair": "atEdge"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    }
+   ],
+   "note": "Rendered in 2.8 s."
+  },
+  {
+   "actor": "builder",
+   "round": 5,
+   "roundTitle": "Turn 5",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- On both, \"Find Your Perfect Puppy Today\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n\nThis is turn 5 of 30.\n\nWhat do you do next? Pick one:\n1. give n00 padding left and right (words are at the edge of the screen; now: (not set))\n2. make n02 bigger (the headline does not stand out; now: text-base)\n3. give n00 padding top and bottom (no space above and below; now: (not set))\n4. add a part (a Group, Columns, Text, Image or Button) inside a part\n5. change one setting of a part\n6. write the words of a Text or a Button\n7. undo your last step\n8. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.758
+    },
+    {
+     "label": "4",
+     "p": 0.096
+    },
+    {
+     "label": "3",
+     "p": 0.041
+    },
+    {
+     "label": "5",
+     "p": 0.036
+    },
+    {
+     "label": "2",
+     "p": 0.032
+    },
+    {
+     "label": "6",
+     "p": 0.024
+    },
+    {
+     "label": "7",
+     "p": 0.011
+    },
+    {
+     "label": "8",
+     "p": 0.002
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 2431,
+   "tokensIn": 527,
+   "tokensOut": 14
+  },
+  {
+   "actor": "builder",
+   "round": 5,
+   "roundTitle": "Turn 5",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- On both, \"Find Your Perfect Puppy Today\" is 0px from the left edge of the screen. n00 (the whole section) has padding left and right: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 1: added a Group as the whole section\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n\nThis is turn 5 of 30.\n\nYou are fixing this: words are at the edge of the screen. You are changing \"padding left and right\" of n00 (Group): the space inside its left and right edges. It is now: (not set). Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "huge"
+   },
+   "ms": 3619,
+   "tokensIn": 438,
+   "tokensOut": 14
+  },
+  {
+   "actor": "script",
+   "round": 5,
+   "roundTitle": "Turn 5",
+   "key": "set",
+   "did": {
+    "say": "Did it: set padding left and right of n00 to huge (a fix from the menu).",
+    "nodes": "n00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\""
+   },
+   "pictures": [
+    {
+     "src": "t5/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t5/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t5/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    }
+   ],
+   "note": "Rendered in 3.4 s."
+  },
+  {
+   "actor": "builder",
+   "round": 6,
+   "roundTitle": "Turn 6",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n\nThis is turn 6 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. write the words of a Text or a Button\n6. undo your last step\n7. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "3",
+     "p": 0.55
+    },
+    {
+     "label": "2",
+     "p": 0.247
+    },
+    {
+     "label": "5",
+     "p": 0.086
+    },
+    {
+     "label": "1",
+     "p": 0.07
+    },
+    {
+     "label": "6",
+     "p": 0.028
+    },
+    {
+     "label": "4",
+     "p": 0.015
+    },
+    {
+     "label": "7",
+     "p": 0.004
+    }
+   ],
+   "answer": {
+    "pick": "3"
+   },
+   "ms": 2627,
+   "tokensIn": 481,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 6,
+   "roundTitle": "Turn 6",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n\nThis is turn 6 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Group",
+     "p": 0.873
+    },
+    {
+     "label": "Button",
+     "p": 0.057
+    },
+    {
+     "label": "Image",
+     "p": 0.043
+    },
+    {
+     "label": "Columns",
+     "p": 0.018
+    },
+    {
+     "label": "Text",
+     "p": 0.009
+    }
+   ],
+   "answer": {
+    "pick": "Group"
+   },
+   "ms": 2576,
+   "tokensIn": 431,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 6,
+   "roundTitle": "Turn 6",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n\nYOUR LAST STEPS:\n- turn 2: added a Columns inside n00\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n\nThis is turn 6 of 30.\n\nYou are adding a Group. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 1)\n- n01 (Columns, holding 1)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n00",
+     "p": 0.929
+    },
+    {
+     "label": "n01",
+     "p": 0.071
+    }
+   ],
+   "answer": {
+    "pick": "n00"
+   },
+   "ms": 2666,
+   "tokensIn": 411,
+   "tokensOut": 10
+  },
+  {
+   "actor": "script",
+   "round": 6,
+   "roundTitle": "Turn 6",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Group inside n00.",
+    "nodes": "n00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]"
+   },
+   "pictures": [
+    {
+     "src": "t6/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t6/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t6/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "n03 is empty: it shows nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Your last step changed nothing a person can see, on a desktop or on a phone.",
+     "repair": "unchanged"
+    }
+   ],
+   "note": "Rendered in 3.2 s."
+  },
+  {
+   "actor": "builder",
+   "round": 7,
+   "roundTitle": "Turn 7",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n\nThis is turn 7 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. remove the empty parts n03 (they show nothing)\n4. add a part (a Group, Columns, Text, Image or Button) inside a part\n5. change one setting of a part\n6. write the words of a Text or a Button\n7. undo your last step\n8. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "4",
+     "p": 0.786
+    },
+    {
+     "label": "6",
+     "p": 0.067
+    },
+    {
+     "label": "3",
+     "p": 0.036
+    },
+    {
+     "label": "1",
+     "p": 0.032
+    },
+    {
+     "label": "2",
+     "p": 0.029
+    },
+    {
+     "label": "5",
+     "p": 0.023
+    },
+    {
+     "label": "7",
+     "p": 0.021
+    },
+    {
+     "label": "8",
+     "p": 0.008
+    }
+   ],
+   "answer": {
+    "pick": "4"
+   },
+   "ms": 2830,
+   "tokensIn": 548,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 7,
+   "roundTitle": "Turn 7",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n\nThis is turn 7 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Group",
+     "p": 0.373
+    },
+    {
+     "label": "Button",
+     "p": 0.228
+    },
+    {
+     "label": "Text",
+     "p": 0.221
+    },
+    {
+     "label": "Image",
+     "p": 0.157
+    },
+    {
+     "label": "Columns",
+     "p": 0.021
+    }
+   ],
+   "answer": {
+    "pick": "Group"
+   },
+   "ms": 3008,
+   "tokensIn": 483,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 7,
+   "roundTitle": "Turn 7",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03 is empty: it shows nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 3: added a Text inside n01\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n\nThis is turn 7 of 30.\n\nYou are adding a Group. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 2)\n- n01 (Columns, holding 1)\n- n03 (Group, holding 0)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n00",
+     "p": 0.85
+    },
+    {
+     "label": "n03",
+     "p": 0.14
+    },
+    {
+     "label": "n01",
+     "p": 0.01
+    }
+   ],
+   "answer": {
+    "pick": "n00"
+   },
+   "ms": 3293,
+   "tokensIn": 475,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 7,
+   "roundTitle": "Turn 7",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Group inside n00.",
+    "nodes": "n00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]"
+   },
+   "pictures": [
+    {
+     "src": "t7/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t7/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t7/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Your last step changed nothing a person can see, on a desktop or on a phone.",
+     "repair": "unchanged"
+    }
+   ],
+   "note": "Rendered in 2.7 s."
+  },
+  {
+   "actor": "builder",
+   "round": 8,
+   "roundTitle": "Turn 8",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n- turn 7: added a Group inside n00\n\nThis is turn 8 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. remove the empty parts n03, n04 (they show nothing)\n4. add a part (a Group, Columns, Text, Image or Button) inside a part\n5. change one setting of a part\n6. write the words of a Text or a Button\n7. undo your last step\n8. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "4",
+     "p": 0.581
+    },
+    {
+     "label": "6",
+     "p": 0.21
+    },
+    {
+     "label": "1",
+     "p": 0.064
+    },
+    {
+     "label": "2",
+     "p": 0.052
+    },
+    {
+     "label": "3",
+     "p": 0.041
+    },
+    {
+     "label": "5",
+     "p": 0.033
+    },
+    {
+     "label": "7",
+     "p": 0.015
+    },
+    {
+     "label": "8",
+     "p": 0.005
+    }
+   ],
+   "answer": {
+    "pick": "4"
+   },
+   "ms": 2675,
+   "tokensIn": 571,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 8,
+   "roundTitle": "Turn 8",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n- turn 7: added a Group inside n00\n\nThis is turn 8 of 30.\n\nYou are adding a part. Which kind?\n- Text (words) — still missing\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Text",
+     "p": 0.35
+    },
+    {
+     "label": "Group",
+     "p": 0.281
+    },
+    {
+     "label": "Image",
+     "p": 0.202
+    },
+    {
+     "label": "Button",
+     "p": 0.127
+    },
+    {
+     "label": "Columns",
+     "p": 0.039
+    }
+   ],
+   "answer": {
+    "pick": "Text"
+   },
+   "ms": 2716,
+   "tokensIn": 502,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 8,
+   "roundTitle": "Turn 8",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a line under the headline (a Text), a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 4: wrote n02: \"Find Your Perfect Puppy Today\" (a fix from the menu)\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n- turn 7: added a Group inside n00\n\nThis is turn 8 of 30.\n\nYou are adding a Text. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 3)\n- n01 (Columns, holding 1)\n- n03 (Group, holding 0)\n- n04 (Group, holding 0)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n00",
+     "p": 0.52
+    },
+    {
+     "label": "n03",
+     "p": 0.346
+    },
+    {
+     "label": "n01",
+     "p": 0.073
+    },
+    {
+     "label": "n04",
+     "p": 0.061
+    }
+   ],
+   "answer": {
+    "pick": "n00"
+   },
+   "ms": 3802,
+   "tokensIn": 506,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 8,
+   "roundTitle": "Turn 8",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Text inside n00.",
+    "nodes": "n00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\""
+   },
+   "pictures": [
+    {
+     "src": "t8/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t8/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t8/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "On both, \"Find Your Perfect Puppy Today\" and \"Text\" are touching (0px apart). The space between them is the gap of n00, which holds both: (not set).",
+     "repair": "touching"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Still holding placeholder words: n05.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 2.7 s."
+  },
+  {
+   "actor": "builder",
+   "round": 9,
+   "roundTitle": "Turn 9",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- On both, \"Find Your Perfect Puppy Today\" and \"Text\" are touching (0px apart). The space between them is the gap of n00, which holds both: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n05.\n\nYOUR LAST STEPS:\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n- turn 7: added a Group inside n00\n- turn 8: added a Text inside n00\n\nThis is turn 9 of 30.\n\nWhat do you do next? Pick one:\n1. give n00 more space between its parts (words are touching; now: (not set))\n2. make n02 bigger (the headline does not stand out; now: text-base)\n3. give n00 padding top and bottom (no space above and below; now: (not set))\n4. remove the empty parts n03, n04 (they show nothing)\n5. write the words of n05 (it still says \"Text\")\n6. add a part (a Group, Columns, Text, Image or Button) inside a part\n7. change one setting of a part\n8. write the words of a Text or a Button\n9. undo your last step\n10. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.311
+    },
+    {
+     "label": "10",
+     "p": 0.311
+    },
+    {
+     "label": "5",
+     "p": 0.149
+    },
+    {
+     "label": "6",
+     "p": 0.128
+    },
+    {
+     "label": "2",
+     "p": 0.029
+    },
+    {
+     "label": "8",
+     "p": 0.023
+    },
+    {
+     "label": "3",
+     "p": 0.018
+    },
+    {
+     "label": "7",
+     "p": 0.015
+    },
+    {
+     "label": "4",
+     "p": 0.012
+    },
+    {
+     "label": "9",
+     "p": 0.004
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 2871,
+   "tokensIn": 650,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 9,
+   "roundTitle": "Turn 9",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- On both, \"Find Your Perfect Puppy Today\" and \"Text\" are touching (0px apart). The space between them is the gap of n00, which holds both: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n05.\n\nYOUR LAST STEPS:\n- turn 5: set padding left and right of n00 to huge (a fix from the menu)\n- turn 6: added a Group inside n00\n- turn 7: added a Group inside n00\n- turn 8: added a Text inside n00\n\nThis is turn 9 of 30.\n\nYou are fixing this: words are touching. You are changing \"gap\" of n00 (Group): the space between its parts. It is now: (not set). Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "huge"
+   },
+   "ms": 2961,
+   "tokensIn": 517,
+   "tokensOut": 14
+  },
+  {
+   "actor": "script",
+   "round": 9,
+   "roundTitle": "Turn 9",
+   "key": "set",
+   "did": {
+    "say": "Did it: set gap of n00 to huge (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\""
+   },
+   "pictures": [
+    {
+     "src": "t9/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t9/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t9/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a button (a Button), a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Still holding placeholder words: n05.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 3.0 s."
+  },
+  {
+   "actor": "builder",
+   "round": 10,
+   "roundTitle": "Turn 10",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n05.\n\nYOUR LAST STEPS:\n- turn 6: added a Group inside n00\n- turn 7: added a Group inside n00\n- turn 8: added a Text inside n00\n- turn 9: set gap of n00 to huge (a fix from the menu)\n\nThis is turn 10 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. remove the empty parts n03, n04 (they show nothing)\n4. write the words of n05 (it still says \"Text\")\n5. add a part (a Group, Columns, Text, Image or Button) inside a part\n6. change one setting of a part\n7. write the words of a Text or a Button\n8. undo your last step\n9. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "5",
+     "p": 0.837
+    },
+    {
+     "label": "7",
+     "p": 0.065
+    },
+    {
+     "label": "3",
+     "p": 0.02
+    },
+    {
+     "label": "1",
+     "p": 0.017
+    },
+    {
+     "label": "4",
+     "p": 0.017
+    },
+    {
+     "label": "6",
+     "p": 0.015
+    },
+    {
+     "label": "2",
+     "p": 0.014
+    },
+    {
+     "label": "8",
+     "p": 0.013
+    },
+    {
+     "label": "9",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "5"
+   },
+   "ms": 2865,
+   "tokensIn": 587,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 10,
+   "roundTitle": "Turn 10",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n05.\n\nYOUR LAST STEPS:\n- turn 6: added a Group inside n00\n- turn 7: added a Group inside n00\n- turn 8: added a Text inside n00\n- turn 9: set gap of n00 to huge (a fix from the menu)\n\nThis is turn 10 of 30.\n\nYou are adding a part. Which kind?\n- Button — still missing\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Text (words)\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Button",
+     "p": 0.871
+    },
+    {
+     "label": "Group",
+     "p": 0.07
+    },
+    {
+     "label": "Image",
+     "p": 0.037
+    },
+    {
+     "label": "Columns",
+     "p": 0.017
+    },
+    {
+     "label": "Text",
+     "p": 0.004
+    }
+   ],
+   "answer": {
+    "pick": "Button"
+   },
+   "ms": 2761,
+   "tokensIn": 498,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 10,
+   "roundTitle": "Turn 10",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a button (a Button), a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n05.\n\nYOUR LAST STEPS:\n- turn 6: added a Group inside n00\n- turn 7: added a Group inside n00\n- turn 8: added a Text inside n00\n- turn 9: set gap of n00 to huge (a fix from the menu)\n\nThis is turn 10 of 30.\n\nYou are adding a Button. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 4)\n- n01 (Columns, holding 1)\n- n03 (Group, holding 0)\n- n04 (Group, holding 0)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n00",
+     "p": 0.744
+    },
+    {
+     "label": "n03",
+     "p": 0.174
+    },
+    {
+     "label": "n04",
+     "p": 0.071
+    },
+    {
+     "label": "n01",
+     "p": 0.011
+    }
+   ],
+   "answer": {
+    "pick": "n00"
+   },
+   "ms": 3570,
+   "tokensIn": 505,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 10,
+   "roundTitle": "Turn 10",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Button inside n00.",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\""
+   },
+   "pictures": [
+    {
+     "src": "t10/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t10/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t10/facts.json",
+   "findings": [
+    {
+     "say": "Not there yet: a photo (an Image).",
+     "repair": "goal"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Still holding placeholder words: n05, n06.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 3.3 s."
+  },
+  {
+   "actor": "builder",
+   "round": 11,
+   "roundTitle": "Turn 11",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n05, n06.\n\nYOUR LAST STEPS:\n- turn 7: added a Group inside n00\n- turn 8: added a Text inside n00\n- turn 9: set gap of n00 to huge (a fix from the menu)\n- turn 10: added a Button inside n00\n\nThis is turn 11 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. remove the empty parts n03, n04 (they show nothing)\n4. write the words of n05 (it still says \"Text\")\n5. add a part (a Group, Columns, Text, Image or Button) inside a part\n6. change one setting of a part\n7. write the words of a Text or a Button\n8. undo your last step\n9. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "5",
+     "p": 0.627
+    },
+    {
+     "label": "1",
+     "p": 0.144
+    },
+    {
+     "label": "2",
+     "p": 0.106
+    },
+    {
+     "label": "3",
+     "p": 0.064
+    },
+    {
+     "label": "4",
+     "p": 0.022
+    },
+    {
+     "label": "6",
+     "p": 0.019
+    },
+    {
+     "label": "7",
+     "p": 0.014
+    },
+    {
+     "label": "8",
+     "p": 0.003
+    },
+    {
+     "label": "9",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "5"
+   },
+   "ms": 3113,
+   "tokensIn": 639,
+   "tokensOut": 8
+  },
+  {
+   "actor": "builder",
+   "round": 11,
+   "roundTitle": "Turn 11",
+   "key": "add.kind",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n05, n06.\n\nYOUR LAST STEPS:\n- turn 7: added a Group inside n00\n- turn 8: added a Text inside n00\n- turn 9: set gap of n00 to huge (a fix from the menu)\n- turn 10: added a Button inside n00\n\nThis is turn 11 of 30.\n\nYou are adding a part. Which kind?\n- Image (the photo) — still missing\n- Columns (two columns side by side, one under the other on a phone)\n- Text (words)\n- Button\n- Group (a box that holds other parts)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "Image",
+     "p": 0.91
+    },
+    {
+     "label": "Group",
+     "p": 0.069
+    },
+    {
+     "label": "Columns",
+     "p": 0.019
+    },
+    {
+     "label": "Text",
+     "p": 0.003
+    },
+    {
+     "label": "Button",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "Image"
+   },
+   "ms": 2328,
+   "tokensIn": 547,
+   "tokensOut": 8
+  },
+  {
+   "actor": "builder",
+   "round": 11,
+   "roundTitle": "Turn 11",
+   "key": "add.inside",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n\nWHAT THE LAST LOOK FOUND:\n- Not there yet: a photo (an Image).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n05, n06.\n\nYOUR LAST STEPS:\n- turn 7: added a Group inside n00\n- turn 8: added a Text inside n00\n- turn 9: set gap of n00 to huge (a fix from the menu)\n- turn 10: added a Button inside n00\n\nThis is turn 11 of 30.\n\nYou are adding a Image. Inside which part? These are the parts that can take it:\n- n00 (Group, holding 5)\n- n01 (Columns, holding 1)\n- n03 (Group, holding 0)\n- n04 (Group, holding 0)",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "n00",
+     "p": 0.585
+    },
+    {
+     "label": "n01",
+     "p": 0.209
+    },
+    {
+     "label": "n04",
+     "p": 0.175
+    },
+    {
+     "label": "n03",
+     "p": 0.03
+    }
+   ],
+   "answer": {
+    "pick": "n00"
+   },
+   "ms": 3734,
+   "tokensIn": 557,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 11,
+   "roundTitle": "Turn 11",
+   "key": "add",
+   "did": {
+    "say": "Did it: added a Image inside n00.",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n  n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]"
+   },
+   "pictures": [
+    {
+     "src": "t11/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t11/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t11/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "The photo n07 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.",
+     "repair": "photoRight"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Still holding placeholder words: n05, n06.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 2.8 s."
+  },
+  {
+   "actor": "builder",
+   "round": 12,
+   "roundTitle": "Turn 12",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n  n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- The photo n07 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n05, n06.\n\nYOUR LAST STEPS:\n- turn 8: added a Text inside n00\n- turn 9: set gap of n00 to huge (a fix from the menu)\n- turn 10: added a Button inside n00\n- turn 11: added a Image inside n00\n\nThis is turn 12 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. put n02 in a Group of its own, so the words column of n01 can hold the line and the button too\n4. write the words of n05 (it still says \"Text\")\n5. add a part (a Group, Columns, Text, Image or Button) inside a part\n6. change one setting of a part\n7. write the words of a Text or a Button\n8. undo your last step\n9. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "4",
+     "p": 0.616
+    },
+    {
+     "label": "3",
+     "p": 0.197
+    },
+    {
+     "label": "7",
+     "p": 0.052
+    },
+    {
+     "label": "5",
+     "p": 0.036
+    },
+    {
+     "label": "2",
+     "p": 0.032
+    },
+    {
+     "label": "6",
+     "p": 0.031
+    },
+    {
+     "label": "1",
+     "p": 0.019
+    },
+    {
+     "label": "8",
+     "p": 0.017
+    },
+    {
+     "label": "9",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "4"
+   },
+   "ms": 3041,
+   "tokensIn": 731,
+   "tokensOut": 8
+  },
+  {
+   "actor": "builder",
+   "round": 12,
+   "roundTitle": "Turn 12",
+   "key": "write.text",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Text\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n  n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- The photo n07 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n05, n06.\n\nYOUR LAST STEPS:\n- turn 8: added a Text inside n00\n- turn 9: set gap of n00 to huge (a fix from the menu)\n- turn 10: added a Button inside n00\n- turn 11: added a Image inside n00\n\nThis is turn 12 of 30.\n\nWrite the words of n05 (Text) for \"Puppy Haven\". This is the line under the headline: one sentence of ten to twenty words that says what a visitor gets here. It must not repeat the headline.",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "Welcome to Puppy Haven, your trusted source for finding loving and wonderful companions for your family."
+   },
+   "ms": 1675,
+   "tokensIn": 617,
+   "tokensOut": 28
+  },
+  {
+   "actor": "script",
+   "round": 12,
+   "roundTitle": "Turn 12",
+   "key": "write",
+   "did": {
+    "say": "Did it: wrote n05: \"Welcome to Puppy Haven, your trusted source for finding loving and wonderful companions for your family.\" (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n  n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]"
+   },
+   "pictures": [
+    {
+     "src": "t12/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t12/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t12/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "The photo n07 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.",
+     "repair": "photoRight"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Still holding placeholder words: n06.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 2.9 s."
+  },
+  {
+   "actor": "builder",
+   "round": 13,
+   "roundTitle": "Turn 13",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n  n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- The photo n07 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n06.\n\nYOUR LAST STEPS:\n- turn 9: set gap of n00 to huge (a fix from the menu)\n- turn 10: added a Button inside n00\n- turn 11: added a Image inside n00\n- turn 12: wrote n05: \"Welcome to Puppy Haven, your trusted source for finding loving and wonderful companions for your family.\" (a fix from the menu)\n\nThis is turn 13 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. put n02 in a Group of its own, so the words column of n01 can hold the line and the button too\n4. write the words of n06 (it still says \"Button\")\n5. add a part (a Group, Columns, Text, Image or Button) inside a part\n6. change one setting of a part\n7. write the words of a Text or a Button\n8. undo your last step\n9. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "3",
+     "p": 0.573
+    },
+    {
+     "label": "4",
+     "p": 0.102
+    },
+    {
+     "label": "6",
+     "p": 0.081
+    },
+    {
+     "label": "7",
+     "p": 0.075
+    },
+    {
+     "label": "5",
+     "p": 0.057
+    },
+    {
+     "label": "2",
+     "p": 0.053
+    },
+    {
+     "label": "1",
+     "p": 0.029
+    },
+    {
+     "label": "8",
+     "p": 0.025
+    },
+    {
+     "label": "9",
+     "p": 0.005
+    }
+   ],
+   "answer": {
+    "pick": "3"
+   },
+   "ms": 2518,
+   "tokensIn": 762,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 13,
+   "roundTitle": "Turn 13",
+   "key": "wrap",
+   "did": {
+    "say": "Did it: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n  n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]"
+   },
+   "pictures": [
+    {
+     "src": "t13/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t13/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t13/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "The photo n07 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.",
+     "repair": "photoRight"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Your last step changed nothing a person can see, on a desktop or on a phone.",
+     "repair": "unchanged"
+    },
+    {
+     "say": "Still holding placeholder words: n06.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 2.9 s."
+  },
+  {
+   "actor": "builder",
+   "round": 14,
+   "roundTitle": "Turn 14",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n  n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- The photo n07 is not on the right of the words: for that, one Columns must hold the words in its first column and the photo in its second.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n- Still holding placeholder words: n06.\n\nYOUR LAST STEPS:\n- turn 10: added a Button inside n00\n- turn 11: added a Image inside n00\n- turn 12: wrote n05: \"Welcome to Puppy Haven, your trusted source for finding loving and wonderful companions for your family.\" (a fix from the menu)\n- turn 13: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n\nThis is turn 14 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. move the photo n07 into n01 as its second column, beside the words\n4. write the words of n06 (it still says \"Button\")\n5. add a part (a Group, Columns, Text, Image or Button) inside a part\n6. change one setting of a part\n7. write the words of a Text or a Button\n8. undo your last step\n9. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "3",
+     "p": 0.905
+    },
+    {
+     "label": "6",
+     "p": 0.024
+    },
+    {
+     "label": "2",
+     "p": 0.016
+    },
+    {
+     "label": "5",
+     "p": 0.015
+    },
+    {
+     "label": "4",
+     "p": 0.013
+    },
+    {
+     "label": "7",
+     "p": 0.012
+    },
+    {
+     "label": "1",
+     "p": 0.008
+    },
+    {
+     "label": "8",
+     "p": 0.006
+    },
+    {
+     "label": "9",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "3"
+   },
+   "ms": 4259,
+   "tokensIn": 808,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 14,
+   "roundTitle": "Turn 14",
+   "key": "move",
+   "did": {
+    "say": "Did it: move the photo n07 into n01 as its second column, beside the words (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\""
+   },
+   "pictures": [
+    {
+     "src": "t14/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t14/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t14/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "The line under the headline (n05) is not straight under it: n07 comes between them.",
+     "repair": "order"
+    },
+    {
+     "say": "the line under the headline n05 and the button n06 are not in the words column, beside the photo.",
+     "repair": "together"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    },
+    {
+     "say": "Still holding placeholder words: n06.",
+     "repair": "words"
+    }
+   ],
+   "note": "Rendered in 3.5 s."
+  },
+  {
+   "actor": "builder",
+   "round": 15,
+   "roundTitle": "Turn 15",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- The line under the headline (n05) is not straight under it: n07 comes between them.\n- the line under the headline n05 and the button n06 are not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n06.\n\nYOUR LAST STEPS:\n- turn 11: added a Image inside n00\n- turn 12: wrote n05: \"Welcome to Puppy Haven, your trusted source for finding loving and wonderful companions for your family.\" (a fix from the menu)\n- turn 13: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n- turn 14: move the photo n07 into n01 as its second column, beside the words (a fix from the menu)\n\nThis is turn 15 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. move the line under it n05 into n08, the words column\n4. write the words of n06 (it still says \"Button\")\n5. add a part (a Group, Columns, Text, Image or Button) inside a part\n6. change one setting of a part\n7. write the words of a Text or a Button\n8. undo your last step\n9. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "4",
+     "p": 0.658
+    },
+    {
+     "label": "2",
+     "p": 0.115
+    },
+    {
+     "label": "7",
+     "p": 0.071
+    },
+    {
+     "label": "1",
+     "p": 0.054
+    },
+    {
+     "label": "6",
+     "p": 0.036
+    },
+    {
+     "label": "3",
+     "p": 0.027
+    },
+    {
+     "label": "8",
+     "p": 0.027
+    },
+    {
+     "label": "5",
+     "p": 0.011
+    },
+    {
+     "label": "9",
+     "p": 0.002
+    }
+   ],
+   "answer": {
+    "pick": "4"
+   },
+   "ms": 3354,
+   "tokensIn": 820,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 15,
+   "roundTitle": "Turn 15",
+   "key": "write.text",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Button\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- The line under the headline (n05) is not straight under it: n07 comes between them.\n- the line under the headline n05 and the button n06 are not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n- Still holding placeholder words: n06.\n\nYOUR LAST STEPS:\n- turn 11: added a Image inside n00\n- turn 12: wrote n05: \"Welcome to Puppy Haven, your trusted source for finding loving and wonderful companions for your family.\" (a fix from the menu)\n- turn 13: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n- turn 14: move the photo n07 into n01 as its second column, beside the words (a fix from the menu)\n\nThis is turn 15 of 30.\n\nWrite the words of n06 (Button) for \"Puppy Haven\". Two to four words, a verb first.",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "Adopt Now"
+   },
+   "ms": 876,
+   "tokensIn": 696,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 15,
+   "roundTitle": "Turn 15",
+   "key": "write",
+   "did": {
+    "say": "Did it: wrote n06: \"Adopt Now\" (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\""
+   },
+   "pictures": [
+    {
+     "src": "t15/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t15/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t15/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The section n00 has no space above and below its parts: the words touch its top.",
+     "repair": "airY"
+    },
+    {
+     "say": "The line under the headline (n05) is not straight under it: n07 comes between them.",
+     "repair": "order"
+    },
+    {
+     "say": "the line under the headline n05 and the button n06 are not in the words column, beside the photo.",
+     "repair": "together"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 2.8 s."
+  },
+  {
+   "actor": "builder",
+   "round": 16,
+   "roundTitle": "Turn 16",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- The line under the headline (n05) is not straight under it: n07 comes between them.\n- the line under the headline n05 and the button n06 are not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 12: wrote n05: \"Welcome to Puppy Haven, your trusted source for finding loving and wonderful companions for your family.\" (a fix from the menu)\n- turn 13: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n- turn 14: move the photo n07 into n01 as its second column, beside the words (a fix from the menu)\n- turn 15: wrote n06: \"Adopt Now\" (a fix from the menu)\n\nThis is turn 16 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. give n00 padding top and bottom (no space above and below; now: (not set))\n3. move the line under it n05 into n08, the words column\n4. add a part (a Group, Columns, Text, Image or Button) inside a part\n5. change one setting of a part\n6. write the words of a Text or a Button\n7. undo your last step\n8. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "2",
+     "p": 0.572
+    },
+    {
+     "label": "1",
+     "p": 0.159
+    },
+    {
+     "label": "3",
+     "p": 0.118
+    },
+    {
+     "label": "5",
+     "p": 0.077
+    },
+    {
+     "label": "6",
+     "p": 0.034
+    },
+    {
+     "label": "4",
+     "p": 0.031
+    },
+    {
+     "label": "7",
+     "p": 0.005
+    },
+    {
+     "label": "8",
+     "p": 0.004
+    }
+   ],
+   "answer": {
+    "pick": "2"
+   },
+   "ms": 2664,
+   "tokensIn": 802,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 16,
+   "roundTitle": "Turn 16",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding right space-12 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The section n00 has no space above and below its parts: the words touch its top.\n- The line under the headline (n05) is not straight under it: n07 comes between them.\n- the line under the headline n05 and the button n06 are not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 12: wrote n05: \"Welcome to Puppy Haven, your trusted source for finding loving and wonderful companions for your family.\" (a fix from the menu)\n- turn 13: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n- turn 14: move the photo n07 into n01 as its second column, beside the words (a fix from the menu)\n- turn 15: wrote n06: \"Adopt Now\" (a fix from the menu)\n\nThis is turn 16 of 30.\n\nYou are fixing this: no space above and below. You are changing \"padding top and bottom\" of n00 (Group): the space inside its top and bottom edges. It is now: (not set). Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "huge"
+   },
+   "ms": 1353,
+   "tokensIn": 718,
+   "tokensOut": 14
+  },
+  {
+   "actor": "script",
+   "round": 16,
+   "roundTitle": "Turn 16",
+   "key": "set",
+   "did": {
+    "say": "Did it: set padding top and bottom of n00 to huge (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\""
+   },
+   "pictures": [
+    {
+     "src": "t16/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t16/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t16/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "The line under the headline (n05) is not straight under it: n07 comes between them.",
+     "repair": "order"
+    },
+    {
+     "say": "the line under the headline n05 and the button n06 are not in the words column, beside the photo.",
+     "repair": "together"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 2.9 s."
+  },
+  {
+   "actor": "builder",
+   "round": 17,
+   "roundTitle": "Turn 17",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- The line under the headline (n05) is not straight under it: n07 comes between them.\n- the line under the headline n05 and the button n06 are not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 13: put n02 in a Group of its own, so the words column of n01 can hold the line and the button too (a fix from the menu)\n- turn 14: move the photo n07 into n01 as its second column, beside the words (a fix from the menu)\n- turn 15: wrote n06: \"Adopt Now\" (a fix from the menu)\n- turn 16: set padding top and bottom of n00 to huge (a fix from the menu)\n\nThis is turn 17 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. move the line under it n05 into n08, the words column\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. write the words of a Text or a Button\n6. undo your last step\n7. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "2",
+     "p": 0.354
+    },
+    {
+     "label": "1",
+     "p": 0.323
+    },
+    {
+     "label": "3",
+     "p": 0.121
+    },
+    {
+     "label": "4",
+     "p": 0.08
+    },
+    {
+     "label": "5",
+     "p": 0.068
+    },
+    {
+     "label": "6",
+     "p": 0.038
+    },
+    {
+     "label": "7",
+     "p": 0.017
+    }
+   ],
+   "answer": {
+    "pick": "2"
+   },
+   "ms": 3456,
+   "tokensIn": 753,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 17,
+   "roundTitle": "Turn 17",
+   "key": "move",
+   "did": {
+    "say": "Did it: move the line under it n05 into n08, the words column (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\""
+   },
+   "pictures": [
+    {
+     "src": "t17/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t17/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t17/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "On both, \"Find Your Perfect Puppy Today\" and \"Welcome to Puppy Haven, your…\" are touching (0px apart). The space between them is the gap of n08, which holds both: (not set).",
+     "repair": "touching"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "the button n06 is not in the words column, beside the photo.",
+     "repair": "together"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 3.4 s."
+  },
+  {
+   "actor": "builder",
+   "round": 18,
+   "roundTitle": "Turn 18",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- On both, \"Find Your Perfect Puppy Today\" and \"Welcome to Puppy Haven, your…\" are touching (0px apart). The space between them is the gap of n08, which holds both: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- the button n06 is not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 14: move the photo n07 into n01 as its second column, beside the words (a fix from the menu)\n- turn 15: wrote n06: \"Adopt Now\" (a fix from the menu)\n- turn 16: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 17: move the line under it n05 into n08, the words column (a fix from the menu)\n\nThis is turn 18 of 30.\n\nWhat do you do next? Pick one:\n1. give n08 more space between its parts (words are touching; now: (not set))\n2. make n02 bigger (the headline does not stand out; now: text-base)\n3. move the button n06 into n08, the words column\n4. add a part (a Group, Columns, Text, Image or Button) inside a part\n5. change one setting of a part\n6. write the words of a Text or a Button\n7. undo your last step\n8. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.833
+    },
+    {
+     "label": "3",
+     "p": 0.044
+    },
+    {
+     "label": "2",
+     "p": 0.04
+    },
+    {
+     "label": "6",
+     "p": 0.024
+    },
+    {
+     "label": "4",
+     "p": 0.023
+    },
+    {
+     "label": "5",
+     "p": 0.02
+    },
+    {
+     "label": "7",
+     "p": 0.009
+    },
+    {
+     "label": "8",
+     "p": 0.006
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 3812,
+   "tokensIn": 777,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 18,
+   "roundTitle": "Turn 18",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- On both, \"Find Your Perfect Puppy Today\" and \"Welcome to Puppy Haven, your…\" are touching (0px apart). The space between them is the gap of n08, which holds both: (not set).\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- the button n06 is not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 14: move the photo n07 into n01 as its second column, beside the words (a fix from the menu)\n- turn 15: wrote n06: \"Adopt Now\" (a fix from the menu)\n- turn 16: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 17: move the line under it n05 into n08, the words column (a fix from the menu)\n\nThis is turn 18 of 30.\n\nYou are fixing this: words are touching. You are changing \"gap\" of n08 (Group): the space between its parts. It is now: (not set). Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": null,
+   "answer": {
+    "pick": "huge"
+   },
+   "ms": 1694,
+   "tokensIn": 688,
+   "tokensOut": 14
+  },
+  {
+   "actor": "script",
+   "round": 18,
+   "roundTitle": "Turn 18",
+   "key": "set",
+   "did": {
+    "say": "Did it: set gap of n08 to huge (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\""
+   },
+   "pictures": [
+    {
+     "src": "t18/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t18/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t18/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-base): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "the button n06 is not in the words column, beside the photo.",
+     "repair": "together"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 3.6 s."
+  },
+  {
+   "actor": "builder",
+   "round": 19,
+   "roundTitle": "Turn 19",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- the button n06 is not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 15: wrote n06: \"Adopt Now\" (a fix from the menu)\n- turn 16: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 17: move the line under it n05 into n08, the words column (a fix from the menu)\n- turn 18: set gap of n08 to huge (a fix from the menu)\n\nThis is turn 19 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-base)\n2. move the button n06 into n08, the words column\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. write the words of a Text or a Button\n6. undo your last step\n7. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.547
+    },
+    {
+     "label": "2",
+     "p": 0.306
+    },
+    {
+     "label": "4",
+     "p": 0.052
+    },
+    {
+     "label": "3",
+     "p": 0.05
+    },
+    {
+     "label": "6",
+     "p": 0.027
+    },
+    {
+     "label": "5",
+     "p": 0.017
+    },
+    {
+     "label": "7",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 3427,
+   "tokensIn": 702,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 19,
+   "roundTitle": "Turn 19",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size text-base, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-base): it does not stand out.\n- the button n06 is not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 15: wrote n06: \"Adopt Now\" (a fix from the menu)\n- turn 16: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 17: move the line under it n05 into n08, the words column (a fix from the menu)\n- turn 18: set gap of n08 to huge (a fix from the menu)\n\nThis is turn 19 of 30.\n\nYou are fixing this: the headline does not stand out. You are changing \"size\" of n02 (Text): how big the words are. It is now: text-base. Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "text-lg",
+     "p": 0.5
+    },
+    {
+     "label": "text-xl",
+     "p": 0.5
+    },
+    {
+     "label": "display-sm",
+     "p": 0
+    },
+    {
+     "label": "display-md",
+     "p": 0
+    },
+    {
+     "label": "display-lg",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "text-xl"
+   },
+   "ms": 1278,
+   "tokensIn": 639,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 19,
+   "roundTitle": "Turn 19",
+   "key": "set",
+   "did": {
+    "say": "Did it: set size of n02 to text-xl (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size text-xl, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\""
+   },
+   "pictures": [
+    {
+     "src": "t19/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t19/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t19/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "The headline n02 is the size of ordinary words (text-xl): it does not stand out.",
+     "repair": "hierarchy"
+    },
+    {
+     "say": "the button n06 is not in the words column, beside the photo.",
+     "repair": "together"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 3.9 s."
+  },
+  {
+   "actor": "builder",
+   "round": 20,
+   "roundTitle": "Turn 20",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size text-xl, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-xl): it does not stand out.\n- the button n06 is not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 16: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 17: move the line under it n05 into n08, the words column (a fix from the menu)\n- turn 18: set gap of n08 to huge (a fix from the menu)\n- turn 19: set size of n02 to text-xl (a fix from the menu)\n\nThis is turn 20 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 bigger (the headline does not stand out; now: text-xl)\n2. move the button n06 into n08, the words column\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. write the words of a Text or a Button\n6. undo your last step\n7. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.822
+    },
+    {
+     "label": "2",
+     "p": 0.046
+    },
+    {
+     "label": "4",
+     "p": 0.044
+    },
+    {
+     "label": "6",
+     "p": 0.033
+    },
+    {
+     "label": "3",
+     "p": 0.028
+    },
+    {
+     "label": "5",
+     "p": 0.021
+    },
+    {
+     "label": "7",
+     "p": 0.006
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 2857,
+   "tokensIn": 703,
+   "tokensOut": 13
+  },
+  {
+   "actor": "builder",
+   "round": 20,
+   "roundTitle": "Turn 20",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size text-xl, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- The headline n02 is the size of ordinary words (text-xl): it does not stand out.\n- the button n06 is not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 16: set padding top and bottom of n00 to huge (a fix from the menu)\n- turn 17: move the line under it n05 into n08, the words column (a fix from the menu)\n- turn 18: set gap of n08 to huge (a fix from the menu)\n- turn 19: set size of n02 to text-xl (a fix from the menu)\n\nThis is turn 20 of 30.\n\nYou are fixing this: the headline does not stand out. You are changing \"size\" of n02 (Text): how big the words are. It is now: text-xl. Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "display-lg",
+     "p": 1
+    },
+    {
+     "label": "display-sm",
+     "p": 0
+    },
+    {
+     "label": "display-md",
+     "p": 0
+    }
+   ],
+   "answer": {
+    "pick": "display-lg"
+   },
+   "ms": 2180,
+   "tokensIn": 640,
+   "tokensOut": 15
+  },
+  {
+   "actor": "script",
+   "round": 20,
+   "roundTitle": "Turn 20",
+   "key": "set",
+   "did": {
+    "say": "Did it: set size of n02 to display-lg (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\""
+   },
+   "pictures": [
+    {
+     "src": "t20/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t20/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t20/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "On a desktop, the headline n02 breaks onto 3 lines: it is too big for its column.",
+     "repair": "headlineWraps"
+    },
+    {
+     "say": "the button n06 is not in the words column, beside the photo.",
+     "repair": "together"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 3.5 s."
+  },
+  {
+   "actor": "builder",
+   "round": 21,
+   "roundTitle": "Turn 21",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- On a desktop, the headline n02 breaks onto 3 lines: it is too big for its column.\n- the button n06 is not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 17: move the line under it n05 into n08, the words column (a fix from the menu)\n- turn 18: set gap of n08 to huge (a fix from the menu)\n- turn 19: set size of n02 to text-xl (a fix from the menu)\n- turn 20: set size of n02 to display-lg (a fix from the menu)\n\nThis is turn 21 of 30.\n\nWhat do you do next? Pick one:\n1. make n02 a little smaller (it breaks onto 3 lines on a desktop; now: display-lg)\n2. move the button n06 into n08, the words column\n3. add a part (a Group, Columns, Text, Image or Button) inside a part\n4. change one setting of a part\n5. write the words of a Text or a Button\n6. undo your last step\n7. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.853
+    },
+    {
+     "label": "2",
+     "p": 0.045
+    },
+    {
+     "label": "4",
+     "p": 0.031
+    },
+    {
+     "label": "3",
+     "p": 0.026
+    },
+    {
+     "label": "6",
+     "p": 0.026
+    },
+    {
+     "label": "5",
+     "p": 0.013
+    },
+    {
+     "label": "7",
+     "p": 0.005
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 2856,
+   "tokensIn": 708,
+   "tokensOut": 8
+  },
+  {
+   "actor": "builder",
+   "round": 21,
+   "roundTitle": "Turn 21",
+   "key": "set.value",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-lg, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- On a desktop, the headline n02 breaks onto 3 lines: it is too big for its column.\n- the button n06 is not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 17: move the line under it n05 into n08, the words column (a fix from the menu)\n- turn 18: set gap of n08 to huge (a fix from the menu)\n- turn 19: set size of n02 to text-xl (a fix from the menu)\n- turn 20: set size of n02 to display-lg (a fix from the menu)\n\nThis is turn 21 of 30.\n\nYou are fixing this: it breaks onto 3 lines on a desktop. You are changing \"size\" of n02 (Text): how big the words are. It is now: display-lg. Change it to:",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "display-md",
+     "p": 1
+    }
+   ],
+   "answer": {
+    "pick": "display-md"
+   },
+   "ms": 1687,
+   "tokensIn": 643,
+   "tokensOut": 10
+  },
+  {
+   "actor": "script",
+   "round": 21,
+   "roundTitle": "Turn 21",
+   "key": "set",
+   "did": {
+    "say": "Did it: set size of n02 to display-md (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-md, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\""
+   },
+   "pictures": [
+    {
+     "src": "t21/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t21/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t21/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "the button n06 is not in the words column, beside the photo.",
+     "repair": "together"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 4.1 s."
+  },
+  {
+   "actor": "builder",
+   "round": 22,
+   "roundTitle": "Turn 22",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-md, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n  n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- the button n06 is not in the words column, beside the photo.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 18: set gap of n08 to huge (a fix from the menu)\n- turn 19: set size of n02 to text-xl (a fix from the menu)\n- turn 20: set size of n02 to display-lg (a fix from the menu)\n- turn 21: set size of n02 to display-md (a fix from the menu)\n\nThis is turn 22 of 30.\n\nWhat do you do next? Pick one:\n1. move the button n06 into n08, the words column\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. write the words of a Text or a Button\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.85
+    },
+    {
+     "label": "2",
+     "p": 0.047
+    },
+    {
+     "label": "4",
+     "p": 0.042
+    },
+    {
+     "label": "3",
+     "p": 0.033
+    },
+    {
+     "label": "5",
+     "p": 0.016
+    },
+    {
+     "label": "6",
+     "p": 0.012
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 3219,
+   "tokensIn": 650,
+   "tokensOut": 13
+  },
+  {
+   "actor": "script",
+   "round": 22,
+   "roundTitle": "Turn 22",
+   "key": "move",
+   "did": {
+    "say": "Did it: move the button n06 into n08, the words column (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-md, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n      n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]"
+   },
+   "pictures": [
+    {
+     "src": "t22/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t22/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t22/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "n03, n04 are empty: they show nothing until something is put inside.",
+     "repair": "empty"
+    }
+   ],
+   "note": "Rendered in 4.6 s."
+  },
+  {
+   "actor": "builder",
+   "round": 23,
+   "roundTitle": "Turn 23",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n08 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-md, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n05 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n      n06 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n    n07 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n  n03 Group [stacked, width 100%]\n  n04 Group [stacked, width 100%]\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- n03, n04 are empty: they show nothing until something is put inside.\n\nYOUR LAST STEPS:\n- turn 19: set size of n02 to text-xl (a fix from the menu)\n- turn 20: set size of n02 to display-lg (a fix from the menu)\n- turn 21: set size of n02 to display-md (a fix from the menu)\n- turn 22: move the button n06 into n08, the words column (a fix from the menu)\n\nThis is turn 23 of 30.\n\nWhat do you do next? Pick one:\n1. remove the empty parts n03, n04 (they show nothing)\n2. add a part (a Group, Columns, Text, Image or Button) inside a part\n3. change one setting of a part\n4. write the words of a Text or a Button\n5. undo your last step\n6. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "1",
+     "p": 0.743
+    },
+    {
+     "label": "2",
+     "p": 0.086
+    },
+    {
+     "label": "3",
+     "p": 0.068
+    },
+    {
+     "label": "4",
+     "p": 0.05
+    },
+    {
+     "label": "5",
+     "p": 0.03
+    },
+    {
+     "label": "6",
+     "p": 0.022
+    }
+   ],
+   "answer": {
+    "pick": "1"
+   },
+   "ms": 2270,
+   "tokensIn": 640,
+   "tokensOut": 12
+  },
+  {
+   "actor": "script",
+   "round": 23,
+   "roundTitle": "Turn 23",
+   "key": "remove",
+   "did": {
+    "say": "Did it: remove the empty parts n03, n04 (a fix from the menu).",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n06 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-md, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n03 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n      n04 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n    n05 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]"
+   },
+   "pictures": [
+    {
+     "src": "t23/desktop.png",
+     "label": "desktop, 1280"
+    },
+    {
+     "src": "t23/phone.png",
+     "label": "phone, 390"
+    }
+   ],
+   "facts": "t23/facts.json",
+   "findings": [
+    {
+     "say": "Every part of the goal is there. What is left is how it looks: the findings below.",
+     "repair": "goalMet"
+    },
+    {
+     "say": "Your last step changed nothing a person can see, on a desktop or on a phone.",
+     "repair": "unchanged"
+    }
+   ],
+   "note": "Rendered in 3.8 s."
+  },
+  {
+   "actor": "builder",
+   "round": 24,
+   "roundTitle": "Turn 24",
+   "key": "move",
+   "model": "gemma4:e2b-it-qat",
+   "prompt": "GOAL: a hero section for \"Puppy Haven\" (a puppy adoption site; blue, modern): a headline, one line under it, a button, and a photo on the right. It must look right on a desktop and on a phone.\n\nTHE SECTION NOW, one line per part (its name, its kind, its settings, its words):\nn00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n06 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-md, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n03 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n      n04 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n    n05 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]\n\nWHAT THE LAST LOOK FOUND:\n- Every part of the goal is there. What is left is how it looks: the findings below.\n- Your last step changed nothing a person can see, on a desktop or on a phone.\n\nYOUR LAST STEPS:\n- turn 20: set size of n02 to display-lg (a fix from the menu)\n- turn 21: set size of n02 to display-md (a fix from the menu)\n- turn 22: move the button n06 into n08, the words column (a fix from the menu)\n- turn 23: remove the empty parts n03, n04 (a fix from the menu)\n\nThis is turn 24 of 30.\n\nWhat do you do next? Pick one:\n1. add a part (a Group, Columns, Text, Image or Button) inside a part\n2. change one setting of a part\n3. write the words of a Text or a Button\n4. undo your last step\n5. stop: the section is finished",
+   "system": "You are building one section of a web page, one small step at a time. Reply with JSON only, matching the schema.",
+   "options": [
+    {
+     "label": "5",
+     "p": 0.833
+    },
+    {
+     "label": "1",
+     "p": 0.069
+    },
+    {
+     "label": "4",
+     "p": 0.052
+    },
+    {
+     "label": "3",
+     "p": 0.03
+    },
+    {
+     "label": "2",
+     "p": 0.017
+    }
+   ],
+   "answer": {
+    "pick": "5"
+   },
+   "ms": 2484,
+   "tokensIn": 591,
+   "tokensOut": 8
+  },
+  {
+   "actor": "script",
+   "round": 24,
+   "roundTitle": "Turn 24",
+   "key": "done",
+   "did": {
+    "say": "Did it: said the section is finished.",
+    "nodes": "n00 Group [stacked, gap space-12, padding top space-24 right space-12 bottom space-24 left space-12, width 100%]\n  n01 Columns [columns 1:1, one column under 640px, column gap 24px]\n    n06 Group [stacked, gap space-12, width 100%]\n      n02 Text \"the headline\" [size display-md, colour foreground]: \"Find Your Perfect Puppy Today\"\n      n03 Text \"the line under the headline\" [size text-base, colour foreground]: \"Welcome to Puppy Haven, your trusted source for finding l…\"\n      n04 Button \"the button\" [padding top space-2 right space-4 bottom space-2 left space-4, size text-sm, semibold, colour primary-foreground, fill primary, corners radius-md]: \"Adopt Now\"\n    n05 Image \"the photo\" (animal-dog.webp) [width 100%, height 320px, fit cover]"
+   },
+   "findings": []
+  }
+ ]
+}
